@@ -14,9 +14,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * An optimized PATRICIA Trie for Kademlia. That means I
- * removed some unused stuff like support for 0bit Keys
- * which requires some extra steps.
+ * An optimized PATRICIA Trie for Kademlia. 
  * 
  * @author Roger Kapsi
  */
@@ -37,6 +35,9 @@ public class PatriciaTrie {
         this.keyCreator = keyCreator;
     }
     
+    /**
+     * Clears the Trie (i.e. removes all emelemnts).
+     */
     public void clear() {
         root.key = null;
         root.bitIndex = -1;
@@ -50,30 +51,53 @@ public class PatriciaTrie {
         incrementModCount();
     }
     
+    /**
+     * Returns true if the Trie is empty
+     */
     public boolean isEmpty() {
         return size == 0;
     }
     
+    /**
+     * Returns the number items in the Trie
+     */
     public int size() {
         return size;
     }
    
+    /**
+     * Increments both, the size and mod counter.
+     */
     private void incrementSize() {
         size++;
         incrementModCount();
     }
     
+    /**
+     * Decrements the size and increments the mod
+     * counter.
+     */
     private void decrementSize() {
         size--;
         incrementModCount();
     }
     
+    /**
+     * Increments the mod counter. It's currently
+     * unused but it will be useful to detect
+     * concurrent modifications on the Trie (e.g.
+     * as thrown by Iterators).
+     */
     private void incrementModCount() {
         modCount++;
     }
     
+    /**
+     * Adds a new <key, value> pair to the Trie and if a pair already
+     * exists it will be replaced. In the latter case it will return
+     * the old value.
+     */
     public Object put(Object key, Object value) {
-        
         if (key == null) {
             throw new NullPointerException("Key cannot be null");
         }
@@ -82,6 +106,8 @@ public class PatriciaTrie {
         if (key.equals(found.key)) {
             if (/*found == root */ found.isEmpty()) {
                 incrementSize();
+            } else {
+                incrementModCount();
             }
             return found.setKeyValue(key, value);
         }
@@ -97,6 +123,8 @@ public class PatriciaTrie {
             /* NULL BIT KEY */
             if (root.isEmpty()) {
                 incrementSize();
+            } else {
+                incrementModCount();
             }
             return root.setKeyValue(key, value);
         } else if (isEqualBitKey(bitIndex)) { // actually not possible 
@@ -110,7 +138,11 @@ public class PatriciaTrie {
         throw new IndexOutOfBoundsException("Failed to put: " + key + " -> " + value + ", " + bitIndex);
     }
     
-    private Entry putR(Entry h, Entry t, Entry p) {
+    /**
+     * The actual put implementation. Entry t is the new Entry we're
+     * gonna add.
+     */
+    private Entry putR(Entry h, final Entry t, Entry p) {
         if ((h.bitIndex >= t.bitIndex) || (h.bitIndex <= p.bitIndex)) {
             
             if (!isBitSet(t.key, t.bitIndex)) {
@@ -138,11 +170,20 @@ public class PatriciaTrie {
         return h;
     }
     
+    /**
+     * Returns the Value whose Key equals our lookup Key
+     * or null if no such key exists.
+     */
     public Object get(Object key) {
         Entry entry = getR(root.left, -1, key);
         return (!entry.isEmpty() && key.equals(entry.key) ? entry.value : null);
     }
     
+    /**
+     * The actual get implementation. This is very similar to
+     * selectR but with the exception that it might return the
+     * root Entry even if it's empty.
+     */
     private Entry getR(Entry h, int bitIndex, Object key) {
         if (h.bitIndex <= bitIndex) {
             return h;
@@ -159,13 +200,20 @@ public class PatriciaTrie {
         List l = select(key, Collections.EMPTY_SET, 2);
         return l.get(l.size()-1);
     }
+    
     /**
-     * 
+     * Returns the Value whose Key has the longest prefix
+     * in common with our lookup key.
      */
     public Object select(Object key) {
         return selectR(root.left, -1, key, root).value;
     }
     
+    /**
+     * Selects a single best matching Entry. Very similar to getR
+     * but we have to cheat if the root Entry has no <key,value>
+     * associated with it.
+     */
     private Entry selectR(Entry h, int bitIndex, Object key, Entry p) {
         if (h.bitIndex <= bitIndex) {
             return (h.isEmpty() ? p : h);
@@ -192,6 +240,37 @@ public class PatriciaTrie {
         SearchState state = new SearchState(key, exclude, count);
         selectR(state);
         return state.getResults();
+    }
+    
+    /**
+     * The actual select (bucket) implementation. It uses a 
+     * probability function to randomize the returned List (bucket).
+     */
+    private void selectR(final SearchState state) {
+        if (state.done) {
+            return;
+        }
+        
+        Entry h = state.current; // need a copy on the stack
+        if (state.add(h) || state.done) {
+            return;
+        }
+        
+        if (!isBitSet(state.key, h.bitIndex)) {
+            state.goToChildEntry(h, true);
+            selectR(state);
+            if (!state.done) {
+                state.goToChildEntry(h, false);
+                selectR(state);
+            }
+        } else {
+            state.goToChildEntry(h, false);
+            selectR(state);
+            if (!state.done) {
+                state.goToChildEntry(h, true);
+                selectR(state);
+            }
+        }
     }
     
     /**
@@ -226,6 +305,10 @@ public class PatriciaTrie {
         }
     }
     
+    /**
+     * This is very similar to getR but with the difference that
+     * we stop the lookup if h.bitIndex > keyLength.
+     */
     private Entry rangeR(Entry h, int bitIndex, 
             final Object key, final int keyLength, Entry p) {
         
@@ -240,46 +323,33 @@ public class PatriciaTrie {
         }
     }
     
-    private void selectR(final SearchState state) {
-        if (state.done) {
-            return;
-        }
-        
-        Entry h = state.current; // need a copy on the stack
-        if (state.add(h) || state.done) {
-            return;
-        }
-        
-        if (!isBitSet(state.key, h.bitIndex)) {
-            state.goToChildEntry(h, true);
-            selectR(state);
-            if (!state.done) {
-                state.goToChildEntry(h, false);
-                selectR(state);
-            }
-        } else {
-            state.goToChildEntry(h, false);
-            selectR(state);
-            if (!state.done) {
-                state.goToChildEntry(h, true);
-                selectR(state);
-            }
-        }
-    }
-    
+    /**
+     * Returns true if this trie contains the specified Key
+     */
     public boolean containsKey(Object key) {
         Entry entry = getR(root.left, -1, key);
         return !entry.isEmpty() && key.equals(entry.key);
     }
     
+    /**
+     * Removes a Key from the Trie if one exists
+     * 
+     * @param key the Key to delete
+     * @return Returns the deleted Value
+     */
     public Object remove(Object key) {
         return removeR(root.left, -1, key, root);
     }
     
+    /**
+     * Part 1
+     * 
+     * Serach for the Key
+     */
     private Object removeR(Entry h, int bitIndex, Object key, Entry p) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && key.equals(h.key)) {
-                return removeNode(h, p);
+                return removeEntry(h, p);
             }
             return null;
         }
@@ -291,25 +361,34 @@ public class PatriciaTrie {
         }
     }
     
-    private Object removeNode(Entry h, Entry p) {
+    /**
+     * Part 2
+     * 
+     * If we found a Key (Entry h) then figure out if it's
+     * an internal (hard to remove) or external Entry (easy 
+     * to remove)
+     */
+    private Object removeEntry(Entry h, Entry p) {
         
-        if (h == root) {
-            if (!h.isEmpty()) {
-                decrementSize();
-            }
-        } else {
+        if (h != root) {
             if (h.isInternalNode()) {
-                removeInternalNode(h, p);
+                removeInternalEntry(h, p);
             } else {
-                removeExternalNode(h);
+                removeExternalEntry(h);
             }
-            decrementSize();
         }
         
+        decrementSize();
         return h.setKeyValue(null, null);
     }
     
-    private void removeExternalNode(Entry h) {
+    /**
+     * Part 3
+     * 
+     * If it's an external Entry then just remove it.
+     * This is very easy and straight forward.
+     */
+    private void removeExternalEntry(Entry h) {
         if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isExternalNode()) {
@@ -330,7 +409,14 @@ public class PatriciaTrie {
         }
     }
     
-    private void removeInternalNode(Entry h, Entry p) {
+    /**
+     * Part 4
+     * 
+     * If it's an internal Entry then "good luck" with understanding
+     * this code. The Idea is essentially that Entry p takes Entry h's
+     * place in the trie which requires some re-wireing.
+     */
+    private void removeInternalEntry(Entry h, Entry p) {
         if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isInternalNode()) {
@@ -405,36 +491,68 @@ public class PatriciaTrie {
         return toStringR(h.right, h.bitIndex, buffer);
     }
     
+    /**
+     * Returns all Keys as List. You can think of it as
+     * a Set since there're no duplicate keys.
+     */
+    public List keys() {
+        return keysR(root.left, -1, new ArrayList(size()));
+    }
+    
+    /**
+     * The actual keys() implementation. Just an inorder traverse
+     */
+    private List keysR(Entry h, int bitIndex, final List keys) {
+        if (h.bitIndex <= bitIndex) {
+            if (!h.isEmpty()) {
+                keys.add(h.key);
+            }
+            return keys;
+        }
+        
+        keysR(h.left, h.bitIndex, keys);
+        return keysR(h.right, h.bitIndex, keys);
+    }
+    
+    /**
+     * Returns all Values
+     */
     public List values() {
         return valuesR(root.left, -1, new ArrayList(size()));
     }
     
-    private List valuesR(Entry h, int bitIndex, final List list) {
+    /**
+     * The actual values() implementation. Just an inorder traverse
+     */
+    private List valuesR(Entry h, int bitIndex, final List values) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty()) {
-                list.add(h.value);
+                values.add(h.value);
             }
-            return list;
+            return values;
         }
         
-        valuesR(h.left, h.bitIndex, list);
-        return valuesR(h.right, h.bitIndex, list);
+        valuesR(h.left, h.bitIndex, values);
+        return valuesR(h.right, h.bitIndex, values);
     }
     
+    /** Helper method. Returns true if bitIndex is a valid index */
     private static boolean isValidBitIndex(int bitIndex) {
         return 0 <= bitIndex && bitIndex <= Integer.MAX_VALUE;
     }
     
+    /** Helper method. Returns true if bitIndex is a NULL_BIT_KEY */
     private static boolean isNullBitKey(int bitIndex) {
         return bitIndex == KeyCreator.NULL_BIT_KEY;
     }
     
+    /** Helper method. Returns true if bitIndex is a EQUAL_BIT_KEY */
     private static boolean isEqualBitKey(int bitIndex) {
         return bitIndex == KeyCreator.EQUAL_BIT_KEY;
     }
     
     private boolean isBitSet(Object key, int bitIndex) {
-        if (key == null) { // root's key is null!
+        if (key == null) { // root's might be null!
             return false;
         }
         return keyCreator.isBitSet(key, bitIndex);
@@ -444,6 +562,9 @@ public class PatriciaTrie {
         return keyCreator.bitIndex(key, foundKey);
     }
     
+    /**
+     * The actual Trie nodes.
+     */
     private final class Entry implements Map.Entry {
         
         private Object key;
@@ -487,15 +608,21 @@ public class PatriciaTrie {
             return o;
         }
         
+        /** 
+         * Replaces the old key and value with the new ones.
+         * Returns the old vlaue.
+         */
         private Object setKeyValue(Object key, Object value) {
             this.key = key;
             return setValue(value);
         }
         
+        /** Neither the left nor right child is a loopback */
         private boolean isInternalNode() {
             return left != this && right != this;
         }
         
+        /** Either the left or right child is a loopback */
         private boolean isExternalNode() {
             return !isInternalNode();
         }
@@ -548,21 +675,26 @@ public class PatriciaTrie {
             buffer.append(")");
             return buffer.toString();
         }
-        
     }
     
+    /**
+     * SearchState is utilitized during select to keep track of 
+     * the current recursion state and some probalistic buckt
+     * randomization
+     */
     private class SearchState {
-        Entry current = root.left;
-        int bitIndex = -1;
         
-        final List dest;
-        final Object key;
-        final Collection exclude;
-        final int targetSize;
+        private Entry current = root.left;
+        private int bitIndex = -1;
+        
+        private List dest;
+        private Object key;
+        private Collection exclude;
+        private int targetSize;
 
-        int currentDistance, numEquidistant, numEquidistantToAdd;
+        private int currentDistance, numEquidistant, numEquidistantToAdd;
         
-        boolean done;
+        private boolean done;
         
         private final Random r = new Random();
         
@@ -619,13 +751,29 @@ public class PatriciaTrie {
         }
     }
     
+    /**
+     * The interface used by PatriciaTrie to access the Keys
+     * on bit level.
+     */
     public static interface KeyCreator {
         
+        /** Returned by bitIndex if key's bits are all 0 */
         public static final int NULL_BIT_KEY = -1;
+        
+        /** 
+         * Returned by bitIndex if key and found key are
+         * equal. This is a very very specific case and
+         * shouldn't happen on a regular basis
+         */
         public static final int EQUAL_BIT_KEY = -2;
         
+        /** Returns the length of the Key in bits. */
         public int length();
+        
+        /** Returns weather or not a bit is set */
         public boolean isBitSet(Object key, int bitIndex);
+        
+        /** Returns the n-th different bit between key and found */
         public int bitIndex(Object key, Object found);
     }
 }
