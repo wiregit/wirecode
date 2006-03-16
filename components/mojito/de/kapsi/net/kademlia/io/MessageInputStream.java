@@ -14,8 +14,8 @@ import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.util.Arrays;
 
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.ContactNode;
+import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;

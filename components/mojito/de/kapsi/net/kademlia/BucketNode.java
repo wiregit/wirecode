@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
-import de.kapsi.net.kademlia.util.ArrayUtils;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 
 public class BucketNode extends Node {

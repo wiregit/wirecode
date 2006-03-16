@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.ContactNode;
+import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 

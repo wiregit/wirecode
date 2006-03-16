@@ -13,8 +13,8 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Arrays;
 
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.ContactNode;
+import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.security.CryptoHelper;
 
 public class KeyValue {
