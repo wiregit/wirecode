@@ -2,11 +2,11 @@ package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * An InputStream that attempts to read from a Buffer.
@@ -14,7 +14,7 @@ import org.apache.commons.logging.Log;
  * The stream must be notified when data is available in the buffer
  * to be read.
  */
- class BufferInputStream extends InputStream implements Shutdownable {
+class BufferInputStream extends InputStream implements Shutdownable {
     
     private static final Log LOG = LogFactory.getLog(BufferInputStream.class);
     
@@ -22,8 +22,11 @@ import org.apache.commons.logging.Log;
     /** the lock that reading waits on. */
     private final Object LOCK = new Object();
     
-    /** the socket to get soTimeouts for waiting & shutdown on close */
-    private final NIOSocket handler;
+    /** The shutdownable to shutdown. */
+    private final Shutdownable shutdownHandler;
+    
+    /** The ReadTimeout handler. */
+    private final ReadTimeout readTimeoutHandler;
     
     /** the buffer that has data for reading */
     private final ByteBuffer buffer;
@@ -41,8 +44,10 @@ import org.apache.commons.logging.Log;
      * Constructs a new BufferInputStream that reads from the given buffer,
      * using the given socket to retrieve the soTimeouts.
      */
-    BufferInputStream(ByteBuffer buffer, NIOSocket handler, InterestReadChannel channel) {
-        this.handler = handler;
+    BufferInputStream(ByteBuffer buffer, ReadTimeout timeout, 
+                             Shutdownable shutdown, InterestReadChannel channel) {
+        this.readTimeoutHandler = timeout;
+        this.shutdownHandler = shutdown;
         this.buffer = buffer;
         this.channel = channel;
     }
@@ -120,7 +125,10 @@ import org.apache.commons.logging.Log;
     
     /** Waits the soTimeout amount of time. */
     private void waitImpl() throws IOException {
-        int timeout = handler.getSoTimeout();
+        long timeout = readTimeoutHandler.getReadTimeout();
+        if(timeout == -1)
+            throw new SocketException("unable to get read timeout");
+        
         boolean looped = false;
         while(buffer.position() == 0 && !finished) {
             if(shutdown)
@@ -144,7 +152,7 @@ import org.apache.commons.logging.Log;
     
     /** Closes this InputStream & the Socket that it's associated with */
     public void close() throws IOException  {
-        NIODispatcher.instance().shutdown(handler);
+        shutdownHandler.shutdown();
     }
     
     /** Shuts down this socket */

@@ -52,35 +52,35 @@ public class UStandalone extends ActivityCallbackStub
         try { Thread.sleep(1000); } catch (InterruptedException ie){}
 
 		for ( ; ;) {
-			log("Go ...");
+			LOG.trace("Go ...");
 			try {
 				InetAddress remoteIP = InetAddress.getByName(args[0]);
-				log2("InetAddress: "+remoteIP+" port:"+ 
+				LOG.debug("InetAddress: "+remoteIP+" port:"+ 
                   Integer.parseInt(args[1]) );
 				UDPConnection usock = 
 				  new UDPConnection(remoteIP, Integer.parseInt(args[1]));
-				log2("Created UDPSocket");
+				LOG.debug("Created UDPSocket");
 
 				if ( args.length == 2 ) {
-                    tlogstart("Starting SimpleTest:");
+                    LOG.debug("Starting SimpleTest:");
 					simpleTest(usock);
                 } else if (args[2].equals("-ec")) {
-                    tlogstart("Starting EchoClient:");
+                    LOG.debug("Starting EchoClient:");
                     echoClient(usock, TARGET_BYTES);
                 } else if (args[2].equals("-es")) {
-                    tlogstart("Starting EchoServer:");
+                    LOG.debug("Starting EchoServer:");
                     echoServer(usock, TARGET_BYTES);
                 } else if (args[2].equals("-ecb")) {
-                    tlogstart("Starting EchoClientBlock:");
+                    LOG.debug("Starting EchoClientBlock:");
                     echoClientBlock(usock, TARGET_BLOCKS);
                 } else if (args[2].equals("-esb")) {
-                    tlogstart("Starting EchoServerBlock:");
+                    LOG.debug("Starting EchoServerBlock:");
                     echoServerBlock(usock, TARGET_BLOCKS);
 				} else if (args[2].equals("-uc")) {
-                    tlogstart("Starting UnidirectionalClient:");
+                    LOG.debug("Starting UnidirectionalClient:");
 					unidirectionalClient(usock, TARGET_BYTES);
 				} else if (args[2].equals("-us")) {
-                    tlogstart("Starting UnidirectionalServer:");
+                    LOG.debug("Starting UnidirectionalServer:");
 					unidirectionalServer(usock, TARGET_BYTES);
                 }
 
@@ -88,27 +88,12 @@ public class UStandalone extends ActivityCallbackStub
 				break;
 			} catch (IOException e) {
 				e.printStackTrace();
-				log("Exiting  ...");
+				LOG.trace("Exiting  ...");
 				System.exit(1);
 			}
 		}
-		log("Shutdown ...");
+		LOG.trace("Shutdown ...");
 		RouterService.shutdown(); 
-    }
-
-    private static void log(String str) {
-    }
-
-    private static void log2(String str) {
-        	LOG.debug(str);
-    }
-
-    private static void tlogstart(String str) {
-        LOG.debug("start" + str);
-    }
-
-    private static void tlogend(String str) {
-        LOG.debug("end "+str);
     }
 
 	/** The amount of data to transfer */
@@ -130,12 +115,12 @@ public class UStandalone extends ActivityCallbackStub
 		for (int i = 0; i < numBytes; i++) {
 			ostream.write(i % 256);
 			if ( (i % 1000) == 0 ) 
-				log2("Write status: "+i);
+				LOG.debug("Write status: "+i);
 		}
-		log("Done write");
+		LOG.trace("Done write");
 		
 		try { reader.join(); } catch (InterruptedException ie){}
-        tlogend("Done echoClient test");
+        LOG.debug("Done echoClient test");
 
 		return readSuccess;
 	}
@@ -152,25 +137,25 @@ public class UStandalone extends ActivityCallbackStub
 
 		public void managedRun() {
 			int rval;
-			log2("Begin read");
+			LOG.debug("Begin read");
 
 			try {
 				for (int i = 0; i < numBytes; i++) {
 					rval = istream.read();
 					if ( rval != (i % 256) ) {
-						log2("Error on read expected: "+i
+						LOG.debug("Error on read expected: "+i
 						  +" received: "+rval);
 						break;
 					} else
-						log("Properly recieved: "+i);
+						LOG.trace("Properly recieved: "+i);
 					if ( (i % 1000) == 0 ) 
-						log2("Read status: "+i);
+						LOG.debug("Read status: "+i);
 				}
 				readSuccess = true;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			log2("Done read");
+			LOG.debug("Done read");
 		}
 	}
 
@@ -185,18 +170,18 @@ public class UStandalone extends ActivityCallbackStub
 		for (int i = 0; i < numBytes; i++) {
 			rval = istream.read();
 			if ( rval != (i % 256) ) {
-				log2("Error on read expected: "+i
+				LOG.debug("Error on read expected: "+i
 				  +" received: "+rval);
 				return false;
 			} 
 			if ( (i % 1000) == 0 ) 
-				log2("Echo status: "+i);
+				LOG.debug("Echo status: "+i);
 			ostream.write(rval);
 		}
 		success = true;
-		log("Done echo");
+		LOG.trace("Done echo");
 		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        tlogend("Done echoServer test");
+        LOG.debug("Done echoServer test");
 		return success;
 	}
 
@@ -217,13 +202,13 @@ public class UStandalone extends ActivityCallbackStub
 		for (int i = 0; i < numBlocks; i++) {
 			ostream.write(bdata, 0, 512);
 			if ( (i % 8) == 0 ) 
-				log2("Write status: "+i*512+
+				LOG.debug("Write status: "+i*512+
                   " time:"+System.currentTimeMillis());
 		}
-		log("Done write");
+		LOG.trace("Done write");
 		
 		try { reader.join(); } catch (InterruptedException ie){}
-        tlogend("Done echoClientBlock test");
+        LOG.debug("Done echoClientBlock test");
 		return readSuccess;
 	}
 
@@ -237,7 +222,7 @@ public class UStandalone extends ActivityCallbackStub
 		}
 
 		public void managedRun() {
-			log2("Begin read");
+			LOG.debug("Begin read");
 
 			byte bdata[] = new byte[512];
 
@@ -249,17 +234,17 @@ public class UStandalone extends ActivityCallbackStub
 					len = istream.read(bdata);
 
                     if ( len != 512 ) 
-                        log2("Abnormal data size: "+len+" loc: "+i);
+                        LOG.debug("Abnormal data size: "+len+" loc: "+i);
 
 					for (int j = 0; j < len; j++) {
                         btest = bdata[j] & 0xff;
 						if ( btest != ((i+j) % 256) ) {
-							log2("Error on read expected: "+(i+j)
+							LOG.debug("Error on read expected: "+(i+j)
 							  +" received: "+bdata[j]);
 							return;
 						} 
 						if ( (i+j) > printTarget ) { 
-							log2("Read status: "+i+
+							LOG.debug("Read status: "+i+
                               " time:"+System.currentTimeMillis());
                             printTarget = i+j+1024;
                         }
@@ -269,7 +254,7 @@ public class UStandalone extends ActivityCallbackStub
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			log2("Done read");
+			LOG.debug("Done read");
 		}
 	}
 
@@ -288,25 +273,25 @@ public class UStandalone extends ActivityCallbackStub
 			len = istream.read(bdata);
 
             if ( len != 512 ) 
-                log2("Abnormal data size: "+len+" loc: "+i);
+                LOG.debug("Abnormal data size: "+len+" loc: "+i);
 
 			for (int j = 0; j < len; j++) {
                 btest = bdata[j] & 0xff;
 				if ( btest != ((i+j) % 256) ) {
-					log2("Error on echo expected: "+(i+j)
+					LOG.debug("Error on echo expected: "+(i+j)
 					  +" received: "+bdata[j]);
 					return false;
 				} 
 				if ( ((i+j) % 1024) == 0 ) 
-					log2("Echo status: "+i+
+					LOG.debug("Echo status: "+i+
                       " time:"+System.currentTimeMillis());
 			}
             ostream.write(bdata, 0, len);
 		}
 		success = true;
-		log("Done echoBlock");
+		LOG.trace("Done echoBlock");
 		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        tlogend("Done echoServerBlock test");
+        LOG.debug("Done echoServerBlock test");
 		return success;
 	}
 
@@ -320,13 +305,13 @@ public class UStandalone extends ActivityCallbackStub
         for (i = 0; i < numBytes; i++) {
             ostream.write(i % 256);
             if ( (i % 1000) == 0 ) 
-                log2("Write status: "+i);
+                LOG.debug("Write status: "+i);
         }
 		success = true;
-        log2("Write reached: "+i);
+        LOG.debug("Write reached: "+i);
         
         try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        tlogend("Done unidirectionalClient test");
+        LOG.debug("Done unidirectionalClient test");
 		return success;
     }
 
@@ -340,25 +325,25 @@ public class UStandalone extends ActivityCallbackStub
         for (i = 0; i < numBytes; i++) {
             rval = istream.read();
             if ( rval != (i % 256) ) {
-                log2("Error on read expected: "+i
+                LOG.debug("Error on read expected: "+i
                   +" received: "+rval);
                 break;
             } else {
                 if ( (i % 1000) == 0 ) 
-                    log2("Read Properly received: "+i);
+                    LOG.debug("Read Properly received: "+i);
             }
         }
 		success = true;
-        log2("Read reached: "+i);
+        LOG.debug("Read reached: "+i);
         
         try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
-        tlogend("Done unidirectionalServer test");
+        LOG.debug("Done unidirectionalServer test");
 		return success;
     }
 
 	private static void simpleTest(UDPConnection usock) throws IOException {
 		OutputStream ostream = usock.getOutputStream();
-		log2("Created OutputStream");
+		LOG.debug("Created OutputStream");
 
 		ostream.write(new byte[50]);
 		ostream.write(new byte[50]);
@@ -371,8 +356,8 @@ public class UStandalone extends ActivityCallbackStub
 		ostream.write(new byte[500]);
 
 		try { Thread.sleep(2*1000); } catch (InterruptedException ie){}
-		log2("Done sleep");
-        tlogend("Done simple test");
+		LOG.debug("Done sleep");
+        LOG.debug("Done simple test");
 	}
 
 	private static void waitOnUDP() {
@@ -387,8 +372,8 @@ public class UStandalone extends ActivityCallbackStub
             waits++;
         }
 		if ( waits >= 10 ) {
-			log2("UDP didn't make it up ...");
-			log2("Bubye ...");
+			LOG.debug("UDP didn't make it up ...");
+			LOG.debug("Bubye ...");
 			throw new RuntimeException("no UDP");
 		}
 	}

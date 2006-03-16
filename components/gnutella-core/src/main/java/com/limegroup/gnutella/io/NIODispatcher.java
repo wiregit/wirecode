@@ -12,9 +12,11 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -104,6 +106,9 @@ public class NIODispatcher implements Runnable {
 	
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
+    
+    /** A list of repeatable events that should be polled. */
+    private final List /* of Runnable */ POLLERS = new ArrayList();
     
 	/** The invokeLater queue. */
     private final Collection /* of Runnable */ LATER = new LinkedList();
@@ -255,7 +260,25 @@ public class NIODispatcher implements Runnable {
     /** Shuts down the handler, possibly scheduling it for shutdown in the NIODispatch thread. */
     public void shutdown(Shutdownable handler) {
         handler.shutdown();
-    }    
+    }
+    
+    /** Attaches the given attachment to the SelectionKey. */
+    public void attach(SelectionKey key, IOErrorObserver attachment) {
+        key.attach(new Attachment(attachment));
+    }
+    
+    /** Adds a new Pollable. */
+    public void addPollable(final Pollable poller) {
+        if(Thread.currentThread() == dispatchThread) {
+            POLLERS.add(poller);
+        } else {
+            invokeLater(new Runnable() {
+                public void run() {
+                    POLLERS.add(poller);
+                }
+            });
+        }
+    }
     
     /** Invokes the method in the NIODispatch thread. */
    public void invokeLater(Runnable runner) {
@@ -424,12 +447,40 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
+     * Runs any repeatable post-event tasks.  This does not lock, as the events
+     * are not added to the list outside of the NIO thread.
+     */
+    private Collection /* of SelectionKey */ runPollables() {
+        Collection ret = null;
+        boolean growable = false;
+        
+        // Optimized to not create collection objects unless absolutely
+        // necessary.
+        for(int i = 0; i < POLLERS.size(); i++) {
+            Pollable p = (Pollable)POLLERS.get(i);
+            Collection selected = p.poll();
+            if(!selected.isEmpty()) {
+                if(ret == null) {
+                    ret = selected;
+                } else if(!growable) {
+                    ret = new HashSet(ret);
+                    ret.addAll(selected);
+                } else {
+                    ret.addAll(selected);
+                }
+            }
+        }
+        
+        return ret == null ? Collections.EMPTY_SET : ret;
+    }
+    
+    /**
      * Loops through all Throttles and gives them the ready keys.
      */
     private void readyThrottles(Collection keys) {
         List throttle = THROTTLE;
-            for(int i = 0; i < throttle.size(); i++)
-                ((NBThrottle)throttle.get(i)).selectableKeys(keys);
+        for (int i = 0; i < throttle.size(); i++)
+            ((NBThrottle) throttle.get(i)).selectableKeys(keys);
     }
     
     /**
@@ -458,13 +509,18 @@ public class NIODispatcher implements Runnable {
             }
             
             runPendingTasks();
+            
+            Collection polled = runPollables();
 
+            boolean immediate = !polled.isEmpty();
             try {
-                if(checkTime)
+                if(!immediate && checkTime)
                     startSelect = System.currentTimeMillis();
                     
-                // see register(...) for why this has a timeout
-                selector.select(100);
+                if(!immediate)
+                    selector.select(100);
+                else
+                    selector.selectNow();
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
@@ -476,49 +532,60 @@ public class NIODispatcher implements Runnable {
             }
             
             Collection keys = selector.selectedKeys();
-            if(keys.size() == 0) {
-                long now = System.currentTimeMillis();
-                if(startSelect == -1) {
-                    LOG.warn("No keys selected, starting spin check.");
-                    checkTime = true;
-                } else if(startSelect + 30 >= now) {
-                    if(LOG.isWarnEnabled())
-                        LOG.warn("Spinning detected, current spins: " + zeroes);
-                    if(zeroes++ > SPIN_AMOUNT)
-                        throw new SpinningException();
-                } else { // waited the timeout just fine, reset everything.
-                    checkTime = false;
-                    startSelect = -1;
-                    zeroes = 0;
-                    ignores = 0;
-                }
-                TIMEOUTER.processTimeouts(now);
-                continue;                
-            } else if (checkTime) {             
-                // skip up to certain number of good selects if we suspect the selector is broken
-                ignores++;
-                if (ignores > MAX_IGNORES) {
-                    checkTime = false;
-                    zeroes = 0;
-                    startSelect = -1;
-                    ignores = 0;
+            if(!immediate) {
+                if(keys.isEmpty()) {
+                    long now = System.currentTimeMillis();
+                    if(startSelect == -1) {
+                        LOG.warn("No keys selected, starting spin check.");
+                        checkTime = true;
+                    } else if(startSelect + 30 >= now) {
+                        if(LOG.isWarnEnabled())
+                            LOG.warn("Spinning detected, current spins: " + zeroes);
+                        if(zeroes++ > SPIN_AMOUNT)
+                            throw new SpinningException();
+                    } else { // waited the timeout just fine, reset everything.
+                        checkTime = false;
+                        startSelect = -1;
+                        zeroes = 0;
+                        ignores = 0;
+                    }
+                    TIMEOUTER.processTimeouts(now);
+                    continue;                
+                } else if (checkTime) {             
+                    // skip up to certain number of good selects if we suspect the selector is broken
+                    ignores++;
+                    if (ignores > MAX_IGNORES) {
+                        checkTime = false;
+                        zeroes = 0;
+                        startSelect = -1;
+                        ignores = 0;
+                    }
                 }
             }
             
             if(LOG.isDebugEnabled())
                 LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
             
-            readyThrottles(keys);
+            Collection allKeys;
+            if(immediate) {
+                allKeys = keys;
+            } else {
+                allKeys = new HashSet(keys.size() + polled.size());
+                allKeys.addAll(keys);
+                allKeys.addAll(polled);
+            }
+            
+            readyThrottles(allKeys);
             
             long now = System.currentTimeMillis();
-            for(Iterator it = keys.iterator(); it.hasNext(); ) {
+            for(Iterator it = allKeys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();
 				if(sk.isValid())
                     process(now, sk, sk.attachment(), 0xFFFF);
             }
             
             keys.clear();
-            iteration++;            
+            iteration++;
             TIMEOUTER.processTimeouts(now);
         }
     }

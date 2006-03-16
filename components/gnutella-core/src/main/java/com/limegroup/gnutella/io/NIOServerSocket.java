@@ -306,9 +306,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
                 // Shutdown all sockets it created.
                 for(Iterator i = pendingSockets.iterator(); i.hasNext(); ) {
                     NIOSocket next = (NIOSocket)i.next();
-                    try {
-                        next.close();
-                    } catch(IOException ignored) {}
+                    next.close();
                 }
                 pendingSockets.clear();
                 

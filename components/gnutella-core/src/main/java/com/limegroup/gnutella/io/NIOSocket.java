@@ -26,7 +26,8 @@ import org.apache.commons.logging.LogFactory;
  * A ChannelReadObserver must be used so that the Socket can set the appropriate
  * underlying channel.
  */
-public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObserver, NIOMultiplexor, ReadTimeout {
+public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObserver,
+                                                   NIOMultiplexor, ReadTimeout, SoTimeout {
     
     private static final Log LOG = LogFactory.getLog(NIOSocket.class);
     
@@ -64,7 +65,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
         channel = s.getChannel();
         socket = s;
         writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, new SocketInterestReadAdapter(channel));
+        reader = new NIOInputStream(this, this, new SocketInterestReadAdapter(channel));
         NIODispatcher.instance().register(channel, this);
         connectedTo = s.getInetAddress();
     }
@@ -75,7 +76,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
         socket = channel.socket();
         init();
         writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, new SocketInterestReadAdapter(channel));
+        reader = new NIOInputStream(this, this, new SocketInterestReadAdapter(channel));
     }
     
     /** Creates an NIOSocket and connects (with no timeout) to addr/port */
@@ -84,7 +85,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
         socket = channel.socket();
         init();
         writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, new SocketInterestReadAdapter(channel));
+        reader = new NIOInputStream(this, this, new SocketInterestReadAdapter(channel));
         connect(new InetSocketAddress(addr, port));
     }
     
@@ -94,7 +95,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
         socket = channel.socket();
         init();
         writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, new SocketInterestReadAdapter(channel));
+        reader = new NIOInputStream(this, this, new SocketInterestReadAdapter(channel));
         bind(new InetSocketAddress(localAddr, localPort));
         connect(new InetSocketAddress(addr, port));
     }
@@ -285,8 +286,8 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
     }
     
     /** Closes the socket & all streams, waking up any waiting locks.  */
-    public void close() throws IOException {
-        NIODispatcher.instance().shutdown(this);
+    public void close() {
+        shutdown();
     }
     
     /** Connects to addr with no timeout */
@@ -377,7 +378,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
                 private Object result;
                 public void run() {
                     try {
-                        NIOInputStream stream = new NIOInputStream(NIOSocket.this, null).init();
+                        NIOInputStream stream = new NIOInputStream(NIOSocket.this, NIOSocket.this, null).init();
                         setReadObserver(stream);
                         result = stream.getInputStream();
                     } catch(IOException iox) { // impossible, but not a big deal.

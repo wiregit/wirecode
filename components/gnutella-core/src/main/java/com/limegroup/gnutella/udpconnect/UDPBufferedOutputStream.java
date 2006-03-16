@@ -2,6 +2,7 @@ package com.limegroup.gnutella.udpconnect;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
@@ -28,17 +29,12 @@ public class UDPBufferedOutputStream extends OutputStream {
     /**
      * The list of buffered chunks.
      */
-    private ArrayList chunks;
+    private ArrayList /* of ByteBuffer */ chunks;
 
     /**
      * The current chunk getting written to.
      */
-    private byte[]    activeChunk;
-
-    /**
-     *  The written progress on the activeChunk.
-     */
-    private int       activeCount;
+    private ByteBuffer activeChunk;
 
     /**
      *  The reader of information coming into this output stream.
@@ -65,32 +61,26 @@ public class UDPBufferedOutputStream extends OutputStream {
 		// If there was no data before this, then ensure a writer is awake
     	if ( _connectionActive && getPendingChunks() == 0 )
             _processor.wakeupWriteEvent();
-
+        
         while (true) {
-            if ( !_connectionActive ) 
+            if ( !_connectionActive ) {
                 throw new IOException("Connection Closed");
-            
-			// If there is room within current chunk
-            else if ( activeCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
-				// Add to the current chunk
-                activeChunk[activeCount] = (byte) b;
-                activeCount++;
+            } else if (activeChunk.remaining() > 0) {
+                // If there is room within current chunk
+                activeChunk.put((byte) b);
                 return;
+            } else if (chunks.size() < _processor.getChunkLimit()) {
+                // If there is room for more chunks, allocate a new chunk
+                chunks.add(activeChunk);
+                allocateNewChunk();
             } else {
-				// If there is room for more chunks
-                if ( chunks.size() < _processor.getChunkLimit() ) {
-					// Allocate a new chunk
-                    chunks.add(activeChunk);
-                    allocateNewChunk();
-                } else {
-					// Wait for room for a new chunk
-                    waitOnReader();
+                // Wait for room for a new chunk
+                waitOnReader();
 
-                    // Again, If there was no data before this, 
-                    // then ensure a writer is awake
-                    if ( getPendingChunks() == 0 )
-                        _processor.wakeupWriteEvent();
-                }
+                // Again, If there was no data before this,
+                // then ensure a writer is awake
+                if (getPendingChunks() == 0)
+                    _processor.wakeupWriteEvent();
             }
         }
     }
@@ -101,53 +91,38 @@ public class UDPBufferedOutputStream extends OutputStream {
     public synchronized void write(byte b[], int off, int len) 
       throws IOException {
 
-        if(LOG.isDebugEnabled())  {
+        if(LOG.isDebugEnabled())
             LOG.debug("writing len: "+len+" bytes");
-        }
 		
-		int space;   // The space available within the active chunk
-		int wlength; // The length of data to be written to the active chunk
 
 		// If there was no data before this, then ensure a writer is awake
         if ( _connectionActive && getPendingChunks() == 0 )
 			_processor.wakeupWriteEvent();
 
         while (true) {
-            if ( !_connectionActive ) 
+            if ( !_connectionActive ) {
                 throw new IOException("Connection Closed");
-
-			// If there is room within current chunk
-			else if ( activeCount < activeChunk.length ) {
-				// Fill up the current chunk
-				space   = activeChunk.length - activeCount;
-				wlength = Math.min(space, len);
-				System.arraycopy(b, off, activeChunk, activeCount, wlength);
-				space       -= wlength;
-				activeCount += wlength;
-				// If the data length was less than the available space
-				if ( space > 0 ) {
-					return;
-				}
-				len         -= wlength;
-				off         += wlength;
-				// If the data length matched the space available
-				if ( len <= 0 )
-                	return;
+            } else if (activeChunk.remaining() > 0) {
+                // If there is room within current chunk then
+                // fill up the current chunk
+                int available = Math.min(activeChunk.remaining(), len);
+                activeChunk.put(b, off, available);
+                len -= available;
+                off += available;
+                if(len == 0)
+                    return;
+            } else if (chunks.size() < _processor.getChunkLimit()) {
+                // If there is room for more chunks, allocate a new chunk
+                chunks.add(activeChunk);
+                allocateNewChunk();
             } else {
-				// If there is room for more chunks
-                if ( chunks.size() < _processor.getChunkLimit() ) {
-					// Allocate a new chunk
-                    chunks.add(activeChunk);
-                    allocateNewChunk();
-                } else {
-					// Wait for room for a new chunk
-                    waitOnReader();
+                // Wait for room for a new chunk
+                waitOnReader();
 
-                    // Again, If there was no data before this, 
-                    // then ensure a writer is awake
-                    if ( getPendingChunks() == 0 )
-                        _processor.wakeupWriteEvent();
-                }
+                // Again, If there was no data before this,
+                // then ensure a writer is awake
+                if (getPendingChunks() == 0)
+                    _processor.wakeupWriteEvent();
             }
         }
     }
@@ -172,28 +147,22 @@ public class UDPBufferedOutputStream extends OutputStream {
      *  Allocates a chunk for writing to and reset written amount.
      */
     private void allocateNewChunk() {
-        activeChunk = new byte[UDPConnectionProcessor.DATA_CHUNK_SIZE];
-        activeCount = 0;
+        activeChunk = ByteBuffer.allocate(UDPConnectionProcessor.DATA_CHUNK_SIZE);
     }
 
     /**
      *  Package accessor for retrieving and freeing up chunks of data.
      *  Returns null if no data.
      */
-    synchronized Chunk getChunk() {
-        Chunk rChunk;
+    synchronized ByteBuffer getChunk() {
+        ByteBuffer rChunk;
         if ( chunks.size() > 0 ) {
             // Return the oldest chunk 
-            rChunk        = new Chunk();
-            rChunk.data   = (byte[]) chunks.remove(0);
-            rChunk.start  = 0; // Keep this to zero here
-            rChunk.length = rChunk.data.length;
-        } else if (activeCount > 0) {
-            // Return a partial chunk and allocate a fresh one
-            rChunk        = new Chunk();
-            rChunk.data   = activeChunk;
-            rChunk.start  = 0; // Keep this to zero here
-            rChunk.length = activeCount;
+            rChunk = (ByteBuffer)chunks.remove(0);
+            rChunk.flip();
+        } else if (activeChunk.position() > 0) {
+            rChunk = activeChunk;
+            rChunk.flip();
             allocateNewChunk();
         } else {
             // If no data currently, return null
@@ -232,7 +201,7 @@ public class UDPBufferedOutputStream extends OutputStream {
 		int count = chunks.size();
 		
 		// Add one for the current block if data available.
-		if (activeCount > 0)
+		if (activeChunk.position() > 0)
 			count++;
 
 		return count;

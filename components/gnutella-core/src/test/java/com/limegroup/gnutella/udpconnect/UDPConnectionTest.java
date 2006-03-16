@@ -25,7 +25,6 @@ import com.limegroup.gnutella.util.ManagedThread;
  */
 public final class UDPConnectionTest extends BaseTestCase {
 
-    private static RouterService rs;
     private static Acceptor      ac;
 
 	/*
@@ -50,8 +49,8 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Setup the test to use the UDPServiceStub
         UDPConnectionProcessor.setUDPServiceForTesting(
             UDPServiceStub.instance());
-        rs = new RouterService(new ActivityCallbackStub());
-        ac = rs.getAcceptor();
+        new RouterService(new ActivityCallbackStub());
+        ac = RouterService.getAcceptor();
         ac.setAddress(InetAddress.getByName("127.0.0.1"));
         ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
@@ -117,7 +116,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Init the first connection
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
+        
         // Run the first connection
         boolean cSuccess = UStandalone.echoClient(uconn1, NUM_BYTES);
 
@@ -307,11 +306,16 @@ public final class UDPConnectionTest extends BaseTestCase {
         t.setDaemon(true);
         t.start();
 
+        System.out.println("starting conn1");
+        
         // Startup connection one in original thread
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
+System.out.println("started 1");
+        
         // Wait for commpletion of uconn2 startup
         t.join();
+        
+        System.out.println("joined 2");
 
         // Get the initialized connection 2
         uconn2 = t.getConnection();
@@ -320,6 +324,8 @@ public final class UDPConnectionTest extends BaseTestCase {
         OutputStream ostream = uconn1.getOutputStream();
         for ( int i = 0; i < NUM_BYTES; i++ )
             ostream.write(i % 256);
+        
+        System.out.println("wrote out");
 
         // Read to end and one extra on second stream
         InputStream  istream = uconn2.getInputStream();
@@ -329,8 +335,12 @@ public final class UDPConnectionTest extends BaseTestCase {
             if ( (i % 256)  != rval )
                 fail("Error on byte:"+i);
         }
+        System.out.println("read in");
+        
         // Close writer
         uconn1.close();
+        
+        System.out.println("closed 1");
 
         // Wait a little
         try { Thread.sleep(200); } catch (InterruptedException e) {}
@@ -432,7 +442,6 @@ public final class UDPConnectionTest extends BaseTestCase {
                     // Close writer
                     uconn1.close(); 
                         
-                } catch(IOException e) {
                 } catch(InterruptedException ie) {
                 }
             }
