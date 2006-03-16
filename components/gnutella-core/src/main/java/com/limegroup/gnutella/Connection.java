@@ -460,9 +460,14 @@ public class Connection implements IpPort {
         	// If the remote computer told us "Vendor-Message: 0.1" and the version number is bigger than 0
 			if (_headers.supportsVendorMessages() > 0) {
 
-				// Send vendor specific messages to the remote computer
-                send(MessagesSupportedVendorMessage.instance());
-                send(CapabilitiesVM.instance());
+                /*
+                 * After two Gnutella computers finish the handshake, they exchange Messages Supported and Capabilities vendor messages.
+                 * These vendor messages have the same purpose as the handshake, advertising support for ways to communicate and features.
+                 */
+
+                // Send the remote computer our Messages Supported and Capabilities vendor message
+                send(MessagesSupportedVendorMessage.instance()); // Tell it which vendor messages we support
+                send(CapabilitiesVM.instance());                 // Tell it what advanced and vendor-specific capabilities we have
 			}
 
 		// It's OK if that didn't work
@@ -2108,13 +2113,6 @@ public class Connection implements IpPort {
     	return -1;
     }
 
-    
-    
-    
-    
-    
-    
-    
     /**
      * Determine if this remote computer's Messages Supported vendor message indicates support for the UDP Connect Back vendor message.
      * Looks for GTKG 7 to get a version number like 2.

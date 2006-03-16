@@ -14,6 +14,13 @@ import com.limegroup.gnutella.messages.BadPacketException;
 /**
  * Vendor message containing a serialized properties object which contains
  * the headers that need to be updated.
+ * 
+ * 
+ * 
+ * 
+ * we send one when our ip address changes, but we never read one
+ * 
+ * 
  */
 public class HeaderUpdateVendorMessage extends VendorMessage {
 

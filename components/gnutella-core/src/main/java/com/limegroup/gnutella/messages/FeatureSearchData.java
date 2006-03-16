@@ -29,7 +29,7 @@ public final class FeatureSearchData {
      * Determine if a given feature search version supports the What's New search.
      * 
      * @param version The version number
-     * @return        True if version is 1
+     * @return        True if version is 1 or more
      */
     public static boolean supportsWhatIsNew(int version) {
 

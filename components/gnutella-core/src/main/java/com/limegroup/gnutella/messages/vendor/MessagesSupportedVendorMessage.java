@@ -34,7 +34,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  * 
  * The first 8 bytes of a vendor message payload identify what type of message it is.
  * In a Messages Supported vendor message, the vendor code, ID number, and version number are all 0.
- * Beyond that is a list of 8-byte chunks that name the vendor messages the computer supports.
+ * Beyond that is a number, and then a list of 8-byte chunks that name the vendor messages the computer supports.
  * 
  * Connection.postInit() calls MessagesSupportedVendorMessage.instance() to get our Messages Supported vendor message.
  * It sends it to a remote computer we've just finished the handshake with.
@@ -93,12 +93,12 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     /**
      * A list of the names of the vendor messages the computer that sent us this Messages Supported vendor message supports.
-     * _messagesSupported is a HashSet that contains SupportedMessageBlock objects.
+     * _messagesSupported is a HashSet that contains MessagesSupportedVendorMessage.SupportedMessageBlock objects.
      */
     private final Set _messagesSupported = new HashSet();
 
     /**
-     * The single MessagesSupportedVendorMessage that lists the 12 kinds of vendor messages we support.
+     * The single MessagesSupportedVendorMessage object that lists the 12 kinds of vendor messages we support.
      * This is the Messages Supported vendor message that we send.
      */
     private static MessagesSupportedVendorMessage _instance;
@@ -123,7 +123,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             F_NULL_VENDOR_ID,     // The vendor ID that names the Messages Supported vendor message is 4 0s instead of text like "LIME"
             F_MESSAGES_SUPPORTED, // The vendor message code that names the Messages Supported vendor message is 0
             version,              // From the payload, the version number, which should be 0
-            payload);             // The payload after that, with a list of vendor message names like zzLIMEssvvLIMEssvvLIMEssvv
+            payload);             // The payload after that, with a list of vendor message names like nnLIMEssvvLIMEssvvLIMEssvv
 
         // Make sure the version number is 0 and not something higher from the future we don't understand
         if (getVersion() > VERSION) throw new BadPacketException("UNSUPPORTED VERSION");
@@ -134,7 +134,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
         try {
 
-            // Get the payload data like zzLIMEssvvLIMEssvvLIMEssvv, and wrap a ByteArrayInputStream around it to keep our place as we read it
+            // Get the payload data like nnLIMEssvvLIMEssvvLIMEssvv, and wrap a ByteArrayInputStream around it to keep our place as we read it
             ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
 
             // Read the first 2 bytes, which are little endian and contain the number of LIMEssvv chunks that follow
@@ -143,7 +143,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             // Loop that many times to turn 8 bytes like LIMEssvv into a SupportedMessageBlock object, and add it to the _messagesSupported HashSet
             for (int i = 0; i < vectorSize; i++) _messagesSupported.add(new SupportedMessageBlock(bais));
 
-        // There was an error reading from the byte array
+        // There was an error reading the byte array
         } catch (IOException ioe) { ErrorService.error(ioe); }
     }
 
@@ -152,7 +152,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * This is the packet maker.
      * 
      * This constructor is marked private, and only the instance() method below calls it.
-     * The program only makes one MessagesSupportedVendorMessage object, and uses it each time we need to send it.
+     * The program makes one MessagesSupportedVendorMessage object to use each time we send the message.
      */
     private MessagesSupportedVendorMessage() {
 
@@ -182,6 +182,8 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * They hold the number 12, 0x0c, in little endian order, c0.
      * After that are the names, each of which take 8 bytes.
      * An 8-byte name is composed of a vendor code, message ID number, and message version number.
+     * 
+     * @return A byte array with the payload data of our Messages Supported vendor message
      */
     private static byte[] derivePayload() {
 
@@ -264,17 +266,17 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     }
 
     /**
-     * Get the MessagesSupportedVendorMessage that lists the kinds of vendor messages we support.
+     * Get the MessagesSupportedVendorMessage object that lists the kinds of vendor messages we support.
      * Connection.postInit() does this to send our Messages Supported vendor message to a remote computer we just finished the handshake with.
      * 
      * @return A reference to the program's one MessagesSupportedVendorMessage object
      */
     public static MessagesSupportedVendorMessage instance() {
 
-        // If the program hasn't needed the MessagesSupportedVendorMessage before, make it and save it now
+        // If the program hasn't needed our MessagesSupportedVendorMessage object before, make it and save it now
         if (_instance == null) _instance = new MessagesSupportedVendorMessage();
 
-        // Return a reference to the MessagesSupportedVendorMessage we made
+        // Return a reference to the MessagesSupportedVendorMessage we made with information about us
         return _instance;
     }
 
@@ -284,11 +286,11 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * @param vendorID The vendor ID of a vendor message, like "LIME".
      * @param selector The vendor message type number, like 4.
      * @return         If this Messages Supported vendor message indicates support for that kind of vendor message, the version number it supports.
-     *                 -1 if we don't support that kind of vendor message.
+     *                 -1 if not listed.
      */
     public int supportsMessage(byte[] vendorID, int selector) {
 
-        // Loop through our list of the vendor messages we support
+        // Loop through the vendor messages named in this packet
         Iterator iter = _messagesSupported.iterator();
         while (iter.hasNext()) {
             SupportedMessageBlock currSMP = (SupportedMessageBlock)iter.next(); // Each type of vendor message is represented by a SupportedMessageBlock object
@@ -426,7 +428,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * Determine if a given MessagesSupportedVendorMessage object lists the same vendor messages as this one.
      * 
      * @param other The object to compare this one to
-     * @return      True if they contain the same information, false if they are different.
+     * @return      True if they contain the same information, false if they are different
      */
     public boolean equals(Object other) {
 
@@ -438,7 +440,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         // Make sure the given object is also a MessagesSupportedVendorMessage
         if (other instanceof MessagesSupportedVendorMessage) {
             MessagesSupportedVendorMessage vmp = (MessagesSupportedVendorMessage)other;
-            
+
             // Compare the HashSet lists of SupportedMessageBlock objects
             return (_messagesSupported.equals(vmp._messagesSupported)); // Calls SupportedMessageBlock.equals()
         }
@@ -610,15 +612,15 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * 
      *   LIMEssvv  Tells what kind of vendor message this is
      * 
-     * payload
+     * rest of the payload
      * 
-     *   zz        The number of vendor message names that follow
+     *   nn        The number of vendor message names that follow
      *   LIMEssvv  A list of vendor message names
      *   LIMEssvv
      *   LIMEssvv
      * 
      * The vendor message type is like LIMEssvv, but for a Messages Supported vendor message, it's all 0s.
-     * This method writes the payload after that, like zzLIMEssvvLIMEssvvLIMEssvv.
+     * This method writes the payload after that, like nnLIMEssvvLIMEssvvLIMEssvv.
      * 
      * MessagesSupportedVendorMessage overrides this method from VendorMessage to count a statistic.
      * 
