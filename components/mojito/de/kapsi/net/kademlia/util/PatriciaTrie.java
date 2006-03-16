@@ -6,6 +6,7 @@
 package de.kapsi.net.kademlia.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -209,21 +210,26 @@ public class PatriciaTrie {
             return Collections.EMPTY_LIST;
         }
         
-        boolean a = isBitSet(entry.key, length);
-        boolean b = isBitSet(key, length);
+        // Found key's length-th bit differs from our
+        // key which means it cannot be the prefix!
+        if (isBitSet(key, length)
+                != isBitSet(entry.key, length)) {
+            return Collections.EMPTY_LIST;
+        }
         
-        if (!a && !b) {
+        if (length < entry.bitIndex) {
+            //System.out.println("Has Subtree");
             return valuesR(entry, -1, new ArrayList());
-        } else if (!b) {
-            return valuesR(entry.left, -1, new ArrayList());
         } else {
-            return valuesR(entry.right, -1, new ArrayList());
+            //System.out.println("Has No Subtree");
+            return Arrays.asList(new Entry[]{entry});
         }
     }
     
-    private Entry rangeR(Entry h, int bitIndex, Object key, int keyLength, Entry p) {
+    private Entry rangeR(Entry h, int bitIndex, 
+            final Object key, final int keyLength, Entry p) {
         
-        if (h.bitIndex <= bitIndex || keyLength <= h.bitIndex) {
+        if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
             return (h.isEmpty() ? p : h);
         }
         
