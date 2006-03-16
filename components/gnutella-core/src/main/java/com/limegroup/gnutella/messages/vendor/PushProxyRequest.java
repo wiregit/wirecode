@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.IOException;
@@ -14,6 +17,7 @@ import com.limegroup.gnutella.util.DataUtils;
  */
 public final class PushProxyRequest extends VendorMessage {
 
+    /** 1, LimeWire understands the initial version of the Push Proxy Request vendor message. */
     public static final int VERSION = 1;
 
     /**

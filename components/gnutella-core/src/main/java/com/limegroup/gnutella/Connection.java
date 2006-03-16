@@ -181,16 +181,16 @@ public class Connection implements IpPort {
     private volatile long _compressedBytesReceived;
 
     /**
-     * The MessagesSupported vendor-specific message from the remote computer.
-     * This vendor message tells what other vendor-specific messages the remote computer understands.
-     * _messagesSupported is a reference to the payload of the Gnutella message.
+     * The Messages Supported vendor message from the remote computer.
+     * This vendor message lists what other vendor-specific messages the remote computer understands.
+     * Gnutella programs exchange Messages Supported vendor messages right after the handshake.
      */
     protected MessagesSupportedVendorMessage _messagesSupported = null;
 
     /**
      * The Capabilities vendor-specific message from the remote computer.
-     * This vendor message tells what capabilities the remote computer supports.
-     * _capabilities is a reference to the payload of the Gnutella message.
+     * This vendor message tells whether the remote computer supports some additional advanced features.
+     * Gnutella programs exchange Capabilities vendor messages right after the handshake.
      */
     protected CapabilitiesVM _capabilities = null;
 
@@ -488,39 +488,41 @@ public class Connection implements IpPort {
     }
 
     /**
-     * Handles a vendor message a remote computer sent us. (do)
+     * Handles a vendor message a remote computer sent us.
      * 
      * The message router calls this when we receive a vendor message.
-     * Saves the vendor message in _messagesSuported or _capabilities.
-     * If it's a header update vendor message, adds its headers to HEADERS_READ and _headers.
+     * Saves a Messages Supported vendor message in _messagesSupported and a Capabilities vendor message in _capabilities.
+     * If it's a Header Update vendor message, adds its headers to HEADERS_READ and _headers.
+     * 
+     * @param vm An object that extends VendorMessage that represents a vendor message from this remote computer
      */
     protected void handleVendorMessage(VendorMessage vm) {
 
-    	// The given vendor message is a MessagesSupportedVendorMessage object (do)
+    	// The given vendor message is a Messages Supported vendor message object, listing the kinds of vendor messages the remote computer supports
         if (vm instanceof MessagesSupportedVendorMessage) {
-        	
-        	// Cast it to that type and save it in _messagesSupported (do)
+
+        	// Cast it to that type and save it in _messagesSupported
         	_messagesSupported = (MessagesSupportedVendorMessage)vm;
         }
 
-        // The given vendor message is a CapabilitiesVM object (do)
+        // The given vendor message is a CapabilitiesVM object, listing the remote computer's capabilities
         if (vm instanceof CapabilitiesVM) {
 
-        	// Cast it to that type and save it in _capabilities (do)
+        	// Cast it to that type and save it in _capabilities
         	_capabilities = (CapabilitiesVM)vm;
         }
 
-        // The given vendor message is a HeaderUpdateVendorMessage object (do)
+        // The given vendor message is a HeaderUpdateVendorMessage object with more handshake headers
         if (vm instanceof HeaderUpdateVendorMessage) {
 
-        	// Cast it to that type (do)
+        	// Cast it to that type
             HeaderUpdateVendorMessage huvm = (HeaderUpdateVendorMessage)vm;
 
             // Copy all the keys and values from the header update vendor message into HEADERS_READ
             HEADERS_READ.putAll(huvm.getProperties());
 
             try {
-            	
+
             	/*
             	 * Both HEADERS_READ and _headers are the handshake headers the remote computer sent us.
             	 * HEADERS_READ is a Properties hash table of strings.
@@ -2090,92 +2092,184 @@ public class Connection implements IpPort {
         return false;
     }
 
-    /*
-     * (do) vendor messages
+    /**
+     * Determine if this remote computer can understand a given type of vendor message.
+     * See if this remote computer's Messages Supported vendor message lists it, and gets the version number.
+     * 
+     * @param vendorID The vendor ID that identifies a vendor message, like LIME.
+     * @param selector The vendor message type number that identifies a vendor message, like 4.
+     * @return         The vendor message version number listed with that ID and number in this remote computer's Messages Supported vendor message, like 1.
+     *                 -1 if not listed.
      */
-
-    /** @return -1 if the message isn't supported, else the version number supported. */
     public int supportsVendorMessage(byte[] vendorID, int selector) {
+
+        // Search the remote computer's Messages Supported vendor message for the given vendor ID and message type number
     	if (_messagesSupported != null) return _messagesSupported.supportsMessage(vendorID, selector);
     	return -1;
     }
 
-    /** @return -1 if the message isn't supported, else the version number supported. */
+    
+    
+    
+    
+    
+    
+    
+    /**
+     * Determine if this remote computer's Messages Supported vendor message indicates support for the UDP Connect Back vendor message.
+     * Looks for GTKG 7 to get a version number like 2.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsUDPConnectBack() {
+
+        // Search the remote computer's Messages Supported vendor message
         if (_messagesSupported != null) return _messagesSupported.supportsUDPConnectBack();
-        return -1;
+        return -1; // Not listed
     }
-    
-    /** @return -1 if the message isn't supported, else the version number supported. */
+
+    /**
+     * Determine if this remote computer's Messages Supported vendor message indicates support for the TCP Connect Back vendor message.
+     * Looks for BEAR 7 to get a version number like 1.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsTCPConnectBack() {
+
+        // Search the remote computer's Messages Supported vendor message
         if (_messagesSupported != null) return _messagesSupported.supportsTCPConnectBack();
-        return -1;
+        return -1; // Not listed
     }
-    
-    /** @return -1 if the message isn't supported, else the version number supported. */
+
+    /**
+     * Determine if this remote computer's Messages Supported vendor message indicates support for the UDP Connect Back Redirect vendor message.
+     * Looks for LIME 8 to get a version number like 1.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsUDPRedirect() {
+
+        // Search the remote computer's Messages Supported vendor message
         if (_messagesSupported != null) return _messagesSupported.supportsUDPConnectBackRedirect();
-        return -1;
+        return -1; // Not listed
     }
-    
-    /** @return -1 if the message isn't supported, else the version number supported. */
+
+    /**
+     * Determine if this remote computer's Messages Supported vendor message indicates support for the TCP Connect Back Redirect vendor message.
+     * Looks for LIME 7 to get a version number like 1.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsTCPRedirect() {
+
+        // Search the remote computer's Messages Supported vendor message
         if (_messagesSupported != null) return _messagesSupported.supportsTCPConnectBackRedirect();
-        return -1;
+        return -1; // Not listed
     }
-    
-    /** @return -1 if UDP crawling is supported, else the version number supported. */
+
+    /**
+     * Determine if this remote computer's Messages Supported vendor message indicates support for the UDP Crawler Pong vendor message.
+     * Looks for LIME 6 to get a version number like 1.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsUDPCrawling() {
+
+        // Search the remote computer's Messages Supported vendor message
     	if (_messagesSupported != null) return _messagesSupported.supportsUDPCrawling();
-    	return -1;
+    	return -1; // Not listed
     }
-    
-    /** @return -1 if the message isn't supported, else the version number supported. */
+
+    /**
+     * Determine if this remote computer's Messages Supported vendor message indicates support for the Hops Flow vendor message.
+     * Looks for BEAR 4 to get a version number like 1.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsHopsFlow() {
+
+        // Search the remote computer's Messages Supported vendor message
         if (_messagesSupported != null) return _messagesSupported.supportsHopsFlow();
-        return -1;
+        return -1; // Not listed
     }
 
-    /** @return -1 if the message isn't supported, else the version number supported. */
+    /**
+     * If this is a connection up to an ultrapeer, determine if this remote computer's Messages Supported vendor message indicates support for the Push Proxy Request vendor message.
+     * Looks for LIME 21 to get a version number like 1.
+     * 
+     * Only returns a version number if the remote computer is an ultrapeer and we're just a leaf.
+     * If this connection isn't up to an ultrapeer, always returns -1.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsPushProxy() {
+
+        // Search the remote computer's Messages Supported vendor message
         if ((_messagesSupported != null) && isClientSupernodeConnection()) return _messagesSupported.supportsPushProxy();
-        return -1;
+        return -1; // Not listed
     }
 
-    /** @return -1 if the message isn't supported, else the version number supported. */
+    /**
+     * Determine if this remote computer's Messages Supported vendor message indicates support for the Query Status Request vendor message.
+     * Looks for BEAR 11 to get a version number like 1.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsLeafGuidance() {
+
+        // Search the remote computer's Messages Supported vendor message
         if (_messagesSupported != null) return _messagesSupported.supportsLeafGuidance();
-        return -1;
+        return -1; // Not listed
     }
-    
+
+    /**
+     * Determine if this remote computer's Messages Supported vendor message indicates support for the Header Update vendor message.
+     * Looks for LIME 25 to get a version number like 1.
+     * 
+     * @return The version number in the message listing, or -1 if not found
+     */
     public int remoteHostSupportsHeaderUpdate() {
+
+        // Search the remote computer's Messages Supported vendor message
         if (_messagesSupported != null) return _messagesSupported.supportsHeaderUpdate();
-        return -1;
+        return -1; // Not listed
     }
-    
+
+    //do
+
     /** Return whether or not the remote host supports feature queries. */
     public boolean getRemoteHostSupportsFeatureQueries() {
+
+        // Search the remote computer's Messages Supported vendor message for 
         if (_capabilities != null) return _capabilities.supportsFeatureQueries() > 0;
         return false;
     }
 
     /** @return the maximum selector of capability supported, else -1 if no support. */
     public int getRemoteHostFeatureQuerySelector() {
+
+        // Search the remote computer's Messages Supported vendor message for 
         if (_capabilities != null) return _capabilities.supportsFeatureQueries();
         return -1;
     }
 
     /** @return true if the capability is supported. */
     public boolean remoteHostSupportsWhatIsNew() {
+
+        // Search the remote computer's Messages Supported vendor message for 
         if (_capabilities != null) return _capabilities.supportsWhatIsNew();
         return false;
     }
-    
+
     /** Gets the remote host's 'update' version. */
     public int getRemoteHostUpdateVersion() {
+
+        // Search the remote computer's Messages Supported vendor message for 
         if(_capabilities != null) return _capabilities.supportsUpdate();
         return -1;
     }
+
+    //done
 
     /**
      * True if the remote computer we're connected to is on the same LAN here as we are.

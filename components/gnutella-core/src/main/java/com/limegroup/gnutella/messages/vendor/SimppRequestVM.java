@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -5,6 +8,7 @@ import com.limegroup.gnutella.util.DataUtils;
 
 public final class SimppRequestVM extends VendorMessage {
     
+    /** 1, LimeWire understands the initial version of the SIMPP Request vendor message. */
     public static final int VERSION = 1;
 
     /**

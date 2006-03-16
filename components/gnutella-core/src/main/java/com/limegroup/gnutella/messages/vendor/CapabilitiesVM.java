@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
@@ -18,10 +21,9 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.version.UpdateHandler;
 
-/** 
- * The message that lets other know what capabilities you support.  Everytime 
+/**
+ * The message that lets other know what capabilities you support.  Everytime
  * you add a capability you should modify this class.
- *
  */
 public final class CapabilitiesVM extends VendorMessage {
 
@@ -30,18 +32,17 @@ public final class CapabilitiesVM extends VendorMessage {
      * The value is 'WHAT' for legacy reasons, because 'what is new' 
      * was the first feature search supported.
      */
-    static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
-                                                      (byte)65, (byte)84};
+    static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72, (byte)65, (byte)84};
     /**
      * The bytes for supporting SIMPP.  This used to be 'SIMP', but that
      * implementation was broken.  We now use 'IMPP' to advertise support.
      */
-    private static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
+    private static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P'};
     
     /**
      * The bytes for the LMUP message.
      */
-    private static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
+    private static final byte[] LIME_UPDATE_BYTES = {'L', 'M', 'U', 'P'};
     
     /**
      * The current version of this message.

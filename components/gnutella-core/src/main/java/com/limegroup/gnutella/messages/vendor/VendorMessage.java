@@ -56,7 +56,7 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
  * "GTKG"  8 F_UDP_CONNECT_BACK       UDPConnectBackVendorMessage
  * "LIME"  8 F_UDP_CONNECT_BACK_REDIR UDPConnectBackRedirect
  * 
- * Query Status
+ * Search
  * 
  * "LIME" 11 F_LIME_ACK               LimeACKVendorMessage
  * "BEAR" 11 F_LIME_ACK               QueryStatusRequest
@@ -103,7 +103,7 @@ public abstract class VendorMessage extends Message {
     protected static final int F_UDP_CONNECT_BACK_REDIR = 8;
     /** 10, Capabilities vendor message code. */
     protected static final int F_CAPABILITIES = 10;
-    /** 11, Lime ACK vendor message code. */
+    /** 11, Lime Ack vendor message code. */
     protected static final int F_LIME_ACK = 11;
     /** 12, Reply Number vendor message code. */
     protected static final int F_REPLY_NUMBER = 12;
@@ -205,6 +205,9 @@ public abstract class VendorMessage extends Message {
     /**
      * Make a new VendorMessage object with the given information.
      * This is the message maker.
+     * 
+     * Sets the TTL to 1.
+     * Vendor messages can only travel 1 hop, and aren't forwarded.
      * 
      * @param vendorIDBytes The 4 byte vendor code of this message, like "LIME"
      * @param selector      The type number
@@ -421,29 +424,29 @@ public abstract class VendorMessage extends Message {
         } catch (IOException ioe) { ErrorService.error(ioe); }
 
         // Make and return a new object that extends VendorMessage and is specific to the type of vendor message we read, like a HopsFlowVendorMessage or a HeadPing
-        if ((selector == F_HOPS_FLOW)              && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new HopsFlowVendorMessage(guid, ttl, hops, version, restOf);           // BearShare's Hops Flow vendor message
-        if ((selector == F_LIME_ACK)               && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new LimeACKVendorMessage(guid, ttl, hops, version, restOf);
-        if ((selector == F_REPLY_NUMBER)           && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new ReplyNumberVendorMessage(guid, ttl, hops, version, restOf);
-        if ((selector == F_TCP_CONNECT_BACK)       && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new TCPConnectBackVendorMessage(guid, ttl, hops, version, restOf);     // BearShare's TCP Connect Back vendor message
-        if ((selector == F_MESSAGES_SUPPORTED)     && (Arrays.equals(vendorID, F_NULL_VENDOR_ID))) return new MessagesSupportedVendorMessage(guid, ttl, hops, version, restOf);  // The Messages Supported vendor message has a null vendor code
-        if ((selector == F_UDP_CONNECT_BACK)       && (Arrays.equals(vendorID, F_GTKG_VENDOR_ID))) return new UDPConnectBackVendorMessage(guid, ttl, hops, version, restOf);     // Gtk-Gnutella's UDP Connect Back vendor message
-        if ((selector == F_PUSH_PROXY_REQ)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new PushProxyRequest(guid, ttl, hops, version, restOf);
-        if ((selector == F_PUSH_PROXY_ACK)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new PushProxyAcknowledgement(guid, ttl, hops, version, restOf);
-        if ((selector == F_LIME_ACK)               && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new QueryStatusRequest(guid, ttl, hops, version, restOf);              // BearShare's Query Status Request vendor message
-        if ((selector == F_REPLY_NUMBER)           && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new QueryStatusResponse(guid, ttl, hops, version, restOf);             // BearShare's Query Status Response vendor message
-        if ((selector == F_TCP_CONNECT_BACK)       && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new TCPConnectBackRedirect(guid, ttl, hops, version, restOf);
-        if ((selector == F_UDP_CONNECT_BACK_REDIR) && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);
-        if ((selector == F_CAPABILITIES)           && (Arrays.equals(vendorID, F_NULL_VENDOR_ID))) return new CapabilitiesVM(guid, ttl, hops, version, restOf);                  // The Capabilities Vendor Message has a null vendor code
-        if ((selector == F_GIVE_STATS)             && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf, network); // Also pass the Internet protocol like Message.N_TCP or Message.N_UDP
-        if ((selector == F_STATISTICS)             && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
-        if ((selector == F_SIMPP_REQ)              && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new SimppRequestVM(guid, ttl, hops, version, restOf);
-        if ((selector == F_SIMPP)                  && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new SimppVM(guid, ttl, hops, version, restOf);
-        if ((selector == F_GIVE_ULTRAPEER)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UDPCrawlerPing(guid, ttl, hops, version, restOf);
-        if ((selector == F_ULTRAPEER_LIST)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UDPCrawlerPong(guid, ttl, hops, version, restOf);
-        if ((selector == F_UDP_HEAD_PING)          && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new HeadPing(guid, ttl, hops, version, restOf);
-        if ((selector == F_UDP_HEAD_PONG)          && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new HeadPong(guid, ttl, hops, version, restOf);
-        if ((selector == F_UPDATE_REQ)             && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UpdateRequest(guid, ttl, hops, version, restOf);
-        if ((selector == F_UPDATE_RESP)            && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UpdateResponse(guid, ttl, hops, version, restOf);
+        if ((selector == F_HOPS_FLOW)              && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new HopsFlowVendorMessage(guid, ttl, hops, version, restOf);           // BEAR  4 Hops Flow
+        if ((selector == F_LIME_ACK)               && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new LimeACKVendorMessage(guid, ttl, hops, version, restOf);            // LIME 11 Lime Ack
+        if ((selector == F_REPLY_NUMBER)           && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new ReplyNumberVendorMessage(guid, ttl, hops, version, restOf);        // LIME 12 Reply Number
+        if ((selector == F_TCP_CONNECT_BACK)       && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new TCPConnectBackVendorMessage(guid, ttl, hops, version, restOf);     // BEAR  7 TCP Connect Back
+        if ((selector == F_MESSAGES_SUPPORTED)     && (Arrays.equals(vendorID, F_NULL_VENDOR_ID))) return new MessagesSupportedVendorMessage(guid, ttl, hops, version, restOf);  // 0000  0 Messages Supported
+        if ((selector == F_UDP_CONNECT_BACK)       && (Arrays.equals(vendorID, F_GTKG_VENDOR_ID))) return new UDPConnectBackVendorMessage(guid, ttl, hops, version, restOf);     // GTKG  7 UDP Connect Back
+        if ((selector == F_PUSH_PROXY_REQ)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new PushProxyRequest(guid, ttl, hops, version, restOf);                // LIME 21 Push Proxy Request
+        if ((selector == F_PUSH_PROXY_ACK)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new PushProxyAcknowledgement(guid, ttl, hops, version, restOf);        // LIME 22 Push Proxy Acknowledgement
+        if ((selector == F_LIME_ACK)               && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new QueryStatusRequest(guid, ttl, hops, version, restOf);              // BEAR 11 Query Status Request
+        if ((selector == F_REPLY_NUMBER)           && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new QueryStatusResponse(guid, ttl, hops, version, restOf);             // BEAR 12 Query Status Response
+        if ((selector == F_TCP_CONNECT_BACK)       && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new TCPConnectBackRedirect(guid, ttl, hops, version, restOf);          // LIME  7 TCP Connect Back Redirect
+        if ((selector == F_UDP_CONNECT_BACK_REDIR) && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);          // LIME  8 UDP Connect Back Redirect
+        if ((selector == F_CAPABILITIES)           && (Arrays.equals(vendorID, F_NULL_VENDOR_ID))) return new CapabilitiesVM(guid, ttl, hops, version, restOf);                  // 0000 10 Capabilities
+        if ((selector == F_GIVE_STATS)             && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf, network); // LIME 14 Give Statistics
+        if ((selector == F_STATISTICS)             && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new StatisticVendorMessage(guid, ttl, hops, version, restOf);          // LIME 15 Statistic
+        if ((selector == F_SIMPP_REQ)              && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new SimppRequestVM(guid, ttl, hops, version, restOf);                  // LIME 16 SIMPP Request
+        if ((selector == F_SIMPP)                  && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new SimppVM(guid, ttl, hops, version, restOf);                         // LIME 17 SIMPP
+        if ((selector == F_GIVE_ULTRAPEER)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UDPCrawlerPing(guid, ttl, hops, version, restOf);                  // LIME  5 UDP Crawler Ping
+        if ((selector == F_ULTRAPEER_LIST)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UDPCrawlerPong(guid, ttl, hops, version, restOf);                  // LIME  6 UDP Crawler Pong
+        if ((selector == F_UDP_HEAD_PING)          && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new HeadPing(guid, ttl, hops, version, restOf);                        // LIME 23 Head Ping
+        if ((selector == F_UDP_HEAD_PONG)          && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new HeadPong(guid, ttl, hops, version, restOf);                        // LIME 24 Head Pong
+        if ((selector == F_UPDATE_REQ)             && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UpdateRequest(guid, ttl, hops, version, restOf);                   // LIME 26 Update Request
+        if ((selector == F_UPDATE_RESP)            && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UpdateResponse(guid, ttl, hops, version, restOf);                  // LIME 27 Update Response
 
         // We read a vendor type number we didn't expect
         ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();

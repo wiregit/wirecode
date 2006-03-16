@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 /*
  * This message represents a list of ultrapeer connections that has been 
  * returned by an ultrapeer.  Its payload is a byte indicating how many
@@ -32,7 +35,8 @@ import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.IOUtils;
 
 public class UDPCrawlerPong extends VendorMessage {
-	
+
+    /** 1, LimeWire understands the initial version of the UDP Crawler Pong vendor message. */
 	public static final int VERSION = 1;
 	
 	public static final String AGENT_SEP = ";";

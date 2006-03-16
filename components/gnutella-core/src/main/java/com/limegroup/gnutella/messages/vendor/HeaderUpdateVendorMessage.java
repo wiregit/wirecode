@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
@@ -13,18 +16,17 @@ import com.limegroup.gnutella.messages.BadPacketException;
  * the headers that need to be updated.
  */
 public class HeaderUpdateVendorMessage extends VendorMessage {
-   
+
+    /** 1, LimeWire understands the initial version of the Header Update vendor message. */
     public static final int VERSION = 1;
    
     private Properties _headers;
-    
+
+    /** Not used. */
     protected HeaderUpdateVendorMessage(byte[] guid, byte ttl, byte hops, int version, byte[] payload) throws BadPacketException {
-        
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_HEADER_UPDATE, version, payload);
-		
 		//see if the payload is valid
 		if (getVersion() == VERSION && (payload == null || payload.length == 0)) throw new BadPacketException();
-		
 		_headers = new Properties();
 		try {
 		    InputStream bais = new ByteArrayInputStream(payload);
@@ -33,7 +35,13 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
 		    throw new BadPacketException(bad.getMessage());
 		}
 	}
-    
+
+    /**
+     * 
+     * Only RouterService.addressChanged() makes a new HeaderUpdateVendorMessage with this constructor.
+     * 
+     * @param props
+     */
     public HeaderUpdateVendorMessage(Properties props) {
         super(F_LIME_VENDOR_ID, F_HEADER_UPDATE, VERSION, derivePayload(props));
         _headers = props;

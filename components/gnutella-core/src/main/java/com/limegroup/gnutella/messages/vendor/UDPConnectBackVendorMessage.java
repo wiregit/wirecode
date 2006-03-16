@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
@@ -25,6 +28,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  */
 public final class UDPConnectBackVendorMessage extends VendorMessage {
 
+    /** 2, LimeWire understands the 2nd version of the UDP Connect Back vendor message. */
     public static final int VERSION = 2;
 
     /** The payload has a 16-bit unsigned value - the port - at which one should
