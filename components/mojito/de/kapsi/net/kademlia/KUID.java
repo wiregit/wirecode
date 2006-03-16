@@ -49,13 +49,22 @@ public class KUID implements Serializable {
         0x1
     };
     
-    public static final KUID MIN_ID = new KUID(false);
-    public static final KUID MAX_ID = new KUID(true);
-    
     public static final int UNKNOWN_ID = 0x00;
     public static final int NODE_ID = 0x01;
     public static final int VALUE_ID = 0x02;
     public static final int MESSAGE_ID = 0x04;
+    
+    public static final KUID MIN_UNKNOWN_ID = new KUID(UNKNOWN_ID, false);
+    public static final KUID MAX_UNKNOWN_ID = new KUID(UNKNOWN_ID, true);
+    
+    public static final KUID MIN_NODE_ID = new KUID(NODE_ID, false);
+    public static final KUID MAX_NODE_ID = new KUID(NODE_ID, true);
+    
+    public static final KUID MIN_VALUE_ID = new KUID(VALUE_ID, false);
+    public static final KUID MAX_VALUE_ID = new KUID(VALUE_ID, true);
+    
+    public static final KUID MIN_MESSAGE_ID = new KUID(MESSAGE_ID, false);
+    public static final KUID MAX_MESSAGE_ID = new KUID(MESSAGE_ID, true);
     
     protected final int type;
     protected final byte[] id;
@@ -80,8 +89,8 @@ public class KUID implements Serializable {
         this.hashCode = ArrayUtils.hashCode(id);
     }
     
-    private KUID(boolean max) {
-        this.type = UNKNOWN_ID;
+    private KUID(int type, boolean max) {
+        this.type = type;
 
         this.id = new byte[LENGTH/8];
         
@@ -203,11 +212,21 @@ public class KUID implements Serializable {
             sum += xor;
         }
         
+        int t = (type == nodeId.type) ? type : UNKNOWN_ID;
+        
         if (sum == 0) {
-            return MIN_ID;
+            switch(type) {
+                case NODE_ID:
+                    return MIN_NODE_ID;
+                case VALUE_ID:
+                    return MIN_VALUE_ID;
+                case MESSAGE_ID:
+                    return MIN_MESSAGE_ID;
+                default:
+                    return MIN_UNKNOWN_ID;
+            }
         }
         
-        int t = (type == nodeId.type) ? type : UNKNOWN_ID;
         return new KUID(t, result);
     }
     
