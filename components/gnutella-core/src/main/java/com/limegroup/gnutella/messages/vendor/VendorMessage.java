@@ -447,10 +447,7 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_UDP_HEAD_PONG)          && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new HeadPong(guid, ttl, hops, version, restOf);                        // LIME 24 Head Pong
         if ((selector == F_UPDATE_REQ)             && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UpdateRequest(guid, ttl, hops, version, restOf);                   // LIME 26 Update Request
         if ((selector == F_UPDATE_RESP)            && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UpdateResponse(guid, ttl, hops, version, restOf);                  // LIME 27 Update Response
-
-        /*
-         * TODO:kfaaborg What about LIME 25 1 HeaderUpdateVendorMessage?
-         */
+        if ((selector == F_HEADER_UPDATE)          && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new HeaderUpdateVendorMessage(guid, ttl, hops, version, restOf);       // LIME 25 Header Update
 
         // We read a vendor type number we didn't expect
         ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();

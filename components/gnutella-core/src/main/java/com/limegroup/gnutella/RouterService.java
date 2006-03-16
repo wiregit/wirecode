@@ -1627,51 +1627,73 @@ public class RouterService {
     public static boolean getIsShuttingDown() {
 		return isShuttingDown;
     }
-    
+
     /**
-     * Notifies components that this' IP address has changed.
+     * Send a Header Update vendor message with our new IP address in a header like "Listen-IP: 216.27.158.74:6346" to the remote computers we're connected to.
+     * 
+     * Call addressChanged() when our IP address has changed, or we have new information about it that has changed our record of it.
+     * Makes a new Header Update vendor message with a header like "Listen-IP: 216.27.158.74:6346".
+     * Sends it to our connections.
+     * 
+     * @return True if we know our IP address and sent the message.
+     *         False if we don't have valid information for our own IP address.
      */
     public static boolean addressChanged() {
-        if(callback != null)
-            callback.addressStateChanged();        
-        
-        // Only continue if the current address/port is valid & not private.
+
+        // Tell the GUI our IP address has changed
+        if (callback != null) callback.addressStateChanged();
+
+        /*
+         * Only continue if the current address/port is valid & not private.
+         */
+
+        // Make sure we know what our IP address and port number are
         byte addr[] = getAddress();
         int port = getPort();
-        if(!NetworkUtils.isValidAddress(addr))
-            return false;
-        if(NetworkUtils.isPrivateAddress(addr))
-            return false;            
-        if(!NetworkUtils.isValidPort(port))
-            return false;
+        if (!NetworkUtils.isValidAddress(addr))  return false; // Make sure our IP address doesn't start 0 or 255
+        if (NetworkUtils.isPrivateAddress(addr)) return false; // Make sure our IP address isn't in a LAN range
+        if (!NetworkUtils.isValidPort(port))     return false; // Make sure our port number isn't 0 or too big to fit in 2 bytes
 
-        // reset the last connect back time so the next time the TCP/UDP
-        // validators run they try to connect back.
-        if (acceptor != null)
-        	acceptor.resetLastConnectBackTime();
-        if (UDPSERVICE != null)
-        	UDPSERVICE.resetLastConnectBackTime();
-        
+        /*
+         * reset the last connect back time so the next time the TCP/UDP
+         * validators run they try to connect back.
+         */
+
+        // Have one of our ultrapeers try to connect back to us to see if we're externally contactable on TCP and UDP
+        if (acceptor   != null) acceptor.resetLastConnectBackTime(); // Make it look like we haven't requested TCP and UDP connect back checks in more than a half hour
+        if (UDPSERVICE != null) UDPSERVICE.resetLastConnectBackTime();
+
+        // If the program has made the ConnectionManager object
         if (manager != null) {
+
+            // Make a new Java Properties hash table of strings with one key "Listen-IP" and our IP address and port number in its value, like "216.27.158.74:6346"
         	Properties props = new Properties();
-        	props.put(HeaderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
+        	props.put(HeaderNames.LISTEN_IP, NetworkUtils.ip2string(addr) + ":" + port);
+
+            // Compose a Header Update vendor message for us to send with our new "Listen-IP" header
         	HeaderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
-        	
-        	for (Iterator iter = manager.getInitializedConnections().iterator();iter.hasNext();) {
+
+            // Loop for each ultrapeer we're connected to
+        	for (Iterator iter = manager.getInitializedConnections().iterator(); iter.hasNext(); ) {
         		ManagedConnection c = (ManagedConnection)iter.next();
-        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
-        			c.send(huvm);
+
+                // If the remote computer's Messages Supported vendor message lists version 1 or later of Header Update, send it ours
+        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION) c.send(huvm);
         	}
-        	
-        	for (Iterator iter = manager.getInitializedClientConnections().iterator();iter.hasNext();) {
+
+            // Loop for each of our leaves
+        	for (Iterator iter = manager.getInitializedClientConnections().iterator(); iter.hasNext(); ) {
         		ManagedConnection c = (ManagedConnection)iter.next();
-        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
-        			c.send(huvm);
+
+                // If the remote computer's Messages Supported vendor message lists version 1 or later of Header Update, send it ours
+        		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION) c.send(huvm);
         	}
         }
+
+        // We looped to send the message
         return true;
     }
-    
+
     /**
      * Notification that we've either just set or unset acceptedIncoming.
      */
