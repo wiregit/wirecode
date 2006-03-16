@@ -41,7 +41,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         ContactNode node = context.getRouteTable().get(nodeId, true);
         if (node == null) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(ContactNode.toString(nodeId, src) + " is unknown and requests us to store some values");
+                LOG.error(ContactNode.toString(nodeId, src) 
+                        + " is unknown and requests us to store some values");
             }
             return;
         }

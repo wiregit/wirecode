@@ -198,7 +198,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         // Get the first round of alpha nodes
-        List alphaList = toQuery.select(lookup, queried, LookupSettings.getA());
+        List alphaList = toQuery.select(lookup, LookupSettings.getA());
         
         // send alpha requests
         for(int i = 0; i < alphaList.size(); i++) {
@@ -259,7 +259,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         int numLookups = LookupSettings.getA() - activeSearches;
         if(numLookups>0) {
-            List bucketList = toQuery.select(lookup, queried, numLookups);
+            List bucketList = toQuery.select(lookup, numLookups);
             final int size = bucketList.size();
             
             MessageDispatcher messageDispatcher = context.getMessageDispatcher();

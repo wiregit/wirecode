@@ -119,39 +119,9 @@ public class OldRouteTable {
      * and most-recently seen.
      */
     public List select(KUID lookup, int k) {
-        return select(lookup, k, false);
+        return routeTableMap.select(lookup, k);
     }
-    
-    public List select(KUID lookup, int k, boolean skipStale) {
-        if (skipStale) {
-            return routeTableMap.select(lookup, staleNodes.keySet(), k);
-        } else {
-            return routeTableMap.select(lookup, Collections.EMPTY_SET, k);
-        }
-    }
-    
-    public List select(KUID lookup, KUID excludeKey, int k) {
-        return select(lookup, excludeKey, k, false);
-    }
-    
-    public synchronized List select(KUID lookup, KUID excludeKey, 
-            int k, boolean skipStale) {
-        
-        Collection exclude = Collections.EMPTY_SET;
-        if (skipStale) {
-            exclude = staleNodes.keySet();
-            if (excludeKey != null && !staleNodes.containsKey(excludeKey)) {
-                exclude = new StaleExcludeDelegate(staleNodes.keySet(), excludeKey);
-            }
-        } else {
-            if (excludeKey != null) {
-                exclude = new HashSet();
-                exclude.add(excludeKey);
-            }
-        }
-        return routeTableMap.select(lookup, exclude, k);
-    }
-    
+
     public boolean containsNode(KUID nodeId) {
         return routeTableMap.containsKey(nodeId);
     }
@@ -300,10 +270,6 @@ public class OldRouteTable {
         
         public List select(Object key, int k) {
             return updateAccessOrder(trie.select(key, k));
-        }
-        
-        public List select(Object key, Collection exclude, int k) {
-            return updateAccessOrder(trie.select(key, exclude, k));
         }
         
         public Object getLeastRecentlySeen(boolean remove) {

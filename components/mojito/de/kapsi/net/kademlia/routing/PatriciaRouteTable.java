@@ -1,15 +1,10 @@
 package de.kapsi.net.kademlia.routing;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,17 +34,12 @@ public class PatriciaRouteTable implements RoutingTable{
     private final PatriciaTrie nodesTrie;
     
     private final PatriciaTrie bucketsTrie;
-    
-    private final HashMap staleNodes;
 
     public PatriciaRouteTable(Context context) {
         this.context = context;
         
-        staleNodes = new HashMap();
-        
         nodesTrie = new PatriciaTrie();
         bucketsTrie = new PatriciaTrie();
-        
         
         KUID rootKUID = KUID.MIN_NODE_ID;
         BucketNode root = new BucketNode(rootKUID,0);
@@ -77,7 +67,6 @@ public class PatriciaRouteTable implements RoutingTable{
             throw new IllegalArgumentException("NodeID and the ID returned by Node do not match");
         }
         
-        staleNodes.remove(nodeId);
         if(updateExistingNode(nodeId,node,alive)) {
             return;
         }
@@ -310,7 +299,6 @@ public class PatriciaRouteTable implements RoutingTable{
     public void clear() {
         nodesTrie.clear();
         bucketsTrie.clear();
-        staleNodes.clear();
     }
 
     public boolean containsNode(KUID nodeId) {
@@ -348,7 +336,6 @@ public class PatriciaRouteTable implements RoutingTable{
     public boolean handleFailure(ContactNode node) {
         if (node != null) {
             if (node.failure() >= RouteTableSettings.getMaxNodeFailures()) {
-                staleNodes.put(node.getNodeID(), node);
                 return true;
             }
         }
@@ -360,7 +347,6 @@ public class PatriciaRouteTable implements RoutingTable{
     }
 
     public void remove(KUID key) {
-        staleNodes.remove(key);
         //TODO mark: some logic to delete a bucket if it's empty
         BucketNode bucket = (BucketNode)bucketsTrie.select(key);
         bucket.decrementNodeCount();
@@ -368,15 +354,6 @@ public class PatriciaRouteTable implements RoutingTable{
         nodesTrie.remove(key);
     }
 
-    public List select(KUID lookup, int k, boolean skipStale) {
-        touchBucket(lookup);
-        if (skipStale) {
-            return nodesTrie.select(lookup, staleNodes.keySet(), k);
-        } else {
-            return nodesTrie.select(lookup, Collections.EMPTY_SET, k);
-        }
-    }
-    
     /** 
      * Returns a List of buckts sorted by their 
      * closeness to the provided Key. Use BucketList's
@@ -384,28 +361,8 @@ public class PatriciaRouteTable implements RoutingTable{
      * and most-recently seen.
      */
     public List select(KUID lookup, int k) {
-        return select(lookup, k, false);
-    }
-
-    public synchronized List select(KUID lookup, KUID excludeKey, int k, boolean skipStale) {
         touchBucket(lookup);
-        Collection exclude = Collections.EMPTY_SET;
-        if (skipStale) {
-            exclude = staleNodes.keySet();
-            if (excludeKey != null && !staleNodes.containsKey(excludeKey)) {
-                exclude = new StaleExcludeDelegate(staleNodes.keySet(), excludeKey);
-            }
-        } else {
-            if (excludeKey != null) {
-                exclude = new HashSet();
-                exclude.add(excludeKey);
-            }
-        }
-        return nodesTrie.select(lookup, exclude, k);
-    }
-
-    public List select(KUID lookup, KUID excludeKey, int k) {
-        return select(lookup, excludeKey, k, false);
+        return nodesTrie.select(lookup, k);
     }
 
     public ContactNode select(KUID key) {
@@ -422,7 +379,6 @@ public class PatriciaRouteTable implements RoutingTable{
         //TODO change this!!!!
         if (node != null) {
             node.alive();
-            staleNodes.remove(node.getNodeID());
             updateIfCached(node.getNodeID());
             return true;
         }
@@ -438,85 +394,5 @@ public class PatriciaRouteTable implements RoutingTable{
         //      get bucket closest to node
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
         bucket.touch();
-    }
-    
-    
-
-    
-    /**
-     * A combined Stale ContactNode and excude ContactNode Delegate.
-     * Pass it to the Trie to exclude all stale Nodes
-     * and one specific ContactNode.
-     */
-    private static class StaleExcludeDelegate implements Collection {
-        
-        private Set stale;
-        private KUID exclude;
-        
-        public StaleExcludeDelegate(Set stale, KUID exclude) {
-            this.stale = stale;
-            this.exclude = exclude;
-        }
-
-        public boolean add(Object o) {
-            throw new UnsupportedOperationException();
-        }
-
-        public boolean addAll(Collection c) {
-            throw new UnsupportedOperationException();
-        }
-
-        public void clear() {
-            throw new UnsupportedOperationException();
-        }
-
-        public boolean contains(Object o) {
-            return stale.contains(o) || exclude.equals(o);
-        }
-
-        public boolean containsAll(Collection c) {
-            for(Iterator it = c.iterator(); it.hasNext(); ) {
-                if (!contains(it.next())) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public boolean isEmpty() {
-            return false;
-        }
-
-        public Iterator iterator() {
-            return Collections.EMPTY_LIST.iterator();
-        }
-
-        public boolean remove(Object o) {
-            throw new UnsupportedOperationException();
-        }
-
-        public boolean removeAll(Collection c) {
-            throw new UnsupportedOperationException();
-        }
-
-        public boolean retainAll(Collection c) {
-            throw new UnsupportedOperationException();
-        }
-
-        public int size() {
-            int size = stale.size();
-            if (!stale.contains(exclude)) {
-                size++;
-            }
-            return size;
-        }
-
-        public Object[] toArray() {
-            throw new UnsupportedOperationException();
-        }
-
-        public Object[] toArray(Object[] a) {
-            throw new UnsupportedOperationException();
-        }
     }
 }

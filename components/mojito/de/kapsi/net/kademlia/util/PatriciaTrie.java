@@ -7,7 +7,6 @@ package de.kapsi.net.kademlia.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -197,8 +196,8 @@ public class PatriciaTrie {
     }
   
     public Object selectNextClosest(Object key) {
-        List l = select(key, Collections.EMPTY_SET, 2);
-        return l.get(l.size()-1);
+        List list = select(key, 2);
+        return list.get(list.size()-1);
     }
     
     /**
@@ -233,15 +232,11 @@ public class PatriciaTrie {
      * and most-recently seen.
      */
     public List select(Object key, int count) {
-        return select(key, Collections.EMPTY_SET, count);
-    }
-    
-    public List select(Object key, Collection exclude, int count) {
-        SearchState state = new SearchState(key, exclude, count);
+        SearchState state = new SearchState(key, count);
         selectR(state);
         return state.getResults();
     }
-    
+
     /**
      * The actual select (bucket) implementation. It uses a 
      * probability function to randomize the returned List (bucket).
@@ -689,7 +684,6 @@ public class PatriciaTrie {
         
         private List dest;
         private Object key;
-        private Collection exclude;
         private int targetSize;
 
         private int currentDistance, numEquidistant, numEquidistantToAdd;
@@ -698,9 +692,8 @@ public class PatriciaTrie {
         
         private final Random r = new Random();
         
-        public SearchState(Object key, Collection exclude, int targetSize) {
+        public SearchState(Object key, int targetSize) {
             this.key = key;
-            this.exclude = exclude == null ? Collections.EMPTY_SET : exclude;
             this.targetSize = targetSize;
             
             dest = new ArrayList(Math.min(targetSize, size()));
@@ -712,7 +705,7 @@ public class PatriciaTrie {
         
         public boolean add(Entry h) {
             if (h.bitIndex <= bitIndex) {
-                if (!h.isEmpty() && !exclude.contains(h.key)) {
+                if (!h.isEmpty()) {
                     addResult(h);
                 }
                 return true;

@@ -1,6 +1,6 @@
 package de.kapsi.net.kademlia;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +8,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import de.kapsi.net.kademlia.handler.DefaultMessageHandler;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 
@@ -81,17 +80,15 @@ public class BucketNode extends Node {
     }
  
     public List split() {
-        List list = new ArrayList();
+        
         BucketNode leftBucket = new BucketNode(nodeId, depth+1);
-        BucketNode rightBucket = new BucketNode(nodeId.set(depth, true),depth+1);
+        BucketNode rightBucket = new BucketNode(nodeId.set(depth),depth+1);
         if(replacementCache != null && !replacementCache.isEmpty()) {
             if(LOG.isErrorEnabled()) {
                 LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
             }
         }
-        list.add(leftBucket);
-        list.add(rightBucket);
-        return list;
+        return Arrays.asList(new BucketNode[]{leftBucket, rightBucket});
     }
 
     

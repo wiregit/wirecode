@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,10 +17,7 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.Message;
-import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.routing.RoutingTable;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.util.BucketUtils;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 
 /**

@@ -25,12 +25,6 @@ public interface RoutingTable {
     
     public List select(KUID lookup, int k);
     
-    public List select(KUID lookup, int k, boolean skipStale);
-    
-    public List select(KUID lookup, KUID excludeKey, int k);
-    
-    public List select(KUID lookup, KUID excludeKey, int k, boolean skipStale);
-
     public boolean containsNode(KUID nodeId);
     
     public boolean updateTimeStamp(ContactNode node);

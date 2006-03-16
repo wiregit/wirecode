@@ -20,7 +20,6 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class LookupRequestHandler extends AbstractRequestHandler {
     
@@ -40,9 +39,8 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
         
         List bucketList 
-            = context.getRouteTable().select(lookup, nodeId, 
-                    KademliaSettings.getReplicationParameter(), 
-                    RouteTableSettings.getSkipStale());
+            = context.getRouteTable().select(lookup,  
+                    KademliaSettings.getReplicationParameter());
         
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request.getMessageID(), bucketList);

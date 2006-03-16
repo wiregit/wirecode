@@ -64,7 +64,15 @@ public class KeyValuePublisher implements Runnable {
                 KeyValue keyValue = (KeyValue)it.next();
                 
                 synchronized(database) {
+                    
+                    // this is neccessary because database.getAllValues()
+                    // creates a new Collection rather than returning a
+                    // reference to the internal data structure.
                     if (!database.contains(keyValue)) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("KeyValue " + keyValue 
+                                    + " is no longer stored in our database");
+                        }
                         continue;
                     }
                     

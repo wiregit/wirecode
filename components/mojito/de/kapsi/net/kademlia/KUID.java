@@ -144,7 +144,15 @@ public class KUID implements Serializable {
         return (id[index] & BITS[bit]) != 0;
     }
     
-    public KUID set(int bitIndex, boolean set) {
+    public KUID set(int bit) {
+        return set(bit, true);
+    }
+    
+    public KUID unset(int bit) {
+        return set(bit, false);
+    }
+    
+    private KUID set(int bitIndex, boolean set) {
         int index = (int) (bitIndex / BITS.length);
         int bit = (int) (bitIndex - index * BITS.length);
         

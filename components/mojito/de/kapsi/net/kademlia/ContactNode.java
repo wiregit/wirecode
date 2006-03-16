@@ -46,6 +46,16 @@ public class ContactNode extends Node{
         return o;
     }
     
+    public boolean equals(Object o) {
+        if (!(o instanceof ContactNode)) {
+            return false;
+        }
+        
+        ContactNode other = (ContactNode)o;
+        return nodeId.equals(other.nodeId) 
+                    && address.equals(other.address);
+    }
+    
     public String toString() {
         return nodeId + " (" + address + ")" + ",timestamp: " +timeStamp;
     }
