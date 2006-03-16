@@ -49,7 +49,7 @@ public class PatriciaRouteTable implements RoutingTable{
         bucketsTrie = new PatriciaTrie();
         
         
-        KUID rootKUID = KUID.NULL;
+        KUID rootKUID = KUID.MIN_ID;
         BucketNode root = new BucketNode(rootKUID,0);
         bucketsTrie.put(rootKUID,root);
     }

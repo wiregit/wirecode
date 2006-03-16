@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 
-public class NetworkUtils {
+public final class NetworkUtils {
     
     private NetworkUtils() {}
     

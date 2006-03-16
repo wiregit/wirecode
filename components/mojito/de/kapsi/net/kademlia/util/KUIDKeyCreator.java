@@ -19,7 +19,7 @@ public class KUIDKeyCreator implements PatriciaTrie.KeyCreator {
     
     public int bitIndex(Object key, Object found) {
         if (found == null) {
-            found = KUID.NULL;
+            found = KUID.MIN_ID;
         }
         return ((KUID)key).bitIndex((KUID)found);
     }

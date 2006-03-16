@@ -84,7 +84,7 @@ public class BucketNode extends Node {
     }
     
     public static void main(String[] args) {
-        BucketNode bucket = new BucketNode(KUID.NULL,0);
+        BucketNode bucket = new BucketNode(KUID.MIN_ID,0);
         System.out.println(bucket);
         for (int i = 0; i < 10; i++) {
             List l = bucket.split();

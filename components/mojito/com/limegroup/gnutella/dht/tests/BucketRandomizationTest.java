@@ -10,25 +10,23 @@ import de.kapsi.net.kademlia.util.PatriciaTrie;
 public class BucketRandomizationTest {
 	
 	public static void main(String[] args) {
-		final String[] keys = new String[]{ 
-                "Albert", "Xavier", "XyZ", "Anna", "Alien", "Alberto",
-                "Alberts", "Allie", "Alliese", "Alabama", "Banane",
-                "Blabla", "Amber", "Ammun", "Akka", "Akko", "Albertoo", 
-                "Amma"
-        };
-		
-		PatriciaTrie trie = new PatriciaTrie(new KUIDKeyCreator());
-		for(int i = 0; i < keys.length; i++) {
-			trie.put(toKUID(keys[i]), keys[i]);
-		}
-		
-		System.out.println(trie);
-		
-		List list = trie.select(toKUID("Am"), 6);
-		for(Iterator it = list.iterator(); it.hasNext(); ) {
-			System.out.println(it.next());
-		}
-	}
+        final String[] keys = new String[] { "Albert", "Xavier", "XyZ", "Anna",
+                "Alien", "Alberto", "Alberts", "Allie", "Alliese", "Alabama",
+                "Banane", "Blabla", "Amber", "Ammun", "Akka", "Akko",
+                "Albertoo", "Amma" };
+
+        PatriciaTrie trie = new PatriciaTrie(new KUIDKeyCreator());
+        for (int i = 0; i < keys.length; i++) {
+            trie.put(toKUID(keys[i]), keys[i]);
+        }
+
+        System.out.println(trie);
+
+        List list = trie.select(toKUID("Albert"), 6);
+        for (Iterator it = list.iterator(); it.hasNext();) {
+            System.out.println(it.next());
+        }
+    }
 	
 	public static KUID toKUID(String key) {
 		byte[] b = key.getBytes();

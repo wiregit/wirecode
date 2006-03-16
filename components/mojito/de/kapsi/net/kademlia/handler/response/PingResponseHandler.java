@@ -18,6 +18,7 @@ import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 public class PingResponseHandler extends AbstractResponseHandler {
     
@@ -37,6 +38,9 @@ public class PingResponseHandler extends AbstractResponseHandler {
             LOG.trace("Ping to " + ContactNode.toString(nodeId, src) 
                     + " succeeded");
         }
+        
+        PingResponse response = (PingResponse)message;
+        context.setExternalSocketAddress(response.getSocketAddress());
         
         if (l != null) {
             getEventDispatcher().add(new Runnable() {

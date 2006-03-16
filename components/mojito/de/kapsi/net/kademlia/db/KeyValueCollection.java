@@ -5,10 +5,10 @@
 
 package de.kapsi.net.kademlia.db;
 
+import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -17,7 +17,6 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.settings.DatabaseSettings;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 
 public class KeyValueCollection implements Collection {
@@ -29,9 +28,7 @@ public class KeyValueCollection implements Collection {
     
     private PublicKey masterKey;
     private FixedSizeHashMap values;
-    
-    private boolean locked = false;
-    
+
     public KeyValueCollection(Context context, KUID key, int maxSize) {
         this.context = context;
         this.key = key;
@@ -57,83 +54,69 @@ public class KeyValueCollection implements Collection {
     }
     
     public boolean add(Object value) {
-        
         KeyValue keyValue = (KeyValue)value;
         
         try {
             boolean isTrustworthy = isTrustworthy(keyValue);
+            boolean isLocalKeyValue = keyValue.isLocalKeyValue();
             
-            if (isLocked() && !isTrustworthy) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("KeyValueCollection for " + key + " is locked and the new KeyValue is not trustworthy");
-                }
-                return false;
-            }
+            KUID nodeId = keyValue.getNodeID();
+            KeyValue current = (KeyValue)values.get(nodeId);
             
-            if (isAheadOfTime(keyValue) && !isTrustworthy) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("KeyValue " + key + " is ahead of time and the KeyValue is not trustworthy");
-                }
-                return false;
-            }
-            
-            PublicKey pubKey = keyValue.getPublicKey();
-            KeyValue current = (KeyValue)values.get(pubKey);
-            
-            if (current == null 
-                    && isFull() 
-                    && !isTrustworthy) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Cannot store " + key + " as Collection is full and the KeyValue is not trustworthy");
-                }
-                return false;
-            }
-            
-            if (current == null 
-                    || isTrustworthy
-                    || current.verify(pubKey)) { // old and new Value are from the same orignator
+            if (current != null 
+                    && (!isTrustworthy || !isLocalKeyValue)) {
                 
-                if (isTrustworthy && !keyValue.isStandard()) {
-                    if (keyValue.isClear()) {
-                        values.clear();
-                    }
-                    
-                    locked = keyValue.isLock();
-                }
-                
-                /*if (isDuplicate(current, keyValue)) {
+                SocketAddress currentSrc = current.getSocketAddress();
+                if (currentSrc != null 
+                        && !currentSrc.equals(keyValue.getSocketAddress())) {
                     if (LOG.isTraceEnabled()) {
-                        LOG.trace("Dropping duplicate KeyValue " + key);
+                        LOG.trace("Cannot replace " + current + " with " + keyValue);
                     }
                     return false;
-                }*/
+                }
+            }
+            
+            if (current != null) {
+                
+                if (!isTrustworthy && isTrustworthy(current)) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Cannot replace " + current + " with " + keyValue);
+                    }
+                    return false;
+                }
+                
+                SocketAddress currentSrc = current.getSocketAddress();
+                if (currentSrc != null 
+                        && !currentSrc.equals(keyValue.getSocketAddress())
+                        ) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Cannot replace " + current + " with " + keyValue);
+                    }
+                    return false;
+                }
+            }
+            
+            
+            if (isFull() && current == null 
+                    && (!isTrustworthy || !isLocalKeyValue)) {
                 
                 if (LOG.isTraceEnabled()) {
-                    if (current != null) {
-                        LOG.trace("Updating KeyValue " + current + " with " + keyValue);
-                    } else {
-                        LOG.trace("Adding KeyValue " + keyValue);
-                    }
+                    LOG.trace("KeyValueCollection is full and " + keyValue 
+                            + " is neither trustworthy nor a local KeyValue");
                 }
-                
-                if (keyValue.getUpdateTime() > 0L) {
-                    keyValue.setUpdateTime(System.currentTimeMillis());
-                }
-                
-                // The Publisher has a handle to the OLD
-                // value. Make sure we're not publishing it!
-                if (current != null) {
-                    current.setUpdateTime(Long.MAX_VALUE);
-                }
-                
-                values.put(pubKey, keyValue);
-                return true;
+                return false;
             }
             
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Could not add KeyValue " + keyValue);
+                if (current != null) {
+                    LOG.trace("Updating KeyValue " + current + " with " + keyValue);
+                } else {
+                    LOG.trace("Adding KeyValue " + keyValue);
+                }
             }
-            return false;
+            
+            values.put(nodeId, keyValue);
+            return true;
             
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
@@ -143,8 +126,8 @@ public class KeyValueCollection implements Collection {
     }
     
     public boolean contains(Object value) {
-        PublicKey pubKey = ((KeyValue)value).getPublicKey();
-        KeyValue current = (KeyValue)values.get(pubKey);
+        KUID nodeId = ((KeyValue)value).getNodeID();
+        KeyValue current = (KeyValue)values.get(nodeId);
         if (current == null) {
             return false;
         }
@@ -153,23 +136,17 @@ public class KeyValueCollection implements Collection {
     
     public void clear() {
         values.clear();
-        locked = false;
     }
     
     public boolean remove(Object value) {
-        PublicKey pubKey = ((KeyValue)value).getPublicKey();
-        KeyValue current = (KeyValue)values.remove(pubKey);
+        KUID nodeId = ((KeyValue)value).getNodeID();
+        KeyValue current = (KeyValue)values.remove(nodeId);
         if (current == null) {
             return false;
         }
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Removed KeyValue " + current);
-        }
-        
-        // Stays locked until empty
-        if (locked) {
-            locked = !values.isEmpty();
         }
         
         return true;
@@ -226,28 +203,10 @@ public class KeyValueCollection implements Collection {
     public Object[] toArray(Object[] a) {
         return values.values().toArray(a);
     }
-
-    public boolean isLocked() {
-        return locked;
-    }
     
     private boolean isTrustworthy(KeyValue keyValue) 
             throws SignatureException, InvalidKeyException {
         return masterKey != null && keyValue.verify(masterKey);
-    }
-    
-    private boolean isAheadOfTime(KeyValue keyValue) {
-        return keyValue.getCreationTime() >= System.currentTimeMillis() + DatabaseSettings.MILLIS_PER_HOUR;
-    }
-    
-    private boolean isDuplicate(KeyValue current, KeyValue keyValue) {
-        if (current == null 
-                || keyValue.getUpdateTime() <= 0L
-                || !Arrays.equals(current.getSignature(), keyValue.getSignature())) {
-            return false;
-        }
-        
-        return keyValue.getUpdateTime()-current.getUpdateTime() < DatabaseSettings.REPUBLISH_INTERVAL;
     }
     
     public String toString() {

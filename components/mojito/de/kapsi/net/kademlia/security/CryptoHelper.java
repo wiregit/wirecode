@@ -150,6 +150,11 @@ public final class CryptoHelper {
 
     public static synchronized boolean verify(PublicKey publicKey, byte[] data, byte[] signature) 
             throws SignatureException, InvalidKeyException {
+        
+        if (signature == null) {
+            return false;
+        }
+        
         try {
             if (SIGNATURE == null) {
                 SIGNATURE = Signature.getInstance(SIGNATURE_ALGORITHM);

@@ -51,7 +51,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         if (LOG.isTraceEnabled()) {
             LOG.trace(ContactNode.toString(nodeId, src) 
-                    + " requested us to store the Keys and Values " + values);
+                    + " requested us to store the KeyValues " + values);
         }
         
         List stats = new ArrayList(values.size());

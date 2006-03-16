@@ -3,11 +3,9 @@ package com.limegroup.gnutella.dht.tests;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Collection;
 
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.event.BootstrapListener;
 
 public class NodeIDSpoofTest {
 

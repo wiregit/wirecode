@@ -6,8 +6,6 @@
 package de.kapsi.net.kademlia.db;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -55,67 +53,52 @@ public class KeyValuePublisher implements Runnable {
         
         running = true;
         while(running) {
-            
             if (it == null) {
-                it = database.getValues().iterator();
+                it = database.getAllValues().iterator();
                 
                 evicted = 0;
                 published = 0;
             }
             
             if (it.hasNext()) {
-                KeyValue value = (KeyValue)it.next();
+                KeyValue keyValue = (KeyValue)it.next();
                 
                 synchronized(database) {
-                    if (!database.contains(value)) {
+                    if (!database.contains(keyValue)) {
                         continue;
                     }
                     
-                    try {
-                        if (database.isExpired(value)) {
-                            if (database.isLocalValue(value)) {
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace("Renewing CreationTime lease of " + value);
-                                }
-                                
-                                // TODO see comment of KeyValue.setCreationTime!!!
-                                value.setCreationTime(System.currentTimeMillis());
-                                
-                            } else {
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace(value + " is expired!");
-                                }
-                                
-                                database.remove(value);
-                                evicted++;
-                                continue;
-                            }
+                    if (database.isKeyValueExpired(keyValue)) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(keyValue + " is expired!");
                         }
-                    } catch (SignatureException err) {
-                        LOG.error(err);
-                        continue;
-                    } catch (InvalidKeyException err) {
-                        LOG.error(err);
+                        
+                        database.remove(keyValue);
+                        evicted++;
                         continue;
                     }
                     
-                    if (!database.isUpdateRequired(value)) {
+                    if (!database.isRepublishingRequired(keyValue)) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("KeyValue " + keyValue 
+                                    + " does not require republishing");
+                        }
                         continue;
                     }
                 }
                 
                 synchronized(lock) {
                     try {
-                        context.store(value, new StoreListener() {
+                        context.store(keyValue, new StoreListener() {
                             public void store(KeyValue keyValue, Collection nodes) {
-                                keyValue.setUpdateTime(System.currentTimeMillis());
+                                keyValue.setRepublishTime(System.currentTimeMillis());
                                 published++;
                                 
                                 synchronized(lock) {
                                     lock.notify();
                                 }
                                 
-                                if (true || LOG.isTraceEnabled()) {
+                                if (LOG.isTraceEnabled()) {
                                     if (!nodes.isEmpty()) {
                                         StringBuffer buffer = new StringBuffer("\nStoring ");
                                         buffer.append(keyValue).append(" at the following Nodes:\n");
@@ -125,8 +108,9 @@ public class KeyValuePublisher implements Runnable {
                                         for(int i = 0; i < k && it.hasNext(); i++) {
                                             buffer.append(i).append(": ").append(it.next()).append("\n");
                                         }
-                                        //LOG.trace(buffer);
-                                        System.out.println(buffer);
+                                        
+                                        LOG.trace(buffer);
+                                        //System.out.println(buffer);
                                     } else {
                                         LOG.trace("Failed to store " + keyValue);
                                     }

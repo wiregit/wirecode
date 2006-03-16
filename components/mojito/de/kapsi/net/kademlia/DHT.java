@@ -8,7 +8,6 @@ package de.kapsi.net.kademlia;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.SignatureException;
 import java.util.Collection;
 
@@ -46,7 +45,7 @@ public class DHT implements Runnable {
     }
     
     public SocketAddress getSocketAddress() {
-        return context.getSocketAddress();
+        return context.getLocalSocketAddress();
     }
     
     public boolean isRunning() {
@@ -76,15 +75,9 @@ public class DHT implements Runnable {
             throws IOException {
         
         try {
-            KeyPair keyPair = context.getKeyPair();
-            long creationTime = System.currentTimeMillis();
-            
-            KeyValue v = new KeyValue(key, value, 
-                    keyPair, 
-                    creationTime, 
-                    KeyValue.STANDARD);
-            
-            context.getDatabase().add(v);
+            KeyValue keyValue = 
+                KeyValue.createLocalKeyValue(key, value, getLocalNode());
+            context.getDatabase().add(keyValue);
         } catch (SignatureException err) {
             throw new RuntimeException(err);
         } catch (InvalidKeyException err) {
