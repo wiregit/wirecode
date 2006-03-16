@@ -167,8 +167,8 @@ public class CreationTimeCacheTest
          } else {
              responder = new OldResponder();
          }
-         Connection con = new Connection(socket, responder);
-         con.initialize();
+         Connection con = new Connection(socket);
+         con.initialize(null, responder);
          replyToPing(con, ultrapeer);
          return con;
      }
@@ -550,7 +550,7 @@ public class CreationTimeCacheTest
 
     private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
+                boolean outgoing) {
             Properties props = new UltrapeerHeaders("127.0.0.1"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
@@ -562,7 +562,7 @@ public class CreationTimeCacheTest
 
     private static class OldResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
+                boolean outgoing) {
             Properties props=new Properties();
             return HandshakeResponse.createResponse(props);
         }

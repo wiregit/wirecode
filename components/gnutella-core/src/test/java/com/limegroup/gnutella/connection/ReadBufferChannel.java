@@ -3,12 +3,14 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 
-public class ReadBufferChannel implements ReadableByteChannel {
+import com.limegroup.gnutella.io.InterestReadChannel;
+
+public class ReadBufferChannel implements InterestReadChannel {
     private ByteBuffer buffer;
     private boolean useEOF;
     private boolean closed = false;
+    private boolean interest = false;
     
     public ReadBufferChannel() {
         this(new byte[0]);
@@ -25,6 +27,10 @@ public class ReadBufferChannel implements ReadableByteChannel {
     
     public ReadBufferChannel(byte[] source) {
         this(ByteBuffer.wrap(source));
+    }
+    
+    public ReadBufferChannel(byte[] source, boolean useEOF) {
+        this(ByteBuffer.wrap(source), useEOF);
     }
     
     public ReadBufferChannel(byte[] source, int off, int len) {
@@ -64,5 +70,13 @@ public class ReadBufferChannel implements ReadableByteChannel {
     
     public void setClosed(boolean closed) {
         this.closed = closed;
+    }
+    
+    public void interest(boolean status) {
+        this.interest = status;
+    }
+
+    public boolean isInterested() {
+        return interest;
     }
 }

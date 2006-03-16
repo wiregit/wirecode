@@ -3,6 +3,7 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.Selector;
@@ -173,7 +174,134 @@ public class NIODispatcherTest extends BaseTestCase {
         
         c2.close();
         c3.close();
+    }
+    
+    public void testSimpleReadTimeout() throws Exception {
+        StubReadObserver o1 = new StubReadObserver();
+        SelectableChannel c1 = o1.getChannel();
         
+        o1.setReadTimeout(1023);
+        NIODispatcher.instance().registerRead(c1, o1);
+        o1.waitForIOException(2000);
+        assertInstanceof(SocketTimeoutException.class, o1.getIox());
+        assertEquals("operation timed out (1023)", o1.getIox().getMessage());
+        assertTrue(o1.isShutdown());
+        assertEquals(0, o1.getReadsHandled());
+        
+        c1.close();
+    }
+    
+    public void testNoTimeoutIfInterestOff() throws Exception {
+        StubReadObserver o1 = new StubReadObserver();
+        SelectableChannel c1 = o1.getChannel();
+        
+        o1.setReadTimeout(1000);
+        NIODispatcher.instance().registerRead(c1, o1);
+        Thread.sleep(200); // let it register.
+        NIODispatcher.instance().interestRead(c1, false);
+        o1.waitForIOException(2000);
+        assertNull(o1.getIox());
+        assertFalse(o1.isShutdown());
+        assertEquals(0, o1.getReadsHandled());
+        
+        c1.close();
+    }
+    
+    public void testChangingTimeoutByInterest() throws Exception {
+        StubReadObserver o1 = new StubReadObserver();
+        SelectableChannel c1 = o1.getChannel();
+        
+        o1.setReadTimeout(1000);
+        NIODispatcher.instance().registerRead(c1, o1);
+        Thread.sleep(200); // let it register.
+        o1.setReadTimeout(2005);
+        NIODispatcher.instance().interestRead(c1, true);
+        o1.waitForIOException(4000);
+        assertInstanceof(SocketTimeoutException.class, o1.getIox());
+        assertEquals("operation timed out (2005)", o1.getIox().getMessage());
+        assertTrue(o1.isShutdown());
+        assertEquals(0, o1.getReadsHandled());
+        
+        c1.close();
+    }
+    
+    public void testTimeoutUpsAfterReads() throws Exception {
+        StubReadConnectObserver o1 = new StubReadConnectObserver();
+        SocketChannel c1 = o1.getChannel();
+        
+        o1.setReadTimeout(1000);
+        NIODispatcher.instance().registerConnect(c1, o1, 1000);
+        c1.connect(LISTEN_ADDR);
+        o1.waitForEvent(1000);
+        assertEquals(c1.socket(), o1.getSocket());
+        assertTrue(c1.isConnected());
+        
+        // Now accept on the server socket.
+        LISTEN_SOCKET.setSoTimeout(5000);
+        Socket accepted = LISTEN_SOCKET.accept();
+        
+        // Wait 2 seconds & make sure it didn't disco
+        Thread.sleep(2000);
+        assertTrue(c1.isConnected());
+        assertFalse(o1.isShutdown());
+        assertNull(o1.getIoException());
+        assertEquals(0, o1.getReadsHandled());
+        
+        // Turn interest on in reading & send some data.
+        NIODispatcher.instance().interestRead(c1, true);
+        o1.setReadTimeout(2000); // change timeout length so we can make sure the exception matched
+        accepted.getOutputStream().write(new byte[100]);
+        Thread.sleep(500);
+        assertGreaterThanOrEquals(1, o1.getReadsHandled());
+        
+        // Now make sure that since interest is still on, it'll IOX after a second.
+        Thread.sleep(2500);
+        assertInstanceof(SocketTimeoutException.class, o1.getIoException());
+        assertEquals("operation timed out (2000)", o1.getIoException().getMessage());
+        assertGreaterThanOrEquals(o1.getLastReadTime() + 1000, o1.getIoxTime());
+        
+        c1.close();
+    }
+    
+    public void testTimeoutBecomesSmaller() throws Exception {
+        StubReadConnectObserver o1 = new StubReadConnectObserver();
+        SocketChannel c1 = o1.getChannel();
+        
+        NIODispatcher.instance().registerConnect(c1, o1, 1000);
+        c1.connect(LISTEN_ADDR);
+        o1.waitForEvent(1000);
+        assertEquals(c1.socket(), o1.getSocket());
+        assertTrue(c1.isConnected());
+        
+        // Now accept on the server socket.
+        LISTEN_SOCKET.setSoTimeout(5000);
+        Socket accepted = LISTEN_SOCKET.accept();
+        
+        // Wait 2 seconds & make sure it didn't disco
+        Thread.sleep(2000);
+        assertTrue(c1.isConnected());
+        assertFalse(o1.isShutdown());
+        assertNull(o1.getIoException());
+        assertEquals(0, o1.getReadsHandled());
+        
+        // Turn interest on in reading & send some data.
+        o1.setReadTimeout(5000);
+        NIODispatcher.instance().interestRead(c1, true);
+        o1.setReadTimeout(1000); // change timeout length so we can make sure the exception matched
+        accepted.getOutputStream().write(new byte[100]);
+        Thread.sleep(500);
+        assertGreaterThanOrEquals(1, o1.getReadsHandled());
+        
+        // Now make sure that since interest is still on, it'll IOX after a second.
+        Thread.sleep(1500);
+        assertInstanceof(SocketTimeoutException.class, o1.getIoException());
+        assertEquals("operation timed out (1000)", o1.getIoException().getMessage());
+        
+        // Wait a bit longer and make sure the msg didn't change on the IOX
+        Thread.sleep(5500);
+        assertEquals("operation timed out (1000)", o1.getIoException().getMessage());
+        
+        c1.close();        
     }
     
     

@@ -123,10 +123,8 @@ public class I18NSendReceiveTest
     private static void connect() throws Exception {
         UltrapeerHeaders headers = new UltrapeerHeaders("localhost");
         headers.put(HeaderNames.X_DEGREE,"42");
-        CONN_1 = new Connection("localhost", TEST_PORT,
-                                headers,
-                                new EmptyResponder());
-        CONN_1.initialize();
+        CONN_1 = new Connection("localhost", TEST_PORT);
+        CONN_1.initialize(headers, new EmptyResponder());
         drain(CONN_1);
     }
 

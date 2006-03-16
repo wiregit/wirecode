@@ -3,7 +3,6 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
 
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestWriteChannel;
@@ -89,6 +88,11 @@ public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel {
         return (ByteBuffer)buffer.flip();
     }
     
+    public String getDataAsString() {
+        ByteBuffer buffer = getBuffer();
+        return new String(buffer.array(), 0, buffer.limit());
+    }
+    
     public void setBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
         channel.interest(this, true);
@@ -140,5 +144,9 @@ public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel {
     
     public int limit() {
         return buffer.limit();
+    }
+
+    public boolean isShutdown() {
+        return shutdown;
     }
 }

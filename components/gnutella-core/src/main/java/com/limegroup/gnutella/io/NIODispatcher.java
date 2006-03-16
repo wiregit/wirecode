@@ -4,26 +4,24 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedSelectorException;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-
+import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.LinkedList;
-import java.util.ArrayList;
+import java.util.List;
 
-import com.limegroup.gnutella.Assert;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Dispatcher for NIO.
@@ -127,6 +125,18 @@ public class NIODispatcher implements Runnable {
      */
     private final ArrayList UNLOCKED = new ArrayList();
     
+    /**
+     * A common ByteBufferCache that classes can use.
+     * TODO: Move somewhere else.
+     */
+    private final ByteBufferCache BUFFER_CACHE = new ByteBufferCache();
+    
+    /** The last time the ByteBufferCache was cleared. */
+    private long lastCacheClearTime;
+    
+    /** The length of time between clearing intervals for the cache. */
+    private static final long CACHE_CLEAR_INTERVAL = 30000;
+    
     /** Returns true if the NIODispatcher is merrily chugging along. */
     public boolean isRunning() {
         return dispatchThread != null;
@@ -136,6 +146,11 @@ public class NIODispatcher implements Runnable {
 	public boolean isDispatchThread() {
 	    return Thread.currentThread() == dispatchThread;
 	}
+    
+    /** Gets the common ByteBufferCache */
+    public ByteBufferCache getBufferCache() {
+        return BUFFER_CACHE;
+    }
 	
 	/** Adds a Throttle into the throttle requesting loop. */
 	// TODO: have some way to remove Throttles, or make these use WeakReferences
@@ -220,7 +235,10 @@ public class NIODispatcher implements Runnable {
                 // so that multiple threads calling interest(..) will be atomic with
                 // respect to each other.  Otherwise, one thread can preempt another's
                 // interest setting, and one of the interested ops may be lost.
-			    synchronized(channel.blockingLock()) {
+			    synchronized(sk.attachment()) {
+                    if((op & SelectionKey.OP_READ) == SelectionKey.OP_READ)
+                        ((Attachment)sk.attachment()).changeReadStatus(on);
+                        
     				if(on)
     					sk.interestOps(sk.interestOps() | op);
     				else
@@ -249,6 +267,29 @@ public class NIODispatcher implements Runnable {
             }
         }
     }
+   
+   /** Invokes the method in the NIODispatcher thread & returns after it ran. */
+   public void invokeAndWait(final Runnable future) throws InterruptedException {
+       if(Thread.currentThread() == dispatchThread) {
+           future.run();
+       } else {
+           Runnable waiter = new Runnable() {
+               public void run() {
+                   future.run();
+                   synchronized(this) {
+                       notify();
+                   }
+               }
+           };
+           
+           synchronized(waiter) {
+               synchronized(Q_LOCK) {
+                   LATER.add(waiter);
+               }
+               waiter.wait();
+           }
+       }
+   }
     
     /** Gets the underlying attachment for the given SelectionKey's attachment. */
     public IOErrorObserver attachment(Object proxyAttachment) {
@@ -270,7 +311,7 @@ public class NIODispatcher implements Runnable {
      * 
      * @throws IOException
      */
-    private void processAccept(SelectionKey sk, AcceptChannelObserver handler) throws IOException {
+    private void processAccept(long now, SelectionKey sk, AcceptChannelObserver handler, Attachment proxy) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling accept: " + handler);
         
@@ -295,10 +336,11 @@ public class NIODispatcher implements Runnable {
     /**
      * Process a connected channel.
      */
-    private void processConnect(SelectionKey sk, ConnectObserver handler) throws IOException {
+    private void processConnect(long now, SelectionKey sk, ConnectObserver handler, Attachment proxy) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling connect: " + handler);
         SocketChannel channel = (SocketChannel)sk.channel();
+        proxy.clearTimeout();
         
         boolean finished = channel.finishConnect();
         if(finished) {
@@ -307,6 +349,17 @@ public class NIODispatcher implements Runnable {
         } else {
             cancel(sk, handler);
         }
+    }
+    
+    /** Process a channel read operation. */
+    private void processRead(long now, ReadObserver handler, Attachment proxy) throws IOException {
+        proxy.updateReadTimeout(now);
+        handler.handleRead();
+    }
+    
+    /** Process a channel write operation. */
+    private void processWrite(long now, WriteObserver handler, Attachment proxy) throws IOException {
+        handler.handleWrite();
     }
     
     /**
@@ -320,6 +373,8 @@ public class NIODispatcher implements Runnable {
             guard.setKey(key);
             if(timeout != 0) 
                 guard.addTimeout(System.currentTimeMillis(), timeout);
+            else if((op & SelectionKey.OP_READ) != 0)
+                guard.changeReadStatus(true);
         } catch(IOException iox) {
             attachment.handleIOException(iox);
         }
@@ -347,6 +402,11 @@ public class NIODispatcher implements Runnable {
 
             UNLOCKED.addAll(LATER);
             LATER.clear();
+        }
+        
+        if(now > lastCacheClearTime + CACHE_CLEAR_INTERVAL) {
+            BUFFER_CACHE.clearCache();
+            lastCacheClearTime = now;
         }
         
         if(!UNLOCKED.isEmpty()) {
@@ -450,15 +510,16 @@ public class NIODispatcher implements Runnable {
             
             readyThrottles(keys);
             
+            long now = System.currentTimeMillis();
             for(Iterator it = keys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();
 				if(sk.isValid())
-                    process(sk, sk.attachment(), 0xFFFF);
+                    process(now, sk, sk.attachment(), 0xFFFF);
             }
             
             keys.clear();
             iteration++;            
-            TIMEOUTER.processTimeouts(System.currentTimeMillis());
+            TIMEOUTER.processTimeouts(now);
         }
     }
     
@@ -466,9 +527,8 @@ public class NIODispatcher implements Runnable {
      * Processes a single SelectionKey & attachment, processing only
      * ops that are in allowedOps.
      */
-    void process(SelectionKey sk, Object proxyAttachment, int allowedOps) {
+    void process(long now, SelectionKey sk, Object proxyAttachment, int allowedOps) {
         Attachment proxy = (Attachment)proxyAttachment;
-        proxy.clearTimeout();
         IOErrorObserver attachment = proxy.attachment;
         
         if(proxy.lastMod == iteration) {
@@ -483,14 +543,14 @@ public class NIODispatcher implements Runnable {
             try {
                 try {
                     if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
-                        processAccept(sk, (AcceptChannelObserver)attachment);
+                        processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
                     else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
-                        processConnect(sk, (ConnectObserver)attachment);
+                        processConnect(now, sk, (ConnectObserver)attachment, proxy);
                     else {
                         if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
-                            ((ReadObserver)attachment).handleRead();
+                            processRead(now, (ReadObserver)attachment, proxy);
                         if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
-                            ((WriteObserver)attachment).handleWrite();
+                            processWrite(now, (WriteObserver)attachment, proxy);
                     }
                 } catch (CancelledKeyException err) {
                     LOG.warn("Ignoring cancelled key", err);
@@ -598,26 +658,83 @@ public class NIODispatcher implements Runnable {
         private final IOErrorObserver attachment;
         private long lastMod;
         private long hits;
-        private boolean timeoutActive;
         private SelectionKey key;
+
+        private boolean timeoutActive = false;
+        private long storedTimeoutLength = Long.MAX_VALUE;
+        private long storedExpireTime = Long.MAX_VALUE;
         
         Attachment(IOErrorObserver attachment) {
             this.attachment = attachment;
         }
         
-        void clearTimeout() {
+        synchronized void clearTimeout() {
             timeoutActive = false;
         }
+        
+        synchronized void updateReadTimeout(long now) {
+            if(attachment instanceof ReadTimeout) {
+                long timeoutLength = ((ReadTimeout)attachment).getReadTimeout();
+                if(timeoutLength != 0) {
+                    long expireTime = now + timeoutLength;
+                    // We need to add a new timeout if none is scheduled or we need
+                    // to timeout before the next one.
+                    if(expireTime < storedExpireTime || storedExpireTime == -1 || storedExpireTime < now) {
+                        addTimeout(now, timeoutLength);
+                    } else {
+                        // Otherwise, store the timeout info so when we get notified
+                        // we can reschedule it for the future.
+                        storedExpireTime = expireTime;
+                        storedTimeoutLength = timeoutLength;
+                        timeoutActive = true;
+                    }
+                } else {
+                    clearTimeout();
+                }
+            }
+        }
+        
+        synchronized void changeReadStatus(boolean reading) {
+            if(reading)
+                updateReadTimeout(System.currentTimeMillis());
+            else
+                clearTimeout();
+        }
 
-        void addTimeout(long now, long timeoutLength) {
+        synchronized void addTimeout(long now, long timeoutLength) {
             timeoutActive = true;
+            storedTimeoutLength = timeoutLength;
+            storedExpireTime = now + timeoutLength;
             TIMEOUTER.addTimeout(this, now, timeoutLength);
         }
         
         public void notifyTimeout(long now, long expireTime, long timeoutLength) {
-            if(timeoutActive) {
+            boolean cancel = false;
+            long timeToUse = 0;
+            synchronized(this) {
+                if(timeoutActive) {
+                    if(expireTime == storedExpireTime) {
+                        cancel = true;
+                        timeoutActive = false;
+                        timeToUse = storedTimeoutLength;
+                        storedExpireTime = -1;
+                    } else if(expireTime < storedExpireTime) {
+                        TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
+                    } else { // expireTime > storedExpireTime
+                        storedExpireTime = -1;
+                        if(LOG.isWarnEnabled())
+                            LOG.warn("Ignoring extra timeout for: " + attachment);
+                    }
+                } else {
+                    storedExpireTime = -1;
+                    storedTimeoutLength = -1;
+                }
+            }
+            
+            // must do cancel & IOException outside of the lock.
+            if(cancel) {
                 cancel(key, attachment);
-                attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeoutLength + ")"));
+                attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeToUse + ")"));
             }
         }
         

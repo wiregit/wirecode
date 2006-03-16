@@ -82,8 +82,8 @@ public class MiniAcceptor implements Runnable {
             Socket s=ss.accept();
             //Technically "GNUTELLA " should be read from s.  Turns out that
             //out implementation doesn't care;
-            Connection c=new Connection(s, properties);
-            c.initialize();
+            Connection c=new Connection(s);
+            c.initialize(null, properties);
             ss.close();
             synchronized (lock) {
                 this.c=c;

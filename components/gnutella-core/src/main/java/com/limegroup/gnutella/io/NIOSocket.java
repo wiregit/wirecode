@@ -11,7 +11,6 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.UnsupportedAddressTypeException;
 
@@ -27,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * A ChannelReadObserver must be used so that the Socket can set the appropriate
  * underlying channel.
  */
-public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplexor {
+public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObserver, NIOMultiplexor, ReadTimeout {
     
     private static final Log LOG = LogFactory.getLog(NIOSocket.class);
     
@@ -65,7 +64,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         channel = s.getChannel();
         socket = s;
         writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, channel);
+        reader = new NIOInputStream(this, new SocketInterestReadAdapter(channel));
         NIODispatcher.instance().register(channel, this);
         connectedTo = s.getInetAddress();
     }
@@ -76,7 +75,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         socket = channel.socket();
         init();
         writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, channel);
+        reader = new NIOInputStream(this, new SocketInterestReadAdapter(channel));
     }
     
     /** Creates an NIOSocket and connects (with no timeout) to addr/port */
@@ -85,7 +84,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         socket = channel.socket();
         init();
         writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, channel);
+        reader = new NIOInputStream(this, new SocketInterestReadAdapter(channel));
         connect(new InetSocketAddress(addr, port));
     }
     
@@ -95,7 +94,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         socket = channel.socket();
         init();
         writer = new NIOOutputStream(this, channel);
-        reader = new NIOInputStream(this, channel);
+        reader = new NIOInputStream(this, new SocketInterestReadAdapter(channel));
         bind(new InetSocketAddress(localAddr, localPort));
         connect(new InetSocketAddress(addr, port));
     }
@@ -138,13 +137,14 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
                     while(lastChannel.getReadChannel() instanceof ChannelReader)
                         lastChannel = (ChannelReader)lastChannel.getReadChannel();
                     
-                    if(oldReader instanceof ReadableByteChannel && oldReader != newReader) {
-                        lastChannel.setReadChannel((ReadableByteChannel)oldReader);
+                    if(oldReader instanceof InterestReadChannel && oldReader != newReader) {
+                        lastChannel.setReadChannel((InterestReadChannel)oldReader);
                         reader.handleRead(); // read up any buffered data.
                         oldReader.shutdown(); // shutdown the now unused reader.
                     }
                     
-                    lastChannel.setReadChannel(channel);
+                    InterestReadChannel source = new SocketInterestReadAdapter(channel);
+                    lastChannel.setReadChannel(source);
                     NIODispatcher.instance().interestRead(channel, true);
                 } catch(IOException iox) {
                     shutdown();
@@ -256,11 +256,6 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
             shutdownOutput();
         } catch(IOException ignored) {}
             
-        reader.shutdown();
-        writer.shutdown();
-        if(connecter != null)
-            connecter.shutdown();
-        
         try {
             socket.close();
         } catch(IOException ignored) {
@@ -270,13 +265,18 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
             channel.close();
         } catch(IOException ignored) {}
         
+        reader.shutdown();
+        writer.shutdown();
+        if(connecter != null)
+            connecter.shutdown();
+        
         NIODispatcher.instance().invokeLater(new Runnable() {
             public void run() {
                 reader = new NoOpReader();
                 writer = new NoOpWriter();
                 connecter = null;
             }
-        });        
+        });
     }
     
     /** Binds the socket to the SocketAddress */
@@ -369,16 +369,45 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         if(isClosed() || shutdown)
             throw new IOException("Socket closed.");
         
-        if(reader instanceof NIOInputStream)
+        if(reader instanceof NIOInputStream) {
+            NIODispatcher.instance().interestRead(channel, true);
             return ((NIOInputStream)reader).getInputStream();
-        else
-            throw new IllegalStateException("reader not NIOInputStream!");
+        } else {
+            Future future = new Future() {
+                private Object result;
+                public void run() {
+                    try {
+                        NIOInputStream stream = new NIOInputStream(NIOSocket.this, null).init();
+                        setReadObserver(stream);
+                        result = stream.getInputStream();
+                    } catch(IOException iox) { // impossible, but not a big deal.
+                        LOG.error("IOXed after creation", iox);
+                    }
+                }
+                
+                public Object getResult() {
+                    return result;
+                }
+            };
+            
+            try {
+                NIODispatcher.instance().invokeAndWait(future);
+            } catch(InterruptedException ie) {
+                throw (IOException)new IOException().initCause(ie);
+            }
+            
+            InputStream result = (InputStream)future.getResult();
+            if(result == null)
+                throw new IOException("error constructing InputStream");
+            else
+                return result;
+        }
     }
     
     /**
      * Returns the OutputStream from the NIOOutputStream.
      *
-     * Internally, this is a blcoking Pipe from the non-blocking SocketChannel.
+     * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
     public OutputStream getOutputStream() throws IOException {
         if(isClosed() || shutdown)
@@ -389,6 +418,19 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         else
             throw new IllegalStateException("writer not NIOOutputStream!");
     }
+    
+    /** Gets the read timeout for this socket. */
+    public long getReadTimeout() {
+        if(reader instanceof NIOInputStream) {
+            return 0; // NIOInputStream handles its own timeouts.
+        } else {
+            try {
+                return getSoTimeout();
+            } catch(SocketException se) {
+                return 0;
+            }
+        }
+    }    
     
     
     ///////////////////////////////////////////////
@@ -542,5 +584,5 @@ public class NIOSocket extends NBSocket implements ConnectObserver, NIOMultiplex
         
         // unused.
         public void handleIOException(IOException iox) {}
-    }          
+    }
 }

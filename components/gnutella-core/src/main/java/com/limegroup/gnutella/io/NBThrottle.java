@@ -191,6 +191,7 @@ public class NBThrottle implements Throttle {
             //LOG.trace("Interested: " + _interested.size() + ", ready: " + _ready.size());
             
             _active = true;
+            long now = System.currentTimeMillis();
             for(Iterator i = _interested.entrySet().iterator(); !_ready.isEmpty() && i.hasNext(); ) {
                 Map.Entry next = (Map.Entry)i.next();
                 ThrottleListener listener = (ThrottleListener)next.getValue();
@@ -200,7 +201,7 @@ public class NBThrottle implements Throttle {
                     //LOG.trace("Removing closed but interested party: " + next.getKey());
                     i.remove();
                 } else if(key != null) {
-                    NIODispatcher.instance().process(key, key.attachment(), _processOp);
+                    NIODispatcher.instance().process(now, key, key.attachment(), _processOp);
                     i.remove();
                     if(_available < MINIMUM_TO_GIVE)
                         break;

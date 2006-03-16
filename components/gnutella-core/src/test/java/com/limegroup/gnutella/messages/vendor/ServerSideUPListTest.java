@@ -119,29 +119,12 @@ public class ServerSideUPListTest extends BaseTestCase {
 	 * @throws Exception something bad happened (?)
 	 */
 	private static void buildConnections() throws Exception {
-		LEAF_1 =
-			new CountingConnection("localhost", PORT, 
-                            new LeafHeaders("localhost"),new EmptyResponder());
-
-	    LEAF_2 =
-			new CountingConnection("localhost", PORT, 
-                            new LeafHeaders("localhost"), new EmptyResponder());
-
-	    LEAF_3 =
-			new CountingConnection("localhost", PORT, 
-                           new LeafHeaders("localhost"), new EmptyResponder());
-	    UP1 = 
-			new CountingConnection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder() );
-	    UP2 = 
-			new CountingConnection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder() );
-	    UP3 = 
-			new CountingConnection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder() );
+		LEAF_1 = new CountingConnection("localhost", PORT);
+	    LEAF_2 = new CountingConnection("localhost", PORT);
+	    LEAF_3 = new CountingConnection("localhost", PORT);
+	    UP1 =  new CountingConnection("localhost", PORT);
+	    UP2 = new CountingConnection("localhost", PORT);
+	    UP3 =  new CountingConnection("localhost", PORT);
 	    
 	    UDP_ACCESS = new DatagramSocket();
 	    
@@ -217,14 +200,14 @@ public class ServerSideUPListTest extends BaseTestCase {
     private static void connect() throws Exception {
 		buildConnections();
         //ultrapeers 
-        UP2.initialize();
-        UP1.initialize();
-        UP3.initialize();
+        UP1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        UP2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        UP3.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         
         //leafs
-        LEAF_1.initialize();
-        LEAF_2.initialize();
-        LEAF_3.initialize();
+        LEAF_1.initialize(new LeafHeaders("localhost"),new EmptyResponder());
+        LEAF_2.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF_3.initialize(new LeafHeaders("localhost"), new EmptyResponder());
                 
 
 		assertTrue("ULTRAPEER_2 should be connected", UP2.isOpen());

@@ -10,6 +10,7 @@ import java.net.*;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 
@@ -309,7 +310,7 @@ public final class MessageReaderTest extends BaseTestCase {
             fail("expected NPE");
         } catch(NullPointerException expected) {}
         
-        ReadableByteChannel channel = new ReadBufferChannel();
+        InterestReadChannel channel = new ReadBufferChannel();
         READER.setReadChannel(channel);
         assertSame(channel, READER.getReadChannel());
         
@@ -325,11 +326,11 @@ public final class MessageReaderTest extends BaseTestCase {
         assertNull(READER.getReadChannel());
     }
     
-    private ReadableByteChannel channel(ByteBuffer buffer) throws Exception {
+    private InterestReadChannel channel(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer);
     }
     
-    private ReadableByteChannel eof(ByteBuffer buffer) throws Exception {
+    private InterestReadChannel eof(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer, true);
     }
     

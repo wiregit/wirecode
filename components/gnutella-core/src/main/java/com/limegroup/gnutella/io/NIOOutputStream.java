@@ -33,14 +33,14 @@ class NIOOutputStream implements WriteObserver {
     /**
      * Creates the pipes, buffer & registers channels for interest.
      */
-    synchronized NIOOutputStream init() throws IOException {
+    private synchronized NIOOutputStream init() throws IOException {
         if(buffer != null)
             throw new IllegalStateException("already init'd!");
             
         if(shutdown)
             throw new IOException("already closed!");
 
-        this.buffer = NIOInputStream.getBuffer();
+        this.buffer = NIODispatcher.instance().getBufferCache().getHeap();
         sink = new BufferOutputStream(buffer, handler, channel);
         bufferLock = sink.getBufferLock();
         return this;
@@ -60,6 +60,9 @@ class NIOOutputStream implements WriteObserver {
      * Notification that a write can happen on the SocketChannel.
      */
     public boolean handleWrite() throws IOException {// write everything we can.
+        if(buffer == null)
+            return false;
+        
         synchronized(bufferLock) {
             buffer.flip();
             while(buffer.hasRemaining() && channel.write(buffer) > 0);
@@ -93,15 +96,14 @@ class NIOOutputStream implements WriteObserver {
     public synchronized void shutdown() {
         if(shutdown)
             return;
+        
+        if(buffer != null)
+            NIODispatcher.instance().getBufferCache().release(buffer);
 
         if(sink != null)
             sink.shutdown();
             
         shutdown = true;
-        if (buffer != null) {
-            buffer.clear();
-            NIOInputStream.CACHE.push(buffer);
-        }
     }
     
     /** Unused */

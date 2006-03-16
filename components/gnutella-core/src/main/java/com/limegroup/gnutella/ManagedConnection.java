@@ -28,14 +28,19 @@ import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
+import com.limegroup.gnutella.handshaking.AsyncOutgoingHandshaker;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.HandshakeObserver;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.Handshaker;
 import com.limegroup.gnutella.handshaking.LeafHandshakeResponder;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.io.ChannelWriter;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOMultiplexor;
@@ -275,6 +280,9 @@ public class ManagedConnection extends Connection
      */
     private byte[] clientGUID = DataUtils.EMPTY_GUID;
 
+    /** Whether or not the HandshakeResponder should use locale preferencing during handshaking. */
+    private boolean _useLocalPreference;
+
     /**
      * Creates a new outgoing connection to the specified host on the
 	 * specified port.  
@@ -283,26 +291,10 @@ public class ManagedConnection extends Connection
 	 * @param port the port the host is listening on
      */
     public ManagedConnection(String host, int port) {
-        this(host, port, 
-			 (RouterService.isSupernode() ? 
-			  (Properties)(new UltrapeerHeaders(host)) : 
-			  (Properties)(new LeafHeaders(host))),
-			 (RouterService.isSupernode() ?
-			  (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
-			  (HandshakeResponder)new LeafHandshakeResponder(host)));
+        super(host, port);
+        _manager = RouterService.getConnectionManager();
     }
-
-	/**
-	 * Creates a new <tt>ManagedConnection</tt> with the specified 
-	 * handshake classes and the specified host and port.
-	 */
-	private ManagedConnection(String host, int port, 
-							  Properties props, 
-							  HandshakeResponder responder) {	
-        super(host, port, props, responder);        
-        _manager = RouterService.getConnectionManager();		
-	}
-
+      
     /**
      * Creates an incoming connection.
      * ManagedConnections should only be constructed within ConnectionManager.
@@ -312,12 +304,7 @@ public class ManagedConnection extends Connection
      *  Gnutella handshake.
      */
     ManagedConnection(Socket socket) {
-        super(socket, 
-			  RouterService.isSupernode() ? 
-			  (HandshakeResponder)(new UltrapeerHandshakeResponder(
-			      socket.getInetAddress().getHostAddress())) : 
-			  (HandshakeResponder)(new LeafHandshakeResponder(
-				  socket.getInetAddress().getHostAddress())));
+        super(socket);
         _manager = RouterService.getConnectionManager();
     }
     
@@ -333,31 +320,111 @@ public class ManagedConnection extends Connection
      * created with a pre-existing Socket this will return immediately.  Otherwise,
      * this will block while connecting or initializing the handshake.
      * return immediately, 
+     * 
      * @param observer
      * @throws IOException
      * @throws NoGnutellaOkException
      * @throws BadHandshakeException
      */
     public void initialize(GnetConnectObserver observer) throws IOException, NoGnutellaOkException, BadHandshakeException {
+        Properties requestHeaders;
+        HandshakeResponder responder;
+        
+        if(isOutgoing()) {
+            String host = getAddress();
+            if(RouterService.isSupernode()) {
+                requestHeaders = new UltrapeerHeaders(host);
+                responder = new UltrapeerHandshakeResponder(host);
+            } else {
+                requestHeaders = new LeafHeaders(host);
+                responder = new LeafHandshakeResponder(host);
+            }
+        } else {
+            String host = getSocket().getInetAddress().getHostAddress();
+            requestHeaders = null;
+            if(RouterService.isSupernode()) {
+                responder = new UltrapeerHandshakeResponder(host);
+            } else {
+                responder = new LeafHandshakeResponder(host);
+            }
+        }        
+        
         // Establish the socket (if needed), handshake.
-        super.initialize(CONNECT_TIMEOUT, observer);
+        super.initialize(requestHeaders, responder, CONNECT_TIMEOUT, observer);
         
         // Nothing else should be done here.  All post-init-sequences
         // should be triggered from finishInitialize, which will be called
         // when the socket is connected (if it connects).
     }
-
+    
+    /** Constructs a Connector that will do an asynchronous handshake. */
+    protected ConnectObserver createAsyncConnectObserver(Properties requestHeaders, 
+                           HandshakeResponder responder, GnetConnectObserver observer) {
+        return new AsyncHandshakeConnecter(requestHeaders, responder, observer);
+    }
+    
     /**
      * Completes the initialization process.
      */
-    protected void finishInitialize() throws IOException, NoGnutellaOkException, BadHandshakeException {
-        super.finishInitialize();
+    protected void preHandshakeInitialize(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
+      throws IOException, NoGnutellaOkException, BadHandshakeException {
+        responder.setLocalePreferencing(_useLocalPreference);
+        super.preHandshakeInitialize(requestHeaders, responder, observer);
+    }
+    
+    /**
+     * Performs the handshake.
+     * 
+     * If there is a GnetConnectObserver (it is non-null) & this connection supports
+     * asynchronous messaging, then this method will return immediately and the observer
+     * will be notified when handshaking completes (either succesfully or unsuccesfully).
+     * 
+     * Otherwise, this will block until handshaking completes.
+     */
+    protected void performHandshake(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
+      throws IOException, BadHandshakeException, NoGnutellaOkException {
+        if(observer == null || !isAsynchronous()) {
+            if(!isOutgoing() && observer != null)
+                throw new IllegalStateException("cannot support incoming blocking w/ observer");
+            super.performHandshake(requestHeaders, responder, observer);
+        } else {
+            Handshaker shaker = createAsyncHandshaker(requestHeaders, responder, observer);
+            try {
+                shaker.shake();
+            } catch (IOException iox) {
+                ErrorService.error(iox); // impossible.
+            }
+        }
+    }
+    
+    /** Creates the asynchronous handshaker. */
+    protected Handshaker createAsyncHandshaker(Properties requestHeaders,
+                                               HandshakeResponder responder,
+                                               GnetConnectObserver observer) {
+        
+        HandshakeWatcher shakeObserver = new HandshakeWatcher(observer);
+        Handshaker shaker;
+        
+        if(isOutgoing())
+            shaker = new AsyncOutgoingHandshaker(requestHeaders, responder, _socket, shakeObserver);
+        else
+            shaker = new AsyncIncomingHandshaker(responder, _socket, shakeObserver);
+        
+        shakeObserver.setHandshaker(shaker);
+        return shaker;
+    }
+    
+    /**
+     * Starts out OutputRunners & notifies UpdateManager that this
+     * connection may have an update on it.
+     */
+    protected void postHandshakeInitialize(Handshaker shaker) {
+        super.postHandshakeInitialize(shaker);
 
         // Start our OutputRunner.
         startOutput();
-
-        UpdateManager updater = UpdateManager.instance();
-        updater.checkAndUpdate(this);
+        // See if this connection had an old-style update msg.
+        UpdateManager.instance().checkAndUpdate(this);
     }
 
     /**
@@ -724,6 +791,7 @@ public class ManagedConnection extends Connection
         supernodeClientAtLooping = isSupernodeClientConnection();
         
         if(!isAsynchronous()) {
+            Thread.currentThread().setName("MessageLoopingThread");
             while (true) {
                 Message m=null;
                 try {
@@ -734,6 +802,8 @@ public class ManagedConnection extends Connection
                 } catch (BadPacketException ignored) {}
             }
         } else {
+            _socket.setSoTimeout(0); // no timeout for reading.
+            
             MessageReader reader = new MessageReader(ManagedConnection.this);
             if(isReadDeflated())
                 reader.setReadChannel(new InflaterReader(_inflater));
@@ -1246,7 +1316,7 @@ public class ManagedConnection extends Connection
      * (in Connection.java: conclude..))
      */
     public void setLocalePreferencing(boolean b) {
-        RESPONSE_HEADERS.setLocalePreferencing(b);
+        _useLocalPreference = b;
     }
     
     public void reply(Message m){
@@ -1389,6 +1459,74 @@ public class ManagedConnection extends Connection
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * A ConnectObserver that continues the handshaking process in the same thread,
+     * expecting that performHandshake(...) callback to the observer.
+     */
+    private class AsyncHandshakeConnecter implements ConnectObserver {
+
+        private Properties requestHeaders;
+        private HandshakeResponder responder;
+        private GnetConnectObserver observer;
+
+        AsyncHandshakeConnecter(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer) {
+            this.requestHeaders = requestHeaders;
+            this.responder = responder;
+            this.observer = observer;
+        }
+        
+        public void handleConnect(Socket socket) throws IOException {
+            preHandshakeInitialize(requestHeaders, responder, observer);
+        }
+
+        public void shutdown() {
+            observer.shutdown();
+        }
+
+        //ignored.
+        public void handleIOException(IOException iox) {}
+    }
+    
+    /**
+     * A HandshakeObserver that notifies the GnetConnectObserver when handshaking finishes.
+     */
+    private class HandshakeWatcher implements HandshakeObserver {
+        
+        private Handshaker shaker;
+        private  GnetConnectObserver observer;
+
+        HandshakeWatcher(GnetConnectObserver observer) {
+            this.observer = observer;
+        }
+        
+        void setHandshaker(Handshaker shaker) {
+            this.shaker = shaker;
+        }
+
+        public void shutdown() {
+            setHeaders(shaker);
+            close();
+            observer.shutdown();            
+        }
+
+        public void handleHandshakeFinished(Handshaker shaker) {
+            postHandshakeInitialize(shaker);
+            observer.handleConnect();
+        }
+
+        public void handleBadHandshake() {
+            setHeaders(shaker);
+            close();
+            observer.handleBadHandshake();
+        }
+
+        public void handleNoGnutellaOk(int code, String msg) {
+            setHeaders(shaker);
+            close();
+            observer.handleNoGnutellaOk(code, msg);
         }
     }
 }

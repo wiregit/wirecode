@@ -10,6 +10,7 @@ import java.net.*;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 
@@ -39,7 +40,7 @@ public final class InflaterReaderTest extends BaseTestCase {
             fail("expected NPE");
         } catch(NullPointerException expected) {}
         
-        ReadableByteChannel channel = new ReadBufferChannel(new byte[0]);
+        InterestReadChannel channel = new ReadBufferChannel(new byte[0]);
         READER.setReadChannel(channel);
         assertSame(channel, READER.getReadChannel());
         
@@ -186,11 +187,11 @@ public final class InflaterReaderTest extends BaseTestCase {
         assertEquals("stream shouldn't have ended.", 0, READER.read(in));
     }
     
-    private ReadableByteChannel channel(ByteBuffer buffer) throws Exception {
+    private InterestReadChannel channel(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer);
     }
     
-    private ReadableByteChannel eof(ByteBuffer buffer) throws Exception {
+    private InterestReadChannel eof(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer, true);
     }
     

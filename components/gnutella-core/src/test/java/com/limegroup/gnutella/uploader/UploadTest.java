@@ -299,7 +299,7 @@ public class UploadTest extends BaseTestCase {
     public void testDuplicatePushes() throws Exception {
         
         Connection c = createConnection();
-        c.initialize();
+        c.initialize(new UltrapeerHeaders(null), new EmptyResponder());
         QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
         c.send(query);
         c.flush();
@@ -1901,7 +1901,7 @@ public class UploadTest extends BaseTestCase {
      */
     private static Socket getSocketFromPush() throws IOException, BadPacketException {
 		Connection c = createConnection();
-		c.initialize();
+		c.initialize(new UltrapeerHeaders(null), new EmptyResponder());
 		QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
         c.send(query);
         c.flush();
@@ -2563,14 +2563,13 @@ public class UploadTest extends BaseTestCase {
 	 * Creates an Ultrapeer connection.
 	 */
 	private static Connection createConnection() {
-		return new Connection("localhost", PORT, new UltrapeerHeaders(null),
-							  new EmptyResponder());
+		return new Connection("localhost", PORT);
 	}
     
 
     private static class EmptyResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
-                                         boolean outgoing) throws IOException {
+                                         boolean outgoing) {
             return HandshakeResponse.createResponse(new Properties());
         }
         

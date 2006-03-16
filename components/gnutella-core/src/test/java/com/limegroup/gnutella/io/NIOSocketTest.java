@@ -8,7 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
+import java.util.Random;
 
 import junit.framework.Test;
 
@@ -34,6 +34,53 @@ public final class NIOSocketTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+    
+    public void testDelayedGetInputStream() throws Exception {
+        ServerSocket server = new ServerSocket(PORT, 0);
+        try {
+            server.setReuseAddress(true);
+            InetSocketAddress addr = new InetSocketAddress("127.0.0.1", PORT);
+            NIOSocket socket = new NIOSocket();
+            socket.setSoTimeout(1000);
+            socket.connect(addr);
+            
+            server.setSoTimeout(1000);
+            Socket accepted = server.accept();
+            byte[] rnd = new byte[100];
+            new Random().nextBytes(rnd);
+            accepted.getOutputStream().write(rnd); // this'll go immediately into the buffer
+            
+            ICROAdapter icro = new ICROAdapter();
+            ByteBuffer read = icro.getReadBuffer();
+            assertEquals(0, read.position());
+            
+            socket.setReadObserver(icro);
+            Thread.sleep(500); // let NIODispatcher to its thang.
+            
+            assertEquals(100, read.position()); // data was transferred to the reader.
+            for(int i = 0; i < 100; i++)
+                assertEquals(rnd[i], read.get(i));
+            
+            InputStream stream = socket.getInputStream();
+            byte[] readData = new byte[100];
+            assertEquals(100, stream.read(readData));
+            assertEquals(rnd, readData);
+            
+            assertEquals(0, read.position()); // moved to the InputStream
+            
+            new Random().nextBytes(rnd);
+            accepted.getOutputStream().write(rnd); // write some more, make sure it goes to stream
+            
+            Thread.sleep(500);
+            assertEquals(0, read.position());
+            assertEquals(100, stream.read(readData));
+            assertEquals(rnd, readData);
+            
+            socket.close();
+        } finally {
+            server.close();
+        }        
+    }
 	
 	// tests to make sure that calling setReadObserver
 	// will gobble any data that wasn't gobbled in blocking mode.
@@ -73,7 +120,8 @@ public final class NIOSocketTest extends BaseTestCase {
 	    for(int i = readIn.length; i < data.length; i++)
 	        assertEquals(i, remaining.get());
 	        
-        assertSame(socket.getChannel(), reader.getReadChannel());
+        assertInstanceof(SocketInterestReadAdapter.class, reader.getReadChannel());
+        assertSame(socket.getChannel(), ((SocketInterestReadAdapter)reader.getReadChannel()).getChannel());
     }
     
     public void testSetReadObserverGoesThroughChains() throws Exception {
@@ -83,20 +131,23 @@ public final class NIOSocketTest extends BaseTestCase {
         RCROAdapter entry = new RCROAdapter();
         socket.setReadObserver(entry);
         Thread.sleep(1000);
-        assertSame(channel, entry.getReadChannel());
+        assertInstanceof(SocketInterestReadAdapter.class, entry.getReadChannel());
+        assertSame(channel, ((SocketInterestReadAdapter)entry.getReadChannel()).getChannel());
         
         RCRAdapter chain1 = new RCRAdapter();
         entry.setReadChannel(chain1);
         socket.setReadObserver(entry);
         Thread.sleep(1000);
-        assertSame(channel, chain1.getReadChannel());
+        assertInstanceof(SocketInterestReadAdapter.class, chain1.getReadChannel());
+        assertSame(channel, ((SocketInterestReadAdapter)chain1.getReadChannel()).getChannel());
         assertSame(chain1, entry.getReadChannel());
         
         RCRAdapter chain2 = new RCRAdapter();
         chain1.setReadChannel(chain2);
         socket.setReadObserver(entry);
         Thread.sleep(1000);
-        assertSame(channel, chain2.getReadChannel());
+        assertInstanceof(SocketInterestReadAdapter.class, chain2.getReadChannel());
+        assertSame(channel, ((SocketInterestReadAdapter)chain2.getReadChannel()).getChannel());        
         assertSame(chain2, chain1.getReadChannel());
         assertSame(chain1, entry.getReadChannel());
     }
@@ -176,6 +227,32 @@ public final class NIOSocketTest extends BaseTestCase {
         assertNull(observer.getSocket());
         assertNull(observer.getIoException()); // NIOSocket swallows the IOX.
         assertFalse(socket.isConnected());
+    }
+    
+    public void testSoTimeoutUsedForNonBlockingRead() throws Exception {
+        ServerSocket server = new ServerSocket(PORT, 0);
+        try {
+            server.setReuseAddress(true);
+            InetSocketAddress addr = new InetSocketAddress("127.0.0.1", PORT);
+            NIOSocket socket = new NIOSocket();
+            socket.setSoTimeout(1000);
+            socket.connect(addr);
+            
+            server.setSoTimeout(1000);
+            Socket accepted = server.accept();
+            accepted.getOutputStream().write(new byte[100]); // this'll go immediately into the buffer
+            socket.getInputStream().read(new byte[100]);
+            Thread.sleep(2000);
+            assertTrue(!socket.isClosed()); // didn't close 'cause we're using stream reading
+            
+            accepted.getOutputStream().write(new byte[1]); // give it some data just to make sure it has
+            socket.setReadObserver(new ReadTester());
+            Thread.sleep(2000);
+            assertTrue(socket.isClosed()); // closed because we switched to NB reading w/ timeout set
+        } finally {
+            server.close();
+        }
+        
     }
     
     private static class Listener {
@@ -272,12 +349,12 @@ public final class NIOSocketTest extends BaseTestCase {
     
     private static class ReadTester implements ChannelReadObserver {
         
-        private ReadableByteChannel source;
+        private InterestReadChannel source;
         private ByteBuffer readData = ByteBuffer.allocate(128 * 1024);
         
         // ChannelReader methods.
-        public ReadableByteChannel getReadChannel() { return source; }
-        public void setReadChannel(ReadableByteChannel channel) { source = channel; }
+        public InterestReadChannel getReadChannel() { return source; }
+        public void setReadChannel(InterestReadChannel channel) { source = channel; }
         
         // IOErrorObserver methods.
         public void handleIOException(IOException x) { fail(x); }
@@ -294,13 +371,58 @@ public final class NIOSocketTest extends BaseTestCase {
         public ByteBuffer getRead() { return (ByteBuffer)readData.flip(); }
     }
     
-    private static class RCRAdapter implements ChannelReader, ReadableByteChannel {
-        protected ReadableByteChannel source;
-        public ReadableByteChannel getReadChannel() { return source; }
-        public void setReadChannel(ReadableByteChannel channel) { source = channel; }
+    private static class ICROAdapter implements ChannelReadObserver, InterestReadChannel {
+        private InterestReadChannel source;
+
+        private ByteBuffer buffer = ByteBuffer.allocate(1024);
+        
+        public ByteBuffer getReadBuffer() {
+            return buffer;
+        }
+
+        public InterestReadChannel getReadChannel() {
+            return source;
+        }
+
+        public void setReadChannel(InterestReadChannel channel) {
+            source = channel;
+        }
+
+        public int read(ByteBuffer b) {
+            return BufferUtils.transfer(buffer, b);
+        }
+
+        public void close() throws IOException {
+            source.close();
+        }
+
+        public boolean isOpen() {
+            return source.isOpen();
+        }
+
+        public void interest(boolean status) {
+            source.interest(status);
+        }
+
+        public void handleRead() throws IOException {
+            while (buffer.hasRemaining() && source.read(buffer) != 0);
+        }
+
+        public void handleIOException(IOException iox) {
+        }
+
+        public void shutdown() {
+        }
+    }
+    
+    private static class RCRAdapter implements ChannelReader, InterestReadChannel {
+        protected InterestReadChannel source;
+        public InterestReadChannel getReadChannel() { return source; }
+        public void setReadChannel(InterestReadChannel channel) { source = channel; }
         public int read(ByteBuffer b) throws IOException { return source.read(b); }
         public void close() throws IOException { source.close(); }
         public boolean isOpen() { return source.isOpen(); }
+        public void interest(boolean status) { source.interest(status); }
     }
     
     private static class RCROAdapter extends RCRAdapter implements ChannelReadObserver {

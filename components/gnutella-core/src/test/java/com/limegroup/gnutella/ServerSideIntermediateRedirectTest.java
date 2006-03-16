@@ -122,11 +122,9 @@ public final class ServerSideIntermediateRedirectTest
 
     public void testSendsRedirect() throws Exception {
 
-        Connection redirUP = new Connection("localhost", PORT,
-                                            new UltrapeerHeaders("localhost"),
-                                            new EmptyResponder());
+        Connection redirUP = new Connection("localhost", PORT);
         
-        redirUP.initialize();
+        redirUP.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         assertTrue(redirUP.isOpen());
         drain(redirUP);
 
@@ -177,11 +175,8 @@ public final class ServerSideIntermediateRedirectTest
 
     public void testSendsRedirectMultiple() throws Exception {
 
-        Connection redirUP1 = new Connection("localhost", PORT,
-                                            new UltrapeerHeaders("localhost"),
-                                            new EmptyResponder());
-        
-        redirUP1.initialize();
+        Connection redirUP1 = new Connection("localhost", PORT);
+        redirUP1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         assertTrue(redirUP1.isOpen());
         drain(redirUP1);
 
@@ -189,11 +184,8 @@ public final class ServerSideIntermediateRedirectTest
         redirUP1.send(msvm);
         redirUP1.flush();
 
-        Connection redirUP2 = new Connection("localhost", PORT,
-                                            new UltrapeerHeaders("localhost"),
-                                            new EmptyResponder());
-        
-        redirUP2.initialize();
+        Connection redirUP2 = new Connection("localhost", PORT);
+        redirUP2.initialize( new UltrapeerHeaders("localhost"), new EmptyResponder());
         assertTrue(redirUP2.isOpen());
         drain(redirUP2);
 

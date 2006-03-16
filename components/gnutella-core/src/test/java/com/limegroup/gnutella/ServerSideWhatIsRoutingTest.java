@@ -116,20 +116,10 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
 	}
 	
 	private static void buildConnections() throws Exception {
-        ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-
+        ULTRAPEER_1 = new Connection("localhost", PORT);
         UDP_ACCESS = new DatagramSocket();
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
-
-        ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+        ULTRAPEER_2 = new Connection("localhost", PORT);
     }
 
     public static void setSettings() {
@@ -215,10 +205,9 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
     private static void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize();
-
+        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize();
+        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
@@ -232,11 +221,9 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
 
-	    LEAF = new Connection("localhost", PORT, new LeafHeaders("localhost"),
-                              new EmptyResponder());
-
+	    LEAF = new Connection("localhost", PORT);
         //3. routed leaf, with route table for "test"
-        LEAF.initialize();
+        LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder());
         qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");

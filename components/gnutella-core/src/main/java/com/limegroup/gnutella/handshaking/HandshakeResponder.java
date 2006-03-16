@@ -68,7 +68,7 @@ public interface HandshakeResponder {
      * connection.
      */
     public HandshakeResponse respond(HandshakeResponse response, 
-         boolean outgoing) throws IOException;
+         boolean outgoing);
 
     /**
      * optional method.

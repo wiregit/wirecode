@@ -3,9 +3,8 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Stack;
+import java.nio.channels.SocketChannel;
 
 /**
  * Manages reading data from the network & piping it to a blocking input stream.
@@ -14,15 +13,14 @@ import java.util.Stack;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be read.
  *
- * ReadableByteChannel is implemented so that future ReadObservers can take over
+ * InterestReadChannel is implemented so that future ReadObservers can take over
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
  */
-class NIOInputStream implements ReadObserver, ReadableByteChannel {
+class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
     
-    static final Stack CACHE = new Stack();
     private final NIOSocket handler;
-    private final SocketChannel channel;
+    private InterestReadChannel channel;
     private BufferInputStream source;
     private Object bufferLock;
     private ByteBuffer buffer;
@@ -32,7 +30,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    NIOInputStream(NIOSocket handler, SocketChannel channel) {
+    NIOInputStream(NIOSocket handler, InterestReadChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }
@@ -47,23 +45,11 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
         if(shutdown)
             throw new IOException("Already closed!");
         
-        buffer = getBuffer(); 
+        buffer = NIODispatcher.instance().getBufferCache().getHeap(); 
         source = new BufferInputStream(buffer, handler, channel);
         bufferLock = source.getBufferLock();
         
-        NIODispatcher.instance().interestRead(channel, true);
         return this;
-    }
-    
-    static ByteBuffer getBuffer() {
-        synchronized(CACHE) {
-            if (CACHE.isEmpty()) {
-                ByteBuffer buf = ByteBuffer.allocateDirect(8192);
-                CACHE.push(buf);
-            } 
-            
-            return (ByteBuffer)CACHE.pop();
-        }
     }
     
     /**
@@ -71,32 +57,8 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      * not the SocketChannel) into the given buffer.
      */
     public int read(ByteBuffer toBuffer) {
-        if(buffer == null)
-            return 0;
-        
-        int read = 0;
-
-        if(buffer.position() > 0) {
-            buffer.flip();
-            int remaining = buffer.remaining();
-            int toRemaining = toBuffer.remaining();
-            if(toRemaining >= remaining) {
-                toBuffer.put(buffer);
-                read += remaining;
-            } else {
-                int limit = buffer.limit();
-                int position = buffer.position();
-                buffer.limit(position + toRemaining);
-                toBuffer.put(buffer);
-                read += toRemaining;
-                buffer.limit(limit);
-            }
-            buffer.compact();
-        }
-        
-        return read;
+        return BufferUtils.transfer(buffer, toBuffer);
     }
-                
     
     /**
      * Retrieves the InputStream to read from.
@@ -127,7 +89,7 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
             // if there's room in the buffer, we're interested in more reading ...
             // if not, we're not interested in more reading.
             if(!buffer.hasRemaining() || read == -1)
-                NIODispatcher.instance().interestRead(channel, false);
+                channel.interest(false);
         }
     }
     
@@ -136,14 +98,16 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      * The SocketChannel should be shut by NIOSocket.
      */
     public synchronized void shutdown() {
-        
         if(shutdown)
             return;
-         
+
+        if (buffer != null)
+            NIODispatcher.instance().getBufferCache().release(buffer);
+        
         if(source != null)
             source.shutdown();
+        
         shutdown = true;
-        try {close();}catch(IOException ignored) {}
     }
     
     /** Unused */
@@ -157,10 +121,6 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      * there is no buffer to close in this case.
      */
     public void close() throws IOException {
-        if (buffer != null) {
-            buffer.clear();
-            CACHE.push(buffer);
-        }
     }
     
     /**
@@ -169,6 +129,22 @@ class NIOInputStream implements ReadObserver, ReadableByteChannel {
      */
     public boolean isOpen() {
         return true;
+    }
+    
+    /**
+     * Does nothing.
+     */
+    public void interest(boolean status) {}
+    
+    public InterestReadChannel getReadChannel() {
+        return channel;
+    }
+    
+    public void setReadChannel(InterestReadChannel newChannel) {
+        synchronized(bufferLock) {
+            this.channel = newChannel;
+            source.setReadChannel(newChannel);
+        }
     }
 }
                 

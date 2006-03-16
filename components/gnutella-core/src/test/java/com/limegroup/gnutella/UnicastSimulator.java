@@ -134,8 +134,8 @@ public class UnicastSimulator {
                 sock.setSoTimeout(0);
 
                 if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
-                    Connection conn = new Connection(sock, null);
-                    conn.initialize();
+                    Connection conn = new Connection(sock);
+                    conn.initialize(null, null);
                     debug("UnicastSimulator.tcpLoop(): sending pings.");
                     for (int i = 0; i < _pongs.length; i++) {
                         conn.send(_pongs[i]);

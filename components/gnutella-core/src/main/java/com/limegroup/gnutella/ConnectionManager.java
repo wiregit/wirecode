@@ -274,22 +274,18 @@ public class ConnectionManager {
      * Create a new connection, blocking until it's initialized, but launching
      * a new thread to do the message loop.
      */
-    public ManagedConnection createConnectionBlocking(String hostname,
-        int portnum)
-		throws IOException {
-        ManagedConnection c =
-			new ManagedConnection(hostname, portnum);
+    public ManagedConnection createConnectionBlocking(String hostname, int portnum) throws IOException {
+        ManagedConnection c = new ManagedConnection(hostname, portnum);
 
         // Initialize synchronously
-        initializeExternallyGeneratedConnection(c);
+        initializeExternallyGeneratedConnection(c, null);
         // Kick off a thread for the message loop.
         ThreadFactory.startThread(new OutgoingConnector(c, false), "OutgoingConnector");
         return c;
     }
 
     /**
-     * Create a new connection, allowing it to initialize and loop for messages
-     * on a new thread.
+     * Create a new connection, allowing it to initialize and loop for messages on a new thread.
      */
     public void createConnectionAsynchronously(
             String hostname, int portnum) {
@@ -304,29 +300,36 @@ public class ConnectionManager {
 
 
     /**
-     * Create an incoming connection.  This method starts the message loop,
-     * so it will block for a long time.  Make sure the thread that calls
-     * this method is suitable doing a connection message loop.
-     * If there are already too many connections in the manager, this method
-     * will launch a RejectConnection to send pongs for other hosts.
+     * Create an incoming connection.
+     * 
+     * If the connection can support asynchronous messaging, this method will return
+     * immediately.  Otherwise, this will block forever while the connection handshakes
+     * and then loops for messages (it will return when the connection dies).
      */
      void acceptConnection(Socket socket) {
-         //1. Initialize connection.  It's always safe to recommend new headers.
-         Thread.currentThread().setName("IncomingConnectionThread");
          ManagedConnection connection = new ManagedConnection(socket);
+         
+         GnetConnectObserver listener = null;
+         
+         if(connection.isAsynchronous())
+             listener = new IncomingGNetObserver(connection);
+         else
+             Thread.currentThread().setName("IncomingConnectionThread");
+         
          try {
-             initializeExternallyGeneratedConnection(connection);
+             initializeExternallyGeneratedConnection(connection, listener);
          } catch (IOException e) {
 			 connection.close();
              return;
          }
-
-         try {
-			 startConnection(connection);
-         } catch(IOException e) {
-             // we could not start the connection for some reason --
-             // this can easily happen, for example, if the connection
-             // just drops
+         
+         // Otherwise, the listener will be notified when to start.
+         if(listener == null) {
+             try {
+    			 startConnection(connection);
+             } catch(IOException e) {
+                 // the blocking connection died.
+             }
          }
      }
 
@@ -1833,8 +1836,8 @@ public class ConnectionManager {
      *
      * @throws IOException on failure.  No cleanup is necessary if this happens.
      */
-    private void initializeExternallyGeneratedConnection(ManagedConnection c)
-		throws IOException {
+    private void initializeExternallyGeneratedConnection(ManagedConnection c, GnetConnectObserver observer)
+      throws IOException {
         //For outgoing connections add it to the GUI and the fetcher lists now.
         //For incoming, we'll do this below after checking incoming connection
         //slots.  This keeps reject connections from appearing in the GUI, as
@@ -1850,29 +1853,47 @@ public class ConnectionManager {
         }
 
         try {
-            c.initialize();
-
+            c.initialize(observer);
         } catch(IOException e) {
-            remove(c);
+            cleanupBrokenExternallyGeneratedConnection(c);
             throw e;
         }
-        finally {
-            //if the connection received headers, process the headers to
-            //take steps based on the headers
-            processConnectionHeaders(c);
-        }
 
-        //If there's not space for the connection, destroy it.
-        //It really should have been destroyed earlier, but this is just in case.
+        // If observer is null, we blocked while initializing.
+        // Otherwise, the observer will be notified on completion and do their own thing.
+        if(observer == null)
+            completeInitializeExternallyGeneratedConnection(c);
+    }
+    
+    /**
+     * Cleans up a connection that couldn't be initialized.
+     * @param c
+     */
+    private void cleanupBrokenExternallyGeneratedConnection(ManagedConnection c) {
+        remove(c);
+        processConnectionHeaders(c);
+    }
+    
+    /**
+     * Completes the process of initializing an externally generated connection.
+     * 
+     * @param c
+     * @throws IOException
+     */
+    private void completeInitializeExternallyGeneratedConnection(ManagedConnection c) throws IOException {
+        processConnectionHeaders(c);
+        
+        // If there's not space for the connection, destroy it.
+        // It really should have been destroyed earlier, but this is just in case.
         if (!c.isOutgoing() && !allowConnection(c)) {
-            //No need to remove, since it hasn't been added to any lists.
+            // No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
 
-        //For incoming connections, add it to the GUI.  For outgoing connections
-        //this was done at the top of the method.  See note there.
-        if (! c.isOutgoing()) {
-            synchronized(this) {
+        // For incoming connections, add it to the GUI. For outgoing connections
+        // this was done at the top of the method. See note there.
+        if (!c.isOutgoing()) {
+            synchronized (this) {
                 connectionInitializingIncoming(c);
                 // We've added a connection, so the need for connections went
                 // down.
@@ -1886,12 +1907,11 @@ public class ConnectionManager {
 
     /**
      * Performs the steps necessary to complete connection initialization.
-     *
+     * 
      * @param mc the <tt>ManagedConnection</tt> to finish initializing
-     * @param fetched Specifies whether or not this connection is was fetched
-     *  by a connection fetcher.  If so, this removes that connection from
-     *  the list of fetched connections being initialized, keeping the
-     *  connection fetcher data in sync
+     * @param fetched Specifies whether or not this connection is was fetched by a connection fetcher. If so, this
+     *            removes that connection from the list of fetched connections being initialized, keeping the connection
+     *            fetcher data in sync
      */
     private void completeConnectionInitialization(ManagedConnection mc,
                                                   boolean fetched) {
@@ -1977,9 +1997,8 @@ public class ConnectionManager {
 
         public void run() {
             try {
-				if(_doInitialization) {
-					initializeExternallyGeneratedConnection(_connection);
-				}
+				if(_doInitialization)
+					initializeExternallyGeneratedConnection(_connection, null);
 				startConnection(_connection);
             } catch(IOException ignored) {}
         }
@@ -1994,15 +2013,45 @@ public class ConnectionManager {
 	 *  for messages
 	 */
 	private void startConnection(ManagedConnection conn) throws IOException {
-	    Thread.currentThread().setName("MessageLoopingThread");
-		if(conn.isGUESSUltrapeer()) {
-			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-				conn.getPort());
-		}
+		if(conn.isGUESSUltrapeer())
+			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(), conn.getPort());
 
 		// this can throw IOException
 		conn.loopForMessages();
 	}
+    
+    /**
+     * Asynchronous GnetConnectObserver for externally generated connections.
+     * Not as robust as ConnectionFetcher because less accounting is needed.
+     */
+    private class IncomingGNetObserver implements GnetConnectObserver {
+        private ManagedConnection connection;
+        IncomingGNetObserver(ManagedConnection connection) {
+            this.connection = connection;
+        }
+
+        public void handleConnect() {
+            try {
+                completeInitializeExternallyGeneratedConnection(connection);
+                startConnection(connection);
+            } catch(IOException ignored) {
+                LOG.warn("Failed to complete initialization", ignored);
+            }
+        }
+        
+        public void handleBadHandshake() {
+            shutdown();
+        }
+
+        public void handleNoGnutellaOk(int code, String msg) {
+            shutdown();
+        }
+
+        public void shutdown() {
+            cleanupBrokenExternallyGeneratedConnection(connection);
+        }
+        
+    }
 
     /**
      * Asynchronously fetches a connection from hostcatcher, then does

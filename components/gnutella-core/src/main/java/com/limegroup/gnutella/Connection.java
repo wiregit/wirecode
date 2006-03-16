@@ -19,8 +19,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.BlockingIncomingHandshaker;
+import com.limegroup.gnutella.handshaking.BlockingOutgoingHandshaker;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.Handshaker;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.io.ConnectObserver;
@@ -39,6 +42,7 @@ import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 import com.limegroup.gnutella.util.CompressingOutputStream;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -191,69 +195,11 @@ public class Connection implements IpPort {
      */
     protected volatile boolean _closed=false;
 
-    /** 
-	 * The headers read from the connection.
-	 */
-    private final Properties HEADERS_READ = new Properties();
-
-    /**
-     * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
-     */
-	private volatile HandshakeResponse _headers = 
-        HandshakeResponse.createEmptyResponse();
+    /** The <tt>HandshakeResponse</tt> wrapper for all headers we read from the remote side. */
+    private HandshakeResponse _headersRead = HandshakeResponse.createEmptyResponse();
         
-    /**
-     * The <tt>HandshakeResponse</tt> wrapper for written connection headers.
-     */
-	private HandshakeResponse _headersWritten = 
-        HandshakeResponse.createEmptyResponse();        
-
-    /** For outgoing Gnutella 0.6 connections, the properties written
-     *  after "GNUTELLA CONNECT".  Null otherwise. */
-    private final Properties REQUEST_HEADERS;
-
-    /** 
-     * For outgoing Gnutella 0.6 connections, a function calculating the
-     *  properties written after the server's "GNUTELLA OK".  For incoming
-     *  Gnutella 0.6 connections, the properties written after the client's
-     *  "GNUTELLA CONNECT".
-     * Non-final so that the responder can be garbage collected after we've
-     * concluded the responding (by setting to null).
-     */
-    protected HandshakeResponder RESPONSE_HEADERS;
-
-    /** The list of all properties written during the handshake sequence,
-     *  analogous to HEADERS_READ.  This is needed because
-     *  RESPONSE_HEADERS lazily calculates properties according to what it
-     *  read. */
-    private final Properties HEADERS_WRITTEN = new Properties();
-
-	/**
-	 * Gnutella 0.6 connect string.
-	 */
-    private String GNUTELLA_CONNECT_06 = "GNUTELLA CONNECT/0.6";
-
-	/**
-	 * Gnutella 0.6 accept connection string.
-	 */
-    public static final String GNUTELLA_OK_06 = "GNUTELLA/0.6 200 OK";
-    public static final String GNUTELLA_06 = "GNUTELLA/0.6";
-    public static final String _200_OK     = " 200 OK";
-    public static final String GNUTELLA_06_200 = "GNUTELLA/0.6 200";
-    public static final String CONNECT="CONNECT/";
-    /** End of line for Gnutella 0.6 */
-    public static final String CRLF="\r\n";
-    
-    /**
-     * Time to wait for inut from user at the remote end. (in milliseconds)
-     */
-    public static final int USER_INPUT_WAIT_TIME = 2 * 60 * 1000; //2 min
-    
-    /**
-     * The number of times we will respond to a given challenge 
-     * from the other side, or otherwise, during connection handshaking
-     */
-    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;  
+    /** The <tt>HandshakeResponse</tt> wrapper for all headers we wrote to the remote side. */
+	private HandshakeResponse _headersWritten = HandshakeResponse.createEmptyResponse();
 
     /**
      * The time in milliseconds since 1970 that this connection was
@@ -287,45 +233,27 @@ public class Connection implements IpPort {
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
-     * desired outgoing properties, possibly reverting to Gnutella 0.4 if
-     * needed.
-     * 
-     * If properties1 and properties2 are null, forces connection at the 0.4
-     * level.  This is a bit of a hack to make implementation in this and
-     * subclasses easier; outside classes are discouraged from using it.
+     * desired outgoing properties.
      *
      * @param host the name of the host to connect to
      * @param port the port of the remote host
      * @param requestHeaders the headers to be sent after "GNUTELLA CONNECT"
-     * @param responseHeaders a function returning the headers to be sent
+     * @param responder a function returning the headers to be sent
      *  after the server's "GNUTELLA OK".  Typically this returns only
      *  vendor-specific properties.
 	 * @throws <tt>NullPointerException</tt> if any of the arguments are
 	 *  <tt>null</tt>
 	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Connection(String host, int port,
-                      Properties requestHeaders,
-                      HandshakeResponder responseHeaders) {
-
-		if(host == null) {
+    public Connection(String host, int port) {
+		if(host == null)
 			throw new NullPointerException("null host");
-		}
-		if(!NetworkUtils.isValidPort(port)) {
+		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("illegal port: "+port);
-		}
-		if(requestHeaders == null) {
-			throw new NullPointerException("null request headers");
-		}
-		if(responseHeaders == null) {
-			throw new NullPointerException("null response headers");
-		}		
 
         _host = host;
         _port = port;
-        OUTGOING = true;
-        REQUEST_HEADERS = requestHeaders;
-        RESPONSE_HEADERS = responseHeaders;            
+        OUTGOING = true;     
 		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
@@ -336,18 +264,15 @@ public class Connection implements IpPort {
      * 
      * @param socket the socket accepted by a ServerSocket.  The word
      *  "GNUTELLA " and nothing else must have been read from the socket.
-     * @param responseHeaders the headers to be sent in response to the client's 
+     * @param responder the headers to be sent in response to the client's 
 	 *  "GNUTELLA CONNECT".  
 	 * @throws <tt>NullPointerException</tt> if any of the arguments are
 	 *  <tt>null</tt>
      */
-    public Connection(Socket socket, HandshakeResponder responseHeaders) {
-		if(socket == null) {
+    public Connection(Socket socket) {
+		if(socket == null)
 			throw new NullPointerException("null socket");
-		}
-		if(responseHeaders == null) {
-			throw new NullPointerException("null response headers");
-		}
+        
         //Get the address in dotted-quad format.  It's important not to do a
         //reverse DNS lookup here, as that can block.  And on the Mac, it blocks
         //your entire system!
@@ -355,8 +280,6 @@ public class Connection implements IpPort {
         _port = socket.getPort();
         _socket = socket;
         OUTGOING = false;
-        RESPONSE_HEADERS = responseHeaders;	
-		REQUEST_HEADERS = null;
 		ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
@@ -366,7 +289,7 @@ public class Connection implements IpPort {
      */
     protected void postInit() {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
-			if(_headers.supportsVendorMessages() > 0) {
+			if(_headersRead.supportsVendorMessages() > 0) {
                 send(MessagesSupportedVendorMessage.instance());
                 send(CapabilitiesVM.instance());
 			}
@@ -380,7 +303,7 @@ public class Connection implements IpPort {
      */
     protected void sendUpdatedCapabilities() {
         try {
-            if(_headers.supportsVendorMessages() > 0)
+            if(_headersRead.supportsVendorMessages() > 0)
                 send(CapabilitiesVM.instance());
         } catch (IOException iox) { }
     }
@@ -395,10 +318,9 @@ public class Connection implements IpPort {
             _capabilities = (CapabilitiesVM) vm;
         if (vm instanceof HeaderUpdateVendorMessage) {
             HeaderUpdateVendorMessage huvm = (HeaderUpdateVendorMessage)vm;
-            HEADERS_READ.putAll(huvm.getProperties());
-            try {
-                _headers = HandshakeResponse.createResponse(HEADERS_READ);
-            }catch(IOException ignored){}
+            Properties props = _headersRead.props();
+            props.putAll(huvm.getProperties());
+            _headersRead = HandshakeResponse.createResponse(props);
         }
     }
 
@@ -407,17 +329,17 @@ public class Connection implements IpPort {
      * Initializes this without timeout; exactly like initialize(0). 
      * @see initialize(int)
      */
-    public void initialize() 
-		throws IOException, NoGnutellaOkException, BadHandshakeException {
-        initialize(0, null);
+    public void initialize(Properties requestHeaders, HandshakeResponder responder)
+      throws IOException, NoGnutellaOkException, BadHandshakeException {
+        initialize(requestHeaders, responder, 0, null);
     }
     
     /**
      * Initializes this without a timeout, using the given ConnectObserver.
      */
-    public void initialize(GnetConnectObserver observer) 
+    public void initialize(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer) 
      throws IOException, NoGnutellaOkException, BadHandshakeException {
-        initialize(0, observer);
+        initialize(requestHeaders, responder, 0, observer);
     }
 
     /**
@@ -437,20 +359,27 @@ public class Connection implements IpPort {
      *  the connection, e.g., the server responded with HTTP, closed the
      *  the connection during handshaking, etc.
      */
-    protected void initialize(int timeout, GnetConnectObserver observer) 
+    protected void initialize(Properties requestHeaders, HandshakeResponder responder,
+                              int timeout, GnetConnectObserver observer) 
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
-
         if(isOutgoing()) {
             if(observer != null) {
-                ConnectObserver wrapper = new Connector(observer);
-                _socket = Sockets.connect(_host, _port, timeout, wrapper);
+                _socket = Sockets.connect(_host, _port, timeout, createAsyncConnectObserver(requestHeaders, responder, observer));
             } else {
                 _socket=Sockets.connect(_host, _port, timeout);
-                finishInitialize();
+                preHandshakeInitialize(requestHeaders, responder, observer);
             }
         } else {
-            finishInitialize();
+            preHandshakeInitialize(requestHeaders, responder, observer);
         }
+    }
+    
+    /**
+     * Constructs the ConnectObserver that will be used to continue the connection process asynchronously.
+     */
+    protected ConnectObserver createAsyncConnectObserver(Properties requestHeaders, HandshakeResponder responder,
+                                                         GnetConnectObserver observer) {
+        return new Connector(requestHeaders, responder, observer);
     }
     
     /**
@@ -460,7 +389,8 @@ public class Connection implements IpPort {
      * @throws NoGnutellaOkException
      * @throws BadHandshakeException
      */
-    protected void finishInitialize() throws IOException,
+    protected void preHandshakeInitialize(Properties requestHeaders, HandshakeResponder responder,  
+                                          GnetConnectObserver observer) throws IOException,
             NoGnutellaOkException, BadHandshakeException {
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
@@ -471,19 +401,51 @@ public class Connection implements IpPort {
         // Check to see if this is an attempt to connect to ourselves
 		InetAddress localAddress = _socket.getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
-            _socket.getInetAddress().equals(localAddress) &&
-            _port == ConnectionSettings.PORT.getValue()) {
+          _socket.getInetAddress().equals(localAddress) &&
+          _port == ConnectionSettings.PORT.getValue()) {
             throw new IOException("Connection to self");
         }
         
         // Notify the acceptor of our address.
-        RouterService.getAcceptor().setAddress(localAddress);
-
+        RouterService.getAcceptor().setAddress(localAddress);        
+        performHandshake(requestHeaders, responder, observer);
+    }
+    
+    /**
+     * Delegates to the Handshaker to perform the handshake, and then calls
+     * postHandshakeInitialize.
+     * 
+     * @throws IOException
+     * @throws BadHandshakeException
+     * @throws NoGnutellaOkException
+     */
+    protected void performHandshake(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer)
+      throws IOException, BadHandshakeException, NoGnutellaOkException {     
+        Handshaker shaker = createHandshaker(requestHeaders, responder);
+        
+        try {
+            shaker.shake();
+        } catch (NoGnutellaOkException e) {
+            setHeaders(shaker);
+            close();
+            throw e;
+        } catch (IOException e) {
+            setHeaders(shaker);            
+            close();
+            throw new BadHandshakeException(e);
+        }
+            
+        postHandshakeInitialize(shaker);
+    }
+    
+    /** Constructs the Handshaker object. */
+    protected Handshaker createHandshaker(Properties requestHeaders, HandshakeResponder responder)
+      throws IOException {
         try {
             _in = getInputStream();
             _out = getOutputStream();
             if (_in == null) throw new IOException("null input stream");
-			else if(_out == null) throw new IOException("null output stream");
+            else if(_out == null) throw new IOException("null output stream");
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
             //NullPointerException if the socket is closed.  (See Sun bug
@@ -496,62 +458,60 @@ public class Connection implements IpPort {
             //are not null.
             close();
             throw new IOException("could not establish connection");
+        }        
+        
+        if(isOutgoing())
+            return new BlockingOutgoingHandshaker(requestHeaders, responder, _socket, _in, _out);
+        else
+            return new BlockingIncomingHandshaker(responder, _socket, _in, _out);
+    }
+    
+    /**
+     * Sets the headers read & written.
+     * 
+     * @param shaker
+     */
+    protected void setHeaders(Handshaker shaker) {
+        _headersWritten = shaker.getWrittenHeaders();
+        _headersRead = shaker.getReadHeaders();
+    }
+    
+    /**
+     * Sets up the connection for post-handshake info.
+     * @param shaker
+     */
+    protected void postHandshakeInitialize(Handshaker shaker) {
+        setHeaders(shaker);
+        _connectionTime = System.currentTimeMillis();
+
+        // Now set the soft max TTL that should be used on this connection.
+        // The +1 on the soft max for "good" connections is because the message
+        // may come from a leaf, and therefore can have an extra hop.
+        // "Good" connections are connections with features such as
+        // intra-Ultrapeer QRP passing.
+        _softMax = ConnectionSettings.SOFT_MAX.getValue();
+        if (isGoodUltrapeer() || isGoodLeaf()) {
+            // we give these an extra hop because they might be sending
+            // us traffic from their leaves
+            _softMax++;
         }
 
-        try {
-            //In all the line reading code below, we are somewhat lax in
-            //distinguishing between '\r' and '\n'.  Who cares?
-            if(isOutgoing()) {
-                initializeOutgoing();
-            } else {
-                initializeIncoming();
-            }
-
-            _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
-
-            _connectionTime = System.currentTimeMillis();
-
-            // Now set the soft max TTL that should be used on this connection.
-            // The +1 on the soft max for "good" connections is because the message
-            // may come from a leaf, and therefore can have an extra hop.
-            // "Good" connections are connections with features such as 
-            // intra-Ultrapeer QRP passing.
-            _softMax = ConnectionSettings.SOFT_MAX.getValue();
-            if(isGoodUltrapeer() || isGoodLeaf()) {
-                // we give these an extra hop because they might be sending
-                // us traffic from their leaves
-                _softMax++;
-            } 
-            
-            //wrap the streams with inflater/deflater
-            // These calls must be delayed until absolutely necessary (here)
-            // because the native construction for Deflater & Inflater 
-            // allocate buffers outside of Java's memory heap, preventing 
-            // Java from fully knowing when/how to GC.  The call to end()
-            // (done explicitly in the close() method of this class, and
-            //  implicitly in the finalization of the Deflater & Inflater)
-            // releases these buffers.
-            if(isWriteDeflated()) {
-                _deflater = new Deflater();
-                _out = createDeflatedOutputStream(_out);
-            }            
-            if(isReadDeflated()) {
-                _inflater = new Inflater();
-                _in = createInflatedInputStream(_in);
-            }
-            
-            // remove the reference to the RESPONSE_HEADERS, since we'll no
-            // longer be responding.
-            // This does not need to be in a finally clause, because if an
-            // exception was thrown, the connection will be removed anyway.
-            RESPONSE_HEADERS = null;
-						
-        } catch (NoGnutellaOkException e) {
-            close();
-            throw e;
-        } catch (IOException e) {
-            close();
-            throw new BadHandshakeException(e);
+        // wrap the streams with inflater/deflater
+        // These calls must be delayed until absolutely necessary (here)
+        // because the native construction for Deflater & Inflater
+        // allocate buffers outside of Java's memory heap, preventing
+        // Java from fully knowing when/how to GC. The call to end()
+        // (done explicitly in the close() method of this class, and
+        // implicitly in the finalization of the Deflater & Inflater)
+        // releases these buffers.
+        if (isWriteDeflated()) {
+            _deflater = new Deflater();
+            _out = createDeflatedOutputStream(_out);
+        }
+        
+        if (isReadDeflated()) {
+            _inflater = new Inflater();
+            _in = createInflatedInputStream(_in);
         }
     }
     
@@ -585,436 +545,7 @@ public class Connection implements IpPort {
     public boolean isInitialized() {
         return _socket != null;
     }
-
-    /** 
-     * Sends and receives handshake strings for outgoing connections,
-     * throwing exception if any problems. 
-     * 
-     * @exception NoGnutellaOkException one of the participants responded
-     *  with an error code other than 200 OK (possibly after several rounds
-     *  of 401's)
-     * @exception IOException any other error.  
-     */
-    private void initializeOutgoing() throws IOException {
-        //1. Send "GNUTELLA CONNECT/0.6" and headers
-        writeLine(GNUTELLA_CONNECT_06+CRLF);
-        sendHeaders(REQUEST_HEADERS);   
-        
-        //conclude the handshake (This may involve exchange of 
-        //information multiple times with the host at the other end).
-        concludeOutgoingHandshake();
-    }
     
-    /**
-     * Responds to the responses/challenges from the host on the other
-     * end of the connection, till a conclusion reaches. Handshaking may
-     * involve multiple steps. 
-     *
-     * @exception NoGnutellaOkException one of the participants responded
-     *  with an error code other than 200 OK (possibly after several rounds
-     *  of 401's)
-     * @exception IOException any other error.  
-     */
-    private void concludeOutgoingHandshake() throws IOException {
-        //This step may involve handshaking multiple times so as
-        //to support challenge/response kind of behaviour
-        for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++) {
-
-			//2. Read "GNUTELLA/0.6 200 OK"  
-			String connectLine = readLine();
-			Assert.that(connectLine != null, "null connectLine");
-			if (! connectLine.startsWith(GNUTELLA_06)) {
-                HandshakingStat.OUTGOING_BAD_CONNECT.incrementStat();
-                throw new IOException("Bad connect string");
-            }
-				
-
-			//3. Read the Gnutella headers. 
-			readHeaders(Constants.TIMEOUT);
-
-            //Terminate abnormally if we read something other than 200 or 401.
-            HandshakeResponse theirResponse = 
-                HandshakeResponse.createRemoteResponse(
-                    connectLine.substring(GNUTELLA_06.length()).trim(), 
-                    HEADERS_READ);
-			_headers = theirResponse;
-            Assert.that(theirResponse != null, "null theirResponse");
-
-            int code = theirResponse.getStatusCode();
-            if (code != HandshakeResponse.OK) {
-                if(code == HandshakeResponse.SLOTS_FULL) {
-                    if(theirResponse.isLimeWire()) {
-                        if(theirResponse.isUltrapeer()) {
-                            HandshakingStat.
-                                OUTGOING_LIMEWIRE_ULTRAPEER_REJECT.
-                                    incrementStat();
-                        } else {
-                            HandshakingStat.
-                                OUTGOING_LIMEWIRE_LEAF_REJECT.
-                                    incrementStat();
-                        }
-                    } else {
-                        if(theirResponse.isUltrapeer()) {
-                            HandshakingStat.
-                                OUTGOING_OTHER_ULTRAPEER_REJECT.
-                                    incrementStat();
-                        } else {
-                            HandshakingStat.
-                                OUTGOING_OTHER_LEAF_REJECT.
-                                    incrementStat();
-                        }                            
-                    } 
-                    throw NoGnutellaOkException.SERVER_REJECT;
-                } else {
-                    HandshakingStat.OUTGOING_SERVER_UNKNOWN.incrementStat();
-                    throw NoGnutellaOkException.createServerUnknown(code);
-                }
-            }
-
-            //4. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
-			//   and headers.
-			Assert.that(RESPONSE_HEADERS != null, "null RESPONSE_HEADERS");			
-            HandshakeResponse ourResponse = 
-				RESPONSE_HEADERS.respond(theirResponse, true);
-            
-            Assert.that(ourResponse != null, "null ourResponse");
-            writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.props());
-
-            code = ourResponse.getStatusCode();
-            //Consider termination...
-            if(code == HandshakeResponse.OK) {
-                if(HandshakeResponse.OK_MESSAGE.equals(
-                    ourResponse.getStatusMessage())){
-                    HandshakingStat.SUCCESSFUL_OUTGOING.incrementStat();
-                    //a) Terminate normally if we wrote "200 OK".
-                    return;
-                } else {
-                    //b) Continue loop if we wrote "200 AUTHENTICATING".
-                    continue;
-                }
-            } else {                
-                //c) Terminate abnormally if we wrote anything else.
-                if(code == HandshakeResponse.SLOTS_FULL) {
-                    HandshakingStat.OUTGOING_CLIENT_REJECT.incrementStat();
-                    throw NoGnutellaOkException.CLIENT_REJECT;
-                } 
-                else if(code == HandshakeResponse.LOCALE_NO_MATCH) {
-                    //if responder's locale preferencing was set 
-                    //and didn't match the locale this code is used.
-                    //(currently in use by the dedicated connectionfetcher)
-                    throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
-                }
-                else {
-                    HandshakingStat.OUTGOING_CLIENT_UNKNOWN.incrementStat();
-                    throw NoGnutellaOkException.createClientUnknown(code);
-                }
-            }
-        }
-            
-        //If we didn't successfully return out of the method, throw an exception
-        //to indicate that handshaking didn't reach any conclusion.  The values
-        //here are kind of a hack.
-        throw NoGnutellaOkException.UNRESOLVED_SERVER;
-    }
-    
-    /** 
-     * Sends and receives handshake strings for incoming connections,
-     * throwing exception if any problems. 
-     * 
-     * @exception NoGnutellaOkException one of the participants responded
-     *  with an error code other than 200 OK (possibly after several rounds
-     *  of 401's)
-     * @exception IOException if there's an unexpected connect string or
-	 *  any other problem
-     */
-    private void initializeIncoming() throws IOException {
-        //Dispatch based on first line read.  Remember that "GNUTELLA " has
-        //already been read by Acceptor.  Hence we are looking for "CONNECT/0.6"
-		String connectString = readLine();
-        if (notLessThan06(connectString)) {
-            //1. Read headers (connect line has already been read)
-            readHeaders();
-            //Conclude the handshake (This may involve exchange of information
-            //multiple times with the host at the other end).
-            concludeIncomingHandshake();
-        } else {
-            throw new IOException("Unexpected connect string: "+connectString);
-        }
-    }
-
-    
-    /**
-     * Responds to the handshake from the host on the other
-     * end of the connection, till a conclusion reaches. Handshaking may
-     * involve multiple steps.
-     * 
-     * @exception NoGnutellaOkException one of the participants responded
-     *  with an error code other than 200 OK (possibly after several rounds
-     *  of 401's)
-     * @exception IOException any other error.  May wish to retry at 0.4
-     */
-    private void concludeIncomingHandshake() throws IOException {
-        //Respond to the handshake.  This step may involve handshaking multiple
-        //times so as to support challenge/response kind of behaviour
-        for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
-            //2. Send our response and headers.
-
-			// is this an incoming connection from the crawler??
-			boolean isCrawler = _headers.isCrawler();
-			
-			//Note: in the following code, it appears that we're ignoring
-			//the response code written by the initiator of the connection.
-			//However, you can prove that the last code was always 200 OK.
-			//See initializeIncoming and the code at the bottom of this
-			//loop.
-			HandshakeResponse ourResponse = 
-				RESPONSE_HEADERS.respond(_headers, false);
-
-            writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.props());
-            
-            // if it was the crawler, leave early.
-            if(isCrawler) {
-                // read one response, just to make sure they got ours.
-                readLine();
-                throw new IOException("crawler");
-            }
-                
-            
-            //Our response should be either OK or UNAUTHORIZED for the handshake
-            //to proceed.
-            int code = ourResponse.getStatusCode();
-            if(code != HandshakeResponse.OK) {
-                if(code == HandshakeResponse.SLOTS_FULL) {
-                    HandshakingStat.INCOMING_CLIENT_REJECT.incrementStat();
-                    throw NoGnutellaOkException.CLIENT_REJECT;
-                } else {
-                    HandshakingStat.INCOMING_CLIENT_UNKNOWN.incrementStat();
-                    throw NoGnutellaOkException.createClientUnknown(code);
-                }
-            }
-                    
-            //3. read the response from the other side.  If we asked the other
-            //side to authenticate, give more time so as to receive user input
-            String connectLine = readLine();  
-            readHeaders();
-			
-            if (! connectLine.startsWith(GNUTELLA_06)) {
-                HandshakingStat.INCOMING_BAD_CONNECT.incrementStat();
-                throw new IOException("Bad connect string");
-            }
-                
-
-            HandshakeResponse theirResponse = 
-                HandshakeResponse.createRemoteResponse(
-                    connectLine.substring(GNUTELLA_06.length()).trim(),
-                    HEADERS_READ);           
-
-
-            //Decide whether to proceed.
-            code = ourResponse.getStatusCode();
-            if(code == HandshakeResponse.OK) {
-                if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
-                    HandshakingStat.SUCCESSFUL_INCOMING.incrementStat();
-                    //a) If we wrote 200 and they wrote 200 OK, stop normally.
-                    return;
-                }
-            }
-
-			HandshakingStat.INCOMING_SERVER_UNKNOWN.incrementStat();
-            //c) Terminate abnormally
-            throw NoGnutellaOkException.
-                createServerUnknown(theirResponse.getStatusCode());
-        }        
-        
-        HandshakingStat.INCOMING_NO_CONCLUSION.incrementStat();
-        //If we didn't successfully return out of the method, throw an exception
-        //to indicate that handshaking didn't reach any conclusion.
-        throw NoGnutellaOkException.UNRESOLVED_CLIENT;
-    }
-    
-    /** Returns true iff line ends with "CONNECT/N", where N
-     *  is a number greater than or equal "0.6". */
-    private static boolean notLessThan06(String line) {
-        int i=line.indexOf(CONNECT);
-        if (i<0)
-            return false;
-        try {
-            Float F = new Float(line.substring(i+CONNECT.length()));
-            float f= F.floatValue();
-            return f>=0.6f;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Writes the properties in props to network, including the blank line at
-     * the end.  Throws IOException if there are any problems.
-     * @param props The headers to be sent. Note: null argument is 
-     * acceptable, if no headers need to be sent (still the trailer will
-     * be sent
-     * @modifies network 
-     */
-    private void sendHeaders(Properties props) throws IOException {
-        if(props != null) {
-            Enumeration names=props.propertyNames();
-            while (names.hasMoreElements()) {
-                String key=(String)names.nextElement();
-                String value=props.getProperty(key);
-                // Overwrite any domainname with true IP address
-                if ( HeaderNames.REMOTE_IP.equals(key) )
-                    value=getInetAddress().getHostAddress();
-                if (value==null)
-                    value="";
-                writeLine(key+": "+value+CRLF);   
-                HEADERS_WRITTEN.put(key, value);
-            }
-        }
-        //send the trailer
-        writeLine(CRLF);
-    }
-
-
-    /**
-     * Reads the properties from the network into HEADERS_READ, throwing
-     * IOException if there are any problems. 
-     *     @modifies network 
-     */
-    private void readHeaders() throws IOException {
-        readHeaders(Constants.TIMEOUT);
-        _headers = HandshakeResponse.createResponse(HEADERS_READ);
-    }
-    
-    /**
-     * Reads the properties from the network into HEADERS_READ, throwing
-     * IOException if there are any problems. 
-     * @param timeout The time to wait on the socket to read data before 
-     * IOException is thrown
-     * @return The line of characters read
-     * @modifies network
-     * @exception IOException if the characters cannot be read within 
-     * the specified timeout
-     */
-    private void readHeaders(int timeout) throws IOException {
-        //TODO: limit number of headers read
-        while (true) {
-            //This doesn't distinguish between \r and \n.  That's fine.
-            String line=readLine(timeout);
-            if (line==null)
-                throw new IOException("unexpected end of file"); //unexpected EOF
-            if (line.equals(""))
-                return;                    //blank line ==> done
-            int i=line.indexOf(':');
-            if (i<0)
-                continue;                  //ignore lines without ':'
-            String key=line.substring(0, i);
-            String value=line.substring(i+1).trim();
-            if (HeaderNames.REMOTE_IP.equals(key))
-                changeAddress(value);
-            HEADERS_READ.put(key, value);
-        }
-    }
-    
-    /**
-     * Determines if the address should be changed and changes it if
-     * necessary.
-     */
-    private void changeAddress(final String v) {
-        InetAddress ia = null;
-        try {
-            ia = InetAddress.getByName(v);
-        } catch(UnknownHostException uhe) {
-            return; // invalid.
-        }
-        
-        // invalid or private, exit
-        if(!NetworkUtils.isValidAddress(ia) ||
-            NetworkUtils.isPrivateAddress(ia))
-            return;
-            
-        // If we're forcing, change that if necessary.
-        if( ConnectionSettings.FORCE_IP_ADDRESS.getValue() ) {
-            StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
-            if(!v.equals(addr.getValue())) {
-                addr.setValue(v);
-                RouterService.addressChanged();
-            }
-        }
-        // Otherwise, if our current address is invalid, change.
-        else if(!NetworkUtils.isValidAddress(RouterService.getAddress())) {
-            // will auto-call addressChanged.
-            RouterService.getAcceptor().setAddress(ia);
-        }
-        
-        RouterService.getAcceptor().setExternalAddress(ia);
-    }
-            
-
-    /**
-     * Writes s to out, with no trailing linefeeds.  Called only from
-     * initialize().  
-     *    @requires _socket, _out are properly set up */
-    private void writeLine(String s) throws IOException {
-        if(s == null || s.equals("")) {
-            throw new NullPointerException("null or empty string: "+s);
-        }
-
-        //TODO: character encodings?
-        byte[] bytes=s.getBytes();
-		BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(bytes.length);
-        _out.write(bytes);
-        _out.flush();
-    }
-    
-    /**
-     * Reads and returns one line from the network.  A line is defined as a
-     * maximal sequence of characters without '\n', with '\r''s removed.  If the
-     * characters cannot be read within TIMEOUT milliseconds (as defined by the
-     * property manager), throws IOException.  This includes EOF.
-     * @return The line of characters read
-     * @requires _socket is properly set up
-     * @modifies network
-     * @exception IOException if the characters cannot be read within 
-     * the specified timeout
-     */
-    private String readLine() throws IOException {
-        return readLine(Constants.TIMEOUT);
-    }
-
-    /**
-     * Reads and returns one line from the network.  A line is defined as a
-     * maximal sequence of characters without '\n', with '\r''s removed.  If the
-     * characters cannot be read within the specified timeout milliseconds,
-     * throws IOException.  This includes EOF.
-     * @param timeout The time to wait on the socket to read data before 
-     * IOException is thrown
-     * @return The line of characters read
-     * @requires _socket is properly set up
-     * @modifies network
-     * @exception IOException if the characters cannot be read within 
-     * the specified timeout
-     */
-    private String readLine(int timeout) throws IOException {
-        int oldTimeout=_socket.getSoTimeout();
-        // _in.read can throw an NPE if we closed the connection,
-        // so we must catch NPE and throw the CONNECTION_CLOSED.
-        try {
-            _socket.setSoTimeout(timeout);
-            String line=(new ByteReader(_in)).readLine();
-            if (line==null)
-                throw new IOException("read null line");
-            BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(line.length());
-            return line;
-        } catch(NullPointerException npe) {
-            throw CONNECTION_CLOSED;
-        } finally {
-            //Restore socket timeout.
-            _socket.setSoTimeout(oldTimeout);
-        }
-    }
-
     /**
      * Returns the stream to use for writing to s.
      * If the message supports asynchronous messaging, we don't need
@@ -1419,8 +950,8 @@ public class Connection implements IpPort {
      * (i.e. will not drop a VM that has ttl <> 1 and hops > 0)
      */
     public boolean supportsVMRouting() {
-        if (_headers != null)
-            return _headers.supportsVendorMessages() >= 0.2;
+        if (_headersRead != null)
+            return _headersRead.supportsVendorMessages() >= 0.2;
         return false;
     }
     
@@ -1555,7 +1086,7 @@ public class Connection implements IpPort {
      * time during connection, returns the latest.
      */
     public String getPropertyWritten(String name) {
-        return HEADERS_WRITTEN.getProperty(name);
+        return _headersWritten.props().getProperty(name);
     }
 
     /**
@@ -1600,17 +1131,9 @@ public class Connection implements IpPort {
        // the case where one thread is reading from the stream and
        // another closes it.
        // See BugParade ID: 4505257
-       
-       if (_in != null) {
-           try {
-               _in.close();
-           } catch (IOException e) {}
-       }
-       if (_out != null) {
-           try {
-               _out.close();
-           } catch (IOException e) {}
-       }
+        
+        IOUtils.close(_in);
+        IOUtils.close(_out);
     }
 
     
@@ -1618,18 +1141,18 @@ public class Connection implements IpPort {
      *  the USER_AGENT property, or null if it wasn't set.
      *  @return the vendor string, or null if unknown */
     public String getUserAgent() {
-		return _headers.getUserAgent();
+		return _headersRead.getUserAgent();
     }
     
     /**
      * Returns whether or not the remote host is a LimeWire (or derivative)
      */
     public boolean isLimeWire() {
-        return _headers.isLimeWire();
+        return _headersRead.isLimeWire();
     }
     
     public boolean isOldLimeWire() {
-        return _headers.isOldLimeWire();
+        return _headersRead.isOldLimeWire();
     }
 
     /**
@@ -1647,22 +1170,22 @@ public class Connection implements IpPort {
      * @return true if the incoming stream is deflated.
      */
     public boolean isReadDeflated() {
-        return _headers.isDeflateEnabled();
+        return _headersRead.isDeflateEnabled();
     }
 
     // inherit doc comment
     public boolean isGoodUltrapeer() {
-        return _headers.isGoodUltrapeer();
+        return _headersRead.isGoodUltrapeer();
     }
 
     // inherit doc comment
     public boolean isGoodLeaf() {
-        return _headers.isGoodLeaf();
+        return _headersRead.isGoodLeaf();
     }
 
     // inherit doc comment
     public boolean supportsPongCaching() {
-        return _headers.supportsPongCaching();
+        return _headersRead.supportsPongCaching();
     }
 
     /**
@@ -1729,12 +1252,12 @@ public class Connection implements IpPort {
 	 * @return the number of intra-Ultrapeer connections this node maintains
 	 */
 	public int getNumIntraUltrapeerConnections() {
-		return _headers.getNumIntraUltrapeerConnections();
+		return _headersRead.getNumIntraUltrapeerConnections();
 	}
 
 	// implements ReplyHandler interface -- inherit doc comment
 	public boolean isHighDegreeConnection() {
-		return _headers.isHighDegreeConnection();
+		return _headersRead.isHighDegreeConnection();
 	}
 
 	/**
@@ -1746,7 +1269,7 @@ public class Connection implements IpPort {
 	 *  otherwise <tt>false</tt>
 	 */
 	public boolean isUltrapeerQueryRoutingConnection() {
-		return _headers.isUltrapeerQueryRoutingConnection();
+		return _headersRead.isUltrapeerQueryRoutingConnection();
     }
 
     /**
@@ -1758,7 +1281,7 @@ public class Connection implements IpPort {
      *  otherwise <tt>false</tt>
      */
     public boolean supportsProbeQueries() {
-        return _headers.supportsProbeQueries();
+        return _headersRead.supportsProbeQueries();
     }
 
     /**
@@ -1769,7 +1292,7 @@ public class Connection implements IpPort {
      *  and therefore has headers, otherwise <tt>false</tt>
      */
     public boolean receivedHeaders() {
-        return _headers != HandshakeResponse.createEmptyResponse();
+        return _headersRead != HandshakeResponse.createEmptyResponse();
     }
 
 	/**
@@ -1780,7 +1303,7 @@ public class Connection implements IpPort {
 	 *  the Gnutella connection headers passed by this node
 	 */
 	public HandshakeResponse headers() {
-		return _headers;
+		return _headersRead;
 	}
 	
 	/**
@@ -1788,18 +1311,18 @@ public class Connection implements IpPort {
 	 * for this node.	 
 	 */
 	public String getVersion() {
-		return _headers.getVersion();
+		return _headersRead.getVersion();
 	}
 
     /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
     public boolean isLeafConnection() {
-		return _headers.isLeaf();
+		return _headersRead.isLeaf();
     }
 
     /** Returns true iff this connection wrote "Supernode: true". */
     public boolean isSupernodeConnection() {
-		return _headers.isUltrapeer();
+		return _headersRead.isUltrapeer();
     }
 
     /** 
@@ -1853,7 +1376,7 @@ public class Connection implements IpPort {
 	 *  connection supports GUESS, <tt>false</tt> otherwise
 	 */
 	public boolean isGUESSCapable() {
-		return _headers.isGUESSCapable();
+		return _headersRead.isGUESSCapable();
 	}
 
 	/**
@@ -1864,14 +1387,14 @@ public class Connection implements IpPort {
 	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
 	 */
 	public boolean isGUESSUltrapeer() {
-		return _headers.isGUESSUltrapeer();
+		return _headersRead.isGUESSUltrapeer();
 	}
 
 
     /** Returns true iff this connection is a temporary connection as per
      the headers. */
     public boolean isTempConnection() {
-		return _headers.isTempConnection();
+		return _headersRead.isTempConnection();
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
@@ -1898,7 +1421,7 @@ public class Connection implements IpPort {
      *  big pongs) should only be sent along connections for which
      *  supportsGGEP()==true. */
     public boolean supportsGGEP() {
-		return _headers.supportsGGEP();
+		return _headersRead.supportsGGEP();
     }
 
     /**
@@ -1920,7 +1443,7 @@ public class Connection implements IpPort {
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-ultrapeer relationships. */
     boolean isQueryRoutingEnabled() {
-		return _headers.isQueryRoutingEnabled();
+		return _headersRead.isQueryRoutingEnabled();
     }
 
     // overrides Object.toString
@@ -1932,7 +1455,7 @@ public class Connection implements IpPort {
      * access the locale pref. of the connected servent
      */
     public String getLocalePref() {
-        return _headers.getLocalePref();
+        return _headersRead.getLocalePref();
     }
     
     /**
@@ -1941,9 +1464,13 @@ public class Connection implements IpPort {
      */
     private class Connector implements ConnectObserver, Runnable {
         
+        private final Properties requestHeaders;
+        private final HandshakeResponder responder;
         private final GnetConnectObserver observer;
         
-        Connector(GnetConnectObserver observer) {
+        Connector(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer) {
+            this.requestHeaders = requestHeaders;
+            this.responder = responder;
             this.observer = observer;
         }
         
@@ -1965,7 +1492,7 @@ public class Connection implements IpPort {
         /** Does the handshaking & completes the connection process. */
         public void run() {
             try {
-                finishInitialize();
+                preHandshakeInitialize(requestHeaders, responder, observer);
                 observer.handleConnect();
             } catch(NoGnutellaOkException ex) {
                 observer.handleNoGnutellaOk(ex.getCode(), ex.getMessage());

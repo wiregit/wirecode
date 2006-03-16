@@ -338,6 +338,17 @@ public final class ConnectionSettings extends LimeProps {
     public static final IntSetting IDLE_CONNECTIONS =
         FACTORY.createSettableIntSetting("IDLE_CONNECTIONS",1,"ConnectionSettings.IdleConnections",3,1);
     
+    /**
+     * The maximum line length we'll try to parse while reading a header.
+     */
+    public static final IntSetting MAX_HANDSHAKE_LINE_SIZE =
+        FACTORY.createSettableIntSetting("MAX_HANDSHAKE_LINE_SIZE", 1024, "handshake.maxLineSize", 4096, 512);
+    
+    /**
+     * The maximum number of headers to try and parse.
+     */
+    public static final IntSetting MAX_HANDSHAKE_HEADERS =
+        FACTORY.createSettableIntSetting("MAX_HANDSHAKZE_LIMIT", 30, "handshake.maxHeaderLimit", 100, 15);
     
     /**
      * Helper method left from Settings Manager

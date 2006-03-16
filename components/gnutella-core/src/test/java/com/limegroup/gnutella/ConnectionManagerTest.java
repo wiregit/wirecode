@@ -72,6 +72,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
+        UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(true);
     }
 
     public void tearDown() {

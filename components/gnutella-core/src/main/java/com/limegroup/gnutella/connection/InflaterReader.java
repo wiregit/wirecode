@@ -7,6 +7,7 @@ import java.util.zip.Inflater;
 import java.util.zip.DataFormatException;
 
 import com.limegroup.gnutella.io.ChannelReader;
+import com.limegroup.gnutella.io.InterestReadChannel;
 
 /**
  * Reads data from a source channel and offers the inflated version for reading.
@@ -24,13 +25,13 @@ import com.limegroup.gnutella.io.ChannelReader;
  * The source channel does not need to be set for construction.  However, before read(ByteBuffer)
  * is called, setReadChannel(ReadableByteChannel) must be called with a valid channel.
  */
-public class InflaterReader implements ChannelReader, ReadableByteChannel {
+public class InflaterReader implements ChannelReader, InterestReadChannel {
     
     /** the inflater that will do the decompressing for us */
     private Inflater inflater;
     
     /** the channel this reads from */
-    private ReadableByteChannel channel;
+    private InterestReadChannel channel;
     
     /** the temporary buffer that data from the channel goes to prior to inflating */
     private ByteBuffer data;
@@ -47,7 +48,7 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
     /**
      * Constructs a new InflaterReader with the given source channel & inflater.
      */
-    public InflaterReader(ReadableByteChannel channel, Inflater inflater ) {        
+    public InflaterReader(InterestReadChannel channel, Inflater inflater ) {        
         if(inflater == null)
             throw new NullPointerException("null inflater!");
 
@@ -59,7 +60,7 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
     /**
      * Sets the new channel.
      */
-    public void setReadChannel(ReadableByteChannel channel) {
+    public void setReadChannel(InterestReadChannel channel) {
         if(channel == null)
             throw new NullPointerException("cannot set null channel!");
 
@@ -67,8 +68,12 @@ public class InflaterReader implements ChannelReader, ReadableByteChannel {
     }
     
     /** Gets the read channel */
-    public ReadableByteChannel getReadChannel() {
+    public InterestReadChannel getReadChannel() {
         return channel;
+    }
+    
+    public void interest(boolean status) {
+        channel.interest(status);
     }
     
     /**

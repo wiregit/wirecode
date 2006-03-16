@@ -84,10 +84,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
         qrt.add("foosball");
 
         // Set up a connection to the host....
-        _leaf1=new Connection(_remoteHost, _remotePort, 
-                              new LeafHeaders(""),
-                              new EmptyResponder());
-        _leaf1.initialize();
+        _leaf1=new Connection(_remoteHost, _remotePort);
+        _leaf1.initialize(new LeafHeaders(""), new EmptyResponder());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf1.send((RouteTableMessage)iter.next());
         _leaf1.flush();
@@ -95,10 +93,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
         // you support any vendor message....
         
         // Set up another connection to the host....
-        _leaf2=new Connection(_remoteHost, _remotePort, 
-                              new LeafHeaders(""),
-                              new EmptyResponder());
-        _leaf2.initialize();
+        _leaf2=new Connection(_remoteHost, _remotePort);
+        _leaf2.initialize(new LeafHeaders(""), new EmptyResponder());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf2.send((RouteTableMessage)iter.next());
         _leaf2.flush();

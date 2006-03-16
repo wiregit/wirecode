@@ -69,18 +69,12 @@ public abstract class ServerSideTestCase extends BaseTestCase {
     
 	private static void buildConnections() throws Exception {
         for (int i = 0; i < LEAF.length; i++) {
-            LEAF[i] = new Connection("localhost", PORT, 
-                                     new LeafHeaders("localhost"),
-                                     new EmptyResponder()
-                                     );
+            LEAF[i] = new Connection("localhost", PORT);
             assertTrue(LEAF[i].isOpen());
         }
         
         for (int i = 0; i < ULTRAPEER.length; i++) {
-            ULTRAPEER[i] = new Connection("localhost", PORT,
-                                          new UltrapeerHeaders("localhost"),
-                                          new EmptyResponder()
-                                          );
+            ULTRAPEER[i] = new Connection("localhost", PORT);
             assertTrue(ULTRAPEER[i].isOpen());
         }
     }
@@ -201,9 +195,9 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 		buildConnections();
         // init connections
         for (int i = ULTRAPEER.length-1; i > -1; i--)
-            ULTRAPEER[i].initialize();
+            ULTRAPEER[i].initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
         for (int i = 0; i < LEAF.length; i++)
-            LEAF[i].initialize();
+            LEAF[i].initialize(new LeafHeaders("localhost"), new EmptyResponder());
 
         for (int i = 0; i < ULTRAPEER.length; i++)
             assertTrue(ULTRAPEER[i].isOpen());
@@ -227,8 +221,8 @@ public abstract class ServerSideTestCase extends BaseTestCase {
     
     /** Builds a single connection with the given headers. */
     protected Connection createConnection(Properties headers) throws Exception {
-        Connection c = new Connection("localhost", PORT, headers, new EmptyResponder());
-        c.initialize();
+        Connection c = new Connection("localhost", PORT);
+        c.initialize(headers, new EmptyResponder());
         assertTrue(c.isOpen());
         return c;
     }

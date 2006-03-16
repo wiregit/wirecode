@@ -36,7 +36,6 @@ public class ConnectionTest extends BaseTestCase {
     public void setUp() throws Exception {
         ACCEPTOR = new ConnectionAcceptor();
         ACCEPTOR.start();
-        
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
     }
@@ -44,14 +43,13 @@ public class ConnectionTest extends BaseTestCase {
     public void tearDown() throws Exception {
         ACCEPTOR.shutdown();
         
-        // Give the OS a bit time to close the Socket
         Thread.sleep(1000);
     }
     
     public void testBlockingConnectFailing() throws Exception {
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT+1, new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"));
+        Connection c = new Connection("127.0.0.1", LISTEN_PORT+1);
         try {
-            c.initialize();
+            c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"));
             fail("shouldn't have initialized");
         } catch(IOException iox) {
             // timed out.
@@ -59,9 +57,9 @@ public class ConnectionTest extends BaseTestCase {
     }
     
     public void testNonBlockingConnectFailing() throws Exception {
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT+1, new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"));
-        StubConnectionObserver observer = new StubConnectionObserver();
-        c.initialize(observer);
+        Connection c = new Connection("127.0.0.1", LISTEN_PORT+1);
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
+        c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(3000);
         assertTrue(observer.isShutdown());
         assertFalse(observer.isBadHandshake());
@@ -70,26 +68,26 @@ public class ConnectionTest extends BaseTestCase {
     }
     
     public void testBlockingConnectSucceeds() throws Exception {
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT, new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"));
+        ManagedConnection c = new ManagedConnection("127.0.0.1", LISTEN_PORT);
         c.initialize();
     }
     
     public void testNonBlockingConnectSucceeds() throws Exception {
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT, new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"));
-        StubConnectionObserver observer = new StubConnectionObserver();
+        ManagedConnection c = new ManagedConnection("127.0.0.1", LISTEN_PORT);
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
         c.initialize(observer);
         observer.waitForResponse(3000);
         assertFalse(observer.isShutdown());
         assertFalse(observer.isBadHandshake());
-        assertTrue(observer.isConnect());
         assertFalse(observer.isNoGOK());
+        assertTrue(observer.isConnect());
     }
     
     public void testNonBlockingNoGOK() throws Exception {
         ACCEPTOR.getObserver().setNoGOK(true);
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT, new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"));
-        StubConnectionObserver observer = new StubConnectionObserver();
-        c.initialize(observer);
+        Connection c = new Connection("127.0.0.1", LISTEN_PORT);
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
+        c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(10000);
         assertFalse(observer.isShutdown());
         assertFalse(observer.isBadHandshake());
@@ -100,9 +98,9 @@ public class ConnectionTest extends BaseTestCase {
     
     public void testNonBlockingBadHandshake() throws Exception {
         ACCEPTOR.getObserver().setBadHandshake(true);
-        Connection c = new Connection("127.0.0.1", LISTEN_PORT, new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"));
-        StubConnectionObserver observer = new StubConnectionObserver();
-        c.initialize(observer);
+        Connection c = new Connection("127.0.0.1", LISTEN_PORT);
+        StubGnetConnectObserver observer = new StubGnetConnectObserver();
+        c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), observer);
         observer.waitForResponse(10000);
         assertFalse(observer.isShutdown());
         assertTrue(observer.isBadHandshake());
@@ -155,8 +153,8 @@ public class ConnectionTest extends BaseTestCase {
                             return;
                         }
                         
-                        final Connection con = new Connection(socket, new UltrapeerHandshakeResponder("127.0.0.1"));
-                        con.initialize();
+                        final Connection con = new Connection(socket);
+                        con.initialize(null, new UltrapeerHandshakeResponder("127.0.0.1"));
                     } catch (Exception e) {
                         ErrorService.error(e);
                     }

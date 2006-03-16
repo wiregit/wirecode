@@ -168,8 +168,8 @@ public abstract class ClientSideTestCase
          } else {
              responder = new OldResponder();
          }
-         Connection con = new Connection(socket, responder);
-         con.initialize();
+         Connection con = new Connection(socket);
+         con.initialize(null, responder);
          Boolean shouldReply = Boolean.TRUE;
          try {
              shouldReply = (Boolean)PrivilegedAccessor.invokeMethod(callingClass,
@@ -275,7 +275,7 @@ public abstract class ClientSideTestCase
 
     private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
+                boolean outgoing)  {
             Properties props = new UltrapeerHeaders("127.0.0.1"); 
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
@@ -286,7 +286,7 @@ public abstract class ClientSideTestCase
 
     private static class OldResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) throws IOException {
+                boolean outgoing)  {
             Properties props=new Properties();
             return HandshakeResponse.createResponse(props);
         }
