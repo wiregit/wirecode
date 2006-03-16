@@ -10,7 +10,10 @@ import java.net.SocketAddress;
 public class ContactNode extends Node{
     
     protected SocketAddress address;
+    
     private int failures = 0;
+    
+    private long firstAliveTime = 0L;
     
     public ContactNode(KUID nodeId, SocketAddress address) {
         super(nodeId);
@@ -25,9 +28,12 @@ public class ContactNode extends Node{
         return failures;
     }
     
-    public void updateTimeStamp() {
-        super.updateTimeStamp();
+    public void alive() {
+        super.alive();
         failures = 0;
+        if(firstAliveTime == 0L) {
+            firstAliveTime = System.currentTimeMillis();
+        }
     }
     
     public SocketAddress getSocketAddress() {
@@ -41,7 +47,7 @@ public class ContactNode extends Node{
     }
     
     public String toString() {
-        return nodeId + " (" + address + ")";
+        return nodeId + " (" + address + ")" + ",timestamp: " +timeStamp;
     }
     
     public static String toString(KUID nodeId, SocketAddress address) {

@@ -1,12 +1,14 @@
 package de.kapsi.net.kademlia.routing;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -16,8 +18,10 @@ import de.kapsi.net.kademlia.BucketNode;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
+import de.kapsi.net.kademlia.util.BucketUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class PatriciaRouteTable implements RoutingTable{
@@ -52,11 +56,11 @@ public class PatriciaRouteTable implements RoutingTable{
         bucketsTrie.put(rootKUID,root);
     }
 
-    public void add(ContactNode node) {
-        put(node.getNodeID(), node);
+    public void add(ContactNode node, boolean alive) {
+        put(node.getNodeID(), node,alive);
     }
     
-    private void put(KUID nodeId, ContactNode node) {
+    private void put(KUID nodeId, ContactNode node, boolean alive) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Trying to add node: "+node+" to routing table");
         }
@@ -72,7 +76,11 @@ public class PatriciaRouteTable implements RoutingTable{
         if (!nodeId.equals(node.getNodeID())) {
             throw new IllegalArgumentException("NodeID and the ID returned by Node do not match");
         }
+        
         staleNodes.remove(nodeId);
+        if(updateExistingNode(nodeId,node,alive)) {
+            return;
+        }
         //get bucket closest to node
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
         if(bucket.getNodeCount() < K) {
@@ -133,7 +141,7 @@ public class PatriciaRouteTable implements RoutingTable{
                 }
                 //trying recursive call!
                 //attempt the put the new contact again with the split buckets
-                put(nodeId,node);
+                put(nodeId,node,alive);
                 
             } 
             //not splitting --> replacement cache
@@ -143,7 +151,43 @@ public class PatriciaRouteTable implements RoutingTable{
                     LOG.trace("NOT splitting bucket "+ bucket+", adding node "+node+" to replacement cache");
                 }
                 
-               bucket.addReplacementNode(node);
+                addReplacementNode(bucket,node);
+            }
+        }
+    }
+    
+    public void handleFailure(KUID nodeId) {
+        
+        //this should never happen -- who knows?!!
+        if(nodeId.equals(context.getLocalNodeID())) {
+            if(LOG.isErrorEnabled()) {
+                LOG.error("Local node marked as dead!");
+            }
+        }
+        ContactNode node = (ContactNode) nodesTrie.get(nodeId);
+        //get closest bucket
+        BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+        Map replacementCache = bucket.getReplacementCache();
+        if(node != null) {
+            if(node.failure() > RouteTableSettings.getMaxNodeFailures()) {
+                
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Removing node: "+node+" from bucket: "+bucket);
+                }
+                //remove node and replace with most recent alive one from cache
+                nodesTrie.remove(nodeId);
+                bucket.decrementNodeCount();
+                if(replacementCache != null && replacementCache.size()!=0) {
+                    ContactNode replacement = bucket.getMostRecentlySeenCachedNode(true);
+                    put(replacement.getNodeID(),replacement,false);
+                }
+            }
+        } else {
+            if(replacementCache!= null) {
+                node = (ContactNode)replacementCache.remove(nodeId);
+                if (node!= null && LOG.isTraceEnabled()) {
+                    LOG.trace("Removed node: "+node+" from replacement cache");
+                }
             }
         }
     }
@@ -152,6 +196,99 @@ public class PatriciaRouteTable implements RoutingTable{
         int newCount = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1).size();
         bucket.setNodeCount(newCount);
         return newCount;
+    }
+    
+    /**
+     * Adds a node to the replacement cache of the corresponding bucket
+     * 
+     * @param bucket
+     * @param node
+     */
+    public void addReplacementNode(BucketNode bucket,ContactNode node) {
+        
+        boolean added = false;
+        
+        Map replacementCache = bucket.getReplacementCache();
+
+        if(replacementCache!= null &&
+                replacementCache.size() == RouteTableSettings.getMaxCacheSize()) {
+            //replace older cache entries with this one
+            for (Iterator iter = replacementCache.values().iterator(); iter.hasNext();) {
+                ContactNode oldNode = (ContactNode) iter.next();
+                
+                if(oldNode.getTimeStamp() <= node.getTimeStamp()) {
+                    replacementCache.remove(oldNode);
+                    replacementCache.put(node.getNodeID(),node);
+                    added = true;
+                }
+            }
+        } else {
+            bucket.addReplacementNode(node);
+            added = true;
+        }
+        //ping least recently seen node
+        if(added) {
+            List bucketList = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1);
+            ContactNode leastRecentlySeen = 
+                BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
+
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Pinging the least recently seen Node " 
+                        + leastRecentlySeen);
+            }
+            
+            PingRequest ping = context.getMessageFactory().createPingRequest();
+            
+            //TODO fix pinging
+            //context.getMessageDispatcher().send(leastRecentlySeen, ping, this);
+        }
+    }
+    
+    
+    /**
+     * Checks the local table and replacement nodes and updates timestamp.
+     * 
+     * 
+     * @param nodeId The contact nodeId
+     * @param node The contact node 
+     * @param alive If the contact is alive
+     * 
+     * @return true if the contact exists and has been updated, false otherwise
+     */
+    public boolean updateExistingNode(KUID nodeId, ContactNode node, boolean alive) {
+        boolean replacement = false;
+        ContactNode existingNode = (ContactNode) nodesTrie.get(nodeId);
+        if(existingNode == null) {
+            //check replacement cache in closest bucket
+            BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+            Map replacementCache = bucket.getReplacementCache();
+            if(replacementCache!= null &&
+                    replacementCache.size()!=0 && 
+                    replacementCache.containsKey(nodeId)) {
+                existingNode = (ContactNode) replacementCache.get(nodeId);
+                replacement = true;
+            }
+            else {
+                return false;
+            }
+        }
+        //TODO do some contact checking here first!
+        if(alive) {
+            existingNode.alive();
+            //TODO: we have found a live contact in the bucket's replacement cache!
+            //It's a good time to replace this bucket's dead entry with this node
+            if(replacement) {
+                
+            }
+        }
+        //TODO update the contact's info here
+        
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Replaced existing node: "+existingNode+" with node: " 
+                    + node);
+        }
+        return true;
     }
     
 
@@ -281,8 +418,10 @@ public class PatriciaRouteTable implements RoutingTable{
     }
 
     public boolean updateTimeStamp(ContactNode node) {
+        
+        //TODO change this!!!!
         if (node != null) {
-            node.updateTimeStamp();
+            node.alive();
             staleNodes.remove(node.getNodeID());
             updateIfCached(node.getNodeID());
             return true;

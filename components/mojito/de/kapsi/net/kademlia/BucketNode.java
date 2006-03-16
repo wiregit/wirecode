@@ -3,6 +3,7 @@ package de.kapsi.net.kademlia;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,8 +26,6 @@ public class BucketNode extends Node {
         super(nodeId);
         this.depth = depth;
         nodeCount = 0;
-        
-        replacementCache = new Cache(RouteTableSettings.getMaxCacheSize());
     }
     
     public void incrementNodeCount() {
@@ -46,27 +45,46 @@ public class BucketNode extends Node {
     }
     
     public void addReplacementNode(ContactNode node) {
+        //lazy instantiation of the replacement cache to save mem space
+        if(replacementCache == null) {
+            replacementCache = new Cache(RouteTableSettings.getMaxCacheSize());
+        }
         replacementCache.put(node.getNodeID(), node);
     }
     
     public ContactNode getReplacementNode(KUID nodeId) {
-        return (ContactNode)replacementCache.get(nodeId);
+        if(replacementCache == null) return null;
+        else return (ContactNode)replacementCache.get(nodeId);
+    }
+    
+    public int getReplacementCacheSize() {
+        if(replacementCache == null) return 0;
+        else return replacementCache.size();
+    }
+    
+    public Map getReplacementCache() {
+        return replacementCache;
+    }
+    
+    public ContactNode getMostRecentlySeenCachedNode(boolean remove) {
+        if(replacementCache == null) return null;
+        else return (ContactNode)replacementCache.getMostRecentlySeen(remove);
     }
     
     public void removeReplacementNode(KUID nodeId) {
-        replacementCache.remove(nodeId);
+        if(replacementCache == null) return;
+        else replacementCache.remove(nodeId);
     }
     
     public void touch() {
-        super.updateTimeStamp();
+        super.alive();
     }
  
     public List split() {
         List list = new ArrayList();
         BucketNode leftBucket = new BucketNode(nodeId, depth+1);
         BucketNode rightBucket = new BucketNode(nodeId.set(depth, true),depth+1);
-        //split replacement cache -- costly?
-        if(!replacementCache.isEmpty()) {
+        if(replacementCache != null && !replacementCache.isEmpty()) {
             if(LOG.isErrorEnabled()) {
                 LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
             }
@@ -82,7 +100,8 @@ public class BucketNode extends Node {
     }
     
     public String toString() {
-        return  super.toString() + ",depth: "+depth+", size: "+nodeCount+", replacements: "+replacementCache.size();
+        return  super.toString() + ",depth: "+depth+", size: "+nodeCount+", replacements: "
+        +(replacementCache==null?0:replacementCache.size());
     }
     
     public static void main(String[] args) {

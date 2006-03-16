@@ -3,14 +3,15 @@ package de.kapsi.net.kademlia;
 public abstract class Node {
     
     protected final KUID nodeId;
-    private long timeStamp = 0L;
+    
+    protected long timeStamp = 0L;
     
     public Node(KUID nodeId) {
         this.nodeId = nodeId;
-        updateTimeStamp();
+        alive();
     }
     
-    public void updateTimeStamp() {
+    public void alive() {
         timeStamp = System.currentTimeMillis();
     }
     

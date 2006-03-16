@@ -196,7 +196,7 @@ public class Context implements Runnable {
             nodeId = KUID.createNodeID(id);
         }
         //add ourselve to the routing table
-        routeTable.add(getLocalNode());
+        routeTable.add(getLocalNode(),true);
     }
     
     //TODO testing purposes only - remove

@@ -15,7 +15,7 @@ public interface RoutingTable {
     
     public int size();
     
-    public void add(ContactNode node);
+    public void add(ContactNode node, boolean alive);
     
     public ContactNode get(KUID nodeId);
     
@@ -33,11 +33,9 @@ public interface RoutingTable {
 
     public boolean containsNode(KUID nodeId);
     
-    public void remove(KUID key);
-    
     public boolean updateTimeStamp(ContactNode node);
     
-    public boolean handleFailure(ContactNode node);
+    public void handleFailure(KUID nodeId);
     
     public Collection getAllNodes();
     

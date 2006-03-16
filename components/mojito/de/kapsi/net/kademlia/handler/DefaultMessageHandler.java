@@ -48,7 +48,7 @@ public class DefaultMessageHandler extends MessageHandler
         
         ContactNode node = getRouteTable().get(nodeId, true);
         if (node == null) {
-            addContactInfo(nodeId, src, message);
+            addLiveContactInfo(nodeId, src, message);
         } else {
             updateContactInfo(node, nodeId, src, message);
         }
@@ -56,7 +56,8 @@ public class DefaultMessageHandler extends MessageHandler
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
             long time) throws IOException {
-        removeIfStale(nodeId, dst);
+        RoutingTable routeTable = getRouteTable();
+        routeTable.handleFailure(nodeId);
     }
 
     public void handleRequest(KUID nodeId, SocketAddress src, 
@@ -64,65 +65,34 @@ public class DefaultMessageHandler extends MessageHandler
         
         ContactNode node = getRouteTable().get(nodeId, true);
         if (node == null) {
-            addContactInfo(nodeId, src, message);
+            addLiveContactInfo(nodeId, src, message);
         } else {
             updateContactInfo(node, nodeId, src, message);
         }
     }
     
-    private void addContactInfo(KUID nodeId, SocketAddress src, 
+    private void addLiveContactInfo(KUID nodeId, SocketAddress src, 
             Message message) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
         
-        if (!routeTable.isFull()) {
+        ContactNode node = new ContactNode(nodeId, src);
+        routeTable.add(node,true);
+            
+        Collection keyValues = context.getDatabase().select(nodeId);
+        if (keyValues != null && !keyValues.isEmpty()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Adding " + ContactNode.toString(nodeId, src) 
-                        + " to RouteTable");
-            }
-            
-            ContactNode node = new ContactNode(nodeId, src);
-            routeTable.add(node);
-            
-            Collection keyValues = context.getDatabase().select(nodeId);
-            if (keyValues != null && !keyValues.isEmpty()) {
-                if (LOG.isTraceEnabled()) {
-                    StringBuffer buffer = new StringBuffer();
-                    buffer.append("Sending store Request to ").append(node).append("\n");
-                    for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                        buffer.append(it.next()).append("\n");
-                    }
-                    buffer.setLength(buffer.length()-1);
-                    LOG.trace(buffer.toString());
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("Sending store Request to ").append(node).append("\n");
+                for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
+                    buffer.append(it.next()).append("\n");
                 }
-                context.getMessageDispatcher().send(node, 
-                        context.getMessageFactory().createStoreRequest(keyValues), null);
+                buffer.setLength(buffer.length()-1);
+                LOG.trace(buffer.toString());
             }
-        } else {
-            addContactInfoToCache(nodeId, src, message);
+            context.getMessageDispatcher().send(node, 
+                    context.getMessageFactory().createStoreRequest(keyValues), null);
         }
-    }
-    
-    private void addContactInfoToCache(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
-        
-        RoutingTable routeTable = getRouteTable();
-        List bucketList = routeTable.select(nodeId, KademliaSettings.getReplicationParameter());
-        ContactNode leastRecentlySeen = 
-            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Adding " + ContactNode.toString(nodeId, src) 
-                    + " to RouteTable's LRU cache and pinging the least recently seen Node " 
-                    + leastRecentlySeen);
-        }
-        routeTable.addToCache(new ContactNode(nodeId, src));
-        
-        // TODO don't ping
-        PingRequest ping = context.getMessageFactory().createPingRequest();
-        
-        context.getMessageDispatcher()
-            .send(leastRecentlySeen, ping, this);
     }
     
     private void updateContactInfo(ContactNode node, KUID nodeId, 
@@ -153,38 +123,6 @@ public class DefaultMessageHandler extends MessageHandler
             PingRequest request = context.getMessageFactory().createPingRequest();
             context.getMessageDispatcher().send(node, request, handler);
         }*/
-    }
-    
-    private void removeIfStale(KUID nodeId, SocketAddress dst) 
-            throws IOException {
-        
-        RoutingTable routeTable = getRouteTable();
-        ContactNode node = routeTable.get(nodeId);
-        
-        if (node == null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("No Node for " 
-                        + ContactNode.toString(nodeId, dst) + " in RouteTable");
-            }
-            return;
-        }
-        
-        if (routeTable.handleFailure(node)) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(node + " is stale!");
-            }
-            
-            if (routeTable.isFull() 
-                    && !routeTable.isCacheEmpty()) {
-                
-                ContactNode lastSeen = routeTable.replaceWithMostRecentlySeenNode(nodeId);
-                
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Replaced " + ContactNode.toString(nodeId, dst) + " with " + lastSeen 
-                            + " from RouteTable's LRU cache");
-                }
-            }
-        }
     }
     
     /*private final Map checker = new FixedSizeHashMap(8);
