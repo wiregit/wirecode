@@ -42,6 +42,10 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             = context.getRouteTable().select(lookup,  
                     KademliaSettings.getReplicationParameter());
         
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Sending back: " + bucketList);
+        }
+        
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request.getMessageID(), bucketList);
         

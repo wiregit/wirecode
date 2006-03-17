@@ -90,8 +90,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //TODO for now
         this.resultSize = KademliaSettings.getReplicationParameter();
         // Initial state: we're the closest ContactNode to lookup
-        //TODO mark: What happens if we really are the closest node to lookup??? -> we skip ourself for now?
-        markAsQueried(context.getLocalNode());
         closest = context.getLocalNodeID();
     }
     
@@ -197,6 +195,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         for(int i = bucketList.size()-1; i >= 0; i--) {
             addYetToBeQueried((ContactNode)bucketList.get(i));
         }
+        
+        //TODO mark: What happens if we really are the closest node to lookup??? -> we skip ourself for now?
+        markAsQueried(context.getLocalNode());
         
         // Get the first round of alpha nodes
         List alphaList = toQuery.select(lookup, KademliaSettings.getLookupParameter());

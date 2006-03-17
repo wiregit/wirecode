@@ -57,7 +57,7 @@ public class ContactNode extends Node{
     }
     
     public String toString() {
-        return nodeId + " (" + address + ")" + ",timestamp: " +timeStamp;
+        return nodeId + " (" + address + ")";
     }
     
     public static String toString(KUID nodeId, SocketAddress address) {

@@ -78,6 +78,7 @@ public class PatriciaRouteTable implements RoutingTable{
             }
             bucket.incrementNodeCount();
             bucket.removeReplacementNode(nodeId);
+            if(alive)node.alive();
             nodesTrie.put(nodeId,node);
             return;
         } 
@@ -228,7 +229,7 @@ public class PatriciaRouteTable implements RoutingTable{
             
             PingRequest ping = context.getMessageFactory().createPingRequest();
             
-            //TODO fix pinging
+			//TODO fix pinging
             //context.getMessageDispatcher().send(leastRecentlySeen, ping, this);
         }
     }
@@ -395,4 +396,33 @@ public class PatriciaRouteTable implements RoutingTable{
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
         bucket.touch();
     }
+
+    public String toString() {
+        Collection bucketsList = getAllBuckets();
+        StringBuffer buffer = new StringBuffer("\n");
+        buffer.append("-------------\nBuckets:\n");
+        int totalNodesInBuckets = 0;
+        for(Iterator it = bucketsList.iterator(); it.hasNext(); ) {
+            BucketNode bucket = (BucketNode)it.next();
+            buffer.append(bucket).append("\n");
+            totalNodesInBuckets += bucket.getNodeCount();
+        }
+        buffer.append("-------------\n");
+        buffer.append("TOTAL BUCKETS: " + bucketsList.size()).append(" NUM. OF NODES: "+totalNodesInBuckets+"\n");
+        buffer.append("-------------\n");
+        
+        Collection nodesList = getAllNodes();
+        buffer.append("-------------\nNodes:\n");
+        for(Iterator it = nodesList.iterator(); it.hasNext(); ) {
+            ContactNode node = (ContactNode)it.next();
+            
+            buffer.append(node).append("\n");
+        }
+        buffer.append("-------------\n");
+        buffer.append("TOTAL NODES: " + nodesList.size()).append("\n");
+        buffer.append("-------------\n");
+        return buffer.toString();
+    }
+    
+    
 }

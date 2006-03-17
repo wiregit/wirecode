@@ -16,8 +16,10 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.routing.RoutingTable;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 
 /**
@@ -75,19 +77,17 @@ public class DefaultMessageHandler extends MessageHandler
         ContactNode node = new ContactNode(nodeId, src);
         routeTable.add(node,true);
             
-        Collection keyValues = context.getDatabase().select(nodeId);
-        if (keyValues != null && !keyValues.isEmpty()) {
-            if (LOG.isTraceEnabled()) {
-                StringBuffer buffer = new StringBuffer();
-                buffer.append("Sending store Request to ").append(node).append("\n");
-                for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                    buffer.append(it.next()).append("\n");
+        Collection keyValues = context.getDatabase().getAllValues();
+        for (Iterator iter = keyValues.iterator(); iter.hasNext();) {
+            KeyValue keyValue = (KeyValue) iter.next();
+            boolean isCloser = node.getNodeID().isCloser(context.getLocalNodeID(),keyValue.getKey());
+            if(!keyValue.isLocalKeyValue() && isCloser) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Node "+node+" is now closer then us to a value. Sending store request");   
                 }
-                buffer.setLength(buffer.length()-1);
-                LOG.trace(buffer.toString());
+                context.getMessageDispatcher().send(node, 
+                      context.getMessageFactory().createStoreRequest(keyValues), null);
             }
-            context.getMessageDispatcher().send(node, 
-                    context.getMessageFactory().createStoreRequest(keyValues), null);
         }
     }
     
