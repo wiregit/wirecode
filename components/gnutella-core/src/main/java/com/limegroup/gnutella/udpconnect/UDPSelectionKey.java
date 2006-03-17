@@ -42,7 +42,8 @@ class UDPSelectionKey extends SelectionKey {
     }
 
     public int readyOps() {
-        return processor.isReadReady() ? SelectionKey.OP_READ : 0;
+        return (processor.isReadReady()  ? SelectionKey.OP_READ  : 0)
+             | (processor.isWriteReady() ? SelectionKey.OP_WRITE : 0);
     }
 
     public Selector selector() {

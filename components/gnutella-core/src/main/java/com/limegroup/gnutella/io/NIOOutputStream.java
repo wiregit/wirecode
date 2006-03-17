@@ -12,10 +12,10 @@ import java.nio.channels.SocketChannel;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be written.
  */
-class NIOOutputStream implements WriteObserver {
+public class NIOOutputStream implements WriteObserver {
     
-    private final NIOSocket handler;
-    private final SocketChannel channel;
+    private final Shutdownable handler;
+    private final InterestWriteChannel channel;
     private BufferOutputStream sink;
     private Object bufferLock;
     private ByteBuffer buffer;
@@ -25,7 +25,7 @@ class NIOOutputStream implements WriteObserver {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    NIOOutputStream(NIOSocket handler, SocketChannel channel) {
+    public NIOOutputStream(Shutdownable handler, InterestWriteChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }
@@ -41,7 +41,7 @@ class NIOOutputStream implements WriteObserver {
             throw new IOException("already closed!");
 
         this.buffer = NIODispatcher.instance().getBufferCache().getHeap();
-        sink = new BufferOutputStream(buffer, handler, channel);
+        sink = new BufferOutputStream(buffer, handler, this, channel);
         bufferLock = sink.getBufferLock();
         return this;
     }
@@ -49,7 +49,7 @@ class NIOOutputStream implements WriteObserver {
     /**
      * Retrieves the OutputStream to write to.
      */
-    synchronized OutputStream getOutputStream() throws IOException {
+    public synchronized OutputStream getOutputStream() throws IOException {
         if(buffer == null)
             init();
         
@@ -66,22 +66,22 @@ class NIOOutputStream implements WriteObserver {
         synchronized(bufferLock) {
             buffer.flip();
             while(buffer.hasRemaining() && channel.write(buffer) > 0);
-            if (buffer.position() > 0) {
+            if (buffer.position() > 0) { // > 0 if it could write something
                 if (buffer.hasRemaining()) 
                     buffer.compact();
                 else 
                     buffer.clear();
-            } else 
+            } else // == 0 if it couldn't write anything
                 buffer.position(buffer.limit()).limit(buffer.capacity());
             
             // If there's room in the buffer, we're interested in reading.
             if(buffer.hasRemaining())
                 bufferLock.notify();
-                
+            
             // if we were able to write everything, we're not interested in more writing.
             // otherwise, we are interested.
             if(buffer.position() == 0) {
-                NIODispatcher.instance().interestWrite(channel, false);
+                channel.interest(this, false);
                 return false;
             } else {
                 return true;

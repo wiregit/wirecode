@@ -10,7 +10,7 @@ import java.io.IOException;
  * events to the last party that was interested.  All WritableByteChannel
  * calls are delegated to the SocketChannel.
  */
-class SocketInterestWriteAdapater implements InterestWriteChannel {
+class SocketInterestWriteAdapter implements InterestWriteChannel {
     
     /** the last party that was interested.  null if none. */
     private volatile WriteObserver interested;
@@ -20,7 +20,7 @@ class SocketInterestWriteAdapater implements InterestWriteChannel {
     private boolean shutdown = false;
     
     /** Constructs a new SocketInterestWriteAdapater */
-    SocketInterestWriteAdapater(SocketChannel channel) {
+    SocketInterestWriteAdapter(SocketChannel channel) {
         this.channel = channel;
     }
     

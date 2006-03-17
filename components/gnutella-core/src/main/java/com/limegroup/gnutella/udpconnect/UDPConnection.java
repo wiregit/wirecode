@@ -20,14 +20,17 @@ import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOInputStream;
 import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.io.NIOOutputStream;
 import com.limegroup.gnutella.io.NoOpReader;
 import com.limegroup.gnutella.io.ReadObserver;
 import com.limegroup.gnutella.io.SoTimeout;
+import com.limegroup.gnutella.io.ThrottleListener;
+import com.limegroup.gnutella.io.WriteObserver;
 
 /** 
  *  Create a reliable udp connection interface.
  */
-public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserver, SoTimeout {
+public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserver, WriteObserver, SoTimeout {
     public static final byte VERSION = (byte) 1;
     
     private static final Log LOG = LogFactory.getLog(UDPConnection.class);
@@ -36,6 +39,7 @@ public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserve
 	private final UDPConnectionProcessor processor;
     private final Object LOCK = new Object();
     private ReadObserver reader;
+    private WriteObserver writer;
     private boolean shutdown = false;
     private int soTimeout = 1 * 60 * 1000; // default to 1 minute.
 
@@ -54,7 +58,8 @@ public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserve
 		// Handle the real work in the processor
 		processor = new UDPConnectionProcessor();
         channel = processor.getChannel();
-        reader = new NIOInputStream(this, this, channel);        
+        reader = new NIOInputStream(this, this, channel);
+        writer = new NIOOutputStream(this, channel);
         NIODispatcher.instance().register(channel, this);
         processor.connect(ip, port);
     }
@@ -72,7 +77,15 @@ public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserve
 	}
 
 	public OutputStream getOutputStream() throws IOException {
-		return processor.getOutputStream();
+        if(isClosed())
+            throw new IOException("Socket closed.");
+        
+        if(writer instanceof NIOOutputStream) {
+            NIODispatcher.instance().interestWrite(channel, true);
+            return ((NIOOutputStream)writer).getOutputStream();
+        } else {
+            throw new IllegalStateException("not an NIOInputStream!");
+        }
 	}
 
 	public void setSoTimeout(int timeout) throws SocketException {
@@ -325,7 +338,32 @@ public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserve
         });
     }
 
-    public void setWriteObserver(ChannelWriter writer) {
-        throw new UnsupportedOperationException();
+    public void setWriteObserver(final ChannelWriter newWriter) {
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    if(writer.handleWrite())
+                        throw new IllegalStateException("data still in old writer!");
+                    writer.shutdown();
+
+                    ChannelWriter lastChannel = newWriter;
+                    while(lastChannel.getWriteChannel() instanceof ChannelWriter) {
+                        lastChannel = (ChannelWriter)lastChannel.getWriteChannel();
+                        if(lastChannel instanceof ThrottleListener)
+                            ((ThrottleListener)lastChannel).setAttachment(UDPConnection.this);
+                    }
+
+                    writer = channel;
+                    lastChannel.setWriteChannel(channel);
+                } catch(IOException iox) {
+                    shutdown();
+                    newWriter.shutdown(); // in case we hadn't set it yet.
+                }
+            }
+       });
+    }
+
+    public boolean handleWrite() throws IOException {
+        return writer.handleWrite();
     }
 }

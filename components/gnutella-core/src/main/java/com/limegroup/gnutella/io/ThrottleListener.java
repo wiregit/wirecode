@@ -3,7 +3,7 @@ package com.limegroup.gnutella.io;
 /**
  * Something that interfaces with a Throttle.
  */
-interface ThrottleListener {
+public interface ThrottleListener {
     
     /** Sets the attachment that the Throttle recognizes from this listener */
     public void setAttachment(Object attachment);

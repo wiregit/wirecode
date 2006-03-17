@@ -23,13 +23,16 @@ import org.apache.commons.logging.Log;
     private final Object LOCK = new Object();
     
     /** the handler to get for shutdown on close */
-    private final NIOSocket handler;
+    private final Shutdownable handler;
+    
+    /** The WriteObserver to use when the channel is set for interest. */
+    private final WriteObserver writeObserver;
     
     /** the buffer that has data for writing */
     private final ByteBuffer buffer;
     
-    /** the SelectableChannel that the buffer is written from. */
-    private final SelectableChannel channel;
+    /** the InterestWriteChannel that the buffer is written from. */
+    private final InterestWriteChannel channel;
     
     /** whether or not this stream has been shutdown. */
     private boolean shutdown = false;
@@ -37,10 +40,12 @@ import org.apache.commons.logging.Log;
     /**
      * Constructs a new BufferOutputStream that writes data to the given buffer.
      */
-    BufferOutputStream(ByteBuffer buffer, NIOSocket handler, SelectableChannel channel) {
+    BufferOutputStream(ByteBuffer buffer, Shutdownable handler,
+                       WriteObserver observer, InterestWriteChannel channel) {
         this.handler = handler;
         this.buffer = buffer;
         this.channel = channel;
+        this.writeObserver = observer;
     }
     
     /** Returns the lock object upon which writing into the buffer should lock */
@@ -56,7 +61,7 @@ import org.apache.commons.logging.Log;
             buffer.put((byte)(x & 0xFF));
             
             // there's data in the buffer now, the channel can write it.
-            NIODispatcher.instance().interestWrite(channel, true);
+            channel.interest(writeObserver, true);
         }
     }
     
@@ -72,7 +77,7 @@ import org.apache.commons.logging.Log;
                 len -= available;
             
                 // now that there's data in the buffer, write with the channel
-                NIODispatcher.instance().interestWrite(channel, true);
+                channel.interest(writeObserver, true);
             }
         }
     }
@@ -115,8 +120,8 @@ import org.apache.commons.logging.Log;
     }
     
     /** Closes this InputStream & the Socket that it's associated with */
-    public void close() throws IOException  {
-        NIODispatcher.instance().shutdown(handler);
+    public void close() {
+        handler.shutdown();
     }
     
     /** Shuts down this socket */

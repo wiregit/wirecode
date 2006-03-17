@@ -31,9 +31,6 @@ public class UDPConnectionProcessor {
     /** Define the maximum chunk size read for data bytes
         before we will blow out the connection */
     public static final int   MAX_DATA_SIZE           = 4096;
-
-    /** Handle to the output stream that is the input to this connection */
-    private UDPBufferedOutputStream  _inputFromOutputStream;
     
     /** SelectableChannel used to expose I/O. */
     private UDPSocketChannel _channel;
@@ -178,7 +175,7 @@ public class UDPConnectionProcessor {
     private UDPTimerEvent     _ackTimeoutEvent;
 
     /** Adhoc event for waking up the writing of data */
-    private SafeWriteWakeupTimerEvent _safeWriteWakeup;
+    private UDPTimerEvent     _safeWriteWakeup;
 
     /** The current sequence number of messages originated here */
     private long              _sequenceNumber;
@@ -342,28 +339,19 @@ public class UDPConnectionProcessor {
     public UDPSocketChannel getChannel() {
         return _channel;
     }
-
-    /**
-     *  Create a special output stream that feeds byte array chunks
-	 *  into this connection.
-     */
-	public OutputStream getOutputStream() throws IOException {
-        if ( _inputFromOutputStream == null ) {
-            // Start looking for data to write after an initial startup time
-            // Note: the caller needs to open the output connection and write
-            // some data before we can do anything.
-            scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
-
-            _inputFromOutputStream = new UDPBufferedOutputStream(this);
-        }
-        return _inputFromOutputStream;
-	}
     
     /**
      * Gets the read-readiness of this processor.
      */
     boolean isReadReady() {
         return _receivedFin || _receiveWindow.hasReadableData();
+    }
+    
+    /**
+     * Gets the write-readiness of this processor.
+     */
+    boolean isWriteReady() {
+        return _channel.getNumberOfPendingChunks() < getChunkLimit();
     }
     
     /** Completely closes the connection. */
@@ -412,10 +400,6 @@ public class UDPConnectionProcessor {
 		// Tell the receiver that we are shutting down
         if(oldState != PRECONNECT_STATE)
             safeSendFin();
-        
-        // Wakeup any sleeping writers
-        if ( _inputFromOutputStream != null )
-            _inputFromOutputStream.connectionClosed();
 
         // Register for a full cleanup after a slight delay
         if (_closedCleanupEvent==null) {
@@ -434,8 +418,6 @@ public class UDPConnectionProcessor {
 
         // Clean up my caller
         _closedCleanupEvent.unregister();
-
-        // TODO: Clear up state to streams? Might need more time. Anything else?
     }
 
     /**
@@ -555,8 +537,8 @@ public class UDPConnectionProcessor {
     /**
      *  Hand off the wakeup of data writing to the scheduler
      */
-    public void wakeupWriteEvent() {
-        if ( _waitingForDataAvailable ) {
+    public void wakeupWriteEvent(boolean force) {
+        if (force || _waitingForDataAvailable ) {
             LOG.debug("wakupWriteEvent");
             if (_safeWriteWakeup.getEventTime() == Long.MAX_VALUE) {
                 _safeWriteWakeup.updateTime(System.currentTimeMillis()+
@@ -684,11 +666,9 @@ public class UDPConnectionProcessor {
 	 */
     private synchronized void sendData(ByteBuffer chunk) {
         try {
-            
             assert chunk.position() == 0;
-            
-            DataMessage dm = new DataMessage(_theirConnectionID, 
-			  _sequenceNumber, chunk.array(), chunk.limit());
+            DataMessage dm = new DataMessage(_theirConnectionID,  
+                    _sequenceNumber, chunk.array(), chunk.remaining()); 
             send(dm);
 			DataRecord drec   = _sendWindow.addData(dm);  
             drec.sentTime     = _lastSendTime;
@@ -1296,17 +1276,10 @@ public class UDPConnectionProcessor {
      *  and schedule next write time.
      */
     public synchronized void writeData() {
-
         // Make sure we don't write without a break for too long
         int noSleepCount = 0;
         
         while (true) {
-            // If the input has not been started then wait again
-            if ( _inputFromOutputStream == null ) {
-                scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
-                return;
-            }
-
             // Reset special flags for long wait times
             _waitingForDataAvailable = false;
             _waitingForDataSpace = false;
@@ -1320,8 +1293,8 @@ public class UDPConnectionProcessor {
                 // if available
                 if ( getChunkLimit() > 0 ) {
                     // Get data and send it
-                    ByteBuffer chunk = _inputFromOutputStream.getChunk();
-                    if ( chunk != null )
+                    ByteBuffer chunk = _channel.getNextChunk();
+                    if(chunk != null)
                         sendData(chunk);
                 } else {
                     // if no room to send data then wait for the window to Open
@@ -1338,8 +1311,8 @@ public class UDPConnectionProcessor {
 
             // Don't wait for next write if there is no chunk available.
             // Writes will get rescheduled if a chunk becomes available.
-            synchronized(_inputFromOutputStream) {
-                if ( _inputFromOutputStream.getPendingChunks() == 0 ) {
+            synchronized(_channel.writeLock()) {
+                if (_channel.getNumberOfPendingChunks() == 0 ) {
                     // Don't wait more than 1 second for sanity checking 
                     scheduleWriteDataEvent(
                       System.currentTimeMillis() + NOTHING_TO_DO_DELAY);

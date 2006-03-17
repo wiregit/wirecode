@@ -64,7 +64,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
     NIOSocket(Socket s) {
         channel = s.getChannel();
         socket = s;
-        writer = new NIOOutputStream(this, channel);
+        writer = new NIOOutputStream(this, new SocketInterestWriteAdapter(channel));
         reader = new NIOInputStream(this, this, new SocketInterestReadAdapter(channel));
         NIODispatcher.instance().register(channel, this);
         connectedTo = s.getInetAddress();
@@ -75,7 +75,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
         channel = SocketChannel.open();
         socket = channel.socket();
         init();
-        writer = new NIOOutputStream(this, channel);
+        writer = new NIOOutputStream(this, new SocketInterestWriteAdapter(channel));
         reader = new NIOInputStream(this, this, new SocketInterestReadAdapter(channel));
     }
     
@@ -84,7 +84,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
         channel = SocketChannel.open();
         socket = channel.socket();
         init();
-        writer = new NIOOutputStream(this, channel);
+        writer = new NIOOutputStream(this, new SocketInterestWriteAdapter(channel));
         reader = new NIOInputStream(this, this, new SocketInterestReadAdapter(channel));
         connect(new InetSocketAddress(addr, port));
     }
@@ -94,7 +94,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
         channel = SocketChannel.open();
         socket = channel.socket();
         init();
-        writer = new NIOOutputStream(this, channel);
+        writer = new NIOOutputStream(this, new SocketInterestWriteAdapter(channel));
         reader = new NIOInputStream(this, this, new SocketInterestReadAdapter(channel));
         bind(new InetSocketAddress(localAddr, localPort));
         connect(new InetSocketAddress(addr, port));
@@ -183,7 +183,7 @@ public class NIOSocket extends NBSocket implements ConnectObserver, ReadWriteObs
                             ((ThrottleListener)lastChannel).setAttachment(NIOSocket.this);
                     }
 
-                    InterestWriteChannel source = new SocketInterestWriteAdapater(channel);
+                    InterestWriteChannel source = new SocketInterestWriteAdapter(channel);
                     writer = source;
                     lastChannel.setWriteChannel(source);
                 } catch(IOException iox) {
