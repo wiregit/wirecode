@@ -23,6 +23,7 @@ import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.response.LookupResponse;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.LookupSettings;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
@@ -87,7 +88,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         this.lookup = lookup;
         this.valueLookup = valueLookup;
         //TODO for now
-        this.resultSize = LookupSettings.getK();
+        this.resultSize = KademliaSettings.getReplicationParameter();
         // Initial state: we're the closest ContactNode to lookup
         //TODO mark: What happens if we really are the closest node to lookup??? -> we skip ourself for now?
         markAsQueried(context.getLocalNode());
@@ -190,7 +191,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         // Select the K closest Nodes from the K bucket list
-        List bucketList = context.getRouteTable().select(lookup, LookupSettings.getK());
+        List bucketList = context.getRouteTable().select(lookup, KademliaSettings.getReplicationParameter());
         
         // Add the Nodes to the yet-to-be query list
         for(int i = bucketList.size()-1; i >= 0; i--) {
@@ -198,7 +199,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         // Get the first round of alpha nodes
-        List alphaList = toQuery.select(lookup, LookupSettings.getA());
+        List alphaList = toQuery.select(lookup, KademliaSettings.getLookupParameter());
         
         // send alpha requests
         for(int i = 0; i < alphaList.size(); i++) {
@@ -257,7 +258,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
         }
         
-        int numLookups = LookupSettings.getA() - activeSearches;
+        int numLookups = KademliaSettings.getLookupParameter() - activeSearches;
         if(numLookups>0) {
             List bucketList = toQuery.select(lookup, numLookups);
             final int size = bucketList.size();

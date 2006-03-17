@@ -15,9 +15,6 @@ public final class KademliaSettings {
     private static final int LOOKUP_PARAMETER = 3; // a.k.a. A
     private static final String LOOKUP_PARAMETER_KEY = "LOOKUP_PARAMETER";
     
-    private static final int ROUTE_TABLE_SIZE = 65536;  // a.k.a. I
-    private static final String ROUTE_TABLE_SIZE_KEY = "ROUTE_TABLE_SIZE";
-    
     private static final Preferences SETTINGS 
         = Preferences.userNodeForPackage(KademliaSettings.class);
     
@@ -38,13 +35,5 @@ public final class KademliaSettings {
     public static void setLookupParameter(int lookupParameter) {
         SETTINGS.putInt(LOOKUP_PARAMETER_KEY, 
                 Math.max(0, Math.min(lookupParameter, getReplicationParameter())));
-    }
-    
-    public static int getRouteTableSize() {
-        return SETTINGS.getInt(ROUTE_TABLE_SIZE_KEY, ROUTE_TABLE_SIZE);
-    }
-    
-    public static void setRouteTableSize(int routeTableSize) {
-        SETTINGS.putInt(ROUTE_TABLE_SIZE_KEY, Math.max(0, routeTableSize));
     }
 }

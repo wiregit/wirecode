@@ -29,14 +29,6 @@ public final class RouteTableSettings {
     
     private RouteTableSettings() {}
     
-    public static int getMaxSize() {
-        return KademliaSettings.getRouteTableSize();
-    }
-    
-    public static void setMaxSize(int maxSize) {
-        KademliaSettings.setRouteTableSize(maxSize);
-    }
-    
     public static int getMaxCacheSize() {
         return SETTINGS.getInt(MAX_CACHE_SIZE_KEY, MAX_CACHE_SIZE);
     }

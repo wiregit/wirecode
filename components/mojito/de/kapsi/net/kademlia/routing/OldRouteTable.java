@@ -36,14 +36,10 @@ public class OldRouteTable {
     public OldRouteTable(Context context) {
         this.context = context;
         
-        routeTableMap = new RouteTableMap(getMaxSize());
+        routeTableMap = new RouteTableMap(65536);
         cache = new Cache(getMaxCacheSize());
         
         staleNodes = new HashMap();
-    }
-    
-    public int getMaxSize() {
-        return RouteTableSettings.getMaxSize();
     }
     
     public int getMaxCacheSize() {
@@ -69,7 +65,7 @@ public class OldRouteTable {
     }
     
     public boolean isClose(KUID nodeId) {
-        float min = 100f * size() / getMaxSize();
+        float min = 100f * size() / 65536;
         float closeness = 100f * context.getLocalNodeID().bitIndex(nodeId) / KUID.LENGTH;
         return closeness > min;
     }
