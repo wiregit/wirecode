@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
+import java.util.Properties;
 
 import junit.framework.Test;
 
@@ -10,9 +11,11 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
@@ -755,7 +758,34 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         
     }
 
+    public void testReadHeaderUpdateVendorMessage() throws Exception {
+        
+        // make a header update message as we do when our ip changes
+        byte addr[] = RouterService.getAddress();
+        int port = RouterService.getPort();
+        Properties props = new Properties();
+        props.put(HeaderNames.LISTEN_IP, NetworkUtils.ip2string(addr) + ":" + port);
+        HeaderUpdateVendorMessage m = new HeaderUpdateVendorMessage(props);
 
+        // serialize it like we're sending it across the wire
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
+        m.write(data);
+
+        // now pretend we're on the other end, and we've received it
+
+        // split it into header and payload
+        int headerLength, payloadLength;
+        headerLength = 23;
+        payloadLength = data.size() - headerLength;
+        byte[] header = new byte[headerLength];
+        byte[] payload = new byte[payloadLength];
+        System.arraycopy(data.toByteArray(), 0, header, 0, headerLength);
+        System.arraycopy(data.toByteArray(), headerLength, payload, 0, payloadLength);
+
+        // see if Message.createMessage() can understand it
+        Message m2 = Message.createMessage(header, payload, (byte)4, Message.N_TCP);
+    }
+    
     private static class VM extends VendorMessage {
         public VM(byte[] guid, byte ttl, byte hops, byte[] vendorID, 
                   int selector, int version, byte[] payload) 

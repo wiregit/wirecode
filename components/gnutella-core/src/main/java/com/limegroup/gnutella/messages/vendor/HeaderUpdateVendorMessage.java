@@ -18,7 +18,7 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
    
     private Properties _headers;
     
-    protected HeaderUpdateVendorMessage(byte[] guid, byte ttl, byte hops,
+    HeaderUpdateVendorMessage(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload)
 			throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_HEADER_UPDATE, version, payload);
