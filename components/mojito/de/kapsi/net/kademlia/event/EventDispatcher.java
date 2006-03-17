@@ -19,7 +19,7 @@ public class EventDispatcher extends TimerTask implements Runnable {
     private final Object LOCK = new Object();
     private List events = new ArrayList();
     
-    private boolean running = false;
+    private boolean running = true;
     
     public void add(Runnable event) {
         if (event == null) {
@@ -43,7 +43,6 @@ public class EventDispatcher extends TimerTask implements Runnable {
     }
     
     public void run() {
-        running = true;
         List dispatch = null;
         int size = 0;
         

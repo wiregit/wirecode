@@ -231,8 +231,7 @@ public class Context implements Runnable {
                 = new Thread(publisher, "PublishThread");
             publisherThread.setDaemon(true);
             
-            scheduler.scheduleAtFixedRate(eventDispatcher, EVENT_DISPATCHER_DELAY, 
-                    EVENT_DISPATCHER_INTERVAL);
+            scheduler.scheduleAtFixedRate(eventDispatcher, 0, EVENT_DISPATCHER_INTERVAL);
             publisherThread.start();
             
             messageDispatcher.run();
