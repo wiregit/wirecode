@@ -37,6 +37,7 @@ public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserve
     private final Object LOCK = new Object();
     private ReadObserver reader;
     private boolean shutdown = false;
+    private int soTimeout = 1 * 60 * 1000; // default to 1 minute.
 
     /**
      *  Create the UDPConnection.
@@ -75,7 +76,7 @@ public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserve
 	}
 
 	public void setSoTimeout(int timeout) throws SocketException {
-		processor.setSoTimeout(timeout);
+        soTimeout = timeout;
 	}
 
 	public void close() {
@@ -91,7 +92,7 @@ public class UDPConnection extends Socket implements NIOMultiplexor, ReadObserve
     }
     
     public int getSoTimeout() {
-    	return processor.getReadTimeout();
+        return soTimeout;
     }
     
     //-------  Mostly Unimplemented  ----------------

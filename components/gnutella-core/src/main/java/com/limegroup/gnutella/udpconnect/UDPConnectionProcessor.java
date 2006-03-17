@@ -13,8 +13,6 @@ import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.io.SoTimeout;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -22,7 +20,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 /** 
  *  Manage a reliable udp connection for the transfer of data.
  */
-public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
+public class UDPConnectionProcessor {
 
     private static final Log LOG =
       LogFactory.getLog(UDPConnectionProcessor.class);
@@ -50,9 +48,6 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
     /** Record the desired connection timeout on the connection */
     private long              _connectTimeOut         = MAX_CONNECT_WAIT_TIME;
 
-    /** Record the desired read timeout on the connection, defaults to 1 minute */
-    private int               _readTimeOut            = 1 * 60 * 1000;
-
 	/** Predefine a common exception if the user can't receive UDP */
 	private static final IOException CANT_RECEIVE_UDP = 
 	  new IOException("Can't receive UDP");
@@ -74,6 +69,7 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
     private UDPService        _udpService;
     private UDPScheduler      _scheduler;
     private Acceptor          _acceptor;
+    private UDPMultiplexor    _multiplexor;
 
     // Define WAIT TIMES
     //
@@ -138,7 +134,9 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
 
     /** The port of the host connected to */
 	private int         _port;
-
+    
+    /** Whether or not the remote side has sent us a fin. */
+    private volatile boolean  _receivedFin;
 
     /** The Window for sending and acking data */
 	private DataWindow        _sendWindow;
@@ -149,10 +147,10 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
     /** The Window for receiving data */
     private DataWindow        _receiveWindow;
 
-    /** The connectionID of this end of connection.  Used for routing */
-	private byte              _myConnectionID;
-
-    /** The connectionID of the other end of connection.  Used for routing */
+    /** The connection id of this end of the connection. Used for routing. */
+    private byte              _myConnectionID;
+    
+    /** The connectionID of the other end of the connection.  Used for routing */
 	private volatile byte     _theirConnectionID;
 
     /** The status of the connection */
@@ -297,6 +295,7 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
         }
 
         // Only wake these guys up if the service is okay
+        _multiplexor       = UDPMultiplexor.instance();
         _scheduler         = UDPScheduler.instance();
         _acceptor          = RouterService.getAcceptor();
 
@@ -308,11 +307,7 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
         _localExtender     = new SequenceNumberExtender();
         _extender          = new SequenceNumberExtender();
         
-        _channel           = new UDPSocketChannel(UDPMultiplexor.instance(), this, _receiveWindow);
-    }
-    
-    void setConnectionId(byte id) {
-        _myConnectionID = id;
+        _channel           = new UDPSocketChannel(this, _receiveWindow);
     }
     
     /**
@@ -335,6 +330,8 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
 
         if (LOG.isDebugEnabled())
             LOG.debug("Connecting to ip:" + ip + " port:" + port);
+        
+        _myConnectionID = _multiplexor.register(this, _channel.keyFor(null));
 
         // See if you can establish a pseudo connection 
         // which means each side can send/receive a SYN and ACK
@@ -366,16 +363,8 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
      * Gets the read-readiness of this processor.
      */
     boolean isReadReady() {
-        // TODO: read is also available if the complete fin-sequence happened.
-        return _receiveWindow.hasReadableData();
+        return _receivedFin || _receiveWindow.hasReadableData();
     }
-
-    /**
-     *  Set the read timeout for the associated input stream.
-     */
-	public void setSoTimeout(int timeout) {
-        _readTimeOut = timeout;
-	}
     
     /** Completely closes the connection. */
     public void shutdown() {
@@ -663,13 +652,6 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
 	}
 
     /**
-     *  Return the connections connectionID identifier.
-     */
-	public byte getConnectionID() {
-		return _myConnectionID;
-	}
-
-    /**
      *  Return the room for new local incoming data in chunks. This should 
 	 *  remain equal to the space available in the sender and receiver 
 	 *  data window.
@@ -677,22 +659,6 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
 	public int getChunkLimit() {
 		return Math.min(_chunkLimit, _receiverWindowSpace);
 	}
-
-    /**
-     * Returns the timeout to be used on blocking operations.
-     */
-    public int getSoTimeout() {
-        return getReadTimeout();
-    }
- 
-    /**
-     * Returns the timeout to be used on non-blocking operations.
-     * 
-     * @return
-     */
-    public int getReadTimeout() {
-        return _readTimeOut;
-    }
 
     /**
      *  Convenience method for sending keepalive message since we might fire 
@@ -780,10 +746,6 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
           	}
           	_skippedAcks=0;
             send(ack);
-        } catch (BadPacketException bpe) {
-            // This would not be good.   
-            ErrorService.error(bpe);
-            closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
@@ -1288,8 +1250,6 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
      * @param msg
      */
     private void handleFinMessage(FinMessage msg) {
-        Thread.dumpStack();
-        
         // Extend the msgs sequenceNumber to 8 bytes based on past state
         msg.extendSequenceNumber(
           _extender.extendSequenceNumber(
@@ -1297,6 +1257,7 @@ public class UDPConnectionProcessor implements SoTimeout, Shutdownable {
 
         // Stop sending data
         _receiverWindowSpace    = 0;
+        _receivedFin = true;
 
         // Ack the Fin message
         safeSendAck(msg);

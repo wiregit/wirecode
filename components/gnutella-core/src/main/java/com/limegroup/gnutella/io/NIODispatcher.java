@@ -568,11 +568,11 @@ public class NIODispatcher implements Runnable {
             
             Collection allKeys;
             if(immediate) {
-                allKeys = keys;
-            } else {
                 allKeys = new HashSet(keys.size() + polled.size());
                 allKeys.addAll(keys);
                 allKeys.addAll(polled);
+            } else {
+                allKeys = keys;
             }
             
             readyThrottles(allKeys);

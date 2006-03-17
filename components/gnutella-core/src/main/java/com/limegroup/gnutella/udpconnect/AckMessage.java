@@ -13,8 +13,7 @@ public class AckMessage extends UDPConnectionMessage {
      * Construct a new AckMessage with the specified settings and data
      */
     public AckMessage(byte connectionID, long sequenceNumber, 
-      long windowStart, int windowSpace) 
-      throws BadPacketException {
+      long windowStart, int windowSpace) {
 
         super(
           /* his connectionID           */ connectionID, 

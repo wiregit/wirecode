@@ -18,15 +18,13 @@ import com.limegroup.gnutella.io.NIODispatcher;
  */
 class UDPSocketChannel extends SelectableChannel implements InterestReadChannel {
     
-    private UDPSelectionKey key;
-    private UDPMultiplexor multiplexor;
+    private SelectionKey key;
     private final UDPConnectionProcessor processor;
     private final DataWindow data;
     
-    UDPSocketChannel(UDPMultiplexor multiplexor, UDPConnectionProcessor processor, DataWindow window) {
+    UDPSocketChannel(UDPConnectionProcessor processor, DataWindow window) {
         this.processor = processor;
         this.data = window;
-        this.multiplexor = multiplexor;
     }
 
     /**
@@ -71,7 +69,7 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel 
             processor.sendKeepAlive();
         }
         
-        if(read == 0 && !isOpen())
+        if(read == 0 && processor.isClosed())
             return -1;
         else
             return read;       
@@ -131,9 +129,7 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel 
     }
 
     public SelectionKey register(Selector sel, int ops, Object att) throws ClosedChannelException {
-        key = new UDPSelectionKey(processor);
-        key.attach(att);
-        processor.setConnectionId(multiplexor.register(processor, key));
+        key = new UDPSelectionKey(processor, att);
         return key;
     }
 

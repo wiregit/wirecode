@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.udpconnect;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.nio.channels.SelectionKey;
@@ -29,7 +30,7 @@ public class UDPMultiplexor implements Pollable {
 	public static final byte          UNASSIGNED_SLOT   = 0;
 
 	/** Keep track of the assigned connections */
-	private volatile WeakReference[] /* ConnectionPair */  _connections;
+	private volatile WeakReference[] /* UDPConnectionProcessor */  _connections;
 
 	/** Keep track of the last assigned connection id so that we can use a 
 		circular assignment algorithm.  This should cut down on message
@@ -63,8 +64,8 @@ public class UDPMultiplexor implements Pollable {
         for(int i = 0; i < array.length; i++) {
             WeakReference conRef = array[i];
             if(conRef != null) {
-                ConnectionPair pair = (ConnectionPair)conRef.get();
-                if(pair != null && host.equals(pair.connection.getInetAddress())) {
+                UDPConnectionProcessor conn = (UDPConnectionProcessor)conRef.get();
+                if(conn != null && host.equals(conn.getInetAddress())) {
                     return true;
                 }
             }
@@ -76,7 +77,8 @@ public class UDPMultiplexor implements Pollable {
      *  Register a UDPConnectionProcessor for receiving incoming events and 
 	 *  return the assigned connectionID;
      */
-	public synchronized byte register(UDPConnectionProcessor con, UDPSelectionKey key) {
+	public synchronized byte register(UDPConnectionProcessor con, SelectionKey key)
+      throws IOException {
 		int connID;
 		
 		WeakReference[] copy = new WeakReference[_connections.length];
@@ -93,13 +95,13 @@ public class UDPMultiplexor implements Pollable {
 			// If the slot is open, take it.
 			if (copy[connID] == null || copy[connID].get()==null) {
 				_lastConnectionID = connID;
-                ConnectionPair pair = new ConnectionPair(key, con);
-				copy[connID] = new WeakReference(pair);
+				copy[connID] = new WeakReference(con);
 				_connections=copy;
 				return (byte) connID;
 			}
 		}
-		return UNASSIGNED_SLOT;
+        
+        throw new IOException("no room for connection");
 	}
     
     /**
@@ -109,17 +111,46 @@ public class UDPMultiplexor implements Pollable {
     public Set poll() {
         Set selected = null;
         
-        // TODO: remove closed connections.
-        
         WeakReference[] array = _connections;
+        UDPConnectionProcessor[] removed = null;
+        
         for(int i = 0; i < array.length; i++) {
             if(array[i] == null)
                 continue;
-            ConnectionPair pair = (ConnectionPair)array[i].get();
-            if(pair != null && pair.key != null && (pair.key.readyOps() & pair.key.interestOps()) != 0) {
-                if(selected == null)
-                    selected = new HashSet(5);
-                selected.add(pair.key);
+            UDPConnectionProcessor con = (UDPConnectionProcessor)array[i].get();
+            if(con != null) {
+                SelectionKey key = con.getChannel().keyFor(null);
+                if ((key.readyOps() & key.interestOps()) != 0) {
+                    if (selected == null)
+                        selected = new HashSet(5);
+                    selected.add(key);
+                }
+                
+                if(con.isClosed()) {
+                    if(removed == null)
+                        removed = new UDPConnectionProcessor[256];
+                    removed[i] = con;
+                }
+            }
+        }
+        
+        // Go through the removed list & remove them from _connections.
+        // _connections may have changed (since we didn't lock while polling),
+        // so we need to check and ensure the given UDPConnectionProcessor
+        // is the same.
+        if(removed != null) {
+            synchronized(this) {
+                WeakReference[] copy = new WeakReference[_connections.length];
+                for (int i= 0 ; i< _connections.length;i++) {
+                    copy[i] = _connections[i];
+                    if(copy[i] != null && removed[i] != null) {
+                        if(copy[i].get() == removed[i]) {
+                            copy[i].clear();
+                            copy[i] = null;
+                        }
+                    }
+                }
+                _connections = copy;
             }
         }
         
@@ -144,15 +175,15 @@ public class UDPMultiplexor implements Pollable {
 				if (array[i]==null)
 					continue;
                 
-				ConnectionPair pair = (ConnectionPair)array[i].get();
-				if ( pair != null && 
-					 pair.connection.isConnecting() &&
-                     pair.connection.matchAddress(senderIP, senderPort) ) {
+                UDPConnectionProcessor conn = (UDPConnectionProcessor)array[i].get();
+				if ( conn != null && 
+                     conn.isConnecting() &&
+                     conn.matchAddress(senderIP, senderPort) ) {
 
                     if(LOG.isDebugEnabled()) 
                         LOG.debug("routeMessage to conn:"+i+" Syn:"+msg);
 
-                    pair.connection.handleMessage(msg);
+                    conn.handleMessage(msg);
 					break;
 				} 
 			}
@@ -160,19 +191,9 @@ public class UDPMultiplexor implements Pollable {
 			// so it is safe to throw away premature ones
 
 		} else if(array[connID] != null) {  // If valid connID then send on to connection
-            ConnectionPair pair = (ConnectionPair)array[connID].get();
-			if (pair != null && pair.connection.matchAddress(senderIP, senderPort) )
-                pair.connection.handleMessage(msg);
+            UDPConnectionProcessor conn = (UDPConnectionProcessor)array[connID].get();
+			if (conn != null && conn.matchAddress(senderIP, senderPort) )
+                conn.handleMessage(msg);
 		}
 	}
-    
-    private static class ConnectionPair {
-        private UDPSelectionKey key;
-        private UDPConnectionProcessor connection;
-        
-        public ConnectionPair(UDPSelectionKey key, UDPConnectionProcessor connection) {
-            this.connection = connection;
-            this.key = key;
-        }
-    }
 }

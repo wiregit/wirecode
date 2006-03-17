@@ -14,6 +14,11 @@ class UDPSelectionKey extends SelectionKey {
     UDPSelectionKey(UDPConnectionProcessor processor) {
         this.processor = processor;
     }
+    
+    UDPSelectionKey(UDPConnectionProcessor processor, Object attachment) {
+        this.processor = processor;
+        attach(attachment);
+    }
 
     public void cancel() {
         valid = false;
