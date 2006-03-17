@@ -159,19 +159,25 @@ public class Database {
         KUID key = keyValue.getKey();
         ContactNode closest = context.getRouteTable().select(key);
         
+        //TODO: we are not caching, expiration time constant for now
+        
         // If RouteTable is empty. TODO: is expired or not?
-        if (closest == null) {
-            return false;
-        }
+//        if (closest == null) {
+//            return false;
+//        }
         
-        KUID closestId = closest.getNodeID();
-        KUID currentId = context.getLocalNodeID();
-        KUID xorId = currentId.xor(closestId);
-        int log = xorId.log();
         
-        long creationTime = keyValue.getCreationTime();
-        long expirationTime = creationTime 
-            + DatabaseSettings.MILLIS_PER_DAY/KUID.LENGTH * log;
+//        KUID closestId = closest.getNodeID();
+//        KUID currentId = context.getLocalNodeID();
+//        KUID xorId = currentId.xor(closestId);
+//        int log = xorId.log();
+//        
+//        long creationTime = keyValue.getCreationTime();
+//        long expirationTime = creationTime 
+//            + DatabaseSettings.MILLIS_PER_DAY/KUID.LENGTH * log;
+        
+        
+        long expirationTime = keyValue.getCreationTime() + DatabaseSettings.MILLIS_PER_DAY;
         
         // TODO: this needs some finetuning. Anonymous KeyValues
         // expire 50% faster at the moment.
