@@ -81,7 +81,7 @@ public class DefaultMessageHandler extends MessageHandler
         for (Iterator iter = keyValues.iterator(); iter.hasNext();) {
             KeyValue keyValue = (KeyValue) iter.next();
             boolean isCloser = node.getNodeID().isCloser(context.getLocalNodeID(),keyValue.getKey());
-            if(!keyValue.isLocalKeyValue() && isCloser) {
+            if(isCloser) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Node "+node+" is now closer then us to a value. Sending store request");   
                 }
