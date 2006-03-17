@@ -171,6 +171,14 @@ public class KeyValue {
             return false;
         }
         
+        if (nodeId != null && !nodeId.equals(v.nodeId)) {
+            return false;
+        }
+        
+        if (address != null && !address.equals(v.address)) {
+            return false;
+        }
+        
         return Arrays.equals(value, v.value);
     }
     

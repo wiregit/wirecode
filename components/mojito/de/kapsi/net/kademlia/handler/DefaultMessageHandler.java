@@ -7,8 +7,11 @@ package de.kapsi.net.kademlia.handler;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,10 +19,11 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.db.KeyValue;
+import de.kapsi.net.kademlia.db.Database;
+import de.kapsi.net.kademlia.db.KeyValueCollection;
+import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.routing.RoutingTable;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 
 /**
@@ -76,18 +80,29 @@ public class DefaultMessageHandler extends MessageHandler
         
         ContactNode node = new ContactNode(nodeId, src);
         routeTable.add(node,true);
-            
-        Collection keyValues = context.getDatabase().getAllValues();
-        for (Iterator iter = keyValues.iterator(); iter.hasNext();) {
-            KeyValue keyValue = (KeyValue) iter.next();
-            boolean isCloser = node.getNodeID().isCloser(context.getLocalNodeID(),keyValue.getKey());
-            if(isCloser) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Node "+node+" is now closer then us to a value. Sending store request");   
+        
+        List toStore = new ArrayList();
+        
+        Database database = context.getDatabase();
+        synchronized(database) {
+            Collection keyValues = context.getDatabase().getAllCollections();
+            for (Iterator iter = keyValues.iterator(); iter.hasNext(); ) {
+                KeyValueCollection c = (KeyValueCollection)iter.next();
+
+                boolean isCloser = nodeId.isCloser(context.getLocalNodeID(), c.getKey());
+                if(isCloser) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Node "+node+" is now closer then us to a value. Sending store request");   
+                    }
+                    toStore.addAll(c);
                 }
-                context.getMessageDispatcher().send(node, 
-                      context.getMessageFactory().createStoreRequest(keyValues), null);
             }
+        }
+        
+        if (!toStore.isEmpty()) {
+            StoreResponseHandler handler = new StoreResponseHandler(context, toStore);
+            context.getMessageDispatcher().send(node, 
+                    context.getMessageFactory().createStoreRequest(toStore.size(), Collections.EMPTY_LIST), handler);
         }
     }
     

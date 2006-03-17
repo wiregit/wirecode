@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Timer;
 
 import org.apache.commons.logging.Log;
@@ -325,19 +326,19 @@ public class Context implements Runnable {
             public void foundNodes(KUID lookup, Collection nodes, long time) {
                 try {
                     
-                    Collection values = Arrays.asList(new KeyValue[]{value});
+                    List keyValues = Arrays.asList(new KeyValue[]{value});
                     
                     Iterator it = nodes.iterator();
                     int k = KademliaSettings.getReplicationParameter();
                     
-                    ResponseHandler responseHandler = new StoreResponseHandler(Context.this, values);
+                    ResponseHandler responseHandler = new StoreResponseHandler(Context.this, keyValues);
                     
                     for(int i = 0; i < k && it.hasNext(); i++) {
                         ContactNode node = (ContactNode)it.next();
                         
                         // TODO: Don't just store one KeyValue!
                         // Store the n-closest values to ContactNode!
-                        messageDispatcher.send(node, messageFactory.createStoreRequest(values), responseHandler);
+                        messageDispatcher.send(node, messageFactory.createStoreRequest(0, keyValues), responseHandler);
                     }
                     
                     if (l != null) {

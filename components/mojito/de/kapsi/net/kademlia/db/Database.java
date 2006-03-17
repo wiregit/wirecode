@@ -145,6 +145,10 @@ public class Database {
         return list;
     }
     
+    public synchronized Collection getAllCollections() {
+        return Collections.unmodifiableCollection(database.values());
+    }
+    
     public boolean isOriginator(KeyValue value) 
             throws SignatureException, InvalidKeyException {
         PublicKey pubKey = context.getKeyPair().getPublic();

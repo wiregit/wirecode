@@ -129,7 +129,7 @@ public class MessageInputStream extends DataInputStream {
     
     private FindNodeResponse readFindNodeResponse(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
-        final int size = readUnsignedByte();
+        int size = readUnsignedByte();
         ContactNode[] nodes = new ContactNode[size];
         for(int i = 0; i < nodes.length; i++) {
             nodes[i] = readNode();
@@ -155,25 +155,31 @@ public class MessageInputStream extends DataInputStream {
     
     private StoreRequest readStoreRequest(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
+        
+        int remaining = readUnsignedShort();
+        
         int size = readUnsignedByte();
         KeyValue[] values = new KeyValue[size];
         for(int i = 0; i < values.length; i++) {
             values[i] = readKeyValue();
         }
-        return new StoreRequest(vendor, version, nodeId, messageId, Arrays.asList(values));
+        return new StoreRequest(vendor, version, nodeId, messageId, remaining, Arrays.asList(values));
     }
     
     private StoreResponse readStoreResponse(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
         
-        StoreResponse.Status[] stats = new StoreResponse.Status[read()];
+        int requesting = readUnsignedShort();
+        
+        int size = readUnsignedByte();
+        StoreResponse.StoreStatus[] stats = new StoreResponse.StoreStatus[size];
         for(int i = 0; i < stats.length; i++) {
             KUID key = readKUID();
-            int status = read();
-            stats[i] = new StoreResponse.Status(key, status);
+            int status = readUnsignedByte();
+            stats[i] = new StoreResponse.StoreStatus(key, status);
         }
         
-        return new StoreResponse(vendor, version, nodeId, messageId, Arrays.asList(stats));
+        return new StoreResponse(vendor, version, nodeId, messageId, requesting, Arrays.asList(stats));
     }
     
     public Message readMessage() throws IOException {

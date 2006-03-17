@@ -11,6 +11,7 @@ import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -48,14 +49,22 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         }
         
         StoreRequest request = (StoreRequest)message;
+        
+        int remaining = request.getRemaingCount();
         Collection values = request.getValues();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(ContactNode.toString(nodeId, src) 
-                    + " requested us to store the KeyValues " + values);
+            if (!values.isEmpty()) {
+                LOG.trace(ContactNode.toString(nodeId, src) 
+                        + " requested us to store the KeyValues " + values);
+            } else {
+                LOG.trace(ContactNode.toString(nodeId, src)
+                        + " requested us to store " + remaining + " KeyValues");
+            }
         }
         
-        List stats = new ArrayList(values.size());
+        // Avoid to create an empty ArrayList
+        List stats = (values.isEmpty() ? Collections.EMPTY_LIST : new ArrayList(values.size()));
         
         // Add the KeyValues...
         for(Iterator it = values.iterator(); it.hasNext(); ) {
@@ -63,19 +72,20 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             
             try {
                 if (context.getDatabase().add(keyValue)) {
-                    stats.add(new StoreResponse.Status(keyValue.getKey(), StoreResponse.SUCCEEDED));
+                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.SUCCEEDED));
                 } else {
-                    stats.add(new StoreResponse.Status(keyValue.getKey(), StoreResponse.FAILED));
+                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
                 }
             } catch (SignatureException err) {
-                stats.add(new StoreResponse.Status(keyValue.getKey(), StoreResponse.FAILED));
+                stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
             } catch (InvalidKeyException err) {
-                stats.add(new StoreResponse.Status(keyValue.getKey(), StoreResponse.FAILED));
+                stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
             }
         }
         
-        StoreResponse response = context.getMessageFactory()
-                                    .createStoreResponse(request.getMessageID(), stats);
+        // TODO do not request all values at once
+        StoreResponse response 
+            = context.getMessageFactory().createStoreResponse(request.getMessageID(), remaining, stats);
         
         context.getMessageDispatcher().send(src, response, null);
     }

@@ -68,11 +68,11 @@ public class MessageFactory {
         return new FindValueResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, values);
     }
     
-    public StoreRequest createStoreRequest(Collection values) {
-        return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), values);
+    public StoreRequest createStoreRequest(int remaining, Collection values) {
+        return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), remaining, values);
     }
     
-    public StoreResponse createStoreResponse(KUID messageId, Collection status) {
-        return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, status);
+    public StoreResponse createStoreResponse(KUID messageId, int requesting, Collection status) {
+        return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, requesting, status);
     }
 }
