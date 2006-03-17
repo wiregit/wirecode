@@ -46,11 +46,11 @@ public class PatriciaRouteTable implements RoutingTable{
         bucketsTrie.put(rootKUID,root);
     }
 
-    public void add(ContactNode node, boolean alive) {
-        put(node.getNodeID(), node,alive);
+    public void add(ContactNode node, boolean knowToBeAlive) {
+        put(node.getNodeID(), node,knowToBeAlive);
     }
     
-    private void put(KUID nodeId, ContactNode node, boolean alive) {
+    private void put(KUID nodeId, ContactNode node, boolean knowToBeAlive) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Trying to add node: "+node+" to routing table");
         }
@@ -67,7 +67,7 @@ public class PatriciaRouteTable implements RoutingTable{
             throw new IllegalArgumentException("NodeID and the ID returned by Node do not match");
         }
         
-        if(updateExistingNode(nodeId,node,alive)) {
+        if(updateExistingNode(nodeId,node,knowToBeAlive)) {
             return;
         }
         //get bucket closest to node
@@ -78,7 +78,7 @@ public class PatriciaRouteTable implements RoutingTable{
             }
             bucket.incrementNodeCount();
             bucket.removeReplacementNode(nodeId);
-            if(alive)node.alive();
+            if(knowToBeAlive)node.alive();
             nodesTrie.put(nodeId,node);
             return;
         } 
@@ -131,7 +131,7 @@ public class PatriciaRouteTable implements RoutingTable{
                 }
                 //trying recursive call!
                 //attempt the put the new contact again with the split buckets
-                put(nodeId,node,alive);
+                put(nodeId,node,knowToBeAlive);
                 
             } 
             //not splitting --> replacement cache

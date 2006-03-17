@@ -141,6 +141,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     }
                     
                     addYetToBeQueried(node);
+                    //also add to our routing table
+                    context.getRouteTable().add(node,false);
                 }
             }
             

@@ -20,7 +20,7 @@ public class BucketNode extends Node {
     private int depth;
     
     private Cache replacementCache;
-
+    
     public BucketNode(KUID nodeId,int depth) {
         super(nodeId);
         this.depth = depth;
@@ -80,7 +80,7 @@ public class BucketNode extends Node {
     }
  
     public List split() {
-        
+    
         BucketNode leftBucket = new BucketNode(nodeId, depth+1);
         BucketNode rightBucket = new BucketNode(nodeId.set(depth),depth+1);
         if(replacementCache != null && !replacementCache.isEmpty()) {
@@ -97,7 +97,7 @@ public class BucketNode extends Node {
     }
     
     public String toString() {
-        return  super.toString() + ",depth: "+depth+", size: "+nodeCount+", replacements: "
+        return  super.toString() + ", depth: "+depth+", size: "+nodeCount+", replacements: "
         +(replacementCache==null?0:replacementCache.size());
     }
     
