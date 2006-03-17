@@ -69,6 +69,8 @@ public class MessageDispatcher implements Runnable {
     private FindValueRequestHandler findValueHandler;
     private StoreRequestHandler storeHandler;
     
+    private Filter filter;
+    
     public MessageDispatcher(Context context) {
         this.context = context;
         
@@ -77,6 +79,8 @@ public class MessageDispatcher implements Runnable {
         findNodeHandler = new FindNodeRequestHandler(context);
         findValueHandler = new FindValueRequestHandler(context);
         storeHandler = new StoreRequestHandler(context);
+        
+        filter = new Filter();
     }
     
     public void stop() throws IOException {
@@ -184,6 +188,7 @@ public class MessageDispatcher implements Runnable {
     }
     
     private void handleLateResponse(KUID nodeId, SocketAddress src, Message msg) throws IOException {
+        
         if (LOG.isTraceEnabled()) {
             if (msg instanceof PingResponse) {
                 LOG.trace("Received a late Pong from " + ContactNode.toString(nodeId, src));
@@ -200,7 +205,7 @@ public class MessageDispatcher implements Runnable {
         if (node != null) {
             if (node.getSocketAddress().equals(src)) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Even tough ContactNode " + node 
+                    LOG.trace("Even tough " + node 
                             + " sent a late response we're giving it a chance and update its last seen time stamp");
                 }
                 context.getRouteTable().updateTimeStamp(node);
@@ -280,13 +285,22 @@ public class MessageDispatcher implements Runnable {
             if (receipt.getHandler() != defaultHandler) {
                 receipt.handleSuccess(nodeId, src, message);
             }
-        } else if (message instanceof RequestMessage) {
-            handleRequest(nodeId, src, message);
-            defaultHandler.handleRequest(nodeId, src, message); // AFTER!
-        } else if (message instanceof ResponseMessage) {
-            handleLateResponse(nodeId, src, message);
         } else {
-            if (LOG.isErrorEnabled()) {
+            
+            // Make sure a singe Node cannot monopolize our resources
+            if (!filter.allow(src)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(ContactNode.toString(nodeId, src) + " refused");
+                }
+                return;
+            }
+            
+            if (message instanceof RequestMessage) {
+                handleRequest(nodeId, src, message);
+                defaultHandler.handleRequest(nodeId, src, message); // AFTER!
+            } else if (message instanceof ResponseMessage) {
+                handleLateResponse(nodeId, src, message);
+            } else if (LOG.isErrorEnabled()) {
                 LOG.error(message + " is neither Request nor Response");
             }
         }
