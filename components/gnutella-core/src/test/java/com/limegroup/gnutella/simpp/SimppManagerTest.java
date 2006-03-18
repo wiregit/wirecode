@@ -116,7 +116,7 @@ public class SimppManagerTest extends BaseTestCase {
         //_simppMessageNumber = OLD;
         changeSimppFile(OLD_SIMPP_FILE);
 
-        if (SimppManagerTestSetting.TEST_UPLOAD_SETTING.getValue() != 
+        if (SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue() != 
             SimppManagerTestSettings.DEFAULT_SETTING) {
         
             Thread.sleep(2000);
