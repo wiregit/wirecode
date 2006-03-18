@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for a long setting.
  */
-public final class LongSetting extends AbstractNumberSetting {
+public class LongSetting extends AbstractNumberSetting {
     
     private long value;
 
@@ -24,9 +24,9 @@ public final class LongSetting extends AbstractNumberSetting {
 
 
 	LongSetting(Properties defaultProps, Properties props, String key, 
-                long defaultLong, String simppSetting, long max, long min) {
+                long defaultLong, String simppSetting, long min, long max) {
 		super(defaultProps, props, key, String.valueOf(defaultLong), 
-                                 simppSetting, new Long(max), new Long(min) );
+                                 simppSetting, new Long(min), new Long(max) );
 	}
         
 	/**
@@ -58,11 +58,8 @@ public final class LongSetting extends AbstractNumberSetting {
             revertToDefault();
         }
     }
-
-    protected boolean isInRange(String value) {
-        long max = ((Long)MAX_VALUE).longValue();
-        long min = ((Long)MIN_VALUE).longValue();
-        long val = Long.parseLong(value);
-        return (val <= max && val >= min);
+    
+    protected Comparable convertToComparable(String value) {
+        return new Long(value);
     }
 }

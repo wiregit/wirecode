@@ -24,9 +24,9 @@ public final class ByteSetting extends AbstractNumberSetting {
 
 
 	ByteSetting(Properties defaultProps, Properties props, String key, 
-                byte defaultByte, String simppKey, byte max, byte min) {
+                byte defaultByte, String simppKey, byte min, byte max) {
 		super(defaultProps, props, key, String.valueOf(defaultByte), 
-              simppKey, new Byte(max), new Byte(min) );
+              simppKey, new Byte(min), new Byte(max) );
 	}
         
 	/**
@@ -58,11 +58,8 @@ public final class ByteSetting extends AbstractNumberSetting {
             revertToDefault();
         }
     }
-
-    protected boolean isInRange(String value) {
-        byte max = ((Byte)MAX_VALUE).byteValue();
-        byte min = ((Byte)MIN_VALUE).byteValue();
-        byte val = Byte.parseByte(value);
-        return (val <= max && val >= min);
+    
+    protected Comparable convertToComparable(String value) {
+        return new Byte(value);
     }
 }

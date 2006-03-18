@@ -23,9 +23,9 @@ public final class FloatSetting extends AbstractNumberSetting {
 	}
 
 	FloatSetting(Properties defaultProps, Properties props, String key, 
-                 float defaultFloat, String simppKey, float max, float min) {
+                 float defaultFloat, String simppKey, float min, float max) {
 		super(defaultProps, props, key, String.valueOf(defaultFloat), 
-              simppKey, new Float(max), new Float(min) );
+              simppKey, new Float(min), new Float(max) );
 	}
         
 	/**
@@ -58,11 +58,8 @@ public final class FloatSetting extends AbstractNumberSetting {
         }
     }
 
-    protected boolean isInRange(String value) {
-        float max = ((Float)MAX_VALUE).floatValue();
-        float min = ((Float)MIN_VALUE).floatValue();
-        float val = Float.parseFloat(value);
-        return (val <= max && val >= min);
+    protected Comparable convertToComparable(String value) {
+        return new Float(value);
     }
 
 }

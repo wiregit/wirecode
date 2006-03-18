@@ -335,9 +335,9 @@ public final class SettingsFactory {
     }
     
     public synchronized IntSetting createSettableIntSetting(String key, 
-                        int defaultValue, String simppKey, int max, int min) {
+                        int defaultValue, String simppKey, int min, int max) {
         IntSetting result = new IntSetting(
-                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
+                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, min, max);
         handleSettingInternal(result, simppKey);
         return result;
     }
@@ -359,9 +359,9 @@ public final class SettingsFactory {
     }
     
     public synchronized ByteSetting createSettableByteSetting(String key, 
-                      byte defaultValue, String simppKey, byte max, byte min) {
+                      byte defaultValue, String simppKey, byte min, byte max) {
         ByteSetting result = new ByteSetting(
-             DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
+             DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, min, max);
         handleSettingInternal(result, simppKey);
         return result;
     }
@@ -383,14 +383,39 @@ public final class SettingsFactory {
     }
     
     public synchronized LongSetting createSettableLongSetting(String key,
-                       long defaultValue, String simppKey, long max, long min) {
+                       long defaultValue, String simppKey, long min, long max) {
          LongSetting result = 
              new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
-                                                            simppKey, max, min);
+                                                            simppKey, min, max);
          handleSettingInternal(result, simppKey);
          return result;
     }
 
+    /**
+     * Creates a new <tt>PowerOfTwoSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting, which must be a
+     *            power of two.
+     */
+    public synchronized PowerOfTwoSetting createPowerOfTwoSetting(String key,
+                       long defaultValue) {
+        PowerOfTwoSetting result = 
+            new PowerOfTwoSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal(result, null);
+        return result;
+    }
+    
+    public synchronized PowerOfTwoSetting createSettablePowerOfTwoSetting(String key,
+            long defaultValue, String simppKey, long min, long max) {
+        PowerOfTwoSetting result = 
+            new PowerOfTwoSetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
+                                                 simppKey, min, max);
+        handleSettingInternal(result, simppKey);
+        return result;
+    }
+    
     /**
      * Creates a new <tt>FileSetting</tt> instance with the specified
      * key and default value.
@@ -501,9 +526,9 @@ public final class SettingsFactory {
     }
 
     public synchronized FloatSetting createSettableFloatSetting(String key, 
-                   float defaultValue, String simppKey, float max, float min) {
+                   float defaultValue, String simppKey, float min, float max) {
         FloatSetting result = new FloatSetting(
-                  DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
+                  DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, min, max);
         handleSettingInternal(result, simppKey);
         return result;
     }

@@ -17,6 +17,7 @@ import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 //Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
 
@@ -55,8 +56,6 @@ public class QueryRouteTable {
     public static final byte DEFAULT_INFINITY=(byte)7;
     /** What should come across the wire if a keyword status is unchanged. */
     public static final byte KEYWORD_NO_CHANGE=(byte)0;
-    /** The suggested default table size. */
-    public static final int DEFAULT_TABLE_SIZE=1<<16;  //64KB
     /** The maximum size of patch messages, in bytes. */
     public static final int MAX_PATCH_SIZE=1<<12;      //4 KB
     
@@ -117,7 +116,11 @@ public class QueryRouteTable {
 
     /** Creates a QueryRouteTable with default sizes. */
     public QueryRouteTable() {
-        this(DEFAULT_TABLE_SIZE);
+        long byteCount = 1024 * ConnectionSettings.QRT_SIZE_IN_KIBI_ENTRIES.getValue();
+        if (byteCount > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Default QRT size cannot be expressed as an int.");
+        }
+        initialize((int)byteCount, DEFAULT_INFINITY);
     }
 
     /**

@@ -75,11 +75,11 @@ public final class UploadSettings extends LimeProps {
      * (larger == more times)
      */
     public static final FloatSetting LEGACY_BIAS =
-        FACTORY.createSettableFloatSetting("LEGACY_BIAS",1f,"AlternateLocation.legacyBias",100f,0f);
+        FACTORY.createSettableFloatSetting("LEGACY_BIAS",1f,"AlternateLocation.legacyBias",0.0f,100.0f);
     public static final FloatSetting PING_BIAS =
-        FACTORY.createSettableFloatSetting("PING_BIAS",1f,"AlternateLocation.pingBias",100f,0f);
+        FACTORY.createSettableFloatSetting("PING_BIAS",1f,"AlternateLocation.pingBias",0.0f,100.0f);
     public static final FloatSetting RESPONSE_BIAS = // send altlocs in responses more often by default
-        FACTORY.createSettableFloatSetting("RESPONSE_BIAS",3f,"AlternateLocation.responseBias",100f,0f);
+        FACTORY.createSettableFloatSetting("RESPONSE_BIAS",3f,"AlternateLocation.responseBias",0.0f,100.0f);
     
 
     /**
@@ -89,31 +89,23 @@ public final class UploadSettings extends LimeProps {
     public static final FloatSetting LEGACY_EXPIRATION_DAMPER =
         FACTORY.createSettableFloatSetting("LEGACY_DAMPER",
                 (float)Math.E/2,"AlternateLocation.legacyDamper",
-                (float)Math.E-0.1f,
-                (float)Math.E/100);
+                (float)Math.E/100,
+                (float)Math.E-0.1f);
     public static final FloatSetting PING_EXPIRATION_DAMPER =
         FACTORY.createSettableFloatSetting("PING_DAMPER",
                     (float)Math.E/2,"AlternateLocation.pingDamper",
-                    (float)Math.E-0.1f,
-                    (float)Math.E/100);
+                    (float)Math.E/100,
+                    (float)Math.E-0.1f);
     public static final FloatSetting RESPONSE_EXPIRATION_DAMPER =
         FACTORY.createSettableFloatSetting("RESPONSE_DAMPER",
                 (float)Math.E/2,"AlternateLocation.responseDamper",
-                (float)Math.E-0.1f,
-                (float)Math.E/100);
-    
-    
-    /**
-     * A test SIMPP setting.
-     */
-    public static final IntSetting TEST_UPLOAD_SETTING = 
-        FACTORY.createSettableIntSetting("TEST_UPLOAD_SETTING",4, 
-                                                         "test_upload", 20, 3);
+                (float)Math.E/100,
+                (float)Math.E-0.1f);
     
     /**
      * How much to throttle the Thex upload speed.
      */
     public static final IntSetting THEX_UPLOAD_SPEED =
         FACTORY.createSettableIntSetting("THEX_UPLOAD_SPEED",512,
-                "THEXUploadState.ThexUploadSpeed",4*1024,256);
+                "THEXUploadState.ThexUploadSpeed",256,4*1024);
 }

@@ -89,7 +89,7 @@ public class FilterSettings extends LimeProps {
     
     public static final IntSetting MIN_MATCHING_WORDS =
     	FACTORY.createSettableIntSetting("MIN_MATCHING_WORDS",0,
-    			"FilterSettings.minMatchingWords", 30, 0);
+    			"FilterSettings.minMatchingWords", 0, 30);
     
     /** 
      * Whether to drop responses that have an action 

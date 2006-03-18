@@ -10,20 +10,22 @@ public abstract class AbstractNumberSetting extends Setting {
      * Adds a safeguard against simpp making a setting take a value beyond the
      * reasonable max 
      */
-    protected final Object MAX_VALUE;
+    protected final Number MAX_VALUE;
 
     /**
      * Adds a safeguard against simpp making a setting take a value below the
      * reasonable min
      */
-    protected final Object MIN_VALUE;
+    protected final Number MIN_VALUE;
     
     protected AbstractNumberSetting(Properties defaultProps, Properties props,
                                     String key, String defaultValue, 
-                              String simppKey, Comparable max, Comparable min) {
+                              String simppKey, Number min, Number max) {
         super(defaultProps, props, key, defaultValue, simppKey);
         if(max != null && min != null) {//do we need to check max, min?
-            if(max.compareTo(min) < 0) //max less than min?
+            // All standard library Numbers implement Comparable
+            Comparable comparableMax = (Comparable) max;
+            if(comparableMax.compareTo(min) < 0) //max less than min?
                 throw new IllegalArgumentException("max less than min");
         }
         MAX_VALUE = max;
@@ -41,17 +43,33 @@ public abstract class AbstractNumberSetting extends Setting {
         if(isSimppEnabled()) {
             Assert.that(MAX_VALUE != null, "simpp setting created with no max");
             Assert.that(MIN_VALUE != null, "simpp setting created with no min");
-            if(!isInRange(value))
-                return;
         }
+        value = normalizeValue(value);
         super.setValue(value);
     }
 
 
     /**
-     * The various settings must decide for themselves if this value is withing
-     * acceptable range
+     * Normalizes a value to an acceptable value for this setting.
      */
-    abstract protected boolean isInRange(String value);
+    protected String normalizeValue(String value) {
+        Comparable comparableValue = null;
+        try {
+            comparableValue = convertToComparable(value);
+        } catch (NumberFormatException e) {
+            return DEFAULT_VALUE;
+        }
+        if (MAX_VALUE != null && comparableValue.compareTo(MAX_VALUE) > 0) {
+            return MAX_VALUE.toString();
+        } else if (MIN_VALUE != null && comparableValue.compareTo(MIN_VALUE) < 0) {
+            return MIN_VALUE.toString();
+        }
+        return value;
+    }
 
+    /**
+     * Converts a String to a Comparable of the same type as MAX_VALUE and MIN_VALUE.
+     */
+    abstract protected Comparable convertToComparable(String value);
+    
 }

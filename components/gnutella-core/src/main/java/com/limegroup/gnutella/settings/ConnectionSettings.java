@@ -43,15 +43,15 @@ public final class ConnectionSettings extends LimeProps {
 	 * Settings for the number of connections to maintain.
 	 */
 	public static final IntSetting NUM_CONNECTIONS =
-        FACTORY.createSettableIntSetting("NUM_CONNECTIONS", 32, "ConnectionSettings.numConnections",96,16);
+        FACTORY.createSettableIntSetting("NUM_CONNECTIONS", 32, "ConnectionSettings.numConnections",16,96);
     
     /** The maximum ratio of non-limewire peers to allow */
     public static final FloatSetting MAX_NON_LIME_PEERS =
-        FACTORY.createSettableFloatSetting("MAX_NON_LIME_PEERS",0.2f,"ConnectionSettings.maxLimePeers",0.5f,0f);
+        FACTORY.createSettableFloatSetting("MAX_NON_LIME_PEERS",0.2f,"ConnectionSettings.maxLimePeers",0.0f, 0.5f);
     
     /** The minimum ratio of non-limewire peers to allow */
     public static final FloatSetting MIN_NON_LIME_PEERS =
-        FACTORY.createSettableFloatSetting("MIN_NON_LIME_PEERS",0.1f,"ConnectionSettings.minLimePeers",0.2f,0f);
+        FACTORY.createSettableFloatSetting("MIN_NON_LIME_PEERS",0.1f,"ConnectionSettings.minLimePeers",0.0f, 0.2f);
 
 	
     /**
@@ -296,7 +296,7 @@ public final class ConnectionSettings extends LimeProps {
      * How many pongs to send back for each ping.
      */
     public static final IntSetting NUM_RETURN_PONGS =
-        FACTORY.createSettableIntSetting("NUM_RETURN_PONGS",10,"pings",25,5);
+        FACTORY.createSettableIntSetting("NUM_RETURN_PONGS",10,"pings",5,25);
     
     /**
      * Setting to disable bootstrapping.. used only in tests.
@@ -323,7 +323,7 @@ public final class ConnectionSettings extends LimeProps {
      * Time in milliseconds to delay prior to flushing data on peer -> peer connections
      */
     public static final LongSetting FLUSH_DELAY_TIME =
-        FACTORY.createSettableLongSetting("FLUSH_DELAY_TIME", 0, "flushdelay", 300, 0);
+        FACTORY.createSettableLongSetting("FLUSH_DELAY_TIME", 0, "flushdelay", 0, 300);
                                             
     
     /**
@@ -336,19 +336,27 @@ public final class ConnectionSettings extends LimeProps {
      * How many connections to maintain as a leaf when idle
      */
     public static final IntSetting IDLE_CONNECTIONS =
-        FACTORY.createSettableIntSetting("IDLE_CONNECTIONS",1,"ConnectionSettings.IdleConnections",3,1);
+        FACTORY.createSettableIntSetting("IDLE_CONNECTIONS",1,"ConnectionSettings.IdleConnections",1,3);
     
     /**
      * The maximum line length we'll try to parse while reading a header.
      */
     public static final IntSetting MAX_HANDSHAKE_LINE_SIZE =
-        FACTORY.createSettableIntSetting("MAX_HANDSHAKE_LINE_SIZE", 1024, "handshake.maxLineSize", 4096, 512);
+        FACTORY.createSettableIntSetting("MAX_HANDSHAKE_LINE_SIZE", 1024, "handshake.maxLineSize", 512, 4096);
     
     /**
      * The maximum number of headers to try and parse.
      */
     public static final IntSetting MAX_HANDSHAKE_HEADERS =
-        FACTORY.createSettableIntSetting("MAX_HANDSHAKZE_LIMIT", 30, "handshake.maxHeaderLimit", 100, 15);
+        FACTORY.createSettableIntSetting("MAX_HANDSHAKZE_LIMIT", 30, "handshake.maxHeaderLimit", 15, 100);
+    
+    /**
+     * The size of our Querry Routing Tables, in multiples of 1024 entries. 
+     * (In 1998, the IEC standardized "kibi" as the prefix denoting 1024, or "kilo binary".) 
+     */
+    public static final PowerOfTwoSetting QRT_SIZE_IN_KIBI_ENTRIES =
+        FACTORY.createSettablePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 64,
+                "ConnectionSettings.QRTSizeInKibiEntries", 64, 256);
     
     /**
      * Helper method left from Settings Manager
