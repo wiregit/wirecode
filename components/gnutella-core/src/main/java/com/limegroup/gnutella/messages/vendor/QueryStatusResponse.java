@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella.messages.vendor;
 
@@ -12,17 +12,31 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
+ * Send a Query Status Response vendor message to tell a searching computer how many hits you have.
+ * QueryStatusResponse represents the BEAR 12 version 1 Query Status Response vendor message.
  * 
+ * This packet is used in LimeWire's dynamic querying system. (do)
  * 
+ * The SearchResultHandler class makes QueryStatusResponse objects. (do)
  * 
- * Used by dynamic querying.
+ * A Query Status Response vendor message looks like this:
  * 
+ * gnutella packet header 23 bytes
+ * vendor type 8 bytes
  * 
+ *   BEAR 12 1
  * 
- * In Vendor Message parlance, the "message type" of this VMP is "BEAR/12".
- * This message contains 2 unsigned bytes that tells you how many
+ * rest of the payload
+ * 
+ *   nn
+ * 
+ * The rest of the payload is 2 bytes.
+ * nn is the number of hits the computer has.
+ * The number is stored in 2 bytes, and must be 1 through 65535, 0x0001 through 0xffff.
+ * 
+ * This message contains 2 unsigned bytes that tell you how many
  * results the sending host has for the guid of a query (the guid of this
- * message is the same as the original query).  
+ * message is the same as the original query).
  */
 public final class QueryStatusResponse extends VendorMessage {
 
@@ -60,16 +74,17 @@ public final class QueryStatusResponse extends VendorMessage {
      * Make a new QueryStatusResponse for us to send.
      * This is the message maker.
      * 
-     * @param numResults The number of results (1-65535) that you have
-     * for this query.  If you have more than 65535 just send 65535.
-     * @param replyGUID The guid of the original query/reply that you want to
-     * send reply info for.
+     * The following 3 methods use this constructor to make Query Status Response vendor messages for us to send: (do)
+     * SearchResultHandler.removeQuery(GUID)
+     * SearchResultHandler.accountAndUpdateDynamicQueriers(QueryReply, int)
+     * ManagedConnection.morphToStopQuery(QueryStatusResponse)
      * 
-     * 
-     * @param replyGUID  The message GUID for this new message which will route it back home
+     * @param replyGUID  The GUID that identifies the search, matches the message GUID of all the packets, and can route packets back to the searching computer.
      *                   Sets this new packet's message GUID.
-     * @param numResults The result count to put in the payload
+     * @param numResults The number of hits we have.
      *                   Puts this number in the payload.
+     *                   Must be 1 through 65535.
+     *                   If you have more than 65535 results, just say you have 65535.
      */
     public QueryStatusResponse(GUID replyGUID, int numResults) {
 
@@ -85,33 +100,48 @@ public final class QueryStatusResponse extends VendorMessage {
     }
 
     /**
-     * @return an int (1-65535) representing the amount of results that a host
-     * for a given query (as specified by the guid of this message).
+     * Get the results number that this Query Status Response vendor message is carrying.
+     * This number is stored in the 2-byte payload beyond the LIMEssvv type information.
+     * 
+     * @return The number in the payload
      */
     public int getNumResults() {
-        
+
+        // Read the 2 byte payload in little endian order, and return the number stored there
         return ByteOrder.ushort2int(ByteOrder.leb2short(getPayload(), 0));
     }
 
-    /** The query guid that this response refers to.
+    /**
+     * Get the message GUID of this Query Status Response vendor message.
+     * This is the GUID that identifies the search this Query Status Response is a part of.
+     * All the packets involved in this search have this as their message GUID.
+     * You can use this message GUID to route a packet back to the computer that sent the original request.
+     * 
+     * @return This packet's message GUID that identifies the search
      */
     public GUID getQueryGUID() {
-        
+
+        // Copy this packet's message GUID and return it
         return new GUID(getGUID());
     }
 
     /**
-     * Constructs the payload from the desired number of results.
+     * Write the given number in 2 bytes in little endian order.
+     * This is the payload of the Query Status Response vendor message beyond the LIMEssvv type information.
+     * 
+     * @param numResults A number, like 5
+     * @return           A 2-byte array with the number in little endian order, like {0x05, 0x00}
      */
     private static byte[] derivePayload(int numResults) {
-        
+
+        // Make sure the given results number will fit in 2 bytes
         if ((numResults < 0) || (numResults > 65535)) throw new IllegalArgumentException("Number of results too big: " + numResults);
+
+        // Compose 2 bytes with the number in little endian order, and return it as the payload
         byte[] payload = new byte[2];
-        ByteOrder.short2leb((short) numResults, payload, 0);
+        ByteOrder.short2leb((short)numResults, payload, 0);
         return payload;
     }
-
-    //done
 
     /**
      * Write the payload of this vendor message to the given OutputStream.
