@@ -2121,7 +2121,7 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsUDPConnectBack() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
         if (_messagesSupported != null) return _messagesSupported.supportsUDPConnectBack();
         return -1; // Not listed
     }
@@ -2134,7 +2134,7 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsTCPConnectBack() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
         if (_messagesSupported != null) return _messagesSupported.supportsTCPConnectBack();
         return -1; // Not listed
     }
@@ -2147,7 +2147,7 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsUDPRedirect() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
         if (_messagesSupported != null) return _messagesSupported.supportsUDPConnectBackRedirect();
         return -1; // Not listed
     }
@@ -2160,7 +2160,7 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsTCPRedirect() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
         if (_messagesSupported != null) return _messagesSupported.supportsTCPConnectBackRedirect();
         return -1; // Not listed
     }
@@ -2173,7 +2173,7 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsUDPCrawling() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
     	if (_messagesSupported != null) return _messagesSupported.supportsUDPCrawling();
     	return -1; // Not listed
     }
@@ -2186,7 +2186,7 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsHopsFlow() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
         if (_messagesSupported != null) return _messagesSupported.supportsHopsFlow();
         return -1; // Not listed
     }
@@ -2202,7 +2202,7 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsPushProxy() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
         if ((_messagesSupported != null) && isClientSupernodeConnection()) return _messagesSupported.supportsPushProxy();
         return -1; // Not listed
     }
@@ -2215,7 +2215,7 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsLeafGuidance() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
         if (_messagesSupported != null) return _messagesSupported.supportsLeafGuidance();
         return -1; // Not listed
     }
@@ -2228,46 +2228,67 @@ public class Connection implements IpPort {
      */
     public int remoteHostSupportsHeaderUpdate() {
 
-        // Search the remote computer's Messages Supported vendor message
+        // Look in the Messages Supported vendor message this remote computer sent us
         if (_messagesSupported != null) return _messagesSupported.supportsHeaderUpdate();
         return -1; // Not listed
     }
 
-    //do
-
-    /** Return whether or not the remote host supports feature queries. */
+    /**
+     * Determine if this remote computer told us which advanced features it supports by including "WHAT" in its Capabilities vendor message.
+     * Looks in the Capabilities vendor message for "WHAT" with a version of 1 or more.
+     * "WHAT" tells which advanced features the computer supports.
+     * 
+     * @return True if this remote computer sent a Capabilities vendor message with "WHAT" listed with a version of 1 or more.
+     *         False if it didn't include "WHAT" or send a Capabilities vendor message at all.
+     */
     public boolean getRemoteHostSupportsFeatureQueries() {
 
-        // Search the remote computer's Messages Supported vendor message for 
-        if (_capabilities != null) return _capabilities.supportsFeatureQueries() > 0;
+        // Look in the Capabilties vendor message this remote computer sent us
+        if (_capabilities != null) return _capabilities.supportsFeatureQueries() > 0; // Return true if the Capabilities
         return false;
     }
 
-    /** @return the maximum selector of capability supported, else -1 if no support. */
+    /**
+     * Find out how many advanced features this remote computer supports.
+     * Looks in the Capabilities vendor message for "WHAT", and returns the version number.
+     * The return value is probably 1, indicating support for the first advanced feature, What's New search.
+     * 
+     * @return The number of advanced Gnutella features the computer supports, like 1.
+     *         -1 if "WHAT" is not listed, or we don't have a Capabilities vendor message from this remote computer.
+     */
     public int getRemoteHostFeatureQuerySelector() {
 
-        // Search the remote computer's Messages Supported vendor message for 
+        // Look in the Capabilties vendor message this remote computer sent us
         if (_capabilities != null) return _capabilities.supportsFeatureQueries();
         return -1;
     }
 
-    /** @return true if the capability is supported. */
+    /**
+     * Determine if this remote computer supports What's New search.
+     * Searches the Capabilities vendor message it sent us for the "WHAT" capability, and gets the version number.
+     * If the version number is 1 or more, the compuer supports What's New search, returns true.
+     * 
+     * @return True if this remote computer supports What's New search
+     */
     public boolean remoteHostSupportsWhatIsNew() {
 
-        // Search the remote computer's Messages Supported vendor message for 
+        // Look in the Capabilties vendor message this remote computer sent us
         if (_capabilities != null) return _capabilities.supportsWhatIsNew();
         return false;
     }
 
-    /** Gets the remote host's 'update' version. */
+    /**
+     * Get the current update number, according to this remote computer.
+     * Searches the Capabilities vendor message it sent us for the "LMUP" capability, and gets the version number.
+     * 
+     * @return The number of the most recent update information this remote computer has received, like 77
+     */
     public int getRemoteHostUpdateVersion() {
 
-        // Search the remote computer's Messages Supported vendor message for 
+        // Look in the Capabilties vendor message this remote computer sent us
         if(_capabilities != null) return _capabilities.supportsUpdate();
         return -1;
     }
-
-    //done
 
     /**
      * True if the remote computer we're connected to is on the same LAN here as we are.

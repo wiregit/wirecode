@@ -1,9 +1,14 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.util;
 
 import java.util.Random;
 
 /**
  * A simple UUID.
+ * 
+ * LimeWire uses this UUID for TigerTree, and nothing else.
  */
 public final class UUID {
     

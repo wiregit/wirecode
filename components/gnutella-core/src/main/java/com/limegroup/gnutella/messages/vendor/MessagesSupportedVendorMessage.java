@@ -117,9 +117,9 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
         // Call the VendorMessage constructor
         super(
-            guid,                 // From the gnutella packet header, the message GUID
-            ttl,                  // From the gnutella packet header, the message TTL
-            hops,                 // From the gnutella packet header, the hops count
+            guid,                 // From the Gnutella packet header data, the message GUID
+            ttl,                  // From the Gnutella packet header data, the message TTL
+            hops,                 // From the Gnutella packet header data, the hops count
             F_NULL_VENDOR_ID,     // The vendor ID that names the Messages Supported vendor message is 4 0s instead of text like "LIME"
             F_MESSAGES_SUPPORTED, // The vendor message code that names the Messages Supported vendor message is 0
             version,              // From the payload, the version number, which should be 0
@@ -251,18 +251,22 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
         // Make a SupportedMessageBlock that names each vendor message's vendor code, ID number, and version, and add it to the given HashSet
         SupportedMessageBlock smp = null;
-        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK,       TCPConnectBackVendorMessage.VERSION); hashSet.add(smp); // TCP Connect Back
-        smp = new SupportedMessageBlock(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK,       UDPConnectBackVendorMessage.VERSION); hashSet.add(smp); // UDP Connect Back
-        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_HOPS_FLOW,              HopsFlowVendorMessage.VERSION);       hashSet.add(smp); // Hops Flow
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_GIVE_STATS,             GiveStatsVendorMessage.VERSION);      hashSet.add(smp); // Give Statistics Request
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ,         PushProxyRequest.VERSION);            hashSet.add(smp); // Push Proxy Request
-        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_LIME_ACK,               QueryStatusRequest.VERSION);          hashSet.add(smp); // Leaf Guidance Support
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK,       TCPConnectBackRedirect.VERSION);      hashSet.add(smp); // TCP Connect Back Redirect
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_UDP_CONNECT_BACK_REDIR, UDPConnectBackRedirect.VERSION);      hashSet.add(smp); // UDP Connect Back Redirect
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_ULTRAPEER_LIST,         UDPCrawlerPong.VERSION);              hashSet.add(smp); // UDP Crawl Support
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_SIMPP_REQ,              SimppRequestVM.VERSION);              hashSet.add(smp); // SIMPP Request Message
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_SIMPP,                  SimppVM.VERSION);                     hashSet.add(smp); // SIMPP Message
-        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_HEADER_UPDATE,          HeaderUpdateVendorMessage.VERSION);   hashSet.add(smp); // Header Update
+        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK,       TCPConnectBackVendorMessage.VERSION); hashSet.add(smp); // BEAR  7 1 TCP Connect Back
+        smp = new SupportedMessageBlock(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK,       UDPConnectBackVendorMessage.VERSION); hashSet.add(smp); // GTKG  7 2 UDP Connect Back
+        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_HOPS_FLOW,              HopsFlowVendorMessage.VERSION);       hashSet.add(smp); // BEAR  4 1 Hops Flow
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_GIVE_STATS,             GiveStatsVendorMessage.VERSION);      hashSet.add(smp); // LIME 14 1 Give Statistics
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ,         PushProxyRequest.VERSION);            hashSet.add(smp); // LIME 21 1 Push Proxy Request
+        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_LIME_ACK,               QueryStatusRequest.VERSION);          hashSet.add(smp); // BEAR 11 1 Query Status Request, not used
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_TCP_CONNECT_BACK,       TCPConnectBackRedirect.VERSION);      hashSet.add(smp); // LIME  7 1 TCP Connect Back Redirect
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_UDP_CONNECT_BACK_REDIR, UDPConnectBackRedirect.VERSION);      hashSet.add(smp); // LIME  8 1 UDP Connect Back Redirect
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_ULTRAPEER_LIST,         UDPCrawlerPong.VERSION);              hashSet.add(smp); // LIME  6 1 UDP Crawler Pong
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_SIMPP_REQ,              SimppRequestVM.VERSION);              hashSet.add(smp); // LIME 16 1 SIMPP Request
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_SIMPP,                  SimppVM.VERSION);                     hashSet.add(smp); // LIME 17 1 SIMPP Message
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_HEADER_UPDATE,          HeaderUpdateVendorMessage.VERSION);   hashSet.add(smp); // LIME 25 1 Header Update
+
+        /*
+         * TODO:kfaaborg Remove BEAR 11 1 QueryStatusRequest, which is not used.
+         */
     }
 
     /**
@@ -604,7 +608,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     }
 
     /**
-     * Write the payload to the given OutputStream.
+     * Write the payload of this vendor message to the given OutputStream.
+     * Writes the 8-byte LIMEssvv type identifer that begins the payload, and the type specific payload data after that.
+     * This class overrides this method from VendorMessage to count the statistic that we're sending this message.
+     * 
      * A Messages Supported vendor message looks like this:
      * 
      * gnutella header 23 bytes
@@ -620,7 +627,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      *   LIMEssvv
      * 
      * The vendor message type is like LIMEssvv, but for a Messages Supported vendor message, it's all 0s.
-     * This method writes the payload after that, like nnLIMEssvvLIMEssvvLIMEssvv.
+     * This method writes the whole payload, the vendor message type and the rest of the payload.
      * 
      * MessagesSupportedVendorMessage overrides this method from VendorMessage to count a statistic.
      * 

@@ -15,7 +15,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  */
 public class GiveStatsVendorMessage extends VendorMessage {
 
-    /** 1, LimeWire understands the initial version of the Give Stats vendor message. */
+    /** 1, LimeWire understands the initial version of the Give Statistics vendor message. */
     public static final int VERSION = 1;
     
     /**

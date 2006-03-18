@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayOutputStream;
@@ -12,7 +15,8 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 
 public class StatisticVendorMessage extends VendorMessage {
-    
+
+    /** 1, LimeWire understands the initial version of the Statistic vendor message. */
     public static final int VERSION = 1;
 
     private static final String DELIMITER = " | ";

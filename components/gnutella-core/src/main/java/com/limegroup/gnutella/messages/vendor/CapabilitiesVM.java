@@ -130,9 +130,9 @@ public final class CapabilitiesVM extends VendorMessage {
 
         // Call the VendorMessage constructor
         super(
-            guid,             // From the gnutella packet header, the message GUID
-            ttl,              // From the gnutella packet header, the message TTL
-            hops,             // From the gnutella packet header, the hops count
+            guid,             // From the Gnutella packet header data, the message GUID
+            ttl,              // From the Gnutella packet header data, the message TTL
+            hops,             // From the Gnutella packet header data, the hops count
             F_NULL_VENDOR_ID, // The vendor ID that names the Capabilities vendor message is 4 0s instead of text like "LIME"
             F_CAPABILITIES,   // The vendor message code that names the Capabilities vendor message is 10
             version,          // From the payload, the version number, which should be 0
@@ -553,7 +553,10 @@ public final class CapabilitiesVM extends VendorMessage {
     }
 
     /**
-     * Write the payload to the given OutputStream.
+     * Write the payload of this vendor message to the given OutputStream.
+     * Writes the 8-byte LIMEssvv type identifer that begins the payload, and the type specific payload data after that.
+     * This class overrides this method from VendorMessage to count the statistic that we're sending this message.
+     * 
      * A Capabilities vendor message looks like this:
      * 
      * gnutella header 23 bytes
@@ -568,7 +571,7 @@ public final class CapabilitiesVM extends VendorMessage {
      *   WHATvv
      *   LMUPvv
      * 
-     * This method writes the rest of the payload, like nnIMPPvvWHATvvLMUPvv.
+     * This method writes the whole payload, the vendor message type and the rest of the payload.
      * 
      * CapabilitiesVM overrides this method from VendorMessage to count a statistic.
      * 

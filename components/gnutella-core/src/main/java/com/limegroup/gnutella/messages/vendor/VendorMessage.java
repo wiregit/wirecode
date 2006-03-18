@@ -432,7 +432,7 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_UDP_CONNECT_BACK)       && (Arrays.equals(vendorID, F_GTKG_VENDOR_ID))) return new UDPConnectBackVendorMessage(guid, ttl, hops, version, restOf);     // GTKG  7 UDP Connect Back
         if ((selector == F_PUSH_PROXY_REQ)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new PushProxyRequest(guid, ttl, hops, version, restOf);                // LIME 21 Push Proxy Request
         if ((selector == F_PUSH_PROXY_ACK)         && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new PushProxyAcknowledgement(guid, ttl, hops, version, restOf);        // LIME 22 Push Proxy Acknowledgement
-        if ((selector == F_LIME_ACK)               && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new QueryStatusRequest(guid, ttl, hops, version, restOf);              // BEAR 11 Query Status Request
+        if ((selector == F_LIME_ACK)               && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new QueryStatusRequest(guid, ttl, hops, version, restOf);              // BEAR 11 Query Status Request, not used
         if ((selector == F_REPLY_NUMBER)           && (Arrays.equals(vendorID, F_BEAR_VENDOR_ID))) return new QueryStatusResponse(guid, ttl, hops, version, restOf);             // BEAR 12 Query Status Response
         if ((selector == F_TCP_CONNECT_BACK)       && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new TCPConnectBackRedirect(guid, ttl, hops, version, restOf);          // LIME  7 TCP Connect Back Redirect
         if ((selector == F_UDP_CONNECT_BACK_REDIR) && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);          // LIME  8 UDP Connect Back Redirect
@@ -448,6 +448,10 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_UPDATE_REQ)             && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UpdateRequest(guid, ttl, hops, version, restOf);                   // LIME 26 Update Request
         if ((selector == F_UPDATE_RESP)            && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new UpdateResponse(guid, ttl, hops, version, restOf);                  // LIME 27 Update Response
         if ((selector == F_HEADER_UPDATE)          && (Arrays.equals(vendorID, F_LIME_VENDOR_ID))) return new HeaderUpdateVendorMessage(guid, ttl, hops, version, restOf);       // LIME 25 Header Update
+
+        /*
+         * TODO:kfaaborg Remove BEAR 11 1 QueryStatusRequest, which is not used.
+         */
 
         // We read a vendor type number we didn't expect
         ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
