@@ -1616,7 +1616,7 @@ public class QueryReply extends Message implements Serializable{
     }
 
 	/**
-     * Determine how likely it is we'll be able to get the files this query hit packet lists.
+     * Estimate how likely it is we'll be able to get the files this query hit packet lists.
      * Weighs information the sharing computer told us about itself in the packet.
      * 
      * Looks at 0x04 in the mask and values bytes, are all the sharing computer's upload slots full.
