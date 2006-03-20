@@ -12,7 +12,7 @@ public final class DatabaseSettings {
     private static final Preferences SETTINGS 
         = Preferences.userNodeForPackage(DatabaseSettings.class);
     
-    private static final int MAX_SIZE = 1048576;
+    private static final int MAX_SIZE = 16384;
     private static final String MAX_SIZE_KEY = "MAX_SIZE";
     
     private static final int MAX_VALUES = 5;
@@ -24,6 +24,8 @@ public final class DatabaseSettings {
     public static final long MILLIS_PER_HOUR = MILLIS_PER_DAY / 24L;
     
     public static final long REPUBLISH_INTERVAL = 3L * 60L * 1000L; // 3 minutes
+    
+    public static final String DATABASE_FILE = "Database.pat";
     
     private DatabaseSettings() {}
     

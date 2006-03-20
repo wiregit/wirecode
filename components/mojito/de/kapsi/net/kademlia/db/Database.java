@@ -5,6 +5,14 @@
 
 package de.kapsi.net.kademlia.db;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -14,6 +22,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,11 +46,11 @@ public class Database {
     public Database(Context context) {
         this.context = context;
         
-        database = new DatabaseMap(getMaxSize());
+        database = new DatabaseMap(DatabaseSettings.getMaxSize());
     }
     
     public int getMaxSize() {
-        return DatabaseSettings.getMaxSize();
+        return database.getMaxSize();
     }
     
     public int size() {
@@ -188,7 +198,7 @@ public class Database {
         try {
             if (keyValue.isAnonymous()
                     && !keyValue.verify(context.getMasterKey())) {
-                expirationTime /= 2;
+                expirationTime = keyValue.getCreationTime() + DatabaseSettings.MILLIS_PER_DAY / 2;
             }
         } catch (InvalidKeyException e) {
         } catch (SignatureException e) {
@@ -208,7 +218,68 @@ public class Database {
         return System.currentTimeMillis() >= time;
     }
     
-    private class DatabaseMap extends FixedSizeHashMap {
+    public synchronized boolean store() {
+        File file = new File(DatabaseSettings.DATABASE_FILE);
+        
+        ObjectOutputStream out = null;
+        
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            GZIPOutputStream gzout = new GZIPOutputStream(fos);
+            out = new ObjectOutputStream(gzout);
+            out.writeObject(context.getLocalNodeID());
+            out.writeObject(database);
+            out.flush();
+            return true;
+        } catch (FileNotFoundException e) {
+            LOG.error(e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOG.error(e);
+        } finally {
+            try { if (out != null) { out.close(); } } catch (IOException ignore) {}
+        }
+        return false;
+    }
+    
+    public synchronized boolean load() {
+        File file = new File(DatabaseSettings.DATABASE_FILE);
+        if (file.exists() && file.isFile() && file.canRead()) {
+            
+            ObjectInputStream in = null;
+            try {
+                FileInputStream fin = new FileInputStream(file);
+                GZIPInputStream gzin = new GZIPInputStream(fin);
+                in = new ObjectInputStream(gzin);
+                
+                KUID nodeId = (KUID)in.readObject();
+                if (!nodeId.equals(context.getLocalNodeID())) {
+                    return false;
+                }
+                
+                DatabaseMap database = (DatabaseMap)in.readObject();
+                for(Iterator it = database.values().iterator(); it.hasNext(); ) {
+                    // Set the context
+                    ((KeyValueCollection)it.next()).setContext(context);
+                }
+                this.database = database;
+                return true;
+            } catch (FileNotFoundException e) {
+                LOG.error(e);
+            } catch (IOException e) {
+                LOG.error(e);
+            } catch (ClassNotFoundException e) {
+                LOG.error(e);
+            } finally {
+                try { if (in != null) { in.close(); } } catch (IOException ignore) {}
+            }
+        }
+        return false;
+    }
+    
+    private static class DatabaseMap extends FixedSizeHashMap implements Serializable {
+        
+        private static final long serialVersionUID = -4796278962768822384L;
         
         private PatriciaTrie trie;
         
@@ -223,11 +294,8 @@ public class Database {
         }
         
         public Object remove(Object key) {
-            Object value = super.remove(key);
-            if (value != null) {
-                trie.remove(key);
-            }
-            return value;
+            trie.remove(key);
+            return super.remove(key);
         }
         
         public Object select(Object key) {

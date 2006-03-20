@@ -5,6 +5,7 @@
 
 package de.kapsi.net.kademlia.db;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -17,7 +18,9 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.security.CryptoHelper;
 
-public class KeyValue {
+public class KeyValue implements Serializable {
+    
+    private static final long serialVersionUID = -666238398053901179L;
     
     private KUID key;
     private byte[] value;
@@ -183,6 +186,6 @@ public class KeyValue {
     }
     
     public String toString() {
-        return key.toString() + " = " + new String(value);
+        return "KeyValue: " + key.toString() + " = " + new String(value);
     }
 }

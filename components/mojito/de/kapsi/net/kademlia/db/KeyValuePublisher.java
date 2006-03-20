@@ -86,9 +86,14 @@ public class KeyValuePublisher implements Runnable {
                         continue;
                     }
                     
+                    if (!keyValue.isLocalKeyValue()) {
+                        LOG.trace(keyValue + " is not a local value");
+                        continue;
+                    }
+                    
                     if (!database.isRepublishingRequired(keyValue)) {
                         if (LOG.isTraceEnabled()) {
-                            LOG.trace("KeyValue " + keyValue 
+                            LOG.trace(keyValue 
                                     + " does not require republishing");
                         }
                         continue;

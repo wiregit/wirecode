@@ -24,8 +24,7 @@ public final class RouteTableSettings {
     private static final long BUCKET_REFRESH_TIME = 20 * 1000; //TODO figure this out
     private static final String BUCKET_REFRESH_TIME_KEY = "BUCKET_REFRESH_TIME";
     
-    public static final String NODE_TRIE_FILE = "NodeTrie.dat";
-    public static final String BUCKET_TRIE_FILE = "BucketTrie.dat";
+    public static final String ROUTETABLE_FILE = "RouteTable.pat";
     
     private static final Preferences SETTINGS 
         = Preferences.userNodeForPackage(RouteTableSettings.class);

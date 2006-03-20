@@ -5,11 +5,14 @@
 
 package de.kapsi.net.kademlia.util;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class FixedSizeHashMap extends LinkedHashMap {
+public class FixedSizeHashMap extends LinkedHashMap implements Serializable {
+    
+    private static final long serialVersionUID = 8502617259787609782L;
     
     protected final int maxSize;
 

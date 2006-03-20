@@ -155,10 +155,6 @@ public class KUID implements Serializable {
         return set(bit, false);
     }
     
-    public KUID invert(int bit){
-        return set(bit, !isBitSet(bit));
-    }
-    
     private KUID set(int bitIndex, boolean set) {
         int index = (int) (bitIndex / BITS.length);
         int bit = (int) (bitIndex - index * BITS.length);
@@ -394,11 +390,11 @@ public class KUID implements Serializable {
      * @param prefix the fixed prefix bytes
      * @return a random KUID starting with the given prefix
      */
-    private static KUID createRandomID(byte[] prefix, int depth,byte[] random) {
+    private static KUID createPrefxNodeID(byte[] prefix, int depth, byte[] random) {
         ++depth;
         int length = (int)(depth)/8;
         System.arraycopy(prefix,0,random,0,length);
-        if(((depth) % 8) != 0) {
+        if((depth % 8) != 0) {
             int bitsToCopy = (depth) % 8;
             // Mask has the low-order (8-bits) bits set
             int mask = (1 << (8-bitsToCopy)) - 1;
@@ -408,11 +404,17 @@ public class KUID implements Serializable {
         }
         return KUID.createNodeID(random);
     }
-      
-    public static KUID createRandomID(byte[] prefix, int depth) {
+    
+    /**
+     * Creates a random ID with the specified byte prefix
+     * 
+     * @param prefix the fixed prefix bytes
+     * @return a random KUID starting with the given prefix
+     */
+    public static KUID createPrefxNodeID(byte[] prefix, int depth) {
         byte[] random = new byte[20];
         GENERATOR.nextBytes(random);
-        return createRandomID(prefix,depth,random);
+        return createPrefxNodeID(prefix,depth,random);
     }
     
     
@@ -428,14 +430,6 @@ public class KUID implements Serializable {
     
     public static KUID createUnknownID(byte[] id) {
         return new KUID(UNKNOWN_ID, id);
-    }
-    
-    private static boolean isValidId(byte[] id) {
-        int sum = 0;
-        for(int i = 0; i < id.length; i++) {
-            sum += (int)(id[i] & 0xFF);
-        }
-        return sum != 0;
     }
     
     public BigInteger toBigInteger() {

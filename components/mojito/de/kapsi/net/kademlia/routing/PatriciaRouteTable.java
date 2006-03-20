@@ -48,21 +48,20 @@ public class PatriciaRouteTable implements RoutingTable {
     public PatriciaRouteTable(Context context) {
         this.context = context;
         
-        //nodesTrie = new PatriciaTrie();
-        //bucketsTrie = new PatriciaTrie();
+        nodesTrie = new PatriciaTrie();
+        bucketsTrie = new PatriciaTrie();
         
-        nodesTrie = createTrie(RouteTableSettings.NODE_TRIE_FILE);
-        bucketsTrie = createTrie(RouteTableSettings.BUCKET_TRIE_FILE);
-        
-        if (bucketsTrie.isEmpty()) {
-            KUID rootKUID = KUID.MIN_NODE_ID;
-            BucketNode root = new BucketNode(rootKUID,0);
-            bucketsTrie.put(rootKUID,root);
-        }
+        init();
     }
     
-    private PatriciaTrie createTrie(String fileName) {
-        File file = new File(fileName);
+    private void init() {
+        KUID rootKUID = KUID.MIN_NODE_ID;
+        BucketNode root = new BucketNode(rootKUID,0);
+        bucketsTrie.put(rootKUID,root);
+    }
+    
+    public boolean load() {
+        File file = new File(RouteTableSettings.ROUTETABLE_FILE);
         if (file.exists() && file.isFile() && file.canRead()) {
             
             ObjectInputStream in = null;
@@ -70,7 +69,17 @@ public class PatriciaRouteTable implements RoutingTable {
                 FileInputStream fin = new FileInputStream(file);
                 GZIPInputStream gzin = new GZIPInputStream(fin);
                 in = new ObjectInputStream(gzin);
-                return (PatriciaTrie)in.readObject();
+                
+                KUID nodeId = (KUID)in.readObject();
+                if (!nodeId.equals(context.getLocalNodeID())) {
+                    return false;
+                }
+                
+                PatriciaTrie bucketsTrie = (PatriciaTrie)in.readObject();
+                PatriciaTrie nodeTrie = (PatriciaTrie)in.readObject();
+                this.bucketsTrie = bucketsTrie;
+                this.nodesTrie = nodeTrie;
+                return true;
             } catch (FileNotFoundException e) {
                 LOG.error(e);
             } catch (IOException e) {
@@ -81,17 +90,11 @@ public class PatriciaRouteTable implements RoutingTable {
                 try { if (in != null) { in.close(); } } catch (IOException ignore) {}
             }
         }
-        
-        return new PatriciaTrie();
+        return false;
     }
     
-    public void save() {
-        save(nodesTrie, RouteTableSettings.NODE_TRIE_FILE);
-        save(bucketsTrie, RouteTableSettings.BUCKET_TRIE_FILE);
-    }
-    
-    private boolean save(PatriciaTrie trie, String fileName) {
-        File file = new File(fileName);
+    public boolean store() {
+        File file = new File(RouteTableSettings.ROUTETABLE_FILE);
         
         ObjectOutputStream out = null;
         
@@ -99,7 +102,9 @@ public class PatriciaRouteTable implements RoutingTable {
             FileOutputStream fos = new FileOutputStream(file);
             GZIPOutputStream gzout = new GZIPOutputStream(fos);
             out = new ObjectOutputStream(gzout);
-            out.writeObject(trie);
+            out.writeObject(context.getLocalNodeID());
+            out.writeObject(bucketsTrie);
+            out.writeObject(nodesTrie);
             out.flush();
             return true;
         } catch (FileNotFoundException e) {
@@ -205,6 +210,11 @@ public class PatriciaRouteTable implements RoutingTable {
                     }
                     else if(newLocalBucket.equals(rightSplitBucket)){
                         smallestSubtreeBucket = leftSplitBucket;
+                    } else {
+                        if (LOG.isErrorEnabled()) {
+                            LOG.error("New buckets don't contain local node");
+                        }
+                        return;
                     }
                 }
                 //now trying recursive call!
@@ -368,7 +378,7 @@ public class PatriciaRouteTable implements RoutingTable {
             long delay = now - bucket.getTimeStamp();
             if(delay > refreshLimit) {
                 //select a random ID with this prefix
-                KUID randomID = KUID.createRandomID(bucket.getNodeID().getBytes(),bucket.getDepth());
+                KUID randomID = KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth());
                 //TODO: properly request the lookup
                 context.lookup(randomID,null);
             }
@@ -378,6 +388,7 @@ public class PatriciaRouteTable implements RoutingTable {
     public void clear() {
         nodesTrie.clear();
         bucketsTrie.clear();
+        init();
     }
 
     public boolean containsNode(KUID nodeId) {
@@ -477,9 +488,11 @@ public class PatriciaRouteTable implements RoutingTable {
     private void touchBucket(KUID nodeId) {
         //      get bucket closest to node
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+        
+        System.out.println(nodeId + " touches " + bucket);
         bucket.touch();
     }
-
+    
     public String toString() {
         Collection bucketsList = getAllBuckets();
         StringBuffer buffer = new StringBuffer("\n");

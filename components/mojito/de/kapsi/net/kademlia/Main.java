@@ -24,7 +24,6 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
-import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
@@ -93,7 +92,10 @@ public class Main {
         String getr = "getr (key|kuid) (\\w|\\d)+";
         String listDB = "list db";
         String listRT = "list rt";
-        String saveRT = "save rt";
+        String storeRT = "store rt";
+        String storeDB = "store db";
+        String loadRT = "load rt";
+        String loadDB = "load db";
         String quit = "quit";
         
         String[] commands = {
@@ -107,7 +109,10 @@ public class Main {
                 getr,
                 listDB,
                 listRT,
-                saveRT,
+                storeRT,
+                storeDB,
+                loadRT,
+                loadDB,
                 quit
         };
         
@@ -137,12 +142,12 @@ public class Main {
                     get(dht, line.split(" "));
                 } else if (line.matches(getr)) {
                     get(dht, line.split(" "));
-                } else if (line.matches(listDB)) {
+                } else if (line.matches(listDB) || line.matches(listRT)) {
                     list(dht, line.split(" "));
-                } else if (line.matches(listRT)) {
-                    list(dht, line.split(" "));
-                } else if (line.matches(saveRT)) {
-                    save(dht, line.split(" "));
+                } else if (line.matches(storeRT) || line.matches(storeDB)) {
+                    store(dht, line.split(" "));
+                } else if (line.matches(loadRT) || line.matches(loadDB)) {
+                    load(dht, line.split(" "));
                 } else if (line.matches(quit)) {
                     for(int i = 0; i < dhts.size(); i++) {
                         ((DHT)dhts.get(i)).close();
@@ -321,13 +326,31 @@ public class Main {
         }
     }
     
-    private static void save(DHT dht, String[] line) {
+    private static void load(DHT dht, String[] line) {
         if (line[1].equals("rt")) {
             Context context = dht.getContext();
-            PatriciaRouteTable rt = (PatriciaRouteTable)context.getRouteTable();
-            rt.save();
+            if (context.getRouteTable().load()) {
+                System.out.println("RouteTable was loaded successfully");
+            } else {
+                System.out.println("Loading RouteTable failed");
+            }
         } else {
-            System.out.println("Not implemented yet!");
+            Context context = dht.getContext();
+            if (context.getDatabase().load()) {
+                System.out.println("Database was loaded successfully");
+            } else {
+                System.out.println("Loading Database failed");
+            }
+        }
+    }
+    
+    private static void store(DHT dht, String[] line) {
+        if (line[1].equals("rt")) {
+            Context context = dht.getContext();
+            context.getRouteTable().store();
+        } else {
+            Context context = dht.getContext();
+            context.getDatabase().store();
         }
     }
     

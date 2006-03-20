@@ -39,4 +39,6 @@ public interface RoutingTable {
     
     public void refreshBuckets() throws IOException;
     
+    public boolean load();
+    public boolean store();
 }

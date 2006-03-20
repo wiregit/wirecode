@@ -83,10 +83,10 @@ public class RoutingTableTest {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         for (int i = 0; i < 2; i++) {
-            ContactNode node = new ContactNode(KUID.createRandomID(prefix,4),addr);
+            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
             routingTable.add(node,true);
         }
-        ContactNode node1 = new ContactNode(KUID.createRandomID(prefix,4),addr);
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
         routingTable.add(node1,true);
         try {
             Thread.sleep(1000);
@@ -100,7 +100,7 @@ public class RoutingTableTest {
     public static void testReplaceNode(RoutingTable routingTable) {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
-        ContactNode node1 = new ContactNode(KUID.createRandomID(prefix,4),addr);
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
         routingTable.add(node1,true);
         try {
             Thread.sleep(1000);
@@ -114,10 +114,10 @@ public class RoutingTableTest {
     public static void testRemoveNode(RoutingTable routingTable) {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
-        ContactNode node1 = new ContactNode(KUID.createRandomID(prefix,4),addr);
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
         routingTable.add(node1,true);
         for (int i = 0; i < 20; i++) {
-            ContactNode node = new ContactNode(KUID.createRandomID(prefix,4),addr);
+            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
             routingTable.add(node,true);
         }
         routingTable.handleFailure(node1.getNodeID());

@@ -114,7 +114,7 @@ public class BucketNode extends Node {
             bucket = (BucketNode)l.get(1);
             System.out.println(bucket0);
             System.out.println(bucket);
-            System.out.println(KUID.createRandomID(bucket.getNodeID().getBytes(),bucket.getDepth()).toHexString());
+            System.out.println(KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth()).toHexString());
         }
 //        System.out.println(bucket2);
     }

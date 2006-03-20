@@ -26,8 +26,8 @@ public class KeyValueCollection implements Collection, Serializable {
 
     private static final Log LOG = LogFactory.getLog(KeyValueCollection.class);
     
-    private Context context;
-    private PublicKey masterKey;
+    private transient Context context;
+    private transient PublicKey masterKey;
     
     private KUID key;
     private FixedSizeHashMap values;
@@ -39,7 +39,7 @@ public class KeyValueCollection implements Collection, Serializable {
         values = new FixedSizeHashMap(Math.min(maxSize, 10), maxSize);
     }
     
-    public void setContext(Context context) {
+    void setContext(Context context) {
         this.context = context;
         masterKey = context.getMasterKey();
     }
@@ -94,8 +94,7 @@ public class KeyValueCollection implements Collection, Serializable {
                 
                 SocketAddress currentSrc = current.getSocketAddress();
                 if (currentSrc != null 
-                        && !currentSrc.equals(keyValue.getSocketAddress())
-                        ) {
+                        && !currentSrc.equals(keyValue.getSocketAddress())) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Cannot replace " + current + " with " + keyValue);
                     }
