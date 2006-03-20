@@ -113,7 +113,7 @@ public class NIODispatcher implements Runnable {
     private final Collection /* of Runnable */ LATER = new LinkedList();
     
     /** The throttle queue. */
-    private volatile List /* of NBThrottle */ THROTTLE = new ArrayList();
+    private final List /* of NBThrottle */ THROTTLE = new ArrayList();
     
     /** The timeout manager. */
     private final TimeoutController TIMEOUTER = new TimeoutController();
@@ -158,11 +158,15 @@ public class NIODispatcher implements Runnable {
 	
 	/** Adds a Throttle into the throttle requesting loop. */
 	// TODO: have some way to remove Throttles, or make these use WeakReferences
-	public void addThrottle(NBThrottle t) {
-        synchronized(Q_LOCK) {
-            ArrayList throttle = new ArrayList(THROTTLE);
-            throttle.add(t);
-            THROTTLE = throttle;
+	public void addThrottle(final NBThrottle t) {
+        if(Thread.currentThread() == dispatchThread)
+            THROTTLE.add(t);
+        else {
+            invokeLater(new Runnable() {
+                public void run() {
+                    THROTTLE.add(t);
+                }
+            });
         }
     }
     
@@ -437,12 +441,11 @@ public class NIODispatcher implements Runnable {
      * deadlock.
      */
     private void runPendingTasks() {
-        long now;
+        long now = System.currentTimeMillis();
+        for(int i = 0; i < THROTTLE.size(); i++)
+            ((NBThrottle)THROTTLE.get(i)).tick(now);
+        
         synchronized(Q_LOCK) {
-            now = System.currentTimeMillis();
-            for(int i = 0; i < THROTTLE.size(); i++)
-                ((NBThrottle)THROTTLE.get(i)).tick(now);
-
             UNLOCKED.addAll(LATER);
             LATER.clear();
         }
@@ -498,9 +501,8 @@ public class NIODispatcher implements Runnable {
      * Loops through all Throttles and gives them the ready keys.
      */
     private void readyThrottles(Collection keys) {
-        List throttle = THROTTLE;
-        for (int i = 0; i < throttle.size(); i++)
-            ((NBThrottle) throttle.get(i)).selectableKeys(keys);
+        for (int i = 0; i < THROTTLE.size(); i++)
+            ((NBThrottle) THROTTLE.get(i)).selectableKeys(keys);
     }
     
     /**
