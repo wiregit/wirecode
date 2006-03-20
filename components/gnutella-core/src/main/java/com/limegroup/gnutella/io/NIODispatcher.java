@@ -631,14 +631,14 @@ public class NIODispatcher implements Runnable {
                 try {
                     int readyOps = sk.readyOps();
                     int interestOps = sk.interestOps();
-                    if (allowed(SelectionKey.OP_ACCEPT, readyOps, interestOps, allowedOps)) 
+                    if ((allowedOps & interestOps & readyOps & SelectionKey.OP_ACCEPT) != 0) 
                         processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
-                    else if(allowed(SelectionKey.OP_CONNECT, readyOps, interestOps, allowedOps))
+                    else if((allowedOps & interestOps & readyOps & SelectionKey.OP_CONNECT) != 0)
                         processConnect(now, sk, (ConnectObserver)attachment, proxy);
                     else {
-                        if (allowed(SelectionKey.OP_READ, readyOps, interestOps, allowedOps))
+                        if ((allowedOps & interestOps & readyOps & SelectionKey.OP_READ) != 0)
                             processRead(now, (ReadObserver)attachment, proxy);
-                        if (allowed(SelectionKey.OP_WRITE, readyOps, interestOps, allowedOps))
+                        if ((allowedOps & interestOps & readyOps & SelectionKey.OP_WRITE) != 0)
                             processWrite(now, (WriteObserver)attachment, proxy);
                     }
                 } catch (CancelledKeyException err) {
@@ -657,11 +657,6 @@ public class NIODispatcher implements Runnable {
             // we've had too many hits in a row.  kill this attachment.
             safeCancel(sk, attachment);
         }
-    }
-    
-    /** Determines whether or not the readyOps, interestOps & allowedOps match the given op. */
-    private boolean allowed(int op, int readyOps, int interestOps, int allowedOps) {
-        return (allowedOps & op) != 0 && (interestOps & op) != 0 && (readyOps & op) != 0;
     }
     
     /** A very safe cancel, ignoring errors & only shutting down if possible. */

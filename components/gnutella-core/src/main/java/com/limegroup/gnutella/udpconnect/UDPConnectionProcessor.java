@@ -392,15 +392,16 @@ public class UDPConnectionProcessor {
         _waitingForFinAck = true;  
 
 		// Tell the receiver that we are shutting down
-        if(oldState != PRECONNECT_STATE)
+        if(oldState != PRECONNECT_STATE) {
             safeSendFin();
 
-        // Register for a full cleanup after a slight delay
-        if (_closedCleanupEvent==null) {
-        	_closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
-        			System.currentTimeMillis() + SHUTDOWN_DELAY_TIME,this);
-        	LOG.debug("registering a closedCleanupEvent");
-        	_scheduler.register(_closedCleanupEvent);
+            // Register for a full cleanup after a slight delay
+            if (_closedCleanupEvent==null) {
+            	_closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
+            			System.currentTimeMillis() + SHUTDOWN_DELAY_TIME,this);
+            	LOG.debug("registering a closedCleanupEvent");
+            	_scheduler.register(_closedCleanupEvent);
+            }
         }
 	}
 
@@ -772,8 +773,6 @@ public class UDPConnectionProcessor {
         }
 		_udpService.send(msg, _connectedTo);  
 	}
-
-
 
     /**
      *  Schedule an ack timeout for the oldest unacked data.
