@@ -1,6 +1,8 @@
 package de.kapsi.net.kademlia;
 
-public abstract class Node {
+import java.io.Serializable;
+
+public abstract class Node implements Serializable {
     
     protected final KUID nodeId;
     

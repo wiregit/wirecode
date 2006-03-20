@@ -9,6 +9,8 @@ import de.kapsi.net.kademlia.KUID;
 
 public class KUIDKeyCreator implements PatriciaTrie.KeyCreator {
     
+    private static final long serialVersionUID = 6412279289438108492L;
+
     public boolean isBitSet(Object key, int bitIndex) {
         return ((KUID)key).isBitSet(bitIndex);
     }

@@ -5,6 +5,7 @@
 
 package de.kapsi.net.kademlia.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,12 +18,14 @@ import java.util.Random;
  * 
  * @author Roger Kapsi
  */
-public class PatriciaTrie {
+public class PatriciaTrie implements Serializable {
     
+    private static final long serialVersionUID = 110232526181493307L;
+
     private final Entry root = new Entry(null, null, -1);
     
     private int size = 0;
-    private int modCount = 0;
+    private transient int modCount = 0;
     
     private final KeyCreator keyCreator;
     
@@ -560,7 +563,9 @@ public class PatriciaTrie {
     /**
      * The actual Trie nodes.
      */
-    private final class Entry implements Map.Entry {
+    private final class Entry implements Map.Entry, Serializable {
+        
+        private static final long serialVersionUID = 4596023148184140013L;
         
         private Object key;
         private Object value;
@@ -748,7 +753,7 @@ public class PatriciaTrie {
      * The interface used by PatriciaTrie to access the Keys
      * on bit level.
      */
-    public static interface KeyCreator {
+    public static interface KeyCreator extends Serializable {
         
         /** Returned by bitIndex if key's bits are all 0 */
         public static final int NULL_BIT_KEY = -1;

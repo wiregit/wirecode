@@ -1,10 +1,18 @@
 package de.kapsi.net.kademlia.routing;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +27,7 @@ import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
-public class PatriciaRouteTable implements RoutingTable{
+public class PatriciaRouteTable implements RoutingTable {
     
     private static final Log LOG = LogFactory.getLog(PatriciaRouteTable.class);
     
@@ -29,23 +37,79 @@ public class PatriciaRouteTable implements RoutingTable{
     
     private static final long refreshLimit = RouteTableSettings.getBucketRefreshTime();
     
-    private final Context context;
+    private Context context;
     
-    private final PatriciaTrie nodesTrie;
+    private PatriciaTrie nodesTrie;
     
-    private final PatriciaTrie bucketsTrie;
+    private PatriciaTrie bucketsTrie;
 
     public PatriciaRouteTable(Context context) {
         this.context = context;
         
-        nodesTrie = new PatriciaTrie();
-        bucketsTrie = new PatriciaTrie();
+        //nodesTrie = new PatriciaTrie();
+        //bucketsTrie = new PatriciaTrie();
         
-        KUID rootKUID = KUID.MIN_NODE_ID;
-        BucketNode root = new BucketNode(rootKUID,0);
-        bucketsTrie.put(rootKUID,root);
+        nodesTrie = createTrie(RouteTableSettings.NODE_TRIE_FILE);
+        bucketsTrie = createTrie(RouteTableSettings.BUCKET_TRIE_FILE);
+        
+        if (bucketsTrie.isEmpty()) {
+            KUID rootKUID = KUID.MIN_NODE_ID;
+            BucketNode root = new BucketNode(rootKUID,0);
+            bucketsTrie.put(rootKUID,root);
+        }
     }
-
+    
+    private PatriciaTrie createTrie(String fileName) {
+        File file = new File(fileName);
+        if (file.exists() && file.isFile() && file.canRead()) {
+            
+            ObjectInputStream in = null;
+            try {
+                FileInputStream fin = new FileInputStream(file);
+                GZIPInputStream gzin = new GZIPInputStream(fin);
+                in = new ObjectInputStream(gzin);
+                return (PatriciaTrie)in.readObject();
+            } catch (FileNotFoundException e) {
+                LOG.error(e);
+            } catch (IOException e) {
+                LOG.error(e);
+            } catch (ClassNotFoundException e) {
+                LOG.error(e);
+            } finally {
+                try { if (in != null) { in.close(); } } catch (IOException ignore) {}
+            }
+        }
+        
+        return new PatriciaTrie();
+    }
+    
+    public void save() {
+        save(nodesTrie, RouteTableSettings.NODE_TRIE_FILE);
+        save(bucketsTrie, RouteTableSettings.BUCKET_TRIE_FILE);
+    }
+    
+    private boolean save(PatriciaTrie trie, String fileName) {
+        File file = new File(fileName);
+        
+        ObjectOutputStream out = null;
+        
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            GZIPOutputStream gzout = new GZIPOutputStream(fos);
+            out = new ObjectOutputStream(gzout);
+            out.writeObject(trie);
+            out.flush();
+            return true;
+        } catch (FileNotFoundException e) {
+            LOG.error(e);
+        } catch (IOException e) {
+            LOG.error(e);
+        } finally {
+            try { if (out != null) { out.close(); } } catch (IOException ignore) {}
+        }
+        return false;
+    }
+    
     public void add(ContactNode node, boolean knowToBeAlive) {
         put(node.getNodeID(), node,knowToBeAlive);
     }

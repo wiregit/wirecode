@@ -7,8 +7,10 @@ package de.kapsi.net.kademlia;
 
 import java.net.SocketAddress;
 
-public class ContactNode extends Node{
+public class ContactNode extends Node {
     
+    private static final long serialVersionUID = -5416538917308950549L;
+
     protected SocketAddress address;
     
     private int failures = 0;

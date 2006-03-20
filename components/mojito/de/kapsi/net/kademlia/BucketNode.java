@@ -13,6 +13,8 @@ import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 
 public class BucketNode extends Node {
     
+    private static final long serialVersionUID = 2903713682317244655L;
+
     private static final Log LOG = LogFactory.getLog(BucketNode.class);
     
     private int nodeCount;
@@ -128,8 +130,25 @@ public class BucketNode extends Node {
      */
     private static class Cache extends FixedSizeHashMap {
         
+        private static final long serialVersionUID = 5255663117632404183L;
+
         private Cache(int maxSize) {
             super(maxSize, 0.75f, true, maxSize);
+        }
+        
+        // O(1)
+        public Object getLeastRecentlySeen(boolean remove) {
+            if (isEmpty()) {
+                return null;
+            }
+            
+            Iterator it = values().iterator();
+            Object value = it.next();
+            
+            if (remove) {
+                it.remove();
+            }
+            return value;
         }
         
         // O(n)
@@ -137,14 +156,14 @@ public class BucketNode extends Node {
             if (isEmpty()) {
                 return null;
             }
-            
+
             Object value = null;
             Iterator it = values().iterator();
             while (it.hasNext()) {
                 value = it.next();
             }
             
-            if (remove && value != null) {
+            if (remove) {
                 it.remove();
             }
             return value;

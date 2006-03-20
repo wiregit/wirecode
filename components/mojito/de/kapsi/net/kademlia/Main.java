@@ -24,6 +24,7 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
@@ -92,6 +93,7 @@ public class Main {
         String getr = "getr (key|kuid) (\\w|\\d)+";
         String listDB = "list db";
         String listRT = "list rt";
+        String saveRT = "save rt";
         String quit = "quit";
         
         String[] commands = {
@@ -105,6 +107,7 @@ public class Main {
                 getr,
                 listDB,
                 listRT,
+                saveRT,
                 quit
         };
         
@@ -138,6 +141,8 @@ public class Main {
                     list(dht, line.split(" "));
                 } else if (line.matches(listRT)) {
                     list(dht, line.split(" "));
+                } else if (line.matches(saveRT)) {
+                    save(dht, line.split(" "));
                 } else if (line.matches(quit)) {
                     for(int i = 0; i < dhts.size(); i++) {
                         ((DHT)dhts.get(i)).close();
@@ -313,6 +318,16 @@ public class Main {
                     }
                 }
             });
+        }
+    }
+    
+    private static void save(DHT dht, String[] line) {
+        if (line[1].equals("rt")) {
+            Context context = dht.getContext();
+            PatriciaRouteTable rt = (PatriciaRouteTable)context.getRouteTable();
+            rt.save();
+        } else {
+            System.out.println("Not implemented yet!");
         }
     }
     
