@@ -54,17 +54,36 @@ public class KUID implements Serializable {
     public static final int VALUE_ID = 0x02;
     public static final int MESSAGE_ID = 0x04;
     
-    public static final KUID MIN_UNKNOWN_ID = new KUID(UNKNOWN_ID, false);
-    public static final KUID MAX_UNKNOWN_ID = new KUID(UNKNOWN_ID, true);
+    public static final KUID MIN_UNKNOWN_ID;
+    public static final KUID MAX_UNKNOWN_ID;
     
-    public static final KUID MIN_NODE_ID = new KUID(NODE_ID, false);
-    public static final KUID MAX_NODE_ID = new KUID(NODE_ID, true);
+    public static final KUID MIN_NODE_ID;
+    public static final KUID MAX_NODE_ID;
     
-    public static final KUID MIN_VALUE_ID = new KUID(VALUE_ID, false);
-    public static final KUID MAX_VALUE_ID = new KUID(VALUE_ID, true);
+    public static final KUID MIN_VALUE_ID;
+    public static final KUID MAX_VALUE_ID;
     
-    public static final KUID MIN_MESSAGE_ID = new KUID(MESSAGE_ID, false);
-    public static final KUID MAX_MESSAGE_ID = new KUID(MESSAGE_ID, true);
+    public static final KUID MIN_MESSAGE_ID;
+    public static final KUID MAX_MESSAGE_ID;
+    
+    static {
+        byte[] min = new byte[20];
+        
+        byte[] max = new byte[20];
+        Arrays.fill(max, (byte)0xFF);
+        
+        MIN_UNKNOWN_ID = new KUID(UNKNOWN_ID, min);
+        MAX_UNKNOWN_ID = new KUID(UNKNOWN_ID, max);
+        
+        MIN_NODE_ID = new KUID(NODE_ID, min);
+        MAX_NODE_ID = new KUID(NODE_ID, max);
+        
+        MIN_VALUE_ID = new KUID(VALUE_ID, min);
+        MAX_VALUE_ID = new KUID(VALUE_ID, max);
+        
+        MIN_MESSAGE_ID = new KUID(MESSAGE_ID, min);
+        MAX_MESSAGE_ID = new KUID(MESSAGE_ID, max);
+    }
     
     protected final int type;
     protected final byte[] id;
@@ -80,24 +99,8 @@ public class KUID implements Serializable {
             throw new IllegalArgumentException("ID must be " + LENGTH + " bits long");
         }
         
-        /*if (!isValidId(id)) {
-            throw new IllegalArgumentException("All bits of ID are 0");
-        }*/
-        
         this.type = type;
         this.id = id;
-        this.hashCode = ArrayUtils.hashCode(id);
-    }
-    
-    private KUID(int type, boolean max) {
-        this.type = type;
-
-        this.id = new byte[LENGTH/8];
-        
-        if (max) {
-            Arrays.fill(this.id, (byte)0xFF);
-        }
-        
         this.hashCode = ArrayUtils.hashCode(id);
     }
     
@@ -152,6 +155,10 @@ public class KUID implements Serializable {
         return set(bit, false);
     }
     
+    public KUID invert(int bit){
+        return set(bit, !isBitSet(bit));
+    }
+    
     private KUID set(int bitIndex, boolean set) {
         int index = (int) (bitIndex / BITS.length);
         int bit = (int) (bitIndex - index * BITS.length);
@@ -165,10 +172,6 @@ public class KUID implements Serializable {
         }
         
         return new KUID(type, id);
-    }
-    
-    public KUID invert(int bitIndex){
-        return set(bitIndex,!isBitSet(bitIndex));
     }
     
     public int bits() {
