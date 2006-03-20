@@ -107,7 +107,7 @@ public class NIODispatcher implements Runnable {
 	private final Object Q_LOCK = new Object();
     
     /** A list of repeatable events that should be polled. */
-    private final List /* of Runnable */ POLLERS = new ArrayList();
+    private final List /* of Pollable */ POLLERS = new ArrayList();
     
 	/** The invokeLater queue. */
     private final Collection /* of Runnable */ LATER = new LinkedList();
