@@ -21,6 +21,7 @@ import de.kapsi.net.kademlia.BucketNode;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.Node;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
@@ -375,11 +376,15 @@ public class PatriciaRouteTable implements RoutingTable {
         List buckets = bucketsTrie.values();
         for (Iterator iter = buckets.iterator(); iter.hasNext();) {
             BucketNode bucket = (BucketNode) iter.next();
-            long delay = now - bucket.getTimeStamp();
-            if(delay > refreshLimit) {
+            long lastTouch = bucket.getTimeStamp();
+            if(now - lastTouch < RouteTableSettings.getBucketRefreshTime()) continue;
+            else{
                 //select a random ID with this prefix
                 KUID randomID = KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth());
-                //TODO: properly request the lookup
+                
+                if(LOG.isTraceEnabled()) {
+                    LOG.trace("Refreshing bucket:" + bucket + " with random ID: "+ randomID);
+                }
                 context.lookup(randomID,null);
             }
         }
@@ -450,18 +455,37 @@ public class PatriciaRouteTable implements RoutingTable {
      * sort method to sort the Nodes by last-recently 
      * and most-recently seen.
      */
-    public List select(KUID lookup, int k) {
-        touchBucket(lookup);
+    public List select(KUID lookup, int k, boolean isLocalLookup) {
+        //only touch bucket if we know we are going to contact it's nodes
+        if(isLocalLookup) touchBucket(lookup);
+        
+        //not necessary(for now)
+//        List list = nodesTrie.select(lookup, k);
+//        
+//        int bitIndex = -1;
+//        KUID head = null;
+//        int currentBitIndex = -1;
+//
+//        for(Iterator it = list.iterator(); it.hasNext(); ) {
+//            KUID current = (KUID)((Node)it.next()).getNodeID();
+//            if (head == null || (currentBitIndex = head.bitIndex(current)) != bitIndex) {
+//                bitIndex = currentBitIndex;
+//                head = current;
+//                touchBucket(head);
+//            }
+//        }
+//
+//        return list;
+        
         return nodesTrie.select(lookup, k);
     }
 
+
     public ContactNode selectNextClosest(KUID key) {
-        touchBucket(key);
         return (ContactNode)nodesTrie.selectNextClosest(key);
     }
     
     public ContactNode select(KUID key) {
-        touchBucket(key);
         return (ContactNode)nodesTrie.select(key);
     }
     
@@ -488,8 +512,11 @@ public class PatriciaRouteTable implements RoutingTable {
     private void touchBucket(KUID nodeId) {
         //      get bucket closest to node
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Touching bucket: " + bucket);
+        }
         
-        System.out.println(nodeId + " touches " + bucket);
         bucket.touch();
     }
     

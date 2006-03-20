@@ -25,7 +25,7 @@ public interface RoutingTable {
 
     public ContactNode select(KUID key);
     
-    public List select(KUID lookup, int k);
+    public List select(KUID lookup, int k, boolean isLocalLookup);
     
     public boolean containsNode(KUID nodeId);
     

@@ -15,7 +15,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,10 +44,12 @@ import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
+import de.kapsi.net.kademlia.routing.RandomBucketRefresher;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.CryptoHelper;
 import de.kapsi.net.kademlia.settings.ContextSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class Context implements Runnable {
     
@@ -55,6 +59,8 @@ public class Context implements Runnable {
     
     private static final long EVENT_DISPATCHER_DELAY = 100L;
     private static final long EVENT_DISPATCHER_INTERVAL = 100L;
+    
+    private static final long BUCKET_REFRESH_TIME = RouteTableSettings.getBucketRefreshTime();
     
     private static final int VENDOR = 0xDEADBEEF;
     private static final int VERSION = 0;
@@ -73,6 +79,7 @@ public class Context implements Runnable {
     private EventDispatcher eventDispatcher;
     private MessageFactory messageFactory;
     private KeyValuePublisher publisher;
+    private RandomBucketRefresher bucketRefresher;
     
     private boolean running = false;
     private final Timer scheduler = new Timer(true);
@@ -98,6 +105,7 @@ public class Context implements Runnable {
         eventDispatcher = new EventDispatcher();
         messageFactory = new MessageFactory(this);
         publisher = new KeyValuePublisher(this);
+        bucketRefresher = new RandomBucketRefresher(this);
         
         stats = new DHTNodeStat(this);
     }
@@ -233,9 +241,11 @@ public class Context implements Runnable {
             publisherThread.setDaemon(true);
             
             scheduler.scheduleAtFixedRate(eventDispatcher, 0, EVENT_DISPATCHER_INTERVAL);
+            scheduler.scheduleAtFixedRate(bucketRefresher, BUCKET_REFRESH_TIME , BUCKET_REFRESH_TIME);
             publisherThread.start();
-            
+
             messageDispatcher.run();
+            
         } finally {
             publisher.stop();
             scheduler.cancel();

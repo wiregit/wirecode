@@ -102,7 +102,7 @@ public class BucketNode extends Node {
     public String toString() {
         return super.toString() + ", depth: " + getDepth() 
                     + ", size: " + getNodeCount() 
-                    + ", replacements: " + getReplacementCacheSize();
+                    + ", replacements: " + getReplacementCacheSize()+", timestamp: "+timeStamp;
     }
     
     public static void main(String[] args) {

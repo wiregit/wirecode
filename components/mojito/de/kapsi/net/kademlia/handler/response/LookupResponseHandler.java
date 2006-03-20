@@ -23,6 +23,7 @@ import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.response.LookupResponse;
+import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.LookupSettings;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
@@ -154,6 +155,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     
     public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
         
+        RoutingTable routeTable = getRouteTable();
+        routeTable.handleFailure(nodeId);
+        
         if (!isQueried(nodeId)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("LookupRequestHandler did not query " 
@@ -191,7 +195,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         // Select the K closest Nodes from the K bucket list
-        List bucketList = context.getRouteTable().select(lookup, KademliaSettings.getReplicationParameter());
+        List bucketList = context.getRouteTable().select(lookup, KademliaSettings.getReplicationParameter(),true);
         
         // Add the Nodes to the yet-to-be query list
         for(int i = bucketList.size()-1; i >= 0; i--) {

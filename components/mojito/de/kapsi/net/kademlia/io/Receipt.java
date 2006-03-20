@@ -125,7 +125,6 @@ class Receipt {
                         + nodeId + " from " + src);
             }
             
-            //context.getRouteTable().remove(this.nodeId);
             handleTimeout();
         }
     }
