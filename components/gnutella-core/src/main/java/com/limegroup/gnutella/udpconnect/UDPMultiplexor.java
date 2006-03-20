@@ -78,8 +78,7 @@ public class UDPMultiplexor implements Pollable {
      *  Register a UDPConnectionProcessor for receiving incoming events and 
 	 *  return the assigned connectionID;
      */
-	public synchronized byte register(UDPConnectionProcessor con, SelectionKey key)
-      throws IOException {
+    public synchronized byte register(UDPConnectionProcessor con) throws IOException {
 		int connID;
 		
 		WeakReference[] copy = new WeakReference[_connections.length];
@@ -121,23 +120,18 @@ public class UDPMultiplexor implements Pollable {
             UDPConnectionProcessor con = (UDPConnectionProcessor)array[i].get();
             if(con != null) {
                 SelectionKey key = con.getChannel().keyFor(null);
-                if(key == null) {
-                    LOG.debug("Ignoring con: " + con);
-                    continue;
-                }
-                
-                LOG.debug("KR: " + key.readyOps() + ", KO: " + key.interestOps());
-                
-                if ((key.readyOps() & key.interestOps()) != 0) {
-                    if (selected == null)
-                        selected = new HashSet(5);
-                    selected.add(key);
-                }
-                
-                if(con.isClosed()) {
-                    if(removed == null)
-                        removed = new UDPConnectionProcessor[256];
-                    removed[i] = con;
+                if(key != null) {
+                    if(key.isValid()) {
+                        if ((key.readyOps() & key.interestOps()) != 0) {
+                            if (selected == null)
+                                selected = new HashSet(5);
+                            selected.add(key);
+                        }
+                    } else {
+                        if(removed == null)
+                            removed = new UDPConnectionProcessor[256];
+                        removed[i] = con;
+                    }
                 }
             }
         }

@@ -305,17 +305,12 @@ public final class UDPConnectionTest extends BaseTestCase {
         ConnStarter t = new ConnStarter();
         t.setDaemon(true);
         t.start();
-
-        System.out.println("starting conn1");
         
         // Startup connection one in original thread
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-System.out.println("started 1");
         
         // Wait for commpletion of uconn2 startup
         t.join();
-        
-        System.out.println("joined 2");
 
         // Get the initialized connection 2
         uconn2 = t.getConnection();
@@ -324,8 +319,6 @@ System.out.println("started 1");
         OutputStream ostream = uconn1.getOutputStream();
         for ( int i = 0; i < NUM_BYTES; i++ )
             ostream.write(i % 256);
-        
-        System.out.println("wrote out");
 
         // Read to end and one extra on second stream
         InputStream  istream = uconn2.getInputStream();
@@ -335,15 +328,9 @@ System.out.println("started 1");
             if ( (i % 256)  != rval )
                 fail("Error on byte:"+i);
         }
-        System.out.println("read in");
         
         // Close writer
         uconn1.close();
-        
-        System.out.println("closed 1");
-
-        // Wait a little
-        try { Thread.sleep(200); } catch (InterruptedException e) {}
 
         // Read from reader
         rval = istream.read();

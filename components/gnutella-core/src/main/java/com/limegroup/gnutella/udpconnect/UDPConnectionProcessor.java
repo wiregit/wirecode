@@ -1,10 +1,7 @@
 package com.limegroup.gnutella.udpconnect;
 
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AlreadyConnectedException;
 import java.nio.channels.ClosedChannelException;
@@ -13,12 +10,9 @@ import java.nio.channels.ConnectionPendingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /** 
  *  Manage a reliable udp connection for the transfer of data.
@@ -32,20 +26,7 @@ public class UDPConnectionProcessor {
 
     /** Define the maximum chunk size read for data bytes
         before we will blow out the connection */
-    public static final int   MAX_DATA_SIZE           = 4096;
-    
-    /** SelectableChannel used to expose I/O. */
-    private UDPSocketChannel _channel;
-
-    /** The limit on space for data to be written out */
-    private volatile int      _chunkLimit;
-
-    /** The receivers windowSpace defining amount of data that receiver can
-        accept */
-    private volatile int      _receiverWindowSpace;
-
-    /** Record the desired connection timeout on the connection */
-    private long              _connectTimeOut         = MAX_CONNECT_WAIT_TIME;
+    private static final int   MAX_DATA_SIZE           = 4096;
     
     /** Define the size of the data window */
     private static final int  DATA_WINDOW_SIZE        = 20;
@@ -56,14 +37,6 @@ public class UDPConnectionProcessor {
     /** The maximum number of times to try and send a data message */
     private static final int  MAX_SEND_TRIES          = 8;
 
-    // Handle to various singleton objects in our architecture
-    private UDPService        _udpService;
-    private UDPScheduler      _scheduler;
-    private Acceptor          _acceptor;
-    private UDPMultiplexor    _multiplexor;
-
-    // Define WAIT TIMES
-    //
 	/** Define the wait time between SYN messages */
 	private static final long SYN_WAIT_TIME           = 400;
 
@@ -85,7 +58,7 @@ public class UDPConnectionProcessor {
     private static final long MIN_ACK_WAIT_TIME       = 5;
 
     /** Define the size of a small send window for increasing wait time */
-    static final long SMALL_SEND_WINDOW       = 2;
+            static final long SMALL_SEND_WINDOW       = 2;
 
     /** Ensure that writing takes a break every 4 writes so other 
         synchronized activity can take place */
@@ -115,11 +88,23 @@ public class UDPConnectionProcessor {
     /** The state after user communication during shutdown */
     private static final int  FIN_STATE               = 3;
     
+    // Handle to various singleton objects in our architecture
+    private UDPService        _udpService;
+    private UDPScheduler      _scheduler;
+    private UDPMultiplexor    _multiplexor;
+    
+    /** The UDPSocketChannel backing this processor. */
+    private UDPSocketChannel  _channel;
+    
     /** The address we're connected to. */
     private InetSocketAddress _connectedTo;
     
-    /** Whether or not the remote side has sent us a fin. */
-    private volatile boolean  _receivedFin;
+    /** The limit on space for data to be written out */
+    private volatile int      _chunkLimit;
+
+    /** The receivers windowSpace defining amount of data that receiver can
+        accept */
+    private volatile int      _receiverWindowSpace;    
     
     /** Whether or not we've received an ack to our syn. */
     private boolean           _receivedSynAck;
@@ -211,6 +196,7 @@ public class UDPConnectionProcessor {
     
     /** Whether to skip any acks at all */
     private final boolean _skipAcks = DownloadSettings.SKIP_ACKS.getValue();
+    
     /** How long each measuring period is */
     private final int _period = DownloadSettings.PERIOD_LENGTH.getValue();
     
@@ -260,7 +246,7 @@ public class UDPConnectionProcessor {
     /**
      * Creates a new unconnected UDPConnectionProcessor.
      */
-    UDPConnectionProcessor() throws IOException {
+    UDPConnectionProcessor(UDPSocketChannel channel) {
         // Init default state
         _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
         _connectionState         = PRECONNECT_STATE;
@@ -274,6 +260,7 @@ public class UDPConnectionProcessor {
         _skipADataWrite          = false;
         _ackResendCount          = 0;
         _closeReasonCode         = FinMessage.REASON_NORMAL_CLOSE;
+        _channel                 = channel;
 
         // Allow UDPService to be overridden for testing
         if ( _testingUDPService == null )
@@ -281,15 +268,9 @@ public class UDPConnectionProcessor {
         else
             _udpService = _testingUDPService;
 
-        // If UDP is not running or not workable, barf
-        if (!_udpService.isListening() || !_udpService.canDoFWT()) {
-            throw new IOException("udp isn't working");
-        }
-
         // Only wake these guys up if the service is okay
         _multiplexor       = UDPMultiplexor.instance();
         _scheduler         = UDPScheduler.instance();
-        _acceptor          = RouterService.getAcceptor();
 
         // Precreate the receive window for responce reporting
         _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
@@ -298,8 +279,6 @@ public class UDPConnectionProcessor {
         // Acks seqNo need to be extended separately
         _localExtender     = new SequenceNumberExtender();
         _extender          = new SequenceNumberExtender();
-        
-        _channel           = new UDPSocketChannel(this, _receiveWindow);
     }
     
     /**
@@ -310,6 +289,11 @@ public class UDPConnectionProcessor {
      * @throws IOException
      */
     void connect(InetSocketAddress addr) throws IOException {
+        // If UDP is not running or not workable, barf
+        if (!_udpService.isListening() || !_udpService.canDoFWT()) {
+            throw new IOException("udp isn't working");
+        }        
+        
         synchronized(this) {
             if(_connectionState != PRECONNECT_STATE) {
                 if(isConnected())
@@ -331,7 +315,7 @@ public class UDPConnectionProcessor {
         if (LOG.isDebugEnabled())
             LOG.debug("Connecting to: " + addr);
         
-        _myConnectionID = _multiplexor.register(this, _channel.keyFor(null));
+        _myConnectionID = _multiplexor.register(this);
 
         // See if you can establish a pseudo connection 
         // which means each side can send/receive a SYN and ACK
@@ -348,6 +332,11 @@ public class UDPConnectionProcessor {
         return _channel;
     }
     
+    /** Retrieves the DataWindow used for reading data. */
+    DataWindow getReadWindow() {
+        return _receiveWindow;
+    }    
+    
     /** Gets the connect readiness. */
     synchronized boolean isConnectReady() {
         return isClosed() ||
@@ -358,21 +347,14 @@ public class UDPConnectionProcessor {
     
     /** Gets the read-readiness of this processor. */
     synchronized boolean isReadReady() {
-        return _receivedFin || _receiveWindow.hasReadableData();
+        return isClosed() || _receiveWindow.hasReadableData();
     }
     
     /** Gets the write-readiness of this processor. */
     synchronized boolean isWriteReady() {
-        return isConnected() && _channel.getNumberOfPendingChunks() < getChunkLimit();
+        return isClosed() || (isConnected() && _channel.getNumberOfPendingChunks() < getChunkLimit());
     }
     
-    /** Completely closes the connection. */
-    public void shutdown() {
-        try {
-            close();
-        } catch(IOException ignored) {}
-    }
-
     /**
      * Closes the connection
      * 
@@ -430,25 +412,6 @@ public class UDPConnectionProcessor {
 
         // Clean up my caller
         _closedCleanupEvent.unregister();
-    }
-
-    /**
-     *  Do some magic to get the local address if available.
-     */
-    InetAddress getLocalAddress() {
-        InetAddress lip = null;
-        try {
-            lip = InetAddress.getByName(
-              NetworkUtils.ip2string(_acceptor.getAddress(false)));
-        } catch (UnknownHostException uhe) {
-            try {
-                lip = InetAddress.getLocalHost();
-            } catch (UnknownHostException uhe2) {
-                lip = null;
-            }
-        }
-
-        return lip;
     }
     
     /**
@@ -955,7 +918,7 @@ public class UDPConnectionProcessor {
         // Keep track of how long you are waiting on connection
         long now = System.currentTimeMillis();
         long waitTime = now - _startedConnecting;
-        if (waitTime > _connectTimeOut) {
+        if (waitTime > MAX_CONNECT_WAIT_TIME) {
             LOG.debug("Timed out, waited for: " + waitTime);
             _connectionState = FIN_STATE;
         } else {
@@ -1235,7 +1198,6 @@ public class UDPConnectionProcessor {
 
         // Stop sending data
         _receiverWindowSpace    = 0;
-        _receivedFin = true;
 
         // Ack the Fin message
         safeSendAck(msg);
@@ -1522,17 +1484,5 @@ public class UDPConnectionProcessor {
             
             unregister();
         }
-    }
-    
-    //
-    // -----------------------------------------------------------------
-    
-    protected void finalize() {
-    	if (!isClosed()) {
-    		LOG.warn("finalizing an open UDPConnectionProcessor!");
-    		try {
-    			close();
-    		}catch (IOException ignored) {}
-    	}
     }
 }

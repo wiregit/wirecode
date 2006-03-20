@@ -12,6 +12,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.ConnectableChannel;
 import com.limegroup.gnutella.io.InterestReadChannel;
@@ -31,6 +34,8 @@ import com.limegroup.gnutella.io.WriteObserver;
 class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
                                                             InterestWriteChannel,
                                                             ConnectableChannel {
+    
+    private static final Log LOG = LogFactory.getLog(UDPSocketChannel.class);
     
     /** The SelectionKey associated with this channel. */
     private SelectionKey key;
@@ -62,9 +67,9 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     /** Whether or not we've propogated the shutdown to other writers. */
     private boolean shutdown = false;
     
-    UDPSocketChannel(UDPConnectionProcessor processor, DataWindow window) {
-        this.processor = processor;
-        this.readData = window;
+    UDPSocketChannel() {
+        this.processor = new UDPConnectionProcessor(this);
+        this.readData = processor.getReadWindow();
         this.chunks = new ArrayList(5);
         allocateNewChunk();
     }
@@ -83,46 +88,53 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
      * sending a keep alive if more space became available.
      */
     public int read(ByteBuffer to) throws IOException {
-        int read = 0;
-        DataRecord currentRecord = readData.getReadableBlock();
-        while (currentRecord != null) {
-            read += transfer(currentRecord, to);
-            if (!to.hasRemaining())
-                break;
-
-            // If to still has room left, we must have written
-            // all we could from the record, so we assign a new one.
-            // Fetch a block from the receiving window.
-            currentRecord = readData.getReadableBlock();
-        }
+        // It is possible that the channel is open but the processor
+        // is closed.  In that case, this will return -1.
+        // Once this closes, it throws CCE.
+        if(!isOpen())
+            throw new ClosedChannelException();
         
-        // Now that we've transferred all we can to the buffer, clear up
-        // the space & send a keep-alive if necessary
-        // Record how much space was previously available in the receive window
-        int priorSpace = readData.getWindowSpace();
+        synchronized (processor) {
+            int read = 0;
+            DataRecord currentRecord = readData.getReadableBlock();
+            while (currentRecord != null) {
+                read += transfer(currentRecord, to);
+                if (!to.hasRemaining())
+                    break;
 
-        // Remove all records we just read from the receiving window
-        readData.clearEarlyReadBlocks();   
+                // If to still has room left, we must have written
+                // all we could from the record, so we assign a new one.
+                // Fetch a block from the receiving window.
+                currentRecord = readData.getReadableBlock();
+            }
 
-        // If the receive window opened up then send a special 
-        // KeepAliveMessage so that the window state can be 
-        // communicated.
-        if ( (priorSpace == 0 && read > 0)|| 
-             (priorSpace <= UDPConnectionProcessor.SMALL_SEND_WINDOW && 
-              readData.getWindowSpace() > UDPConnectionProcessor.SMALL_SEND_WINDOW) ) {
-            processor.sendKeepAlive();
-        }
+            // Now that we've transferred all we can to the buffer, clear up
+            // the space & send a keep-alive if necessary
+            // Record how much space was previously available in the receive window
+            int priorSpace = readData.getWindowSpace();
+
+            // Remove all records we just read from the receiving window
+            readData.clearEarlyReadBlocks();
+
+            // If the receive window opened up then send a special
+            // KeepAliveMessage so that the window state can be
+            // communicated.
+            if ((priorSpace == 0 && read > 0)
+                    || (priorSpace <= UDPConnectionProcessor.SMALL_SEND_WINDOW &&
+                        readData.getWindowSpace() > UDPConnectionProcessor.SMALL_SEND_WINDOW)) {
+                processor.sendKeepAlive();
+            }
         
-        if(read == 0 && processor.isClosed())
-            return -1;
-        else
-            return read;       
+            if(read == 0 && processor.isClosed())
+                return -1;
+            else
+                return read;
+        }
     }
     
     /**
-     * Transfers the chunks in the DataRecord's msg to the ByteBuffer.
-     * Sets the record as being succesfully read after all data is
-     * read from it.
+     * Transfers the chunks in the DataRecord's msg to the ByteBuffer. Sets the record as being succesfully read after
+     * all data is read from it.
      * 
      * @param record
      * @param to
@@ -150,8 +162,18 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     
     /// ********** writing ***************
     
+    /**
+     * Writes all data in src into a list of internal chunks.
+     * This will notify the processor if we have no pending chunks prior
+     * to writing, so that it will know to retrieve some data.
+     * Chunks will be created until the processor tells us we're at the limit,
+     * at which point this will forcibly will return the amount of data that
+     * could be written so far.
+     * If all data is emptied from src, this will return that amount of data.
+     */
     public int write(ByteBuffer src) throws IOException {
-        if(processor.isClosed())
+        // We cannot write if either the channel or the processor is closed.
+        if(!isOpen() || processor.isClosed())
             throw new ClosedChannelException();
             
         synchronized(writeLock) {
@@ -182,14 +204,14 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     }
     
     /**
-     *  Allocates a chunk for writing to and reset written amount.
+     *  Allocates a chunk for writing to.
      */
     private void allocateNewChunk() {
         activeChunk = ByteBuffer.allocate(UDPConnectionProcessor.DATA_CHUNK_SIZE);
     }
 
     /**
-     *  Package accessor for retrieving and freeing up chunks of data.
+     *  Gets the first chunk of data that should be written to the wire.
      *  Returns null if no data.
      */
     ByteBuffer getNextChunk() {
@@ -212,7 +234,7 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     }
     
     /**
-     *  Return how many pending chunks are waiting.
+     *  Return how many pending chunks are waiting on being written to the wire.
      */
     int getNumberOfPendingChunks() {
         synchronized(writeLock) { 
@@ -264,8 +286,11 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     }
 
     /** Creates a new UDPSelectionKey & attaches the attachment, then returns it. */
-    public SelectionKey register(Selector sel, int ops, Object att) throws ClosedChannelException {
-        key = new UDPSelectionKey(processor, att, this, ops);
+    public synchronized SelectionKey register(Selector sel, int ops, Object att) throws ClosedChannelException {
+        if(!isOpen())
+            throw new ClosedChannelException();
+        
+        key = new UDPSelectionKey(processor, att, this, ops);        
         return key;
     }
 
@@ -277,8 +302,10 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     }
 
     /** Closes the processor. */
-    protected void implCloseChannel() throws IOException {
+    protected synchronized void implCloseChannel() throws IOException {
         processor.close();
+        if(key != null)
+            key.cancel();
     }
 
     /// ********** InterestWriteChannel methods. ***************
@@ -294,11 +321,9 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
             shutdown = true;
         }
         
-        if(isOpen()) {
-            try {
-                close();
-            } catch(IOException ignored) {}
-        }
+        try {
+            close();
+        } catch(IOException ignored) {}
         
         Shutdownable chain = writer;
         if(chain != null)
@@ -327,6 +352,10 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     public void handleIOException(IOException iox) {
         throw new UnsupportedOperationException();
     }
+    
+    public SocketAddress getRemoteSocketAddress() {
+        return processor.getSocketAddress();
+    }
 
     public boolean connect(SocketAddress remote) throws IOException {
         processor.connect((InetSocketAddress)remote);
@@ -352,4 +381,21 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     void setSocket(Socket socket) {
         this.socket = socket;
     }
+    
+
+    
+    //
+    // -----------------------------------------------------------------
+    
+    protected void finalize() {
+        if (isOpen()) {
+            LOG.warn("finalizing an open UDPSocketChannel!");
+            try {
+                close();
+            } catch (IOException ignored) {}
+            try {
+                processor.close();
+            } catch(IOException ignored) {}
+        }
+    }    
 }

@@ -3,7 +3,6 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 
 /**
  * Manages writing data to the network from a piped blocking OutputStream.
@@ -12,7 +11,7 @@ import java.nio.channels.SocketChannel;
  * The stream exposes a BufferLock that should be notified when data is available
  * to be written.
  */
-public class NIOOutputStream implements WriteObserver {
+class NIOOutputStream implements WriteObserver {
     
     private final Shutdownable handler;
     private final InterestWriteChannel channel;
@@ -25,7 +24,7 @@ public class NIOOutputStream implements WriteObserver {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    public NIOOutputStream(Shutdownable handler, InterestWriteChannel channel) {
+    NIOOutputStream(Shutdownable handler, InterestWriteChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }
@@ -49,7 +48,7 @@ public class NIOOutputStream implements WriteObserver {
     /**
      * Retrieves the OutputStream to write to.
      */
-    public synchronized OutputStream getOutputStream() throws IOException {
+    synchronized OutputStream getOutputStream() throws IOException {
         if(buffer == null)
             init();
         

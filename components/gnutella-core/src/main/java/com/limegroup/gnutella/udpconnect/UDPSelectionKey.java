@@ -4,6 +4,9 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
+/**
+ * A selection key for UDP connections.
+ */
 class UDPSelectionKey extends SelectionKey {
     
     private final UDPConnectionProcessor processor;
@@ -42,9 +45,11 @@ class UDPSelectionKey extends SelectionKey {
     }
 
     public int readyOps() {
-        return (processor.isReadReady()    ? SelectionKey.OP_READ  : 0)
-             | (processor.isWriteReady()   ? SelectionKey.OP_WRITE : 0)
-             | (processor.isConnectReady() ? SelectionKey.OP_CONNECT : 0);
+        synchronized(processor) {
+            return (processor.isReadReady()    ? SelectionKey.OP_READ  : 0)
+                 | (processor.isWriteReady()   ? SelectionKey.OP_WRITE : 0)
+                 | (processor.isConnectReady() ? SelectionKey.OP_CONNECT : 0);
+        }
     }
 
     public Selector selector() {

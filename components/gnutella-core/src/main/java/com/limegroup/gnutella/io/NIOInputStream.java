@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
  */
-public class NIOInputStream implements ChannelReadObserver, InterestReadChannel, ReadTimeout {
+class NIOInputStream implements ChannelReadObserver, InterestReadChannel, ReadTimeout {
     
     private final Shutdownable shutdownHandler;
     private final SoTimeout soTimeoutHandler;
@@ -36,7 +36,7 @@ public class NIOInputStream implements ChannelReadObserver, InterestReadChannel,
      * @param shutdowner  Object to shutdown when the InputStream is closed.
      * @param channel     Channel to do reads from.
      */
-    public NIOInputStream(SoTimeout soTimeouter, Shutdownable shutdowner, InterestReadChannel channel) {
+    NIOInputStream(SoTimeout soTimeouter, Shutdownable shutdowner, InterestReadChannel channel) {
         this.soTimeoutHandler = soTimeouter;
         this.shutdownHandler = shutdowner;
         this.channel = channel;
@@ -70,7 +70,7 @@ public class NIOInputStream implements ChannelReadObserver, InterestReadChannel,
     /**
      * Retrieves the InputStream to read from.
      */
-    public synchronized InputStream getInputStream() throws IOException {
+    synchronized InputStream getInputStream() throws IOException {
         if(buffer == null)
             init();
         
@@ -86,6 +86,7 @@ public class NIOInputStream implements ChannelReadObserver, InterestReadChannel,
             
             // read everything we can.
             while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
+            
             if(read == -1)
                 source.finished();
             

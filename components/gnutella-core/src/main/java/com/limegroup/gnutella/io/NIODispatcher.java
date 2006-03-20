@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -468,8 +467,8 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Runs any repeatable post-event tasks.  This does not lock, as the events
-     * are not added to the list outside of the NIO thread.
+     * Runs through all Pollables and returns a Collection of SelectionKeys
+     * that those Pollables returned.
      */
     private Collection /* of SelectionKey */ runPollables() {
         Collection ret = null;
@@ -630,14 +629,16 @@ public class NIODispatcher implements Runnable {
         if(proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
             try {
                 try {
-                    if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
+                    int readyOps = sk.readyOps();
+                    int interestOps = sk.interestOps();
+                    if (allowed(SelectionKey.OP_ACCEPT, readyOps, interestOps, allowedOps)) 
                         processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
-                    else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
+                    else if(allowed(SelectionKey.OP_CONNECT, readyOps, interestOps, allowedOps))
                         processConnect(now, sk, (ConnectObserver)attachment, proxy);
                     else {
-                        if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
+                        if (allowed(SelectionKey.OP_READ, readyOps, interestOps, allowedOps))
                             processRead(now, (ReadObserver)attachment, proxy);
-                        if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
+                        if (allowed(SelectionKey.OP_WRITE, readyOps, interestOps, allowedOps))
                             processWrite(now, (WriteObserver)attachment, proxy);
                     }
                 } catch (CancelledKeyException err) {
@@ -656,6 +657,11 @@ public class NIODispatcher implements Runnable {
             // we've had too many hits in a row.  kill this attachment.
             safeCancel(sk, attachment);
         }
+    }
+    
+    /** Determines whether or not the readyOps, interestOps & allowedOps match the given op. */
+    private boolean allowed(int op, int readyOps, int interestOps, int allowedOps) {
+        return (allowedOps & op) != 0 && (interestOps & op) != 0 && (readyOps & op) != 0;
     }
     
     /** A very safe cancel, ignoring errors & only shutting down if possible. */
