@@ -519,7 +519,7 @@ public abstract class MessageRouter {
 		// for routing to the appropriate connection processor
 		if ( msg instanceof UDPConnectionMessage ) {
 		    _udpConnectionMultiplexor.routeMessage(
-			  (UDPConnectionMessage)msg, address, port);
+			  (UDPConnectionMessage)msg, addr);
 			return;
 		}
 

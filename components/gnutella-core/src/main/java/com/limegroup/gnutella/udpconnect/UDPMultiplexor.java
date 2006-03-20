@@ -3,6 +3,7 @@ package com.limegroup.gnutella.udpconnect;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.util.Collections;
 import java.util.HashSet;
@@ -65,7 +66,7 @@ public class UDPMultiplexor implements Pollable {
             WeakReference conRef = array[i];
             if(conRef != null) {
                 UDPConnectionProcessor conn = (UDPConnectionProcessor)conRef.get();
-                if(conn != null && host.equals(conn.getInetAddress())) {
+                if(conn != null && host.equals(conn.getSocketAddress().getAddress())) {
                     return true;
                 }
             }
@@ -120,6 +121,13 @@ public class UDPMultiplexor implements Pollable {
             UDPConnectionProcessor con = (UDPConnectionProcessor)array[i].get();
             if(con != null) {
                 SelectionKey key = con.getChannel().keyFor(null);
+                if(key == null) {
+                    LOG.debug("Ignoring con: " + con);
+                    continue;
+                }
+                
+                LOG.debug("KR: " + key.readyOps() + ", KO: " + key.interestOps());
+                
                 if ((key.readyOps() & key.interestOps()) != 0) {
                     if (selected == null)
                         selected = new HashSet(5);
@@ -161,7 +169,7 @@ public class UDPMultiplexor implements Pollable {
      *  Route a message to the UDPConnectionProcessor identified in the messages
 	 *  connectionID;
      */
-	public void routeMessage(UDPConnectionMessage msg, InetAddress senderIP, int senderPort) {
+	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr) {
 		WeakReference[] array = _connections;
 		int connID = (int) msg.getConnectionID() & 0xff;
 
@@ -178,7 +186,7 @@ public class UDPMultiplexor implements Pollable {
                 UDPConnectionProcessor conn = (UDPConnectionProcessor)array[i].get();
 				if ( conn != null && 
                      conn.isConnecting() &&
-                     conn.matchAddress(senderIP, senderPort) ) {
+                     conn.matchAddress(addr) ) {
 
                     if(LOG.isDebugEnabled()) 
                         LOG.debug("routeMessage to conn:"+i+" Syn:"+msg);
@@ -192,7 +200,7 @@ public class UDPMultiplexor implements Pollable {
 
 		} else if(array[connID] != null) {  // If valid connID then send on to connection
             UDPConnectionProcessor conn = (UDPConnectionProcessor)array[connID].get();
-			if (conn != null && conn.matchAddress(senderIP, senderPort) )
+			if (conn != null && conn.matchAddress(addr) )
                 conn.handleMessage(msg);
 		}
 	}

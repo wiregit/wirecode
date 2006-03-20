@@ -362,15 +362,36 @@ public class NIODispatcher implements Runnable {
     private void processConnect(long now, SelectionKey sk, ConnectObserver handler, Attachment proxy) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug("Handling connect: " + handler);
-        SocketChannel channel = (SocketChannel)sk.channel();
-        proxy.clearTimeout();
         
-        boolean finished = channel.finishConnect();
-        if(finished) {
-            sk.interestOps(0); // interested in nothing just yet.
-            handler.handleConnect(channel.socket());
+        SelectableChannel sc = sk.channel();
+         // Note: We process the SelectionKey's attachment as both a SocketChannel
+         // and a ConnectableChannel, in the case that someone was unable to extend
+         // SocketChannel but wanted to provide the channel the ability to do
+         // non-blocking connects.
+        if(sc instanceof SocketChannel) {
+            SocketChannel channel = (SocketChannel)sk.channel();
+            proxy.clearTimeout();
+            
+            boolean finished = channel.finishConnect();
+            if(finished) {
+                sk.interestOps(0); // interested in nothing just yet.
+                handler.handleConnect(channel.socket());
+            } else {
+                cancel(sk, handler);
+            }
+        } else if(sc instanceof ConnectableChannel){
+            ConnectableChannel channel = (ConnectableChannel)sk.channel();
+            proxy.clearTimeout();
+            
+            boolean finished = channel.finishConnect();
+            if(finished) {
+                sk.interestOps(0); // interested in nothing just yet.
+                handler.handleConnect(channel.socket());
+            } else {
+                cancel(sk, handler);
+            }
         } else {
-            cancel(sk, handler);
+            throw new IllegalStateException("unsupported channel: " + sc);
         }
     }
     

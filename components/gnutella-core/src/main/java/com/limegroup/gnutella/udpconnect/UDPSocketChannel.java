@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.udpconnect;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
@@ -10,6 +13,7 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 
 import com.limegroup.gnutella.io.BufferUtils;
+import com.limegroup.gnutella.io.ConnectableChannel;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.NIODispatcher;
@@ -23,28 +27,40 @@ import com.limegroup.gnutella.io.WriteObserver;
  * This class _is_ the SocketChannel for UDP, except because we wrote it,
  * we can make it implement InterestReadChannel & InterestWriteChannel, so
  * we don't need the additional InterestAdapter.
- * 
- * TODO: extend SocketChannel instead of SelectableChannel.
- *       (should be done after writing & connecting are implemented)
  */
-class UDPSocketChannel extends SelectableChannel implements InterestReadChannel, InterestWriteChannel {
+class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
+                                                            InterestWriteChannel,
+                                                            ConnectableChannel {
     
     /** The SelectionKey associated with this channel. */
     private SelectionKey key;
+    
     /** The processor this channel is writing to / reading from. */
     private final UDPConnectionProcessor processor;
+    
+    /** The Socket object this UDPSocketChannel is used for. */
+    private Socket socket;
+    
     /** The DataWindow containing incoming read data. */
     private final DataWindow readData;
+    
     /** The WriteObserver that last requested interest from us. */
     private volatile WriteObserver writer;
+    
     /** The list of buffered chunks that need to be written out. */
     private ArrayList /* of ByteBuffer */ chunks;
+    
     /** The current chunk we're writing to. */
     private ByteBuffer activeChunk;
+    
     /** Whether or not we've handled one write yet. */
     private boolean writeHandled = false;
+    
     /** A lock to hold while manipulating chunks or activeChunk. */
     private final Object writeLock = new Object();
+    
+    /** Whether or not we've propogated the shutdown to other writers. */
+    private boolean shutdown = false;
     
     UDPSocketChannel(UDPConnectionProcessor processor, DataWindow window) {
         this.processor = processor;
@@ -249,13 +265,15 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
 
     /** Creates a new UDPSelectionKey & attaches the attachment, then returns it. */
     public SelectionKey register(Selector sel, int ops, Object att) throws ClosedChannelException {
-        key = new UDPSelectionKey(processor, att);
+        key = new UDPSelectionKey(processor, att, this, ops);
         return key;
     }
 
     /** Returns OP_READ & OP_WRITE. */
     public int validOps() {
-        return SelectionKey.OP_READ & SelectionKey.OP_WRITE;
+        return SelectionKey.OP_READ 
+             & SelectionKey.OP_WRITE 
+             & SelectionKey.OP_CONNECT;
     }
 
     /** Closes the processor. */
@@ -270,12 +288,17 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
      * that we're now shutdown.
      */
     public void shutdown() {
-        if(!isOpen())
-            return;
+        synchronized(this) {
+            if(shutdown)
+                return;
+            shutdown = true;
+        }
         
-        try {
-            close();
-        } catch(IOException ignored) {}
+        if(isOpen()) {
+            try {
+                close();
+            } catch(IOException ignored) {}
+        }
         
         Shutdownable chain = writer;
         if(chain != null)
@@ -303,5 +326,30 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     /** Unused. */
     public void handleIOException(IOException iox) {
         throw new UnsupportedOperationException();
+    }
+
+    public boolean connect(SocketAddress remote) throws IOException {
+        processor.connect((InetSocketAddress)remote);
+        return false;
+    }
+
+    public boolean finishConnect() throws IOException {
+        return processor.prepareOpenConnection();
+    }
+
+    public boolean isConnected() {
+        return processor.isConnected();
+    }
+
+    public boolean isConnectionPending() {
+        return processor.isConnecting();
+    }
+
+    public Socket socket() {
+        return socket;
+    }
+
+    void setSocket(Socket socket) {
+        this.socket = socket;
     }
 }

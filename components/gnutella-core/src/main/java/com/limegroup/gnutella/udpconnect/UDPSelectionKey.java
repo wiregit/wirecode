@@ -6,17 +6,17 @@ import java.nio.channels.Selector;
 
 class UDPSelectionKey extends SelectionKey {
     
-    private UDPConnectionProcessor processor;
+    private final UDPConnectionProcessor processor;
+    private final SelectableChannel channel;
     private volatile boolean valid = true;
     
     private int interestOps = 0;
     
-    UDPSelectionKey(UDPConnectionProcessor processor) {
+    UDPSelectionKey(UDPConnectionProcessor processor, Object attachment,
+                    SelectableChannel channel, int ops) {
         this.processor = processor;
-    }
-    
-    UDPSelectionKey(UDPConnectionProcessor processor, Object attachment) {
-        this.processor = processor;
+        this.channel = channel;
+        interestOps(ops);
         attach(attachment);
     }
 
@@ -25,7 +25,7 @@ class UDPSelectionKey extends SelectionKey {
     }
 
     public SelectableChannel channel() {
-        throw new UnsupportedOperationException();
+        return channel;
     }
 
     public int interestOps() {
@@ -42,8 +42,9 @@ class UDPSelectionKey extends SelectionKey {
     }
 
     public int readyOps() {
-        return (processor.isReadReady()  ? SelectionKey.OP_READ  : 0)
-             | (processor.isWriteReady() ? SelectionKey.OP_WRITE : 0);
+        return (processor.isReadReady()    ? SelectionKey.OP_READ  : 0)
+             | (processor.isWriteReady()   ? SelectionKey.OP_WRITE : 0)
+             | (processor.isConnectReady() ? SelectionKey.OP_CONNECT : 0);
     }
 
     public Selector selector() {

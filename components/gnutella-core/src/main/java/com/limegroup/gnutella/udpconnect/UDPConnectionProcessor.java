@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.udpconnect;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.channels.AlreadyConnectedException;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.ConnectionPendingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,7 +17,6 @@ import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -22,8 +25,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  */
 public class UDPConnectionProcessor {
 
-    private static final Log LOG =
-      LogFactory.getLog(UDPConnectionProcessor.class);
+    private static final Log LOG = LogFactory.getLog(UDPConnectionProcessor.class);
 
     /** Define the chunk size used for data bytes */
     public static final int   DATA_CHUNK_SIZE         = 512;
@@ -44,15 +46,7 @@ public class UDPConnectionProcessor {
 
     /** Record the desired connection timeout on the connection */
     private long              _connectTimeOut         = MAX_CONNECT_WAIT_TIME;
-
-	/** Predefine a common exception if the user can't receive UDP */
-	private static final IOException CANT_RECEIVE_UDP = 
-	  new IOException("Can't receive UDP");
-
-    /** Predefine a common exception if the connection times out on creation */
-    private static final IOException CONNECTION_TIMEOUT = 
-      new IOException("Connection timed out");
-
+    
     /** Define the size of the data window */
     private static final int  DATA_WINDOW_SIZE        = 20;
 
@@ -79,10 +73,6 @@ public class UDPConnectionProcessor {
 	/** Define the maximum wait time before sending a message in order to
         keep the connection alive (and firewalls open).  */
 	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
-
-	/** Define the startup time before starting to send data.  Note that
-        on the receivers end, they may not be setup initially.  */
-	private static final long WRITE_STARTUP_WAIT_TIME = 400;
 
     /** Define the default time to check for an ack to a data message */
     private static final long DEFAULT_RTO_WAIT_TIME   = 400;
@@ -124,16 +114,15 @@ public class UDPConnectionProcessor {
 
     /** The state after user communication during shutdown */
     private static final int  FIN_STATE               = 3;
-
-
-    /** The ip of the host connected to */
-	private InetAddress _ip;
-
-    /** The port of the host connected to */
-	private int         _port;
+    
+    /** The address we're connected to. */
+    private InetSocketAddress _connectedTo;
     
     /** Whether or not the remote side has sent us a fin. */
     private volatile boolean  _receivedFin;
+    
+    /** Whether or not we've received an ack to our syn. */
+    private boolean           _receivedSynAck;
 
     /** The Window for sending and acking data */
 	private DataWindow        _sendWindow;
@@ -170,6 +159,12 @@ public class UDPConnectionProcessor {
 
     /** Flag saying that a Fin packet has been acked on shutdown */
     private boolean           _waitingForFinAck;
+    
+    /** The time we started connecting. */
+    private long              _startedConnecting;
+    
+    /** Scheduled event for connecting. */
+    private UDPTimerEvent     _connectEvent;
 
     /** Scheduled event for ensuring that data is acked or resent */
     private UDPTimerEvent     _ackTimeoutEvent;
@@ -258,14 +253,14 @@ public class UDPConnectionProcessor {
     /**
      *  For testing only, allow UDPService to be overridden
      */
-    public static void setUDPServiceForTesting(UDPService udpService) {
+    static void setUDPServiceForTesting(UDPService udpService) {
 		_testingUDPService = udpService;
 	}
     
     /**
      * Creates a new unconnected UDPConnectionProcessor.
      */
-    public UDPConnectionProcessor() throws IOException {
+    UDPConnectionProcessor() throws IOException {
         // Init default state
         _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
         _connectionState         = PRECONNECT_STATE;
@@ -288,7 +283,7 @@ public class UDPConnectionProcessor {
 
         // If UDP is not running or not workable, barf
         if (!_udpService.isListening() || !_udpService.canDoFWT()) {
-            throw CANT_RECEIVE_UDP;
+            throw new IOException("udp isn't working");
         }
 
         // Only wake these guys up if the service is okay
@@ -314,19 +309,27 @@ public class UDPConnectionProcessor {
      * @param port
      * @throws IOException
      */
-    void connect(InetAddress ip, int port) throws IOException {
+    void connect(InetSocketAddress addr) throws IOException {
         synchronized(this) {
-            if(_connectionState != PRECONNECT_STATE)
-                throw new IOException("already closed or connected");
+            if(_connectionState != PRECONNECT_STATE) {
+                if(isConnected())
+                    throw new AlreadyConnectedException();
+                else if(isClosed())
+                    throw new ClosedChannelException();
+                else
+                    throw new ConnectionPendingException();
+            }
             _connectionState = CONNECTING_STATE;
         }
         
         // Record their address
-        _ip        		         = ip;
-        _port      		         = port;
+        _connectedTo = addr;
+        
+        _startedConnecting = System.currentTimeMillis();
+        _sequenceNumber = 0;
 
         if (LOG.isDebugEnabled())
-            LOG.debug("Connecting to ip:" + ip + " port:" + port);
+            LOG.debug("Connecting to: " + addr);
         
         _myConnectionID = _multiplexor.register(this, _channel.keyFor(null));
 
@@ -335,23 +338,32 @@ public class UDPConnectionProcessor {
 		tryToConnect();
     }
     
+    /** Retrieves the InetSocketAddress this is connecting to. */
+    InetSocketAddress getSocketAddress() {
+        return _connectedTo;
+    }
+    
     /** Retrieves the SelectableChannel. */
-    public UDPSocketChannel getChannel() {
+    UDPSocketChannel getChannel() {
         return _channel;
     }
     
-    /**
-     * Gets the read-readiness of this processor.
-     */
-    boolean isReadReady() {
+    /** Gets the connect readiness. */
+    synchronized boolean isConnectReady() {
+        return isClosed() ||
+                (_receivedSynAck
+                 && isConnecting()
+                 && _theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT);
+    }
+    
+    /** Gets the read-readiness of this processor. */
+    synchronized boolean isReadReady() {
         return _receivedFin || _receiveWindow.hasReadableData();
     }
     
-    /**
-     * Gets the write-readiness of this processor.
-     */
-    boolean isWriteReady() {
-        return _channel.getNumberOfPendingChunks() < getChunkLimit();
+    /** Gets the write-readiness of this processor. */
+    synchronized boolean isWriteReady() {
+        return isConnected() && _channel.getNumberOfPendingChunks() < getChunkLimit();
     }
     
     /** Completely closes the connection. */
@@ -421,16 +433,9 @@ public class UDPConnectionProcessor {
     }
 
     /**
-     *  Return the InetAddress.
-     */
-    public InetAddress getInetAddress() {
-        return _ip;
-    }
-
-    /**
      *  Do some magic to get the local address if available.
      */
-    public InetAddress getLocalAddress() {
+    InetAddress getLocalAddress() {
         InetAddress lip = null;
         try {
             lip = InetAddress.getByName(
@@ -445,30 +450,36 @@ public class UDPConnectionProcessor {
 
         return lip;
     }
-
-    int getPort() {
-        return _port;
-    }
     
     /**
      *  Prepare for handling an open connection.
      */
-    private void prepareOpenConnection() {
+    synchronized boolean prepareOpenConnection() throws IOException {
+        if(isClosed())
+            throw new ClosedChannelException();
+        if(isConnected())
+            return true;
+        
+        if(!_receivedSynAck || _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT)
+            return false;
+            
         _connectionState = CONNECT_STATE;
-        _sequenceNumber=1;
+        _sequenceNumber = 1;
         scheduleKeepAlive();
 
         // Create the delayed connection components
-        _sendWindow      = new DataWindow(DATA_WINDOW_SIZE, 1);
-        _writeRegulator  = new WriteRegulator(_sendWindow); 
+        _sendWindow = new DataWindow(DATA_WINDOW_SIZE, 1);
+        _writeRegulator = new WriteRegulator(_sendWindow);
 
-        // Precreate the event for rescheduling writing to allow 
-        // thread safety and faster writing 
-        _safeWriteWakeup = new SafeWriteWakeupTimerEvent(Long.MAX_VALUE,this);
+        // Precreate the event for rescheduling writing to allow
+        // thread safety and faster writing
+        _safeWriteWakeup = new SafeWriteWakeupTimerEvent(Long.MAX_VALUE, this);
         _scheduler.register(_safeWriteWakeup);
 
-		// Keep chunkLimit in sync with window space
-        _chunkLimit      = _sendWindow.getWindowSpace();  
+        // Keep chunkLimit in sync with window space
+        _chunkLimit      = _sendWindow.getWindowSpace();
+        return true;
+    
     }
 
     /**
@@ -528,7 +539,7 @@ public class UDPConnectionProcessor {
     /**
      *  Activate writing if we were waiting for data to write
      */
-    public synchronized void writeDataActivation() {
+    private synchronized void writeDataActivation() {
         // Schedule at a reasonable time
         long rto = (long)_sendWindow.getRTO();
         scheduleWriteDataEvent( _lastDataSendTime + (rto/4) );
@@ -537,7 +548,7 @@ public class UDPConnectionProcessor {
     /**
      *  Hand off the wakeup of data writing to the scheduler
      */
-    public void wakeupWriteEvent(boolean force) {
+    void wakeupWriteEvent(boolean force) {
         if (force || _waitingForDataAvailable ) {
             LOG.debug("wakupWriteEvent");
             if (_safeWriteWakeup.getEventTime() == Long.MAX_VALUE) {
@@ -547,7 +558,20 @@ public class UDPConnectionProcessor {
             }
         }
     }
-
+    
+    /**
+     * Setup and schedule the callback event for ensuring we resend SYNs on Connect.
+     */
+    private synchronized void scheduleConnectEvent(long time) {
+        if(_connectEvent == null) {
+            _connectEvent = new ConnectSynEvent(time, this);
+            _scheduler.register(_connectEvent);
+        } else {
+            _connectEvent.updateTime(time);
+        }
+        _scheduler.scheduleEvent(_connectEvent);
+    }
+    
     /**
      *  Setup and schedule the callback event for ensuring data gets acked.
      */
@@ -596,7 +620,7 @@ public class UDPConnectionProcessor {
     /**
      *  Test whether the connection is in connecting mode
      */
-    public synchronized boolean isConnected() {
+    synchronized boolean isConnected() {
         return (_connectionState == CONNECT_STATE && 
                 _theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT);
     }
@@ -604,14 +628,14 @@ public class UDPConnectionProcessor {
     /**
      *  Test whether the connection is closed
      */
-    public synchronized boolean isClosed() {
+    synchronized boolean isClosed() {
         return (_connectionState == FIN_STATE);
     }
 
     /**
      *  Test whether the connection is not fully setup
      */
-	public synchronized boolean isConnecting() {
+	synchronized boolean isConnecting() {
         // It is important to check for either CONNECTING_STATE
         // or UNASSIGNED_SLOT because the state is advanced when
         // an ACK to our syn is received, and the connectionId is
@@ -629,8 +653,8 @@ public class UDPConnectionProcessor {
     /**
      *  Test whether the ip and ports match
      */
-	public boolean matchAddress(InetAddress ip, int port) {
-		return (_ip.equals(ip) && _port == port);
+	boolean matchAddress(InetSocketAddress addr) {
+        return _connectedTo.equals(addr);
 	}
 
     /**
@@ -638,7 +662,7 @@ public class UDPConnectionProcessor {
 	 *  remain equal to the space available in the sender and receiver 
 	 *  data window.
      */
-	public int getChunkLimit() {
+	int getChunkLimit() {
 		return Math.min(_chunkLimit, _receiverWindowSpace);
 	}
 
@@ -777,14 +801,13 @@ public class UDPConnectionProcessor {
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
         if(LOG.isDebugEnabled())  {
-            LOG.debug("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+
-              _lastSendTime);
+            LOG.debug("send:" + msg + " to: " + _connectedTo + ", t:" + _lastSendTime);
             if ( msg instanceof FinMessage ) { 
             	Exception ex = new Exception();
             	LOG.debug("", ex);
             }
         }
-		_udpService.send(msg, _ip, _port);  
+		_udpService.send(msg, _connectedTo);  
 	}
 
 
@@ -921,59 +944,39 @@ public class UDPConnectionProcessor {
     //
     /**
      *  Send SYN messages to desired host and wait for Acks and their 
-     *  SYN message.  Block connector while trying to connect.
+     *  SYN message.  Schedules an event to periodically resend a Syn.
      */
-	private void tryToConnect() throws IOException {
-		try {
-            _sequenceNumber       = 0;
-
-            // Keep track of how long you are waiting on connection
-            long       waitTime   = 0;
-
+	synchronized private void tryToConnect() {
+        if (!isConnecting()) {
+            LOG.debug("Already connected");
+            return;
+        }
+        
+        // Keep track of how long you are waiting on connection
+        long now = System.currentTimeMillis();
+        long waitTime = now - _startedConnecting;
+        if (waitTime > _connectTimeOut) {
+            LOG.debug("Timed out, waited for: " + waitTime);
+            _connectionState = FIN_STATE;
+        } else {
             // Build SYN message with my connectionID in it
-            SynMessage synMsg = new SynMessage(_myConnectionID);
+            SynMessage synMsg;
+            if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT)
+                synMsg = new SynMessage(_myConnectionID, _theirConnectionID);
+            else
+                synMsg = new SynMessage(_myConnectionID);
 
-            // Keep sending and waiting until you get a Syn and an Ack from 
-            // the other side of the connection.
-			while ( true ) { 
-
-                // If we have received their connectionID then use it
-			    synchronized(this){
-			        
-			        if (!isConnecting()) 
-			            break;
-			        
-			        if ( waitTime > _connectTimeOut ) { 
-			            _connectionState = FIN_STATE;
-			            throw CONNECTION_TIMEOUT;
-			        }
-			        
-			        if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT &&
-			                _theirConnectionID != synMsg.getConnectionID()) {
-			            synMsg = 
-			                new SynMessage(_myConnectionID, _theirConnectionID);
-			        } 
-			    }
-
-				// Send a SYN packet with our connectionID 
-				send(synMsg);  
-    
-                // Wait for some kind of response
-				try { Thread.sleep(SYN_WAIT_TIME); } 
-                catch(InterruptedException e) {}
-                waitTime += SYN_WAIT_TIME;
-			}
-
-		} catch (IllegalArgumentException iae) {
-			throw (IOException)new IOException().initCause(iae);
-		}
+            LOG.debug("Sending SYN: " + synMsg);
+            // Send a SYN packet with our connectionID
+            send(synMsg);
+            
+            scheduleConnectEvent(now + SYN_WAIT_TIME);
+        }
 	}
     
     /**
-     * Handles an incoming SYN message.
-     * All initial and/or duplicate SYNs are acked.  We set theirConnectionID
-     * once we see the first SYN.  If a subsequent SYN has a different ID, that
-     * SYN is ignored.
+     * Handles an incoming SYN message. All initial and/or duplicate SYNs are acked. We set theirConnectionID once we see the first SYN. If a subsequent SYN has a different ID,
+     * that SYN is ignored.
      * 
      * @param smsg
      */
@@ -1050,13 +1053,8 @@ public class UDPConnectionProcessor {
         }
 
 
-        // If they are Acking our SYN message, advance the state,
-        // but make sure that we advance the state only once.
-        if ( seqNo == 0 && isConnecting() && _connectionState == CONNECTING_STATE) { 
-            // The connection should be successful assuming that I
-            // receive their SYN so move state to CONNECT_STATE
-            // and get ready for activity
-            prepareOpenConnection();
+        if ( seqNo == 0 && isConnecting()) {
+            _receivedSynAck = true;
         } else if ( _waitingForFinAck && seqNo == _finSeqNo ) { 
             // A fin message has been acked on shutdown
             _waitingForFinAck = false;
@@ -1251,31 +1249,28 @@ public class UDPConnectionProcessor {
     /**
      *  Take action on a received message.
      */
-    public void handleMessage(UDPConnectionMessage msg) {
-        synchronized (this) {
-            // Record when the last message was received
-            _lastReceivedTime = System.currentTimeMillis();
-            if(LOG.isDebugEnabled())  
-                LOG.debug("handleMessage :"+msg+" t:"+_lastReceivedTime);
+     synchronized void handleMessage(UDPConnectionMessage msg) {
+        // Record when the last message was received
+        _lastReceivedTime = System.currentTimeMillis();
+        if (LOG.isDebugEnabled())
+            LOG.debug("handleMessage :" + msg + " t:" + _lastReceivedTime);
 
-            if (msg instanceof SynMessage)
-                handleSynMessage((SynMessage)msg);
-            else if (msg instanceof AckMessage)
-                handleAckMessage((AckMessage)msg);
-            else if (msg instanceof DataMessage)
-                handleDataMessage((DataMessage)msg);
-            else if (msg instanceof KeepAliveMessage)
-                handleKeepAliveMessage((KeepAliveMessage)msg);
-            else if (msg instanceof FinMessage)
-                handleFinMessage((FinMessage)msg);
-        }
+        if (msg instanceof SynMessage)
+            handleSynMessage((SynMessage) msg);
+        else if (msg instanceof AckMessage)
+            handleAckMessage((AckMessage) msg);
+        else if (msg instanceof DataMessage)
+            handleDataMessage((DataMessage) msg);
+        else if (msg instanceof KeepAliveMessage)
+            handleKeepAliveMessage((KeepAliveMessage) msg);
+        else if (msg instanceof FinMessage)
+            handleFinMessage((FinMessage) msg);
     }
 
     /**
-     *  If there is data to be written then write it 
-     *  and schedule next write time.
+     * If there is data to be written then write it and schedule next write time.
      */
-    public synchronized void writeData() {
+    private synchronized void writeData() {
         // Make sure we don't write without a break for too long
         int noSleepCount = 0;
         
@@ -1487,6 +1482,22 @@ public class UDPConnectionProcessor {
                 LOG.debug("write wakeup timeout: "+ System.currentTimeMillis());
         }
     }
+    
+    /** 
+     *  Event that will resend a Syn if we need to while connecting.
+     */
+    static class ConnectSynEvent extends UDPTimerEvent {
+
+        public ConnectSynEvent(long time,UDPConnectionProcessor proc) {
+            super(time,proc);
+        }
+
+        protected void doActualEvent(UDPConnectionProcessor udpCon) {
+            _eventTime = Long.MAX_VALUE;
+            LOG.debug("Running SYN Event");
+            udpCon.tryToConnect();
+        }
+    }    
 
     /** 
      *  Do final cleanup and shutdown after connection is closed.
