@@ -33,10 +33,10 @@ public class RoutingTableTest {
         new Thread(dht,"DHT").start();
         RoutingTable routingTable = dht.getContext().getRouteTable();
         
-//        testBuckets(routingTable);
+        testBuckets(routingTable);
 //        testReplaceNode(routingTable);
 //        testReplaceCachedNode(routingTable);
-        testRemoveNode(routingTable);
+//        testRemoveNode(routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
         try {
@@ -49,7 +49,7 @@ public class RoutingTableTest {
     }
     
     public static void testBuckets(RoutingTable routingTable) {
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 22; i++) {
             ContactNode node = new ContactNode(KUID.createRandomNodeID(addr),addr);
             routingTable.add(node,true);
         }

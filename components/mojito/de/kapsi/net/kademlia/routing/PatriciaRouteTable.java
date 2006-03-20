@@ -43,6 +43,8 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private PatriciaTrie bucketsTrie;
 
+    private BucketNode smallestSubtreeBucket;
+    
     public PatriciaRouteTable(Context context) {
         this.context = context;
         
@@ -160,18 +162,10 @@ public class PatriciaRouteTable implements RoutingTable {
             }
             
             BucketNode localBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
-            int localDepth = localBucket.getDepth();
-            
             //1
             boolean containsLocal = localBucket.equals(bucket);
             //2
-            boolean partOfSmallest = true;
-            if(localDepth > 0){
-                List smallestSubtreeBuckets = bucketsTrie.range(localBucket.getNodeID().invert(localDepth-1),localDepth-1);
-                partOfSmallest =   smallestSubtreeBuckets.contains(bucket);
-            
-            }
-
+            boolean partOfSmallest = (smallestSubtreeBucket!= null) && smallestSubtreeBucket.equals(bucket);
             //3
             boolean tooDeep = bucket.getDepth() % B == 0;
             
@@ -203,7 +197,17 @@ public class PatriciaRouteTable implements RoutingTable {
                     }
                     return;
                 }
-                //trying recursive call!
+                //update smallest subtree if split reason was that it contained the local bucket
+                if(containsLocal) {
+                    BucketNode newLocalBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
+                    if(newLocalBucket.equals(leftSplitBucket)) {
+                        smallestSubtreeBucket = rightSplitBucket;
+                    }
+                    else if(newLocalBucket.equals(rightSplitBucket)){
+                        smallestSubtreeBucket = leftSplitBucket;
+                    }
+                }
+                //now trying recursive call!
                 //attempt the put the new contact again with the split buckets
                 put(nodeId,node,knowToBeAlive);
                 
