@@ -90,7 +90,11 @@ public class DefaultMessageHandler extends MessageHandler
                 KeyValueCollection c = (KeyValueCollection)iter.next();
 
                 boolean isCloser = nodeId.isCloser(context.getLocalNodeID(), c.getKey());
-                if(isCloser) {
+                //To avoid redundant STORE forward, a node only transfers a value if it's ID is closer
+                //than any other ID (except the new closest one of course)
+                //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
+                boolean localIsClosest = routeTable.selectNextClosest(c.getKey()).equals(context.getLocalNode());
+                if(isCloser && localIsClosest) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Node "+node+" is now closer then us to a value. Sending store request");   
                     }

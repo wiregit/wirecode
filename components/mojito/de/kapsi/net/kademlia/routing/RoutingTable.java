@@ -20,6 +20,8 @@ public interface RoutingTable {
     public ContactNode get(KUID nodeId);
     
     public ContactNode get(KUID nodeId, boolean checkAndUpdateCache);
+    
+    public ContactNode selectNextClosest(KUID key);
 
     public ContactNode select(KUID key);
     

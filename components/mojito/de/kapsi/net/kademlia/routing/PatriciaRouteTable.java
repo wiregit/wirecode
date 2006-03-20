@@ -366,6 +366,11 @@ public class PatriciaRouteTable implements RoutingTable{
         return nodesTrie.select(lookup, k);
     }
 
+    public ContactNode selectNextClosest(KUID key) {
+        touchBucket(key);
+        return (ContactNode)nodesTrie.selectNextClosest(key);
+    }
+    
     public ContactNode select(KUID key) {
         touchBucket(key);
         return (ContactNode)nodesTrie.select(key);
