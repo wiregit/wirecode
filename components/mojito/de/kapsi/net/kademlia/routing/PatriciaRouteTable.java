@@ -142,7 +142,11 @@ public class PatriciaRouteTable implements RoutingTable {
             }
             bucket.incrementNodeCount();
             bucket.removeReplacementNode(nodeId);
-            if(knowToBeAlive)node.alive();
+            
+            if(knowToBeAlive) {
+                node.alive();
+            }
+            
             nodesTrie.put(nodeId,node);
             return;
         } 
@@ -156,12 +160,18 @@ public class PatriciaRouteTable implements RoutingTable {
             }
             
             BucketNode localBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
+            int localDepth = localBucket.getDepth();
+            
             //1
             boolean containsLocal = localBucket.equals(bucket);
             //2
-            BucketNode smallestSubtree = (BucketNode)bucketsTrie.selectNextClosest(localBucket.getNodeID());
+            boolean partOfSmallest = true;
+            if(localDepth > 0){
+                List smallestSubtreeBuckets = bucketsTrie.range(localBucket.getNodeID().invert(localDepth-1),localDepth-1);
+                partOfSmallest =   smallestSubtreeBuckets.contains(bucket);
             
-            boolean partOfSmallest = bucket.equals(smallestSubtree);
+            }
+
             //3
             boolean tooDeep = bucket.getDepth() % B == 0;
             

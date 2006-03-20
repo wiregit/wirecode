@@ -5,6 +5,7 @@
 
 package de.kapsi.net.kademlia.db;
 
+import java.io.Serializable;
 import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
@@ -19,22 +20,28 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 
-public class KeyValueCollection implements Collection {
+public class KeyValueCollection implements Collection, Serializable {
     
+    private static final long serialVersionUID = 1992547869696103652L;
+
     private static final Log LOG = LogFactory.getLog(KeyValueCollection.class);
     
     private Context context;
-    private KUID key;
-    
     private PublicKey masterKey;
+    
+    private KUID key;
     private FixedSizeHashMap values;
 
     public KeyValueCollection(Context context, KUID key, int maxSize) {
-        this.context = context;
-        this.key = key;
+        setContext(context);
         
-        masterKey = context.getMasterKey();
+        this.key = key;
         values = new FixedSizeHashMap(Math.min(maxSize, 10), maxSize);
+    }
+    
+    public void setContext(Context context) {
+        this.context = context;
+        masterKey = context.getMasterKey();
     }
     
     public KUID getKey() {

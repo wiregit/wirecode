@@ -54,13 +54,11 @@ public class BucketNode extends Node {
     }
     
     public ContactNode getReplacementNode(KUID nodeId) {
-        if(replacementCache == null) return null;
-        else return (ContactNode)replacementCache.get(nodeId);
+        return (replacementCache != null ? (ContactNode)replacementCache.get(nodeId) : null);
     }
     
     public int getReplacementCacheSize() {
-        if(replacementCache == null) return 0;
-        else return replacementCache.size();
+        return (replacementCache != null ? replacementCache.size() : 0);
     }
     
     public Map getReplacementCache() {
@@ -68,13 +66,16 @@ public class BucketNode extends Node {
     }
     
     public ContactNode getMostRecentlySeenCachedNode(boolean remove) {
-        if(replacementCache == null) return null;
-        else return (ContactNode)replacementCache.getMostRecentlySeen(remove);
+        if(replacementCache != null) {
+            return (ContactNode)replacementCache.getMostRecentlySeen(remove);
+        }
+        return null;
     }
     
     public void removeReplacementNode(KUID nodeId) {
-        if(replacementCache == null) return;
-        else replacementCache.remove(nodeId);
+        if(replacementCache != null) {
+            replacementCache.remove(nodeId);
+        }
     }
     
     public void touch() {
@@ -99,8 +100,9 @@ public class BucketNode extends Node {
     }
     
     public String toString() {
-        return  super.toString() + ", depth: "+depth+", size: "+nodeCount+", replacements: "
-        +(replacementCache==null?0:replacementCache.size());
+        return super.toString() + ", depth: " + getDepth() 
+                    + ", size: " + getNodeCount() 
+                    + ", replacements: " + getReplacementCacheSize();
     }
     
     public static void main(String[] args) {

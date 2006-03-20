@@ -80,9 +80,9 @@ public class KUID implements Serializable {
             throw new IllegalArgumentException("ID must be " + LENGTH + " bits long");
         }
         
-        if (!isValidId(id)) {
+        /*if (!isValidId(id)) {
             throw new IllegalArgumentException("All bits of ID are 0");
-        }
+        }*/
         
         this.type = type;
         this.id = id;
@@ -165,6 +165,10 @@ public class KUID implements Serializable {
         }
         
         return new KUID(type, id);
+    }
+    
+    public KUID invert(int bitIndex){
+        return set(bitIndex,!isBitSet(bitIndex));
     }
     
     public int bits() {
