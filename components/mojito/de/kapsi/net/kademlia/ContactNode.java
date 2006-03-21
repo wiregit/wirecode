@@ -26,6 +26,10 @@ public class ContactNode extends Node {
         return ++failures;
     }
     
+    public boolean hasFailed() {
+        return (failures > 0);
+    }
+    
     public int getFailureCount() {
         return failures;
     }
