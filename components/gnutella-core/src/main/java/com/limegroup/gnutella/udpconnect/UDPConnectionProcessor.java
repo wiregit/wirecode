@@ -42,6 +42,10 @@ public class UDPConnectionProcessor {
 
     /** Define the maximum wait time to connect */
     private static final long MAX_CONNECT_WAIT_TIME   = 20*1000;
+    
+    /** Define the maximum time that we'll allow a connection to remain
+     *  open through keep-alives alone. */
+    private static final long MAX_KEEPALIVE_TIME      = 60 * 1000;
 
 	/** Define the maximum wait time before sending a message in order to
         keep the connection alive (and firewalls open).  */
@@ -180,6 +184,9 @@ public class UDPConnectionProcessor {
 
     /** The last time that a message was received from the other host */
 	private long              _lastReceivedTime;
+    
+    /** The last time we received a non-keepalive message. */
+    private long              _lastDataOrAckTime;
 
     /** The number of resends to take into account when scheduling ack wait */
     private int               _ackResendCount;
@@ -764,6 +771,9 @@ public class UDPConnectionProcessor {
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
+        if(msg instanceof DataMessage || msg instanceof AckMessage)
+            _lastDataOrAckTime = _lastSendTime;
+        
         if(LOG.isDebugEnabled())  {
             LOG.debug("send:" + msg + " to: " + _connectedTo + ", t:" + _lastSendTime);
             if ( msg instanceof FinMessage ) { 
@@ -1216,16 +1226,19 @@ public class UDPConnectionProcessor {
         if (LOG.isDebugEnabled())
             LOG.debug("handleMessage :" + msg + " t:" + _lastReceivedTime);
 
-        if (msg instanceof SynMessage)
+        if (msg instanceof SynMessage) {
             handleSynMessage((SynMessage) msg);
-        else if (msg instanceof AckMessage)
+        } else if (msg instanceof AckMessage) {
+            _lastDataOrAckTime = _lastReceivedTime;
             handleAckMessage((AckMessage) msg);
-        else if (msg instanceof DataMessage)
+        } else if (msg instanceof DataMessage) {
+            _lastDataOrAckTime = _lastReceivedTime;
             handleDataMessage((DataMessage) msg);
-        else if (msg instanceof KeepAliveMessage)
+        } else if (msg instanceof KeepAliveMessage) {
             handleKeepAliveMessage((KeepAliveMessage) msg);
-        else if (msg instanceof FinMessage)
+        } else if (msg instanceof FinMessage) {
             handleFinMessage((FinMessage) msg);
+        }
     }
 
     /**
@@ -1326,8 +1339,6 @@ public class UDPConnectionProcessor {
     	}
 
         protected void doActualEvent(UDPConnectionProcessor udpCon) {
-
-
             long time = System.currentTimeMillis();
             
             if(LOG.isDebugEnabled())  
@@ -1337,19 +1348,17 @@ public class UDPConnectionProcessor {
 
             if (udpCon.isClosed() ) {
                 udpCon._keepaliveEvent.unregister();
+                return;
             }
-
-			// Make sure that some messages are received within timeframe
-			if ( udpCon.isConnected() && 
-				 udpCon._lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
-
+            
+            if (udpCon.isConnected()
+                    && (udpCon._lastDataOrAckTime + MAX_KEEPALIVE_TIME < time ||
+                        udpCon._lastReceivedTime  + MAX_MESSAGE_WAIT_TIME < time)
+               ) {
                 LOG.debug("Keepalive generated shutdown");
-
-				// If no incoming messages for very long time then 
-				// close connection
                 udpCon.closeAndCleanup(FinMessage.REASON_TIMEOUT);
-				return;
-			}
+                return;
+            }
             
             // If reevaluation of the time still requires a keepalive then send
             if ( time+1 >= (udpCon._lastSendTime + KEEPALIVE_WAIT_TIME) ) {

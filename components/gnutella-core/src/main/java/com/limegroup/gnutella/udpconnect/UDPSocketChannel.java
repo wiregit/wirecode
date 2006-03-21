@@ -383,19 +383,5 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
 
     void setSocket(Socket socket) {
         this.socket = socket;
-    }
-    
-
-    
-    //
-    // -----------------------------------------------------------------
-    
-    protected void finalize() {
-        if (isOpen()) {
-            LOG.warn("finalizing an open UDPSocketChannel!");
-            try {
-                close();
-            } catch (IOException ignored) {}
-        }
     }    
 }

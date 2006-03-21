@@ -31,7 +31,7 @@ public class UDPMultiplexor implements Pollable {
 	public static final byte          UNASSIGNED_SLOT   = 0;
 
 	/** Keep track of the assigned connections */
-	private volatile WeakReference[] /* UDPConnectionProcessor */  _connections;
+	private volatile UDPConnectionProcessor[] _connections;
 
 	/** Keep track of the last assigned connection id so that we can use a 
 		circular assignment algorithm.  This should cut down on message
@@ -49,7 +49,7 @@ public class UDPMultiplexor implements Pollable {
      *  Initialize the UDPMultiplexor.
      */
     private UDPMultiplexor() {
-		_connections       = new WeakReference[256];
+		_connections       = new UDPConnectionProcessor[256];
 		_lastConnectionID  = 0;
         NIODispatcher.instance().addPollable(this);
     }
@@ -58,51 +58,47 @@ public class UDPMultiplexor implements Pollable {
      * Determines if we're connected to the given host.
      */
     public boolean isConnectedTo(InetAddress host) {
-        WeakReference[] array = _connections;
-        
-        if(_lastConnectionID == 0)
+        UDPConnectionProcessor[] array = _connections;
+
+        if (_lastConnectionID == 0)
             return false;
-        for(int i = 0; i < array.length; i++) {
-            WeakReference conRef = array[i];
-            if(conRef != null) {
-                UDPConnectionProcessor conn = (UDPConnectionProcessor)conRef.get();
-                if(conn != null && host.equals(conn.getSocketAddress().getAddress())) {
-                    return true;
-                }
+        for (int i = 0; i < array.length; i++) {
+            UDPConnectionProcessor con = array[i];
+            if (con != null && host.equals(con.getSocketAddress().getAddress())) {
+                return true;
             }
         }
         return false;
     }
 
     /**
-     *  Register a UDPConnectionProcessor for receiving incoming events and 
-	 *  return the assigned connectionID;
+     * Register a UDPConnectionProcessor for receiving incoming events and return the assigned connectionID;
      */
     public synchronized byte register(UDPConnectionProcessor con) throws IOException {
-		int connID;
-		
-		WeakReference[] copy = new WeakReference[_connections.length];
-		for (int i= 0 ; i< _connections.length;i++) 
-		    copy[i] = _connections[i];
-		
-		for (int i = 1; i <= copy.length; i++) { 
-			connID = (_lastConnectionID + i) % 256;
+        int connID;
 
-			// We don't assign zero.
-			if ( connID == 0 )
-				continue;
+        UDPConnectionProcessor[] copy = new UDPConnectionProcessor[_connections.length];
+        for (int i = 0; i < _connections.length; i++)
+            copy[i] = _connections[i];
 
-			// If the slot is open, take it.
-			if (copy[connID] == null || copy[connID].get()==null) {
-				_lastConnectionID = connID;
-				copy[connID] = new WeakReference(con);
-				_connections=copy;
-				return (byte) connID;
-			}
-		}
-        
+        for (int i = 1; i <= copy.length; i++) {
+            connID = (_lastConnectionID + i) % 256;
+
+            // We don't assign zero.
+            if (connID == 0)
+                continue;
+
+            // If the slot is open, take it.
+            if (copy[connID] == null) {
+                _lastConnectionID = connID;
+                copy[connID] = con;
+                _connections = copy;
+                return (byte) connID;
+            }
+        }
+
         throw new IOException("no room for connection");
-	}
+    }
     
     /**
      * Returns the SelectionKey associated w/ the connection for
@@ -111,27 +107,26 @@ public class UDPMultiplexor implements Pollable {
     public Set poll() {
         Set selected = null;
         
-        WeakReference[] array = _connections;
+        UDPConnectionProcessor[] array = _connections;
         UDPConnectionProcessor[] removed = null;
         
         for(int i = 0; i < array.length; i++) {
-            if(array[i] == null)
+            UDPConnectionProcessor con = (UDPConnectionProcessor)array[i];
+            if(con == null)
                 continue;
-            UDPConnectionProcessor con = (UDPConnectionProcessor)array[i].get();
-            if(con != null) {
-                SelectionKey key = con.getChannel().keyFor(null);
-                if(key != null) {
-                    if(key.isValid()) {
-                        if ((key.readyOps() & key.interestOps()) != 0) {
-                            if (selected == null)
-                                selected = new HashSet(5);
-                            selected.add(key);
-                        }
-                    } else {
-                        if(removed == null)
-                            removed = new UDPConnectionProcessor[256];
-                        removed[i] = con;
+            
+            SelectionKey key = con.getChannel().keyFor(null);
+            if(key != null) {
+                if(key.isValid()) {
+                    if ((key.readyOps() & key.interestOps()) != 0) {
+                        if (selected == null)
+                            selected = new HashSet(5);
+                        selected.add(key);
                     }
+                } else {
+                    if(removed == null)
+                        removed = new UDPConnectionProcessor[array.length];
+                    removed[i] = con;
                 }
             }
         }
@@ -140,17 +135,14 @@ public class UDPMultiplexor implements Pollable {
         // _connections may have changed (since we didn't lock while polling),
         // so we need to check and ensure the given UDPConnectionProcessor
         // is the same.
-        if(removed != null) {
-            synchronized(this) {
-                WeakReference[] copy = new WeakReference[_connections.length];
-                for (int i= 0 ; i< _connections.length;i++) {
-                    copy[i] = _connections[i];
-                    if(copy[i] != null && removed[i] != null) {
-                        if(copy[i].get() == removed[i]) {
-                            copy[i].clear();
-                            copy[i] = null;
-                        }
-                    }
+        if (removed != null) {
+            synchronized (this) {
+                UDPConnectionProcessor[] copy = new UDPConnectionProcessor[_connections.length];
+                for (int i = 0; i < _connections.length; i++) {
+                    if(_connections[i] == removed[i])
+                        copy[i] = null;
+                    else
+                        copy[i] = _connections[i];
                 }
                 _connections = copy;
             }
@@ -164,7 +156,7 @@ public class UDPMultiplexor implements Pollable {
 	 *  connectionID;
      */
 	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr) {
-		WeakReference[] array = _connections;
+        UDPConnectionProcessor[] array = _connections;
 		int connID = (int) msg.getConnectionID() & 0xff;
 
 		// If connID equals 0 and SynMessage then associate with a connection
@@ -174,14 +166,11 @@ public class UDPMultiplexor implements Pollable {
                 LOG.debug("Receiving SynMessage :"+msg);
             
 			for (int i = 1; i < array.length; i++) {
-				if (array[i]==null)
-					continue;
+                UDPConnectionProcessor conn = (UDPConnectionProcessor)array[i];
+                if(conn == null)
+                    continue;
                 
-                UDPConnectionProcessor conn = (UDPConnectionProcessor)array[i].get();
-				if ( conn != null && 
-                     conn.isConnecting() &&
-                     conn.matchAddress(addr) ) {
-
+				if ( conn.isConnecting() && conn.matchAddress(addr) ) {
                     if(LOG.isDebugEnabled()) 
                         LOG.debug("routeMessage to conn:"+i+" Syn:"+msg);
 
@@ -193,8 +182,8 @@ public class UDPMultiplexor implements Pollable {
 			// so it is safe to throw away premature ones
 
 		} else if(array[connID] != null) {  // If valid connID then send on to connection
-            UDPConnectionProcessor conn = (UDPConnectionProcessor)array[connID].get();
-			if (conn != null && conn.matchAddress(addr) )
+            UDPConnectionProcessor conn = (UDPConnectionProcessor)array[connID];
+			if (conn.matchAddress(addr) )
                 conn.handleMessage(msg);
 		}
 	}
