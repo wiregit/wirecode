@@ -235,7 +235,11 @@ public class PatriciaTrie implements Serializable {
      * and most-recently seen.
      */
     public List select(Object key, int count) {
-        SearchState state = new SearchState(key, count);
+        return select(key, count, null);
+    }
+    
+    public List select(Object key, int count, KeySelector keySelector) {
+        SearchState state = new SearchState(key, count, keySelector);
         selectR(state);
         return state.getResults();
     }
@@ -697,9 +701,21 @@ public class PatriciaTrie implements Serializable {
         
         private final Random r = new Random();
         
-        public SearchState(Object key, int targetSize) {
+        private KeySelector keySelector;
+        
+        public SearchState(Object key, int targetSize, KeySelector keySelector) {
             this.key = key;
             this.targetSize = targetSize;
+            
+            if (keySelector != null) {
+                this.keySelector = keySelector;
+            } else {
+                this.keySelector = new KeySelector() {
+                    public boolean allow(Object key, Object value) {
+                        return true;
+                    }
+                };
+            }
             
             dest = new ArrayList(Math.min(targetSize, size()));
         }
@@ -710,7 +726,7 @@ public class PatriciaTrie implements Serializable {
         
         public boolean add(Entry h) {
             if (h.bitIndex <= bitIndex) {
-                if (!h.isEmpty()) {
+                if (!h.isEmpty() && keySelector.allow(h.key, h.value)) {
                     addResult(h);
                 }
                 return true;
@@ -773,5 +789,9 @@ public class PatriciaTrie implements Serializable {
         
         /** Returns the n-th different bit between key and found */
         public int bitIndex(Object key, Object found);
+    }
+    
+    public static interface KeySelector {
+        public boolean allow(Object key, Object value);
     }
 }
