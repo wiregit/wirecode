@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ChannelInterestReadAdapter;
+import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.NIOMultiplexor;
@@ -657,7 +657,7 @@ public class Acceptor {
     /**
      * A ConnectionDispatcher that reads asynchronously from the socket.
      */
-    private static class AsyncConnectionDispatcher extends ChannelInterestReadAdapter {
+    private static class AsyncConnectionDispatcher extends AbstractChannelInterestRead {
         private final Socket client;
         
         AsyncConnectionDispatcher(Socket client) {

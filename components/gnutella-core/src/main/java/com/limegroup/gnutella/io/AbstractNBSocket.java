@@ -22,10 +22,10 @@ import org.apache.commons.logging.LogFactory;
  * ensure all remaining data is written.   This also exposes a common blocking input
  * & output stream.
  */
-public abstract class NBSocketAdapter extends NBSocket implements ConnectObserver, ReadWriteObserver,
+public abstract class AbstractNBSocket extends NBSocket implements ConnectObserver, ReadWriteObserver,
                                                                   NIOMultiplexor, ReadTimeout, SoTimeout{
     
-    private static final Log LOG = LogFactory.getLog(NBSocketAdapter.class);
+    private static final Log LOG = LogFactory.getLog(AbstractNBSocket.class);
 
 
     /** Lock for shutting down. */
@@ -156,7 +156,7 @@ public abstract class NBSocketAdapter extends NBSocket implements ConnectObserve
                     while(lastChannel.getWriteChannel() instanceof ChannelWriter) {
                         lastChannel = (ChannelWriter)lastChannel.getWriteChannel();
                         if(lastChannel instanceof ThrottleListener)
-                            ((ThrottleListener)lastChannel).setAttachment(NBSocketAdapter.this);
+                            ((ThrottleListener)lastChannel).setAttachment(AbstractNBSocket.this);
                     }
 
                     InterestWriteChannel source = getBaseWriteChannel();
@@ -288,7 +288,7 @@ public abstract class NBSocketAdapter extends NBSocket implements ConnectObserve
                 private Object result;
                 public void run() {
                     try {
-                        NIOInputStream stream = new NIOInputStream(NBSocketAdapter.this, NBSocketAdapter.this, null).init();
+                        NIOInputStream stream = new NIOInputStream(AbstractNBSocket.this, AbstractNBSocket.this, null).init();
                         setReadObserver(stream);
                         result = stream.getInputStream();
                     } catch(IOException iox) { // impossible, but not a big deal.

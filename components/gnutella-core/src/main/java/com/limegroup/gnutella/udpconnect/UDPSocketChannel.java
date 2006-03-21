@@ -302,10 +302,13 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     }
 
     /** Closes the processor. */
-    protected synchronized void implCloseChannel() throws IOException {
+    protected void implCloseChannel() throws IOException {
+        synchronized(this) {
+            if(key != null)
+                key.cancel();
+        }
+        
         processor.close();
-        if(key != null)
-            key.cancel();
     }
 
     /// ********** InterestWriteChannel methods. ***************
@@ -393,9 +396,6 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
             try {
                 close();
             } catch (IOException ignored) {}
-            try {
-                processor.close();
-            } catch(IOException ignored) {}
         }
     }    
 }

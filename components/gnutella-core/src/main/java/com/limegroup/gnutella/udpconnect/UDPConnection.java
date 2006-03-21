@@ -13,13 +13,13 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.NBSocketAdapter;
+import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /** 
  *  Create a reliable udp connection interface.
  */
-public class UDPConnection extends NBSocketAdapter {
+public class UDPConnection extends AbstractNBSocket {
     
     /** The current version of the reliable UDP protocol. */
     public static final byte VERSION = (byte) 1;

@@ -18,7 +18,7 @@ import java.nio.channels.UnsupportedAddressTypeException;
  * switch to using event-based reads, setReadObserver can be used, and read-events will be passed to the ReadObserver. A
  * ChannelReadObserver must be used so that the Socket can set the appropriate underlying channel.
  */
-public class NIOSocket extends NBSocketAdapter {
+public class NIOSocket extends AbstractNBSocket {
 
     /** The underlying channel the socket is using */
     private final SocketChannel channel;
