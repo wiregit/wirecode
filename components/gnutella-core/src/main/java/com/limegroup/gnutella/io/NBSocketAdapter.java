@@ -29,7 +29,7 @@ public abstract class NBSocketAdapter extends NBSocket implements ConnectObserve
 
 
     /** Lock for shutting down. */
-    protected final Object LOCK = new Object();
+    private final Object LOCK = new Object();
 
     /** The reader. */
     protected ReadObserver reader;
@@ -41,7 +41,7 @@ public abstract class NBSocketAdapter extends NBSocket implements ConnectObserve
     protected volatile ConnectObserver connecter;
 
     /** Whether or not we've shutdown the socket. */
-    protected boolean shutdown = false;
+    private boolean shutdown = false;
     
     /**
      * Retrieves the channel which should be used as the base channel
@@ -277,7 +277,7 @@ public abstract class NBSocketAdapter extends NBSocket implements ConnectObserve
      * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
     public final InputStream getInputStream() throws IOException {
-        if(isClosed() || shutdown)
+        if(isClosed() || isShutdown())
             throw new IOException("Socket closed.");
         
         if(reader instanceof NIOInputStream) {
@@ -321,7 +321,7 @@ public abstract class NBSocketAdapter extends NBSocket implements ConnectObserve
      * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
     public final OutputStream getOutputStream() throws IOException {
-        if(isClosed() || shutdown)
+        if(isClosed() || isShutdown())
             throw new IOException("Socket closed.");
             
         if(writer instanceof NIOOutputStream)
@@ -382,6 +382,12 @@ public abstract class NBSocketAdapter extends NBSocket implements ConnectObserve
                 connecter = null;
             }
         });
+    }
+    
+    private boolean isShutdown() {
+        synchronized(LOCK) {
+            return shutdown;
+        }
     }
     
     /** A ConnectObserver to use when someone wants to do a blocking connection. */
