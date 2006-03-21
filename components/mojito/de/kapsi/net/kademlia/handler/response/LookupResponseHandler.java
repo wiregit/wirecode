@@ -195,7 +195,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         // Select the K closest Nodes from the K bucket list
-        List bucketList = context.getRouteTable().select(lookup, KademliaSettings.getReplicationParameter(),true);
+        List bucketList = context.getRouteTable().select(lookup, KademliaSettings.getReplicationParameter(),false,true);
         
         // Add the Nodes to the yet-to-be query list
         for(int i = bucketList.size()-1; i >= 0; i--) {

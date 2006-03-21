@@ -40,7 +40,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         
         List bucketList 
             = context.getRouteTable().select(lookup,  
-                    KademliaSettings.getReplicationParameter(),false);
+                    KademliaSettings.getReplicationParameter(),false,false);
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Sending back: " + bucketList);

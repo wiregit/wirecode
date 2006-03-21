@@ -246,9 +246,11 @@ public class PatriciaRouteTable implements RoutingTable {
         ContactNode node = (ContactNode) nodesTrie.get(nodeId);
         //get closest bucket
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
-        Map replacementCache = bucket.getReplacementCache();
         if(node != null) {
-            if(node.failure() > RouteTableSettings.getMaxNodeFailures()) {
+            //only remove if node considered stale and the bucket is full and it's replacement cache is not empty
+            if((node.failure() > RouteTableSettings.getMaxNodeFailures())
+                    && (bucket.getNodeCount() >= K) 
+                    && (bucket.getReplacementCacheSize() > 0)) {
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Removing node: "+node+" from bucket: "+bucket);
@@ -256,18 +258,14 @@ public class PatriciaRouteTable implements RoutingTable {
                 //remove node and replace with most recent alive one from cache
                 nodesTrie.remove(nodeId);
                 bucket.decrementNodeCount();
-                if(replacementCache != null && replacementCache.size()!=0) {
-                    ContactNode replacement = bucket.getMostRecentlySeenCachedNode(true);
-                    put(replacement.getNodeID(),replacement,false);
-                }
+                ContactNode replacement = bucket.getMostRecentlySeenCachedNode(true);
+                put(replacement.getNodeID(),replacement,false);
             }
         } else {
-            if(replacementCache!= null) {
-                node = (ContactNode)replacementCache.remove(nodeId);
+                node = bucket.removeReplacementNode(nodeId);
                 if (node!= null && LOG.isTraceEnabled()) {
                     LOG.trace("Removed node: "+node+" from replacement cache");
                 }
-            }
         }
     }
     
@@ -377,7 +375,7 @@ public class PatriciaRouteTable implements RoutingTable {
         for (Iterator iter = buckets.iterator(); iter.hasNext();) {
             BucketNode bucket = (BucketNode) iter.next();
             long lastTouch = bucket.getTimeStamp();
-            if(now - lastTouch < RouteTableSettings.getBucketRefreshTime()) continue;
+            if(now - lastTouch < refreshLimit) continue;
             else{
                 //select a random ID with this prefix
                 KUID randomID = KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth());
@@ -441,43 +439,28 @@ public class PatriciaRouteTable implements RoutingTable {
         return nodesTrie.isEmpty();
     }
 
-    public void remove(KUID key) {
-        //TODO mark: some logic to delete a bucket if it's empty
-        BucketNode bucket = (BucketNode)bucketsTrie.select(key);
-        bucket.decrementNodeCount();
-        bucket.removeReplacementNode(key);
-        nodesTrie.remove(key);
-    }
-
     /** 
      * Returns a List of buckts sorted by their 
      * closeness to the provided Key. Use BucketList's
      * sort method to sort the Nodes by last-recently 
      * and most-recently seen.
      */
-    public List select(KUID lookup, int k, boolean isLocalLookup) {
+    public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean isLocalLookup) {
         //only touch bucket if we know we are going to contact it's nodes
         if(isLocalLookup) touchBucket(lookup);
-        
-        //not necessary(for now)
-//        List list = nodesTrie.select(lookup, k);
-//        
-//        int bitIndex = -1;
-//        KUID head = null;
-//        int currentBitIndex = -1;
-//
-//        for(Iterator it = list.iterator(); it.hasNext(); ) {
-//            KUID current = (KUID)((Node)it.next()).getNodeID();
-//            if (head == null || (currentBitIndex = head.bitIndex(current)) != bitIndex) {
-//                bitIndex = currentBitIndex;
-//                head = current;
-//                touchBucket(head);
-//            }
-//        }
-//
-//        return list;
-        
-        return nodesTrie.select(lookup, k);
+        if(onlyLiveNodes) {
+            return nodesTrie.select(lookup, k, new PatriciaTrie.KeySelector() {
+                public boolean allow(Object key, Object value) {
+                    if(value instanceof ContactNode) {
+                        ContactNode node = (ContactNode)value;
+                        if(node.hasFailed()) {
+                            return false;
+                        } else return true;
+                    } else return false;
+                }
+                
+            });
+        }else return nodesTrie.select(lookup, k);
     }
 
 

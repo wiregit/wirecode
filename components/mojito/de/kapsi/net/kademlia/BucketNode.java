@@ -72,10 +72,10 @@ public class BucketNode extends Node {
         return null;
     }
     
-    public void removeReplacementNode(KUID nodeId) {
+    public ContactNode removeReplacementNode(KUID nodeId) {
         if(replacementCache != null) {
-            replacementCache.remove(nodeId);
-        }
+            return (ContactNode)replacementCache.remove(nodeId);
+        } else return null;
     }
     
     public void touch() {

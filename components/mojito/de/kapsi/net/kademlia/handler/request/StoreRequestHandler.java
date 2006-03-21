@@ -26,6 +26,7 @@ import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class StoreRequestHandler extends AbstractRequestHandler {
     
@@ -70,17 +71,25 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         for(Iterator it = values.iterator(); it.hasNext(); ) {
             KeyValue keyValue = (KeyValue)it.next();
             
-            try {
-                if (context.getDatabase().add(keyValue)) {
-                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.SUCCEEDED));
-                } else {
+            //under the assumption that the requester sent us a lookup before
+            //check if we are part of the closest alive nodes to this value
+            List nodesList = getRouteTable().select(keyValue.getKey(),KademliaSettings.getReplicationParameter(),true, false);
+            if(nodesList.contains(context.getLocalNode())) {
+                try {
+                    if (context.getDatabase().add(keyValue)) {
+                        stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.SUCCEEDED));
+                    } else {
+                        stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
+                    }
+                } catch (SignatureException err) {
+                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
+                } catch (InvalidKeyException err) {
                     stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
                 }
-            } catch (SignatureException err) {
-                stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
-            } catch (InvalidKeyException err) {
+            } else {
                 stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
             }
+            
         }
         
         // TODO do not request all values at once
