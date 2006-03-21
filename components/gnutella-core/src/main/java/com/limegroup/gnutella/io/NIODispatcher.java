@@ -110,24 +110,13 @@ public class NIODispatcher implements Runnable {
     private final List /* of Pollable */ POLLERS = new ArrayList();
     
 	/** The invokeLater queue. */
-    private final Collection /* of Runnable */ LATER = new LinkedList();
+    private Collection /* of Runnable */ LATER = new LinkedList();
     
     /** The throttle queue. */
     private final List /* of NBThrottle */ THROTTLE = new ArrayList();
     
     /** The timeout manager. */
     private final TimeoutController TIMEOUTER = new TimeoutController();
-    
-    /**
-     * Temporary list used where REGISTER & LATER are combined, so that
-     * handling IOException or running arbitrary code can't deadlock.
-     * Otherwise, it could be possible that one thread locked some arbitrary
-     * Object and then tried to acquire Q_LOCK by registering or invokeLatering.
-     * Meanwhile, the NIODispatch thread may be running pending items and holding
-     * Q_LOCK.  If while running those items it tries to lock that arbitrary
-     * Object, deadlock would occur.
-     */
-    private final ArrayList UNLOCKED = new ArrayList();
     
     /**
      * A common ByteBufferCache that classes can use.
@@ -430,24 +419,22 @@ public class NIODispatcher implements Runnable {
     /**
      * Adds any pending actions.
      *
-     * This works by adding any pending actions into a temporary list so that actions
-     * to the outside world don't need to hold Q_LOCK.
+     * This works by adding any pending actions into a local list and then replacing
+     * LATER with a new list.  This is done so that actions to the outside world
+     * don't need to hold Q_LOCK.
      *
-     * Interaction with UNLOCKED doesn't need to hold a lock, because it's only used
-     * in the NIODispatch thread.
-     *
-     * Throttle is not moved to UNLOCKED because it is not cleared, and because the
-     * actions are all within this package, so we can guarantee that it doesn't
-     * deadlock.
+     * Throttle is ticked outside the lock because ticking only hits items in this
+     * package and we can ensure it doesn't deadlock.
      */
     private void runPendingTasks() {
         long now = System.currentTimeMillis();
         for(int i = 0; i < THROTTLE.size(); i++)
             ((NBThrottle)THROTTLE.get(i)).tick(now);
         
+        Collection localLater;
         synchronized(Q_LOCK) {
-            UNLOCKED.addAll(LATER);
-            LATER.clear();
+            localLater = LATER;
+            LATER = new LinkedList();
         }
         
         if(now > lastCacheClearTime + CACHE_CLEAR_INTERVAL) {
@@ -455,8 +442,8 @@ public class NIODispatcher implements Runnable {
             lastCacheClearTime = now;
         }
         
-        if(!UNLOCKED.isEmpty()) {
-            for(Iterator i = UNLOCKED.iterator(); i.hasNext(); ) {
+        if(!localLater.isEmpty()) {
+            for(Iterator i = localLater.iterator(); i.hasNext(); ) {
                 Runnable item = (Runnable) i.next();
                 try {
                     item.run();
@@ -465,7 +452,6 @@ public class NIODispatcher implements Runnable {
                     ErrorService.error(t);
                 }
             }
-            UNLOCKED.clear();
         }
     }
     
