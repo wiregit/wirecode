@@ -242,7 +242,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 		} finally {
 			try{
 				ftp.disconnect();	
-			} catch(Exception e) {}
+			} catch( IOException e ) {}  // don't care if disconnecting fails
 		}		
 
 		// now tell the Internet Archive that we're done
