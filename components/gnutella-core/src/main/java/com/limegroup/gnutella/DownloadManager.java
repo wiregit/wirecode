@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -1288,8 +1289,10 @@ public class DownloadManager implements BandwidthTracker {
                 if(head.getStatusCode() == 202) {
                     if(LOG.isInfoEnabled())
                         LOG.info("Succesful push proxy: " + connectTo);
-                    if (shouldDoFWTransfer)
-                        startFWIncomingThread(file);
+                    if (shouldDoFWTransfer) {
+                        UDPConnection socket = new UDPConnection();
+                        socket.connect(file.getSocketAddress(), 20000, new FWTConnectObserver());
+                    }
                     return true; // push proxy succeeded!
                 } else {
                     if(LOG.isWarnEnabled())
@@ -1306,35 +1309,6 @@ public class DownloadManager implements BandwidthTracker {
         
         // they all failed.
         return false;
-    }
-    
-    /**
-     * Starts a thread waiting for an incoming fw-fw transfer.
-     */
-    private void startFWIncomingThread(final RemoteFileDesc file) {
-        // we need to open up our NAT for incoming UDP, so
-        // start the UDPConnection.  The other side should
-        // do it soon too so hopefully we can communicate.
-        ThreadFactory.startThread(new Runnable() {
-            public void run() {
-                Socket fwTrans = null;
-                try {
-                    fwTrans = new UDPConnection(file.getHost(), file.getPort());
-                    DownloadStat.FW_FW_SUCCESS.incrementStat();
-                    // TODO: put this out to Acceptor in // the future
-                    InputStream is = fwTrans.getInputStream();
-                    String word = IOUtils.readWord(is, 4);
-                    if (word.equals("GIV"))
-                        acceptDownload(fwTrans);
-                    else
-                        fwTrans.close();
-                } catch (IOException crap) {
-                    LOG.debug("failed to establish UDP connection",crap);
-                    IOUtils.close(fwTrans);
-                    DownloadStat.FW_FW_FAILURE.incrementStat();
-                }
-            }
-        }, "FWIncoming");
     }
     
     /**
@@ -1650,4 +1624,20 @@ public class DownloadManager implements BandwidthTracker {
         public String getHostValue(String key) { return null; }
     }
 	
+
+    /** Simple ConnectObserver for FWT connections. */
+    private static class FWTConnectObserver implements ConnectObserver {
+
+        public void handleIOException(IOException iox) {}
+
+        public void handleConnect(Socket socket) throws IOException {
+            DownloadStat.FW_FW_SUCCESS.incrementStat();
+            RouterService.getAcceptor().accept(socket, "GIV");
+        }
+
+        public void shutdown() {
+            DownloadStat.FW_FW_FAILURE.incrementStat();
+        }
+    }
+    
 }

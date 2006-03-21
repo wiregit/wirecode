@@ -572,7 +572,7 @@ public class NIODispatcher implements Runnable {
             }
             
             if(LOG.isDebugEnabled())
-                LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
+                LOG.debug("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ", (" + this + ").");
             
             Collection allKeys;
             if(immediate) {
