@@ -7,7 +7,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class RandomBucketRefresher extends TimerTask implements Runnable{
     
