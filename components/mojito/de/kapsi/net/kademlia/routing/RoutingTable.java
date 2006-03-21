@@ -37,7 +37,7 @@ public interface RoutingTable {
     
     public Collection getAllBuckets();
     
-    public void refreshBuckets() throws IOException;
+    public void refreshBuckets(boolean force) throws IOException;
     
     public boolean load();
     public boolean store();

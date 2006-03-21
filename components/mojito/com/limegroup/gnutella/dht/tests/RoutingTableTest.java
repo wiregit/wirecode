@@ -33,10 +33,11 @@ public class RoutingTableTest {
         new Thread(dht,"DHT").start();
         RoutingTable routingTable = dht.getContext().getRouteTable();
         
-        testBuckets(routingTable);
+//        testBuckets(routingTable);
 //        testReplaceNode(routingTable);
 //        testReplaceCachedNode(routingTable);
 //        testRemoveNode(routingTable);
+        testLiveNodesOnly(routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
         try {
@@ -46,6 +47,25 @@ public class RoutingTableTest {
             e.printStackTrace();
         }
         System.exit(0);
+    }
+    
+    public static void testLiveNodesOnly(RoutingTable routingTable) {
+        ContactNode node = new ContactNode(KUID.createRandomNodeID(addr),addr);
+        routingTable.add(node,true);
+        node = new ContactNode(KUID.createRandomNodeID(addr),addr);
+        routingTable.add(node,false);
+        routingTable.handleFailure(node.getNodeID());
+        routingTable.handleFailure(node.getNodeID());
+        routingTable.handleFailure(node.getNodeID());
+        routingTable.handleFailure(node.getNodeID());
+        routingTable.handleFailure(node.getNodeID());
+        routingTable.handleFailure(node.getNodeID());
+        try {
+            routingTable.refreshBuckets(false);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     public static void testBuckets(RoutingTable routingTable) {

@@ -305,7 +305,14 @@ public class PatriciaRouteTable implements RoutingTable {
         }
         //ping least recently seen node
         if(added) {
-            List bucketList = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1);
+            int depth = bucket.getDepth();
+            List bucketList;
+            if(depth < 1) {
+                //we are selecting from the root
+                bucketList = nodesTrie.range(bucket.getNodeID(),0);
+            } else {
+                bucketList = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1);
+            }
             ContactNode leastRecentlySeen = 
                 BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
 
@@ -369,14 +376,21 @@ public class PatriciaRouteTable implements RoutingTable {
     }
     
 
-    public void refreshBuckets() throws IOException {
+    public void refreshBuckets(boolean force) throws IOException {
         long now = System.currentTimeMillis();
         List buckets = bucketsTrie.values();
         for (Iterator iter = buckets.iterator(); iter.hasNext();) {
             BucketNode bucket = (BucketNode) iter.next();
             long lastTouch = bucket.getTimeStamp();
-            if(now - lastTouch < refreshLimit) continue;
-            else{
+            //update bucket if freshness limit has passed
+            //OR if it is not full (not complete)
+            //OR if there is at least one invalid node inside
+            //OR if forced
+            List liveNodes = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1,new NodeAliveKeySelector());
+            if(force || 
+                    (now - lastTouch > refreshLimit) || 
+                    (bucket.getNodeCount() < K) || 
+                    (liveNodes.size() != bucket.getNodeCount())) {
                 //select a random ID with this prefix
                 KUID randomID = KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth());
                 
@@ -440,7 +454,7 @@ public class PatriciaRouteTable implements RoutingTable {
     }
 
     /** 
-     * Returns a List of buckts sorted by their 
+     * Returns a List of buckets sorted by their 
      * closeness to the provided Key. Use BucketList's
      * sort method to sort the Nodes by last-recently 
      * and most-recently seen.
@@ -449,17 +463,7 @@ public class PatriciaRouteTable implements RoutingTable {
         //only touch bucket if we know we are going to contact it's nodes
         if(isLocalLookup) touchBucket(lookup);
         if(onlyLiveNodes) {
-            return nodesTrie.select(lookup, k, new PatriciaTrie.KeySelector() {
-                public boolean allow(Object key, Object value) {
-                    if(value instanceof ContactNode) {
-                        ContactNode node = (ContactNode)value;
-                        if(node.hasFailed()) {
-                            return false;
-                        } else return true;
-                    } else return false;
-                }
-                
-            });
+            return nodesTrie.select(lookup, k, new NodeAliveKeySelector());
         }else return nodesTrie.select(lookup, k);
     }
 
@@ -530,5 +534,15 @@ public class PatriciaRouteTable implements RoutingTable {
         return buffer.toString();
     }
     
+    private class NodeAliveKeySelector implements PatriciaTrie.KeySelector{
+        public boolean allow(Object key, Object value) {
+            if(value instanceof ContactNode) {
+                ContactNode node = (ContactNode)value;
+                if(node.hasFailed()) {
+                    return false;
+                } else return true;
+            } else return false;
+        }
+    }
     
 }

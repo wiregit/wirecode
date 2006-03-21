@@ -21,7 +21,7 @@ public final class RouteTableSettings {
     private static final int DEPTH_LIMIT = 4; //a.k.a B
     private static final String DEPTH_LIMIT_KEY = "DEPTH_LIMIT";
     
-    private static final long BUCKET_REFRESH_TIME = 2 * 60* 1000; //TODO figure this out
+    private static final long BUCKET_REFRESH_TIME = 15 * 60* 1000; //15 minutes for now
     private static final String BUCKET_REFRESH_TIME_KEY = "BUCKET_REFRESH_TIME";
     
     public static final String ROUTETABLE_FILE = "RouteTable.pat";
