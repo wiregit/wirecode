@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +23,8 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Node;
+import de.kapsi.net.kademlia.handler.ResponseHandler;
+import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
@@ -80,6 +83,10 @@ public class PatriciaRouteTable implements RoutingTable {
                 PatriciaTrie nodeTrie = (PatriciaTrie)in.readObject();
                 this.bucketsTrie = bucketsTrie;
                 this.nodesTrie = nodeTrie;
+                
+                //refresh the buckets
+                refreshBuckets(true);
+                
                 return true;
             } catch (FileNotFoundException e) {
                 LOG.error(e);
@@ -277,6 +284,7 @@ public class PatriciaRouteTable implements RoutingTable {
     
     /**
      * Adds a node to the replacement cache of the corresponding bucket
+     * and ping the last recently node
      * 
      * @param bucket
      * @param node
@@ -287,6 +295,7 @@ public class PatriciaRouteTable implements RoutingTable {
         
         Map replacementCache = bucket.getReplacementCache();
 
+        //first add to the replacement cache
         if(replacementCache!= null &&
                 replacementCache.size() == RouteTableSettings.getMaxCacheSize()) {
             //replace older cache entries with this one
@@ -303,29 +312,42 @@ public class PatriciaRouteTable implements RoutingTable {
             bucket.addReplacementNode(node);
             added = true;
         }
-        //ping least recently seen node
+        //a good time to ping least recently seen node
         if(added) {
-            int depth = bucket.getDepth();
-            List bucketList;
-            if(depth < 1) {
-                //we are selecting from the root
-                bucketList = nodesTrie.range(bucket.getNodeID(),0);
-            } else {
-                bucketList = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1);
-            }
-            ContactNode leastRecentlySeen = 
-                BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
-
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Pinging the least recently seen Node " 
-                        + leastRecentlySeen);
-            }
-            
-            PingRequest ping = context.getMessageFactory().createPingRequest();
-            
-			//TODO fix pinging
-            //context.getMessageDispatcher().send(leastRecentlySeen, ping, this);
+            pingBucketLastRecentlySeenNode(bucket);
         }
+    }
+    
+    private void pingBucketLastRecentlySeenNode(BucketNode bucket) {
+        
+        if(bucket == null) return;
+        
+        int depth = bucket.getDepth();
+        List bucketList;
+        if(depth < 1) {
+            //we are selecting from the root
+            bucketList = nodesTrie.range(bucket.getNodeID(),0);
+        } else {
+            bucketList = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1);
+        }
+        ContactNode leastRecentlySeen = 
+            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
+        
+        //don't ping ourselves
+        if(leastRecentlySeen.equals(context.getLocalNode())) {
+            return;
+        }
+
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Pinging the least recently seen Node " 
+                    + leastRecentlySeen);
+        }
+        
+        PingRequest ping = context.getMessageFactory().createPingRequest();
+        try {
+            //will get handled by DefaultMessageHandler
+            context.getMessageDispatcher().send(leastRecentlySeen, ping, null);
+        } catch (IOException e) {}
     }
     
     
@@ -341,10 +363,11 @@ public class PatriciaRouteTable implements RoutingTable {
      */
     public boolean updateExistingNode(KUID nodeId, ContactNode node, boolean alive) {
         boolean replacement = false;
+        BucketNode bucket = null;
         ContactNode existingNode = (ContactNode) nodesTrie.get(nodeId);
         if(existingNode == null) {
             //check replacement cache in closest bucket
-            BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+            bucket = (BucketNode)bucketsTrie.select(nodeId);
             Map replacementCache = bucket.getReplacementCache();
             if(replacementCache!= null &&
                     replacementCache.size()!=0 && 
@@ -362,7 +385,7 @@ public class PatriciaRouteTable implements RoutingTable {
             //TODO: we have found a live contact in the bucket's replacement cache!
             //It's a good time to replace this bucket's dead entry with this node
             if(replacement) {
-                
+                pingBucketLastRecentlySeenNode(bucket);
             }
         }
         //TODO update the contact's info here
@@ -480,22 +503,6 @@ public class PatriciaRouteTable implements RoutingTable {
         return nodesTrie.size();
     }
 
-    public boolean updateTimeStamp(ContactNode node) {
-        
-        //TODO change this!!!!
-        if (node != null) {
-            node.alive();
-            updateIfCached(node.getNodeID());
-            return true;
-        }
-        return false;
-    }
-    
-    private boolean updateIfCached(KUID key) {
-        BucketNode bucket = (BucketNode)bucketsTrie.select(key);
-        return bucket.getReplacementNode(key) != null;
-    }
-    
     private void touchBucket(KUID nodeId) {
         //      get bucket closest to node
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);

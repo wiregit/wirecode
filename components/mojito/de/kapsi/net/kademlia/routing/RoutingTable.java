@@ -29,8 +29,6 @@ public interface RoutingTable {
     
     public boolean containsNode(KUID nodeId);
     
-    public boolean updateTimeStamp(ContactNode node);
-    
     public void handleFailure(KUID nodeId);
     
     public Collection getAllNodes();

@@ -110,11 +110,13 @@ public class DefaultMessageHandler extends MessageHandler
         }
     }
     
+    
+    //TODO TODO TODO TODO TODO
     private void updateContactInfo(ContactNode node, KUID nodeId, 
             SocketAddress src, Message message) throws IOException {
         
         if (node.getSocketAddress().equals(src)) {
-            context.getRouteTable().updateTimeStamp(node);
+            context.getRouteTable().add(node,true);
             return;
         }
         
@@ -125,13 +127,13 @@ public class DefaultMessageHandler extends MessageHandler
         if (NetworkUtils.isLocalAddress(src)
                 && NetworkUtils.isLocalAddress(node.getSocketAddress())) {
             node.setSocketAddress(src);
-            context.getRouteTable().updateTimeStamp(node);
+//            context.getRouteTable().updateTimeStamp(node);
             return;
         }
         
         // TODO check if src is trying to spoof its NodeID!
         node.setSocketAddress(src);
-        context.getRouteTable().updateTimeStamp(node);
+//        context.getRouteTable().updateTimeStamp(node);
         
         /*if (!isSpoofCheckActive(nodeId)) {
             ResponseHandler handler = createSpoofChecker(nodeId, src);

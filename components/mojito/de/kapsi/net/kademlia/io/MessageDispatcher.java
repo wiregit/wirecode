@@ -157,6 +157,10 @@ public class MessageDispatcher implements Runnable {
             return;
         }
         
+        if(handler == null) {
+            handler = defaultHandler;
+        }
+        
         Receipt receipt = new Receipt(context, nodeId, dst, message, handler);
         
         synchronized(OUTPUT_LOCK) {
@@ -189,6 +193,7 @@ public class MessageDispatcher implements Runnable {
     
     private void handleLateResponse(KUID nodeId, SocketAddress src, Message msg) throws IOException {
         
+        
         if (LOG.isTraceEnabled()) {
             if (msg instanceof PingResponse) {
                 LOG.trace("Received a late Pong from " + ContactNode.toString(nodeId, src));
@@ -200,23 +205,8 @@ public class MessageDispatcher implements Runnable {
                 LOG.trace("Received a late Store response from " + ContactNode.toString(nodeId, src));
             }
         }
-        
-        ContactNode node = context.getRouteTable().get(nodeId);
-        if (node != null) {
-            if (node.getSocketAddress().equals(src)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Even tough " + node 
-                            + " sent a late response we're giving it a chance and update its last seen time stamp");
-                }
-                context.getRouteTable().updateTimeStamp(node);
-            } else {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(nodeId + " (" + src + ") is claiming to be " + node);
-                }
-                
-                // DO NOTHING
-            }
-        }
+        ContactNode node = new ContactNode(nodeId,src);
+        context.getRouteTable().add(node,true);
     }
     
     /**
