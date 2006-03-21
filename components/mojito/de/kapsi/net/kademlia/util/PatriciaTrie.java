@@ -235,7 +235,11 @@ public class PatriciaTrie implements Serializable {
      * and most-recently seen.
      */
     public List select(Object key, int count) {
-        return select(key, count, null);
+        return select(key, count, new KeySelector() {
+            public boolean allow(Object key, Object value) {
+                return true;
+            }
+        });
     }
     
     public List select(Object key, int count, KeySelector keySelector) {
@@ -282,6 +286,14 @@ public class PatriciaTrie implements Serializable {
      * @param length (depth) in bits
      */
     public List range(Object key, int length) {
+        return range(key, length, new KeySelector() {
+            public boolean allow(Object key, Object value) {
+                return true;
+            }
+        });
+    }
+    
+    public List range(Object key, int length, KeySelector keySelector) {
         if (length >= keyCreator.length()) {
             throw new IllegalArgumentException(length + " >= " + keyCreator.length());
         }
@@ -300,10 +312,14 @@ public class PatriciaTrie implements Serializable {
         
         if (length < entry.bitIndex) {
             //System.out.println("Has Subtree");
-            return valuesR(entry, -1, new ArrayList());
+            return valuesInRangeR(entry, -1, keySelector, new ArrayList());
         } else {
             //System.out.println("Has No Subtree");
-            return Arrays.asList(new Object[]{entry.value});
+            if (keySelector.allow(entry.key, entry.value)) {
+                return Arrays.asList(new Object[]{entry.value});
+            } else {
+                return Collections.EMPTY_LIST;
+            }
         }
     }
     
@@ -323,6 +339,20 @@ public class PatriciaTrie implements Serializable {
         } else {
             return rangeR(h.right, h.bitIndex, key, keyLength, h);
         }
+    }
+    
+    private List valuesInRangeR(Entry h, int bitIndex, 
+            final KeySelector keySelector, final List values) {
+        if (h.bitIndex <= bitIndex) {
+            if (!h.isEmpty() 
+                    && keySelector.allow(h.key, h.value)) {
+                values.add(h.value);
+            }
+            return values;
+        }
+        
+        valuesInRangeR(h.left, h.bitIndex, keySelector, values);
+        return valuesInRangeR(h.right, h.bitIndex, keySelector, values);
     }
     
     /**
@@ -706,17 +736,8 @@ public class PatriciaTrie implements Serializable {
         public SearchState(Object key, int targetSize, KeySelector keySelector) {
             this.key = key;
             this.targetSize = targetSize;
-            
-            if (keySelector != null) {
-                this.keySelector = keySelector;
-            } else {
-                this.keySelector = new KeySelector() {
-                    public boolean allow(Object key, Object value) {
-                        return true;
-                    }
-                };
-            }
-            
+            this.keySelector = keySelector;
+
             dest = new ArrayList(Math.min(targetSize, size()));
         }
         
