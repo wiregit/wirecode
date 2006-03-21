@@ -244,6 +244,8 @@ public class PatriciaRouteTable implements RoutingTable {
     
     public void handleFailure(KUID nodeId) {
         
+        if(nodeId == null) return;
+        
         //this should never happen -- who knows?!!
         if(nodeId.equals(context.getLocalNodeID())) {
             if(LOG.isErrorEnabled()) {

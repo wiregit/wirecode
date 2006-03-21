@@ -241,7 +241,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             KUID furthest = lookup.invert();
             ContactNode worstResponse = (ContactNode)responses.select(furthest);
             ContactNode bestToQuery = (ContactNode)toQuery.select(lookup);
-            
+
             if(bestToQuery == null || 
                     worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(),lookup)) {
             
@@ -323,7 +323,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //if the list is full discard the furthest node and put this one
         if(responses.size() == resultSize) {
             KUID furthest = lookup.invert();
-            responses.remove((KUID)responses.select(furthest));
+            responses.remove(((ContactNode)responses.select(furthest)).getNodeID());
         } 
         responses.put(node.getNodeID(), node);
     }

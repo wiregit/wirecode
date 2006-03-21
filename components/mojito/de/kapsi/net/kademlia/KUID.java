@@ -260,14 +260,14 @@ public class KUID implements Serializable {
         
         for (int i=0;i<id.length;i++){
 
-            int d1 = (id[i] ^ targetID.id[i]) & 0xFF;
-            int d2 = (nodeID.id[i] ^ targetID.id[i]) & 0xFF;
-
-            int diff = d1 - d2;
-            
-            if ( diff < 0 ){
+            int dSelf = (id[i] ^ targetID.id[i]) & 0xFF;
+            int dOther = (nodeID.id[i] ^ targetID.id[i]) & 0xFF;
+            int diff = dOther - dSelf;
+            if ( diff > 0 ){
                 return true;
-            }
+            } else if (diff < 0 ) {
+                return false;
+            } 
         }
         return false;
     }
