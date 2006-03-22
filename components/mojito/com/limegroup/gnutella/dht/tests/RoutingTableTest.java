@@ -22,7 +22,7 @@ public class RoutingTableTest {
      */
     public static void main(String[] args) {
         KademliaSettings.setReplicationParameter(2);
-        RouteTableSettings.setMaxNodeFailures(2);
+        RouteTableSettings.setMaxLiveNodeFailures(2);
         DHT dht = new DHT();
         try {
             dht.bind(addr);

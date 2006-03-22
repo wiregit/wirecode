@@ -12,7 +12,7 @@ public class CacheForwardTest {
 
     public void testCacheForward() {
         KademliaSettings.setReplicationParameter(20);
-        RouteTableSettings.setMaxNodeFailures(3);
+        RouteTableSettings.setMaxLiveNodeFailures(3);
        
         DHT originalRequesterDHT = new DHT();
         
@@ -34,7 +34,7 @@ public class CacheForwardTest {
             firstStorer.bootstrap(originalRequesterDHT.getSocketAddress(),null);
             byte[] valueID = firstStorer.getLocalNode().getNodeID().getBytes();
             //replace with first bits of first storer to make sure it lands there first
-            originalRequesterDHT.put(KUID.createValueID(valueID),"test".getBytes("UTF-8"));
+            originalRequesterDHT.put(KUID.createValueID(valueID),"test".getBytes("UTF-8"),null);
             Thread.sleep(5000);
             new Thread(secondStorer,"DHT-3").start();
             secondStorer.bootstrap(firstStorer.getSocketAddress(),null);

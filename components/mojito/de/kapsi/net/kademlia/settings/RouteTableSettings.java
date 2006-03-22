@@ -15,8 +15,11 @@ public final class RouteTableSettings {
     private static final boolean SKIP_STALE = true;
     private static final String SKIP_STALE_KEY = "SKIP_STALE";
     
-    private static final int MAX_NODE_FAILURES = 5;
-    private static final String MAX_NODE_FAILURES_KEY = "MAX_NODE_FAILURES";
+    private static final int MAX_LIVE_NODE_FAILURES = 4;
+    private static final String MAX_LIVE_NODE_FAILURES_KEY = "MAX_LIVE_NODE_FAILURES";
+    
+    private static final int MAX_UNKNOWN_NODE_FAILURES = 2;
+    private static final String MAX_UNKNOWN_NODE_FAILURES_KEY = "MAX_UNKNOWN_NODE_FAILURES";
     
     private static final int DEPTH_LIMIT = 4; //a.k.a B
     private static final String DEPTH_LIMIT_KEY = "DEPTH_LIMIT";
@@ -47,12 +50,20 @@ public final class RouteTableSettings {
         SETTINGS.putBoolean(SKIP_STALE_KEY, skipStale);
     }
     
-    public static int getMaxNodeFailures() {
-        return SETTINGS.getInt(MAX_NODE_FAILURES_KEY, MAX_NODE_FAILURES);
+    public static int getMaxLiveNodeFailures() {
+        return SETTINGS.getInt(MAX_LIVE_NODE_FAILURES_KEY, MAX_LIVE_NODE_FAILURES);
     }
     
-    public static void setMaxNodeFailures(int maxFailures) {
-        SETTINGS.putInt(MAX_NODE_FAILURES_KEY, Math.max(0, maxFailures));
+    public static void setMaxLiveNodeFailures(int maxFailures) {
+        SETTINGS.putInt(MAX_LIVE_NODE_FAILURES_KEY, Math.max(0, maxFailures));
+    }
+    
+    public static int getMaxUnknownNodeFailures() {
+        return SETTINGS.getInt(MAX_UNKNOWN_NODE_FAILURES_KEY, MAX_UNKNOWN_NODE_FAILURES);
+    }
+    
+    public static void setMaxUnknownNodeFailures(int maxFailures) {
+        SETTINGS.putInt(MAX_UNKNOWN_NODE_FAILURES_KEY, Math.max(0, maxFailures));
     }
     
     public static int getDepthLimit() {

@@ -129,6 +129,8 @@ public class PatriciaRouteTable implements RoutingTable {
     }
     
     private void put(KUID nodeId, ContactNode node, boolean knowToBeAlive) {
+        boolean pingNode = false;
+        
         if (LOG.isTraceEnabled()) {
             LOG.trace("Trying to add node: "+node+" to routing table");
         }
@@ -146,100 +148,111 @@ public class PatriciaRouteTable implements RoutingTable {
         }
         
         // Update an existing node
-        if(updateExistingNode(nodeId,node,knowToBeAlive)) {
-            return;
-        }
-        
-        //get bucket closest to node
-        BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
-        if(bucket.getNodeCount() < K) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Adding node: "+node+" to bucket: "+bucket);
-            }
-            bucket.incrementNodeCount();
-            bucket.removeReplacementNode(nodeId);
+        ContactNode existingNode = updateExistingNode(nodeId,node,knowToBeAlive);
+        if(existingNode != null && existingNode.getTimeStamp() == 0) { 
+            //node existed but we don't kow if it's alive
+            pingNode = true;
             
-            if(knowToBeAlive) {
-                node.alive();
-            }
-            
-            nodesTrie.put(nodeId,node);
-            return;
-        } 
-        //Three conditions for splitting:
-        //1. Bucket contains nodeID.
-        //2. New node part of the smallest subtree to the local node
-        //2. current_depth mod symbol_size != 0
-        else {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Bucket "+bucket+" full");
-            }
-            
-            BucketNode localBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
-            //1
-            boolean containsLocal = localBucket.equals(bucket);
-            //2
-            boolean partOfSmallest = (smallestSubtreeBucket!= null) && smallestSubtreeBucket.equals(bucket);
-            //3
-            boolean tooDeep = bucket.getDepth() % B == 0;
-            
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Bucket "+bucket+" full:" +
-                        "\ncontainsLocal: " + containsLocal + 
-                        "\npartOfSmallest: " + partOfSmallest + 
-                        "\nNot tooDeep: "+!tooDeep);
-            }
-            
-            if(containsLocal || partOfSmallest || !tooDeep) {
+        } else if(existingNode == null) {
+            //get bucket closest to node
+            BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+            if(bucket.getNodeCount() < K) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Adding node: "+node+" to bucket: "+bucket);
+                }
+                bucket.incrementNodeCount();
+                bucket.removeReplacementNode(nodeId);
+                
+                if(knowToBeAlive) {
+                    node.alive();
+                } else {
+                    pingNode = true;
+                }
+                nodesTrie.put(nodeId,node);
+            } else {
+            //Three conditions for splitting:
+            //1. Bucket contains nodeID.
+            //2. New node part of the smallest subtree to the local node
+            //2. current_depth mod symbol_size != 0
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Bucket "+bucket+" full");
+                }
+                
+                BucketNode localBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
+                //1
+                boolean containsLocal = localBucket.equals(bucket);
+                //2
+                boolean partOfSmallest = (smallestSubtreeBucket!= null) && smallestSubtreeBucket.equals(bucket);
+                //3
+                boolean tooDeep = bucket.getDepth() % B == 0;
                 
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("splitting bucket: " + bucket);
+                    LOG.trace("Bucket "+bucket+" full:" +
+                            "\ncontainsLocal: " + containsLocal + 
+                            "\npartOfSmallest: " + partOfSmallest + 
+                            "\nNot tooDeep: "+!tooDeep);
                 }
                 
-                List newBuckets = bucket.split();
-                //update bucket node count
-                BucketNode leftSplitBucket = (BucketNode) newBuckets.get(0);
-                BucketNode rightSplitBucket = (BucketNode) newBuckets.get(1);
-                bucketsTrie.put(leftSplitBucket.getNodeID(),leftSplitBucket);
-                bucketsTrie.put(rightSplitBucket.getNodeID(),rightSplitBucket);
-                int countLeft = updateBucketNodeCount(leftSplitBucket);
-                int countRight = updateBucketNodeCount(rightSplitBucket);
-                //this should never happen
-                if(countLeft+countRight != bucket.getNodeCount()) {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error("Bucket did not split correctly!");
+                if(containsLocal || partOfSmallest || !tooDeep) {
+                    
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("splitting bucket: " + bucket);
                     }
-                    return;
-                }
-                //update smallest subtree if split reason was that it contained the local bucket
-                if(containsLocal) {
-                    BucketNode newLocalBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
-                    if(newLocalBucket.equals(leftSplitBucket)) {
-                        smallestSubtreeBucket = rightSplitBucket;
-                    }
-                    else if(newLocalBucket.equals(rightSplitBucket)){
-                        smallestSubtreeBucket = leftSplitBucket;
-                    } else {
+                    
+                    List newBuckets = bucket.split();
+                    //update bucket node count
+                    BucketNode leftSplitBucket = (BucketNode) newBuckets.get(0);
+                    BucketNode rightSplitBucket = (BucketNode) newBuckets.get(1);
+                    bucketsTrie.put(leftSplitBucket.getNodeID(),leftSplitBucket);
+                    bucketsTrie.put(rightSplitBucket.getNodeID(),rightSplitBucket);
+                    int countLeft = updateBucketNodeCount(leftSplitBucket);
+                    int countRight = updateBucketNodeCount(rightSplitBucket);
+                    //this should never happen
+                    if(countLeft+countRight != bucket.getNodeCount()) {
                         if (LOG.isErrorEnabled()) {
-                            LOG.error("New buckets don't contain local node");
+                            LOG.error("Bucket did not split correctly!");
                         }
                         return;
                     }
+                    //update smallest subtree if split reason was that it contained the local bucket
+                    if(containsLocal) {
+                        BucketNode newLocalBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
+                        if(newLocalBucket.equals(leftSplitBucket)) {
+                            smallestSubtreeBucket = rightSplitBucket;
+                        }
+                        else if(newLocalBucket.equals(rightSplitBucket)){
+                            smallestSubtreeBucket = leftSplitBucket;
+                        } else {
+                            if (LOG.isErrorEnabled()) {
+                                LOG.error("New buckets don't contain local node");
+                            }
+                            return;
+                        }
+                    }
+                    //now trying recursive call!
+                    //attempt the put the new contact again with the split buckets
+                    put(nodeId,node,knowToBeAlive);
+                    
+                } 
+                //not splitting --> replacement cache
+                else {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("NOT splitting bucket "+ bucket+", adding node "+node+" to replacement cache");
+                    }
+                    pingNode = addReplacementNode(bucket,node);
                 }
-                //now trying recursive call!
-                //attempt the put the new contact again with the split buckets
-                put(nodeId,node,knowToBeAlive);
-                
-            } 
-            //not splitting --> replacement cache
-            else {
-                
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("NOT splitting bucket "+ bucket+", adding node "+node+" to replacement cache");
-                }
-                
-                addReplacementNode(bucket,node);
             }
+        }
+        if(pingNode) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Node add requests pinging node: "+node);
+            }
+            
+            PingRequest ping = context.getMessageFactory().createPingRequest();
+            try {
+                //will get handled by DefaultMessageHandler
+                context.getMessageDispatcher().send(node, ping, null);
+            } catch (IOException e) {}
         }
     }
     
@@ -247,6 +260,10 @@ public class PatriciaRouteTable implements RoutingTable {
         
         if(nodeId == null) {
             return;
+        }
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Handling failure for nodeId: "+nodeId);
         }
         
         //this should never happen -- who knows?!!
@@ -260,7 +277,7 @@ public class PatriciaRouteTable implements RoutingTable {
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
         if(node != null) {
             //only remove if node considered stale and the bucket is full and it's replacement cache is not empty
-            if((node.failure() > RouteTableSettings.getMaxNodeFailures())
+            if(handleNodeFailure(node)
                     && (bucket.getNodeCount() >= K) 
                     && (bucket.getReplacementCacheSize() > 0)) {
                 
@@ -297,8 +314,9 @@ public class PatriciaRouteTable implements RoutingTable {
      * 
      * @param bucket
      * @param node
+     * @return true if the node has been added to the replacement cache, false otherwise
      */
-    public void addReplacementNode(BucketNode bucket,ContactNode node) {
+    public boolean addReplacementNode(BucketNode bucket,ContactNode node) {
         
         boolean added = false;
         
@@ -324,6 +342,9 @@ public class PatriciaRouteTable implements RoutingTable {
         //a good time to ping least recently seen node
         if(added) {
             pingBucketLastRecentlySeenNode(bucket);
+            return true;
+        } else {
+            return false;
         }
     }
     
@@ -370,7 +391,7 @@ public class PatriciaRouteTable implements RoutingTable {
      * 
      * @return true if the contact exists and has been updated, false otherwise
      */
-    public boolean updateExistingNode(KUID nodeId, ContactNode node, boolean alive) {
+    public ContactNode updateExistingNode(KUID nodeId, ContactNode node, boolean alive) {
         boolean replacement = false;
         BucketNode bucket = null;
         
@@ -388,12 +409,12 @@ public class PatriciaRouteTable implements RoutingTable {
                 // replacement cache then it's new and unknown! We 
                 // have to add it first!
                 if (existingNode == null) {
-                    return false;
+                    return null;
                 }
                 
                 replacement = true;
             } else {
-                return false;
+                return null;
             }
         }
         
@@ -405,7 +426,7 @@ public class PatriciaRouteTable implements RoutingTable {
             if(replacement) {
                 pingBucketLastRecentlySeenNode(bucket);
             }
-        }
+        } 
         //TODO update the contact's info here
         
         
@@ -413,7 +434,7 @@ public class PatriciaRouteTable implements RoutingTable {
             LOG.trace("Replaced existing node: "+existingNode+" with node: " 
                     + node);
         }
-        return true;
+        return existingNode;
     }
     
     public void refreshBuckets(boolean force) throws IOException{
@@ -448,7 +469,10 @@ public class PatriciaRouteTable implements RoutingTable {
                 bucketsLookups.add(randomID);
             }
         }
-        
+        if(bucketsLookups.size() == 0) {
+            l.secondPhaseComplete(0,false);
+            return;
+        }
         BootstrapFindNodeListener listener = new BootstrapFindNodeListener(bucketsLookups,l);
         for (Iterator iter = bucketsLookups.iterator(); iter.hasNext();) {
             KUID lookupId = (KUID) iter.next();
@@ -493,10 +517,17 @@ public class PatriciaRouteTable implements RoutingTable {
      * if a certain error level is exceeded and returns 
      * true if it's the case.
      */
-    public boolean handleFailure(ContactNode node) {
+    private boolean handleNodeFailure(ContactNode node) {
         if (node != null) {
-            if (node.failure() >= RouteTableSettings.getMaxNodeFailures()) {
-                return true;
+            //node has been alive at least once
+            if(node.getTimeStamp() > 0L) {
+                if (node.failure() >= RouteTableSettings.getMaxLiveNodeFailures()) {
+                    return true;
+                }
+            } else {
+                if (node.failure() >= RouteTableSettings.getMaxUnknownNodeFailures()) {
+                    return true;
+                }
             }
         }
         return false;
@@ -593,7 +624,7 @@ public class PatriciaRouteTable implements RoutingTable {
             if(!foundNodes && !nodes.isEmpty()) {
                 foundNodes = true;
             }
-            
+            System.out.println("Query list: "+queryList);
             queryList.remove(lookup);
             if(queryList.isEmpty() 
                     && bootstrapListener != null) {

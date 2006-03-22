@@ -24,6 +24,7 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
@@ -283,16 +284,19 @@ public class Main {
         md.reset();
         
         System.out.println("Storing... " + key);
-        dht.put(key, value);/*, new StoreListener() {
+        dht.put(key, value, new StoreListener() {
             public void store(KeyValue value, Collection nodes) {
                 StringBuffer buffer = new StringBuffer();
                 buffer.append("STORED KEY: ").append(value.getKey()).append("\n");
-                for(int i = 0; i < nodes.size(); i++) {
-                    buffer.append(i).append(": ").append(nodes.get(i)).append("\n");
+                int i = 0;
+                for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+                    Node node = (Node) iter.next();
+                    buffer.append(i).append(": ").append(node).append("\n");
+                    i++;
                 }
                 System.out.println(buffer.toString());
             }
-        });*/
+        });
     }
     
     private static void get(DHT dht, String[] line) throws Throwable {

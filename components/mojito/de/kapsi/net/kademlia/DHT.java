@@ -17,6 +17,7 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 
 public class DHT implements Runnable {
@@ -71,13 +72,19 @@ public class DHT implements Runnable {
         return context;
     }
     
-    public void put(KUID key, byte[] value/*, StoreListener l*/) 
+    public void put(KUID key, byte[] value, StoreListener l) 
             throws IOException {
         
         try {
             KeyValue keyValue = 
                 KeyValue.createLocalKeyValue(key, value, getLocalNode());
-            context.getDatabase().add(keyValue);
+            Database database = context.getDatabase();
+            synchronized(database) {
+                if(database.add(keyValue)){
+                    context.store(keyValue, l);
+                    keyValue.setRepublishTime(System.currentTimeMillis());
+                }
+            }
         } catch (SignatureException err) {
             throw new RuntimeException(err);
         } catch (InvalidKeyException err) {
