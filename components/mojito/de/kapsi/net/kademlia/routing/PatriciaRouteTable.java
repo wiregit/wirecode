@@ -145,9 +145,11 @@ public class PatriciaRouteTable implements RoutingTable {
             throw new IllegalArgumentException("NodeID and the ID returned by Node do not match");
         }
         
+        // Update an existing node
         if(updateExistingNode(nodeId,node,knowToBeAlive)) {
             return;
         }
+        
         //get bucket closest to node
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
         if(bucket.getNodeCount() < K) {
@@ -367,21 +369,30 @@ public class PatriciaRouteTable implements RoutingTable {
     public boolean updateExistingNode(KUID nodeId, ContactNode node, boolean alive) {
         boolean replacement = false;
         BucketNode bucket = null;
+        
+        // Check the RouteTable...
         ContactNode existingNode = (ContactNode) nodesTrie.get(nodeId);
         if(existingNode == null) {
-            //check replacement cache in closest bucket
+            // check replacement cache in closest bucket
             bucket = (BucketNode)bucketsTrie.select(nodeId);
             Map replacementCache = bucket.getReplacementCache();
-            if(replacementCache!= null 
-                    && !replacementCache.isEmpty() 
-                    && replacementCache.containsKey(nodeId)) {
+            
+            if (replacementCache!= null && !replacementCache.isEmpty()) {
                 existingNode = (ContactNode) replacementCache.get(nodeId);
+                
+                // If it was neither in the RouteTable nor in the
+                // replacement cache then it's new and unknown! We 
+                // have to add it first!
+                if (existingNode == null) {
+                    return false;
+                }
+                
                 replacement = true;
-            }
-            else {
+            } else {
                 return false;
             }
         }
+        
         //TODO do some contact checking here first!
         if(alive) {
             existingNode.alive();
