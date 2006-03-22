@@ -25,6 +25,7 @@ import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.settings.LookupSettings;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 
 /**
@@ -38,12 +39,14 @@ public class DefaultMessageHandler extends MessageHandler
     
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
     
+    private long timeout = LookupSettings.getTimeout();
+    
     public DefaultMessageHandler(Context context) {
         super(context);
     }
     
     public long timeout() {
-        return 0L;
+        return timeout;
     }
 
     public void handleResponse(KUID nodeId, SocketAddress src, 

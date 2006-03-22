@@ -101,7 +101,7 @@ public class MessageDispatcher implements Runnable {
         channel.register(selector, SelectionKey.OP_READ);
         
         DatagramSocket socket = channel.socket();
-        socket.setReuseAddress(true);
+        socket.setReuseAddress(false);
         socket.setReceiveBufferSize(Receipt.MAX_PACKET_SIZE);
         socket.setSendBufferSize(Receipt.MAX_PACKET_SIZE);
         
@@ -166,7 +166,8 @@ public class MessageDispatcher implements Runnable {
         synchronized(OUTPUT_LOCK) {
             output.add(receipt);
             interestWrite(true);
-        }
+        }          	
+
     }
     
     private void handleRequest(KUID nodeId, SocketAddress src, Message msg) throws IOException {
@@ -219,7 +220,10 @@ public class MessageDispatcher implements Runnable {
 
             if (receipt.send(channel)) {
                 receipt.sent();
-                input.put(receipt.getMessageID(), receipt);
+                
+                if (receipt.isRequest()) {
+                    input.put(receipt.getMessageID(), receipt);
+                }
                 receipt.freeData();
             } else {
                 output.addFirst(receipt);
@@ -389,6 +393,9 @@ public class MessageDispatcher implements Runnable {
             if (super.removeEldestEntry(eldest) 
                     || receipt.timeout()) {
                 receipt.received();
+                if(LOG.isErrorEnabled()) {
+                    LOG.error("Out of space: "+ size()+", timeout: "+receipt.timeout());
+                }
                 try {
                     receipt.handleTimeout();
                 } catch (Throwable t) {

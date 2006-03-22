@@ -624,7 +624,6 @@ public class PatriciaRouteTable implements RoutingTable {
             if(!foundNodes && !nodes.isEmpty()) {
                 foundNodes = true;
             }
-            System.out.println("Query list: "+queryList);
             queryList.remove(lookup);
             if(queryList.isEmpty() 
                     && bootstrapListener != null) {

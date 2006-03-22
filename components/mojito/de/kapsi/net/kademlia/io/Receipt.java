@@ -18,6 +18,7 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.util.InputOutputUtils;
 
 class Receipt {
@@ -39,14 +40,16 @@ class Receipt {
     private long sent = 0L;
     private long received = 0L;
     
+    private boolean isRequest = false;
+    
     public Receipt(Context context, KUID nodeId, SocketAddress dst, 
             Message message, ResponseHandler handler) throws IOException {
         this(context, nodeId, dst, InputOutputUtils.serialize(message), 
-                message.getMessageID(), handler);
+                message.getMessageID(), message instanceof RequestMessage, handler);
     }
     
-    public Receipt(Context context, KUID nodeId, SocketAddress dst, byte[] data, 
-            KUID messageId, ResponseHandler handler) throws IOException {
+    private Receipt(Context context, KUID nodeId, SocketAddress dst, byte[] data, 
+            KUID messageId, boolean isRequest, ResponseHandler handler) throws IOException {
         
         if (data.length >= MAX_PACKET_SIZE) {
             throw new IOException("Packet is too large: " + data.length);
@@ -60,7 +63,13 @@ class Receipt {
         this.data = ByteBuffer.wrap(data);
         
         this.messageId = messageId;
+        this.isRequest = isRequest;
+        
         this.handler = handler;
+    }
+    
+    public boolean isRequest() {
+        return isRequest;
     }
     
     public boolean compareNodeID(KUID nodeId) {
