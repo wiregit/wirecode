@@ -3,6 +3,7 @@ package com.limegroup.gnutella.guess;
 import java.util.Arrays;
 import java.net.InetAddress;
 import java.security.SecureRandom;
+import com.limegroup.gnutella.security.SecurityUtils;
 
 /* package */ class TEAQueryKeyGenerator implements QueryKeyGenerator {
 
@@ -35,7 +36,7 @@ import java.security.SecureRandom;
     
     
     /* package */ TEAQueryKeyGenerator() {
-       SecureRandom rand = new SecureRandom();
+       SecureRandom rand = SecurityUtils.createSecureRandomNoBlock();
        PRE_WHITEN_KEY = rand.nextLong();
        POST_WHITEN_KEY = rand.nextLong();
       

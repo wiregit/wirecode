@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.security.SecureRandom;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
