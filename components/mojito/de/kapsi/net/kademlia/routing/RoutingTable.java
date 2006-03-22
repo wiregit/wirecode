@@ -6,6 +6,8 @@ import java.util.List;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.event.BootstrapListener;
+import de.kapsi.net.kademlia.event.FindNodeListener;
 
 public interface RoutingTable {
     
@@ -36,6 +38,16 @@ public interface RoutingTable {
     public Collection getAllBuckets();
     
     public void refreshBuckets(boolean force) throws IOException;
+    
+    /**
+     * Refreshes the routing table's buckets
+     * 
+     * @param force true to refresh all buckets, false otherwise
+     * @param l the FindNodeListener callback
+     * @return The number of buckets to refresh
+     * @throws IOException
+     */
+    public void refreshBuckets(boolean force,BootstrapListener l) throws IOException;
     
     public boolean load();
     public boolean store();

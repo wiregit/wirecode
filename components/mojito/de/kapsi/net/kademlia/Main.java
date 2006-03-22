@@ -247,8 +247,12 @@ public class Main {
         
         System.out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void bootstrap(KUID nodeId, Collection nodes, long time) {
-                System.out.println("*** Bootstraping " + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
+            public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
+                System.out.println("*** Bootstraping phase 1" + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
+            }
+
+            public void secondPhaseComplete(long time, boolean foundNodes) {
+                System.out.println("*** Bootstraping phase 2" + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
     }
@@ -365,6 +369,15 @@ public class Main {
             this.dhts = dhts;
         }
 
+        public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
+
+        public void secondPhaseComplete(long time,boolean foundNodes) {
+            if (time >= 0) {
+                this.time += time;
+            }
+            bootstrap();
+        }
+
         public synchronized void bootstrap() {
             if (index < dhts.size()) {
                 try {
@@ -376,13 +389,6 @@ public class Main {
             } else if (dhts.size() > 1) {
                 System.out.println("*** Bootstraping finished in " + time + " ms");
             }
-        }
-        
-        public void bootstrap(KUID nodeId, Collection nodes, long time) {
-            if (time >= 0) {
-                this.time += time;
-            }
-            bootstrap();
         }
     }
 }

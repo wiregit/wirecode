@@ -10,5 +10,7 @@ import java.util.Collection;
 import de.kapsi.net.kademlia.KUID;
 
 public interface BootstrapListener {
-    public void bootstrap(KUID nodeId, Collection nodes, long time);
+    public void initialPhaseComplete(KUID nodeId, Collection nodes, long time);
+    
+    public void secondPhaseComplete(long time, boolean foundNodes);
 }

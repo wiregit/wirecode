@@ -10,7 +10,6 @@ public abstract class Node implements Serializable {
     
     public Node(KUID nodeId) {
         this.nodeId = nodeId;
-        alive();
     }
     
     public void alive() {

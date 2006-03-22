@@ -297,9 +297,22 @@ public class Context implements Runnable {
                 if (time1 >= 0L) {
                     try {
                         lookup(getLocalNodeID(), new FindNodeListener() {
-                            public void foundNodes(KUID lookup, Collection nodes, long time2) {
+                            public void foundNodes(final KUID lookup, Collection nodes, final long time2) {
                                 if (l != null) {
-                                    l.bootstrap(getLocalNodeID(), nodes, time1+time2);
+                                    l.initialPhaseComplete(getLocalNodeID(), nodes, time1+time2);
+                                }
+                                //now refresh furthest buckets too! 
+                                try {
+                                    routeTable.refreshBuckets(false,l);
+                                } catch (IOException err) {
+                                    LOG.error(err);
+                                    if (l != null) {
+                                        fireEvent(new Runnable() {
+                                            public void run() {
+                                                l.secondPhaseComplete(time2,false);
+                                            }
+                                        });
+                                    }
                                 }
                             }
                         });
@@ -308,7 +321,7 @@ public class Context implements Runnable {
                         if (l != null) {
                             fireEvent(new Runnable() {
                                 public void run() {
-                                    l.bootstrap(getLocalNodeID(), Collections.EMPTY_LIST, time1);
+                                    l.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time1);
                                 }
                             });
                         }
@@ -319,7 +332,7 @@ public class Context implements Runnable {
                     if (l != null) {
                         fireEvent(new Runnable() {
                             public void run() {
-                                l.bootstrap(getLocalNodeID(), Collections.EMPTY_LIST, time1);
+                                l.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time1);
                             }
                         });
                     }

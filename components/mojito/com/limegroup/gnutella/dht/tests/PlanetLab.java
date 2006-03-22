@@ -55,12 +55,21 @@ public class PlanetLab {
                 //System.out.println("Bootstraping " + dht);
                 synchronized(lock) {
                     dht.bootstrap(dst, new BootstrapListener() {
-                        public void bootstrap(KUID nodeId, Collection nodes, long time) {
-                            
+                        
+                        
+                        public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
                             if (nodes.isEmpty()) {
-                                System.out.println(index + ": " + nodeId + " failed to bootstrap");
+                                System.out.println(index + ": " + nodeId + " failed to bootstrap at PHASE 1");
                             } else {
-                                System.out.println(index + ": " + nodeId + " finished bootstraping in " + time + " ms");
+//                                System.out.println(index + ": " + nodeId + " finished bootstraping PHASE 1 in " + time + " ms");
+                            }
+                        }
+
+                        public void secondPhaseComplete(long time, boolean foundNodes) {
+                            if (!foundNodes) {
+                                System.out.println(index + ": failed to bootstrap at PHASE 2");
+                            } else {
+                                System.out.println(index + ": finished bootstraping PHASE 2 in " + time + " ms");
                             }
                             
                             synchronized(lock) {

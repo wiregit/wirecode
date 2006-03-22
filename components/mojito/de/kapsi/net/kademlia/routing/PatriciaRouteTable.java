@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -17,10 +19,14 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import sun.security.krb5.internal.crypto.b;
+
 import de.kapsi.net.kademlia.BucketNode;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.event.BootstrapListener;
+import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
@@ -396,8 +402,12 @@ public class PatriciaRouteTable implements RoutingTable {
         return true;
     }
     
-
-    public void refreshBuckets(boolean force) throws IOException {
+    public void refreshBuckets(boolean force) throws IOException{
+        refreshBuckets(force,null);
+    }
+    
+    public void refreshBuckets(boolean force,BootstrapListener l) throws IOException{
+        ArrayList bucketsLookups = new ArrayList();
         long now = System.currentTimeMillis();
         List buckets = bucketsTrie.values();
         for (Iterator iter = buckets.iterator(); iter.hasNext();) {
@@ -407,7 +417,13 @@ public class PatriciaRouteTable implements RoutingTable {
             //OR if it is not full (not complete)
             //OR if there is at least one invalid node inside
             //OR if forced
-            List liveNodes = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1,new NodeAliveKeySelector());
+            int depth = bucket.getDepth();
+            List liveNodes;
+            if(depth < 1) {
+                liveNodes = nodesTrie.range(bucket.getNodeID(),0,new NodeAliveKeySelector());
+            } else {
+                liveNodes = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1,new NodeAliveKeySelector());
+            }
             if(force || 
                     (now - lastTouch > refreshLimit) || 
                     (bucket.getNodeCount() < K) || 
@@ -418,10 +434,17 @@ public class PatriciaRouteTable implements RoutingTable {
                 if(LOG.isTraceEnabled()) {
                     LOG.trace("Refreshing bucket:" + bucket + " with random ID: "+ randomID);
                 }
-                context.lookup(randomID,null);
+                
+                bucketsLookups.add(randomID);
             }
         }
+        BootstrapFindNodeListener listener = new BootstrapFindNodeListener(bucketsLookups,l);
+        for (Iterator iter = bucketsLookups.iterator(); iter.hasNext();) {
+            KUID lookupId = (KUID) iter.next();
+            context.lookup(lookupId,listener);
+        }
     }
+    
 
     public void clear() {
         nodesTrie.clear();
@@ -537,6 +560,34 @@ public class PatriciaRouteTable implements RoutingTable {
         buffer.append("TOTAL NODES: " + nodesList.size()).append("\n");
         buffer.append("-------------\n");
         return buffer.toString();
+    }
+    
+    private class BootstrapFindNodeListener implements FindNodeListener{
+
+        private List queryList;
+        
+        private BootstrapListener bootstrapListener;
+        
+        private boolean foundNodes;
+        
+        private BootstrapFindNodeListener(List queryList,BootstrapListener listener) {
+            this.queryList = queryList;
+            this.bootstrapListener = listener;
+        }
+        
+        public synchronized void foundNodes(KUID lookup, Collection nodes, long time) {
+            if(!foundNodes && !nodes.isEmpty()) {
+                foundNodes = true;
+            }
+            queryList.remove(lookup);
+            
+            if(queryList.size() == 0) {
+                if(bootstrapListener != null) {
+                    bootstrapListener.secondPhaseComplete(time,foundNodes);
+                }
+            }
+        }
+        
     }
     
     private class NodeAliveKeySelector implements PatriciaTrie.KeySelector{
