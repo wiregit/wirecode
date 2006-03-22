@@ -22,8 +22,9 @@ import org.apache.commons.logging.LogFactory;
  * transfer occurs (sending search results).  This prevents the use of the
  * Gnutella network as a huge DDoS botnet.
  *
- * If you want to change the underlying generation algorithm, you need to change
- * getKeyBytes(ip, port) and of the inner class QueryKeyGenerator.
+ * If you want to change the underlying generation algorithm, you need to create
+ * a new class that implements QueryKeyGenerator and modify getQueryKey(InetAddress, int)
+ * to use your new QueryKeyGenerator implementation. 
  */
 public final class QueryKey {
 
