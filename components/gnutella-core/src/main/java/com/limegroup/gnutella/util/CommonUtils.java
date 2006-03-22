@@ -13,12 +13,14 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 
 /**
  * This class handles common utility functions that many classes
@@ -1201,15 +1203,18 @@ public final class CommonUtils {
         try {
             Method m = Thread.class.getDeclaredMethod("getAllStackTraces", new Class[0]);
             Map map = (Map)m.invoke(null, new Object[0]);
-            Map sorted = new TreeMap(new Comparator() {
+            
+            List sorted = new ArrayList(map.entrySet());
+            Collections.sort(sorted, new Comparator() {
                 public int compare(Object a, Object b) {
-                    return ((Thread)a).getName().compareTo(((Thread)b).getName());
+                    Thread threadA = (Thread)((Map.Entry)a).getKey();
+                    Thread threadB = (Thread)((Map.Entry)b).getKey();
+                    return threadA.getName().compareTo(threadB.getName());
                 }
             });
-            sorted.putAll(map);
             
             StringBuffer buffer = new StringBuffer();
-            Iterator it = sorted.entrySet().iterator();
+            Iterator it = sorted.iterator();
             while(it.hasNext()) {
                 Map.Entry entry = (Map.Entry)it.next();
                 Thread key = (Thread)entry.getKey();
