@@ -82,26 +82,28 @@ public class DefaultMessageHandler extends MessageHandler
         ContactNode node = new ContactNode(nodeId, src);
         routeTable.add(node,true);
         
+        int k = KademliaSettings.getReplicationParameter();
+        
         //are we one of the K closest nodes to the contact?
-        List closestNodes = routeTable.select(nodeId,KademliaSettings.getReplicationParameter(),false,false);
+        List closestNodes = routeTable.select(nodeId, k, false, false);
         
         if(closestNodes.contains(context.getLocalNode())) {
             List toStore = new ArrayList();
             
             Database database = context.getDatabase();
             synchronized(database) {
-                Collection keyValues = context.getDatabase().getAllCollections();
+                Collection keyValues = database.getAllCollections();
                 for (Iterator iter = keyValues.iterator(); iter.hasNext(); ) {
                     KeyValueCollection c = (KeyValueCollection)iter.next();
+                    
                     //To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
                     //or if it's ID is closer than any other ID (except the new closest one of course)
                     //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                    List closestNodesToKey = routeTable.select(c.getKey(),KademliaSettings.getReplicationParameter(),false,false);
+                    List closestNodesToKey = routeTable.select(c.getKey(), k, false, false);
                     ContactNode closest = (ContactNode)closestNodesToKey.get(0);
-                    if((closest.equals(context.getLocalNode()))||
-                            ((closest.equals(node) && 
-                                    closestNodesToKey.size() > 1)) &&
-                                    ((ContactNode)closestNodesToKey.get(1)).equals(context.getLocalNode())) {
+                    if (closest.equals(context.getLocalNode())
+                            || (closest.equals(node) && (closestNodesToKey.size() > 1)
+                                    && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                         
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   

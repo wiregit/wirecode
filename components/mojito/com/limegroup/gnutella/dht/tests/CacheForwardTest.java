@@ -10,10 +10,7 @@ import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class CacheForwardTest {
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
+    public void testCacheForward() {
         KademliaSettings.setReplicationParameter(20);
         RouteTableSettings.setMaxNodeFailures(3);
        
@@ -47,8 +44,9 @@ public class CacheForwardTest {
         } catch (InterruptedException iex) {
             iex.printStackTrace();
         }
-        
-
     }
-
+    
+    public static void main(String[] args) {
+        new CacheForwardTest().testCacheForward();
+    }
 }

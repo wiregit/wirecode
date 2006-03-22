@@ -448,6 +448,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 bucketsLookups.add(randomID);
             }
         }
+        
         BootstrapFindNodeListener listener = new BootstrapFindNodeListener(bucketsLookups,l);
         for (Iterator iter = bucketsLookups.iterator(); iter.hasNext();) {
             KUID lookupId = (KUID) iter.next();
@@ -467,9 +468,9 @@ public class PatriciaRouteTable implements RoutingTable {
     }
 
     public ContactNode get(KUID nodeId, boolean checkAndUpdateCache) {
-        BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
         ContactNode node = (ContactNode)nodesTrie.get(nodeId);
         if (node == null && checkAndUpdateCache) {
+            BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
             node = (ContactNode)bucket.getReplacementNode(nodeId);
         }
         return node;
