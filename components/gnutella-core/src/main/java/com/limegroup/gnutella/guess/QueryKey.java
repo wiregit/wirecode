@@ -91,10 +91,12 @@ public final class QueryKey {
         // Mix all bits of key fairly evenly into code
         for (int i = key.length - 1; i >= 0; --i) {
             code ^= (0xFF & key[i]);
-            // One-to-one mixing function from RC6 cipher
-            long codeLong = 0xFFFFFFFFL & code;
-            code = (int) (codeLong * ((codeLong << 1) + 1));
-            // Left circular rotate code by 5 bits
+            // One-to-one mixing function from RC6 cipher:  
+            // f(x) = (2*x*x + x) mod 2**N
+            // We only care about the low-order 32-bits, so there's no
+            // need to use longs to emulate 32-bit unsigned multiply.
+            code = (int) (code * ((code << 1) + 1));
+            // Left circular shift (rotate) code by 5 bits
             code = (code >>> 27) | (code << 5);
         }
         
