@@ -32,6 +32,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import com.limegroup.gnutella.io.ByteBufferCache;
 import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.io.NIODispatcher;
 
@@ -70,6 +71,17 @@ public class UDPService implements ReadWriteObserver {
 	 * The buffer that's re-used for reading incoming messages.
 	 */
 	private final ByteBuffer BUFFER;
+    
+    /**
+     * A cache for ByteBuffers.
+     */
+    private final ByteBufferCache BUFFER_CACHE = new ByteBufferCache();
+    
+    private final Runnable CACHE_CLEANER = new Runnable() {
+        public void run() {
+            BUFFER_CACHE.clearCache();
+        }
+    };
 
 	/**
 	 * The maximum size of a UDP message we'll accept.
@@ -171,6 +183,7 @@ public class UDPService implements ReadWriteObserver {
                                Acceptor.TIME_BETWEEN_VALIDATES,
                                Acceptor.TIME_BETWEEN_VALIDATES);
         RouterService.schedule(new PeriodicPinger(), 0, PING_PERIOD);
+        RouterService.schedule(CACHE_CLEANER, 20*1000, 5*1000);
     }
     
     /** @return The GUID to send for UDPConnectBack attempts....
@@ -441,7 +454,8 @@ public class UDPService implements ReadWriteObserver {
         if(_channel == null || _channel.socket().isClosed())
             return; // ignore if not open.
 
-        BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(msg.getTotalLength());
+        BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(
+                BUFFER_CACHE.getHeap(msg.getTotalLength()));
         try {
             msg.writeQuickly(baos);
         } catch(IOException e) {
@@ -466,21 +480,25 @@ public class UDPService implements ReadWriteObserver {
 	public boolean handleWrite() throws IOException {
 	    synchronized(OUTGOING_MSGS) {
 	        while(!OUTGOING_MSGS.isEmpty()) {
+                boolean releaseBuffer = true;
+                SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
 	            try {
-    	            SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
-    
     	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
     	                // we removed the bundle from the list but couldn't send it,
     	                // so we have to put it back in.
     	                OUTGOING_MSGS.add(0, bundle);
+                        releaseBuffer = false;
     	                return true; // no room left to send.
-                    }
+                    } 
                 } catch(BindException ignored) {
                 } catch(ConnectException ignored) {
                 } catch(NoRouteToHostException ignored) {
                 } catch(PortUnreachableException ignored) {
                 } catch(SocketException ignored) {
                     LOG.warn("Ignoring exception on socket", ignored);
+                } finally {
+                    if (releaseBuffer)
+                        BUFFER_CACHE.release(bundle.buffer);
                 }
 	        }
 	        
