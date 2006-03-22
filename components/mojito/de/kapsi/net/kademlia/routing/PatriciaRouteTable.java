@@ -282,7 +282,11 @@ public class PatriciaRouteTable implements RoutingTable {
     }
     
     public int updateBucketNodeCount(BucketNode bucket) {
-        int newCount = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1).size();
+        // This isn't neccessary because updateBucketNodeCount()
+        // is called first time AFTER a split has happened and
+        // the depth is at least 1! 
+        int length = Math.max(0, bucket.getDepth()-1);
+        int newCount = nodesTrie.range(bucket.getNodeID(),length).size();
         bucket.setNodeCount(newCount);
         return newCount;
     }
@@ -588,15 +592,13 @@ public class PatriciaRouteTable implements RoutingTable {
             if(!foundNodes && !nodes.isEmpty()) {
                 foundNodes = true;
             }
-            queryList.remove(lookup);
             
-            if(queryList.size() == 0) {
-                if(bootstrapListener != null) {
-                    bootstrapListener.secondPhaseComplete(time,foundNodes);
-                }
+            queryList.remove(lookup);
+            if(queryList.isEmpty() 
+                    && bootstrapListener != null) {
+                bootstrapListener.secondPhaseComplete(time,foundNodes);
             }
         }
-        
     }
     
     private class NodeAliveKeySelector implements PatriciaTrie.KeySelector{
