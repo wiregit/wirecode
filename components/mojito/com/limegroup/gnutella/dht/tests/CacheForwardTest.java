@@ -35,10 +35,10 @@ public class CacheForwardTest {
         
         try {
             firstStorer.bootstrap(originalRequesterDHT.getSocketAddress(),null);
-            byte[] valueID = secondStorer.getLocalNode().getNodeID().getBytes();
+            byte[] valueID = firstStorer.getLocalNode().getNodeID().getBytes();
             //replace with first bits of first storer to make sure it lands there first
             originalRequesterDHT.put(KUID.createValueID(valueID),"test".getBytes("UTF-8"));
-            Thread.sleep(15000);
+            Thread.sleep(5000);
             new Thread(secondStorer,"DHT-3").start();
             secondStorer.bootstrap(firstStorer.getSocketAddress(),null);
         } catch (IOException e) {

@@ -24,6 +24,7 @@ import de.kapsi.net.kademlia.db.KeyValueCollection;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.routing.RoutingTable;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 
 /**
@@ -81,33 +82,42 @@ public class DefaultMessageHandler extends MessageHandler
         ContactNode node = new ContactNode(nodeId, src);
         routeTable.add(node,true);
         
-        List toStore = new ArrayList();
+        //are we one of the K closest nodes to the contact?
+        List closestNodes = routeTable.select(nodeId,KademliaSettings.getReplicationParameter(),false,false);
         
-        Database database = context.getDatabase();
-        synchronized(database) {
-            Collection keyValues = context.getDatabase().getAllCollections();
-            for (Iterator iter = keyValues.iterator(); iter.hasNext(); ) {
-                KeyValueCollection c = (KeyValueCollection)iter.next();
-
-                boolean isCloser = nodeId.isCloser(context.getLocalNodeID(), c.getKey());
-                //To avoid redundant STORE forward, a node only transfers a value if it's ID is closer
-                //than any other ID (except the new closest one of course)
-                //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                boolean localIsClosest = routeTable.selectNextClosest(c.getKey()).equals(context.getLocalNode());
-                if(isCloser && localIsClosest) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Node "+node+" is now closer then us to a value. Sending store request");   
+        if(closestNodes.contains(context.getLocalNode())) {
+            List toStore = new ArrayList();
+            
+            Database database = context.getDatabase();
+            synchronized(database) {
+                Collection keyValues = context.getDatabase().getAllCollections();
+                for (Iterator iter = keyValues.iterator(); iter.hasNext(); ) {
+                    KeyValueCollection c = (KeyValueCollection)iter.next();
+                    //To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
+                    //or if it's ID is closer than any other ID (except the new closest one of course)
+                    //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
+                    List closestNodesToKey = routeTable.select(c.getKey(),KademliaSettings.getReplicationParameter(),false,false);
+                    ContactNode closest = (ContactNode)closestNodesToKey.get(0);
+                    if((closest.equals(context.getLocalNode()))||
+                            ((closest.equals(node) && 
+                                    closestNodesToKey.size() > 1)) &&
+                                    ((ContactNode)closestNodesToKey.get(1)).equals(context.getLocalNode())) {
+                        
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   
+                        }
+                        toStore.addAll(c);
                     }
-                    toStore.addAll(c);
                 }
+            }
+            
+            if (!toStore.isEmpty()) {
+                StoreResponseHandler handler = new StoreResponseHandler(context, toStore);
+                context.getMessageDispatcher().send(node, 
+                        context.getMessageFactory().createStoreRequest(toStore.size(), Collections.EMPTY_LIST), handler);
             }
         }
         
-        if (!toStore.isEmpty()) {
-            StoreResponseHandler handler = new StoreResponseHandler(context, toStore);
-            context.getMessageDispatcher().send(node, 
-                    context.getMessageFactory().createStoreRequest(toStore.size(), Collections.EMPTY_LIST), handler);
-        }
     }
     
     
