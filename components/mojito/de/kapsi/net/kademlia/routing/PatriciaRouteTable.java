@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -18,8 +17,6 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import sun.security.krb5.internal.crypto.b;
 
 import de.kapsi.net.kademlia.BucketNode;
 import de.kapsi.net.kademlia.ContactNode;
@@ -246,7 +243,9 @@ public class PatriciaRouteTable implements RoutingTable {
     
     public void handleFailure(KUID nodeId) {
         
-        if(nodeId == null) return;
+        if(nodeId == null) {
+            return;
+        }
         
         //this should never happen -- who knows?!!
         if(nodeId.equals(context.getLocalNodeID())) {
@@ -273,10 +272,10 @@ public class PatriciaRouteTable implements RoutingTable {
                 put(replacement.getNodeID(),replacement,false);
             }
         } else {
-                node = bucket.removeReplacementNode(nodeId);
-                if (node!= null && LOG.isTraceEnabled()) {
-                    LOG.trace("Removed node: "+node+" from replacement cache");
-                }
+            node = bucket.removeReplacementNode(nodeId);
+            if (node!= null && LOG.isTraceEnabled()) {
+                LOG.trace("Removed node: "+node+" from replacement cache");
+            }
         }
     }
     
@@ -324,16 +323,16 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private void pingBucketLastRecentlySeenNode(BucketNode bucket) {
         
-        if(bucket == null) return;
-        
-        int depth = bucket.getDepth();
-        List bucketList;
-        if(depth < 1) {
-            //we are selecting from the root
-            bucketList = nodesTrie.range(bucket.getNodeID(),0);
-        } else {
-            bucketList = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1);
+        if(bucket == null) {
+            return;
         }
+        
+        // Depth is 0 on the root level and since 0-1 is -1 we're
+        // a bit screwed if we try to compare bits up to the -1th
+        // bit.
+        int length = Math.max(0, bucket.getDepth()-1);
+        List bucketList = nodesTrie.range(bucket.getNodeID(), length);
+        
         ContactNode leastRecentlySeen = 
             BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
         
@@ -373,9 +372,9 @@ public class PatriciaRouteTable implements RoutingTable {
             //check replacement cache in closest bucket
             bucket = (BucketNode)bucketsTrie.select(nodeId);
             Map replacementCache = bucket.getReplacementCache();
-            if(replacementCache!= null &&
-                    replacementCache.size()!=0 && 
-                    replacementCache.containsKey(nodeId)) {
+            if(replacementCache!= null 
+                    && !replacementCache.isEmpty() 
+                    && replacementCache.containsKey(nodeId)) {
                 existingNode = (ContactNode) replacementCache.get(nodeId);
                 replacement = true;
             }
@@ -417,17 +416,13 @@ public class PatriciaRouteTable implements RoutingTable {
             //OR if it is not full (not complete)
             //OR if there is at least one invalid node inside
             //OR if forced
-            int depth = bucket.getDepth();
-            List liveNodes;
-            if(depth < 1) {
-                liveNodes = nodesTrie.range(bucket.getNodeID(),0,new NodeAliveKeySelector());
-            } else {
-                liveNodes = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1,new NodeAliveKeySelector());
-            }
-            if(force || 
-                    (now - lastTouch > refreshLimit) || 
-                    (bucket.getNodeCount() < K) || 
-                    (liveNodes.size() != bucket.getNodeCount())) {
+
+            int length = Math.max(0, bucket.getDepth()-1);
+            List liveNodes = nodesTrie.range(bucket.getNodeID(), length, new NodeAliveKeySelector());
+            
+            if(force || (now - lastTouch > refreshLimit) 
+                    || (bucket.getNodeCount() < K) 
+                    || (liveNodes.size() != bucket.getNodeCount())) {
                 //select a random ID with this prefix
                 KUID randomID = KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth());
                 
@@ -473,8 +468,6 @@ public class PatriciaRouteTable implements RoutingTable {
         return nodesTrie.values();
     }
 
-    
-    
     public Collection getAllBuckets() {
         return bucketsTrie.values();
     }
@@ -505,10 +498,15 @@ public class PatriciaRouteTable implements RoutingTable {
      */
     public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean isLocalLookup) {
         //only touch bucket if we know we are going to contact it's nodes
-        if(isLocalLookup) touchBucket(lookup);
+        if(isLocalLookup) {
+            touchBucket(lookup);
+        }
+        
         if(onlyLiveNodes) {
             return nodesTrie.select(lookup, k, new NodeAliveKeySelector());
-        }else return nodesTrie.select(lookup, k);
+        } else {
+            return nodesTrie.select(lookup, k);
+        }
     }
 
 
@@ -593,12 +591,10 @@ public class PatriciaRouteTable implements RoutingTable {
     private class NodeAliveKeySelector implements PatriciaTrie.KeySelector{
         public boolean allow(Object key, Object value) {
             if(value instanceof ContactNode) {
-                ContactNode node = (ContactNode)value;
-                if(node.hasFailed()) {
-                    return false;
-                } else return true;
-            } else return false;
+                return !((ContactNode)value).hasFailed();
+            } else {
+                return false;
+            }
         }
     }
-    
 }
