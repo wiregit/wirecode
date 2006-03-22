@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * An optimized PATRICIA Trie for Kademlia. 
@@ -243,40 +242,34 @@ public class PatriciaTrie implements Serializable {
     }
     
     public List select(Object key, int count, KeySelector keySelector) {
-        SearchState state = new SearchState(key, count, keySelector);
-        selectR(state);
-        return state.getResults();
+        List list = new ArrayList(count);
+        selectR(root.left, -1, key, list, count, keySelector);
+        return list;
     }
 
-    /**
-     * The actual select (bucket) implementation. It uses a 
-     * probability function to randomize the returned List (bucket).
-     */
-    private void selectR(final SearchState state) {
-        if (state.done) {
-            return;
-        }
+    private boolean selectR(Entry h, int bitIndex, 
+            final Object key, 
+            final List list, 
+            final int count, 
+            final KeySelector keySelector) {
         
-        Entry h = state.current; // need a copy on the stack
-        if (state.add(h) || state.done) {
-            return;
+        if (h.bitIndex <= bitIndex) {
+            if (!h.isEmpty() && keySelector.allow(h.key, h.value)) {
+                list.add(h.value);
+            }
+            return list.size() < count;
         }
-        
-        if (!isBitSet(state.key, h.bitIndex)) {
-            state.goToChildEntry(h, true);
-            selectR(state);
-            if (!state.done) {
-                state.goToChildEntry(h, false);
-                selectR(state);
+
+        if (!isBitSet(key, h.bitIndex)) {
+            if (selectR(h.left, h.bitIndex, key, list, count, keySelector)) {
+                return selectR(h.right, h.bitIndex, key, list, count, keySelector);
             }
         } else {
-            state.goToChildEntry(h, false);
-            selectR(state);
-            if (!state.done) {
-                state.goToChildEntry(h, true);
-                selectR(state);
+            if (selectR(h.right, h.bitIndex, key, list, count, keySelector)) {
+                return selectR(h.left, h.bitIndex, key, list, count, keySelector);
             }
         }
+        return false;
     }
     
     /**
@@ -708,81 +701,6 @@ public class PatriciaTrie implements Serializable {
             
             buffer.append(")");
             return buffer.toString();
-        }
-    }
-    
-    /**
-     * SearchState is utilitized during select to keep track of 
-     * the current recursion state and some probalistic buckt
-     * randomization
-     */
-    private class SearchState {
-        
-        private Entry current = root.left;
-        private int bitIndex = -1;
-        
-        private List dest;
-        private Object key;
-        private int targetSize;
-
-        private int currentDistance, numEquidistant, numEquidistantToAdd;
-        
-        private boolean done;
-        
-        private final Random r = new Random();
-        
-        private KeySelector keySelector;
-        
-        public SearchState(Object key, int targetSize, KeySelector keySelector) {
-            this.key = key;
-            this.targetSize = targetSize;
-            this.keySelector = keySelector;
-
-            dest = new ArrayList(Math.min(targetSize, size()));
-        }
-        
-        public List getResults() {
-            return dest;
-        }
-        
-        public boolean add(Entry h) {
-            if (h.bitIndex <= bitIndex) {
-                if (!h.isEmpty() && keySelector.allow(h.key, h.value)) {
-                    addResult(h);
-                }
-                return true;
-            }
-            return false;
-        }
-        
-        private void addResult(Entry h) {
-           int distance = bitIndex(key, h.key);
-           
-           if (distance != currentDistance) {
-               if (dest.size() == targetSize) { // finito.
-                   done = true;
-                   return;
-               }
-               currentDistance = distance;
-               numEquidistant = 0;
-               numEquidistantToAdd = targetSize - dest.size();
-           }
-           
-           numEquidistant++;
-           
-           if (dest.size() < targetSize) {
-               // trivial case: we don't have enough peers, just add
-               dest.add(h.value);
-           } else if (Math.random() < (float)numEquidistantToAdd / numEquidistant) {
-               // we have to replace somebody at random...
-               int ejectee = targetSize - r.nextInt(numEquidistantToAdd) -1;
-               dest.set(ejectee,h.value);
-           } 
-        }
-        
-        public void goToChildEntry(Entry h, boolean left) {
-            bitIndex = h.bitIndex;
-            current = left ? h.left : h.right;
         }
     }
     
