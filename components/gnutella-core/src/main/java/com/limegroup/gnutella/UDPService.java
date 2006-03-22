@@ -72,17 +72,6 @@ public class UDPService implements ReadWriteObserver {
 	 */
 	private final ByteBuffer BUFFER;
     
-    /**
-     * A cache for ByteBuffers.
-     */
-    private final ByteBufferCache BUFFER_CACHE = new ByteBufferCache();
-    
-    private final Runnable CACHE_CLEANER = new Runnable() {
-        public void run() {
-            BUFFER_CACHE.clearCache();
-        }
-    };
-
 	/**
 	 * The maximum size of a UDP message we'll accept.
 	 */
@@ -183,7 +172,6 @@ public class UDPService implements ReadWriteObserver {
                                Acceptor.TIME_BETWEEN_VALIDATES,
                                Acceptor.TIME_BETWEEN_VALIDATES);
         RouterService.schedule(new PeriodicPinger(), 0, PING_PERIOD);
-        RouterService.schedule(CACHE_CLEANER, 20*1000, 5*1000);
     }
     
     /** @return The GUID to send for UDPConnectBack attempts....
@@ -455,7 +443,7 @@ public class UDPService implements ReadWriteObserver {
             return; // ignore if not open.
 
         BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(
-                BUFFER_CACHE.getHeap(msg.getTotalLength()));
+                NIODispatcher.instance().getBufferCache().getHeap(msg.getTotalLength()));
         try {
             msg.writeQuickly(baos);
         } catch(IOException e) {
@@ -498,7 +486,7 @@ public class UDPService implements ReadWriteObserver {
                     LOG.warn("Ignoring exception on socket", ignored);
                 } finally {
                     if (releaseBuffer)
-                        BUFFER_CACHE.release(bundle.buffer);
+                        NIODispatcher.instance().getBufferCache().release(bundle.buffer);
                 }
 	        }
 	        

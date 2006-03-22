@@ -3,6 +3,7 @@ package com.limegroup.gnutella.io;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +12,9 @@ import java.util.TreeMap;
 
 public class HeapByteBufferCache {
 
-    private final TreeMap /* Integer(size) -> ByteBuffer */ CACHE = new TreeMap();
+    private final TreeMap /* Integer -> List<ByteBuffer> */ CACHE = new TreeMap();
     
-    private final Map /* Integer(hashcode) -> ByteBuffer */ SLICED = new HashMap();
+    private final Map /* ByteBuffer -> ByteBuffer */ SLICED = new IdentityHashMap();
 
     public ByteBuffer get() {
         return get(8192);
@@ -69,15 +70,14 @@ public class HeapByteBufferCache {
         // slice!
         larger.limit(size);
         ByteBuffer ret = larger.slice();
-        SLICED.put(new Integer(System.identityHashCode(ret)), larger);
+        SLICED.put(ret, larger);
         return ret;
     }
 
     public synchronized void put(ByteBuffer buf) {
         
         // see if this buffer was sliced off of a bigger one
-        ByteBuffer toReturn = (ByteBuffer) 
-            SLICED.remove(new Integer(System.identityHashCode(buf)));
+        ByteBuffer toReturn = (ByteBuffer) SLICED.remove(buf);
         if (toReturn == null)
             toReturn = buf;
         
