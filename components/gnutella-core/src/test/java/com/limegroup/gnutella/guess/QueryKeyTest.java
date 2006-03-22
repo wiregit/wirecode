@@ -52,7 +52,7 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testSimpleGeneration() throws Exception {
-        QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
+        QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         InetAddress ip = null;
         ip = InetAddress.getByName("www.limewire.com");
         int port = 6346;
@@ -69,57 +69,7 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(qk1,qk2);
     }
 
-    /*
-    public void testSamePadModulo() throws Exception {
-        QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
-        InetAddress ip = null;
-        ip = InetAddress.getByName("www.limewire.com");
-        int port = 6346;
-        // suppose the pads have the same modulo 8 - this case should be
-        // handled.
-        byte[] innards = (byte[]) PrivilegedAccessor.getValue(secretKey, "_pad");
-        // test lower bound
-        innards[0] = 0;
-        innards[1] = 0;
-        QueryKey qk1 = QueryKey.getQueryKey(ip, port, secretKey);
-        QueryKey qk2 = QueryKey.getQueryKey(ip, port, secretKey);
-        assertEquals(qk1,qk2);
-        // test everything else bound
-        innards[0] = 1;
-        innards[1] = 1;
-        qk1 = QueryKey.getQueryKey(ip, port, secretKey);
-        qk2 = QueryKey.getQueryKey(ip, port, secretKey);
-        assertEquals(qk1,qk2);
-    }
-
-    public void testNegativePad() throws Exception {
-        QueryKey.QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
-        InetAddress ip = null;
-        ip = InetAddress.getByName("www.limewire.com");
-        int port = 6346;
-        // suppose the pads have the same modulo 8 - this case should be
-        // handled.
-        byte[] innards = (byte[]) PrivilegedAccessor.getValue(secretKey, "_pad");
-        // test first negative
-        innards[0] = -1;
-        innards[1] = 0;
-        QueryKey qk1 = QueryKey.getQueryKey(ip, port, secretKey);
-        QueryKey qk2 = QueryKey.getQueryKey(ip, port, secretKey);
-        assertEquals(qk1,qk2);
-        // test secind negative
-        innards[0] = 5;
-        innards[1] = -24;
-        qk1 = QueryKey.getQueryKey(ip, port, secretKey);
-        qk2 = QueryKey.getQueryKey(ip, port, secretKey);
-        assertEquals(qk1,qk2);
-        // test everything negative
-        innards[0] = -41;
-        innards[1] = -51;
-        qk1 = QueryKey.getQueryKey(ip, port, secretKey);
-        qk2 = QueryKey.getQueryKey(ip, port, secretKey);
-        assertEquals(qk1,qk2);
-    }
-    */
+    
 
     // Makes sure QueryKeys have no problem going in and out of GGEP blocks
     public void testQueryKeysAndGGEP() throws Exception {
@@ -148,74 +98,13 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
                        queryKey, queryKey2);
         }
     }
-    
-    private class TEAVectorTester extends QueryKey.QueryKeyGenerator {
-        /** Set up a tester with given TEA encryption keys */
-        public TEAVectorTester(int k0, int k1, int k2, int k3, 
-                int preRotate, int postRotate) {
-            super(k0,k1,k2,k3, preRotate, postRotate);
-        }
-        
-        /** In the absence of 0x00 and 0x1C bytes, returns the
-         * left int of the TEA encryption block after encrypting (left,right).
-         * Use the postRotate to get at different parts of the TEA encryption
-         * output.
-         */
-        public int encrypt(int left, int right) throws UnknownHostException {
-            // Prepare right for the unusual encoding
-            // of IP addresses as ints used in QueryKeyGenerator
-            for(int i=0x80; i>0; i <<= 8) {
-                if ((right & i) != 0) {
-                    right = (~right) ^ (i-1) ^ i;
-                }
-            }
-            byte[] ipBytes = new byte[4];
-            for(int i=0; i <= 3; ++i) {
-                ipBytes[i] = (byte) right;
-                right >>>= 8;
-            }
-            
-            byte[] resultBytes = getKeyBytes(Inet4Address.getByAddress(ipBytes), left);
-            
-            int byteCount = resultBytes.length;
-            int result = 0;
-            for(int i=byteCount-4; i<byteCount ; ++i) {
-                result <<= 8;
-                result |= 0xFF & resultBytes[i];
-            }
-            
-            return result;
-        }
-    }
-    
-    // Breaks abstraction, but ensures that TEA is implemented correctly
-    public void testTEAtestVectors() throws Exception {
-        TEAVectorTester key = new TEAVectorTester(0,0,0,0,0,0);
-        long cipherBlock = ((Long)invokeMethod(key, "encrypt", 0x0L)).longValue();
-        assertEquals("TEA test vecotr failed", 0x41EA3A0A94BAA940L, cipherBlock);
-        assertEquals("TEA test vector failed.", 0x41EA3A0A, key.encrypt(0,0));
-        
-        // get at the other half of the block and test the 64-bit rotation code
-        key = new TEAVectorTester(0,0,0,0,0,32); 
-        assertEquals("TEA test vector failed.", 0x94BAA940, key.encrypt(0,0));
-    }
+
 
     public void testOddsAndEnds() throws Exception {
         // test to make clover 100% for QK
         QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(), 6346);
         assertFalse(qk.equals(new Object()));
         qk.toString();
-    }
-
-    
-    // Helper methods
-    private Object invokeMethod(Object target, String name, long arg)
-        throws NoSuchMethodException, IllegalAccessException,
-        java.lang.reflect.InvocationTargetException {
-        return PrivilegedAccessor.invokeMethod(target, name, 
-                new Object[] { new Long(arg)},
-                new Class[] { long.class }
-            );
     }
     
 }

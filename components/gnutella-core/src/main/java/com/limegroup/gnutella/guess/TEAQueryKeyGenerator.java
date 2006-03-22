@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.guess;
 
+import java.util.Arrays;
 import java.net.InetAddress;
 import java.security.SecureRandom;
 
@@ -64,10 +65,14 @@ import java.security.SecureRandom;
         LK0 = k0; LK1 = k1; RK0 = k2; RK1 = k3;
     }
     
+    /** Checks that this instance was used to create keyBytes from ip and port.*/
+    public boolean checkKeyBytes(byte[] keyBytes, InetAddress ip, int port) {
+        // This only works because this.getKeyBytes(ip,port) is deterministic.
+        return Arrays.equals(keyBytes, getKeyBytes(ip, port));
+    }
     
-    /** Returns the raw bytes for a QueryKey, which may need to
-     * be processed to remove 0x1C and 0x00 before sending on
-     * the network.
+    /** Returns the raw bytes for a QueryKey, which will not contain
+     *  0x1C and 0x00, to accomidate clients that poorly parse GGEP.
      */
     public byte[] getKeyBytes(InetAddress ip, int port) {
         byte[] toEncrypt = new byte[8];
