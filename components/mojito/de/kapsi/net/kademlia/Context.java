@@ -194,14 +194,16 @@ public class Context implements Runnable {
         messageDispatcher.bind(address);
         this.localAddress = address;
         
-        byte[] id = ContextSettings.getLocalNodeID(address);
+        nodeId = KUID.createRandomNodeID(address);
+        
+        /*byte[] id = ContextSettings.getLocalNodeID(address);
         if (id == null) {
             nodeId = KUID.createRandomNodeID(address);
             id = nodeId.getBytes();
             ContextSettings.setLocalNodeID(address, id);
         } else {
             nodeId = KUID.createNodeID(id);
-        }
+        }*/
         //add ourselve to the routing table
         routeTable.add(getLocalNode(),true);
     }
