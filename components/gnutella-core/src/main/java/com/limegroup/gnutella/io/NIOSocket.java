@@ -120,11 +120,6 @@ public class NIOSocket extends AbstractNBSocket {
     protected InterestWriteChannel getBaseWriteChannel() {
         return new SocketInterestWriteAdapter(channel);
     }
-    
-    /** Returns the SelectableChannel. */
-    protected SelectableChannel getSelectableChannel() {
-        return channel;
-    }
 
     /** Shuts down input, output & the socket. */
     protected void shutdownImpl() {

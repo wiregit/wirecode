@@ -66,11 +66,6 @@ public class UDPConnection extends AbstractNBSocket {
         return channel;
     }
 
-    /** Returns the UDPSocketChannel. */
-    protected SelectableChannel getSelectableChannel() {
-        return channel;
-    }
-
     /** Does nothing. */
     protected void shutdownImpl() {
     }

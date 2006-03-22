@@ -117,6 +117,11 @@ public class UDPMultiplexor extends AbstractSelector {
         throw new IllegalStateException("should never be closed.");
     }
 
+    /**
+     * Registers a new channel with this Selector.
+     * If we've already stored over the limit of channels, this will store
+     * the channel in a temporary list to be cancelled on the next selection.
+     */
     protected synchronized SelectionKey register(AbstractSelectableChannel ch, int ops, Object att) {
         int connID;
 

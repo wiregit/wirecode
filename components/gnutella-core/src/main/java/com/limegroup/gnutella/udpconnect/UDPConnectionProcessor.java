@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AlreadyConnectedException;
+import java.nio.channels.Channel;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ConnectionPendingException;
 import java.nio.channels.SelectionKey;
@@ -78,6 +79,12 @@ public class UDPConnectionProcessor {
 
     /** Time to wait after a close before everything is totally shutdown. */
     private static final long SHUTDOWN_DELAY_TIME     = 400;
+    
+    /**
+     *  Time to wait after the connection is closed to completely and totally
+     *  shut down the connection (and its channel).
+     */
+    private static final long CHANNEL_SHUTDOWN_DELAY  = 30000;
 
     // Define Connection states
     //
@@ -377,6 +384,9 @@ public class UDPConnectionProcessor {
         // If closed then done
         if ( _connectionState == FIN_STATE )
             throw new IOException("already closed");
+        
+        if(_connectEvent != null)
+            _connectEvent.unregister();
 
         // Shutdown keepalive event callbacks
         if ( _keepaliveEvent  != null ) 
@@ -425,6 +435,9 @@ public class UDPConnectionProcessor {
 
         // Clean up my caller
         _closedCleanupEvent.unregister();
+
+        _scheduler.register(new ChannelCloseTimerEvent(System.currentTimeMillis() +
+                                                       CHANNEL_SHUTDOWN_DELAY, this));
     }
     
     /**
@@ -919,6 +932,8 @@ public class UDPConnectionProcessor {
 	synchronized private void tryToConnect() {
         if (!isConnecting()) {
             LOG.debug("Already connected");
+            if(_connectEvent != null)
+                _connectEvent.unregister();
             return;
         }
         
@@ -929,23 +944,27 @@ public class UDPConnectionProcessor {
             LOG.debug("Timed out, waited for: " + waitTime);
             _connectionState = FIN_STATE;
         } else {
-            // Build SYN message with my connectionID in it
-            SynMessage synMsg;
-            if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT)
-                synMsg = new SynMessage(_myConnectionID, _theirConnectionID);
-            else
-                synMsg = new SynMessage(_myConnectionID);
-
-            LOG.debug("Sending SYN: " + synMsg);
-            // Send a SYN packet with our connectionID
-            send(synMsg);
+            // We cannot send the SYN until we've registered in the Multiplexor.
+            if(_myConnectionID != 0) {
+                // Build SYN message with my connectionID in it
+                SynMessage synMsg;
+                if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT)
+                    synMsg = new SynMessage(_myConnectionID, _theirConnectionID);
+                else
+                    synMsg = new SynMessage(_myConnectionID);
+    
+                LOG.debug("Sending SYN: " + synMsg);
+                // Send a SYN packet with our connectionID
+                send(synMsg);
+            }
             
             scheduleConnectEvent(now + SYN_WAIT_TIME);
         }
 	}
     
     /**
-     * Handles an incoming SYN message. All initial and/or duplicate SYNs are acked. We set theirConnectionID once we see the first SYN. If a subsequent SYN has a different ID,
+     * Handles an incoming SYN message. All initial and/or duplicate SYNs are acked.
+     * We set theirConnectionID once we see the first SYN. If a subsequent SYN has a different ID,
      * that SYN is ignored.
      * 
      * @param smsg
@@ -1488,6 +1507,24 @@ public class UDPConnectionProcessor {
             if(LOG.isDebugEnabled())  
                 LOG.debug("Closed connection done: "+ System.currentTimeMillis());
             
+            unregister();
+        }
+    }
+    
+
+    /** 
+     *  Makes sure the channel is closed after a certain amount of time.
+     */
+    static class ChannelCloseTimerEvent extends UDPTimerEvent {
+
+        public ChannelCloseTimerEvent(long time, UDPConnectionProcessor proc) {
+            super(time,proc );
+        }
+
+        protected void doActualEvent(UDPConnectionProcessor udpCon) {
+            try {
+                udpCon._channel.close();
+            } catch(IOException ignored) {}
             unregister();
         }
     }
