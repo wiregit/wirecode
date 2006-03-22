@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.udpconnect;
 
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -9,15 +10,16 @@ import java.nio.channels.Selector;
  */
 class UDPSelectionKey extends SelectionKey {
     
-    private final UDPConnectionProcessor processor;
+    private final Selector selector;
     private final SelectableChannel channel;
     private volatile boolean valid = true;
     
+    private int readyOps = 0;
     private int interestOps = 0;
     
-    UDPSelectionKey(UDPConnectionProcessor processor, Object attachment,
+    UDPSelectionKey(Selector selector, Object attachment,
                     SelectableChannel channel, int ops) {
-        this.processor = processor;
+        this.selector = selector;
         this.channel = channel;
         interestOps(ops);
         attach(attachment);
@@ -36,6 +38,9 @@ class UDPSelectionKey extends SelectionKey {
     }
 
     public SelectionKey interestOps(int ops) {
+        if(!isValid())
+            throw new CancelledKeyException();
+        
         this.interestOps = ops;
         return this;
     }
@@ -45,14 +50,17 @@ class UDPSelectionKey extends SelectionKey {
     }
 
     public int readyOps() {
-        synchronized(processor) {
-            return (processor.isReadReady()    ? SelectionKey.OP_READ  : 0)
-                 | (processor.isWriteReady()   ? SelectionKey.OP_WRITE : 0)
-                 | (processor.isConnectReady() ? SelectionKey.OP_CONNECT : 0);
-        }
+        if(!isValid())
+            throw new CancelledKeyException();
+        
+        return readyOps;
+    }
+    
+    public void setReadyOps(int readyOps) {
+        this.readyOps = readyOps;
     }
 
     public Selector selector() {
-        throw new UnsupportedOperationException();
+        return selector;
     }
 }

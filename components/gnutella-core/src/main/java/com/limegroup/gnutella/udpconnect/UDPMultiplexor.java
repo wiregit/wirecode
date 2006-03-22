@@ -1,25 +1,29 @@
 package com.limegroup.gnutella.udpconnect;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
-import java.util.Collections;
+import java.nio.channels.Selector;
+import java.nio.channels.spi.AbstractSelectableChannel;
+import java.nio.channels.spi.AbstractSelector;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.io.NIODispatcher;
-import com.limegroup.gnutella.io.Pollable;
 
 /** 
  *  Manage the assignment of connectionIDs and the routing of 
  *  UDPConnectionMessages. 
  */
-public class UDPMultiplexor implements Pollable {
+public class UDPMultiplexor extends AbstractSelector {
 
     private static final Log LOG =
       LogFactory.getLog(UDPMultiplexor.class);
@@ -31,7 +35,13 @@ public class UDPMultiplexor implements Pollable {
 	public static final byte          UNASSIGNED_SLOT   = 0;
 
 	/** Keep track of the assigned connections */
-	private volatile UDPConnectionProcessor[] _connections;
+	private volatile UDPSocketChannel[] _channels;
+    
+    /** A list of overflowed channels when registering. */
+    private final List channelsToRemove = new LinkedList();
+    
+    /** A set of the currently connected keys. */
+    private Set selectedKeys = new HashSet(256);
 
 	/** Keep track of the last assigned connection id so that we can use a 
 		circular assignment algorithm.  This should cut down on message
@@ -49,22 +59,23 @@ public class UDPMultiplexor implements Pollable {
      *  Initialize the UDPMultiplexor.
      */
     private UDPMultiplexor() {
-		_connections       = new UDPConnectionProcessor[256];
+        super(null);
+		_channels       = new UDPSocketChannel[256];
 		_lastConnectionID  = 0;
-        NIODispatcher.instance().addPollable(this);
+        NIODispatcher.instance().registerSelector(this, UDPSocketChannel.class);
     }
     
     /**
      * Determines if we're connected to the given host.
      */
     public boolean isConnectedTo(InetAddress host) {
-        UDPConnectionProcessor[] array = _connections;
+        UDPSocketChannel[] array = _channels;
 
         if (_lastConnectionID == 0)
             return false;
         for (int i = 0; i < array.length; i++) {
-            UDPConnectionProcessor con = array[i];
-            if (con != null && host.equals(con.getSocketAddress().getAddress())) {
+            UDPSocketChannel channel = array[i];
+            if (channel != null && host.equals(channel.getRemoteSocketAddress().getAddress())) {
                 return true;
             }
         }
@@ -72,14 +83,46 @@ public class UDPMultiplexor implements Pollable {
     }
 
     /**
-     * Register a UDPConnectionProcessor for receiving incoming events and return the assigned connectionID;
+     *  Route a message to the UDPConnectionProcessor identified in the messages
+	 *  connectionID;
      */
-    public synchronized byte register(UDPConnectionProcessor con) throws IOException {
+	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr) {
+        UDPSocketChannel[] array = _channels;
+		int connID = (int) msg.getConnectionID() & 0xff;
+
+		// If connID equals 0 and SynMessage then associate with a connection
+        // that appears to want it (connecting and with knowledge of it).
+		if ( connID == 0 && msg instanceof SynMessage ) {
+			for (int i = 1; i < array.length; i++) {
+                UDPSocketChannel channel = (UDPSocketChannel)array[i];
+                if(channel == null)
+                    continue;
+                
+				if ( channel.isConnectionPending() && channel.getRemoteSocketAddress().equals(addr)) {
+                    channel.getProcessor().handleMessage(msg);
+					break;
+				} 
+			}
+			// Note: eventually these messages should find a match
+			// so it is safe to throw away premature ones
+
+		} else if(array[connID] != null) {  // If valid connID then send on to connection
+            UDPSocketChannel channel = (UDPSocketChannel)array[connID];
+			if (channel.getRemoteSocketAddress().equals(addr) )
+                channel.getProcessor().handleMessage(msg);
+		}
+	}
+
+    protected void implCloseSelector() throws IOException {
+        throw new IllegalStateException("should never be closed.");
+    }
+
+    protected synchronized SelectionKey register(AbstractSelectableChannel ch, int ops, Object att) {
         int connID;
 
-        UDPConnectionProcessor[] copy = new UDPConnectionProcessor[_connections.length];
-        for (int i = 0; i < _connections.length; i++)
-            copy[i] = _connections[i];
+        UDPSocketChannel[] copy = new UDPSocketChannel[_channels.length];
+        for (int i = 0; i < _channels.length; i++)
+            copy[i] = _channels[i];
 
         for (int i = 1; i <= copy.length; i++) {
             connID = (_lastConnectionID + i) % 256;
@@ -91,100 +134,98 @@ public class UDPMultiplexor implements Pollable {
             // If the slot is open, take it.
             if (copy[connID] == null) {
                 _lastConnectionID = connID;
-                copy[connID] = con;
-                _connections = copy;
-                return (byte) connID;
+                UDPSocketChannel channel = (UDPSocketChannel)ch;
+                copy[connID] = channel;
+                channel.getProcessor().setConnectionId((byte)connID);
+                _channels = copy;
+                return new UDPSelectionKey(this, att, ch, ops);
             }
         }
-
-        throw new IOException("no room for connection");
+        
+        // We don't have enough space for this connection.  Add it to a temporary
+        // list of bad connections which will be removed during selectNow.
+        LOG.warn("Attempting to add over connection limit");
+        channelsToRemove.add(ch);
+        return new UDPSelectionKey(this, att, ch, ops);
     }
-    
-    /**
-     * Returns the SelectionKey associated w/ the connection for
-     * all connections that are ready for an operation.
-     */
-    public Set poll() {
-        Set selected = null;
+
+    public Set keys() {
+        throw new UnsupportedOperationException("full keyset retrieval not supported");
+    }
+
+    public int select() throws IOException {
+        throw new UnsupportedOperationException("blocking select not supported");
+    }
+
+    public int select(long timeout) throws IOException {
+        throw new UnsupportedOperationException("blocking select not supported");
+    }
+
+    public Set selectedKeys() {
+        return selectedKeys;
+    }
+
+    /** Polls through all available channels and returns those that are ready. */
+    public int selectNow() throws IOException {
+        UDPSocketChannel[] array = _channels;
+        UDPSocketChannel[] removed = null;
+
+        selectedKeys.clear();
         
-        UDPConnectionProcessor[] array = _connections;
-        UDPConnectionProcessor[] removed = null;
-        
-        for(int i = 0; i < array.length; i++) {
-            UDPConnectionProcessor con = (UDPConnectionProcessor)array[i];
-            if(con == null)
+        for (int i = 0; i < array.length; i++) {
+            UDPSocketChannel channel = (UDPSocketChannel) array[i];
+            if (channel == null)
                 continue;
-            
-            SelectionKey key = con.getChannel().keyFor(null);
-            if(key != null) {
-                if(key.isValid()) {
-                    if ((key.readyOps() & key.interestOps()) != 0) {
-                        if (selected == null)
-                            selected = new HashSet(5);
-                        selected.add(key);
+
+            UDPSelectionKey key = (UDPSelectionKey)channel.keyFor(this);
+            if (key != null) {
+                if (key.isValid()) {
+                    int currentOps = channel.getProcessor().readyOps();
+                    int readyOps = currentOps & key.interestOps();
+                    if (readyOps != 0) {
+                        key.setReadyOps(readyOps);
+                        selectedKeys.add(key);
                     }
                 } else {
-                    if(removed == null)
-                        removed = new UDPConnectionProcessor[array.length];
-                    removed[i] = con;
+                    if (removed == null)
+                        removed = new UDPSocketChannel[array.length];
+                    removed[i] = channel;
                 }
             }
         }
-        
+
         // Go through the removed list & remove them from _connections.
         // _connections may have changed (since we didn't lock while polling),
         // so we need to check and ensure the given UDPConnectionProcessor
         // is the same.
-        if (removed != null) {
-            synchronized (this) {
-                UDPConnectionProcessor[] copy = new UDPConnectionProcessor[_connections.length];
-                for (int i = 0; i < _connections.length; i++) {
-                    if(_connections[i] == removed[i])
+        synchronized (this) {
+            if (removed != null) {
+                UDPSocketChannel[] copy = new UDPSocketChannel[_channels.length];
+                for (int i = 0; i < _channels.length; i++) {
+                    if (_channels[i] == removed[i])
                         copy[i] = null;
                     else
-                        copy[i] = _connections[i];
+                        copy[i] = _channels[i];
                 }
-                _connections = copy;
+                _channels = copy;
+            }
+            
+            if(!channelsToRemove.isEmpty()) {
+                for(Iterator i = channelsToRemove.iterator(); i.hasNext(); ) {
+                    SelectableChannel next = (SelectableChannel)i.next();
+                    UDPSelectionKey key = (UDPSelectionKey)next.keyFor(this);
+                    key.cancel();
+                    selectedKeys.add(key);
+                }
+                channelsToRemove.clear();
             }
         }
         
-        return selected == null ? Collections.EMPTY_SET : selected;
+        return selectedKeys.size();
     }
 
-    /**
-     *  Route a message to the UDPConnectionProcessor identified in the messages
-	 *  connectionID;
-     */
-	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr) {
-        UDPConnectionProcessor[] array = _connections;
-		int connID = (int) msg.getConnectionID() & 0xff;
-
-		// If connID equals 0 and SynMessage then associate with a connection
-        // that appears to want it (connecting and with knowledge of it).
-		if ( connID == 0 && msg instanceof SynMessage ) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Receiving SynMessage :"+msg);
-            
-			for (int i = 1; i < array.length; i++) {
-                UDPConnectionProcessor conn = (UDPConnectionProcessor)array[i];
-                if(conn == null)
-                    continue;
-                
-				if ( conn.isConnecting() && conn.matchAddress(addr) ) {
-                    if(LOG.isDebugEnabled()) 
-                        LOG.debug("routeMessage to conn:"+i+" Syn:"+msg);
-
-                    conn.handleMessage(msg);
-					break;
-				} 
-			}
-			// Note: eventually these messages should find a match
-			// so it is safe to throw away premature ones
-
-		} else if(array[connID] != null) {  // If valid connID then send on to connection
-            UDPConnectionProcessor conn = (UDPConnectionProcessor)array[connID];
-			if (conn.matchAddress(addr) )
-                conn.handleMessage(msg);
-		}
-	}
+    public Selector wakeup() {
+        // Does nothing, since this never blocks.
+        return this;
+    }
 }

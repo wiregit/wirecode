@@ -6,17 +6,10 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectableChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.spi.SelectorProvider;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ConnectableChannel;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.NIODispatcher;
@@ -31,14 +24,13 @@ import com.limegroup.gnutella.io.WriteObserver;
  * we can make it implement InterestReadChannel & InterestWriteChannel, so
  * we don't need the additional InterestAdapter.
  */
-class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
-                                                            InterestWriteChannel,
-                                                            ConnectableChannel {
+class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
+                                                        InterestWriteChannel {
     
-    private static final Log LOG = LogFactory.getLog(UDPSocketChannel.class);
+    static {
+        UDPMultiplexor.instance(); // ensure the Multiplexor exists.
+    }
     
-    /** The SelectionKey associated with this channel. */
-    private SelectionKey key;
     
     /** The processor this channel is writing to / reading from. */
     private final UDPConnectionProcessor processor;
@@ -68,10 +60,20 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     private boolean shutdown = false;
     
     UDPSocketChannel() {
+        super(null);
         this.processor = new UDPConnectionProcessor(this);
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList(5);
         allocateNewChunk();
+        try {
+            configureBlocking(false);
+        } catch(IOException iox) {
+            throw new RuntimeException(iox);
+        }
+    }
+    
+    UDPConnectionProcessor getProcessor() {
+        return processor;
     }
 
     /**
@@ -254,60 +256,9 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
     }
 
     /// ********** SelectableChannel methods. ***************
-    
-    /** Unsupported. */
-    public Object blockingLock() {
-        throw new UnsupportedOperationException();
-    }
-
-    /** Unsupported. */
-    public SelectableChannel configureBlocking(boolean block) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /** Returns false. */
-    public boolean isBlocking() {
-        return false;
-    }
-
-    /** Returns true if register(...) was called. */
-    public boolean isRegistered() {
-        return key != null;
-    }
-
-    /** Returns the UDPSelectionKey that this created when it was registered. */
-    public SelectionKey keyFor(Selector sel) {
-        return key;
-    }
-
-    /** Unsupported. */
-    public SelectorProvider provider() {
-        throw new UnsupportedOperationException();
-    }
-
-    /** Creates a new UDPSelectionKey & attaches the attachment, then returns it. */
-    public synchronized SelectionKey register(Selector sel, int ops, Object att) throws ClosedChannelException {
-        if(!isOpen())
-            throw new ClosedChannelException();
-        
-        key = new UDPSelectionKey(processor, att, this, ops);        
-        return key;
-    }
-
-    /** Returns OP_READ & OP_WRITE. */
-    public int validOps() {
-        return SelectionKey.OP_READ 
-             & SelectionKey.OP_WRITE 
-             & SelectionKey.OP_CONNECT;
-    }
 
     /** Closes the processor. */
-    protected void implCloseChannel() throws IOException {
-        synchronized(this) {
-            if(key != null)
-                key.cancel();
-        }
-        
+    protected void implCloseSelectableChannel() throws IOException {        
         processor.close();
     }
 
@@ -356,7 +307,7 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
         throw new UnsupportedOperationException();
     }
     
-    public SocketAddress getRemoteSocketAddress() {
+    public InetSocketAddress getRemoteSocketAddress() {
         return processor.getSocketAddress();
     }
 
@@ -383,5 +334,17 @@ class UDPSocketChannel extends SelectableChannel implements InterestReadChannel,
 
     void setSocket(Socket socket) {
         this.socket = socket;
+    }
+
+    public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
+        throw new IOException("unsupported");
+    }
+
+    public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
+        throw new IOException("unsupported");
+    }
+
+    protected void implConfigureBlocking(boolean block) throws IOException {
+        // does nothing.
     }    
 }

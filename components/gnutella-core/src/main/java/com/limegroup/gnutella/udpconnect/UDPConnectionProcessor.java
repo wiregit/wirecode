@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AlreadyConnectedException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ConnectionPendingException;
+import java.nio.channels.SelectionKey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,7 +96,6 @@ public class UDPConnectionProcessor {
     // Handle to various singleton objects in our architecture
     private UDPService        _udpService;
     private UDPScheduler      _scheduler;
-    private UDPMultiplexor    _multiplexor;
     
     /** The UDPSocketChannel backing this processor. */
     private UDPSocketChannel  _channel;
@@ -275,8 +275,6 @@ public class UDPConnectionProcessor {
         else
             _udpService = _testingUDPService;
 
-        // Only wake these guys up if the service is okay
-        _multiplexor       = UDPMultiplexor.instance();
         _scheduler         = UDPScheduler.instance();
 
         // Precreate the receive window for responce reporting
@@ -321,12 +319,15 @@ public class UDPConnectionProcessor {
 
         if (LOG.isDebugEnabled())
             LOG.debug("Connecting to: " + addr);
-        
-        _myConnectionID = _multiplexor.register(this);
 
         // See if you can establish a pseudo connection 
         // which means each side can send/receive a SYN and ACK
 		tryToConnect();
+    }
+    
+    /** Sets the connection id this is using. */
+    void setConnectionId(byte id) {
+        this._myConnectionID = id;
     }
     
     /** Retrieves the InetSocketAddress this is connecting to. */
@@ -334,32 +335,36 @@ public class UDPConnectionProcessor {
         return _connectedTo;
     }
     
-    /** Retrieves the SelectableChannel. */
-    UDPSocketChannel getChannel() {
-        return _channel;
-    }
-    
     /** Retrieves the DataWindow used for reading data. */
     DataWindow getReadWindow() {
         return _receiveWindow;
-    }    
+    }
+
+    /** Returns the ready ops of this processor. */
+    synchronized int readyOps() {
+        if(isClosed())
+            return 0xFF;
+        else
+            return (isConnectReady() ? SelectionKey.OP_CONNECT : 0) 
+                 | (isReadReady()    ? SelectionKey.OP_READ    : 0)
+                 | (isWriteReady()   ? SelectionKey.OP_WRITE   : 0);
+    }
     
     /** Gets the connect readiness. */
-    synchronized boolean isConnectReady() {
-        return isClosed() ||
-                (_receivedSynAck
-                 && isConnecting()
-                 && _theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT);
+    private boolean isConnectReady() {
+        return _receivedSynAck
+               && isConnecting()
+               && _theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT;
     }
     
     /** Gets the read-readiness of this processor. */
-    synchronized boolean isReadReady() {
-        return isClosed() || _receiveWindow.hasReadableData();
+    private boolean isReadReady() {
+        return  _receiveWindow.hasReadableData();
     }
     
     /** Gets the write-readiness of this processor. */
-    synchronized boolean isWriteReady() {
-        return isClosed() || (isConnected() && _channel.getNumberOfPendingChunks() < getChunkLimit());
+    private boolean isWriteReady() {
+        return isConnected() && _channel.getNumberOfPendingChunks() < getChunkLimit();
     }
     
     /**
@@ -619,13 +624,6 @@ public class UDPConnectionProcessor {
                     (_connectionState != PRECONNECT_STATE &&
                      _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT)
             );
-	}
-
-    /**
-     *  Test whether the ip and ports match
-     */
-	boolean matchAddress(InetSocketAddress addr) {
-        return _connectedTo.equals(addr);
 	}
 
     /**

@@ -145,11 +145,6 @@ public class NIOSocket extends AbstractNBSocket {
         }
     }
 
-    /** Connects to the SocketAddress. */
-    protected boolean doConnect(SocketAddress addr) throws IOException {
-        return channel.connect(addr);
-    }
-
     // /////////////////////////////////////////////
     // / BELOW ARE ALL WRAPPERS FOR SOCKET.
     // /////////////////////////////////////////////

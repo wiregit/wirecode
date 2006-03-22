@@ -74,11 +74,6 @@ public class UDPConnection extends AbstractNBSocket {
     /** Does nothing. */
     protected void shutdownImpl() {
     }
-    
-    /** Connects to the SocketAddress. */
-    protected boolean doConnect(SocketAddress addr) throws IOException {
-        return channel.connect(addr);
-    }
 
     /** Sets the soTimeout this socket should use. */
 	public void setSoTimeout(int timeout) {
@@ -126,6 +121,10 @@ public class UDPConnection extends AbstractNBSocket {
     public SocketAddress getLocalSocketAddress() {
         return new InetSocketAddress(getLocalAddress(), getLocalPort());
     }
+    
+    public SocketChannel getChannel() {
+        return channel;
+    }    
 
     public String toString() {
         return "UDPConnection:" + channel;
@@ -153,10 +152,6 @@ public class UDPConnection extends AbstractNBSocket {
     
     public void bind(SocketAddress bindpoint) throws IOException {
         throw new IOException("not implemented");
-    }
-
-    public SocketChannel getChannel() {
-        return null; // TODO: have an Adapter to the UDPSocketChannel
     }
 
     public void setTcpNoDelay(boolean on) throws SocketException {

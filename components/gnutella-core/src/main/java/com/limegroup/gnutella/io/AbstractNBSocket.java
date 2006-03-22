@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.nio.channels.SelectableChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,29 +55,10 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     protected abstract InterestWriteChannel getBaseWriteChannel();
     
     /**
-     * Retrieves the channel which should be used as the SelectableChannel
-     * when interfacing with a Selector.
-     */
-    protected abstract SelectableChannel getSelectableChannel();
-    
-    /**
      * Performs any operations required for shutting down this socket.
      * This will only be called once per Socket.
      */
     protected abstract void shutdownImpl();
-    
-    /**
-     * Performs the connection attempt.  This should return immediately, with either
-     * a true or false value.  True indicates the socket connection immediately, false
-     * indiciates it will require some waiting.
-     * 
-     * This should be implemented like:
-     *   return MySocketChannel.connect(addr);
-     * Or:
-     *   return MyConnectableChannel.connect(addr);
-     */
-    protected abstract boolean doConnect(SocketAddress addr) throws IOException;
-    
     
     /**
      * Sets the initial reader value.
@@ -122,7 +102,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     
                     InterestReadChannel source = getBaseReadChannel();
                     lastChannel.setReadChannel(source);
-                    NIODispatcher.instance().interestRead(getSelectableChannel(), true);
+                    NIODispatcher.instance().interestRead(getChannel(), true);
                 } catch(IOException iox) {
                     shutdown();
                     oldReader.shutdown(); // in case we lost it.
@@ -256,11 +236,11 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             if (iaddr.isUnresolved())
                 throw new IOException("unresolved: " + addr);
             
-            if(doConnect(addr)) {
+            if(getChannel().connect(addr)) {
                 observer.handleConnect(this);
                 return true;
             } else {
-                NIODispatcher.instance().registerConnect(getSelectableChannel(), this, timeout);
+                NIODispatcher.instance().registerConnect(getChannel(), this, timeout);
                 return false;
             }
         } catch(IOException failed) {
@@ -281,7 +261,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             throw new IOException("Socket closed.");
         
         if(reader instanceof NIOInputStream) {
-            NIODispatcher.instance().interestRead(getSelectableChannel(), true);
+            NIODispatcher.instance().interestRead(getChannel(), true);
             return ((NIOInputStream)reader).getInputStream();
         } else {
             Future future = new Future() {
@@ -367,7 +347,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         shutdownImpl();
             
         try {
-            getSelectableChannel().close();
+            getChannel().close();
         } catch(IOException ignored) {}
         
         reader.shutdown();
