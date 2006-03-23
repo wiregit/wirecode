@@ -6,14 +6,13 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /** 
@@ -34,7 +33,7 @@ public class UDPConnection extends AbstractNBSocket {
      * Creates an unconnected UDPConnection. You must call connect(...) to connect.
      */
     public UDPConnection() {
-        channel = new UDPSocketChannel();
+        channel = (UDPSocketChannel)UDPSelectorProvider.instance().openSocketChannel();
         channel.setSocket(this);
         setInitialReader();
         setInitialWriter();  

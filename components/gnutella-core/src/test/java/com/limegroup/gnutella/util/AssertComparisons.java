@@ -66,6 +66,70 @@ public class AssertComparisons extends TestCase {
             fail(formatComparison(BLANK, msg, asList(expected), asList(actual)));
     }
     
+    /**
+     * Assert that the two arrays are equal.
+     */
+    static public void assertEquals(byte[] expected, byte[] actual, int actualOff, int actualLen) {
+        assertEquals(null, expected, actual, actualOff, actualLen);
+    }
+    
+    /**
+     * Assert that the two arrays are equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertEquals(String msg, byte[] expected, byte[] actual, int actualOff, int actualLen) {
+        byte[] newActual = new byte[actualLen];
+        for(int i = 0; i < actualLen; i++)
+            newActual[i] = actual[actualOff + i];
+        
+        if(!Arrays.equals(expected, newActual))
+            fail(formatComparison(BLANK, msg, asList(expected), asList(newActual)));
+    }
+    
+    /**
+     * Assert that the two arrays are equal.
+     */
+    static public void assertEquals(byte[] expected, int expectedOff, int expectedLen, byte[] actual) {
+        assertEquals(null, expected, expectedOff, expectedLen, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertEquals(String msg, byte[] expected, int expectedOff, int expectedLen, byte[] actual) {
+        byte[] newExpected = new byte[expectedLen];
+        for(int i = 0; i < expectedLen; i++)
+            newExpected[i] = expected[expectedOff + i];
+        
+        if(!Arrays.equals(newExpected, actual))
+            fail(formatComparison(BLANK, msg, asList(newExpected), asList(actual)));
+    }       
+    
+    /**
+     * Assert that the two arrays are equal.
+     */
+    static public void assertEquals(byte[] expected, int expectedOff, int expectedLen, byte[] actual, int actualOff, int actualLen) {
+        assertEquals(null, expected, expectedOff, expectedLen, actual, actualOff, actualLen);
+    }
+    
+    /**
+     * Assert that the two arrays are equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertEquals(String msg, byte[] expected, int expectedOff, int expectedLen, byte[] actual, int actualOff, int actualLen) {
+        byte[] newActual = new byte[actualLen];
+        for(int i = 0; i < actualLen; i++)
+            newActual[i] = actual[actualOff + i];
+        
+        byte[] newExpected = new byte[expectedLen];
+        for(int i = 0; i < expectedLen; i++)
+            newExpected[i] = expected[expectedOff + i];
+        
+        if(!Arrays.equals(newExpected, newActual))
+            fail(formatComparison(BLANK, msg, asList(newExpected), asList(newActual)));
+    }   
+    
 
     /**
      * Assert that the two arrays are equal.

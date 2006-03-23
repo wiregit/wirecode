@@ -25,8 +25,6 @@ import com.limegroup.gnutella.util.ManagedThread;
  */
 public final class UDPConnectionTest extends BaseTestCase {
 
-    private static Acceptor      ac;
-
 	/*
 	 * Constructs the test.
 	 */
@@ -46,11 +44,13 @@ public final class UDPConnectionTest extends BaseTestCase {
 	}
 
     public static void globalSetUp() throws Exception {
-        // Setup the test to use the UDPServiceStub
-        UDPConnectionProcessor.setUDPServiceForTesting(
-            UDPServiceStub.instance());
+        UDPConnectionProcessor.setUDPServiceForTesting(UDPServiceStub.instance());
         new RouterService(new ActivityCallbackStub());
-        ac = RouterService.getAcceptor();
+        setSettings();
+    }
+    
+    private static void setSettings() throws Exception {
+        Acceptor ac = RouterService.getAcceptor();
         ac.setAddress(InetAddress.getByName("127.0.0.1"));
         ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
@@ -64,11 +64,7 @@ public final class UDPConnectionTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
-        ac.setAddress(InetAddress.getByName("127.0.0.1"));
-        ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
-        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
+        setSettings();
 
         // Add some simulated connections to the UDPServiceStub
         UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 0);

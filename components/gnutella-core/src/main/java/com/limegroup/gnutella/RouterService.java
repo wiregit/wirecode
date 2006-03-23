@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.channels.Channel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +31,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
@@ -49,6 +51,7 @@ import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
+import com.limegroup.gnutella.udpconnect.UDPSelectorProvider;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.upelection.PromotionManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
@@ -170,6 +173,7 @@ public class RouterService {
 	 * messages.
 	 */
 	private static final UDPService UDPSERVICE = UDPService.instance();
+    
 
 	/**
 	 * Constant for the <tt>SearchResultHandler</tt> class that processes
@@ -206,6 +210,23 @@ public class RouterService {
 	 * messages.
 	 */
     private static MessageRouter router;
+    
+    /**
+     * The UDPMultiplexor.
+     */
+    private static UDPMultiplexor UDP_MULTIPLEXOR;
+    
+    
+    static {
+        // Link the multiplexor & NIODispatcher together.
+        UDPSelectorProvider provider = UDPSelectorProvider.instance();
+        UDP_MULTIPLEXOR = (UDPMultiplexor)provider.openSelector();
+        Channel socketChannel = provider.openSocketChannel();
+        try {
+            socketChannel.close();
+        } catch(IOException ignored) {}
+        NIODispatcher.instance().registerSelector(UDP_MULTIPLEXOR, socketChannel.getClass());
+    }
     
     /**
      * A list of items that require running prior to shutting down LW.
@@ -557,13 +578,6 @@ public class RouterService {
 	public static UDPService getUdpService() {
 		return UDPSERVICE;
 	}
-	
-	/**
-	 * Gets the UDPMultiplexor.
-	 */
-	public static UDPMultiplexor getUDPConnectionManager() {
-	    return UDPMultiplexor.instance();
-	}
 
 	/**
 	 * Accessor for the <tt>ConnectionManager</tt> instance.
@@ -647,6 +661,11 @@ public class RouterService {
     public static SecureMessageVerifier getSecureMessageVerifier() {
         return secureMessageVerifier;
     }
+    
+    /** Gets the UDP Multiplexor. */
+    public static UDPMultiplexor getUDPMultiplexor() {
+        return UDP_MULTIPLEXOR;
+    }
 	
 	public static byte [] getMyGUID() {
 	    return MYGUID;
@@ -724,7 +743,7 @@ public class RouterService {
         
         String host = addr.getHostAddress();
         return manager.isConnectedTo(host) ||
-               UDPMultiplexor.instance().isConnectedTo(addr) ||
+               UDP_MULTIPLEXOR.isConnectedTo(addr) ||
                uploadManager.isConnectedTo(addr); // ||
                // dloadManager.isConnectedTo(addr);
     }

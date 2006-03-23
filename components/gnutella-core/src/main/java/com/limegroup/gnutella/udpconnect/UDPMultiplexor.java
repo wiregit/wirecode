@@ -3,11 +3,13 @@ package com.limegroup.gnutella.udpconnect;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.channels.IllegalSelectorException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.nio.channels.spi.AbstractSelector;
+import java.nio.channels.spi.SelectorProvider;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,22 +19,16 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.NIODispatcher;
-
 /** 
  *  Manage the assignment of connectionIDs and the routing of 
  *  UDPConnectionMessages. 
  */
 public class UDPMultiplexor extends AbstractSelector {
 
-    private static final Log LOG =
-      LogFactory.getLog(UDPMultiplexor.class);
-
-	/** Keep track of a singleton instance */
-    private static UDPMultiplexor     _instance    = new UDPMultiplexor();
+    private static final Log LOG = LogFactory.getLog(UDPMultiplexor.class);
 
 	/** The 0 slot is for incoming new connections so it is not assigned */
-	public static final byte          UNASSIGNED_SLOT   = 0;
+	public static final byte UNASSIGNED_SLOT   = 0;
 
 	/** Keep track of the assigned connections */
 	private volatile UDPSocketChannel[] _channels;
@@ -46,23 +42,15 @@ public class UDPMultiplexor extends AbstractSelector {
 	/** Keep track of the last assigned connection id so that we can use a 
 		circular assignment algorithm.  This should cut down on message
 		collisions after the connection is shut down. */
-	private int                       _lastConnectionID;
-
-    /**
-     *  Return the UDPMultiplexor singleton.
-     */
-    public static UDPMultiplexor instance() {
-		return _instance;
-    }      
+	private int _lastConnectionID;
 
     /**
      *  Initialize the UDPMultiplexor.
      */
-    private UDPMultiplexor() {
-        super(null);
+    UDPMultiplexor(SelectorProvider provider) {
+        super(provider);
 		_channels       = new UDPSocketChannel[256];
 		_lastConnectionID  = 0;
-        NIODispatcher.instance().registerSelector(this, UDPSocketChannel.class);
     }
     
     /**
@@ -124,6 +112,11 @@ public class UDPMultiplexor extends AbstractSelector {
      */
     protected synchronized SelectionKey register(AbstractSelectableChannel ch, int ops, Object att) {
         int connID;
+        
+        if(!(ch instanceof UDPSocketChannel))
+            throw new IllegalSelectorException();
+        
+        UDPSocketChannel channel = (UDPSocketChannel)ch;
 
         UDPSocketChannel[] copy = new UDPSocketChannel[_channels.length];
         for (int i = 0; i < _channels.length; i++)
@@ -139,7 +132,6 @@ public class UDPMultiplexor extends AbstractSelector {
             // If the slot is open, take it.
             if (copy[connID] == null) {
                 _lastConnectionID = connID;
-                UDPSocketChannel channel = (UDPSocketChannel)ch;
                 copy[connID] = channel;
                 channel.getProcessor().setConnectionId((byte)connID);
                 _channels = copy;
@@ -154,8 +146,21 @@ public class UDPMultiplexor extends AbstractSelector {
         return new UDPSelectionKey(this, att, ch, ops);
     }
 
+    /**
+     * Returns all SelectionKeys this Selector is currently in control of.
+     */
     public Set keys() {
-        throw new UnsupportedOperationException("full keyset retrieval not supported");
+        UDPSocketChannel[] channels = _channels;
+        Set keys = new HashSet();
+        for(int i = 0; i < channels.length; i++) {
+            if(channels[i] != null)
+                keys.add(channels[i].keyFor(this));
+        }
+        synchronized(this) {
+            for(Iterator i = channelsToRemove.iterator(); i.hasNext(); )
+                keys.add(((SelectableChannel)i.next()).keyFor(this));
+        }
+        return keys;
     }
 
     public int select() throws IOException {
@@ -220,6 +225,7 @@ public class UDPMultiplexor extends AbstractSelector {
                     SelectableChannel next = (SelectableChannel)i.next();
                     UDPSelectionKey key = (UDPSelectionKey)next.keyFor(this);
                     key.cancel();
+                    key.setReadyOps(0);
                     selectedKeys.add(key);
                 }
                 channelsToRemove.clear();

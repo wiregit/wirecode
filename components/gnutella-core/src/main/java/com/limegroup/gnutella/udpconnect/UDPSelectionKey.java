@@ -52,7 +52,6 @@ class UDPSelectionKey extends SelectionKey {
     public int readyOps() {
         if(!isValid())
             throw new CancelledKeyException();
-        
         return readyOps;
     }
     

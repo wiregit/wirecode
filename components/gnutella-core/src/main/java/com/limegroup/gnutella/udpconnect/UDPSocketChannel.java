@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 
 import com.limegroup.gnutella.io.BufferUtils;
@@ -26,11 +27,6 @@ import com.limegroup.gnutella.io.WriteObserver;
  */
 class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
                                                         InterestWriteChannel {
-    
-    static {
-        UDPMultiplexor.instance(); // ensure the Multiplexor exists.
-    }
-    
     
     /** The processor this channel is writing to / reading from. */
     private final UDPConnectionProcessor processor;
@@ -59,9 +55,23 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
     /** Whether or not we've propogated the shutdown to other writers. */
     private boolean shutdown = false;
     
-    UDPSocketChannel() {
-        super(null);
+    UDPSocketChannel(SelectorProvider provider) {
+        super(provider);
         this.processor = new UDPConnectionProcessor(this);
+        this.readData = processor.getReadWindow();
+        this.chunks = new ArrayList(5);
+        allocateNewChunk();
+        try {
+            configureBlocking(false);
+        } catch(IOException iox) {
+            throw new RuntimeException(iox);
+        }
+    }
+    
+    // for testing.
+    UDPSocketChannel(UDPConnectionProcessor processor) {
+        super(null);
+        this.processor = processor;
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList(5);
         allocateNewChunk();

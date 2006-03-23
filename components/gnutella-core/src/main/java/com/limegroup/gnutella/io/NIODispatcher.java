@@ -295,6 +295,23 @@ public class NIODispatcher implements Runnable {
         }
     }
     
+    /**
+     * Removes a registered Selector.
+     */
+    public void removeSelector(final Selector selector) {
+        if(Thread.currentThread() == dispatchThread) {
+            POLLERS.remove(selector);
+            OTHER_SELECTORS.remove(selector);
+        } else {
+            invokeLater(new Runnable() {
+                public void run() {
+                    POLLERS.remove(selector);
+                    OTHER_SELECTORS.remove(selector);
+                }
+            });
+        }
+    }
+    
     /** Invokes the method in the NIODispatch thread. */
    public void invokeLater(Runnable runner) {
         if(Thread.currentThread() == dispatchThread) {
@@ -629,7 +646,6 @@ public class NIODispatcher implements Runnable {
             try {
                 try {
                     int readyOps = sk.readyOps();
-                    LOG.debug("Processing: " + sk + ", ops: " + readyOps + ", attachment: " + attachment);
                     if ((allowedOps & readyOps & SelectionKey.OP_ACCEPT) != 0) 
                         processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
                     else if((allowedOps & readyOps & SelectionKey.OP_CONNECT) != 0)
