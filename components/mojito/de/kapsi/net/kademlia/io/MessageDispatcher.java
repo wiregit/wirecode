@@ -52,7 +52,6 @@ public class MessageDispatcher implements Runnable {
     private static final long CLEANUP_INTERVAL = 3L * 1000L;
     private static final long SLEEP = 50L;
     
-    private final Object INPUT_LOCK = new Object();
     private final Object OUTPUT_LOCK = new Object();
     
     private LinkedList output = new LinkedList();
@@ -194,7 +193,6 @@ public class MessageDispatcher implements Runnable {
     
     private void handleLateResponse(KUID nodeId, SocketAddress src, Message msg) throws IOException {
         
-        
         if (LOG.isTraceEnabled()) {
             if (msg instanceof PingResponse) {
                 LOG.trace("Received a late Pong from " + ContactNode.toString(nodeId, src));
@@ -247,10 +245,10 @@ public class MessageDispatcher implements Runnable {
             
             if (message instanceof ResponseMessage) {
                 receipt = (Receipt)input.remove(message.getMessageID());
-            }
             
-            if (receipt != null) {
-                receipt.received();
+                if (receipt != null) {
+                    receipt.received();
+                }
             }
             
             processMessage(receipt, src, message);
@@ -260,6 +258,7 @@ public class MessageDispatcher implements Runnable {
     }
     
     private void processMessage(Receipt receipt, SocketAddress src, Message message) throws IOException {
+        
         KUID nodeId = message.getNodeID();
         
         // MAKE SURE WE'RE NOT RECEIVING MESSAGES FROM OURSELF
@@ -331,12 +330,12 @@ public class MessageDispatcher implements Runnable {
                 
                 selector.select(SLEEP);
                 
-                synchronized(INPUT_LOCK) {
-                    while(readNext() && isRunning());
-                    interestRead(true);
-                }
+                while(readNext() && isRunning());
+                interestRead(true); // We're always interested in reading
                 
                 synchronized(OUTPUT_LOCK) {
+                    
+                    // TODO propper throtteling.
                     int remaining = 0;
                     for(int i = 0; i < 10 && isRunning(); i++) {
                         remaining = writeNext();
@@ -348,9 +347,7 @@ public class MessageDispatcher implements Runnable {
                 }
                 
                 if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
-                    synchronized(INPUT_LOCK) {
-                        input.cleanup();
-                    }
+                    input.cleanup();
                     lastCleanup = System.currentTimeMillis();
                 }
             } catch (ClosedChannelException err) {
@@ -365,6 +362,8 @@ public class MessageDispatcher implements Runnable {
     
     private static class ReceiptMap extends FixedSizeHashMap {
         
+        private static final long serialVersionUID = -3084244582682726933L;
+
         public ReceiptMap(int maxSize) {
             super(maxSize);
         }
@@ -393,9 +392,6 @@ public class MessageDispatcher implements Runnable {
             if (super.removeEldestEntry(eldest) 
                     || receipt.timeout()) {
                 receipt.received();
-                if(LOG.isErrorEnabled()) {
-                    LOG.error("Out of space: "+ size()+", timeout: "+receipt.timeout());
-                }
                 try {
                     receipt.handleTimeout();
                 } catch (Throwable t) {
