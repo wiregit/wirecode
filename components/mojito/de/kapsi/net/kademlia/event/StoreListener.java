@@ -5,11 +5,9 @@
 
 package de.kapsi.net.kademlia.event;
 
-
 import java.util.Collection;
-
-import de.kapsi.net.kademlia.db.KeyValue;
+import java.util.List;
 
 public interface StoreListener {
-    public void store(KeyValue value, Collection nodes);
+    public void store(List keyValues, Collection nodes);
 }

@@ -34,7 +34,7 @@ public class FindValueRequestHandler extends LookupRequestHandler {
             KUID lookup = request.getLookupID();
 
             Collection values = context.getDatabase().get(lookup);
-            if (values != null) {
+            if (values != null && !values.isEmpty()) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Hit! " + lookup + " = " + values);
                 }
@@ -43,11 +43,10 @@ public class FindValueRequestHandler extends LookupRequestHandler {
                             .createFindValueResponse(request.getMessageID(), values);
                 context.getMessageDispatcher().send(src, response, null);
                 
-            } else {
-                super.handleRequest(nodeId, src, message);
+                return; // We're done here!
             }
-        } else {
-            super.handleRequest(nodeId, src, message);
         }
+        
+        super.handleRequest(nodeId, src, message);
     }
 }

@@ -22,6 +22,7 @@ import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
+import de.kapsi.net.kademlia.security.QueryKey;
 
 /**
  * Currently unused. Could be used to ACK/NACK store
@@ -33,21 +34,32 @@ public class StoreResponseHandler extends AbstractResponseHandler {
     
     private static final int MAX_ERRORS = 3;
     
-    private int errorCount = 0;
+    private int errors = 0;
+    private boolean done = false;
     
     private int index = 0;
     private int length = 0;
     
+    private QueryKey queryKey;
     private List keyValues;
     
-    public StoreResponseHandler(Context context, List keyValues) {
+    public StoreResponseHandler(Context context, QueryKey queryKey, List keyValues) {
         super(context);
         
+        if (queryKey == null) {
+            throw new NullPointerException("QueryKey is null");
+        }
+        
+        this.queryKey = queryKey;
         this.keyValues = keyValues;
     }
 
-    public void handleResponse(KUID nodeId, SocketAddress src, Message message, long time) 
-            throws IOException {
+    public void handleResponse(KUID nodeId, SocketAddress src, 
+            Message message, long time) throws IOException {
+        
+        if (done) {
+            return;
+        }
         
         StoreResponse response = (StoreResponse)message;
         
@@ -70,24 +82,30 @@ public class StoreResponseHandler extends AbstractResponseHandler {
                 toSend.add(keyValues.get(index + i));
             }
             
+            int remaining = keyValues.size()-index-length;
             StoreRequest request 
                 = (StoreRequest)context.getMessageFactory()
-                    .createStoreRequest(keyValues.size()-index-length, toSend);
+                    .createStoreRequest(remaining, queryKey, toSend);
             
             context.getMessageDispatcher().send(nodeId, src, request, this);
+            
+            done = (remaining == 0);
         }
         
         // reset the error counter
-        errorCount = 0;
+        errors = 0;
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, long time) 
             throws IOException {
         
-        errorCount++;
-        if (errorCount >= MAX_ERRORS) {
+        if (done) {
+            return;
+        }
+        
+        if (++errors >= MAX_ERRORS) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("");
+                LOG.trace("Max number of errors occured. Giving up!");
             }
             return;
         }
@@ -97,7 +115,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         if (remaining > 0) {
             StoreRequest request 
                 = (StoreRequest)context.getMessageFactory()
-                    .createStoreRequest(remaining, Collections.EMPTY_LIST);
+                    .createStoreRequest(remaining, queryKey, Collections.EMPTY_LIST);
         
             context.getMessageDispatcher().send(nodeId, dst, request, this);
         }

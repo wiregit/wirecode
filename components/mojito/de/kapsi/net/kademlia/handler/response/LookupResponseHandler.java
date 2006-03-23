@@ -8,9 +8,11 @@ package de.kapsi.net.kademlia.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +27,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.LookupSettings;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
@@ -40,28 +43,27 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     protected final KUID lookup;
     
     /** Set of queried KUIDs */
-    protected Set queried = new HashSet();
+    private Set queried = new HashSet();
     
     /** Trie of <KUID,ContactNode> from whom we got replies */
-    protected PatriciaTrie responses = new PatriciaTrie();
+    private PatriciaTrie responses = new PatriciaTrie();
     
     /** Trie of <KUID,ContactNode> to query */
-    protected PatriciaTrie toQuery = new PatriciaTrie();
-    
-    /** The closest NodeID we currently know */
-    protected KUID closest = null;
+    private PatriciaTrie toQuery = new PatriciaTrie();
     
     /** 
-     * The number of times a lookup round hasn't
-     * brought us closer to the lookup KUID
+     * 
      */
-    protected int lookupFailures = 0;
+    private Map queryKeys = new HashMap();
     
     /**
      * The number of lookup rounds
      */
-    protected int round = 0;
+    private int round = 0;
     
+    /**
+     * The number of searches that are currently active
+     */
     private int activeSearches = 0;
        
     /**
@@ -75,26 +77,20 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     private long time = 0L;
     
     /**
-     * Whather or not this Lookup handler is used
-     * for KeyValue lookups
-     */
-    private boolean valueLookup = false;
-    
-    /**
      * Wheather or not this lookup has terminated
      */
     private boolean finished = false;
     
-    public LookupResponseHandler(Context context, KUID lookup, boolean valueLookup) {
-        super(context, LookupSettings.getTimeout());
-        this.lookup = lookup;
-        this.valueLookup = valueLookup;
-        //TODO for now
-        this.resultSize = KademliaSettings.getReplicationParameter();
-        // Initial state: we're the closest ContactNode to lookup
-        closest = context.getLocalNodeID();
+    public LookupResponseHandler(Context context, KUID lookup) {
+        this(context, lookup, KademliaSettings.getReplicationParameter());
     }
     
+    public LookupResponseHandler(Context context, KUID lookup, int resultSize) {
+        super(context, LookupSettings.getTimeout());
+        
+        this.lookup = lookup;
+        this.resultSize = resultSize;
+    }
     
     public void handleResponse(KUID nodeId, SocketAddress src, 
             Message message, long time) throws IOException {
@@ -123,7 +119,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
             
             if (!finished) {
-                finish(lookup, response, time());
+                finishValueLookup(lookup, response, time());
             }
             
             finished = true;
@@ -144,12 +140,22 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     }
                     
                     addYetToBeQueried(node);
-                    //also add to our routing table
-                    context.getRouteTable().add(node,false);
+                    
+                    // Add them to the routing table as not alive
+                    // contacts. We're likely going to add them
+                    // anyways!
+                    context.getRouteTable().add(node, false);
                 }
             }
             
-            addResponse(new ContactNode(nodeId, src));
+            ContactNode node = new ContactNode(nodeId, src);
+            addResponse(node);
+            
+            QueryKey queryKey = response.getQueryKey();
+            if (queryKey != null) {
+                queryKeys.put(node, queryKey);
+            }
+            
             --activeSearches;
             lookupStep();
         }
@@ -190,14 +196,15 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     public void lookup() throws IOException {
         
         MessageDispatcher messageDispatcher 
-        = context.getMessageDispatcher();
+            = context.getMessageDispatcher();
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting a new Lookup for " + lookup);
         }
         
         // Select the K closest Nodes from the K bucket list
-        List bucketList = context.getRouteTable().select(lookup, KademliaSettings.getReplicationParameter(),false,true);
+        int k = KademliaSettings.getReplicationParameter();
+        List bucketList = context.getRouteTable().select(lookup, k, false, true);
         
         // Add the Nodes to the yet-to-be query list
         for(int i = bucketList.size()-1; i >= 0; i--) {
@@ -230,8 +237,13 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " terminates. No contacts left to query ");
             }
-            Collection nodes = responses.select(lookup, responses.size());
-            finish(lookup, nodes, time);
+            
+            if (isValueLookup()) {
+                finishValueLookup(lookup, null, time);
+            } else {
+                Collection nodes = responses.select(lookup, responses.size());
+                finishNodeLookup(lookup, nodes, queryKeys, time);
+            }
             
             finished = true;
             return;
@@ -245,22 +257,22 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             ContactNode bestToQuery = (ContactNode)toQuery.select(lookup);
 
             if(bestToQuery == null || 
-                    worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(),lookup)) {
+                    worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(), lookup)) {
             
                 ContactNode bestResponse = (ContactNode)responses.select(lookup);
                 
                 if (LOG.isTraceEnabled()) {
-                  LOG.trace("Lookup for " + lookup + " terminates with " 
-                          + bestResponse + " as the best match after " 
-                          + round + " lookup rounds and " 
-                          + queried.size() + " queried Nodes");
+                    LOG.trace("Lookup for " + lookup + " terminates with " 
+                        + bestResponse + " as the best match after " 
+                        + round + " lookup rounds and " 
+                        + queried.size() + " queried Nodes");
                 }
             
                 if (isValueLookup()) {
-                    finish(lookup, null, time);
+                    finishValueLookup(lookup, null, time);
                 } else {
                     Collection nodes = responses.select(lookup, responses.size());
-                    finish(lookup, nodes, time);
+                    finishNodeLookup(lookup, nodes, queryKeys, time);
                 }
                 finished = true;
                 return;
@@ -268,7 +280,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         int numLookups = KademliaSettings.getLookupParameter() - activeSearches;
-        if(numLookups>0) {
+        if(numLookups > 0) {
             List bucketList = toQuery.select(lookup, numLookups);
             final int size = bucketList.size();
             
@@ -290,48 +302,49 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     
     protected abstract Message createMessage(KUID lookup);
 
-    protected abstract void finish(KUID lookup, Collection results, long time);
-   
+    protected abstract void finishValueLookup(KUID lookup, Collection keyValues, long time);
+    
+    protected abstract void finishNodeLookup(KUID lookup, Collection nodes, Map queryKeys, long time);
+    
+    protected abstract boolean isValueLookup();
+    
     public long time() {
         return time;
     }
     
-    public boolean isValueLookup() {
-        return valueLookup;
-    }
-    
-    protected void markAsQueried(ContactNode node) {
+    private void markAsQueried(ContactNode node) {
         queried.add(node.getNodeID());
         toQuery.remove(node.getNodeID());
     }
     
-    protected boolean isQueried(KUID nodeId) {
+    private boolean isQueried(KUID nodeId) {
         return queried.contains(nodeId);
     }
     
-    protected boolean isQueried(ContactNode node) {
+    private boolean isQueried(ContactNode node) {
         return queried.contains(node.getNodeID());
     }
     
-    protected void addYetToBeQueried(ContactNode node) {
-        if(!queried.contains(node) && !node.equals(context.getLocalNode())) toQuery.put(node.getNodeID(), node);
+    private void addYetToBeQueried(ContactNode node) {
+        if(!queried.contains(node) 
+                && !node.equals(context.getLocalNode())) {
+            toQuery.put(node.getNodeID(), node);
+        }
     }
     
-    protected boolean isYetToBeQueried(ContactNode node) {
+    private boolean isYetToBeQueried(ContactNode node) {
         return toQuery.containsKey(node.getNodeID());
     }
     
-    protected void addResponse(ContactNode node) {
+    private void addResponse(ContactNode node) {
         //if the list is full discard the furthest node and put this one
         if(responses.size() == resultSize) {
             KUID furthest = lookup.invert();
-            responses.remove(((ContactNode)responses.select(furthest)).getNodeID());
+            
+            ContactNode worst = (ContactNode)responses.select(furthest);
+            responses.remove(worst.getNodeID());
+            queryKeys.remove(worst);
         } 
         responses.put(node.getNodeID(), node);
     }
-    
-    protected List getClosestNodes(KUID lookup, int k) {
-        return responses.select(lookup, k);
-    }
-    
 }

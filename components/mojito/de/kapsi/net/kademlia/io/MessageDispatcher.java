@@ -354,8 +354,8 @@ public class MessageDispatcher implements Runnable {
                 // thrown as close() is called asynchron
                 //LOG.error(err);
             } catch (IOException err) {
-                //err.printStackTrace();
-                LOG.error(err);
+                err.printStackTrace();
+                //LOG.error(err);
             }
         }
     }

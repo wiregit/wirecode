@@ -26,6 +26,7 @@ import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class StoreRequestHandler extends AbstractRequestHandler {
@@ -36,20 +37,29 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         super(context);
     }
     
-    public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
-        // Before we're going to accept the store request make
-        // sure that the originator has queried us at least. Check
-        // also the replacement cache!
-        ContactNode node = context.getRouteTable().get(nodeId, true);
-        if (node == null) {
+    public void handleRequest(KUID nodeId, SocketAddress src, 
+            Message message) throws IOException {
+        
+        StoreRequest request = (StoreRequest)message;
+        QueryKey queryKey = request.getQueryKey();
+        
+        if (queryKey == null) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(ContactNode.toString(nodeId, src) 
-                        + " is unknown and requests us to store some values");
+                        + " does not provide a QueryKey");
             }
             return;
         }
         
-        StoreRequest request = (StoreRequest)message;
+        QueryKey expected = QueryKey.getQueryKey(src);
+        if (!expected.equals(queryKey)) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Expected " + expected + " from " 
+                        + ContactNode.toString(nodeId, src) 
+                        + " but got " + queryKey);
+            }
+            return;
+        }
         
         int remaining = request.getRemaingCount();
         Collection values = request.getValues();
@@ -64,16 +74,18 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             }
         }
         
+        int k = KademliaSettings.getReplicationParameter();
+        
         // Avoid to create an empty ArrayList
         List stats = (values.isEmpty() ? Collections.EMPTY_LIST : new ArrayList(values.size()));
         
         // Add the KeyValues...
         for(Iterator it = values.iterator(); it.hasNext(); ) {
             KeyValue keyValue = (KeyValue)it.next();
-            
-            //under the assumption that the requester sent us a lookup before
-            //check if we are part of the closest alive nodes to this value
-            List nodesList = getRouteTable().select(keyValue.getKey(),KademliaSettings.getReplicationParameter(),true, false);
+
+            // under the assumption that the requester sent us a lookup before
+            // check if we are part of the closest alive nodes to this value
+            List nodesList = getRouteTable().select(keyValue.getKey(), k, true, false);
             if(nodesList.contains(context.getLocalNode())) {
                 try {
                     if (context.getDatabase().add(keyValue)) {
@@ -89,7 +101,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             } else {
                 stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
             }
-            
         }
         
         // TODO do not request all values at once

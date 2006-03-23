@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
 
+import de.kapsi.net.kademlia.util.ArrayUtils;
+
 /**
  * This is just a dummy QueryKey implementation. Once we're 
  * done with the raw implementation we can start using stuff 
@@ -49,5 +51,9 @@ public class QueryKey {
     
     public static QueryKey getQueryKey(InetAddress ip, int port) {
         return new QueryKey(new byte[]{1,2,3,4});
+    }
+    
+    public String toString() {
+        return "QueryKey: " + ArrayUtils.toHexString(queryKey);
     }
 }

@@ -285,9 +285,9 @@ public class Main {
         
         System.out.println("Storing... " + key);
         dht.put(key, value, new StoreListener() {
-            public void store(KeyValue value, Collection nodes) {
+            public void store(List keyValues, Collection nodes) {
                 StringBuffer buffer = new StringBuffer();
-                buffer.append("STORED KEY: ").append(value.getKey()).append("\n");
+                buffer.append("STORED KEY_VALUES: ").append(keyValues).append("\n");
                 int i = 0;
                 for (Iterator iter = nodes.iterator(); iter.hasNext();) {
                     Node node = (Node) iter.next();

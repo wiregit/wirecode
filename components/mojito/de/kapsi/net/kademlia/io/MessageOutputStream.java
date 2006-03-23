@@ -26,6 +26,7 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
+import de.kapsi.net.kademlia.security.QueryKey;
 
 public class MessageOutputStream extends DataOutputStream {
     
@@ -92,6 +93,16 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    private void writeQueryKey(QueryKey queryKey) throws IOException {
+        if (queryKey != null) {
+            byte[] qk = queryKey.getBytes();
+            writeByte(qk.length);
+            write(qk, 0, qk.length);
+        } else {
+            writeByte(0);
+        }
+    }
+    
     private void writePing(PingRequest ping) throws IOException {
         /* WRITE NOTHING */
     }
@@ -105,6 +116,8 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeFindNodeResponse(FindNodeResponse response) throws IOException {
+        writeQueryKey(response.getQueryKey());
+        
         writeByte(response.size());
         for(Iterator it = response.iterator(); it.hasNext(); ) {
             writeNode((ContactNode)it.next());
@@ -123,6 +136,8 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeStoreRequest(StoreRequest request) throws IOException {
+        
+        writeQueryKey(request.getQueryKey());
         writeShort(request.getRemaingCount());
         
         Collection values = request.getValues();

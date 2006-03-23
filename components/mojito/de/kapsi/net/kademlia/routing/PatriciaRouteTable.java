@@ -620,7 +620,7 @@ public class PatriciaRouteTable implements RoutingTable {
             this.bootstrapListener = listener;
         }
         
-        public synchronized void foundNodes(KUID lookup, Collection nodes, long time) {
+        public synchronized void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time) {
             if(!foundNodes && !nodes.isEmpty()) {
                 foundNodes = true;
             }

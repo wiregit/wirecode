@@ -19,6 +19,7 @@ import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class LookupRequestHandler extends AbstractRequestHandler {
@@ -38,16 +39,23 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             LOG.trace(ContactNode.toString(nodeId, src) + " is trying to lookup " + lookup);
         }
         
+        int k = KademliaSettings.getReplicationParameter();
         List bucketList 
-            = context.getRouteTable().select(lookup,  
-                    KademliaSettings.getReplicationParameter(),false,false);
+            = context.getRouteTable().select(lookup, k, false, false);
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Sending back: " + bucketList);
         }
         
+        QueryKey queryKey = null;
+        
+        // TODO condition doesn't work
+        if (bucketList.contains(context.getLocalNode())) {
+            queryKey = QueryKey.getQueryKey(src);
+        }
+        
         FindNodeResponse response = context.getMessageFactory()
-                    .createFindNodeResponse(request.getMessageID(), bucketList);
+                    .createFindNodeResponse(request.getMessageID(), queryKey, bucketList);
         
         context.getMessageDispatcher().send(src, response, null);
     }

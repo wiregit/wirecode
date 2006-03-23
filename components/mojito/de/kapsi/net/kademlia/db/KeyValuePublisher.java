@@ -8,6 +8,7 @@ package de.kapsi.net.kademlia.db;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,10 +104,12 @@ public class KeyValuePublisher implements Runnable {
                 synchronized(lock) {
                     try {
                         context.store(keyValue, new StoreListener() {
-                            public void store(KeyValue keyValue, Collection nodes) {
-                                keyValue.setRepublishTime(System.currentTimeMillis());
-                                published++;
-                                
+                            public void store(List keyValues, Collection nodes) {
+                                for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
+                                    ((KeyValue)it.next()).setRepublishTime(System.currentTimeMillis());
+                                    published++;
+                                }
+
                                 synchronized(lock) {
                                     lock.notify();
                                 }
@@ -114,7 +117,7 @@ public class KeyValuePublisher implements Runnable {
                                 if (LOG.isTraceEnabled()) {
                                     if (!nodes.isEmpty()) {
                                         StringBuffer buffer = new StringBuffer("\nStoring ");
-                                        buffer.append(keyValue).append(" at the following Nodes:\n");
+                                        buffer.append(keyValues).append(" at the following Nodes:\n");
                                         
                                         Iterator it = nodes.iterator();
                                         int k = KademliaSettings.getReplicationParameter();
@@ -125,7 +128,7 @@ public class KeyValuePublisher implements Runnable {
                                         LOG.trace(buffer);
                                         //System.out.println(buffer);
                                     } else {
-                                        LOG.trace("Failed to store " + keyValue);
+                                        LOG.trace("Failed to store " + keyValues);
                                     }
                                 }
                             }

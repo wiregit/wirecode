@@ -10,11 +10,13 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 
 import org.apache.commons.logging.Log;
@@ -45,8 +47,7 @@ import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
 import de.kapsi.net.kademlia.routing.RandomBucketRefresher;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.CryptoHelper;
-import de.kapsi.net.kademlia.settings.ContextSettings;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class Context implements Runnable {
@@ -55,7 +56,6 @@ public class Context implements Runnable {
     
     private static final String MESSAGE_DISPATCHER_THREAD = "MessageDispatcherThread";
     
-    private static final long EVENT_DISPATCHER_DELAY = 100L;
     private static final long EVENT_DISPATCHER_INTERVAL = 100L;
     
     private static final long BUCKET_REFRESH_TIME = RouteTableSettings.getBucketRefreshTime();
@@ -129,11 +129,15 @@ public class Context implements Runnable {
     }
     
     public ContactNode getLocalNode() {
-		if (externalAddress == null) {
-            return new ContactNode(nodeId, localAddress);
-        } else {
-            return new ContactNode(nodeId, externalAddress);
+        ContactNode local = (ContactNode)routeTable.get(nodeId);
+        if (local == null) {
+            if (externalAddress != null) {
+                local = new ContactNode(nodeId, externalAddress);
+            } else {
+                local = new ContactNode(nodeId, localAddress);
+            }
         }
+        return local;
     }
     
     public KUID getLocalNodeID() {
@@ -151,6 +155,9 @@ public class Context implements Runnable {
     public void setExternalSocketAddress(SocketAddress externalAddress) {
         if (this.externalAddress == null) {
             this.externalAddress = externalAddress;
+            
+            ContactNode localNode = (ContactNode)routeTable.get(nodeId);
+            localNode.setSocketAddress(externalAddress);
         }
     }
     
@@ -205,7 +212,7 @@ public class Context implements Runnable {
             nodeId = KUID.createNodeID(id);
         }*/
         //add ourselve to the routing table
-        routeTable.add(getLocalNode(),true);
+        routeTable.add(getLocalNode(), true);
     }
     
     //TODO testing purposes only - remove
@@ -285,7 +292,7 @@ public class Context implements Runnable {
     public void lookup(KUID lookup, FindNodeListener l) throws IOException {
         
         FindNodeResponseHandler handler 
-            = new FindNodeResponseHandler(this, lookup, l);
+            = FindNodeResponseHandler.createDefaultHandler(this, lookup, l);
         
         handler.lookup();
     }
@@ -299,7 +306,7 @@ public class Context implements Runnable {
                 if (time1 >= 0L) {
                     try {
                         lookup(getLocalNodeID(), new FindNodeListener() {
-                            public void foundNodes(final KUID lookup, Collection nodes, final long time2) {
+                            public void foundNodes(final KUID lookup, Collection nodes, Map queryKeys, final long time2) {
                                 if (l != null) {
                                     l.initialPhaseComplete(getLocalNodeID(), nodes, time1+time2);
                                 }
@@ -344,34 +351,51 @@ public class Context implements Runnable {
     }
     
     /** store */
-    public void store(final KeyValue value, final StoreListener l) throws IOException {
-        lookup(value.getKey(), new FindNodeListener() {
-            public void foundNodes(KUID lookup, Collection nodes, long time) {
+    public void store(final KeyValue keyValue, final StoreListener l) throws IOException {
+        lookup(keyValue.getKey(), new FindNodeListener() {
+            public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time) {
                 try {
+                    List keyValues = Arrays.asList(new KeyValue[]{keyValue});
                     
-                    List keyValues = Arrays.asList(new KeyValue[]{value});
-                    
-                    Iterator it = nodes.iterator();
-                    int k = KademliaSettings.getReplicationParameter();
-                    
-                    ResponseHandler responseHandler = new StoreResponseHandler(Context.this, keyValues);
-                    
-                    for(int i = 0; i < k && it.hasNext(); i++) {
+                    List targets = new ArrayList(nodes.size());
+                    for(Iterator it = nodes.iterator(); it.hasNext(); ) {
                         ContactNode node = (ContactNode)it.next();
+                        QueryKey queryKey = (QueryKey)queryKeys.get(node);
                         
-                        // TODO: Don't just store one KeyValue!
-                        // Store the n-closest values to ContactNode!
-                        messageDispatcher.send(node, messageFactory.createStoreRequest(0, keyValues), responseHandler);
+                        if (queryKey == null) {
+                            if (LOG.isErrorEnabled()) {
+                                LOG.error("Cannot store " + keyValues + " at " 
+                                        + node + " because we have no QueryKey for it");
+                            }
+                            continue;
+                        }
+                        
+                        store(node, queryKey, keyValues);
+                        targets.add(node);
                     }
                     
                     if (l != null) {
-                        l.store(value, nodes);
+                        l.store(keyValues, targets);
                     }
                 } catch (IOException err) {
                     LOG.error(err);
                 }
             }
         });
+    }
+    
+    public void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
+        if (queryKey == null) {
+            throw new NullPointerException();
+        }
+        
+        ResponseHandler handler = new StoreResponseHandler(this, queryKey, keyValues);
+        
+        RequestMessage request 
+            = messageFactory.createStoreRequest(keyValues.size(), 
+                    queryKey, Collections.EMPTY_LIST);
+        
+        messageDispatcher.send(node, request, handler);
     }
     
     public void get(KUID key, FindValueListener l) throws IOException {

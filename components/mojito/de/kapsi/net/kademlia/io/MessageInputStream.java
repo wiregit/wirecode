@@ -27,6 +27,7 @@ import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.CryptoHelper;
+import de.kapsi.net.kademlia.security.QueryKey;
 
 public class MessageInputStream extends DataInputStream {
     
@@ -90,7 +91,7 @@ public class MessageInputStream extends DataInputStream {
         return signature;
     }
 	
-    private ContactNode readNode() throws IOException {
+    private ContactNode readContactNode() throws IOException {
         KUID nodeId = readKUID();
         SocketAddress addr = readSocketAddress();
         
@@ -108,6 +109,17 @@ public class MessageInputStream extends DataInputStream {
         
         int port = readUnsignedShort();
         return new InetSocketAddress(InetAddress.getByAddress(address), port);
+    }
+    
+    private QueryKey readQueryKey() throws IOException {
+        int length = readUnsignedByte();
+        if (length == 0) {
+            return null;
+        }
+        
+        byte[] queryKey = new byte[length];
+        readFully(queryKey, 0, queryKey.length);
+        return QueryKey.getQueryKey(queryKey);
     }
     
     private PingRequest readPing(int vendor, int version, 
@@ -129,12 +141,14 @@ public class MessageInputStream extends DataInputStream {
     
     private FindNodeResponse readFindNodeResponse(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
+        
+        QueryKey queryKey = readQueryKey();
         int size = readUnsignedByte();
         ContactNode[] nodes = new ContactNode[size];
         for(int i = 0; i < nodes.length; i++) {
-            nodes[i] = readNode();
+            nodes[i] = readContactNode();
         }
-        return new FindNodeResponse(vendor, version, nodeId, messageId, Arrays.asList(nodes));
+        return new FindNodeResponse(vendor, version, nodeId, messageId, queryKey, Arrays.asList(nodes));
     }
     
     private FindValueRequest readFindValueRequest(int vendor, int version, 
@@ -145,6 +159,7 @@ public class MessageInputStream extends DataInputStream {
     
     private Message readFindValueResponse(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
+        
         int size = readUnsignedByte();
         KeyValue[] values = new KeyValue[size];
         for(int i = 0; i < values.length; i++) {
@@ -156,6 +171,7 @@ public class MessageInputStream extends DataInputStream {
     private StoreRequest readStoreRequest(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
         
+        QueryKey queryKey = readQueryKey();
         int remaining = readUnsignedShort();
         
         int size = readUnsignedByte();
@@ -163,7 +179,7 @@ public class MessageInputStream extends DataInputStream {
         for(int i = 0; i < values.length; i++) {
             values[i] = readKeyValue();
         }
-        return new StoreRequest(vendor, version, nodeId, messageId, remaining, Arrays.asList(values));
+        return new StoreRequest(vendor, version, nodeId, messageId, remaining, queryKey, Arrays.asList(values));
     }
     
     private StoreResponse readStoreResponse(int vendor, int version, 

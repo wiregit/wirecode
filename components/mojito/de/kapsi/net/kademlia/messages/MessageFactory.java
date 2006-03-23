@@ -19,6 +19,7 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
+import de.kapsi.net.kademlia.security.QueryKey;
 
 public class MessageFactory {
     
@@ -56,8 +57,8 @@ public class MessageFactory {
         return new FindNodeRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), lookup);
     }
     
-    public FindNodeResponse createFindNodeResponse(KUID messageId, List nodes) {
-        return new FindNodeResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, nodes);
+    public FindNodeResponse createFindNodeResponse(KUID messageId, QueryKey queryKey, List nodes) {
+        return new FindNodeResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, queryKey, nodes);
     }
     
     public FindValueRequest createFindValueRequest(KUID lookup) {
@@ -68,8 +69,8 @@ public class MessageFactory {
         return new FindValueResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, values);
     }
     
-    public StoreRequest createStoreRequest(int remaining, Collection values) {
-        return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), remaining, values);
+    public StoreRequest createStoreRequest(int remaining, QueryKey queryKey, Collection values) {
+        return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), remaining, queryKey, values);
     }
     
     public StoreResponse createStoreResponse(KUID messageId, int requesting, Collection status) {
