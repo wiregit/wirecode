@@ -243,7 +243,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 }
             }
         }
-        if(pingNode) {
+        if(pingNode && !node.equals(context.getLocalNode())) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Node add requests pinging node: "+node);
             }

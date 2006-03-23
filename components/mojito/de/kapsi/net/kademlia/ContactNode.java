@@ -52,6 +52,10 @@ public class ContactNode extends Node {
         return o;
     }
     
+    public void setTimeStamp(long timestamp) {
+        this.timeStamp = timestamp;
+    }
+    
     public boolean equals(Object o) {
         if (!(o instanceof ContactNode)) {
             return false;
