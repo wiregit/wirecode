@@ -9,7 +9,7 @@ import java.util.prefs.Preferences;
 
 public final class RouteTableSettings {
     
-    private static final int MAX_CACHE_SIZE = 1024;
+    private static final int MAX_CACHE_SIZE = 32;
     private static final String MAX_CACHE_SIZE_KEY = "MAX_CACHE_SIZE";
     
     private static final boolean SKIP_STALE = true;
