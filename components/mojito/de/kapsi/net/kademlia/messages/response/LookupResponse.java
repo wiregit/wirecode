@@ -24,8 +24,6 @@ public abstract class LookupResponse extends ResponseMessage
         this.values = Collections.unmodifiableCollection(responseValues);
     }
     
-    public abstract boolean isKeyValueResponse();
-
     public boolean add(Object o) {
         return values.add(o);
     }

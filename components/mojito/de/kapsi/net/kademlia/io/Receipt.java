@@ -44,12 +44,8 @@ class Receipt {
     
     public Receipt(Context context, KUID nodeId, SocketAddress dst, 
             Message message, ResponseHandler handler) throws IOException {
-        this(context, nodeId, dst, InputOutputUtils.serialize(message), 
-                message.getMessageID(), message instanceof RequestMessage, handler);
-    }
-    
-    private Receipt(Context context, KUID nodeId, SocketAddress dst, byte[] data, 
-            KUID messageId, boolean isRequest, ResponseHandler handler) throws IOException {
+        
+        byte[] data = InputOutputUtils.serialize(message);
         
         if (data.length >= MAX_PACKET_SIZE) {
             throw new IOException("Packet is too large: " + data.length);
@@ -62,8 +58,8 @@ class Receipt {
         
         this.data = ByteBuffer.wrap(data);
         
-        this.messageId = messageId;
-        this.isRequest = isRequest;
+        this.messageId = message.getMessageID();
+        this.isRequest = (message instanceof RequestMessage);
         
         this.handler = handler;
     }

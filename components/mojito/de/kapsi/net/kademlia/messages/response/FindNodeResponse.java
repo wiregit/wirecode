@@ -15,8 +15,4 @@ public class FindNodeResponse extends LookupResponse {
             KUID messageId, List bucketList) {
         super(vendor, version, nodeId, messageId, bucketList);
     }
-    
-    public boolean isKeyValueResponse() {
-        return false;
-    }
 }

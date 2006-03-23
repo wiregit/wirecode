@@ -22,7 +22,8 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
-import de.kapsi.net.kademlia.messages.response.LookupResponse;
+import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
+import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.LookupSettings;
@@ -108,11 +109,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         this.time += time;
         
-        LookupResponse response = (LookupResponse)message;
-        boolean isKeyValueResponse = response.isKeyValueResponse();
-        
         // VALUE lookup response
-        if (isValueLookup() && isKeyValueResponse) {
+        if (isValueLookup() && message instanceof FindValueResponse) {
+            
+            FindValueResponse response = (FindValueResponse)message;
             
             if (LOG.isTraceEnabled()) {
                 LOG.trace(ContactNode.toString(nodeId, src) 
@@ -130,7 +130,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         // NODE/VALUE lookup response
-        if (!finished && !isKeyValueResponse) {
+        if (!finished && message instanceof FindNodeResponse) {
+            
+            FindNodeResponse response = (FindNodeResponse)message;
             
             for(Iterator it = response.iterator(); it.hasNext(); ) {
                 ContactNode node = (ContactNode)it.next();
@@ -224,7 +226,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     
     private void lookupStep() throws IOException {
         
-        if(toQuery.size()==0 && activeSearches == 0) {
+        if(toQuery.isEmpty() && activeSearches == 0) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " terminates. No contacts left to query ");
             }
