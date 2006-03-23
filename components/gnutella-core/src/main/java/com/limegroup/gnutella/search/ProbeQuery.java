@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.search;
 
 import java.util.Iterator;
@@ -29,7 +32,6 @@ final class ProbeQuery {
      */
     private final QueryHandler QUERY_HANDLER;
 
-
     /**
      * Constructs a new <tt>ProbeQuery</tt> instance with the specified
      * list of connections to query and with the data enclosed in the
@@ -40,14 +42,13 @@ final class ProbeQuery {
      *  for the probe
      */
     ProbeQuery(List connections, QueryHandler qh) {
+
         QUERY_HANDLER = qh;
-        LinkedList[] lists = 
-            createProbeLists(connections, qh.QUERY);
+        LinkedList[] lists = createProbeLists(connections, qh.QUERY);
 
         TTL_1_PROBES = lists[0];
         TTL_2_PROBES = lists[1];        
     }
-    
 
     /**
      * Obtains the time to wait for probe results to return.
@@ -60,11 +61,9 @@ final class ProbeQuery {
         // determine the wait time.  we wait a little longer per
         // hop for probes to give them more time -- also weight
         // this depending on how many TTL=1 probes we're sending
-        if(!TTL_2_PROBES.isEmpty()) 
-            return (long)((double)QUERY_HANDLER.getTimeToWaitPerHop()*1.3);
-        if(!TTL_1_PROBES.isEmpty()) 
-            return (long)((double)QUERY_HANDLER.getTimeToWaitPerHop()*
-                ((double)TTL_1_PROBES.size()/2.0));
+        
+        if (!TTL_2_PROBES.isEmpty()) return (long)((double)QUERY_HANDLER.getTimeToWaitPerHop() * 1.3);
+        if (!TTL_1_PROBES.isEmpty()) return (long)((double)QUERY_HANDLER.getTimeToWaitPerHop() * ((double)TTL_1_PROBES.size() / 2.0));
         return 0L;
     }
     
@@ -76,23 +75,26 @@ final class ProbeQuery {
      *  probe
      */
     int sendProbe() {
+        
         Iterator iter = TTL_1_PROBES.iterator();
+        
         int hosts = 0;
+        
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
-        while(iter.hasNext()) {
+        
+        while (iter.hasNext()) {
+            
             ManagedConnection mc = (ManagedConnection)iter.next();
-            hosts += 
-                QueryHandler.sendQueryToHost(query, 
-                                             mc, QUERY_HANDLER);
+            hosts += QueryHandler.sendQueryToHost(query, mc, QUERY_HANDLER);
         }
         
         query = QUERY_HANDLER.createQuery((byte)2);
         iter = TTL_2_PROBES.iterator();
-        while(iter.hasNext()) {
+        
+        while (iter.hasNext()) {
+            
             ManagedConnection mc = (ManagedConnection)iter.next();
-            hosts += 
-                QueryHandler.sendQueryToHost(query, 
-                                             mc, QUERY_HANDLER);
+            hosts += QueryHandler.sendQueryToHost(query, mc, QUERY_HANDLER);
         }
         
         TTL_1_PROBES.clear();
@@ -106,8 +108,8 @@ final class ProbeQuery {
      * This list will vary in size depending on how popular the content appears
      * to be.
      */
-    private static LinkedList[] createProbeLists(List connections, 
-        QueryRequest query) {
+    private static LinkedList[] createProbeLists(List connections, QueryRequest query) {
+        
         Iterator iter = connections.iterator();
         
         LinkedList missConnections = new LinkedList();
@@ -116,16 +118,24 @@ final class ProbeQuery {
 
         // iterate through our connections, adding them to the hit, miss, or
         // old connections list
-        while(iter.hasNext()) {
+        
+        while (iter.hasNext()) {
+            
             ManagedConnection mc = (ManagedConnection)iter.next();
             
-            if(mc.isUltrapeerQueryRoutingConnection()) {
-                if(mc.shouldForwardQuery(query)) { 
+            if (mc.isUltrapeerQueryRoutingConnection()) {
+                
+                if (mc.shouldForwardQuery(query)) {
+                    
                     hitConnections.add(mc);
+                    
                 } else {
+                    
                     missConnections.add(mc);
                 }
+                
             } else {
+                
                 oldConnections.add(mc);
             }
         }
@@ -139,34 +149,33 @@ final class ProbeQuery {
 
         // do we have adequate data to determine some measure of the file's 
         // popularity?
-        boolean adequateData = 
-            (missConnections.size()+hitConnections.size()) > 8;
+        boolean adequateData = (missConnections.size()+hitConnections.size()) > 8;
 
         // if we don't have enough data from QRP tables, just send out a 
         // traditional probe also, if we don't have an adequate number of QRP 
         // tables to access the popularity of the file, just send out an 
         // old-style probe at TTL=2
-        if(hitConnections.size() == 0 || !adequateData) {
-            return createAggressiveProbe(oldConnections, missConnections, 
-                                         hitConnections, returnLists);
+        if (hitConnections.size() == 0 || !adequateData) {
+            
+            return createAggressiveProbe(oldConnections, missConnections, hitConnections, returnLists);
         } 
 
         int numHitConnections = hitConnections.size();
-        double popularity = 
-            (double)((double)numHitConnections/
-                     ((double)missConnections.size()+numHitConnections));
+        double popularity = (double)((double)numHitConnections / ((double)missConnections.size() + numHitConnections));
         
         // if the file appears to be very popular, send it to only one host
-        if(popularity == 1.0) {
+        if (popularity == 1.0) {
+            
             ttl1List.add(hitConnections.removeFirst());
             return returnLists;
         }
 
-        if(numHitConnections > 3) {
+        if (numHitConnections > 3) {
+            
             // TTL=1 queries are cheap -- send a lot of them if we can
             int numToTry = Math.min(9, numHitConnections);
 
-            int startIndex = numHitConnections-numToTry;
+            int startIndex = numHitConnections - numToTry;
             int endIndex   = numHitConnections;
             ttl1List.addAll(hitConnections.subList(startIndex, endIndex));
             return returnLists;
@@ -174,12 +183,12 @@ final class ProbeQuery {
 
         // otherwise, it's not very widely distributed content -- send
         // the query to all hit connections plus 3 TTL=2 connections
+        
         ttl1List.addAll(hitConnections);        
         addToList(ttl2List, oldConnections, missConnections, 3);
 
         return returnLists;        
     }
-
 
     /**
      * Helper method that adds as many elements as possible up to the
@@ -197,24 +206,29 @@ final class ProbeQuery {
      *  <tt>listToAddTo</tt> -- note that this number will not be reached
      *  if the list1.size()+list2.size() < numElements
      */
-    private static void addToList(List listToAddTo, List list1, List list2, 
-                                  int numElements) {
-        if(list1.size() >= numElements) {
+    private static void addToList(List listToAddTo, List list1, List list2, int numElements) {
+        
+        if (list1.size() >= numElements) {
+            
             listToAddTo.addAll(list1.subList(0, numElements));
             return;
+            
         } else {
+            
             listToAddTo.addAll(list1);
         }
 
         numElements = numElements - list1.size();
 
-        if(list2.size() >= numElements) {
+        if (list2.size() >= numElements) {
+            
             listToAddTo.addAll(list2.subList(0, numElements));
+            
         } else {
+            
             listToAddTo.addAll(list2);
         }
     }
-       
 
     /**
      * Helper method that creates lists of TTL=1 and TTL=2 connections to query
@@ -228,31 +242,18 @@ final class ProbeQuery {
      * @param hitConnections the <tt>List</tt> of connections with hits
      * @param returnLists the array of TTL=1 and TTL=2 connections to query
      */
-    private static LinkedList[] 
-        createAggressiveProbe(List oldConnections, List missConnections,
-                              List hitConnections, LinkedList[] returnLists) {
+    private static LinkedList[] createAggressiveProbe(List oldConnections, List missConnections, List hitConnections, LinkedList[] returnLists) {
         
         // add as many connections as possible from first the old connections
         // list, then the connections that did not have hits
+        
         addToList(returnLists[1], oldConnections, missConnections, 3);
 
-        // add any hits there are to the TTL=1 list
+        // add any hits there are to the TTL = 1 list
+        
         int maxIndex = Math.min(4, hitConnections.size());
         returnLists[0].addAll(hitConnections.subList(0, maxIndex));
 
         return returnLists;        
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

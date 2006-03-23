@@ -12,10 +12,18 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
- * Send a Query Status Response vendor message to tell a searching computer how many hits you have.
+ * As a leaf, send a Query Status Response vendor message to tell the ultrapeers searching for you how many hits you have.
  * QueryStatusResponse represents the BEAR 12 version 1 Query Status Response vendor message.
  * 
- * This packet is used in LimeWire's dynamic querying system. (do)
+ * This packet is used in LimeWire's dynamic querying system.
+ * In dynamic querying, a leaf has its ultrapeers perform a search on its behalf.
+ * 
+ * The leaf needs to tell the ultrapeer how many hits it's gotten and kept.
+ * This is necessary in a variety of situations:
+ * The leaf may be getting out of band replies directly in UDP packets, so the ultrapeer doesn't know how effective its search has been.
+ * The leaf may have an agressive filter, causing it to throw out many of the results the ultrapeer is sending it.
+ * The leaf has several of its ultrapeers searching for it, and one may be doing so well all can stop their search.
+ * The leaf may have done really well searching its LAN on multicast, and not need any more hits from its ultrapeers.
  * 
  * The SearchResultHandler class makes QueryStatusResponse objects. (do)
  * 

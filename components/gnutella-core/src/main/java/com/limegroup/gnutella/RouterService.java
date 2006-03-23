@@ -1104,39 +1104,57 @@ public class RouterService {
     }
 
 	/**
+     * 
+     * 
+     * 
 	 * Searches the network for files with the given metadata.
 	 * 
 	 * @param richQuery metadata query to insert between the nulls,
 	 *  typically in XML format
 	 * @see query(byte[], String, MediaType)
+     * 
+     * @param guid
+     * @param query
+     * @param richQuery
+     * @param type
 	 */
-	public static void query(final byte[] guid, 
-							 final String query, 
-							 final String richQuery, 
-							 final MediaType type) {
+	public static void query(final byte[] guid, final String query, final String richQuery, final MediaType type) {
 
 		try {
+
             QueryRequest qr = null;
-            if (isIpPortValid() && (new GUID(guid)).addressesMatch(getAddress(), 
-                                                                   getPort())) {
-                // if the guid is encoded with my address, mark it as needing out
-                // of band support.  note that there is a VERY small chance that
-                // the guid will be address encoded but not meant for out of band
-                // delivery of results.  bad things may happen in this case but 
-                // it seems tremendously unlikely, even over the course of a 
-                // VERY long lived client
-                qr = QueryRequest.createOutOfBandQuery(guid, query, richQuery,
-                                                       type);
+
+            // The given GUID has our IP address and port number hidden in it
+            if (isIpPortValid() &&                                          // We know our IP address and port number, and
+                (new GUID(guid)).addressesMatch(getAddress(), getPort())) { // The given GUID has our IP address and port number hidden in it
+
+                /*
+                 * if the guid is encoded with my address, mark it as needing out
+                 * of band support.  note that there is a VERY small chance that
+                 * the guid will be address encoded but not meant for out of band
+                 * delivery of results.  bad things may happen in this case but
+                 * it seems tremendously unlikely, even over the course of a
+                 * VERY long lived client
+                 */
+
+                // 
+                qr = QueryRequest.createOutOfBandQuery(guid, query, richQuery, type);
+                
                 OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
-            }
-            else
+
+            // The given GUID doesn't have our IP address and port number hidden in it
+            } else {
+
                 qr = QueryRequest.createQuery(guid, query, richQuery, type);
+            }
+
             recordAndSendQuery(qr, type);
-		} catch(Throwable t) {
+
+		} catch (Throwable t) {
+
 			ErrorService.error(t);
 		}
 	}
-
 
 	/**
 	 * Sends a 'What Is New' query on the network.
@@ -1166,10 +1184,11 @@ public class RouterService {
 		}
 	}
 
-    /** Just aggregates some common code in query() and queryWhatIsNew().
+    /**
+     * Just aggregates some common code in query() and queryWhatIsNew().
      */ 
-    private static void recordAndSendQuery(final QueryRequest qr, 
-                                           final MediaType type) {
+    private static void recordAndSendQuery(final QueryRequest qr, final MediaType type) {
+
         _lastQueryTime = System.currentTimeMillis();
         VERIFIER.record(qr, type);
         RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
@@ -1178,7 +1197,7 @@ public class RouterService {
 
 	/**
 	 * Accessor for the last time a query was originated from this host.
-	 *
+	 * 
 	 * @return a <tt>long</tt> representing the number of milliseconds since
 	 *  January 1, 1970, that the last query originated from this host
 	 */

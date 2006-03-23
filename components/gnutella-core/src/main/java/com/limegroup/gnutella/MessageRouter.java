@@ -585,8 +585,10 @@ public abstract class MessageRouter {
 
             handlePushProxyRequest((PushProxyRequest)msg, receivingConnection);
 
+        // BEAR 12 version 1 Query Status Response vendor message, a leaf is telling us how many hits it has for a search we're running on its behalf
         } else if (msg instanceof QueryStatusResponse) {
 
+            // Have the QueryDispatcher find the QueryHandler that represents the search, and save the updated number there
             handleQueryStatus((QueryStatusResponse)msg, receivingConnection);
 
         } else if (msg instanceof GiveStatsVendorMessage) {
@@ -744,11 +746,12 @@ public abstract class MessageRouter {
             
 			ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
             handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
-            
+
+        // LIME 12 version 2 Reply Number vendor message, a computer with hits for our search is telling us how many it has
         } else if (msg instanceof ReplyNumberVendorMessage) {
-            
+
             handleReplyNumberMessage((ReplyNumberVendorMessage) msg, addr);
-            
+
         } else if (msg instanceof GiveStatsVendorMessage) {
             
             handleGiveStats((GiveStatsVendorMessage) msg, handler);
@@ -1464,63 +1467,113 @@ public abstract class MessageRouter {
         // TODO: tally some stat stuff here
     }
 
-    /** This is called when a client on the network has results for us that we
-     *  may want.  We may contact them back directly or just cache them for
-     *  use.
+    //done
+
+    /**
+     * A remote computer is telling us how many results we want, reply to request them all.
+     * 
+     * A remote computer sent us a LIME 12 2 Reply Number vendor message in a UDP packet.
+     * Our query packet reached it, and it has hits for us.
+     * It's telling us how many hits it has.
+     * 
+     * This method confirms we're still interested in the search, and we don't already have too many hits for it yet.
+     * Makes a LIME 11 2 Lime Acknowledgement vendor message to request all the results, and sends it back to the remote computer over UDP.
+     * 
+     * This is called when a client on the network has results for us that we
+     * may want.  We may contact them back directly or just cache them for
+     * use.
+     * 
+     * @param reply The LIME 12 2 Reply Number vendor message
+     * @param addr  The IP address and port number of the computer that sent it to us in a UDP packet
      */
     protected void handleReplyNumberMessage(ReplyNumberVendorMessage reply, InetSocketAddress addr) {
-        
-        GUID qGUID = new GUID(reply.getGUID());
-        int numResults = RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
-        if (numResults < 0) numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID); // this may be a proxy query
 
-        // see if we need more results for this query....
-        // if not, remember this location for a future, 'find more sources'
-        // targeted GUESS query, as long as the other end said they can receive
-        // unsolicited.
-        
+        // Get the message GUID of the LIME 12 2 Reply Number vendor message
+        GUID qGUID = new GUID(reply.getGUID()); // All the packets that are a part of this search have this as their message GUID, it identifies the search
+
+        /*
+         * Find out how many hits we've found for this search.
+         * If this search is for us, get the hit count from the SearchResultHandler, which passes information up to the GUI.
+         * If the SearchResultHandler doesn't know about it, this is probably a proxy search we're performing for one of our leaves.
+         * Look up the hit count in the QueryDispatcher instead.
+         */
+
+        // Look up the GUID in the program's SearchResultHandler object, and find out how many results we've told the GUI about for it
+        int numResults = RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID); // Returns -1 if not found
+
+        // If the SearchResultHandler doesn't know about this search, it may be a proxy query, look up the results number in the QueryDispatcher instead
+        if (numResults < 0) numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID); // Returns -1 if not found
+
+        /*
+         * see if we need more results for this query....
+         * if not, remember this location for a future, 'find more sources'
+         * targeted GUESS query, as long as the other end said they can receive
+         * unsolicited.
+         */
+
+        // If we couldn't find the search in the SearchResultHandler or QueryDispatcher, or we did find it and it has more than 150 hits
         if ((numResults < 0) || (numResults > QueryHandler.ULTRAPEER_RESULTS)) {
-            
+
+            // We'll bypass this result
             OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
 
-            //if the reply cannot receive unsolicited udp, there is no point storing it.
-            if (!reply.canReceiveUnsolicited()) return;
-            
-            DownloadManager dManager = RouterService.getDownloadManager();
-            
-            // only store result if it is being shown to the user or if a
-            // file with the same guid is being downloaded
-            
-            if (!_callback.isQueryAlive(qGUID) && 
-                !dManager.isGuidForQueryDownloading(qGUID))
-                return;
+            /*
+             * if the reply cannot receive unsolicited udp, there is no point storing it.
+             */
 
+            // Make sure the hit computer can get a UDP packet
+            if (!reply.canReceiveUnsolicited()) return; // Looks for the flag in the second payload byte
+
+            // Access the program's DownloadManager object
+            DownloadManager dManager = RouterService.getDownloadManager();
+
+            /*
+             * only store result if it is being shown to the user or if a
+             * file with the same guid is being downloaded
+             */
+
+            // Only continue if the user interface or the download manager know about the search
+            if (!_callback.isQueryAlive(qGUID) &&           // The user interface doesn't have the search anymore, and
+                !dManager.isGuidForQueryDownloading(qGUID)) // The DownloadManager doesn't recognize it
+                return;                                     // Leave
+
+            // Wrap the IP address and port number of the remote computer that sent us the UDP packet in a GUESSEndpoint object
             GUESSEndpoint ep = new GUESSEndpoint(addr.getAddress(), addr.getPort());
-            
+
+            // Only let one thread access _bypassedResults at once
             synchronized (_bypassedResults) {
-                
-                // this is a quick critical section for _bypassedResults
-                // AND the set within it
-                Set eps = (Set) _bypassedResults.get(qGUID);
-                
+
+                /*
+                 * this is a quick critical section for _bypassedResults
+                 * AND the set within it
+                 */
+
+                // Loop up the search GUID in the _bypassedResults list
+                Set eps = (Set)_bypassedResults.get(qGUID);
                 if (eps == null) {
-                    
+
+                    // Not found, add the GUESSEndpoint to it under the search GUID
                     eps = new HashSet();
                     _bypassedResults.put(qGUID, eps);
                 }
-                
+
+                // If we don't have 150 GUESSEndpoint objects stored under the search GUID yet, add the one we made there
                 if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS) eps.add(ep);
             }
 
+            // Leave, we're bypassing the result
             return;
         }
-        
-        LimeACKVendorMessage ack = new LimeACKVendorMessage(qGUID, reply.getNumResults());
+
+        /*
+         * We found the search in the SearchResultHandler or QueryDispatcher
+         */
+
+        // Make a Lime Acknowledgement vendor message to request those results from the remote computer, and send it
+        LimeACKVendorMessage ack = new LimeACKVendorMessage(qGUID, reply.getNumResults()); // Ask for all the results
         UDPService.instance().send(ack, addr.getAddress(), addr.getPort());
         OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
     }
-
-    //done
 
     /**
      * Save a query packet we received and our list of file hits to send them later.
@@ -1752,9 +1805,13 @@ public abstract class MessageRouter {
     }
 
     /**
+     * 
+     * 
      * 1) confirm that the connection is Ultrapeer to Leaf, then send your
      * listening port in a PushProxyAcknowledgement.
      * 2) Also cache the client's client GUID.
+     * 
+     * 
      */
     protected void handlePushProxyRequest(PushProxyRequest ppReq, ManagedConnection source) {
         
@@ -1781,24 +1838,32 @@ public abstract class MessageRouter {
         }
     }
 
-    /** This method should be invoked when this node receives a
-     *  QueryStatusResponse message from the wire.  If this node is an
-     *  Ultrapeer, we should update the Dynamic Querier about the status of
-     *  the leaf's query.
-     */    
+    //done
+
+    /**
+     * One of our leaves sent us a BEAR 12 1 QueryStatusResponse message, telling us how many hits it has for a search we're running on its behalf.
+     * Saves the updated number in the QueryHandler object that represents the search.
+     * 
+     * This method should be invoked when this node receives a
+     * QueryStatusResponse message from the wire.  If this node is an
+     * Ultrapeer, we should update the Dynamic Querier about the status of
+     * the leaf's query.
+     * 
+     * @param resp A BEAR 12 1 QueryStatusResponse vendor message one of our leaves sent us telling us how many hits it has gotten and kept for a search we're running for it 
+     * @param leaf The ManagedConnection object that represents our connection down to the leaf, over which it sent us this packet
+     */
     protected void handleQueryStatus(QueryStatusResponse resp, ManagedConnection leaf) {
-        
-        // message only makes sense if i'm a UP and the sender is a leaf
+
+        // Only do something if we're an ultrapeer and the remote computer that sent us this packet is one of our leaves
         if (!leaf.isSupernodeClientConnection()) return;
 
-        GUID queryGUID = resp.getQueryGUID();
-        int numResults = resp.getNumResults();
-        
-        // get the QueryHandler and update the stats....
-        DYNAMIC_QUERIER.updateLeafResultsForQuery(queryGUID, numResults);
-    }
+        // Read the 2 important pieces of information from the Query Status Response vendor message
+        GUID queryGUID = resp.getQueryGUID();  // The message GUID, which identifies the search and is used by all the packets for this search
+        int numResults = resp.getNumResults(); // The number of results the leaf says it has
 
-    //done
+        // Have the QueryDispatcher look up the QueryHandler for the search in its list, and save the updated hit count there
+        DYNAMIC_QUERIER.updateLeafResultsForQuery(queryGUID, numResults); // Calls QueryDispatcher.updateLeafResultsForQuery()
+    }
 
     /**
      * Send a ping to a remote computer, adding it to the RouteTable so the ForMeReplyHandler will get a pong response.
@@ -1851,46 +1916,56 @@ public abstract class MessageRouter {
         broadcastPingRequest(ping, FOR_ME_REPLY_HANDLER, _manager);
     }
 
-    //do
-
 	/**
-	 * Generates a new dynamic query.  This method is used to send a new 
+     * Make a new dynamic query for our own search.
+     * Use this method when we're searching for our user at this computer, not on behalf of one of our leaves.
+     * We can be a leaf or an ultrapeer.
+     * 
+     * Adds the query to our RouteTable for searches with the ForMeReplyHandler to catch the responses.
+     * If we're an ultrapeer, wraps the query in a QueryHandler, and gives it to the QueryDispatcher.
+     * If we're a leaf, sends the query packet up to our ultrapeers, who will search for us.
+     * 
+     * DownloadManager.sendQuery() and RouterService.recordAndSendQuery() call this.
+     * 
+	 * Generates a new dynamic query.  This method is used to send a new
 	 * dynamic query from this host (the user initiated this query directly,
 	 * so it's replies are intended for this node.
-	 *
-	 * @param query the <tt>QueryRequest</tt> instance that generates
-	 *  queries for this dynamic query
-	 * @throws <tt>NullPointerException</tt> if the <tt>QueryHandler</tt> 
-	 *  argument is <tt>null</tt>
+	 * 
+     * @param query The query packet to search with
 	 */
 	public void sendDynamicQuery(QueryRequest query) {
-        
-		if (query == null) {
-            
-			throw new NullPointerException("null QueryHandler");
-		}
-        
-		// get the result counter so we can track the number of results
-		ResultCounter counter = _queryRouteTable.routeReply(query.getGUID(), FOR_ME_REPLY_HANDLER);
-        
-		if (RouterService.isSupernode()) {
-            
-			sendDynamicQuery(QueryHandler.createHandlerForMe(query, counter), FOR_ME_REPLY_HANDLER);
-            
-		} else {
-            
-            originateLeafQuery(query);
-		} 
-		
-		// always send the query to your multicast people
-		multicastQueryRequest(QueryRequest.createMulticastQuery(query));		
-	}
 
-    //done
+        // Make sure the caller gave us a query packet
+		if (query == null) throw new NullPointerException("null QueryHandler");
+
+        // Add the query's message GUID to our RouteTable for queries and query hits
+		ResultCounter counter =          // Get the RouteTableEntry object entered in the RouteTable, we can call counter.getNumResults() on it to see how many hits we've routed back
+            _queryRouteTable.routeReply( // Add the search to our RouteTable for searches
+                query.getGUID(),         // Store it in the route table under the query packet's message GUID, this identifies the search
+                FOR_ME_REPLY_HANDLER);   // Use the ForMeReplyHandler object in place of a ManagedConnection or UDPReplyHandler, we want the hits, this search is for us
+
+        // We're an ultrapeer
+		if (RouterService.isSupernode()) {
+
+            // Wrap the query packet and RouteTableEntry into a QueryHandler, and give it to the QueryDispatcher
+			sendDynamicQuery(                                    // (2) Call QueryDispatcher.addQuery(qh) to give the QueryHandler object to the QueryDispatcher
+                QueryHandler.createHandlerForMe(query, counter), // (1) Make a new QueryHandler to keep the given objects together, and set a goal of 172 hits
+                FOR_ME_REPLY_HANDLER);                           // Not used, we specified the ForMeReplyHandler object above
+
+        // We're a leaf
+		} else {
+
+            // Send the query packet up to our ultrapeers, who will search for us
+            originateLeafQuery(query); // If we can get UDP packets, we've already set 0x04 in the query's speed flags bytes
+		}
+
+        // Turn the query into a multicast query, and send it over UDP multicast on the LAN
+		multicastQueryRequest(QueryRequest.createMulticastQuery(query));
+	}
 
 	/**
      * Pass the given QueryHandler object to the QueryDispatcher, initiating a dynamic query.
-     * Calls DYNAMIC_QUERIER.addQuery(qh).
+     * Calls QueryDispatcher.addQuery(qh) to pass the given QueryHandler to the program's QueryDispatcher object.
      * 
 	 * Initiates a dynamic query.  Only Ultrapeer should call this method,
 	 * as this technique relies on fairly high numbers of connections to
@@ -1910,8 +1985,6 @@ public abstract class MessageRouter {
         // Give the QueryHandler object to the QueryDispatcher, initiating the dynamic query
 		DYNAMIC_QUERIER.addQuery(qh);
 	}
-
-    //done
 
     /**
      * Sends the given ping to 30% of our Gnutella connections.
@@ -2241,60 +2314,99 @@ public abstract class MessageRouter {
         }
     }
 
+    //done
+
     /**
+     * Send the given query packet up to our ultrapeers, who will search with it for us.
+     * 
+     * Only sendDynamicQuery() calls this.
+     * We're a leaf, and our user has searched for something.
+     * If we can get UDP packets, we've adjusted the given query packet to request out of band results.
+     * The query packet's message GUID has our IP address inside, and is marked with 0x04 in the speed flags byte.
+     * Hit computers will send query hit packets directly back to us, the leaf.
+     * originateLeafQuery() sends the query packet up to several of our ultrapeers, which perform the dynamic query for us.
+     * We'll tell them how many hits we've gotten with BEAR 12 1 QueryStatusResponse vendor messages.
+     * 
      * Originate a new query from this leaf node.
-     *
-     * @param qr the <tt>QueryRequest</tt> to send
+     * 
+     * @param qr The query packet to send to our ultrapeers
      */
     private void originateLeafQuery(QueryRequest qr) {
-        
+
+        // Get a list of our connections up to ultrapeers
 		List list = _manager.getInitializedConnections();
 
-        // only send to at most 4 Ultrapeers, as we could have more
-        // as a result of race conditions - also, don't send what is new
-        // requests down too many connections
-        
-        final int max = qr.isWhatIsNewRequest() ? 2 : 3;
-        int start = !qr.isWhatIsNewRequest() ? 0 : (int)(Math.floor(Math.random()*(list.size() - 1)));
+        /*
+         * only send to at most 4 Ultrapeers, as we could have more
+         * as a result of race conditions - also, don't send what is new
+         * requests down too many connections
+         */
+
+        // Set the number of ultrapeers we'll send our search to as 3, unless it's a What's New search, then make it just 2
+        final int max = qr.isWhatIsNewRequest() ? 2 : 3; // Look for GGEP "WH" in the query packet, making this a What's New search
+
+        // Choose what index in the list to start at
+        int start =
+            !qr.isWhatIsNewRequest() ?                            // Look for GGEP "WH" in the query packet, making this a What's New search
+            0 :                                                   // Normal search, start at the beginning
+            (int)(Math.floor(Math.random() * (list.size() - 1))); // What's New search, randomly choose an index in the list to start at
+
+        // Set limit to the smallest one, max or the number of ultrapeers in our list
         int limit = Math.min(max, list.size());
-        final boolean wantsOOB = qr.desiresOutOfBandReplies();
-        
+
+        // Determine if the given query packet is marked to request out of band replies
+        final boolean wantsOOB = qr.desiresOutOfBandReplies(); // Look for 0x04 in the speed flags bytes
+
+        // Loop through our list of ultrapeers, from start but within limit
         for (int i = start; i < start + limit; i++) {
-            
-			ManagedConnection mc = (ManagedConnection)list.get(i);
-            QueryRequest qrToSend = qr;
-            
-            if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0)) qrToSend = QueryRequest.unmarkOOBQuery(qr);
+			ManagedConnection mc = (ManagedConnection)list.get(i); // Get the ManagedConnection object that represents this ultrapeer
+
+            // If the query packet wants out of band replies, but the ultrapeer we're about to send it to can't do dynamic querying, have it ask for in band hits instead
+			QueryRequest qrToSend = qr;
+            if (wantsOOB &&                                 // The query packet wants out of band replies, it has 0x04 set in its speed flags bytes, and
+                (mc.remoteHostSupportsLeafGuidance() < 0))  // The ultrapeer we're about to send it to doesn't support BEAR 11 1
+                qrToSend = QueryRequest.unmarkOOBQuery(qr); // Remove the 0x04 out of band UDP bit, returns a copy of the QueryRequest object
+
+            // Send the query to the ultrapeer
             mc.send(qrToSend);
         }
     }
-    
+
     /**
-     * Originates a new query request to the ManagedConnection.
-     *
-     * @param request The query to send.
-     * @param mc The ManagedConnection to send the query along
-     * @return false if the query was not sent, true if so
+     * Send the given query packet to the given remote computer.
+     * 
+     * Makes sure we're not sending a What's New search to a computer that doesn't support them.
+     * Sets query.originated to true so the sacrifice algorithm doesn't kill it.
+     * Leads to the call mc.send(query).
+     * 
+     * @param query A query packet
+     * @param mc    The remote computer to send it to
+     * @return      True if we sent the query packet, false if we didn't because it's a What's New search and the computer doesn't support them
      */
     public boolean originateQuery(QueryRequest query, ManagedConnection mc) {
-        
+
+        // Make sure the given objects aren't null
         if (query == null) throw new NullPointerException("null query");
         if (mc    == null) throw new NullPointerException("null connection");
-    
-        // if this is a feature query & the other side doesn't
-        // support it, then don't send it
-        // This is an optimization of network traffic, and doesn't
-        // necessarily need to exist.  We could be shooting ourselves
-        // in the foot by not sending this, rendering Feature Searches
-        // inoperable for some users connected to bad Ultrapeers.
-        
-        if (query.isFeatureQuery() && !mc.getRemoteHostSupportsFeatureQueries()) return false;
-        
-        mc.originateQuery(query);
+
+        /*
+         * if this is a feature query & the other side doesn't
+         * support it, then don't send it
+         * This is an optimization of network traffic, and doesn't
+         * necessarily need to exist.  We could be shooting ourselves
+         * in the foot by not sending this, rendering Feature Searches
+         * inoperable for some users connected to bad Ultrapeers.
+         */
+
+        // If the given query packet is a What's New search and the remote computer we're about to send it to doesn't support them, leave without doing anything
+        if (query.isFeatureQuery() &&                  // This is a What's New search, the GGEP block has "WH" in it, and
+            !mc.getRemoteHostSupportsFeatureQueries()) // This remote computer doesn't support What's New search, it's Capabilities vendor message didn't mention "WHAT"
+            return false;                              // Don't send it
+
+        // Send the query packet to the remote computer, and return true
+        mc.originateQuery(query); // Set query.originated to true first so the sacrifice algorithm doesn't kill it
         return true;
     }
-
-    //done
 
     /*
      * Respond to the ping request.  Implementations typically will either

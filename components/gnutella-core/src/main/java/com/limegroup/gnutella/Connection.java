@@ -2208,8 +2208,12 @@ public class Connection implements IpPort {
     }
 
     /**
-     * Determine if this remote computer's Messages Supported vendor message indicates support for the Query Status Request vendor message.
-     * Looks for BEAR 11 to get a version number like 1.
+     * Determine if this remote computer can do dynamic querying, where a leaf has its ultrapeers search for it.
+     * 
+     * Looks in the remote computer's Messages Supported vendor message for BEAR 11 1 QueryStatusRequest.
+     * LimeWire doesn't use this packet anymore, but still uses its name to advertise support for the dynamic querying fature.
+     * 
+     * Here, leaf guidance refers to the practice of a leaf telling its ultrapeer how many hits it has gotten in the search the ultrapeer is performing on its behalf.
      * 
      * @return The version number in the message listing, or -1 if not found
      */

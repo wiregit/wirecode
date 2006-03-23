@@ -169,8 +169,13 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
     /**
      * Determine if the sharing computer that sent this Reply Number vendor message can receive unsolicited UDP packets.
      * This is the flag in the second payload byte.
+     * When we receive a Reply Number vendor message, we make sure it has this flag set before doing anything with it.
      * 
-     * Only MessageRouter.handleReplyNumberMessage() calls this. (do)
+     * Only MessageRouter.handleReplyNumberMessage() calls this.
+     * A remote computer has sent us a Reply Number vendor message in a UDP packet.
+     * It has hits for us, and is telling us how many it has.
+     * handleReplyNumberMessage() calls canReceiveUnsolicited() to make sure the hit computer is externally contactable for UDP.
+     * If it's not, we can't communicate with it, so it's results are meaningless.
      * 
      * @return True if the sharing computer is externally contactable for UDP, false if it's firewalled
      */

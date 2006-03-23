@@ -13,6 +13,11 @@ import com.limegroup.gnutella.util.DataUtils;
 /**
  * Not used.
  * 
+ * LimeWire doesn't send or receive BEAR 11 version 1 QueryStatusRequest messages.
+ * But, we still list BEAR 11 1 in our MesagesSupportedVendorMessage.
+ * Connection.remoteHostSupportsLeafGuidance() checks a remote computer's MessagesSupportedVendorMessage to see if it's listed.
+ * We're not using the packet, but we're using its name to indicate support for the feature of dynamic querying.
+ * 
  * TODO:kfaaborg Remove this class, which isn't used.
  * 
  * In Vendor Message parlance, the "message type" of this message is "BEAR/11".

@@ -421,14 +421,17 @@ public class QueryRequest extends Message implements Serializable {
 		if (query.length() == 0 && xmlQuery.length() == 0) throw new IllegalArgumentException("empty query");
 		if (xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) throw new IllegalArgumentException("invalid XML");
         return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, true);
-    }                                
+    }
 
 	/**
-     * Make a new query for us to send with search text and XML.
+     * Make a query packet marked to get query hit packets out of band in UDP.
+     * Takes a GUID with our IP address and port number hidden in it, this is how hit computers will address UDP packets back to us.
+     * Sets 0x04 in the speed flags bytes, this marks the query as wanting out of band results.
+     * 
      * RouterService.query() calls this.
      * Leads to the packet maker.
      * 
-     * @param guid     The message GUID, which must have our IP address in it (do)
+     * @param guid     The message GUID, which has our IP address and port number hidden in it
      * @param query    The search text
      * @param xmlQuery XML search
      * @param type     A MediaType object we'll turn into GGEP "M" with bits for audio and video to filter the search, or null to not do this
@@ -448,7 +451,7 @@ public class QueryRequest extends Message implements Serializable {
         // Make and return a new QueryRequest object with the given values and more defaults
         return new QueryRequest(
             guid,
-            DEFAULT_TTL, // byte    ttl                        Default TTL 6
+            DEFAULT_TTL, // byte    ttl                        Default TTL 6, we'll lower it before we actually send it
             query,
             xmlQuery,
             true,        // boolean canReceiveOutOfBandReplies Add SPECIAL_OUTOFBAND_MASK and not SPECIAL_XML_MASK to the flags byte
@@ -1788,7 +1791,7 @@ public class QueryRequest extends Message implements Serializable {
     }
 
     /**
-     * Determine if the searching computer is externally contactable for UDP packets.
+     * Determine if the searching computer is externally contactable for UDP packets, and wants query hits sent that way.
      * Looks for 0x04, the bit at 0000 0100, in the speed flags bytes.
      * 
      * If true, use getReplyAddress() and getReplyPort() to get the computer's address. (do)
@@ -1830,10 +1833,10 @@ public class QueryRequest extends Message implements Serializable {
     }
 
     /**
-     * Determine if this is a feature query.
-     * This means this QueryRequest packet has something to do with a new LimeWire feature.
-     * Right now, the only new LimeWire feature this refers to is the What's New feature, feature number 1.
-     * The GGEP block will have the "WH" extension, with a byte value of 1.
+     * Determine if this query packet is a What's New search.
+     * Looks for the GGEP extension "WH", with a byte value of 1 or more.
+     * In a query packet, "WH" means this is a What's New search.
+     * Other places, "WH" means the sending computer supports What's New search.
      * 
      * @return True if this query's GGEP block has "WH" with a byte value of 1 or more
      */

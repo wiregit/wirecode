@@ -1176,7 +1176,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     public void originateQuery(QueryRequest query) {
 
         // Make the QueryRequest packet look like we created it, even though we actually got it from the network (do)
-        query.originate();
+        query.originate(); // Marks our object that represents the query packet with originated = true
 
         // Send the modified QueryRequest packet to this remote computer
         send(query);
