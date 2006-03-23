@@ -15,31 +15,10 @@ import de.kapsi.net.kademlia.messages.Message;
 
 public class FindNodeResponseHandler extends LookupResponseHandler {
     
-    private boolean storeLookup;
     private FindNodeListener l;
     
-    public static FindNodeResponseHandler createDefaultHandler(Context context, KUID lookup) {
-        return new FindNodeResponseHandler(context, lookup, null);
-    }
-    
-    public static FindNodeResponseHandler createDefaultHandler(Context context, KUID lookup, FindNodeListener l) {
-        return new FindNodeResponseHandler(context, lookup, l);
-    }
-    
-    public static FindNodeResponseHandler createStoreForwardHandler(Context context, KUID lookup, FindNodeListener l) {
-        if (l == null) {
-            throw new NullPointerException("Listener cannot be null");
-        }
-        return new FindNodeResponseHandler(context, lookup, 1, l);
-    }
-    
-    private FindNodeResponseHandler(Context context, KUID lookup, FindNodeListener l) {
+    public FindNodeResponseHandler(Context context, KUID lookup, FindNodeListener l) {
         super(context, lookup);
-        this.l = l;
-    }
-    
-    private FindNodeResponseHandler(Context context, KUID lookup, int resultSize, FindNodeListener l) {
-        super(context, lookup, resultSize);
         this.l = l;
     }
     

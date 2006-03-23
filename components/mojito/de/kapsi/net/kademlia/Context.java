@@ -294,7 +294,7 @@ public class Context implements Runnable {
     public void lookup(KUID lookup, FindNodeListener l) throws IOException {
         
         FindNodeResponseHandler handler 
-            = FindNodeResponseHandler.createDefaultHandler(this, lookup, l);
+            = new FindNodeResponseHandler(this, lookup, l);
         
         handler.lookup();
     }
