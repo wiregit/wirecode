@@ -26,6 +26,8 @@ import de.kapsi.net.kademlia.util.PatriciaTrie.KeyCreator;
  * an 160bit value. You're welcome to proposal a better name 
  * which is suitable for Keys, NodeIDs and MessageIDs!
  * 
+ * This class is immutable!
+ * 
  * TODO: Maybe Key, NodeID and MessageID but 'Key' sucks!
  * 
  * @author Roger Kapsi
@@ -54,16 +56,28 @@ public class KUID implements Serializable {
     public static final int VALUE_ID = 0x02;
     public static final int MESSAGE_ID = 0x04;
     
+    /** All bits 0 Unknown ID */
     public static final KUID MIN_UNKNOWN_ID;
+    
+    /** All bits 1 Unknown ID */
     public static final KUID MAX_UNKNOWN_ID;
     
+    /** All bits 0 Node ID */
     public static final KUID MIN_NODE_ID;
+    
+    /** All bits 1 Node ID */
     public static final KUID MAX_NODE_ID;
     
+    /** All bits 0 Value ID */
     public static final KUID MIN_VALUE_ID;
+    
+    /** All bits 1 Value ID */
     public static final KUID MAX_VALUE_ID;
     
+    /** All bits 0 Message ID */
     public static final KUID MIN_MESSAGE_ID;
+    
+    /** All bits 1 Message ID */
     public static final KUID MAX_MESSAGE_ID;
     
     static {
@@ -88,7 +102,7 @@ public class KUID implements Serializable {
     protected final int type;
     protected final byte[] id;
     
-    private final int hashCode;
+    private int hashCode;
     
     protected KUID(int type, byte[] id) {
         if (id == null) {
@@ -104,6 +118,10 @@ public class KUID implements Serializable {
         this.hashCode = ArrayUtils.hashCode(id);
     }
     
+    /**
+     * Returns the identity and throws a RuntimeException
+     * if this isn't a Node ID.
+     */
     public KUID assertNodeID() throws RuntimeException {
         if (!isNodeID()) {
             throw new RuntimeException(this + " is not a NODE_ID");
@@ -111,10 +129,17 @@ public class KUID implements Serializable {
         return this;
     }
     
+    /**
+     * Returns true if this is a Node ID
+     */
     public boolean isNodeID() {
         return type == NODE_ID;
     }
     
+    /**
+     * Returns the identity and throws a RuntimeException
+     * if this isn't a Value ID.
+     */
     public KUID assertValueID() throws RuntimeException {
         if (!isValueID()) {
             throw new RuntimeException(this + " is not a VALUE_ID");
@@ -122,10 +147,17 @@ public class KUID implements Serializable {
         return this;
     }
     
+    /**
+     * Returns true if this is a Value ID
+     */
     public boolean isValueID() {
         return type == VALUE_ID;
     }
     
+    /**
+     * Returns the identity and throws a RuntimeException
+     * if this isn't a Message ID.
+     */
     public KUID assertMessageID() throws RuntimeException {
         if (!isMessageID()) {
             throw new RuntimeException(this + " is not a MESSAGE_ID");
@@ -133,10 +165,16 @@ public class KUID implements Serializable {
         return this;
     }
     
+    /**
+     * Returns true if this is a Message ID
+     */
     public boolean isMessageID() {
         return type == MESSAGE_ID;
     }
     
+    /**
+     * Returns true if this is a Unknown ID
+     */
     public boolean isUnknownID() {
         return type == UNKNOWN_ID;
     }
@@ -147,10 +185,18 @@ public class KUID implements Serializable {
         return (id[index] & BITS[bit]) != 0;
     }
     
+    /**
+     * Sets the specified bit to 1 and returns a new
+     * KUID instance
+     */
     public KUID set(int bit) {
         return set(bit, true);
     }
     
+    /**
+     * Sets the specified bit to 0 and returns a new
+     * KUID instance
+     */
     public KUID unset(int bit) {
         return set(bit, false);
     }
@@ -158,18 +204,26 @@ public class KUID implements Serializable {
     private KUID set(int bitIndex, boolean set) {
         int index = (int) (bitIndex / BITS.length);
         int bit = (int) (bitIndex - index * BITS.length);
+        boolean isBitSet = (id[index] & BITS[bit]) != 0;
         
-        byte[] id = getBytes();
-        
-        if (set) {
-            id[index] |= BITS[bit];
+        // Don't create a new Object if nothing is
+        // gonna change
+        if (isBitSet != set) {
+            byte[] id = getBytes();
+            if (set) {
+                id[index] |= BITS[bit];
+            } else {
+                id[index] &= ~BITS[bit];
+            }
+            return new KUID(type, id);
         } else {
-            id[index] &= ~BITS[bit];
+            return this;
         }
-        
-        return new KUID(type, id);
     }
     
+    /**
+     * Returns the number of bits that are 1
+     */
     public int bits() {
         int bits = 0;
         for(int i = 0; i < LENGTH; i++) {
@@ -213,34 +267,22 @@ public class KUID implements Serializable {
         return bitIndex;
     }
     
+    /**
+     * Returns the xor distance between the current and passed KUID.
+     */
     public KUID xor(KUID nodeId) {
-        int sum = 0;
         byte[] result = new byte[id.length];
         for(int i = 0; i < result.length; i++) {
-            int xor = (id[i] ^ nodeId.id[i]) & 0xFF;
-            
-            result[i] = (byte)xor;
-            sum += xor;
+            result[i] = (byte)(id[i] ^ nodeId.id[i]);
         }
         
         int t = (type == nodeId.type) ? type : UNKNOWN_ID;
-        
-        if (sum == 0) {
-            switch(type) {
-                case NODE_ID:
-                    return MIN_NODE_ID;
-                case VALUE_ID:
-                    return MIN_VALUE_ID;
-                case MESSAGE_ID:
-                    return MIN_MESSAGE_ID;
-                default:
-                    return MIN_UNKNOWN_ID;
-            }
-        }
-        
         return new KUID(t, result);
     }
     
+    /**
+     * Inverts all bits of the current KUID
+     */
     public KUID invert() {
         byte[] result = new byte[id.length];
         for(int i = 0; i < result.length; i++) {
@@ -272,6 +314,9 @@ public class KUID implements Serializable {
         return false;
     }
     
+    /**
+     * Returns the type of the current KUID
+     */
     public int getType() {
         return type;
     }
@@ -280,12 +325,20 @@ public class KUID implements Serializable {
         return hashCode;
     }
     
+    /**
+     * Returns the raw bytes of the current KUID
+     */
     public byte[] getBytes() {
+        // TODO are we trustworthy?
         byte[] clone = new byte[id.length];
         System.arraycopy(id, 0, clone, 0, id.length);
         return clone;
     }
     
+    /**
+     * KUIDs are equal if they're of the same type and 
+     * if their IDs are equal.
+     */
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -297,12 +350,36 @@ public class KUID implements Serializable {
         }
     }
     
+    /**
+     * Returns the current KUID as hex String
+     */
     public String toHexString() {
         return ArrayUtils.toHexString(id);
     }
     
+    /**
+     * Returns the current KUID as bin String
+     */
     public String toBinString() {
         return ArrayUtils.toBinString(id);
+    }
+    
+    /**
+     * Returns the current KUID as BigInteger
+     */
+    public BigInteger toBigInteger() {
+        // unsigned!
+        byte[] num = new byte[1 + id.length];
+        System.arraycopy(id, 0, num, 1, id.length);
+        return new BigInteger(num);
+    }
+    
+    /**
+     * Returns the approximate log2. See BigInteger.bitLength()
+     * for more info!
+     */
+    public int log() {
+        return new BigInteger(id).bitLength();
     }
     
     public String toString() {
@@ -325,6 +402,10 @@ public class KUID implements Serializable {
         return buffer.toString();
     }
     
+    /**
+     * Creates and returns a random Node ID. The SocketAddress
+     * can be null and it's used to just add some extra randomness.
+     */
     public static KUID createRandomNodeID(SocketAddress address) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");
@@ -370,18 +451,34 @@ public class KUID implements Serializable {
         }
     }
     
+    /**
+     * Creates and returns a Node ID from a byte array
+     */
     public static KUID createNodeID(byte[] id) {
         return new KUID(NODE_ID, id);
     }
     
+    /**
+     * Creates and returns a Value ID from a byte array
+     */
     public static KUID createValueID(byte[] id) {
         return new KUID(VALUE_ID, id);
     }
     
+    /**
+     * Creates and returns a random Message ID
+     */
     public static KUID createRandomMessageID() {
         byte[] id = new byte[LENGTH/8];
         GENERATOR.nextBytes(id);
         return createMessageID(id);
+    }
+    
+    /**
+     * Creates and returns a Message ID from the byte array
+     */
+    public static KUID createMessageID(byte[] id) {
+        return new KUID(MESSAGE_ID, id);
     }
     
     /**
@@ -417,33 +514,19 @@ public class KUID implements Serializable {
         return createPrefxNodeID(prefix,depth,random);
     }
     
-    
-    public static KUID createMessageID(byte[] id) {
-        return new KUID(MESSAGE_ID, id);
-    }
-    
+    /**
+     * Creates and returns an Unknown ID
+     */
     public static KUID createUnknownID() {
         byte[] id = new byte[LENGTH/8];
         GENERATOR.nextBytes(id);
         return createUnknownID(id);
     }
     
+    /**
+     * Creates and returns an Unknown ID from the byte array
+     */
     public static KUID createUnknownID(byte[] id) {
         return new KUID(UNKNOWN_ID, id);
-    }
-    
-    public BigInteger toBigInteger() {
-        // unsigned!
-        byte[] num = new byte[1 + id.length];
-        System.arraycopy(id, 0, num, 1, id.length);
-        return new BigInteger(num);
-    }
-    
-    /**
-     * Returns the approximate log2. See BigInteger.bitLength()
-     * for more info!
-     */
-    public int log() {
-        return new BigInteger(id).bitLength();
     }
 }
