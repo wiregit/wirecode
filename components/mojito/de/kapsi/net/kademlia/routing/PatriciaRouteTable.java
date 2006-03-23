@@ -186,13 +186,6 @@ public class PatriciaRouteTable implements RoutingTable {
                 //3
                 boolean tooDeep = bucket.getDepth() % B == 0;
                 
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Bucket "+bucket+" full:" +
-                            "\ncontainsLocal: " + containsLocal + 
-                            "\npartOfSmallest: " + partOfSmallest + 
-                            "\nNot tooDeep: "+!tooDeep);
-                }
-                
                 if(containsLocal || partOfSmallest || !tooDeep) {
                     
                     if (LOG.isTraceEnabled()) {
@@ -234,16 +227,17 @@ public class PatriciaRouteTable implements RoutingTable {
                     put(nodeId,node,knowToBeAlive);
                     
                 } 
-                //not splitting --> replacement cache
+                //not splitting --> replacement cache. Also a good time to replace stale nodes
                 else {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("NOT splitting bucket "+ bucket+", adding node "+node+" to replacement cache");
                     }
                     pingNode = addReplacementNode(bucket,node);
+                    replaceBucketStaleNodes(bucket);
                 }
             }
         }
-        if(pingNode && !node.equals(context.getLocalNode())) {
+        if(!knowToBeAlive && pingNode && !node.equals(context.getLocalNode())) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Node add requests pinging node: "+node);
             }
@@ -281,20 +275,46 @@ public class PatriciaRouteTable implements RoutingTable {
                     && (bucket.getNodeCount() >= K) 
                     && (bucket.getReplacementCacheSize() > 0)) {
                 
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Removing node: "+node+" from bucket: "+bucket);
-                }
                 //remove node and replace with most recent alive one from cache
-                nodesTrie.remove(nodeId);
-                bucket.decrementNodeCount();
-                ContactNode replacement = bucket.getMostRecentlySeenCachedNode(true);
-                put(replacement.getNodeID(),replacement,false);
+                removeNodeAndReplace(nodeId,bucket);
             }
         } else {
             node = bucket.removeReplacementNode(nodeId);
-            if (node!= null && LOG.isTraceEnabled()) {
+            if (LOG.isTraceEnabled() && node!= null) {
                 LOG.trace("Removed node: "+node+" from replacement cache");
             }
+        }
+    }
+    
+    private void replaceBucketStaleNodes(BucketNode bucket) {
+        int length = Math.max(0, bucket.getDepth()-1);
+        List deadNodes = nodesTrie.range(bucket.getNodeID(),length,new PatriciaTrie.KeySelector(){
+            public boolean allow(Object key, Object value) {
+                if(value instanceof ContactNode) {
+                    return ((ContactNode)value).isDead();
+                } else {
+                    return false;
+                }
+            }
+        });
+        for (Iterator iter = deadNodes.iterator(); iter.hasNext();) {
+            ContactNode deadNode = (ContactNode) iter.next();
+            if(!removeNodeAndReplace(deadNode.getNodeID(),bucket)) return;
+        }
+    }
+    
+    private boolean removeNodeAndReplace(KUID nodeId, BucketNode bucket) {
+        ContactNode replacement = bucket.getMostRecentlySeenCachedNode(true);
+        if(replacement != null) {
+            nodesTrie.remove(nodeId);
+            bucket.decrementNodeCount();
+            put(replacement.getNodeID(),replacement,false);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Replaced nodeId: "+nodeId+" with node "+ replacement +" from bucket: "+bucket);
+            }
+            return true;
+        } else {
+            return false;
         }
     }
     
@@ -520,15 +540,7 @@ public class PatriciaRouteTable implements RoutingTable {
     private boolean handleNodeFailure(ContactNode node) {
         if (node != null) {
             //node has been alive at least once
-            if(node.getTimeStamp() > 0L) {
-                if (node.failure() >= RouteTableSettings.getMaxLiveNodeFailures()) {
-                    return true;
-                }
-            } else {
-                if (node.failure() >= RouteTableSettings.getMaxUnknownNodeFailures()) {
-                    return true;
-                }
-            }
+            return node.failure();
         }
         return false;
     }

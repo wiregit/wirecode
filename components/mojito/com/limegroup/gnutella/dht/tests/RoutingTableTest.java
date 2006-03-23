@@ -15,7 +15,7 @@ import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class RoutingTableTest {
 
-    private static InetSocketAddress addr = new InetSocketAddress(3000);
+    private static InetSocketAddress addr = new InetSocketAddress("localhost",3000);
     
     /**
      * @param args
@@ -37,7 +37,8 @@ public class RoutingTableTest {
 //        testReplaceNode(routingTable);
 //        testReplaceCachedNode(routingTable);
 //        testRemoveNode(routingTable);
-        testLiveNodesOnly(routingTable);
+//        testLiveNodesOnly(routingTable);
+        testreplaceBucketStaleNodes(routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
         try {
@@ -103,10 +104,10 @@ public class RoutingTableTest {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         for (int i = 0; i < 2; i++) {
-            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
+            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",3000+i));
             routingTable.add(node,true);
         }
-        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30010));
         routingTable.add(node1,true);
         try {
             Thread.sleep(1000);
@@ -115,6 +116,20 @@ public class RoutingTableTest {
             e.printStackTrace();
         }
         routingTable.add(node1,true);
+    }
+    
+    public static void testreplaceBucketStaleNodes(RoutingTable routingTable) {
+        byte[] prefix = new byte[1];
+        prefix[0] = (byte)(0x01);
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30010));
+        node1.failure();
+        node1.failure();
+        node1.failure();
+        routingTable.add(node1,false);
+        for (int i = 0; i < 2; i++) {
+            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",3000+i));
+            routingTable.add(node,true);
+        }
     }
     
     public static void testReplaceNode(RoutingTable routingTable) {

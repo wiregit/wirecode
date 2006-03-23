@@ -7,6 +7,8 @@ package de.kapsi.net.kademlia;
 
 import java.net.SocketAddress;
 
+import de.kapsi.net.kademlia.settings.RouteTableSettings;
+
 public class ContactNode extends Node {
     
     private static final long serialVersionUID = -5416538917308950549L;
@@ -22,12 +24,27 @@ public class ContactNode extends Node {
         this.address = address;
     }
     
-    public int failure() {
-        return ++failures;
+    public boolean failure() {
+        ++failures;
+        return isDead();
     }
     
     public boolean hasFailed() {
         return (failures > 0);
+    }
+    
+    public boolean isDead() {
+        //node has ever been alive?
+        if(timeStamp > 0L) {
+            if (failures >= RouteTableSettings.getMaxLiveNodeFailures()) {
+                return true;
+            }
+        } else {
+            if (failures >= RouteTableSettings.getMaxUnknownNodeFailures()) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public int getFailureCount() {
