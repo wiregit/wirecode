@@ -129,15 +129,15 @@ public class Context implements Runnable {
     }
     
     public ContactNode getLocalNode() {
-        ContactNode local = (ContactNode)routeTable.get(nodeId);
-        if (local == null) {
+        ContactNode localNode = (ContactNode)routeTable.get(nodeId);
+        if (localNode == null) {
             if (externalAddress != null) {
-                local = new ContactNode(nodeId, externalAddress);
+                localNode = new ContactNode(nodeId, externalAddress);
             } else {
-                local = new ContactNode(nodeId, localAddress);
+                localNode = new ContactNode(nodeId, localAddress);
             }
         }
-        return local;
+        return localNode;
     }
     
     public KUID getLocalNodeID() {
@@ -157,7 +157,9 @@ public class Context implements Runnable {
             this.externalAddress = externalAddress;
             
             ContactNode localNode = (ContactNode)routeTable.get(nodeId);
-            localNode.setSocketAddress(externalAddress);
+            if (localNode != null) {
+                localNode.setSocketAddress(externalAddress);
+            }
         }
     }
     
