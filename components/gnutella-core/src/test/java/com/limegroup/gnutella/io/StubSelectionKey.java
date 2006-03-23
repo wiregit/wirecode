@@ -1,28 +1,30 @@
-package com.limegroup.gnutella.udpconnect;
+/**
+ * 
+ */
+package com.limegroup.gnutella.io;
 
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
-/**
- * A selection key for UDP connections.
- */
-class UDPSelectionKey extends SelectionKey {
+class StubSelectionKey extends SelectionKey {
     
-    private final Selector selector;
-    private final SelectableChannel channel;
-    private volatile boolean valid = true;
+    private volatile int interestOps;
+    private int readyOps;
+    private volatile boolean valid;
+    private SelectableChannel channel;
+    private Selector selector;
     
-    private int readyOps = 0;
-    private volatile int interestOps = 0;
-    
-    UDPSelectionKey(Selector selector, Object attachment,
-                    SelectableChannel channel, int ops) {
+    StubSelectionKey(Selector selector, SelectableChannel channel, int ops, Object attachment) {
         this.selector = selector;
         this.channel = channel;
-        interestOps(ops);
+        this.interestOps = ops;
         attach(attachment);
+    }
+    
+    void setReadyOps(int ops) {
+        this.readyOps = ops;
     }
 
     public void cancel() {
@@ -38,9 +40,8 @@ class UDPSelectionKey extends SelectionKey {
     }
 
     public SelectionKey interestOps(int ops) {
-        if(!isValid())
+        if(!valid)
             throw new CancelledKeyException();
-        
         this.interestOps = ops;
         return this;
     }
@@ -50,13 +51,9 @@ class UDPSelectionKey extends SelectionKey {
     }
 
     public int readyOps() {
-        if(!isValid())
+        if(!valid)
             throw new CancelledKeyException();
         return readyOps;
-    }
-    
-    public void setReadyOps(int readyOps) {
-        this.readyOps = readyOps;
     }
 
     public Selector selector() {

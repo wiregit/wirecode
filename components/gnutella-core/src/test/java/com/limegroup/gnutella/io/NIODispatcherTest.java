@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -304,11 +305,39 @@ public class NIODispatcherTest extends BaseTestCase {
         c1.close();        
     }
     
+    public void testOtherSelectors() throws Exception {
+        Selector stub = new StubSelector();
+        NIODispatcher.instance().registerSelector(stub, StubChannel.class);
+        try {
+            StubReadConnectObserver observer = new StubReadConnectObserver();
+            StubChannel channel = new StubChannel();
+            Socket socket = new Socket();
+            channel.setSocket(socket);
+            NIODispatcher.instance().registerConnect(channel, observer, 0);
+            Thread.sleep(100);
+            assertEquals(SelectionKey.OP_CONNECT, interestOps(channel));
+            channel.setReadyOps(SelectionKey.OP_CONNECT);
+            observer.waitForEvent(1000);
+            assertSame(socket, channel.socket());
+            assertEquals(0, interestOps(channel));
+
+            assertEquals(0, observer.getReadsHandled());
+            NIODispatcher.instance().interestRead(channel, true);
+            assertEquals(SelectionKey.OP_READ, interestOps(channel));
+            channel.setReadyOps(SelectionKey.OP_READ);
+            observer.waitForEvent(2000);
+            assertEquals(1, observer.getReadsHandled());
+        } finally {
+            NIODispatcher.instance().removeSelector(stub);
+        }
+    }
+    
     
     
     private int interestOps(SelectableChannel channel) throws Exception {
         // peeks into the NIODispatcher to get the Selector so we can assert the interetOps
-        Selector selector = (Selector)PrivilegedAccessor.getValue(NIODispatcher.instance(), "selector");
+        Selector selector = (Selector)PrivilegedAccessor.invokeMethod(
+                NIODispatcher.instance(), "getSelectorFor", new Object[] {channel }, new Class[] { SelectableChannel.class });
         return channel.keyFor(selector).interestOps();
     }
 

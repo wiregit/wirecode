@@ -4,6 +4,7 @@ import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -137,7 +138,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
         private StubProcessor stubProcessor = new StubProcessor(this);
         
         StubUDPSocketChannel() {
-            super(null);
+            super((SelectorProvider)null);
         }
         
         UDPConnectionProcessor getProcessor() {

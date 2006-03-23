@@ -235,6 +235,7 @@ public class NIODispatcher implements Runnable {
         try {
             Selector sel = getSelectorFor(channel);
 			SelectionKey sk = channel.keyFor(sel);
+            System.out.println("selector: " + sel + ", k: " + sk);
 			if(sk != null && sk.isValid()) {
 			    // We must synchronize on something unique to each key,
 			    // (but not the key itself, 'cause that'll interfere with Selector.select)
@@ -401,9 +402,11 @@ public class NIODispatcher implements Runnable {
 
         boolean finished = channel.finishConnect();
         if (finished) {
+            System.out.println("finis");
             sk.interestOps(0); // interested in nothing just yet.
             handler.handleConnect(channel.socket());
         } else {
+            System.out.println("not finis");
             cancel(sk, handler);
         }
     }
