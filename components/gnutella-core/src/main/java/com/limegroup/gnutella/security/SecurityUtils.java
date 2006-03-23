@@ -33,7 +33,7 @@ public class SecurityUtils {
                 return new SecureRandom(seed);
             }
         } catch (SecurityException ignored) {}
-        catch (IOException ignored) {};
+        catch (IOException ignored) {}
         
         // Either we're on MS Windows, or some fringe OS that
         // doesn't have /dev/urandom or doesn't let normal
