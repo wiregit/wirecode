@@ -53,12 +53,18 @@ import com.limegroup.gnutella.messages.BadPacketException;
  * f is the 8 bytes like LIMEssvv that indentify what kind of vendor message this is.
  * The vendor code is LIME, the type number is 0x19, 25, and the version number is 1.
  * 
- * g is a serialized Java Properties object.
- * derivePayload() serializes it with the code props.save(baos, null).
- * The HeaderUpdateVendorMessage() constructor here deserializes it with the code _headers.load(bais).
+ * g is a Java Properties object written out as a program would to a properties file.
+ * derivePayload() writes it out with the code props.save(baos, null).
+ * The HeaderUpdateVendorMessage() constructor here reads it with the code _headers.load(bais).
  * 
- * You can see additional information in the serialized block, like today's date, Thursday March 16, 2006.
- * This design for the Header Update vendor message favors Java Gnutella clients.
+ * Written out, the information from the Properties object looks like this:
+ * 
+ * #Thu Mar 16 15:36:03 EST 2006
+ * Listen-IP=216.27.158.74\:6375
+ * 
+ * The first line is a comment that begins with a # symbol.
+ * Each line is termianted with "\r\n", the two bytes 0x0d 0x0a.
+ * The : has a \ before it, for some reason.
  */
 public class HeaderUpdateVendorMessage extends VendorMessage {
 
@@ -105,7 +111,7 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
             // Wrap a ByteArrayInputStream around the payload data
 		    InputStream bais = new ByteArrayInputStream(payload);
 
-            // Unserialize the data from the packet payload into keys and values in the Properties hash table
+            // Read the data from the packet payload into keys and values in the Properties hash table
 		    _headers.load(bais);
 
         // The load() method didn't like the data
@@ -134,7 +140,7 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
             F_LIME_VENDOR_ID,      // "LIME" 25 1, the vendor code, message type number, and version number that identify the Header Update vendor message
             F_HEADER_UPDATE,
             VERSION,
-            derivePayload(props)); // Serialize the given Properties object, and save it as VendorMessage._payload
+            derivePayload(props)); // Write the given Properties object as we would to a file, and save it as VendorMessage._payload
 
         // Save the given Properties object in this new one
         _headers = props;
@@ -142,18 +148,18 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
 
     /**
      * Compose the payload beyond LIMEssvv for this Header Update vendor message.
-     * Calls props.save(b, null) to serialize the given Properties object into data.
+     * Calls props.save(b, null) to write the given Properties object into lines of text.
      * 
      * @param props A Properties hash table of strings with handshake headers like key "Listen-IP" and value "216.27.158.74:6346"
-     * @return      The Properties object serialized into a byte array
+     * @return      The Properties object written into a byte array
      */
     private static byte[] derivePayload(Properties props) {
 
         // Make a new ByteArrayOutputStream that will grow to hold the data we write to it
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        // Call save() to serialize the contens of the Properties hash table into the ByteArrayOutputStream
-        props.save(baos, null);
+        // Call save() to write the contens of the Properties hash table into the ByteArrayOutputStream
+        props.save(baos, null); // Use save() to ignore the IOException
 
         // Get the byte array inside the ByteArrayOutputStream with the data we composed, and return it
         return baos.toByteArray();
@@ -167,7 +173,7 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
      */
     public Properties getProperties() {
 
-        // Return the Properties object we saved or deserialized
+        // Return the Properties object we saved or read
         return _headers;
     }
 }

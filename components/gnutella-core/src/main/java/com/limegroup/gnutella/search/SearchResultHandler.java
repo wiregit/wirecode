@@ -32,9 +32,9 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * necessary to pass those results up to the UI.
  */
 public final class SearchResultHandler {
-    
+
     private static final Log LOG = LogFactory.getLog(SearchResultHandler.class);
-        
+
     /**
      * The maximum amount of time to allow a query's processing
      * to pass before giving up on it as an 'old' query.
