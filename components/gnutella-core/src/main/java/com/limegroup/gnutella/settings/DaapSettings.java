@@ -88,10 +88,22 @@ public class DaapSettings extends LimeProps {
         = FACTORY.createIntSetting("DAAP_PRIORITY", 0);
 	
     /**
+     * Whether or not an username is required 
+     */
+    public static BooleanSetting DAAP_REQUIRES_USERNAME =
+        FACTORY.createBooleanSetting("DAAP_REQUIRES_USERNAME", false);
+    
+    /**
      * Whether or not password protection is enabled
      */
     public static BooleanSetting DAAP_REQUIRES_PASSWORD =
 	    FACTORY.createBooleanSetting("DAAP_REQUIRES_PASSWORD", false);
+    
+    /**
+     * The DAAP password
+     */
+    public static StringSetting DAAP_USERNAME =
+        FACTORY.createStringSetting("DAAP_USERNAME", "");
     
     /**
      * The DAAP password
@@ -113,24 +125,7 @@ public class DaapSettings extends LimeProps {
      */
     public static IntSetting DAAP_MAX_LIBRARY_SIZE =
         FACTORY.createIntSetting("DAAP_MAX_LIBRARY_SIZE", 10000);
-    
-    /**
-     * The number of revisions the Library should keep in the history
-     * (necessary for slowly updating clients and iTunes is quite
-     * slow in that respect).
-     */
-    public static IntSetting DAAP_LIBRARY_REVISIONS =
-        FACTORY.createIntSetting("DAAP_LIBRARY_REVISIONS", 100);
-    
-    /**
-     * If <tt>true</tt> (default) then Library earses entries 
-     * from the eldest to the latest entry automatically from
-     * the revision history table. <b>IT IS A VERY BAD IDEA
-     * TO DISABLE THIS CUZ YOU WOULD WASTE MEMORY!!!</b>
-     */
-    public static BooleanSetting DAAP_LIBRARY_GC =
-        FACTORY.createBooleanSetting("DAAP_LIBRARY_GC", true);
-        
+     
     /**
      * Gets the user's name, in possessive format.
      */

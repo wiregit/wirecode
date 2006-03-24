@@ -180,4 +180,13 @@ public final class PasswordSetting extends Setting {
         }
         return buffer.toString();
     }
+    
+    public static String toEncrypted(String algorithm, String value) {
+        for(int i = 0; i < ALGORITHMS.length; i++) {
+            if (ALGORITHMS[i].equals(algorithm)) {
+                return algorithm + SEPERATOR + value;
+            }
+        }
+        throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
+    }
 }
