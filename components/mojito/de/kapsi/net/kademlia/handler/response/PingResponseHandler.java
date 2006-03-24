@@ -40,7 +40,16 @@ public class PingResponseHandler extends AbstractResponseHandler {
         }
         
         PingResponse response = (PingResponse)message;
-        context.setExternalSocketAddress(response.getSocketAddress());
+        SocketAddress externalAddress = response.getSocketAddress();
+       
+        if (externalAddress != null) {
+            SocketAddress currentAddress = context.getExternalSocketAddress();
+            if (!externalAddress.equals(currentAddress)) {
+                
+                // TODO: Make sure it's really our external Address!
+                context.setExternalSocketAddress(externalAddress);
+            }
+        }
         
         if (l != null) {
             getEventDispatcher().add(new Runnable() {

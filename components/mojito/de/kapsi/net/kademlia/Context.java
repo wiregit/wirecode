@@ -152,14 +152,49 @@ public class Context implements Runnable {
         return externalAddress;
     }
     
-    public void setExternalSocketAddress(SocketAddress externalAddress) {
+    public void setExternalSocketAddress(SocketAddress externalAddress) 
+                throws IOException {       
+        
         if (this.externalAddress == null) {
-            this.externalAddress = externalAddress;
-            
             ContactNode localNode = (ContactNode)routeTable.get(nodeId);
             if (localNode != null) {
+                this.externalAddress = externalAddress;
                 localNode.setSocketAddress(externalAddress);
             }
+        } else if (!externalAddress.equals(this.externalAddress)) {
+            
+            // TODO: See PingResponseHandler!!!
+            
+            ContactNode old = getLocalNode();
+            
+            this.externalAddress = externalAddress;
+            this.nodeId = KUID.createRandomNodeID(externalAddress);
+            
+            Collection nodes = routeTable.getAllNodes();
+            routeTable.clear();
+            
+            ContactNode localNode = getLocalNode();
+            localNode.setTimeStamp(Long.MAX_VALUE);
+            routeTable.add(localNode, false);
+            
+            boolean check = true;
+            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+                ContactNode node = (ContactNode)it.next();
+                
+                // Skip the old local Node!
+                if (check && node.getNodeID().equals(old.getNodeID())) {
+                    check = false;
+                    continue;
+                }
+                
+                // TODO Not sure about this!
+                boolean alive = !node.isDead();
+                routeTable.add(node, alive);
+            }
+            
+            // And finally do a looup for ourself on the DHT
+            // TODO: full bucket refresh?
+            lookup(nodeId, null);
         }
     }
     
