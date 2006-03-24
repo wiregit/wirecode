@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.guess.QueryKeyGenerator;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -340,8 +341,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
-        QueryKey.SecretKey key = QueryKey.generateSecretKey();
-        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
+        QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -360,7 +360,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                             QueryKey qk = 
                                 QueryKey.getQueryKey(datagram.getAddress(),
                                                      datagram.getPort(),
-                                                     key, pad);
+                                                     secretKey);
                             
                             PingReply pRep = 
                                 PingReply.createQueryKeyReply(pr.getGUID(), 
