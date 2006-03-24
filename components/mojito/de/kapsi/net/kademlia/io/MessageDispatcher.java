@@ -355,7 +355,7 @@ public class MessageDispatcher implements Runnable {
                 //LOG.error(err);
             } catch (IOException err) {
                 err.printStackTrace();
-                //LOG.error(err);
+                LOG.fatal(err);
             }
         }
     }

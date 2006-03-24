@@ -15,6 +15,9 @@ public final class NetworkSettings {
     private static final long TIMEOUT = 10L * 1000L;
     private static final String TIMEOUT_KEY = "TIMEPUT";
     
+    private static final int MAX_ERRORS = 3;
+    private static final String MAX_ERRORS_KEY = "MAX_ERRORS";
+    
     private static final Preferences SETTINGS 
         = Preferences.userNodeForPackage(NetworkSettings.class);
     
@@ -34,5 +37,13 @@ public final class NetworkSettings {
     
     public static void setTimeout(long timeout) {
         SETTINGS.putLong(TIMEOUT_KEY, Math.max(0L, timeout));
+    }
+    
+    public static int getMaxErrors() {
+        return SETTINGS.getInt(MAX_ERRORS_KEY, MAX_ERRORS);
+    }
+    
+    public static void setMaxErrors(int maxErrors) {
+        SETTINGS.putInt(MAX_ERRORS_KEY, Math.max(0, maxErrors));
     }
 }

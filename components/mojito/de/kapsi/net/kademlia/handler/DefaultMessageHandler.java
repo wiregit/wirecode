@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +28,8 @@ import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.LookupSettings;
+import de.kapsi.net.kademlia.settings.NetworkSettings;
+import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 
 /**
@@ -41,6 +44,8 @@ public class DefaultMessageHandler extends MessageHandler
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
     
     private long timeout = LookupSettings.getTimeout();
+    
+    private Map loopLock = new FixedSizeHashMap(16);
     
     public DefaultMessageHandler(Context context) {
         super(context);
@@ -126,13 +131,24 @@ public class DefaultMessageHandler extends MessageHandler
         }
     }
     
-    
-    //TODO TODO TODO TODO TODO
-    private void updateContactInfo(ContactNode node, KUID nodeId, 
-            SocketAddress src, Message message) throws IOException {
+    private void updateContactInfo(ContactNode currentContact, 
+            KUID nodeId, SocketAddress src, Message message) throws IOException {
         
-        if (node.getSocketAddress().equals(src)) {
-            context.getRouteTable().add(node,true);
+        // Technically, this shouldn't be possible since MessageDispatcher
+        // already takes care of it! We cannot send nor receive Messages
+        // from Nodes that have the same Node ID as we do. This is just
+        // for the case somebody is screwing around with the MessageDispatcher!
+        if (nodeId.equals(context.getLocalNodeID())) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot update local contact info");
+            }
+            return;
+        }
+        
+        // Same Address? OK, mark it as alive if it 
+        // isn't aleardy
+        if (currentContact.getSocketAddress().equals(src)) {
+            context.getRouteTable().add(currentContact, true);
             return;
         }
         
@@ -141,27 +157,121 @@ public class DefaultMessageHandler extends MessageHandler
         // we can do. Set it to the new address and hope it 
         // doesn't use a different NIF everytime...
         if (NetworkUtils.isLocalAddress(src)
-                && NetworkUtils.isLocalAddress(node.getSocketAddress())) {
-            node.setSocketAddress(src);
-//            context.getRouteTable().updateTimeStamp(node);
+                && NetworkUtils.isLocalAddress(currentContact.getSocketAddress())) {
+            // TODO what's better?
+            context.getRouteTable().add(new ContactNode(nodeId, src), true);
+            //node.setSocketAddress(src);
             return;
         }
         
-        // TODO check if src is trying to spoof its NodeID!
-        node.setSocketAddress(src);
-//        context.getRouteTable().updateTimeStamp(node);
+        // If a Host has multiple IPs (see also above case) then
+        // we may create an infinite loop if boths ends think
+        // the other end is trying to spoof its Node ID! Make sure
+        // we're not creating a such loop.
+        if (loopLock.containsKey(nodeId)) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Spoof check already in progress for " + currentContact);
+            }
+            return;
+        }
         
-        /*if (!isSpoofCheckActive(nodeId)) {
-            ResponseHandler handler = createSpoofChecker(nodeId, src);
-            PingRequest request = context.getMessageFactory().createPingRequest();
-            context.getMessageDispatcher().send(node, request, handler);
-        }*/
+        // Kick off the spoof check. Ping the current contact and
+        // if it responds then interpret it as an attempt to spoof
+        // the node ID and if it doesn't then it is obviously dead.
+        ResponseHandler handler 
+            = new SpoofCheckHandler(context, 
+                currentContact, new ContactNode(nodeId, src));
+        
+        doSpoofCheck(currentContact, handler);
     }
     
+    private void doSpoofCheck(ContactNode contact, ResponseHandler handler) throws IOException {
+        RequestMessage request = context.getMessageFactory().createPingRequest();
+        context.getMessageDispatcher().send(contact, request, handler);
+        loopLock.put(contact.getNodeID(), handler);
+    }
+    
+    /**
+     * Handles a spoof check where we're trying to figure out
+     * wheather or not a Node is trying to spoof its Node ID.
+     */
+    private class SpoofCheckHandler extends AbstractResponseHandler {
+        
+        private boolean done = false;
+        
+        private int errors = 0;
+        
+        private ContactNode currentContact;
+        private ContactNode newContact;
+        
+        public SpoofCheckHandler(Context context, ContactNode currentContact, ContactNode newContact) {
+            super(context);
+            
+            this.currentContact = currentContact;
+            this.newContact = newContact;
+        }
+
+        public void handleResponse(KUID nodeId, SocketAddress src, 
+                Message message, long time) throws IOException {
+            
+            if (done) {
+                return;
+            }
+            
+            loopLock.remove(nodeId);
+            done = true;
+            
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(newContact + " is trying to spoof its NodeID. " 
+                        + ContactNode.toString(nodeId, src) 
+                        + " responded in " + time + " ms");
+            }
+            
+            // Do nothing else! DefaultMessageHandler takes
+            // care of everything else!
+        }
+
+        public void handleTimeout(KUID nodeId, SocketAddress dst, 
+                long time) throws IOException {
+            
+            if (done) {
+                return;
+            }
+            
+            // Try at least x-times before giving up!
+            if (++errors >= NetworkSettings.getMaxErrors()) {
+                
+                loopLock.remove(nodeId);
+                done = true;
+                
+                // The current contact is obviously not responding
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(currentContact + " does not respond! Replacing it with " + newContact);
+                }
+                
+                // TODO this should be maybe part of route tables internal logic?
+                ContactNode node = context.getRouteTable().get(nodeId);
+                if (node == null) {
+                    node = newContact;
+                } else {
+                    node.setSocketAddress(newContact.getSocketAddress());
+                }
+                
+                context.getRouteTable().add(node, true);
+                return;
+            }
+            
+            doSpoofCheck(currentContact, this);
+        }
+    }
+
+    /**
+     * Handles Store-Forward response. We're actually sending our
+     * Target Node a lookup for its own Node ID and it will tell us
+     * the QueryKey we need to store a KeyValue.
+     */
     private static class StoreForwardResponseHandler extends AbstractResponseHandler {
 
-        private static final int MAX_ERRORS = 3;
-        
         private List keyValues;
         
         private boolean done = false;
@@ -200,7 +310,7 @@ public class DefaultMessageHandler extends MessageHandler
                 return;
             }
             
-            if (++errors >= MAX_ERRORS) {
+            if (++errors >= NetworkSettings.getMaxErrors()) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Max number of errors has occured. Giving up!");
                 }

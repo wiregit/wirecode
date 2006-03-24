@@ -23,6 +23,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
+import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 /**
  * Currently unused. Could be used to ACK/NACK store
@@ -31,8 +32,6 @@ import de.kapsi.net.kademlia.security.QueryKey;
 public class StoreResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
-    
-    private static final int MAX_ERRORS = 3;
     
     private int errors = 0;
     private boolean done = false;
@@ -103,7 +102,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             return;
         }
         
-        if (++errors >= MAX_ERRORS) {
+        if (++errors >= NetworkSettings.getMaxErrors()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Max number of errors occured. Giving up!");
             }
