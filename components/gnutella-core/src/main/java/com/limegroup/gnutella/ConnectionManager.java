@@ -1717,6 +1717,8 @@ public class ConnectionManager {
      * Only does something if we're a leaf with connections up to ultrapeers.
      * Only sends the QueryStatusResponse packet to the ultrapeers that support the leaf guidance vendor message.
      * 
+     * Only code in the SearchResultHandler class calls this method.
+     * 
      * @param stat A QueryStatusResponse packet
      */
     public void updateQueryStatus(QueryStatusResponse stat) {

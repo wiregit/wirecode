@@ -1666,72 +1666,117 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     }
 
     /**
-     * Used for vendor messages. (do)
+     * This remote computer sent us a vendor message through our TCP socket connection with it.
+     * Only MessageRouter.handleMessage() calls this.
+     * 
+     * @param vm The vendor message
      */
     protected void handleVendorMessage(VendorMessage vm) {
-        // let Connection do as needed....
+
+        // Save this remote computer's Messages Supported, Capabilities, or Header Update vendor messages
         super.handleVendorMessage(vm);
 
-        // now i can process
+        // BEAR 4 Hops Flow vendor message (do)
         if (vm instanceof HopsFlowVendorMessage) {
-            // update the softMaxHops value so it can take effect....
-            HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
-            
-            if( isSupernodeClientConnection() )
-                //	If the connection is to a leaf, and it is busy (HF == 0)
-                //	then set the global busy leaf flag appropriately
-                setBusy( hops.getHopValue()==0 );
-            
-            hopsFlowMax = hops.getHopValue();
-        }
-        else if (vm instanceof PushProxyAcknowledgement) {
-            // this connection can serve as a PushProxy, so note this....
-            PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
-            if (Arrays.equals(ack.getGUID(),
-                              RouterService.getMessageRouter()._clientGUID)) {
-                _pushProxy = true;
+            HopsFlowVendorMessage hops = (HopsFlowVendorMessage)vm;
+
+            // We're an ultrapeer and this remote computer is a leaf
+            if (isSupernodeClientConnection()) {
+
+                /*
+                 * If the connection is to a leaf, and it is busy (HF == 0)
+                 * then set the global busy leaf flag appropriately
+                 */
+
+                // If the hop value in the message is 0, set the busy timer, otherwise clear it (do)
+                setBusy(hops.getHopValue() == 0);
             }
+
+            // Save the remote computer's hops flow value in hopsFlowMax
+            hopsFlowMax = hops.getHopValue();
+
+        // BEAR 7 Push Proxy Acknowledgement vendor message (do)
+        } else if (vm instanceof PushProxyAcknowledgement) {
+            PushProxyAcknowledgement ack = (PushProxyAcknowledgement)vm;
+
+            // this connection can serve as a PushProxy, so note this....
+            if (Arrays.equals(ack.getGUID(), RouterService.getMessageRouter()._clientGUID)) _pushProxy = true;
             // else mistake on the server side - the guid should be my client
             // guid - not really necessary but whatever
-        }
-        else if(vm instanceof CapabilitiesVM) {
-            //we need to see if there is a new simpp version out there.
-            CapabilitiesVM capVM = (CapabilitiesVM)vm;
-            if(capVM.supportsSIMPP() > SimppManager.instance().getVersion()) {
-                //request the simpp message
-                SimppRequestVM simppReq = new SimppRequestVM();
-                send(simppReq);
-            }
-            
-            // see if there's a new update message.
-            int latestId = UpdateHandler.instance().getLatestId();
-            int currentId = capVM.supportsUpdate();
-            if(currentId > latestId)
-                send(new UpdateRequest());
-            else if(currentId == latestId)
-                UpdateHandler.instance().handleUpdateAvailable(this, currentId);
-                
-        }
-        else if (vm instanceof MessagesSupportedVendorMessage) {        
-            // If this is a ClientSupernodeConnection and the host supports
-            // leaf guidance (because we have to tell them when to stop)
-            // then see if there are any old queries that we can re-originate
-            // on this connection.
-            if(isClientSupernodeConnection() &&
-               (remoteHostSupportsLeafGuidance() >= 0)) {
-                SearchResultHandler srh =
-                    RouterService.getSearchResultHandler();
-                List queries = srh.getQueriesToReSend();
-                for(Iterator i = queries.iterator(); i.hasNext(); )
-                    send((Message)i.next());
-            }            
 
-            // see if you need a PushProxy - the remoteHostSupportsPushProxy
-            // test incorporates my leaf status in it.....
+        // Capabilities vendor message, the remote computer is telling us what capabilities it supports
+        } else if (vm instanceof CapabilitiesVM) {
+            CapabilitiesVM capVM = (CapabilitiesVM)vm;
+
+            /*
+             * we need to see if there is a new simpp version out there.
+             */
+
+            // The remote compuer has a later numbered SIMPP command message than we do
+            if (capVM.supportsSIMPP() >                 // The value of the "SIMPP" capability is the number of the signed SIMPP command message the remote computer has
+                SimppManager.instance().getVersion()) { // If this is bigger than the number of the SIMPP command message we have received and followed
+
+                // Ask the remote computer for it
+                SimppRequestVM simppReq = new SimppRequestVM(); // Make a new SIMPP Request vendor message
+                send(simppReq);                                 // Send it to the remote computer
+            }
+
+            /*
+             * see if there's a new update message.
+             */
+
+            // Get the current software update number from the remote computer, and from us
+            int latestId = UpdateHandler.instance().getLatestId(); // The latest update we're aware of
+            int currentId = capVM.supportsUpdate();                // The update number the remote computer knows about
+
+            // The remote computer knows about a new update
+            if (currentId > latestId) {
+
+                // Make a new Update Request vendor message and send it to this remote computer
+                send(new UpdateRequest());
+
+            // We and the remote computer know about the same update
+            } else if (currentId == latestId) {
+
+                // Add this remote comptuer as a source for the same LimeWire setup file we have
+                UpdateHandler.instance().handleUpdateAvailable(this, currentId);
+            }
+
+        // Messages Supported vendor message, the remote computer is telling us what kinds of vendor messages it understands
+        } else if (vm instanceof MessagesSupportedVendorMessage) {
+
+            /*
+             * If this is a ClientSupernodeConnection and the host supports
+             * leaf guidance (because we have to tell them when to stop)
+             * then see if there are any old queries that we can re-originate
+             * on this connection.
+             */
+
+            // If we're a leaf and we just connected to this remote ultrapeer, and we searched for something less than 30 seconds ago, have this new ultrapeer search for us too
+            if (isClientSupernodeConnection() &&           // This remote computer is an ultrapeer and we are just a leaf, and
+                (remoteHostSupportsLeafGuidance() >= 0)) { // This remote computer can do dynamic querying, in which it will run our searches for us
+
+                // Access the SearchResultHandler
+                SearchResultHandler srh = RouterService.getSearchResultHandler();
+
+                // Get a list of the query packets we've been searching with for the last 30 seconds that don't have enough hits yet
+                List queries = srh.getQueriesToReSend();
+
+                // Send them all to our new ultrapeer
+                for (Iterator i = queries.iterator(); i.hasNext(); ) send((Message)i.next());
+            }
+
+            //do
+
+            /*
+             * see if you need a PushProxy - the remoteHostSupportsPushProxy
+             * test incorporates my leaf status in it.....
+             */
+
             if (remoteHostSupportsPushProxy() > -1) {
+
                 // get the client GUID and send off a PushProxyRequest
-                GUID clientGUID =
-                    new GUID(RouterService.getMessageRouter()._clientGUID);
+                GUID clientGUID = new GUID(RouterService.getMessageRouter()._clientGUID);
                 PushProxyRequest req = new PushProxyRequest(clientGUID);
                 send(req);
             }
@@ -1740,9 +1785,9 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
             if (!UDPService.instance().canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsUDPRedirect() > -1)) {
+
                 GUID connectBackGUID = RouterService.getUDPConnectBackGUID();
-                Message udp = new UDPConnectBackVendorMessage(RouterService.getPort(),
-                                                              connectBackGUID);
+                Message udp = new UDPConnectBackVendorMessage(RouterService.getPort(), connectBackGUID);
                 send(udp);
                 _numUDPConnectBackRequests++;
             }
@@ -1750,10 +1795,13 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
             if (!RouterService.acceptedIncomingConnection() &&
                 (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsTCPRedirect() > -1)) {
+
                 Message tcp = new TCPConnectBackVendorMessage(RouterService.getPort());
                 send(tcp);
                 _numTCPConnectBackRequests++;
             }
+
+            //done
         }
     }
 

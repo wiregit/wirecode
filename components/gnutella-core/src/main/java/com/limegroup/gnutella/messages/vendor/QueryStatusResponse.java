@@ -42,6 +42,11 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  * nn is the number of hits the computer has.
  * The number is stored in 2 bytes, and must be 1 through 65535, 0x0001 through 0xffff.
  * 
+ * The hit number in a Query Status Response vendor message isn't the total number of hits the leaf has.
+ * Rather, it's the number of hits the leaf has up to 150, divided by 4.
+ * A leaf divides by 4 assuming it has connections up to 4 ultrapeers.
+ * In the packet, nn is the number of hits the ultrapeer that receives the message has gotten the leaf that sent it.
+ * 
  * This message contains 2 unsigned bytes that tell you how many
  * results the sending host has for the guid of a query (the guid of this
  * message is the same as the original query).
@@ -82,14 +87,15 @@ public final class QueryStatusResponse extends VendorMessage {
      * Make a new QueryStatusResponse for us to send.
      * This is the message maker.
      * 
-     * The following 3 methods use this constructor to make Query Status Response vendor messages for us to send: (do)
-     * SearchResultHandler.removeQuery(GUID)
-     * SearchResultHandler.accountAndUpdateDynamicQueriers(QueryReply, int)
-     * ManagedConnection.morphToStopQuery(QueryStatusResponse)
+     * The following 3 methods use this constructor to make Query Status Response vendor messages for us to send:
+     * SearchResultHandler.accountAndUpdateDynamicQueriers(QueryReply, int) makes a message to tell our ultrapeers how many hits their searching has gotten us.
+     * SearchResultHandler.removeQuery(GUID) makes a message with 0xffff 65535 hits to tell the ultrapeers to stop.
+     * ManagedConnection.morphToStopQuery(QueryStatusResponse) (do)
      * 
      * @param replyGUID  The GUID that identifies the search, matches the message GUID of all the packets, and can route packets back to the searching computer.
      *                   Sets this new packet's message GUID.
-     * @param numResults The number of hits we have.
+     * @param numResults The number of hits we have up to 150, divided by 4.
+     *                   This is the number of hits we'd like each of our ultrapeers to get for us.
      *                   Puts this number in the payload.
      *                   Must be 1 through 65535.
      *                   If you have more than 65535 results, just say you have 65535.

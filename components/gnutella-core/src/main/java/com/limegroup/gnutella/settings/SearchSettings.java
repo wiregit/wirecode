@@ -57,10 +57,16 @@ public final class SearchSettings extends LimeProps {
     /** 500 characters, the maximum number to allow in an XML query. */
     public static final IntSetting MAX_XML_QUERY_LENGTH = FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 500);
 
-    /** 0, a search result will have to have this many stars to show up in the list. */
+    /**
+     * 0, a search result will have to have this many stars to show up in the list.
+     * The number of stars in the GUI come from the number HostData.getQuality() returns.
+     */
     public static final IntSetting MINIMUM_SEARCH_QUALITY = FACTORY.createIntSetting("MINIMUM_SEARCH_QUALITY", 0);
 
-    /** 0, a search result has to have this speed to show up in the list. */
+    /**
+     * 0, a search result has to have this speed to show up in the list.
+     * The speed is compared to the upload speed a sharing computer reports in the payload of a query hit packet.
+     */
     public static final IntSetting MINIMUM_SEARCH_SPEED = FACTORY.createIntSetting("MINIMUM_SEARCH_SPEED", 0);
 
     /** 5, don't let the user run more than 5 searches at once. */

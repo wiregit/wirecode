@@ -493,13 +493,16 @@ public class Connection implements IpPort {
     }
 
     /**
-     * Handles a vendor message a remote computer sent us.
+     * Save this remote computer's Messages Supported, Capabilities, and Header Update vendor messages.
      * 
-     * The message router calls this when we receive a vendor message.
+     * This remote computer sent us a vendor message through our TCP socket connection with it.
      * Saves a Messages Supported vendor message in _messagesSupported and a Capabilities vendor message in _capabilities.
      * If it's a Header Update vendor message, adds its headers to HEADERS_READ and _headers.
      * 
-     * @param vm An object that extends VendorMessage that represents a vendor message from this remote computer
+     * These messages serve the same purpose as the handshake, advertising support for features and outline how we can communicate.
+     * Gnutella computers exchange Messages Supported and Capabilities vendor messages shortly after the handshake.
+     * 
+     * @param vm The vendor message from the remote computer
      */
     protected void handleVendorMessage(VendorMessage vm) {
 

@@ -512,28 +512,28 @@ public abstract class MessageRouter {
         // Move 1 from the TTL to the hops count, having the packet record its trip across the Internet to get here
         msg.hop();
 
-        // The remote computer sent us a ping
+        // 0x00 Ping, the remote computer wants to know the addresses of more computers running Gnutella software
         if (msg instanceof PingRequest) {
 
             // Update statistics and hand off the message
             ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
             handlePingRequestPossibleDuplicate((PingRequest)msg, receivingConnection);
 
-        // The remote computer sent us a pong
+        // 0x01 Pong, the remote computer is telling us the addresses of more computers running Gnutella software
 		} else if (msg instanceof PingReply) {
 
             // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, receivingConnection);
 
-        // The remote computer sent us a query
+        // 0x80 Query, the remote computer is searching us
         } else if (msg instanceof QueryRequest) {
 
             // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
             handleQueryRequestPossibleDuplicate((QueryRequest)msg, receivingConnection);
 
-        // The remote computer sent us a query hit
+        // 0x81 Query Hit, the remote computer is giving us information about shared files we can download
 		} else if (msg instanceof QueryReply) {
 		    
 		    /*
@@ -544,16 +544,16 @@ public abstract class MessageRouter {
             // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
             QueryReply qmsg = (QueryReply)msg;
-            handleQueryReply(qmsg, receivingConnection); 
+            handleQueryReply(qmsg, receivingConnection);
 
-        // The remote computer sent us a push
+        // 0x40 Push, a remote computer wants us to push open a new connection to it
 		} else if (msg instanceof PushRequest) {
 
             // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
 
-		} else if (msg instanceof ResetTableMessage) {
+        } else if (msg instanceof ResetTableMessage) {
 
 			ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleResetTableMessage((ResetTableMessage)msg, receivingConnection);
@@ -593,17 +593,14 @@ public abstract class MessageRouter {
 
         } else if (msg instanceof GiveStatsVendorMessage) {
 
-            //TODO: add the statistics recording code
             handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
 
         } else if(msg instanceof StatisticVendorMessage) {
 
-            //TODO: add the statistics recording code
             handleStatisticsMessage((StatisticVendorMessage)msg, receivingConnection);
 
         } else if (msg instanceof HeadPing) {
 
-        	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, receivingConnection);
 
         } else if(msg instanceof SimppRequestVM) {
@@ -626,8 +623,10 @@ public abstract class MessageRouter {
 
             handleHeadPong((HeadPong)msg, receivingConnection);
 
+        // It's some other kind of vendor message
         } else if (msg instanceof VendorMessage) {
 
+            // Have ManagedConnection.handleVendorMessage() sort it and handle it
             receivingConnection.handleVendorMessage((VendorMessage)msg);
         }
 
