@@ -475,19 +475,36 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     private QueryRouteTable _lastQRPTableSent;
 
     /**
-     * The GUID map used for UDP query hits. (do)
+     * Maps the search GUIDs this leaf sent us with its address in them to the GUIDs we made with our IP address in them instead.
      * 
-     * Holds the mappings of GUIDs that are being proxied.
-     * We want to construct this lazily....
-     * GUID.TimedGUID -> GUID
-     * OOB Proxy GUID - > Original GUID
+     * ManagedConnection uses _guidMap when this remote computer, one of our leaves, sends us a query that we'll run on its behalf.
+     * We replace the leaf's IP address and port number hidden in the query packet's message GUID with our own.
+     * _guidMap is our record of the GUID before and after this change.
+     * 
+     * _guidMap is a Java Hashtable, which maps keys to values.
+     * The keys are TimedGUID objects, and the values are GUID objects.
+     * A key is a TimedGUID object with the GUID with our IP address, and an expriation time of 10 minutes from when we added it.
+     * A value is the GUID with the leaf's IP address, as the leaf sent it to us.
+     * 
+     * _guidMap isn't static.
+     * Each ManagedConnection object has it's own _guidMap.
+     * 
+     * Here's how the code in ManagedConnection uses _guidMap:
+     * close() removes this ManagedConnection's _guidMap from the list of them the GuidMapExpirer keeps.
+     * tryToProxy() adds a new entry to _guidMap with the GUID before and after address replacement, and the time the entry should expire 10 minutes from now.
+     * morphToStopQuery() changes the message guid of a BEAR 12 1 Query Status Response vendor message the same way, so our QueryHandler object will recognize it.
+     * handleQueryReply() looks up the possibly morphed GUID of a query hit packet in _guidMap, and changes it back to the GUID this leaf will understand.
+     * Every 10 minutes, the GuidMapExpirer loops through every entry in every ManagedConnection's _guidMap, removing those older than 10 minutes.
+     * 
+     * _guidMap lets us see that we've morphed a GUID so we can morph it again the same way, or un-morph it back.
+     * tryToProxy() and morphToStopQuery() morph the GUID.
+     * handleQueryReply() morphs it back.
      */
     private Map _guidMap = null;
 
     /**
-     * 10 minutes, used for UDP query hits. (do)
-     * 
-     * The max lifetime of the GUID (10 minutes).
+     * 10 minutes in milliseconds.
+     * After 10 minutes, we'll forget about a search this leaf asked us to run on its behalf.
      */
     private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
 
@@ -1204,7 +1221,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
         // Call Connection.close(), which will close the NIOSocket object and put away the Java Deflater and Inflater
         super.close();
 
-        // Have the GuidMapExpirer release its pointer to _guidMap so the garbage collector can reclaim this object also
+        // Remove this ManagedConnection's _guidMap from the list of them the GuidMapExpirer keeps
         if (_guidMap != null) GuidMapExpirer.removeMap(_guidMap);
     }
 
@@ -1407,8 +1424,8 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
                  */
 
                 // The leaf sent us a QueryRequest or QueryStatusResponse packet, morph its guid to try to proxy it (do)
-                if      (m instanceof QueryRequest)        m = tryToProxy((QueryRequest)m);
-                else if (m instanceof QueryStatusResponse) m = morphToStopQuery((QueryStatusResponse)m);
+                if      (m instanceof QueryRequest)        m = tryToProxy((QueryRequest)m);              // Our leaf sent us a query packet
+                else if (m instanceof QueryStatusResponse) m = morphToStopQuery((QueryStatusResponse)m); // Our leaf sent us a BEAR 12 1 Query Status Response vendor message
             }
 
             // Have the "MessageDispatch" thread call MessageRouter.handleMessage(m, this)
@@ -1433,80 +1450,218 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     }
 
     /**
-     * Used for UDP query hits. (do)
+     * Takes a query packet this leaf sent us, replaces the leaf's IP address in the GUID with our own, and returns it.
+     * 
+     * We are an ultrapeer and this remote computer is a leaf.
+     * Our leaf sent us a QueryRequest packet.
+     * It wants us to perform this search for it.
+     * 
+     * Here's what's happened up to this point:
+     * MessageReader.handleRead() sliced some data from the remote computer, and parsed it into a new QueryRequest packet.
+     * ManagedConnection.processReadMessage() updated statistics and called the next method.
+     * ManagedConnection.handleMessageInternal() determined that we're an ultrapeer and this remote computer is a leaf, and the packet is a QueryRequest packet.
+     * 
+     * tryToProxy() only does something if we can get UDP packets.
+     * If we can't, it returns the packet unchanged.
+     * 
+     * When the leaf made the query packet, it hid its IP address and port number in the message GUID.
+     * It's using this message GUID to identify its search.
+     * tryToProxy() replaces the leaf's address in the GUID with our own.
+     * This will make query hit packets come back to us, not the leaf.
+     * 
+     * tryToProxy() adds an entry to this ManagedConnection's _guidMap with 3 pieces of information:
+     * The GUID the leaf gave this search, with the leaf's IP address and port number in it.
+     * The GUID we gave this search, with our IP address and port number in it instead.
+     * The time 10 minutes from now when we'll remove the entry.
+     * 
+     * Here's what will happen next:
+     * The "MessageDispatch" thread calls MessageRouter.handleMessage(m), which leads to handleQueryRequestPossibleDuplicate().
+     * handleQueryRequest() starts dynamic querying, searches our shared files and respons with query hit packets, and forwards the query to our ultrapeers.
+     * 
+     * @param query The query packet the leaf sent us.
+     * @return      The query packet with our IP address and port number hidden in the GUID instead of the leaf's.
+     *              If we can't run this search for the leaf, returns the query packet unchanged.
      */
     private QueryRequest tryToProxy(QueryRequest query) {
-        // we must have the following qualifications:
-        // 1) Leaf must be sending SuperNode a query (checked in loopForMessages)
-        // 2) Leaf must support Leaf Guidance
-        // 3) Query must not be OOB.
-        // 3.5) The query originator should not disallow proxying.
-        // 4) We must be able to OOB and have great success rate.
-        if (remoteHostSupportsLeafGuidance() < 1) return query;
-        if (query.desiresOutOfBandReplies()) return query;
-        if (query.doNotProxy()) return query;
-        if (!RouterService.isOOBCapable() || 
-            !OutOfBandThroughputStat.isSuccessRateGreat() ||
-            !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;
 
-        // everything is a go - we need to do the following:
-        // 1) mutate the GUID of the query - you should maintain every param of
-        // the query except the new GUID and the OOB minspeed flag
-        // 2) set up mappings between the old guid and the new guid.
-        // after that, everything is set.  all you need to do is map the guids
-        // of the replies back to the original guid.  also, see if a you get a
-        // QueryStatusResponse message and morph it...
-        // THIS IS SOME MAJOR HOKERY-POKERY!!!
-        
-        // 1) mutate the GUID of the query
-        byte[] origGUID = query.getGUID();
-        byte[] oobGUID = new byte[origGUID.length];
-        System.arraycopy(origGUID, 0, oobGUID, 0, origGUID.length);
-        GUID.addressEncodeGuid(oobGUID, RouterService.getAddress(),
-                               RouterService.getPort());
+        /*
+         * we must have the following qualifications:
+         * 1) Leaf must be sending SuperNode a query (checked in loopForMessages)
+         * 2) Leaf must support Leaf Guidance
+         * 3) Query must not be OOB.
+         * 3.5) The query originator should not disallow proxying.
+         * 4) We must be able to OOB and have great success rate.
+         */
 
-        query = QueryRequest.createProxyQuery(query, oobGUID);
+        // Make sure the leaf understands dynamic querying, looks in its Messages Supported vendor message for BEAR 11
+        if (remoteHostSupportsLeafGuidance() < 1) return query; // If it doesn't, return the query packet without changing it
 
-        // 2) set up mappings between the guids
+        // Make sure the leaf wants query hits sent directly to it in UDP, looks for 0x04 in the speed flags bytes
+        if (query.desiresOutOfBandReplies()) return query; // If it doesn't, return the query packet without changing it
+
+        // Make sure the leaf wants us to search for it, make sure the query packet doesn't have the GGEP "NP" No Proxy extension
+        if (query.doNotProxy()) return query; // If it does, return the query packet without changing it
+
+        // Make sure we can get UDP packets
+        if (!RouterService.isOOBCapable()                 ||   // Make sure we can receive UDP packets
+            !OutOfBandThroughputStat.isSuccessRateGreat() ||   // Make sure we're getting most of the UDP packets we expect to get
+            !OutOfBandThroughputStat.isOOBEffectiveForProxy()) // Make sure we've gotten results when we've tried this before
+            return query;                                      // If not, return the query packet without changing it
+
+        /*
+         * everything is a go - we need to do the following:
+         * 1) mutate the GUID of the query - you should maintain every param of
+         * the query except the new GUID and the OOB minspeed flag
+         * 2) set up mappings between the old guid and the new guid.
+         * after that, everything is set.  all you need to do is map the guids
+         * of the replies back to the original guid.  also, see if a you get a
+         * QueryStatusResponse message and morph it...
+         * THIS IS SOME MAJOR HOKERY-POKERY!!!
+         */
+
+        /*
+         * 1) mutate the GUID of the query
+         */
+
+        // Get the query packet's message GUID, origGUID, and make a copy we'll change, oobGUID
+        byte[] origGUID = query.getGUID();                          // Get the query packet's message GUID, this is the GUID the leaf chose for the search
+        byte[] oobGUID = new byte[origGUID.length];                 // Make a 16-byte array for the morphed GUID we'll make
+        System.arraycopy(origGUID, 0, oobGUID, 0, origGUID.length); // Copy origGUID into oobGUID
+
+        // Replace the leaf's IP address and port number in the GUID with our own
+        GUID.addressEncodeGuid(
+            oobGUID,                    // The GUID to edit
+            RouterService.getAddress(), // Write our IP address at the start
+            RouterService.getPort());   // Write our port number at byte 13
+
+        // Replace our reference to the query packet with one to a copy that has our IP address and port number in the GUID instead of the leaf's
+        query = QueryRequest.createProxyQuery(query, oobGUID); // In the speed flags bytes, set 0x04 to say we can receive UDP packets and want hits that way
+
+        /*
+         * Before, the query packet had:
+         * The leaf's IP address and port number hidden in the GUID.
+         * 0x04 set to request hits to it directly in UDP packets.
+         * 
+         * Now, the query packet has:
+         * Our IP address and port number hidden in the GUID.
+         * 0x04 set to request hits to us directly in UDP packets.
+         * 
+         * When we send copies of this new query packet, we'll get the hits, not the leaf. (ask)
+         */
+
+        /*
+         * 2) set up mappings between the guids
+         */
+
+        // We haven't done any searches for this leaf yet
         if (_guidMap == null) {
+
+            // Make _guidMap, a list of 
             _guidMap = new Hashtable();
             GuidMapExpirer.addMapToExpire(_guidMap);
         }
-        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(oobGUID),
-                                                  TIMED_GUID_LIFETIME);
-        _guidMap.put(tGuid, new GUID(origGUID));
 
+        // Make a TimedGUID object with the GUID with our IP address that will expire in 10 minutes
+        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(oobGUID), TIMED_GUID_LIFETIME);
+
+        // Add the GUID with our IP address, the GUID with the leaf's IP address, and the time 10 minutes from now to this leaf's _guidMap
+        _guidMap.put(
+            tGuid,               // The key, the TimedGUID with the GUID with our IP address and an expiration time 10 minutes from now
+            new GUID(origGUID)); // The value, a copy of the GUID with the leaf's IP address
+
+        // Record a statistic
         OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+
+        // Return the query packet with our IP address and port number in the message GUID, overwriting the leaf's address
         return query;
     }
 
     /**
-     * Used for UDP query hits. (do)
+     * Takes a BEAR 12 1 Query Status Response vendor message this leaf sent us, replaces the leaf's IP address in the GUID with our own, and returns it.
+     * Only does this if we previously got a query packet from this leaf, and replaced the address in the GUID to search on the leaf's behalf.
+     * 
+     * Both tryToProxy() and morphToStopQuery() replace the leaf's IP address in the GUID with our own.
+     * They are not morph and un-morph, they are both morph the same way.
+     * morphToStopQuery() looks up how tryToProxy() morphed the GUID in _guidMap.
+     * If there isn't a listing, we didn't proxy the search, and this method returns the packet unchanged.
+     * 
+     * We are an ultrapeer and this remote computer is a leaf.
+     * Our leaf sent us a BEAR 12 1 Query Status Response vendor message.
+     * It's telling us how many hits its gotten for the search we're performing for it.
+     * 
+     * Here's what's happened up to this point:
+     * MessageReader.handleRead() sliced some data from the remote computer, and parsed it into a new BEAR 12 1 Query Status Response vendor message.
+     * ManagedConnection.processReadMessage() updated statistics and called the next method.
+     * ManagedConnection.handleMessageInternal() determined that we're an ultrapeer and this remote computer is a leaf, and the packet is a BEAR 12 1 vendor message.
+     * 
+     * morphToStopQuery() takes the Query Status Response vendor message, morphs its GUID the same way tryToProxy() did, and returns it.
+     * 
+     * Here's what will happen next:
+     * The "MessageDispatch" thread calls MessageRouter.handleMessage(m), which leads to handleQueryStatus().
+     * handleQueryStatus() has the QueryDispatcher find the QueryHandler that represents the search, and saves the updated number in it.
+     * We replaced the GUID the leaf assigned this search to the GUID we assigned it.
+     * With our GUID in it, the QueryHandler object will recognize it.
+     * 
+     * @param resp The BEAR 12 1 Query Status Response vendor message the leaf sent us.
+     * @return     The vendor message with our IP address and port number hidden in the GUID instead of the leaf's.
+     *             If tryToProxy() didn't perform this same replacement to run this search on behalf of the leaf, rturns the vendor message unchanged.
      */
     private QueryStatusResponse morphToStopQuery(QueryStatusResponse resp) {
-        // if the _guidMap is null, we aren't proxying anything....
+
+        /*
+         * if the _guidMap is null, we aren't proxying anything....
+         */
+
+        // If we haven't run any searches for this leaf, return the Query Status Response vendor message unchanged
         if (_guidMap == null) return resp;
 
-        // if we are proxying this query, we should modify the GUID so as
-        // to shut off the correct query
-        final GUID origGUID = resp.getQueryGUID();
-        GUID oobGUID = null;
+        /*
+         * if we are proxying this query, we should modify the GUID so as
+         * to shut off the correct query
+         */
+
+        // Get the GUID from the message the leaf sent us
+        final GUID origGUID = resp.getQueryGUID(); // origGUID has the leaf's IP address and port number in it
+
+        // Make a GUID object for the corresponding GUID we'll look up in _guidMap
+        GUID oobGUID = null; // oobGUID will be the GUID with our IP address and port number in it instead
+
+        // Only let one thread access this leaf's _guidMap at a time
         synchronized (_guidMap) {
+
+            // Loop for each key and value pair in _guidMap
             Iterator entrySetIter = _guidMap.entrySet().iterator();
             while (entrySetIter.hasNext()) {
-                Map.Entry entry = (Map.Entry) entrySetIter.next();
-                if (origGUID.equals(entry.getValue())) {
+
+                // Get this key and value pair as a Map.Entry object
+                Map.Entry entry = (Map.Entry)entrySetIter.next();
+
+                // If this entry has the leaf's GUID with the leaf's IP address and port number in it
+                if (origGUID.equals(entry.getValue())) { // getValue() returns the GUID with the leaf's IP address, as the leaf sent it to us and before we changed it
+
+                    // Get the GUID we made by replacing the leaf's IP address with our own, oobGUID
                     oobGUID = ((GUID.TimedGUID)entry.getKey()).getGUID();
                     break;
                 }
             }
         }
 
-        // if we had a match, then just construct a new one....
-        if (oobGUID != null)
+        /*
+         * if we had a match, then just construct a new one....
+         */
+
+        // We found the GUID the leaf chose for this search in _guidMap
+        if (oobGUID != null) {
+
+            // Replace the leaf's GUID for this search with our own, morphing it the same way tryToProxy() did so our QueryDispatcher will recognize it
             return new QueryStatusResponse(oobGUID, resp.getNumResults());
 
-        else return resp;
+        // Not found
+        } else {
+
+            // Return the vendor message unchanged
+            return resp;
+        }
     }
 
     /**
@@ -1598,7 +1753,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
         // Send the given packet to this remote computer
         send(pingReply);
     }
-    
+
     /**
      * Send the given query hit to this remote computer.
      * 
@@ -1606,27 +1761,51 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
      * Now, we're getting query hits in response to that query.
      * This method sends them back to the computer that wanted them.
      * 
-     * The ReplyHandler interface requires this method.
+     * Or, this leaf of ours sent us a query packet.
+     * We decided to search on behalf of the leaf, and switched the IP address hidden in the GUID from the leaf's to our own.
+     * Now, we're getting query hits in response to that query.
+     * This method restores the GUID so the leaf will recognize the search, and sends the packet to the leaf.
      * 
-     * Used for UDP query hits. (do)
+     * The ReplyHandler interface requires this method.
      * 
      * @param queryReply          A query hit packet addressed to this remote computer
      * @param receivingConnection Not used, may be null
      */
     public void handleQueryReply(QueryReply queryReply, ReplyHandler receivingConnection) {
 
-        // (do)
         /*
          * If we are proxying for a query, map back the guid of the reply
          */
+
+        // We took a query packet from this leaf, replaced the address information in its GUID with our own, and ran the search for it
         if (_guidMap != null) {
+
+            /*
+             * In the _guidMap:
+             * A key is a TimedGUID object with the morphed GUID with our IP address, and an expiration time of 10 minutes from when we added it.
+             * A value is a GUID object with the original GUID with the leaf's IP address.
+             * 
+             * The lookup below works because TimedGUID.equals() only compares GUIDs, and doesn't look at expiration times.
+             */
+
+            // Wrap the morphed GUID with our IP address from the query hit packet we just got into a new TimedGUID object
             GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()), TIMED_GUID_LIFETIME);
+
+            // Use the new TimedGUID object to look up the morphed GUID in the _guidMap
             GUID origGUID = (GUID) _guidMap.get(tGuid);
+
+            // If we found it
             if (origGUID != null) {
-                byte prevHops = queryReply.getHops();
-                queryReply = new QueryReply(origGUID.bytes(), queryReply);
-                queryReply.setTTL((byte)2); // we ttl 1 more than necessary
-                queryReply.setHops(prevHops);
+
+                /*
+                 * we ttl 1 more than necessary
+                 */
+
+                // Change the GUID in the packet from having our IP address to having the IP address of the leaf we've been searching on behalf of
+                byte prevHops = queryReply.getHops();                      // Get the hops from the query hit
+                queryReply = new QueryReply(origGUID.bytes(), queryReply); // Copy the query hit packet, putting in the GUID the leaf chose to identify this search
+                queryReply.setTTL((byte)2);                                // Set the TTL to 2, one more than necessary
+                queryReply.setHops(prevHops);                              // Keep the hops count the same
             }
         }
 
@@ -2191,44 +2370,99 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     }
 
     /**
-     * Use for UDP query hits. (do)
+     * The GuidMapExpirer keeps a list of all the _guidMap objects in the program, and removes entries in them that grow older than 10 minutes.
      * 
-     * Class-wide expiration mechanism for all ManagedConnections.
-     * Only expires on-demand.
+     * As the program runs, there is one GuidMapExpirer object and many ManagedConnection objects.
+     * Each ManagedConnection has a _guidMap object.
+     * The GuidMapExpirer keeps a list of all the _guidMap objects.
+     * 
+     * The GuidMapExpirer schedules itself with the RouterService.
+     * The RouterService has a thread that will call GuidMapExpirer.run() once every 10 minutes.
+     * run() loops through every entry in every _guidMap list.
+     * When it finds an entry that was added more than 10 minutes ago, it removes it.
      */
     private static class GuidMapExpirer implements Runnable {
-        
+
+        /**
+         * A list of all the _guidMap objects the ManagedConnection objects make as the program runs.
+         * 
+         * This list is static.
+         * As the program runs, there will be a lot of ManagedConnection objects.
+         * Each ManagedConnection object will have a _guidMap member variable.
+         * But, there will be only one GuidMapExpirer object for the whole program.
+         * And it will have only one toEpire list.
+         */
         private static List toExpire = new LinkedList();
+
+        /**
+         * True when we've scheduled the GuidMapExpirer object with the RouterService.
+         * When true, the RouterService will have a thread call the run() method below once every 10 minutes.
+         */
         private static boolean scheduled = false;
 
+        /** Only the addMapToExpire() method below makes a new GuidMapExpirer() object. */
         public GuidMapExpirer() {};
 
+        /**
+         * Add the _guidMap you just made to the list of them the program keeps.
+         * 
+         * ManagedConnection.tryToProxy() calls this.
+         * It's just made this ManagedConnection object's _guidMap, and needs to add it to the program's list.
+         * 
+         * @param expiree A new _guidMap we just made
+         */
         public static synchronized void addMapToExpire(Map expiree) {
-            // schedule it on demand
+
+            // If we haven't scheduled the GuidMapExpirer with the RouterService yet, set that up now
             if (!scheduled) {
-                RouterService.schedule(new GuidMapExpirer(), 0,
-                                       TIMED_GUID_LIFETIME);
+
+                // Have the RouterService call GuidMapExpirer.run() every 10 minutes
+                RouterService.schedule(new GuidMapExpirer(), 0, TIMED_GUID_LIFETIME);
+
+                // Record that it's scheduled
                 scheduled = true;
             }
+
+            // Add the new _guidMap to the program's list of them
             toExpire.add(expiree);
         }
 
+        /**
+         * Remove a _guidMap that belongs to a ManagedConnection object that we're disconnecting.
+         * ManagedConnection.close() calls this.
+         * 
+         * @param expiree A _guidMap that we won't have access to anymore
+         */
         public static synchronized void removeMap(Map expiree) {
+
+            // Remove it from the program's list of all of them
             toExpire.remove(expiree);
         }
 
+        /**
+         * Loop through all the entres in all the _guidMap objects in the program, removing those that are more than 10 minutes old.
+         * The RouterService has a thread call this run() method once every 10 minutes.
+         */
         public void run() {
+
+            // Only let one thread do this at a time
             synchronized (GuidMapExpirer.class) {
-                // iterator through all the maps....
+
+                // Loop for each _guidMap that a ManagedConnection object has made as the program has run
                 Iterator iter = toExpire.iterator();
                 while (iter.hasNext()) {
-                    Map currMap = (Map) iter.next();
+                    Map currMap = (Map)iter.next();
+
+                    // Wait here until other threads are done with this _guidMap
                     synchronized (currMap) {
+
+                        // Loop for each entry in the _guidMap
                         Iterator keyIter = currMap.keySet().iterator();
-                        // and expire as many entries as possible....
-                        while (keyIter.hasNext()) 
-                            if (((GUID.TimedGUID) keyIter.next()).shouldExpire())
-                                keyIter.remove();
+                        while (keyIter.hasNext()) {
+
+                            // If it's been 10 minutes since we added this entry, remove it
+                            if (((GUID.TimedGUID)keyIter.next()).shouldExpire()) keyIter.remove();
+                        }
                     }
                 }
             }

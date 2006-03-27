@@ -325,11 +325,7 @@ public class Connection implements IpPort {
     private byte _softMax;
 
     /*
-     * (do)
-     * Volatile to avoid multiple threads caching old data for the ping time.
-     * 
-     * _nextPingTime and _nextPongTime are marked volatile.
-     * Multiple threads will get packets and set this value.
+     * volatile to avoid multiple threads caching old data for the ping time.
      */
 
     /**

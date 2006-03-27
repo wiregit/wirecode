@@ -1795,17 +1795,38 @@ public class RouterService {
 		return UDPSERVICE.isGUESSCapable();
 	}
 
+    //done
 
-    /** 
-     * Returns whether or not this node is capable of performing OOB queries.
+    /**
+     * Determine if we can get UDP packets.
+     * 
+     * Only returns true if all of the following things are true:
+     * We can receive solicited and unsolicited UDP packets.
+     * We're not losing too many of the UDP packets we expect to get.
+     * The IP address we've been telling computers isn't a LAN IP address.
+     * Settings allow UDP communications.
+     * Remote computers agree with us when we tell them our IP address.
+     * Our IP address doesn't start 0 or 255, and our port number isn't 0.
+     * 
+     * RouterService.newQueryGUID() calls this. (do)
+     * ManagedConnection.tryToProxy() gets this to return true before morphing the GUID in a query packet from our leaf.
+     * 
+     * @return True if we can get UDP, and are ready to do out of band communications.
+     *         False if we can't get UDP, and should keep communications in Gnutella TCP socket connections.
      */
     public static boolean isOOBCapable() {
-        return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
-               !NetworkUtils.isPrivate() &&
-               SearchSettings.OOB_ENABLED.getValue() &&
-               acceptor.isAddressExternal() && isIpPortValid();
+
+        // Return true if all of the following things are true
+        return
+            isGUESSCapable()                            && // We can receive solicited and unsolicited UDP packets
+            OutOfBandThroughputStat.isSuccessRateGood() && // We're not losing too many of the UDP packets we expect to get
+            !NetworkUtils.isPrivate()                   && // The IP address we've been telling computers isn't a LAN IP address
+            SearchSettings.OOB_ENABLED.getValue()       && // Settings allow UDP communications
+            acceptor.isAddressExternal()                && // Remote computers agree with us when we tell them our IP address
+            isIpPortValid();                               // Our IP address doesn't start 0 or 255, and our port number isn't 0
     }
 
+    //do
 
     public static GUID getUDPConnectBackGUID() {
         return UDPSERVICE.getConnectBackGUID();

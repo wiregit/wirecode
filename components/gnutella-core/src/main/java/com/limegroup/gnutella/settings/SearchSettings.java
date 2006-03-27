@@ -33,7 +33,7 @@ public final class SearchSettings extends LimeProps {
 	/** LimeWire doesn't use GUESS searching any longer. */
 	public static final BooleanSetting GUESS_ENABLED = FACTORY.createBooleanSetting("GUESS_ENABLED", true);
 
-	/** This is a part of GUESS, which LimeWire doesn't use any longer. (do) */
+	/** True, allow the program to get UDP packets outside of TCP socket Gnutella connections. */
 	public static final BooleanSetting OOB_ENABLED = FACTORY.createBooleanSetting("OOB_ENABLED", true);
 
     /**
