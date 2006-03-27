@@ -6,28 +6,42 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * 
+ * A token used for the parsing of a Long value.
  */
-
 class BELong extends Token {
-    StringBuffer sb = new StringBuffer();
-    byte [] currentByte = new byte[1];
-    ByteBuffer buf = ByteBuffer.wrap(currentByte);
+    /** Storage for the value of the token */
+    private StringBuffer sb = new StringBuffer();
+    private byte [] currentByte = new byte[1];
+    private ByteBuffer buf = ByteBuffer.wrap(currentByte);
+
+    /** -1 for negative values, 0 for 0, 1 for positive values */
+    private int multiplier = 1; 
     
-    int multiplier = 1; // valid values are -1, 0, 1
-    boolean done;
+    /** whether this token has been parsed */
+    private boolean done;
     
+    /** The terminating character used to parse this token */
     private final byte terminator;
     
-    public BELong(ReadableByteChannel chan) {
+    /**
+     * Creates a new Token ready to parse a Long using the default terminating
+     * character.
+     */
+    BELong(ReadableByteChannel chan) {
         this(chan, 'e', (byte)' ');
     }
     
-    BELong(ReadableByteChannel chan, char terminator, byte firstSizeByte) {
+    /**
+     * Creates a new Token read to parse a Long using a custon terminating
+     * character
+     * @param terminator the character that will mark the end of the value
+     * @param firstByte the first character of the value, if read.
+     */
+    BELong(ReadableByteChannel chan, char terminator, byte firstByte) {
         super(chan);
         this.terminator = (byte)terminator;
-        if (firstSizeByte != (byte)' ')
-            sb.append((char)firstSizeByte);
+        if (firstByte != (byte)' ')
+            sb.append((char)firstByte);
     }
     
     public void handleRead() throws IOException {

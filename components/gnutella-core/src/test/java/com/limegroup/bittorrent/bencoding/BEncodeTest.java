@@ -3,6 +3,8 @@ package com.limegroup.bittorrent.bencoding;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 
@@ -22,11 +24,12 @@ public class BEncodeTest extends BaseTestCase {
     
     private static class TestReadChannel implements ReadableByteChannel {
         
-        private ByteBuffer src;
-        private boolean closed;
+        public ByteBuffer src;
+        public boolean closed;
         
         public void setString(String src) {
             this.src = ByteBuffer.wrap(src.getBytes());
+            closed = false;
         }
 
         public int read(ByteBuffer dst) throws IOException {
@@ -50,41 +53,330 @@ public class BEncodeTest extends BaseTestCase {
         
     }
     
-    /**
-     * TODO: add real tests
+    static TestReadChannel chan = new TestReadChannel();
+
+    public void testTokenRecognition() throws Exception {
+        // nothing 
+        chan.setString("");
+        Token t = Token.getNextToken(chan);
+        assertNull(t);
+        
+        // long
+        chan.setString("iSomething");
+        t = Token.getNextToken(chan);
+        assertEquals(Token.LONG,t.getType());
+        assertEquals(1,chan.src.position());
+        
+        // string
+        chan.setString("1adf");
+        t = Token.getNextToken(chan);
+        assertEquals(Token.STRING,t.getType());
+        assertEquals(1,chan.src.position());
+        
+        // list
+        chan.setString("ladf");
+        t = Token.getNextToken(chan);
+        assertEquals(Token.LIST,t.getType());
+        assertEquals(1,chan.src.position());
+        
+        // dictionary
+        chan.setString("dadf");
+        t = Token.getNextToken(chan);
+        assertEquals(Token.DICTIONARY,t.getType());
+        assertEquals(1,chan.src.position());
+    }
+    
+    /** 
+     * Tests some scenarios of creating a string.
      */
-    public void testBlah() throws Exception {
-        TestReadChannel chan = new TestReadChannel();
-        chan.setString("-");
-        BELong myLong = new BELong(chan);
-        if (myLong.getResult() != null)
-            System.out.println("bad");
-        myLong.handleRead();
-        System.out.println(myLong.getResult());
-        chan.setString("2e");
-        myLong.handleRead();
-        System.out.println(myLong.getResult());
+    public void testString() throws Exception {
+        // test a regular string
+        chan.setString("4:asdf");
         
-        chan.setString("3:e3");
-        BEString myString = (BEString) Token.getTokenType(chan);
-        myString.handleRead();
-        System.out.println(myString.getResult());
-        myString.handleRead();
-        System.out.println(myString.getResult());
-        myString.handleRead();
-        System.out.println(myString.getResult());
-        chan.setString("r");
-        myString.handleRead();
-        System.out.println(myString.getResult());
+        Token t = Token.getNextToken(chan);
+        t.handleRead();
+        assertNotNull(t.getResult());
+        assertEquals(Token.STRING, t.getType());
+        assertEquals("asdf", t.getResult());
+        // make sure the channel has been consumed completely
+        assertFalse(chan.src.hasRemaining());
         
-        chan.setString("d3:asdli2ei3ee1:");
-        Token t = Token.getTokenType(chan);
+        // repeat with some extra data to the channel
+        chan.setString("4:asdfasdf");
+        t = Token.getNextToken(chan);
         t.handleRead();
-        System.out.println(t.getResult());
-        chan.setString("ai5ee");
-        System.out.println("added last terminating element");
+        assertNotNull(t.getResult());
+        assertEquals(Token.STRING, t.getType());
+        assertEquals("asdf", t.getResult());
+        // there should be 4 bytes left in the channel
+        assertEquals(4,chan.src.remaining());
+        
+        // try sending the values byte by byte 
+        chan.setString("2");
+        
+        t = Token.getNextToken(chan);
         t.handleRead();
-        System.out.println(t.getResult());
+        assertNull(t.getResult());
+        chan.setString(":");
+        t.handleRead();
+        assertNull(t.getResult());
+        chan.setString("a");
+        t.handleRead();
+        assertNull(t.getResult());
+        chan.setString("s");
+        t.handleRead();
+        assertNotNull(t.getResult());
+        assertEquals("as",t.getResult());
+        
+        // try an empty read call
+        chan.setString("2:a");
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        assertNull(t.getResult());
+        t.handleRead();
+        chan.setString("s");
+        t.handleRead();
+        assertNotNull(t.getResult());
+        assertEquals("as",t.getResult());
+        
+        // try a closed channel before end of string
+        chan.setString("2:a");
+        chan.close();
+        t = Token.getNextToken(chan);
+        try {
+            t.handleRead();
+            fail("trying to read from closed channel should throw");
+        } catch (IOException expected){}
+        
+        // test an invalid string
+        chan.setString("2;as");
+        t = Token.getNextToken(chan);
+        assertEquals(Token.STRING,t.getType());
+        try {
+            t.handleRead();
+            fail("invalid string should throw");
+        } catch (IOException expected){}
+        assertEquals(2,chan.src.position()); // should stop reading after the invalid char.
+    }
+    
+    /**
+     * tests various scenarios of parsing a Long value.
+     */
+    public void testLong() throws Exception {
+        // test some empty calls
+        chan.setString("i");
+        Token t = Token.getNextToken(chan);
+        assertEquals(Token.LONG, t.getType());
+        t.handleRead();
+        assertNull(t.getResult());
+        t.handleRead();
+        assertNull(t.getResult());
+        
+        // test adding the values digit by digit
+        chan.setString("1");
+        t.handleRead();
+        assertNull(t.getResult());
+        chan.setString("2");
+        t.handleRead();
+        assertNull(t.getResult());
+        chan.setString("3");
+        t.handleRead();
+        assertNull(t.getResult());
+        chan.setString("e");
+        t.handleRead();
+        assertNotNull(t.getResult());
+        assertEquals(new Long(123),t.getResult());
+        
+        // test having extra data in channel
+        chan.setString("i123easdfadfs");
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        assertEquals(new Long(123), t.getResult());
+        assertEquals(5, chan.src.position());
+        assertTrue(chan.src.hasRemaining());
+        
+        // 0
+        chan.setString("i0e");
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        assertEquals(new Long(0),t.getResult());
+        
+        // negative values
+        chan.setString("i-1e");
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        assertEquals(new Long(-1),t.getResult());
+        
+        // leading 0s are invalid
+        chan.setString("i001e");
+        t = Token.getNextToken(chan);
+        try {
+            t.handleRead();
+            fail(" leading 0s didn't throw");
+        } catch (IOException expected) {}
+        assertNull(t.getResult());
+        assertEquals(3, chan.src.position());
+        
+        // negative 0 is invalid
+        chan.setString("i-01e");
+        t = Token.getNextToken(chan);
+        try {
+            t.handleRead();
+            fail(" negative 0 didn't throw");
+        } catch (IOException expected) {}
+        assertNull(t.getResult());
+        assertEquals(3, chan.src.position());
+        
+        // any non-numeric char is invalid
+        chan.setString("i13i1e");
+        t = Token.getNextToken(chan);
+        try {
+            t.handleRead();
+            fail(" invalid chars didn't throw");
+        } catch (IOException expected) {}
+        assertNull(t.getResult());
+        assertEquals(4, chan.src.position());
+    }
+    
+    /**
+     * test various scenarios of parsing a List
+     */
+    public void testList() throws Exception {
+        // few empty calls
+        chan.setString("l");
+        Token t = Token.getNextToken(chan);
+        assertEquals(Token.LIST, t.getType());
+        t.handleRead();
+        assertNull(t.getResult());
+        t.handleRead();
+        assertNull(t.getResult());
+        
+        // create a list char at a time
+        chan.setString("i5e");
+        t.handleRead();
+        assertNull(t.getResult());
+        chan.setString("e");
+        t.handleRead();
+        assertNotNull(t.getResult());
+        List l = (List)t.getResult();
+        assertEquals(1,l.size());
+        assertTrue(l.contains(new Long(5)));
+        
+        // an empty list
+        chan.setString("le");
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        l = (List) t.getResult();
+        assertTrue(l.isEmpty());
+        
+        // test that no extra data is read
+        chan.setString("l2:asi44eei56e");
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        l = (List) t.getResult();
+        assertEquals(2, l.size());
+        assertTrue(l.contains("as"));
+        assertTrue(l.contains(new Long(44)));
+        assertEquals(4, chan.src.remaining());
+    }
+    
+    /**
+     * Tests various scenarios of parsing a dictionary
+     */
+    public void testDictionary() throws Exception {
+        // few empty calls
+        chan.setString("d");
+        Token t = Token.getNextToken(chan);
+        assertEquals(Token.DICTIONARY, t.getType());
+        t.handleRead();
+        assertNull(t.getResult());
+        t.handleRead();
+        assertNull(t.getResult());
+        
+        // create a dictionary one char at a time
+        chan.setString("2:as2:df");
+        t.handleRead();
+        assertNull(t.getResult());
+        chan.setString("e");
+        t.handleRead();
+        assertNotNull(t.getResult());
+        Map m = (Map)t.getResult();
+        assertEquals(1,m.size());
+        assertTrue(m.containsKey("as"));
+        assertTrue(m.containsValue("df"));
+        
+        // an empty dictionary
+        chan.setString("de");
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        m = (Map)t.getResult();
+        assertTrue(m.isEmpty());
+        
+        // no extra characters read
+        chan.setString("d1:ai1eei45e");
+        t = Token.getNextToken(chan);
+        t.handleRead();
+        m = (Map)t.getResult();
+        assertEquals(1,m.size());
+        assertTrue(chan.src.hasRemaining());
+        assertEquals(4, chan.src.remaining());
+        
+        // invalid key
+        chan.setString("di4ei5ee");
+        t = Token.getNextToken(chan);
+        try {
+            t.handleRead();
+            fail("non-string key didn't throw");
+        } catch (IOException expected){}
+        
+        // missing value
+        chan.setString("d1:ae");
+        t = Token.getNextToken(chan);
+        try {
+            t.handleRead();
+            fail("missing value didn't throw");
+        } catch (IOException expected){}
+    }
+    
+    /**
+     * test a fancy nested collection structure
+     */
+    public void testNested() throws Exception {
+        // { key1 -> { key11 -> [badger, badger, 3, [mushroom, mushroom], {}], 
+        //             key12 -> []}
+        //   key2 -> [[[[snake],snake]]]}
+        
+        chan.setString("d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeeee");
+        
+        Token t = Token.getNextToken(chan);
+        t.handleRead();
+        Map outtest = (Map)t.getResult();
+        assertEquals(2, outtest.size());
+        Map inner = (Map)outtest.get("key1");
+        List empty = (List) inner.get("key12");
+        assertTrue(empty.isEmpty());
+        List badgers = (List) inner.get("key11");
+        assertEquals(5, badgers.size());
+        assertEquals("badger",badgers.get(0));
+        assertEquals("badger",badgers.get(1));
+        assertEquals(new Long(3),badgers.get(2));
+        List mushrooms = (List)badgers.get(3);
+        assertEquals(2,mushrooms.size());
+        assertEquals("mushroom",mushrooms.get(0));
+        assertEquals("mushroom",mushrooms.get(1));
+        Map emptyMap = (Map)badgers.get(4);
+        assertTrue(emptyMap.isEmpty());
+        
+        List nestedList0 = (List)outtest.get("key2");
+        assertEquals(1,nestedList0.size());
+        List nestedList1 = (List)nestedList0.get(0);
+        assertEquals(1,nestedList1.size());
+        List nestedList2 = (List)nestedList1.get(0);
+        assertEquals(2,nestedList2.size());
+        assertTrue(nestedList2.contains("snake"));
+        List nestedList3 = (List) nestedList2.get(0);
+        assertEquals(1,nestedList3.size());
+        assertTrue(nestedList3.contains("snake"));
     }
 
 }

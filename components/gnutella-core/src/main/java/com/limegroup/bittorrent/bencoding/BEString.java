@@ -6,18 +6,28 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * 
+ * A token that represents a String object.
  */
-
 class BEString extends Token {
-    StringBuffer str;
-    final byte firstSizeByte;
-    BELong sizeToken;
-    int size;
-    ByteBuffer buf;
-    boolean readColon = false;
+    /** The first byte of the length of the string */
+    private final byte firstSizeByte;
     
-    public BEString(byte firstChar, ReadableByteChannel chan) {
+    /** Token that will be used to parse how long the string is */
+    private BELong sizeToken;
+    
+    /** The parsed length of the string */
+    private int size;
+    
+    /** Buffer used for internal storage */
+    private ByteBuffer buf;
+    
+    /**
+     * Constructs a new Token ready to parse a string
+     * 
+     * @param firstChar the first character of the token - it will have been
+     * read before constructing this object
+     */
+    BEString(byte firstChar, ReadableByteChannel chan) {
         super(chan);
         this.firstSizeByte = firstChar;
     }
@@ -47,7 +57,7 @@ class BEString extends Token {
         if (l != null) {
             sizeToken = null; //don't need this object anymore
             long l2 = l.longValue();
-            if (l2 > 0 && l2 < 65000) {
+            if (l2 > 0 && l2 < 65000) { //TODO: this limit should be much larger...
                 size = (int)l2;
                 result = new byte[size];
                 buf = ByteBuffer.wrap((byte[])result);

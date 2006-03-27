@@ -7,12 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 
+ * A token used to represent a bencoded Dictionary (Mapping) of keys to values.
  */
-
 class BEDictionary extends BEList {
     
-    public BEDictionary(ReadableByteChannel chan) {
+    BEDictionary(ReadableByteChannel chan) {
         super(chan);
     }
     
@@ -34,21 +33,30 @@ class BEDictionary extends BEList {
         return new BEEntry(chan);
     }
     
+    /**
+     * A token used to represent a bencoded mapping of a Key -> Value
+     * The Key must be a String.
+     */
     private static class BEEntry extends Token {
+        /** Token for the parsing of the key */
         private BEString keyToken;
+        /** The key itself */
         private String key;
+        /** Token for the parsing of the value */
         private Token valueToken;
+        /** The value itself */
         private Object value;
+        /** Whether this is the last entry in the map */
         private boolean lastEntry;
         
-        public BEEntry (ReadableByteChannel chan) {
+        BEEntry (ReadableByteChannel chan) {
             super(chan);
             result = this;
         }
         
         public void handleRead() throws IOException {
             if (keyToken == null && key == null) {
-                Token t = getTokenType(chan);
+                Token t = getNextToken(chan);
                 if (t != null) {
                     if (t instanceof BEString) { 
                         keyToken = (BEString)t;
@@ -74,7 +82,7 @@ class BEDictionary extends BEList {
             // if we got here we have fully read the key
             
             if (valueToken == null && value == null) {
-                Token t = getTokenType(chan);
+                Token t = getNextToken(chan);
                 if (t != null) 
                     valueToken = t;
                 else
@@ -85,6 +93,8 @@ class BEDictionary extends BEList {
             if (value == null) {
                 valueToken.handleRead();
                 value = valueToken.getResult();
+                if (value == Token.TERMINATOR)
+                    throw new IOException("missing value");
                 if (value != null)
                     valueToken = null; //clean the ref
             } else

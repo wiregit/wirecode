@@ -7,14 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
+ * A token used to parse a bencoded list of elements.
  */
-
 class BEList extends Token {
+    /** Whether the token has been parsed completely */
     protected boolean done;
+    
+    /** The current element being parsed */
     protected Token currentElement;
     
-    public BEList(ReadableByteChannel chan) {
+    BEList(ReadableByteChannel chan) {
         super(chan);
         result = createCollection();
     }
@@ -28,7 +30,7 @@ class BEList extends Token {
     }
     
     protected Token getNewElement() throws IOException {
-        return getTokenType(chan);
+        return getNextToken(chan);
     }
     
     public void handleRead() throws IOException {
