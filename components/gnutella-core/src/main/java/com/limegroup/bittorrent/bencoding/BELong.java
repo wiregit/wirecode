@@ -2,6 +2,7 @@ package com.limegroup.bittorrent.bencoding;
 
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
@@ -9,6 +10,18 @@ import java.nio.channels.ReadableByteChannel;
  * A token used for the parsing of a Long value.
  */
 class BELong extends Token {
+    
+    private static final byte MINUS;
+    static {
+        byte minus = 0;
+        try {
+            minus = "-".getBytes(ASCII)[0];
+        } catch (UnsupportedEncodingException impossible) {
+            // hook to ErrorService
+        }
+        MINUS = minus;
+    }
+    
     /** Storage for the value of the token */
     private StringBuffer sb = new StringBuffer();
     private byte [] currentByte = new byte[1];
@@ -28,7 +41,7 @@ class BELong extends Token {
      * character.
      */
     BELong(ReadableByteChannel chan) {
-        this(chan, 'e', (byte)' ');
+        this(chan, E, (byte)0);
     }
     
     /**
@@ -37,11 +50,14 @@ class BELong extends Token {
      * @param terminator the character that will mark the end of the value
      * @param firstByte the first character of the value, if read.
      */
-    BELong(ReadableByteChannel chan, char terminator, byte firstByte) {
+    BELong(ReadableByteChannel chan, byte terminator, byte firstByte) {
         super(chan);
-        this.terminator = (byte)terminator;
-        if (firstByte != (byte)' ')
-            sb.append((char)firstByte);
+        this.terminator = terminator;
+        if (firstByte != 0) {
+            if (firstByte <= ZERO || firstByte > NINE)
+                throw new IllegalArgumentException("invalid first byte");
+            sb.append(firstByte - ZERO); 
+        }
     }
     
     public void handleRead() throws IOException {
@@ -58,8 +74,8 @@ class BELong extends Token {
                 buf.clear();
             }
             
-            if (currentByte[0] < (byte)'0' || currentByte[0] > (byte)'9') {
-                if (currentByte[0] == (byte)'-' && sb.length() == 0 && multiplier != -1)
+            if (currentByte[0] < ZERO || currentByte[0] > NINE) {
+                if (currentByte[0] == MINUS && sb.length() == 0 && multiplier != -1)
                     multiplier = -1;
                 else if (currentByte[0] == terminator && sb.length() != 0) {
                     try {
@@ -73,7 +89,7 @@ class BELong extends Token {
                 else 
                     throw new IOException("invalid integer");
             }
-            else if (currentByte[0] == (byte)'0') {
+            else if (currentByte[0] == ZERO) {
                 switch (sb.length()) {
                 case 0 :
                     if (multiplier == -1) throw new IOException("negative 0");
@@ -82,12 +98,12 @@ class BELong extends Token {
                 case 1 :
                     if (multiplier == 0) throw new IOException("leading 0s");
                 }
-                sb.append((char)currentByte[0]);
+                sb.append(0);
             }
             else {
                 if (multiplier == 0)
                     throw new IOException("leading 0s - wrong");
-                sb.append((char)currentByte[0]);
+                sb.append(currentByte[0] - ZERO);
             }
         }
     }

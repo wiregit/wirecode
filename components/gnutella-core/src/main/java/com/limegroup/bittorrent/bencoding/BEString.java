@@ -2,6 +2,7 @@ package com.limegroup.bittorrent.bencoding;
 
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
@@ -20,6 +21,17 @@ class BEString extends Token {
     
     /** Buffer used for internal storage */
     private ByteBuffer buf;
+    
+    final static byte COLON;
+    static {
+        byte colon = 0;
+        try {
+            colon = ":".getBytes(ASCII)[0];
+        } catch (UnsupportedEncodingException impossible) {
+            // hook to ErrorService
+        }
+        COLON = colon;
+    }
     
     /**
      * Constructs a new Token ready to parse a string
@@ -45,12 +57,12 @@ class BEString extends Token {
             throw new IOException("closed before end of String token");
         
         if (!buf.hasRemaining())
-            result = new String((byte[]) result);
+            result = new String((byte[]) result, "ISO-8859-1");
     }
     
     private boolean readSize() throws IOException {
         if (sizeToken == null) 
-            sizeToken = new BELong(chan,':',firstSizeByte);
+            sizeToken = new BELong(chan,COLON,firstSizeByte);
         
         sizeToken.handleRead();
         Long l = (Long) sizeToken.getResult();

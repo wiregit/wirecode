@@ -1,8 +1,11 @@
 package com.limegroup.bittorrent.bencoding;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -339,14 +342,48 @@ public class BEncodeTest extends BaseTestCase {
     }
     
     /**
-     * test a fancy nested collection structure
+     * tests encoding and decoding a fancy nested collection structure
      */
     public void testNested() throws Exception {
         // { key1 -> { key11 -> [badger, badger, 3, [mushroom, mushroom], {}], 
         //             key12 -> []}
         //   key2 -> [[[[snake],snake]]]}
         
-        chan.setString("d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeeee");
+        List l = new ArrayList();
+        l.add("snake");
+        List l2 = new ArrayList();
+        l2.add(l);
+        l2.add("snake");
+        l = new ArrayList();
+        l.add(l2);
+        l2 = new ArrayList();
+        l2.add(l);
+        
+        Map m = new HashMap();
+        m.put("key2",l2);
+        Map m2 = new HashMap();
+        m.put("key1",m2);
+        
+        m2.put("key12",new ArrayList());
+        l = new ArrayList();
+        l.add("badger");
+        l.add("badger");
+        l.add(new Long(3));
+        l2 = new ArrayList();
+        l.add(l2);
+        l.add(new HashMap());
+        l2.add("mushroom");
+        l2.add("mushroom");
+        m2.put("key11",l);
+        // this finishes the fancy object
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BEncoder.encode(baos,m);
+        
+        String s = new String(baos.toByteArray(),Token.ASCII);
+        String expected = "d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeeee";
+        assertEquals(expected, s);
+        
+        chan.setString(s);
         
         Token t = Token.getNextToken(chan);
         t.handleRead();
@@ -378,5 +415,4 @@ public class BEncodeTest extends BaseTestCase {
         assertEquals(1,nestedList3.size());
         assertTrue(nestedList3.contains("snake"));
     }
-
 }

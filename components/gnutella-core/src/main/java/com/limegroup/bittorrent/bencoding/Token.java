@@ -2,6 +2,7 @@
 package com.limegroup.bittorrent.bencoding;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
@@ -28,6 +29,28 @@ public abstract class Token {
     public static final int STRING = 1;
     public static final int LIST = 2;
     public static final int DICTIONARY = 3; // cast to java.util.Map
+    
+    protected static final String ASCII = "ISO-8859-1";
+    protected static final byte I,D,L,E,ZERO,NINE;
+    static {
+        byte i = 0;
+        byte d = 0;
+        byte l = 0;
+        byte e = 0;
+        byte zero = 0;
+        byte nine = 0;
+        try {
+            i = "i".getBytes(ASCII)[0];
+            d = "d".getBytes(ASCII)[0];
+            l = "l".getBytes(ASCII)[0];
+            e = "e".getBytes(ASCII)[0];
+            zero = "0".getBytes(ASCII)[0];
+            nine = "9".getBytes(ASCII)[0];
+        } catch (UnsupportedEncodingException impossible) {
+            // connect to error service eventually
+        }
+        I = i; D = d; L = l; E = e; ZERO = zero; NINE = nine;
+    }
     
     private static final ByteBuffer ONE_BYTE = ByteBuffer.wrap(new byte[1]);
     
@@ -99,18 +122,15 @@ public abstract class Token {
         }
         
         byte b = ONE_BYTE.array()[0];
-        switch (b) {
-        case (byte)'i':
+        if (b == I)
             return new BELong(chan);
-        case (byte)'l':
-            return new BEList(chan);
-        case (byte)'d':
+        else if (b == D)
             return new BEDictionary(chan);
-        case (byte)'e':
+        else if (b == L)
+            return new BEList(chan);
+        else if (b == E)
             return Token.TERMINATOR;
-        }
-        
-        if (b > (byte)'0' && b <= (byte)'9')
+        else if (b > ZERO && b <= NINE)
             return new BEString(b,chan);
         else
             throw new IOException("unrecognized token type "+(char)b);
