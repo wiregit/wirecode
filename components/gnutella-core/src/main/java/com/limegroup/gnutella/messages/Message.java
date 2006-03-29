@@ -78,11 +78,20 @@ public abstract class Message implements Serializable, Comparable {
     public static final byte F_VENDOR_MESSAGE        = (byte)0x31;
     /** 0x32, stable vendor message, not commonly used. */
     public static final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
-    /** 0x41, UDP connection. (do) */
-	public static final byte F_UDP_CONNECTION        = (byte)0x41;
+
+    /**
+     * 0x41, UDP connection message.
+     * This Gnutella message is a part of LimeWire's firewall-to-firewall file transfer feature.
+     * The AckMessage, DataMessage, FinMessage, KeepAliveMessage, and SynMessage packets are have 0x41 16 bytes into the packet.
+     * These classes extend UDPConnectionMessage, which extends Message.
+     */
+	public static final byte F_UDP_CONNECTION = (byte)0x41;
 
     /*
-     * We can communicate on the Internet with TCP connections, UDP packets, or multicast on the LAN. (do)
+     * There are 3 ways LimeWire communicates:
+     * TCP socket connections on the Internet.
+     * UDP packets on the Internet.
+     * UDP packets sent with multicast on the LAN.
      */
 
     /** -1, network unknown, we don't know if it's TCP, UDP, or multicast UDP on the LAN. */
@@ -752,7 +761,7 @@ public abstract class Message implements Serializable, Comparable {
             // Give the information we read to the static RouteTableMessage.read() method, which will decide what kind of object to create
             return RouteTableMessage.read(guid, ttl, hops, payload);
 
-        // Vendor-specific message
+        // Vendor-specific message, a Gnutella message designed and introduced by a specific Gnutella program vendor, like LimeWire or BearShare
         case F_VENDOR_MESSAGE:
 
             // Have the VendorMessage factory method parse the network data into a vendor message specific object that extends VendorMessage
@@ -764,10 +773,10 @@ public abstract class Message implements Serializable, Comparable {
             // Have the VendorMessage factory method parse the network data into a vendor message specific object that extends VendorMessage
             return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload, network);
 
-        // UDP connection message (do)
+        // UDP connection message, a modified Gnutella message designed to hold data and be part of a UDP firewall-to-firewall file transfer connection
         case F_UDP_CONNECTION:
 
-            // Have a factory method make a new UDPConnectionMessage object, or return null
+            // Have the UDPConnectionMessage factory method make a new UDPConnectionMessage object, or return null
             return UDPConnectionMessage.createMessage(guid, ttl, hops, payload);
         }
 
