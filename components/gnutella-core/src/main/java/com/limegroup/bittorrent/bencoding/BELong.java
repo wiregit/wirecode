@@ -83,6 +83,7 @@ class BELong extends Token {
                     } catch (NumberFormatException impossible) {
                         throw new IOException(impossible.getMessage());
                     }
+                    sb = null;
                     done = true;
                     return;
                 }
