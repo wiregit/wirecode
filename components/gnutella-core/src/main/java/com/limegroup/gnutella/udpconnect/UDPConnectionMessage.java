@@ -106,41 +106,22 @@ public abstract class UDPConnectionMessage extends Message {
      */
     protected long _sequenceNumber;
 
-    /**
-     * The start of the data this UDP connection message holds.
-     * Up to 12 bytes that fit into the GUID area in the Gnutella packet header.
-     * Don't read this whole byte array, just look at the contents from _data1Offset to _data1Length.
-     */
+    /** The start of the data this UDP connection message holds, up to 12 bytes that fit into the GUID area in the Gnutella packet header. */
     protected byte _data1[];
 
-    /**
-     * Look at the contents of _data1 from _data1Offset onwards.
-     * Both _data1Offset and _data1Length are measured from the start of _data1.
-     */
+    /** Look at the contents of _data1 from _data1Offset onwards. */
     protected int _data1Offset;
 
-    /**
-     * Look at the contents of _data1 up to _data1Length.
-     * Both _data1Offset and _data1Length are measured from the start of _data1.
-     */
+    /** There are _data1Length bytes of data in _data1 at _data1Offset. */
     protected int _data1Length;
 
-    /**
-     * The data this UDP connection message holds, after the 12 bytes we fit in the GUID area.
-     * Don't read this whole byte array, just look at the contents from _data2Offset to _data2Length.
-     */
+    /** The data this UDP connection message holds, after the 12 bytes we fit in the GUID area. */
     protected byte _data2[];
 
-    /**
-     * Look at the contents of _data2 from _data2Offset onwards.
-     * Both _data2Offset and _data2Length are measured from the start of _data2.
-     */
+    /** Look at the contents of _data2 from _data2Offset onwards. */
     protected int _data2Offset;
 
-    /**
-     * Look at the contents of _data2 up to _data2Length.
-     * Both _data2Offset and _data2Length are measured from the start of _data2.
-     */
+    /** There are _data2Length of bytes of data in _data2 after _data2Offset. */
     protected int _data2Length;
 
     /** createMessage() throws the BadPacketException NO_MATCH when it gets a packet with a type code it doesn't recognize. */
@@ -225,7 +206,7 @@ public abstract class UDPConnectionMessage extends Message {
         // Make _data2, _data2Offset, and _data2Length clip out the rest of the data that will go in the payload
         _data2       = data;          // Point _data2 at the same whole array of data
         _data2Offset = MAX_GUID_DATA; // The data starts 12 bytes into the array
-        _data2Length = getLength();   // Offset and Length are both measured from the start of the array
+        _data2Length = getLength();   // There is getLength() data there
     }
 
     /**
@@ -498,11 +479,6 @@ public abstract class UDPConnectionMessage extends Message {
      */
     public int getDataLength() {
 
-        /*
-         * TODO:kfaaborg This should be: return _data1Length - _data1Offset + getLength();
-         * _data1Length is measured from the start of _data1, but the data might actually start at _data1Offset.
-         */
-
         // Add the number of bytes of data we stored in the GUID to the message payload length
         return _data1Length + getLength();
     }
@@ -516,12 +492,6 @@ public abstract class UDPConnectionMessage extends Message {
 
         // If this UDP connection packet holds more than 12 bytes of data
         if (_data2Length > 0) {
-
-            /*
-             * TODO:kfaaborg This should be: out.write(_data2, _data2Offset, _data2Length - _data2Offset);
-             * _data2Length is measured from the start of _data2, while out.write wants a length measured from _data2Offset.
-             * This doesn't matter when _data2Offset is 0.
-             */
 
             // Write _data2, the part of the data after the 12 bytes we put in the GUID area that we'll put in the payload
             out.write(_data2, _data2Offset, _data2Length);

@@ -1,32 +1,30 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella.udpconnect;
 
 /**
- * A container for a chunk of byte information.
+ * A Chunk object keeps a byte array with start and length indices that clip out a part of it you can read.
  * 
+ * A Chunk looks like this:
  * 
- * DataMessage.getData1Chunk() and getData2Chunk() make Chunk objects.
- * UDPBufferedOutputStream
+ * chunk.data    [array - - datadatadatadatadata - - - - - - - ]
+ * chunk.start   ---------->
+ * chunk.length             ------------------->
  * 
+ * chunk.data is the byte array.
+ * Read chunk.length bytes from chunk.start.
  */
 public class Chunk {
 
-    /**
-     * A byte array that holds the data.
-     */
+    /** The byte array with the data in the middle. */
 	public byte[] data;
-    
-    /**
-     * The index in the data byte array where the data starts.
-     */
-    public int    start;
-    
-    /**
-     * 
-     */
-	public int    length;
+
+    /** The index in the data byte array where the data starts. */
+    public int start;
+
+    /** The number of bytes of data. */
+	public int length;
 
     /**
      * Express this Chunk object as text.
@@ -36,6 +34,7 @@ public class Chunk {
      */
 	public String toString() {
 
+        // Compose and return the String
 	    return " dl: " + data.length + " start:" + start + " len:" + length;
 	}
 }
