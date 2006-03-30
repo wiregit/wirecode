@@ -135,4 +135,39 @@ public abstract class Token {
         else
             throw new IOException("unrecognized token type "+(char)b);
     }
+
+    /**
+     * Utility method which parses a BEncoded object from a byte[].
+     * It assumes the array contains the entire object.
+     */
+    public static Object parse(byte []data) throws IOException {
+        Token t = getNextToken(new BufferChannel(data));
+        t.handleRead();
+        return t.getResult();
+    }
+    
+    private static class BufferChannel implements ReadableByteChannel {
+        private final ByteBuffer src;
+        
+        BufferChannel(byte []data) {
+            src = ByteBuffer.wrap(data);
+        }
+        
+        public int read(ByteBuffer dst) throws IOException {
+            if (!src.hasRemaining())
+                return -1;
+            int position = src.position();
+            src.limit(Math.min(src.capacity(),src.position()+dst.remaining()));
+            dst.put(src);
+            src.limit(src.capacity());
+            return src.position() - position;
+        }
+        
+        public void close() throws IOException {}
+        public boolean isOpen() {
+            return true;
+        }
+        
+        
+    }
 }

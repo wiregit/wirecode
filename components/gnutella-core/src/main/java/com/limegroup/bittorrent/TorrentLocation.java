@@ -72,8 +72,8 @@ public class TorrentLocation extends Endpoint {
 	/**
 	 * @return true if we should wait before retrying
 	 */
-	public boolean isBusy() {
-		return _nextRetryTime > System.currentTimeMillis();
+	public boolean isBusy(long now) {
+		return _nextRetryTime > now;
 	}
 	
 	/**
@@ -115,6 +115,7 @@ public class TorrentLocation extends Endpoint {
 
 	/**
 	 * @return true if the remote supports alt-loc requests
+     * TODO: ask gregorio where is this documented if anywhere
 	 */
 	public boolean supportsAltLocRequests() {
 		return (0x02 & EXTENSION_BYTES[7]) == 0x02;
