@@ -390,7 +390,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
             h,                                     // The IP address to push a new connection open to, like "72.139.164.14"
             port,                                  // The port number to push a new connection open to
             req_guid_hexstring,                    // The client ID GUID that addressed the push to us, our client ID GUID, as base 16 text
-            pushRequest.isMulticast(),             // force accept (do)
+            pushRequest.isMulticast(),             // If the remote computer is on the same LAN as us, upload the file even if we don't have a free upload slot
             pushRequest.isFirewallTransferPush()); // The ID in the push packet is the special code indicating we should open a firewall-to-firewall connection
     }
 

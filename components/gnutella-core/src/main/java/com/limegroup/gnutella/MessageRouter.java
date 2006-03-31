@@ -682,7 +682,7 @@ public abstract class MessageRouter {
 		int         port    = addr.getPort();
 
         // Make sure our IP address we're saying doesn't start 0 or 255, and our port number isn't 0
-		if(!RouterService.isIpPortValid()) return; // If we have bad address information for ourself, we can't send a pong about us
+		if (!RouterService.isIpPortValid()) return; // If we have bad address information for ourself, we can't send a pong about us
 
 		// Send UDPConnection messages on to the connection multiplexor
 		// for routing to the appropriate connection processor

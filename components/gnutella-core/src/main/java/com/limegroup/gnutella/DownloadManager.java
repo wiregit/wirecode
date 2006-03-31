@@ -1289,40 +1289,115 @@ public class DownloadManager implements BandwidthTracker {
         // they all failed.
         return false;
     }
-    
+
+    //done
+
     /**
-     * Starts a thread waiting for an incoming fw-fw transfer.
+     * Start a thread to wait for an incoming firewall-to-firewall file transfer.
+     * 
+     * Starts a thread named "FWIncoming" that calls new UDPConnection(file.getHost(), file.getPort()).
+     * This makes a new UDPConnection object that starts sending UDP packets to the file's IP address and port number.
+     * The remote computer is doing the same thing.
+     * If it's running LimeWire, it's even called the same constructor.
+     * With both comptuers doing this, we establish the UDP connection between us.
+     * 
+     * The UDPConnection constructor blocks until it makes the connection.
+     * The "FWIncoming" thread reads the 4 bytes "GIV " from the remote computer.
+     * Then, it hands the connection to acceptDownload(fwTrans).
+     * 
+     * @param file The file the remote computer is going to initiate a UDP connection to us to give us.
+     *             This method calls file.getHost() and file.getPort() to get the remote computer's IP address and port number.
      */
     private void startFWIncomingThread(final RemoteFileDesc file) {
-        // we need to open up our NAT for incoming UDP, so
-        // start the UDPConnection.  The other side should
-        // do it soon too so hopefully we can communicate.
-        Thread startPushThread = new ManagedThread("FWIncoming") {
+
+        /*
+         * we need to open up our NAT for incoming UDP, so
+         * start the UDPConnection.  The other side should
+         * do it soon too so hopefully we can communicate.
+         */
+
+        // Define a new unnamed nested class right here that extends ManagedThread and overrides its managedRun() method
+        Thread startPushThread = new ManagedThread("FWIncoming") { // Name the thead "FWIncoming", and make a new object of this unnamed class named startPushThread
+
+            // The "FWIncoming" thread will call managedRun(), and exit when control leaves this method
             public void managedRun() {
-                Socket fwTrans=null;
+
+                // We'll point fwTrans at the new UDPConnection object we'll make
+                Socket fwTrans = null; // UDPConnection extends Socket to use its interface, so we can point the Socket reference fwTrans at our UDPConnection object
+
                 try {
-                    fwTrans = 
-                        new UDPConnection(file.getHost(), file.getPort());
+
+                    // Make a new UDPConnection object that will try to connect to the IP address and port number we're giving it
+                    fwTrans = new UDPConnection(file.getHost(), file.getPort()); // The remote computer is doing exactly the same thing
+
+                    /*
+                     * When 2 comptuers running LimeWire on the Internet want to establish a UDP connection, they both call:
+                     * 
+                     * connection = new UDPConnection(ip, port);
+                     * 
+                     * ip and port are the IP address and port number of the other computer.
+                     * 
+                     * The process of starting a UDP connection is completely symmetric.
+                     * This is different from a TCP socket connection, where one computer initiates the connection and the other receives it.
+                     */
+
+                    /*
+                     * The UDPConnection constructor blocks until we've established the connection.
+                     * If we can't in a certain amount of time, the UDPConnection constructor throws an IOException.
+                     */
+
+                    // We made the connection to the remote computer
                     DownloadStat.FW_FW_SUCCESS.incrementStat();
-                    // TODO: put this out to Acceptor in // the future
-                    InputStream is = fwTrans.getInputStream();
-                    String word = IOUtils.readWord(is, 4);
-                    if (word.equals("GIV"))
+
+                    /*
+                     * TODO: put this out to Acceptor in the future
+                     */
+
+                    // Make sure the first bytes the computer sends us are "GIV "
+                    InputStream is = fwTrans.getInputStream(); // Get the InputStream we can use to read data from the remote computer through our new UDP connection with it
+                    String word = IOUtils.readWord(is, 4);     // Read up to 4 bytes, and get the word before the first space
+                    if (word.equals("GIV")) {
+
+                        // Use the connection to download the file from the remote computer
                         acceptDownload(fwTrans);
-                    else
+
+                    // The remote computer sent us 4 bytes, but they aren't "GIV "
+                    } else {
+
+                        // Close the UDP connection
                         fwTrans.close();
+                    }
+
+                // We couldn't establish the UDP connection, or we did but then had trouble reading the first 4 bytes
                 } catch (IOException crap) {
-                    LOG.debug("failed to establish UDP connection",crap);
-                    if (fwTrans!=null)
-                        try {fwTrans.close();}catch(IOException ignored){}
+
+                    // Make a note this happened in the debugging log
+                    LOG.debug("failed to establish UDP connection", crap);
+
+                    // The UDPConnection constructor made and returned a UDPConnection object, representing an open UDP connection
+                    if (fwTrans != null) {
+
+                        try {
+
+                            // Close the UDP connection
+                            fwTrans.close();
+
+                        } catch (IOException ignored) {}
+                    }
+
+                    // Record the failed UDP connection in statistics
                     DownloadStat.FW_FW_FAILURE.incrementStat();
                 }
             }
         };
-        startPushThread.setDaemon(true);
-        startPushThread.start();
+
+        // Have the "FWIncoming" thread we just made run the managedRun() method above
+        startPushThread.setDaemon(true); // Let Java close even if this thread is still running
+        startPushThread.start();         // Have the thread run the managedRun() method, then exit
     }
-    
+
+    //do
+
     /**
      * Sends a push for the given file.
      */
