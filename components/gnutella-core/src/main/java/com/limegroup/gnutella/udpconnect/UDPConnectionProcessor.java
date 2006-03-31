@@ -18,13 +18,18 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 
-/** 
- *  Manage a reliable udp connection for the transfer of data.
+/**
+ * Manage a reliable udp connection for the transfer of data.
+ * 
+ * 
+ * 
+ * A UDPConnection object represents one UDP connection to a remote computer on the Internet.
+ * Each UDPConnection object makes a private UDPConnectionProcessor named _processor to help.
+ * 
  */
 public class UDPConnectionProcessor {
 
-    private static final Log LOG =
-      LogFactory.getLog(UDPConnectionProcessor.class);
+    private static final Log LOG = LogFactory.getLog(UDPConnectionProcessor.class);
 
     /** Define the chunk size used for data bytes */
     public static final int   DATA_CHUNK_SIZE         = 512;
@@ -323,11 +328,10 @@ public class UDPConnectionProcessor {
         _extender          = new SequenceNumberExtender();
 
         // Register yourself for incoming messages
-		_myConnectionID    = _multiplexor.register(this);
+		_myConnectionID = _multiplexor.register(this);
 
-		// Throw an exception if udp connection limit hit
-		if ( _myConnectionID == UDPMultiplexor.UNASSIGNED_SLOT) 
-			throw new IOException("no room for connection"); 
+		// Throw an exception if we have so many UDP connections we can't make another one
+		if (_myConnectionID == UDPMultiplexor.UNASSIGNED_SLOT) throw new IOException("no room for connection");
 
         // See if you can establish a pseudo connection 
         // which means each side can send/receive a SYN and ACK
@@ -764,22 +768,23 @@ public class UDPConnectionProcessor {
      *  receive window space.
      */
     private synchronized void safeSendAck(UDPConnectionMessage msg) {
+
         // Ack the message
         AckMessage ack = null;
         try {
-          ack = new AckMessage(
-           _theirConnectionID, 
-           msg.getSequenceNumber(),
-           _receiveWindow.getWindowStart(),   
-           _receiveWindow.getWindowSpace());
-          
-          	if (LOG.isDebugEnabled()) {
-          	    LOG.debug("total data packets "+_totalDataPackets+
-          	            " total acks skipped "+_skippedAcksTotal+
-          	            " skipped this session "+ _skippedAcks);
-          	}
-          	_skippedAcks=0;
+
+            // Make a new Ack message for us to send
+            ack = new AckMessage(
+                _theirConnectionID,               // Begin it with the ID the remote computer assigned us and this connection
+                msg.getSequenceNumber(),          // The sequence number of the message we're acknowledging we received
+                _receiveWindow.getWindowStart(),  // The message we need next
+                _receiveWindow.getWindowSpace()); // The number of messages we have room to receive right now
+
+          	if (LOG.isDebugEnabled()) LOG.debug("total data packets " + _totalDataPackets + " total acks skipped " + _skippedAcksTotal + " skipped this session " + _skippedAcks);
+
+          	_skippedAcks = 0;
             send(ack);
+
         } catch (BadPacketException bpe) {
             // This would not be good.   
             ErrorService.error(bpe);

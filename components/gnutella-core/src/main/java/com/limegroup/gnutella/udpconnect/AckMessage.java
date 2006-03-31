@@ -6,26 +6,29 @@ package com.limegroup.gnutella.udpconnect;
 import com.limegroup.gnutella.messages.BadPacketException;
 
 /**
- * Acknowledge other types of UDP connection messages with an Ack message.
+ * A computer sends an Ack message to acknowledge it's received a Syn message or a Data message.
+ * 
  * 
  * 
  */
 public class AckMessage extends UDPConnectionMessage {
 
-    /** */
+    /** The lowest numbered message the acknowledging computer is missing. */
     private long _windowStart;
 
-    /** */
-    private int  _windowSpace;
+    /** The number of messages the acknowledging computer has space to receive right now, 0 if its full. */
+    private int _windowSpace;
 
     /**
      * Make a new Ack message for us to send.
      * This is the message maker.
      * 
-     * @param connectionID   The connection ID the remote computer chose for this UDP connection
-     * @param sequenceNumber The sequence number of this packet
-     * @param windowStart    The lowest-numbered message we still need
-     * @param windowSpace    The number of bytes we can receive right now, 0 if we're full
+     * Only UDPConnectionProcessor.safeSendAck() calls this.
+     * 
+     * @param connectionID   The connection ID the remote computer chose to identify us and the UDP packets we're sending
+     * @param sequenceNumber The sequence number of the message we're acknowledging we've received
+     * @param windowStart    The lowest-numbered message we're missing
+     * @param windowSpace    The number of messages we can receive right now, 0 if we're full
      */
     public AckMessage(byte connectionID, long sequenceNumber, long windowStart, int windowSpace) throws BadPacketException {
 
@@ -47,9 +50,11 @@ public class AckMessage extends UDPConnectionMessage {
      * Parse data we received into a new AckMessage object.
      * This is the message parser.
      * 
-     * @param guid    The first 16 bytes of the Gnutella message header, where the GUID should be
-     * @param ttl     The ttl we read
-     * @param hops    The hops we read
+     * Only UDPConnectionMessage.createMessage() calls this.
+     * 
+     * @param guid    The first 16 bytes of the Gnutella message header, where the GUID would be
+     * @param ttl     The ttl we read, we don't use it
+     * @param hops    The hops we read, we don't use it
      * @param payload The payload data after the 23-byte Gnutella message header
      */
     public AckMessage(byte[] guid, byte ttl, byte hops, byte[] payload) throws BadPacketException {
@@ -62,8 +67,8 @@ public class AckMessage extends UDPConnectionMessage {
          * 
          * aabb
          * 
-         * a is 2 bytes with the window start, the packet number the sending computer needs next.
-         * b is 2 bytes with the window space, the number of bytes of space the sending computer can receive right now, or 0 if it's full.
+         * a is 2 bytes with the window start, the message number the remote computer needs next.
+         * b is 2 bytes with the window space, the number of messages the remote computer can receive right now, or 0 if it's full.
          * 
          * The 4 bytes of data fit into the area where the GUID should be.
          */
@@ -74,48 +79,62 @@ public class AckMessage extends UDPConnectionMessage {
     }
 
     /**
-     * Get the lowest sequence number of the packets the computer that sent this Ack message still needs.
+     * Get the number of the earliest message the computer that sent this Ack message still needs.
      * For instance, if a computer has received packets 1 2 4 5 6 7 8 9, it will send an Ack with a window start of 3.
      * 
-     * 
      * The windowStart is equivalent to the lowest unreceived sequenceNumber
-     * coming from the receiving end of the connection.  It is saying, I have 
-     * received everything up to one minus this. (Note: it rolls)
+     * coming from the receiving end of the connection.  It is saying, I have
+     * received everything up to this. (Note: it rolls)
      */
     public long getWindowStart() {
-        
-        // lowest numbrered windows packet
-        
+
+        // Return the value we parsed or saved
         return _windowStart;
     }
 
     /**
+     * Save the window start number we extended.
+     * Saves the given value in _windowStart.
      * 
+     * In the packet, the window start number is 2 bytes that go from 0x0000 to 0xffff, and then wrap around.
+     * Our SequenceNumberExtender for this connection watches the numbers grow to the end, and handles it.
+     * This lets it extend 2-byte truncated numbers into the full 8 bytes they were before the sending computer truncated them.
      * 
-     * Extend the windowStart of incoming messages with the full 8 bytes
-	 * of state
+     * @param wStart The extended window start value
      */
 	public void extendWindowStart(long wStart) {
-        
+
+        // Save the given value
 		_windowStart = wStart;
 	}
 
     /**
-     * The windowSpace is a measure of how much more data the receiver can 
-     * receive within its buffer.  This number will go to zero if the 
-     * application on the receiving side is reading data slowly.  If it goes 
+     * Find out how many more 512 byte messages the computer that made this Ack can take right now.
+     * 
+     * The windowSpace is a measure of how much more data the receiver can
+     * receive within its buffer.  This number will go to zero if the
+     * application on the receiving side is reading data slowly.  If it goes
      * to zero then the sender should stop sending.
      */
     public int getWindowSpace() {
-        
+
+        // Return the value we parsed or saved
         return _windowSpace;
     }
 
     /**
+     * Express this Ack message as a String.
+     * Composes text like "AckMessage DestID:1234 start:22 space:4 seq:" + getSequenceNumber();".
      * 
+     * @return A String
      */
 	public String toString() {
 
-		return "AckMessage DestID:" + getConnectionID() + " start:" + _windowStart + " space:" + _windowSpace + " seq:" + getSequenceNumber();
+        // Compose and return the String
+		return
+            "AckMessage DestID:" + getConnectionID() +  // The connection ID the receiving computer assigned to the sending computer
+            " start:"            + _windowStart      +  // The lowest numbered message the acknowledging computer is missing
+            " space:"            + _windowSpace      +  // The number of messages the acknowledging computer has space to receive right now
+            " seq:"              + getSequenceNumber(); // The sequence number this Ack packet is acknowledging we've received
 	}
 }

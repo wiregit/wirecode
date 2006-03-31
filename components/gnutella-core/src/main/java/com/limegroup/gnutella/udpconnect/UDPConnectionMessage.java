@@ -237,8 +237,8 @@ public abstract class UDPConnectionMessage extends Message {
     }
 
     /**
-     * This UDP connection message's connection ID.
-     * All the UDP packets from a sending computer that make up a stream of data have the same ID.
+     * The connection ID the receiving computer chose to identify the sending computer and their connection.
+     * All the UDP packets that make up a stream of data have the same ID.
      * This lets the receiving computer keep them separate from other UDP packets.
      * The connection ID is the first byte in the header.
      * 

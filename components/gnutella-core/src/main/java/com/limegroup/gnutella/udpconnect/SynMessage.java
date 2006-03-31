@@ -7,7 +7,9 @@ import com.limegroup.gnutella.messages.BadPacketException;
 
 /**
  * Begin a UDP connection by pinging a remote computer with a Syn message.
- * The Syn message tells the remote computer the connection ID all the packets that make up the connection will use.
+ * 
+ * The Syn message tells the receiving computer what connection ID the sending computer has assigned it.
+ * The computer that receives a Syn will begin all its UDP packets with this 1-byte connection ID.
  * 
  * A Syn message carries 3 bytes of payload data.
  * They all fit into the 12 bytes of space in the GUID area.
@@ -50,6 +52,8 @@ public class SynMessage extends UDPConnectionMessage {
      * Use this constructor when we don't know what connection ID the remote comptuer will choose for us yet.
      * In the packet, we leave the remote computer's connection ID as 0.
      * This is a packet maker.
+     * 
+     * Only UDPConnectionProcessor.tryToConnect() calls this.
      * 
      * @param connectionID The connection ID number all the packets that make up the stream this SynMessage starts will share
      */
