@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -26,8 +27,8 @@ import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.QuestionsHandler;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -68,7 +69,7 @@ import com.limegroup.gnutella.util.ThreadFactory;
  * ConnectionManager has methods to get up and downstream bandwidth, but it
  * doesn't quite fit the BandwidthTracker interface.
  */
-public class ConnectionManager {
+public class ConnectionManager implements ConnectionAcceptor {
 
     /**
      * Timestamp for the last time the user selected to disconnect.
@@ -257,6 +258,8 @@ public class ConnectionManager {
     public void initialize() {
         _catcher = RouterService.getHostCatcher();
 
+        RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
+        
         // schedule the Runnable that will allow us to change
         // the number of connections we're shooting for if
         // we're idle.
@@ -299,6 +302,33 @@ public class ConnectionManager {
     }
 
 
+    public void acceptConnection(String word, Socket socket) {
+    	if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) 
+    		HTTPStat.GNUTELLA_REQUESTS.incrementStat();
+    	else if (ConnectionSettings.CONNECT_STRING.isDefault() &&
+    			word.equals("LIMEWIRE") ) 
+    		HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
+    	else
+    		return; //drop it.
+    	
+    	acceptConnection(socket);
+    }
+    
+    public Collection getFirstWords() {
+    	List l = new ArrayList(2);
+    	l.add(ConnectionSettings.CONNECT_STRING_FIRST_WORD);
+    	l.add("LIMEWIRE");
+    	return l;
+    }
+    
+    public boolean localOnly() {
+    	return false;
+    }
+    
+    public boolean isBlocking() {
+    	return false;
+    }
+    
     /**
      * Create an incoming connection.
      * 

@@ -51,6 +51,7 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
+import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
@@ -87,7 +88,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
-public class DownloadManager implements BandwidthTracker {
+public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
     
@@ -204,6 +205,7 @@ public class DownloadManager implements BandwidthTracker {
         this.router = router;
         this.fileManager = fileManager;
         scheduleWaitingPump();
+        RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
     }
 
     /**
@@ -926,6 +928,25 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
 
+    public Collection getFirstWords() {
+    	List ret = new ArrayList(1);
+    	ret.add("GIV");
+    	return ret;
+    }
+    
+    public void acceptConnection(String word, Socket sock) {
+    	HTTPStat.GIV_REQUESTS.incrementStat();
+    	acceptDownload(sock);
+    }
+    
+    public boolean localOnly() {
+    	return false;
+    }
+    
+    public boolean isBlocking() {
+    	return true;
+    }
+    
     /**
      * Accepts the given socket for a push download to this host.
      * If the GIV is for a file that was never requested or has already

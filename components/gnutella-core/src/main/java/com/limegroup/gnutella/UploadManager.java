@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.FreeloaderUploadingException;
 import com.limegroup.gnutella.uploader.HTTPUploader;
@@ -94,7 +96,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  *
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
-public class UploadManager implements BandwidthTracker {
+public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
 
@@ -238,7 +240,37 @@ public class UploadManager implements BandwidthTracker {
      */
     private final Map /* of String to RequestCache */ REQUESTS =
         new FixedsizeForgetfulHashMap(250);
-                
+    
+    public UploadManager() {
+    	RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
+    }
+    
+	public void acceptConnection(String word, Socket s) {
+		if (word.equals("GET")) {
+			HTTPStat.GET_REQUESTS.incrementStat();
+			acceptUpload(HTTPRequestMethod.GET, s, false);
+		} else if (word.equals("HEAD")) {
+			HTTPStat.HEAD_REQUESTS.incrementStat();
+			acceptUpload(HTTPRequestMethod.HEAD, s, false);
+		}
+	}
+
+	public Collection getFirstWords() {
+		List l = new ArrayList(2);
+		l.add("GET");
+		l.add("HEAD");
+		return l;
+	}
+
+	public boolean localOnly() {
+		return false;
+	}
+	
+	public boolean isBlocking() {
+		return true;
+	}
+
+
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
 	 * if it successfully parses the HTTP request.  BLOCKING.

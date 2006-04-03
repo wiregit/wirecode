@@ -2,13 +2,14 @@ package com.limegroup.gnutella;
 
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.browser.ExternalControl;
-import com.limegroup.gnutella.chat.ChatManager;
-import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.IOUtils;
@@ -19,44 +20,11 @@ public class ConnectionDispatcher {
     
     private static final Log LOG = LogFactory.getLog(ConnectionDispatcher.class);
     
-    private static final int UNKNOWN = -1;
-    private static final int GNUTELLA = 0;
-    private static final int LIMEWIRE = 1;
-    private static final int GET = 2;
-    private static final int HEAD = 3;
-    private static final int GIV = 4;
-    private static final int CHAT = 5;
-    private static final int MAGNET = 6;
-    private static final int CONNECT = 7;
-    
     /**
-     * Determines which protocol this word is
-     * 
-     * @param word
-     * @return
+     * Mapping of first protocol word -> ConnectionAcceptor
      */
-    private int parseWord(String word) {
-        if(word == null)
-            return UNKNOWN;
-        else if(word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD))
-            return GNUTELLA;
-        else if(ConnectionSettings.CONNECT_STRING.isDefault() && word.equals("LIMEWIRE"))
-            return LIMEWIRE;
-        else if(word.equals("GET"))
-            return GET;
-        else if(word.equals("HEAD"))
-            return HEAD;
-        else if(word.equals("GIV"))
-            return GIV;
-        else if(word.equals("CHAT"))
-            return CHAT;
-        else if(word.equals("MAGNET"))
-            return MAGNET;
-        else if(word.equals("CONNECT") || word.equals("\n\n"))
-            return CONNECT;
-        else
-            return UNKNOWN;
-    }
+    private static final Map protocols = 
+    	Collections.synchronizedMap(new HashMap());
     
     /**
      * Retrieves the maximum size a word can have.
@@ -65,6 +33,19 @@ public class ConnectionDispatcher {
         return 8; // GNUTELLA == 8
     }
 
+    public void addConnectionAcceptor(ConnectionAcceptor acceptor) {
+    	synchronized(protocols) {
+    		for (Iterator iter = acceptor.getFirstWords().iterator(); iter.hasNext();)
+    			protocols.put(iter.next(),acceptor);
+    	}
+    }
+    
+    public void removeConnectionAcceptor(ConnectionAcceptor acceptor) {
+    	synchronized(protocols) {
+    		for (Iterator iter = acceptor.getFirstWords().iterator(); iter.hasNext();)
+    			protocols.remove(iter.next());
+    	}
+    }
     
     /**
      * Dispatches this incoming connection to the appropriate manager, depending
@@ -82,20 +63,27 @@ public class ConnectionDispatcher {
             return;
         }
         
-        final int protocol = parseWord(word);
-        if(LOG.isDebugEnabled())
-            LOG.debug("Dispatching protocol: " + protocol + ", from word: " + word);
-
-        boolean localHost = NetworkUtils.isLocalHost(client);
+        // try to find someone who understands this protocol
+        final ConnectionAcceptor acceptor = (ConnectionAcceptor) protocols.get(word);
+       
+        // no protocol available to handle this word 
+        if (acceptor == null) {
+        	HTTPStat.UNKNOWN_REQUESTS.incrementStat();
+        	if (LOG.isErrorEnabled())
+        		LOG.error("Unknown protocol: " + word);
+        	IOUtils.close(client);
+        }
+        
         // Only selectively allow localhost connections
-        if (protocol != MAGNET) {
+        boolean localHost = NetworkUtils.isLocalHost(client);
+        if (!acceptor.localOnly()) {
             if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && localHost) {
-                LOG.trace("Killing localhost connection with non-magnet.");
+                LOG.trace("Killing localhost connection with non-local protocol.");
                 IOUtils.close(client);
                 return;
             }
         } else if (!localHost) { // && word.equals(MAGNET)
-            LOG.trace("Killing non-local ExternalControl request.");
+            LOG.trace("Killing non-local request for local protcol.");
             IOUtils.close(client);
             return;
         }
@@ -108,30 +96,9 @@ public class ConnectionDispatcher {
         //
         // The others perform no blocking operations, so either way, it is okay to process
         // them immediately.
-        switch(protocol) {
-        case GNUTELLA:
-            HTTPStat.GNUTELLA_REQUESTS.incrementStat();
-            RouterService.getConnectionManager().acceptConnection(client);
-            return;
-        case LIMEWIRE:
-            HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
-            RouterService.getConnectionManager().acceptConnection(client);
-            return;
-        case CONNECT:
-            if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
-                RouterService.getAcceptor().checkFirewall(client.getInetAddress());
-            IOUtils.close(client);
-            return;
-        case CHAT:
-            HTTPStat.CHAT_REQUESTS.incrementStat();
-            ChatManager.instance().accept(client);
-            return;
-        case UNKNOWN:
-            HTTPStat.UNKNOWN_REQUESTS.incrementStat();
-            if (LOG.isErrorEnabled())
-                LOG.error("Unknown protocol: " + word);
-            IOUtils.close(client);
-            return;
+        if (!acceptor.isBlocking()) {
+        	acceptor.acceptConnection(word, client);
+        	return;
         }
         
         // All the below protocols are handled in a blocking manner by their managers.
@@ -141,28 +108,7 @@ public class ConnectionDispatcher {
         // with no problems.
         Runnable runner = new Runnable() {
             public void run() {
-                switch(protocol) {
-                case GET:
-                    HTTPStat.GET_REQUESTS.incrementStat();
-                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.GET, client, false);
-                    break;
-                case HEAD:
-                    HTTPStat.HEAD_REQUESTS.incrementStat();
-                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.HEAD, client, false);
-                    break;
-                case GIV:
-                    HTTPStat.GIV_REQUESTS.incrementStat();
-                    RouterService.getDownloadManager().acceptDownload(client);
-                    break;
-                case MAGNET:
-                    HTTPStat.MAGNET_REQUESTS.incrementStat();  
-                    ExternalControl.fireMagnet(client);
-                    break;
-                default:
-                    IOUtils.close(client);
-                    LOG.error("Parsed to unsupported protocol: " + protocol + ", word: " + word);
-                }
-                
+            		acceptor.acceptConnection(word,client);
                 // We must not close the connection at this point, because some things may
                 // have only done a temporary blocking operation and then handed the socket
                 // off to a callback (such as DownloadManager parsing the GIV).
@@ -175,5 +121,5 @@ public class ConnectionDispatcher {
         else
             runner.run();
     }
-
 }
+
