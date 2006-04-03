@@ -155,47 +155,69 @@ public class Context implements Runnable {
     public void setExternalSocketAddress(SocketAddress externalAddress) 
                 throws IOException {       
         
+        // Our external address is null? That means we don't 
+        // know it yet!
         if (this.externalAddress == null) {
+            
+            // TODO: See PingResponseHandler!!!
             ContactNode localNode = (ContactNode)routeTable.get(nodeId);
             if (localNode != null) {
                 this.externalAddress = externalAddress;
                 localNode.setSocketAddress(externalAddress);
             }
         } else if (!externalAddress.equals(this.externalAddress)) {
+            handleReconnect(externalAddress);
+        }
+    }
+    
+    /**
+     * If our external address changed then we dis- and reconneced
+     * to the Internet.
+     * 
+     * TODO: See PingResponseHandler!!! We MUST make sure the other
+     * Node isn't fooling us with a wrong external address! I.e. we
+     * must ping ourself!
+     */
+    private void handleReconnect(SocketAddress externalAddress) throws IOException {
+        if (externalAddress.equals(this.externalAddress)) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("The address has not changed!");
+            }
+            return;
+        }
+        
+        ContactNode currentLocalNode = getLocalNode();
+        
+        this.externalAddress = externalAddress;
+        this.nodeId = KUID.createRandomNodeID(externalAddress);
+        
+        Collection nodes = routeTable.getAllNodes();
+        routeTable.clear();
+        
+        ContactNode localNode = new ContactNode(nodeId, externalAddress);
+        localNode.setTimeStamp(Long.MAX_VALUE);
+        routeTable.add(localNode, false);
+        
+        // A flag to speedup the iteration a bit once we've
+        // found the old local node in the collection.
+        boolean check = true;
+        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+            ContactNode node = (ContactNode)it.next();
             
-            // TODO: See PingResponseHandler!!!
-            
-            ContactNode old = getLocalNode();
-            
-            this.externalAddress = externalAddress;
-            this.nodeId = KUID.createRandomNodeID(externalAddress);
-            
-            Collection nodes = routeTable.getAllNodes();
-            routeTable.clear();
-            
-            ContactNode localNode = getLocalNode();
-            localNode.setTimeStamp(Long.MAX_VALUE);
-            routeTable.add(localNode, false);
-            
-            boolean check = true;
-            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-                ContactNode node = (ContactNode)it.next();
-                
-                // Skip the old local Node!
-                if (check && node.getNodeID().equals(old.getNodeID())) {
-                    check = false;
-                    continue;
-                }
-                
-                // TODO Not sure about this!
-                boolean alive = !node.isDead();
-                routeTable.add(node, alive);
+            // Skip the old local Node!
+            if (check && node.getNodeID().equals(currentLocalNode.getNodeID())) {
+                check = false;
+                continue;
             }
             
-            // And finally do a looup for ourself on the DHT
-            // TODO: full bucket refresh?
-            lookup(nodeId, null);
+            // TODO Not sure about this!
+            boolean alive = !node.isDead();
+            routeTable.add(node, alive);
         }
+        
+        // And finally do a looup for ourself on the DHT
+        // TODO: full bucket refresh?
+        lookup(nodeId, null);
     }
     
     public Database getDatabase() {
