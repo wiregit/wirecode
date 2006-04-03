@@ -242,7 +242,11 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         new FixedsizeForgetfulHashMap(250);
     
     public UploadManager() {
-    	RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
+    	RouterService.getConnectionDispatcher().addConnectionAcceptor(
+    			this,
+    			new String[]{"GET","HEAD"},
+    			false,
+    			true);
     }
     
 	public void acceptConnection(String word, Socket s) {
@@ -254,22 +258,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 			acceptUpload(HTTPRequestMethod.HEAD, s, false);
 		}
 	}
-
-	public Collection getFirstWords() {
-		List l = new ArrayList(2);
-		l.add("GET");
-		l.add("HEAD");
-		return l;
-	}
-
-	public boolean localOnly() {
-		return false;
-	}
-	
-	public boolean isBlocking() {
-		return true;
-	}
-
 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
