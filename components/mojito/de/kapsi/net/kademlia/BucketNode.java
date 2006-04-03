@@ -83,7 +83,6 @@ public class BucketNode extends Node {
     }
  
     public List split() {
-    
         BucketNode leftBucket = new BucketNode(nodeId, depth+1);
         BucketNode rightBucket = new BucketNode(nodeId.set(depth),depth+1);
         if(replacementCache != null && !replacementCache.isEmpty()) {
@@ -94,15 +93,18 @@ public class BucketNode extends Node {
         return Arrays.asList(new BucketNode[]{leftBucket, rightBucket});
     }
 
-    
     public int getDepth() {
         return depth;
     }
     
     public String toString() {
-        return super.toString() + ", depth: " + getDepth() 
-                    + ", size: " + getNodeCount() 
-                    + ", replacements: " + getReplacementCacheSize()+", timestamp: "+timeStamp;
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(nodeId)
+            .append(", depth: ").append(getDepth())
+            .append(", size: ").append(getNodeCount())
+            .append(", replacements: ").append(getReplacementCacheSize())
+            .append(", timestamp: ").append(getTimeStamp());
+        return buffer.toString();
     }
     
     public static void main(String[] args) {

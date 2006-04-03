@@ -35,7 +35,7 @@ public class ContactNode extends Node {
     
     public boolean isDead() {
         //node has ever been alive?
-        if(timeStamp > 0L) {
+        if(getTimeStamp() > 0L) {
             if (failures >= RouteTableSettings.getMaxLiveNodeFailures()) {
                 return true;
             }
@@ -69,10 +69,6 @@ public class ContactNode extends Node {
         return o;
     }
     
-    public void setTimeStamp(long timestamp) {
-        this.timeStamp = timestamp;
-    }
-    
     public boolean equals(Object o) {
         if (!(o instanceof ContactNode)) {
             return false;
@@ -84,7 +80,11 @@ public class ContactNode extends Node {
     }
     
     public String toString() {
-        return nodeId + " (" + address + ")" + ", failures: "+failures+", alive: "+(timeStamp>0L);
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(toString(nodeId, address))
+            .append(", failures: ").append(failures)
+            .append(", alive: ").append(getTimeStamp() > 0L);
+        return buffer.toString();
     }
     
     public static String toString(KUID nodeId, SocketAddress address) {

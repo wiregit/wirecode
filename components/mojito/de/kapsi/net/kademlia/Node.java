@@ -6,7 +6,7 @@ public abstract class Node implements Serializable {
     
     protected final KUID nodeId;
     
-    protected long timeStamp = 0L;
+    private long timeStamp = 0L;
     
     public Node(KUID nodeId) {
         this.nodeId = nodeId;
@@ -18,6 +18,10 @@ public abstract class Node implements Serializable {
     
     public long getTimeStamp() {
         return timeStamp;
+    }
+    
+    public void setTimeStamp(long timestamp) {
+        this.timeStamp = timestamp;
     }
     
     public KUID getNodeID() {
