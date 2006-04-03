@@ -26,17 +26,29 @@ public class ConnectionDispatcher {
     private static final Map protocols = 
     	Collections.synchronizedMap(new HashMap());
     
+    /** 
+     * The longest protocol word we understand.
+     * LOCKING: protocols.
+     */
+    private int longestWordSize = 0;
+    
     /**
      * Retrieves the maximum size a word can have.
      */
     public int getMaximumWordSize() {
-        return 8; // GNUTELLA == 8
+    	synchronized(protocols) {
+    		return longestWordSize; // currently GNUTELLA == 8
+    	}
     }
 
     public void addConnectionAcceptor(ConnectionAcceptor acceptor) {
     	synchronized(protocols) {
-    		for (Iterator iter = acceptor.getFirstWords().iterator(); iter.hasNext();)
-    			protocols.put(iter.next(),acceptor);
+    		for (Iterator iter = acceptor.getFirstWords().iterator(); iter.hasNext();) {
+    			String word = (String) iter.next();
+    			if (word.length() > longestWordSize)
+    				longestWordSize = word.length();
+    			protocols.put(word,acceptor);
+    		}
     	}
     }
     
@@ -44,6 +56,13 @@ public class ConnectionDispatcher {
     	synchronized(protocols) {
     		for (Iterator iter = acceptor.getFirstWords().iterator(); iter.hasNext();)
     			protocols.remove(iter.next());
+    		int newLongestSize = 0;
+    		for (Iterator iter = protocols.keySet().iterator();iter.hasNext();){
+    			String word = (String) iter.next();
+    			if (word.length() > newLongestSize)
+    				newLongestSize = word.length();
+    		}
+    		longestWordSize = newLongestSize;
     	}
     }
     
