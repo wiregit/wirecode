@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.Constants;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 

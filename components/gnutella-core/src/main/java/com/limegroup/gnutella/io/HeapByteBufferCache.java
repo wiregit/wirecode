@@ -53,7 +53,7 @@ public class HeapByteBufferCache {
         // creating a new object is justified.
         for (Iterator iter = CACHE.entrySet().iterator();iter.hasNext();) {
             Map.Entry entry = (Map.Entry) iter.next();
-            if (key.compareTo((Comparable)entry.getKey()) > 0)
+            if (key.compareTo((Integer)entry.getKey()) > 0)
                 continue;
             
             l = (List) entry.getValue();
