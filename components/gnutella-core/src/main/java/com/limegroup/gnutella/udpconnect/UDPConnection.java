@@ -40,6 +40,8 @@ public class UDPConnection extends Socket {
      * Make a new UDPConnection object, establishing a new UDP connection to a remote computer.
      * Blocks until we've established the connection, or times out and throws an IOException.
      * 
+     * When 2 LimeWire programs on the Internet try to open a UDP connection between them, they both call this constructor at the same time.
+     * 
      * @param ip   The IP address to connect to in a String, like "1.2.3.4"
      * @param port The port number to connect to
      */

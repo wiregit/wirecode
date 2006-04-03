@@ -32,87 +32,128 @@ public class UDPConnectionProcessor {
     private static final Log LOG = LogFactory.getLog(UDPConnectionProcessor.class);
 
     /** Define the chunk size used for data bytes */
-    public static final int   DATA_CHUNK_SIZE         = 512;
+    public static final int DATA_CHUNK_SIZE = 512;
 
     /** Define the maximum chunk size read for data bytes
         before we will blow out the connection */
-    public static final int   MAX_DATA_SIZE           = 4096;
+    public static final int MAX_DATA_SIZE = 4096;
 
     /** Handle to the output stream that is the input to this connection */
-    private UDPBufferedOutputStream  _inputFromOutputStream;
+    private UDPBufferedOutputStream _inputFromOutputStream;
 
     /** Handle to the input stream that is the output of this connection */
-    private UDPBufferedInputStream   _outputToInputStream;
+    private UDPBufferedInputStream _outputToInputStream;
 
     /** A leftover chunk of data from an incoming data message.  These will 
         always be present with a data message because the first data chunk 
         will be from the GUID and the second chunk will be the payload. */
-    private Chunk             _trailingChunk;
+    private Chunk _trailingChunk;
 
     /** The limit on space for data to be written out */
-    private volatile int      _chunkLimit;
+    private volatile int _chunkLimit;
 
-    /** The receivers windowSpace defining amount of data that receiver can
-        accept */
-    private volatile int      _receiverWindowSpace;
+    //done
 
-    /** Record the desired connection timeout on the connection */
-    private long              _connectTimeOut         = MAX_CONNECT_WAIT_TIME;
+    /**
+     * The number of messages the remote computer tells us we can send it now.
+     * The remote computer tells us its window space in an Ack message.
+     * The number takes up 2 bytes, and is located 6 bytes into the message.
+     */
+    private volatile int _receiverWindowSpace;
+
+    /** 20 seconds in milliseconds, tryToConnect() will give up after 20 seconds. */
+    private long _connectTimeOut = MAX_CONNECT_WAIT_TIME;
+
+    //do
 
     /** Record the desired read timeout on the connection, defaults to 1 minute */
-    private int               _readTimeOut            = 1 * 60 * 1000;
+    private int _readTimeOut = 1 * 60 * 1000;
 
-	/** Predefine a common exception if the user can't receive UDP */
-	private static final IOException CANT_RECEIVE_UDP = 
-	  new IOException("Can't receive UDP");
+    //done
 
-    /** Predefine a common exception if the connection times out on creation */
-    private static final IOException CONNECTION_TIMEOUT = 
-      new IOException("Connection timed out");
+	/**
+     * Throw this IOException if the UDPConnectionProcessor won't connect because our UDPService says we can't get UDP packets at all.
+     * Only the UDPConnectionProcessor() constructor throws this exception.
+     */
+	private static final IOException CANT_RECEIVE_UDP = new IOException("Can't receive UDP");
 
-    /** Define the size of the data window */
-    private static final int  DATA_WINDOW_SIZE        = 20;
+    /**
+     * Throw this IOException if we've waited too long for the remote computer to respond.
+     * tryToConnect() throws CONNECTION_TIMEOUT if we've been sending Syn messages to the remote computer for 20 seconds without getting one back.
+     */
+    private static final IOException CONNECTION_TIMEOUT = new IOException("Connection timed out");
 
-    /** Define the maximum accepted write ahead packet */
-    private static final int  DATA_WRITE_AHEAD_MAX    = DATA_WINDOW_SIZE + 5;
+    //do
+
+    /**
+     * 20
+     * Define the size of the data window
+     */
+    private static final int DATA_WINDOW_SIZE = 20;
+
+    /**
+     * 25
+     * Define the maximum accepted write ahead packet
+     */
+    private static final int DATA_WRITE_AHEAD_MAX = DATA_WINDOW_SIZE + 5;
 
     /** The maximum number of times to try and send a data message */
-    private static final int  MAX_SEND_TRIES          = 8;
+    private static final int MAX_SEND_TRIES = 8;
 
-    // Handle to various singleton objects in our architecture
-    private UDPService        _udpService;
-    private UDPMultiplexor    _multiplexor;
-    private UDPScheduler      _scheduler;
-    private Acceptor          _acceptor;
+    //done
 
-    // Define WAIT TIMES
-    //
-	/** Define the wait time between SYN messages */
-	private static final long SYN_WAIT_TIME           = 400;
+    /*
+     * Handle to various singleton objects in our architecture
+     */
 
-    /** Define the maximum wait time to connect */
-    private static final long MAX_CONNECT_WAIT_TIME   = 20*1000;
+    /** A reference to the program's single UDPService object, which can send and receive UDP packets on the Internet. */
+    private UDPService _udpService;
+
+    /** A reference to the program's single UDPMultiplexor object, which keeps a list of our UDP connections represented by UDPConnectionProcessor objects and the IDs we've assigned them. */
+    private UDPMultiplexor _multiplexor;
+
+    /** A reference to the program's single UDPScheduler object, which controls the timing we use to send UDP connection packets. */
+    private UDPScheduler _scheduler;
+
+    /** A reference to the program's single Acceptor object, which keeps our listening socket that remote computers can connect TCP socket connections to. */
+    private Acceptor _acceptor;
+
+    //do
+
+    /*
+     * Define WAIT TIMES
+     */
+
+	/** 0.4 seconds in milliseconds, tryToConnect() sends a Syn message every 0.4 seconds. */
+	private static final long SYN_WAIT_TIME = 400;
+
+    //done
+
+    /** 20 seconds in milliseconds, Define the maximum wait time to connect */
+    private static final long MAX_CONNECT_WAIT_TIME = 20 * 1000;
+
+    //do
 
 	/** Define the maximum wait time before sending a message in order to
         keep the connection alive (and firewalls open).  */
-	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
+	private static final long KEEPALIVE_WAIT_TIME = ((3 * 1000) - 500);
 
 	/** Define the startup time before starting to send data.  Note that
         on the receivers end, they may not be setup initially.  */
 	private static final long WRITE_STARTUP_WAIT_TIME = 400;
 
     /** Define the default time to check for an ack to a data message */
-    private static final long DEFAULT_RTO_WAIT_TIME   = 400;
+    private static final long DEFAULT_RTO_WAIT_TIME = 400;
 
     /** Define the maximum time that a connection will stay open without 
 		a message being received */
-    private static final long MAX_MESSAGE_WAIT_TIME   = 20 * 1000;
+    private static final long MAX_MESSAGE_WAIT_TIME = 20 * 1000;
 
     /** Define the minimum wait time between ack timeout events */
-    private static final long MIN_ACK_WAIT_TIME       = 5;
+    private static final long MIN_ACK_WAIT_TIME = 5;
 
     /** Define the size of a small send window for increasing wait time */
-    private static final long SMALL_SEND_WINDOW       = 2;
+    private static final long SMALL_SEND_WINDOW = 2;
 
     /** Ensure that writing takes a break every 4 writes so other 
         synchronized activity can take place */
@@ -123,104 +164,133 @@ public class UDPConnectionProcessor {
     private static final long WRITE_WAKEUP_DELAY_TIME = 10;
 
     /** Delay the write events by one second if there is nothing to do */
-    private static final long NOTHING_TO_DO_DELAY     = 1000;
+    private static final long NOTHING_TO_DO_DELAY = 1000;
 
     /** Time to wait after a close before everything is totally shutdown. */
-    private static final long SHUTDOWN_DELAY_TIME     = 400;
+    private static final long SHUTDOWN_DELAY_TIME = 400;
 
     // Define Connection states
     //
     /** The state on first creation before connection is established */
-	private static final int  PRECONNECT_STATE        = 0;
+	private static final int PRECONNECT_STATE = 0;
 
     /** The state after a connection is established */
-    private static final int  CONNECT_STATE           = 1;
+    private static final int CONNECT_STATE = 1;
 
     /** The state after user communication during shutdown */
-    private static final int  FIN_STATE               = 2;
+    private static final int FIN_STATE = 2;
 
+    //done
 
-    /** The ip of the host connected to */
+    /** The remote computer's IP address. */
 	private final InetAddress _ip;
 
-    /** The port of the host connected to */
-	private final int         _port;
+    /** The remote computer's port number. */
+	private final int _port;
 
+    //do
 
     /** The Window for sending and acking data */
-	private DataWindow        _sendWindow;
+	private DataWindow _sendWindow;
 
     /** The WriteRegulator controls the amount of waiting time between writes */
-    private WriteRegulator    _writeRegulator;
+    private WriteRegulator _writeRegulator;
 
     /** The Window for receiving data */
-    private DataWindow        _receiveWindow;
+    private DataWindow _receiveWindow;
 
-    /** The connectionID of this end of connection.  Used for routing */
-	private byte              _myConnectionID;
+    //done
 
-    /** The connectionID of the other end of connection.  Used for routing */
-	private volatile byte     _theirConnectionID;
+    /**
+     * The connection ID we assigned this connection.
+     * A number 1 through 255.
+     * 
+     * This UDPConnectionProcessor is listed in the UDPMultiplexor's list of our UDP connections under this connection ID.
+     * The UDPConnectionProcessor calls _multiplexor.register(this) to choose our ID for this connection.
+     * We send it 4 bytes into the Syn packets we send the remote computer at the start of the connection.
+     * When the remote computer finds out what connection ID we've chosen, it begins the packets it sends us with it.
+     */
+	private byte _myConnectionID;
+
+    /**
+     * The connection ID the remote computer assigned this connection.
+     * A number 1 through 255.
+     * 
+     * We start all our messages to the remote computer with _theirConnectionID so it knows they are from us.
+     * We find out _theirConnectionID when the remote computer sends us a Syn packet, it's 4 bytes into the message at the start of the data area in the GUID.
+     */
+	private volatile byte _theirConnectionID;
+
+    //do
 
     /** The status of the connection */
-	private int               _connectionState;
+	private int _connectionState;
 
     /** Scheduled event for keeping connection alive  */
-    private UDPTimerEvent     _keepaliveEvent;
+    private UDPTimerEvent _keepaliveEvent;
 
     /** Scheduled event for writing data appropriately over time  */
-    private UDPTimerEvent     _writeDataEvent;
+    private UDPTimerEvent _writeDataEvent;
 
     /** Scheduled event for cleaning up at end of connection life  */
-    private UDPTimerEvent     _closedCleanupEvent;
+    private UDPTimerEvent _closedCleanupEvent;
 
     /** Flag that the writeEvent is shutdown waiting for space to write */
-	private boolean           _waitingForDataSpace;
+	private boolean _waitingForDataSpace;
 
     /** Flag that the writeEvent is shutdown waiting for data to write */
-	private volatile boolean  _waitingForDataAvailable;
+	private volatile boolean _waitingForDataAvailable;
 
     /** Flag saying that a Fin packet has been acked on shutdown */
-    private boolean           _waitingForFinAck;
+    private boolean _waitingForFinAck;
 
     /** Scheduled event for ensuring that data is acked or resent */
-    private UDPTimerEvent     _ackTimeoutEvent;
+    private UDPTimerEvent _ackTimeoutEvent;
 
     /** Adhoc event for waking up the writing of data */
     private SafeWriteWakeupTimerEvent _safeWriteWakeup;
 
     /** The current sequence number of messages originated here */
-    private long              _sequenceNumber;
+    private long _sequenceNumber;
 
     /** The sequence number of a pending fin message */
-	private long              _finSeqNo;
+	private long _finSeqNo;
 
-	/** Transformer for mapping 2 byte sequenceNumbers of incoming ACK 
-        messages to 8 byte longs of essentially infinite size - note Acks 
-        echo our seqNo */
+    //done
+
+	/**
+     * _localExtender watches our sequence numbers in Ack messages from the remote computer, and restores them from 2 to 8 bytes.
+     * A SequenceNumberExtender object can watch 2-byte sequence numbers grow from 0x0000 to 0xffff and wrap around, and unwrap the 2-byte numbers into a full 8 bytes.
+     * We use _localExtender for Ack and KeepAlive messages, which contain our sequence numbers the remote computer is telling back to us.
+     */
 	private SequenceNumberExtender _localExtender;
 
-    /** Transformer for mapping 2 byte sequenceNumbers of incoming messages to
-        8 byte longs of essentially infinite size */
+    /**
+     * _extender watches the remote computer's sequence numbers in the packets it's sending us, and restores them from 2 to 8 bytes.
+     * A SequenceNumberExtender object can watch 2-byte sequence numbers grow from 0x0000 to 0xffff and wrap around, and unwrap the 2-byte numbers into a full 8 bytes.
+     * We use _extender for Syn, Data, and Fin messages, which contain the remote computer's sequence numbers.
+     */
     private SequenceNumberExtender _extender;
 
-    /** The last time that a message was sent to other host */
-    private long              _lastSendTime;
+    /** The time we last sent the remote computer a UDP connection message in a UDP packet. */
+    private long _lastSendTime;
+
+    //do
 
     /** The last time that data was sent to other host */
-    private long              _lastDataSendTime;
+    private long _lastDataSendTime;
 
     /** The last time that a message was received from the other host */
-	private long              _lastReceivedTime;
+	private long _lastReceivedTime;
 
     /** The number of resends to take into account when scheduling ack wait */
-    private int               _ackResendCount;
+    private int _ackResendCount;
 
     /** Skip a Data Write if this flag is true */
-    private boolean           _skipADataWrite;
+    private boolean _skipADataWrite;
 
     /** Keep track of the reason for shutting down */
-    private byte              _closeReasonCode;
+    private byte _closeReasonCode;
 
     ////////////////////////////////////////////
     // Some settings related to skipping acks
@@ -228,6 +298,7 @@ public class UDPConnectionProcessor {
     
     /** Whether to skip any acks at all */
     private final boolean _skipAcks = DownloadSettings.SKIP_ACKS.getValue();
+
     /** How long each measuring period is */
     private final int _period = DownloadSettings.PERIOD_LENGTH.getValue();
     
@@ -254,16 +325,41 @@ public class UDPConnectionProcessor {
     
     /** whether we have enough data */
     private boolean _enoughData;
-    
+
     /** when the current second started */
     private long _lastPeriod;
-    
-    /** how many acks we skipped in a row vs. total */
-    private int _skippedAcks, _skippedAcksTotal;
-    
+
+    //done
+
+    /*
+     * In an early design, a computer in a UDP connection was supposed to acknowledge every non-Ack message it received with an Ack message.
+     * For instance, imagine computer A sent 3 Data messages with sequence numbers 1, 2, and 3.
+     * Computer B was supposed send 3 Ack messages with sequence numbers 1, 2, and 3 in response.
+     * Data messages are 512 bytes, while Ack messages are only 23 bytes, so this is feasable.
+     * 
+     * However, this design was using up a lot of computer B's valuable upstream bandwidth.
+     * So, the protocol now allows for computer B to skip some Ack messages.
+     * For example, it can acknowledge Data messages 1, 2, and 3 with a single Ack with the sequence number 3.
+     */
+
+    /**
+     * The number of Ack messages we've skipped in a row.
+     * Each time safeSendAck() sends an Ack message, it sets _skippedAcks back to 0.
+     * When handleMessage() skips an Ack, it increments _skippedAcks and _skippedAcksTotal.
+     */
+    private int _skippedAcks;
+
+    /**
+     * The total number of Ack messages we've skipped sending this remote computer.
+     * When handleMessage() skips an Ack, it increments _skippedAcks and _skippedAcksTotal.
+     */
+    private int _skippedAcksTotal;
+
+    //do
+
     /** how many packets we got in total */
     private int _totalDataPackets;
-    
+
 	/** Allow a testing stub version of UDPService to be used */
 	private static UDPService _testingUDPService;
 
@@ -274,70 +370,100 @@ public class UDPConnectionProcessor {
 		_testingUDPService = udpService;
 	}
 
+    //done
+
     /**
-     *  Try to kickoff a reliable udp connection. This method blocks until it 
-	 *  either sucessfully establishes a connection or it times out and throws
-	 *  an IOException.
+     * Open a new UDP connection to the given IP address and port number.
+     * When 2 LimeWire programs on the Internet try to open a UDP connection between them, they both call this constructor at the same time.
+     * 
+     * Saves the remote computer's IP address and port number, initializes member variables, and gets references to program objects.
+     * Has the UDPMultiplexor assign our connection ID, add this UDPConnectionProcessor to the list of them it keeps.
+     * Sends a Syn message with our connection ID every 0.4 seconds for up to 20, until the remote computer sends a Syn telling us the connection ID it's chosen.
+     * When this constructor returns, we're connected.
+     * 
+     * @param  ip          The IP address of the remote computer to establish a UDP connection with
+     * @param  port        The port number of the remote computer to establish a UDP connection with
+     * @throws IOException We waited for 20 seconds for the remote computer to send us a Syn, but it never did
      */
     public UDPConnectionProcessor(InetAddress ip, int port) throws IOException {
-        // Record their address
-        _ip        		         = ip;
-        _port      		         = port;
 
-        if(LOG.isDebugEnabled())  {
-            LOG.debug("Creating UDPConn ip:"+ip+" port:"+port);
-        }
+        // Save the IP address and port number we'll try to connect to
+        _ip   = ip;
+        _port = port;
 
-        // Init default state
-        _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
-		_connectionState         = PRECONNECT_STATE;
-		_lastSendTime            = 0l;
-        _lastDataSendTime        = 0l;
-    	_chunkLimit              = DATA_WINDOW_SIZE;
-    	_receiverWindowSpace     = DATA_WINDOW_SIZE; 
-        _waitingForDataSpace     = false;
-        _waitingForDataAvailable = false;
-        _waitingForFinAck        = false;  
-        _skipADataWrite          = false;
-        _ackResendCount          = 0;
-        _closeReasonCode         = FinMessage.REASON_NORMAL_CLOSE;
+        // Make a note we're going to start trying to connect in the debugging log
+        if (LOG.isDebugEnabled()) LOG.debug("Creating UDPConn ip:" + ip + " port:" + port);
 
-		// Allow UDPService to be overridden for testing
-		if ( _testingUDPService == null )
-			_udpService = UDPService.instance();
-		else
-			_udpService = _testingUDPService;
+        // Initialize the default state
+        _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; // 0, we don't know what ID the remote computer will assign this connection yet
+		_connectionState         = PRECONNECT_STATE;               // This UDPConnectionProcessor starts out in the PRECONNECT_STATE
+		_lastSendTime            = 0l;                             // 0 as a long, we haven't sent a message yet
+        _lastDataSendTime        = 0l;                             // 0 as a long, we haven't sent a data message yet
+    	_chunkLimit              = DATA_WINDOW_SIZE;               // 20, we have space to store 20 messages going out right now (do)
+    	_receiverWindowSpace     = DATA_WINDOW_SIZE;               // 20, as far as we know, the remote computer has space for 20 messages from us right now (do)
+        _waitingForDataSpace     = false;                          // We're not paused sending because the remote computer is full
+        _waitingForDataAvailable = false;                          // We're not paused sending because we don't have anything to send
+        _waitingForFinAck        = false;                          // We're not waiting for the remote computer to Ack our Fin so we can close the connection
+        _skipADataWrite          = false;                          // We don't need to skip a data write at this time
+        _ackResendCount          = 0;                              // 0, We don't have any resends to take into account when scheduling an Ack wait (do)
+        _closeReasonCode         = FinMessage.REASON_NORMAL_CLOSE; // 0x0, we haven't closed this connection yet
 
-		// If UDP is not running or not workable, barf
-		if ( !_udpService.isListening() || 
-			 !_udpService.canDoFWT() ) { 
-			throw CANT_RECEIVE_UDP;
-		}
+		// If setUDPServiceForTesting() got a test UDPService, use it instead of the real one
+		if (_testingUDPService == null) _udpService = UDPService.instance(); // Point _udpService at the program's UDPService object that can send and receive UDP packets
+		else                            _udpService = _testingUDPService;    // Point _udpService at a simulation equivalent setUDPServiceForTesting() gave us for testing
 
-        // Only wake these guys up if the service is okay
-		_multiplexor       = UDPMultiplexor.instance();
-		_scheduler         = UDPScheduler.instance();
-        _acceptor          = RouterService.getAcceptor();
+        // Ask the UDPService to make sure we have a listening socket and it can get UDP packets
+		if (!_udpService.isListening() || !_udpService.canDoFWT()) throw CANT_RECEIVE_UDP;
 
-		// Precreate the receive window for responce reporting
-        _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
+        /*
+         * Only wake these guys up if the service is okay
+         */
 
-		// All incoming seqNo and windowStarts get extended
-        // Acks seqNo need to be extended separately
-		_localExtender     = new SequenceNumberExtender();
-        _extender          = new SequenceNumberExtender();
+        // Get references to the program's UDPMultiplexor, UDPScheduler, and Acceptor objects
+		_multiplexor = UDPMultiplexor.instance();   // The UDPMultiplexor keeps the list of our UDP connections
+		_scheduler   = UDPScheduler.instance();     // The UDPScheduler manages the timing we'll use to send our UDP connection messages
+        _acceptor    = RouterService.getAcceptor(); // The Acceptor keeps the program's listening socket
 
-        // Register yourself for incoming messages
+        // Make the DataWindow object this UDP connection will put messages from the remote computer in
+        _receiveWindow = new DataWindow(
+            DATA_WINDOW_SIZE, // 20, make a DataWindow object that can hold 20 messages
+            1);               // 1, the lowest sequence number of a message we haven't acknowledged yet
+
+        /*
+         * All incoming seqNo and windowStarts get extended
+         * Acks seqNo need to be extended separately
+         */
+
+        // Make 2 SequenceNumberExtender objects, which can watch sequence numbers grow from 0x0000 to 0xffff and then wrap around, and unwrap the numbers
+        _localExtender = new SequenceNumberExtender(); // For the Acks the remote computer acknowledges our packets with, which contain the sequence numbers we assigned our packets
+        _extender      = new SequenceNumberExtender(); // For the sequence numbers the remote computer assigns the packets it sends us
+
+        /*
+         * _multiplexor.register(this) does 3 things:
+         * 
+         * Assigns this new UDPConnectinProcessor object its connection ID number 1 through 255, which no other UDP connection we have right now is using.
+         * 
+         * Lists this new UDPConnectionProcessor in the UDPMultiplexor's list of our UDP connections.
+         * 
+         * Registers us to receive messages.
+         * When the program gets a UDP connection packet with our connection ID number written into its first byte, we'll get the message.
+         * UDPMultiplexor.routeMessage(m) will call our handleMessage(m) method.
+         */
+
+        // Have the UDPMultiplexor assign our connection ID, and list this UDPConnectionProcessor under it in the list it keeps
 		_myConnectionID = _multiplexor.register(this);
+		if (_myConnectionID == UDPMultiplexor.UNASSIGNED_SLOT) throw new IOException("no room for connection"); // We already have 255 UDP connections
 
-		// Throw an exception if we have so many UDP connections we can't make another one
-		if (_myConnectionID == UDPMultiplexor.UNASSIGNED_SLOT) throw new IOException("no room for connection");
+        /*
+         * See if you can establish a pseudo connection
+         * which means each side can send/receive a SYN and ACK
+         */
 
-        // See if you can establish a pseudo connection 
-        // which means each side can send/receive a SYN and ACK
-		tryToConnect();
+        // Send a Syn message with our connection ID every 0.4 seconds for up to 20, until the remote computer sends a Syn telling us the connection ID it's chosen
+        tryToConnect();
     }
 
+    //do
 
 	public InputStream getInputStream() throws IOException {
         if (_outputToInputStream == null) {
@@ -615,21 +741,43 @@ public class UDPConnectionProcessor {
                 _theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT);
     }
 
+    //done
+
     /**
-     *  Test whether the connection is closed
+     * Determine if this UDP connection is closed.
+     * 
+     * @return True if _connectionState is FIN_STATE
      */
     public synchronized boolean isClosed() {
-        return (_connectionState == FIN_STATE);
+
+        // Match _connectionState to FIN_STATE
+        return _connectionState == FIN_STATE;
     }
 
     /**
-     *  Test whether the connection is not fully setup
+     * Determine if this UDP connection is still connecting with the remote computer.
+     * 
+     * If _connectionState is FIN_STATE, we've closed the connection, returns false.
+     * If _connectionState is CONNECT_STATE and we know _theirConnectionID, we're connected, returns false.
+     * Otherwise, returns true.
+     * We haven't found out _theirConnectionID yet, or we have but we're still waiting for _connectionState to be set to CONNECT_STATE.
+     * 
+     * @return True if we haven't connected yet and don't know the ID the remote computer has assigned this connection.
+     *         False if we've made or closed the connection.
      */
 	public synchronized boolean isConnecting() {
-	    return !isClosed() && 
-	    	(_connectionState == PRECONNECT_STATE ||
-	            _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT);
+
+        // Return true if we're still connecting
+	    return
+
+	        // Make sure _connectionState isn't FIN_STATE
+            !isClosed() &&
+
+            // _connectionState is still PRECONNECT_STATE, or we don't know what connection ID they've assigned this connection yet
+	    	(_connectionState == PRECONNECT_STATE || _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT);
 	}
+
+    //do
 
     /**
      *  Test whether the ip and ports match
@@ -762,10 +910,17 @@ public class UDPConnectionProcessor {
         }
     }
 
+    //done
+
     /**
-     *  Build and send an ack with default error handling with
-     *  the messages sequenceNumber, receive window start and 
-     *  receive window space.
+     * Send an Ack message to the remote computer to acknowledge a UDP connection message it sent us.
+     * The Ack we send will have the same sequence number as the given message the remote computer sent us.
+     * 
+     * Build and send an ack with default error handling with
+     * the messages sequenceNumber, receive window start and
+     * receive window space.
+     * 
+     * @param msg The message the remote computer sent us, we'll Ack its sequence number
      */
     private synchronized void safeSendAck(UDPConnectionMessage msg) {
 
@@ -775,26 +930,35 @@ public class UDPConnectionProcessor {
 
             // Make a new Ack message for us to send
             ack = new AckMessage(
-                _theirConnectionID,               // Begin it with the ID the remote computer assigned us and this connection
+                _theirConnectionID,               // Begin it with the ID the remote computer chose for this connection
                 msg.getSequenceNumber(),          // The sequence number of the message we're acknowledging we received
                 _receiveWindow.getWindowStart(),  // The message we need next
                 _receiveWindow.getWindowSpace()); // The number of messages we have room to receive right now
-
           	if (LOG.isDebugEnabled()) LOG.debug("total data packets " + _totalDataPackets + " total acks skipped " + _skippedAcksTotal + " skipped this session " + _skippedAcks);
 
-          	_skippedAcks = 0;
+            // We're about to send an Ack, so restart our count of the number of Ack messages we've skipped sending this computer in a row
+          	_skippedAcks = 0; // This ends our string of skipped Ack messages, if we had one
+
+            // Send the Ack message to the remote computer
             send(ack);
 
+        // The AckMessage() constructor couldn't make the message
         } catch (BadPacketException bpe) {
-            // This would not be good.   
+
+            // Close the connection
             ErrorService.error(bpe);
             closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
+
+        // The UDPService couldn't send the message
         } catch(IllegalArgumentException iae) {
-            // Report an error since this shouldn't ever happen
+
+            // Close the connection
             ErrorService.error(iae);
             closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
+
+    //do
 
     /**
      *  Build and send a fin message with default error handling.
@@ -833,25 +997,38 @@ public class UDPConnectionProcessor {
         }
     }
 
+    //done
 
     /**
-     *  Send a message on to the UDPService
+     * Send a UDP connection message to the remote computer at the far end of the connection this UDPConnectionProcessor object represents.
+     * 
+     * @paam msg The UDP connection message to send, and object that extends UDPConnectionMessage like a SynMessage or AckMessage
      */
-	private synchronized void send(UDPConnectionMessage msg) 
-      throws IllegalArgumentException {
+	private synchronized void send(UDPConnectionMessage msg) throws IllegalArgumentException {
+
+        // Record that now is the last time we sent the remote computer a message
 		_lastSendTime = System.currentTimeMillis();
-        if(LOG.isDebugEnabled())  {
-            LOG.debug("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+
-              _lastSendTime);
-            if ( msg instanceof FinMessage ) { 
+
+        // If the debugging log is enabled
+        if (LOG.isDebugEnabled()) {
+
+            // Record that we're sending this message in it
+            LOG.debug("send :" + msg + " ip:" + _ip + " p:" + _port + " t:" + _lastSendTime);
+
+            // We're going to send a FinMessage
+            if (msg instanceof FinMessage) {
+
+                // Make an Exception and give it to the log
             	Exception ex = new Exception();
             	LOG.debug("", ex);
             }
         }
-		_udpService.send(msg, _ip, _port);  
+
+        // Have the UDPService send the given UDPConnectionMessage to the remote computer
+		_udpService.send(msg, _ip, _port); // Leads to Message.writeQuickly() to get the data of the message
 	}
 
-
+    //do
 
     /**
      *  Schedule an ack timeout for the oldest unacked data.
@@ -980,136 +1157,178 @@ public class UDPConnectionProcessor {
 		} catch (IOException ioe) {}
 	}
 
+    /*
+     * -------- Connection Handling Logic --------
+     */
 
-    // ------------------  Connection Handling Logic -------------------
-    //
+    //done
+
     /**
-     *  Send SYN messages to desired host and wait for Acks and their 
-     *  SYN message.  Block connector while trying to connect.
+     * Send a Syn message with our connection ID every 0.4 seconds for up to 20, until the remote computer sends a Syn telling us the connection ID it's chosen.
+     * The UDPConnectionProcessor() calls tryToConnect() at its end.
+     * When tryToConnect() returns, we're connected.
+     * 
+     * The thread that calls tryToConnect() loops and pauses, sending a Syn message every 0.4 seconds.
+     * If it runs for 20 seconds without a response, tryToConnect() throws the CONNECTION_TIMEOUT IOException.
+     * 
+     * A Syn message has 2 connection IDs, the remote computer's at the start, and ours 4 bytes in to the message.
+     * At first, the Syn messages we send will start with 0 because we don't know the connection ID the remote computer has assigned this connection.
+     * When we find it out, we add it to the start of our Syn message.
+     * 
+     * In the loop, tryToConnect() calls isConnecting() to see if we're connected.
+     * When _connectionState is CONNECT_STATE and we know _theirConnectionID, isConnecting() returns true and we leave the loop and return.
      */
 	private void tryToConnect() throws IOException {
+
 		try {
-            _sequenceNumber       = 0;
 
-            // Keep track of how long you are waiting on connection
-            long       waitTime   = 0;
+            // Start out the sequence number at 0
+            _sequenceNumber = 0; // The sequence number isn't used in this method
 
-            // Build SYN message with my connectionID in it
-            SynMessage synMsg = new SynMessage(_myConnectionID);
+            // Keep track of how long we've been trying to connect
+            long waitTime = 0;
 
-            // Keep sending and waiting until you get a Syn and an Ack from 
-            // the other side of the connection.
-			while ( true ) { 
+            // Make a Syn message to send with our connection ID in it
+            SynMessage synMsg = new SynMessage(_myConnectionID); // We don't know the remote computer's ID for this connection, so the mesage will start 0
 
-                // If we have received their connectionID then use it
-			    synchronized(this){
-			        
-			        if (!isConnecting()) 
-			            break;
-			        
-			        if ( waitTime > _connectTimeOut ) { 
-			            _connectionState = FIN_STATE; 
-			            _multiplexor.unregister(this);
-			            throw CONNECTION_TIMEOUT;
+            /*
+             * Keep sending and waiting until you get a Syn and an Ack from
+             * the other side of the connection.
+             */
+
+            // Loop to send Syn messages every 0.4 seconds
+            while (true) {
+
+                /*
+                 * If we have received their connectionID then use it
+                 */
+
+                // Only let one thread in here at a time
+                synchronized (this) {
+
+                    // If the remote computer sent us a Syn message telling us _theirConnectionID, and we set _connectionState to CONNECT_STATE, leave the loop
+			        if (!isConnecting()) break;
+
+                    // If we've been in this loop for for more than 20 seconds
+			        if (waitTime > _connectTimeOut) {
+
+                        // Give up
+			            _connectionState = FIN_STATE;  // Put this UDP connection into the closed state
+			            _multiplexor.unregister(this); // Have the UDPMultiplexor unlist us
+			            throw CONNECTION_TIMEOUT;      // Throw the exception that we've timed out
 			        }
-			        
-			        if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT &&
-			                _theirConnectionID != synMsg.getConnectionID()) {
-			            synMsg = 
-			                new SynMessage(_myConnectionID, _theirConnectionID);
-			        } 
+
+                    // We know their connection ID
+			        if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT && // We know the remote computer's connection ID now
+                        _theirConnectionID != synMsg.getConnectionID()) {       // It's not written into the start of our Syn message yet
+
+                        // Replace the Syn message we've been sending with one that has both connection IDs
+			            synMsg = new SynMessage(_myConnectionID, _theirConnectionID);
+			        }
 			    }
 
-				// Send a SYN packet with our connectionID 
-				send(synMsg);  
-    
-                // Wait for some kind of response
-				try { Thread.sleep(SYN_WAIT_TIME); } 
-                catch(InterruptedException e) {}
-                waitTime += SYN_WAIT_TIME;
+				// Send our Syn message
+				send(synMsg);
+
+                // Pause here for 0.4 seconds
+				try { Thread.sleep(SYN_WAIT_TIME); } catch (InterruptedException e) {}
+                waitTime += SYN_WAIT_TIME; // Record that we've been trying to connect for another 0.4 seconds
 			}
 
-		} catch (IllegalArgumentException iae) {
-			throw new IOException(iae.getMessage());
-		}
+        // Convert an IllegalArgumentException from send() into an IOException
+		} catch (IllegalArgumentException iae) { throw new IOException(iae.getMessage()); }
 	}
 
+    //do
 
     /**
-     *  Take action on a received message.
+     * Take action on a received message.
      */
     public void handleMessage(UDPConnectionMessage msg) {
+        
         boolean doYield = false;  // Trigger a yield at the end if 1k available
 
         synchronized (this) {
 
-            // Record when the last message was received
+            // Record that this is the last time the remote computer sent us a message
             _lastReceivedTime = System.currentTimeMillis();
-            if(LOG.isDebugEnabled())  
-                LOG.debug("handleMessage :"+msg+" t:"+_lastReceivedTime);
+            if (LOG.isDebugEnabled()) LOG.debug("handleMessage :" + msg + " t:" + _lastReceivedTime);
 
+            // The remote computer sent us a Syn message, telling us the connection ID it chose for this connection
             if (msg instanceof SynMessage) {
-                // Extend the msgs sequenceNumber to 8 bytes based on past state
-                msg.extendSequenceNumber(
-                  _extender.extendSequenceNumber(
-                    msg.getSequenceNumber()) );
 
-                // First Message from other host - get his connectionID.
-                SynMessage smsg        = (SynMessage) msg;
-                byte       theirConnID = smsg.getSenderConnectionID();
-                if ( _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT ) { 
-                    // Keep track of their connectionID
+                // Extend the message's sequence number from 2 bytes to 8 bytes
+                msg.extendSequenceNumber(_extender.extendSequenceNumber(msg.getSequenceNumber())); // Syn messages have the remote computer's sequence numbers, use _extender
+
+                // Read the connection ID the remote computer chose for this UDP connection
+                SynMessage smsg = (SynMessage)msg;
+                byte theirConnID = smsg.getSenderConnectionID(); // This is the connection ID 4 bytes into the message, at the start of the data area in the GUID space
+
+                // We don't know the connection ID the remote computer chose for this connection yet
+                if (_theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT) { // Our record of the remote computer's connection ID is still 0
+
+                    // Save it
                     _theirConnectionID = theirConnID;
-                } else if ( _theirConnectionID == theirConnID ) {
-                    // Getting a duplicate SYN so just ack it again.
+
+                // We already knew it
+                } else if (_theirConnectionID == theirConnID) {
+
+                    /*
+                     * Getting a duplicate SYN so just ack it again.
+                     */
+
+                // The remote computer sent us a second Syn with a different connection ID
                 } else {
-                    // Unmatching SYN so just ignore it
+
+                    // Ignore this Syn message
                     return;
                 }
 
-                // Ack their SYN message
-                safeSendAck(msg);
+                // Acknowledge that we've received the Syn message the remote computer sent us by sending an Ack message in response
+                safeSendAck(msg); // Give safeSendAck(msg) the Syn message to compose an Ack in response
+
+            // The remote computer sent us an Ack message, acknowledging a Syn or Data message
             } else if (msg instanceof AckMessage) {
-                // Extend the msgs sequenceNumber to 8 bytes based on past state
-                // Note that this sequence number is of local origin
-                msg.extendSequenceNumber(
-                  _localExtender.extendSequenceNumber(
-                    msg.getSequenceNumber()) );
 
-                AckMessage    amsg   = (AckMessage) msg;
+                // Extend the Ack's sequence number from 2 bytes to 8 bytes
+                msg.extendSequenceNumber(_localExtender.extendSequenceNumber(msg.getSequenceNumber())); // Ack messages have our sequence numbers, use _localExtender
+                AckMessage amsg = (AckMessage)msg;                                                      // Look at the given message as an AckMessage object
+                amsg.extendWindowStart(_localExtender.extendSequenceNumber(amsg.getWindowStart()));     // The window start in an Ack is also one of our sequence numbers
 
-                // Extend the windowStart to 8 bytes the same as the 
-                // sequenceNumber 
-                amsg.extendWindowStart(
-                  _localExtender.extendSequenceNumber(amsg.getWindowStart()) );
+                // Read information from the Ack message
+                long seqNo  = amsg.getSequenceNumber();       // The sequence number the remote computer is acknowledging receiving
+                long wStart = amsg.getWindowStart();          // The earliest numbered mesage the remote computer still needs
+                int priorR  = _receiverWindowSpace;           // The last number of messages the remote computer reported it could receive 
+                _receiverWindowSpace = amsg.getWindowSpace(); // The number of messages the remote computer reports it can receive now
 
-                long          seqNo  = amsg.getSequenceNumber();
-                long          wStart = amsg.getWindowStart();
-                int           priorR = _receiverWindowSpace;
-                _receiverWindowSpace = amsg.getWindowSpace();
+                /*
+                 * Adjust the receivers window space with knowledge of
+                 * how many extra messages we have sent since this ack
+                 */
 
-                // Adjust the receivers window space with knowledge of
-                // how many extra messages we have sent since this ack
-                if ( _sequenceNumber > wStart ) 
-                    _receiverWindowSpace = 
-					  DATA_WINDOW_SIZE + (int) (wStart - _sequenceNumber);
-                    //_receiverWindowSpace += (wStart - _sequenceNumber);
+                if (_sequenceNumber > wStart) _receiverWindowSpace = DATA_WINDOW_SIZE + (int)(wStart - _sequenceNumber);
+
+                //_receiverWindowSpace += (wStart - _sequenceNumber);
 
                 // Reactivate writing if required
-                if ( (priorR == 0 || _waitingForDataSpace) && 
-                     _receiverWindowSpace > 0 ) {
-                    if(LOG.isDebugEnabled())  
-                        LOG.debug(" -- ACK wakeup");
+                if ((priorR == 0 || _waitingForDataSpace) && _receiverWindowSpace > 0 ) {
+
+                    if (LOG.isDebugEnabled()) LOG.debug(" -- ACK wakeup");
                     writeSpaceActivation();
                 }
 
-
                 // If they are Acking our SYN message, advance the state
-                if ( seqNo == 0 && isConnecting() && _connectionState == PRECONNECT_STATE ) { 
+                if ( seqNo == 0 && isConnecting() && _connectionState == PRECONNECT_STATE ) {
+
                     // The connection should be successful assuming that I
                     // receive their SYN so move state to CONNECT_STATE
                     // and get ready for activity
                     prepareOpenConnection();
+                    
+                    //ok, for the connection to be open, they have to do 2 things
+                    // they have to send us their syn, telling us their connection id number
+                    // they have to ack one of our syns, done here
+                    
                 } else if ( _waitingForFinAck && seqNo == _finSeqNo ) { 
                     // A fin message has been acked on shutdown
                     _waitingForFinAck = false;

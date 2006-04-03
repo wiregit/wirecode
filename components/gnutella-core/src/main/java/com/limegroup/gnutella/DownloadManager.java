@@ -1,3 +1,4 @@
+
 package com.limegroup.gnutella;
 
 import java.io.BufferedInputStream;
@@ -63,7 +64,6 @@ import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.version.UpdateInformation;
-
 
 /** 
  * The list of all downloads in progress.  DownloadManager has a fixed number 
@@ -1294,6 +1294,7 @@ public class DownloadManager implements BandwidthTracker {
 
     /**
      * Start a thread to wait for an incoming firewall-to-firewall file transfer.
+     * We've routed a push packet to the remote computer, telling it to start trying to start the connection to us.
      * 
      * Starts a thread named "FWIncoming" that calls new UDPConnection(file.getHost(), file.getPort()).
      * This makes a new UDPConnection object that starts sending UDP packets to the file's IP address and port number.
@@ -1374,16 +1375,8 @@ public class DownloadManager implements BandwidthTracker {
                     // Make a note this happened in the debugging log
                     LOG.debug("failed to establish UDP connection", crap);
 
-                    // The UDPConnection constructor made and returned a UDPConnection object, representing an open UDP connection
-                    if (fwTrans != null) {
-
-                        try {
-
-                            // Close the UDP connection
-                            fwTrans.close();
-
-                        } catch (IOException ignored) {}
-                    }
+                    // If the UDPConnection constructor made and returned a UDPConnection object, representing an open UDP connection, close it
+                    if (fwTrans != null) try { fwTrans.close(); } catch (IOException ignored) {}
 
                     // Record the failed UDP connection in statistics
                     DownloadStat.FW_FW_FAILURE.incrementStat();

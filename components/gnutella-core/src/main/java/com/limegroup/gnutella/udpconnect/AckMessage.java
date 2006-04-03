@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella.udpconnect;
 
@@ -8,8 +8,27 @@ import com.limegroup.gnutella.messages.BadPacketException;
 /**
  * A computer sends an Ack message to acknowledge it's received a Syn message or a Data message.
  * 
+ * A 23-byte Ack message has the following structure:
  * 
+ * aa bc dd dd ee ee ff ff
+ * gg gg gg gg gg gg gg gg
+ * hh ii jj kk kk kk kk
  * 
+ * a is the connection ID the remote computer assigned this connection.
+ * b and c are 4-bit nibbles that fit together into a single byte.
+ * b is the operation code, 1 identifies this as an Ack message.
+ * c is the length of data in the GUID area, an Ack has 4 bytes there.
+ * d is the sequence number, an Ack's sequence number is the same as the message it's acknowledging having received.
+ * 
+ * e through g are the 12 bytes in the GUID area we can start to put data, our 4 bytes of data fit into this area.
+ * e through f are the 4 bytes of data specific to an Ack message.
+ * e is the window start, the sequence number of the lowest numbered message the sending computer is missing.
+ * f is the window space, the number of 512-byte messages the sending computer has space to receive right now.
+ * g is the extra area in the GUID we don't need.
+ * 
+ * h is the Gnutella packet type, 0x41 identifies this as a UDP connection message.
+ * i and j are the TTL and hops, 1 and 0, and not really useful or used.
+ * k is the length of the payload beyond this 23-byte header, 0, there is no payload because all our data fits in the 12-byte GUID area e through g.
  */
 public class AckMessage extends UDPConnectionMessage {
 
@@ -25,7 +44,7 @@ public class AckMessage extends UDPConnectionMessage {
      * 
      * Only UDPConnectionProcessor.safeSendAck() calls this.
      * 
-     * @param connectionID   The connection ID the remote computer chose to identify us and the UDP packets we're sending
+     * @param connectionID   The connection ID the remote computer chose to identify this connection and the packets we send that are a part of it
      * @param sequenceNumber The sequence number of the message we're acknowledging we've received
      * @param windowStart    The lowest-numbered message we're missing
      * @param windowSpace    The number of messages we can receive right now, 0 if we're full
@@ -34,7 +53,7 @@ public class AckMessage extends UDPConnectionMessage {
 
         // Call the UDPConnectionMessage constructor to make the message
         super(
-            connectionID,   // The connection ID the remote computer chose
+            connectionID,   // The connection ID the remote computer chose for this connection
             OP_ACK,         // 0x1, this is an Ack message
             sequenceNumber, // The sequence number
 
@@ -109,7 +128,7 @@ public class AckMessage extends UDPConnectionMessage {
 	}
 
     /**
-     * Find out how many more 512 byte messages the computer that made this Ack can take right now.
+     * Find out how many more 512-byte messages the computer that made this Ack can take right now.
      * 
      * The windowSpace is a measure of how much more data the receiver can
      * receive within its buffer.  This number will go to zero if the

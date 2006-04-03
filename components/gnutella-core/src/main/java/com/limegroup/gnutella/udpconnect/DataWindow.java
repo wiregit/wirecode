@@ -45,9 +45,10 @@ public class DataWindow
      *  or one.
      */
 	public DataWindow(int size, long start) {
+
 		windowStart = start;
 		windowSize  = size;
-		window      = new HashMap(size+2);
+		window      = new HashMap(size + 2);
 	}
 
     /*
