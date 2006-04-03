@@ -10,9 +10,9 @@ import java.nio.channels.Selector;
 
 class StubSelectionKey extends SelectionKey {
     
-    private volatile int interestOps;
-    private int readyOps;
-    private volatile boolean valid;
+    private volatile int interestOps = 0;
+    private int readyOps = 0;
+    private volatile boolean valid = true;
     private SelectableChannel channel;
     private Selector selector;
     

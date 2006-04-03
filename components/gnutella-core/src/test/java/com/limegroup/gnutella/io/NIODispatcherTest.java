@@ -311,10 +311,11 @@ public class NIODispatcherTest extends BaseTestCase {
         try {
             StubReadConnectObserver observer = new StubReadConnectObserver();
             StubChannel channel = new StubChannel();
+            observer.setChannel(channel);
             Socket socket = new Socket();
             channel.setSocket(socket);
             NIODispatcher.instance().registerConnect(channel, observer, 0);
-            Thread.sleep(100);
+            Thread.sleep(300);
             assertEquals(SelectionKey.OP_CONNECT, interestOps(channel));
             channel.setReadyOps(SelectionKey.OP_CONNECT);
             observer.waitForEvent(1000);

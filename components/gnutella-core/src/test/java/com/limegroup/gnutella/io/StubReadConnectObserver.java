@@ -26,6 +26,11 @@ public class StubReadConnectObserver implements ReadObserver, ConnectObserver, R
         notify();
     }
     
+    public void setChannel(SocketChannel channel) {
+        this.channel = channel;
+        readDelegate.setChannel(channel);
+    }
+    
     public SocketChannel getChannel() throws IOException {
         if(channel == null) {
             channel = SocketChannel.open();
