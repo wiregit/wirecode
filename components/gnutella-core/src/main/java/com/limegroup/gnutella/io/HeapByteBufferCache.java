@@ -28,7 +28,7 @@ public class HeapByteBufferCache {
         }
         
         // if not, see if we have a buffer of the exact size
-        Integer key = new Integer(size);
+        Comparable key = new Integer(size);
         List l = (List) CACHE.get(key);
 
         // if yes, return it.
@@ -43,7 +43,7 @@ public class HeapByteBufferCache {
             
         // are there any larger buffers than this one at all?
         // if not, just allocate a new one
-        Integer largest = (Integer) CACHE.lastKey();
+        Comparable largest = (Comparable)CACHE.lastKey();
         if (largest.compareTo(key) < 0) 
             return ByteBuffer.allocate(size);
         
@@ -53,7 +53,7 @@ public class HeapByteBufferCache {
         // creating a new object is justified.
         for (Iterator iter = CACHE.entrySet().iterator();iter.hasNext();) {
             Map.Entry entry = (Map.Entry) iter.next();
-            if (key.compareTo((Comparable)entry.getKey()) > 0)
+            if (key.compareTo(entry.getKey()) > 0)
                 continue;
             
             l = (List) entry.getValue();
