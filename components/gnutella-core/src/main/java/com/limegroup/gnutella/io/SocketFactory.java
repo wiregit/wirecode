@@ -24,4 +24,13 @@ public class SocketFactory {
        //  return new BlockingServerSocketAdapter(port, observer); // based on IO
     }
     
+    /**
+     * Returns a new ServerSocket with the observer.
+     * The socket is NOT BOUND.
+     */
+    public static ServerSocket newServerSocket(AcceptObserver observer) throws IOException {
+        return new NIOServerSocket(observer); // based on NIO
+       //  return new BlockingServerSocketAdapter(observer); // based on IO
+    }
+    
 }
