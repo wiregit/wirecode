@@ -205,7 +205,11 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         this.router = router;
         this.fileManager = fileManager;
         scheduleWaitingPump();
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
+        RouterService.getConnectionDispatcher().
+        addConnectionAcceptor(this,
+        		new String[]{"GIV"},
+        		false,
+        		true);
     }
 
     /**
@@ -928,23 +932,9 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         }
     }
 
-    public Collection getFirstWords() {
-    	List ret = new ArrayList(1);
-    	ret.add("GIV");
-    	return ret;
-    }
-    
     public void acceptConnection(String word, Socket sock) {
     	HTTPStat.GIV_REQUESTS.incrementStat();
     	acceptDownload(sock);
-    }
-    
-    public boolean localOnly() {
-    	return false;
-    }
-    
-    public boolean isBlocking() {
-    	return true;
     }
     
     /**

@@ -41,28 +41,30 @@ public class ConnectionDispatcher {
     	}
     }
 
-    public void addConnectionAcceptor(ConnectionAcceptor acceptor) {
+    public void addConnectionAcceptor(ConnectionAcceptor acceptor,
+    		String [] words,
+    		boolean localOnly,
+    		boolean blocking) {
+    	Delegator d = new Delegator(acceptor, localOnly, blocking);
     	synchronized(protocols) {
-    		for (Iterator iter = acceptor.getFirstWords().iterator(); iter.hasNext();) {
-    			String word = (String) iter.next();
-    			if (word.length() > longestWordSize)
-    				longestWordSize = word.length();
-    			protocols.put(word,acceptor);
+    		for (int i = 0; i < words.length; i++) {
+    			if (words[i].length() > longestWordSize)
+    				longestWordSize = words[i].length();
+    			protocols.put(words[i],d);
     		}
     	}
     }
     
-    public void removeConnectionAcceptor(ConnectionAcceptor acceptor) {
+    public void removeConnectionAcceptor(String [] words) {
     	synchronized(protocols) {
-    		for (Iterator iter = acceptor.getFirstWords().iterator(); iter.hasNext();)
-    			protocols.remove(iter.next());
-    		int newLongestSize = 0;
+    		for (int i = 0; i < words.length; i++)
+    			protocols.remove(words[i]);
+    		longestWordSize = 0;
     		for (Iterator iter = protocols.keySet().iterator();iter.hasNext();){
     			String word = (String) iter.next();
-    			if (word.length() > newLongestSize)
-    				newLongestSize = word.length();
+    			if (word.length() > longestWordSize)
+    				longestWordSize = word.length();
     		}
-    		longestWordSize = newLongestSize;
     	}
     }
     
@@ -83,62 +85,62 @@ public class ConnectionDispatcher {
         }
         
         // try to find someone who understands this protocol
-        final ConnectionAcceptor acceptor = (ConnectionAcceptor) protocols.get(word);
+        Delegator delegator = (Delegator) protocols.get(word);
        
         // no protocol available to handle this word 
-        if (acceptor == null) {
+        if (delegator == null) {
         	HTTPStat.UNKNOWN_REQUESTS.incrementStat();
         	if (LOG.isErrorEnabled())
         		LOG.error("Unknown protocol: " + word);
         	IOUtils.close(client);
         }
-        
-        // Only selectively allow localhost connections
-        boolean localHost = NetworkUtils.isLocalHost(client);
-        if (!acceptor.localOnly()) {
-            if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && localHost) {
-                LOG.trace("Killing localhost connection with non-local protocol.");
-                IOUtils.close(client);
-                return;
-            }
-        } else if (!localHost) { // && word.equals(MAGNET)
-            LOG.trace("Killing non-local request for local protcol.");
-            IOUtils.close(client);
-            return;
-        }
 
-        // GNUTELLA & LIMEWIRE can do this because if we dispatched with 'newThread' true,
-        // that means it was dispatched from NIODispatcher, meaning the connection can
-        // support asynchronous handshaking & looping, so acceptConnection will return immediately.
-        // Conversely, if 'newThread' is false, the connection has already been given its own
-        // thread, so the fact that acceptConnection will block is okay.
-        //
-        // The others perform no blocking operations, so either way, it is okay to process
-        // them immediately.
-        if (!acceptor.isBlocking()) {
-        	acceptor.acceptConnection(word, client);
-        	return;
-        }
-        
-        // All the below protocols are handled in a blocking manner by their managers.
-        // Thus, if this was handled by NIODispatcher (and 'newThread' is true), we need
-        // to spawn a new thread to process them.  Conversely, if 'newThread' is false,
-        // they have already been given their own thread and the calls can block
-        // with no problems.
-        Runnable runner = new Runnable() {
-            public void run() {
-            		acceptor.acceptConnection(word,client);
-                // We must not close the connection at this point, because some things may
-                // have only done a temporary blocking operation and then handed the socket
-                // off to a callback (such as DownloadManager parsing the GIV).
-            }
-        };
-        
-        // (see comment above)
-        if(newThread)
-            ThreadFactory.startThread(runner, "IncomingConnection");
-        else
-            runner.run();
+        delegator.delegate(word, client, newThread);
+    }
+    
+    /**
+     * Utility wrapper that checks whether the new protocol is
+     * supposed to be local, and whether the reading should happen
+     * in a new thread or not.
+     */
+    private class Delegator {
+    	private final ConnectionAcceptor acceptor;
+    	private final boolean localOnly, blocking;
+    	
+    	Delegator(ConnectionAcceptor acceptor, 
+    			boolean localOnly, 
+    			boolean blocking) {
+    		this.acceptor = acceptor;
+    		this.localOnly = localOnly;
+    		this.blocking = blocking;
+    	}
+    	
+    	public void delegate(final String word, 
+    			final Socket sock, 
+    			boolean newThread) {
+    		boolean localHost = NetworkUtils.isLocalHost(sock);
+    		boolean drop = false;
+    		if (localOnly && !localHost)
+    			drop = true;
+    		if (!localOnly && localHost && 
+    				ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+    			drop = true;
+    		
+    		if (drop) {
+    			IOUtils.close(sock);
+    			return;
+    		}
+    		
+    		if (blocking && newThread) {
+    			Runnable r = new Runnable() {
+    				public void run() {
+    					acceptor.acceptConnection(word, sock);
+    				}
+    			};
+    			ThreadFactory.startThread(r, "IncomingConnection");
+    		} else
+    			acceptor.acceptConnection(word, sock);
+    	}
     }
 }
 

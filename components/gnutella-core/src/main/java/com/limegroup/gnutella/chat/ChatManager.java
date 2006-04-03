@@ -46,7 +46,11 @@ public final class ChatManager implements ConnectionAcceptor {
 	}
 
 	private ChatManager() {
-		RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
+		RouterService.getConnectionDispatcher().
+		addConnectionAcceptor(this,
+				new String[]{"CHAT"},
+				false,
+				false);
 	}
 	
 	/** 
@@ -157,19 +161,5 @@ public final class ChatManager implements ConnectionAcceptor {
 	public void acceptConnection(String word, Socket s) {
 		HTTPStat.CHAT_REQUESTS.incrementStat();
 		accept(s);
-	}
-
-	public Collection getFirstWords() {
-		List ret = new ArrayList(1);
-		ret.add("CHAT");
-		return ret;
-	}
-	
-	public boolean localOnly() {
-		return false;
-	}
-	
-	public boolean isBlocking() {
-		return false;
 	}
 }

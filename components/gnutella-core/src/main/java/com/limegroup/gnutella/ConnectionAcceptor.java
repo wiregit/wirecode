@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.net.Socket;
-import java.util.Collection;
 
 /**
  * Objects of this type can be notified whenever a new
@@ -19,21 +18,4 @@ public interface ConnectionAcceptor {
 	 * @param s the newly opened socket.
 	 */
 	public void acceptConnection(String word, Socket s);
-	
-	/**
-	 * @return a Collection of words this understands
-	 */
-	public Collection getFirstWords();
-	
-	/**
-	 * @return whether this acceptor should accept only
-	 * localhost connections.
-	 */
-	public boolean localOnly();
-	
-	/**
-	 * @return whether this acceptor is blocking (i.e. should
-	 * run in a different thread).
-	 */
-	public boolean isBlocking();
 }

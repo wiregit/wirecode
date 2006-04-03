@@ -294,7 +294,11 @@ public class Acceptor implements ConnectionAcceptor {
         MulticastService.instance().start();
         UDPService.instance().start();
         RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
+        RouterService.getConnectionDispatcher().
+        addConnectionAcceptor(this,
+        		new String[]{"CONNECT","\n\n"},
+        		false,
+        		false);
         _started = true;
     }
 	
@@ -486,21 +490,6 @@ public class Acceptor implements ConnectionAcceptor {
         if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
             checkFirewall(s.getInetAddress());
         IOUtils.close(s);
-	}
-	
-	public Collection getFirstWords() {
-		List ret = new ArrayList(2);
-		ret.add("CONNECT");
-		ret.add("\n\n");
-		return ret;
-	}
-	
-	public boolean localOnly() {
-		return false;
-	}
-	
-	public boolean isBlocking() {
-		return false;
 	}
 	
 	/**

@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Collection;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -258,7 +257,11 @@ public class ConnectionManager implements ConnectionAcceptor {
     public void initialize() {
         _catcher = RouterService.getHostCatcher();
 
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
+        RouterService.getConnectionDispatcher().
+        addConnectionAcceptor(this,
+        		new String[]{ConnectionSettings.CONNECT_STRING_FIRST_WORD,"LIMEWIRE"},
+        		false,
+        		false);
         
         // schedule the Runnable that will allow us to change
         // the number of connections we're shooting for if
@@ -312,21 +315,6 @@ public class ConnectionManager implements ConnectionAcceptor {
     		return; //drop it.
     	
     	acceptConnection(socket);
-    }
-    
-    public Collection getFirstWords() {
-    	List l = new ArrayList(2);
-    	l.add(ConnectionSettings.CONNECT_STRING_FIRST_WORD);
-    	l.add("LIMEWIRE");
-    	return l;
-    }
-    
-    public boolean localOnly() {
-    	return false;
-    }
-    
-    public boolean isBlocking() {
-    	return false;
     }
     
     /**

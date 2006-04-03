@@ -54,21 +54,11 @@ public class ExternalControl implements ConnectionAcceptor {
 		new ExternalControl();
 	
 	private ExternalControl() {
-		RouterService.getConnectionDispatcher().addConnectionAcceptor(this);
-	}
-	
-	public boolean localOnly() {
-		return true;
-	}
-	
-	public boolean isBlocking() {
-		return true;
-	}
-	
-	public Collection getFirstWords() {
-		Collection ret = new ArrayList();
-		ret.add("MAGNET");
-		return ret;
+		RouterService.getConnectionDispatcher().
+		addConnectionAcceptor(this,
+				new String[]{"MAGNET"},
+				true,
+				true);
 	}
 	
 	public void acceptConnection(String word, Socket sock) {
