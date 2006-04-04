@@ -672,8 +672,7 @@ public class UDPConnectionProcessor {
     private synchronized void sendData(ByteBuffer chunk) {
         try {
             assert chunk.position() == 0;
-            DataMessage dm = new DataMessage(_theirConnectionID,  
-                    _sequenceNumber, chunk.array(), chunk.remaining()); 
+            DataMessage dm = new DataMessage(_theirConnectionID,_sequenceNumber, chunk); 
             send(dm);
 			DataRecord drec   = _sendWindow.addData(dm);  
             drec.sentTime     = _lastSendTime;
@@ -1055,7 +1054,7 @@ public class UDPConnectionProcessor {
             _sendWindow.pseudoAckToReceiverWindow(amsg.getWindowStart());
             
             // Clear out the acked blocks at window start
-            _sendWindow.clearLowAckedBlocks();  
+            _sendWindow.clearLowAckedBlocks(_channel);  
 
             // Update the chunk limit for fast (nonlocking) access
             _chunkLimit = _sendWindow.getWindowSpace();

@@ -26,7 +26,8 @@ import com.limegroup.gnutella.io.WriteObserver;
  * we don't need the additional InterestAdapter.
  */
 class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
-                                                        InterestWriteChannel {
+                                                        InterestWriteChannel,
+                                                        ChunkReleaser {
     
     /** The processor this channel is writing to / reading from. */
     private final UDPConnectionProcessor processor;
@@ -219,7 +220,14 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
      *  Allocates a chunk for writing to.
      */
     private void allocateNewChunk() {
-        activeChunk = ByteBuffer.allocate(UDPConnectionProcessor.DATA_CHUNK_SIZE);
+        activeChunk = NIODispatcher.instance().getBufferCache().getHeap(UDPConnectionProcessor.DATA_CHUNK_SIZE);
+    }
+    
+    /**
+     * Releases a chunk.
+     */
+    public void releaseChunk(ByteBuffer chunk) {
+        NIODispatcher.instance().getBufferCache().release(chunk);
     }
 
     /**

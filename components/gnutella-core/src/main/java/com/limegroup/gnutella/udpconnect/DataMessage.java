@@ -9,42 +9,42 @@ import com.limegroup.gnutella.messages.BadPacketException;
 public class DataMessage extends UDPConnectionMessage {
 
 	public static final int MAX_DATA = 512;
+    private final ByteBuffer chunk;
 
     /**
      * Construct a new DataMessage with the specified data.
      */
-    public DataMessage(byte connectionID, long sequenceNumber, 
-	  byte[] data, int datalength) {
-
-        super(
-          /* his connectionID           */ connectionID, 
-          /* opcode                     */ OP_DATA, 
-          /* sequenceNumber             */ sequenceNumber, 
-          /* data                       */ data,
-          /* data length                */ datalength
-          );
-
+    public DataMessage(byte connectionID, long sequenceNumber, ByteBuffer chunk) {
+        super(connectionID, OP_DATA, sequenceNumber, chunk.array(), chunk.remaining());
+        this.chunk = chunk;
+    }
+    
+    public DataMessage(byte connectionID, long sequenceNumber, byte[] data, int len) {
+        super(connectionID, OP_DATA, sequenceNumber, data, len);
+        this.chunk = null;
+    }
+    
+    ByteBuffer getChunk() {
+        return chunk;
     }
 
     /**
      * Construct a new DataMessage from the network.
      */
-    public DataMessage(
-      byte[] guid, byte ttl, byte hops, byte[] payload) 
-      throws BadPacketException {
-
-      	super(guid, ttl, hops, payload);
+    public DataMessage(byte[] guid, byte ttl, byte hops, byte[] payload) throws BadPacketException {
+        super(guid, ttl, hops, payload);
+        this.chunk = null;
     }
 
     /**
-     *  Return the data in the GUID as the data1 chunk.
+     * Return the data in the GUID as the data1 chunk.
      */
     public ByteBuffer getData1Chunk() {
         return _data1;
     }
 
     /**
-     *  Return the data in the payload as the data2 chunk/
+     * Return the data in the payload as the data2 chunk/
      */
     public ByteBuffer getData2Chunk() {
         return _data2;

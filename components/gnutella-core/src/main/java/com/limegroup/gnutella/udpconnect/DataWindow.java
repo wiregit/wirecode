@@ -57,7 +57,7 @@ public class DataWindow
     /*
      *  Add a new message to the window.  
      */
-	public DataRecord addData(UDPConnectionMessage msg) {
+	public DataRecord addData(DataMessage msg) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
 
@@ -146,7 +146,7 @@ public class DataWindow
      *  Clear out the acknowledged blocks at the beginning and advance the 
      *  window forward.  Return the number of acked blocks.
      */
-	public int clearLowAckedBlocks() {
+	public int clearLowAckedBlocks(ChunkReleaser releaser) {
         DataRecord d;
         Long     pkey;
         int        count = 0;
@@ -154,6 +154,9 @@ public class DataWindow
             pkey = new Long(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.acks > 0 ) {
+                if(releaser != null) {
+                   releaser.releaseChunk(d.msg.getChunk());
+                }
                 window.remove(pkey);
                 count++;
             } else {
@@ -161,7 +164,7 @@ public class DataWindow
             }
         }
         windowStart += count;
-		return(count);
+		return count;
 	}
 
     /** 
@@ -175,7 +178,7 @@ public class DataWindow
             if (window.get(pkey) == null)
                 return(i);
         }
-        return(-1);
+        return -1;
     }
 
     /** 
@@ -507,14 +510,14 @@ public class DataWindow
  */
 class DataRecord {
 	final Long 				    pkey;     // sequence number as a Long
-	final UDPConnectionMessage  msg;      // the actual data message
+	final DataMessage  msg;      // the actual data message
     int                         sends;    // count of the sends
 	boolean 		            read;     // whether the data was read
 	int   		                acks;     // count of the number of acks
     long                        sentTime; // when it was sent
     long                        ackTime;  // when it was acked
     
-    DataRecord(long pnum, UDPConnectionMessage msg) {
+    DataRecord(long pnum, DataMessage msg) {
     	pkey = new Long(pnum);
     	this.msg=msg;
     }

@@ -141,8 +141,7 @@ public class UDPMessageTest extends BaseTestCase {
 
         DataMessage dmWrite;
         DataMessage dmRead;
-        dmWrite = 
-          new DataMessage(connectionID, sequenceNumber, data, datalength);
+        dmWrite = new DataMessage(connectionID, sequenceNumber, data, datalength);
 
         // Write the message out
         sout = new ByteArrayOutputStream();
