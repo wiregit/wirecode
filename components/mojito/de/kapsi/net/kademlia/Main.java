@@ -220,21 +220,21 @@ public class Main {
         
         SocketAddress addr = new InetSocketAddress(host, port);
         
-        System.out.println("Ping... " + addr);
+        System.out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
-            public void pingResponse(KUID nodeId, SocketAddress address, long time) {
-                if (time >= 0L) {
-                    if (nodeId != null) {
-                        System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " succeeded: " + time + "ms");
-                    } else {
-                        System.out.println("*** Ping to " + address + " succeeded: " + time + "ms");
-                    }
+            public void pingSuccess(KUID nodeId, SocketAddress address, long time) {
+                if (nodeId != null) {
+                    System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " succeeded: " + time + "ms");
                 } else {
-                    if (nodeId != null) {
-                        System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " failed");
-                    } else {
-                        System.out.println("*** Ping to " + address + " failed");
-                    }
+                    System.out.println("*** Ping to " + address + " succeeded: " + time + "ms");
+                }
+            }
+            
+            public void pingTimeout(KUID nodeId, SocketAddress address) {
+                if (nodeId != null) {
+                    System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " failed");
+                } else {
+                    System.out.println("*** Ping to " + address + " failed");
                 }
             }
         });

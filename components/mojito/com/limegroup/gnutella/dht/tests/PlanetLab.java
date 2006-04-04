@@ -56,7 +56,6 @@ public class PlanetLab {
                 synchronized(lock) {
                     dht.bootstrap(dst, new BootstrapListener() {
                         
-                        
                         public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
                             if (nodes.isEmpty()) {
                                 System.out.println(index + ": " + nodeId + " failed to bootstrap at PHASE 1");

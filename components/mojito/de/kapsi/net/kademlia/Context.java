@@ -100,7 +100,7 @@ public class Context implements Runnable {
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
         messageDispatcher = new MessageDispatcher(this);
-        eventDispatcher = new EventDispatcher();
+        eventDispatcher = new EventDispatcher(this);
         messageFactory = new MessageFactory(this);
         publisher = new KeyValuePublisher(this);
         bucketRefresher = new RandomBucketRefresher(this);
@@ -142,6 +142,10 @@ public class Context implements Runnable {
     
     public KUID getLocalNodeID() {
         return nodeId;
+    }
+    
+    public SocketAddress getSocketAddress() {
+        return (externalAddress != null ? externalAddress : localAddress);
     }
     
     public SocketAddress getLocalSocketAddress() {
@@ -361,44 +365,30 @@ public class Context implements Runnable {
     public void bootstrap(SocketAddress address, final BootstrapListener l) throws IOException {
         // Ping the ContactNode
         ping(address, new PingListener() {
-            public void pingResponse(KUID nodeId, SocketAddress address, final long time1) {
-                
-                // Ping was successful, bootstrap!
-                if (time1 >= 0L) {
-                    try {
-                        lookup(getLocalNodeID(), new FindNodeListener() {
-                            public void foundNodes(final KUID lookup, Collection nodes, Map queryKeys, final long time2) {
+            public void pingSuccess(KUID nodeId, SocketAddress address, final long time1) {
+                try {
+                    lookup(getLocalNodeID(), new FindNodeListener() {
+                        public void foundNodes(final KUID lookup, Collection nodes, Map queryKeys, final long time2) {
+                            if (l != null) {
+                                l.initialPhaseComplete(getLocalNodeID(), nodes, time1+time2);
+                            }
+                            //now refresh furthest buckets too! 
+                            try {
+                                routeTable.refreshBuckets(false,l);
+                            } catch (IOException err) {
+                                LOG.error(err);
                                 if (l != null) {
-                                    l.initialPhaseComplete(getLocalNodeID(), nodes, time1+time2);
-                                }
-                                //now refresh furthest buckets too! 
-                                try {
-                                    routeTable.refreshBuckets(false,l);
-                                } catch (IOException err) {
-                                    LOG.error(err);
-                                    if (l != null) {
-                                        fireEvent(new Runnable() {
-                                            public void run() {
-                                                l.secondPhaseComplete(time2,false);
-                                            }
-                                        });
-                                    }
+                                    fireEvent(new Runnable() {
+                                        public void run() {
+                                            l.secondPhaseComplete(time2,false);
+                                        }
+                                    });
                                 }
                             }
-                        });
-                    } catch (IOException err) {
-                        LOG.error(err);
-                        if (l != null) {
-                            fireEvent(new Runnable() {
-                                public void run() {
-                                    l.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time1);
-                                }
-                            });
                         }
-                    }
-                    
-                // Ping failed, notify listener!
-                } else {
+                    });
+                } catch (IOException err) {
+                    LOG.error(err);
                     if (l != null) {
                         fireEvent(new Runnable() {
                             public void run() {
@@ -408,11 +398,21 @@ public class Context implements Runnable {
                     }
                 }
             }
+            
+            public void pingTimeout(KUID nodeId, SocketAddress address) {
+                if (l != null) {
+                    fireEvent(new Runnable() {
+                        public void run() {
+                            l.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
+                        }
+                    });
+                }
+            }
         });
     }
     
     /** store */
-    public void store(final KeyValue keyValue, final StoreListener l) throws IOException {
+    public void store(final KeyValue keyValue, final StoreListener l) throws IOException {       
         lookup(keyValue.getKey(), new FindNodeListener() {
             public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time) {
                 try {

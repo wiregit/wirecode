@@ -119,7 +119,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
             
             if (!finished) {
-                finishValueLookup(lookup, response, time());
+                finishValueLookup(lookup, response.getValues(), time());
             }
             
             finished = true;
@@ -130,7 +130,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             
             FindNodeResponse response = (FindNodeResponse)message;
             
-            for(Iterator it = response.iterator(); it.hasNext(); ) {
+            Collection values = response.getValues();
+            for(Iterator it = values.iterator(); it.hasNext(); ) {
                 ContactNode node = (ContactNode)it.next();
                 
                 if (!isQueried(node) 
@@ -241,7 +242,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             if (isValueLookup()) {
                 finishValueLookup(lookup, null, time);
             } else {
-                Collection nodes = responses.select(lookup, responses.size());
+                List nodes = responses.select(lookup, responses.size());
                 finishNodeLookup(lookup, nodes, queryKeys, time);
             }
             
@@ -271,7 +272,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 if (isValueLookup()) {
                     finishValueLookup(lookup, null, time);
                 } else {
-                    Collection nodes = responses.select(lookup, responses.size());
+                    List nodes = responses.select(lookup, responses.size());
                     finishNodeLookup(lookup, nodes, queryKeys, time);
                 }
                 finished = true;

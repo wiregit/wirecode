@@ -54,7 +54,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         if (l != null) {
             getEventDispatcher().add(new Runnable() {
                 public void run() {
-                    l.pingResponse(nodeId, src, time);
+                    l.pingSuccess(nodeId, src, time);
                 }
             });
         }
@@ -70,7 +70,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         if (l != null) {
             getEventDispatcher().add(new Runnable() {
                 public void run() {
-                    l.pingResponse(nodeId, dst, -1L);
+                    l.pingTimeout(nodeId, dst);
                 }
             });
         }

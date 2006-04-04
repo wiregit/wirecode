@@ -118,8 +118,9 @@ public class MessageOutputStream extends DataOutputStream {
     private void writeFindNodeResponse(FindNodeResponse response) throws IOException {
         writeQueryKey(response.getQueryKey());
         
-        writeByte(response.size());
-        for(Iterator it = response.iterator(); it.hasNext(); ) {
+        Collection values = response.getValues();
+        writeByte(values.size());
+        for(Iterator it = values.iterator(); it.hasNext(); ) {
             writeNode((ContactNode)it.next());
         }
     }
@@ -129,8 +130,10 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeFindValueResponse(FindValueResponse response) throws IOException {
-        writeByte(response.size());
-        for(Iterator it = response.iterator(); it.hasNext(); ) {
+        
+        Collection values = response.getValues();
+        writeByte(values.size());
+        for(Iterator it = values.iterator(); it.hasNext(); ) {
             writeKeyValue((KeyValue)it.next());
         }
     }
