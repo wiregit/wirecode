@@ -122,6 +122,9 @@ public final class NIOSocketTest extends BaseTestCase {
 	        
         assertInstanceof(SocketInterestReadAdapter.class, reader.getReadChannel());
         assertSame(socket.getChannel(), ((SocketInterestReadAdapter)reader.getReadChannel()).getChannel());
+        
+        socket.close();
+        stream.socket.close();
     }
     
     public void testSetReadObserverGoesThroughChains() throws Exception {

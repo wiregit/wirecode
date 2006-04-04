@@ -19,11 +19,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class DataWindow
 {
-	private static final Log LOG =
-	      LogFactory.getLog(DataWindow.class);
-	static{
-		LOG.debug("log system initialized debug level");
-	}
+	private static final Log LOG = LogFactory.getLog(DataWindow.class);
+    
     public  static final int   MAX_SEQUENCE_NUMBER = 0xFFFF;
     private static final int   HIST_SIZE           = 4;
     private static final float RTT_GAIN            = 1.0f / 8.0f;
@@ -38,6 +35,13 @@ public class DataWindow
     private float   srtt;
     private float   rttvar;
     private float   rto;
+    
+    /**
+     * optimization: use this instead of iterating through data to see
+     * if there is any readable data.
+     * must be set/unset when data is added/removed.
+     */
+    private boolean readableData;
 
     /*
      *  Define a data window for sending or receiving multiple udp packets
@@ -57,7 +61,11 @@ public class DataWindow
 		if (LOG.isDebugEnabled())
 			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
 
-		DataRecord d = new DataRecord(msg.getSequenceNumber(),msg);
+        long seqNo = msg.getSequenceNumber();
+		DataRecord d = new DataRecord(seqNo, msg);
+        if(seqNo == windowStart)
+            readableData = true;
+        
 		window.put(d.pkey, d);
 
         return d;
@@ -86,7 +94,7 @@ public class DataWindow
 	}
 
     /** 
-     *  Get the number of slots in use.  This excludes written data.
+     *  Get the number of slots in use.  This excludes read data.
      */
     public int getUsedSpots() {
         DataRecord d;
@@ -96,7 +104,7 @@ public class DataWindow
             pkey = new Long(i);
             // Count the spots that are full and not written
             if ( (d = (DataRecord) window.get(pkey)) != null &&
-                  (!d.written || i != windowStart))
+                  (!d.read || i != windowStart))
                 count++;
         }
         return(count);
@@ -346,50 +354,54 @@ public class DataWindow
         }
         return oldest;
     }
+    
+    /**
+     * Checks if we have atleast one block that can be read (in order).
+     * Specifically, this will return false if there is atleast one null or
+     * already-read block nearer to the windowStart than the first non-null non-read
+     * block.
+     */
+    public boolean hasReadableData() {
+        return readableData;
+    }
 
     /** 
-     *  Get a writable block which means unwritten ones at the start of Window
+     *  Get a readable block.  This will return the first unread block starting from
+     *  windowStart.  
      */
-    public DataRecord getWritableBlock() {
+    public DataRecord getReadableBlock() {
     	if (LOG.isDebugEnabled())
-    		LOG.debug("entered getWritableBlock wStart "+windowStart+" wSize "+windowSize);
+            LOG.debug("wStart " + windowStart+" wSize "+windowSize);
         DataRecord d;
 
-        // Find a writable block
+        // Find a readable block
         for (long i = windowStart; i < windowStart+windowSize+1; i++) {
             d = getBlock(i);
             if ( d != null ) {
-            	LOG.debug("current block not null");
-                if (d.written) {
-                	LOG.debug("current block is written");
+                if (d.read)
                 	continue;
-                }
-                else {
-                	LOG.debug("returning a block");
+                else
                 	return d;
-                }
             } else {
-            	LOG.debug("log is null");
                 break;
             }
         }
-        LOG.debug("returning null");
         return null;
     }
 
     /** 
      *  To advance the window of the reader, higher blocks need to come in.
-	 *  Once they do, older written blocks below the new window can be cleared.
+	 *  Once they do, older read blocks below the new window can be cleared.
 	 *  Return the size of the window advancement.
      */
-	public int clearEarlyWrittenBlocks() {
+	public int clearEarlyReadBlocks() {
         DataRecord d;
         Long     pkey;
         int        count = 0;
 
-		long maxBlock      = windowStart+windowSize;
-		long newMaxBlock   = maxBlock+windowSize;
-		long lastBlock     = -1;
+	//	long maxBlock      = windowStart+windowSize;
+	//	long newMaxBlock   = maxBlock+windowSize;
+	//	long lastBlock     = -1;
 
 		// Find the last block
         /*
@@ -408,10 +420,15 @@ public class DataWindow
         for (long i = windowStart; i < windowStart + windowSize + 1; i++) {
             pkey = new Long(i);
             d = (DataRecord) window.get(pkey);
-            if ( d != null && d.written) {
+            if ( d != null && d.read) {
                 window.remove(pkey);
                 count++;
             } else {
+                if(d == null)
+                    readableData = false;
+                else
+                    readableData = true;
+                
                 break;
             }
         }
@@ -440,16 +457,16 @@ public class DataWindow
 	}
 
     /** 
-     *  Find the number of unwritten records
+     *  Find the number of unread records
      */
-	public int numNotWritten() {
+	public int numNotRead() {
         DataRecord d;
         int count = 0;
 
 		// Count the number of records not written
 		for (long i = windowStart; i < windowStart+windowSize+1; i++) {
 			d = getBlock(i);
-			if ( d != null && !d.written) {
+			if ( d != null && !d.read) {
 				count++;
 			} 
 		}
@@ -484,18 +501,18 @@ public class DataWindow
 /**
  *  Record information about data messages either getting written to the 
  *  network or  getting read from the network.  In the first case, the 
- *  acks is important.  In the second case, the written state is important.  
+ *  acks is important.  In the second case, the read state is important.  
  *  For writing, the  sentTime and the ackTime form the basis for the 
  *  round trip time and a calculation for timeout resends.
  */
 class DataRecord {
-	final Long 				pkey;     // sequence number as a Long
-	final UDPConnectionMessage              msg;      // the actual data message
-        int                                     sends;    // count of the sends
-	boolean 		                written;  // whether the data was written
-	int   		                        acks;     // count of the number of acks
-        long                                    sentTime; // when it was sent
-        long                                    ackTime;  // when it was acked
+	final Long 				    pkey;     // sequence number as a Long
+	final UDPConnectionMessage  msg;      // the actual data message
+    int                         sends;    // count of the sends
+	boolean 		            read;     // whether the data was read
+	int   		                acks;     // count of the number of acks
+    long                        sentTime; // when it was sent
+    long                        ackTime;  // when it was acked
     
     DataRecord(long pnum, UDPConnectionMessage msg) {
     	pkey = new Long(pnum);

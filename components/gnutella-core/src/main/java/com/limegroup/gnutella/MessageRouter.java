@@ -265,12 +265,6 @@ public abstract class MessageRouter {
      * ref to the promotion manager.
      */
     private PromotionManager _promotionManager;
-    
-    /**
-     * Router for UDPConnection messages.
-     */
-	private final UDPMultiplexor _udpConnectionMultiplexor =
-	    UDPMultiplexor.instance(); 
 
     /**
      * The time we last received a request for a query key.
@@ -518,8 +512,7 @@ public abstract class MessageRouter {
 		// Send UDPConnection messages on to the connection multiplexor
 		// for routing to the appropriate connection processor
 		if ( msg instanceof UDPConnectionMessage ) {
-		    _udpConnectionMultiplexor.routeMessage(
-			  (UDPConnectionMessage)msg, address, port);
+		    RouterService.getUDPMultiplexor().routeMessage((UDPConnectionMessage)msg, addr);
 			return;
 		}
 

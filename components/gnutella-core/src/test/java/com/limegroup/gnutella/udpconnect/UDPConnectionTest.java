@@ -25,9 +25,6 @@ import com.limegroup.gnutella.util.ManagedThread;
  */
 public final class UDPConnectionTest extends BaseTestCase {
 
-    private static RouterService rs;
-    private static Acceptor      ac;
-
 	/*
 	 * Constructs the test.
 	 */
@@ -47,11 +44,13 @@ public final class UDPConnectionTest extends BaseTestCase {
 	}
 
     public static void globalSetUp() throws Exception {
-        // Setup the test to use the UDPServiceStub
-        UDPConnectionProcessor.setUDPServiceForTesting(
-            UDPServiceStub.instance());
-        rs = new RouterService(new ActivityCallbackStub());
-        ac = rs.getAcceptor();
+        UDPConnectionProcessor.setUDPServiceForTesting(UDPServiceStub.instance());
+        new RouterService(new ActivityCallbackStub());
+        setSettings();
+    }
+    
+    private static void setSettings() throws Exception {
+        Acceptor ac = RouterService.getAcceptor();
         ac.setAddress(InetAddress.getByName("127.0.0.1"));
         ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
@@ -65,11 +64,7 @@ public final class UDPConnectionTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
-        ac.setAddress(InetAddress.getByName("127.0.0.1"));
-        ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
-        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
+        setSettings();
 
         // Add some simulated connections to the UDPServiceStub
         UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 0);
@@ -117,7 +112,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Init the first connection
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
+        
         // Run the first connection
         boolean cSuccess = UStandalone.echoClient(uconn1, NUM_BYTES);
 
@@ -306,10 +301,10 @@ public final class UDPConnectionTest extends BaseTestCase {
         ConnStarter t = new ConnStarter();
         t.setDaemon(true);
         t.start();
-
+        
         // Startup connection one in original thread
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
-
+        
         // Wait for commpletion of uconn2 startup
         t.join();
 
@@ -329,11 +324,9 @@ public final class UDPConnectionTest extends BaseTestCase {
             if ( (i % 256)  != rval )
                 fail("Error on byte:"+i);
         }
+        
         // Close writer
         uconn1.close();
-
-        // Wait a little
-        try { Thread.sleep(200); } catch (InterruptedException e) {}
 
         // Read from reader
         rval = istream.read();
@@ -432,7 +425,6 @@ public final class UDPConnectionTest extends BaseTestCase {
                     // Close writer
                     uconn1.close(); 
                         
-                } catch(IOException e) {
                 } catch(InterruptedException ie) {
                 }
             }

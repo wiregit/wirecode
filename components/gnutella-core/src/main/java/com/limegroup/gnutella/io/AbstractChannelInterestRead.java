@@ -3,12 +3,12 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public abstract class ChannelInterestReadAdapter implements ChannelReadObserver, InterestReadChannel {
+public abstract class AbstractChannelInterestRead implements ChannelReadObserver, InterestReadChannel {
     protected ByteBuffer buffer;
     protected InterestReadChannel source;
     protected boolean shutdown;
     
-    public ChannelInterestReadAdapter() {
+    public AbstractChannelInterestRead() {
         buffer = ByteBuffer.allocate(getBufferSize());
     }
     

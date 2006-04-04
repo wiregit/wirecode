@@ -1,130 +1,152 @@
 package com.limegroup.gnutella.udpconnect;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.SocketImplFactory;
+import java.net.UnknownHostException;
+import java.nio.channels.SocketChannel;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.io.AbstractNBSocket;
+import com.limegroup.gnutella.io.InterestReadChannel;
+import com.limegroup.gnutella.io.InterestWriteChannel;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /** 
  *  Create a reliable udp connection interface.
  */
-public class UDPConnection extends Socket {
-
+public class UDPConnection extends AbstractNBSocket {
+    
+    /** The current version of the reliable UDP protocol. */
     public static final byte VERSION = (byte) 1;
+    
+    /** Channel backing the socket. */
+    private final UDPSocketChannel channel;
 
-	private UDPConnectionProcessor _processor;
+    /** The default read timeout. */
+    private int soTimeout = 1 * 60 * 1000; // default to 1 minute.
 
     /**
-     *  Create the UDPConnection.
+     * Creates an unconnected UDPConnection. You must call connect(...) to connect.
+     */
+    public UDPConnection() {
+        channel = (UDPSocketChannel)UDPSelectorProvider.instance().openSocketChannel();
+        channel.setSocket(this);
+        setInitialReader();
+        setInitialWriter();  
+    }
+    
+    /**
+     *  Create a UDPConnection connected to the given IP/Port.
      */
     public UDPConnection(String ip, int port) throws IOException {
-		// Handle the real work in the processor
-		this(InetAddress.getByName(ip), port);
-    }
+        // Handle the real work in the processor
+        this(InetAddress.getByName(ip), port);
+    }     
 
     /**
-     *  Create the UDPConnection.
+     *  Creates a UDPConnection connected to the given IP/Port.
      */
     public UDPConnection(InetAddress ip, int port) throws IOException {
-		// Handle the real work in the processor
-		_processor = new UDPConnectionProcessor(ip, port);
+		this();
+        connect(new InetSocketAddress(ip, port));
     }
 
-	public InputStream getInputStream() throws IOException {
-		return _processor.getInputStream();
-	}
-
-	public OutputStream getOutputStream() throws IOException {
-		return _processor.getOutputStream();
-	}
-
-	public void setSoTimeout(int timeout) throws SocketException {
-		_processor.setSoTimeout(timeout);
-	}
-
-	public void close() throws IOException {
-		_processor.close();
-	}
-
-    public InetAddress getInetAddress() {
-        return _processor.getInetAddress();
+    /** Returns the UDPSocketChannel, since it already implements InterestReadChannel. */
+    protected InterestReadChannel getBaseReadChannel() {
+        return channel;
+    }
+    
+    /** Returns the UDPSocketChannel, since it already implements InterestWriteChannel. */
+    protected InterestWriteChannel getBaseWriteChannel() {
+        return channel;
     }
 
+    /** Does nothing. */
+    protected void shutdownImpl() {
+    }
+
+    /** Sets the soTimeout this socket should use. */
+	public void setSoTimeout(int timeout) {
+        soTimeout = timeout;
+	}
+	
+	/** Returns the timeout this socket uses when reading. */
+	public int getSoTimeout() {
+	    return soTimeout;
+	}
+
+    /** Returns the local address this socket uses. */
     public InetAddress getLocalAddress() {
-        return _processor.getLocalAddress();
+        InetAddress lip = null;
+        try {
+            lip = InetAddress.getByName(
+              NetworkUtils.ip2string(RouterService.getNonForcedAddress()));
+        } catch (UnknownHostException uhe) {
+            try {
+                lip = InetAddress.getLocalHost();
+            } catch (UnknownHostException uhe2) {
+                lip = null;
+            }
+        }
+
+        return lip;
     }
     
-    public int getSoTimeout() {
-    	return _processor.getReadTimeout();
+    public SocketAddress getRemoteSocketAddress() {
+        return channel.getRemoteSocketAddress();
     }
     
-    //-------  Mostly Unimplemented  ----------------
-
-    public UDPConnection() throws IOException {
-        throw new IOException("not implemented");
+    public InetAddress getInetAddress() {
+        return ((InetSocketAddress)getRemoteSocketAddress()).getAddress();
     }
-
-
-    public UDPConnection(String host, int port, InetAddress localAddr,
-      int localPort) throws IOException {
-        throw new IOException("not implemented");
-    }
-
-    public UDPConnection(InetAddress address, int port, InetAddress localAddr,
-      int localPort) throws IOException {
-        throw new IOException("not implemented");
-    }
-
-    public UDPConnection(String host, int port, boolean stream) 
-      throws IOException {
-      throw new IOException("not implemented");
-    }
-
-    public UDPConnection(InetAddress host, int port, boolean stream) 
-      throws IOException {
-        throw new IOException("not implemented");
-    }
-
-    // These won't compile in Java 1.3
-    //public void connect(SocketAddress endpoint) throws IOException {
-        //throw new IOException("not implemented");
-    //}
-
-    //public void connect(SocketAddress endpoint, int timeout) 
-      //throws IOException {
-        //throw new IOException("not implemented");
-    //}
-
-    //public void bind(SocketAddress bindpoint) throws IOException {
-        //throw new IOException("not implemented");
-    //}
-
 
     public int getPort() {
-        return _processor.getPort();
+        return ((InetSocketAddress)getRemoteSocketAddress()).getPort();
     }
 
     public int getLocalPort() {
         return UDPService.instance().getStableUDPPort();
     }
+    
+    public SocketAddress getLocalSocketAddress() {
+        return new InetSocketAddress(getLocalAddress(), getLocalPort());
+    }
+    
+    public SocketChannel getChannel() {
+        return channel;
+    }    
 
-    // These won't compile in Java 1.3
-    //public SocketAddress getRemoteSocketAddress() {
-        //return null;
-    //}
+    public String toString() {
+        return "UDPConnection:" + channel;
+    }
 
-    //public SocketAddress getLocalSocketAddress() {
-        //return null;
-    //}
+    public boolean isConnected() {
+        return channel.isConnected();
+    }
 
-    //public SocketChannel getChannel() {
-        //return null;
-    //}
+    public boolean isBound() {
+        return true;
+    }
+
+    public boolean isClosed() {
+        return !channel.isOpen();
+    }
+
+    public boolean isInputShutdown() {
+        return !channel.isOpen();
+    }
+
+    public boolean isOutputShutdown() {
+        return !channel.isOpen();
+    }
+    
+    public void bind(SocketAddress bindpoint) throws IOException {
+        throw new IOException("not implemented");
+    }
 
     public void setTcpNoDelay(boolean on) throws SocketException {
         // does nothing
@@ -200,38 +222,9 @@ public class UDPConnection extends Socket {
     public void shutdownInput() throws IOException {
         throw new SocketException("not implemented");
     }
+
+    public void shutdownOutput() throws IOException {
+        throw new IOException("not implemented");
+    }
     
-    public void shutdownOutput() throws IOException
-    {
-        throw new IOException("not implemented");
-    }
-
-    public String toString() {
-        return "UDPConnection";
-    }
-
-    public boolean isConnected() {
-        return _processor.isConnected();
-    }
-
-    public boolean isBound() {
-        return true;
-    }
-
-    public boolean isClosed() {
-        return !_processor.isConnected();
-    }
-
-    public boolean isInputShutdown() {
-        return !_processor.isConnected();
-    }
-
-    public boolean isOutputShutdown() {
-        return !_processor.isConnected();
-    }
-
-    public static void setSocketImplFactory(SocketImplFactory fac)
-      throws IOException {
-        throw new IOException("not implemented");
-    }
 }

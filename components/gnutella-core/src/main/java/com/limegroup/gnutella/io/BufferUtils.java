@@ -6,15 +6,14 @@ import java.nio.ByteBuffer;
  * A collection of useful ByteBuffer utilities.
  */
 public class BufferUtils {
-
-    /**
-     * Transfers as much data as possible from from to to.
-     * Returns how much data was transferred.
-     * 
-     * @param from
-     * @param to
-     * @return
-     */
+    
+    private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
+    
+    /** Retrieves an empty ByteBuffer. */
+    public static ByteBuffer getEmptyBuffer() {
+        return EMPTY_BUFFER;
+    }
+    
     public static int transfer(ByteBuffer from, ByteBuffer to) {
         if(from == null)
             return 0;
@@ -40,6 +39,44 @@ public class BufferUtils {
         }
         
         return read;
+    }
+
+    /**
+     * Transfers as much data as possible from from to to.
+     * Returns how much data was transferred.
+     * 
+     * @param from
+     * @param to
+     * @return
+     */
+    public static int transfer(ByteBuffer from, ByteBuffer to, boolean needsFlip) {
+        if(needsFlip)
+            return transfer(from, to);
+        else {
+        
+        if(from == null)
+            return 0;
+        
+        int read = 0;
+
+        if(from.hasRemaining()) {
+            int remaining = from.remaining();
+            int toRemaining = to.remaining();
+            if(toRemaining >= remaining) {
+                to.put(from);
+                read += remaining;
+            } else {
+                int limit = from.limit();
+                int position = from.position();
+                from.limit(position + toRemaining);
+                to.put(from);
+                read += toRemaining;
+                from.limit(limit);
+            }
+        }
+        
+        return read;
+        }
     }
     
     /**

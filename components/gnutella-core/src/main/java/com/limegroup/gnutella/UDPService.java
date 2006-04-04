@@ -400,6 +400,16 @@ public class UDPService implements ReadWriteObserver {
      * @param msg the <tt>Message</tt> to send
      * @param host the host to send the message to
      */
+    public void send(Message msg, InetSocketAddress host) {
+        send(msg, host.getAddress(), host.getPort());
+    }    
+    
+    /**
+     * Sends the specified <tt>Message</tt> to the specified host.
+     * 
+     * @param msg the <tt>Message</tt> to send
+     * @param host the host to send the message to
+     */
     public void send(Message msg, IpPort host) {
         send(msg, host.getInetAddress(), host.getPort());
     }

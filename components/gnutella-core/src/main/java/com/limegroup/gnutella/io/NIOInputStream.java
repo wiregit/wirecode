@@ -2,9 +2,8 @@ package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SocketChannel;
 
 /**
  * Manages reading data from the network & piping it to a blocking input stream.
@@ -17,26 +16,34 @@ import java.nio.channels.SocketChannel;
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
  */
-class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
+class NIOInputStream implements ChannelReadObserver, InterestReadChannel, ReadTimeout {
     
-    private final NIOSocket handler;
+    private final Shutdownable shutdownHandler;
+    private final SoTimeout soTimeoutHandler;
     private InterestReadChannel channel;
     private BufferInputStream source;
     private Object bufferLock;
     private ByteBuffer buffer;
     private boolean shutdown;
     
+ 
     /**
-     * Constructs a new pipe to allow SocketChannel's reading to funnel
-     * to a blocking InputStream.
+     * Constructs a class that will allow asynchronous read events to be
+     * piped to an InputStream.
+     * 
+     * @param soTimeouter Socket object to use to retrieve the soTimeout for 
+     *                    the input stream timing out while reading.
+     * @param shutdowner  Object to shutdown when the InputStream is closed.
+     * @param channel     Channel to do reads from.
      */
-    NIOInputStream(NIOSocket handler, InterestReadChannel channel) {
-        this.handler = handler;
+    NIOInputStream(SoTimeout soTimeouter, Shutdownable shutdowner, InterestReadChannel channel) {
+        this.soTimeoutHandler = soTimeouter;
+        this.shutdownHandler = shutdowner;
         this.channel = channel;
     }
     
     /**
-     * Creates the pipes, buffer, and registers channels for interest.
+     * Creates the pipes & buffer.
      */
     synchronized NIOInputStream init() throws IOException {
         if(buffer != null)
@@ -46,7 +53,7 @@ class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
             throw new IOException("Already closed!");
         
         buffer = NIODispatcher.instance().getBufferCache().getHeap(); 
-        source = new BufferInputStream(buffer, handler, channel);
+        source = new BufferInputStream(buffer, this, shutdownHandler, channel);
         bufferLock = source.getBufferLock();
         
         return this;
@@ -79,6 +86,7 @@ class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
             
             // read everything we can.
             while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
+            
             if(read == -1)
                 source.finished();
             
@@ -144,6 +152,14 @@ class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
         synchronized(bufferLock) {
             this.channel = newChannel;
             source.setReadChannel(newChannel);
+        }
+    }
+
+    public long getReadTimeout() {
+        try {
+            return soTimeoutHandler.getSoTimeout();
+        } catch(SocketException se) {
+            return -1;
         }
     }
 }

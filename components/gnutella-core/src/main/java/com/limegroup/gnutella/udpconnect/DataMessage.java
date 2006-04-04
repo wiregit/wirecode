@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.udpconnect;
 
+import java.nio.ByteBuffer;
+
 import com.limegroup.gnutella.messages.BadPacketException;
 
 /** The data message is used to communicate data on the connection.
@@ -37,33 +39,22 @@ public class DataMessage extends UDPConnectionMessage {
     /**
      *  Return the data in the GUID as the data1 chunk.
      */
-    public Chunk getData1Chunk() {
-        if ( _data1Length == 0 )
-            return null;
-        Chunk chunk = new Chunk();
-        chunk.data   = _data1;
-        chunk.start  = _data1Offset;
-        chunk.length = _data1Length;
-        return chunk;
+    public ByteBuffer getData1Chunk() {
+        return _data1;
     }
 
     /**
      *  Return the data in the payload as the data2 chunk/
      */
-    public Chunk getData2Chunk() {
-        if ( _data2Length == 0 )
-            return null;
-        Chunk chunk = new Chunk();
-        chunk.data   = _data2;
-        chunk.start  = _data2Offset;
-        chunk.length = _data2Length;
-        return chunk;
+    public ByteBuffer getData2Chunk() {
+        return _data2;
     }
 
     public byte getDataAt(int i) {
         if (i < MAX_GUID_DATA) 
-            return _data1[i+(16-MAX_GUID_DATA)];
-        return _data2[i-MAX_GUID_DATA];
+            return _data1.get(i + _data1.position());
+        else
+            return _data2.get(i-MAX_GUID_DATA + _data2.position());
     }
 
 	public String toString() {

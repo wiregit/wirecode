@@ -12,9 +12,12 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,7 +68,7 @@ public class NIODispatcher implements Runnable {
     private NIODispatcher() {
         boolean failed = false;
         try {
-            selector = Selector.open();
+            primarySelector = Selector.open();
         } catch(IOException iox) {
             failed = true;
         }
@@ -97,7 +100,7 @@ public class NIODispatcher implements Runnable {
     private final Thread dispatchThread;
     
     /** The selector this uses. */
-    private Selector selector = null;
+    private Selector primarySelector = null;
     
     /** The current iteration of selection. */
     private long iteration = 0;
@@ -105,25 +108,23 @@ public class NIODispatcher implements Runnable {
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
     
+    /**
+     * A map of classes of SelectableChannels to the Selector that should
+     * be used to register that channel with.
+     */
+    private final Map /* of Class -> Selector */ OTHER_SELECTORS = new HashMap();
+    
+    /** A list of other Selectors that should be polled. */
+    private final List /* of Selector */ POLLERS = new ArrayList();
+    
 	/** The invokeLater queue. */
-    private final Collection /* of Runnable */ LATER = new LinkedList();
+    private Collection /* of Runnable */ LATER = new LinkedList();
     
     /** The throttle queue. */
-    private volatile List /* of NBThrottle */ THROTTLE = new ArrayList();
+    private final List /* of NBThrottle */ THROTTLE = new ArrayList();
     
     /** The timeout manager. */
     private final TimeoutController TIMEOUTER = new TimeoutController();
-    
-    /**
-     * Temporary list used where REGISTER & LATER are combined, so that
-     * handling IOException or running arbitrary code can't deadlock.
-     * Otherwise, it could be possible that one thread locked some arbitrary
-     * Object and then tried to acquire Q_LOCK by registering or invokeLatering.
-     * Meanwhile, the NIODispatch thread may be running pending items and holding
-     * Q_LOCK.  If while running those items it tries to lock that arbitrary
-     * Object, deadlock would occur.
-     */
-    private final ArrayList UNLOCKED = new ArrayList();
     
     /**
      * A common ByteBufferCache that classes can use.
@@ -154,11 +155,15 @@ public class NIODispatcher implements Runnable {
 	
 	/** Adds a Throttle into the throttle requesting loop. */
 	// TODO: have some way to remove Throttles, or make these use WeakReferences
-	public void addThrottle(NBThrottle t) {
-        synchronized(Q_LOCK) {
-            ArrayList throttle = new ArrayList(THROTTLE);
-            throttle.add(t);
-            THROTTLE = throttle;
+	public void addThrottle(final NBThrottle t) {
+        if(Thread.currentThread() == dispatchThread)
+            THROTTLE.add(t);
+        else {
+            invokeLater(new Runnable() {
+                public void run() {
+                    THROTTLE.add(t);
+                }
+            });
         }
     }
     
@@ -195,7 +200,7 @@ public class NIODispatcher implements Runnable {
     /** Register interest */
     private void register(SelectableChannel channel, IOErrorObserver handler, int op, int timeout) {
 		if(Thread.currentThread() == dispatchThread) {
-		    registerImpl(selector, channel, op, handler, timeout);
+		    registerImpl(getSelectorFor(channel), channel, op, handler, timeout);
 		} else {
 	        synchronized(Q_LOCK) {
 				LATER.add(new RegisterOp(channel, handler, op, timeout));
@@ -228,7 +233,8 @@ public class NIODispatcher implements Runnable {
     /** Registers interest on the channel for the given op */
     private void interest(SelectableChannel channel, int op, boolean on) {
         try {
-			SelectionKey sk = channel.keyFor(selector);
+            Selector sel = getSelectorFor(channel);
+			SelectionKey sk = channel.keyFor(sel);
 			if(sk != null && sk.isValid()) {
 			    // We must synchronize on something unique to each key,
 			    // (but not the key itself, 'cause that'll interfere with Selector.select)
@@ -252,10 +258,59 @@ public class NIODispatcher implements Runnable {
         }
     }
     
+    /** Returns the Selector that should be used for the given channel. */
+    private Selector getSelectorFor(SelectableChannel channel) {
+        Selector sel = (Selector)OTHER_SELECTORS.get(channel.getClass());
+        if(sel == null)
+            return primarySelector; // default selector
+        else
+            return sel;      // custom selector
+    }
+    
     /** Shuts down the handler, possibly scheduling it for shutdown in the NIODispatch thread. */
     public void shutdown(Shutdownable handler) {
         handler.shutdown();
-    }    
+    }
+    
+    /** Attaches the given attachment to the SelectionKey. */
+    public void attach(SelectionKey key, IOErrorObserver attachment) {
+        key.attach(new Attachment(attachment));
+    }
+    
+    /**
+     * Registers a new Selector that should be used when SelectableChannels
+     * assignable from the given class are registered.
+     */
+    public void registerSelector(final Selector newSelector, final Class channelClass) {
+        if(Thread.currentThread() == dispatchThread) {
+            POLLERS.add(newSelector);
+            OTHER_SELECTORS.put(channelClass, newSelector);
+        } else {
+            invokeLater(new Runnable() {
+                public void run() {
+                    POLLERS.add(newSelector);
+                    OTHER_SELECTORS.put(channelClass, newSelector);
+                }
+            });
+        }
+    }
+    
+    /**
+     * Removes a registered Selector.
+     */
+    public void removeSelector(final Selector selector) {
+        if(Thread.currentThread() == dispatchThread) {
+            POLLERS.remove(selector);
+            OTHER_SELECTORS.remove(selector);
+        } else {
+            invokeLater(new Runnable() {
+                public void run() {
+                    POLLERS.remove(selector);
+                    OTHER_SELECTORS.remove(selector);
+                }
+            });
+        }
+    }
     
     /** Invokes the method in the NIODispatch thread. */
    public void invokeLater(Runnable runner) {
@@ -336,14 +391,16 @@ public class NIODispatcher implements Runnable {
     /**
      * Process a connected channel.
      */
-    private void processConnect(long now, SelectionKey sk, ConnectObserver handler, Attachment proxy) throws IOException {
-        if(LOG.isDebugEnabled())
+    private void processConnect(long now, SelectionKey sk, ConnectObserver handler, Attachment proxy)
+            throws IOException {
+        if (LOG.isDebugEnabled())
             LOG.debug("Handling connect: " + handler);
-        SocketChannel channel = (SocketChannel)sk.channel();
+
+        SocketChannel channel = (SocketChannel) sk.channel();
         proxy.clearTimeout();
-        
+
         boolean finished = channel.finishConnect();
-        if(finished) {
+        if (finished) {
             sk.interestOps(0); // interested in nothing just yet.
             handler.handleConnect(channel.socket());
         } else {
@@ -383,25 +440,22 @@ public class NIODispatcher implements Runnable {
     /**
      * Adds any pending actions.
      *
-     * This works by adding any pending actions into a temporary list so that actions
-     * to the outside world don't need to hold Q_LOCK.
+     * This works by adding any pending actions into a local list and then replacing
+     * LATER with a new list.  This is done so that actions to the outside world
+     * don't need to hold Q_LOCK.
      *
-     * Interaction with UNLOCKED doesn't need to hold a lock, because it's only used
-     * in the NIODispatch thread.
-     *
-     * Throttle is not moved to UNLOCKED because it is not cleared, and because the
-     * actions are all within this package, so we can guarantee that it doesn't
-     * deadlock.
+     * Throttle is ticked outside the lock because ticking only hits items in this
+     * package and we can ensure it doesn't deadlock.
      */
     private void runPendingTasks() {
-        long now;
+        long now = System.currentTimeMillis();
+        for(int i = 0; i < THROTTLE.size(); i++)
+            ((NBThrottle)THROTTLE.get(i)).tick(now);
+        
+        Collection localLater;
         synchronized(Q_LOCK) {
-            now = System.currentTimeMillis();
-            for(int i = 0; i < THROTTLE.size(); i++)
-                ((NBThrottle)THROTTLE.get(i)).tick(now);
-
-            UNLOCKED.addAll(LATER);
-            LATER.clear();
+            localLater = LATER;
+            LATER = new LinkedList();
         }
         
         if(now > lastCacheClearTime + CACHE_CLEAR_INTERVAL) {
@@ -409,8 +463,8 @@ public class NIODispatcher implements Runnable {
             lastCacheClearTime = now;
         }
         
-        if(!UNLOCKED.isEmpty()) {
-            for(Iterator i = UNLOCKED.iterator(); i.hasNext(); ) {
+        if(!localLater.isEmpty()) {
+            for(Iterator i = localLater.iterator(); i.hasNext(); ) {
                 Runnable item = (Runnable) i.next();
                 try {
                     item.run();
@@ -419,17 +473,53 @@ public class NIODispatcher implements Runnable {
                     ErrorService.error(t);
                 }
             }
-            UNLOCKED.clear();
         }
+    }
+    
+    /**
+     * Runs through all secondary Selectors and returns a 
+     * Collection of SelectionKeys that they selected.
+     */
+    private Collection /* of SelectionKey */ pollOtherSelectors() {
+        Collection ret = null;
+        boolean growable = false;
+        
+        // Optimized to not create collection objects unless absolutely
+        // necessary.
+        for(int i = 0; i < POLLERS.size(); i++) {
+            Selector sel = (Selector)POLLERS.get(i);
+            int n = 0;
+            try {
+                n = sel.selectNow();
+            } catch(IOException iox) {
+                LOG.error("Error performing secondary select", iox);
+            }
+            
+            if(n != 0) {
+                Collection selected = sel.selectedKeys();
+                if(!selected.isEmpty()) {
+                    if(ret == null) {
+                        ret = selected;
+                    } else if(!growable) {
+                        growable = true;
+                        ret = new HashSet(ret);
+                        ret.addAll(selected);
+                    } else {
+                        ret.addAll(selected);
+                    }
+                }
+            }
+        }
+        
+        return ret == null ? Collections.EMPTY_SET : ret;
     }
     
     /**
      * Loops through all Throttles and gives them the ready keys.
      */
     private void readyThrottles(Collection keys) {
-        List throttle = THROTTLE;
-            for(int i = 0; i < throttle.size(); i++)
-                ((NBThrottle)throttle.get(i)).selectableKeys(keys);
+        for (int i = 0; i < THROTTLE.size(); i++)
+            ((NBThrottle) THROTTLE.get(i)).selectableKeys(keys);
     }
     
     /**
@@ -458,13 +548,17 @@ public class NIODispatcher implements Runnable {
             }
             
             runPendingTasks();
-
+            
+            Collection polled = pollOtherSelectors();
+            boolean immediate = !polled.isEmpty();
             try {
-                if(checkTime)
+                if(!immediate && checkTime)
                     startSelect = System.currentTimeMillis();
                     
-                // see register(...) for why this has a timeout
-                selector.select(100);
+                if(!immediate)
+                    primarySelector.select(100);
+                else
+                    primarySelector.selectNow();
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
@@ -475,50 +569,60 @@ public class NIODispatcher implements Runnable {
                 throw new ProcessingException(iox);
             }
             
-            Collection keys = selector.selectedKeys();
-            if(keys.size() == 0) {
-                long now = System.currentTimeMillis();
-                if(startSelect == -1) {
-                    LOG.warn("No keys selected, starting spin check.");
-                    checkTime = true;
-                } else if(startSelect + 30 >= now) {
-                    if(LOG.isWarnEnabled())
-                        LOG.warn("Spinning detected, current spins: " + zeroes);
-                    if(zeroes++ > SPIN_AMOUNT)
-                        throw new SpinningException();
-                } else { // waited the timeout just fine, reset everything.
-                    checkTime = false;
-                    startSelect = -1;
-                    zeroes = 0;
-                    ignores = 0;
-                }
-                TIMEOUTER.processTimeouts(now);
-                continue;                
-            } else if (checkTime) {             
-                // skip up to certain number of good selects if we suspect the selector is broken
-                ignores++;
-                if (ignores > MAX_IGNORES) {
-                    checkTime = false;
-                    zeroes = 0;
-                    startSelect = -1;
-                    ignores = 0;
+            Collection keys = primarySelector.selectedKeys();
+            if(!immediate) {
+                if(keys.isEmpty()) {
+                    long now = System.currentTimeMillis();
+                    if(startSelect == -1) {
+                        LOG.warn("No keys selected, starting spin check.");
+                        checkTime = true;
+                    } else if(startSelect + 30 >= now) {
+                        if(LOG.isWarnEnabled())
+                            LOG.warn("Spinning detected, current spins: " + zeroes);
+                        if(zeroes++ > SPIN_AMOUNT)
+                            throw new SpinningException();
+                    } else { // waited the timeout just fine, reset everything.
+                        checkTime = false;
+                        startSelect = -1;
+                        zeroes = 0;
+                        ignores = 0;
+                    }
+                    TIMEOUTER.processTimeouts(now);
+                    continue;                
+                } else if (checkTime) {             
+                    // skip up to certain number of good selects if we suspect the selector is broken
+                    ignores++;
+                    if (ignores > MAX_IGNORES) {
+                        checkTime = false;
+                        zeroes = 0;
+                        startSelect = -1;
+                        ignores = 0;
+                    }
                 }
             }
             
             if(LOG.isDebugEnabled())
-                LOG.debug("Selected (" + keys.size() + ") keys (" + this + ").");
+                LOG.debug("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ", (" + this + ").");
             
-            readyThrottles(keys);
+            Collection allKeys;
+            if(immediate) {
+                allKeys = new HashSet(keys.size() + polled.size());
+                allKeys.addAll(keys);
+                allKeys.addAll(polled);
+            } else {
+                allKeys = keys;
+            }
+            
+            readyThrottles(allKeys);
             
             long now = System.currentTimeMillis();
-            for(Iterator it = keys.iterator(); it.hasNext(); ) {
+            for(Iterator it = allKeys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();
-				if(sk.isValid())
-                    process(now, sk, sk.attachment(), 0xFFFF);
+				process(now, sk, sk.attachment(), 0xFFFF);
             }
             
             keys.clear();
-            iteration++;            
+            iteration++;
             TIMEOUTER.processTimeouts(now);
         }
     }
@@ -539,17 +643,18 @@ public class NIODispatcher implements Runnable {
             
         proxy.lastMod = iteration + 1;
             
-        if(proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
+        if(sk.isValid() && proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
             try {
                 try {
-                    if ((allowedOps & SelectionKey.OP_ACCEPT) != 0 && sk.isAcceptable())
+                    int readyOps = sk.readyOps();
+                    if ((allowedOps & readyOps & SelectionKey.OP_ACCEPT) != 0) 
                         processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
-                    else if((allowedOps & SelectionKey.OP_CONNECT)!= 0 && sk.isConnectable())
+                    else if((allowedOps & readyOps & SelectionKey.OP_CONNECT) != 0)
                         processConnect(now, sk, (ConnectObserver)attachment, proxy);
                     else {
-                        if ((allowedOps & SelectionKey.OP_READ) != 0 && sk.isReadable())
+                        if ((allowedOps & readyOps & SelectionKey.OP_READ) != 0)
                             processRead(now, (ReadObserver)attachment, proxy);
-                        if ((allowedOps & SelectionKey.OP_WRITE) != 0 && sk.isWritable())
+                        if ((allowedOps & readyOps & SelectionKey.OP_WRITE) != 0)
                             processWrite(now, (WriteObserver)attachment, proxy);
                     }
                 } catch (CancelledKeyException err) {
@@ -564,7 +669,7 @@ public class NIODispatcher implements Runnable {
             }
         } else {
             if(LOG.isErrorEnabled())
-                LOG.error("Too many hits in a row for: " + attachment);
+                LOG.error("Too many hits in a row (or cancelled) for: " + attachment);
             // we've had too many hits in a row.  kill this attachment.
             safeCancel(sk, attachment);
         }
@@ -581,7 +686,7 @@ public class NIODispatcher implements Runnable {
      * Swaps all channels out of the old selector & puts them in the new one.
      */
     private void swapSelector() {
-        Selector oldSelector = selector;
+        Selector oldSelector = primarySelector;
         Collection oldKeys = Collections.EMPTY_SET;
         try {
             if(oldSelector != null)
@@ -591,12 +696,14 @@ public class NIODispatcher implements Runnable {
         }
         
         try {
-            selector = Selector.open();
+            primarySelector = Selector.open();
         } catch(IOException iox) {
             LOG.error("Can't make a new selector!!!", iox);
             throw new RuntimeException(iox);
         }
         
+        // We do not have to concern ourselves with secondary selectors,
+        // because we only retrieves keys from the primary one.
         for(Iterator i = oldKeys.iterator(); i.hasNext(); ) {
             try {
                 SelectionKey key = (SelectionKey)i.next();
@@ -604,7 +711,7 @@ public class NIODispatcher implements Runnable {
                 Attachment attachment = (Attachment)key.attachment();
                 int ops = key.interestOps();
                 try {
-                    SelectionKey newKey = channel.register(selector, ops, attachment);
+                    SelectionKey newKey = channel.register(primarySelector, ops, attachment);
                     attachment.setKey(newKey);
                 } catch(IOException iox) {
                     attachment.attachment.handleIOException(iox);
@@ -628,8 +735,8 @@ public class NIODispatcher implements Runnable {
     public void run() {
         while(true) {
             try {
-                if(selector == null)
-                    selector = Selector.open();
+                if(primarySelector == null)
+                    primarySelector = Selector.open();
                 process();
             } catch(SpinningException spin) {
                 LOG.warn("selector is spinning!", spin);
@@ -758,7 +865,7 @@ public class NIODispatcher implements Runnable {
         }
         
         public void run() {
-            registerImpl(selector, channel, op, handler, timeout);
+            registerImpl(getSelectorFor(channel), channel, op, handler, timeout);
         }
     }
 

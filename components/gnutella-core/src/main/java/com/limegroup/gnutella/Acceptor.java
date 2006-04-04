@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ChannelInterestReadAdapter;
+import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.NIOMultiplexor;
@@ -518,58 +518,70 @@ public class Acceptor {
         }
         
         public void handleAccept(Socket client) {
-            if(!_started) {
-                IOUtils.close(client);
+            accept(client);
+        }
+    }
+    
+    /** Accepts the given socket. */
+    public void accept(Socket client) {
+        accept(client, null);
+    }
+    
+    /**
+     * Accepts the given incoming socket, allowing only the given protocol.
+     * If allowedProtocol is null, all are allowed.
+     */
+    public void accept(Socket client, String allowedProtocol) {
+        if (!_started) {
+            IOUtils.close(client);
+            return;
+        }
+
+        // If the client was closed before we were able to get the address,
+        // then getInetAddress will return null.
+        InetAddress address = client.getInetAddress();
+        if (address == null) {
+            IOUtils.close(client);
+            LOG.warn("connection closed while accepting");
+        } else if (isBannedIP(address.getAddress())) {
+            if (LOG.isWarnEnabled())
+                LOG.warn("Ignoring banned host: " + address);
+            HTTPStat.BANNED_REQUESTS.incrementStat();
+            IOUtils.close(client);
+        } else {
+            if (LOG.isDebugEnabled())
+                LOG.debug("Dispatching new client connecton: " + address);
+
+            // if we want to unset firewalled from any connection,
+            // do it here.
+            if (!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
+                checkFirewall(client.getInetAddress());
+
+            // Set our IP address of the local address of this socket.
+            InetAddress localAddress = client.getLocalAddress();
+            setAddress(localAddress);
+
+            try {
+                _socket.setSoTimeout(Constants.TIMEOUT);
+            } catch (SocketException se) {
+                IOUtils.close(_socket);
                 return;
             }
-            
-            // If the client was closed before we were able to get the address,
-            // then getInetAddress will return null.
-            InetAddress address = client.getInetAddress();
-            if (address == null) {
-                IOUtils.close(client);
-                LOG.warn("connection closed while accepting");
-            } else if(isBannedIP(address.getAddress())) {
-                if (LOG.isWarnEnabled())
-                    LOG.warn("Ignoring banned host: " + address);
-                HTTPStat.BANNED_REQUESTS.incrementStat();
-                IOUtils.close(client);
-            } else {
-                if (LOG.isDebugEnabled())
-                    LOG.debug("Dispatching new client connecton: " + address);
-                
-                // if we want to unset firewalled from any connection,
-                // do it here.
-                if (!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
-                    checkFirewall(client.getInetAddress());
 
-                // Set our IP address of the local address of this socket.
-                InetAddress localAddress = client.getLocalAddress();
-                setAddress(localAddress);
-                
-                try {
-                    _socket.setSoTimeout(Constants.TIMEOUT);
-                } catch(SocketException se) {
-                    IOUtils.close(_socket);
-                    return;
-                }
-    
-                // Dispatch asynchronously if possible.
-                if(client.getChannel() != null) // supports non-blocking reads
-                    ((NIOMultiplexor)client).setReadObserver(new AsyncConnectionDispatcher(client));
-                else
-                    ThreadFactory.startThread(new BlockingConnectionDispatcher(client), "ConnectionDispatchRunner");
-            }
+            // Dispatch asynchronously if possible.
+            if (client.getChannel() instanceof NIOMultiplexor) // supports non-blocking reads
+                ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(client, allowedProtocol));
+            else
+                ThreadFactory.startThread(new BlockingConnectionDispatcher(client, allowedProtocol), "ConnectionDispatchRunner");
         }
     }
     
     /**
-     * Determines whether or not this INetAddress is found an outside
-     * source, so as to correctly set "acceptedIncoming" to true.
-     *
-     * This ignores connections from private or local addresses,
-     * ignores those who may be on the same subnet, and ignores those
-     * who we are already connected to.
+     * Determines whether or not this INetAddress is found an outside source, so as to correctly set "acceptedIncoming"
+     * to true.
+     * 
+     * This ignores connections from private or local addresses, ignores those who may be on the same subnet, and
+     * ignores those who we are already connected to.
      */
     private boolean isOutsideConnection(InetAddress addr) {
         // short-circuit for tests.
@@ -657,12 +669,14 @@ public class Acceptor {
     /**
      * A ConnectionDispatcher that reads asynchronously from the socket.
      */
-    private static class AsyncConnectionDispatcher extends ChannelInterestReadAdapter {
+    private static class AsyncConnectionDispatcher extends AbstractChannelInterestRead {
         private final Socket client;
+        private final String allowedWord;
         
-        AsyncConnectionDispatcher(Socket client) {
+        AsyncConnectionDispatcher(Socket client, String allowedWord) {
             super();
             this.client = client;
+            this.allowedWord = allowedWord;
         }
         
         protected int getBufferSize() {
@@ -684,8 +698,10 @@ public class Acceptor {
             for(int i = 0; i < buffer.position(); i++) {
                 if(buffer.get(i) == ' ') {
                     String word = new String(buffer.array(), 0, i);
+                    if(allowedWord != null && !allowedWord.equals(word))
+                        throw new IOException("wrong word!");
+                    
                     buffer.limit(buffer.position()).position(i+1);
-                    buffer.compact();
                     source.interest(false);
                     RouterService.getConnectionDispatcher().dispatch(word, client, true);
                     return;
@@ -697,6 +713,10 @@ public class Acceptor {
             if(!buffer.hasRemaining() || read == -1)
                 close();
         }
+        
+        public int read(ByteBuffer dst) {
+            return BufferUtils.transfer(buffer, dst, false);
+        }
     }
 
 
@@ -705,9 +725,11 @@ public class Acceptor {
      */
     private static class BlockingConnectionDispatcher implements Runnable {
         private final Socket client;
+        private final String allowedWord;
         
-        public BlockingConnectionDispatcher(Socket socket) {
-            client = socket;
+        public BlockingConnectionDispatcher(Socket socket, String allowedWord) {
+            this.client = socket;
+            this.allowedWord = allowedWord;
         }
 
         /** Reads a word and sends it off to the ConnectionDispatcher for dispatching. */
@@ -728,6 +750,8 @@ public class Acceptor {
                 
                 ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
                 String word = IOUtils.readLargestWord(in, dispatcher.getMaximumWordSize());
+                if(allowedWord != null && !allowedWord.equals(word))
+                    throw new IOException("wrong word!");
                 dispatcher.dispatch(word, client, false);
             } catch (IOException iox) {
                 HTTPStat.CLOSED_REQUESTS.incrementStat();

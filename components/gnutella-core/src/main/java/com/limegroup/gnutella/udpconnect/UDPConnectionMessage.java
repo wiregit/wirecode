@@ -2,7 +2,9 @@ package com.limegroup.gnutella.udpconnect;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
+import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 
@@ -48,21 +50,12 @@ public abstract class UDPConnectionMessage extends Message {
     
     /** The first piece of data in this message.
         This will hold any data stored in the GUID.         14 bytes */
-    protected byte _data1[];
-    /** The offset of the data in data1.  4 in GUID data. 0 in raw data */
-    protected int  _data1Offset;
-    /** The amount of data used in the GUID.  Up to 12 bytes by design. */
-    protected int  _data1Length;                           // 1 nibble 
+    protected ByteBuffer _data1; 
     
     /** The second piece of data in this message.
         This will hold any data stored in the payload. 
         Up to 512 bytes by design. */
-    protected byte _data2[];
-    /** The offset of the data in data1.  
-        0 in network payload.  12 in raw data. */
-    protected int  _data2Offset;
-    /** The usable length of data2.  Up to 500 bytes by design. */
-    protected int  _data2Length;
+    protected ByteBuffer _data2;
 
     private static final BadPacketException NO_MATCH = 
       	new BadPacketException("No matching UDPConnectionMessage");
@@ -108,15 +101,19 @@ public abstract class UDPConnectionMessage extends Message {
         _connectionID   = connectionID;
         _opcode         = opcode;
         _sequenceNumber = sequenceNumber;
-        _data1          = data;
-        _data1Offset    = 0;
-        _data1Length    = (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
-                           datalength);
-        _data2          = data;
-        _data2Offset    = MAX_GUID_DATA;
-        _data2Length    = getLength();
+        if(datalength > 0)
+            _data1 = ByteBuffer.wrap(data, 0, 
+                    (datalength >= MAX_GUID_DATA ? MAX_GUID_DATA : 
+                        datalength));
+        else
+            _data1 = BufferUtils.getEmptyBuffer();
+        
+        if(datalength > MAX_GUID_DATA)
+            _data2 = ByteBuffer.wrap(data, MAX_GUID_DATA, getLength());
+        else
+            _data2 = BufferUtils.getEmptyBuffer();
     }
-
+    
     /**
      * Construct a new UDPConnectionMessage from the network.
      */
@@ -195,14 +192,10 @@ public abstract class UDPConnectionMessage extends Message {
         _sequenceNumber = 
           (((long) guid[2] & 0xff) << 8) | ((long) guid[3] & 0xff);
 
-        _data1          = guid;
-        _data1Offset    = GUID_DATA_START;
-        _data1Length    = ((int) guid[1] & 0x0f); 
-        _data2          = payload;
-        _data2Offset    = 0;
-        _data2Length    = payload.length;
+        _data1 = ByteBuffer.wrap(guid, GUID_DATA_START, ((int) guid[1] & 0x0f));
+        _data2 = ByteBuffer.wrap(payload);
 
-        if ( _data1Length > MAX_GUID_DATA )
+        if ( _data1.remaining() > MAX_GUID_DATA )
             throw new BadPacketException("GUID data too big");
     }
 
@@ -252,15 +245,15 @@ public abstract class UDPConnectionMessage extends Message {
      *  Return the length of data stored in this message.
      */
     public int getDataLength() {
-        return _data1Length + getLength();
+        return _data1.remaining() + getLength();
     }
 
     /** 
      *  Output additional data as payload.
      */
     protected void writePayload(OutputStream out) throws IOException {
-        if ( _data2Length > 0 )
-            out.write(_data2, _data2Offset, _data2Length);
+        if ( _data2.remaining() > 0 )
+            out.write(_data2.array(), _data2.position(), _data2.remaining());
     }
 
     /** 
