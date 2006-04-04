@@ -25,6 +25,12 @@ import java.util.prefs.Preferences;
 
 public class ContextSettings {
     
+    private static final String LOCAL_NODE_ID_KEY = "LOCAL_NODE_ID";
+    
+    private static final String NODE_ID_TIMEOUT_KEY = "NODE_ID_TIMEOUT";
+    
+    private static final long NODE_ID_TIMEOUT = 30L * 60L * 1000L; // 30 Minutes
+    
     private static final Preferences SETTINGS 
         = Preferences.userNodeForPackage(ContextSettings.class);
     
@@ -34,7 +40,12 @@ public class ContextSettings {
         String key = (address != null) ? address.toString() : "null";
         try {
             if (SETTINGS.nodeExists(key)) {
-                return SETTINGS.node(key).getByteArray("LOCAL_NODE_ID", null);
+                Preferences node = SETTINGS.node(key);
+                
+                long time = node.getLong(NODE_ID_TIMEOUT_KEY, System.currentTimeMillis());
+                if ((System.currentTimeMillis() - time) < NODE_ID_TIMEOUT) {
+                    return node.getByteArray(LOCAL_NODE_ID_KEY, null);
+                }
             }
         } catch (BackingStoreException e) {
             throw new RuntimeException(e);
@@ -44,6 +55,9 @@ public class ContextSettings {
     
     public static void setLocalNodeID(SocketAddress address, byte[] localId) {
         String key = (address != null) ? address.toString() : "null";
-        SETTINGS.node(key).putByteArray("LOCAL_NODE_ID", localId);
+        
+        Preferences node = SETTINGS.node(key);
+        node.putByteArray(LOCAL_NODE_ID_KEY, localId);
+        node.putLong(NODE_ID_TIMEOUT_KEY, System.currentTimeMillis());
     }
 }

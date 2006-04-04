@@ -62,6 +62,7 @@ import de.kapsi.net.kademlia.routing.RandomBucketRefresher;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.CryptoHelper;
 import de.kapsi.net.kademlia.security.QueryKey;
+import de.kapsi.net.kademlia.settings.ContextSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class Context implements Runnable {
@@ -175,7 +176,8 @@ public class Context implements Runnable {
         
         // Our external address is null? That means we don't 
         // know it yet!
-        if (this.externalAddress == null) {
+        if (this.externalAddress == null 
+                || !externalAddress.equals(this.externalAddress)) {
             
             // TODO: See PingResponseHandler!!!
             ContactNode localNode = (ContactNode)routeTable.get(nodeId);
@@ -183,59 +185,7 @@ public class Context implements Runnable {
                 this.externalAddress = externalAddress;
                 localNode.setSocketAddress(externalAddress);
             }
-        } else if (!externalAddress.equals(this.externalAddress)) {
-            handleReconnect(externalAddress);
         }
-    }
-    
-    /**
-     * If our external address changed then we dis- and reconneced
-     * to the Internet.
-     * 
-     * TODO: See PingResponseHandler!!! We MUST make sure the other
-     * Node isn't fooling us with a wrong external address! I.e. we
-     * must ping ourself!
-     */
-    private void handleReconnect(SocketAddress externalAddress) throws IOException {
-        if (externalAddress.equals(this.externalAddress)) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("The address has not changed!");
-            }
-            return;
-        }
-        
-        ContactNode currentLocalNode = getLocalNode();
-        
-        this.externalAddress = externalAddress;
-        this.nodeId = KUID.createRandomNodeID(externalAddress);
-        
-        Collection nodes = routeTable.getAllNodes();
-        routeTable.clear();
-        
-        ContactNode localNode = new ContactNode(nodeId, externalAddress);
-        localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode, false);
-        
-        // A flag to speedup the iteration a bit once we've
-        // found the old local node in the collection.
-        boolean check = true;
-        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-            ContactNode node = (ContactNode)it.next();
-            
-            // Skip the old local Node!
-            if (check && node.getNodeID().equals(currentLocalNode.getNodeID())) {
-                check = false;
-                continue;
-            }
-            
-            // TODO Not sure about this!
-            boolean alive = !node.isDead();
-            routeTable.add(node, alive);
-        }
-        
-        // And finally do a looup for ourself on the DHT
-        // TODO: full bucket refresh?
-        lookup(nodeId, null);
     }
     
     public Database getDatabase() {
@@ -294,18 +244,16 @@ public class Context implements Runnable {
         messageDispatcher.bind(address);
         this.localAddress = address;
         
-        nodeId = KUID.createRandomNodeID(address);
-        
-        /*byte[] id = ContextSettings.getLocalNodeID(address);
+        byte[] id = ContextSettings.getLocalNodeID(address);
         if (id == null) {
             nodeId = KUID.createRandomNodeID(address);
-            id = nodeId.getBytes();
-            ContextSettings.setLocalNodeID(address, id);
+            ContextSettings.setLocalNodeID(address, nodeId.getBytes());
         } else {
             nodeId = KUID.createNodeID(id);
-        }*/
+        }
+        
         //add ourselve to the routing table
-        ContactNode localNode = getLocalNode();
+        ContactNode localNode = new ContactNode(nodeId, address);
         localNode.setTimeStamp(Long.MAX_VALUE);
         routeTable.add(localNode, false);
     }
