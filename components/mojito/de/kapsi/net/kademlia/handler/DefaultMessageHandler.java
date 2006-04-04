@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,14 +36,13 @@ import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValueCollection;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.LookupSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
-import de.kapsi.net.kademlia.util.FixedSizeHashMap;
-import de.kapsi.net.kademlia.util.NetworkUtils;
 
 /**
  * The DefaultMessageHandler performs basic Kademlia RouteTable 
@@ -59,8 +57,6 @@ public class DefaultMessageHandler extends MessageHandler
     
     private long timeout = LookupSettings.getTimeout();
     
-    private Map loopLock = new FixedSizeHashMap(16);
-    
     public DefaultMessageHandler(Context context) {
         super(context);
     }
@@ -72,7 +68,6 @@ public class DefaultMessageHandler extends MessageHandler
     public void handleResponse(KUID nodeId, SocketAddress src, 
             Message message, long time) throws IOException {
         
-        ContactNode node = getRouteTable().get(nodeId, true);
         addLiveContactInfo(nodeId, src, message);
     }
 
@@ -85,7 +80,6 @@ public class DefaultMessageHandler extends MessageHandler
     public void handleRequest(KUID nodeId, SocketAddress src, 
             Message message) throws IOException {
         
-        ContactNode node = getRouteTable().get(nodeId, true);
         addLiveContactInfo(nodeId, src, message);
     }
     
@@ -95,7 +89,16 @@ public class DefaultMessageHandler extends MessageHandler
         RoutingTable routeTable = getRouteTable();
         
         ContactNode node = new ContactNode(nodeId, src);
-        if(routeTable.add(node, true)) {
+        
+        //only do store forward if it is a new node in our routing table or 
+        //a node that is (re)connecting
+        boolean storeForward = routeTable.add(node, true);
+        if(!storeForward && (message instanceof FindNodeRequest)) {
+            FindNodeRequest request = (FindNodeRequest) message;
+            storeForward = request.getLookupID().equals(nodeId);
+        }
+
+        if(storeForward) {
             int k = KademliaSettings.getReplicationParameter();
             
             //are we one of the K closest nodes to the contact?
@@ -116,7 +119,9 @@ public class DefaultMessageHandler extends MessageHandler
                         List closestNodesToKey = routeTable.select(c.getKey(), k, false, false);
                         ContactNode closest = (ContactNode)closestNodesToKey.get(0);
                         if (closest.equals(context.getLocalNode())   
-                                || ((node.equals(closest)|| node.getNodeID().isCloser(closest.getNodeID(), c.getKey()))
+                                || ((node.equals(closest)
+                                        //maybe we haven't added him to the routing table
+                                        || node.getNodeID().isCloser(closest.getNodeID(), c.getKey())) 
                                         && (closestNodesToKey.size() > 1)
                                         && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                             
