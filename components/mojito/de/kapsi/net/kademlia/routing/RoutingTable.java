@@ -35,7 +35,7 @@ public interface RoutingTable {
     
     public int size();
     
-    public void add(ContactNode node, boolean knownToBeAlive);
+    public boolean add(ContactNode node, boolean knownToBeAlive);
     
     public ContactNode get(KUID nodeId);
     

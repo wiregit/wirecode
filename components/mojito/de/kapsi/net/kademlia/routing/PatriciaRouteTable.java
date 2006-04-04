@@ -26,6 +26,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -43,10 +45,17 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindNodeListener;
+import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
+import de.kapsi.net.kademlia.handler.ResponseHandler;
+import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
+import de.kapsi.net.kademlia.util.FixedSizeHashMap;
+import de.kapsi.net.kademlia.util.NetworkUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class PatriciaRouteTable implements RoutingTable {
@@ -58,6 +67,8 @@ public class PatriciaRouteTable implements RoutingTable {
     private static final int B = RouteTableSettings.getDepthLimit();
     
     private static final long refreshLimit = RouteTableSettings.getBucketRefreshTime();
+    
+    private Map loopLock = new FixedSizeHashMap(16);
     
     private Context context;
     
@@ -143,15 +154,21 @@ public class PatriciaRouteTable implements RoutingTable {
         return false;
     }
     
-    public void add(ContactNode node, boolean knowToBeAlive) {
-        put(node.getNodeID(), node,knowToBeAlive);
+    public boolean add(ContactNode node, boolean knowToBeAlive) {
+        return put(node.getNodeID(), node,knowToBeAlive);
     }
     
-    private void put(KUID nodeId, ContactNode node, boolean knowToBeAlive) {
+    /**
+     * @param nodeId
+     * @param node
+     * @param knowToBeAlive
+     * @return true if the node was added, false otherwise
+     */
+    private boolean put(KUID nodeId, ContactNode node, boolean knowToBeAlive) {
         boolean pingNode = false;
-        
+        boolean added = false;
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Trying to add node: "+node+" to routing table");
+            LOG.trace("Trying to add "+(knowToBeAlive?"live":"unknown")+" node: "+node+" to routing table");
         }
         
         if (nodeId == null) {
@@ -188,6 +205,7 @@ public class PatriciaRouteTable implements RoutingTable {
                     pingNode = true;
                 }
                 nodesTrie.put(nodeId,node);
+                added = true;
             } else {
             //Three conditions for splitting:
             //1. Bucket contains nodeID.
@@ -224,7 +242,7 @@ public class PatriciaRouteTable implements RoutingTable {
                         if (LOG.isErrorEnabled()) {
                             LOG.error("Bucket did not split correctly!");
                         }
-                        return;
+                        return false;
                     }
                     //update smallest subtree if split reason was that it contained the local bucket
                     if(containsLocal) {
@@ -238,7 +256,7 @@ public class PatriciaRouteTable implements RoutingTable {
                             if (LOG.isErrorEnabled()) {
                                 LOG.error("New buckets don't contain local node");
                             }
-                            return;
+                            return false;
                         }
                     }
                     //now trying recursive call!
@@ -267,6 +285,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 context.getMessageDispatcher().send(node, ping, null);
             } catch (IOException e) {}
         }
+        return added;
     }
     
     public void handleFailure(KUID nodeId) {
@@ -434,7 +453,7 @@ public class PatriciaRouteTable implements RoutingTable {
         boolean replacement = false;
         BucketNode bucket = null;
         
-        // Check the RouteTable...
+        // Check the RouteTable for existence
         ContactNode existingNode = (ContactNode) nodesTrie.get(nodeId);
         if(existingNode == null) {
             // check replacement cache in closest bucket
@@ -456,26 +475,73 @@ public class PatriciaRouteTable implements RoutingTable {
                 return null;
             }
         }
-        
-        //TODO do some contact checking here first!
+        //if we are here -> the node is already in the routing table
         if(alive) {
-            existingNode.alive();
-            //TODO: we have found a live contact in the bucket's replacement cache!
-            //It's a good time to replace this bucket's dead entry with this node
-            if(replacement) {
-                pingBucketLastRecentlySeenNode(bucket);
+            // Same Address? OK, mark it as alive if it 
+            // isn't aleardy
+            InetSocketAddress newAddress = (InetSocketAddress) node.getSocketAddress();
+            InetSocketAddress oldAddress = (InetSocketAddress) existingNode.getSocketAddress();
+            if (oldAddress.equals(newAddress)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Updating timestamp for node: "+existingNode);
+                }
+                existingNode.alive();
+                return existingNode;
             }
-        } 
-        //TODO update the contact's info here
-        
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Replaced existing node: "+existingNode+" with node: " 
-                    + node);
+
+            //START: SPOOF CHECK
+            try {
+                // Huh? The addresses are not equal but both belong
+                // obviously to this local machine!? There isn't much
+                // we can do. Set it to the new address and hope it 
+                // doesn't use a different NIF everytime...
+                if (NetworkUtils.isLocalAddress(newAddress)
+                        && NetworkUtils.isLocalAddress(oldAddress)
+                        && newAddress.getPort()==oldAddress.getPort()) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Local maching loop detection for node: "+existingNode);
+                    }
+                    existingNode.setSocketAddress(newAddress);
+                    existingNode.alive();
+                    return existingNode;
+                }
+            } catch (IOException e) {} //just ignore
+            
+            // If a Host has multiple IPs (see also above case) then
+            // we may create an infinite loop if boths ends think
+            // the other end is trying to spoof its Node ID! Make sure
+            // we're not creating a such loop.
+            if (loopLock.containsKey(nodeId)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Spoof check already in progress for " + existingNode);
+                }
+                return existingNode;
+            }
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Spoof check for node: "+existingNode);
+            }
+    
+            // Kick off the spoof check. Ping the current contact and
+            // if it responds then interpret it as an attempt to spoof
+            // the node ID and if it doesn't then it is obviously dead.
+            ResponseHandler handler 
+                = new SpoofCheckHandler(context, 
+                    existingNode, node, replacement, bucket);
+            
+            doSpoofCheck(existingNode, handler);
         }
         return existingNode;
     }
     
+    private void doSpoofCheck(ContactNode contact, ResponseHandler handler){
+        RequestMessage request = context.getMessageFactory().createPingRequest();
+        try {
+            context.getMessageDispatcher().send(contact, request, handler);
+            loopLock.put(contact.getNodeID(), handler);
+        } catch (IOException e) {}
+    }
+        
     public void refreshBuckets(boolean force) throws IOException{
         refreshBuckets(force,null);
     }
@@ -670,6 +736,84 @@ public class PatriciaRouteTable implements RoutingTable {
             } else {
                 return false;
             }
+        }
+    }
+    
+    /**
+     * Handles a spoof check where we're trying to figure out
+     * wheather or not a Node is trying to spoof its Node ID.
+     */
+    private class SpoofCheckHandler extends AbstractResponseHandler {
+        
+        private boolean done = false;
+        
+        private int errors = 0;
+        
+        private ContactNode currentContact;
+        private ContactNode newContact;
+        
+        private boolean replacementNode;
+        private BucketNode replacementBucket;
+        
+        public SpoofCheckHandler(Context context, ContactNode currentContact, ContactNode newContact, 
+                boolean replacementNode, BucketNode replacementBucket) {
+            super(context);
+            
+            this.currentContact = currentContact;
+            this.newContact = newContact;
+            this.replacementNode = replacementNode;
+            this.replacementBucket = replacementBucket;
+        }
+
+        public void handleResponse(KUID nodeId, SocketAddress src, 
+                Message message, long time) throws IOException {
+            
+            if (done) {
+                return;
+            }
+            
+            loopLock.remove(nodeId);
+            done = true;
+            
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("WARNING: "+newContact + " is trying to spoof its NodeID. " 
+                        + ContactNode.toString(nodeId, src) 
+                        + " responded in " + time + " ms");
+            }
+            
+            // Do nothing else! DefaultMessageHandler takes
+            // care of everything else!
+            //TODO: add bad node to IP Filter
+        }
+
+        public void handleTimeout(KUID nodeId, SocketAddress dst, 
+                long time) throws IOException {
+            
+            if (done) {
+                return;
+            }
+            
+            // Try at least x-times before giving up!
+            if (++errors >= NetworkSettings.getMaxErrors()) {
+                
+                loopLock.remove(nodeId);
+                done = true;
+                
+                // The current contact is obviously not responding
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(currentContact + " does not respond! Replacing it with " + newContact);
+                }
+                currentContact.setSocketAddress(newContact.getSocketAddress());
+                currentContact.alive();
+                if(replacementNode && replacementBucket!=null) {
+                    // we have found a live contact in the bucket's replacement cache!
+                    // It's a good time to replace this bucket's dead entry with this node
+                    pingBucketLastRecentlySeenNode(replacementBucket);
+                }
+                return;
+            }
+                
+            doSpoofCheck(currentContact, this);
         }
     }
 }
