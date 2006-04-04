@@ -22,9 +22,11 @@ package com.limegroup.gnutella.dht.tests;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.event.BootstrapListener;
 
 public class NodeIDSpoofTest {
 
@@ -79,21 +81,31 @@ public class NodeIDSpoofTest {
         System.out.println("3");
     }
     
-    public static void testReplace(int port) throws IOException{
+    public static void testReplace(final int port) throws IOException{
         //original DHT
         SocketAddress sac2 = new InetSocketAddress(port+1);
-        KUID nodeID = KUID.createRandomNodeID(sac2);
-        DHT dht2 = new DHT();
+        final KUID nodeID = KUID.createRandomNodeID(sac2);
+        final DHT dht2 = new DHT();
         dht2.bind(sac2,nodeID);
         Thread t2 = new Thread(dht2, "DHT-1");
         t2.start();
-        dht2.bootstrap(new InetSocketAddress("localhost",port),null);
-        //REPLACE!
-        dht2.close();
-        DHT dht3 = new DHT();
-        dht3.bind(new InetSocketAddress(port+2),nodeID);
-        Thread t3 = new Thread(dht3, "DHT-2");
-        t3.start();
-        dht3.bootstrap(new InetSocketAddress("localhost",port),null);
+        dht2.bootstrap(new InetSocketAddress("localhost",port),new BootstrapListener(){
+            public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
+            public void secondPhaseComplete(long time, boolean foundNodes) {
+                System.out.println("2");
+                //REPLACE!
+                try {
+                    dht2.close();
+                    DHT dht3 = new DHT();
+                    dht3.bind(new InetSocketAddress(port+2),nodeID);
+                    Thread t3 = new Thread(dht3, "DHT-2");
+                    t3.start();
+                    dht3.bootstrap(new InetSocketAddress("localhost",port),null);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }
