@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.apache.commons.logging.Log;
@@ -85,25 +86,19 @@ public final class PushManager {
         // which will connect using FWT.  Otherwise, do a non-blocking connect and have
         // the observer spawn the thread only if it succesfully connected.
         if(isFWTransfer) {
-            startPushRunner(data, null);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Adding push observer FW-FW to host: " + host + ":" + port);
+            UDPConnection socket = new UDPConnection();
+            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, true));
         } else {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
-                Sockets.connect(host, port, CONNECT_TIMEOUT, new PushObserver(data));
+                Sockets.connect(host, port, CONNECT_TIMEOUT, new PushObserver(data, false));
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();
             }
         }
-    }
-
-    /**
-     * Starts a thread that'll do the pushing using the given PushData & Socket.
-     * @param data All the data about the push.
-     * @param socket The possibly null socket.
-     */
-    private static void startPushRunner(PushData data, Socket socket) {
-        ThreadFactory.startThread(new Pusher(data, socket), "PushUploadThread");
     }
     
     /** A simple collection of Push information */
@@ -137,9 +132,11 @@ public final class PushManager {
     /** Non-blocking observer for connect events related to pushing. */
     private static class PushObserver implements ConnectObserver {
         private final PushData data;
+        private final boolean fwt;
         
-        PushObserver(PushData data) {
+        PushObserver(PushData data, boolean fwt) {
             this.data = data;
+            this.fwt = fwt;
         }        
         
         public void handleIOException(IOException iox) {}
@@ -147,15 +144,18 @@ public final class PushManager {
         /** Increments the PUSH_FAILED stat and does nothing else. */
         public void shutdown() {
             if(LOG.isDebugEnabled())
-                LOG.debug("Push connect to: " + data.getHost() + ":" + data.getPort() + " failed");
-            UploadStat.PUSH_FAILED.incrementStat();
+                LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " failed");
+            if(fwt)
+                UploadStat.FW_FW_FAILURE.incrementStat();
+            else
+                UploadStat.PUSH_FAILED.incrementStat();
         }
 
         /** Starts a new thread that'll do the pushing. */
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
-                LOG.debug("Push connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");            
-            startPushRunner(data, socket);
+                LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
+            ThreadFactory.startThread(new Pusher(data, socket, fwt), "PushUploadThread");
         }
     }    
 
@@ -165,20 +165,14 @@ public final class PushManager {
         private Socket socket;
         private boolean fwTransfer;
         
-        Pusher(PushData data, Socket socket) {
+        Pusher(PushData data, Socket socket, boolean fwt) {
             this.data = data;
             this.socket = socket;
+            this.fwTransfer = fwt;
         }
 
         public void run() {
             try {
-                if (socket == null) {
-                    if (LOG.isDebugEnabled())
-                        LOG.debug("Creating UDP Connection to " + data.getHost() + ":" + data.getPort());
-                    fwTransfer = true;
-                    socket = new UDPConnection(data.getHost(), data.getPort());
-                }
-
                 OutputStream ostream = socket.getOutputStream();
                 String giv = "GIV 0:" + data.getGuid() + "/file\n\n";
                 ostream.write(giv.getBytes());
