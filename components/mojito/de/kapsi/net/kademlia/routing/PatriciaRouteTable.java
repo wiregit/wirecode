@@ -167,9 +167,6 @@ public class PatriciaRouteTable implements RoutingTable {
     private boolean put(KUID nodeId, ContactNode node, boolean knowToBeAlive) {
         boolean pingNode = false;
         boolean added = false;
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Trying to add "+(knowToBeAlive?"live":"unknown")+" node: "+node+" to routing table");
-        }
         
         if (nodeId == null) {
             throw new IllegalArgumentException("NodeID is null");
@@ -183,9 +180,13 @@ public class PatriciaRouteTable implements RoutingTable {
             throw new IllegalArgumentException("NodeID and the ID returned by Node do not match");
         }
         
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Trying to add "+(knowToBeAlive?"live":"unknown")+" node: "+node+" to routing table");
+        }
+        
         // Update an existing node
         ContactNode existingNode = updateExistingNode(nodeId,node,knowToBeAlive);
-        if(existingNode != null && existingNode.getTimeStamp() == 0) { 
+        if(existingNode != null && existingNode.getTimeStamp() == 0L) { 
             //node existed but we don't kow if it's alive
             pingNode = true;
             
@@ -505,7 +506,7 @@ public class PatriciaRouteTable implements RoutingTable {
                     existingNode.alive();
                     return existingNode;
                 }
-            } catch (IOException e) {} //just ignore
+            } catch (IOException ignore) {}
             
             // If a Host has multiple IPs (see also above case) then
             // we may create an infinite loop if boths ends think
@@ -534,12 +535,14 @@ public class PatriciaRouteTable implements RoutingTable {
         return existingNode;
     }
     
-    private void doSpoofCheck(ContactNode contact, ResponseHandler handler){
+    private void doSpoofCheck(ContactNode contact, ResponseHandler handler) {
         RequestMessage request = context.getMessageFactory().createPingRequest();
         try {
             context.getMessageDispatcher().send(contact, request, handler);
             loopLock.put(contact.getNodeID(), handler);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            LOG.error("Coud not start spoof check", e);
+        }
     }
         
     public void refreshBuckets(boolean force) throws IOException{
@@ -585,7 +588,6 @@ public class PatriciaRouteTable implements RoutingTable {
         }
     }
     
-
     public void clear() {
         nodesTrie.clear();
         bucketsTrie.clear();
@@ -609,11 +611,11 @@ public class PatriciaRouteTable implements RoutingTable {
         return get(nodeId, false);
     }
 
-    public Collection getAllNodes() {
+    public List getAllNodes() {
         return nodesTrie.values();
     }
 
-    public Collection getAllBuckets() {
+    public List getAllBuckets() {
         return bucketsTrie.values();
     }
 
@@ -653,7 +655,7 @@ public class PatriciaRouteTable implements RoutingTable {
         }
     }
 
-
+    // TODO: remove since unused
     public ContactNode selectNextClosest(KUID key) {
         return (ContactNode)nodesTrie.selectNextClosest(key);
     }

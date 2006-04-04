@@ -20,7 +20,6 @@
 package de.kapsi.net.kademlia.routing;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 import de.kapsi.net.kademlia.ContactNode;
@@ -51,9 +50,9 @@ public interface RoutingTable {
     
     public void handleFailure(KUID nodeId);
     
-    public Collection getAllNodes();
+    public List getAllNodes();
     
-    public Collection getAllBuckets();
+    public List getAllBuckets();
     
     public void refreshBuckets(boolean force) throws IOException;
     
