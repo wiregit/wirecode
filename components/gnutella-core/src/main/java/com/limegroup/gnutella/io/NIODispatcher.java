@@ -451,10 +451,10 @@ public class NIODispatcher implements Runnable {
             // that cause this.
             if (!checkTime || !CommonUtils.isWindows()) {
                 try {
-                    Thread.sleep(50);
+                   Thread.sleep(50);
                 } catch(InterruptedException ix) {
                     LOG.warn("Selector interrupted", ix);
-                }
+               }
             }
             
             runPendingTasks();

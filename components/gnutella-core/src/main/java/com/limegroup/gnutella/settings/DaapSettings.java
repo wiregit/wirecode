@@ -112,12 +112,6 @@ public class DaapSettings extends LimeProps {
 	    FACTORY.createPasswordSettingMD5("DAAP_PASSWORD", "");
     
     /**
-     * Use either BIO or NIO (default) for DAAP
-     */
-    public static BooleanSetting DAAP_USE_NIO = 
-        FACTORY.createBooleanSetting("DAAP_USE_NIO", true);
-    
-    /**
      * With default JVM settings we start to run out of memory
      * if the Library becomes greater than 16000 Songs (OSX 10.3,
      * JVM 1.4.2_04, G5 with 2.5GB of RAM). Therefore I'm limiting
@@ -125,6 +119,9 @@ public class DaapSettings extends LimeProps {
      */
     public static IntSetting DAAP_MAX_LIBRARY_SIZE =
         FACTORY.createIntSetting("DAAP_MAX_LIBRARY_SIZE", 10000);
+    
+    public static IntSetting DAAP_BUFFER_SIZE =
+        FACTORY.createIntSetting("DAAP_BUFFER_SIZE", 2048);
      
     /**
      * Gets the user's name, in possessive format.
