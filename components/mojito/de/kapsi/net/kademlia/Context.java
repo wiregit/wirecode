@@ -270,6 +270,22 @@ public class Context implements Runnable {
         return messageDispatcher.isOpen();
     }
     
+    public int getReceivedMessagesCount() {
+        return messageDispatcher.getReceivedMessagesCount();
+    }
+    
+    public long getReceivedMessagesSize() {
+        return messageDispatcher.getReceivedMessagesSize();
+    }
+    
+    public int getSentMessagesCount() {
+        return messageDispatcher.getSentMessagesCount();
+    }
+    
+    public long getSentMessagesSize() {
+        return messageDispatcher.getSentMessagesSize();
+    }
+    
     public void bind(SocketAddress address) throws IOException {
         if (isOpen()) {
             throw new IOException("DHT is already bound");

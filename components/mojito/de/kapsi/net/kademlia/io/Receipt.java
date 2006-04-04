@@ -47,6 +47,7 @@ class Receipt {
     private final SocketAddress dst;
     
     private ByteBuffer data;
+    private int dataSize;
     
     private final KUID messageId;
     private final ResponseHandler handler;
@@ -70,6 +71,7 @@ class Receipt {
         this.nodeId = nodeId;
         this.dst = dst;
         
+        dataSize = data.length;
         this.data = ByteBuffer.wrap(data);
         
         this.messageId = message.getMessageID();
@@ -152,6 +154,10 @@ class Receipt {
         if (handler != null) {
             handler.handleTimeout(nodeId, dst, time());
         }
+    }
+    
+    public int dataSize() {
+        return dataSize;
     }
     
     public void freeData() {

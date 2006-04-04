@@ -84,6 +84,12 @@ public class MessageDispatcher implements Runnable {
     
     private Filter filter;
     
+    private int sentCount = 0;
+    private long sentSize = 0L;
+    
+    private int receivedCount = 0;
+    private long receivedSize = 0L;
+    
     public MessageDispatcher(Context context) {
         this.context = context;
         
@@ -94,6 +100,22 @@ public class MessageDispatcher implements Runnable {
         storeHandler = new StoreRequestHandler(context);
         
         filter = new Filter();
+    }
+    
+    public int getReceivedMessagesCount() {
+        return receivedCount;
+    }
+    
+    public long getReceivedMessagesSize() {
+        return receivedSize;
+    }
+    
+    public int getSentMessagesCount() {
+        return sentCount;
+    }
+    
+    public long getSentMessagesSize() {
+        return sentSize;
     }
     
     public void stop() throws IOException {
@@ -232,6 +254,8 @@ public class MessageDispatcher implements Runnable {
 
             if (receipt.send(channel)) {
                 receipt.sent();
+                sentCount++;
+                sentSize += receipt.dataSize(); // compressed size
                 
                 if (receipt.isRequest()) {
                     input.put(receipt.getMessageID(), receipt);
@@ -255,6 +279,9 @@ public class MessageDispatcher implements Runnable {
             buffer.get(data, 0, length);
             
             Message message = InputOutputUtils.deserialize(data);
+            receivedCount++;
+            receivedSize += data.length; // compressed size!
+            
             Receipt receipt = null;
             
             if (message instanceof ResponseMessage) {
@@ -338,6 +365,9 @@ public class MessageDispatcher implements Runnable {
     
     public void run() {
         long lastCleanup = System.currentTimeMillis();
+        
+        sentCount = 0;
+        receivedCount = 0;
         
         while(isRunning()) {
             try {
