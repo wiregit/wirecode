@@ -489,7 +489,15 @@ public class PatriciaRouteTable implements RoutingTable {
                 existingNode.alive();
                 return existingNode;
             }
-
+            //check if we have heard of the existing node recently
+            long now = System.currentTimeMillis();
+            long delay = now - existingNode.getTimeStamp();
+            if(delay < RouteTableSettings.getMinReconnectionTime()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Not doing spoof check as contact alive recently for node: "+existingNode);
+                }
+                return existingNode;
+            }
             //START: SPOOF CHECK
             try {
                 // Huh? The addresses are not equal but both belong

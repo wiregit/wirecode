@@ -35,6 +35,9 @@ public final class RouteTableSettings {
     private static final int MAX_UNKNOWN_NODE_FAILURES = 2;
     private static final String MAX_UNKNOWN_NODE_FAILURES_KEY = "MAX_UNKNOWN_NODE_FAILURES";
     
+    private static final long MIN_RECONNECTION_TIME = 1 * 60;
+    private static final String MIN_RECONNECTION_TIME_KEY = "MIN_RECONNECTION_TIME";
+    
     private static final int DEPTH_LIMIT = 4; //a.k.a B
     private static final String DEPTH_LIMIT_KEY = "DEPTH_LIMIT";
     
@@ -94,5 +97,13 @@ public final class RouteTableSettings {
     
     public static void setBucketRefreshTime(long time) {
         SETTINGS.putLong(BUCKET_REFRESH_TIME_KEY,time);
+    }
+    
+    public static long getMinReconnectionTime() {
+        return SETTINGS.getLong(MIN_RECONNECTION_TIME_KEY, MIN_RECONNECTION_TIME);
+    }
+    
+    public static void setMinReconnectionTime(long time) {
+        SETTINGS.putLong(MIN_RECONNECTION_TIME_KEY,time);
     }
 }
