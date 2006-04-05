@@ -203,26 +203,7 @@ public class Main {
             buffer.append("TOTAL: " + values.size()).append("\n");
         } else {
             RoutingTable routingTable = dht.getRoutingTable();
-            Collection bucketsList = routingTable.getAllBuckets();
-            buffer.append("-------------\nBuckets:\n");
-            for(Iterator it = bucketsList.iterator(); it.hasNext(); ) {
-                BucketNode node = (BucketNode)it.next();
-                buffer.append(node).append("\n");
-            }
-            buffer.append("-------------\n");
-            buffer.append("TOTAL BUCKETS: " + bucketsList.size()).append("\n");
-            buffer.append("-------------\n");
-            
-            Collection nodesList = routingTable.getAllNodes();
-            buffer.append("-------------\nNodes:\n");
-            for(Iterator it = nodesList.iterator(); it.hasNext(); ) {
-                ContactNode node = (ContactNode)it.next();
-                
-                buffer.append(node).append("\n");
-            }
-            buffer.append("-------------\n");
-            buffer.append("TOTAL NODES: " + nodesList.size()).append("\n");
-            buffer.append("-------------\n");
+            buffer.append(routingTable.toString());
         }
         
         System.out.println(buffer);

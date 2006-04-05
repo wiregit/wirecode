@@ -118,7 +118,7 @@ public class BucketNode extends Node {
     
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(nodeId)
+        buffer.append("Bucket: "+nodeId)
             .append(", depth: ").append(getDepth())
             .append(", size: ").append(getNodeCount())
             .append(", replacements: ").append(getReplacementCacheSize())

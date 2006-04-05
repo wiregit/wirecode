@@ -64,10 +64,7 @@ public class DHTNodeStat implements DHTStats{
             nodeID = context.getLocalNodeID().toHexString();
         }
         writer.write(nodeID);
-        for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-            ContactNode node = (ContactNode) iter.next();
-            writer.write(FILE_DELIMITER + node.getNodeID().toHexString());
-        }
+        writer.write(FILE_DELIMITER+routeTable.toString());
         writer.write("\n");
     }
     

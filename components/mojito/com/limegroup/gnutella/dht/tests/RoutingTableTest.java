@@ -52,12 +52,12 @@ public class RoutingTableTest {
         new Thread(dht,"DHT").start();
         RoutingTable routingTable = dht.getContext().getRouteTable();
         
-//        testBuckets(routingTable);
+        testBuckets(routingTable);
 //        testReplaceNode(routingTable);
 //        testReplaceCachedNode(routingTable);
 //        testRemoveNode(routingTable);
 //        testLiveNodesOnly(routingTable);
-        testreplaceBucketStaleNodes(routingTable);
+//        testreplaceBucketStaleNodes(routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
         try {
@@ -92,6 +92,7 @@ public class RoutingTableTest {
         for (int i = 0; i < 22; i++) {
             ContactNode node = new ContactNode(KUID.createRandomNodeID(addr),addr);
             routingTable.add(node,true);
+            System.out.println(routingTable.toString());
         }
         Collection bucketsList = routingTable.getAllBuckets();
         StringBuffer buffer = new StringBuffer("\n");

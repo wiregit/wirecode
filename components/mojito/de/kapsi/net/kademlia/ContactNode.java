@@ -47,6 +47,11 @@ public class ContactNode extends Node {
         return (failures > 0);
     }
     
+    public void setUnknown() {
+        failures = 0;
+        setTimeStamp(0L);
+    }
+    
     public boolean isDead() {
         //node has ever been alive?
         if(getTimeStamp() > 0L) {
@@ -97,7 +102,7 @@ public class ContactNode extends Node {
         StringBuffer buffer = new StringBuffer();
         buffer.append(toString(nodeId, address))
             .append(", failures: ").append(failures)
-            .append(", alive: ").append(getTimeStamp() > 0L);
+            .append(", unknown?: ").append(getTimeStamp()==0);
         return buffer.toString();
     }
     

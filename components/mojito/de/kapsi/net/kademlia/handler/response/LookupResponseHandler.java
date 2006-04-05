@@ -71,11 +71,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     private Map queryKeys = new HashMap();
     
     /**
-     * The number of lookup rounds
-     */
-    private int round = 0;
-    
-    /**
      * The number of searches that are currently active
      */
     private int activeSearches = 0;
@@ -128,7 +123,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 LOG.trace(ContactNode.toString(nodeId, src) 
                         + " returned KeyValues for " 
                         + lookup + " after " 
-                        + round + " rounds and " 
                         + queried.size() + " queried Nodes");
             }
             
@@ -200,7 +194,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         if (LOG.isTraceEnabled()) {
             LOG.trace(ContactNode.toString(nodeId, dst) 
-                    + " did not response to our Find request");
+                    + " did not respond to our Find request");
         }
         
         --activeSearches;
@@ -279,7 +273,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookup + " terminates with " 
                         + bestResponse + " as the best match after " 
-                        + round + " lookup rounds and " 
                         + queried.size() + " queried Nodes");
                 }
             
