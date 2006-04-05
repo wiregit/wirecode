@@ -30,7 +30,7 @@ public final class NetworkUtils {
     private NetworkUtils() {}
     
     /**
-     * Returns true if the SocketAddress is any of our local machine addresses
+     * Returns true if the SocketAddress is any of our local machine addresses.
      */
     public static boolean isLocalAddress(SocketAddress addr) throws IOException {
         return isLocalAddress(((InetSocketAddress)addr).getAddress());
