@@ -20,6 +20,8 @@
 package de.kapsi.net.kademlia.handler.response;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
@@ -56,12 +58,17 @@ public class PingResponseHandler extends AbstractResponseHandler {
         PingResponse response = (PingResponse)message;
         SocketAddress externalAddress = response.getSocketAddress();
         
-        if (externalAddress != null && !externalAddress.equals(src)) {
-            SocketAddress currentAddress = context.getExternalSocketAddress();
-            if (!externalAddress.equals(currentAddress)) {
-                
-                // TODO: Make sure it's really our external Address!
-                context.setExternalSocketAddress(externalAddress);
+        if (externalAddress != null) {
+            InetAddress extAddr = ((InetSocketAddress)externalAddress).getAddress();
+            InetAddress srcAddr = ((InetSocketAddress)src).getAddress();
+            
+            if (extAddr.equals(srcAddr)) {
+                SocketAddress currentAddress = context.getExternalSocketAddress();
+                if (!externalAddress.equals(currentAddress)) {
+                    
+                    // TODO: Make sure it's really our external Address!
+                    context.setExternalSocketAddress(externalAddress);
+                }
             }
         }
         
