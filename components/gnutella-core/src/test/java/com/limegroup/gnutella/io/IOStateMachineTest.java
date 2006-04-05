@@ -8,8 +8,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.connection.WriteBufferChannel;
-import com.limegroup.gnutella.handshaking.StubHandshakeObserver;
-import com.limegroup.gnutella.handshaking.StubHandshaker;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class IOStateMachineTest extends BaseTestCase {
