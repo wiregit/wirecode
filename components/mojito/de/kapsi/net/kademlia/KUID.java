@@ -343,7 +343,9 @@ public class KUID implements Serializable {
      * Returns the raw bytes of the current KUID
      */
     public byte[] getBytes() {
-        return id;
+        byte[] clone = new byte[id.length];
+        System.arraycopy(id, 0, clone, 0, id.length);
+        return clone;
     }
     
     /**
