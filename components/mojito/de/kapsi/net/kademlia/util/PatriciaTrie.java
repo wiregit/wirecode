@@ -301,6 +301,12 @@ public class PatriciaTrie implements Serializable {
     }
     
     public List range(Object key, int length, KeySelector keySelector) {
+        
+        // If length is -1 then return everything!
+        if (length == -1) {
+            return values();
+        }
+        
         if (length >= keyCreator.length()) {
             throw new IllegalArgumentException(length + " >= " + keyCreator.length());
         }
