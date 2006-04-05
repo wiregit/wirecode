@@ -8,6 +8,12 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ErrorService;
 
+/**
+ * A TorrentLocation object represents a remote computer on the Internet running BitTorrent software.
+ * It's downloading files with BitTorrent, so we can use it as a location to get parts of files from.
+ * 
+ * The TorrentLocation class extends Endpoint to have an IP address and port number.
+ */
 public class TorrentLocation extends Endpoint {
 	private static final long serialVersionUID = 7953314787152210101L;
 
