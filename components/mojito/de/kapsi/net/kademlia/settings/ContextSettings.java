@@ -36,6 +36,18 @@ public class ContextSettings {
     
     private ContextSettings() {}
     
+    public static void deleteNodeID(SocketAddress address) {
+        String key = (address != null) ? address.toString() : "null";
+        try {
+            if (SETTINGS.nodeExists(key)) {
+                Preferences node = SETTINGS.node(key);
+                node.removeNode();
+            }
+        } catch (BackingStoreException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public static byte[] getLocalNodeID(SocketAddress address) {
         String key = (address != null) ? address.toString() : "null";
         try {
