@@ -20,12 +20,12 @@ public abstract class WriteHandshakeState extends HandshakeState {
     }
 
     /** Returns true. */
-    boolean isWriting() {
+    public boolean isWriting() {
         return true;
     }
 
     /** Returns false. */
-    boolean isReading() {
+    public boolean isReading() {
         return false;
     }
 
@@ -39,7 +39,7 @@ public abstract class WriteHandshakeState extends HandshakeState {
      * This will return true if it needs to be called again to continue writing.
      * If it returns false, all data has been written and you can proceed to the next state.
      */
-    boolean process(Channel channel, ByteBuffer buffer) throws IOException {
+    public boolean process(Channel channel, ByteBuffer buffer) throws IOException {
         if(outgoing == null) {
             outgoing = createOutgoingData();
         }

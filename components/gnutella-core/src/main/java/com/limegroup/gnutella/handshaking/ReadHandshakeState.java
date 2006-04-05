@@ -36,7 +36,7 @@ abstract class ReadHandshakeState extends HandshakeState {
      * otherwise it will return false indiciating it's time to move on to the next
      * state.
      */
-    boolean process(Channel channel, ByteBuffer buffer) throws IOException {
+    public boolean process(Channel channel, ByteBuffer buffer) throws IOException {
         ReadableByteChannel rc = (ReadableByteChannel)channel;
         boolean allDone = false;
         while(!allDone) {
@@ -99,12 +99,12 @@ abstract class ReadHandshakeState extends HandshakeState {
     }
     
     /** Returns false. */
-    boolean isWriting() {
+    public boolean isWriting() {
         return false;
     }
     
     /** Returns true. */
-    boolean isReading() {
+    public boolean isReading() {
         return true;
     }
     

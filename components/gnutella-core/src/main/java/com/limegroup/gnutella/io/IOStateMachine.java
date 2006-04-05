@@ -1,7 +1,8 @@
-package com.limegroup.gnutella.handshaking;
+package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.util.List;
 
 import com.limegroup.gnutella.io.BufferUtils;
@@ -11,19 +12,16 @@ import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 
 /**
- * Handshaking class that iterates through the available states and sets the
- * appropriate interest on the channel depending on the state.
+ * State machine for reading & writing.
  */
-class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestReadChannel {
+public class IOStateMachine implements ChannelReadObserver, ChannelWriter, InterestReadChannel {
    
-    /** The Handshaker controlling this. */
-    private Handshaker shaker;
     /** Observer to notify when this finishes or fails. */
-    private HandshakeObserver handshakeObserver;
+    private IOStateObserver observer;
     /** The states this will use while handshaking.*/
-    private List /* of HandshakeState */ states;
+    private List /* of IOState */ states;
     /** The current state. */
-    private HandshakeState currentState;
+    private IOState currentState;
     /** The sink we write to. */
     private InterestWriteChannel writeSink;
     /** The sink we read from. */
@@ -33,14 +31,40 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
     /** Whether or not we've shutdown this handshaker. */
     private volatile boolean shutdown;
 
-    /** Constructs a new AsyncHandker using the given Handshaker, HandshakeObserver, and List of states. */
-    AsyncHandshaker(Handshaker shaker, HandshakeObserver observer, List states) {
-        this.shaker = shaker;
-        this.handshakeObserver = observer;
+    public IOStateMachine(IOStateObserver observer, List states) {
+        this.observer = observer;
         this.states = states;
-        this.readBuffer = ByteBuffer.allocate(2048);
-        this.currentState = (HandshakeState)states.remove(0);
-    }    
+        this.readBuffer = NIODispatcher.instance().getBufferCache().getHeap(2048);
+        this.currentState = (IOState)states.remove(0);
+    }
+    
+    /**
+     * Adds a new state to process.
+     * 
+     * @param state
+     */
+    public void addState(final IOState newState) {
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                states.add(newState);
+                if(states.size() == 1)
+                    nextState(false, false);
+            }
+        });
+    }
+    
+    /**
+     * Adds a collection of new states to process.
+     */
+    public void addState(final List /* of IOState */ newStates) {
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                states.addAll(newStates);
+                if(states.size() == newStates.size())
+                    nextState(false, false);
+            }
+        });        
+    }
     
     /**
      * Notification that a read can be performed.  If our current state is for writing,
@@ -83,19 +107,17 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
             try {
                 if (reading) {
                     if (!currentState.process(readSink, readBuffer))
-                        nextState(true);
+                        nextState(true, false);
                 } else {
                     if (!currentState.process(writeSink, null))
-                        nextState(false);
+                        nextState(false, true);
                     else
                         return true;
                 }
-            } catch (NoGnutellaOkException ex) {
-                shutdown = true;
-                handshakeObserver.handleNoGnutellaOk(ex.getCode(), ex.getMessage());
             } catch (IOException iox) {
                 shutdown = true;
-                handshakeObserver.handleBadHandshake();
+                NIODispatcher.instance().getBufferCache().release(readBuffer);
+                observer.handleIOException(iox);
             }
         }
         
@@ -110,18 +132,18 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
      * 
      * @param reading
      */
-    private void nextState(boolean reading) {
+    private void nextState(boolean reading, boolean writing) {
         if(states.isEmpty()) {
             readSink.interest(false);
             writeSink.interest(this, false);
-            handshakeObserver.handleHandshakeFinished(shaker);
+            observer.handleStatesFinished();
         } else {
-            currentState = (HandshakeState)states.remove(0);
+            currentState = (IOState)states.remove(0);
             if(currentState.isReading() && !reading) {
                 if(readSink != null)
                     readSink.interest(true);
                 writeSink.interest(this, false);
-            } else if(currentState.isWriting() && reading) {
+            } else if(currentState.isWriting() && !writing) {
                 readSink.interest(false);
                 if(writeSink != null)
                     writeSink.interest(this, true);
@@ -169,10 +191,12 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
             shutdown = true;
         }
         
-        // this may be called when the message reading is installed
+        // this may be called when transfer is switched to another observer
         if(!isOpen()) {
-            handshakeObserver.shutdown();
+            observer.shutdown();
         }
+        
+        NIODispatcher.instance().getBufferCache().release(readBuffer);
     }
 
     public void interest(boolean status) {
@@ -184,7 +208,10 @@ class AsyncHandshaker implements ChannelReadObserver, ChannelWriter, InterestRea
      * This is typically used for the MessageReader to read any bytes that this AsyncHandshaker
      * read from the network but did not process during handshaking.
      */
-    public int read(ByteBuffer toBuffer) {
+    public int read(ByteBuffer toBuffer) throws ClosedChannelException {
+        if(shutdown)
+            throw new ClosedChannelException();
+        
         return BufferUtils.transfer(readBuffer, toBuffer);
     }
 
