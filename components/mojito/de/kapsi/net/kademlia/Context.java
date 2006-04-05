@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,6 +142,14 @@ public class Context implements Runnable {
     
     public KeyPair getKeyPair() {
         return keyPair;
+    }
+    
+    public PublicKey getPublicKey() {
+        return keyPair.getPublic();
+    }
+    
+    public PrivateKey getPrivateKey() {
+        return keyPair.getPrivate();
     }
     
     public ContactNode getLocalNode() {

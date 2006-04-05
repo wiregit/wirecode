@@ -138,13 +138,16 @@ public class MessageInputStream extends DataInputStream {
     
     private PingRequest readPing(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
-        return new PingRequest(vendor, version, nodeId, messageId);
+        
+        int request = readInt();
+        return new PingRequest(vendor, version, nodeId, messageId, request);
     }
     
     private PingResponse readPong(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
         SocketAddress addr = readSocketAddress();
-        return new PingResponse(vendor, version, nodeId, messageId, addr);
+        byte[] signature = readSignature();
+        return new PingResponse(vendor, version, nodeId, messageId, addr, signature);
     }
     
     private FindNodeRequest readFindNodeRequest(int vendor, int version, 

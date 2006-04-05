@@ -21,6 +21,8 @@ package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.security.InvalidKeyException;
+import java.security.SignatureException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +32,7 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 /**
@@ -50,9 +53,26 @@ public class PingRequestHandler extends AbstractRequestHandler {
             LOG.trace(ContactNode.toString(nodeId, src) + " sent us a Ping");
         }
         
-        PingResponse pong = context.getMessageFactory()
-                .createPingResponse(message.getMessageID(), src);
+        PingRequest request = (PingRequest)message;
+        PingResponse response = null;
         
-        context.getMessageDispatcher().send(src, pong, null);
+        if (request.isSignatureRequest()) {
+            try {
+                response = context.getMessageFactory()
+                    .createSignedPingResponse(message.getMessageID(), src, 
+                            context.getPrivateKey());
+            } catch (InvalidKeyException e) {
+                LOG.error(e);
+            } catch (SignatureException e) {
+                LOG.error(e);
+            }
+        } else {
+            response = context.getMessageFactory()
+                .createPingResponse(message.getMessageID(), src);
+        }
+
+        if (response != null) {
+            context.getMessageDispatcher().send(src, response, null);
+        }
     }
 }

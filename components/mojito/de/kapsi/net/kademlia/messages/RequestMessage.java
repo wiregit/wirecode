@@ -27,4 +27,9 @@ public abstract class RequestMessage extends Message {
             KUID nodeId, KUID messageId) {
         super(vendor, version, nodeId, messageId);
     }
+    
+    public RequestMessage(int vendor, int version, 
+            KUID nodeId, KUID messageId, byte[] signature) {
+        super(vendor, version, nodeId, messageId, signature);
+    }
 }

@@ -41,8 +41,14 @@ public abstract class Message {
     protected final KUID nodeId;
     protected final KUID messageId;
     
+    protected final byte[] signature;
+    
+    public Message(int vendor, int version, KUID nodeId, KUID messageId) {
+        this(vendor, version, nodeId, messageId, null);
+    }
+    
     public Message(int vendor, int version, 
-            KUID nodeId, KUID messageId) {
+            KUID nodeId, KUID messageId, byte[] signature) {
         
         if (nodeId == null) {
             throw new NullPointerException("NodeID is null");
@@ -64,6 +70,7 @@ public abstract class Message {
         this.version = version;
         this.nodeId = nodeId;
         this.messageId = messageId;
+        this.signature = signature;
     }
     
     public int getVendor() {
@@ -80,5 +87,9 @@ public abstract class Message {
     
     public KUID getNodeID() {
         return nodeId;
+    }
+    
+    public byte[] getSignature() {
+        return signature;
     }
 }

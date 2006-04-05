@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.InvalidKeyException;
+import java.security.SignatureException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,13 +34,18 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
+import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.security.CryptoHelper;
 
 public class PingResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);
+    
+    private static boolean PERMIT_SAME_HOST = false;
     
     private PingListener l;
     
@@ -62,12 +69,14 @@ public class PingResponseHandler extends AbstractResponseHandler {
             InetAddress extAddr = ((InetSocketAddress)externalAddress).getAddress();
             InetAddress srcAddr = ((InetSocketAddress)src).getAddress();
             
-            if (extAddr.equals(srcAddr)) {
+            if (!extAddr.equals(srcAddr) || PERMIT_SAME_HOST) {
+                
                 SocketAddress currentAddress = context.getExternalSocketAddress();
                 if (!externalAddress.equals(currentAddress)) {
                     
-                    // TODO: Make sure it's really our external Address!
-                    context.setExternalSocketAddress(externalAddress);
+                    PingRequest request = context.getMessageFactory().createPingRequest(PingRequest.SIGN);
+                    ResponseHandler handler = new VerifyExternalAddressHandler(context, externalAddress);
+                    context.getMessageDispatcher().send(context.getLocalNodeID(), externalAddress, request, handler);
                 }
             }
         }
@@ -94,6 +103,60 @@ public class PingResponseHandler extends AbstractResponseHandler {
                     l.pingTimeout(nodeId, dst);
                 }
             });
+        }
+    }
+    
+    private static class VerifyExternalAddressHandler extends AbstractResponseHandler {
+        
+        private SocketAddress externalAddress;
+        
+        private VerifyExternalAddressHandler(Context context, 
+                SocketAddress externalAddress) {
+            super(context);
+            
+            this.externalAddress = externalAddress;
+        }
+
+        public void handleResponse(KUID nodeId, SocketAddress src, 
+                    Message message, long time) throws IOException {
+            
+            KUID messageId = message.getMessageID();
+            byte[] signature = message.getSignature();
+            
+            try {
+                if (CryptoHelper.verify(context.getPublicKey(), messageId.getBytes(), signature)) {
+                    // TODO externalAddress and src should be equal 
+                    // until the Router is doing some weird stuff!?
+                    
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Setting external address from " 
+                                + context.getExternalSocketAddress() 
+                                + " to " + externalAddress);
+                    }
+                    context.setExternalSocketAddress(externalAddress);
+                } else {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error(externalAddress + " is not my external address!");
+                    }
+                }
+            } catch (InvalidKeyException e) {
+                LOG.error(e);
+            } catch (SignatureException e) {
+                LOG.error(e);
+            }
+        }
+
+        public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
+            // No special handling of errors required as we sent a
+            // ping on the local network which shouldn't fail due to
+            // network errors like packet loss. Keep in mind that this 
+            // method gets also called if destination and response 
+            // Node ID didn't match. That means the guy sent us an
+            // IP:Port of an another Lime DHT Node. See Receipt!
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(ContactNode.toString(nodeId, dst) + " did not respond");
+            }
         }
     }
 }

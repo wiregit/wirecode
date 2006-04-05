@@ -118,11 +118,12 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writePing(PingRequest ping) throws IOException {
-        /* WRITE NOTHING */
+        writeInt(ping.getRequest());
     }
     
     private void writePong(PingResponse pong) throws IOException {
         writeSocketAddress(pong.getSocketAddress());
+        writeSignature(pong.getSignature());
     }
     
     private void writeFindNodeRequest(FindNodeRequest findNode) throws IOException {

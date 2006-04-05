@@ -183,11 +183,16 @@ public class MessageDispatcher implements Runnable {
             throw new IOException("Channel is not bound");
         }
         
-        // MAKE SURE WE'RE NOT SENDING MESSAGES TO OURSELF
+        // Make sure we're not sending messages to ourself.
+        // The only exception are Pings/Pongs
         if (nodeId != null 
-                && nodeId.equals(context.getLocalNodeID())) {
+                && nodeId.equals(context.getLocalNodeID())
+                && !(message instanceof PingRequest)
+                && !(message instanceof PingResponse)) {
+            
             if (LOG.isErrorEnabled()) {
-                LOG.error("Cannot send messages to ourself: " + ContactNode.toString(nodeId, dst));
+                LOG.error("Cannot send message of type " + message.getClass().getName() 
+                        + " to ourself " + ContactNode.toString(nodeId, dst));
             }
             return;
         }
@@ -302,12 +307,17 @@ public class MessageDispatcher implements Runnable {
         
         KUID nodeId = message.getNodeID();
         
-        // MAKE SURE WE'RE NOT RECEIVING MESSAGES FROM OURSELF
+        // Make sure we're not receiving messages from ourself.
+        // The only exception are Pings/Pongs
         if (nodeId != null 
                 && nodeId.equals(context.getLocalNodeID())
-                && src.equals(context.getLocalSocketAddress())) {
+                && src.equals(context.getLocalSocketAddress())
+                && !(message instanceof PingRequest)
+                && !(message instanceof PingResponse)) {
+            
             if (LOG.isErrorEnabled()) {
-                LOG.error("Received a message from ourself: " + ContactNode.toString(nodeId, src));
+                LOG.error("Received a message of type " + message.getClass().getName() 
+                        + " from ourself " + ContactNode.toString(nodeId, src));
             }
             return;
         }

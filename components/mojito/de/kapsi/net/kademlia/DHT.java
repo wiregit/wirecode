@@ -71,6 +71,22 @@ public class DHT implements Runnable {
         return context.getExternalSocketAddress();
     }
     
+    public int getReceivedMessagesCount() {
+        return context.getReceivedMessagesCount();
+    }
+    
+    public long getReceivedMessagesSize() {
+        return context.getReceivedMessagesSize();
+    }
+    
+    public int getSentMessagesCount() {
+        return context.getSentMessagesCount();
+    }
+    
+    public long getSentMessagesSize() {
+        return context.getSentMessagesSize();
+    }
+    
     public boolean isRunning() {
         return context.isRunning();
     }

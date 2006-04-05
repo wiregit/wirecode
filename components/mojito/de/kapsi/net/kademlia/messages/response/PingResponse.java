@@ -29,8 +29,14 @@ public class PingResponse extends ResponseMessage {
     private final SocketAddress address;
     
     public PingResponse(int vendor, int version, KUID nodeId, 
-            KUID messageId, SocketAddress address/*, long time*/) {
+            KUID messageId, SocketAddress address) {
         super(vendor, version, nodeId, messageId);
+        this.address = address;
+    }
+    
+    public PingResponse(int vendor, int version, KUID nodeId, 
+            KUID messageId, SocketAddress address, byte[] signature) {
+        super(vendor, version, nodeId, messageId, signature);
         this.address = address;
     }
     
