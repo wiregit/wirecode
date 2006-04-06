@@ -1,6 +1,9 @@
-package com.limegroup.bittorrent.messages;
+package com.limegroup.gnutella.torrent.messages;
 
 import java.nio.ByteBuffer;
+
+import com.limegroup.gnutella.torrent.BTMetaInfo;
+import com.limegroup.gnutella.torrent.BadBTMessageException;
 
 /**
  * indicates that we will not upload anything to the remote host
@@ -25,9 +28,22 @@ public class BTBitField extends BTMessage {
 		return new BTBitField(bitfield);
 	}
 
-	public BTBitField(byte[] bitfield) {
+	private BTBitField(byte[] bitfield) {
 		super(BITFIELD);
 		_payload = ByteBuffer.wrap(bitfield);
+	}
+
+	/**
+	 * factory method, creates a new BitField message
+	 * 
+	 * @param info
+	 *            the <tt>BTMetaInfo</tt> from which to request the actual
+	 *            bitfield
+	 * @return new instance of BTBitField
+	 */
+	public static BTBitField createMessage(BTMetaInfo info) {
+		byte[] bitfield = info.createBitField();
+		return new BTBitField(bitfield);
 	}
 
 	/**

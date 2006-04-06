@@ -1,9 +1,10 @@
-package com.limegroup.bittorrent.messages;
+package com.limegroup.gnutella.torrent.messages;
 
 import java.nio.ByteBuffer;
 
-import com.limegroup.bittorrent.statistics.BTMessageStat;
-import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
+import com.limegroup.gnutella.statistics.BTMessageStat;
+import com.limegroup.gnutella.statistics.BTMessageStatBytes;
+import com.limegroup.gnutella.torrent.BadBTMessageException;
 
 public abstract class BTMessage {
 	// private static final Log LOG = LogFactory.getLog(BTMessage.class);
@@ -31,10 +32,6 @@ public abstract class BTMessage {
 
 	public static final byte CANCEL = 0x08;
 
-	public static final byte ALT_LOC_REQUEST = 0x12;
-
-	public static final byte ALT_LOCS = 0x13;
-	
 	/**
 	 * Buffer used for messages without payload
 	 */
@@ -141,14 +138,6 @@ public abstract class BTMessage {
 			BTMessageStat.INCOMING_CANCEL.incrementStat();
 			BTMessageStatBytes.INCOMING_CANCEL.addData(17);
 			return BTCancel.readMessage(in);
-		case ALT_LOC_REQUEST:
-			BTMessageStat.INCOMING_ALT_LOC_REQUEST.incrementStat();
-			BTMessageStatBytes.INCOMING_ALT_LOC_REQUEST.addData(5);
-			return BTAltLocRequest.readMessage(in);
-		case ALT_LOCS:
-			BTMessageStat.INCOMING_ALT_LOCS.incrementStat();
-			BTMessageStatBytes.INCOMING_ALT_LOCS.addData(5 + in.remaining());
-			return BTAltLocs.readMessage(in);
 		default:
 			throw new BadBTMessageException("unknown message, type " + type);
 		}

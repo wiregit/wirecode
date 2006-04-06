@@ -1,8 +1,10 @@
-package com.limegroup.bittorrent.messages;
+package com.limegroup.gnutella.torrent.messages;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.limegroup.gnutella.torrent.BTInterval;
+import com.limegroup.gnutella.torrent.BadBTMessageException;
 
 /**
  * cancels a request we may have sent to the remote host
@@ -10,20 +12,14 @@ import java.nio.ByteOrder;
 public class BTCancel extends BTMessage {
 	private ByteBuffer _payload = null;
 
-	private int _pieceNum;
-
-	private int _offset;
-
-	private int _length;
+	private BTInterval in;
 
 	/**
 	 * Constructs new BTCancel message
 	 */
-	private BTCancel(int pieceNum, int offset, int length) {
+	public BTCancel(BTInterval in) {
 		super(CANCEL);
-		_pieceNum = pieceNum;
-		_offset = offset;
-		_length = length;
+		this.in = in;
 	}
 
 	/**
@@ -53,53 +49,26 @@ public class BTCancel extends BTMessage {
 
 		int length = payload.getInt();
 		
-		return new BTCancel(pieceNum, offset, length);
-	}
-
-	/**
-	 * factory method
-	 * 
-	 * @param pieceNum
-	 *            the number of the piece we requested
-	 * @param offset
-	 *            the offset of the requested range wrt. to the beginning of the
-	 *            piece
-	 * @param length
-	 *            the length of the requested range in bytes
-	 * @return new instance of BTCancel
-	 */
-	public static BTCancel createMessage(int pieceNum, int offset, int length) {
-		return new BTCancel(pieceNum, offset, length);
+		if (length == 0)
+			throw new BadBTMessageException("0 length in cancel message " + pieceNum);
+		
+		return new BTCancel(new BTInterval(offset, offset + length + -1, pieceNum));
 	}
 
 	/**
 	 * @return piece number of the requested piece
 	 */
-	public int getPieceNum() {
-		return _pieceNum;
-	}
-
-	/**
-	 * @return offset wrt. the beginning of the piece
-	 */
-	public int getOffset() {
-		return _offset;
-	}
-
-	/**
-	 * @return requested amount of bytes
-	 */
-	public int getLength() {
-		return _length;
+	public BTInterval getInterval() {
+		return in;
 	}
 
 	public ByteBuffer getPayload() {
 		if (_payload == null) {
 			_payload = ByteBuffer.allocate(12);
 			_payload.order(ByteOrder.BIG_ENDIAN);
-			_payload.putInt(_pieceNum);
-			_payload.putInt(_offset);
-			_payload.putInt(_length);
+			_payload.putInt(in.getId());
+			_payload.putInt(in.low);
+			_payload.putInt(in.high - in.low + 1);
 			_payload = _payload.asReadOnlyBuffer();
 		}
 		_payload.clear();
@@ -108,6 +77,6 @@ public class BTCancel extends BTMessage {
 	
 
 	public String toString() {
-		return "BTCancel (" + _pieceNum + ";" + _offset + ";" + _length + ")" ;
+		return "BTCancel (" + in + ")" ;
 	}
 }

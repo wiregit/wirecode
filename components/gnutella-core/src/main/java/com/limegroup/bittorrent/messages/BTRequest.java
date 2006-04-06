@@ -1,8 +1,10 @@
-package com.limegroup.bittorrent.messages;
+package com.limegroup.gnutella.torrent.messages;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.limegroup.gnutella.torrent.BTInterval;
+import com.limegroup.gnutella.torrent.BadBTMessageException;
 
 /**
  * indicates that we will not upload anything to the remote host
@@ -13,22 +15,16 @@ public class BTRequest extends BTMessage {
 	 */
 	private static final int MAX_REQUEST_SIZE = 65536;
 
-	private int _pieceNum;
-
-	private int _offset;
-
-	private int _length;
+	private BTInterval in;
 	
 	private ByteBuffer _payload;
 
 	/**
 	 * Constructs new BTRequest message
 	 */
-	private BTRequest(int pieceNum, int offset, int length) {
+	public BTRequest(BTInterval in) {
 		super(REQUEST);
-		_pieceNum = pieceNum;
-		_offset = offset;
-		_length = length;
+		this.in = in;
 	}
 
 	/**
@@ -54,59 +50,29 @@ public class BTRequest extends BTMessage {
 					"invalid piece number in request message: " + pieceNum);
 
 		int offset = payload.getInt();
+		if (offset < 0)
+			throw new BadBTMessageException("negative offset in mesage");
 
 		int length = payload.getInt();
-		if (length < 0 || length > MAX_REQUEST_SIZE)
+		if (length <= 0 || length > MAX_REQUEST_SIZE)
 			throw new BadBTMessageException(
 					"invalid requested length in request message: " + length);
 		
-		return new BTRequest(pieceNum, offset, length);
+		return new BTRequest(new BTInterval(offset, offset + length - 1, pieceNum));
 	}
 
-	/**
-	 * factory method
-	 * 
-	 * @param pieceNum
-	 *            the number of the piece to request
-	 * @param offset
-	 *            the offset of the requested range wrt. to the beginning of the
-	 *            piece
-	 * @param length
-	 *            the length of the requested range in bytes
-	 * @return new instance of BTRequest
-	 */
-	public static BTRequest createMessage(int pieceNum, int offset, int length) {
-		return new BTRequest(pieceNum, offset, length);
-	}
-
-	/**
-	 * @return piece number of the requested piece
-	 */
-	public int getPieceNum() {
-		return _pieceNum;
-	}
-
-	/**
-	 * @return offset wrt. the beginning of the piece
-	 */
-	public int getOffset() {
-		return _offset;
-	}
-
-	/**
-	 * @return requested amount of bytes
-	 */
-	public int getLength() {
-		return _length;
+	
+	public BTInterval getInterval() {
+		return in;
 	}
 
 	public ByteBuffer getPayload() {
 		if (_payload == null) {
 			ByteBuffer buf = ByteBuffer.allocate(12);
 			buf.order(ByteOrder.BIG_ENDIAN);
-			buf.putInt(_pieceNum);
-			buf.putInt(_offset);
-			buf.putInt(_length);
+			buf.putInt(in.getId());
+			buf.putInt(in.low);
+			buf.putInt(in.high - in.low + 1);
 			_payload = buf.asReadOnlyBuffer();
 		}
 		_payload.clear();
@@ -114,6 +80,6 @@ public class BTRequest extends BTMessage {
 	}
 	
 	public String toString() {
-		return "BTRequest (" + _pieceNum + ";" + _offset + ";" + _length + ")" ;
+		return "BTRequest (" + in + ")" ;
 	}
 }
