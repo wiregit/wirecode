@@ -59,7 +59,7 @@ public class PatriciaTest {
         //System.out.println(trie);
         
         KUID key = KUID.createNodeID(ArrayUtils.parseHexString(LOOKUP));
-        List items = trie.select(key, 4);
+        List items = trie.select(key, NODES.length);
         
         System.out.println();
         System.out.println("Key: \n" + key + " = " + key.toBinString() + "\n");
