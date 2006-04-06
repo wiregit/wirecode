@@ -93,19 +93,33 @@ public class PatriciaTest {
         }
         
         System.out.println();
+        System.out.println(trie);
         
+        System.out.println();
         System.out.println("Lookup:");
         System.out.println(lookup + " = " + lookup.toBinString());
         
         System.out.println("Inverted:");
         System.out.println(inverted + " = " + inverted.toBinString());
         
+        
         System.out.println();
-        System.out.println(CollectionUtils.toString(trie.select(inverted, trie.size())));
+        List items = trie.select(inverted, trie.size());
+        for(Iterator it = items.iterator(); it.hasNext(); ) {
+            KUID kuid = (KUID)it.next();
+            System.out.println(kuid + " = " + kuid.toBinString());
+        }
+        
+        System.out.println();
+        KUID best = (KUID)trie.select(lookup);
+        System.out.println("Selected for lookup: " + best);
         
         System.out.println();
         KUID selected = (KUID)trie.select(inverted);
-        System.out.println("Selected to remove: " + selected);
+        System.out.println("Selected for inverted: " + selected);
+        
+        System.out.println();
+        System.out.println(trie.select(inverted, 1));
     }
     
     public static void main(String[] args) {
