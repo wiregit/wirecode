@@ -446,6 +446,8 @@ public class Context implements Runnable {
                         ContactNode node = (ContactNode)it.next();
                         QueryKey queryKey = (QueryKey)queryKeys.get(node);
                         
+                        if(node.getNodeID().equals(getLocalNodeID())) continue;
+                        
                         if (queryKey == null) {
                             if (LOG.isErrorEnabled()) {
                                 LOG.error("Cannot store " + keyValues + " at " 

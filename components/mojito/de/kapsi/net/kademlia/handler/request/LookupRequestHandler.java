@@ -66,7 +66,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         // TODO condition doesn't work
         if (bucketList.contains(context.getLocalNode())) {
             queryKey = QueryKey.getQueryKey(src);
-        }
+        } 
         
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request.getMessageID(), queryKey, bucketList);

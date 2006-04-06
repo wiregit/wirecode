@@ -12,7 +12,7 @@ public final class CollectionUtils {
         for(Iterator it = c.iterator(); it.hasNext(); ) {
             buffer.append(it.next()).append("\n");
         }
-        buffer.setLength(buffer.length()-1);
+        if(buffer.length()>1)buffer.setLength(buffer.length()-1);
         return buffer.toString();
     }
 }

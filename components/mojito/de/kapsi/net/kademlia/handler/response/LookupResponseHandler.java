@@ -44,6 +44,7 @@ import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.LookupSettings;
+import de.kapsi.net.kademlia.util.CollectionUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 /**
@@ -220,8 +221,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             addYetToBeQueried((ContactNode)bucketList.get(i));
         }
         
-        //TODO mark: What happens if we really are the closest node to lookup??? -> we skip ourself for now?
         markAsQueried(context.getLocalNode());
+        addResponse(context.getLocalNode());
         
         // Get the first round of alpha nodes
         List alphaList = toQuery.select(lookup, KademliaSettings.getLookupParameter());
@@ -242,6 +243,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     
     private void lookupStep() throws IOException {
         
+        //stop if we have nothing more to query and no more active searches
         if(toQuery.isEmpty() && activeSearches == 0) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " terminates. No contacts left to query ");
@@ -259,8 +261,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         //stop if we have enough values and the yet-to-query list does not contain
-        //a closer node to the target than the furthest away that we have.
-        if(responses.size() == resultSize) {
+        //a closer node to the target than the furthest away that we have
+        //and this is the last of the last set of concurrent searches
+        if((responses.size() == resultSize)&& (activeSearches == 0)) {
             KUID furthest = lookup.invert();
             ContactNode worstResponse = (ContactNode)responses.select(furthest);
             ContactNode bestToQuery = (ContactNode)toQuery.select(lookup);
@@ -345,14 +348,13 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     private void addResponse(ContactNode node) {
+        responses.put(node.getNodeID(), node);
         //if the list is full discard the furthest node and put this one
-        if(responses.size() == resultSize) {
+        if(responses.size() > resultSize) {
             KUID furthest = lookup.invert();
-            
             ContactNode worst = (ContactNode)responses.select(furthest);
             responses.remove(worst.getNodeID());
             queryKeys.remove(worst);
         } 
-        responses.put(node.getNodeID(), node);
     }
 }
