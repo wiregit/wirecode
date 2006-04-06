@@ -175,7 +175,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	/**
 	 * Whether or not the body has been consumed.
 	 */
-	private boolean _bodyConsumed = true;
+	private volatile boolean _bodyConsumed = true;
 
 	private ByteReader _byteReader;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
@@ -693,13 +693,17 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * Consumes the body of the HTTP message that was previously exchanged,
 	 * if necessary.
 	 */
-    public void consumeBodyIfNecessary() {
-        LOG.trace("enter consumeBodyIfNecessary");
+    void consumeBody() {
         try {
             if(!_bodyConsumed)
                 consumeBody(_contentLength);
         } catch(IOException ignored) {}
         _bodyConsumed = true;
+    }
+    
+    /** Determines if the body needs to be consumed. */
+    boolean isBodyConsumed() {
+        return _bodyConsumed;
     }
 	
     /**

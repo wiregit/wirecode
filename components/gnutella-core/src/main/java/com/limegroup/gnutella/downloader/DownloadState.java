@@ -2,12 +2,12 @@ package com.limegroup.gnutella.downloader;
 
 class DownloadState {
     
-    public static int BEGIN = 0;
-    public static int REQUESTING_THEX = 1;
-    public static int CONSUMING_BODY = 2;
-    public static int REQUESTING_HTTP = 3;
-    public static int QUEUED = 4;
-    public static int DOWNLOADING = 5;
+    public static final int BEGIN = 0;
+    public static final int REQUESTING_THEX = 1;
+    public static final int CONSUMING_BODY = 2;
+    public static final int REQUESTING_HTTP = 3;
+    public static final int QUEUED = 4;
+    public static final int DOWNLOADING = 5;
     
     private int state;
     private boolean http11;

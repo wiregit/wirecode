@@ -254,6 +254,7 @@ public class DownloadWorker implements DownloadStateObserver {
      * The main loop that runs this download.
      */
     private void httpLoop() {
+        LOG.debug("Starting HTTP Loop");
         currentState = new DownloadState();
         handleStateFinished(null);
     }
@@ -271,6 +272,8 @@ public class DownloadWorker implements DownloadStateObserver {
      * This kicks off the next stage if necessary.
      */
     public void handleStateFinished(ConnectionStatus status) {
+        LOG.debug("State Changed, Current: " + currentState.getCurrentState() + ", status: " + status);
+        
         switch(currentState.getCurrentState()) {
         case DownloadState.DOWNLOADING:
         case DownloadState.QUEUED:
@@ -288,6 +291,7 @@ public class DownloadWorker implements DownloadStateObserver {
         case DownloadState.CONSUMING_BODY:
             _downloader.forgetRanges();
             if(status == null || !status.isQueued()) {
+                currentState.setState(DownloadState.REQUESTING_HTTP);
                 if(!assignAndRequest()) { // no data
                     finishHttpLoop();
                 }
@@ -302,8 +306,49 @@ public class DownloadWorker implements DownloadStateObserver {
         }
     }
     
+    private boolean assignAndRequest() {
+        LOG.debug("Scheduling A&R");
+        ThreadFactory.startThread(new Runnable() {
+            public void run() {
+                LOG.debug("Doing A&R");
+                final ConnectionStatus status = assignAndRequestImpl();
+                LOG.debug("A&R done, status: " + status);
+                NIODispatcher.instance().invokeLater(new Runnable() {
+                    public void run() {
+                        handleStateFinished(status);
+                    }
+                });
+            }
+        }, "AssignAndRequestor");
+        return true;
+    }
+    
+    private boolean consumeBodyIfNecessary() {
+        if(_downloader.isBodyConsumed()) {
+            LOG.debug("Not consuming body.");
+            return false;
+        }
+        
+        LOG.debug("Scheduling body consumption");
+        ThreadFactory.startThread(new Runnable() {
+            public void run() {
+                LOG.debug("Consuming body.");
+                _downloader.consumeBody();
+                LOG.debug("done consuming body.");
+                NIODispatcher.instance().invokeLater(new Runnable() {
+                    public void run() {
+                        handleStateFinished(null);
+                    }
+                });
+            }
+        }, "BodyConsumer");
+        return true;
+    }
+    
     private void httpRequestFinished(ConnectionStatus status) {
         assert status != null;
+        
+        LOG.debug("HTTP req finished, status: " + status);
         
         if(!status.isConnected())
             releaseRanges();
@@ -333,6 +378,25 @@ public class DownloadWorker implements DownloadStateObserver {
         }
     }
     
+    private void beginDownload() {
+        LOG.debug("Scheduling beginDownload");
+        ThreadFactory.startThread(new Runnable() {
+            public void run() {
+                LOG.debug("Doing download");
+                final boolean success = doDownload();
+                LOG.debug("Download done, success: " + success);
+                NIODispatcher.instance().invokeLater(new Runnable() {
+                    public void run() {
+                        if(success)
+                            handleStateFinished(null);
+                        else
+                            handleStateShutdown();
+                    }
+                });
+            }
+        }, "DoDownloader");
+    }
+    
     private boolean requestTHEXIfNeeded() {
         boolean shouldRequest = false;
         final HashTree ourTree;
@@ -349,13 +413,18 @@ public class DownloadWorker implements DownloadStateObserver {
     
                 if (shouldRequest)
                     _commonOutFile.setHashTreeRequested(true);
+            } else {
+                ourTree = null;
             }
         }
 
         if (shouldRequest) {
+            LOG.debug("Schedule THEX request");
             ThreadFactory.startThread(new Runnable() {
                 public void run() {
+                    LOG.debug("Requesting THEX");
                     final ConnectionStatus status = requestTHEXIfNeededImpl(ourTree);
+                    LOG.debug("THEX request done, status: " + status);
                     NIODispatcher.instance().invokeLater(new Runnable() {
                         public void run() {
                             handleStateFinished(status);
@@ -363,7 +432,8 @@ public class DownloadWorker implements DownloadStateObserver {
                     });
                 }
             }, "ThexRequestor");
-        }
+        } else
+            LOG.debug("Not requesting thex.");
         
         return shouldRequest;
     }
@@ -435,19 +505,23 @@ public class DownloadWorker implements DownloadStateObserver {
         _manager.removeActiveWorker(this);
         
         synchronized(currentState) {
-            if(_interrupted)
+            if(_interrupted) {
+                LOG.debug("Exiting from queueing");
                 return;
+            }
             
+            LOG.debug("Queueing");
             currentState.setState(DownloadState.QUEUED);
         }
         
         RouterService.schedule(new Runnable() {
             public void run() {
+                LOG.debug("Queue time up");
+                
                 boolean remQ = false;
                 synchronized(currentState) {
                     if(_interrupted) {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("WORKER: interrupted while waiting in queue " + _downloader);
+                        LOG.warn("WORKER: interrupted while waiting in queue " + _downloader);
                         remQ = true;
                     }
                 }
@@ -599,7 +673,7 @@ public class DownloadWorker implements DownloadStateObserver {
      * @return true if there was no IOException while downloading, false
      * otherwise.  
      */
-    private boolean doDownload(boolean http11) {
+    private boolean doDownload() {
         if(LOG.isTraceEnabled())
             LOG.trace("WORKER: about to start downloading "+_downloader);
         
@@ -607,7 +681,7 @@ public class DownloadWorker implements DownloadStateObserver {
         try {
             _downloader.doDownload();
             _rfd.resetFailedCount();
-            if(http11)
+            if(currentState.isHttp11())
                 DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
             else
                 DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
@@ -618,7 +692,7 @@ public class DownloadWorker implements DownloadStateObserver {
             // kill the other threads and set
             _manager.diskProblemOccured();
         } catch (IOException e) {
-            if(http11)
+            if(currentState.isHttp11())
                 DownloadStat.FAILED_HTTP11.incrementStat();
             else
                 DownloadStat.FAILED_HTTP10.incrementStat();
@@ -651,7 +725,7 @@ public class DownloadWorker implements DownloadStateObserver {
                         _manager.informMesh(_rfd, false);
                 } else {
                     _manager.informMesh(_rfd, true);
-                    if( !http11 ) // no need to add http11 _activeWorkers to files
+                    if( !currentState.isHttp11() ) // no need to add http11 _activeWorkers to files
                         _manager.addRFD(_rfd);
                 }
             }
@@ -683,7 +757,7 @@ public class DownloadWorker implements DownloadStateObserver {
      * a grey area or white area.
      * @return the ConnectionStatus.
      */
-    private ConnectionStatus assignAndRequest(boolean http11) {
+    private ConnectionStatus assignAndRequestImpl() {
         if(LOG.isTraceEnabled())
             LOG.trace("assignAndRequest for: " + _rfd);
         
@@ -691,7 +765,7 @@ public class DownloadWorker implements DownloadStateObserver {
             Interval interval = null;
             synchronized(_commonOutFile) {
                 if (_commonOutFile.hasFreeBlocksToAssign() > 0)
-                    interval = pickAvailableInterval(http11);
+                    interval = pickAvailableInterval();
             }
             
             // it is still possible that a worker has died and released their ranges
@@ -852,12 +926,12 @@ public class DownloadWorker implements DownloadStateObserver {
      * @throws NoSuchRangeException if the remote host is partial and doesn't 
      * have the ranges we need
      */
-    private Interval pickAvailableInterval(boolean http11) throws NoSuchRangeException{
+    private Interval pickAvailableInterval() throws NoSuchRangeException{
         Interval interval = null;
         //If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if( !_downloader.getRemoteFileDesc().isPartialSource() ) {
-            if(http11) {
+            if(currentState.isHttp11()) {
                 interval = _commonOutFile.leaseWhite(findChunkSize());
             } else
                 interval = _commonOutFile.leaseWhite();
@@ -866,17 +940,15 @@ public class DownloadWorker implements DownloadStateObserver {
         // If it is a partial source, extract the first needed/available range
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         else {
-            try { 
-                IntervalSet availableRanges =
-                    _downloader.getRemoteFileDesc().getAvailableRanges();
-                
-                if(http11) {
-                    interval =
-                        _commonOutFile.leaseWhite(availableRanges, findChunkSize());
+            try {
+                IntervalSet availableRanges = _downloader.getRemoteFileDesc().getAvailableRanges();
+
+                if (currentState.isHttp11()) {
+                    interval = _commonOutFile.leaseWhite(availableRanges, findChunkSize());
                 } else
                     interval = _commonOutFile.leaseWhite(availableRanges);
-                
-            } catch(NoSuchElementException nsee) {
+
+            } catch (NoSuchElementException nsee) {
                 // if nothing satisfied this partial source, don't throw NSEE
                 // because that means there's nothing left to download.
                 // throw NSRE, which means that this particular source is done.
@@ -1217,6 +1289,7 @@ public class DownloadWorker implements DownloadStateObserver {
         
         // If we should continue, then start the download.
         if(finishConnect()) {
+            LOG.trace("Starting download");
             initializeAlternateLocations();
             httpLoop();
         } else {
