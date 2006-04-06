@@ -221,7 +221,8 @@ public class PatriciaTrie implements Serializable {
      * in common with our lookup key.
      */
     public Object select(Object key) {
-        return selectR(root.left, -1, key, root).value;
+        List values = select(key, 1);
+        return values.isEmpty() ? null : values.get(0);
     }
     
     /**
@@ -229,7 +230,7 @@ public class PatriciaTrie implements Serializable {
      * but we have to cheat if the root Entry has no <key,value>
      * associated with it.
      */
-    private Entry selectR(Entry h, int bitIndex, Object key, Entry p) {
+    /*private Entry selectR(Entry h, int bitIndex, final Object key, Entry p) {
         if (h.bitIndex <= bitIndex) {
             return (h.isEmpty() ? p : h);
         }
@@ -239,7 +240,7 @@ public class PatriciaTrie implements Serializable {
         } else {
             return selectR(h.right, h.bitIndex, key, h);
         }
-    }
+    }*/
     
     /** 
      * Returns a List of buckts sorted by their 
