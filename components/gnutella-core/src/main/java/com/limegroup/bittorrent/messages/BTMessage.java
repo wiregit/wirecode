@@ -1,10 +1,9 @@
-package com.limegroup.gnutella.torrent.messages;
+package com.limegroup.bittorrent.messages;
 
 import java.nio.ByteBuffer;
 
-import com.limegroup.gnutella.statistics.BTMessageStat;
-import com.limegroup.gnutella.statistics.BTMessageStatBytes;
-import com.limegroup.gnutella.torrent.BadBTMessageException;
+import com.limegroup.bittorrent.statistics.BTMessageStat;
+import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 
 public abstract class BTMessage {
 	// private static final Log LOG = LogFactory.getLog(BTMessage.class);

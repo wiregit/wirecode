@@ -1,10 +1,9 @@
-package com.limegroup.gnutella.torrent.messages;
+package com.limegroup.bittorrent.messages;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import com.limegroup.gnutella.torrent.BTInterval;
-import com.limegroup.gnutella.torrent.BadBTMessageException;
+import com.limegroup.bittorrent.BTInterval;
 
 /**
  * cancels a request we may have sent to the remote host
