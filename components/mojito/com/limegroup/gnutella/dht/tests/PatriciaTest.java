@@ -5,11 +5,47 @@ import java.util.List;
 
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.util.ArrayUtils;
-import de.kapsi.net.kademlia.util.CollectionUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class PatriciaTest {
 
+    public void testNames() {
+        String[] keys = { "Albert", "Xavier", "XyZ", "Anna",
+                "Alien", "Alberto", "Alberts", "Allie", "Alliese", "Alabama",
+                "Banane", "Blabla", "Amber", "Ammun", "Akka", "Akko",
+                "Albertoo", "Amma" };
+
+        PatriciaTrie trie = new PatriciaTrie();
+        for (int i = 0; i < keys.length; i++) {
+            trie.put(toKUID(keys[i]), keys[i]);
+        }
+
+        int k = 6;
+        List list = trie.select(toKUID("Albert"), k);
+        System.out.println(k == list.size()); // true
+        for (Iterator it = list.iterator(); it.hasNext(); ) {
+            String name = (String)it.next();
+            System.out.println(name);
+        }
+        
+        System.out.println();
+        list = trie.range(toKUID("Brasil"), 8);
+        System.out.println(2 == list.size()); // true
+        for (Iterator it = list.iterator(); it.hasNext(); ) {
+            String name = (String)it.next();
+            System.out.println(name);
+        }
+    }
+    
+    private static KUID toKUID(String key) {
+        byte[] b = key.getBytes();
+        
+        byte[] id = new byte[20];
+        System.arraycopy(b, 0, id, 0, Math.min(b.length, id.length));
+        
+        return KUID.createNodeID(id);
+    }
+    
     public void testRange() {
         PatriciaTrie trie = new PatriciaTrie();
         for(int i = 0; i < 50; i++) {
@@ -116,6 +152,7 @@ public class PatriciaTest {
         
         System.out.println();
         KUID selected = (KUID)trie.select(inverted);
+        System.out.println(trie.size());
         System.out.println("Selected for inverted: " + selected);
         
         System.out.println();
@@ -123,8 +160,9 @@ public class PatriciaTest {
     }
     
     public static void main(String[] args) {
-        //new PatriciaTest().testRange();
+        new PatriciaTest().testNames();
+        new PatriciaTest().testRange();
         new PatriciaTest().testSelect();
-        //new PatriciaTest().testMultipleSelect();
+        new PatriciaTest().testMultipleSelect();
     }
 }
