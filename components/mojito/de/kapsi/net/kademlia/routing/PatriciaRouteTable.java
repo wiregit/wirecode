@@ -57,6 +57,7 @@ import de.kapsi.net.kademlia.util.BucketUtils;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
+import de.kapsi.net.kademlia.util.PatriciaTrie.KeySelector;
 
 public class PatriciaRouteTable implements RoutingTable {
     
@@ -66,7 +67,25 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private static final int B = RouteTableSettings.getDepthLimit();
     
-    private static final long refreshLimit = RouteTableSettings.getBucketRefreshTime();
+    private static final long bucketRefreshTime = RouteTableSettings.getBucketRefreshTime();
+    
+    /**
+     * Selects ContactNodes with one or more failures
+     */
+    private static final KeySelector SELECT_FAILED_CONTACTS = new KeySelector() {
+        public boolean allow(Object key, Object value) {
+            return ((ContactNode)value).hasFailed();
+        }
+    };
+    
+    /**
+     * Selects ContactNodes with no failures
+     */
+    private static final KeySelector SELECT_ALIVE_CONTACTS = new KeySelector() {
+        public boolean allow(Object key, Object value) {
+            return !((ContactNode)value).hasFailed();
+        }
+    };
     
     private Map loopLock = new FixedSizeHashMap(16);
     
@@ -89,6 +108,9 @@ public class PatriciaRouteTable implements RoutingTable {
         init();
     }
     
+    /**
+     * Initializes the bucket Trie with an empty Bucket
+     */
     private void init() {
         KUID rootKUID = KUID.MIN_NODE_ID;
         BucketNode root = new BucketNode(rootKUID,0);
@@ -157,7 +179,7 @@ public class PatriciaRouteTable implements RoutingTable {
     }
     
     public boolean add(ContactNode node, boolean knowToBeAlive) {
-        return put(node.getNodeID(), node,knowToBeAlive);
+        return put(node.getNodeID(), node, knowToBeAlive);
     }
     
     /**
@@ -280,6 +302,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 }
             }
         }
+        
         if(!knowToBeAlive && pingNode && !node.equals(context.getLocalNode())) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Pinging node: "+node);
@@ -338,30 +361,26 @@ public class PatriciaRouteTable implements RoutingTable {
         } else {
             node = bucket.removeReplacementNode(nodeId);
             if(node!=null) {
-                if(!node.failure()) {
+                if (!node.failure()) {
                     bucket.addReplacementNode(node);
                 }
-            }
-            if (LOG.isTraceEnabled() && node!= null) {
-                LOG.trace("Removed node: "+node+" from replacement cache");
+                
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Removed node: "+node+" from replacement cache");
+                }
             }
         }
     }
     
     private void replaceBucketStaleNodes(BucketNode bucket) {
         int length = Math.max(0, bucket.getDepth()-1);
-        List failingNodes = nodesTrie.range(bucket.getNodeID(),length,new PatriciaTrie.KeySelector(){
-            public boolean allow(Object key, Object value) {
-                if(value instanceof ContactNode) {
-                    return ((ContactNode)value).hasFailed();
-                } else {
-                    return false;
-                }
-            }
-        });
+        List failingNodes = nodesTrie.range(bucket.getNodeID(),length, SELECT_FAILED_CONTACTS);
+        
         for (Iterator iter = failingNodes.iterator(); iter.hasNext();) {
             ContactNode failingNode = (ContactNode) iter.next();
-            if(!removeNodeAndReplace(failingNode.getNodeID(),bucket,false)) return;
+            if(!removeNodeAndReplace(failingNode.getNodeID(),bucket,false)) {
+                return;
+            }
         }
     }
     
@@ -459,7 +478,9 @@ public class PatriciaRouteTable implements RoutingTable {
         try {
             //will get handled by DefaultMessageHandler
             context.getMessageDispatcher().send(leastRecentlySeen, ping, null);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            LOG.error("Pinging the least recently seen Node failed", e);
+        }
     }
     
     
@@ -604,9 +625,9 @@ public class PatriciaRouteTable implements RoutingTable {
             //OR if forced
             //TODO: maybe relax this a little bit?
             int length = Math.max(0, bucket.getDepth()-1);
-            List liveNodes = nodesTrie.range(bucket.getNodeID(), length, new NodeAliveKeySelector());
+            List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
-            if(force || ((now - lastTouch) > refreshLimit) 
+            if(force || ((now - lastTouch) > bucketRefreshTime) 
                     || (bucket.getNodeCount() < K) 
                     || (liveNodes.size() != bucket.getNodeCount())) {
                 //select a random ID with this prefix
@@ -633,7 +654,7 @@ public class PatriciaRouteTable implements RoutingTable {
     public void clear() {
         nodesTrie.clear();
         bucketsTrie.clear();
-        init();
+        init(); // init the Bucket Trie!
     }
 
     public boolean containsNode(KUID nodeId) {
@@ -691,7 +712,7 @@ public class PatriciaRouteTable implements RoutingTable {
         }
         
         if(onlyLiveNodes) {
-            return nodesTrie.select(lookup, k, new NodeAliveKeySelector());
+            return nodesTrie.select(lookup, k, SELECT_ALIVE_CONTACTS);
         } else {
             return nodesTrie.select(lookup, k);
         }
@@ -773,16 +794,6 @@ public class PatriciaRouteTable implements RoutingTable {
             if(queryList.isEmpty() 
                     && bootstrapListener != null) {
                 bootstrapListener.secondPhaseComplete(time,foundNodes);
-            }
-        }
-    }
-    
-    private class NodeAliveKeySelector implements PatriciaTrie.KeySelector{
-        public boolean allow(Object key, Object value) {
-            if(value instanceof ContactNode) {
-                return !((ContactNode)value).hasFailed();
-            } else {
-                return false;
             }
         }
     }
