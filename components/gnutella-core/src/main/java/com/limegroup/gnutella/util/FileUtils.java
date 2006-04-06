@@ -389,4 +389,35 @@ public class FileUtils {
 
         return retArray;
     }
+    
+    public static boolean deleteRecursive(File file) {
+		// make sure we only delete canonical children of the parent file we
+		// wish to delete. I have a hunch this might be an issue on OSX and
+		// Linux under certain circumstances.
+		// If anyone can test whether this really happens (possibly related to
+		// symlinks), I would much appreciate it.
+		String canonicalParent;
+		try {
+			canonicalParent = file.getCanonicalPath();
+		} catch (IOException ioe) {
+			return false;
+		}
+
+		if (!file.isDirectory())
+			return file.delete();
+
+		File[] files = file.listFiles();
+		for (int i = 0; i < files.length; i++) {
+			try {
+				if (!files[i].getCanonicalPath().startsWith(canonicalParent))
+					continue;
+			} catch (IOException ioe) {
+				return false;
+			}
+			if (!deleteRecursive(files[i]))
+				return false;
+		}
+
+		return file.delete();
+	}
 }
