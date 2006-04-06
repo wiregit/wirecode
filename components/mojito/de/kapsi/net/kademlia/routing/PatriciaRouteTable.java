@@ -78,6 +78,8 @@ public class PatriciaRouteTable implements RoutingTable {
 
     private BucketNode smallestSubtreeBucket;
     
+    private int consecutiveFailures = 0;
+    
     public PatriciaRouteTable(Context context) {
         this.context = context;
         
@@ -183,6 +185,8 @@ public class PatriciaRouteTable implements RoutingTable {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Trying to add "+(knowToBeAlive?"live":"unknown")+" node: "+node+" to routing table");
         }
+        //reset the consecutive failure counter
+        consecutiveFailures = 0;
         
         // Update an existing node
         ContactNode existingNode = updateExistingNode(nodeId,node,knowToBeAlive);
@@ -295,6 +299,14 @@ public class PatriciaRouteTable implements RoutingTable {
         if(nodeId == null) {
             return;
         }
+        //ignore failure if we start getting to many disconnections in a row
+        ++consecutiveFailures;
+        if(consecutiveFailures > RouteTableSettings.getMaxConsecutiveFailures()) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Ignoring node failure as it appears that we are disconnected");
+            }
+            return;
+        }
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Handling failure for nodeId: "+nodeId);
@@ -310,6 +322,7 @@ public class PatriciaRouteTable implements RoutingTable {
         //get closest bucket
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
         if(node != null) {
+            
             //TODO: we delete dead contacts immediately for now!...maybe relax?
             if(handleNodeFailure(node)) {
                 removeNodeAndReplace(nodeId,bucket,true);
@@ -324,6 +337,11 @@ public class PatriciaRouteTable implements RoutingTable {
             */
         } else {
             node = bucket.removeReplacementNode(nodeId);
+            if(node!=null) {
+                if(!node.failure()) {
+                    bucket.addReplacementNode(node);
+                }
+            }
             if (LOG.isTraceEnabled() && node!= null) {
                 LOG.trace("Removed node: "+node+" from replacement cache");
             }
@@ -584,11 +602,11 @@ public class PatriciaRouteTable implements RoutingTable {
             //OR if it is not full (not complete)
             //OR if there is at least one invalid node inside
             //OR if forced
-
+            //TODO: maybe relax this a little bit?
             int length = Math.max(0, bucket.getDepth()-1);
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, new NodeAliveKeySelector());
             
-            if(force || (now - lastTouch > refreshLimit) 
+            if(force || ((now - lastTouch) > refreshLimit) 
                     || (bucket.getNodeCount() < K) 
                     || (liveNodes.size() != bucket.getNodeCount())) {
                 //select a random ID with this prefix

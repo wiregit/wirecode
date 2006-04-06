@@ -44,6 +44,9 @@ public final class RouteTableSettings {
     private static final long BUCKET_REFRESH_TIME = 15 * 60* 1000; //15 minutes for now
     private static final String BUCKET_REFRESH_TIME_KEY = "BUCKET_REFRESH_TIME";
     
+    private static final int MAX_CONSECUTIVE_FAILURES = 100;
+    private static final String MAX_CONSECUTIVE_FAILURES_KEY = "MAX_CONSECUTIVE_FAILURES";
+    
     public static final String ROUTETABLE_FILE = "RouteTable.pat";
     
     private static final Preferences SETTINGS 
@@ -74,6 +77,15 @@ public final class RouteTableSettings {
     public static void setMaxLiveNodeFailures(int maxFailures) {
         SETTINGS.putInt(MAX_LIVE_NODE_FAILURES_KEY, Math.max(0, maxFailures));
     }
+    
+    public static int getMaxConsecutiveFailures() {
+        return SETTINGS.getInt(MAX_CONSECUTIVE_FAILURES_KEY, MAX_CONSECUTIVE_FAILURES);
+    }
+    
+    public static void setMaxConsecutiveFailures(int maxFailures) {
+        SETTINGS.putInt(MAX_CONSECUTIVE_FAILURES_KEY, Math.max(0, maxFailures));
+    }
+    
     
     public static int getMaxUnknownNodeFailures() {
         return SETTINGS.getInt(MAX_UNKNOWN_NODE_FAILURES_KEY, MAX_UNKNOWN_NODE_FAILURES);
