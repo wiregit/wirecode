@@ -221,26 +221,41 @@ public class PatriciaTrie implements Serializable {
      * in common with our lookup key.
      */
     public Object select(Object key) {
-        List values = select(key, 1);
-        return values.isEmpty() ? null : values.get(0);
+        Entry[] entry = new Entry[1];
+        if (!selectR(root.left, -1, key, entry)) {
+            return entry[0].value;
+        }
+        return null;
     }
     
     /**
-     * Selects a single best matching Entry. Very similar to getR
-     * but we have to cheat if the root Entry has no <key,value>
-     * associated with it.
+     * This is eqivalent to the other selectR() method but without
+     * its overhead because we're selecting only one best matching
+     * Entry from the Trie.
      */
-    /*private Entry selectR(Entry h, int bitIndex, final Object key, Entry p) {
+    private boolean selectR(Entry h, int bitIndex, final Object key, final Entry[] entry) {
         if (h.bitIndex <= bitIndex) {
-            return (h.isEmpty() ? p : h);
+            // If we hit the root Node and it is empty
+            // we have to look for an alternative best
+            // mathcing node.
+            if (!h.isEmpty()) {
+                entry[0] = h;
+                return false;
+            }
+            return true;
         }
 
         if (!isBitSet(key, h.bitIndex)) {
-            return selectR(h.left, h.bitIndex, key, h);
+            if (selectR(h.left, h.bitIndex, key, entry)) {
+                return selectR(h.right, h.bitIndex, key, entry);
+            }
         } else {
-            return selectR(h.right, h.bitIndex, key, h);
+            if (selectR(h.right, h.bitIndex, key, entry)) {
+                return selectR(h.left, h.bitIndex, key, entry);
+            }
         }
-    }*/
+        return false;
+    }
     
     /** 
      * Returns a List of buckts sorted by their 
