@@ -42,8 +42,7 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.settings.LookupSettings;
+import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 /**
@@ -97,14 +96,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     private boolean active = false;
     
     public LookupResponseHandler(Context context, KUID lookup) {
-        this(context, lookup, KademliaSettings.getReplicationParameter());
-    }
-    
-    public LookupResponseHandler(Context context, KUID lookup, int resultSize) {
-        super(context, LookupSettings.getTimeout());
+        super(context);
         
         this.lookup = lookup;
-        this.resultSize = resultSize;
+        this.resultSize = RouteTableSettings.REPLICATION_PARAMETER.getValue();
     }
     
     public void handleResponse(KUID nodeId, SocketAddress src, 
@@ -228,8 +223,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         MessageDispatcher messageDispatcher = context.getMessageDispatcher();
         
         // Select the K closest Nodes from the K bucket list
-        int k = KademliaSettings.getReplicationParameter();
-        List bucketList = context.getRouteTable().select(lookup, k, false, true);
+        List bucketList = context.getRouteTable().select(lookup, resultSize, false, true);
         
         // Add the Nodes to the yet-to-be query list
         for(int i = bucketList.size()-1; i >= 0; i--) {
@@ -240,7 +234,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         addResponse(context.getLocalNode());
         
         // Get the first round of alpha nodes
-        List alphaList = toQuery.select(lookup, KademliaSettings.getLookupParameter());
+        List alphaList = toQuery.select(lookup, RouteTableSettings.LOOKUP_PARAMETER.getValue());
         
         // send alpha requests
         for(int i = 0; i < alphaList.size(); i++) {
@@ -306,7 +300,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
         }
         
-        int numLookups = KademliaSettings.getLookupParameter() - activeSearches;
+        int numLookups = RouteTableSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
         if(numLookups > 0) {
             List bucketList = toQuery.select(lookup, numLookups);
             final int size = bucketList.size();

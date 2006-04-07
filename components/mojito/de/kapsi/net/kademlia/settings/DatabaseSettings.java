@@ -19,43 +19,27 @@
  
 package de.kapsi.net.kademlia.settings;
 
-import java.util.prefs.Preferences;
 
-public final class DatabaseSettings {
-    
-    private static final Preferences SETTINGS 
-        = Preferences.userNodeForPackage(DatabaseSettings.class);
-    
-    private static final int MAX_SIZE = 16384;
-    private static final String MAX_SIZE_KEY = "MAX_SIZE";
-    
-    private static final int MAX_VALUES = 5;
-    private static final String MAX_VALUES_KEY = "MAX_VALUES";
+public final class DatabaseSettings extends LimeDHTProps {
     
     //public static final long MILLIS_PER_DAY = 24L * 60L * 60L * 1000L; // 24 horus
     public static final long MILLIS_PER_DAY = 60L * 60L * 1000L; // 1 hour
     
     public static final long MILLIS_PER_HOUR = MILLIS_PER_DAY / 24L;
     
-    public static final long REPUBLISH_INTERVAL = 3L * 60L * 1000L; // 3 minutes
-    
     public static final String DATABASE_FILE = "Database.pat";
     
     private DatabaseSettings() {}
     
-    public static int getMaxSize() {
-        return SETTINGS.getInt(MAX_SIZE_KEY, MAX_SIZE);
-    }
+    // TODO reasonable min and max values
+    public static final IntSetting MAX_DATABASE_SIZE
+        = FACTORY.createSettableIntSetting("MAX_DATABASE_SIZE", 16384, "max_database_size", 16384, 65536);
+        
+    // TODO reasonable min and max values
+    public static final IntSetting MAX_KEY_VALUES
+        = FACTORY.createSettableIntSetting("MAX_KEY_VALUES", 5, "max_key_values", 1, 10);
     
-    public static void setMaxSize(int maxSize) {
-        SETTINGS.putInt(MAX_SIZE_KEY, maxSize);
-    }
-    
-    public static int getMaxValues() {
-        return SETTINGS.getInt(MAX_VALUES_KEY, MAX_VALUES);
-    }
-    
-    public static void setMaxValues(int maxValues) {
-        SETTINGS.putInt(MAX_VALUES_KEY, maxValues);
-    }
+    // TODO reasonable min and max values
+    public static final LongSetting REPUBLISH_INTERVAL
+        = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", 3L*60L*1000L, "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
 }

@@ -40,9 +40,8 @@ import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.settings.LookupSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
+import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 /**
  * The DefaultMessageHandler performs basic Kademlia RouteTable 
@@ -55,14 +54,12 @@ public class DefaultMessageHandler extends MessageHandler
     
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
     
-    private long timeout = LookupSettings.getTimeout();
-    
     public DefaultMessageHandler(Context context) {
         super(context);
     }
     
     public long timeout() {
-        return timeout;
+        return NetworkSettings.TIMEOUT.getValue();
     }
 
     public void handleResponse(KUID nodeId, SocketAddress src, 
@@ -99,7 +96,7 @@ public class DefaultMessageHandler extends MessageHandler
         }
 
         if(storeForward) {
-            int k = KademliaSettings.getReplicationParameter();
+            int k = RouteTableSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
             List closestNodes = routeTable.select(nodeId, k, false, false);
@@ -188,7 +185,7 @@ public class DefaultMessageHandler extends MessageHandler
                 return;
             }
             
-            if (++errors >= NetworkSettings.getMaxErrors()) {
+            if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Max number of errors has occured. Giving up!");
                 }

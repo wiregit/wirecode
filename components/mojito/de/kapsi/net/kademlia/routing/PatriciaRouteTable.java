@@ -50,7 +50,6 @@ import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
@@ -63,11 +62,9 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private static final Log LOG = LogFactory.getLog(PatriciaRouteTable.class);
     
-    private static final int K = KademliaSettings.getReplicationParameter();
+    private static final int K = RouteTableSettings.REPLICATION_PARAMETER.getValue();
     
-    private static final int B = RouteTableSettings.getDepthLimit();
-    
-    private static final long bucketRefreshTime = RouteTableSettings.getBucketRefreshTime();
+    private static final int B = RouteTableSettings.DEPTH_LIMIT.getValue();
     
     /**
      * Selects ContactNodes with one or more failures
@@ -324,7 +321,7 @@ public class PatriciaRouteTable implements RoutingTable {
         }
         //ignore failure if we start getting to many disconnections in a row
         ++consecutiveFailures;
-        if(consecutiveFailures > RouteTableSettings.getMaxConsecutiveFailures()) {
+        if(consecutiveFailures > RouteTableSettings.MAX_CONSECUTIVE_FAILURES.getValue()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Ignoring node failure as it appears that we are disconnected");
             }
@@ -429,7 +426,7 @@ public class PatriciaRouteTable implements RoutingTable {
 
         //first add to the replacement cache
         if(replacementCache!= null &&
-                replacementCache.size() == RouteTableSettings.getMaxCacheSize()) {
+                replacementCache.size() == RouteTableSettings.MAX_CACHE_SIZE.getValue()) {
             //replace older cache entries with this one
             for (Iterator iter = replacementCache.values().iterator(); iter.hasNext();) {
                 ContactNode oldNode = (ContactNode) iter.next();
@@ -544,7 +541,7 @@ public class PatriciaRouteTable implements RoutingTable {
             //check if we have heard of the existing node recently
             long now = System.currentTimeMillis();
             long delay = now - existingNode.getTimeStamp();
-            if(delay < RouteTableSettings.getMinReconnectionTime()) {
+            if(delay < RouteTableSettings.MIN_RECONNECTION_TIME.getValue()) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Not doing spoof check as contact alive recently for node: "+existingNode);
                 }
@@ -627,7 +624,7 @@ public class PatriciaRouteTable implements RoutingTable {
             int length = Math.max(0, bucket.getDepth()-1);
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
-            if(force || ((now - lastTouch) > bucketRefreshTime) 
+            if(force || ((now - lastTouch) > RouteTableSettings.BUCKET_REFRESH_TIME.getValue()) 
                     || (bucket.getNodeCount() < K) 
                     || (liveNodes.size() != bucket.getNodeCount())) {
                 //select a random ID with this prefix
@@ -853,7 +850,7 @@ public class PatriciaRouteTable implements RoutingTable {
             }
             
             // Try at least x-times before giving up!
-            if (++errors >= NetworkSettings.getMaxErrors()) {
+            if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
                 
                 loopLock.remove(nodeId);
                 done = true;

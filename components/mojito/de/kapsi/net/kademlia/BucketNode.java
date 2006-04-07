@@ -67,7 +67,7 @@ public class BucketNode extends Node {
     public void addReplacementNode(ContactNode node) {
         //lazy instantiation of the replacement cache to save mem space
         if(replacementCache == null) {
-            replacementCache = new Cache(RouteTableSettings.getMaxCacheSize());
+            replacementCache = new Cache(RouteTableSettings.MAX_CACHE_SIZE.getValue());
         }
         replacementCache.put(node.getNodeID(), node);
     }

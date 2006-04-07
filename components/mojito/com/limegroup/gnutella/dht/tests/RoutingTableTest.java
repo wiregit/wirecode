@@ -29,7 +29,6 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.routing.RoutingTable;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class RoutingTableTest {
@@ -40,8 +39,9 @@ public class RoutingTableTest {
      * @param args
      */
     public static void main(String[] args) {
-        KademliaSettings.setReplicationParameter(2);
-        RouteTableSettings.setMaxLiveNodeFailures(2);
+        RouteTableSettings.REPLICATION_PARAMETER.setValue(2);
+        RouteTableSettings.MAX_LIVE_NODE_FAILURES.setValue(2);
+        
         DHT dht = new DHT();
         try {
             dht.bind(addr);

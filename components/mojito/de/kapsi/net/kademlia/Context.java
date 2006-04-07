@@ -74,8 +74,6 @@ public class Context implements Runnable {
     
     private static final long EVENT_DISPATCHER_INTERVAL = 100L;
     
-    private static final long BUCKET_REFRESH_TIME = RouteTableSettings.getBucketRefreshTime();
-    
     private static final int VENDOR = 0xDEADBEEF;
     private static final int VERSION = 0;
     
@@ -336,7 +334,9 @@ public class Context implements Runnable {
             publisherThread.setDaemon(true);
             
             scheduler.scheduleAtFixedRate(eventDispatcher, 0, EVENT_DISPATCHER_INTERVAL);
-            scheduler.scheduleAtFixedRate(bucketRefresher, BUCKET_REFRESH_TIME , BUCKET_REFRESH_TIME);
+            
+            long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
+            scheduler.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
             publisherThread.start();
 
             messageDispatcher.run();

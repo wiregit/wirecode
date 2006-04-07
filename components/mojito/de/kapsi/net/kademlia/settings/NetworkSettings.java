@@ -19,45 +19,17 @@
  
 package de.kapsi.net.kademlia.settings;
 
-import java.util.prefs.Preferences;
 
-public final class NetworkSettings {
-    
-    private static final int PORT = 31337;
-    private static final String PORT_KEY = "PORT";
-    
-    private static final long TIMEOUT = 10L * 1000L;
-    private static final String TIMEOUT_KEY = "TIMEPUT";
-    
-    private static final int MAX_ERRORS = 3;
-    private static final String MAX_ERRORS_KEY = "MAX_ERRORS";
-    
-    private static final Preferences SETTINGS 
-        = Preferences.userNodeForPackage(NetworkSettings.class);
+public final class NetworkSettings extends LimeDHTProps {
     
     private NetworkSettings() {}
     
-    public static int getPort() {
-        return SETTINGS.getInt(PORT_KEY, PORT);
-    }
+    public static final IntSetting PORT
+        = FACTORY.createIntSetting("PORT", 31337);
     
-    public static void setPort(int port) {
-        SETTINGS.putInt(PORT_KEY, Math.max(0, Math.min(port, 0xFFFF)));
-    }
+    public static final LongSetting TIMEOUT
+        = FACTORY.createSettableLongSetting("TIMEOUT", 5000L, "timeout", 5000L, 30000L);
     
-    public static long getTimeout() {
-        return SETTINGS.getLong(TIMEOUT_KEY, TIMEOUT);
-    }
-    
-    public static void setTimeout(long timeout) {
-        SETTINGS.putLong(TIMEOUT_KEY, Math.max(0L, timeout));
-    }
-    
-    public static int getMaxErrors() {
-        return SETTINGS.getInt(MAX_ERRORS_KEY, MAX_ERRORS);
-    }
-    
-    public static void setMaxErrors(int maxErrors) {
-        SETTINGS.putInt(MAX_ERRORS_KEY, Math.max(0, maxErrors));
-    }
+    public static final IntSetting MAX_ERRORS
+        = FACTORY.createSettableIntSetting("MAX_ERRORS", 3, "max_errors", 0, 10);
 }

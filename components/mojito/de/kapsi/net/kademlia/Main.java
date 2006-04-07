@@ -40,7 +40,6 @@ import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.routing.RoutingTable;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.ArrayUtils;
 
@@ -48,11 +47,9 @@ public class Main {
     
     public static void main(String[] args) throws Exception {
         
-        KademliaSettings.setReplicationParameter(20);
-        
         int count = 10;
         String host = null;
-        int port = NetworkSettings.getPort();
+        int port = NetworkSettings.PORT.getValue();
         
         if (args.length == 0) {
             System.out.println("java Main DHTs count [host] port");

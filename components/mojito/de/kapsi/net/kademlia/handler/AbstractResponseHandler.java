@@ -28,7 +28,7 @@ public abstract class AbstractResponseHandler extends MessageHandler
     private long timeout;
     
     public AbstractResponseHandler(Context context) {
-        this(context, NetworkSettings.getTimeout());
+        this(context, NetworkSettings.TIMEOUT.getValue());
     }
     
     public AbstractResponseHandler(Context context, long timeout) {

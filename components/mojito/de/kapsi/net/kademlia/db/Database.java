@@ -60,7 +60,7 @@ public class Database {
     public Database(Context context) {
         this.context = context;
         
-        database = new DatabaseMap(DatabaseSettings.getMaxSize());
+        database = new DatabaseMap(DatabaseSettings.MAX_DATABASE_SIZE.getValue());
     }
     
     public int getMaxSize() {
@@ -88,7 +88,7 @@ public class Database {
         KUID key = keyValue.getKey();
         KeyValueCollection values = (KeyValueCollection)database.get(key);
         if (values == null) {
-            values = new KeyValueCollection(context, key, DatabaseSettings.getMaxValues());
+            values = new KeyValueCollection(context, key, DatabaseSettings.MAX_KEY_VALUES.getValue());
             database.put(key, values);
         }
         return values.add(keyValue);
