@@ -638,7 +638,7 @@ public class PatriciaRouteTable implements RoutingTable {
             }
         }
         if(bucketsLookups.size() == 0) {
-            l.secondPhaseComplete(0,false);
+            if(l!=null) l.secondPhaseComplete(0,false);
             return;
         }
         BootstrapFindNodeListener listener = new BootstrapFindNodeListener(bucketsLookups,l);
