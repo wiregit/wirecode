@@ -75,7 +75,8 @@ public class EventDispatcher extends TimerTask implements Runnable {
             try {
                 ((Runnable)dispatch.get(i)).run();
             } catch (Throwable t) {
-                //t.printStackTrace();
+                t.printStackTrace();
+                System.out.println("Class: "+((Runnable)dispatch.get(i)).getClass().getCanonicalName());
                 LOG.error(t);
             }
         }

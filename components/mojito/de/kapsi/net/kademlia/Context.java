@@ -37,8 +37,9 @@ import java.util.Timer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.dht.tests.DHTNodeStat;
-import com.limegroup.gnutella.dht.tests.DHTStats;
+import com.limegroup.gnutella.dht.statistics.DHTNodeStat;
+import com.limegroup.gnutella.dht.statistics.DHTStats;
+import com.limegroup.gnutella.dht.statistics.LookupsAggregatedStatistics;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -381,6 +382,8 @@ public class Context implements Runnable {
         
         FindNodeResponseHandler handler 
             = new FindNodeResponseHandler(this, lookup, l);
+        
+        LookupsAggregatedStatistics.FIND_NODE_LOOKUPS.incrementStat();
         
         handler.lookup();
     }

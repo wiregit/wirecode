@@ -32,6 +32,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.LookupStatistic;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -65,9 +67,15 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     private PatriciaTrie toQuery = new PatriciaTrie();
     
     /** 
-     * 
+     * A map of the query keys for this lookup
      */
     private Map queryKeys = new HashMap();
+    
+    /**
+     * A map of the hops for this lookup
+     */
+    private Map hopMap = new HashMap();
+    
     
     /**
      * The number of searches that are currently active
@@ -94,6 +102,12 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
      * started multiple times.
      */
     private boolean active = false;
+    
+    /**
+     * The statistics for this lookup
+     */
+    protected final LookupStatistic lookupStat = new LookupStatistic();
+    
     
     public LookupResponseHandler(Context context, KUID lookup) {
         super(context);
@@ -166,8 +180,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 queryKeys.put(node, queryKey);
             }
             
+            int hop = ((Integer)hopMap.get(nodeId)).intValue();
+            
             --activeSearches;
-            lookupStep();
+            lookupStep(hop);
         }
     }
     
@@ -198,8 +214,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     + " did not respond to our Find request");
         }
         
+        int hop = ((Integer)hopMap.get(nodeId)).intValue();
+        
         --activeSearches;
-        lookupStep();
+        lookupStep(hop);
     }
     
     /**
@@ -245,18 +263,21 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
             
             markAsQueried(node);
+            hopMap.put(node.getNodeID(),new Integer(0));
             ++activeSearches;
             
+            lookupStat.LOOKUP_REQUESTS.incrementStat();
             messageDispatcher.send(node, createMessage(lookup), this);
         }
     }
     
-    private void lookupStep() throws IOException {
+    private void lookupStep(int hop) throws IOException {
         
         //stop if we have nothing more to query and no more active searches
         if(toQuery.isEmpty() && activeSearches == 0) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Lookup for " + lookup + " terminates. No contacts left to query ");
+                LOG.trace("Lookup for " + lookup + " terminates after "
+                        + hop + " hops. No contacts left to query ");
             }
             
             if (isValueLookup()) {
@@ -285,7 +306,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookup + " terminates with " 
-                        + bestResponse + " as the best match after " 
+                        + bestResponse + " as the best match after "+
+                        hop + " hops and "
                         + queried.size() + " queried Nodes");
                 }
             
@@ -315,7 +337,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
                 
                 markAsQueried(node);
+                hopMap.put(node.getNodeID(),new Integer(++hop));
                 ++activeSearches;
+                lookupStat.LOOKUP_REQUESTS.incrementStat();
                 messageDispatcher.send(node, createMessage(lookup), this);
             }
         }

@@ -619,7 +619,7 @@ public class PatriciaRouteTable implements RoutingTable {
             //update bucket if freshness limit has passed
             //OR if it is not full (not complete)
             //OR if there is at least one invalid node inside
-            //OR if forced
+            //OR if forced 
             //TODO: maybe relax this a little bit?
             int length = Math.max(0, bucket.getDepth()-1);
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
