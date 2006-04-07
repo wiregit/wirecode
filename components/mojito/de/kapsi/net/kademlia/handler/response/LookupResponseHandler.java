@@ -44,7 +44,6 @@ import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.LookupSettings;
-import de.kapsi.net.kademlia.util.CollectionUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 /**
@@ -90,6 +89,12 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
      * Wheather or not this lookup has terminated
      */
     private boolean finished = false;
+    
+    /**
+     * A flag to make sure a lookup instance cannot be
+     * started multiple times.
+     */
+    private boolean active = false;
     
     public LookupResponseHandler(Context context, KUID lookup) {
         this(context, lookup, KademliaSettings.getReplicationParameter());
@@ -202,15 +207,25 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         lookupStep();
     }
     
-    
-    public void lookup() throws IOException {
+    /**
+     * Starts the lookup
+     */
+    public synchronized void lookup() throws IOException {
         
-        MessageDispatcher messageDispatcher 
-            = context.getMessageDispatcher();
+        if (active) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("This lookup for " + lookup + " is already active!");
+            }
+            return;
+        }
+        
+        active = true;
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting a new Lookup for " + lookup);
         }
+        
+        MessageDispatcher messageDispatcher = context.getMessageDispatcher();
         
         // Select the K closest Nodes from the K bucket list
         int k = KademliaSettings.getReplicationParameter();
@@ -237,6 +252,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             
             markAsQueried(node);
             ++activeSearches;
+            
             messageDispatcher.send(node, createMessage(lookup), this);
         }
     }
