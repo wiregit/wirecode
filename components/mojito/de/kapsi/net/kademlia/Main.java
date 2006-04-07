@@ -108,6 +108,8 @@ public class Main {
         String storeDB = "store db";
         String loadRT = "load rt";
         String loadDB = "load db";
+        String kill = "kill";
+        String restart = "restart";
         String quit = "quit";
         
         String[] commands = {
@@ -160,6 +162,21 @@ public class Main {
                     store(dht, line.split(" "));
                 } else if (line.matches(loadRT) || line.matches(loadDB)) {
                     load(dht, line.split(" "));
+                } else if (line.matches(kill)) {
+                    if (dht.isRunning()) {
+                        dht.close();
+                    }
+                } else if (line.matches(restart)) {
+                    if (!dht.isRunning()) {
+                        dht = new DHT();
+                        if (addr != null) {
+                            dht.bind(new InetSocketAddress(addr, port+current));
+                        } else {
+                            dht.bind(new InetSocketAddress(port+current));
+                        }
+                        new Thread(dht, "DHT-" + current).start();
+                        dhts.set(current, dht);
+                    }
                 } else if (line.matches(quit)) {
                     for(int i = 0; i < dhts.size(); i++) {
                         ((DHT)dhts.get(i)).close();
@@ -181,6 +198,7 @@ public class Main {
     
     private static void info(DHT dht) throws Throwable {
         System.out.println("Local ContactNode: " + dht.getLocalNode());
+        System.out.println("Is running: " + dht.isRunning());
         System.out.println("Database Size: " + dht.getDatabase().size());
         System.out.println("RouteTable Size: " + dht.getRoutingTable().size());
     }
