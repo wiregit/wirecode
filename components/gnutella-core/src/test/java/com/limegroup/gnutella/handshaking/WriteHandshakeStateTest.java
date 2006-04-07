@@ -7,6 +7,7 @@ import java.util.Properties;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.WriteBufferChannel;
+import com.limegroup.gnutella.io.IOState;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class WriteHandshakeStateTest extends BaseTestCase {
@@ -59,7 +60,7 @@ public class WriteHandshakeStateTest extends BaseTestCase {
         props.put("Out", "Value");
         HandshakeResponse response = new StubHandshakeResponse(200, "YAY", props);
         StubHandshakeResponder responder = new StubHandshakeResponder(response);
-        HandshakeState state = new WriteHandshakeState.WriteResponseState(support, responder, true);
+        IOState state = new WriteHandshakeState.WriteResponseState(support, responder, true);
 
         WriteBufferChannel channel = new WriteBufferChannel(2048);
         assertFalse(state.process(channel, null));
@@ -78,7 +79,7 @@ public class WriteHandshakeStateTest extends BaseTestCase {
         props.put("Out", "Value");
         HandshakeResponse response = new StubHandshakeResponse(200, "YAY", props);
         StubHandshakeResponder responder = new StubHandshakeResponder(response);
-        HandshakeState state = new WriteHandshakeState.WriteResponseState(support, responder, false);
+        IOState state = new WriteHandshakeState.WriteResponseState(support, responder, false);
 
         WriteBufferChannel channel = new WriteBufferChannel(2048);
         assertFalse(state.process(channel, null));
@@ -96,7 +97,7 @@ public class WriteHandshakeStateTest extends BaseTestCase {
         props.put("Out", "Value");
         HandshakeResponse response = new StubHandshakeResponse(HandshakeResponse.CRAWLER_CODE, "YAY", props);
         StubHandshakeResponder responder = new StubHandshakeResponder(response);
-        HandshakeState state = new WriteHandshakeState.WriteResponseState(support, responder, true);
+        IOState state = new WriteHandshakeState.WriteResponseState(support, responder, true);
 
         WriteBufferChannel channel = new WriteBufferChannel(2048);
         try {
@@ -120,7 +121,7 @@ public class WriteHandshakeStateTest extends BaseTestCase {
         props.put("Out", "Value");
         HandshakeResponse response = new StubHandshakeResponse(HandshakeResponse.CRAWLER_CODE, "YAY", props);
         StubHandshakeResponder responder = new StubHandshakeResponder(response);
-        HandshakeState state = new WriteHandshakeState.WriteResponseState(support, responder, false);
+        IOState state = new WriteHandshakeState.WriteResponseState(support, responder, false);
 
         WriteBufferChannel channel = new WriteBufferChannel(2048);
         assertFalse(state.process(channel, null));
@@ -137,7 +138,7 @@ public class WriteHandshakeStateTest extends BaseTestCase {
         props.put("Out", "Value");
         HandshakeResponse response = new StubHandshakeResponse(123, "YAY", props);
         StubHandshakeResponder responder = new StubHandshakeResponder(response);
-        HandshakeState state = new WriteHandshakeState.WriteResponseState(support, responder, false);
+        IOState state = new WriteHandshakeState.WriteResponseState(support, responder, false);
 
         WriteBufferChannel channel = new WriteBufferChannel(2048);
         try {
@@ -155,7 +156,7 @@ public class WriteHandshakeStateTest extends BaseTestCase {
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         Properties props = new Properties();
         props.put("Out", "Value");
-        HandshakeState state = new WriteHandshakeState.WriteRequestState(support, props);
+        IOState state = new WriteHandshakeState.WriteRequestState(support, props);
         
         WriteBufferChannel channel = new WriteBufferChannel(2048);
         assertFalse(state.process(channel, null));

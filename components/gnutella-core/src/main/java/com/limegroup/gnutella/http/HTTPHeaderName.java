@@ -217,8 +217,8 @@ public class HTTPHeaderName {
 	 *  representation of this HTTP header (ignoring case), otherwise
 	 *  returns <tt>false</tt>
 	 */
-	public boolean matchesStartOfString(String str) {
-		return str.toLowerCase(Locale.US).startsWith(LOWER_CASE_NAME);
+	public boolean is(String str) {
+		return str.toLowerCase(Locale.US).equals(LOWER_CASE_NAME);
 	}
 
 	/**

@@ -160,6 +160,10 @@ public final class HTTPUtils {
 		out.write(header);
 		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
+    
+    public static String createHeader(HTTPHeaderName name, HTTPHeaderValue value) {
+        return createHeader(name.httpStringValue(), value.httpStringValue());
+    }
 
 	/**
 	 * Create a single http header String with the specified header name 
@@ -170,22 +174,17 @@ public final class HTTPUtils {
 	 * @param valueStr the value of the header, generally the httpStringValue
 	 *  or a HttpHeaderValue, or just a String.
 	 */
-	private static String createHeader(HTTPHeaderName name, String valueStr) 
-		throws IOException {
-		if((name == null) || (valueStr == null)) {
-			throw new NullPointerException("null value in creating http header");
-		}
-		String nameStr  = name.httpStringValue();
-		if(nameStr == null) {
-			throw new NullPointerException("null value in creating http header");
-		}
-
-		StringBuffer sb = new StringBuffer();
-		sb.append(nameStr);
-		sb.append(COLON_SPACE);
-		sb.append(valueStr);
-		sb.append(CRLF);
-		return sb.toString();
+	public static String createHeader(HTTPHeaderName name, String valueStr) {
+        return createHeader(name.httpStringValue(), valueStr);
+    }
+    
+    public static String createHeader(String name, HTTPHeaderValue value) {
+        return createHeader(name, value.httpStringValue());
+    }
+    
+    public static String createHeader(String name, String value) {
+        StringBuffer sb = new StringBuffer(name.length() + value.length() + 4);
+		return sb.append(name).append(COLON_SPACE).append(value).append(CRLF).toString();
 	}
 
 	/**

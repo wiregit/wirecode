@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.limegroup.gnutella.io.IOState;
-
 /** Outlines all the states an asynchronous handshake can be in. */
-abstract class HandshakeState implements IOState {
+class HandshakeState {
     
     /**
      * Returns a new set of HandshakeStates for doing an asynchronous incoming handshake.
@@ -42,12 +40,6 @@ abstract class HandshakeState implements IOState {
         list.add(new WriteHandshakeState.WriteResponseState(support, responder, true));
         return list;
     }
-
-    /** The HandshakeSupport supporter. */
-    protected HandshakeSupport support;
     
-    /** Constructs a new HandshakeState for reading (or writing) with the given supporter. */
-    HandshakeState(HandshakeSupport support) {
-        this.support = support;
-    }
+    private HandshakeState() {}
 }

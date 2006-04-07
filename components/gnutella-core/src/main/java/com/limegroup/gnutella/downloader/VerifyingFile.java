@@ -70,7 +70,7 @@ public class VerifyingFile {
     /** 
      * A cache for byte[]s.
      */
-    private static final ByteArrayCache CACHE = new ByteArrayCache(512, HTTPDownloader.BUF_LENGTH);
+    private static final ByteArrayCache CACHE = new ByteArrayCache(2048, HTTPDownloader.BUF_LENGTH);
     static {
         RouterService.schedule(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000);
     }
@@ -290,7 +290,8 @@ public class VerifyingFile {
         }
         
         byte[] temp = CACHE.get();
-        Assert.that(temp.length >= length);
+        if(temp.length < length)
+            Assert.that(false, "bad length: " + length + ", needed <= " + temp.length);
         System.arraycopy(buf, start, temp, 0, length);
         QUEUE.add(new ChunkHandler(temp, intvl));
 

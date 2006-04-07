@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -17,6 +18,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.io.IOStateObserver;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -31,7 +33,7 @@ import com.limegroup.gnutella.util.ThreadFactory;
 /**
  * Class that performs the logic of downloading a file from a single host.
  */
-public class DownloadWorker implements DownloadStateObserver {
+public class DownloadWorker {
     /*
       Each potential downloader downloader follows these steps:
       1. Establish a TCP connection to the host in the RFD.
@@ -256,22 +258,14 @@ public class DownloadWorker implements DownloadStateObserver {
     private void httpLoop() {
         LOG.debug("Starting HTTP Loop");
         currentState = new DownloadState();
-        handleStateFinished(null);
-    }
-
-    public void handleStateException(IOException iox) {
-        finishHttpLoop();
-    }
-
-    public void handleStateShutdown() {
-        finishHttpLoop();
+        incrementState(null);
     }
     
     /**
      * Notification that a state has finished.
      * This kicks off the next stage if necessary.
      */
-    public void handleStateFinished(ConnectionStatus status) {
+    public void incrementState(ConnectionStatus status) {
         LOG.debug("State Changed, Current: " + currentState.getCurrentState() + ", status: " + status);
         
         switch(currentState.getCurrentState()) {
@@ -284,6 +278,11 @@ public class DownloadWorker implements DownloadStateObserver {
                 break; // wait for callback
         
         case DownloadState.REQUESTING_THEX:
+            currentState.setState(DownloadState.DOWNLOADING_THEX);
+            if(downloadThexIfNeeded())
+                break;
+        
+        case DownloadState.DOWNLOADING_THEX:
             currentState.setState(DownloadState.CONSUMING_BODY);
             if(consumeBodyIfNecessary())
                 break; // wait for callback
@@ -306,42 +305,25 @@ public class DownloadWorker implements DownloadStateObserver {
         }
     }
     
-    private boolean assignAndRequest() {
-        LOG.debug("Scheduling A&R");
-        ThreadFactory.startThread(new Runnable() {
-            public void run() {
-                LOG.debug("Doing A&R");
-                final ConnectionStatus status = assignAndRequestImpl();
-                LOG.debug("A&R done, status: " + status);
-                NIODispatcher.instance().invokeLater(new Runnable() {
-                    public void run() {
-                        handleStateFinished(status);
-                    }
-                });
-            }
-        }, "AssignAndRequestor");
-        return true;
-    }
-    
     private boolean consumeBodyIfNecessary() {
         if(_downloader.isBodyConsumed()) {
             LOG.debug("Not consuming body.");
             return false;
         }
         
-        LOG.debug("Scheduling body consumption");
-        ThreadFactory.startThread(new Runnable() {
-            public void run() {
-                LOG.debug("Consuming body.");
-                _downloader.consumeBody();
-                LOG.debug("done consuming body.");
-                NIODispatcher.instance().invokeLater(new Runnable() {
-                    public void run() {
-                        handleStateFinished(null);
-                    }
-                });
+        _downloader.consumeBody(new IOStateObserver() {
+            public void handleStatesFinished() {
+                incrementState(null);
             }
-        }, "BodyConsumer");
+
+            public void handleIOException(IOException iox) {
+                finishHttpLoop();
+            }
+
+            public void shutdown() {
+                finishHttpLoop();
+            }           
+        });
         return true;
     }
     
@@ -360,9 +342,9 @@ public class DownloadWorker implements DownloadStateObserver {
             
             if(status.isPartialData()) {
                 currentState.setState(DownloadState.BEGIN);
-                handleStateFinished(null);
+                incrementState(null);
             } else {
-                assert status.isQueued() || status.isConnected();
+                Assert.that( status.isQueued() || status.isConnected() );
                 boolean queued = _manager.killQueuedIfNecessary(this, !status.isQueued() ? -1 : status.getQueuePosition());
                 
                 if(status.isConnected()) {
@@ -379,22 +361,70 @@ public class DownloadWorker implements DownloadStateObserver {
     }
     
     private void beginDownload() {
-        LOG.debug("Scheduling beginDownload");
-        ThreadFactory.startThread(new Runnable() {
-            public void run() {
-                LOG.debug("Doing download");
-                final boolean success = doDownload();
-                LOG.debug("Download done, success: " + success);
-                NIODispatcher.instance().invokeLater(new Runnable() {
-                    public void run() {
-                        if(success)
-                            handleStateFinished(null);
-                        else
-                            handleStateShutdown();
+        try {
+            _downloader.doDownload(new IOStateObserver() {
+                public void handleStatesFinished() {
+                    _rfd.resetFailedCount();
+                    if(currentState.isHttp11())
+                        DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
+                    else
+                        DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
+                    finish(false);
+                }
+    
+                public void handleIOException(IOException iox) {
+                    if(iox instanceof DiskException)
+                        _manager.diskProblemOccured();
+                    else
+                        error();
+                        
+                    finish(true);
+                }
+    
+                public void shutdown() {
+                    error();
+                    finish(true);
+                }
+                
+                private void error() {
+                    if(currentState.isHttp11())
+                        DownloadStat.FAILED_HTTP11.incrementStat();
+                    else
+                        DownloadStat.FAILED_HTTP10.incrementStat();
+                    _manager.workerFailed(DownloadWorker.this);
+                }
+                
+                private void finish(boolean problem) {
+                    // if we got too corrupted, notify the user
+                    if (_commonOutFile.isHopeless())
+                        _manager.promptAboutCorruptDownload();
+    
+                    int stop = _downloader.getInitialReadingPoint() + _downloader.getAmountRead();
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("    WORKER:+" + " terminating from " + _downloader + " at " + stop + " error? "
+                                + problem);
+                    synchronized (_manager) {
+                        if (problem) {
+                            _downloader.stop();
+                            _rfd.incrementFailedCount();
+                            // if we failed less than twice in succession,
+                            // try to use the file again much later.
+                            if (_rfd.getFailedCount() < 2) {
+                                _rfd.setRetryAfter(FAILED_RETRY_AFTER);
+                                _manager.addRFD(_rfd);
+                            } else
+                                _manager.informMesh(_rfd, false);
+                        } else {
+                            _manager.informMesh(_rfd, true);
+                            if (!currentState.isHttp11()) // no need to add http11 _activeWorkers to files
+                                _manager.addRFD(_rfd);
+                        }
                     }
-                });
-            }
-        }, "DoDownloader");
+                }
+            });
+        } catch(SocketException se) {
+            finishHttpLoop();
+        }
     }
     
     private boolean requestTHEXIfNeeded() {
@@ -419,38 +449,65 @@ public class DownloadWorker implements DownloadStateObserver {
         }
 
         if (shouldRequest) {
-            LOG.debug("Schedule THEX request");
-            ThreadFactory.startThread(new Runnable() {
-                public void run() {
-                    LOG.debug("Requesting THEX");
-                    final ConnectionStatus status = requestTHEXIfNeededImpl(ourTree);
-                    LOG.debug("THEX request done, status: " + status);
-                    NIODispatcher.instance().invokeLater(new Runnable() {
-                        public void run() {
-                            handleStateFinished(status);
-                        }
-                    });
+            _downloader.requestHashTree(_manager.getSHA1Urn(), new IOStateObserver() {
+                public void handleStatesFinished() {
+                    incrementState(null);
                 }
-            }, "ThexRequestor");
-        } else
-            LOG.debug("Not requesting thex.");
+
+                public void handleIOException(IOException iox) {
+                    finishHttpLoop();
+                }
+
+                public void shutdown() {
+                    finishHttpLoop();
+                }
+            });
+        }
         
         return shouldRequest;
     }
     
-    private ConnectionStatus requestTHEXIfNeededImpl(HashTree ourTree) {
-        ConnectionStatus status = _downloader.requestHashTree(_manager.getSHA1Urn());
-        synchronized(_commonOutFile) {
-            _commonOutFile.setHashTreeRequested(false);
-            if(status.isThexResponse()) {
-                HashTree temp = status.getHashTree();
-                if (temp.isBetterTree(ourTree)) {
-                    _commonOutFile.setHashTree(temp);
+    private boolean downloadThexIfNeeded() {
+        if(!_downloader.isRequestingThex())
+            return false;
+        
+        ConnectionStatus status = _downloader.parseThexResponseHeaders();
+        if(status.isQueued()) {
+            incrementState(status);
+        } else if(!status.isConnected()) {
+            finishHttpLoop();
+        } else {
+            _downloader.downloadThexBody(_manager.getSHA1Urn(), new IOStateObserver() {
+                public void handleStatesFinished() {
+                    finishThexDownload();
+                    incrementState(null);
                 }
-            }
+
+                public void handleIOException(IOException iox) {
+                    finishThexDownload();
+                    finishHttpLoop();
+                }
+
+                public void shutdown() {
+                    finishThexDownload();
+                    finishHttpLoop();
+                }
+                
+                private void finishThexDownload() {
+                    synchronized(_commonOutFile) {
+                        _commonOutFile.setHashTreeRequested(false);
+                        HashTree newTree = _downloader.getHashTree();
+                        if(newTree != null) {
+                            HashTree oldTree = _commonOutFile.getHashTree();
+                            if(newTree.isBetterTree(oldTree))
+                                _commonOutFile.setHashTree(newTree);
+                        }
+                    }
+                }
+            });
         }
         
-        return status;
+        return true;
     }
     
     /**
@@ -532,7 +589,7 @@ public class DownloadWorker implements DownloadStateObserver {
                 } else {
                     NIODispatcher.instance().invokeLater(new Runnable() {
                         public void run() {
-                            handleStateFinished(null);
+                            incrementState(null);
                         }
                     });
                 }
@@ -655,84 +712,6 @@ public class DownloadWorker implements DownloadStateObserver {
             }, _rfd.isFromAlternateLocation() ? UDP_PUSH_CONNECT_TIME : PUSH_CONNECT_TIME, 0);
         }
     }
-
-    /**
-     * Attempts to run downloader.doDownload, notifying manager of termination
-     * via downloaders.notify(). 
-     * To determine when this downloader should be removed
-     * from the _activeWorkers list: never remove the downloader
-     * from _activeWorkers if the uploader supports persistence, unless we get an
-     * exception - in which case we do not add it back to files.  If !http11,
-     * then we remove from the _activeWorkers in the finally block and add to files as
-     * before if no problem was encountered.   
-     * 
-     * @param downloader the normal or push downloader to use for the transfer,
-     * which MUST be initialized (i.e., downloader.connectTCP() and
-     * connectHTTP() have been called)
-     *
-     * @return true if there was no IOException while downloading, false
-     * otherwise.  
-     */
-    private boolean doDownload() {
-        if(LOG.isTraceEnabled())
-            LOG.trace("WORKER: about to start downloading "+_downloader);
-        
-        boolean problem = false;
-        try {
-            _downloader.doDownload();
-            _rfd.resetFailedCount();
-            if(currentState.isHttp11())
-                DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
-            else
-                DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
-            
-            LOG.debug("WORKER: successfully finished download");
-        } catch (DiskException e) {
-            // something went wrong while writing to the file on disk.
-            // kill the other threads and set
-            _manager.diskProblemOccured();
-        } catch (IOException e) {
-            if(currentState.isHttp11())
-                DownloadStat.FAILED_HTTP11.incrementStat();
-            else
-                DownloadStat.FAILED_HTTP10.incrementStat();
-            problem = true;
-			_manager.workerFailed(this);
-        } catch (AssertFailure bad) {
-            throw new AssertFailure("worker failed "+getInfo()+
-                    " all workers: "+_manager.getWorkersInfo(),bad);
-        } finally {
-            // if we got too corrupted, notify the user
-            if (_commonOutFile.isHopeless())
-                _manager.promptAboutCorruptDownload();
-            
-            int stop=_downloader.getInitialReadingPoint()
-                        +_downloader.getAmountRead();
-            if(LOG.isDebugEnabled())
-                LOG.debug("    WORKER:+"+
-                        " terminating from "+_downloader+" at "+stop+ 
-                  " error? "+problem);
-            synchronized (_manager) {
-                if (problem) {
-                    _downloader.stop();
-                    _rfd.incrementFailedCount();
-                    // if we failed less than twice in succession,
-                    // try to use the file again much later.
-                    if( _rfd.getFailedCount() < 2 ) {
-                        _rfd.setRetryAfter(FAILED_RETRY_AFTER);
-                        _manager.addRFD(_rfd);
-                    } else
-                        _manager.informMesh(_rfd, false);
-                } else {
-                    _manager.informMesh(_rfd, true);
-                    if( !currentState.isHttp11() ) // no need to add http11 _activeWorkers to files
-                        _manager.addRFD(_rfd);
-                }
-            }
-        }
-        
-        return !problem;
-    }
     
     String getInfo() {
         if (_downloader != null) {
@@ -757,26 +736,45 @@ public class DownloadWorker implements DownloadStateObserver {
      * a grey area or white area.
      * @return the ConnectionStatus.
      */
-    private ConnectionStatus assignAndRequestImpl() {
+    private boolean assignAndRequest() {
         if(LOG.isTraceEnabled())
             LOG.trace("assignAndRequest for: " + _rfd);
-        
-        try {
-            Interval interval = null;
-            synchronized(_commonOutFile) {
-                if (_commonOutFile.hasFreeBlocksToAssign() > 0)
+    
+        Interval interval = null;
+        synchronized(_commonOutFile) {
+            if (_commonOutFile.hasFreeBlocksToAssign() > 0) {
+                try {
                     interval = pickAvailableInterval();
-            }
-            
-            // it is still possible that a worker has died and released their ranges
-            // just before we try to steal
-            if (interval == null) {
-                synchronized(_stealLock) {
-                    assignGrey();
+                } catch(NoSuchRangeException nsre) {
+                    handleNoRanges();
+                    return false;
                 }
-            } else {
-                assignWhite(interval);
             }
+        }
+        
+        // it is still possible that a worker has died and released their ranges
+        // just before we try to steal
+        if (interval == null) {
+            synchronized(_stealLock) {
+                if(!assignGrey())
+                    return false;
+            }
+        } else {
+            assignWhite(interval);
+        }
+        
+        return true;
+    }
+    
+    private void completeAssignAndRequest(IOException x) {
+        incrementState(completeAssignAndRequestImpl(x));
+    }
+    
+    private ConnectionStatus completeAssignAndRequestImpl(IOException x) {
+        try {
+            _downloader.parseHeaders();
+            if(x != null)
+                throw x;
             
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
@@ -869,17 +867,31 @@ public class DownloadWorker implements DownloadStateObserver {
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.
      */
-    private void assignWhite(Interval interval) throws 
-    IOException, TryAgainLaterException, FileNotFoundException, 
-    NotSharingException , QueuedException {
+    private void assignWhite(Interval interval) {
         //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
         //code below.  Note connectHTTP can throw several exceptions.
-        int low = interval.low;
-        int high = interval.high; // INCLUSIVE
+        final int low = interval.low;
+        final int high = interval.high; // INCLUSIVE
 		_shouldRelease=true;
-        _downloader.connectHTTP(low, high + 1, true,_commonOutFile.getBlockSize());
-        
+        _downloader.connectHTTP(low, high + 1, true,_commonOutFile.getBlockSize(), new IOStateObserver() {
+            public void handleStatesFinished() {
+                completeAssignWhite(low, high);
+                completeAssignAndRequest(null);
+            }
+
+            public void handleIOException(IOException iox) {
+                completeAssignAndRequest(iox);
+            }
+
+            public void shutdown() {
+                completeAssignAndRequest(new IOException("shutdown"));
+            }
+            
+        });
+    }
+    
+    private void completeAssignWhite(int low, int high) {
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
         //We only want to release a range if the reported subrange
@@ -926,7 +938,7 @@ public class DownloadWorker implements DownloadStateObserver {
      * @throws NoSuchRangeException if the remote host is partial and doesn't 
      * have the ranges we need
      */
-    private Interval pickAvailableInterval() throws NoSuchRangeException{
+    private Interval pickAvailableInterval() throws NoSuchRangeException {
         Interval interval = null;
         //If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
@@ -978,40 +990,61 @@ public class DownloadWorker implements DownloadStateObserver {
      * area to a new HTTPDownloader, if the current downloader is going too
      * slow.
      */
-    private void assignGrey() throws
-    NoSuchElementException,  IOException, TryAgainLaterException, 
-    QueuedException, FileNotFoundException, NotSharingException,  
-    NoSuchRangeException  {
+    private boolean assignGrey() {
         
         //If this _downloader is a partial source, don't attempt to steal...
         //too confusing, too many problems, etc...
-        if( _downloader.getRemoteFileDesc().isPartialSource() )
-            throw new NoSuchRangeException();
+        if( _downloader.getRemoteFileDesc().isPartialSource() ) {
+            handleNoRanges();
+            return false;
+        }
 
-        DownloadWorker slowest = findSlowestDownloader();
+        final DownloadWorker slowest = findSlowestDownloader();
                         
         if (slowest==null) {//Not using this downloader...but RFD maybe useful
             LOG.debug("didn't find anybody to steal from");
-            throw new NoSuchElementException();
+            handleNoMoreDownloaders();
+            return false;
         }
 		
         // see what ranges is the victim requesting
-        Interval slowestRange = slowest.getDownloadInterval();
+        final Interval slowestRange = slowest.getDownloadInterval();
         
-        if (slowestRange.low == slowestRange.high)
-            throw new NoSuchElementException();
+        if (slowestRange.low == slowestRange.high) {
+            handleNoMoreDownloaders();
+            return false;
+        }
         
         //Note: we are not interested in being queued at this point this
         //line could throw a bunch of exceptions (not queuedException)
-        _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize());
+        _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize(), new IOStateObserver() {
+            public void handleStatesFinished() {
+                completeAssignGrey(slowest, slowestRange);
+                completeAssignAndRequest(null);
+            }
+
+            public void handleIOException(IOException iox) {
+                completeAssignAndRequest(iox);
+            }
+
+            public void shutdown() {
+                completeAssignAndRequest(new IOException("shutdown"));
+            }
+            
+        });
         
+        return true;
+    }
+    
+    private void completeAssignGrey(DownloadWorker slowest, Interval slowestRange) {
         Interval newSlowestRange;
         int newStart;
         synchronized(slowest.getDownloader()) {
             // if the victim died or was stopped while the thief was connecting, we can't steal
             if (!slowest.getDownloader().isActive()) {
                 LOG.debug("victim is no longer active");
-                throw new NoSuchElementException();
+                handleNoMoreDownloaders();
+                return;
             }
             
             // see how much did the victim download while we were exchanging headers.
@@ -1022,7 +1055,8 @@ public class DownloadWorker implements DownloadStateObserver {
                 if (LOG.isDebugEnabled())
                     LOG.debug("victim is now downloading something else "+
                             newSlowestRange+" vs. "+slowestRange);
-                throw new NoSuchElementException();
+                handleNoMoreDownloaders();
+                return;
             }
             
             if (newSlowestRange.low > slowestRange.low && LOG.isDebugEnabled()) {
@@ -1043,8 +1077,8 @@ public class DownloadWorker implements DownloadStateObserver {
                             ", high: " + slowestRange.high + ".  Was low: " + myLow +
                             ", high: " + myHigh);
                 }
-                
-                throw new IOException("bad stealer.");
+                handleIO();
+                return;
             }
             
             newStart = Math.max(newSlowestRange.low,myLow);

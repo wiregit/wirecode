@@ -10,11 +10,20 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -44,6 +53,13 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.http.ReadConsumer;
+import com.limegroup.gnutella.http.SimpleReadHeaderState;
+import com.limegroup.gnutella.http.SimpleWriteHeaderState;
+import com.limegroup.gnutella.io.IOState;
+import com.limegroup.gnutella.io.IOStateMachine;
+import com.limegroup.gnutella.io.IOStateObserver;
+import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -52,10 +68,12 @@ import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.ThexReader;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.CountingInputStream;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
@@ -83,14 +101,14 @@ import com.limegroup.gnutella.util.Sockets;
  * LOCKING: _writtenBadLocs and _badLocs are both synchronized on _badLocs
  */
 
-public class HTTPDownloader implements BandwidthTracker {
+public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
     
     private static final Log LOG = LogFactory.getLog(HTTPDownloader.class);
     
     /**
      * The length of the buffer used in downloading.
      */
-    public static final int BUF_LENGTH=1024;
+    public static final int BUF_LENGTH=2048;
     
     /**
      * The smallest possible time in seconds to wait before retrying a busy
@@ -177,10 +195,12 @@ public class HTTPDownloader implements BandwidthTracker {
 	 */
 	private volatile boolean _bodyConsumed = true;
 
-	private ByteReader _byteReader;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
-	private OutputStream _output;
-	private InputStream _input;
+    private IOStateMachine _stateMachine;
+    private IOStateObserver _observer;
+    private SimpleReadHeaderState _headerReader;
+    private boolean _requestingThex;
+    private ThexReader _thexReader;
     private final VerifyingFile _incompleteFile;
     
 	/**
@@ -301,11 +321,10 @@ public class HTTPDownloader implements BandwidthTracker {
      * @param incompleteFile the temp file to use while downloading, which need
      *  not exist.
      */
-	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
-	        VerifyingFile incompleteFile, boolean inNetwork) {
-        if(rfd == null) {
+	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile, boolean inNetwork) {
+        if(rfd == null)
             throw new NullPointerException("null rfd");
-        }
+        
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -425,24 +444,21 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         
         _socket.setKeepAlive(true);
-        _input = new NPECatchingInputStream(new BufferedInputStream(_socket.getInputStream()));
-        _output = new BufferedOutputStream(_socket.getOutputStream());
-
+        _stateMachine = new IOStateMachine(this, new LinkedList());
+        ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
+        ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
+        
         // Note : once we have established the TCP connection with the host we
         // want to download from we set the soTimeout. Its reset in doDownload
         // Note2 : this may throw an IOException.
         _socket.setSoTimeout(Constants.TIMEOUT);
-        _byteReader = new ByteReader(_input);
     }
 
     /**
      * Same as connectHTTP(start, stop, supportQueueing, -1)
      */
-    public void connectHTTP(int start, int stop, boolean supportQueueing) 
-        throws IOException, TryAgainLaterException, FileNotFoundException, 
-             NotSharingException, QueuedException, RangeNotAvailableException,
-             ProblemReadingHeaderException, UnknownCodeException {
-        connectHTTP(start, stop, supportQueueing, -1);
+    public void connectHTTP(int start, int stop, boolean supportQueueing, IOStateObserver observer) {
+        connectHTTP(start, stop, supportQueueing, -1, observer);
     }
     
     /** 
@@ -474,16 +490,11 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException could not parse headers
      * @exception UnknownCodeException unknown response code
      */
-    public void connectHTTP(int start, int stop, boolean supportQueueing,
-    						int amountDownloaded) 
-        throws IOException, TryAgainLaterException, FileNotFoundException, 
-             NotSharingException, QueuedException, RangeNotAvailableException,
-             ProblemReadingHeaderException, UnknownCodeException {
+    public void connectHTTP(int start, int stop, boolean supportQueueing, int amountDownloaded, IOStateObserver observer) {
         if(start < 0)
             throw new IllegalArgumentException("invalid start: " + start);
         if(stop <= start)
-            throw new IllegalArgumentException("stop(" + stop +
-                                               ") <= start(" + start +")");
+            throw new IllegalArgumentException("stop(" + stop + ") <= start(" + start +")");
 
         synchronized(this) {
             _isActive = true;
@@ -493,26 +504,19 @@ public class HTTPDownloader implements BandwidthTracker {
             _initialWritingPoint = start;
             _bodyConsumed = false;
             _contentLength = 0;
+            _requestedInterval = new Interval(_initialReadingPoint, stop-1);
         }
 		
+        _observer = observer;
         
-		// features to be sent with the X-Features header
+        Map headers = new LinkedHashMap();
         Set features = new HashSet();
-		
-        //Write GET request and headers.  We request HTTP/1.1 since we need
-        //persistence for queuing & chunked downloads.
-        //(So we can't write "Connection: close".)
-        OutputStreamWriter osw = new OutputStreamWriter(_output);
-        BufferedWriter out=new BufferedWriter(osw);
-        String startRange = java.lang.String.valueOf(_initialReadingPoint);
-        out.write("GET "+_rfd.getUrl().getFile()+" HTTP/1.1\r\n");
-        out.write("HOST: "+_host+":"+_port+"\r\n");
-        out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
+        
+        headers.put("HOST", _host + ":" + _port);
+        headers.put("User-Agent", CommonUtils.getHttpServer());
 
         if (supportQueueing) {
-            // legacy QUEUE header, - to be replaced by X-Features header
-            // as already implemented by BearShare
-            out.write("X-Queue: 0.1\r\n"); //we support remote queueing
+            headers.put("X-Queue", "0.1");
             features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
         }
         
@@ -538,7 +542,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
-		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,sha1,out);
+            headers.put(HTTPHeaderName.GNUTELLA_CONTENT_URN, sha1);
 
         //We don't want to hold locks while doing network operations, so we use
         //this variable to clone _goodLocs and _badLocs and write to network
@@ -559,8 +563,7 @@ public class HTTPDownloader implements BandwidthTracker {
             }
         }
         if(writeClone != null) //have something to write?
-            HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                 new HTTPHeaderValueCollection(writeClone),out);
+            headers.put(HTTPHeaderName.ALT_LOCATION, new HTTPHeaderValueCollection(writeClone));
         
         writeClone = null;
         //write-nalts        
@@ -578,8 +581,7 @@ public class HTTPDownloader implements BandwidthTracker {
         }
 
         if(writeClone != null) //have something to write?
-            HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
-                                new HTTPHeaderValueCollection(writeClone),out);
+            headers.put(HTTPHeaderName.NALTS, new HTTPHeaderValueCollection(writeClone));
         
         // if the other side indicated they want firewalled altlocs, send some
         //
@@ -613,9 +615,8 @@ public class HTTPDownloader implements BandwidthTracker {
         			_goodPushLocs.clear();
         		}
         	}
-        	if (writeClone!=null) 
-        		HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
-        			new HTTPHeaderValueCollection(writeClone),out);
+        	if (writeClone!=null)
+                headers.put(HTTPHeaderName.FALT_LOCATION, new HTTPHeaderValueCollection(writeClone));
         	
         	//do the same with bad push locs
         	writeClone = null;
@@ -637,67 +638,61 @@ public class HTTPDownloader implements BandwidthTracker {
             }
         	
         	if (writeClone!=null) 
-        		HTTPUtils.writeHeader(HTTPHeaderName.BFALT_LOCATION,
-        				new HTTPHeaderValueCollection(writeClone),out);
+                headers.put(HTTPHeaderName.BFALT_LOCATION, new HTTPHeaderValueCollection(writeClone));
         }
         
         
         
 
+        headers.put("Range", "bytes=" + _initialReadingPoint + "-" + (stop-1));
         
-        out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
-        synchronized(this) {
-            _requestedInterval = new Interval(_initialReadingPoint, stop-1);
-        }
 		if (RouterService.acceptedIncomingConnection() &&
            !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
             int port = RouterService.getPort();
             String host = NetworkUtils.ip2string(RouterService.getAddress());
-            out.write("X-Node: " + host + ":" + port + "\r\n");
+            headers.put("X-Node", host + ":" + port);
             features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
             // Legacy chat header. Replaced by X-Features header / X-Node
             // header
             if (ChatSettings.CHAT_ENABLED.getValue()) {
-                out.write("Chat: " + host + ":" + port + "\r\n");
+                headers.put("Chat", host + ":" + port);
                 features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
             }
         }	
 		
 		// Write X-Features header.
-        if (features.size() > 0) {
-            HTTPUtils.writeHeader(HTTPHeaderName.FEATURES,
-                        new HTTPHeaderValueCollection(features),
-                        out);
-        }
+        if (features.size() > 0)
+            headers.put(HTTPHeaderName.FEATURES, new HTTPHeaderValueCollection(features));
 		
         // Write X-Downloaded header to inform uploader about
         // how many bytes already transferred for this file
         if ( amountDownloaded > 0 ) {
-            HTTPUtils.writeHeader(HTTPHeaderName.DOWNLOADED,
-                        String.valueOf(amountDownloaded),
-                        out);
+            headers.put(HTTPHeaderName.DOWNLOADED, "" + amountDownloaded);
         }
 		
-        out.write("\r\n");
-        out.flush();
-
-        //Read response.
-        readHeaders();
+        SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
+                "GET " + _rfd.getUrl().getFile() + " HTTP/1.1",
+                headers,
+                _inNetwork ? BandwidthStat.HTTP_HEADER_UPSTREAM_INNETWORK_BANDWIDTH :
+                             BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH);
+        SimpleReadHeaderState reader = new SimpleReadHeaderState(
+                _inNetwork ? BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH :
+                             BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH);
         
-        // if we got here, we connected fine
-        if (LOG.isDebugEnabled())
-            LOG.debug(this+" completed connectHTTP");
+        System.out.println("adding writer & reader");
+        _stateMachine.addStates(new IOState[] { writer, reader } );
+        _headerReader = reader;
 	}
 	
 	/**
 	 * Consumes the body of the HTTP message that was previously exchanged,
 	 * if necessary.
 	 */
-    void consumeBody() {
-        try {
-            if(!_bodyConsumed)
-                consumeBody(_contentLength);
-        } catch(IOException ignored) {}
+    void consumeBody(IOStateObserver observer) {
+        if (!_bodyConsumed)
+            consumeBody(_contentLength, observer);
+        else
+            observer.handleStatesFinished();
         _bodyConsumed = true;
     }
     
@@ -713,232 +708,178 @@ public class HTTPDownloader implements BandwidthTracker {
      *   Queued -- means to sleep while queued.
      *   ThexResponse -- means the thex tree was received.
      */
-    public ConnectionStatus requestHashTree(URN sha1) {
+    void requestHashTree(URN sha1, IOStateObserver observer) {
         if (LOG.isDebugEnabled())
             LOG.debug("requesting HashTree for " + _thexUri + 
                       " from " +_host + ":" + _port);
-
+        
+        _observer = observer;
+        
+        Map headers = new LinkedHashMap();
+        headers.put("HOST", _host + ":" + _port);
+        headers.put("User-Agent", CommonUtils.getHttpServer());
+        
+        SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
+                "GET " + _thexUri + " HTTP/1.1",
+                headers,
+                BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH);
+        SimpleReadHeaderState reader = new SimpleReadHeaderState(
+                BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH);
+        
+        _headerReader = reader;
+        _requestingThex = true;
+        _stateMachine.addStates(new IOState[] { writer, reader });
+    }
+    
+    boolean isRequestingThex() {
+        return _requestingThex;
+    }
+    
+    ConnectionStatus parseThexResponseHeaders() {
         try {
-            String str;
-            str = "GET " + _thexUri +" HTTP/1.1\r\n";
-            _output.write(str.getBytes());
-            str = "HOST: "+_host+":"+_port+"\r\n";
-            _output.write(str.getBytes());
-            str = "User-Agent: "+CommonUtils.getHttpServer()+"\r\n";
-            _output.write(str.getBytes());
-            str = "\r\n";
-            _output.write(str.getBytes());
-            _output.flush();
-        } catch (IOException ioe) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("connection failed during sending hashtree request"); 
-            return ConnectionStatus.getConnected();
-        }
-        try {
-            String line = _byteReader.readLine();
-            if(line == null)
-                throw new IOException("disconnected");
-            int code = parseHTTPCode(line, _rfd);
+            int code = parseHTTPCode(_headerReader.getConnectLine(), _rfd);
             if(code < 200 || code >= 300) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("invalid HTTP code: " + code);
                 _rfd.setTHEXFailed();
-                return consumeResponse(code);
             }
-            
-            // Code was 2xx, consume the headers
-            int contentLength = consumeHeaders(null);
-            // .. and read the body.
-            // if it fails for any reason, try consuming however much we
-            // have left to read
-            InputStream in = _input;
-            if(contentLength != -1)
-                in = new CountingInputStream(_input);
-            try {
-                HashTree hashTree =
-                    HashTree.createHashTree(in, sha1.toString(),
-                                            _root32, _rfd.getFileSize());
-                _thexSucceeded = true;
-                return ConnectionStatus.getThexResponse(hashTree);
-            } catch(IOException ioe) {
-                if(in instanceof CountingInputStream) {
-                    LOG.debug("failed with contentLength", ioe);
-                    _rfd.setTHEXFailed();                    
-                    int read = ((CountingInputStream)in).getAmountRead();
-                    return consumeBody(contentLength - read);
-                } else {
-                    throw ioe;
-                }
-            }       
-        } catch (IOException ioe) {
-            LOG.debug("failed without contentLength", ioe);
-            
-            _rfd.setTHEXFailed();
-            // any other replies that can possibly cause an exception
-            // (404, 410) will cause the host to fall through in the
-            // ManagedDownloader anyway.
-            // if it was just a connection failure, we may retry.
-            return ConnectionStatus.getConnected();
+            return parseThexHeaders(code);
+        } catch(IOException failed) {
+            return ConnectionStatus.getNoFile();
         }
+        
+    }
+    
+    void downloadThexBody(URN sha1, IOStateObserver observer) {
+        int length = getContentLengthFromHeaders();
+        _thexReader = new ThexReader(length, sha1, _root32, _rfd.getFileSize());
+        _observer = observer;
+        _stateMachine.addState(_thexReader);
+    }
+    
+    HashTree getHashTree() {
+        HashTree tree =  _thexReader.getHashTree();
+        if(tree == null)
+            _rfd.setTHEXFailed();
+        
+        return tree;
+    }
+    
+    private int getContentLengthFromHeaders() {
+        for(Iterator i = _headerReader.getHeaders().entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            String header = (String)next.getKey();
+            if(HTTPHeaderName.CONTENT_LENGTH.is(header)) {
+                String value = (String)next.getValue();
+                try {
+                    return Integer.parseInt(value.trim());
+                } catch(NumberFormatException nfe) {
+                    return -1;
+                }
+            }   
+        }
+        return -1;
     }
     
     /**
-     * Consumes the headers of an HTTP message, returning the Content-Length.
+     * Parses the headers of a thex response.
+     * Ensures a content-length is included,
+     * and if queued returns a queued response.
      */
-    private int consumeHeaders(int[] queueInfo) throws IOException {
+    private ConnectionStatus parseThexHeaders(int code) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug(_rfd + " consuming headers");
-            
-        int contentLength = -1;
-        String str;
-        while(true) {
-            str = _byteReader.readLine();
-            if(str == null || str.equals(""))
-                break;
-            if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(str)) {
-                String value = HTTPUtils.extractHeaderValue(str);
-                if(value == null) continue;
-                try {
-                    contentLength = Integer.parseInt(value.trim());
-                } catch(NumberFormatException nfe) {
-                    contentLength = -1;
-                }
-            } else if(queueInfo != null && 
-                      HTTPHeaderName.QUEUE.matchesStartOfString(str)) 
-                parseQueueHeaders(str, queueInfo);
+        
+        boolean hasContentLength = false;
+        for(Iterator i = _headerReader.getHeaders().entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            String header = (String)next.getKey();
+            if(HTTPHeaderName.CONTENT_LENGTH.is(header))
+                hasContentLength = true;
+            if(code == 503 && HTTPHeaderName.QUEUE.is(header)) {
+                String value = (String)next.getValue();
+                int queueInfo[] = { -1, -1, -1 };
+                parseQueueHeaders(value, queueInfo);
+                int min = queueInfo[0];
+                int max = queueInfo[1];
+                int pos = queueInfo[2];
+                if(min != -1 && max != -1 && pos != -1)
+                    return ConnectionStatus.getQueued(pos, min);
+            }
         }
-        return contentLength;
-    }   
-    
-    /**
-     * Consumes the response of an HTTP message.
-     */
-    private ConnectionStatus consumeResponse(int code) throws IOException {
-        if(LOG.isDebugEnabled())
-            LOG.debug(_rfd + " consuming response, code: " + code);
-
-        int[] queueInfo = { -1, -1, -1 };
-        int contentLength = consumeHeaders(queueInfo);
-        if(code == 503) {
-            int min = queueInfo[0];
-            int max = queueInfo[1];
-            int pos = queueInfo[2];
-            if(min != -1 && max != -1 && pos != -1)
-                return ConnectionStatus.getQueued(pos, min);
-        }
-        return consumeBody(contentLength);
+        
+        if(!hasContentLength)
+            return ConnectionStatus.getNoFile();
+        else
+            return ConnectionStatus.getConnected();
     }
     
     /**
      * Consumes the body portion of an HTTP Message.
      */
-    private ConnectionStatus consumeBody(int contentLength)
-      throws IOException {
+    private void consumeBody(int contentLength, IOStateObserver observer) {
         if(LOG.isTraceEnabled())
             LOG.trace("enter consumeBody(" + contentLength + ")");
 
         if(contentLength < 0)
-            throw new IOException("unknown content-length, can't consume");
-
-        byte[] buf = new byte[1024];
-        // read & ignore all the content.
-        while(contentLength > 0) {
-            int toRead = Math.min(buf.length, contentLength);
-            int read = _input.read(buf, 0, toRead);
-            if(read == -1)
-                break;
-            contentLength -= read;
-        }
-        return ConnectionStatus.getConnected();
-    }           
+            observer.handleIOException(new IOException("unknown content-length, can't consume"));
+            
+        _observer = observer;
+        _stateMachine.addState(new ReadConsumer(contentLength));
+    }
 
     /*
      * Reads the headers from this, setting _initialReadingPoint and
      * _amountToRead.  Throws any of the exceptions listed in connect().  
      */
-	private void readHeaders() throws IOException {
-		if (_byteReader == null) 
-			throw new ReaderIsNullException();
-
-		// Read the response code from the first line and check for any errors
-		String str = _byteReader.readLine();  
-		if (str==null || str.equals(""))
-            throw new IOException();
-
-        if (_inNetwork)
-            BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(str.length());
-        else 
-            BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+	void parseHeaders() throws IOException {
+        String connectLine = _headerReader.getConnectLine();
+        Properties headers = _headerReader.getHeaders();
         
-        int code=parseHTTPCode(str, _rfd);	
+        if (connectLine == null || connectLine.equals(""))
+            throw new IOException();
+        
+        int code = parseHTTPCode(connectLine, _rfd);
         //Note: According to the specification there are 5 headers, LimeWire
         //ignores 2 of them - queue length, and maxUploadSlots.
         int[] refQueueInfo = {-1,-1,-1};
         //Now read each header...
-		while (true) {            
-			str = _byteReader.readLine();
-            if (str==null || str.equals(""))
-                break;
-            
-            if (_inNetwork)
-                BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(str.length());
-            else 
-                BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
-            //As of LimeWire 1.9, we ignore the "Content-length" header for
-            //handling normal download flow.  The Content-Length is only
-            //used for reading/discarding some HTTP body messages.
+        for(Iterator i = headers.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            String header = (String)next.getKey();
+            String value = (String)next.getValue();
 			
             //For "Content-Range" headers, we store what the remote side is
             //going to give us.  Users should examine the interval and
             //update external structures appropriately.
-            if (str.toUpperCase().startsWith("CONTENT-RANGE:")) {
-                Interval responseRange = parseContentRange(str);
-                int low = responseRange.low;
-                int high = responseRange.high + 1;
-                synchronized(this) {
-                    // were we stolen from in the meantime?
-                    if (_disconnect)
-                        throw new IOException("stolen from");
-                    
-                    // Make sure that the range they gave us is a subrange
-                    // of what we wanted in the first place.
-                    if(low < _initialReadingPoint ||
-                            high > _initialReadingPoint + _amountToRead)
-                        throw new ProblemReadingHeaderException(
-                                "invalid subrange given.  wanted low: " + 
-                                _initialReadingPoint + ", high: " + 
-                                (_initialReadingPoint + _amountToRead - 1) +
-                                "... given low: " + low + ", high: " + high);                
-                    _initialReadingPoint = low;
-                    _amountToRead = high - low;
-                }
-            }
-            else if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(str))
-                _contentLength = readContentLength(str);
-            else if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(str))
-				checkContentUrnHeader(str, _rfd.getSHA1Urn());
-            else if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(str))
-				checkContentUrnHeader(str, _rfd.getSHA1Urn());
-			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str))
-                readAlternateLocations(str);
-            else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) 
-                parseQueueHeaders(str, refQueueInfo);
-            else if (HTTPHeaderName.SERVER.matchesStartOfString(str)) 
-                _server = readServer(str);
-            else if (HTTPHeaderName.AVAILABLE_RANGES.matchesStartOfString(str))
-                parseAvailableRangesHeader(str, _rfd);
-            else if (HTTPHeaderName.RETRY_AFTER.matchesStartOfString(str)) 
-                parseRetryAfterHeader(str, _rfd);
-            else if (HTTPHeaderName.CREATION_TIME.matchesStartOfString(str))
-                parseCreationTimeHeader(str, _rfd);
-            else if (HTTPHeaderName.FEATURES.matchesStartOfString(str))
-            	parseFeatureHeader(str);
-            else if (HTTPHeaderName.THEX_URI.matchesStartOfString(str))
-                parseTHEXHeader(str);
-            else if (HTTPHeaderName.FALT_LOCATION.matchesStartOfString(str))
-            	parseFALTHeader(str);
-            else if (HTTPHeaderName.PROXIES.matchesStartOfString(str))
-                parseProxiesHeader(str);
+            if (HTTPHeaderName.CONTENT_RANGE.is(header))
+                validateContentRange(parseContentRange(value));
+            else if(HTTPHeaderName.CONTENT_LENGTH.is(header))
+                _contentLength = readContentLength(value);
+            else if(HTTPHeaderName.CONTENT_URN.is(header))
+				checkContentUrnHeader(value, _rfd.getSHA1Urn());
+            else if(HTTPHeaderName.GNUTELLA_CONTENT_URN.is(header))
+				checkContentUrnHeader(value, _rfd.getSHA1Urn());
+			else if(HTTPHeaderName.ALT_LOCATION.is(header))
+                readAlternateLocations(value);
+            else if(HTTPHeaderName.QUEUE.is(header)) 
+                parseQueueHeaders(value, refQueueInfo);
+            else if (HTTPHeaderName.SERVER.is(header)) 
+                _server = value;
+            else if (HTTPHeaderName.AVAILABLE_RANGES.is(header))
+                parseAvailableRangesHeader(value, _rfd);
+            else if (HTTPHeaderName.RETRY_AFTER.is(header)) 
+                parseRetryAfterHeader(value, _rfd);
+            else if (HTTPHeaderName.CREATION_TIME.is(header))
+                parseCreationTimeHeader(value, _rfd);
+            else if (HTTPHeaderName.FEATURES.is(header))
+            	parseFeatureHeader(value);
+            else if (HTTPHeaderName.THEX_URI.is(header))
+                parseTHEXHeader(value);
+            else if (HTTPHeaderName.FALT_LOCATION.is(header))
+            	parseFALTHeader(value);
+            else if (HTTPHeaderName.PROXIES.is(header))
+                parseProxiesHeader(value);
             
         }
 
@@ -1010,9 +951,8 @@ public class HTTPDownloader implements BandwidthTracker {
      *            the <tt>URN</tt> we expect
      * @throws ContentUrnMismatchException
      */
-    private void checkContentUrnHeader(String str, URN sha1)
+    private void checkContentUrnHeader(String value, URN sha1)
         throws ContentUrnMismatchException {
-        String value = HTTPUtils.extractHeaderValue(str);
         if (_root32 == null && value.indexOf("urn:bitprint:") > -1) { 
             // If the root32 was not in the X-Thex-URI header
             // (the spec requires it be there), then steal it from
@@ -1048,8 +988,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	 *
 	 * @param altHeader the full alternate locations header
 	 */
-	private void readAlternateLocations(final String altHeader) {
-		final String altStr = HTTPUtils.extractHeaderValue(altHeader);
+	private void readAlternateLocations(final String altStr) {
 		if(altStr == null)
 		    return;
 
@@ -1098,25 +1037,11 @@ public class HTTPDownloader implements BandwidthTracker {
                NetworkUtils.isValidPort(RouterService.getPort()) &&
                NetworkUtils.isValidAddress(RouterService.getAddress()); 
     }
-	
-	/**
-	 * Reads the Server header.  All information after the ':' is considered
-	 * to be the Server.
-	 */
-	public static String readServer(final String serverHeader) {
-	    int colon = serverHeader.indexOf(':');
-	    // if it existed & wasn't at the end...
-	    if ( colon != -1 && colon < serverHeader.length()-1 )
-	        return serverHeader.substring(colon+1).trim();
-        else
-            return "";
-    }
     
     /**
      * Reads the Content-Length.  Invalid Content-Lengths are set to 0.
      */
-    public static int readContentLength(final String header) {
-        String value = HTTPUtils.extractHeaderValue(header);
+    public static int readContentLength(final String value) {
         if(value == null)
             return 0;
         else {
@@ -1180,20 +1105,14 @@ public class HTTPDownloader implements BandwidthTracker {
      *  refQueueInfo[2] is set to the value of position, or -1 if problems; 
      */
     private void parseQueueHeaders(String str, int[] refQueueInfo)  {
-        //Note: According to the specification there are 5 headers, LimeWire
-        //ignores 2 of them - queue length, and maxUploadSlots.        
         if(str==null)
             return;
-        StringTokenizer tokenizer = new StringTokenizer(str," ,:=");
-        if(!tokenizer.hasMoreTokens())  //no tokens on new line??
-            return;
         
-        String token = tokenizer.nextToken();
-        if(!token.equalsIgnoreCase("X-Queue"))
-            return;
-
+        //Note: According to the specification there are 5 headers, LimeWire
+        //ignores 2 of them - queue length, and maxUploadSlots.
+        StringTokenizer tokenizer = new StringTokenizer(str," ,:=");
         while(tokenizer.hasMoreTokens()) {
-            token = tokenizer.nextToken();
+            String token = tokenizer.nextToken();
             String value;
             try {
                 if(token.equalsIgnoreCase("pollMin")) {
@@ -1208,14 +1127,36 @@ public class HTTPDownloader implements BandwidthTracker {
                     value = tokenizer.nextToken();
                     refQueueInfo[2] = Integer.parseInt(value);
                 }
-            } catch(NumberFormatException nfx) {//bad headers drop connection
-                //We could return at this point--basically does the same things.
+            } catch(NumberFormatException nfx) {
                 Arrays.fill(refQueueInfo,-1);
-            } catch(NoSuchElementException nsex) {//bad headers drop connection
-                //We could return at this point--basically does the same things.
+                break;
+            } catch(NoSuchElementException nsex) {
                 Arrays.fill(refQueueInfo,-1);
+                break;
             }
-        } //end of while - done parsing this line.
+        }
+    }
+    
+    private void validateContentRange(Interval responseRange) throws IOException {
+        int low = responseRange.low;
+        int high = responseRange.high + 1;
+        synchronized(this) {
+            // were we stolen from in the meantime?
+            if (_disconnect)
+                throw new IOException("stolen from");
+            
+            // Make sure that the range they gave us is a subrange
+            // of what we wanted in the first place.
+            if(low < _initialReadingPoint ||
+                    high > _initialReadingPoint + _amountToRead)
+                throw new ProblemReadingHeaderException(
+                        "invalid subrange given.  wanted low: " + 
+                        _initialReadingPoint + ", high: " + 
+                        (_initialReadingPoint + _amountToRead - 1) +
+                        "... given low: " + low + ", high: " + high);                
+            _initialReadingPoint = low;
+            _amountToRead = high - low;
+        }
     }
 
     /**
@@ -1395,8 +1336,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * the header
      */
     private static void parseRetryAfterHeader(String str, RemoteFileDesc rfd) 
-        throws IOException {
-        str = HTTPUtils.extractHeaderValue(str);
+      throws IOException {
         int seconds = 0;
         try {
             seconds = Integer.parseInt(str);
@@ -1418,8 +1358,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * the header
      */
     private static void parseCreationTimeHeader(String str, RemoteFileDesc rfd) 
-        throws IOException {
-        str = HTTPUtils.extractHeaderValue(str);
+      throws IOException {
         long milliSeconds = 0;
         try {
             milliSeconds = Long.parseLong(str);
@@ -1445,9 +1384,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *            the header line.
      */
     private void parseFeatureHeader(String str) {
-        str = HTTPUtils.extractHeaderValue(str);
         StringTokenizer tok = new StringTokenizer(str, ",");
-        
         
         while (tok.hasMoreTokens()) {
             String feature = tok.nextToken();
@@ -1492,8 +1429,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private void parseTHEXHeader (String str) {
         if(LOG.isDebugEnabled())
             LOG.debug(_host + ":" + _port +">" + str);
-
-        str = HTTPUtils.extractHeaderValue(str);
+        
         if (str.indexOf(";") > 0) {
             StringTokenizer tok = new StringTokenizer(str, ";");
             _thexUri = tok.nextToken();
@@ -1524,8 +1460,6 @@ public class HTTPDownloader implements BandwidthTracker {
      * the given host, and updates the rfd
      */
     private void parseProxiesHeader(String str) {
-        str = HTTPUtils.extractHeaderValue(str);
-        
         if (_rfd.getPushAddr()==null || str==null || str.length()<12) 
             return;
         
@@ -1548,116 +1482,144 @@ public class HTTPDownloader implements BandwidthTracker {
 
     /*
      * Downloads the content from the server and writes it to a temporary
-     * file.  Blocking.  This MUST be initialized via connect() beforehand, and
-     * doDownload MUST NOT have already been called. If there is
-     * a mismatch in overlaps, the VerifyingFile triggers a callback to
-     * the ManagedDownloader, which triggers a callback to the GUI to let us
-     * know whether to continue or interrupt.
+     * file.  Non-blocking.  This MUST be initialized via connect() beforehand, and
+     * doDownload MUST NOT have already been called.
      *  
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
      */
-	public void doDownload() 
-        throws DiskException, IOException {
-       
+	public void doDownload(IOStateObserver observer) throws SocketException {
         _socket.setSoTimeout(60 * 1000); // downloading, can stall upto 1 minute
-        
-        long currPos = _initialReadingPoint;
-        try {
-            
-            int read = -1;
-            byte[] buf = new byte[BUF_LENGTH];
-            
-            while (true) {
-                //Read from network.  It's possible that we've read more than
-                //requested because of a call to setAmountToRead() or stopAt() from another
-                //thread.  We check for that before we write to disk.
-                
-                // first see how much we have left to read, if any
-                int left;
-                synchronized(this) {
-                    if (_amountRead >= _amountToRead) {
-                        _isActive = false;
-                        break;
-                    }
-                    left = _amountToRead - _amountRead;
-                }
-                
-                Assert.that(left>0);
+        _observer = observer;
+        _stateMachine.addState(new DownloadState());
+    }
+    
+    
+    private class DownloadState implements IOState {
+        private long currPos = _initialReadingPoint;
 
-                // do the actual read from the network using the appropriate bandwidth 
-                // throttle
-                BandwidthThrottle throttle = _socket instanceof UDPConnection ?
-                    UDP_THROTTLE : THROTTLE;
-                int toRead = throttle.request(Math.min(BUF_LENGTH, left));
-                read = _input.read(buf, 0, toRead);
-                if (read == -1) 
-                    break;
+        public boolean process(Channel channel, ByteBuffer buffer) throws IOException {
+            boolean dataLeft = false;
+            try {
+                dataLeft = readImpl((ReadableByteChannel) channel, buffer);
+            } catch (IOException error) {
+                chunkCompleted();
+                throw error;
+            }
+
+            if (!dataLeft) {
+                chunkCompleted();
+                if (!isHTTP11() || _disconnect)
+                    throw new IOException("stolen from");
+            }
+            
+            return dataLeft;
+        }
+        
+        private void chunkCompleted() {
+            _bodyConsumed = true;
+            synchronized (HTTPDownloader.this) {
+                _isActive = false;
+            }
+        }
+
+        private boolean readImpl(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
+            int read = 0;
+            int totalRead = 0;
                 
+            // first see how much we have left to read, if any
+            int left;
+            synchronized(HTTPDownloader.this) {
+                if (_amountRead >= _amountToRead) {
+                    _isActive = false;
+                    return false;
+                }
+                left = _amountToRead - _amountRead;
+            }
+            
+            assert left > 0;
+            
+            // Account for data already in the buffer.
+            left -= buffer.position();
+            totalRead += buffer.position();
+            
+            // ensure we don't read more into the buffer than we want.
+            if(buffer.remaining() > left)
+                buffer.limit(buffer.position() + left);
+            
+            // TODO: Figure out how to throttle this crap.
+            while(left > 0 && buffer.hasRemaining() && (read = rc.read(buffer)) > 0) {
                 if (_inNetwork)
                     BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(read);
                 else
                     BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(read);
-
-                long filePosition;
-                int dataLength;
-                int dataStart;
-				synchronized(this) {
-                    if (_isActive) {
-                        int skipped = Math.max(0, (int)(_initialWritingPoint - currPos));
-                        
-                        // see if we were stolen from while reading
-                        read = Math.min(read, _amountToRead - _amountRead);
-                        if (read <=0 ) {
-                            // if were told to not read anything more, finish
-                            _isActive = false;
-                            break;
-                        }
-                        
-                        // setup data for writing.
-                        dataLength = read - skipped;
-                        dataStart = skipped;
-                        filePosition = currPos + skipped;
-                        // maintain data for next read.
-                        _amountRead += read;
-                        currPos += read;
-                        
-                        if(skipped >= read) {       
-                            if(LOG.isDebugEnabled())
-                                LOG.debug("skipped full read of: " + skipped + " bytes");
-                            continue;
-                        }                 
-                    } else {
-				        if (LOG.isDebugEnabled())
-				            LOG.debug("WORKER:"+this+" stopping at "+(_initialReadingPoint+_amountRead));
-				        break;
-				    }
-				}                
-                // write to disk outside of lock.
-                try {
-                    _incompleteFile.writeBlock(filePosition, dataStart, dataLength, buf);
-                } catch (InterruptedException killed) {
-                    synchronized(this) {
+                left -= read;
+                totalRead += read;
+            }
+            
+            // ensure the limit is set back to normal.
+            buffer.limit(buffer.capacity());
+            
+            // If nothing could be read at all, leave.
+            if(totalRead == 0 && read == -1)
+                return false;
+            
+            long filePosition;
+            int dataLength;
+            int dataStart;
+			synchronized(this) {
+                if (_isActive) {
+                    int skipped = Math.max(0, (int)(_initialWritingPoint - currPos));
+                    
+                    // see if we were stolen from while reading
+                    totalRead = Math.min(totalRead, _amountToRead - _amountRead);
+                    if (totalRead <=0 ) {
+                        // if were told to not read anything more, finish
                         _isActive = false;
+                        return false;
                     }
-                    break;
-                }
-            }  // end of while loop
-
-            synchronized(this) {
-                _isActive = false;
-                if ( _amountRead < _amountToRead ) { 
-                    throw new FileIncompleteException();  
+                    
+                    // setup data for writing.
+                    dataLength = totalRead - skipped;
+                    dataStart = skipped;
+                    filePosition = currPos + skipped;
+                    // maintain data for next read.
+                    _amountRead += totalRead;
+                    currPos += totalRead;
+                    
+                    if(skipped >= totalRead) {       
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("skipped full read of: " + skipped + " bytes");
+                        return true;
+                    }                 
+                } else {
+			        if (LOG.isDebugEnabled())
+			            LOG.debug("WORKER:"+this+" stopping at "+(_initialReadingPoint+_amountRead));
+			       return false;
+			    }
+			}                
+            
+            // write to disk outside of lock.
+            // TODO: write to disk only when buffer is full
+            try {
+                _incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array());
+            } catch (InterruptedException killed) {
+                synchronized(this) {
+                    _isActive = false;
                 }
             }
             
-        } finally {
-            _bodyConsumed = true;
-            synchronized(this) {
-                _isActive = false;
-            }
-            if(!isHTTP11() || _disconnect) 
-                throw new IOException("stolen from");
+            buffer.clear();
+            
+            return true;
+        }
+        
+        
+        public boolean isReading() {
+            return true;
+        }
+        public boolean isWriting() {
+            return false;
         }
 	}
 
@@ -1672,20 +1634,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	            LOG.debug("WORKER:"+this+" signaled to stop at "+(_initialReadingPoint+_amountRead));
 	        _isActive = false;
 	    }
-        if (_byteReader != null)
-            _byteReader.close();
-        try {
-            if (_socket != null)
-                _socket.close();
-        } catch (IOException e) { }
-        try {
-            if(_input != null)
-                _input.close();
-        } catch(IOException e) {}
-        try {
-            if(_output != null)
-                _output.close();
-        } catch(IOException e) {}
+        
+        IOUtils.close(_socket);
 	}
 
     /**
@@ -1829,22 +1779,18 @@ public class HTTPDownloader implements BandwidthTracker {
         THROTTLE.setSwitching(on);
         // DO NOT PUT SWITCHING ON THE UDP SIDE.
     }
-    
-	private HTTPDownloader(String str) {
-		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
-		_byteReader = new ByteReader(stream);
-		_locationsReceived = null;
-        _goodLocs = null;
-        _badLocs = null;
-        _writtenGoodLocs = null;
-        _writtenBadLocs = null;
-		_rfd =  new RemoteFileDesc("127.0.0.1", 1,
-                                  0, "a", 0, new byte[16],
-                                  0, false, 0, false, null, null,
-                                  false, false, "", 0, null, -1, 0);
-        _incompleteFile = null;
-        _inNetwork = false;
-	}    
+
+    public void handleIOException(IOException iox) {
+        _observer.handleIOException(iox);
+    }
+
+    public void handleStatesFinished() {
+        _observer.handleStatesFinished();
+    }
+
+    public void shutdown() {
+        _observer.shutdown();
+    }
 }
 
 
