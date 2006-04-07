@@ -91,6 +91,7 @@ public class VerifyingFolder {
 		partialBlocks = new BlockRangeMap();
 		verifiedBlocks = new BitSet(_info.getNumBlocks());
 		requestedRanges = new BlockRangeMap();
+		pendingRanges = new BlockRangeMap();
 		
 		if (complete) 
 			verifiedBlocks.set(0,_info.getNumBlocks());

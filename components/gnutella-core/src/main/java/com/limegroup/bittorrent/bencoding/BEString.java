@@ -10,6 +10,14 @@ import java.nio.channels.ReadableByteChannel;
  * A token that represents a String object.
  */
 class BEString extends Token {
+	
+	/**
+	 * Maximum size for a string we'll read.  Torrent files do not have limits to their size,
+	 * so for now we'll just limit it to 1MB
+	 * TODO: find a proper way to deal with this limit.
+	 */
+	private static final int MAX_STRING_SIZE = 1024*1024*1024;
+	
     /** The first byte of the length of the string */
     private final byte firstSizeByte;
     
@@ -69,7 +77,7 @@ class BEString extends Token {
         if (l != null) {
             sizeToken = null; //don't need this object anymore
             long l2 = l.longValue();
-            if (l2 > 0 && l2 < 65000) { //TODO: this limit should be much larger...
+            if (l2 > 0 && l2 < MAX_STRING_SIZE) { 
                 size = (int)l2;
                 result = new byte[size];
                 buf = ByteBuffer.wrap((byte[])result);

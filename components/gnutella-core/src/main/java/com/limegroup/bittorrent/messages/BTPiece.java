@@ -52,7 +52,7 @@ public class BTPiece extends BTMessage {
 
 		byte[] data = new byte[payload.remaining()];
 		payload.get(data);
-		return new BTPiece(new BTInterval(offset, data.length - 1, pieceNum), data);
+		return new BTPiece(new BTInterval(offset, offset + data.length - 1, pieceNum), data);
 	}
 
 	public BTInterval getInterval() {
