@@ -441,12 +441,19 @@ public class Context implements Runnable {
                 try {
                     List keyValues = Arrays.asList(new KeyValue[]{keyValue});
                     
+                    // List of ContactNodes where we stored the KeyValues.
                     List targets = new ArrayList(nodes.size());
+                    
                     for(Iterator it = nodes.iterator(); it.hasNext(); ) {
                         ContactNode node = (ContactNode)it.next();
                         QueryKey queryKey = (QueryKey)queryKeys.get(node);
                         
-                        if(node.getNodeID().equals(getLocalNodeID())) continue;
+                        if(node.getNodeID().equals(getLocalNodeID())) {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Skipping local Node as KeyValue is already stored at this Node");
+                            }
+                            continue;
+                        }
                         
                         if (queryKey == null) {
                             if (LOG.isErrorEnabled()) {
