@@ -19,10 +19,8 @@
  
 package de.kapsi.net.kademlia.settings;
 
-import com.limegroup.gnutella.settings.IntSetting;
-import com.limegroup.gnutella.settings.LongSetting;
 
-public final class DatabaseSettings extends DHTProps {
+public final class DatabaseSettings extends LimeDHTProps {
     
     //public static final long MILLIS_PER_DAY = 24L * 60L * 60L * 1000L; // 24 horus
     public static final long MILLIS_PER_DAY = 60L * 60L * 1000L; // 1 hour

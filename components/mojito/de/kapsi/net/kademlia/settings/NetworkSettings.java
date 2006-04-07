@@ -19,10 +19,8 @@
  
 package de.kapsi.net.kademlia.settings;
 
-import com.limegroup.gnutella.settings.IntSetting;
-import com.limegroup.gnutella.settings.LongSetting;
 
-public final class NetworkSettings extends DHTProps {
+public final class NetworkSettings extends LimeDHTProps {
     
     private NetworkSettings() {}
     
