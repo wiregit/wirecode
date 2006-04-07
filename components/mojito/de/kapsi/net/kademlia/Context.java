@@ -449,8 +449,8 @@ public class Context implements Runnable {
                         QueryKey queryKey = (QueryKey)queryKeys.get(node);
                         
                         if(node.getNodeID().equals(getLocalNodeID())) {
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("Skipping local Node as KeyValue is already stored at this Node");
+                            if (LOG.isInfoEnabled()) {
+                                LOG.info("Skipping local Node as KeyValue is already stored at this Node");
                             }
                             continue;
                         }
