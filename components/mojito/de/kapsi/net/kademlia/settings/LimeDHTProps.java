@@ -35,7 +35,7 @@ public class LimeDHTProps /* extends AbstractSettings */ {
     // subclasses should NEVER instantiate a copy themselves.
     protected LimeDHTProps() {
         /*super("dht.props", "Lime DHT properties file");
-        Assert.that( getClass() == DHTProps.class,
+        Assert.that( getClass() == LimeDHTProps.class,
             "should not have a subclass instantiate");*/
     }
     
