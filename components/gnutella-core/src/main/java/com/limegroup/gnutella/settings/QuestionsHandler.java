@@ -132,4 +132,18 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting SKIP_FIRST_DOWNLOAD_WARNING =
         FACTORY.createIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", 0);
+    
+    /**
+     * Setting for whether or not to display a message that a .torrent file 
+     * could not be opened 
+     */
+    public static final BooleanSetting TORRENT_OPEN_FAILURE =
+        FACTORY.createBooleanSetting("TORRENT_OPEN_FAILURE ", false);
+
+    /**
+     * Setting for whether or not to display a message that a .torrent file 
+     * could not be downloaded 
+     */
+    public static final BooleanSetting TORRENT_DOWNLOAD_FAILURE =
+        FACTORY.createBooleanSetting("TORRENT_DOWNLOAD_FAILURE ", false);
 }
