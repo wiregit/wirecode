@@ -19,103 +19,56 @@
  
 package de.kapsi.net.kademlia.settings;
 
-import java.util.prefs.Preferences;
+import com.limegroup.gnutella.settings.BooleanSetting;
+import com.limegroup.gnutella.settings.IntSetting;
+import com.limegroup.gnutella.settings.LongSetting;
 
-public final class RouteTableSettings {
-    
-    private static final int MAX_CACHE_SIZE = 32;
-    private static final String MAX_CACHE_SIZE_KEY = "MAX_CACHE_SIZE";
-    
-    private static final boolean SKIP_STALE = true;
-    private static final String SKIP_STALE_KEY = "SKIP_STALE";
-    
-    private static final int MAX_LIVE_NODE_FAILURES = 4;
-    private static final String MAX_LIVE_NODE_FAILURES_KEY = "MAX_LIVE_NODE_FAILURES";
-    
-    private static final int MAX_UNKNOWN_NODE_FAILURES = 2;
-    private static final String MAX_UNKNOWN_NODE_FAILURES_KEY = "MAX_UNKNOWN_NODE_FAILURES";
-    
-    private static final long MIN_RECONNECTION_TIME = 1 * 60;
-    private static final String MIN_RECONNECTION_TIME_KEY = "MIN_RECONNECTION_TIME";
-    
-    private static final int DEPTH_LIMIT = 4; //a.k.a B
-    private static final String DEPTH_LIMIT_KEY = "DEPTH_LIMIT";
-    
-    private static final long BUCKET_REFRESH_TIME = 15 * 60* 1000; //15 minutes for now
-    private static final String BUCKET_REFRESH_TIME_KEY = "BUCKET_REFRESH_TIME";
-    
-    private static final int MAX_CONSECUTIVE_FAILURES = 100;
-    private static final String MAX_CONSECUTIVE_FAILURES_KEY = "MAX_CONSECUTIVE_FAILURES";
-    
-    public static final String ROUTETABLE_FILE = "RouteTable.pat";
-    
-    private static final Preferences SETTINGS 
-        = Preferences.userNodeForPackage(RouteTableSettings.class);
-    
+public final class RouteTableSettings extends DHTProps {
+
     private RouteTableSettings() {}
     
-    public static int getMaxCacheSize() {
-        return SETTINGS.getInt(MAX_CACHE_SIZE_KEY, MAX_CACHE_SIZE);
-    }
+    // TODO reasonable min and max values
+    public static final IntSetting MAX_CACHE_SIZE
+        = FACTORY.createSettableIntSetting("MAX_CACHE_SIZE", 32, "max_cache_size", 32, 256);
     
-    public static void setMaxCacheSize(int maxCacheSize) {
-        SETTINGS.putInt(MAX_CACHE_SIZE_KEY, maxCacheSize);
-    }
+    public static final BooleanSetting SKIP_STALE
+        = FACTORY.createBooleanSetting("SKIP_STALE", true);
     
-    public static boolean getSkipStale() {
-        return SETTINGS.getBoolean(SKIP_STALE_KEY, SKIP_STALE);
-    }
+    // TODO reasonable min and max values
+    public static final IntSetting MAX_LIVE_NODE_FAILURES
+        = FACTORY.createSettableIntSetting("MAX_LIVE_NODE_FAILURES", 4, "max_live_node_failures", 4, 10);
+   
+    // TODO reasonable min and max values
+    public static final IntSetting MAX_UNKNOWN_NODE_FAILURES
+        = FACTORY.createSettableIntSetting("MAX_UNKNOWN_NODE_FAILURES", 2, "max_unknown_node_failures", 2, 10);
     
-    public static void setSkipStale(boolean skipStale) {
-        SETTINGS.putBoolean(SKIP_STALE_KEY, skipStale);
-    }
+    // TODO reasonable min and max values
+    public static final LongSetting MIN_RECONNECTION_TIME
+        = FACTORY.createSettableLongSetting("MIN_RECONNECTION_TIME", 1L*60L, "min_reconnect_time", 1L*60L, 1L*60L);
     
-    public static int getMaxLiveNodeFailures() {
-        return SETTINGS.getInt(MAX_LIVE_NODE_FAILURES_KEY, MAX_LIVE_NODE_FAILURES);
-    }
+    /**
+     * The replication parameter is also known as K
+     */
+    public static final IntSetting REPLICATION_PARAMETER
+        = FACTORY.createIntSetting("REPLICATION_PARAMETER", 20);
+
+    /**
+     * The number of parallel lookups
+     */
+    public static final IntSetting LOOKUP_PARAMETER
+        = FACTORY.createIntSetting("LOOKUP_PARAMETER", 3);
+
+    // TODO reasonable min and max values
+    public static final IntSetting DEPTH_LIMIT //a.k.a B
+        = FACTORY.createSettableIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);
     
-    public static void setMaxLiveNodeFailures(int maxFailures) {
-        SETTINGS.putInt(MAX_LIVE_NODE_FAILURES_KEY, Math.max(0, maxFailures));
-    }
+    // TODO reasonable min and max values
+    // 15 minutes for now
+    public static final LongSetting BUCKET_REFRESH_TIME
+        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_TIME", 15L*60L*1000L, "bucket_refresh_time", 15L*60L*1000L, 15L*60L*1000L);
     
-    public static int getMaxConsecutiveFailures() {
-        return SETTINGS.getInt(MAX_CONSECUTIVE_FAILURES_KEY, MAX_CONSECUTIVE_FAILURES);
-    }
+    public static final IntSetting MAX_CONSECUTIVE_FAILURES
+        = FACTORY.createIntSetting("MAX_CONSECUTIVE_FAILURES", 100);
     
-    public static void setMaxConsecutiveFailures(int maxFailures) {
-        SETTINGS.putInt(MAX_CONSECUTIVE_FAILURES_KEY, Math.max(0, maxFailures));
-    }
-    
-    
-    public static int getMaxUnknownNodeFailures() {
-        return SETTINGS.getInt(MAX_UNKNOWN_NODE_FAILURES_KEY, MAX_UNKNOWN_NODE_FAILURES);
-    }
-    
-    public static void setMaxUnknownNodeFailures(int maxFailures) {
-        SETTINGS.putInt(MAX_UNKNOWN_NODE_FAILURES_KEY, Math.max(0, maxFailures));
-    }
-    
-    public static int getDepthLimit() {
-        return SETTINGS.getInt(DEPTH_LIMIT_KEY, DEPTH_LIMIT);
-    }
-    
-    public static void setDepthLimit(int symbolSize) {
-        SETTINGS.putInt(DEPTH_LIMIT_KEY,Math.max(0, symbolSize));
-    }
-    
-    public static long getBucketRefreshTime() {
-        return SETTINGS.getLong(BUCKET_REFRESH_TIME_KEY, BUCKET_REFRESH_TIME);
-    }
-    
-    public static void setBucketRefreshTime(long time) {
-        SETTINGS.putLong(BUCKET_REFRESH_TIME_KEY,time);
-    }
-    
-    public static long getMinReconnectionTime() {
-        return SETTINGS.getLong(MIN_RECONNECTION_TIME_KEY, MIN_RECONNECTION_TIME);
-    }
-    
-    public static void setMinReconnectionTime(long time) {
-        SETTINGS.putLong(MIN_RECONNECTION_TIME_KEY,time);
-    }
+    public static final String ROUTETABLE_FILE = "RouteTable.pat";
 }

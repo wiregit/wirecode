@@ -24,15 +24,10 @@ import java.net.InetSocketAddress;
 
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class CacheForwardTest {
 
     public void testCacheForward() {
-        KademliaSettings.setReplicationParameter(20);
-        RouteTableSettings.setMaxLiveNodeFailures(3);
-       
         DHT originalRequesterDHT = new DHT();
         
         DHT firstStorer = new DHT();

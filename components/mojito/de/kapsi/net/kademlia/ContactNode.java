@@ -55,11 +55,11 @@ public class ContactNode extends Node {
     public boolean isDead() {
         //node has ever been alive?
         if(getTimeStamp() > 0L) {
-            if (failures >= RouteTableSettings.getMaxLiveNodeFailures()) {
+            if (failures >= RouteTableSettings.MAX_LIVE_NODE_FAILURES.getValue()) {
                 return true;
             }
         } else {
-            if (failures >= RouteTableSettings.getMaxUnknownNodeFailures()) {
+            if (failures >= RouteTableSettings.MAX_UNKNOWN_NODE_FAILURES.getValue()) {
                 return true;
             }
         }

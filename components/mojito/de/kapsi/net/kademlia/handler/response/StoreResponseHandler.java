@@ -116,7 +116,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             return;
         }
         
-        if (++errors >= NetworkSettings.getMaxErrors()) {
+        if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Max number of errors occured. Giving up!");
             }
