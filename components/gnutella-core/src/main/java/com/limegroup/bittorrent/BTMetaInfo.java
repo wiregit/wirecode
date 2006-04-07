@@ -98,6 +98,11 @@ public class BTMetaInfo implements Serializable {
 	 * the sha1-hash of te beencoded _infoMap Object
 	 */
 	private byte[] _infoHash;
+	
+	/**
+	 * An URN representation of the infoHash;
+	 */
+	private URN _infoHashURN;
 
 	/*
 	 * The VerifyingFolder for this torrent. The VerifyingFolder should not be
@@ -208,6 +213,10 @@ public class BTMetaInfo implements Serializable {
 	 */
 	public byte[] getInfoHash() {
 		return _infoHash;
+	}
+	
+	public URN getURN() {
+		return _infoHashURN;
 	}
 
 	/**
@@ -648,6 +657,11 @@ public class BTMetaInfo implements Serializable {
 		}
 		MessageDigest md = new SHA1();
 		_infoHash = md.digest(baos.toByteArray());
+		try {
+		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
+		} catch (IOException impossible) {
+			ErrorService.error(impossible);
+		}
 
 		// _infoMap is not to be messed with.
 		_infoMap = Collections.unmodifiableMap(info);

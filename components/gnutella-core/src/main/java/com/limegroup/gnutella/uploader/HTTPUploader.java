@@ -529,7 +529,7 @@ public final class HTTPUploader implements Uploader {
     }
 
 	// implements the Uploader interface
-	public int getFileSize() {
+	public long getFileSize() {
 	    if(_stateNum == THEX_REQUEST)
 	        return _fileDesc.getHashTree().getOutputLength();
 	    else
@@ -537,7 +537,7 @@ public final class HTTPUploader implements Uploader {
     }
 	
 	// implements the Uploader interface
-	public int getAmountRequested() {
+	public long getAmountRequested() {
 	    if(_stateNum == THEX_REQUEST)
 	        return _fileDesc.getHashTree().getOutputLength();
 	    else
@@ -688,7 +688,7 @@ public final class HTTPUploader implements Uploader {
      *
 	 * Implements the Uploader interface.
      */
-	public int amountUploaded() {
+	public long amountUploaded() {
 	    if(_stateNum == THEX_REQUEST) {
 	        if(_ostream == null)
 	            return 0;
@@ -704,7 +704,7 @@ public final class HTTPUploader implements Uploader {
 	 *
 	 * Implements the Uploader interface.
 	 */
-	public int getTotalAmountUploaded() {
+	public long getTotalAmountUploaded() {
 	    if(_stateNum == THEX_REQUEST) {
 	        if(_ostream == null)
 	            return 0;

@@ -1114,7 +1114,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         if (incompleteFile == null) { 
             incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
-                                               downloadSHA1, getContentLength());
+                                               downloadSHA1, (int)getContentLength());
         }
         
         LOG.warn("Incomplete File: " + incompleteFile);
@@ -1369,7 +1369,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         final long otherLength = other.getFileSize();
 
         synchronized (this) {
-            int ourLength = getContentLength();
+            int ourLength = (int)getContentLength();
             
             if (ourLength != -1 && ourLength != otherLength) 
                 return false;
@@ -1427,7 +1427,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public synchronized void locationAdded(AlternateLocation loc) {
         Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
-        addDownload(loc.createRemoteFileDesc(getContentLength()),false);
+        addDownload(loc.createRemoteFileDesc((int)getContentLength()),false);
     }
     
     /** 
@@ -2307,7 +2307,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
      *  incompleteFile if rename fails. */
     private void cleanupCorrupt(File incFile, String name) {
-        corruptFileBytes=getAmountRead();        
+        corruptFileBytes= (int) getAmountRead();        
         incompleteFileManager.removeEntry(incFile);
 
         //Try to rename the incomplete file to a new corrupt file in the same
@@ -2829,7 +2829,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	 * Return -1 if the file size is not known yet, i.e. is not stored in the
 	 * properties map under {@link #FILE_SIZE}.
 	 */
-    public synchronized int getContentLength() {
+    public synchronized long getContentLength() {
         Integer i = (Integer)propertiesMap.get(FILE_SIZE);
         return i != null ? i.intValue() : -1;
     }
@@ -2843,7 +2843,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * All other times it will return the amount downloaded.
      * All return values are in bytes.
      */
-    public int getAmountRead() {
+    public long getAmountRead() {
         VerifyingFile ourFile;
         synchronized(this) {
             if ( state == CORRUPT_FILE )
@@ -3060,7 +3060,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return averageBandwidth;
 	}	    
 
-	public int getAmountVerified() {
+	public long getAmountVerified() {
         VerifyingFile ourFile;
         synchronized(this) {
             ourFile = commonOutFile;
@@ -3068,7 +3068,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 		return ourFile == null? 0 : ourFile.getVerifiedBlockSize();
 	}
 	
-	public int getAmountLost() {
+	public long getAmountLost() {
         VerifyingFile ourFile;
         synchronized(this) {
             ourFile = commonOutFile;

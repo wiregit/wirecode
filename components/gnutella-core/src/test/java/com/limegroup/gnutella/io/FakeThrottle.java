@@ -1,8 +1,5 @@
 package com.limegroup.gnutella.io;
 
-import java.nio.channels.SelectionKey;
-import java.nio.channels.CancelledKeyException;
-
 /** A fake throttle, for testing ThrottleWriter. */
 public class FakeThrottle implements Throttle {
     private int available;
@@ -27,6 +24,7 @@ public class FakeThrottle implements Throttle {
     }
     
     void setAvailable(int av) { available = av; }
+    public void limit(int i){}
     int getAvailable() { return available; }
     int interests() { return interests; }
     public boolean didRequest() { return didRequest; }

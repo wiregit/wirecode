@@ -241,6 +241,15 @@ public class NBThrottle implements Throttle {
         //LOG.trace("RETR: " + amount + ", REMAINING: " + _available + ", ALL: " + wroteAll + ", FROM: " + attachment);
     }
     
+	/**
+	 * Set the number of bytes to write per second
+	 * 
+	 * @param bytesPerSecond
+	 */
+	public void limit(int bytesPerSecond) {
+		_bytesPerTick = (int)(bytesPerSecond * MILLIS_PER_TICK / 1000);
+	}
+    
     /**
      * Notification from NIODispatcher that some time has passed.
      *

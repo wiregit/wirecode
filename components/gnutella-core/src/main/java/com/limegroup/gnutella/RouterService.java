@@ -2,7 +2,9 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +18,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
@@ -114,6 +117,11 @@ public class RouterService {
 	 * requests, etc.
 	 */
     private static final Acceptor acceptor = new Acceptor();
+    
+	/**
+	 * <tt>TorrentManager</tt> instance for handling torrents
+	 */
+	private static final TorrentManager torrentManager = new TorrentManager();
     
     /**
      * ConnectionDispatcher instance that will dispatch incoming connections to
@@ -446,6 +454,10 @@ public class RouterService {
             StaticMessages.initialize();
             LOG.trace("END loading StaticMessages");
             
+			LOG.trace("START TorrentManager");
+			torrentManager.initialize();
+			LOG.trace("STOP TorrentManager");
+            
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
             
@@ -590,6 +602,15 @@ public class RouterService {
 	 */
 	public static PushManager getPushManager() {
 	    return pushManager;
+	}
+	
+	/**
+	 * Accessor for the <tt>TorrentManager</tt> instance.
+	 * 
+	 * @return the <tt>TorrentManager</tt> we are using
+	 */
+	public static TorrentManager getTorrentManager() {
+		return torrentManager;
 	}
 	
     /** 
@@ -888,6 +909,9 @@ public class RouterService {
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
             
+			// start closing all active torrents
+			torrentManager.shutdown();
+			
             //Update firewalled status
             ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
 
@@ -904,6 +928,8 @@ public class RouterService {
             cleanupPreviewFiles();
             
             downloader.writeSnapshot();
+            
+            torrentManager.writeSnapshot();
             
             fileManager.stop(); // Saves UrnCache and CreationTimeCache
 
@@ -1502,6 +1528,33 @@ public class RouterService {
         return downloader.download(incompleteFile);
     }
 
+    
+    /**
+	 * Starts a torrent download for a given Inputstream to the .torrent file
+	 * 
+	 * @param is
+	 *            the InputStream belonging to the .torrent file
+	 * @throws IOException
+	 *             in case there was a problem reading the file 
+	 */
+	public static Downloader downloadTorrent(File torrentFile)
+			throws IOException {
+		return torrentManager.download(torrentFile);
+	}
+    
+    /**
+	 * Starts a torrent download for a given Inputstream to the .torrent file
+	 * 
+	 * @param url
+	 *            the url, where the .torrent file is located
+	 * @throws IOException
+	 *             in case there was a problem downloading the .torrent
+	 */
+	public static Downloader downloadTorrent(URL url)
+			throws IOException {
+		return torrentManager.download(url);
+	}
+	
 	/**
 	 * Creates and returns a new chat to the given host and port.
 	 */

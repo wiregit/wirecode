@@ -1,6 +1,5 @@
 package com.limegroup.bittorrent;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;

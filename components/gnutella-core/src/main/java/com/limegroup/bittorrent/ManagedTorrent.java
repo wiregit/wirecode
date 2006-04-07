@@ -1053,6 +1053,10 @@ public class ManagedTorrent {
 	public synchronized List getConnections() {
 		return new ArrayList(_connections);
 	}
+	
+	public synchronized int getNumConnections() {
+		return _connections.size();
+	}
 
 	public synchronized Set getPeers() {
 		return new HashSet(_peers);

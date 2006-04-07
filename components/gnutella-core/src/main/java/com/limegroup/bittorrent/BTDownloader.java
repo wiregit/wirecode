@@ -1,8 +1,10 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import com.limegroup.gnutella.Downloader;
@@ -24,6 +26,13 @@ public class BTDownloader implements Downloader {
 	private final BTMetaInfo _info;
 
 	private SimpleBandwidthTracker _tracker;
+	
+    /**
+     * A map of attributes associated with the download. The attributes
+     * may be used by GUI, to keep some additional information about
+     * the download.
+     */
+    protected Map attributes = new HashMap();
 	
 	public BTDownloader(ManagedTorrent torrent, BTMetaInfo info) {
 		_torrent = torrent;
@@ -192,13 +201,12 @@ public class BTDownloader implements Downloader {
 	}
 
 	public boolean isRelocatable() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public void setSaveFile(File saveDirectory, String fileName,
 			boolean overwrite) throws SaveLocationException {
-		// TODO
+		// TODO: decide how to deal with this...
 	}
 
 	public File getSaveFile() {
@@ -210,7 +218,31 @@ public class BTDownloader implements Downloader {
 	}
 
 	public URN getSHA1Urn() {
-		// TODO Auto-generated method stub
-		return null;
+		return _torrent.getMetaInfo().getURN();
 	}
+	
+	public Object removeAttribute(String key){
+		return attributes.remove(key);
+	}
+	
+	public Object getAttribute(String key) {
+		return attributes.get(key);
+	}
+
+	public int getAmountPending() {
+		//TODO: this locking isn't good...
+		return _torrent.getMetaInfo().
+		getVerifyingFolder().getAmountPending();
+	}
+
+
+	public int getNumHosts() {
+		return _torrent.getNumConnections();
+	}
+
+	public Object setAttribute(String key, Object value) {
+		return attributes.put(key, value);
+	}
+	
+	
 }

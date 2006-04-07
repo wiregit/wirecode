@@ -21,6 +21,8 @@ public class BTMessageWriter implements
 	private static final Log LOG = LogFactory.getLog(BTMessageWriter.class);
 
 	// maximum number of messages allowed in queue
+	// TODO: add a separate limit for Piece messages so we don't
+	// buffer too much data
 	private static final int MAX_QUEUE_SIZE = 10;
 
 	// InterestWriteChannel to write to.
@@ -34,6 +36,9 @@ public class BTMessageWriter implements
 
 	// the BTConnection this BTMessageWriter is associated with
 	private final BTConnection _connection;
+	
+	/** Whether this writer is shutdown */
+	private volatile boolean shutdown;
 
 	/**
 	 * Constructor
@@ -48,6 +53,9 @@ public class BTMessageWriter implements
 	 * Implements ChannelWriter interface
 	 */
 	public boolean handleWrite() throws IOException {
+		if (shutdown)
+			return false;
+		
 		int written = 0;
 		do {
 			if (_out == null || _out.remaining() == 0) {
@@ -95,6 +103,12 @@ public class BTMessageWriter implements
 	 * Implement ChannelWriter interface
 	 */
 	public void shutdown() {
+		synchronized(this) {
+			if (shutdown)
+				return;
+			shutdown = true;
+		}
+		
 		_out = null;
 		_queue.clear();
 		_channel.interest(this, false);

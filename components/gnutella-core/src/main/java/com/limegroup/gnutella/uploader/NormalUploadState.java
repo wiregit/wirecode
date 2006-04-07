@@ -79,7 +79,7 @@ public final class NormalUploadState extends UploadState {
 		
 		_index = UPLOADER.getIndex();	
 		_fileName = UPLOADER.getFileName();
-		_fileSize = UPLOADER.getFileSize();
+		_fileSize = (int)UPLOADER.getFileSize();
 
 		_amountWritten = 0;
 		_stalledChecker = watchdog; //new StalledUploadWatchdog();
@@ -96,7 +96,7 @@ public final class NormalUploadState extends UploadState {
 			_fis =  UPLOADER.getInputStream();
 			_uploadBegin =  UPLOADER.getUploadBegin();
 			_uploadEnd =  UPLOADER.getUploadEnd();
-			_amountRequested = UPLOADER.getAmountRequested();
+			_amountRequested = (int)UPLOADER.getAmountRequested();
 			//guard clause
 			if(_fileSize < _uploadBegin)
 				throw new IOException("Invalid Range");

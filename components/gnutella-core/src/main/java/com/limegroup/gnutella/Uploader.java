@@ -42,12 +42,12 @@ public interface Uploader extends BandwidthTracker {
 	/**
 	 * returns the length of the file being uploaded.
 	 */ 
-	public int getFileSize();
+	public long getFileSize();
 	
 	/**
 	 * returns the length of the requested size for uploading
 	 */ 
-	public int getAmountRequested();	
+	public long getAmountRequested();	
 
 	/**
 	 * Returns the <tt>FileDesc</tt> for this uploader -- the file that
@@ -69,13 +69,13 @@ public interface Uploader extends BandwidthTracker {
 	 * this method was previously called "amountRead", but the
 	 * name was changed to make more sense.
 	 */ 
-	public int amountUploaded();
+	public long amountUploaded();
 	
 	/**
 	 * Returns the amount of data that this uploader and all previous
 	 * uploaders exchanging this file have uploaded.
 	 */
-	public int getTotalAmountUploaded();
+	public long getTotalAmountUploaded();
 
 	/**
 	 * returns the string representation of the IP Address

@@ -19,5 +19,10 @@ public interface Throttle {
      * Releases some unwritten requested data back to the throttle.
      */
     public void release(int amount);
+    
+    /**
+     * Sets a new limit in bytes/sec.
+     */
+    public void limit(int amount);
 }
     

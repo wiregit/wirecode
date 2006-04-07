@@ -617,11 +617,7 @@ public class VerifyingFolder {
 	 */
 	synchronized long getBlockSize() {
 		long written = getVerifiedBlockSize();
-		for (Iterator iter = partialBlocks.values().iterator(); iter.hasNext();) {
-			IntervalSet current = (IntervalSet) iter.next();
-			written += current.getSize();
-		}
-		return written;
+		return written + partialBlocks.byteSize();
 	}
 
 	/**
@@ -636,6 +632,10 @@ public class VerifyingFolder {
 		toWrite.put("verified",verifiedBlocks);
 		toWrite.put("partial",partialBlocks);
 		return toWrite;
+	}
+	
+	synchronized int getAmountPending() {
+		return pendingRanges.byteSize();
 	}
 	
 	private class BlockRangeMap extends HashMap {
@@ -660,6 +660,15 @@ public class VerifyingFolder {
 		
 		public IntervalSet getSet(Integer id) {
 			return (IntervalSet) get(id);
+		}
+		
+		public int byteSize() {
+			int ret = 0;
+			for (Iterator iter = values().iterator(); iter.hasNext();) {
+				IntervalSet set = (IntervalSet) iter.next();
+				ret += set.getSize();
+			}
+			return ret;
 		}
 	}
 }

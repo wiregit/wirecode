@@ -9,7 +9,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -185,7 +184,7 @@ public class TorrentManager {
 	 * checkpointing purposes. Returns true iff the file was successfully
 	 * written.
 	 */
-	synchronized boolean writeSnapshot() {
+	public synchronized boolean writeSnapshot() {
 		LOG.debug("writing snapshot");
 		List buf = new ArrayList();
 		for (int i = 0; i < _active.size(); i++) {
@@ -436,6 +435,10 @@ public class TorrentManager {
 		return download(get.getResponseBody());
 	}
 
+	public synchronized Downloader download(File torrentFile) throws IOException {
+		return download(FileUtils.readFileFully(torrentFile));
+	}
+	
 	/**
 	 * Starts a new Torrent download
 	 * 
@@ -530,7 +533,7 @@ public class TorrentManager {
 		// we definitely need some kind of bandwidth throttle that can be
 		// applied to both HTTP and torrent uploads. The easiest way to
 		// achieve this would probably be to convert HTTP uploads to use NIO.
-		UPLOAD_THROTTLE.limit(RouterService.getUploadManager().getBTUploadSpeed());
+		UPLOAD_THROTTLE.limit(UploadSettings.UPLOAD_SPEED.getValue() * 1000);
 
 		Iterator iter = _waiting.iterator();
 		while (_active.size() < getMaxActiveTorrents() && iter.hasNext()) {

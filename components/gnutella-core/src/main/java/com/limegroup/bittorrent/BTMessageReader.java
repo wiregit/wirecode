@@ -43,13 +43,15 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * my own private BandwidthTracker
 	 */
 	private SimpleBandwidthTracker _tracker;
+	
+	/** Whether this reader is shutdown */
+	private volatile boolean shutdown;
 
 	/**
 	 * Constructor
 	 */
 	public BTMessageReader(BTConnection connection) {
-		_channel = null;
-		_in = ByteBuffer.allocate(MIN_BUFFER_SIZE);
+		resetBuffer();
 		_connection = connection;
 		_tracker = new SimpleBandwidthTracker();
 	}
@@ -58,6 +60,9 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * Notification that read can be performed
 	 */
 	public void handleRead() throws IOException {
+		if (shutdown)
+			return;
+		
 		// all messages should have been read
 		Assert.that(_in.hasRemaining(), "ByteBuffer full!");
 
@@ -147,6 +152,11 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * Implement ChannelReadObserver interface
 	 */
 	public void shutdown() {
+		synchronized(this) {
+			if (shutdown)
+				return;
+			shutdown = true;
+		}
 		_in = null;
 	}
 
