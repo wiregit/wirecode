@@ -55,6 +55,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     /** The Key we're looking for */
     protected final KUID lookup;
     
+    /** The Key that is furthest away from the lookup Key */
+    private final KUID furthest;
+    
     /** Set of queried KUIDs */
     private Set queried = new HashSet();
     
@@ -99,6 +102,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         super(context);
         
         this.lookup = lookup;
+        this.furthest = lookup.invert();
+        
         this.resultSize = RouteTableSettings.REPLICATION_PARAMETER.getValue();
     }
     
@@ -273,8 +278,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //stop if we have enough values and the yet-to-query list does not contain
         //a closer node to the target than the furthest away that we have
         //and this is the last of the last set of concurrent searches
-        if((responses.size() == resultSize)&& (activeSearches == 0)) {
-            KUID furthest = lookup.invert();
+        if((responses.size() == resultSize) && (activeSearches == 0)) {
             ContactNode worstResponse = (ContactNode)responses.select(furthest);
             ContactNode bestToQuery = (ContactNode)toQuery.select(lookup);
 
@@ -361,7 +365,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         responses.put(node.getNodeID(), node);
         //if the list is full discard the furthest node and put this one
         if(responses.size() > resultSize) {
-            KUID furthest = lookup.invert();
             ContactNode worst = (ContactNode)responses.select(furthest);
             responses.remove(worst.getNodeID());
             queryKeys.remove(worst);
