@@ -68,7 +68,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     private PatriciaTrie toQuery = new PatriciaTrie();
     
     /** 
-     * 
+     * Map of ContactNode -> QueryKey
      */
     private Map queryKeys = new HashMap();
     
