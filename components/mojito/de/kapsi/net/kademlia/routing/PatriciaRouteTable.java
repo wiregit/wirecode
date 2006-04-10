@@ -209,12 +209,8 @@ public class PatriciaRouteTable implements RoutingTable {
         
         // Update an existing node
         ContactNode existingNode = updateExistingNode(nodeId,node,knowToBeAlive);
-        if(existingNode != null && (existingNode.getTimeStamp() == 0L || existingNode.isDead())) { 
-            //node existed but we don't kow if it's alive
-            pingNode = true;
-            
-        } else if(existingNode == null) {
-            //get bucket closest to node
+        if (existingNode == null) {
+            // get bucket closest to node
             BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
             if(bucket.getNodeCount() < K) {
                 if (LOG.isTraceEnabled()) {
@@ -298,6 +294,9 @@ public class PatriciaRouteTable implements RoutingTable {
                     replaceBucketStaleNodes(bucket);
                 }
             }
+        } else if (existingNode.getTimeStamp() == 0L || existingNode.isDead()) {
+            // node existed but we don't kow if it's alive
+            pingNode = true;
         }
         
         if(!knowToBeAlive && pingNode && !node.equals(context.getLocalNode())) {
@@ -311,6 +310,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 context.getMessageDispatcher().send(node, ping, null);
             } catch (IOException e) {}
         }
+        
         return added;
     }
     
