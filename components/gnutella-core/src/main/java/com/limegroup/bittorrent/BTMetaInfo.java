@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -43,6 +45,9 @@ public class BTMetaInfo implements Serializable {
 	private static final Log LOG = LogFactory.getLog(BTMetaInfo.class);
 
 	static final long serialVersionUID = -2693983731217045071L;
+	
+	private static final ObjectStreamField[] serialPersistentFields = 
+    	ObjectStreamClass.NO_FIELDS;
 
 	/*
 	 * for creating FakeFileDescs
@@ -301,11 +306,7 @@ public class BTMetaInfo implements Serializable {
 	 * @return number of blocks
 	 */
 	public int getNumBlocks() {
-		int numBlocks = (int) ((_totalSize + _pieceLength - 1) / _pieceLength);
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("num blocks " + numBlocks + " ts " + _totalSize + " pl " + _pieceLength);
-		}
-		return numBlocks;
+		return (int) ((_totalSize + _pieceLength - 1) / _pieceLength);
 	}
 
 	/**
@@ -619,9 +620,9 @@ public class BTMetaInfo implements Serializable {
 			long position = 0;
 			for (Iterator iter = files.iterator(); iter.hasNext();) {
 				TorrentFile file = (TorrentFile) iter.next();
-				file.begin = (int) position / _pieceLength;
+				file.begin = (int) (position / _pieceLength);
 				position += file.LENGTH;
-				file.end = (int) position / _pieceLength;
+				file.end = (int) (position / _pieceLength);
 			}
 			
 			_files = new TorrentFile[files.size()];
@@ -681,7 +682,6 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private synchronized void writeObject(ObjectOutputStream out)
 			throws IOException {
-		
 		Map toWrite = new HashMap();
 		
 		toWrite.put("_hashes",_hashes);
@@ -735,7 +735,6 @@ public class BTMetaInfo implements Serializable {
 		
 		_pieceLength = pieceLength.intValue();
 		_totalSize = totalSize.longValue();
-		
 		initializeVerifyingFolder(folderData, false);
 	}
 

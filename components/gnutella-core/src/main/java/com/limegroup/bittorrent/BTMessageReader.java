@@ -92,7 +92,6 @@ public class BTMessageReader implements ChannelReadObserver {
 	 */
 	public void count(int read) {
 		BandwidthStat.BITTORRENT_MESSAGE_DOWNSTREAM_BANDWIDTH.addData(read);
-		_connection.readBytes(read);
 		_tracker.count(read);
 		_tracker.measureBandwidth();
 	}

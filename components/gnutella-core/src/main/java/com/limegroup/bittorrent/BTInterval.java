@@ -47,4 +47,8 @@ public class BTInterval extends Interval {
 		}
 		return hashCode; 
 	}
+	
+	public String toString() {
+		return getId()+":"+super.toString();
+	}
 }

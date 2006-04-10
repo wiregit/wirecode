@@ -168,10 +168,14 @@ public class VerifyingFolder {
 		if (hasBlock(in.getId()))
 			return;
 		
-		long startOffset = in.getId() * _info.getPieceLength() + in.low;
+		long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
 		int written = 0;
 		for (int i = 0; i < _files.length && written < buf.length; i++) {
 			if (startOffset < _files[i].LENGTH) {
+				if (startOffset < 0) {
+					System.out.println("startOffset:"+startOffset+" length:"+_files[i].LENGTH+" i:"+i+" interval ("+in+") written:"+written);
+					System.exit(1);
+				}
 				_fos[i].seek(startOffset);
 				int toWrite = (int) Math.min(_files[i].LENGTH - startOffset,
 						buf.length - written);
@@ -200,20 +204,18 @@ public class VerifyingFolder {
 	/**
 	 * @return if the block at pieceNum is ok.
 	 */
-	private synchronized boolean verify(int pieceNum) {
+	private synchronized boolean verify(int pieceNum) throws IOException {
 		MessageDigest md = _info.getMessageDigest();
 		md.reset();
 		byte [] buf = new byte[Math.min(65536,_info.getPieceLength())];
-		try {
-			int read = 0;
-			long offset = pieceNum * _info.getPieceLength();
-			while (read < _info.getPieceLength()) {
-				int readNow = read(offset, buf, 0, buf.length);
-				md.update(buf, 0, readNow);
-				read += readNow;
-			}
-		} catch (IOException bad) {
-			// do something smart
+		int read = 0;
+		long offset = (long)pieceNum * _info.getPieceLength();
+		while (read < _info.getPieceLength()) {
+			int readNow = read(offset, buf, 0, buf.length);
+			if (readNow == 0)
+				return false;
+			md.update(buf, 0, readNow);
+			read += readNow;
 		}
 		
 		byte [] sha1 = md.digest();
@@ -418,7 +420,7 @@ public class VerifyingFolder {
 			int length) throws IOException {
 		
 		if (position < 0)
-			throw new IllegalArgumentException("cannot seek negative position");
+			throw new IllegalArgumentException("cannot seek negative position "+position);
 		else if (offset + length > buf.length)
 			throw new ArrayIndexOutOfBoundsException(
 					"buffer to small to store supplied number of bytes");
@@ -426,10 +428,14 @@ public class VerifyingFolder {
 		int read = 0;
 		for (int i = 0; i < _files.length && read < length; i++) {
 			while (position < _files[i].LENGTH && read < length) {
-				int toRead = (int) Math.min(_files[i].LENGTH - position, length
+				if (_fos[i].length() < _files[i].LENGTH && position >= _fos[i].length())
+					return read;
+				int toRead = (int) Math.min(_fos[i].length() - position, length
 						- read);
 				_fos[i].seek(position);
 				int t_read = _fos[i].read(buf, read + offset, toRead);
+				if (t_read == -1)
+					throw new IOException("read -1 with offset:"+offset+ " read:"+read+" toRead"+toRead+" position:"+position+" length"+_files[i].LENGTH+" i"+i+" physical length:"+_fos[i].length());
 				position += t_read;
 				read += t_read;
 			}
@@ -582,7 +588,7 @@ public class VerifyingFolder {
 	private void verifyDelayed(int i ) {
 		// 
 		try {
-			Thread.sleep(QUEUE.size() > 0 ? 100 : 20);
+			wait(QUEUE.size() > 0 ? 10 : 10);
 		} catch (InterruptedException killed) {
 			return;
 		}
@@ -597,11 +603,17 @@ public class VerifyingFolder {
 		}
 		
 		public void run() {
-			synchronized(VerifyingFolder.this) {
-				if (verify(pieceNum)) { 
-					verifiedBlocks.set(pieceNum);
-					handleVerified(pieceNum);
+			if (storedException != null)
+				return;
+			try {
+				synchronized(VerifyingFolder.this) {
+					if (verify(pieceNum)) { 
+						verifiedBlocks.set(pieceNum);
+						handleVerified(pieceNum);
+					}
 				}
+			} catch (IOException bad) {
+				storedException = bad;
 			}
 		}
 	}
@@ -610,7 +622,7 @@ public class VerifyingFolder {
 	 * @return number of bytes written and verified
 	 */
 	synchronized long getVerifiedBlockSize() {
-		return verifiedBlocks.cardinality() * _info.getPieceLength();
+		return verifiedBlocks.cardinality() * (long)_info.getPieceLength();
 	}
 	
 	/**
@@ -636,10 +648,10 @@ public class VerifyingFolder {
 	}
 	
 	synchronized int getAmountPending() {
-		return pendingRanges.byteSize();
+		return (int)pendingRanges.byteSize();
 	}
 	
-	private class BlockRangeMap extends HashMap {
+	private static class BlockRangeMap extends HashMap {
 		public void addInterval(BTInterval in) {
 			IntervalSet s = (IntervalSet) get(in.blockId);
 			if (s == null) {
@@ -663,11 +675,11 @@ public class VerifyingFolder {
 			return (IntervalSet) get(id);
 		}
 		
-		public int byteSize() {
-			int ret = 0;
+		public long byteSize() {
+			long ret = 0;
 			for (Iterator iter = values().iterator(); iter.hasNext();) {
 				IntervalSet set = (IntervalSet) iter.next();
-				ret += set.getSize();
+				ret += (long)set.getSize();
 			}
 			return ret;
 		}

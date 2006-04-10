@@ -123,6 +123,7 @@ public class BTUploader implements Uploader {
 	public float getMeasuredBandwidth() {
 		if (_torrent.hasStopped())
 			return 0.f;
+		measureBandwidth();
 		return _tracker.getMeasuredBandwidth();
 	}
 

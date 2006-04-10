@@ -108,6 +108,9 @@ public class ManagedTorrent {
 	 * Indicates whether this download was stopped.
 	 */
 	private boolean _stopped = true;
+	
+	/** Whether the torrent is being verified */
+	private volatile boolean verifying;
 
 	/*
 	 * The list of known good TorrentLocations that we are not connected to at
@@ -316,10 +319,10 @@ public class ManagedTorrent {
 	 * Stops the torrent
 	 */
 	public void stop() {
+		if (LOG.isDebugEnabled())
+			LOG.debug("Stopping torrent", new Exception());
 		enqueueTask(new Runnable() {
 			public void run() {
-				if (LOG.isDebugEnabled())
-					LOG.debug("Stopping torrent");
 
 				RouterService.getCallback().removeUpload(_uploader);
 
@@ -396,6 +399,7 @@ public class ManagedTorrent {
 
 	private void initializeFolder() {
 		try {
+			verifying = true;
 			_folder.open();
 		} catch (IOException ioe) {
 			// problem opening files cannot recover.
@@ -406,6 +410,8 @@ public class ManagedTorrent {
 			_couldNotSave = true;
 			_stopped = true;
 			return;
+		} finally {
+			verifying = false;
 		}
 		_complete = _folder.isComplete();
 
@@ -515,7 +521,9 @@ public class ManagedTorrent {
 			return Downloader.REMOTE_QUEUED;
 		} else if (_peers != null && _peers.size() > 0)
 			return Downloader.CONNECTING;
-		else if (_peers == null || _peers.size() == 0)
+		else if (verifying)
+			return Downloader.HASHING;
+		else if(_peers == null || _peers.size() == 0)
 			return Downloader.WAITING_FOR_TRACKER;
 		return Downloader.BUSY;
 	}
@@ -1110,6 +1118,8 @@ public class ManagedTorrent {
 		public void schedule(long waitTime) {
 			if (!_isScheduled) {
 				_isScheduled = true;
+				if (hasStopped()) 
+					return;
 				if (LOG.isDebugEnabled())
 					LOG.debug("rescheduling connection fetcher in " + waitTime);
 				RouterService.schedule(this, waitTime, 0);

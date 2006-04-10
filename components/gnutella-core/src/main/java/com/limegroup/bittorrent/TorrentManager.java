@@ -228,9 +228,7 @@ public class TorrentManager {
 								"could not save torrents.dat file, backup failed, please restart LimeWire.");
 			}
 			if (LOG.isDebugEnabled())
-				LOG.debug(e);
-			if (LOG.isDebugEnabled())
-				LOG.debug("snapshot not written");
+				LOG.debug("snapshot not written",e);
 			return false;
 		}
 	}

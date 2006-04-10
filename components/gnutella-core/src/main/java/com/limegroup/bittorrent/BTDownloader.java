@@ -193,6 +193,7 @@ public class BTDownloader implements Downloader {
 	}
 
 	public float getMeasuredBandwidth()  {
+		measureBandwidth();
 		return _tracker.getMeasuredBandwidth();
 	}
 
@@ -231,8 +232,7 @@ public class BTDownloader implements Downloader {
 
 	public int getAmountPending() {
 		//TODO: this locking isn't good...
-		return _torrent.getMetaInfo().
-		getVerifyingFolder().getAmountPending();
+		return _info.getVerifyingFolder().getAmountPending();
 	}
 
 
@@ -243,6 +243,4 @@ public class BTDownloader implements Downloader {
 	public Object setAttribute(String key, Object value) {
 		return attributes.put(key, value);
 	}
-	
-	
 }
