@@ -210,11 +210,6 @@ public class PatriciaTrie implements Serializable {
             return getR(h.right, h.bitIndex, key);
         }
     }
-  
-    public Object selectNextClosest(Object key) {
-        List list = select(key, 2);
-        return list.get(list.size()-1);
-    }
     
     /**
      * Returns the Value whose Key has the longest prefix

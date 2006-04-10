@@ -26,34 +26,101 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 
+/**
+ * RoutingTable interface that all LimeDHT route table implementations
+ * must implement.
+ */
 public interface RoutingTable {
     
+    /**
+     * Clears all elements from the RoutingTable
+     */
     public void clear();
     
+    /**
+     * Returns true if the RoutingTable is empty (initial state)
+     */
     public boolean isEmpty();
     
+    /**
+     * Returns the number of ContactNodes.
+     */
     public int size();
     
+    /**
+     * Returns the number of Buckets
+     */
+    public int getBucketCount();
+    
+    /**
+     * Adds a new ContactNode or if it's already known updates its
+     * contact information.
+     * 
+     * @param node the ContactNode we would like to add
+     * @param knownToBeAlive wheather or not this ContactNode is known to be alive
+     * @return true if ContactNode was added
+     */
     public boolean add(ContactNode node, boolean knownToBeAlive);
     
+    /**
+     * Returns a ContactNode from the local RoutingTable if such Node exists 
+     * and null if it doesn't.
+     */
     public ContactNode get(KUID nodeId);
     
+    /**
+     * Returns a ContactNode from the local RoutingTable if such Node exists 
+     * and null if it doesn't.
+     */
     public ContactNode get(KUID nodeId, boolean checkAndUpdateCache);
     
-    public ContactNode selectNextClosest(KUID key);
-
-    public ContactNode select(KUID key);
+    /**
+     * Selects the best matching ContactNode for the provided KUID.
+     * This method will gueanteed return a non-null value if the
+     * RoutingTable is not empty.
+     */
+    public ContactNode select(KUID lookup);
     
-    public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean isLocalLookup);
+    /**
+     * Selects the best matching k ContactNodes for the provided KUID. The returned
+     * ContactNodes are sorted by their closeness to the lookup Key from closest to
+     * least closest ContactNode. Use {@link de.kapsi.net.kademlia.util.BucketUtils#sort(List)}
+     * to sort the list from least-recently-seen to most-recently-seen ContactNode.
+     * 
+     * @param lookup the lookup KUID
+     * @param k the number of ContactNodes (maybe less if RoutingTable has less than k entries!)
+     * @param onlyLiveNodes wheather or not only live nodes should be in the result set
+     * @param willContact wheather or not we'll contact these ContactNodes
+     * @return list of ContactNodes sorted by closeness
+     */
+    public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact);
     
+    /**
+     * Returns true if the RoutingTable contains a ContactNode with this KUID.
+     */
     public boolean containsNode(KUID nodeId);
     
+    /**
+     * Notifies the RoutingTable that the ContactNode with the provided
+     * KUID 
+     */
     public void handleFailure(KUID nodeId);
     
+    /**
+     * Returns all ContactNodes as List
+     */
     public List getAllNodes();
     
+    /**
+     * Returns all BucketNodes as List
+     */
     public List getAllBuckets();
     
+    /**
+     * Kicks off a Bucket refresh.
+     * 
+     * @param force wheather or not to force are Bucket refresh
+     */
     public void refreshBuckets(boolean force) throws IOException;
     
     /**
@@ -65,6 +132,13 @@ public interface RoutingTable {
      */
     public void refreshBuckets(boolean force, BootstrapListener l) throws IOException;
     
+    /**
+     * Loads a RoutingTable from a File
+     */
     public boolean load();
+    
+    /**
+     * Stores current RoutingTable to a File
+     */
     public boolean store();
 }

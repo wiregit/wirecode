@@ -697,14 +697,14 @@ public class PatriciaRouteTable implements RoutingTable {
     }
 
     /** 
-     * Returns a List of buckets sorted by their 
+     * Returns a List of ContactNodes sorted by their 
      * closeness to the provided Key. Use BucketList's
-     * sort method to sort the Nodes by last-recently 
-     * and most-recently seen.
+     * sort method to sort the Nodes from least-recently 
+     * to most-recently seen.
      */
-    public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean isLocalLookup) {
+    public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact) {
         //only touch bucket if we know we are going to contact it's nodes
-        if(isLocalLookup) {
+        if(willContact) {
             touchBucket(lookup);
         }
         
@@ -714,20 +714,19 @@ public class PatriciaRouteTable implements RoutingTable {
             return nodesTrie.select(lookup, k);
         }
     }
-
-    // TODO: remove since unused
-    public ContactNode selectNextClosest(KUID key) {
-        return (ContactNode)nodesTrie.selectNextClosest(key);
-    }
     
-    public ContactNode select(KUID key) {
-        return (ContactNode)nodesTrie.select(key);
+    public ContactNode select(KUID lookup) {
+        return (ContactNode)nodesTrie.select(lookup);
     }
     
     public int size() {
         return nodesTrie.size();
     }
 
+    public int getBucketCount() {
+        return bucketsTrie.size();
+    }
+    
     private void touchBucket(KUID nodeId) {
         //get bucket closest to node
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);

@@ -501,7 +501,7 @@ public class Context implements Runnable {
     
     public long getMainlineSize() {
         long k = RouteTableSettings.REPLICATION_PARAMETER.getValue();
-        return k * (long)Math.pow(2.0d, routeTable.getAllBuckets().size()-1);
+        return k * (long)Math.pow(2.0d, routeTable.getBucketCount()-1);
     }
     
     private static final int MAX_HISTORY = 20;
