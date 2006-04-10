@@ -382,9 +382,11 @@ public class KUID implements Serializable {
      */
     public BigInteger toBigInteger() {
         // unsigned!
-        byte[] num = new byte[1 + id.length];
+        /*byte[] num = new byte[1 + id.length];
         System.arraycopy(id, 0, num, 1, id.length);
-        return new BigInteger(num);
+        return new BigInteger(num);*/
+        
+        return new BigInteger(1, id);
     }
     
     /**

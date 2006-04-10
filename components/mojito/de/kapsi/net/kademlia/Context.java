@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -496,5 +497,51 @@ public class Context implements Runnable {
             = new FindValueResponseHandler(this, key, l);
         
         handler.lookup();
+    }
+    
+    public long getMainlineSize() {
+        long k = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+        return k * (long)Math.pow(2.0d, routeTable.getAllBuckets().size()-1);
+    }
+    
+    private static final int MAX_HISTORY = 20;
+    private List history = new ArrayList(MAX_HISTORY);
+    
+    public long getAzureusSize() {
+        KUID localNodeId = getLocalNodeID();
+        
+        int k = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+        List nodes = routeTable.select(localNodeId, k, false, false);
+        
+        BigInteger sum1 = BigInteger.ZERO;
+        BigInteger sum2 = BigInteger.ZERO;
+        
+        for(int i = 1; i < nodes.size(); i++) {
+            ContactNode node = (ContactNode)nodes.get(i);
+            
+            BigInteger distance = localNodeId.xor(node.getNodeID()).toBigInteger();
+            BigInteger j = BigInteger.valueOf(i);
+            
+            sum1 = sum1.add(j.multiply(distance));
+            sum2 = sum2.add(j.pow(2));
+        }
+        
+        long estimatedSize = 0L;
+        if (!sum1.equals(BigInteger.ZERO)) {
+            estimatedSize = KUID.MAX_NODE_ID.toBigInteger().multiply(sum2).divide(sum1).longValue();
+        }
+        estimatedSize = Math.max(1L, estimatedSize);
+        
+        history.add(new Long(estimatedSize));
+        if (history.size() >= MAX_HISTORY) {
+            history.remove(0);
+        }
+        
+        long sum3 = 0L;
+        for(Iterator it = history.iterator(); it.hasNext(); ) {
+            sum3 += ((Long)it.next()).longValue();
+        }
+        
+        return sum3/history.size();
     }
 }

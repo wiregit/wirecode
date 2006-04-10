@@ -127,6 +127,8 @@ public class Main {
                 storeDB,
                 loadRT,
                 loadDB,
+                kill,
+                restart,
                 quit
         };
         
@@ -201,6 +203,7 @@ public class Main {
         System.out.println("Is running: " + dht.isRunning());
         System.out.println("Database Size: " + dht.getDatabase().size());
         System.out.println("RouteTable Size: " + dht.getRoutingTable().size());
+        System.out.println("Size: ml=" + dht.getContext().getMainlineSize() + ", az=" + dht.getContext().getAzureusSize());
     }
     
     private static void list(DHT dht, String[] line) throws Throwable {
