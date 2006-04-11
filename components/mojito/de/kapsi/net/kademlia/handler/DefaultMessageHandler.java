@@ -102,7 +102,7 @@ public class DefaultMessageHandler extends MessageHandler
             List closestNodes = routeTable.select(nodeId, k, false, false);
             
             if (closestNodes.contains(context.getLocalNode())) {
-                final List toStore = new ArrayList();
+                List keyValuesToForward = new ArrayList();
                 
                 Database database = context.getDatabase();
                 synchronized(database) {
@@ -125,13 +125,13 @@ public class DefaultMessageHandler extends MessageHandler
                             if (LOG.isTraceEnabled()) {
                                 LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   
                             }
-                            toStore.addAll(c);
+                            keyValuesToForward.addAll(c);
                         }
                     }
                 }
                 
-                if (!toStore.isEmpty()) {
-                    ResponseHandler handler = new StoreForwardResponseHandler(context, toStore);
+                if (!keyValuesToForward.isEmpty()) {
+                    ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);
                     RequestMessage request = context.getMessageFactory().createFindNodeRequest(nodeId);
                     context.getMessageDispatcher().send(nodeId, src, request, handler);
                 }

@@ -49,7 +49,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
 	
     private void writeKUID(KUID key) throws IOException {
-        if (key != null && !key.isUnknownID()) {
+        if (key != null) {
             writeByte(key.getType());
             write(key.getBytes());
         } else {
@@ -88,7 +88,7 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writeNode(ContactNode node) throws IOException {
+    private void writeContactNode(ContactNode node) throws IOException {
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getSocketAddress());
 	}
@@ -136,7 +136,7 @@ public class MessageOutputStream extends DataOutputStream {
         Collection values = response.getValues();
         writeByte(values.size());
         for(Iterator it = values.iterator(); it.hasNext(); ) {
-            writeNode((ContactNode)it.next());
+            writeContactNode((ContactNode)it.next());
         }
     }
     

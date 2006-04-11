@@ -51,21 +51,19 @@ public class MessageInputStream extends DataInputStream {
     
     private KUID readKUID() throws IOException {
         int type = readUnsignedByte();
-        if (type == KUID.UNKNOWN_ID) {
-            return null;
-        }
-        
-        byte[] kuid = new byte[KUID.LENGTH/8];
-        readFully(kuid);
+        byte[] id = new byte[KUID.LENGTH/8];
+        readFully(id);
         switch(type) {
+            case KUID.UNKNOWN_ID:
+                return KUID.createUnknownID(id);
             case KUID.NODE_ID:
-                return KUID.createNodeID(kuid);
+                return KUID.createNodeID(id);
             case KUID.MESSAGE_ID:
-                return KUID.createMessageID(kuid);
+                return KUID.createMessageID(id);
             case KUID.VALUE_ID:
-                return KUID.createValueID(kuid);
+                return KUID.createValueID(id);
             default:
-                throw new IOException("Unknown KUID type: " + type);
+                throw new IOException("Unknown KUID type=" + type);
         }
     }
     

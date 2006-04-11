@@ -63,9 +63,9 @@ public class KUID implements Serializable {
         0x1
     };
     
-    public static final int UNKNOWN_ID = 0x00;
-    public static final int NODE_ID = 0x01;
-    public static final int VALUE_ID = 0x02;
+    public static final int UNKNOWN_ID = 0x01;
+    public static final int NODE_ID = 0x02;
+    public static final int VALUE_ID = 0x03;
     public static final int MESSAGE_ID = 0x04;
     
     /** All bits 0 Unknown ID */
