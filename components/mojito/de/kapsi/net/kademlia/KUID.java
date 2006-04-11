@@ -43,8 +43,6 @@ import de.kapsi.net.kademlia.util.PatriciaTrie.KeyCreator;
  * This class is immutable!
  * 
  * TODO: Maybe Key, NodeID and MessageID but 'Key' sucks!
- * 
- * @author Roger Kapsi
  */
 public class KUID implements Serializable {
     
@@ -381,11 +379,7 @@ public class KUID implements Serializable {
      * Returns the current KUID as BigInteger
      */
     public BigInteger toBigInteger() {
-        // unsigned!
-        /*byte[] num = new byte[1 + id.length];
-        System.arraycopy(id, 0, num, 1, id.length);
-        return new BigInteger(num);*/
-        
+        // unsigned!        
         return new BigInteger(1, id);
     }
     
@@ -394,7 +388,7 @@ public class KUID implements Serializable {
      * for more info!
      */
     public int log() {
-        return new BigInteger(id).bitLength();
+        return new BigInteger(1, id).bitLength();
     }
     
     public String toString() {

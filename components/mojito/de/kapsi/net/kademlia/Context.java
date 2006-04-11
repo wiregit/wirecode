@@ -389,101 +389,18 @@ public class Context implements Runnable {
         handler.lookup();
     }
     
-    public void bootstrap(SocketAddress address, final BootstrapListener l) throws IOException {
-        // Ping the ContactNode
-        ping(address, new PingListener() {
-            public void pingSuccess(KUID nodeId, SocketAddress address, final long time1) {
-                try {
-                    lookup(getLocalNodeID(), new FindNodeListener() {
-                        public void foundNodes(final KUID lookup, Collection nodes, Map queryKeys, final long time2) {
-                            if (l != null) {
-                                l.initialPhaseComplete(getLocalNodeID(), nodes, time1+time2);
-                            }
-                            //now refresh furthest buckets too! 
-                            try {
-                                routeTable.refreshBuckets(false,l);
-                            } catch (IOException err) {
-                                LOG.error(err);
-                                if (l != null) {
-                                    fireEvent(new Runnable() {
-                                        public void run() {
-                                            l.secondPhaseComplete(time2,false);
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    });
-                } catch (IOException err) {
-                    LOG.error(err);
-                    if (l != null) {
-                        fireEvent(new Runnable() {
-                            public void run() {
-                                l.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time1);
-                            }
-                        });
-                    }
-                }
-            }
-            
-            public void pingTimeout(KUID nodeId, SocketAddress address) {
-                if (l != null) {
-                    fireEvent(new Runnable() {
-                        public void run() {
-                            l.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
-                        }
-                    });
-                }
-            }
-        });
+    public void bootstrap(SocketAddress address, BootstrapListener l) throws IOException {
+        ping(address, new BootstrapManager(address, l));
     }
     
     /** store */
-    public void store(final KeyValue keyValue, final StoreListener l) throws IOException {       
-        lookup(keyValue.getKey(), new FindNodeListener() {
-            public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time) {
-                try {
-                    List keyValues = Arrays.asList(new KeyValue[]{keyValue});
-                    
-                    // List of ContactNodes where we stored the KeyValues.
-                    List targets = new ArrayList(nodes.size());
-                    
-                    for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-                        ContactNode node = (ContactNode)it.next();
-                        QueryKey queryKey = (QueryKey)queryKeys.get(node);
-                        
-                        if(node.getNodeID().equals(getLocalNodeID())) {
-                            if (LOG.isInfoEnabled()) {
-                                LOG.info("Skipping local Node as KeyValue is already stored at this Node");
-                            }
-                            continue;
-                        }
-                        
-                        if (queryKey == null) {
-                            if (LOG.isErrorEnabled()) {
-                                LOG.error("Cannot store " + keyValues + " at " 
-                                        + node + " because we have no QueryKey for it");
-                            }
-                            continue;
-                        }
-                        
-                        store(node, queryKey, keyValues);
-                        targets.add(node);
-                    }
-                    
-                    if (l != null) {
-                        l.store(keyValues, targets);
-                    }
-                } catch (IOException err) {
-                    LOG.error(err);
-                }
-            }
-        });
+    public void store(KeyValue keyValue, StoreListener l) throws IOException {       
+        lookup(keyValue.getKey(), new StoreManager(keyValue, l));
     }
     
     public void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
         if (queryKey == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException("Cannot store KeyValues without a QueryKey");
         }
         
         ResponseHandler handler = new StoreResponseHandler(this, queryKey, keyValues);
@@ -546,5 +463,118 @@ public class Context implements Runnable {
         }
         
         return sum3/history.size();
+    }
+    
+    private class BootstrapManager implements PingListener, FindNodeListener {
+        
+        private long totalTime = 0L;
+        
+        private SocketAddress address;
+        private BootstrapListener listener;
+        
+        public BootstrapManager(SocketAddress address, BootstrapListener listener) {
+            this.address = address;
+            this.listener = listener;
+        }
+        
+        public void pingSuccess(KUID nodeId, SocketAddress address, final long time) {
+            totalTime += time;
+            
+            try {
+                lookup(getLocalNodeID(), this);
+            } catch (IOException err) {
+                LOG.error(err);
+                
+                if (listener != null) {
+                    fireEvent(new Runnable() {
+                        public void run() {
+                            listener.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time);
+                        }
+                    });
+                }
+            }
+        }
+
+        public void pingTimeout(KUID nodeId, SocketAddress address) {
+            if (listener != null) {
+                fireEvent(new Runnable() {
+                    public void run() {
+                        listener.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
+                    }
+                });
+            }
+        }
+
+        public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, final long time) {
+            
+            totalTime += time;
+            
+            if (listener != null) {
+                listener.initialPhaseComplete(getLocalNodeID(), nodes, totalTime);
+            }
+            
+            //now refresh furthest buckets too! 
+            try {
+                routeTable.refreshBuckets(false, listener);
+            } catch (IOException err) {
+                LOG.error(err);
+                if (listener != null) {
+                    fireEvent(new Runnable() {
+                        public void run() {
+                            listener.secondPhaseComplete(time, false);
+                        }
+                    });
+                }
+            }
+        }
+    }
+    
+    private class StoreManager implements FindNodeListener {
+        
+        private KeyValue keyValue;
+        private StoreListener listener;
+        
+        public StoreManager(KeyValue keyValue, StoreListener listener) {
+            this.keyValue = keyValue;
+            this.listener = listener;
+        }
+        
+        public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time) {
+            try {
+                List keyValues = Arrays.asList(new KeyValue[]{keyValue});
+                
+                // List of ContactNodes where we stored the KeyValues.
+                List targets = new ArrayList(nodes.size());
+                
+                for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+                    ContactNode node = (ContactNode)it.next();
+                    QueryKey queryKey = (QueryKey)queryKeys.get(node);
+                    
+                    if(node.getNodeID().equals(getLocalNodeID())) {
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Skipping local Node as KeyValue is already stored at this Node");
+                        }
+                        continue;
+                    }
+                    
+                    if (queryKey == null) {
+                        if (LOG.isErrorEnabled()) {
+                            LOG.error("Cannot store " + keyValues + " at " 
+                                    + node + " because we have no QueryKey for it");
+                        }
+                        continue;
+                    }
+                    
+                    store(node, queryKey, keyValues);
+                    targets.add(node);
+                }
+                
+                if (listener != null) {
+                    listener.store(keyValues, targets);
+                }
+            } catch (IOException err) {
+                LOG.error(err);
+            }
+        }
     }
 }
