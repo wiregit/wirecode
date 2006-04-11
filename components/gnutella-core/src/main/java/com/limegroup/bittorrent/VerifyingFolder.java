@@ -215,7 +215,7 @@ public class VerifyingFolder {
 				if (verified) {
 					verifiedBlocks.set(in.getId());
 				} else 
-					_corruptedBytes += buf.length;
+					_corruptedBytes += getPieceSize(in.getId());
 			}
 			if (verified)
 				handleVerified(in.getId());
@@ -238,6 +238,7 @@ public class VerifyingFolder {
 				return false;
 			md.update(buf, 0, readNow);
 			read += readNow;
+			offset += readNow;
 		}
 		
 		byte [] sha1 = md.digest();
