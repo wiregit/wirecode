@@ -625,6 +625,11 @@ public class PatriciaRouteTable implements RoutingTable {
             int length = Math.max(0, bucket.getDepth()-1);
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
+            //if we are bootstrapping, phase 1 allready took care of the local bucket
+            if(l!=null && liveNodes.contains(context.getLocalNodeID())) {
+                continue;
+            }
+            
             if(force || ((now - lastTouch) > RouteTableSettings.BUCKET_REFRESH_TIME.getValue()) 
                     || (bucket.getNodeCount() < K) 
                     || (liveNodes.size() != bucket.getNodeCount())) {
