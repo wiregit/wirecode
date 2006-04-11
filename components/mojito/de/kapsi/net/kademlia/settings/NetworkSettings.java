@@ -32,4 +32,7 @@ public final class NetworkSettings extends LimeDHTProps {
     
     public static final IntSetting MAX_ERRORS
         = FACTORY.createSettableIntSetting("MAX_ERRORS", 3, "max_errors", 0, 10);
+    
+    public static final BooleanSetting ALLOW_MULTIPLE_NODES
+        = FACTORY.createBooleanSetting("ALLOW_MULTIPLE_NODES", false);
 }

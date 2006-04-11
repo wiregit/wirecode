@@ -187,7 +187,6 @@ public class Context implements Runnable {
         if (this.externalAddress == null 
                 || !externalAddress.equals(this.externalAddress)) {
             
-            // TODO: See PingResponseHandler!!!
             ContactNode localNode = (ContactNode)routeTable.get(nodeId);
             if (localNode != null) {
                 this.externalAddress = externalAddress;

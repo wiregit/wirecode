@@ -9,10 +9,10 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
-import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 public class ExternalAddressTest {
     
@@ -34,9 +34,7 @@ public class ExternalAddressTest {
         pingHandler.setAccessible(true);
         pingHandler.set(context3.getMessageDispatcher(), pingHandlerStub);
         
-        Field PERMIT_SAME_HOST = PingResponseHandler.class.getDeclaredField("PERMIT_SAME_HOST");
-        PERMIT_SAME_HOST.setAccessible(true);
-        PERMIT_SAME_HOST.setBoolean(null, true);
+        NetworkSettings.ALLOW_MULTIPLE_NODES.setValue(true);
         
         // BEGIN
         pingHandlerStub.externalAddress = new InetSocketAddress("10.254.0.251", 3000);

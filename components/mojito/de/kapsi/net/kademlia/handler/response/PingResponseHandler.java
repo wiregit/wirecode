@@ -40,12 +40,11 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.security.CryptoHelper;
+import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 public class PingResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);
-    
-    private static boolean PERMIT_SAME_HOST = false;
     
     private PingListener l;
     
@@ -69,7 +68,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
             InetAddress extAddr = ((InetSocketAddress)externalAddress).getAddress();
             InetAddress srcAddr = ((InetSocketAddress)src).getAddress();
             
-            if (!extAddr.equals(srcAddr) || PERMIT_SAME_HOST) {
+            if (!extAddr.equals(srcAddr) || NetworkSettings.ALLOW_MULTIPLE_NODES.getValue()) {
                 
                 SocketAddress currentAddress = context.getExternalSocketAddress();
                 if (!externalAddress.equals(currentAddress)) {
