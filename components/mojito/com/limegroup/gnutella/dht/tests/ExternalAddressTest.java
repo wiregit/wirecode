@@ -12,7 +12,6 @@ import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
-import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 public class ExternalAddressTest {
     

@@ -38,10 +38,12 @@ public class KeyValuePublisher implements Runnable {
     
     private final Context context;
     
-    private boolean running = false;
+    private volatile boolean running = false;
     
     private int published = 0;
     private int evicted = 0;
+    
+    private Object lock = new Object();
     
     public KeyValuePublisher(Context context) {
         this.context = context;
@@ -53,6 +55,9 @@ public class KeyValuePublisher implements Runnable {
     
     public void stop() {
         running = false;
+        synchronized(lock) {
+            lock.notify();
+        }
     }
     
     public void run() {
@@ -64,8 +69,6 @@ public class KeyValuePublisher implements Runnable {
         Iterator it = null;
         Database database = context.getDatabase();
         
-        final Object lock = new Object();
-        
         running = true;
         while(running) {
             if (it == null) {
@@ -73,6 +76,10 @@ public class KeyValuePublisher implements Runnable {
                 
                 evicted = 0;
                 published = 0;
+            }
+            
+            if (!running) {
+                break;
             }
             
             if (it.hasNext()) {
@@ -150,9 +157,7 @@ public class KeyValuePublisher implements Runnable {
                         
                         try {
                             lock.wait();
-                        } catch (InterruptedException err) {
-                            LOG.error(err);
-                        }
+                        } catch (InterruptedException ignore) {}
                         
                     } catch (IOException err) {
                         LOG.error(err);
@@ -161,11 +166,10 @@ public class KeyValuePublisher implements Runnable {
             } else {
                 
                 it = null;
-                try { 
-                    Thread.sleep(DatabaseSettings.REPUBLISH_INTERVAL.getValue()); 
-                } catch (InterruptedException err) {
-                    LOG.error(err);
-                    running = false;
+                synchronized (lock) {
+                    try {
+                        lock.wait(DatabaseSettings.REPUBLISH_INTERVAL.getValue());
+                    } catch (InterruptedException ignore) {}
                 }
             }
         }

@@ -23,10 +23,9 @@ import java.net.SocketAddress;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public class ContextSettings {
+public class ContextSettings extends LimeDHTProps {
     
     private static final String LOCAL_NODE_ID_KEY = "LOCAL_NODE_ID";
-    
     private static final String NODE_ID_TIMEOUT_KEY = "NODE_ID_TIMEOUT";
     
     private static final long NODE_ID_TIMEOUT = 30L * 60L * 1000L; // 30 Minutes
@@ -35,6 +34,9 @@ public class ContextSettings {
         = Preferences.userNodeForPackage(ContextSettings.class);
     
     private ContextSettings() {}
+    
+    public static final LongSetting DISPATCH_EVENTS_EVERY
+        = FACTORY.createLongSetting("DISPATCH_EVENTS_EVERY", 50L);
     
     public static void deleteNodeID(SocketAddress address) {
         String key = (address != null) ? address.toString() : "null";

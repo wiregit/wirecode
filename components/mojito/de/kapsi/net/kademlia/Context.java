@@ -71,8 +71,6 @@ public class Context implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
-    private static final long EVENT_DISPATCHER_INTERVAL = 100L;
-    
     private static final int VENDOR = 0xDEADBEEF;
     private static final int VERSION = 0;
     
@@ -89,7 +87,7 @@ public class Context implements Runnable {
     private MessageDispatcher messageDispatcher;
     private EventDispatcher eventDispatcher;
     private MessageFactory messageFactory;
-    private KeyValuePublisher publisher;
+    private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
     
     private boolean running = false;
@@ -117,7 +115,7 @@ public class Context implements Runnable {
         messageDispatcher = new MessageDispatcher(this);
         eventDispatcher = new EventDispatcher(this);
         messageFactory = new MessageFactory(this);
-        publisher = new KeyValuePublisher(this);
+        keyValuePublisher = new KeyValuePublisher(this);
         bucketRefresher = new RandomBucketRefresher(this);
         
         stats = new DHTNodeStat(this);
@@ -248,7 +246,7 @@ public class Context implements Runnable {
     }
     
     public KeyValuePublisher getPublisher() {
-        return publisher;
+        return keyValuePublisher;
     }
     
     public MessageFactory getMessageFactory() {
@@ -330,21 +328,21 @@ public class Context implements Runnable {
         running = true;
         try {
             
-            Thread publisherThread 
-                = new Thread(publisher, "PublishThread");
-            publisherThread.setDaemon(true);
+            Thread keyValuePublisherThread 
+                = new Thread(keyValuePublisher, "KeyValuePublisherThread");
+            keyValuePublisherThread.setDaemon(true);
             
-            scheduler.scheduleAtFixedRate(eventDispatcher, 0, EVENT_DISPATCHER_INTERVAL);
+            scheduler.scheduleAtFixedRate(eventDispatcher, 0L, ContextSettings.DISPATCH_EVENTS_EVERY.getValue());
             
             long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
             scheduler.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
-            publisherThread.start();
+            keyValuePublisherThread.start();
 
             messageDispatcherThread = Thread.currentThread();
             messageDispatcher.run();
             
         } finally {
-            publisher.stop();
+            keyValuePublisher.stop();
             scheduler.cancel();
         }
     }
