@@ -60,6 +60,15 @@ public class EventDispatcher extends TimerTask implements Runnable {
         }
     }
     
+    public void run(Runnable r) {
+        try {
+            r.run();
+        } catch (Throwable t) {
+            //t.printStackTrace();
+            LOG.error(t);
+        }
+    }
+    
     public void run() {
         List dispatch = null;
         int size = 0;
@@ -72,12 +81,7 @@ public class EventDispatcher extends TimerTask implements Runnable {
         }
         
         for(int i = 0; i < size; i++) {
-            try {
-                ((Runnable)dispatch.get(i)).run();
-            } catch (Throwable t) {
-                //t.printStackTrace();
-                LOG.error(t);
-            }
+            run((Runnable)dispatch.get(i));
         }
         dispatch = null;    
     }

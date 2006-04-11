@@ -363,7 +363,7 @@ public class Context implements Runnable {
         
         if (messageDispatcherThread != null 
                 && Thread.currentThread() != messageDispatcherThread) {
-            event.run();
+            eventDispatcher.run(event);
         } else {
             eventDispatcher.add(event);
         }
