@@ -167,7 +167,7 @@ public class ConnectionStatus {
     /**
      * Determines if this is a Connected ConnectionStatus.
      */    
-    boolean isConnected() {
+    public boolean isConnected() {
         return STATUS == TYPE_CONNECTED;
     }
     

@@ -70,7 +70,7 @@ public class VerifyingFile {
     /** 
      * A cache for byte[]s.
      */
-    private static final ByteArrayCache CACHE = new ByteArrayCache(2048, HTTPDownloader.BUF_LENGTH);
+    private static final ByteArrayCache CACHE = new ByteArrayCache(512, HTTPDownloader.BUF_LENGTH);
     static {
         RouterService.schedule(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000);
     }
@@ -751,7 +751,7 @@ public class VerifyingFile {
             Interval last = (Interval) partial.get(partial.size() - 1);
             if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug("adding the last chunk for verification");
+                     LOG.debug("adding the last chunk for verification");
                 
                 verifyable.add(new Interval(lastChunkOffset, last.high));
             }

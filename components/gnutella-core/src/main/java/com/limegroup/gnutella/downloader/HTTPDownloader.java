@@ -1,13 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -16,7 +9,6 @@ import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -27,14 +19,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
-import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -69,16 +59,13 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.CountingInputStream;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.NPECatchingInputStream;
 import com.limegroup.gnutella.util.Sockets;
 
 /**
@@ -444,7 +431,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         }
         
         _socket.setKeepAlive(true);
-        _stateMachine = new IOStateMachine(this, new LinkedList());
+        _stateMachine = new IOStateMachine(this, new LinkedList(), BUF_LENGTH);
         ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
         
@@ -679,7 +666,6 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                 _inNetwork ? BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH :
                              BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH);
         
-        System.out.println("adding writer & reader");
         _stateMachine.addStates(new IOState[] { writer, reader } );
         _headerReader = reader;
 	}
@@ -708,7 +694,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
      *   Queued -- means to sleep while queued.
      *   ThexResponse -- means the thex tree was received.
      */
-    void requestHashTree(URN sha1, IOStateObserver observer) {
+    public void requestHashTree(URN sha1, IOStateObserver observer) {
         if (LOG.isDebugEnabled())
             LOG.debug("requesting HashTree for " + _thexUri + 
                       " from " +_host + ":" + _port);
@@ -735,7 +721,8 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         return _requestingThex;
     }
     
-    ConnectionStatus parseThexResponseHeaders() {
+    public ConnectionStatus parseThexResponseHeaders() {
+        _requestingThex = false;
         try {
             int code = parseHTTPCode(_headerReader.getConnectLine(), _rfd);
             if(code < 200 || code >= 300) {
@@ -750,17 +737,19 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         
     }
     
-    void downloadThexBody(URN sha1, IOStateObserver observer) {
+    public void downloadThexBody(URN sha1, IOStateObserver observer) {
         int length = getContentLengthFromHeaders();
         _thexReader = new ThexReader(length, sha1, _root32, _rfd.getFileSize());
         _observer = observer;
         _stateMachine.addState(_thexReader);
     }
     
-    HashTree getHashTree() {
+    public HashTree getHashTree() {
         HashTree tree =  _thexReader.getHashTree();
         if(tree == null)
             _rfd.setTHEXFailed();
+        else
+            _thexSucceeded = true;
         
         return tree;
     }
@@ -1503,6 +1492,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
             try {
                 dataLeft = readImpl((ReadableByteChannel) channel, buffer);
             } catch (IOException error) {
+                LOG.debug("Error while reading", error);
                 chunkCompleted();
                 throw error;
             }
@@ -1524,94 +1514,106 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         }
 
         private boolean readImpl(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
-            int read = 0;
-            int totalRead = 0;
-                
-            // first see how much we have left to read, if any
-            int left;
-            synchronized(HTTPDownloader.this) {
-                if (_amountRead >= _amountToRead) {
-                    _isActive = false;
-                    return false;
-                }
-                left = _amountToRead - _amountRead;
-            }
-            
-            assert left > 0;
-            
-            // Account for data already in the buffer.
-            left -= buffer.position();
-            totalRead += buffer.position();
-            
-            // ensure we don't read more into the buffer than we want.
-            if(buffer.remaining() > left)
-                buffer.limit(buffer.position() + left);
-            
-            // TODO: Figure out how to throttle this crap.
-            while(left > 0 && buffer.hasRemaining() && (read = rc.read(buffer)) > 0) {
-                if (_inNetwork)
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(read);
-                else
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(read);
-                left -= read;
-                totalRead += read;
-            }
-            
-            // ensure the limit is set back to normal.
-            buffer.limit(buffer.capacity());
-            
-            // If nothing could be read at all, leave.
-            if(totalRead == 0 && read == -1)
-                return false;
-            
-            long filePosition;
-            int dataLength;
-            int dataStart;
-			synchronized(this) {
-                if (_isActive) {
-                    int skipped = Math.max(0, (int)(_initialWritingPoint - currPos));
+            while(true) {
+                int read = 0;
                     
-                    // see if we were stolen from while reading
-                    totalRead = Math.min(totalRead, _amountToRead - _amountRead);
-                    if (totalRead <=0 ) {
-                        // if were told to not read anything more, finish
+                // first see how much we have left to read, if any
+                int left;
+                synchronized(HTTPDownloader.this) {
+                    if (_amountRead >= _amountToRead) {
                         _isActive = false;
                         return false;
                     }
-                    
-                    // setup data for writing.
-                    dataLength = totalRead - skipped;
-                    dataStart = skipped;
-                    filePosition = currPos + skipped;
-                    // maintain data for next read.
-                    _amountRead += totalRead;
-                    currPos += totalRead;
-                    
-                    if(skipped >= totalRead) {       
-                        if(LOG.isDebugEnabled())
-                            LOG.debug("skipped full read of: " + skipped + " bytes");
-                        return true;
-                    }                 
-                } else {
-			        if (LOG.isDebugEnabled())
-			            LOG.debug("WORKER:"+this+" stopping at "+(_initialReadingPoint+_amountRead));
-			       return false;
-			    }
-			}                
-            
-            // write to disk outside of lock.
-            // TODO: write to disk only when buffer is full
-            try {
-                _incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array());
-            } catch (InterruptedException killed) {
-                synchronized(this) {
-                    _isActive = false;
+                    left = _amountToRead - _amountRead;
                 }
+                
+                if(left == 0)
+                    return false;
+                
+                // Account for data already in the buffer.
+                left -= buffer.position();
+                
+                // ensure we don't read more into the buffer than we want.
+                if(buffer.remaining() > left)
+                    buffer.limit(buffer.position() + left);
+                
+                // TODO: Figure out how to throttle this crap.
+                while(left > 0 && buffer.hasRemaining() && (read = rc.read(buffer)) > 0) {
+                    if (_inNetwork)
+                        BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(read);
+                    else
+                        BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(read);
+                    left -= read;
+                }
+                
+                // ensure the limit is set back to normal.
+                buffer.limit(buffer.capacity());
+                
+                int totalRead = buffer.position();
+                
+                // If nothing could be read at all, leave.
+                if(totalRead == 0) {
+                    if(read == -1) {
+                        LOG.debug("EOF while reading");
+                        throw IOException("EOF");
+                    } else if(read == 0) {
+                        return true;
+                    }
+                }
+                
+                long filePosition;
+                int dataLength;
+                int dataStart;
+    			synchronized(this) {
+                    if (_isActive) {
+                        int skipped = Math.max(0, (int)(_initialWritingPoint - currPos));
+                        if(skipped > 0)
+                            LOG.debug("Amount we should skip: " + skipped);
+                        
+                        // see if we were stolen from while reading
+                        totalRead = Math.min(totalRead, _amountToRead - _amountRead);
+                        if (totalRead <=0 ) {
+                            LOG.debug("Someone stole completely from us while reading");
+                            // if were told to not read anything more, finish
+                            _isActive = false;
+                            buffer.clear();
+                            return false;
+                        }
+                        
+                        // setup data for writing.
+                        dataLength = totalRead - skipped;
+                        dataStart = skipped;
+                        filePosition = currPos + skipped;
+                        // maintain data for next read.
+                        _amountRead += totalRead;
+                        currPos += totalRead;
+                        
+                        if(skipped >= totalRead) {       
+                            if(LOG.isDebugEnabled())
+                                LOG.debug("skipped full read of: " + skipped + " bytes");
+                            buffer.clear();
+                            return true;
+                        }                 
+                    } else {
+    			        if (LOG.isDebugEnabled())
+    			            LOG.debug("WORKER:"+this+" stopping at "+(_initialReadingPoint+_amountRead));
+                        buffer.clear();
+    			       return false;
+    			    }
+    			}                
+                
+                // write to disk outside of lock.
+                // TODO: write to disk only when buffer is full
+                try {
+                    _incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array());
+                } catch (InterruptedException killed) {
+                    synchronized(this) {
+                        _isActive = false;
+                    }
+                }
+                
+                buffer.clear();
             }
-            
-            buffer.clear();
-            
-            return true;
         }
         
         

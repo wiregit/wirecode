@@ -5,6 +5,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.ChannelWriter;
@@ -15,6 +18,9 @@ import com.limegroup.gnutella.io.InterestWriteChannel;
  * State machine for reading & writing.
  */
 public class IOStateMachine implements ChannelReadObserver, ChannelWriter, InterestReadChannel {
+    
+    private static final Log LOG = LogFactory.getLog(IOStateMachine.class);
+    
    
     /** Observer to notify when this finishes or fails. */
     private IOStateObserver observer;
@@ -30,11 +36,15 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     private ByteBuffer readBuffer;
     /** Whether or not we've shutdown this handshaker. */
     private volatile boolean shutdown;
-
+    
     public IOStateMachine(IOStateObserver observer, List states) {
+        this(observer, states, 2048);
+    }
+
+    public IOStateMachine(IOStateObserver observer, List states, int bufferSize) {
         this.observer = observer;
         this.states = states;
-        this.readBuffer = NIODispatcher.instance().getBufferCache().getHeap(2048);
+        this.readBuffer = NIODispatcher.instance().getBufferCache().getHeap(bufferSize);
         if(!states.isEmpty())
             this.currentState = (IOState)states.remove(0);
     }
@@ -47,9 +57,10 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     public void addState(final IOState newState) {
         NIODispatcher.instance().invokeLater(new Runnable() {
             public void run() {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Adding single state: " + newState);
                 states.add(newState);
                 if(states.size() == 1) {
-                    System.out.println("setting new state");
                     nextState(false, false);
                 }
             }
@@ -62,6 +73,8 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     public void addStates(final List /* of IOState */ newStates) {
         NIODispatcher.instance().invokeLater(new Runnable() {
             public void run() {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Adding multiple states: " + newStates);
                 states.addAll(newStates);
                 if(states.size() == newStates.size())
                     nextState(false, false);
@@ -75,8 +88,13 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     public void addStates(final IOState[] newStates) {
         NIODispatcher.instance().invokeLater(new Runnable() {
             public void run() {
-                for(int i = 0; i < newStates.length; i++)
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Adding multiple states...");
+                for(int i = 0; i < newStates.length; i++) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug(" state[" + i + "]: " + newStates[i]);
                     states.add(newStates[i]);
+                }
                 if(states.size() == newStates.length)
                     nextState(false, false);
             }
@@ -89,14 +107,17 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
      * to process.
      */
     public void handleRead() {
-        System.out.println("handling read");
         if(currentState != null) {
             if(currentState.isWriting()) {
+                LOG.warn("Got a read notification while writing.");
+                processCurrentState(null, true); // read up the data into the buffer
                 readSink.interest(false);
             } else {
-                processCurrentState(true);
+                processCurrentState(currentState, true);
             }
         } else {
+            LOG.warn("Got a read notification with no current state");
+            processCurrentState(null, true);
             readSink.interest(false);
         }
     }
@@ -106,15 +127,16 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
      * we'll turn off future interest events.  Otherwise we'll tell the current state to process.
      */
     public boolean handleWrite() {
-        System.out.println("handling write");
         if(currentState != null) {
             if(currentState.isReading()) {
+                LOG.warn("Got a write notification while reading");
                 writeSink.interest(this, false);
                 return false;
             } else {
-                return processCurrentState(false);        
+                return processCurrentState(currentState, false);        
             }
         } else {
+            LOG.warn("Got a write notification with no current state");
             writeSink.interest(this, false);
             return false;
         }
@@ -130,24 +152,37 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
      * @param reading
      * @return
      */
-    private boolean processCurrentState(boolean reading) {
+    private boolean processCurrentState(IOState state, boolean reading) {
         if(!shutdown) {
-            System.out.println("processing state: " + currentState);
             try {
+               // if(LOG.isDebugEnabled())
+              //      LOG.debug("Processing (" + (reading ? "R" : "W") + ") state: " + currentState);
                 if (reading) {
-                    if (!currentState.process(readSink, readBuffer))
+                    if(state == null) {
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Processing a read with no state");
+                        // We must read up data otherwise it could be lost
+                        // (it would be lost if we were transfering observers
+                        //  and the prior observer had already read data)
+                        while(readBuffer.hasRemaining() && readSink.read(readBuffer) > 0);
+                    } else if (!state.process(readSink, readBuffer))
                         nextState(true, false);
                 } else {
-                    if (!currentState.process(writeSink, null))
+                    if (!state.process(writeSink, null))
                         nextState(false, true);
                     else
                         return true;
                 }
             } catch (IOException iox) {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("IOX while processing state: " + state, iox);
                 shutdown = true;
                 NIODispatcher.instance().getBufferCache().release(readBuffer);
                 observer.handleIOException(iox);
             }
+        } else {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Ignoring processing because machine is shutdown");
         }
         
         return false;
@@ -163,15 +198,24 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
      */
     private void nextState(boolean reading, boolean writing) {
         if(states.isEmpty()) {
+            LOG.debug("No more states, processing finished.");
             readSink.interest(false);
             writeSink.interest(this, false);
             observer.handleStatesFinished();
         } else {
             currentState = (IOState)states.remove(0);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Incrementing state to: " + currentState);
             if(currentState.isReading() && !reading) {
-                if(readSink != null)
-                    readSink.interest(true);
                 writeSink.interest(this, false);
+                if(readSink != null) {
+                    readSink.interest(true);
+                    // Process reading immediately, else
+                    // data already in the buffer may be
+                    // ignored while waiting on more data
+                    // in the socket.
+                    processCurrentState(currentState, true);
+                }
             } else if(currentState.isWriting() && !writing) {
                 readSink.interest(false);
                 if(writeSink != null)

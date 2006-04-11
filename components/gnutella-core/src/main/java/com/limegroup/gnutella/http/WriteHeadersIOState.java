@@ -46,7 +46,6 @@ public abstract class WriteHeadersIOState implements IOState {
         
         int written = ((WritableByteChannel)channel).write(outgoing);
         stat.addData(written);
-        System.out.println("wrote: " + written + "(" + this + ")");
         
         if(!outgoing.hasRemaining()) {
             processWrittenHeaders();

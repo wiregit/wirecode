@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -691,9 +692,13 @@ public class TestUploader extends AssertComparisons {
             String str = "HTTP/1.1 200 OK\r\n" +
                          "ugly-header: ugly-value\r\n" + 
                          "hot diggity doo\r\n" +
+                         "Content-Length: " + TestFile.tree().getOutputLength() + "\r\n" + 
                          "\r\n";
             out.write(str.getBytes());
             TestFile.tree().write(out);
+            ByteArrayOutputStream temp = new ByteArrayOutputStream();
+            TestFile.tree().write(temp);
+            System.out.println("OUTPUT, length: " + temp.size() + ",: " + new String(temp.toByteArray()));
         } else {
             String body = "You have failed miserably in your attempts.";
             String str = "HTTP/1.1 9000 Failed Miserably\r\n" +

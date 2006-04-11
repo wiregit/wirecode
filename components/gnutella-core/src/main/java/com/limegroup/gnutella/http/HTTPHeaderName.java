@@ -220,6 +220,20 @@ public class HTTPHeaderName {
 	public boolean is(String str) {
 		return str.toLowerCase(Locale.US).equals(LOWER_CASE_NAME);
 	}
+    
+    /**
+     * Returns whether or not the start of the passed in string matches the 
+     * string representation of this HTTP header, ignoring case.
+     *
+     * @param str the string to check for a match
+     * @return <tt>true</tt> if the passed in string matches the string
+     *  representation of this HTTP header (ignoring case), otherwise
+     *  returns <tt>false</tt>
+     */
+    public boolean matchesStartOfString(String str) {
+        return str.toLowerCase(Locale.US).startsWith(LOWER_CASE_NAME);
+    }
+    
 
 	/**
 	 * Accessor to obtain the string representation of the header

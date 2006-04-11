@@ -332,12 +332,12 @@ public class DownloadWorker {
         
         LOG.debug("HTTP req finished, status: " + status);
         
-        if(!status.isConnected())
-            releaseRanges();
-                
-        if(status.isNoData()) {
+        if(status.isNoData() || status.isNoFile()) {
             finishHttpLoop();
         } else {
+            if(!status.isConnected())
+                releaseRanges();
+            
             _manager.addPossibleSources(_downloader.getLocationsReceived());
             
             if(status.isPartialData()) {
@@ -420,6 +420,11 @@ public class DownloadWorker {
                                 _manager.addRFD(_rfd);
                         }
                     }
+                    
+                    if(!problem)
+                        incrementState(null);
+                    else
+                        finishHttpLoop();
                 }
             });
         } catch(SocketException se) {
@@ -429,10 +434,9 @@ public class DownloadWorker {
     
     private boolean requestTHEXIfNeeded() {
         boolean shouldRequest = false;
-        final HashTree ourTree;
         synchronized (_commonOutFile) {
             if (!_commonOutFile.isHashTreeRequested()) {
-                ourTree = _commonOutFile.getHashTree();
+                HashTree ourTree = _commonOutFile.getHashTree();
     
                 // request THEX from te _downloader if (the tree we have
                 // isn't good enough or we don't have a tree) and another
@@ -441,10 +445,10 @@ public class DownloadWorker {
                              && _manager.getSHA1Urn() != null
                              && (ourTree == null || !ourTree.isDepthGoodEnough());
     
+                LOG.debug("going to request tree: " + shouldRequest + ", has: " + _downloader.hasHashTree() + ", ours: " + ourTree + ", good enough? " + (ourTree == null ? "null" : "" + ourTree.isDepthGoodEnough()));
+                
                 if (shouldRequest)
                     _commonOutFile.setHashTreeRequested(true);
-            } else {
-                ourTree = null;
             }
         }
 
@@ -497,6 +501,8 @@ public class DownloadWorker {
                     synchronized(_commonOutFile) {
                         _commonOutFile.setHashTreeRequested(false);
                         HashTree newTree = _downloader.getHashTree();
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Downloaded tree: " + newTree);
                         if(newTree != null) {
                             HashTree oldTree = _commonOutFile.getHashTree();
                             if(newTree.isBetterTree(oldTree))

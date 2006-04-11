@@ -14,16 +14,19 @@ public class StubIOStateObserver implements IOStateObserver {
         iox = null;
     }
 
-    public void handleStatesFinished() {
+    public synchronized void handleStatesFinished() {
         statesFinished = true;
+        notify();
     }
 
-    public void shutdown() {
-        shutdown = true;        
+    public synchronized void shutdown() {
+        shutdown = true;
+        notify();
     }
 
-    public void handleIOException(IOException iox) {
+    public synchronized void handleIOException(IOException iox) {
         this.iox = iox;
+        notify();
     }
 
     public IOException getIox() {

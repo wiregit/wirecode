@@ -2519,27 +2519,30 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 }
                 
                 if(LOG.isDebugEnabled())
-                    LOG.debug("MANAGER: kicking off workers, dloadsCount: " + 
-                            _activeWorkers.size() + ", threads: " + _workers.size());
+                    LOG.debug("MANAGER: kicking off workers, activeWorkers: " + 
+                            _activeWorkers.size() + ", allWorkers: " + _workers.size());
                 
                 //OK. We are going to create a thread for each RFD. The policy for
                 //the worker threads is to have one more thread than the max swarm
                 //limit, which if successfully starts downloading or gets a better
                 //queued slot than some other worker kills the lowest worker in some
-                //remote queue.
-                if (shouldStartWorker()){
+                // remote queue.
+                if (shouldStartWorker()) {
                     // see if we need to update our ranker
                     ranker = getSourceRanker(ranker);
-                    
+
                     RemoteFileDesc rfd = ranker.getBest();
-                    
+
                     if (rfd != null) {
                         // If the rfd was busy, that means all possible RFDs
                         // are busy - store for later
-                        if( rfd.isBusy() ) 
+                        if (rfd.isBusy()) {
                             addRFD(rfd);
-                         else 
+                        } else {
+                            if(LOG.isDebugEnabled())
+                                LOG.debug("Staring worker for RFD: " + rfd);
                             startWorker(rfd);
+                        }
                     }
                     
                 } else if (LOG.isDebugEnabled())
@@ -2946,20 +2949,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * Interrupts a remotely queued thread if we this status is connected,
+     * Interrupts a remotely queued worker if we this status is connected,
      * or if the status is queued and our queue position is better than
      * an existing queued status.
      *
-     * @param status The ConnectionStatus of this downloader.
-     *
-     * @return true if this thread should be kept around, false otherwise --
-     * explicitly, there is no need to kill any threads, or if the currentThread
-     * is already in the queuedWorkers, or if we did kill a thread worse than
-     * this thread.  
+     * @return true if this worker should be kept around, false otherwise --
+     * explicitly, there is no need to kill any queued workers, or if the DownloadWorker
+     * is already in the queuedWorkers, or if we did kill a worker whose position is
+     * worse than this worker.
      */
     synchronized boolean killQueuedIfNecessary(DownloadWorker worker, int queuePos) {
         if (LOG.isDebugEnabled())
-            LOG.debug("deciding whether to queue worker "+worker+ " at position "+queuePos);
+            LOG.debug("deciding whether to kill a queued host for (" + queuePos + ") worker "+worker);
         
         //Either I am queued or downloading, find the highest queued thread
         DownloadWorker doomed = null;

@@ -404,7 +404,7 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setSendThexTree(true);
         
         TigerTreeCache.instance().purgeTree(rfd.getSHA1Urn());
-        Downloader download=RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
+        RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
         
         waitForComplete();
         assertEquals(6,uploader1.getRequestsReceived());

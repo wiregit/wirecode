@@ -5,12 +5,17 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.IOState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.Statistic;
 
 public abstract class ReadHeadersIOState implements IOState {
+    
+    private static final Log LOG = LogFactory.getLog(ReadHeadersIOState.class);
 
     /** Header support. */
     protected final HeaderSupport support;
@@ -58,7 +63,7 @@ public abstract class ReadHeadersIOState implements IOState {
             if(!doneConnect) {
                 if(BufferUtils.readLine(buffer, currentHeader)) {
                     connectLine = currentHeader.toString();
-                    System.out.println("cl: " + connectLine);
+                    LOG.debug("Read connect line: " + connectLine);
                     currentHeader.delete(0, currentHeader.length());
                     processConnectLine();
                     doneConnect = true;
@@ -70,6 +75,7 @@ public abstract class ReadHeadersIOState implements IOState {
                     if(!BufferUtils.readLine(buffer, currentHeader))
                         break;
                     
+                    LOG.debug("Read header: " + currentHeader);
                     if(!support.processReadHeader(currentHeader.toString())) {
                         allDone = true;
                         break; // we finished reading this set of headers!
