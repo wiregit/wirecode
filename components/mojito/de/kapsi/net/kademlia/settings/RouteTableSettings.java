@@ -43,18 +43,6 @@ public final class RouteTableSettings extends LimeDHTProps {
     public static final LongSetting MIN_RECONNECTION_TIME
         = FACTORY.createSettableLongSetting("MIN_RECONNECTION_TIME", 1L*60L, "min_reconnect_time", 1L*60L, 1L*60L);
     
-    /**
-     * The replication parameter is also known as K
-     */
-    public static final IntSetting REPLICATION_PARAMETER
-        = FACTORY.createIntSetting("REPLICATION_PARAMETER", 20);
-
-    /**
-     * The number of parallel lookups
-     */
-    public static final IntSetting LOOKUP_PARAMETER
-        = FACTORY.createIntSetting("LOOKUP_PARAMETER", 5);
-    
     // TODO reasonable min and max values
     public static final IntSetting DEPTH_LIMIT //a.k.a B
         = FACTORY.createSettableIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);

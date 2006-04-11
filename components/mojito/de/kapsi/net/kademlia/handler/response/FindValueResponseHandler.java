@@ -24,11 +24,11 @@ import java.util.Map;
 
 import com.limegroup.gnutella.dht.statistics.FindValueLookupStatisticContainer;
 
-
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class FindValueResponseHandler extends LookupResponseHandler {
     
@@ -36,7 +36,7 @@ public class FindValueResponseHandler extends LookupResponseHandler {
 
     public FindValueResponseHandler(Context context, 
             KUID lookup, FindValueListener l) {
-        super(context, lookup);
+        super(context, lookup, KademliaSettings.VALUE_LOOKUP_TIMEOUT.getValue());
         lookupStat = new FindValueLookupStatisticContainer(context,lookup);
         this.l = l;
     }

@@ -34,7 +34,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
-import de.kapsi.net.kademlia.settings.RouteTableSettings;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class LookupRequestHandler extends AbstractRequestHandler {
     
@@ -53,7 +53,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             LOG.trace(ContactNode.toString(nodeId, src) + " is trying to lookup " + lookup);
         }
         
-        int k = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         List bucketList 
             = context.getRouteTable().select(lookup, k, false, false);
         

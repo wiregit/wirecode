@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
-import de.kapsi.net.kademlia.settings.RouteTableSettings;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class KeyValuePublisher implements Runnable {
     
@@ -134,7 +134,7 @@ public class KeyValuePublisher implements Runnable {
                                         buffer.append(keyValues).append(" at the following Nodes:\n");
                                         
                                         Iterator it = nodes.iterator();
-                                        int k = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+                                        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
                                         for(int i = 0; i < k && it.hasNext(); i++) {
                                             buffer.append(i).append(": ").append(it.next()).append("\n");
                                         }

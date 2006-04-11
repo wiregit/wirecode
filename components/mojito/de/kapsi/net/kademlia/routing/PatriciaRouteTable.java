@@ -50,6 +50,7 @@ import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
@@ -62,7 +63,7 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private static final Log LOG = LogFactory.getLog(PatriciaRouteTable.class);
     
-    private static final int K = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+    private static final int K = KademliaSettings.REPLICATION_PARAMETER.getValue();
     
     private static final int B = RouteTableSettings.DEPTH_LIMIT.getValue();
     

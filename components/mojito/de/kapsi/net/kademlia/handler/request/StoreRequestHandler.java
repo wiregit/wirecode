@@ -41,7 +41,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
-import de.kapsi.net.kademlia.settings.RouteTableSettings;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class StoreRequestHandler extends AbstractRequestHandler {
     
@@ -88,7 +88,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             }
         }
         
-        int k = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // Avoid to create an empty ArrayList
         List stats = (values.isEmpty() ? Collections.EMPTY_LIST : new ArrayList(values.size()));

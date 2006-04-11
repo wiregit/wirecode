@@ -44,7 +44,7 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
-import de.kapsi.net.kademlia.settings.RouteTableSettings;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 /**
@@ -103,13 +103,24 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
      */
     private boolean active = false;
     
+    /**
+     * The statistics for this lookup
+     */
     protected LookupStatisticContainer lookupStat;
     
-    public LookupResponseHandler(Context context, KUID lookup) {
+    /**
+     * The global lookup timeout
+     */
+    private final long timeout;
+    
+    
+    public LookupResponseHandler(Context context, KUID lookup, long timeout) {
         super(context);
         
         this.lookup = lookup;
-        this.resultSize = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+        this.resultSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        
+        this.timeout = timeout;
     }
     
     public void handleResponse(KUID nodeId, SocketAddress src, 
@@ -155,7 +166,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 if (!isQueried(node) 
                         && !isYetToBeQueried(node)) {
                     if (LOG.isTraceEnabled()) {
-                        LOG.trace("Adding " + node + " to the yet-to-be query list");
+                        LOG.trace("Adding " + node + " to the yet-to-be queried list");
                     }
                     
                     addYetToBeQueried(node);
@@ -178,7 +189,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             int hop = ((Integer)hopMap.get(nodeId)).intValue();
             
             --activeSearches;
-            lookupStep(hop);
+            lookupStep(++hop);
         }
     }
     
@@ -248,7 +259,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         addResponse(context.getLocalNode());
         
         // Get the first round of alpha nodes
-        List alphaList = toQuery.select(lookup, RouteTableSettings.LOOKUP_PARAMETER.getValue());
+        List alphaList = toQuery.select(lookup, KademliaSettings.LOOKUP_PARAMETER.getValue());
         
         // send alpha requests
         for(int i = 0; i < alphaList.size(); i++) {
@@ -269,29 +280,38 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     
     private void lookupStep(int hop) throws IOException {
         
-        //stop if we have nothing more to query and no more active searches
-        if(toQuery.isEmpty() && activeSearches == 0) {
+        if(timeout>0 && (time > timeout)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " terminates after "
-                        + hop + " hops. No contacts left to query ");
+                        + hop + " hops. Lookup timeout reached");
             }
-            
-            if (isValueLookup()) {
-                finishValueLookup(lookup, null, time);
-            } else {
-                List nodes = responses.select(lookup, responses.size());
-                finishNodeLookup(lookup, nodes, queryKeys, time);
-            }
-            lookupStat.setHops(hop);
-            lookupStat.setTime((int)time);
-            finished = true;
-            return;
+            finishLookup(hop);
         }
         
+        if(activeSearches == 0) {
+            //stop if we have nothing more to query and no more active searches
+            if(toQuery.isEmpty()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Lookup for " + lookup + " terminates after "
+                            + hop + " hops. No contacts left to query ");
+                }
+                finishLookup(hop);
+                return;
+            } 
+            //Finish if we found the target node
+            else if((lookup!= context.getLocalNodeID()) && (responses.containsKey(lookup))) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Lookup for " + lookup + " terminates after "
+                            + hop + " hops. Reached target ID! ");
+                }
+                finishLookup(hop);
+                return;
+            }
+        }
         //stop if we have enough values and the yet-to-query list does not contain
         //a closer node to the target than the furthest away that we have
         //and this is the last of the last set of concurrent searches
-        if((responses.size() == resultSize)&& (activeSearches == 0)) {
+        if(responses.size() == resultSize) {
             KUID furthest = lookup.invert();
             ContactNode worstResponse = (ContactNode)responses.select(furthest);
             ContactNode bestToQuery = (ContactNode)toQuery.select(lookup);
@@ -300,36 +320,28 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(), lookup)) {
             
                 
-                if (LOG.isTraceEnabled()) {
-                    ContactNode bestResponse = (ContactNode)responses.select(lookup);
-                    LOG.trace("Lookup for " + lookup + " terminates with " 
-                        + bestResponse + " as the best match after "+
-                        hop + " hops and "
-                        + queried.size() + " queried Nodes");
-                }
-            
-                if (isValueLookup()) {
-                    finishValueLookup(lookup, null, time);
+                if(activeSearches == 0) {
+                    if (LOG.isTraceEnabled()) {
+                        ContactNode bestResponse = (ContactNode)responses.select(lookup);
+                        LOG.trace("Lookup for " + lookup + " terminates with " 
+                                + bestResponse + " as the best match after "+
+                                hop + " hops and "
+                                + queried.size() + " queried Nodes");
+                    }
+                    finishLookup(hop);
+                    return;
                 } else {
-                    List nodes = responses.select(lookup, responses.size());
-                    finishNodeLookup(lookup, nodes, queryKeys, time);
+                    return;
                 }
-                
-                lookupStat.setHops(hop);
-                lookupStat.setTime((int)time);
-                finished = true;
-                return;
             }
-        }
-        
-        int numLookups = RouteTableSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
+        } 
+        int numLookups = KademliaSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
         if(numLookups > 0) {
             List bucketList = toQuery.select(lookup, numLookups);
             final int size = bucketList.size();
             
             MessageDispatcher messageDispatcher = context.getMessageDispatcher();
             
-            ++hop;
             for(int i = 0; i < size; i++) {
                 ContactNode node = (ContactNode)bucketList.get(i);
                 
@@ -356,6 +368,18 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     
     public long time() {
         return time;
+    }
+    
+    private void finishLookup(int hop) {
+        lookupStat.setHops(hop);
+        lookupStat.setTime((int)time);
+        finished = true;
+        if (isValueLookup()) {
+            finishValueLookup(lookup, null, time);
+        } else {
+            List nodes = responses.select(lookup, responses.size());
+            finishNodeLookup(lookup, nodes, queryKeys, time);
+        }
     }
     
     private void markAsQueried(ContactNode node) {

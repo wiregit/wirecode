@@ -28,13 +28,14 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class FindNodeResponseHandler extends LookupResponseHandler {
     
     private FindNodeListener l;
     
     public FindNodeResponseHandler(Context context, KUID lookup, FindNodeListener l) {
-        super(context, lookup);
+        super(context, lookup, KademliaSettings.NODE_LOOKUP_TIMEOUT.getValue());
         lookupStat = new FindNodeLookupStatisticContainer(context,lookup);
         this.l = l;
     }
