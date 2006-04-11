@@ -34,10 +34,15 @@ public class ExternalAddressTest {
         pingHandler.setAccessible(true);
         pingHandler.set(context3.getMessageDispatcher(), pingHandlerStub);
         
-        NetworkSettings.ALLOW_MULTIPLE_NODES.setValue(true);
+        //NetworkSettings.ALLOW_MULTIPLE_NODES.setValue(true);
         
         // BEGIN
         pingHandlerStub.externalAddress = new InetSocketAddress("10.254.0.251", 3000);
+        context1.ping(new InetSocketAddress("localhost", 3000), null);
+        Thread.sleep(1000);
+        System.out.println(pingHandlerStub.externalAddress.equals(context1.getExternalSocketAddress())); // false
+        
+        pingHandlerStub.externalAddress = new InetSocketAddress("127.0.0.1", 2000);
         context1.ping(new InetSocketAddress("localhost", 3000), null);
         Thread.sleep(1000);
         System.out.println(pingHandlerStub.externalAddress.equals(context1.getExternalSocketAddress())); // false
