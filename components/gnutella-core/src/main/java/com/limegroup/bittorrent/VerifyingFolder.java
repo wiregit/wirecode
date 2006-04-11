@@ -11,8 +11,13 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.downloader.Interval;
@@ -29,6 +34,9 @@ import com.limegroup.gnutella.util.ProcessingQueue;
  * of the VerifyingFile class.
  */
 public class VerifyingFolder {
+	
+	private static final Log LOG = LogFactory.getLog(VerifyingFolder.class);
+	
 	/**
 	 * The thread that does the actual verification & writing
 	 */
@@ -94,7 +102,7 @@ public class VerifyingFolder {
 		pendingRanges = new BlockRangeMap();
 		
 		if (complete) 
-			verifiedBlocks.set(0,_info.getNumBlocks());
+			verifiedBlocks.set(0,_info.getNumBlocks() - 1);
 		else if (data != null)
 			initialize(data);
 	}
@@ -207,10 +215,11 @@ public class VerifyingFolder {
 	private synchronized boolean verify(int pieceNum) throws IOException {
 		MessageDigest md = _info.getMessageDigest();
 		md.reset();
-		byte [] buf = new byte[Math.min(65536,_info.getPieceLength())];
+		int pieceSize = getPieceSize(pieceNum);
+		byte [] buf = new byte[Math.min(65536,pieceSize)];
 		int read = 0;
 		long offset = (long)pieceNum * _info.getPieceLength();
-		while (read < _info.getPieceLength()) {
+		while (read < pieceSize) {
 			int readNow = read(offset, buf, 0, buf.length);
 			if (readNow == 0)
 				return false;
@@ -285,22 +294,23 @@ public class VerifyingFolder {
 	 */
 	private boolean addBlockPart(BTInterval in) {
 		// shortcut
-		if (isCompleteBlock(in, _info.getPieceLength()))
+		if (isCompleteBlock(in, in.getId()))
 			return true;
 		
 		partialBlocks.addInterval(in);
 		IntervalSet set = partialBlocks.getSet(in);
 		if (set.getNumberOfIntervals() == 1) {
 			Interval one = set.getFirst();
-			if (isCompleteBlock(one,_info.getPieceLength()))
+			if (isCompleteBlock(one,in.getId()))
 				return true;
 		}
 		
 		return false;
 	}
 	
-	private static boolean isCompleteBlock(Interval in, int size) {
-		return in.low == 0 && in.high + 1 == size;
+	private boolean isCompleteBlock(Interval in, int id) {
+		return in.low == 0 && in.high == getPieceSize(id) - 1;
+		
 	}
 	
 	public synchronized boolean hasBlock(int block) {
@@ -454,6 +464,12 @@ public class VerifyingFolder {
 	 * offset and size within that chunk as second and third elements.
 	 */
 	public synchronized BTInterval leaseRandom(BitSet bs) {
+		if (isComplete())
+			return null;
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
+		
 		// see which pieces we don't have
 		BitSet clone = (BitSet)bs.clone();
 		clone.andNot(verifiedBlocks);
@@ -470,6 +486,9 @@ public class VerifyingFolder {
 			clone.clear(element.intValue());
 		}
 		
+		if (LOG.isDebugEnabled())
+			LOG.debug("after removing pending, partial and requesting ranges, the remote has cardinality "+clone.cardinality());
+		
 		if (clone.cardinality() > 0) {
 			// the remote has new chunks we can get
 			int selected = -1;
@@ -479,68 +498,83 @@ public class VerifyingFolder {
 					selected = i;
 			}
 			
-			BTInterval ret = new BTInterval(0,_info.getPieceLength(),selected);
+			if (LOG.isDebugEnabled())
+				LOG.debug("selecting piece "+selected);
+			
+			BTInterval ret = new BTInterval(0,getPieceSize(selected) - 1,selected);
 			requestedRanges.addInterval(ret);
 			return ret;
 		} 
 		
-		// try to give a partial chunk that is not being requested elsewhere
-		// TODO: figure out how to make this work with endgame mode
-		
-		// prepare a list of partial blocks the remote host has
-		List available = new ArrayList();
+		// prepare a list of partial or requested blocks the remote host has
+		Set available = new LinkedHashSet(partialBlocks.size() + requestedRanges.size());
 		available.addAll(partialBlocks.keySet());
+		available.addAll(requestedRanges.keySet());
 		for (Iterator iterator = available.iterator(); iterator.hasNext();) {
 			Integer block = (Integer) iterator.next();
-			
 			// if the other side doesn't have this block, its not an option
-			if (!bs.get(block.intValue())) {
-				iter.remove();
-				continue;
-			}
-			
-			// also exclude any blocks that would be complete once
-			// their pending ranges get written
-			IntervalSet pending = pendingRanges.getSet(block);
-			if (pending != null) {
-				IntervalSet partial = partialBlocks.getSet(block);
-				if (partial.getSize() + pending.getSize() == _info.getPieceLength())
-					iter.remove();
-			}
+			if (!bs.get(block.intValue())) 
+				iterator.remove();
 		}
 		
-		// shuffle it
-		Collections.shuffle(available);
+		if (LOG.isDebugEnabled())
+			LOG.debug("available partial blocks to attempt: "+available);
 		
 		// go through and find a block that we can request something from.
 		for (Iterator iterator = available.iterator(); iterator.hasNext();) {
 			Integer block = (Integer) iterator.next();
+			
+			// figure out which parts of the chunks we need.
+			IntervalSet needed = new IntervalSet();
+			needed = needed.invert(getPieceSize(block.intValue()));
+			
 			IntervalSet partial = partialBlocks.getSet(block);
 			IntervalSet pending = pendingRanges.getSet(block);
 			IntervalSet requested = requestedRanges.getSet(block);
 			
 			// get the parts of the block we're missing
-			IntervalSet needed = partial.invert(_info.getPieceLength());
+			if (partial != null)
+				needed.delete(partial);
 			
 			// don't request any parts pending write
 			if (pending != null)
 				needed.delete(pending);
 			
 			// try not to request any parts that are already requested
-			if (requested != null)
+			if (requested != null) {
 				needed.delete(requested);
+				
+				// now, if we still have some parts of the chunk, get one of them
+				// if not and this is the last partial chunk, doubly-assign some
+				// part of it (is this endgame?)
+				if (needed.isEmpty() && !iterator.hasNext()) {
+					LOG.debug("requesting part of a block that is already requested...");
+					needed = requested;
+				}
+			}
 			
-			// now, if we still have some parts of the chunk, get one of them
-			// if not and this is the last partial chunk, doubly-assign some
-			// part of it (is this endgame?)
-			if (needed.isEmpty() && !iterator.hasNext())
-				needed = requested;
+			if (needed.isEmpty()) 
+				continue;
 			
-			return new BTInterval(needed.getFirst(),block.intValue());
+			BTInterval ret = new BTInterval(needed.getFirst(),block.intValue());
+			if (LOG.isDebugEnabled())
+				LOG.debug("selected partial/requested interval "+ret);
+			return ret;
 		}
 		
-		// we shouldn't get here.
+		// couldn't find anything to assign.
 		return null;
+	}
+	
+	/**
+	 * @return the size of the piece with given number.  All pieces
+	 * except the last one have the same size.
+	 */
+	private int getPieceSize(int pieceNum) {
+		if (pieceNum == _info.getNumBlocks() - 1)
+			return (int)(_info.getTotalSize() % _info.getPieceLength());
+		else
+			return _info.getPieceLength();
 	}
 	
 	/**
@@ -562,7 +596,7 @@ public class VerifyingFolder {
 	 *         
 	 */
 	public synchronized byte[] createBitField() {
-		byte[] field = new byte[_info.getNumBlocks() / 8];
+		byte[] field = new byte[(_info.getNumBlocks() + 7) / 8];
 		for(int i = verifiedBlocks.nextSetBit(0); i >= 0; i = verifiedBlocks.nextSetBit(i+1)) 
 			field[i / 8] = (byte) (field[i / 8] | (1 << (7 - i % 8)));
 			
@@ -663,8 +697,11 @@ public class VerifyingFolder {
 		
 		public void removeInterval(BTInterval in) {
 			IntervalSet s = (IntervalSet) get(in.blockId);
-			if (s != null) 
-				s.delete(in);
+			if (s == null)
+				return;
+			s.delete(in);
+			if (s.isEmpty())
+				remove(in.blockId);
 		}
 		
 		public IntervalSet getSet(BTInterval in) {

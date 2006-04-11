@@ -141,7 +141,7 @@ public class ManagedTorrent {
 	/*
 	 * this is true if the download is complete
 	 */
-	private boolean _complete = false;
+	private volatile boolean _complete = false;
 
 	/*
 	 * if we could not save this file
@@ -465,16 +465,16 @@ public class ManagedTorrent {
 	 *            the verified chunk
 	 */
 	void notifyOfComplete(int in) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("got completed chunk " + in);
+		if (LOG.isInfoEnabled())
+			LOG.info("got completed chunk " + in);
 		BTHave have = BTHave.createMessage(in);
 		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
 			BTConnection btc = (BTConnection) iter.next();
 			btc.sendHave(have);
 		}
 		_complete = _folder.isComplete();
-		if (LOG.isDebugEnabled())
-			LOG.debug("complete is now: " + _complete);
+		if (LOG.isInfoEnabled())
+			LOG.info("complete is now: " + _complete);
 		if (_complete)
 			saveCompleteFiles();
 	}
