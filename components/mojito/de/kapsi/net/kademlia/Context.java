@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.statistics.DHTNodeStat;
 import com.limegroup.gnutella.dht.statistics.DHTStats;
+import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -96,7 +97,9 @@ public class Context implements Runnable {
     private boolean running = false;
     private final Timer scheduler = new Timer(true);
     
-    private DHTStats stats = null;
+    private DHTStats dhtStats = null;
+    
+    private final NetworkStatisticContainer networkStats;
     
     public Context() {
         
@@ -108,6 +111,9 @@ public class Context implements Runnable {
         } catch (Exception err) {
             throw new RuntimeException(err);
         }
+        dhtStats = new DHTNodeStat(this);
+        
+        networkStats = new NetworkStatisticContainer(this);
         
         keyPair = CryptoHelper.createKeyPair();
 
@@ -119,11 +125,10 @@ public class Context implements Runnable {
         publisher = new KeyValuePublisher(this);
         bucketRefresher = new RandomBucketRefresher(this);
         
-        stats = new DHTNodeStat(this);
     }
     
     public DHTStats getDHTStats() {
-        return stats;
+        return dhtStats;
     }
     
     public int getVendor() {
@@ -368,12 +373,14 @@ public class Context implements Runnable {
     public void ping(SocketAddress address, PingListener l) throws IOException {
         RequestMessage ping = messageFactory.createPingRequest();
         AbstractResponseHandler handler = new PingResponseHandler(this, l);
+        networkStats.PINGS_SENT.incrementStat();
         messageDispatcher.send(null, address, ping, handler);
     }
     
     public void ping(ContactNode node, PingListener l) throws IOException {
         RequestMessage ping = messageFactory.createPingRequest();
         AbstractResponseHandler handler = new PingResponseHandler(this, l);
+        networkStats.PINGS_SENT.incrementStat();
         messageDispatcher.send(node.getNodeID(), node.getSocketAddress(), ping, handler);
     }
     
@@ -497,4 +504,8 @@ public class Context implements Runnable {
         
         handler.lookup();
     }
+    
+    public NetworkStatisticContainer getNetworkStats() {
+        return networkStats;
+    }  
 }

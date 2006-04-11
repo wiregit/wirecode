@@ -25,11 +25,6 @@ public abstract class LookupStatisticContainer extends StatisticContainer {
     
     public abstract void addTimeout();
     
-    //TODO: let's see if we need this
-    protected class LookupStat extends AbstractStatistic{
-        protected LookupStat() {}
-    }
-
     public void writeStats(Writer writer) throws IOException {
         writer.write("Lookup: "+lookupKey+"\n");
         super.writeStats(writer);

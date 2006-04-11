@@ -9,31 +9,31 @@ public class FindNodeLookupStatisticContainer extends LookupStatisticContainer {
      * <tt>Statistic</tt> for all outgoing lookup messages for this lookup.
      */
     public Statistic FIND_NODE_LOOKUP_REQUESTS =
-        new LookupStat();
+        new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for all incoming lookup messages for this lookup.
      */
     public Statistic FIND_NODE_LOOKUP_REPLIES =
-        new LookupStat();
+        new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for timeouts for this lookup.
      */
     public Statistic FIND_NODE_LOOKUP_TIMEOUTS=
-        new LookupStat();
+        new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for the number of hops for this lookup.
      */
     public Statistic FIND_NODE_LOOKUP_HOPS =
-        new LookupStat();
+        new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for the time of this lookup.
      */
     public Statistic FIND_NODE_LOOKUP_TIME =
-        new LookupStat();
+        new SimpleStatistic();
     
     
     

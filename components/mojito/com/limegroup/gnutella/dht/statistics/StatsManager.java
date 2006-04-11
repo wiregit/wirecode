@@ -34,7 +34,7 @@ public class StatsManager {
     
     private static final String LOCALDB_FILE = "storedData";
     
-    private static final String VALUE_LOOKUPS_FILE = "lookedupData";
+    private static final String STATS_FILE = "dhtStats";
     
     private static final String ROUTINGTABLE_FILE = "routingTable";
     
@@ -52,7 +52,7 @@ public class StatsManager {
         try {
             File dbFile = new File(LOCALDB_FILE);
             BufferedWriter dbWriter = new BufferedWriter(new FileWriter(dbFile));
-            File lookupsFile = new File(VALUE_LOOKUPS_FILE);
+            File lookupsFile = new File(STATS_FILE);
             BufferedWriter lookupsWriter = new BufferedWriter(new FileWriter(lookupsFile));
             File routingTableFile = new File(ROUTINGTABLE_FILE);
             BufferedWriter routingTableWriter = new BufferedWriter(new FileWriter(routingTableFile));

@@ -50,6 +50,13 @@ public class FindValueResponseHandler extends LookupResponseHandler {
     }
 
     protected void finishValueLookup(final KUID lookup, final Collection keyValues, final long time) {
+        FindValueLookupStatisticContainer stat = (FindValueLookupStatisticContainer)lookupStat;
+        if(keyValues == null) {
+            stat.FIND_VALUE_OK.incrementStat();
+        } else {
+            stat.FIND_VALUE_FAILURE.incrementStat();
+        }
+        
         if (l != null) {
             context.getEventDispatcher().add(new Runnable() {
                 public void run() {
