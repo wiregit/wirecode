@@ -153,11 +153,11 @@ public abstract class AbstractStatistic implements Statistic {
 	}
     
     public void storeStats(Writer writer) throws IOException {
-        writer.append(Integer.toString(_current));
-        writer.append("\t");
-        writer.append(Double.toString(getAverage()));
-        writer.append("\t");
-        writer.append(Double.toString(getMax()));
+        writer.write(Integer.toString(_current));
+        writer.write("\t");
+        writer.write(Double.toString(getAverage()));
+        writer.write("\t");
+        writer.write(Double.toString(getMax()));
         writer.flush();
     }
 

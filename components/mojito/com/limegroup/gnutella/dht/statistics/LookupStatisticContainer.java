@@ -31,7 +31,7 @@ public abstract class LookupStatisticContainer extends StatisticContainer {
     }
 
     public void writeStats(Writer writer) throws IOException {
-        writer.append("Lookup: "+lookupKey+"\n");
+        writer.write("Lookup: "+lookupKey+"\n");
         super.writeStats(writer);
     }
     

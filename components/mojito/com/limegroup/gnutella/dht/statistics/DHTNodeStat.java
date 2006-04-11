@@ -63,12 +63,12 @@ public class DHTNodeStat implements DHTStats{
         if(nodeID == null) {
             nodeID = context.getLocalNodeID().toHexString();
         }
-        writer.append(nodeID+"\n");
+        writer.write(nodeID+"\n");
         for (Iterator iter = DHT_STATS.iterator(); iter.hasNext();) {
             StatisticContainer stat = (StatisticContainer) iter.next();
             stat.writeStats(writer);
         }
-        writer.append("--------------------------------------------\n");
+        writer.write("--------------------------------------------\n");
     }
 
     public void dumpRouteTable(Writer writer) throws IOException{

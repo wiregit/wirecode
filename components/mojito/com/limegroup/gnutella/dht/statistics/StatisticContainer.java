@@ -37,9 +37,9 @@ public abstract class StatisticContainer{
                 Object fieldObject = fields[i].get(this);
                 if(fieldObject instanceof Statistic) {
                     Statistic stat = (Statistic) fieldObject;
-                    writer.append(fields[i].getName()+delimiter);
+                    writer.write(fields[i].getName()+delimiter);
                     stat.storeStats(writer);
-                    writer.append("\n");
+                    writer.write("\n");
                 }
             } catch(IllegalAccessException e) {
                 continue;
