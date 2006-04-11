@@ -71,8 +71,6 @@ public class Context implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
-    private static final String MESSAGE_DISPATCHER_THREAD = "MessageDispatcherThread";
-    
     private static final long EVENT_DISPATCHER_INTERVAL = 100L;
     
     private static final int VENDOR = 0xDEADBEEF;
@@ -95,7 +93,9 @@ public class Context implements Runnable {
     private RandomBucketRefresher bucketRefresher;
     
     private boolean running = false;
+    
     private final Timer scheduler = new Timer(true);
+    private Thread messageDispatcherThread = null;
     
     private DHTStats stats = null;
     
@@ -315,6 +315,7 @@ public class Context implements Runnable {
     public void close() throws IOException {
         running = false;
         messageDispatcher.close();
+        messageDispatcherThread = null;
     }
     
     public void run() {
@@ -340,6 +341,7 @@ public class Context implements Runnable {
             scheduler.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
             publisherThread.start();
 
+            messageDispatcherThread = Thread.currentThread();
             messageDispatcher.run();
             
         } finally {
@@ -359,7 +361,8 @@ public class Context implements Runnable {
             return;
         }
         
-        if (!Thread.currentThread().getName().equals(MESSAGE_DISPATCHER_THREAD)) {
+        if (messageDispatcherThread != null 
+                && Thread.currentThread() != messageDispatcherThread) {
             event.run();
         } else {
             eventDispatcher.add(event);
