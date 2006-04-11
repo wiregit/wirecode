@@ -53,8 +53,8 @@ public final class RouteTableSettings extends LimeDHTProps {
      * The number of parallel lookups
      */
     public static final IntSetting LOOKUP_PARAMETER
-        = FACTORY.createIntSetting("LOOKUP_PARAMETER", 3);
-
+        = FACTORY.createIntSetting("LOOKUP_PARAMETER", 5);
+    
     // TODO reasonable min and max values
     public static final IntSetting DEPTH_LIMIT //a.k.a B
         = FACTORY.createSettableIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);

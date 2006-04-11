@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.dht.statistics;
 
+import java.io.IOException;
+import java.io.Writer;
+
 import de.kapsi.net.kademlia.util.IntBuffer;
 
 /**
@@ -89,6 +92,8 @@ public interface Statistic {
 	 * setting the currently recorded data back to zero.
 	 */
 	void storeCurrentStat();
+    
+    public void storeStats(Writer writer) throws IOException;
 
 	/**
 	 * Sets whether or not to write this <tt>Statistic</tt> out to a file.

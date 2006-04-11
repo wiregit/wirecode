@@ -106,7 +106,7 @@ public abstract class AbstractStatistic implements Statistic {
 		_current += data;
 		_total += data;
 	}
-		
+    
 	// inherit doc comment
 	public IntBuffer getStatHistory() {
 		synchronized(_buffer) {
@@ -151,6 +151,15 @@ public abstract class AbstractStatistic implements Statistic {
 		_current = 0;
 		_totalStatsRecorded++;
 	}
+    
+    public void storeStats(Writer writer) throws IOException {
+        writer.append(Integer.toString(_current));
+        writer.append("\t");
+        writer.append(Double.toString(getAverage()));
+        writer.append("\t");
+        writer.append(Double.toString(getMax()));
+        writer.flush();
+    }
 
 	// inherit doc comment
 	public synchronized void setWriteStatToFile(boolean write) {

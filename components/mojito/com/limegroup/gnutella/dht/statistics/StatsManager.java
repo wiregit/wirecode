@@ -25,8 +25,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 
 
@@ -36,18 +34,12 @@ public class StatsManager {
     
     private static final String LOCALDB_FILE = "storedData";
     
-    private static final String VALUE_STORES_FILE = "publishedData";
-    
     private static final String VALUE_LOOKUPS_FILE = "lookedupData";
     
     private static final String ROUTINGTABLE_FILE = "routingTable";
     
     private final ArrayList dhtNodeStats = new ArrayList();
     
-    /**
-     * <tt>List</tt> of all statistics classes.
-     */
-    private volatile List DHT_STATS = new LinkedList();
     
     private StatsManager() {
     }
@@ -56,16 +48,10 @@ public class StatsManager {
         dhtNodeStats.add(stat);
     }
 
-    public void addDHTStat(Statistic stat) {
-        DHT_STATS.add(stat);
-    }
-    
     public void writeStatsToFiles() {
         try {
             File dbFile = new File(LOCALDB_FILE);
             BufferedWriter dbWriter = new BufferedWriter(new FileWriter(dbFile));
-            File storesFile = new File(VALUE_STORES_FILE);
-            BufferedWriter storesWriter = new BufferedWriter(new FileWriter(storesFile));
             File lookupsFile = new File(VALUE_LOOKUPS_FILE);
             BufferedWriter lookupsWriter = new BufferedWriter(new FileWriter(lookupsFile));
             File routingTableFile = new File(ROUTINGTABLE_FILE);
@@ -76,15 +62,12 @@ public class StatsManager {
                 stat.dumpDataBase(dbWriter);
                 //write routing table
                 stat.dumpRouteTable(routingTableWriter);
-                //write gets
-                stat.dumpGets(lookupsWriter);
-                //write stores
-                stat.dumpStores(storesWriter);
+                //write other stats
+                stat.dumpStats(lookupsWriter);
             }
             dbWriter.close();
             routingTableWriter.close();
             lookupsWriter.close();
-            storesWriter.close();
         }catch (IOException e) {
             e.printStackTrace();
         }

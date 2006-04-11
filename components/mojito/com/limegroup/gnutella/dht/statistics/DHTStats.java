@@ -22,18 +22,13 @@ package com.limegroup.gnutella.dht.statistics;
 import java.io.IOException;
 import java.io.Writer;
 
-import de.kapsi.net.kademlia.ContactNode;
-import de.kapsi.net.kademlia.db.KeyValue;
-
 public interface DHTStats {
 
-    public void recordLookup(KeyValue value, long latency, int hops, ContactNode node, boolean success,boolean isStore);
-    
     public void dumpRouteTable(Writer writer) throws IOException;
     
     public void dumpDataBase(Writer writer) throws IOException;
     
-    public void dumpStores(Writer writer) throws IOException;
+    public void addStatisticContainer(StatisticContainer statsContainer);
     
-    public void dumpGets(Writer writer) throws IOException;
+    public void dumpStats(Writer writer) throws IOException;
 }

@@ -32,7 +32,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.dht.statistics.LookupStatistic;
+import com.limegroup.gnutella.dht.statistics.LookupStatisticContainer;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
@@ -103,11 +103,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
      */
     private boolean active = false;
     
-    /**
-     * The statistics for this lookup
-     */
-    protected final LookupStatistic lookupStat = new LookupStatistic();
-    
+    protected LookupStatisticContainer lookupStat;
     
     public LookupResponseHandler(Context context, KUID lookup) {
         super(context);
@@ -128,24 +124,23 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         this.time += time;
+        lookupStat.addReply();
         
         // VALUE lookup response
         if (isValueLookup() && message instanceof FindValueResponse) {
-            
-            FindValueResponse response = (FindValueResponse)message;
-            
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(ContactNode.toString(nodeId, src) 
-                        + " returned KeyValues for " 
-                        + lookup + " after " 
-                        + queried.size() + " queried Nodes");
-            }
-            
-            if (!finished) {
-                finishValueLookup(lookup, response.getValues(), time());
-            }
-            
-            finished = true;
+                FindValueResponse response = (FindValueResponse)message;
+                
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(ContactNode.toString(nodeId, src) 
+                            + " returned KeyValues for " 
+                            + lookup + " after " 
+                            + queried.size() + " queried Nodes");
+                }
+                
+                if (!finished) {
+                    finishValueLookup(lookup, response.getValues(), time());
+                }
+                finished = true;
         }
         
         // NODE/VALUE lookup response
@@ -199,7 +194,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
             return;
         }
-        
+
+        lookupStat.addTimeout();
         if (finished) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " is finished");
@@ -266,7 +262,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             hopMap.put(node.getNodeID(),new Integer(0));
             ++activeSearches;
             
-            lookupStat.LOOKUP_REQUESTS.incrementStat();
+            lookupStat.addRequest();
             messageDispatcher.send(node, createMessage(lookup), this);
         }
     }
@@ -286,7 +282,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 List nodes = responses.select(lookup, responses.size());
                 finishNodeLookup(lookup, nodes, queryKeys, time);
             }
-            
+            lookupStat.setHops(hop);
+            lookupStat.setTime((int)time);
             finished = true;
             return;
         }
@@ -302,9 +299,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             if(bestToQuery == null || 
                     worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(), lookup)) {
             
-                ContactNode bestResponse = (ContactNode)responses.select(lookup);
                 
                 if (LOG.isTraceEnabled()) {
+                    ContactNode bestResponse = (ContactNode)responses.select(lookup);
                     LOG.trace("Lookup for " + lookup + " terminates with " 
                         + bestResponse + " as the best match after "+
                         hop + " hops and "
@@ -317,6 +314,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     List nodes = responses.select(lookup, responses.size());
                     finishNodeLookup(lookup, nodes, queryKeys, time);
                 }
+                
+                lookupStat.setHops(hop);
+                lookupStat.setTime((int)time);
                 finished = true;
                 return;
             }
@@ -329,6 +329,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             
             MessageDispatcher messageDispatcher = context.getMessageDispatcher();
             
+            ++hop;
             for(int i = 0; i < size; i++) {
                 ContactNode node = (ContactNode)bucketList.get(i);
                 
@@ -337,9 +338,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
                 
                 markAsQueried(node);
-                hopMap.put(node.getNodeID(),new Integer(++hop));
+                hopMap.put(node.getNodeID(),new Integer(hop));
                 ++activeSearches;
-                lookupStat.LOOKUP_REQUESTS.incrementStat();
+                lookupStat.addRequest();
                 messageDispatcher.send(node, createMessage(lookup), this);
             }
         }

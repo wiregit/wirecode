@@ -22,7 +22,7 @@ package de.kapsi.net.kademlia.handler.response;
 import java.util.Collection;
 import java.util.Map;
 
-import com.limegroup.gnutella.dht.statistics.LookupsAggregatedStatistics;
+import com.limegroup.gnutella.dht.statistics.FindNodeLookupStatisticContainer;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -35,7 +35,7 @@ public class FindNodeResponseHandler extends LookupResponseHandler {
     
     public FindNodeResponseHandler(Context context, KUID lookup, FindNodeListener l) {
         super(context, lookup);
-        LookupsAggregatedStatistics.FIND_NODE_LOOKUPS.addLookupStatistic(lookupStat);
+        lookupStat = new FindNodeLookupStatisticContainer(context,lookup);
         this.l = l;
     }
     
