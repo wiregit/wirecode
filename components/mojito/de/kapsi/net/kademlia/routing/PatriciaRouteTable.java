@@ -609,7 +609,7 @@ public class PatriciaRouteTable implements RoutingTable {
         refreshBuckets(force,null);
     }
     
-    public void refreshBuckets(boolean force,BootstrapListener l) throws IOException{
+    public void refreshBuckets(boolean force, BootstrapListener l) throws IOException{
         ArrayList bucketsLookups = new ArrayList();
         long now = System.currentTimeMillis();
         List buckets = bucketsTrie.values();
@@ -624,7 +624,7 @@ public class PatriciaRouteTable implements RoutingTable {
             int length = Math.max(0, bucket.getDepth()-1);
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
-            if(force || ((now - lastTouch) > RouteTableSettings.BUCKET_REFRESH_TIME.getValue()) 
+            if (force || ((now - lastTouch) > RouteTableSettings.BUCKET_REFRESH_TIME.getValue()) 
                     || (bucket.getNodeCount() < K) 
                     || (liveNodes.size() != bucket.getNodeCount())) {
                 //select a random ID with this prefix
@@ -637,14 +637,17 @@ public class PatriciaRouteTable implements RoutingTable {
                 bucketsLookups.add(randomID);
             }
         }
-        if(bucketsLookups.size() == 0) {
-            l.secondPhaseComplete(0,false);
-            return;
-        }
-        BootstrapFindNodeListener listener = new BootstrapFindNodeListener(bucketsLookups,l);
-        for (Iterator iter = bucketsLookups.iterator(); iter.hasNext();) {
-            KUID lookupId = (KUID) iter.next();
-            context.lookup(lookupId,listener);
+        
+        if(bucketsLookups.isEmpty()) {
+            if (l != null) {
+                l.secondPhaseComplete(0L, false);
+            }
+        } else {
+            BootstrapFindNodeListener listener = new BootstrapFindNodeListener(bucketsLookups, l);
+            for (Iterator iter = bucketsLookups.iterator(); iter.hasNext();) {
+                KUID lookupId = (KUID) iter.next();
+                context.lookup(lookupId, listener);
+            }
         }
     }
     
