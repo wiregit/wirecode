@@ -142,6 +142,8 @@ public abstract class Token {
      */
     public static Object parse(byte []data) throws IOException {
         Token t = getNextToken(new BufferChannel(data));
+        if (t == null)
+        	return null;
         t.handleRead();
         return t.getResult();
     }
@@ -157,7 +159,7 @@ public abstract class Token {
             if (!src.hasRemaining())
                 return -1;
             int position = src.position();
-            src.limit(Math.min(src.capacity(),src.position()+dst.remaining()));
+            src.limit(Math.min(src.capacity(),src.position() + dst.remaining()));
             dst.put(src);
             src.limit(src.capacity());
             return src.position() - position;

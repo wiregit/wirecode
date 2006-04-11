@@ -34,6 +34,7 @@ import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
+import com.limegroup.gnutella.util.CoWList;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -107,7 +108,7 @@ public class ManagedTorrent {
 	/*
 	 * Indicates whether this download was stopped.
 	 */
-	private boolean _stopped = true;
+	private volatile boolean _stopped = true;
 	
 	/** Whether the torrent is being verified */
 	private volatile boolean verifying;
@@ -156,7 +157,7 @@ public class ManagedTorrent {
 	/*
 	 * whether to choke all connections
 	 */
-	private boolean _globalChoke = false;
+	private volatile boolean _globalChoke = false;
 
 	/*
 	 * whether this download was paused.
@@ -195,7 +196,7 @@ public class ManagedTorrent {
 		_info.setManagedTorrent(this);
 		_manager = manager;
 		_folder = info.getVerifyingFolder();
-		_connections = new ArrayList();
+		_connections = new CoWList(CoWList.ARRAY_LIST);
 		_processingQueue = new ProcessingQueue("ManagedTorrent");
 		_downloader = new BTDownloader(this, _info);
 		_uploader = new BTUploader(this, _info);
@@ -299,13 +300,13 @@ public class ManagedTorrent {
 			public void run() {
 				initializeTorrent();
 				initializeFolder();
-				if (_stopped)
+				if (_stopped || _complete) //TODO: decide if we should connect to seed.
 					return;
 				// kick off connectors if we already have some addresses
 				if (_peers.size() > 0)
 					_connectionFetcher.schedule(0);
 				// connect to tracker
-				initializeAnnouncer();
+				announceStart();
 				// start the choking / unchoking of connections
 				scheduleRechoke();
 
@@ -419,7 +420,7 @@ public class ManagedTorrent {
 			saveCompleteFiles();
 	}
 
-	private void initializeAnnouncer() {
+	private void announceStart() {
 		// announce ourselves to the trackers
 		for (int i = 0; i < _info.getTrackers().length; i++) {
 			announceBlocking(_info.getTrackers()[i],
@@ -465,18 +466,22 @@ public class ManagedTorrent {
 	 *            the verified chunk
 	 */
 	void notifyOfComplete(int in) {
-		if (LOG.isInfoEnabled())
-			LOG.info("got completed chunk " + in);
+		if (LOG.isDebugEnabled())
+			LOG.debug("got completed chunk " + in);
 		BTHave have = BTHave.createMessage(in);
 		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
 			BTConnection btc = (BTConnection) iter.next();
 			btc.sendHave(have);
 		}
 		_complete = _folder.isComplete();
-		if (LOG.isInfoEnabled())
-			LOG.info("complete is now: " + _complete);
-		if (_complete)
-			saveCompleteFiles();
+		if (_complete && !verifying) {
+			LOG.info("file is complete");
+			enqueueTask(new Runnable(){
+				public void run(){
+					saveCompleteFiles();
+				}
+			});
+		}
 	}
 
 	/**
@@ -649,7 +654,7 @@ public class ManagedTorrent {
 	/**
 	 * private helper method, adding connection
 	 */
-	private synchronized void addConnection(final BTConnection btc) {
+	private void addConnection(final BTConnection btc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add connection " + btc.toString());
 		// this check prevents a few exceptions that may be thrown if a
@@ -667,7 +672,7 @@ public class ManagedTorrent {
 	/**
 	 * private helper method, removing connection
 	 */
-	private synchronized void removeConnection(final BTConnection btc) {
+	private void removeConnection(final BTConnection btc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("removing connection " + btc.toString());
 		_connections.remove(btc);
@@ -698,16 +703,8 @@ public class ManagedTorrent {
 				btc.sendNotInterested();
 			}
 		}
-		Runnable saver = new Runnable() {
-			public void run() {
-				if (LOG.isDebugEnabled())
-					LOG.debug("saving torrent");
-				saveFiles();
-			}
-		};
-		Thread savingThread = new ManagedThread(saver, "TorrentSavingThread");
-		savingThread.setDaemon(true);
-		savingThread.start();
+		saveFiles();
+		announceComplete();
 	}
 
 	/**
@@ -751,8 +748,11 @@ public class ManagedTorrent {
 
 		// remember attempt to save the file
 		_saved = true;
-
-		// announce that the torrent is complete
+	}
+	
+	private void announceComplete() {
+		//TODO: should we announce how much we've downloaded if we just resumed
+		// the torrent?  Its not mentioned in the spec...
 		for (int i = 0; i < _info.getTrackers().length; i++) {
 			announceBlocking(_info.getTrackers()[i],
 					TrackerRequester.EVENT_COMPLETE);
@@ -788,7 +788,7 @@ public class ManagedTorrent {
 	 *            a <tt>TorrentLocation</tt> to check
 	 * @return true if we are apparently already connected to a certain location
 	 */
-	private synchronized boolean isConnectedTo(TorrentLocation to) {
+	private boolean isConnectedTo(TorrentLocation to) {
 		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
 			BTConnection btc = (BTConnection) iter.next();
 			// compare by address only. there's no way of comparing ports
@@ -914,9 +914,9 @@ public class ManagedTorrent {
 	 * @param choke
 	 *            whether to choke all connections.
 	 */
-	private synchronized void setGlobalChoke(boolean choke) {
+	private void setGlobalChoke(boolean choke) {
 		_globalChoke = choke;
-		if (_globalChoke) {
+		if (choke) {
 			for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
 				BTConnection btc = (BTConnection) iter.next();
 				btc.sendChoke();
@@ -959,7 +959,7 @@ public class ManagedTorrent {
 	 */
 	private void announceBlocking(final URL url, final int event) {
 		if (LOG.isDebugEnabled())
-			LOG.debug("connecting to tracker " + url.toString());
+			LOG.debug("connecting to tracker " + url.toString()+" for event "+event);
 		TrackerResponse tr = TrackerRequester.request(url, _info,
 				ManagedTorrent.this, event);
 		handleTrackerResponse(tr, url);
@@ -1058,11 +1058,11 @@ public class ManagedTorrent {
 		return _stopped;
 	}
 
-	public synchronized List getConnections() {
-		return new ArrayList(_connections);
+	public List getConnections() {
+		return _connections;
 	}
 	
-	public synchronized int getNumConnections() {
+	public int getNumConnections() {
 		return _connections.size();
 	}
 

@@ -48,8 +48,14 @@ public class VerifyingFolder {
 	 */
 	private final TorrentFile[] _files;
 
-	/*
+	/**
+	 * Object to lock on during all disk operations.
+	 */
+	private final Object DISK_LOCK = new Object();
+	
+	/**
 	 * The instances RandomAccessFile for all files contained in this torrent
+	 * LOCKING: this reference as well as the elements of the array - DISK_LOCK
 	 */
 	private RandomAccessFile[] _fos = null;
 
@@ -102,7 +108,7 @@ public class VerifyingFolder {
 		pendingRanges = new BlockRangeMap();
 		
 		if (complete) 
-			verifiedBlocks.set(0,_info.getNumBlocks() - 1);
+			verifiedBlocks.set(0,_info.getNumBlocks());
 		else if (data != null)
 			initialize(data);
 	}
@@ -170,49 +176,56 @@ public class VerifyingFolder {
 	 * @param buf
 	 *            an array of byte containing the bytes to write
 	 */
-	private synchronized void writeBlockImpl(BTInterval in, byte[] buf) 
+	private void writeBlockImpl(BTInterval in, byte[] buf) 
 	throws IOException {
 		// is the chunk verified?
 		if (hasBlock(in.getId()))
 			return;
 		
-		long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
-		int written = 0;
-		for (int i = 0; i < _files.length && written < buf.length; i++) {
-			if (startOffset < _files[i].LENGTH) {
-				if (startOffset < 0) {
-					System.out.println("startOffset:"+startOffset+" length:"+_files[i].LENGTH+" i:"+i+" interval ("+in+") written:"+written);
-					System.exit(1);
-				}
-				_fos[i].seek(startOffset);
-				int toWrite = (int) Math.min(_files[i].LENGTH - startOffset,
-						buf.length - written);
-
-				if (_fos[i].length() < startOffset + toWrite)
-					_fos[i].setLength(startOffset + toWrite);
-
-				_fos[i].write(buf, written, toWrite);
-				startOffset += toWrite;
-				written += toWrite;
-			} 
-			startOffset -= _files[i].LENGTH;
+		synchronized(DISK_LOCK) {
+			long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
+			int written = 0;
+			for (int i = 0; i < _files.length && written < buf.length; i++) {
+				if (startOffset < _files[i].LENGTH) {
+					_fos[i].seek(startOffset);
+					int toWrite = (int) Math.min(_files[i].LENGTH - startOffset,
+							buf.length - written);
+					
+					if (_fos[i].length() < startOffset + toWrite)
+						_fos[i].setLength(startOffset + toWrite);
+					
+					_fos[i].write(buf, written, toWrite);
+					startOffset += toWrite;
+					written += toWrite;
+				} 
+				startOffset -= _files[i].LENGTH;
+			}
 		}
 		
-		pendingRanges.removeInterval(in);
-		if (addBlockPart(in)){
-			partialBlocks.remove(in.blockId);
-			if (verify(in.getId())) {
-				verifiedBlocks.set(in.getId());
+		boolean shouldVerify;
+		synchronized(this) {
+			pendingRanges.removeInterval(in);
+			shouldVerify = addBlockPart(in);
+			if (shouldVerify)
+				partialBlocks.remove(in.blockId);
+		}
+		if (shouldVerify){
+			boolean verified = verify(in.getId());
+			synchronized(this) {
+				if (verified) {
+					verifiedBlocks.set(in.getId());
+				} else 
+					_corruptedBytes += buf.length;
+			}
+			if (verified)
 				handleVerified(in.getId());
-			} else 
-				_corruptedBytes += buf.length;
 		}
 	}
 	
 	/**
 	 * @return if the block at pieceNum is ok.
 	 */
-	private synchronized boolean verify(int pieceNum) throws IOException {
+	private boolean verify(int pieceNum) throws IOException {
 		MessageDigest md = _info.getMessageDigest();
 		md.reset();
 		int pieceSize = getPieceSize(pieceNum);
@@ -275,8 +288,10 @@ public class VerifyingFolder {
 				// TODO: decide if files should be moved to the save
 				// location as they are completed.. cool but not trivial
 				try {
-					_fos[index].close();
-					_fos[index] = new RandomAccessFile(file.PATH, "r");
+					synchronized(DISK_LOCK) {
+						_fos[index].close();
+						_fos[index] = new RandomAccessFile(file.PATH, "r");
+					}
 				} catch (FileNotFoundException bs) {
 					ErrorService.error(bs);
 				} catch (IOException ignored){}
@@ -321,12 +336,13 @@ public class VerifyingFolder {
 	 * Opens this VerifyingFolder for writing. MUST be called before anything
 	 * else. If there is no completion size, this fails.
 	 */
-	public synchronized void open() throws IOException {
-		if (_fos != null)
-			throw new IOException("Files already open!");
-		
-		_fos = new RandomAccessFile[_files.length];
-		
+	public void open() throws IOException {
+		synchronized(DISK_LOCK) {
+			if (_fos != null)
+				throw new IOException("Files already open!");
+			
+			_fos = new RandomAccessFile[_files.length];
+		}
 		// whether the data on disk should be re-verified
 		boolean doVerification = this.getBlockSize() == 0;
 		
@@ -339,8 +355,12 @@ public class VerifyingFolder {
 			// if the file is complete, just open it for reading and be done
 			// with it
 			if (isComplete()) {
-				_fos[i] = new RandomAccessFile(file, "r");
+				LOG.info("opening torrent in read-only mode");
+				synchronized(DISK_LOCK) {
+					_fos[i] = new RandomAccessFile(file, "r");
+				}
 			} else {
+				LOG.info("opening torrent in read-write");
 				if (!file.exists()) {
 
 					// Ensure that the directory this file is in exists & is
@@ -357,8 +377,11 @@ public class VerifyingFolder {
 					// a file is missing, so this must be a new download.
 					// if it was not, we need to reverify every file.
 					if (!doVerification) {
-						partialBlocks.clear(); // pretend nothing was downloaded
-						verifiedBlocks.clear();
+						// pretend nothing was downloaded
+						synchronized(this) {
+							partialBlocks.clear(); 
+							verifiedBlocks.clear();
+						}
 						doVerification = true;
 						i = -1; // restart the loop
 						continue;
@@ -367,7 +390,9 @@ public class VerifyingFolder {
 				} 
 				
 				FileUtils.setWriteable(file);
-				_fos[i] = new RandomAccessFile(file, "rw");
+				synchronized(DISK_LOCK) {
+					_fos[i] = new RandomAccessFile(file, "rw");
+				}
 				
 				// if a file exists, try to verify it
 				if (doVerification && file.length() > 0) 
@@ -382,32 +407,36 @@ public class VerifyingFolder {
 	/**
 	 * @return true if the whole torrent has been written and verified
 	 */
-	boolean isComplete() {
+	synchronized boolean isComplete() {
 		return verifiedBlocks.cardinality() == _info.getNumBlocks();
 	}
 
 	/**
 	 * closes all internal RandomAccessFile objects
 	 */
-	public synchronized void close() {
-		if (_fos == null)
-			return;
-		for (int i = 0; i < _fos.length; i++) {
-			try {
-				if (_fos[i] != null)
-					_fos[i].close();
-			} catch (IOException ioe) {
-				// ignored
+	public void close() {
+		synchronized(DISK_LOCK) {
+			if (_fos == null)
+				return;
+			for (int i = 0; i < _fos.length; i++) {
+				try {
+					if (_fos[i] != null)
+						_fos[i].close();
+				} catch (IOException ioe) {
+					// ignored
+				}
 			}
+			_fos = null;
 		}
-		_fos = null;
 	}
 
 	/**
 	 * determines whether the files for this torrent are open.
 	 */
-	public synchronized boolean isOpen() {
-		return _fos != null;
+	public boolean isOpen() {
+		synchronized(DISK_LOCK) {
+			return _fos != null;
+		}
 	}
 
 	/**
@@ -426,7 +455,7 @@ public class VerifyingFolder {
 	 * @return
 	 * @throws IOException
 	 */
-	public synchronized int read(long position, byte[] buf, int offset,
+	public int read(long position, byte[] buf, int offset,
 			int length) throws IOException {
 		
 		if (position < 0)
@@ -436,20 +465,22 @@ public class VerifyingFolder {
 					"buffer to small to store supplied number of bytes");
 		
 		int read = 0;
-		for (int i = 0; i < _files.length && read < length; i++) {
-			while (position < _files[i].LENGTH && read < length) {
-				if (_fos[i].length() < _files[i].LENGTH && position >= _fos[i].length())
-					return read;
-				int toRead = (int) Math.min(_fos[i].length() - position, length
-						- read);
-				_fos[i].seek(position);
-				int t_read = _fos[i].read(buf, read + offset, toRead);
-				if (t_read == -1)
-					throw new IOException("read -1 with offset:"+offset+ " read:"+read+" toRead"+toRead+" position:"+position+" length"+_files[i].LENGTH+" i"+i+" physical length:"+_fos[i].length());
-				position += t_read;
-				read += t_read;
+		synchronized(DISK_LOCK) {
+			for (int i = 0; i < _files.length && read < length; i++) {
+				while (position < _files[i].LENGTH && read < length) {
+					if (_fos[i].length() < _files[i].LENGTH && position >= _fos[i].length())
+						return read;
+					int toRead = (int) Math.min(_fos[i].length() - position, length
+							- read);
+					_fos[i].seek(position);
+					int t_read = _fos[i].read(buf, read + offset, toRead);
+					if (t_read == -1)
+						throw new IOException("read -1 with offset:"+offset+ " read:"+read+" toRead"+toRead+" position:"+position+" length"+_files[i].LENGTH+" i"+i+" physical length:"+_fos[i].length());
+					position += t_read;
+					read += t_read;
+				}
+				position -= _files[i].LENGTH;
 			}
-			position -= _files[i].LENGTH;
 		}
 		return read;
 	}
@@ -622,7 +653,7 @@ public class VerifyingFolder {
 	private void verifyDelayed(int i ) {
 		// 
 		try {
-			wait(QUEUE.size() > 0 ? 10 : 10);
+			Thread.sleep(QUEUE.size() > 0 ? 10 : 10);
 		} catch (InterruptedException killed) {
 			return;
 		}
@@ -640,11 +671,11 @@ public class VerifyingFolder {
 			if (storedException != null)
 				return;
 			try {
-				synchronized(VerifyingFolder.this) {
-					if (verify(pieceNum)) { 
+				if (verify(pieceNum)) { 
+					synchronized(VerifyingFolder.this) {
 						verifiedBlocks.set(pieceNum);
-						handleVerified(pieceNum);
 					}
+					handleVerified(pieceNum);
 				}
 			} catch (IOException bad) {
 				storedException = bad;
