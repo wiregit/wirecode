@@ -58,7 +58,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
             LOG.trace(ContactNode.toString(nodeId, src) + " sent us a Ping");
         }
         
-        networkStats.PINGS_RECEIVED.incrementStat();
+        networkStats.PING_REQUESTS.incrementStat();
         
         PingRequest request = (PingRequest)message;
         PingResponse response = null;

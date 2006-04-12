@@ -66,7 +66,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
                     + " succeeded");
         }
         
-        networkStats.PONGS_RECEIVED.incrementStat();
+        networkStats.PINGS_OK.incrementStat();
         
         PingResponse response = (PingResponse)message;
         SocketAddress externalAddress = response.getSocketAddress();

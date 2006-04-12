@@ -39,6 +39,8 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.RoutingStatisticContainer;
+
 import de.kapsi.net.kademlia.BucketNode;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
@@ -97,8 +99,12 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private int consecutiveFailures = 0;
     
+    private final RoutingStatisticContainer routingStats;
+    
     public PatriciaRouteTable(Context context) {
         this.context = context;
+        
+        routingStats = new RoutingStatisticContainer(context);
         
         nodesTrie = new PatriciaTrie();
         bucketsTrie = new PatriciaTrie();
@@ -113,6 +119,7 @@ public class PatriciaRouteTable implements RoutingTable {
         KUID rootKUID = KUID.MIN_NODE_ID;
         BucketNode root = new BucketNode(rootKUID,0);
         bucketsTrie.put(rootKUID,root);
+        routingStats.BUCKET_COUNT.incrementStat();
     }
     
     public boolean load() {
@@ -227,6 +234,7 @@ public class PatriciaRouteTable implements RoutingTable {
                     pingNode = true;
                 }
                 nodesTrie.put(nodeId,node);
+                routingStats.NODE_COUNT.incrementStat();
                 added = true;
             } else {
             //Three conditions for splitting:
@@ -252,6 +260,7 @@ public class PatriciaRouteTable implements RoutingTable {
                     }
                     
                     List newBuckets = bucket.split();
+                    routingStats.BUCKET_COUNT.incrementStat();
                     //update bucket node count
                     BucketNode leftSplitBucket = (BucketNode) newBuckets.get(0);
                     BucketNode rightSplitBucket = (BucketNode) newBuckets.get(1);
@@ -359,7 +368,7 @@ public class PatriciaRouteTable implements RoutingTable {
         } else {
             node = bucket.removeReplacementNode(nodeId);
             if(node!=null) {
-                if (!node.failure()) {
+                if (!handleNodeFailure(node)) {
                     bucket.addReplacementNode(node);
                 }
                 
@@ -444,6 +453,7 @@ public class PatriciaRouteTable implements RoutingTable {
         }
         //a good time to ping least recently seen node
         if(added) {
+            routingStats.REPLACEMENT_COUNT.incrementStat();
             pingBucketLastRecentlySeenNode(bucket);
             return true;
         } else {
@@ -652,6 +662,7 @@ public class PatriciaRouteTable implements RoutingTable {
             BootstrapFindNodeListener listener = new BootstrapFindNodeListener(bucketsLookups, l);
             for (Iterator iter = bucketsLookups.iterator(); iter.hasNext();) {
                 KUID lookupId = (KUID) iter.next();
+                routingStats.BUCKET_REFRESH_COUNT.incrementStat();
                 context.lookup(lookupId, listener);
             }
         }
@@ -694,9 +705,9 @@ public class PatriciaRouteTable implements RoutingTable {
      * true if it's the case.
      */
     private boolean handleNodeFailure(ContactNode node) {
-        if (node != null) {
-            //node has been alive at least once
-            return node.failure();
+        if ((node != null) && node.failure()) {
+            routingStats.DEAD_NODE_COUNT.incrementStat();
+            return true;
         }
         return false;
     }
@@ -844,7 +855,7 @@ public class PatriciaRouteTable implements RoutingTable {
                         + ContactNode.toString(nodeId, src) 
                         + " responded in " + time + " ms");
             }
-            
+            routingStats.SPOOF_COUNT.incrementStat();
             // Do nothing else! DefaultMessageHandler takes
             // care of everything else!
             //TODO: add bad node to IP Filter

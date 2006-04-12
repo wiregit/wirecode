@@ -12,7 +12,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
     }
     
     public void writeStats(Writer writer) throws IOException {
-        writer.write("Routing Stats:\n");
+        writer.write("Network Stats:\n");
         super.writeStats(writer);
     }
     
@@ -55,7 +55,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
     /**
      * <tt>Statistic</tt> for incoming PONG messages
      */
-    public Statistic PONGS_RECEIVED =
+    public Statistic PINGS_OK =
         new SimpleStatistic();
     
     /**
@@ -67,7 +67,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
     /**
      * <tt>Statistic</tt> for received PING messages
      */
-    public Statistic PINGS_RECEIVED =
+    public Statistic PING_REQUESTS =
         new SimpleStatistic();
     
     /**
