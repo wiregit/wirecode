@@ -387,8 +387,8 @@ public class KUID implements Serializable {
      * Returns the approximate log2. See BigInteger.bitLength()
      * for more info!
      */
-    public int log() {
-        return new BigInteger(1, id).bitLength();
+    public int log2() {
+        return toBigInteger().bitLength();
     }
     
     public String toString() {
