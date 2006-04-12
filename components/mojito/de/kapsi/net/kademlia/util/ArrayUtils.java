@@ -60,7 +60,10 @@ public final class ArrayUtils {
         for(int i = 0; i < data.length; i++) {
             buffer.append(BIN[(data[i] >> 4) & 0xF]).append(BIN[data[i] & 0xF]).append(" ");
         }
-        buffer.setLength(buffer.length()-1);
+        
+        if (buffer.length() > 0) {
+            buffer.setLength(buffer.length()-1);
+        }
         return buffer.toString();
     }
     
