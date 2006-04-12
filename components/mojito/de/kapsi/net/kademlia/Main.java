@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -32,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import com.limegroup.gnutella.dht.statistics.DHTStats;
+import com.limegroup.gnutella.dht.statistics.StatsManager;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -72,7 +76,6 @@ public class Main {
         for(int i = 0; i < count; i++) {
             try {
                 DHT dht = new DHT();
-                
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
                 } else {
@@ -109,6 +112,7 @@ public class Main {
         String loadRT = "load rt";
         String loadDB = "load db";
         String kill = "kill";
+        String stats = "stats";
         String restart = "restart";
         String quit = "quit";
         
@@ -128,6 +132,7 @@ public class Main {
                 loadRT,
                 loadDB,
                 kill,
+                stats,
                 restart,
                 quit
         };
@@ -168,6 +173,10 @@ public class Main {
                     if (dht.isRunning()) {
                         dht.close();
                     }
+                } else if (line.matches(stats)) {
+                    DHTStats dhtStats = dht.getContext().getDHTStats();
+                    OutputStreamWriter writer = new OutputStreamWriter(System.out);
+                    dhtStats.dumpStats(writer);
                 } else if (line.matches(restart)) {
                     if (!dht.isRunning()) {
                         dht = new DHT();
