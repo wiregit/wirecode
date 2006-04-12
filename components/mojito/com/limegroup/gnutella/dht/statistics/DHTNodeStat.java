@@ -17,16 +17,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.gnutella.dht.tests;
+package com.limegroup.gnutella.dht.statistics;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.routing.RoutingTable;
@@ -39,14 +37,18 @@ public class DHTNodeStat implements DHTStats{
     
     private String nodeID;
 
-    private final HashMap valueStores = new HashMap();
-    
-    private final HashMap valueLookups = new HashMap();
+    /**
+     * <tt>List</tt> of all statistics classes.
+     */
+    private volatile List DHT_STATS = new LinkedList();
     
     public DHTNodeStat(Context context) {
         this.context = context;
     }
-
+    
+    public void addStatisticContainer(StatisticContainer statsContainer) {
+        DHT_STATS.add(statsContainer);
+    }
     
     public void dumpDataBase(Writer writer) throws IOException{
         List KeyVals = context.getDatabase().getAllValues();
@@ -56,39 +58,27 @@ public class DHTNodeStat implements DHTStats{
             writer.write("\n");
         }
     }
+    
+    public void dumpStats(Writer writer) throws IOException{
+        if(nodeID == null) {
+            nodeID = context.getLocalNodeID().toHexString();
+        }
+        writer.write(nodeID+"\n");
+        for (Iterator iter = DHT_STATS.iterator(); iter.hasNext();) {
+            StatisticContainer stat = (StatisticContainer) iter.next();
+            stat.writeStats(writer);
+        }
+        writer.write("--------------------------------------------\n");
+    }
 
     public void dumpRouteTable(Writer writer) throws IOException{
         RoutingTable routeTable = context.getRouteTable();
-        Collection nodes = routeTable.getAllNodes();
         if(nodeID == null) {
             nodeID = context.getLocalNodeID().toHexString();
         }
         writer.write(nodeID);
         writer.write(FILE_DELIMITER+routeTable.toString());
         writer.write("\n");
-    }
-    
-    public void dumpGets(Writer writer) throws IOException {
-        for (Iterator iter = valueLookups.values().iterator(); iter.hasNext();) {
-            DHTLookupStat stat = (DHTLookupStat)iter.next();
-            writeNodeStat(writer,stat.toString());
-            writer.write("\n");
-        }
-    }
-
-    public void dumpStores(Writer writer) throws IOException {
-        for (Iterator iter = valueStores.values().iterator(); iter.hasNext();) {
-            DHTLookupStat stat = (DHTLookupStat)iter.next();
-            writeNodeStat(writer,stat.toString());
-            writer.write("\n");
-        }
-    }
-
-
-    public void recordLookup(KeyValue value, long latency, int hops, ContactNode node, boolean success,boolean isStore) {
-        DHTLookupStat stat = new DHTLookupStat(value,latency,hops,node,success);
-        if(isStore) valueStores.put(value.getKey(),stat);
-        else valueLookups.put(value.getKey(),stat);
     }
     
     public void writeNodeStat(Writer writer,String stat) throws IOException {

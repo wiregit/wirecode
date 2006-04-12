@@ -35,6 +35,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -84,14 +86,11 @@ public class MessageDispatcher implements Runnable {
     
     private Filter filter;
     
-    private int sentCount = 0;
-    private long sentSize = 0L;
-    
-    private int receivedCount = 0;
-    private long receivedSize = 0L;
+    private final NetworkStatisticContainer networkStats;
     
     public MessageDispatcher(Context context) {
         this.context = context;
+        networkStats = context.getNetworkStats();
         
         defaultHandler = new DefaultMessageHandler(context);
         pingHandler = new PingRequestHandler(context);
@@ -100,22 +99,23 @@ public class MessageDispatcher implements Runnable {
         storeHandler = new StoreRequestHandler(context);
         
         filter = new Filter();
+        
     }
     
     public int getReceivedMessagesCount() {
-        return receivedCount;
+        return (int)networkStats.RECEIVED_MESSAGES_COUNT.getTotal();
     }
     
     public long getReceivedMessagesSize() {
-        return receivedSize;
+        return (long)networkStats.RECEIVED_MESSAGES_SIZE.getTotal();
     }
     
     public int getSentMessagesCount() {
-        return sentCount;
+        return (int)networkStats.SENT_MESSAGES_COUNT.getTotal();
     }
     
     public long getSentMessagesSize() {
-        return sentSize;
+        return (long)networkStats.SENT_MESSAGES_SIZE.getTotal();
     }
     
     public void stop() throws IOException {
@@ -245,6 +245,7 @@ public class MessageDispatcher implements Runnable {
                 LOG.trace("Received a late Store response from " + ContactNode.toString(nodeId, src));
             }
         }
+        networkStats.LATE_MESSAGES_COUNT.incrementStat();
         ContactNode node = new ContactNode(nodeId,src);
         context.getRouteTable().add(node,true);
     }
@@ -259,8 +260,8 @@ public class MessageDispatcher implements Runnable {
 
             if (receipt.send(channel)) {
                 receipt.sent();
-                sentCount++;
-                sentSize += receipt.dataSize(); // compressed size
+                networkStats.SENT_MESSAGES_COUNT.incrementStat();
+                networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
                 
                 if (receipt.isRequest()) {
                     input.put(receipt.getMessageID(), receipt);
@@ -284,8 +285,8 @@ public class MessageDispatcher implements Runnable {
             buffer.get(data, 0, length);
             
             Message message = InputOutputUtils.deserialize(data);
-            receivedCount++;
-            receivedSize += data.length; // compressed size!
+            networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
+            networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
             
             Receipt receipt = null;
             
@@ -376,8 +377,8 @@ public class MessageDispatcher implements Runnable {
     public void run() {
         long lastCleanup = System.currentTimeMillis();
         
-        sentCount = 0;
-        receivedCount = 0;
+        networkStats.SENT_MESSAGES_COUNT.clearData();
+        networkStats.RECEIVED_MESSAGES_COUNT.clearData();
         
         while(isRunning()) {
             try {
@@ -455,5 +456,5 @@ public class MessageDispatcher implements Runnable {
             }
             return false;
         }
-    }  
+    }
 }

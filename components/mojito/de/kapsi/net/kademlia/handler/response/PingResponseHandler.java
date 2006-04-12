@@ -29,6 +29,8 @@ import java.security.SignatureException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -48,8 +50,11 @@ public class PingResponseHandler extends AbstractResponseHandler {
     
     private PingListener l;
     
+    private final NetworkStatisticContainer networkStats;
+    
     public PingResponseHandler(Context context, PingListener l) {
         super(context);
+        networkStats = context.getNetworkStats();
         this.l = l;
     }
 
@@ -60,6 +65,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
             LOG.trace("Ping to " + ContactNode.toString(nodeId, src) 
                     + " succeeded");
         }
+        
+        networkStats.PONGS_RECEIVED.incrementStat();
         
         PingResponse response = (PingResponse)message;
         SocketAddress externalAddress = response.getSocketAddress();
@@ -95,6 +102,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Ping to " + ContactNode.toString(nodeId, dst) + " failed");
         }
+        
+        networkStats.PINGS_FAILED.incrementStat();
         
         if (l != null) {
             getEventDispatcher().add(new Runnable() {

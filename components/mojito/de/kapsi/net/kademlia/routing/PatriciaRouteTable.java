@@ -50,6 +50,7 @@ import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
@@ -62,7 +63,7 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private static final Log LOG = LogFactory.getLog(PatriciaRouteTable.class);
     
-    private static final int K = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+    private static final int K = KademliaSettings.REPLICATION_PARAMETER.getValue();
     
     private static final int B = RouteTableSettings.DEPTH_LIMIT.getValue();
     
@@ -619,12 +620,17 @@ public class PatriciaRouteTable implements RoutingTable {
             //update bucket if freshness limit has passed
             //OR if it is not full (not complete)
             //OR if there is at least one invalid node inside
-            //OR if forced
+            //OR if forced 
             //TODO: maybe relax this a little bit?
             int length = Math.max(0, bucket.getDepth()-1);
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
-            if (force || ((now - lastTouch) > RouteTableSettings.BUCKET_REFRESH_TIME.getValue()) 
+            //if we are bootstrapping, phase 1 allready took care of the local bucket
+            if(l!=null && liveNodes.contains(context.getLocalNodeID())) {
+                continue;
+            }
+            
+            if(force || ((now - lastTouch) > RouteTableSettings.BUCKET_REFRESH_TIME.getValue()) 
                     || (bucket.getNodeCount() < K) 
                     || (liveNodes.size() != bucket.getNodeCount())) {
                 //select a random ID with this prefix

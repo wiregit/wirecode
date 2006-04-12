@@ -27,6 +27,8 @@ import java.security.SignatureException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -43,8 +45,11 @@ public class PingRequestHandler extends AbstractRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);
     
+    private final NetworkStatisticContainer networkStats;
+    
     public PingRequestHandler(Context context) {
         super(context);
+        networkStats = context.getNetworkStats();
     }
     
     public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
@@ -52,6 +57,8 @@ public class PingRequestHandler extends AbstractRequestHandler {
         if (LOG.isTraceEnabled()) {
             LOG.trace(ContactNode.toString(nodeId, src) + " sent us a Ping");
         }
+        
+        networkStats.PINGS_RECEIVED.incrementStat();
         
         PingRequest request = (PingRequest)message;
         PingResponse response = null;
@@ -61,6 +68,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
                 response = context.getMessageFactory()
                     .createSignedPingResponse(message.getMessageID(), src, 
                             context.getPrivateKey());
+                networkStats.SIGNED_PONGS_SENT.incrementStat();
             } catch (InvalidKeyException e) {
                 LOG.error(e);
             } catch (SignatureException e) {
@@ -69,6 +77,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
         } else {
             response = context.getMessageFactory()
                 .createPingResponse(message.getMessageID(), src);
+            networkStats.PONGS_SENT.incrementStat();
         }
 
         if (response != null) {

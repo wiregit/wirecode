@@ -40,8 +40,8 @@ import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
-import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 /**
  * The DefaultMessageHandler performs basic Kademlia RouteTable 
@@ -96,7 +96,7 @@ public class DefaultMessageHandler extends MessageHandler
         }
 
         if(storeForward) {
-            int k = RouteTableSettings.REPLICATION_PARAMETER.getValue();
+            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
             List closestNodes = routeTable.select(nodeId, k, false, false);

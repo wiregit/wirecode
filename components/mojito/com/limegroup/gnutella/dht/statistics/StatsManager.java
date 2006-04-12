@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.gnutella.dht.tests;
+package com.limegroup.gnutella.dht.statistics;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -27,19 +27,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 
+
 public class StatsManager {
     
     public static final StatsManager INSTANCE = new StatsManager();
     
     private static final String LOCALDB_FILE = "storedData";
     
-    private static final String VALUE_STORES_FILE = "publishedData";
-    
-    private static final String VALUE_LOOKUPS_FILE = "lookedupData";
+    private static final String STATS_FILE = "dhtStats";
     
     private static final String ROUTINGTABLE_FILE = "routingTable";
     
     private final ArrayList dhtNodeStats = new ArrayList();
+    
     
     private StatsManager() {
     }
@@ -52,9 +52,7 @@ public class StatsManager {
         try {
             File dbFile = new File(LOCALDB_FILE);
             BufferedWriter dbWriter = new BufferedWriter(new FileWriter(dbFile));
-            File storesFile = new File(VALUE_STORES_FILE);
-            BufferedWriter storesWriter = new BufferedWriter(new FileWriter(storesFile));
-            File lookupsFile = new File(VALUE_LOOKUPS_FILE);
+            File lookupsFile = new File(STATS_FILE);
             BufferedWriter lookupsWriter = new BufferedWriter(new FileWriter(lookupsFile));
             File routingTableFile = new File(ROUTINGTABLE_FILE);
             BufferedWriter routingTableWriter = new BufferedWriter(new FileWriter(routingTableFile));
@@ -64,15 +62,12 @@ public class StatsManager {
                 stat.dumpDataBase(dbWriter);
                 //write routing table
                 stat.dumpRouteTable(routingTableWriter);
-                //write gets
-                stat.dumpGets(lookupsWriter);
-                //write stores
-                stat.dumpStores(storesWriter);
+                //write other stats
+                stat.dumpStats(lookupsWriter);
             }
             dbWriter.close();
             routingTableWriter.close();
             lookupsWriter.close();
-            storesWriter.close();
         }catch (IOException e) {
             e.printStackTrace();
         }
