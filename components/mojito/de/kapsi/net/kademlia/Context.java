@@ -93,7 +93,7 @@ public class Context implements Runnable {
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
     
-    private boolean bootstrapped = false;
+    private volatile boolean bootstrapped = false;
     private boolean running = false;
     
     private final Timer scheduler = new Timer(true);
@@ -341,7 +341,7 @@ public class Context implements Runnable {
             return;
         }
         
-        bootstrapped = false;
+        bootstrapped = true;
         running = true;
         try {
             
@@ -402,15 +402,15 @@ public class Context implements Runnable {
     }
     
     public void lookup(KUID lookup, FindNodeListener l) throws IOException {
-        
         FindNodeResponseHandler handler 
             = new FindNodeResponseHandler(this, lookup, l);
         
         handler.lookup();
     }
     
-    public void bootstrap(SocketAddress address, BootstrapListener l) throws IOException {
-        ping(address, new BootstrapManager(address, l));
+    public void bootstrap(SocketAddress address, BootstrapListener listener) throws IOException {
+        setBootstrapped(false);
+        ping(address, new BootstrapManager(address, listener));
     }
     
     /** store */
@@ -538,7 +538,7 @@ public class Context implements Runnable {
                 routeTable.refreshBuckets(false, this);
             } catch (IOException err) {
                 LOG.error(err);
-                secondPhaseComplete(totalTime, false);
+                secondPhaseComplete(getLocalNodeID(), false, totalTime);
             }
         }
 
@@ -552,13 +552,13 @@ public class Context implements Runnable {
             }
         }
 
-        public void secondPhaseComplete(final long time, final boolean foundNodes) {
+        public void secondPhaseComplete(final KUID nodeId, final boolean foundNodes, final long time) {
             setBootstrapped(true);
             
             if (listener != null) {
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.secondPhaseComplete(time, foundNodes);
+                        listener.secondPhaseComplete(nodeId, foundNodes, time);
                     }
                 });
             }

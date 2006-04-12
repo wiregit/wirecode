@@ -85,7 +85,7 @@ public class PlanetLab {
                             }
                         }
 
-                        public void secondPhaseComplete(long time, boolean foundNodes) {
+                        public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
                             StringBuffer buffer = new StringBuffer();
                             buffer.append(index).append(": finished bootstrapping PHASE 2 in ");
                             buffer.append(time).append(" ms ");

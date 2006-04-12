@@ -265,7 +265,7 @@ public class Main {
                 System.out.println("*** Bootstraping phase 1" + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
             }
 
-            public void secondPhaseComplete(long time, boolean foundNodes) {
+            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
                 System.out.println("*** Bootstraping phase 2" + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
@@ -382,16 +382,19 @@ public class Main {
         
         private long time = 0L;
         
+        private boolean finished = false;
+        
         public BootstrapUtil(List dhts) {
             this.dhts = dhts;
         }
 
         public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
 
-        public void secondPhaseComplete(long time,boolean foundNodes) {
+        public synchronized void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
             if (time >= 0) {
                 this.time += time;
             }
+            
             bootstrap();
         }
 
@@ -403,8 +406,9 @@ public class Main {
                 } catch (IOException err) {
                     err.printStackTrace();
                 }
-            } else if (dhts.size() > 1) {
-                System.out.println("*** Bootstraping finished in " + time + " ms");
+            } else if (!finished && !dhts.isEmpty()) {
+                finished = true;
+                System.out.println("*** Bootstraping finished in " + time + " ms ");
             }
         }
     }

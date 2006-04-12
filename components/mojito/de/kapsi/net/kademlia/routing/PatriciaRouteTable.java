@@ -620,8 +620,8 @@ public class PatriciaRouteTable implements RoutingTable {
     public void refreshBuckets(boolean force, BootstrapListener l) throws IOException{
         ArrayList bucketsLookups = new ArrayList();
         long now = System.currentTimeMillis();
-        List buckets = bucketsTrie.values();
-        for (Iterator iter = buckets.iterator(); iter.hasNext();) {
+        
+        for (Iterator iter = bucketsTrie.values().iterator(); iter.hasNext();) {
             BucketNode bucket = (BucketNode) iter.next();
             long lastTouch = bucket.getTimeStamp();
             //update bucket if freshness limit has passed
@@ -653,10 +653,10 @@ public class PatriciaRouteTable implements RoutingTable {
         
         if(bucketsLookups.isEmpty()) {
             if (l != null) {
-                l.secondPhaseComplete(0L, false);
+                l.secondPhaseComplete(context.getLocalNodeID(), false, 0L);
             }
         } else {
-            BootstrapFindNodeListener listener = new BootstrapFindNodeListener(bucketsLookups, l);
+            BootstrapPhaseTwoManager listener = new BootstrapPhaseTwoManager(bucketsLookups, l);
             for (Iterator iter = bucketsLookups.iterator(); iter.hasNext();) {
                 KUID lookupId = (KUID) iter.next();
                 routingStats.BUCKET_REFRESH_COUNT.incrementStat();
@@ -786,27 +786,33 @@ public class PatriciaRouteTable implements RoutingTable {
         return buffer.toString();
     }
     
-    private class BootstrapFindNodeListener implements FindNodeListener{
+    private class BootstrapPhaseTwoManager implements FindNodeListener {
 
         private List queryList;
         
-        private BootstrapListener bootstrapListener;
+        private BootstrapListener listener;
         
         private boolean foundNodes;
         
-        private BootstrapFindNodeListener(List queryList,BootstrapListener listener) {
+        private BootstrapPhaseTwoManager(List queryList, BootstrapListener listener) {
             this.queryList = queryList;
-            this.bootstrapListener = listener;
+            this.listener = listener;
         }
         
-        public synchronized void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time) {
+        public void foundNodes(final KUID lookup, Collection nodes, Map queryKeys, final long time) {
             if(!foundNodes && !nodes.isEmpty()) {
                 foundNodes = true;
             }
+            
             queryList.remove(lookup);
             if(queryList.isEmpty() 
-                    && bootstrapListener != null) {
-                bootstrapListener.secondPhaseComplete(time,foundNodes);
+                    && listener != null) {
+                
+                context.fireEvent(new Runnable() {
+                    public void run() {
+                        listener.secondPhaseComplete(lookup, foundNodes, time);
+                    }
+                });   
             }
         }
     }

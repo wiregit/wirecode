@@ -38,9 +38,9 @@ public interface BootstrapListener {
     /**
      * Called after the second and final bootstrap phase has finished. In 
      * the second phase we are refreshing the furthest away Buckets. 
-     * 
-     * @param time Time in milliseconds
+     * @param nodeId the KUID we used during phase two
      * @param foundNodes wheather or not Nodes were found
+     * @param time Time in milliseconds
      */
-    public void secondPhaseComplete(long time, boolean foundNodes);
+    public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time);
 }

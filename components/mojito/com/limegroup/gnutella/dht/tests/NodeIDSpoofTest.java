@@ -92,7 +92,7 @@ public class NodeIDSpoofTest {
             public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
             }
 
-            public void secondPhaseComplete(long time, boolean foundNodes) {
+            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
                 System.out.println();
                 System.out.println("1) Sent count: " + dht2.getSentMessagesCount());
                 System.out.println("1) Recv count: " + dht2.getReceivedMessagesCount());
@@ -121,7 +121,7 @@ public class NodeIDSpoofTest {
         t2.start();
         dht2.bootstrap(new InetSocketAddress("localhost",port),new BootstrapListener(){
             public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
-            public void secondPhaseComplete(long time, boolean foundNodes) {
+            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
                 System.out.println("2");
                 //REPLACE!
                 try {
