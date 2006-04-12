@@ -269,6 +269,14 @@ public class Context implements Runnable {
         return messageDispatcher.isOpen();
     }
     
+    public void setBootstrapped(boolean bootstrapped) {
+        this.bootstrapped = bootstrapped;
+    }
+    
+    public boolean isBootstrapped() {
+        return isRunning() && bootstrapped;
+    }
+    
     public int getReceivedMessagesCount() {
         return messageDispatcher.getReceivedMessagesCount();
     }
@@ -354,6 +362,9 @@ public class Context implements Runnable {
         } finally {
             keyValuePublisher.stop();
             scheduler.cancel();
+            
+            running = false;
+            bootstrapped = false;
         }
     }
 
@@ -370,7 +381,6 @@ public class Context implements Runnable {
         
         if (messageDispatcherThread != null 
                 && Thread.currentThread() != messageDispatcherThread) {
-            System.out.println(">>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<");
             eventDispatcher.run(event);
         } else {
             eventDispatcher.add(event);
@@ -489,7 +499,7 @@ public class Context implements Runnable {
         return networkStats;
     }
     
-    private class BootstrapManager implements PingListener, FindNodeListener {
+    private class BootstrapManager implements BootstrapListener, PingListener, FindNodeListener {
         
         private long totalTime = 0L;
         
@@ -505,50 +515,52 @@ public class Context implements Runnable {
             totalTime += time;
             
             try {
+                // Ping was successful, start with lookup...
                 lookup(getLocalNodeID(), this);
             } catch (IOException err) {
                 LOG.error(err);
-                
-                if (listener != null) {
-                    fireEvent(new Runnable() {
-                        public void run() {
-                            listener.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time);
-                        }
-                    });
-                }
+                initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time);
             }
         }
 
         public void pingTimeout(KUID nodeId, SocketAddress address) {
-            if (listener != null) {
-                fireEvent(new Runnable() {
-                    public void run() {
-                        listener.initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
-                    }
-                });
-            }
+            initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
         }
 
         public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, final long time) {
             
             totalTime += time;
+            initialPhaseComplete(getLocalNodeID(), nodes, totalTime);
             
-            if (listener != null) {
-                listener.initialPhaseComplete(getLocalNodeID(), nodes, totalTime);
-            }
-            
-            //now refresh furthest buckets too! 
             try {
-                routeTable.refreshBuckets(false, listener);
+                // Begin with PHASE 2 of bootstrapping where we
+                // refresh the furthest away buckets...
+                routeTable.refreshBuckets(false, this);
             } catch (IOException err) {
                 LOG.error(err);
-                if (listener != null) {
-                    fireEvent(new Runnable() {
-                        public void run() {
-                            listener.secondPhaseComplete(time, false);
-                        }
-                    });
-                }
+                secondPhaseComplete(totalTime, false);
+            }
+        }
+
+        public void initialPhaseComplete(final KUID nodeId, final Collection nodes, final long time) {
+            if (listener != null) {
+                fireEvent(new Runnable() {
+                    public void run() {
+                        listener.initialPhaseComplete(nodeId, nodes, time);
+                    }
+                });
+            }
+        }
+
+        public void secondPhaseComplete(final long time, final boolean foundNodes) {
+            setBootstrapped(true);
+            
+            if (listener != null) {
+                fireEvent(new Runnable() {
+                    public void run() {
+                        listener.secondPhaseComplete(time, foundNodes);
+                    }
+                });
             }
         }
     }

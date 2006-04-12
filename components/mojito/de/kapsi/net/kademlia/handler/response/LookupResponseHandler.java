@@ -70,11 +70,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     private PatriciaTrie toQuery = new PatriciaTrie();
     
     /** 
-<<<<<<< LookupResponseHandler.java
      * Map of ContactNode -> QueryKey
-=======
-     * A map of the query keys for this lookup
->>>>>>> 1.24.2.3
      */
     private Map queryKeys = new HashMap();
     
@@ -186,12 +182,16 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
             }
             
-            ContactNode node = new ContactNode(nodeId, src);
-            addResponse(node);
-            
-            QueryKey queryKey = response.getQueryKey();
-            if (queryKey != null) {
-                queryKeys.put(node, queryKey);
+            // Don't add the ContactNode to responses if it didn't
+            // return any contacts because we've no QueryKey for it.
+            if (!values.isEmpty()) {
+                ContactNode node = new ContactNode(nodeId, src);
+                addResponse(node);
+                
+                QueryKey queryKey = response.getQueryKey();
+                if (queryKey != null) {
+                    queryKeys.put(node, queryKey);
+                }
             }
             
             int hop = ((Integer)hopMap.get(nodeId)).intValue();

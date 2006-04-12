@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -35,6 +36,7 @@ import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.util.CollectionUtils;
 
 public class LookupRequestHandler extends AbstractRequestHandler {
     
@@ -46,6 +48,14 @@ public class LookupRequestHandler extends AbstractRequestHandler {
 
     public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
         
+        /*if (!context.isBootstrapped()) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(context.getLocalNode() 
+                        + " has not finished Bootstrapping. Cannot respond to LookupRequest!");
+            }
+            return;
+        }*/
+        
         LookupRequest request = (LookupRequest)message;
         KUID lookup = request.getLookupID();
         
@@ -53,20 +63,21 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             LOG.trace(ContactNode.toString(nodeId, src) + " is trying to lookup " + lookup);
         }
         
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        List bucketList 
-            = context.getRouteTable().select(lookup, k, false, false);
+        QueryKey queryKey = null;
+        List bucketList = Collections.EMPTY_LIST;
         
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Sending back: " + bucketList);
+        if (context.isBootstrapped()) {
+            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+            bucketList = context.getRouteTable().select(lookup, k, false, false);
+            
+            if (bucketList.contains(context.getLocalNode())) {
+                queryKey = QueryKey.getQueryKey(src);
+            } 
         }
         
-        QueryKey queryKey = null;
-        
-        // TODO condition doesn't work
-        if (bucketList.contains(context.getLocalNode())) {
-            queryKey = QueryKey.getQueryKey(src);
-        } 
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));
+        }
         
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request.getMessageID(), queryKey, bucketList);
