@@ -37,6 +37,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
+import de.kapsi.net.kademlia.settings.DatabaseSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 /**
@@ -76,7 +77,8 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         
         StoreResponse response = (StoreResponse)message;
         
-        int requesting = response.getRequestCount();
+        int maxOnce = DatabaseSettings.MAX_STORE_FORWARD_ONCE.getValue();
+        int requesting = Math.min(maxOnce, response.getRequestCount());
         
         // TODO: What to do with the staus?
         Collection storeStatus = response.getStoreStatus();

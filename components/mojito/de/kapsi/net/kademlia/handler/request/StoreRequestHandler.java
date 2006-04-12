@@ -41,6 +41,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
+import de.kapsi.net.kademlia.settings.DatabaseSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 
 public class StoreRequestHandler extends AbstractRequestHandler {
@@ -117,10 +118,11 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             }
         }
         
-        // TODO do not request all values at once
-        StoreResponse response 
-            = context.getMessageFactory().createStoreResponse(request.getMessageID(), remaining, stats);
+        int maxOnce = DatabaseSettings.MAX_STORE_FORWARD_ONCE.getValue();
+        int keyValues = Math.min(maxOnce, remaining);
         
+        StoreResponse response 
+            = context.getMessageFactory().createStoreResponse(request.getMessageID(), keyValues, stats);
         context.getMessageDispatcher().send(src, response, null);
     }
 }

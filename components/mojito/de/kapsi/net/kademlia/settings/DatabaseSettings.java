@@ -40,6 +40,14 @@ public final class DatabaseSettings extends LimeDHTProps {
         = FACTORY.createSettableIntSetting("MAX_KEY_VALUES", 5, "max_key_values", 1, 10);
     
     // TODO reasonable min and max values
+    public static final IntSetting MAX_STORE_FORWARD
+        = FACTORY.createSettableIntSetting("MAX_STORE_FORWARD", 16384, "max_store_forward", 16384, 65536);
+    
+    // TODO reasonable min and max values
+    public static final IntSetting MAX_STORE_FORWARD_ONCE
+        = FACTORY.createSettableIntSetting("MAX_STORE_FORWARD_ONCE", 5, "max_store_forward_once", 1, 10);
+    
+    // TODO reasonable min and max values
     public static final LongSetting REPUBLISH_INTERVAL
         = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", 3L*60L*1000L, "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
 }
