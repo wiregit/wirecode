@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -92,6 +93,7 @@ public class Context implements Runnable {
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
     
+    private boolean bootstrapped = false;
     private boolean running = false;
     
     private final Timer scheduler = new Timer(true);
@@ -331,9 +333,11 @@ public class Context implements Runnable {
             return;
         }
         
+        bootstrapped = false;
         running = true;
         try {
             
+            // TODO use ManagedThread
             Thread keyValuePublisherThread 
                 = new Thread(keyValuePublisher, "KeyValuePublisherThread");
             keyValuePublisherThread.setDaemon(true);
@@ -366,6 +370,7 @@ public class Context implements Runnable {
         
         if (messageDispatcherThread != null 
                 && Thread.currentThread() != messageDispatcherThread) {
+            System.out.println(">>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<");
             eventDispatcher.run(event);
         } else {
             eventDispatcher.add(event);
@@ -430,13 +435,23 @@ public class Context implements Runnable {
     }
     
     private static final int MAX_HISTORY = 20;
-    private List history = new ArrayList(MAX_HISTORY);
+    private LinkedList history = new LinkedList();
     
     public long getAzureusSize() {
         KUID localNodeId = getLocalNodeID();
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        
+        // TODO only live nodes?
         List nodes = routeTable.select(localNodeId, k, false, false);
+        
+        // TODO accoriding to Az code it works only with more than
+        // two Nodes
+        
+        // See Azureus DHTControlImpl.estimateDHTSize()
+        // Di = localNodeID xor NodeIDi
+        // Dc = sum(i * Di) / sum(i * i)
+        // Size = 2**160 / Dc
         
         BigInteger sum1 = BigInteger.ZERO;
         BigInteger sum2 = BigInteger.ZERO;
@@ -459,7 +474,7 @@ public class Context implements Runnable {
         
         history.add(new Long(estimatedSize));
         if (history.size() >= MAX_HISTORY) {
-            history.remove(0);
+            history.removeFirst();
         }
         
         long sum3 = 0L;
@@ -468,6 +483,10 @@ public class Context implements Runnable {
         }
         
         return sum3/history.size();
+    }
+    
+    public NetworkStatisticContainer getNetworkStats() {
+        return networkStats;
     }
     
     private class BootstrapManager implements PingListener, FindNodeListener {
@@ -582,8 +601,4 @@ public class Context implements Runnable {
             }
         }
     }
-    
-    public NetworkStatisticContainer getNetworkStats() {
-        return networkStats;
-    }  
 }
