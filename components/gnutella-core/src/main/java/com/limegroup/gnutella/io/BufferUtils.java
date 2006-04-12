@@ -42,6 +42,15 @@ public class BufferUtils {
         return read;
     }
     
+    public static long transfer(ByteBuffer from, ByteBuffer [] to,
+    		int offset, int length) {
+    	long read = 0;
+    	for (int i = offset; i < offset + length ;i++)
+    		read += transfer(from, to[i]);
+    	
+    	return read;
+    }
+    
     /**
      * Reads data from the ByteBuffer, inserting it into the StringBuffer,
      * until a full line is read.  Returns true if a full line is read, false

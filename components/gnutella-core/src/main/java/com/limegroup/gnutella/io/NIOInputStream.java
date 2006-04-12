@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.ScatteringByteChannel;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -17,7 +18,7 @@ import java.nio.channels.SocketChannel;
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
  */
-class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
+class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChannel {
     
     private final NIOSocket handler;
     private InterestReadChannel channel;
@@ -58,6 +59,14 @@ class NIOInputStream implements ChannelReadObserver, InterestReadChannel {
      */
     public int read(ByteBuffer toBuffer) {
         return BufferUtils.transfer(buffer, toBuffer);
+    }
+    
+    public long read(ByteBuffer[] dst, int offset, int length) {
+    	return BufferUtils.transfer(buffer,dst, offset, length);
+    }
+    
+    public long read(ByteBuffer [] dst) {
+    	return read(dst,0, dst.length);
     }
     
     /**

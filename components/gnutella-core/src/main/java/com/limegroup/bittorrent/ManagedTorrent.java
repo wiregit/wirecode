@@ -1,12 +1,8 @@
 package com.limegroup.bittorrent;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,58 +12,27 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.util.CoWList;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.util.Sockets;
 
 public class ManagedTorrent {
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
-
-	/*
-	 * final String we send as a header for bittorrent connections
-	 */
-	private static final String BITTORRENT_PROTOCOL = "BitTorrent protocol";
-
-	/*
-	 * same as above as byte array
-	 */
-	private static byte[] BITTORRENT_PROTOCOL_BYTES;
-	static {
-		try {
-			BITTORRENT_PROTOCOL_BYTES = BITTORRENT_PROTOCOL
-					.getBytes(Constants.ASCII_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			ErrorService.error(e);
-		}
-	}
-
-	/*
-	 * extension bytes
-	 */
-	static final byte[] EXTENSION_BYTES = new byte[] { 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x02 };
 
 	/*
 	 * extension bytes
@@ -84,16 +49,6 @@ public class ManagedTorrent {
 	 * used to order BTConnections according to the average download speed.
 	 */
 	private static final Comparator DOWNLOAD_SPEED_COMPARATOR = new DownloadSpeedComparator();
-
-	/*
-	 * Max concurrent connection threads
-	 */
-	private static final int MAX_CONNECTORS = 5;
-
-	/*
-	 * time in milliseconds between connection attempts
-	 */
-	private static final int TIME_BETWEEN_CONNECTIONS = 20 * 1000;
 
 	/*
 	 * time in milliseconds between choking/unchoking of connections
@@ -200,7 +155,7 @@ public class ManagedTorrent {
 		_processingQueue = new ProcessingQueue("ManagedTorrent");
 		_downloader = new BTDownloader(this, _info);
 		_uploader = new BTUploader(this, _info);
-		_connectionFetcher = new BTConnectionFetcher();
+		_connectionFetcher = new BTConnectionFetcher(this,_manager.getPeerId());
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
 	}
@@ -228,63 +183,6 @@ public class ManagedTorrent {
 	 */
 	public boolean isComplete() {
 		return _complete;
-	}
-
-	/**
-	 * Accept a bittorrent connection
-	 * 
-	 * @param sock
-	 *            the <tt>Socket</tt> for which to accept the connection
-	 */
-	public void acceptConnection(Socket sock, byte[] extensionBytes) {
-		TorrentLocation ep;
-
-		LOG.debug("got incoming connection "
-				+ sock.getInetAddress().getHostAddress());
-
-		try {
-			InputStream in = sock.getInputStream();
-			// read peer ID, everything else has already been consumed
-			byte[] peerId = new byte[20];
-			for (int i = 0; i < peerId.length; i += in.read(peerId))
-				;
-
-			ep = new TorrentLocation(sock.getInetAddress(), sock.getPort(),
-					new String(peerId, Constants.ASCII_ENCODING),
-					extensionBytes);
-		} catch (IOException ioe) {
-			IOUtils.close(sock);
-			return;
-		}
-
-		if (!allowIncomingConnection(ep)) {
-			LOG.debug("no more connection slots");
-			IOUtils.close(sock);
-			return;
-		}
-
-		// send our part of the handshake
-		try {
-			ByteBuffer handshake = ByteBuffer.allocate(68);
-			handshake.put((byte) BITTORRENT_PROTOCOL.length());
-			handshake.put(BITTORRENT_PROTOCOL_BYTES);
-			handshake.put(EXTENSION_BYTES);
-			handshake.put(getInfoHash());
-			handshake.put(_manager.getPeerId());
-			handshake.flip();
-			sock.getChannel().write(handshake);
-
-			BTConnection btc = new BTConnection((NIOSocket) sock, _info, ep,
-					this);
-
-			// now add the connection to the Choker and to this:
-			addConnection(btc);
-			if (LOG.isDebugEnabled())
-				LOG.debug("added incoming connection "
-						+ sock.getInetAddress().getHostAddress());
-		} catch (IOException ioe) {
-			IOUtils.close(sock);
-		}
 	}
 
 	/**
@@ -322,6 +220,9 @@ public class ManagedTorrent {
 	public void stop() {
 		if (LOG.isDebugEnabled())
 			LOG.debug("Stopping torrent", new Exception());
+		
+		_stopped = true;
+		
 		enqueueTask(new Runnable() {
 			public void run() {
 
@@ -342,7 +243,6 @@ public class ManagedTorrent {
 				// we stopped, removing torrent from active list of
 				// TorrentManager
 				_manager.removeTorrent(ManagedTorrent.this, _complete);
-				_stopped = true;
 				if (LOG.isDebugEnabled())
 					LOG.debug("Torrent stopped!");
 			}
@@ -373,7 +273,7 @@ public class ManagedTorrent {
 		return false;
 	}
 
-	synchronized void connectionClosed(BTConnection btc) {
+	void connectionClosed(BTConnection btc) {
 		if (btc.isWorthRetrying()) {
 			TorrentLocation ep = new TorrentLocation(btc.getEndpoint());
 			ep.strike();
@@ -387,8 +287,9 @@ public class ManagedTorrent {
 		_couldNotSave = false;
 		_globalChoke = false;
 		_paused = false;
-		_badPeers = new FixedSizeExpiringSet(500, 60 * 60 * 1000);
-		_peers = new HashSet();
+		_badPeers = Collections.synchronizedSet(
+				new FixedSizeExpiringSet(500, 60 * 60 * 1000));
+		_peers = Collections.synchronizedSet(new HashSet());
 		if (_info.getLocations() != null)
 			_peers.addAll(_info.getLocations());
 
@@ -547,7 +448,7 @@ public class ManagedTorrent {
 	 *            a TorrentLocation for this download
 	 * @return true if the location was accepted
 	 */
-	public synchronized boolean addEndpoint(TorrentLocation to) {
+	public boolean addEndpoint(TorrentLocation to) {
 		if (_peers.contains(to) || isConnectedTo(to))
 			return false;
 		if (!IPFilter.instance().allow(to.getAddress()))
@@ -559,6 +460,10 @@ public class ManagedTorrent {
 			return true;
 		}
 		return false;
+	}
+	
+	void addBadEndpoint(TorrentLocation to) {
+		_badPeers.add(to);
 	}
 
 	/**
@@ -610,7 +515,7 @@ public class ManagedTorrent {
 	/**
 	 * @return true if we need any more connections
 	 */
-	private boolean needsMoreConnections() {
+	boolean needsMoreConnections() {
 		if (RouterService.acceptedIncomingConnection())
 			return _connections.size() < BittorrentSettings.TORRENT_MAX_CONNECTIONS
 					.getValue() * 4 / 5;
@@ -618,12 +523,16 @@ public class ManagedTorrent {
 				.getValue();
 	}
 
+	public void acceptConnection(Socket sock, byte[] bytes) {
+		_connectionFetcher.acceptConnection(sock, bytes);
+	}
+	
 	/**
 	 * @param ep
 	 *            the TorrentLocation for the connection to add
 	 * @return true if we want this connection, false if not.
 	 */
-	private boolean allowIncomingConnection(TorrentLocation ep) {
+	boolean allowIncomingConnection(TorrentLocation ep) {
 		// happens if we stopped this torrent but we still receive an incoming
 		// connection because it took some time to read the headers & stuff
 		if (_stopped)
@@ -654,7 +563,7 @@ public class ManagedTorrent {
 	/**
 	 * private helper method, adding connection
 	 */
-	private void addConnection(final BTConnection btc) {
+	void addConnection(final BTConnection btc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add connection " + btc.toString());
 		// this check prevents a few exceptions that may be thrown if a
@@ -799,32 +708,36 @@ public class ManagedTorrent {
 		return false;
 	}
 
-	private synchronized long calculateWaitTime() {
+	long calculateWaitTime() {
 		if (_peers.size() == 0)
 			return 0;
 		long ret = Long.MAX_VALUE;
 		long now = System.currentTimeMillis();
 
-		for (Iterator iter = _peers.iterator(); iter.hasNext();) {
-			ret = Math.min(ret, ((TorrentLocation) iter.next())
-					.getWaitTime(now));
-			if (ret == 0)
-				return 0;
+		synchronized(_peers) {
+			for (Iterator iter = _peers.iterator(); iter.hasNext();) {
+				ret = Math.min(ret, ((TorrentLocation) iter.next())
+						.getWaitTime(now));
+				if (ret == 0)
+					return 0;
+			}
 		}
 		return ret;
 	}
 
-	private synchronized TorrentLocation getTorrentLocation() {
+	TorrentLocation getTorrentLocation() {
 		long now = System.currentTimeMillis();
-		Iterator iter = _peers.iterator();
-		while (iter.hasNext()) {
-			TorrentLocation temp = (TorrentLocation) iter.next();
-			if (temp.isBusy(now))
-				continue;
-			iter.remove();
-			// check before connecting
-			if (!isConnectedTo(temp)) {
-				return (temp);
+		synchronized(_peers) {
+			Iterator iter = _peers.iterator();
+			while (iter.hasNext()) {
+				TorrentLocation temp = (TorrentLocation) iter.next();
+				if (temp.isBusy(now))
+					continue;
+				iter.remove();
+				// check before connecting
+				if (!isConnectedTo(temp)) {
+					return (temp);
+				}
 			}
 		}
 		return null;
@@ -836,10 +749,10 @@ public class ManagedTorrent {
 	private void scheduleRechoke() {
 		Runnable choker = new Runnable() {
 			public void run() {
-				if (LOG.isDebugEnabled())
-					LOG.debug("scheduling rechoke");
 				if (_stopped)
 					return;
+				if (LOG.isDebugEnabled())
+					LOG.debug("scheduling rechoke");
 				rechoke();
 				// re-schedule if not stopped
 				RouterService.schedule(this, RECHOKE_TIMEOUT, 0);
@@ -970,7 +883,7 @@ public class ManagedTorrent {
 	 * 
 	 * @see com.limegroup.gnutella.Downloader#getNumberOfAlternateLocations()
 	 */
-	public synchronized int getNumberOfAlternateLocations() {
+	public int getNumberOfAlternateLocations() {
 		return _peers.size();
 	}
 
@@ -979,7 +892,7 @@ public class ManagedTorrent {
 	 * 
 	 * @see com.limegroup.gnutella.Downloader#getNumberOfInvalidAlternateLocations()
 	 */
-	public synchronized int getNumberOfInvalidAlternateLocations() {
+	public int getNumberOfInvalidAlternateLocations() {
 		return _badPeers.size();
 	}
 
@@ -1066,10 +979,6 @@ public class ManagedTorrent {
 		return _connections.size();
 	}
 
-	public synchronized Set getPeers() {
-		return new HashSet(_peers);
-	}
-
 	public int getNumBadPeers() {
 		return _badPeers.size();
 	}
@@ -1078,12 +987,14 @@ public class ManagedTorrent {
 		return _peers.size();
 	}
 
-	public synchronized int getNumBusyPeers() {
+	public  int getNumBusyPeers() {
 		int busy = 0;
 		long now = System.currentTimeMillis();
-		for (Iterator iter = _peers.iterator(); iter.hasNext();)
-			if (((TorrentLocation) iter.next()).isBusy(now))
-				busy++;
+		synchronized(_peers) {
+			for (Iterator iter = _peers.iterator(); iter.hasNext();)
+				if (((TorrentLocation) iter.next()).isBusy(now))
+					busy++;
+		}
 		return busy;
 	}
 
@@ -1095,231 +1006,48 @@ public class ManagedTorrent {
 		return _downloader;
 	}
 
-	private class BTConnectionFetcher implements Runnable {
-		/*
-		 * the List of concurrent connector threads
-		 */
-		private List _connectorThreads;
 
-		private boolean _isScheduled;
-
-		BTConnectionFetcher() {
-			_isScheduled = false;
-			_connectorThreads = new Vector();
-		}
-
-		/**
-		 * schedule a new connection attempt if non is scheduled so far
-		 * 
-		 * @param waitTime
-		 *            the number of milliseconds to wait before starting the
-		 *            BTConnectionFetcher
-		 */
-		public void schedule(long waitTime) {
-			if (!_isScheduled) {
-				_isScheduled = true;
-				if (hasStopped()) 
-					return;
-				if (LOG.isDebugEnabled())
-					LOG.debug("rescheduling connection fetcher in " + waitTime);
-				RouterService.schedule(this, waitTime, 0);
-			}
-		}
-
-		/**
-		 * main method
-		 */
-		public void run() {
-			_isScheduled = false;
-			if (shouldStop())
-				// this is one of two places where a running torrent may
-				// decide to stop
-				stop();
-
-			while (!_stopped && _connectorThreads.size() < MAX_CONNECTORS
-					&& needsMoreConnections() && hasNonBusyLocations()) {
-				fetchConnection();
-				if (LOG.isDebugEnabled())
-					LOG.debug("started connection fetcher: "
-							+ _connectorThreads.size());
-			}
-			if (needsMoreConnections() && _peers.size() > 0) {
-				long waitTime;
-				if (_connectorThreads.size() == 0)
-					// we have busy sources... try scheduling another connection
-					// attempt...
-					waitTime = calculateWaitTime();
-				else
-					waitTime = TIME_BETWEEN_CONNECTIONS;
-
-				schedule(waitTime);
-			}
-		}
-
-		/**
-		 * whether or not continuing is hopeless
-		 */
-		private boolean shouldStop() {
-			if (_connections.size() == 0 && _peers.size() == 0) {
-				if (_trackerFailures > MAX_TRACKER_FAILURES) {
-					if (LOG.isDebugEnabled())
-						LOG.debug("giving up, trackerFailures "
-								+ _trackerFailures);
-					return true;
-				} else if (_manager.shouldYield()) {
-					if (LOG.isDebugEnabled())
-						LOG.debug("making way for other downloader");
-					return true;
-				}
-			} else if (_complete && _manager.shouldYield()) {
-				// we stop if we uploaded more than we downloaded
-				// AND there are other torrents waiting for a slot
-				if (LOG.isDebugEnabled())
-					LOG.debug("uploaded data "
-							+ _uploader.getTotalAmountUploaded()
-							+ " downloaded data "
-							+ _downloader.getTotalAmountDownloaded());
-				if (_uploader.getTotalAmountUploaded() > _downloader
-						.getTotalAmountDownloaded())
-					return true;
-			}
-			return false;
-		}
-
-		/**
-		 * Starts a connector thread if possible
-		 */
-		private void fetchConnection() {
-			Runnable connector = new Runnable() {
-				public void run() {
-					try {
-						if (LOG.isDebugEnabled())
-							LOG.debug("starting connection thread");
-						connect();
-					} finally {
-						Assert.that(_connectorThreads.contains(Thread
-								.currentThread()));
-						_connectorThreads.remove(Thread.currentThread());
-					}
-				}
-			};
-			Thread con = new ManagedThread(connector);
-			con.setName("BTConnectThread");
-			con.setDaemon(true);
-			_connectorThreads.add(con);
-			con.start();
-		}
-
-		/**
-		 * This method tries to establish one more connection.
-		 */
-		private void connect() {
-			TorrentLocation ep = getTorrentLocation();
-
-			if (ep == null) {
-				if (LOG.isDebugEnabled())
-					LOG.debug("no hosts to connect to");
-				return;
-			}
-
-			try {
-				NIOSocket sock = (NIOSocket) Sockets.connect(ep.getAddress(),
-						ep.getPort(), Constants.TIMEOUT);
-				initializeOutgoing(sock);
-			} catch (IOException ioe) {
-				if (LOG.isDebugEnabled())
-					LOG.debug("Connection failed: " + ep);
-				ep.strike();
-				if (!ep.isOut())
-					addEndpoint(ep);
-				else
-					_badPeers.add(ep);
-			}
-		}
-
-		/**
-		 * initializes an outgoing connection
-		 * 
-		 * @param sock
-		 *            the <tt>Socket</tt> for the connection we are about to
-		 *            initialize
-		 * @throws IOException
-		 */
-		private void initializeOutgoing(NIOSocket sock) throws IOException {
-			sock.setSoTimeout(Constants.TIMEOUT);
-			if (LOG.isDebugEnabled())
-				LOG.debug("created outgoing connection "
-						+ sock.getInetAddress().getHostAddress());
-			OutputStream out = sock.getOutputStream();
-			InputStream in = sock.getInputStream();
-			byte[] extbytes = new byte[8];
-			byte[] peerId = new byte[20];
-			try {
-				out.write((byte) BITTORRENT_PROTOCOL.length());
-				out.write(BITTORRENT_PROTOCOL_BYTES);
-				out.write(EXTENSION_BYTES);
-				out.write(getInfoHash());
-				out.write(_manager.getPeerId());
-
-				int protocolVersion = in.read();
-				if (protocolVersion != BITTORRENT_PROTOCOL.length())
-					throw new IOException("unknown BT protocol version"
-							+ protocolVersion);
-
-				byte[] protocol = new byte[BITTORRENT_PROTOCOL.length()];
-
-				for (int i = 0; i < protocol.length; i += in.read(protocol))
-					;
-
-				if (!BITTORRENT_PROTOCOL.equals(new String(protocol,
-						Constants.ASCII_ENCODING)))
-					throw new IOException("unknown BT protocol version "
-							+ new String(protocol, Constants.ASCII_ENCODING));
-
-				for (int i = 0; i < extbytes.length; i += in.read(extbytes))
-					;
-
-				byte[] infoHash = new byte[20];
-				for (int i = 0; i < infoHash.length; i += in.read(infoHash))
-					;
-
-				if (!Arrays.equals(infoHash, getInfoHash()))
-					throw new IOException("bad info hash "
-							+ new String(infoHash, Constants.ASCII_ENCODING));
-
-				for (int i = 0; i < peerId.length; i += in.read(peerId))
-					;
-				// we should check the peerId according to the protocol, but we
-				// are
-				// too lazy...
-			} catch (IOException ioe) {
-				if (LOG.isDebugEnabled())
-					LOG.debug(ioe);
-				IOUtils.close(sock);
-				throw ioe;
-			}
-			TorrentLocation p = new TorrentLocation(sock.getInetAddress(), sock
-					.getPort(), new String(peerId, Constants.ASCII_ENCODING),
-					extbytes);
-			BTConnection btc = new BTConnection(sock, _info, p,
-					ManagedTorrent.this, true);
-			if (LOG.isDebugEnabled())
-				LOG.debug("added outgoing connection "
-						+ sock.getInetAddress().getHostAddress());
-
-			// finally add the connection
-			addConnection(btc);
-		}
-	}
-
-	private synchronized boolean hasNonBusyLocations() {
+	boolean hasNonBusyLocations() {
 		long now = System.currentTimeMillis();
-		Iterator iter = _peers.iterator();
-		while (iter.hasNext()) {
-			TorrentLocation to = (TorrentLocation) iter.next();
-			if (!to.isBusy(now))
+		synchronized(_peers) {
+			Iterator iter = _peers.iterator();
+			while (iter.hasNext()) {
+				TorrentLocation to = (TorrentLocation) iter.next();
+				if (!to.isBusy(now))
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * whether or not continuing is hopeless
+	 */
+	boolean shouldStop() {
+		if (_connections.size() == 0 && _peers.size() == 0) {
+			if (_trackerFailures > MAX_TRACKER_FAILURES) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("giving up, trackerFailures "
+							+ _trackerFailures);
+				return true;
+			} else if (_manager.shouldYield()) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("making way for other downloader");
+				return true;
+			}
+		} else if (_complete && _manager.shouldYield()) {
+			// we stop if we uploaded more than we downloaded
+			// AND there are other torrents waiting for a slot
+			if (LOG.isDebugEnabled())
+				LOG.debug("uploaded data "
+						+ _uploader.getTotalAmountUploaded()
+						+ " downloaded data "
+						+ _downloader.getTotalAmountDownloaded());
+			if (_uploader.getTotalAmountUploaded() > _downloader
+					.getTotalAmountDownloaded())
 				return true;
 		}
 		return false;
 	}
+	
 }
