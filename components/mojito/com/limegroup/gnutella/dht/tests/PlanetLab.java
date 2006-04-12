@@ -86,11 +86,17 @@ public class PlanetLab {
                         }
 
                         public void secondPhaseComplete(long time, boolean foundNodes) {
-                            if (!foundNodes) {
-                                System.out.println(index + ": failed to bootstrap at PHASE 2");
+                            StringBuffer buffer = new StringBuffer();
+                            buffer.append(index).append(": finished bootstrapping PHASE 2 in ");
+                            buffer.append(time).append(" ms ");
+                            
+                            if (foundNodes) {
+                                buffer.append("with new nodes");
                             } else {
-                                System.out.println(index + ": finished bootstraping PHASE 2 in " + time + " ms");
+                                buffer.append("with no new nodes");
                             }
+                            
+                            System.out.println(buffer.toString());
                             
                             synchronized(lock) {
                                 lock.notify();
