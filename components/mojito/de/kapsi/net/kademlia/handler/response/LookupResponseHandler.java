@@ -162,7 +162,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         if (!finished && message instanceof FindNodeResponse) {
             
             FindNodeResponse response = (FindNodeResponse)message;
-            
+            int hop = ((Integer)hopMap.get(nodeId)).intValue();
             Collection values = response.getValues();
             for(Iterator it = values.iterator(); it.hasNext(); ) {
                 ContactNode node = (ContactNode)it.next();
@@ -173,7 +173,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                         LOG.trace("Adding " + node + " to the yet-to-be queried list");
                     }
                     
-                    addYetToBeQueried(node);
+                    addYetToBeQueried(node,hop+1);
                     
                     // Add them to the routing table as not alive
                     // contacts. We're likely going to add them
@@ -194,10 +194,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
             }
             
-            int hop = ((Integer)hopMap.get(nodeId)).intValue();
-            
             --activeSearches;
-            lookupStep(++hop);
+            lookupStep(hop);
         }
     }
     
@@ -260,7 +258,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         // Add the Nodes to the yet-to-be query list
         for(int i = bucketList.size()-1; i >= 0; i--) {
-            addYetToBeQueried((ContactNode)bucketList.get(i));
+            addYetToBeQueried((ContactNode)bucketList.get(i),0);
         }
         
         markAsQueried(context.getLocalNode());
@@ -278,7 +276,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
             
             markAsQueried(node);
-            hopMap.put(node.getNodeID(),new Integer(0));
             ++activeSearches;
             
             lookupStat.addRequest();
@@ -357,7 +354,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
                 
                 markAsQueried(node);
-                hopMap.put(node.getNodeID(),new Integer(hop));
                 ++activeSearches;
                 lookupStat.addRequest();
                 messageDispatcher.send(node, createMessage(lookup), this);
@@ -402,10 +398,11 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         return queried.contains(node.getNodeID());
     }
     
-    private void addYetToBeQueried(ContactNode node) {
+    private void addYetToBeQueried(ContactNode node, int hop) {
         if(!queried.contains(node) 
                 && !node.equals(context.getLocalNode())) {
             toQuery.put(node.getNodeID(), node);
+            hopMap.put(node.getNodeID(),new Integer(hop));
         }
     }
     

@@ -169,6 +169,6 @@ public class PlanetLab {
     private static void shutdown() {
         statsManager.writeStatsToFiles();
         
-        System.exit(0);
+//        System.exit(0);
     }
 }

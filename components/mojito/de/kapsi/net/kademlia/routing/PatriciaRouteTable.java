@@ -51,7 +51,6 @@ import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
-import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
@@ -229,12 +228,13 @@ public class PatriciaRouteTable implements RoutingTable {
                 
                 if(knowToBeAlive) {
                     node.alive();
+                    routingStats.LIVE_NODE_COUNT.incrementStat();
                     touchBucket(nodeId);
                 } else {
                     pingNode = true;
+                    routingStats.UNKNOWN_NODE_COUNT.incrementStat();
                 }
                 nodesTrie.put(nodeId,node);
-                routingStats.NODE_COUNT.incrementStat();
                 added = true;
             } else {
             //Three conditions for splitting:
@@ -314,10 +314,8 @@ public class PatriciaRouteTable implements RoutingTable {
                 LOG.trace("Pinging node: "+node);
             }
             
-            PingRequest ping = context.getMessageFactory().createPingRequest();
             try {
-                //will get handled by DefaultMessageHandler
-                context.getMessageDispatcher().send(node, ping, null);
+                context.ping(node,null);
             } catch (IOException e) {}
         }
         
@@ -482,10 +480,9 @@ public class PatriciaRouteTable implements RoutingTable {
                     + leastRecentlySeen);
         }
         
-        PingRequest ping = context.getMessageFactory().createPingRequest();
         try {
             //will get handled by DefaultMessageHandler
-            context.getMessageDispatcher().send(leastRecentlySeen, ping, null);
+            context.ping(leastRecentlySeen,null);
         } catch (IOException e) {
             LOG.error("Pinging the least recently seen Node failed", e);
         }
