@@ -87,6 +87,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
             }
         }
         
+        context.addEstimatedRemoteSize(response.getEstimatedSize());
+        
         if (l != null) {
             getEventDispatcher().add(new Runnable() {
                 public void run() {

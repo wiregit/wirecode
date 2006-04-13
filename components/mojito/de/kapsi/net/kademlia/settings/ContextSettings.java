@@ -38,6 +38,18 @@ public class ContextSettings extends LimeDHTProps {
     public static final LongSetting DISPATCH_EVENTS_EVERY
         = FACTORY.createLongSetting("DISPATCH_EVENTS_EVERY", 50L);
     
+    public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
+        = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", /*60L **/ 1000L);
+    
+    public static final IntSetting MAX_LOCAL_HISTORY_SIZE
+        = FACTORY.createIntSetting("MAX_LOCAL_HISTORY_SIZE", 20);
+    
+    public static final IntSetting MAX_REMOTE_HISTORY_SIZE
+        = FACTORY.createIntSetting("MAX_REMOTE_HISTORY_SIZE", 10);
+    
+    public static final BooleanSetting COUNT_REMOTE_SIZE
+        = FACTORY.createSettableBooleanSetting("COUNT_REMOTE_SIZE", false, "count_remote_size");
+    
     public static void deleteNodeID(SocketAddress address) {
         String key = (address != null) ? address.toString() : "null";
         try {

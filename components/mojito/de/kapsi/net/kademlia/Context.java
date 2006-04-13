@@ -103,6 +103,12 @@ public class Context implements Runnable {
     
     private final NetworkStatisticContainer networkStats;
     
+    private long lastEstimateTime = 0L;
+    private int estimatedSize = 0;
+    
+    private LinkedList localSizeHistory = new LinkedList();
+    private LinkedList remoteSizeHistory = new LinkedList();
+    
     public Context() {
         
         try {
@@ -365,6 +371,11 @@ public class Context implements Runnable {
             
             running = false;
             bootstrapped = false;
+            
+            lastEstimateTime = 0L;
+            estimatedSize = 0;
+            localSizeHistory.clear();
+            remoteSizeHistory.clear();
         }
     }
 
@@ -439,15 +450,35 @@ public class Context implements Runnable {
         handler.lookup();
     }
     
-    public long getMainlineSize() {
-        long k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        return k * (long)Math.pow(2.0d, routeTable.getBucketCount()-1);
+    public int size() {
+        if (!isRunning()) {
+            return 0;
+        }
+        
+        if ((System.currentTimeMillis() - lastEstimateTime) 
+                >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
+            
+            estimatedSize = getEstimatedSize();
+            lastEstimateTime = System.currentTimeMillis();
+        }
+        
+        return estimatedSize;
     }
     
-    private static final int MAX_HISTORY = 20;
-    private LinkedList history = new LinkedList();
+    public void addEstimatedRemoteSize(int remoteSize) {
+        if (remoteSize <= 0 || !ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
+            return;
+        }
+        
+        synchronized (remoteSizeHistory) {
+            remoteSizeHistory.add(new Integer(remoteSize));
+            if (remoteSizeHistory.size() >= ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
+                remoteSizeHistory.removeFirst();
+            }
+        }
+    }
     
-    public long getAzureusSize() {
+    private int getEstimatedSize() {
         KUID localNodeId = getLocalNodeID();
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
@@ -476,23 +507,46 @@ public class Context implements Runnable {
             sum2 = sum2.add(j.pow(2));
         }
         
-        long estimatedSize = 0L;
+        int estimatedSize = 0;
         if (!sum1.equals(BigInteger.ZERO)) {
-            estimatedSize = KUID.MAX_NODE_ID.toBigInteger().multiply(sum2).divide(sum1).longValue();
+            estimatedSize = KUID.MAX_NODE_ID.toBigInteger().multiply(sum2).divide(sum1).intValue();
         }
-        estimatedSize = Math.max(1L, estimatedSize);
+        estimatedSize = Math.max(1, estimatedSize);
         
-        history.add(new Long(estimatedSize));
-        if (history.size() >= MAX_HISTORY) {
-            history.removeFirst();
-        }
-        
-        long sum3 = 0L;
-        for(Iterator it = history.iterator(); it.hasNext(); ) {
-            sum3 += ((Long)it.next()).longValue();
+        localSizeHistory.add(new Integer(estimatedSize));
+        if (localSizeHistory.size() >= ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
+            localSizeHistory.removeFirst();
         }
         
-        return sum3/history.size();
+        int localSizeSum = 0;
+        for(Iterator it = localSizeHistory.iterator(); it.hasNext(); ) {
+            localSizeSum += ((Integer)it.next()).intValue();
+        }
+        
+        // If somebody is playing around with MAX_HISTORY_SIZE
+        // then localSizeHistory.size() might be zero which
+        // would cause a div by zero error
+        int localSize = (!localSizeHistory.isEmpty() ? localSizeSum/localSizeHistory.size() : 0);
+        
+        int combinedSize = localSize;
+        if (ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
+            synchronized (remoteSizeHistory) {
+                if (remoteSizeHistory.size() >= 3) {
+                    Integer[] remote = (Integer[])remoteSizeHistory.toArray(new Integer[0]);
+                    Arrays.sort(remote);
+                    
+                    // Skip the smallest and largest value
+                    int count = 1;
+                    while(count < remote.length-1) {
+                        combinedSize += remote[count++].intValue();
+                    }
+                    combinedSize /= count;
+                }
+            }
+        }
+        
+        // There's always we!
+        return Math.max(1, combinedSize);
     }
     
     public NetworkStatisticContainer getNetworkStats() {

@@ -63,6 +63,10 @@ public class MessageFactory {
         return KUID.createRandomMessageID();
     }
     
+    private int getEstimatedSize() {
+        return context.size();
+    }
+    
     public PingRequest createPingRequest() {
         return new PingRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID());
     }
@@ -72,7 +76,7 @@ public class MessageFactory {
     }
     
     public PingResponse createPingResponse(KUID messageId, SocketAddress address) {
-        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, address);
+        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, address, getEstimatedSize());
     }
     
     /**
@@ -84,7 +88,7 @@ public class MessageFactory {
             throws SignatureException, InvalidKeyException {
         
         byte[] signature = CryptoHelper.sign(privateKey, messageId.getBytes());
-        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, address, signature);
+        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, address, getEstimatedSize(), signature);
     }
     
     public FindNodeRequest createFindNodeRequest(KUID lookup) {

@@ -55,6 +55,10 @@ public class DHT implements Runnable {
         context.run();
     }
     
+    public int size() {
+        return context.size();
+    }
+    
     public ContactNode getLocalNode() {
         return context.getLocalNode();
     }

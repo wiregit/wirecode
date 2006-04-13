@@ -143,9 +143,12 @@ public class MessageInputStream extends DataInputStream {
     
     private PingResponse readPong(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
+        
         SocketAddress addr = readSocketAddress();
+        int estimatedSize = readInt();
+        
         byte[] signature = readSignature();
-        return new PingResponse(vendor, version, nodeId, messageId, addr, signature);
+        return new PingResponse(vendor, version, nodeId, messageId, addr, estimatedSize, signature);
     }
     
     private FindNodeRequest readFindNodeRequest(int vendor, int version, 

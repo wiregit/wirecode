@@ -26,23 +26,32 @@ import de.kapsi.net.kademlia.messages.ResponseMessage;
 
 public class PingResponse extends ResponseMessage {
     
-    private final SocketAddress address;
+    private SocketAddress address;
+    private int estimatedSize;
     
     public PingResponse(int vendor, int version, KUID nodeId, 
-            KUID messageId, SocketAddress address) {
+            KUID messageId, SocketAddress address, int estimatedSize) {
         super(vendor, version, nodeId, messageId);
+        
         this.address = address;
+        this.estimatedSize = estimatedSize;
     }
     
     public PingResponse(int vendor, int version, KUID nodeId, 
-            KUID messageId, SocketAddress address, byte[] signature) {
+            KUID messageId, SocketAddress address, int estimatedSize, byte[] signature) {
         super(vendor, version, nodeId, messageId, signature);
+        
         this.address = address;
+        this.estimatedSize = estimatedSize;
     }
     
     /** My external address */
     public SocketAddress getSocketAddress() {
         return address;
+    }
+    
+    public int getEstimatedSize() {
+        return estimatedSize;
     }
     
     public String toString() {

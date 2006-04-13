@@ -54,6 +54,10 @@ public class LimeDHTProps /* extends AbstractSettings */ {
             return new BooleanSetting(value);
         }
         
+        public BooleanSetting createSettableBooleanSetting(String key, boolean value, String simppKey) {
+            return new BooleanSetting(value);
+        }
+        
         public IntSetting createIntSetting(String key, int value) {
             return new IntSetting(value);
         }
