@@ -100,8 +100,8 @@ public class Main {
         String help = "help";
         String info = "info";
         String svitch = "switch \\d{1,}";
-        String ping = "ping (\\w|\\d|\\.)+ \\d{1,5}";
-        String bootstrap = "bootstrap (\\w|\\d|\\.)+ \\d{1,5}";
+        String ping = "ping .+ \\d{1,5}";
+        String bootstrap = "bootstrap .+ \\d{1,5}";
         String put = "put (key|kuid) (\\w|\\d)+ (value|file) .+";
         String get = "get (key|kuid) (\\w|\\d)+";
         String getr = "getr (key|kuid) (\\w|\\d)+";
