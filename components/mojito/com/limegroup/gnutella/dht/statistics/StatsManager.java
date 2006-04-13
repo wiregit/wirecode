@@ -41,6 +41,7 @@ public class StatsManager {
     
     private final ArrayList dhtNodeStats = new ArrayList();
     
+    private String outputDir = "";
     
     private StatsManager() {
     }
@@ -51,11 +52,11 @@ public class StatsManager {
 
     public void writeStatsToFiles() {
         try {
-            File dbFile = new File(LOCALDB_FILE);
+            File dbFile = new File(outputDir+LOCALDB_FILE);
             BufferedWriter dbWriter = new BufferedWriter(new FileWriter(dbFile));
-            File lookupsFile = new File(STATS_FILE);
+            File lookupsFile = new File(outputDir+STATS_FILE);
             BufferedWriter lookupsWriter = new BufferedWriter(new FileWriter(lookupsFile));
-            File routingTableFile = new File(ROUTINGTABLE_FILE);
+            File routingTableFile = new File(outputDir+ROUTINGTABLE_FILE);
             BufferedWriter routingTableWriter = new BufferedWriter(new FileWriter(routingTableFile));
             for (Iterator iter = dhtNodeStats.iterator(); iter.hasNext();) {
                 DHTStats stat = (DHTStats) iter.next();
@@ -72,5 +73,9 @@ public class StatsManager {
         }catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public void setOutputDir(String path) {
+        outputDir = path;
     }
 }

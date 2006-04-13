@@ -3,7 +3,7 @@ package com.limegroup.gnutella.dht.statistics;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 
-public class FindValueLookupStatisticContainer extends LookupStatisticContainer{
+public class FindValueLookupStatisticContainer extends SingleLookupStatisticContainer{
     
     /**
      * <tt>Statistic</tt> for all outgoing lookup messages for this lookup.

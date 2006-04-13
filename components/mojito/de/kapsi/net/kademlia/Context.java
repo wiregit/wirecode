@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.statistics.DHTNodeStat;
 import com.limegroup.gnutella.dht.statistics.DHTStats;
+import com.limegroup.gnutella.dht.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
 
 import de.kapsi.net.kademlia.db.Database;
@@ -102,6 +103,7 @@ public class Context implements Runnable {
     private DHTStats dhtStats = null;
     
     private final NetworkStatisticContainer networkStats;
+    private final GlobalLookupStatisticContainer globalLookupStats;
     
     private long lastEstimateTime = 0L;
     private int estimatedSize = 0;
@@ -122,6 +124,7 @@ public class Context implements Runnable {
         dhtStats = new DHTNodeStat(this);
         
         networkStats = new NetworkStatisticContainer(this);
+        globalLookupStats = new GlobalLookupStatisticContainer(this);
         
         keyPair = CryptoHelper.createKeyPair();
 
@@ -553,6 +556,10 @@ public class Context implements Runnable {
         return networkStats;
     }
     
+    public GlobalLookupStatisticContainer getGlobalLookupStats() {
+        return globalLookupStats;
+    }
+    
     private class BootstrapManager implements BootstrapListener, PingListener, FindNodeListener {
         
         private long totalTime = 0L;
@@ -592,7 +599,7 @@ public class Context implements Runnable {
                 routeTable.refreshBuckets(false, this);
             } catch (IOException err) {
                 LOG.error(err);
-                secondPhaseComplete(getLocalNodeID(), false, totalTime);
+                secondPhaseComplete(getLocalNodeID(), false, 0);
             }
         }
 

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.dht.statistics;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 
-public class FindNodeLookupStatisticContainer extends LookupStatisticContainer {
+public class FindNodeLookupStatisticContainer extends SingleLookupStatisticContainer {
     
     /**
      * <tt>Statistic</tt> for all outgoing lookup messages for this lookup.
@@ -42,27 +42,32 @@ public class FindNodeLookupStatisticContainer extends LookupStatisticContainer {
     }
     
     public void setHops(int hops) {
+        super.setHops(hops);
         FIND_NODE_LOOKUP_HOPS.addData(hops);
         FIND_NODE_LOOKUP_HOPS.storeCurrentStat();
     }
     
     public void setTime(int time) {
+        super.setTime(time);
         FIND_NODE_LOOKUP_TIME.addData(time);
         FIND_NODE_LOOKUP_TIME.storeCurrentStat();
     }
 
 
     public void addReply() {
+        super.addReply();
         FIND_NODE_LOOKUP_REPLIES.incrementStat();
     }
 
 
     public void addRequest() {
+        super.addRequest();
         FIND_NODE_LOOKUP_REQUESTS.incrementStat();
     }
 
 
     public void addTimeout() {
+        super.addTimeout();
         FIND_NODE_LOOKUP_TIMEOUTS.incrementStat();
     }
 

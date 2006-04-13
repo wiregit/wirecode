@@ -32,7 +32,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.dht.statistics.LookupStatisticContainer;
+import com.limegroup.gnutella.dht.statistics.SingleLookupStatisticContainer;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
@@ -109,7 +109,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     /**
      * The statistics for this lookup
      */
-    protected LookupStatisticContainer lookupStat;
+    protected SingleLookupStatisticContainer lookupStat;
     
     /**
      * The global lookup timeout
@@ -258,7 +258,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         // Add the Nodes to the yet-to-be query list
         for(int i = bucketList.size()-1; i >= 0; i--) {
-            addYetToBeQueried((ContactNode)bucketList.get(i),0);
+            addYetToBeQueried((ContactNode)bucketList.get(i),1);
         }
         
         markAsQueried(context.getLocalNode());

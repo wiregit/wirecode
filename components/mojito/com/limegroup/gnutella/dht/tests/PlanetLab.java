@@ -19,6 +19,7 @@
  
 package com.limegroup.gnutella.dht.tests;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 public class PlanetLab {
 
     private static final StatsManager statsManager = StatsManager.INSTANCE;
+    
+    private static final String outputDir = "OUTBOUND/";
     
     public static List createDHTs(int port, int number) {
         
@@ -132,6 +135,15 @@ public class PlanetLab {
             System.err.println("PlanetLab <port> <number of instances> [<bootstrap host> <bootstrap port> <test>]");
             System.exit(-1);
         }
+        
+        File file = new File(outputDir);
+        if(!file.exists() || !file.isDirectory()) {
+            file.mkdir();
+        } else {
+            file.delete();
+            file.mkdir();
+        }
+        statsManager.setOutputDir(outputDir);
         
         int port = Integer.parseInt(args[0]);
         int number = Integer.parseInt(args[1]);
