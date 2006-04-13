@@ -75,5 +75,5 @@ public final class DatabaseSettings extends LimeDHTProps {
      * TODO reasonable min and max values
      */
     public static final LongSetting REPUBLISH_INTERVAL
-        = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", 3L*60L*1000L, "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
+        = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", 30L*60L*1000L, "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
 }

@@ -70,9 +70,15 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             bucketList = context.getRouteTable().select(lookup, k, false, false);
             
+            //are we one of the k closest nodes we know of?
             if (bucketList.contains(context.getLocalNode())) {
                 queryKey = QueryKey.getQueryKey(src);
-            } 
+            } else { //another chance: one of the k closest live nodes?
+                List liveNodesList = context.getRouteTable().select(lookup, k, true, false);
+                if(liveNodesList.contains(context.getLocalNode())) {
+                    queryKey = QueryKey.getQueryKey(src);
+                }
+            }
         } else {
             queryKey = QueryKey.getQueryKey(src);
         }
