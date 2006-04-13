@@ -73,6 +73,8 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             if (bucketList.contains(context.getLocalNode())) {
                 queryKey = QueryKey.getQueryKey(src);
             } 
+        } else {
+            queryKey = QueryKey.getQueryKey(src);
         }
         
         if (LOG.isTraceEnabled()) {
