@@ -5,24 +5,23 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.handshaking.BTHandshaker;
+import com.limegroup.bittorrent.handshaking.OutgoingBTHandshaker;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.io.InterestScatteringByteChannel;
-import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -38,7 +37,7 @@ public class BTConnectionFetcher implements Runnable {
 	/*
 	 * same as above as byte array
 	 */
-	private static byte[] BITTORRENT_PROTOCOL_BYTES;
+	public static byte[] BITTORRENT_PROTOCOL_BYTES;
 	static {
 		try {
 			BITTORRENT_PROTOCOL_BYTES = BITTORRENT_PROTOCOL
@@ -67,17 +66,19 @@ public class BTConnectionFetcher implements Runnable {
 	/*
 	 * the List of concurrent connector threads
 	 */
-	private final Set _connectors = 
+	final Set fetchers = 
 		Collections.synchronizedSet(new HashSet());
 	
 	private volatile boolean _isScheduled;
 	
-	private final ManagedTorrent _torrent;
+	final ManagedTorrent _torrent;
 
 	/**
 	 * The fixed outgoing handshake for this torrent.
 	 */
-	private final ByteBuffer _handshake;
+	final ByteBuffer _handshake;
+	
+	private boolean shutdown;
 	
 	BTConnectionFetcher(ManagedTorrent torrent, byte[]peerId) {
 		_isScheduled = false;
@@ -114,7 +115,10 @@ public class BTConnectionFetcher implements Runnable {
 	/**
 	 * main method
 	 */
-	public void run() {
+	public synchronized void run() {
+		if(shutdown)
+			return;
+		
 		_isScheduled = false;
 		
 		if (_torrent.shouldStop()) {
@@ -123,18 +127,23 @@ public class BTConnectionFetcher implements Runnable {
 		}
 
 		while (!_torrent.hasStopped() && 
-				_connectors.size() < MAX_CONNECTORS &&
+				fetchers.size() < MAX_CONNECTORS &&
 				_torrent.needsMoreConnections() && 
 				_torrent.hasNonBusyLocations()) {
 			fetchConnection();
 			if (LOG.isDebugEnabled())
 				LOG.debug("started connection fetcher: "
-						+ _connectors.size());
+						+ fetchers.size());
 		}
 	}
 
 
-	private void reschedule() {
+	void reschedule() {
+		synchronized(this) {
+			if(shutdown)
+				return;
+		}
+		
 		if (_torrent.needsMoreConnections()) {
 			long waitTime = 
 				Math.max(_torrent.calculateWaitTime(), TIME_BETWEEN_CONNECTIONS);
@@ -156,8 +165,8 @@ public class BTConnectionFetcher implements Runnable {
 			return;
 		}
 		
-		BTConnectObserver connector = new BTConnectObserver(ep);
-		_connectors.add(connector);
+		OutgoingBTHandshaker connector = new OutgoingBTHandshaker(ep, _torrent);
+		fetchers.add(connector);
 		try {
 			Sockets.connect(ep.getAddress(),
 					ep.getPort(), Constants.TIMEOUT, connector);
@@ -165,181 +174,20 @@ public class BTConnectionFetcher implements Runnable {
 			ErrorService.error(impossible);
 		}
 	}
-
-	private class BTConnectObserver implements ConnectObserver, 
-	ChannelWriter, ChannelReadObserver {
-
-		private final TorrentLocation loc;
-		
-		private ByteBuffer outgoingHandshake;
-		private ByteBuffer [] incomingHandshake;
-		private int currentBufIndex;
-		
-		private InterestWriteChannel writeChannel;
-		private InterestScatteringByteChannel readChannel;
-		private NIOSocket sock;
-		
-		private boolean incomingDone, finishingHandshakes;
-		
-		// remote host info
-		byte [] extBytes;
-		byte [] peerId;
-		
-		BTConnectObserver(TorrentLocation loc) {
-			this.loc = loc;
-		}
-		
-		public void handleConnect(Socket socket) throws IOException {
-			if (LOG.isDebugEnabled())
-				LOG.debug("established connection to "+socket.getInetAddress());
-			
-			sock = (NIOSocket)socket;
-			
-			// connection was established - init the buffers.
-			outgoingHandshake = _handshake.duplicate();
-			incomingHandshake = new ByteBuffer[5];
-			incomingHandshake[0] = ByteBuffer.allocate(1); // 19
-			byte []tmp = new byte[19];
-			incomingHandshake[1] = ByteBuffer.wrap(tmp); // protocol identifier
-			extBytes = new byte[8];
-			incomingHandshake[2] = ByteBuffer.wrap(extBytes); // extention bytes
-			tmp = new byte[20];
-			incomingHandshake[3] = ByteBuffer.wrap(tmp); // infoHash
-			peerId = new byte[20];
-			incomingHandshake[4] = ByteBuffer.wrap(peerId); // peerID
-			
-			sock.setReadObserver(this);
-			sock.setWriteObserver(this);
-			readChannel.interest(true);
-			writeChannel.interest(this, true);
-		}
-		
-		public void handleRead() throws IOException {
-			long read = 0;
-			while((read = readChannel.read(incomingHandshake)) > 0 && 
-					incomingHandshake[4].hasRemaining());
-			
-			if (read == -1 || !verifyIncoming()) { // bad incoming handshake, drop.
-				if (LOG.isDebugEnabled())
-					LOG.debug("bad incoming handshake on element "+currentBufIndex+
-							" or channel closed "+read);
-				shutdown();
+	
+	synchronized void shutdown() {
+			if (shutdown)
 				return;
+			shutdown = true;
+		synchronized(fetchers) {
+			// copy because shutdown() removes
+			List conns = new ArrayList(fetchers);
+			for (Iterator iter = conns.iterator(); iter.hasNext();) {
+				Shutdownable connector = (Shutdownable) iter.next();
+				connector.shutdown();
 			}
-			
-			if (!incomingHandshake[4].hasRemaining()) { // done with incoming handshake
-				if (LOG.isDebugEnabled())
-					LOG.debug("incoming handshake finished "+sock.getInetAddress());
-				incomingDone = true;
-			}
-			
-			tryToFinishHandshakes();
-		}
-		
-		private boolean verifyIncoming() {
-			for(; 
-			currentBufIndex < incomingHandshake.length &&
-			!incomingHandshake[currentBufIndex].hasRemaining();
-			currentBufIndex++) {
-				ByteBuffer current = incomingHandshake[currentBufIndex];
-				switch(currentBufIndex) {
-				case 0 : // 0x19
-					current.flip();
-					if (current.get() != (byte)19) 
-						return false;
-					current.position(1); // mark it as full
-					break;
-				case 1 : // bittorrent protocol
-					if (!Arrays.equals(current.array(), BITTORRENT_PROTOCOL_BYTES))
-						return false;
-					break;
-				case 2 : // extention bytes
-					break;
-				case 3 : // infoHash
-					if (!Arrays.equals(current.array(), _torrent.getInfoHash()))
-						return false;
-					break;
-				case 4 : // peerId
-					break;
-				}
-			}
-			
-			return true;
-		}
-		
-		public boolean handleWrite() throws IOException {
-			// write out our handshake
-			int wrote = 0;
-			while ((wrote = writeChannel.write(outgoingHandshake)) > 0 &&
-				outgoingHandshake.hasRemaining());
-			
-			if (!outgoingHandshake.hasRemaining()) 
-				writeChannel.interest(this, false);
-			
-			tryToFinishHandshakes();
-			
-			return true; //this falls through to SocketAdapter which ignores it.
-		}
-		
-		private void tryToFinishHandshakes() {
-			if (finishingHandshakes)
-				return;
-
-			if (incomingDone && !outgoingHandshake.hasRemaining()) {
-				finishingHandshakes = true;
-				
-				TorrentLocation p = new TorrentLocation(sock.getInetAddress(), sock
-						.getPort(), new String(peerId),
-						extBytes);
-				
-				BTConnection btc = new BTConnection(sock, _torrent.getMetaInfo(), p,
-						_torrent, true);
-				
-				if (LOG.isDebugEnabled())
-					LOG.debug("added outgoing connection "
-							+ sock.getInetAddress().getHostAddress());
-
-				// add the connection and re-schedule fetching.
-				_torrent.addConnection(btc);
-				_connectors.remove(this);
-				reschedule();
-			}
-		}
-
-		public void handleIOException(IOException iox) {
-			if (LOG.isDebugEnabled())
-				LOG.debug("Connection failed: " + loc);
-			loc.strike();
-			if (!loc.isOut())
-				_torrent.addEndpoint(loc);
-			else
-				_torrent.addBadEndpoint(loc);
-		}
-
-		public void shutdown() {
-			_connectors.remove(this);
-			if (sock != null)
-				try {sock.close();} catch(IOException impossible){}
-		}
-
-		public void setWriteChannel(InterestWriteChannel newChannel) {
-			writeChannel = newChannel;
-		}
-
-		public InterestWriteChannel getWriteChannel() {
-			return writeChannel;
-		}
-
-		public void setReadChannel(InterestReadChannel newChannel) {
-			// if this throws we got problemos.
-			readChannel = (InterestScatteringByteChannel) newChannel;
-		}
-
-		public InterestReadChannel getReadChannel() {
-			return readChannel;
 		}
 	}
-	
 
 	/**
 	 * Accept a bittorrent connection
@@ -392,5 +240,18 @@ public class BTConnectionFetcher implements Runnable {
 		} catch (IOException ioe) {
 			IOUtils.close(sock);
 		}
+	}
+	
+	public ByteBuffer getOutgoingHandshake() {
+		return _handshake.duplicate();
+	}
+
+	public void handshakerStarted(BTHandshaker shaker) {
+		fetchers.add(shaker);
+	}
+	
+	public void handshakerDone(BTHandshaker shaker) {
+		if (fetchers.remove(shaker))
+			reschedule();
 	}
 }

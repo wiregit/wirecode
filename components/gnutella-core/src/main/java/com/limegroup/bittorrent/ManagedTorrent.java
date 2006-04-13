@@ -107,7 +107,7 @@ public class ManagedTorrent {
 	/*
 	 * 
 	 */
-	private BTConnectionFetcher _connectionFetcher;
+	private volatile BTConnectionFetcher _connectionFetcher;
 
 	/*
 	 * whether to choke all connections
@@ -155,7 +155,6 @@ public class ManagedTorrent {
 		_processingQueue = new ProcessingQueue("ManagedTorrent");
 		_downloader = new BTDownloader(this, _info);
 		_uploader = new BTUploader(this, _info);
-		_connectionFetcher = new BTConnectionFetcher(this,_manager.getPeerId());
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
 	}
@@ -239,6 +238,8 @@ public class ManagedTorrent {
 						.hasNext();) {
 					((BTConnection) iter.next()).close();
 				}
+				
+				_connectionFetcher.shutdown();
 
 				// we stopped, removing torrent from active list of
 				// TorrentManager
@@ -294,6 +295,8 @@ public class ManagedTorrent {
 			_peers.addAll(_info.getLocations());
 
 		RouterService.getCallback().addUpload(_uploader);
+		
+		_connectionFetcher = new BTConnectionFetcher(this, _manager.getPeerId());
 
 		if (LOG.isDebugEnabled())
 			LOG.debug("Starting torrent");
@@ -462,7 +465,7 @@ public class ManagedTorrent {
 		return false;
 	}
 	
-	void addBadEndpoint(TorrentLocation to) {
+	public void addBadEndpoint(TorrentLocation to) {
 		_badPeers.add(to);
 	}
 
@@ -563,7 +566,7 @@ public class ManagedTorrent {
 	/**
 	 * private helper method, adding connection
 	 */
-	void addConnection(final BTConnection btc) {
+	public void addConnection(final BTConnection btc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add connection " + btc.toString());
 		// this check prevents a few exceptions that may be thrown if a
@@ -989,11 +992,10 @@ public class ManagedTorrent {
 
 	public  int getNumBusyPeers() {
 		int busy = 0;
-		long now = System.currentTimeMillis();
-		synchronized(_peers) {
-			for (Iterator iter = _peers.iterator(); iter.hasNext();)
-				if (((TorrentLocation) iter.next()).isBusy(now))
-					busy++;
+		for (Iterator iter = _connections.iterator(); iter.hasNext();) {
+			BTConnection con = (BTConnection) iter.next();
+			if (!con.isInteresting())
+				busy++;
 		}
 		return busy;
 	}
@@ -1050,4 +1052,7 @@ public class ManagedTorrent {
 		return false;
 	}
 	
+	public BTConnectionFetcher getFetcher() {
+		return _connectionFetcher;
+	}
 }

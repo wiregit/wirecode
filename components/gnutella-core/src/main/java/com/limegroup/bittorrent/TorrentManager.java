@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -15,6 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -24,9 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.io.NBThrottle;
+import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.*;
+import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -36,17 +38,13 @@ import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.IOUtils;
 
-public class TorrentManager {
+public class TorrentManager implements ConnectionAcceptor {
 	/*
 	 * the upload throttle we are using
 	 */
 	private static final Throttle UPLOAD_THROTTLE = new NBThrottle(true,
 			DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue());
-
-	private static final byte[] PROTOCOL = new byte[] { 'p', 'r', 'o', 't',
-			'o', 'c', 'o', 'l' };
 
 	private final byte[] PEER_ID;
 
@@ -162,6 +160,15 @@ public class TorrentManager {
 			}
 		};
 		RouterService.schedule(waitingPimp, 10 * 1000, 10 * 1000);
+		
+		// register ourselves as an acceptor.
+		StringBuffer word = new StringBuffer();
+		word.append((char)19);
+		word.append("BitTorrent");
+		RouterService.getConnectionDispatcher().addConnectionAcceptor(
+				this,
+				new String[]{word.toString()},
+				false,false);
 	}
 
 	/**
@@ -296,73 +303,6 @@ public class TorrentManager {
 		} catch (ClassCastException e) {
 			return false;
 		}
-	}
-
-	/**
-	 * Accepts incoming connection and tries to initialize it
-	 * 
-	 * @param sock
-	 *            <tt>Socket</tt> for incoming connection
-	 */
-	public void acceptConnection(Socket sock) {
-
-		if (LOG.isDebugEnabled())
-			LOG.debug("accepting connection "
-				+ sock.getInetAddress().getHostAddress());
-		byte[] protocol = new byte[8];
-		byte[] extensionBytes = new byte[8];
-		byte[] infoHash = new byte[20];
-
-		try {
-			sock.setSoTimeout(Constants.TIMEOUT);
-			InputStream in = sock.getInputStream();
-			// read the rest of the protocol string that has not been consumed
-			// by the
-			// Acceptor
-			for (int i = 0; i < protocol.length; i += in.read(protocol))
-				;
-
-			// read reserved bytes
-			for (int i = 0; i < extensionBytes.length; i += in
-					.read(extensionBytes))
-				;
-
-			if (!Arrays.equals(protocol, PROTOCOL)) {
-				// this is not bittorrent
-				throw new IOException("got bad protocol string: "
-						+ new String(protocol));
-			}
-
-			// read info hash, 20 bytes
-			for (int i = 0; i < infoHash.length; i += in.read(infoHash))
-				;
-
-			ManagedTorrent torrent = null;
-			synchronized (this) {
-				for (Iterator iter = _active.iterator(); iter.hasNext();) {
-					ManagedTorrent next = (ManagedTorrent) iter.next();
-
-					// add Torrent to this!
-					if (Arrays.equals(infoHash, next.getInfoHash())) {
-						torrent = next;
-					}
-				}
-			}
-
-			if (torrent != null) {
-				// must do this outside of synchronized block
-				torrent.acceptConnection(sock, extensionBytes);
-				return;
-			}
-		} catch (IOException ioe) {
-			LOG.debug(ioe);
-			IOUtils.close(sock);
-		}
-
-		// bad info hash, close connection
-		if (LOG.isDebugEnabled())
-			LOG.debug("got unknown info hash!");
-		IOUtils.close(sock);
 	}
 
 	/**
@@ -636,5 +576,24 @@ public class TorrentManager {
 		else
 			return 6;
 
+	}
+	
+	public ManagedTorrent getTorrentForHash(byte [] infoHash) {
+		synchronized (this) {
+			for (Iterator iter = _active.iterator(); iter.hasNext();) {
+				ManagedTorrent current = (ManagedTorrent) iter.next();
+
+				if (Arrays.equals(infoHash, current.getInfoHash())) {
+					return current;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public void acceptConnection(String word, Socket sock) {
+		IncomingBTHandshaker shaker = 
+			new IncomingBTHandshaker((NIOSocket)sock, this);
+		shaker.startHandshaking();
 	}
 }
