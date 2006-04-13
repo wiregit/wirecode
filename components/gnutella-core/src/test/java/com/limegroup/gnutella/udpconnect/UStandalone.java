@@ -29,6 +29,7 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * A standalone program for testing UDPConnections across machines.
@@ -42,6 +43,9 @@ public class UStandalone extends ActivityCallbackStub
 
     public static void main(String args[]) {
 		ActivityCallback callback = new UStandalone();
+		ConnectionSettings.PORT.setValue(6346);
+		ConnectionSettings.FORCED_PORT.setValue(6346);
+		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		RouterService service = new RouterService(callback);
 		service.start();    
 
@@ -49,6 +53,11 @@ public class UStandalone extends ActivityCallbackStub
 		waitOnUDP();
 		LOG.debug("UDPServices up ...");
         UDPService.instance().setReceiveSolicited(true);
+        int port = UDPService.instance().getStableUDPPort();
+		LOG.debug("UDPServices Stable port "+port);
+        port = UDPService.instance().lastReportedPort();
+		LOG.debug("UDPServices last port "+port);
+
         try { Thread.sleep(1000); } catch (InterruptedException ie){}
 
 		for ( ; ;) {
