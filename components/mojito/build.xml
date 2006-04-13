@@ -18,8 +18,23 @@
 		
 	<target name="clean">
 		<delete>
-			<fileset dir="${basedir}" includes="**/*.class"/>
+			<fileset dir="${basedir}" 
+				includes="com/**/*.class de/**/*.class"
+			/>
 		</delete>
+	</target>
+	
+	<target name="planetLab" depends="clean, build">
+		<delete file="planetlab.jar"/>
+		<jar destfile="planetlab.jar" 
+			basedir="${basedir}"
+			includes="com/**, de/**, lib/**"
+			excludes="**/bin/**">
+			<manifest>
+			 	<attribute name="Main-Class" value="com.limegroup.gnutella.dht.tests.PlanetLab"/>
+			 	<attribute name="Class-Path" value=". lib/commons-logging.jar lib/log4j.jar"/>
+			</manifest>
+		</jar>
 	</target>
 </project>
 

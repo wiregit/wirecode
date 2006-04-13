@@ -554,11 +554,11 @@ public class Context implements Runnable {
 
         public void secondPhaseComplete(final KUID nodeId, final boolean foundNodes, final long time) {
             setBootstrapped(true);
-            
+            totalTime += time;
             if (listener != null) {
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.secondPhaseComplete(nodeId, foundNodes, time);
+                        listener.secondPhaseComplete(nodeId, foundNodes, totalTime);
                     }
                 });
             }
