@@ -22,6 +22,7 @@ package de.kapsi.net.kademlia.handler.request;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -70,12 +71,20 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             bucketList = context.getRouteTable().select(lookup, k, false, false);
             
+            Comparator c = new Comparator() {
+                public int compare(Object a, Object b) {
+                    KUID one = ((ContactNode)a).getNodeID();
+                    KUID two = ((ContactNode)b).getNodeID();
+                    return one.compareTo(two);
+                }
+            };
+            
             //are we one of the k closest nodes we know of?
-            if (bucketList.contains(context.getLocalNode())) {
+            if (Collections.binarySearch(bucketList, context.getLocalNode(), c) >= 0) {
                 queryKey = QueryKey.getQueryKey(src);
             } else { //another chance: one of the k closest live nodes?
                 List liveNodesList = context.getRouteTable().select(lookup, k, true, false);
-                if(liveNodesList.contains(context.getLocalNode())) {
+                if (Collections.binarySearch(liveNodesList, context.getLocalNode(), c) >= 0) {
                     queryKey = QueryKey.getQueryKey(src);
                 }
             }
