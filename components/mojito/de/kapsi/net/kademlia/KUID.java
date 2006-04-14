@@ -44,7 +44,7 @@ import de.kapsi.net.kademlia.util.PatriciaTrie.KeyCreator;
  * 
  * TODO: Maybe Key, NodeID and MessageID but 'Key' sucks!
  */
-public class KUID implements Serializable {
+public class KUID implements Serializable, Comparable {
     
     private static final long serialVersionUID = 633717248208386374L;
 
@@ -333,10 +333,6 @@ public class KUID implements Serializable {
         return type;
     }
     
-    public int hashCode() {
-        return hashCode;
-    }
-    
     /**
      * Returns the raw bytes of the current KUID
      */
@@ -344,6 +340,26 @@ public class KUID implements Serializable {
         byte[] clone = new byte[id.length];
         System.arraycopy(id, 0, clone, 0, id.length);
         return clone;
+    }
+    
+    public int hashCode() {
+        return hashCode;
+    }
+    
+    public int compareTo(Object o) {
+        KUID other = (KUID)o;
+        
+        int d = 0;
+        for(int i = 0; i < id.length; i++) {
+            d = (id[i] & 0xFF) - (other.id[i] & 0xFF);
+            if (d < 0) {
+                return -1;
+            } else if (d > 0) {
+                return 1;
+            }
+        }
+        
+        return 0;
     }
     
     /**
