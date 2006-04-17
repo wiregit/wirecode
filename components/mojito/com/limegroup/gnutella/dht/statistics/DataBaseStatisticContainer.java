@@ -52,4 +52,9 @@ public class DataBaseStatisticContainer extends StatisticContainer {
     public Statistic REPUBLISHED_VALUES =
         new SimpleStatistic();
     
+    /**
+     * <tt>Statistic</tt> for weather or not we're close to a Key
+     */
+    public Statistic NOT_MEMBER_OF_CLOSEST_SET =
+        new SimpleStatistic();
 }

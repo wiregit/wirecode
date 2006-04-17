@@ -116,6 +116,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("We are not close to " + keyValue.getKey() + ". KeyValue will expire faster!");
                     }
+                    
+                    context.getDataBaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
                     keyValue.setClose(false);
                 }
             }
