@@ -25,9 +25,10 @@ package de.kapsi.net.kademlia.settings;
 public final class DatabaseSettings extends LimeDHTProps {
     
     //public static final long MILLIS_PER_DAY = 24L * 60L * 60L * 1000L; // 24 horus
-    public static final long MILLIS_PER_DAY = 60L * 60L * 1000L; // 1 hour
+    public static final long EXPIRATION_TIME_CLOSEST_NODE = 60L * 60L * 1000L; // 1 hour
+    public static final long EXPIRATION_TIME_UNKNOWN = 30L * 60L * 1000L; // 30 mins
     
-    public static final long MILLIS_PER_HOUR = MILLIS_PER_DAY / 24L;
+    public static final long MILLIS_PER_HOUR = EXPIRATION_TIME_CLOSEST_NODE / 24L;
     
     public static final String DATABASE_FILE = "Database.pat";
     

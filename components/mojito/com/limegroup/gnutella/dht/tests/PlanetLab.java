@@ -29,7 +29,6 @@ import java.util.Random;
 
 import com.limegroup.gnutella.dht.statistics.StatsManager;
 
-import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;

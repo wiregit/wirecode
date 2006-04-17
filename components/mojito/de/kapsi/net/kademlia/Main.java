@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.limegroup.gnutella.dht.statistics.DHTStats;
-import com.limegroup.gnutella.dht.statistics.StatsManager;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;

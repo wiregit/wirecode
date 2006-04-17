@@ -211,14 +211,15 @@ public class Database {
 //            + DatabaseSettings.MILLIS_PER_DAY/KUID.LENGTH * log;
         
         
-        long expirationTime = keyValue.getCreationTime() + DatabaseSettings.MILLIS_PER_DAY;
+        long expirationTime = keyValue.getCreationTime() + DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE;
         
         // TODO: this needs some finetuning. Anonymous KeyValues
         // expire 50% faster at the moment.
         try {
             if (keyValue.isAnonymous()
-                    && !keyValue.verify(context.getMasterKey())) {
-                expirationTime = keyValue.getCreationTime() + DatabaseSettings.MILLIS_PER_DAY / 2;
+                    && !keyValue.verify(context.getMasterKey())
+                    || !keyValue.isClose()) {
+                expirationTime = keyValue.getCreationTime() + DatabaseSettings.EXPIRATION_TIME_UNKNOWN;
             }
         } catch (InvalidKeyException e) {
         } catch (SignatureException e) {

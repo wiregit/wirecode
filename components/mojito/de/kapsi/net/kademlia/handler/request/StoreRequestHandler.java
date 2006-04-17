@@ -26,6 +26,7 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -89,6 +90,14 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             }
         }
         
+        Comparator c = new Comparator() {
+            public int compare(Object a, Object b) {
+                KUID one = ((ContactNode)a).getNodeID();
+                KUID two = ((ContactNode)b).getNodeID();
+                return one.compareTo(two);
+            }
+        };
+        
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // Avoid to create an empty ArrayList
@@ -100,20 +109,23 @@ public class StoreRequestHandler extends AbstractRequestHandler {
 
             // under the assumption that the requester sent us a lookup before
             // check if we are part of the closest alive nodes to this value
-            List nodesList = getRouteTable().select(keyValue.getKey(), k, true, false);
-            if(nodesList.contains(context.getLocalNode())) {
-                try {
-                    if (context.getDatabase().add(keyValue)) {
-                        stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.SUCCEEDED));
-                    } else {
-                        stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
-                    }
-                } catch (SignatureException err) {
-                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
-                } catch (InvalidKeyException err) {
+            List nodesList = getRouteTable().select(keyValue.getKey(), k, false, false);
+            if (Collections.binarySearch(nodesList, context.getLocalNode(), c) < 0) {
+                nodesList = getRouteTable().select(keyValue.getKey(), k, true, false);
+                if (Collections.binarySearch(nodesList, context.getLocalNode(), c) < 0) {
+                    keyValue.setClose(false);
+                }
+            }
+            
+            try {
+                if (context.getDatabase().add(keyValue)) {
+                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.SUCCEEDED));
+                } else {
                     stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
                 }
-            } else {
+            } catch (SignatureException err) {
+                stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
+            } catch (InvalidKeyException err) {
                 stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
             }
         }

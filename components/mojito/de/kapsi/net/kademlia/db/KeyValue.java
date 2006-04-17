@@ -51,6 +51,8 @@ public class KeyValue implements Serializable {
     
     private int hashCode = -1;
     
+    private boolean isClose = true;
+    
     public static KeyValue createLocalKeyValue(KUID key, byte[] value) {
         return createKeyValue(key, value, null, null, null, true);
     }
@@ -112,6 +114,14 @@ public class KeyValue implements Serializable {
         
         return pubKey != null && signature != null 
                     && CryptoHelper.verify(pubKey, value, signature);
+    }
+    
+    public void setClose(boolean close) {
+        this.isClose = close;
+    }
+    
+    public boolean isClose() {
+        return isClose;
     }
     
     public KUID getKey() {
