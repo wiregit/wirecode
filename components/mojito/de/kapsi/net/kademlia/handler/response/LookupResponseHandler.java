@@ -142,6 +142,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //TODO for now
         //this.time += time;
         lookupStat.addReply();
+        int hop = ((Integer)hopMap.get(nodeId)).intValue();
         
         // VALUE lookup response
         if (isValueLookup() && message instanceof FindValueResponse) {
@@ -155,17 +156,19 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
                 
                 if (!finished) {
-                    finishValueLookup(lookup, response.getValues(), time());
+                    long diff = time();
+                    lookupStat.setHops(hop);
+                    lookupStat.setTime((int)diff);
+                    finishValueLookup(lookup, response.getValues(), diff);
                 }
                 finished = true;
         }
         
         // NODE/VALUE lookup response
-        if (!finished && message instanceof FindNodeResponse) {
+        if (message instanceof FindNodeResponse) {
             
             
             FindNodeResponse response = (FindNodeResponse)message;
-            int hop = ((Integer)hopMap.get(nodeId)).intValue();
             Collection values = response.getValues();
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Got FindNode response from " + ContactNode.toString(nodeId, src) + 
@@ -180,7 +183,9 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                         LOG.trace("Adding " + node + " to the yet-to-be queried list");
                     }
                     
-                    addYetToBeQueried(node,hop+1);
+                    if(!finished) {
+                        addYetToBeQueried(node,hop+1);
+                    }
                     
                     // Add them to the routing table as not alive
                     // contacts. We're likely going to add them
@@ -188,21 +193,22 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     context.getRouteTable().add(node, false);
                 }
             }
-            
-            // Don't add the ContactNode to responses if it didn't
-            // return any contacts because we've no QueryKey for it.
-            if (!values.isEmpty()) {
-                ContactNode node = new ContactNode(nodeId, src);
-                addResponse(node);
-                
-                QueryKey queryKey = response.getQueryKey();
-                if (queryKey != null) {
-                    queryKeys.put(node, queryKey);
+            if(!finished) {
+                // Don't add the ContactNode to responses if it didn't
+                // return any contacts because we've no QueryKey for it.
+                if (!values.isEmpty()) {
+                    ContactNode node = new ContactNode(nodeId, src);
+                    addResponse(node);
+                    
+                    QueryKey queryKey = response.getQueryKey();
+                    if (queryKey != null) {
+                        queryKeys.put(node, queryKey);
+                    }
                 }
+                
+                --activeSearches;
+                lookupStep(hop);
             }
-            
-            --activeSearches;
-            lookupStep(hop);
         }
     }
     
@@ -294,7 +300,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     
     private void lookupStep(int hop) throws IOException {
         
-        long diff = System.currentTimeMillis() - startTime;
+        long diff = time();
         
         if(timeout>0 && (diff > timeout)) {
             if (LOG.isTraceEnabled()) {
