@@ -122,7 +122,7 @@ public class PlanetLab {
                 synchronized(lock) {
                     
                     try {
-                        Thread.sleep(generator.nextInt(1000 * 60 * 10));
+                        Thread.sleep(generator.nextInt(1000 * 60 * 5));
                     } catch (InterruptedException err) {
                         err.printStackTrace();
                     }
@@ -238,10 +238,21 @@ public class PlanetLab {
                 break;
         }
         
+        new Thread(new Runnable() {
+            public void run() {
+                while(true) {
+                    try {
+                        Thread.sleep(15L * 60L * 1000L);
+                    } catch (InterruptedException e) {
+                    }
+                    statsManager.writeStatsToFiles();
+                }
+            }
+        }, "StatsWriterThread").start();
     }
     
     private static void shutdown() {
-        statsManager.writeStatsToFiles();
+        //statsManager.writeStatsToFiles();
         
 //        System.exit(0);
     }
@@ -250,17 +261,17 @@ public class PlanetLab {
         
         private static final Random GENERATOR = new Random();
         
-        private static final long minOffline = 1L * /*60L **/ 1000L;
-        private static final long maxOffline = 5L * /*60L **/ 1000L;
+        private static final long minOffline = 1L * 60L * 1000L;
+        private static final long maxOffline = 5L * 60L * 1000L;
         
-        private static final long minChurn = 5L * /*60L **/ 1000L;
-        private static final long maxChurn = 10L * /*60L **/ 1000L;
+        private static final long minChurn = 5L * 60L * 1000L;
+        private static final long maxChurn = 10L * 60L * 1000L;
         
         private static final long minRepublisher = (long)(((float)2/3) * 
             DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE);
         
-        private static final long minRetriever = 1L * /*60L **/ 1000L;
-        private static final long maxRetriever = 5L * /*60L **/ 1000L;
+        private static final long minRetriever = 1L * 60L * 1000L;
+        private static final long maxRetriever = 5L * 60L * 1000L;
         
         private DHT dht;
         private SocketAddress bootstrapServer;
@@ -374,7 +385,7 @@ public class PlanetLab {
                         KUID key = toKUID(value);
                         dht.get(key, new FindValueListener() {
                             public void foundValue(KUID key, Collection values, long time) {
-                                if(values.isEmpty()){
+                                if(values == null || values.isEmpty()){
                                     planetlabStats.RETRIEVE_FAILURES.incrementStat();
                                 } else {
                                     planetlabStats.RETRIEVE_SUCCESS.incrementStat();

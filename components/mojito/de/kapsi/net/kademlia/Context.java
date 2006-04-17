@@ -98,7 +98,7 @@ public class Context implements Runnable {
     private volatile boolean bootstrapped = false;
     private boolean running = false;
     
-    private final Timer scheduler = new Timer(true);
+    private Timer scheduler = null;
     private Thread messageDispatcherThread = null;
     
     private DHTStats dhtStats = null;
@@ -134,11 +134,8 @@ public class Context implements Runnable {
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
         messageDispatcher = new MessageDispatcher(this);
-        eventDispatcher = new EventDispatcher(this);
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
-        bucketRefresher = new RandomBucketRefresher(this);
-        
     }
     
     public DHTStats getDHTStats() {
@@ -362,6 +359,11 @@ public class Context implements Runnable {
                 = new Thread(keyValuePublisher, "KeyValuePublisherThread");
             keyValuePublisherThread.setDaemon(true);
             
+            scheduler = new Timer(true);
+            
+            eventDispatcher = new EventDispatcher(this);
+            bucketRefresher = new RandomBucketRefresher(this);
+            
             scheduler.scheduleAtFixedRate(eventDispatcher, 0L, ContextSettings.DISPATCH_EVENTS_EVERY.getValue());
             
             long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
@@ -374,6 +376,7 @@ public class Context implements Runnable {
         } finally {
             keyValuePublisher.stop();
             scheduler.cancel();
+            scheduler = null;
             
             running = false;
             bootstrapped = false;
@@ -393,6 +396,11 @@ public class Context implements Runnable {
         
         if (!isRunning()) {
             LOG.error("Discarding Event as DHT is not running");
+            return;
+        }
+        
+        if (eventDispatcher == null) {
+            LOG.error("EventDispatcher is null");
             return;
         }
         

@@ -60,11 +60,16 @@ public class EventDispatcher extends TimerTask implements Runnable {
         }
     }
     
-    public void run(Runnable r) {
+    public void run(Runnable event) {
+        if (event == null) {
+            LOG.error("Discarding Event as it is null");
+            return;
+        }
+        
         try {
-            r.run();
+            event.run();
         } catch (Throwable t) {
-            //t.printStackTrace();
+            t.printStackTrace();
             LOG.error(t);
         }
     }
