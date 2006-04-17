@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.NodeList;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
@@ -90,14 +91,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             }
         }
         
-        Comparator c = new Comparator() {
-            public int compare(Object a, Object b) {
-                KUID one = ((ContactNode)a).getNodeID();
-                KUID two = ((ContactNode)b).getNodeID();
-                return one.compareTo(two);
-            }
-        };
-        
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // Avoid to create an empty ArrayList
@@ -110,9 +103,9 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             // under the assumption that the requester sent us a lookup before
             // check if we are part of the closest alive nodes to this value
             List nodesList = getRouteTable().select(keyValue.getKey(), k, false, false);
-            if (Collections.binarySearch(nodesList, context.getLocalNode(), c) < 0) {
+            if (!nodesList.contains(context.getLocalNode())) {
                 nodesList = getRouteTable().select(keyValue.getKey(), k, true, false);
-                if (Collections.binarySearch(nodesList, context.getLocalNode(), c) < 0) {
+                if (!nodesList.contains(context.getLocalNode())) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("We are not close to " + keyValue.getKey() + ". KeyValue will expire faster!");
                     }
