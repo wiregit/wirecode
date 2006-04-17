@@ -27,6 +27,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
+
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
@@ -38,6 +40,8 @@ public class KeyValuePublisher implements Runnable {
     
     private final Context context;
     
+    private final DataBaseStatisticContainer databaseStats;
+    
     private volatile boolean running = false;
     
     private int published = 0;
@@ -47,6 +51,7 @@ public class KeyValuePublisher implements Runnable {
     
     public KeyValuePublisher(Context context) {
         this.context = context;
+        databaseStats = context.getDataBaseStats();
     }
     
     public boolean isRunning() {
@@ -105,6 +110,7 @@ public class KeyValuePublisher implements Runnable {
                         
                         database.remove(keyValue);
                         evicted++;
+                        databaseStats.EXPIRED_VALUES.incrementStat();
                         continue;
                     }
                     
@@ -121,7 +127,7 @@ public class KeyValuePublisher implements Runnable {
                         continue;
                     }
                 }
-                
+                databaseStats.REPUBLISHED_VALUES.incrementStat();
                 synchronized(lock) {
                     try {
                         context.store(keyValue, new StoreListener() {

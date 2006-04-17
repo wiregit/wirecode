@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.statistics.DHTNodeStat;
 import com.limegroup.gnutella.dht.statistics.DHTStats;
+import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
 
@@ -105,6 +106,7 @@ public class Context implements Runnable {
     
     private final NetworkStatisticContainer networkStats;
     private final GlobalLookupStatisticContainer globalLookupStats;
+    private final DataBaseStatisticContainer dataBaseStats;
     
     private long lastEstimateTime = 0L;
     private int estimatedSize = 0;
@@ -126,6 +128,7 @@ public class Context implements Runnable {
         
         networkStats = new NetworkStatisticContainer(this);
         globalLookupStats = new GlobalLookupStatisticContainer(this);
+        dataBaseStats = new DataBaseStatisticContainer(this);
         
         keyPair = CryptoHelper.createKeyPair();
 
@@ -570,6 +573,10 @@ public class Context implements Runnable {
     
     public GlobalLookupStatisticContainer getGlobalLookupStats() {
         return globalLookupStats;
+    }
+    
+    public DataBaseStatisticContainer getDataBaseStats() {
+        return dataBaseStats;
     }
     
     private class BootstrapManager implements BootstrapListener, PingListener, FindNodeListener {

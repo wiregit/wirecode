@@ -29,6 +29,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -54,8 +56,11 @@ public class DefaultMessageHandler extends MessageHandler
     
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
     
+    private DataBaseStatisticContainer databaseStats;
+    
     public DefaultMessageHandler(Context context) {
         super(context);
+        databaseStats = context.getDataBaseStats();
     }
     
     public long timeout() {
@@ -125,6 +130,7 @@ public class DefaultMessageHandler extends MessageHandler
                             if (LOG.isTraceEnabled()) {
                                 LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   
                             }
+                            databaseStats.STORE_FORWARD_COUNT.incrementStat();
                             keyValuesToForward.addAll(c);
                         }
                     }

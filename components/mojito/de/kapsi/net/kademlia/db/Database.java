@@ -42,6 +42,8 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -54,11 +56,13 @@ public class Database {
     private static final Log LOG = LogFactory.getLog(Database.class);
     
     private Context context;
+    private DataBaseStatisticContainer databaseStats;
     
     private DatabaseMap database;
     
     public Database(Context context) {
         this.context = context;
+        databaseStats = context.getDataBaseStats();
         
         database = new DatabaseMap(DatabaseSettings.MAX_DATABASE_SIZE.getValue());
     }
@@ -91,6 +95,7 @@ public class Database {
             values = new KeyValueCollection(context, key, DatabaseSettings.MAX_KEY_VALUES.getValue());
             database.put(key, values);
         }
+        databaseStats.STORED_VALUES.incrementStat();
         return values.add(keyValue);
     }
     
@@ -111,7 +116,7 @@ public class Database {
         if (values == null) {
             return null;
         }
-        
+        databaseStats.RETRIEVED_VALUES.incrementStat();
         return Collections.unmodifiableCollection(values);
     }
     
@@ -139,6 +144,7 @@ public class Database {
         /*if (!bag.remove(value)) {
             throw new IllegalStateException("Could not remove Value from Bag!");
         }*/
+        databaseStats.REMOVED_VALUES.incrementStat();
         return true;
     }
     
