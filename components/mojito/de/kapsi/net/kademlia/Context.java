@@ -628,6 +628,7 @@ public class Context implements Runnable {
         public void secondPhaseComplete(final KUID nodeId, final boolean foundNodes, final long time) {
             setBootstrapped(true);
             totalTime += time;
+            networkStats.BOOTSTRAP_TIME.addData((int)totalTime);
             if (listener != null) {
                 fireEvent(new Runnable() {
                     public void run() {

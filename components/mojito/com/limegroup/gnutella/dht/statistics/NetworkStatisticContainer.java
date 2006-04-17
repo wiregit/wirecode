@@ -94,12 +94,18 @@ public class NetworkStatisticContainer extends StatisticContainer {
     public Statistic RECEIPTS_TIMEOUT =
         new SimpleStatistic();
     
-
     /**
      * <tt>Statistic</tt> for evicted receipts
      */
     public Statistic RECEIPTS_EVICTED =
         new SimpleStatistic();
+    
+    /**
+     * <tt>Statistic</tt> for bootstrap time
+     */
+    public Statistic BOOTSTRAP_TIME =
+        new SimpleStatistic();
+    
     
     protected class MessageSizeStatistic extends AbstractStatistic{
         public void addData(int data) {
