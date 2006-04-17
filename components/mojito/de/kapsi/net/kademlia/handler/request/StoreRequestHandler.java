@@ -26,13 +26,11 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.NodeList;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
