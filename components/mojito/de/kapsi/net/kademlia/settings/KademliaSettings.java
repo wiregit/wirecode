@@ -19,11 +19,11 @@ public class KademliaSettings extends LimeDHTProps {
      * The FIND_NODE lookup timeout
      */
     public static final LongSetting NODE_LOOKUP_TIMEOUT
-        = FACTORY.createLongSetting("NODE_LOOKUP_TIMEOUT",15L*1000L);
+        = FACTORY.createLongSetting("NODE_LOOKUP_TIMEOUT",30L*1000L);
     /**
      * The FIND_VALUE lookup timeout
      */
     public static final LongSetting VALUE_LOOKUP_TIMEOUT
-    = FACTORY.createLongSetting("NODE_LOOKUP_TIMEOUT",30L*1000L);
+    = FACTORY.createLongSetting("VALUE_LOOKUP_TIMEOUT",45L*1000L);
 
 }

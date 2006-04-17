@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.limegroup.gnutella.dht.statistics.StatsManager;
 
+import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
@@ -46,6 +47,10 @@ public class PlanetLab {
                 DHT dht = new DHT();
                 statsManager.addDHTNode(dht.getContext().getDHTStats());
                 dht.bind(new InetSocketAddress(port+i));
+                
+                if (number == 1) {
+                    Context.BOOTSTRAP_NODE = true;
+                }
                 
                 Thread t = new Thread(dht, "DHT-" + i);
                 t.start();

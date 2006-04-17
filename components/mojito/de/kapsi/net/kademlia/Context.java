@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Timer;
 
 import org.apache.commons.logging.Log;
@@ -340,6 +341,8 @@ public class Context implements Runnable {
         messageDispatcherThread = null;
     }
     
+    public static boolean BOOTSTRAP_NODE = false;
+    
     public void run() {
         if (!isOpen()) {
             throw new RuntimeException("DHT is not bound");
@@ -353,6 +356,15 @@ public class Context implements Runnable {
         bootstrapped = true;
         running = true;
         try {
+            
+            if (!BOOTSTRAP_NODE) {
+                Random generator = new Random();
+                try {
+                    Thread.sleep(generator.nextInt(1000 * 60 * 10));
+                } catch (InterruptedException err) {
+                    LOG.error(err);
+                }
+            }
             
             // TODO use ManagedThread
             Thread keyValuePublisherThread 
