@@ -82,6 +82,25 @@ public class NetworkStatisticContainer extends StatisticContainer {
     public Statistic SIGNED_PONGS_SENT =
         new SimpleStatistic();
     
+    /**
+     * <tt>Statistic</tt> for filtered messages
+     */
+    public Statistic FILTERED_MESSAGES =
+        new SimpleStatistic();
+    
+    /**
+     * <tt>Statistic</tt> for receipts timeouts
+     */
+    public Statistic RECEIPTS_TIMEOUT =
+        new SimpleStatistic();
+    
+
+    /**
+     * <tt>Statistic</tt> for evicted receipts
+     */
+    public Statistic RECEIPTS_EVICTED =
+        new SimpleStatistic();
+    
     protected class MessageSizeStatistic extends AbstractStatistic{
         public void addData(int data) {
             super.addData(data);

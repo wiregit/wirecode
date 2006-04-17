@@ -86,7 +86,7 @@ public class MessageDispatcher implements Runnable {
     
     private Filter filter;
     
-    private final NetworkStatisticContainer networkStats;
+    protected final NetworkStatisticContainer networkStats;
     
     public MessageDispatcher(Context context) {
         this.context = context;
@@ -337,7 +337,7 @@ public class MessageDispatcher implements Runnable {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace(ContactNode.toString(nodeId, src) + " refused");
                 }
-                return;
+                networkStats.FILTERED_MESSAGES.incrementStat();
             }
             
             if (message instanceof RequestMessage) {
@@ -415,7 +415,7 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    private static class ReceiptMap extends FixedSizeHashMap {
+    private class ReceiptMap extends FixedSizeHashMap {
         
         private static final long serialVersionUID = -3084244582682726933L;
 
@@ -432,6 +432,7 @@ public class MessageDispatcher implements Runnable {
                 if (receipt.timeout()) {
                     receipt.received();
                     it.remove();
+                    networkStats.RECEIPTS_TIMEOUT.incrementStat();
                     
                     try {
                         receipt.handleTimeout();
@@ -447,6 +448,11 @@ public class MessageDispatcher implements Runnable {
             if (super.removeEldestEntry(eldest) 
                     || receipt.timeout()) {
                 receipt.received();
+                if(receipt.timeout()) {
+                    networkStats.RECEIPTS_TIMEOUT.incrementStat();
+                } else {
+                    networkStats.RECEIPTS_EVICTED.incrementStat();
+                }
                 try {
                     receipt.handleTimeout();
                 } catch (Throwable t) {
