@@ -25,6 +25,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import com.limegroup.gnutella.dht.statistics.StatsManager;
 
@@ -48,10 +49,6 @@ public class PlanetLab {
                 statsManager.addDHTNode(dht.getContext().getDHTStats());
                 dht.bind(new InetSocketAddress(port+i));
                 
-                if (number == 1) {
-                    Context.BOOTSTRAP_NODE = true;
-                }
-                
                 Thread t = new Thread(dht, "DHT-" + i);
                 t.start();
                 
@@ -70,6 +67,7 @@ public class PlanetLab {
     
     public static void bootstrap(List dhts, InetSocketAddress dst) {
         System.out.println("Bootstrapping from " + dst);
+        Random generator = new Random();
         
         long start = System.currentTimeMillis();
         
@@ -83,6 +81,13 @@ public class PlanetLab {
                 
                 //System.out.println("Bootstraping " + dht);
                 synchronized(lock) {
+                    
+                    try {
+                        Thread.sleep(generator.nextInt(1000 * 60 * 10));
+                    } catch (InterruptedException err) {
+                        err.printStackTrace();
+                    }
+                    
                     dht.bootstrap(dst, new BootstrapListener() {
                         
                         public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {

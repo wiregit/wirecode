@@ -43,9 +43,11 @@ public class RandomBucketRefresher extends TimerTask implements Runnable{
         }
         
         try {
-            context.getRouteTable().refreshBuckets(false);
-        } catch (IOException e) {
-            e.printStackTrace();
+            if(context.isBootstrapped()){
+                context.getRouteTable().refreshBuckets(false);
+            }
+        } catch (IOException ex) {
+            LOG.error(ex);
         }
     }
     

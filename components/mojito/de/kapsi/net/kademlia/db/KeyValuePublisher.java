@@ -87,7 +87,7 @@ public class KeyValuePublisher implements Runnable {
                 break;
             }
             
-            if (it.hasNext()) {
+            if (context.isBootstrapped() && it.hasNext()) {
                 KeyValue keyValue = (KeyValue)it.next();
                 
                 synchronized(database) {
