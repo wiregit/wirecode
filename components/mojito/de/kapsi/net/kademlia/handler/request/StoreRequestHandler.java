@@ -113,6 +113,9 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             if (Collections.binarySearch(nodesList, context.getLocalNode(), c) < 0) {
                 nodesList = getRouteTable().select(keyValue.getKey(), k, true, false);
                 if (Collections.binarySearch(nodesList, context.getLocalNode(), c) < 0) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("We are not close to " + keyValue.getKey() + ". KeyValue will expire faster!");
+                    }
                     keyValue.setClose(false);
                 }
             }
