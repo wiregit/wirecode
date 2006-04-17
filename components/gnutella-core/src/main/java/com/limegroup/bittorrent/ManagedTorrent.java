@@ -22,6 +22,7 @@ import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
@@ -339,28 +340,25 @@ public class ManagedTorrent {
 	 *            the BTConnection to request from
 	 */
 	public void request(final BTConnection btc) {
-		enqueueTask(new Runnable() {
-			public void run() {
-				if (LOG.isDebugEnabled())
-					LOG.debug("requesting ranges from " + btc.toString());
-				// don't request if complete
-				if (_complete || _stopped)
-					return;
-				BTInterval in = _folder.leaseRandom(btc.getAvailableRanges());
-				if (in != null)
-					btc.sendRequest(in);
-				else if (btc.getAvailableRanges().isEmpty()) {
-					if (LOG.isDebugEnabled())
-						LOG
-								.debug("leaseRarest returned null, btc connection not interesting anymore");
-					btc.sendNotInterested();
-				} else {
-					if (LOG.isDebugEnabled())
-						LOG
-								.debug("leaseRarest returned null, btc connection still interesting ??!?!?");
-				}
-			}
-		});
+		if (LOG.isDebugEnabled())
+			LOG.debug("requesting ranges from " + btc.toString());
+		
+		// don't request if complete
+		if (_complete || _stopped)
+			return;
+		BTInterval in = _folder.leaseRandom(btc.getAvailableRanges());
+		if (in != null)
+			btc.sendRequest(in);
+		else if (btc.getAvailableRanges().isEmpty()) {
+			if (LOG.isDebugEnabled())
+				LOG
+				.debug("leaseRarest returned null, btc connection not interesting anymore");
+			btc.sendNotInterested();
+		} else {
+			if (LOG.isDebugEnabled())
+				LOG
+				.debug("leaseRarest returned null, btc connection still interesting ??!?!?");
+		}
 	}
 
 	/**
@@ -372,11 +370,16 @@ public class ManagedTorrent {
 	void notifyOfComplete(int in) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("got completed chunk " + in);
-		BTHave have = BTHave.createMessage(in);
-		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
-			BTConnection btc = (BTConnection) iter.next();
-			btc.sendHave(have);
-		}
+		final BTHave have = BTHave.createMessage(in);
+		Runnable haveNotifier = new Runnable() {
+			public void run() {
+				for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
+					BTConnection btc = (BTConnection) iter.next();
+					btc.sendHave(have);
+				}
+			}
+		};
+		NIODispatcher.instance().invokeLater(haveNotifier);
 		_complete = _folder.isComplete();
 		if (_complete && !verifying) {
 			LOG.info("file is complete");
@@ -392,15 +395,15 @@ public class ManagedTorrent {
 	 * @return a Set of <tt>TorrentLocation</tt> containing all endpoints we
 	 *         have outgoing connections to
 	 */
-	public Set getAltLocs() {
-		Set set = new HashSet();
+	public int getNumAltLocs() {
+		int ret = 0;
 		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
 			BTConnection btc = (BTConnection) iter.next();
 
 			if (btc.isOutgoing())
-				set.add(btc.getEndpoint());
+				ret++;
 		}
-		return set;
+		return ret;
 	}
 
 	/*
@@ -526,10 +529,6 @@ public class ManagedTorrent {
 				.getValue();
 	}
 
-	public void acceptConnection(Socket sock, byte[] bytes) {
-		_connectionFetcher.acceptConnection(sock, bytes);
-	}
-	
 	/**
 	 * @param ep
 	 *            the TorrentLocation for the connection to add
@@ -597,24 +596,27 @@ public class ManagedTorrent {
 		if (_saved)
 			return;
 
-		// stop all uploads
-		if (LOG.isDebugEnabled())
-			LOG.debug("global choke");
-		setGlobalChoke(true);
-
-		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
-			BTConnection btc = (BTConnection) iter.next();
-			// close connections that aren't interested in any part of a
-			// complete torrent
-			if (!btc.isInterested())
-				btc.close();
-			else {
-				// cancel all requests, if there are any left. (This should not
-				// be the case at this point anymore)
-				btc.cancelAllRequests();
-				btc.sendNotInterested();
+		Runnable r = new Runnable(){
+			public void run() {
+				LOG.debug("global choke");
+				setGlobalChoke(true);
+				
+				for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
+					BTConnection btc = (BTConnection) iter.next();
+					// close connections that aren't interested in any part of a
+					// complete torrent
+					if (!btc.isInterested())
+						btc.close();
+					else {
+						// cancel all requests, if there are any left. (This should not
+						// be the case at this point anymore)
+						btc.cancelAllRequests();
+						btc.sendNotInterested();
+					}
+				}
 			}
-		}
+		};
+		NIODispatcher.instance().invokeLater(r);
 		saveFiles();
 		announceComplete();
 	}
@@ -764,60 +766,96 @@ public class ManagedTorrent {
 		RouterService.schedule(choker, RECHOKE_TIMEOUT, 0);
 	}
 
-	/**
-	 * rechokes the connections. Unchokes the first connection in _btConnections
-	 * and the connections that have uploaded the most to us
-	 */
 	private void rechoke() {
-		if (_globalChoke)
-			return;
+		NIODispatcher.instance().invokeLater(new Rechoker());
+	}
 
-		LinkedList candidates = new LinkedList();
-
-		// add all interested connections to candidates
-		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
-			BTConnection btc = (BTConnection) iter.next();
-			if (btc.isInterested())
-				candidates.add(btc);
-		}
-		Collections.shuffle(candidates);
-
-		int unchoked = 0;
-		List bad = new ArrayList();
-		// unchoke TORRENT_MIN_UPLOADS connections in order to give everyone a
-		// fair chance
-		while (candidates.size() > 0
-				&& unchoked < BittorrentSettings.TORRENT_MIN_UPLOADS.getValue()) {
-			BTConnection c = (BTConnection) candidates.removeFirst();
-
-			if (!c.getEndpoint().isShareazaPeer()) {
-				// shareaza does not enforce any share ratio whatsoever, it
-				// will have to earn its upload slots by uploading something
-				// to us.
-				c.sendUnchoke();
-				unchoked++;
-			} else {
-				bad.add(c);
+	/**
+	 * 
+	 * TODO: document this thoroughly because its twistid
+	 * 
+	 */
+	private class Rechoker implements Runnable {
+		public void run() {
+			
+			if (_globalChoke) {
+				LOG.debug("global choke");
+				return;
 			}
-		}
-
-		// re-add bad hosts that don't get optimistic unchoke.
-		candidates.addAll(bad);
-
-		// unchoke the hosts that are uploading the most to us
-		Collections.sort(candidates, DOWNLOAD_SPEED_COMPARATOR);
-
-		while (candidates.size() > 0
-				&& unchoked < BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
-			BTConnection c = (BTConnection) candidates.removeFirst();
-			c.sendUnchoke();
-			unchoked++;
-		}
-
-		// choke the rest.
-		while (candidates.size() > 0) {
-			BTConnection c = (BTConnection) candidates.removeFirst();
-			c.sendChoke();
+			
+			LinkedList candidates = new LinkedList();
+			LinkedList unchokedButIdle = new LinkedList();
+			int currentlyUnchoked = 0;
+			int currentlyNotInterested = 0;
+			
+			// add all interested connections to candidates
+			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
+				BTConnection btc = (BTConnection) iter.next();
+				if (btc.isInterested()){
+					if (btc.isChoked())
+						candidates.add(btc);
+					else if (btc.hasRequested())
+						currentlyUnchoked++;
+					else
+						unchokedButIdle.add(btc);
+				} else
+					currentlyNotInterested++;
+			}
+			
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("rechocking.. candidates:"+candidates.size()+
+						" currently unchoked:"+currentlyUnchoked+
+						" unchoked but idle:"+unchokedButIdle.size()+
+						" currently not interested:"+currentlyNotInterested);
+			}
+			
+			// if we have unchoked enough active peers, don't do anything
+			if (currentlyUnchoked >= 
+				BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
+				return;
+			}
+			
+			Collections.shuffle(candidates);
+			
+			// unchoke TORRENT_MIN_UPLOADS connections in order to give everyone a
+			// fair chance
+			while (candidates.size() > 0
+					&& currentlyUnchoked < BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
+				BTConnection c = (BTConnection) candidates.remove(0);
+				
+				if (LOG.isDebugEnabled())
+					LOG.debug("unchoking optimistically "+c);
+				
+				c.sendUnchoke();
+				currentlyUnchoked++;
+			}
+			
+			// unchoke the hosts that are uploading the most to us
+			Collections.sort(candidates, DOWNLOAD_SPEED_COMPARATOR);
+			
+			while (candidates.size() > 0
+					&& currentlyUnchoked + currentlyUnchoked < 
+					BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
+				BTConnection c = (BTConnection) candidates.removeFirst();
+				
+				if (LOG.isDebugEnabled())
+					LOG.debug("unchoking for merit "+c);
+				
+				c.sendUnchoke();
+				currentlyUnchoked++;
+			}
+			
+			// choke any unchoked but idle hosts if they are over the limit.
+			while (!unchokedButIdle.isEmpty() &&
+					unchokedButIdle.size() + currentlyUnchoked >
+					BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
+				BTConnection c = (BTConnection) unchokedButIdle.removeFirst();
+				
+				if (LOG.isDebugEnabled())
+					LOG.debug("choking during rechoke "+c);
+				
+				c.sendChoke();
+			}
 		}
 	}
 

@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.io.DelayedBufferWriter;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
@@ -79,7 +80,7 @@ public class BTConnection {
 	private final Set _requesting;
 
 	/*
-	 * the List of LongInterval containing the ranges requested by the remote
+	 * the List of BTInterval containing the ranges requested by the remote
 	 * host, we avoid queueing up all requested pieces in the MESSAGE_QUEUE to
 	 * save memory
 	 */
@@ -114,7 +115,7 @@ public class BTConnection {
 	/*
 	 * whether they choke us: only send requests if they are not choking us
 	 */
-	private boolean _isChoking;
+	private volatile boolean _isChoking;
 
 	/*
 	 * Indicates whether the remote host is interested in one of the ranges we
@@ -125,7 +126,7 @@ public class BTConnection {
 	/*
 	 * Indicates whether or not the remote host offers ranges we want
 	 */
-	private boolean _isInteresting;
+	private volatile boolean _isInteresting;
 
 	/*
 	 * the time when this Connection was created
@@ -201,13 +202,10 @@ public class BTConnection {
 
 	// PUBLIC INTERFACE
 
-	/**
-	 * Accessor, returning true if we have choked this connection.
-	 */
 	public boolean isChoked() {
 		return _isChoked;
 	}
-
+	
 	/**
 	 * Accessor, returning true if the remote host is choking us.
 	 */
@@ -233,6 +231,10 @@ public class BTConnection {
 	 */
 	public boolean isInteresting() {
 		return _isInteresting;
+	}
+	
+	public boolean hasRequested() {
+		return !_requested.isEmpty();
 	}
 
 	/**
@@ -261,12 +263,20 @@ public class BTConnection {
 	 * Closes the connection.
 	 */
 	public void close() {
-		shutdown();
+		try {
+			_socket.shutdownOutput();
+		} catch (IOException ioe1) {}
+		try {
+			_socket.shutdownInput();
+		} catch (IOException ioe2) {}
+		
+		_reader.shutdown();
+		_writer.shutdown();
+		
 		try {
 			_socket.close();
-		} catch (IOException ioe) {
-
-		}
+		} catch (IOException ioe) {}
+		
 		_torrent.connectionClosed(this);
 	}
 
@@ -315,11 +325,8 @@ public class BTConnection {
 	public void processMessage(final BTMessage message) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("received message: " + message + " from " + _endpoint);
-		_torrent.enqueueTask(new Runnable() {
-			public void run() {
-				handleMessage(message);
-			}
-		});
+		handleMessage(message);
+
 	}
 
 	/**
@@ -348,7 +355,8 @@ public class BTConnection {
 	 * _isInteresting to true
 	 */
 	void sendInterested() {
-		if (!_isInteresting) {LOG.debug("sending interested message");
+		if (!_isInteresting) {
+			LOG.debug("sending interested message");
 			_writer.enqueue(BTInterested.createMessage());
 			_isInteresting = true;
 		} 
@@ -362,7 +370,6 @@ public class BTConnection {
 		if (_isInteresting) {
 			_writer.enqueue(BTNotInterested.createMessage());
 			_isInteresting = false;
-			_isChoking = true;
 		}
 	}
 
@@ -392,23 +399,21 @@ public class BTConnection {
 		// whether we canceled some requested ranges
 		boolean modified = false;
 
-		synchronized (this) {
-			// remove all subranges that we may be requesting
-			for (Iterator iter = _requesting.iterator(); iter.hasNext();) {
-				BTInterval req = (BTInterval) iter.next();
-				if (req.getId() == pieceNum) {
-					iter.remove();
-					sendCancel(req);
-					modified = true;
-				}
+		// remove all subranges that we may be requesting
+		for (Iterator iter = _requesting.iterator(); iter.hasNext();) {
+			BTInterval req = (BTInterval) iter.next();
+			if (req.getId() == pieceNum) {
+				iter.remove();
+				sendCancel(req);
+				modified = true;
 			}
-
-			for (Iterator iter = _toRequest.iterator(); iter.hasNext();) {
-				BTInterval req = (BTInterval) iter.next();
-				if (req.getId() == pieceNum) {
-					iter.remove();
-					modified = true;
-				}
+		}
+		
+		for (Iterator iter = _toRequest.iterator(); iter.hasNext();) {
+			BTInterval req = (BTInterval) iter.next();
+			if (req.getId() == pieceNum) {
+				iter.remove();
+				modified = true;
 			}
 		}
 
@@ -440,22 +445,20 @@ public class BTConnection {
 			// safe cast, length is always <= BLOCK_SIZE
 			int length = (int) Math.min(in.high - i + 1, BLOCK_SIZE);
 			BTInterval toReq = new BTInterval(i, i + length - 1,in.getId());
-			synchronized (this) {
-				if (!_requesting.contains(toReq))
-					_toRequest.add(toReq);
-			}
+			if (!_requesting.contains(toReq))
+				_toRequest.add(toReq);
 		}
 		enqueueRequests();
 	}
 
-	private synchronized void sendCancel(BTInterval in) {
+	private void sendCancel(BTInterval in) {
 		_writer.enqueue(new BTCancel(in));
 	}
 	
 	/**
 	 * Cancels all requests. Called when the download is complete
 	 */
-	synchronized void cancelAllRequests() {
+	void cancelAllRequests() {
 		Iterator iter = _requesting.iterator();
 		while (iter.hasNext()) {
 			BTInterval request = (BTInterval) iter.next();
@@ -468,7 +471,7 @@ public class BTConnection {
 	 * notifies this, that the connection is ready to write the next chunk of
 	 * the torrent
 	 */
-	synchronized void readyForWriting() {
+	void readyForWriting() {
 		if (_isChoked || _requested.size() <= 0) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("cannot write while choked, requested size is "
@@ -479,9 +482,33 @@ public class BTConnection {
 		Iterator iter = _requested.iterator();
 		BTInterval in = (BTInterval) iter.next();
 		iter.remove();
-		sendPiece(in);
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("requesting disk read for "+in);
+		
+		try {
+			_info.getVerifyingFolder().sendPiece(in, this);
+		} catch (IOException bad) {
+			close();
+		}
 	}
 
+	/**
+	 * Notification that a piece is ready to be sent.
+	 * @param in the interval to which the piece corresponds
+	 * @param data the data of the piece.
+	 */
+	void pieceRead(final BTInterval in, final byte [] data) {
+		Runnable pieceSender = new Runnable() {
+			public void run() {
+				if (LOG.isDebugEnabled())
+					LOG.debug("disk read done for "+in);
+				_writer.enqueue(new BTPiece(in, data));
+			}
+		};
+		NIODispatcher.instance().invokeLater(pieceSender);
+	}
+	
 	/**
 	 * Accessor for the LongIntervalSet of available ranges
 	 * 
@@ -491,69 +518,7 @@ public class BTConnection {
 		return _availableRanges;
 	}
 
-	/**
-	 * prepares this connection for closing.
-	 */
-	void shutdown() {
-		try {
-			_socket.shutdownOutput();
-		} catch (IOException ioe) {
-			LOG.debug(ioe);
-		}
-		try {
-			_socket.shutdownInput();
-		} catch (IOException ioe) {
-			LOG.debug(ioe);
-		}
-
-		_reader.shutdown();
-		_writer.shutdown();
-		clearRequests();
-	}
-
-	/**
-	 * Enqueues a new piece message non-blocking
-	 * 
-	 * @param in
-	 *            the LongInterval to send
-	 */
-	void sendPiece(final BTInterval in) {
-		_torrent.enqueueTask(new Runnable() {
-			public void run() {
-				sendPieceBlocking(in);
-			}
-		});
-
-	}
-
-	/**
-	 * Enqueues a new piece message blocking
-	 * 
-	 * @param in the BTInterval to send
-	 */
-	private void sendPieceBlocking(BTInterval in) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("sending piece " + in);
-		int length = in.high - in.low + 1;
-		long position = (long)in.getId() * _info.getPieceLength() + in.low;
-		int offset = 0;
-		byte[] buf = new byte[length];
-
-		try {
-			VerifyingFolder v = _info.getVerifyingFolder();
-			if (!v.isOpen())
-				return;
-			do {
-				offset += v.read(position + offset, buf, offset, length
-						- offset);
-			} while (offset < length);
-			_writer.enqueue(new BTPiece(in, buf));
-		} catch (IOException ioe) {
-			LOG.debug(ioe);
-			shutdown();
-		}
-	}
-
+	
 	/**
 	 * Adds a range to the list of available ranges and resets _isInteresting to
 	 * true if we do not have this range ourselves
@@ -576,7 +541,7 @@ public class BTConnection {
 	 * private utility method clearing all requested ranges and informing the
 	 * VerifyingFolder that these ranges can now be requested again.
 	 */
-	private synchronized void clearRequests() {
+	private void clearRequests() {
 		for (Iterator iter = _toRequest.iterator(); iter.hasNext();)
 			clearRequest((BTInterval) iter.next());
 
@@ -603,7 +568,7 @@ public class BTConnection {
 	 * to the remote host all the time. Gets more ranges to request from the
 	 * ManagedTorrent if necessary
 	 */
-	private synchronized void enqueueRequests() {
+	private void enqueueRequests() {
 		// the reason we randomize the list of requests to be sent is that we
 		// are receiving far too many ranges multiple times when the download
 		// is about to finish.
@@ -611,37 +576,33 @@ public class BTConnection {
 		random.addAll(_toRequest);
 		Collections.shuffle(random);
 		for (Iterator iter = random.iterator(); _requesting.size() < MAX_REQUESTS
-				&& iter.hasNext() && !_isChoking;) {
+		&& iter.hasNext() && !_isChoking;) {
 			BTInterval toReq = (BTInterval) iter.next();
+			if (!_writer.enqueue(new BTRequest(toReq)))
+				return;
 			_toRequest.remove(toReq);
 			_requesting.add(toReq);
-			_writer.enqueue(new BTRequest(toReq));
 		}
 	}
 
 	/**
-	 * Handles incoming message. Do not handle messages in NIO thread!
-	 * 
-	 * @param message
-	 *            the incoming message
+	 * @param message the incoming message
 	 */
 	private void handleMessage(BTMessage message) {
 		switch (message.getType()) {
 		case BTMessage.CHOKE:
 			// we queue all requests up again, maybe we get unchoked
 			// again, - if not this will be resolved in endgame mode
-			synchronized (this) {
-				for (Iterator iter = _requesting.iterator(); iter.hasNext();) {
-					_toRequest.add(iter.next());
-					iter.remove();
-				}
+			for (Iterator iter = _requesting.iterator(); iter.hasNext();) {
+				_toRequest.add(iter.next());
+				iter.remove();
 			}
 			_isChoking = true;
 			break;
 
 		case BTMessage.UNCHOKE:
+			_isChoking = false;
 			if (_isInteresting) {
-				_isChoking = false;
 				// try sending next request as soon as we are unchoked
 				enqueueRequests();
 				// get new ranges to request if necessary
@@ -693,16 +654,14 @@ public class BTConnection {
 	 */
 	private void handleCancel(BTCancel message) {
 		BTInterval in = message.getInterval();
-
+		
 		// removes the range from the list of requests. If we are already
 		// sending the piece, there is nothing we can do about it
-		synchronized (this) {
-			for (Iterator iter = _requested.iterator(); iter.hasNext();) {
-				BTInterval current = (BTInterval) iter.next();
-				if (in.getId() == current.getId() &&
-						(in.low <= current.high && current.low <= in.high))
-					iter.remove();
-			}
+		for (Iterator iter = _requested.iterator(); iter.hasNext();) {
+			BTInterval current = (BTInterval) iter.next();
+			if (in.getId() == current.getId() &&
+					(in.low <= current.high && current.low <= in.high))
+				iter.remove();
 		}
 	}
 
@@ -744,13 +703,11 @@ public class BTConnection {
 
 		
 		// skip the message if we don't have that range
-		synchronized (this) {
-			if (_info.getVerifyingFolder().hasBlock(in.getId())) {
-				_requested.add(in);
-			}
-			if (_writer.isIdle())
-				readyForWriting();
-		}
+		if (_info.getVerifyingFolder().hasBlock(in.getId())) 
+			_requested.add(in);
+		
+		if (!_requested.isEmpty() && _writer.isIdle())
+			readyForWriting();
 	}
 
 	/**
@@ -766,27 +723,19 @@ public class BTConnection {
 		final byte[] data = message.getData();
 		
 		readBytes(data.length);
-
-		synchronized (this) {
-			if (!_requesting.remove(in) && !_toRequest.remove(in)) {
-				if (LOG.isDebugEnabled())
-					LOG.debug("received unexpected range " + in + " from "
-							+ _socket.getInetAddress() + " expected "
-							+ _requesting + " " + _toRequest);
-				return;
-			}
+		
+		if (!_requesting.remove(in) && !_toRequest.remove(in)) {
+			if (LOG.isDebugEnabled())
+				LOG.debug("received unexpected range " + in + " from "
+						+ _socket.getInetAddress() + " expected "
+						+ _requesting + " " + _toRequest);
+			return;
 		}
-
 		try {
 			VerifyingFolder v = _info.getVerifyingFolder();
 			if (v.hasBlock(in.getId()))
 				return;
-			// we don't have the chunk => torrent is not complete
-			// but v is closed!
-			if (!v.isOpen())
-				throw new IOException(
-						"torrent files closed, cannot write range");
-
+			
 			_info.getVerifyingFolder().writeBlock(
 					in,
 					data);
@@ -795,11 +744,12 @@ public class BTConnection {
 			IOUtils.handleException(ioe, null);
 			_torrent.stop();
 		}
-
+		
 		// get new ranges to request if necessary
 		if (!_torrent.isComplete()
 				&& _toRequest.size() + _requesting.size() < MAX_REQUESTS)
 			_torrent.request(this);
+		
 		// send next request upon receiving piece.
 		enqueueRequests();
 	}

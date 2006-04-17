@@ -88,7 +88,10 @@ public class VerifyingFolder {
 	private final BTMetaInfo _info;
 	
 	/**
-	 * an exception indicating something failed.
+	 * an exception indicating Disk operation failed.
+	 * a nice feature would be to have a separate
+	 * exception for each file so that multi-file torrents would 
+	 * not fail if an operation on one of the files throws.
 	 */
 	private volatile IOException storedException;
 
@@ -130,14 +133,14 @@ public class VerifyingFolder {
 	
 	public void writeBlock(BTInterval in, byte [] data) 
 	throws IOException {
-			IOException stored = storedException;
-			if (stored != null)
-				throw stored;
-			synchronized(this) {
-				requestedRanges.removeInterval(in);
-				pendingRanges.addInterval(in);
-			}
-			QUEUE.add(new WriteJob(in, data));
+		IOException stored = storedException;
+		if (stored != null)
+			throw stored;
+		synchronized(this) {
+			requestedRanges.removeInterval(in);
+			pendingRanges.addInterval(in);
+		}
+		QUEUE.add(new WriteJob(in, data));
 	}
 	
 	/**
@@ -183,6 +186,8 @@ public class VerifyingFolder {
 			return;
 		
 		synchronized(DISK_LOCK) {
+			if (!isOpen())
+				throw new IOException("file closed");
 			long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
 			int written = 0;
 			for (int i = 0; i < _files.length && written < buf.length; i++) {
@@ -350,6 +355,7 @@ public class VerifyingFolder {
 		// position of the first byte of a file in the torrent
 		long pos = 0;
 		
+		List filesToVerify = null;
 		for (int i = 0; i < _files.length; i++) {
 			File file = new File(_files[i].PATH);
 
@@ -396,13 +402,20 @@ public class VerifyingFolder {
 				}
 				
 				// if a file exists, try to verify it
-				if (doVerification && file.length() > 0) 
-					verifyFile(_files[i]);
+				if (doVerification && file.length() > 0) {
+					if (filesToVerify == null)
+						filesToVerify = new ArrayList(_files.length);
+					filesToVerify.add(_files[i]);
+				}
 			}
 
 			// increment pos to point to the first byte of the next file
 			pos += _files[i].LENGTH;
 		}
+		
+		// verify any files that needed verification
+		if (filesToVerify != null) 
+			verifyFiles(filesToVerify);
 	}
 
 	/**
@@ -416,6 +429,7 @@ public class VerifyingFolder {
 	 * closes all internal RandomAccessFile objects
 	 */
 	public void close() {
+		LOG.debug("closing the file");
 		synchronized(DISK_LOCK) {
 			if (_fos == null)
 				return;
@@ -440,6 +454,44 @@ public class VerifyingFolder {
 		}
 	}
 
+	public void sendPiece(BTInterval in, BTConnection c) throws IOException {
+		IOException e = storedException;
+		if (e != null)
+			throw e;
+		QUEUE.add(new SendJob(in, c));
+	}
+	
+	private class SendJob implements Runnable {
+		private final BTInterval in;
+		private final BTConnection c;
+		SendJob(BTInterval in, BTConnection c) {
+			this.in = in;
+			this.c = c;
+		}
+		
+		public void run() {
+			if (!isOpen())
+				return;
+			
+			if (LOG.isDebugEnabled())
+				LOG.debug("sending piece " + in);
+			int length = in.high - in.low + 1;
+			long position = (long)in.getId() * _info.getPieceLength() + in.low;
+			int offset = 0;
+			byte[] buf = new byte[length];
+			try {
+				do {
+					offset += read(position + offset, buf, offset, length
+							- offset);
+				} while (offset < length);
+			} catch (IOException bad) {
+				storedException = bad;
+				c.handleIOException(bad);
+			}
+			
+			c.pieceRead(in, buf);
+		}
+	}
 	/**
 	 * reads a number of bytes from a torrent must obtain monitor 
 	 * before reading if you want to make sure the VerifyingFolder can't be
@@ -456,7 +508,7 @@ public class VerifyingFolder {
 	 * @return
 	 * @throws IOException
 	 */
-	public int read(long position, byte[] buf, int offset,
+	private int read(long position, byte[] buf, int offset,
 			int length) throws IOException {
 		
 		if (position < 0)
@@ -467,6 +519,8 @@ public class VerifyingFolder {
 		
 		int read = 0;
 		synchronized(DISK_LOCK) {
+			if (!isOpen())
+				throw new IOException("file closed");
 			for (int i = 0; i < _files.length && read < length; i++) {
 				while (position < _files[i].LENGTH && read < length) {
 					if (_fos[i].length() < _files[i].LENGTH && position >= _fos[i].length())
@@ -476,7 +530,7 @@ public class VerifyingFolder {
 					_fos[i].seek(position);
 					int t_read = _fos[i].read(buf, read + offset, toRead);
 					if (t_read == -1)
-						throw new IOException("read -1 with offset:"+offset+ " read:"+read+" toRead"+toRead+" position:"+position+" length"+_files[i].LENGTH+" i"+i+" physical length:"+_fos[i].length());
+						throw new IOException();
 					position += t_read;
 					read += t_read;
 				}
@@ -639,9 +693,12 @@ public class VerifyingFolder {
 	 * verifies all the chunks that are associated with a file
 	 * TODO: figure out which thread this should be happening in.
 	 */
-	private void verifyFile(TorrentFile f) {
-		for (int i = f.begin; i <= f.end; i++)
-			verifyDelayed(i);
+	private void verifyFiles(List l) {
+		for (Iterator iter = l.iterator(); iter.hasNext();) {
+			TorrentFile f = (TorrentFile) iter.next();
+			for (int i = f.begin; i <= f.end; i++)
+				verifyDelayed(i);
+		}
 	}
 	
 	/**

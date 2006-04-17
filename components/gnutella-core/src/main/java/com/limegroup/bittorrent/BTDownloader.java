@@ -146,7 +146,7 @@ public class BTDownloader implements Downloader {
 	}
 
 	public int getNumberOfAlternateLocations() {
-		return _torrent.getAltLocs().size();
+		return _torrent.getNumAltLocs();
 	}
 
 	public int getNumberOfInvalidAlternateLocations() {

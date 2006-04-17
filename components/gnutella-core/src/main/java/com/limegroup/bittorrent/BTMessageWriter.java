@@ -31,7 +31,10 @@ public class BTMessageWriter implements
 	// ByteBuffer storing the message currently being written
 	private ByteBuffer _out = null;
 
-	// the internal message queue
+	/** 
+	 * the internal message queue
+	 * LOCKING: this
+	 */
 	private final LinkedList _queue;
 
 	// the BTConnection this BTMessageWriter is associated with
@@ -56,18 +59,25 @@ public class BTMessageWriter implements
 		if (shutdown)
 			return false;
 		
+		if (LOG.isDebugEnabled())
+			LOG.debug("entering handleWrite call to "+_connection);
 		int written = 0;
 		do {
 			if (_out == null || _out.remaining() == 0) {
 				if (!sendNextMessage()) {
+					if (LOG.isDebugEnabled())
+						LOG.debug("no more messages to send to "+_connection);
 					_channel.interest(this, false);
 					_out = null;
 					return false;
 				}
 			}
 			written = _channel.write(_out);
-			if (written > 0)
+			if (written > 0) {
 				count(written);
+				if (LOG.isDebugEnabled())
+					LOG.debug("wrote "+written+" bytes");
+			}
 		} while (written > 0);
 		return true;
 	}
@@ -80,12 +90,15 @@ public class BTMessageWriter implements
 	 * @return true if the message was enqueued, false if not.
 	 */
 	public boolean enqueue(BTMessage m) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("sending message of type " + m.getType() + " to "
-					+ _connection.toString() + " : " + m.toString());
+		
 		if (_queue.size() > MAX_QUEUE_SIZE)
 			return false;
 		_queue.addLast(m);
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("enqueing message of type " + m.getType() + " to "
+					+ _connection.toString() + " : " + m.toString());
+		
 		if (_channel != null)
 			_channel.interest(this, true);
 		return true;
@@ -103,14 +116,12 @@ public class BTMessageWriter implements
 	 * Implement ChannelWriter interface
 	 */
 	public void shutdown() {
-		synchronized(this) {
-			if (shutdown)
-				return;
-			shutdown = true;
-		}
+		if (shutdown)
+			return;
+		shutdown = true;
+		_queue.clear();
 		
 		_out = null;
-		_queue.clear();
 		_channel.interest(this, false);
 	}
 
@@ -152,9 +163,14 @@ public class BTMessageWriter implements
 	 *         are no more messages left to write
 	 */
 	private boolean sendNextMessage() {
-		if (_queue.size() == 0)
+		if (_queue.isEmpty())
 			return false;
+		
 		BTMessage message = (BTMessage) _queue.removeFirst();
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("sending message "+message+" to "+_connection);
+		
 		ByteBuffer payload = message.getPayload();
 		_out = ByteBuffer.allocate(payload.remaining() + 5);
 		_out.order(ByteOrder.BIG_ENDIAN);
@@ -163,7 +179,7 @@ public class BTMessageWriter implements
 		_out.put(payload);
 		_out.flip();
 		countMessage(message, _out.remaining());
-		if (_queue.size() == 0)
+		if (_queue.isEmpty())
 			_connection.readyForWriting();
 		return true;
 	}
