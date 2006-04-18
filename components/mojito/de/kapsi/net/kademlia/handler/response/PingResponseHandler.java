@@ -78,8 +78,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
                 SocketAddress currentAddress = context.getExternalSocketAddress();
                 if (!externalAddress.equals(currentAddress)) {
                     
-                    VerifyExternalAddressHandler handler 
-                        = new VerifyExternalAddressHandler(context, nodeId, src, externalAddress);
+                    ExternalAddressVerifier handler 
+                        = new ExternalAddressVerifier(context, nodeId, src, externalAddress);
                     
                     handler.pingRandomContactNode();
                 }
@@ -115,7 +115,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    private static class VerifyExternalAddressHandler extends AbstractResponseHandler {
+    private class ExternalAddressVerifier extends AbstractResponseHandler {
         
         private boolean done = false;
         private int errors = 0;
@@ -125,7 +125,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         
         private SocketAddress externalAddress;
         
-        private VerifyExternalAddressHandler(Context context, 
+        private ExternalAddressVerifier(Context context, 
                 KUID nodeId, SocketAddress src, SocketAddress externalAddress) {
             super(context);
             
@@ -170,6 +170,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
         public void handleResponse(KUID nodeId, SocketAddress src, 
                     Message message, long time) throws IOException {
             
+            networkStats.PINGS_OK.incrementStat();
+            
             if (done) {
                 return;
             }
@@ -186,6 +188,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
         }
 
         public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
+            
+            networkStats.PINGS_FAILED.incrementStat();
             
             if (done) {
                 return;
