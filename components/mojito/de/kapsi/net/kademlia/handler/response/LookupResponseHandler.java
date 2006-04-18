@@ -195,7 +195,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
             if(!finished) {
                 // Don't add the ContactNode to responses if it didn't
-                // return any contacts because we've no QueryKey for it.
+                // return any contacts because we have no QueryKey for it.
                 if (!values.isEmpty()) {
                     ContactNode node = new ContactNode(nodeId, src);
                     addResponse(node);

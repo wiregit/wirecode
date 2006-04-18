@@ -166,7 +166,7 @@ public class KeyValuePublisher implements Runnable {
                         } catch (InterruptedException ignore) {}
                         
                     } catch (IOException err) {
-                        LOG.error(err);
+                        LOG.error("KeyValuePublisher IO exception: ", err);
                     }
                 }
             } else {

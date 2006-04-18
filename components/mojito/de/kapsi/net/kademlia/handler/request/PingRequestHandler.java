@@ -70,9 +70,9 @@ public class PingRequestHandler extends AbstractRequestHandler {
                             context.getPrivateKey());
                 networkStats.SIGNED_PONGS_SENT.incrementStat();
             } catch (InvalidKeyException e) {
-                LOG.error(e);
+                LOG.error("PingRequestHandler invalid key error: ",e);
             } catch (SignatureException e) {
-                LOG.error(e);
+                LOG.error("PingRequestHandler signature error: ",e);
             }
         } else {
             response = context.getMessageFactory()

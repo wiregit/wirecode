@@ -227,7 +227,7 @@ public class MessageDispatcher implements Runnable {
             try {
                 requestHandler.handleRequest(nodeId, src, msg);
             } catch (Throwable t) {
-                LOG.error(t);
+                LOG.error("MessageHandler handle request error: ",t);
             }
         }
     }
@@ -409,8 +409,7 @@ public class MessageDispatcher implements Runnable {
                 // thrown as close() is called asynchron
                 //LOG.error(err);
             } catch (IOException err) {
-                err.printStackTrace();
-                LOG.fatal(err);
+                LOG.fatal("MessageHandler IO exception: ",err);
             }
         }
     }
@@ -437,7 +436,7 @@ public class MessageDispatcher implements Runnable {
                     try {
                         receipt.handleTimeout();
                     } catch (Throwable t) {
-                        LOG.error(t);
+                        LOG.error("ReceiptMap cleanup error: ",t);
                     }
                 }
             }
@@ -456,7 +455,7 @@ public class MessageDispatcher implements Runnable {
                 try {
                     receipt.handleTimeout();
                 } catch (Throwable t) {
-                    LOG.error(t);
+                    LOG.error("ReceiptMap removeEldestEntry error: ",t);
                 }
                 return true;
             }

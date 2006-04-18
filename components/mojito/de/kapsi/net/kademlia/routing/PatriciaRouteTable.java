@@ -146,11 +146,11 @@ public class PatriciaRouteTable implements RoutingTable {
                 
                 return true;
             } catch (FileNotFoundException e) {
-                LOG.error(e);
+                LOG.error("PatriciaRouteTable file not found exception: ", e);
             } catch (IOException e) {
-                LOG.error(e);
+                LOG.error("PatriciaRouteTable IO exception: ", e);
             } catch (ClassNotFoundException e) {
-                LOG.error(e);
+                LOG.error("PatriciaRouteTable Class not found exception: ", e);
             } finally {
                 try { if (in != null) { in.close(); } } catch (IOException ignore) {}
             }
@@ -173,9 +173,9 @@ public class PatriciaRouteTable implements RoutingTable {
             out.flush();
             return true;
         } catch (FileNotFoundException e) {
-            LOG.error(e);
+            LOG.error("PatriciaRouteTable file not found exception: ", e);
         } catch (IOException e) {
-            LOG.error(e);
+            LOG.error("PatriciaRouteTable IO exception: ", e);
         } finally {
             try { if (out != null) { out.close(); } } catch (IOException ignore) {}
         }
