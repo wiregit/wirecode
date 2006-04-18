@@ -64,8 +64,7 @@ public class EventDispatcher extends TimerTask implements Runnable {
         try {
             r.run();
         } catch (Throwable t) {
-            //t.printStackTrace();
-            LOG.error(t);
+            LOG.error("EventDispatcher error: ", t);
         }
     }
     

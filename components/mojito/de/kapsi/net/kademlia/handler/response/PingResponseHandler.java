@@ -150,9 +150,9 @@ public class PingResponseHandler extends AbstractResponseHandler {
                     }
                 }
             } catch (InvalidKeyException e) {
-                LOG.error(e);
+                LOG.error("PingResponseHandler invalid key error: ",e);
             } catch (SignatureException e) {
-                LOG.error(e);
+                LOG.error("PingResponseHandler signature error: ",e);
             }
         }
 

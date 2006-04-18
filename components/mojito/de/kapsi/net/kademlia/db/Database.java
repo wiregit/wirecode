@@ -253,10 +253,9 @@ public class Database {
             out.flush();
             return true;
         } catch (FileNotFoundException e) {
-            LOG.error(e);
+            LOG.error("Database File not found error: ",e);
         } catch (IOException e) {
-            e.printStackTrace();
-            LOG.error(e);
+            LOG.error("Database IO error: ", e);
         } finally {
             try { if (out != null) { out.close(); } } catch (IOException ignore) {}
         }
@@ -286,11 +285,11 @@ public class Database {
                 this.database = database;
                 return true;
             } catch (FileNotFoundException e) {
-                LOG.error(e);
+                LOG.error("Database File not found error: ",e);
             } catch (IOException e) {
-                LOG.error(e);
+                LOG.error("Database IO error: ", e);
             } catch (ClassNotFoundException e) {
-                LOG.error(e);
+                LOG.error("Database Class not found error: ", e);
             } finally {
                 try { if (in != null) { in.close(); } } catch (IOException ignore) {}
             }
