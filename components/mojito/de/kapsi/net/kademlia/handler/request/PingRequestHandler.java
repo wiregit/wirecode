@@ -21,8 +21,6 @@ package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,27 +59,11 @@ public class PingRequestHandler extends AbstractRequestHandler {
         networkStats.PING_REQUESTS.incrementStat();
         
         PingRequest request = (PingRequest)message;
-        PingResponse response = null;
         
-        if (request.isSignatureRequest()) {
-            try {
-                response = context.getMessageFactory()
-                    .createSignedPingResponse(message.getMessageID(), src, 
-                            context.getPrivateKey());
-                networkStats.SIGNED_PONGS_SENT.incrementStat();
-            } catch (InvalidKeyException e) {
-                LOG.error("PingRequestHandler invalid key error: ",e);
-            } catch (SignatureException e) {
-                LOG.error("PingRequestHandler signature error: ",e);
-            }
-        } else {
-            response = context.getMessageFactory()
+        PingResponse response = context.getMessageFactory()
                 .createPingResponse(message.getMessageID(), src);
-            networkStats.PONGS_SENT.incrementStat();
-        }
 
-        if (response != null) {
-            context.getMessageDispatcher().send(src, response, null);
-        }
+        context.getMessageDispatcher().send(src, response, null);
+        networkStats.PONGS_SENT.incrementStat();
     }
 }

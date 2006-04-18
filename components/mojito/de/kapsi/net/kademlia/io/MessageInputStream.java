@@ -137,8 +137,7 @@ public class MessageInputStream extends DataInputStream {
     private PingRequest readPing(int vendor, int version, 
             KUID nodeId, KUID messageId) throws IOException {
         
-        int request = readInt();
-        return new PingRequest(vendor, version, nodeId, messageId, request);
+        return new PingRequest(vendor, version, nodeId, messageId);
     }
     
     private PingResponse readPong(int vendor, int version, 

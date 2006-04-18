@@ -23,27 +23,8 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 
 public class PingRequest extends RequestMessage {
-    
-    public static final int DEFAULT = 0x00;
-    public static final int SIGN = 0x01;
-    
-    private int request;
-    
+       
     public PingRequest(int vendor, int version, KUID nodeId, KUID messageId) {
-        this(vendor, version, nodeId, messageId, DEFAULT);
-    }
-    
-    public PingRequest(int vendor, int version, KUID nodeId, KUID messageId, int request) {
         super(vendor, version, nodeId, messageId);
-        
-        this.request = request;
-    }
-    
-    public int getRequest() {
-        return request;
-    }
-    
-    public boolean isSignatureRequest() {
-        return (request & SIGN) == SIGN;
     }
 }

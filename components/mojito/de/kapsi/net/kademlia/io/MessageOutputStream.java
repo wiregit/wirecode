@@ -118,7 +118,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writePing(PingRequest ping) throws IOException {
-        writeInt(ping.getRequest());
+        /* NOTHING TO WRITE */
     }
     
     private void writePong(PingResponse pong) throws IOException {

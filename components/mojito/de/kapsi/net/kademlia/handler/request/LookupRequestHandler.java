@@ -35,6 +35,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
 
 public class LookupRequestHandler extends AbstractRequestHandler {
@@ -47,14 +48,6 @@ public class LookupRequestHandler extends AbstractRequestHandler {
 
     public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
         
-        /*if (!context.isBootstrapped()) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(context.getLocalNode() 
-                        + " has not finished Bootstrapping. Cannot respond to LookupRequest!");
-            }
-            return;
-        }*/
-        
         LookupRequest request = (LookupRequest)message;
         KUID lookup = request.getLookupID();
         
@@ -65,30 +58,10 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         QueryKey queryKey = QueryKey.getQueryKey(src);
         List bucketList = Collections.EMPTY_LIST;
         
-        /*if (context.isBootstrapped()) {
+        if (context.isBootstrapped()) {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             bucketList = context.getRouteTable().select(lookup, k, false, false);
-            
-            Comparator c = new Comparator() {
-                public int compare(Object a, Object b) {
-                    KUID one = ((ContactNode)a).getNodeID();
-                    KUID two = ((ContactNode)b).getNodeID();
-                    return one.compareTo(two);
-                }
-            };
-            
-            //are we one of the k closest nodes we know of?
-            if (Collections.binarySearch(bucketList, context.getLocalNode(), c) >= 0) {
-                queryKey = QueryKey.getQueryKey(src);
-            } else { //another chance: one of the k closest live nodes?
-                List liveNodesList = context.getRouteTable().select(lookup, k, true, false);
-                if (Collections.binarySearch(liveNodesList, context.getLocalNode(), c) >= 0) {
-                    queryKey = QueryKey.getQueryKey(src);
-                }
-            }
-        } else {
-            queryKey = QueryKey.getQueryKey(src);
-        }*/
+        }
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));

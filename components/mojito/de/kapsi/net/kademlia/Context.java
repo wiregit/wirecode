@@ -138,7 +138,6 @@ public class Context implements Runnable {
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
         bucketRefresher = new RandomBucketRefresher(this);
-        
     }
     
     public DHTStats getDHTStats() {
@@ -211,42 +210,6 @@ public class Context implements Runnable {
                 localNode.setSocketAddress(externalAddress);
             }
         }
-    }
-    
-    /**
-     * Rebuilds the routing table.
-     * Use this method if the localId changes in order to have a correct routing table
-     * 
-     * @param oldNodeId The previous nodeId of the local node
-     * 
-     */
-    private void rebuildRoutingTable(KUID oldNodeId) throws IOException{
-        Collection nodes = routeTable.getAllNodes();
-        routeTable.clear();
-        
-        ContactNode localNode = new ContactNode(nodeId, externalAddress);
-        localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode, false);
-        
-        // A flag to speedup the iteration a bit once we've
-        // found the old local node in the collection.
-        boolean check = true;
-        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-            ContactNode node = (ContactNode)it.next();
-            
-            // Skip the old local Node!
-            if (check && node.getNodeID().equals(oldNodeId)) {
-                check = false;
-                continue;
-            }
-            
-            routeTable.add(node, false);
-        }
-
-        //refresh buckets
-        routeTable.refreshBuckets(true);
-        // And finally do a looup for ourself on the DHT
-        lookup(nodeId, null);
     }
     
     public Database getDatabase() {

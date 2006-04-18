@@ -476,6 +476,12 @@ public class KUID implements Serializable, Comparable {
         }
     }
     
+    public static KUID createRandomNodeID() {
+        byte[] id = new byte[LENGTH/8];
+        GENERATOR.nextBytes(id);
+        return createNodeID(id);
+    }
+    
     /**
      * Creates and returns a Node ID from a byte array
      */

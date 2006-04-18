@@ -20,9 +20,6 @@
 package de.kapsi.net.kademlia.messages;
 
 import java.net.SocketAddress;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.SignatureException;
 import java.util.Collection;
 import java.util.List;
 
@@ -36,7 +33,6 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
-import de.kapsi.net.kademlia.security.CryptoHelper;
 import de.kapsi.net.kademlia.security.QueryKey;
 
 public class MessageFactory {
@@ -71,24 +67,8 @@ public class MessageFactory {
         return new PingRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID());
     }
     
-    public PingRequest createPingRequest(int request) {
-        return new PingRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), request);
-    }
-    
     public PingResponse createPingResponse(KUID messageId, SocketAddress address) {
         return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, address, getEstimatedSize());
-    }
-    
-    /**
-     * Creates and returns a signed PingResponse. The signature is created with the 
-     * PrivateKey from the random messageId. To verify the signature use simply your
-     * PublicKey and the bytes from the messageId.
-     */
-    public PingResponse createSignedPingResponse(KUID messageId, SocketAddress address, PrivateKey privateKey) 
-            throws SignatureException, InvalidKeyException {
-        
-        byte[] signature = CryptoHelper.sign(privateKey, messageId.getBytes());
-        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, address, getEstimatedSize(), signature);
     }
     
     public FindNodeRequest createFindNodeRequest(KUID lookup) {
