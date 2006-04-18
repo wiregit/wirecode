@@ -32,7 +32,6 @@ import java.util.Random;
 
 import com.limegroup.gnutella.dht.statistics.PlanetLabTestsStatContainer;
 import com.limegroup.gnutella.dht.statistics.StatsManager;
-import com.sun.tools.javac.v8.Retro;
 
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
@@ -122,7 +121,7 @@ public class PlanetLab {
                 synchronized(lock) {
                     
                     try {
-                        Thread.sleep(generator.nextInt(1000 * 60 * 5));
+                        Thread.sleep(generator.nextInt(1000 * 60 * 2));
                     } catch (InterruptedException err) {
                         err.printStackTrace();
                     }
