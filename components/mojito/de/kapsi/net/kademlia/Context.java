@@ -374,20 +374,29 @@ public class Context implements Runnable {
             messageDispatcher.run();
             
         } finally {
-            keyValuePublisher.stop();
-            scheduler.cancel();
-            scheduler = null;
-            
-            running = false;
-            bootstrapped = false;
-            
-            lastEstimateTime = 0L;
-            estimatedSize = 0;
-            localSizeHistory.clear();
-            remoteSizeHistory.clear();
+            shutdown();
         }
     }
 
+    private void shutdown() {
+        if (keyValuePublisher != null) {
+            keyValuePublisher.stop();
+        }
+        
+        if (scheduler != null) {
+            scheduler.cancel();
+        }
+        scheduler = null;
+        
+        running = false;
+        bootstrapped = false;
+        
+        lastEstimateTime = 0L;
+        estimatedSize = 0;
+        localSizeHistory.clear();
+        remoteSizeHistory.clear();
+    }
+    
     public void fireEvent(Runnable event) {
         if (event == null) {
             LOG.error("Discarding Event as it is null");
