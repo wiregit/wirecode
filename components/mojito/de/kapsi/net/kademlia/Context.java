@@ -483,6 +483,7 @@ public class Context implements Runnable {
             
             estimatedSize = getEstimatedSize();
             lastEstimateTime = System.currentTimeMillis();
+            networkStats.ESTIMATE_SIZE.addData(estimatedSize);
         }
         
         return estimatedSize;

@@ -23,6 +23,12 @@ public class DataBaseStatisticContainer extends StatisticContainer {
         new SimpleStatistic();
     
     /**
+     * <tt>Statistic</tt> for the number of values removed du to store forward
+     */
+    public Statistic STORE_FORWARD_REMOVALS =
+        new SimpleStatistic();
+    
+    /**
      * <tt>Statistic</tt> for values that expire
      */
     public Statistic EXPIRED_VALUES =
