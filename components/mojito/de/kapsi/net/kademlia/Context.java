@@ -367,6 +367,14 @@ public class Context implements Runnable {
         }
     }
     
+    /**
+     * Pings the DHT node with the given SocketAddress. 
+     * Warning: This method should not be used to ping contacts from the routing table
+     * 
+     * @param address The address of the node
+     * @param l the PingListener for incoming pongs
+     * @throws IOException
+     */
     public void ping(SocketAddress address, PingListener l) throws IOException {
         RequestMessage ping = messageFactory.createPingRequest();
         AbstractResponseHandler handler = new PingResponseHandler(this, l);
@@ -375,6 +383,10 @@ public class Context implements Runnable {
     }
     
     public void ping(ContactNode node, PingListener l) throws IOException {
+        if(node.isPinged()) {
+            return;
+        }
+        node.setPinged(true);
         RequestMessage ping = messageFactory.createPingRequest();
         AbstractResponseHandler handler = new PingResponseHandler(this, l);
         networkStats.PINGS_SENT.incrementStat();

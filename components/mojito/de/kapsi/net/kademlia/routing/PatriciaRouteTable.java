@@ -307,9 +307,9 @@ public class PatriciaRouteTable implements RoutingTable {
         } else if (existingNode.getTimeStamp() == 0L || existingNode.isDead()) {
             // node existed but we don't kow if it's alive
             pingNode = true;
-        }
+        } 
         
-        if(!knowToBeAlive && pingNode && !node.equals(context.getLocalNode())) {
+        if(!knowToBeAlive && pingNode && !node.equals(context.getLocalNode()) && !node.isPinged()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Pinging node: "+node);
             }
@@ -350,7 +350,7 @@ public class PatriciaRouteTable implements RoutingTable {
         //get closest bucket
         BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
         if(node != null) {
-            
+            node.setPinged(false);
             //TODO: we delete dead contacts immediately for now!...maybe relax?
             if(handleNodeFailure(node)) {
                 removeNodeAndReplace(nodeId,bucket,true);
@@ -366,6 +366,7 @@ public class PatriciaRouteTable implements RoutingTable {
         } else {
             node = bucket.removeReplacementNode(nodeId);
             if(node!=null) {
+                node.setPinged(false);
                 if (!handleNodeFailure(node)) {
                     bucket.addReplacementNode(node);
                 }
@@ -470,8 +471,8 @@ public class PatriciaRouteTable implements RoutingTable {
         ContactNode leastRecentlySeen = 
             BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
         
-        //don't ping ourselves
-        if(leastRecentlySeen.equals(context.getLocalNode())) {
+        //don't ping ourselves or an allready pinged node
+        if(leastRecentlySeen.equals(context.getLocalNode())||leastRecentlySeen.isPinged()) {
             return;
         }
 
@@ -527,6 +528,7 @@ public class PatriciaRouteTable implements RoutingTable {
         }
         //if we are here -> the node is already in the routing table
         if(alive) {
+            existingNode.setPinged(false);
             //if the existing node is marked as dead, replace anyway
             if(existingNode.isDead()) {
                 existingNode.setSocketAddress(node.getSocketAddress());
@@ -604,6 +606,10 @@ public class PatriciaRouteTable implements RoutingTable {
     }
     
     private void doSpoofCheck(ContactNode contact, ResponseHandler handler) {
+        if(contact.isPinged()) {
+            return;
+        }
+        contact.setPinged(true);
         RequestMessage request = context.getMessageFactory().createPingRequest();
         try {
             context.getMessageDispatcher().send(contact, request, handler);

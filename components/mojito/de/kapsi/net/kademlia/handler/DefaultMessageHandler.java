@@ -94,13 +94,13 @@ public class DefaultMessageHandler extends MessageHandler
         
         //only do store forward if it is a new node in our routing table or 
         //a node that is (re)connecting
-        boolean storeForward = routeTable.add(node, true);
-        if(!storeForward && (message instanceof FindNodeRequest)) {
+        boolean newNode = routeTable.add(node, true);
+        if(!newNode && (message instanceof FindNodeRequest)) {
             FindNodeRequest request = (FindNodeRequest) message;
-            storeForward = request.getLookupID().equals(nodeId);
+            newNode = request.getLookupID().equals(nodeId);
         }
 
-        if(storeForward) {
+        if(newNode) {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?

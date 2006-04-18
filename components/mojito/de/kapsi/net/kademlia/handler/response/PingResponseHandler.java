@@ -140,7 +140,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
             if (node == null) {
                 return;
             }
-            
+            node.setPinged(true);
             PingRequest request = context.getMessageFactory().createPingRequest();
             context.getMessageDispatcher().send(node, request, this);
         }
@@ -157,9 +157,11 @@ public class PingResponseHandler extends AbstractResponseHandler {
                 // - Ourself since we don't know our external address
                 // - The same Node (ID) that told us the external address
                 // - The same Node (IP) that told us the external address
+                // - A node that we are allready pinging
                 if (!nodeId.equals(context.getLocalNodeID())
                         && !nodeId.equals(this.nodeId)
-                        && !addr.equals(this.addr)) {
+                        && !addr.equals(this.addr)
+                        && !node.isPinged()) {
                     return node;
                 }
             }

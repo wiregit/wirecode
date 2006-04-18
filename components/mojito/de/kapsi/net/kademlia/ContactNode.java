@@ -33,6 +33,8 @@ public class ContactNode extends Node {
     
     private long firstAliveTime = 0L;
     
+    private volatile boolean isPinged;
+    
     public ContactNode(KUID nodeId, SocketAddress address) {
         super(nodeId);
         this.address = address;
@@ -52,6 +54,14 @@ public class ContactNode extends Node {
         setTimeStamp(0L);
     }
     
+    public boolean isPinged() {
+        return isPinged;
+    }
+
+    public void setPinged(boolean isPinged) {
+        this.isPinged = isPinged;
+    }
+
     public boolean isDead() {
         //node has ever been alive?
         if(getTimeStamp() > 0L) {
