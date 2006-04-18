@@ -887,8 +887,8 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
         
-        // the tree will fail, but it'll pick up the content-length
-        // and discard the rest of the bad data.
+        // it should fail immediately because no content-length was around
+        // and it doesn't even know how to try the tree.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());

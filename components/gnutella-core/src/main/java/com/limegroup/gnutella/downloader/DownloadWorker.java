@@ -270,6 +270,7 @@ public class DownloadWorker {
         
         switch(currentState.getCurrentState()) {
         case DownloadState.DOWNLOADING:
+            releaseRanges();
         case DownloadState.QUEUED:
         case DownloadState.BEGIN:
             currentState.setHttp11(_rfd.isHTTP11());
@@ -772,15 +773,20 @@ public class DownloadWorker {
         return true;
     }
     
-    private void completeAssignAndRequest(IOException x) {
-        incrementState(completeAssignAndRequestImpl(x));
+    private void completeAssignAndRequest(IOException x, Interval range, DownloadWorker victim) {
+        incrementState(completeAssignAndRequestImpl(x, range, victim));
     }
     
-    private ConnectionStatus completeAssignAndRequestImpl(IOException x) {
+    private ConnectionStatus completeAssignAndRequestImpl(IOException x, Interval range, DownloadWorker victim) {
         try {
             _downloader.parseHeaders();
             if(x != null)
                 throw x;
+            
+            if(victim == null)
+                completeAssignWhite(range);
+            else
+                completeAssignGrey(victim, range);
             
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
@@ -882,22 +888,21 @@ public class DownloadWorker {
 		_shouldRelease=true;
         _downloader.connectHTTP(low, high + 1, true,_commonOutFile.getBlockSize(), new IOStateObserver() {
             public void handleStatesFinished() {
-                completeAssignWhite(low, high);
-                completeAssignAndRequest(null);
+                completeAssignAndRequest(null, new Interval(low, high), null);
             }
 
             public void handleIOException(IOException iox) {
-                completeAssignAndRequest(iox);
+                completeAssignAndRequest(iox, null, null);
             }
 
             public void shutdown() {
-                completeAssignAndRequest(new IOException("shutdown"));
+                completeAssignAndRequest(new IOException("shutdown"), null, null);
             }
             
         });
     }
     
-    private void completeAssignWhite(int low, int high) {
+    private void completeAssignWhite(Interval expectedRange) {
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
         //We only want to release a range if the reported subrange
@@ -905,6 +910,8 @@ public class DownloadWorker {
         //in case this worker became a victim during the header exchange, we do not
         //clip any ranges.
         synchronized(_downloader) {
+            int low = expectedRange.low;
+            int high = expectedRange.high;
             int newLow = _downloader.getInitialReadingPoint();
             int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
             if (newHigh-newLow >= 0) {
@@ -1025,16 +1032,15 @@ public class DownloadWorker {
         //line could throw a bunch of exceptions (not queuedException)
         _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize(), new IOStateObserver() {
             public void handleStatesFinished() {
-                completeAssignGrey(slowest, slowestRange);
-                completeAssignAndRequest(null);
+                completeAssignAndRequest(null, slowestRange, slowest);
             }
 
             public void handleIOException(IOException iox) {
-                completeAssignAndRequest(iox);
+                completeAssignAndRequest(iox, null, null);
             }
 
             public void shutdown() {
-                completeAssignAndRequest(new IOException("shutdown"));
+                completeAssignAndRequest(new IOException("shutdown"), null, null);
             }
             
         });
@@ -1042,15 +1048,14 @@ public class DownloadWorker {
         return true;
     }
     
-    private void completeAssignGrey(DownloadWorker slowest, Interval slowestRange) {
+    private void completeAssignGrey(DownloadWorker slowest, Interval slowestRange) throws IOException {
         Interval newSlowestRange;
         int newStart;
         synchronized(slowest.getDownloader()) {
             // if the victim died or was stopped while the thief was connecting, we can't steal
             if (!slowest.getDownloader().isActive()) {
                 LOG.debug("victim is no longer active");
-                handleNoMoreDownloaders();
-                return;
+                throw new NoSuchElementException();
             }
             
             // see how much did the victim download while we were exchanging headers.
@@ -1061,8 +1066,7 @@ public class DownloadWorker {
                 if (LOG.isDebugEnabled())
                     LOG.debug("victim is now downloading something else "+
                             newSlowestRange+" vs. "+slowestRange);
-                handleNoMoreDownloaders();
-                return;
+                throw new NoSuchElementException();
             }
             
             if (newSlowestRange.low > slowestRange.low && LOG.isDebugEnabled()) {
@@ -1083,15 +1087,14 @@ public class DownloadWorker {
                             ", high: " + slowestRange.high + ".  Was low: " + myLow +
                             ", high: " + myHigh);
                 }
-                handleIO();
-                return;
+                throw new IOException();
             }
             
             newStart = Math.max(newSlowestRange.low,myLow);
             if(LOG.isDebugEnabled()) {
                 LOG.debug("WORKER:"+
                         " picking stolen grey "
-                        +newStart + "-"+slowestRange.high+" from "+slowest+" to "+_downloader);
+                        +newStart + "-"+slowestRange.high+" from ["+slowest+"] to [" + this + "]");
             }
             
             

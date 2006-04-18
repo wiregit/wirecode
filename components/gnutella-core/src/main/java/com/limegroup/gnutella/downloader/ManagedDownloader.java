@@ -2546,7 +2546,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                     }
                     
                 } else if (LOG.isDebugEnabled())
-                    LOG.debug("no blocks but can't steal - sleeping");
+                    LOG.debug("no blocks but can't steal - sleeping.  parts required: " + commonOutFile.listMissingPieces());
                 
                 //wait for a notification before we continue.
                 try {

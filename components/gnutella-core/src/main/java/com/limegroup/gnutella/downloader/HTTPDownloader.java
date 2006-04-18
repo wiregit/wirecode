@@ -1490,6 +1490,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         public boolean process(Channel channel, ByteBuffer buffer) throws IOException {
             boolean dataLeft = false;
             try {
+                LOG.debug("Doing read");
                 dataLeft = readImpl((ReadableByteChannel) channel, buffer);
             } catch (IOException error) {
                 LOG.debug("Error while reading", error);
@@ -1521,33 +1522,39 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                 int left;
                 synchronized(HTTPDownloader.this) {
                     if (_amountRead >= _amountToRead) {
+                        LOG.debug("Read >= to needed, done.");
                         _isActive = false;
                         return false;
                     }
                     left = _amountToRead - _amountRead;
                 }
                 
-                if(left == 0)
-                    return false;
-                
                 // Account for data already in the buffer.
-                left -= buffer.position();
-                
-                // ensure we don't read more into the buffer than we want.
-                if(buffer.remaining() > left)
-                    buffer.limit(buffer.position() + left);
-                
-                // TODO: Figure out how to throttle this crap.
-                while(left > 0 && buffer.hasRemaining() && (read = rc.read(buffer)) > 0) {
+                int preread = Math.min(left, buffer.position());
+                if(preread != 0) {
+                    LOG.debug("Using preread data of: " + preread);
                     if (_inNetwork)
-                        BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(read);
+                        BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(preread);
                     else
-                        BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(read);
-                    left -= read;
+                        BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(preread);
                 }
                 
-                // ensure the limit is set back to normal.
-                buffer.limit(buffer.capacity());
+                if(left - preread > 0) {
+                    // ensure we don't read more into the buffer than we want.
+                    if(buffer.limit() > left)
+                        buffer.limit(left);
+                    
+                    // TODO: Figure out how to throttle this crap.
+                    while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0) {
+                        if (_inNetwork)
+                            BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(read);
+                        else
+                            BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(read);
+                    }
+                
+                    // ensure the limit is set back to normal.
+                    buffer.limit(buffer.capacity());
+                }
                 
                 int totalRead = buffer.position();
                 
@@ -1555,7 +1562,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                 if(totalRead == 0) {
                     if(read == -1) {
                         LOG.debug("EOF while reading");
-                        throw IOException("EOF");
+                        throw new IOException("EOF");
                     } else if(read == 0) {
                         return true;
                     }
@@ -1566,10 +1573,6 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                 int dataStart;
     			synchronized(this) {
                     if (_isActive) {
-                        int skipped = Math.max(0, (int)(_initialWritingPoint - currPos));
-                        if(skipped > 0)
-                            LOG.debug("Amount we should skip: " + skipped);
-                        
                         // see if we were stolen from while reading
                         totalRead = Math.min(totalRead, _amountToRead - _amountRead);
                         if (totalRead <=0 ) {
@@ -1579,6 +1582,11 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                             buffer.clear();
                             return false;
                         }
+                        
+                        int skipped = Math.min(totalRead, Math.max(0, (int)(_initialWritingPoint - currPos)));
+                        if(skipped > 0)
+                            LOG.debug("Amount we should skip: " + skipped);
+
                         
                         // setup data for writing.
                         dataLength = totalRead - skipped;
@@ -1592,7 +1600,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                             if(LOG.isDebugEnabled())
                                 LOG.debug("skipped full read of: " + skipped + " bytes");
                             buffer.clear();
-                            return true;
+                            continue;
                         }                 
                     } else {
     			        if (LOG.isDebugEnabled())
@@ -1604,6 +1612,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                 
                 // write to disk outside of lock.
                 // TODO: write to disk only when buffer is full
+                LOG.debug("WORKER: " + this + ", left: " + (left-totalRead) +",  writing fp: " + filePosition +", ds: " + dataStart + ", dL: " + dataLength);
                 try {
                     _incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array());
                 } catch (InterruptedException killed) {

@@ -289,6 +289,7 @@ public class VerifyingFile {
             }
         }
         
+        //TODO: CACHE.get() can block -- must make sure it's available prior to getting
         byte[] temp = CACHE.get();
         if(temp.length < length)
             Assert.that(false, "bad length: " + length + ", needed <= " + temp.length);
@@ -474,6 +475,17 @@ public class VerifyingFile {
             return verifiedBlocks.getSize() + savedCorruptBlocks.getSize() + 
             partialBlocks.getSize()== completedSize;
         }
+    }
+    
+    /** Returns all missing pieces. */
+    public synchronized String listMissingPieces() {
+        IntervalSet all = new IntervalSet();
+        all.add(new Interval(0, completedSize-1));
+        all.delete(verifiedBlocks);
+        all.delete(savedCorruptBlocks);
+        if(hashTree == null)
+            all.delete(partialBlocks);
+        return all.toString() + ", pending: " + pendingBlocks.toString() + ", has tree? " + (hashTree != null) + ", verified: " + verifiedBlocks + ", savedCorrupt: " + savedCorruptBlocks + ", partial: " + partialBlocks;
     }
     
     /**

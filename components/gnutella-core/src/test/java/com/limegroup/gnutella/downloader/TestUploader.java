@@ -696,9 +696,6 @@ public class TestUploader extends AssertComparisons {
                          "\r\n";
             out.write(str.getBytes());
             TestFile.tree().write(out);
-            ByteArrayOutputStream temp = new ByteArrayOutputStream();
-            TestFile.tree().write(temp);
-            System.out.println("OUTPUT, length: " + temp.size() + ",: " + new String(temp.toByteArray()));
         } else {
             String body = "You have failed miserably in your attempts.";
             String str = "HTTP/1.1 9000 Failed Miserably\r\n" +
