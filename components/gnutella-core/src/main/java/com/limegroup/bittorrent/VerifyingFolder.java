@@ -774,6 +774,16 @@ public class VerifyingFolder {
 		return (int)pendingRanges.byteSize();
 	}
 	
+	/**
+	 * @return the number of pieces that we have verified
+	 * and the other host doesn't have
+	 */
+	synchronized int getNumMissing(BitSet other) {
+		BitSet clone = (BitSet)verifiedBlocks.clone();
+		clone.andNot(other);
+		return clone.cardinality();
+	}
+	
 	private static class BlockRangeMap extends HashMap {
 		public void addInterval(BTInterval in) {
 			IntervalSet s = (IntervalSet) get(in.blockId);

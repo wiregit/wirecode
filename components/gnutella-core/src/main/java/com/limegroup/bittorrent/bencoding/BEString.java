@@ -25,7 +25,7 @@ class BEString extends Token {
     private BELong sizeToken;
     
     /** The parsed length of the string */
-    private int size;
+    private int size = -1;
     
     /** Buffer used for internal storage */
     private ByteBuffer buf;
@@ -53,8 +53,10 @@ class BEString extends Token {
     }
     
     public void handleRead() throws IOException {
-        if (size == 0 && !readSize()) 
+        if (size == -1 && !readSize()) 
             return; // try next time.
+        if (size == 0)
+        	return;
         if (!buf.hasRemaining()) 
             throw new IllegalStateException("Token is done - don't read to it");
         
@@ -83,7 +85,10 @@ class BEString extends Token {
                 buf = ByteBuffer.wrap((byte[])result);
                 return true;
             }
-            else
+            else if (l2 == 0) {
+            	result = "";
+            	return true;
+            }else
                 throw new IOException("invalid string length");
         } else
             return false; // continue next signal.

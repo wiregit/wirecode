@@ -132,6 +132,12 @@ public class BTConnection {
 	 * the time when this Connection was created
 	 */
 	private final long _startTime;
+	
+	/**
+	 * The # of pieces the remote host is missing.
+	 */
+	private int numMissing;
+	
 
 	/**
 	 * Constructs instance of this
@@ -222,7 +228,15 @@ public class BTConnection {
 	public boolean isInterested() {
 		return _isInterested;
 	}
-
+	
+	/**
+	 * @return whether the remote host should be interested
+	 * in downloading from us.
+	 */
+	public boolean shouldBeInterested() {
+		return numMissing > 0;
+	}
+	
 	/**
 	 * Accessor for the _interesting attribute
 	 * 
@@ -386,9 +400,10 @@ public class BTConnection {
 		// pieces that it already has
 		// Else, simply remove the chunk from the available ranges, to optimize
 		// requesting ranges...
-		if (!_availableRanges.get(pieceNum))
+		if (!_availableRanges.get(pieceNum)) {
+			numMissing++;
 			_writer.enqueue(have);
-		else
+		} else
 			_availableRanges.clear(pieceNum);
 
 		// we should indicate that we are not interested anymore, so we are
@@ -519,6 +534,7 @@ public class BTConnection {
 	}
 
 	
+	
 	/**
 	 * Adds a range to the list of available ranges and resets _isInteresting to
 	 * true if we do not have this range ourselves
@@ -528,13 +544,15 @@ public class BTConnection {
 	 */
 	private void addAvailablePiece(int pieceNum) {
 		VerifyingFolder v = _info.getVerifyingFolder();
-		if (v.hasBlock(pieceNum))
-			return;
-		
 		_availableRanges.set(pieceNum);
+		
+		if (v.hasBlock(pieceNum)) 
+			numMissing--;
+		else
+			sendInterested();
+		
 
 		// tell the remote host we are interested if we don't have that range!
-		sendInterested();
 	}
 
 	/**
@@ -613,10 +631,14 @@ public class BTConnection {
 
 		case BTMessage.INTERESTED:
 			_isInterested = true;
+			if (!_isChoked)
+				_torrent.rechoke();
 			break;
 
 		case BTMessage.NOT_INTERESTED:
 			_isInterested = false;
+			if (!_isChoked)
+				_torrent.rechoke();
 			// connections that aren't interested any more are choked
 			// instantly
 			sendChoke();
@@ -779,6 +801,9 @@ public class BTConnection {
 				addAvailablePiece(i);
 			}
 		}
+		
+		numMissing = _info.getVerifyingFolder().getNumMissing(_availableRanges);
+		LOG.debug("initial numMissing for "+this+" is "+numMissing+" they have "+_availableRanges.cardinality());
 	}
 
 	/**

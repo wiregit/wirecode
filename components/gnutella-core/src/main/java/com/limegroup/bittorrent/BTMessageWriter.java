@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestWriteChannel;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
@@ -68,7 +69,6 @@ public class BTMessageWriter implements
 					if (LOG.isDebugEnabled())
 						LOG.debug("no more messages to send to "+_connection);
 					_channel.interest(this, false);
-					_out = null;
 					return false;
 				}
 			}
@@ -119,10 +119,13 @@ public class BTMessageWriter implements
 		if (shutdown)
 			return;
 		shutdown = true;
-		_queue.clear();
-		
-		_out = null;
-		_channel.interest(this, false);
+		NIODispatcher.instance().invokeLater(new Runnable() {
+			public void run() {
+				_queue.clear();
+				_channel.interest(BTMessageWriter.this, false);
+				
+			}
+		});
 	}
 
 	/**

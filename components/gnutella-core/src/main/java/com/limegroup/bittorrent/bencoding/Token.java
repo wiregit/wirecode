@@ -130,7 +130,7 @@ public abstract class Token {
             return new BEList(chan);
         else if (b == E)
             return Token.TERMINATOR;
-        else if (b > ZERO && b <= NINE)
+        else if (b >= ZERO && b <= NINE)
             return new BEString(b,chan);
         else
             throw new IOException("unrecognized token type "+(char)b);

@@ -11,7 +11,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -587,6 +591,8 @@ public class ManagedTorrent {
 		if (LOG.isDebugEnabled())
 			LOG.debug("removing connection " + btc.toString());
 		_connections.remove(btc);
+		if (btc.isInterested() && !btc.isChoked())
+			rechoke();
 	}
 
 	/**
@@ -753,108 +759,79 @@ public class ManagedTorrent {
 	 */
 	private void scheduleRechoke() {
 		Runnable choker = new Runnable() {
+			private int run = 0;
 			public void run() {
 				if (_stopped)
 					return;
 				if (LOG.isDebugEnabled())
 					LOG.debug("scheduling rechoke");
-				rechoke();
-				// re-schedule if not stopped
+				
+				List l; 
+				if (run++ % 3 == 0) {
+					l = new ArrayList(_connections);
+					Collections.shuffle(l);
+				} else
+					l = _connections;
+				
+				
+				NIODispatcher.instance().invokeLater(new Rechoker(l));
+				
 				RouterService.schedule(this, RECHOKE_TIMEOUT, 0);
 			}
 		};
 		RouterService.schedule(choker, RECHOKE_TIMEOUT, 0);
 	}
-
-	private void rechoke() {
-		NIODispatcher.instance().invokeLater(new Rechoker());
+	
+	void rechoke() {
+		NIODispatcher.instance().invokeLater(new Rechoker(_connections));
 	}
-
-	/**
-	 * 
-	 * TODO: document this thoroughly because its twistid
-	 * 
-	 */
+	
 	private class Rechoker implements Runnable {
+		private final List connections;
+		Rechoker(List connections) {
+			this.connections = connections;
+		}
+		
 		public void run() {
-			
 			if (_globalChoke) {
 				LOG.debug("global choke");
 				return;
 			}
 			
-			LinkedList candidates = new LinkedList();
-			LinkedList unchokedButIdle = new LinkedList();
-			int currentlyUnchoked = 0;
-			int currentlyNotInterested = 0;
-			
-			// add all interested connections to candidates
-			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-				BTConnection btc = (BTConnection) iter.next();
-				if (btc.isInterested()){
-					if (btc.isChoked())
-						candidates.add(btc);
-					else if (btc.hasRequested())
-						currentlyUnchoked++;
-					else
-						unchokedButIdle.add(btc);
-				} else
-					currentlyNotInterested++;
+			SortedSet fastest = new TreeSet(DOWNLOAD_SPEED_COMPARATOR);
+			for (Iterator iter = connections.iterator(); iter.hasNext();) {
+				BTConnection con = (BTConnection) iter.next();
+				if (con.isInterested() && con.shouldBeInterested())
+					fastest.add(con);
 			}
 			
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("rechocking.. candidates:"+candidates.size()+
-						" currently unchoked:"+currentlyUnchoked+
-						" unchoked but idle:"+unchokedButIdle.size()+
-						" currently not interested:"+currentlyNotInterested);
+			// unchoke the fastest connections that are interested in us
+			int numFast = BittorrentSettings.TORRENT_MAX_UPLOADS.getValue() - 1;
+			if (fastest.size() > numFast) {
+				for (Iterator iter = fastest.iterator(); iter.hasNext();) {
+					Object element = (Object) iter.next();
+					if (numFast-- == 0) {
+						fastest = fastest.headSet(element);
+						break;
+					}
+				}
 			}
 			
-			// if we have unchoked enough active peers, don't do anything
-			if (currentlyUnchoked >= 
-				BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
-				return;
-			}
+			// unchoke optimistically at least one connection
+			int optimistic = Math.max(1,
+					BittorrentSettings.TORRENT_MIN_UPLOADS.getValue() - fastest.size());
 			
-			Collections.shuffle(candidates);
 			
-			// unchoke TORRENT_MIN_UPLOADS connections in order to give everyone a
-			// fair chance
-			while (candidates.size() > 0
-					&& currentlyUnchoked < BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
-				BTConnection c = (BTConnection) candidates.remove(0);
-				
-				if (LOG.isDebugEnabled())
-					LOG.debug("unchoking optimistically "+c);
-				
-				c.sendUnchoke();
-				currentlyUnchoked++;
-			}
-			
-			// unchoke the hosts that are uploading the most to us
-			Collections.sort(candidates, DOWNLOAD_SPEED_COMPARATOR);
-			
-			while (candidates.size() > 0
-					&& currentlyUnchoked + currentlyUnchoked < 
-					BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
-				BTConnection c = (BTConnection) candidates.removeFirst();
-				
-				if (LOG.isDebugEnabled())
-					LOG.debug("unchoking for merit "+c);
-				
-				c.sendUnchoke();
-				currentlyUnchoked++;
-			}
-			
-			// choke any unchoked but idle hosts if they are over the limit.
-			while (!unchokedButIdle.isEmpty() &&
-					unchokedButIdle.size() + currentlyUnchoked >
-					BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()) {
-				BTConnection c = (BTConnection) unchokedButIdle.removeFirst();
-				
-				if (LOG.isDebugEnabled())
-					LOG.debug("choking during rechoke "+c);
-				
-				c.sendChoke();
+			for (Iterator iter = connections.iterator(); iter.hasNext();) {
+				BTConnection con = (BTConnection) iter.next();
+				if (fastest.contains(con)) 
+					con.sendUnchoke();
+				else if (optimistic > 0 && con.shouldBeInterested()) {
+					con.sendUnchoke(); // this is weird but that's how Bram does it
+					if (con.isInterested()) 
+						optimistic--;
+				} else 
+					con.sendChoke();
 			}
 		}
 	}

@@ -54,7 +54,7 @@ class BELong extends Token {
         super(chan);
         this.terminator = terminator;
         if (firstByte != 0) {
-            if (firstByte <= ZERO || firstByte > NINE)
+            if (firstByte < ZERO || firstByte > NINE)
                 throw new IllegalArgumentException("invalid first byte");
             sb.append(firstByte - ZERO); 
         }

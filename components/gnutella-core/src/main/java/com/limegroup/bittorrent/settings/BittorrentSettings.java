@@ -32,13 +32,13 @@ public class BittorrentSettings extends LimeProps {
 	 * maximum uploads per torrent
 	 */
 	public static IntSetting TORRENT_MAX_UPLOADS = FACTORY.createIntSetting(
-			"TORRENT_MAX_UPLOADS", 4);
+			"TORRENT_MAX_UPLOADS", 6);
 
 	/**
 	 * the number of uploads to allow to random hosts, ignoring tit-for-tat
 	 */
 	public static IntSetting TORRENT_MIN_UPLOADS = FACTORY.createIntSetting(
-			"TORRENT_MIN_UPLOADS", 1);
+			"TORRENT_MIN_UPLOADS", 4);
 
 	/**
 	 * max connections per torrent

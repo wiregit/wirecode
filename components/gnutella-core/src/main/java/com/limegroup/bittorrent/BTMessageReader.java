@@ -156,7 +156,6 @@ public class BTMessageReader implements ChannelReadObserver {
 				return;
 			shutdown = true;
 		}
-		_in = null;
 	}
 
 	/**
