@@ -82,8 +82,7 @@ public class SystemUtils {
         if(isLoaded && (CommonUtils.isWindows() || CommonUtils.isMacOSX()))
             setFileWriteable(fileName);
     }
-            
-    
+
     private static final native long idleTime();
     private static final native int setFileWriteable(String filename);
     private static final native int setOpenFileLimit0(int max);
@@ -91,10 +90,13 @@ public class SystemUtils {
 	/**
 	 * Get the path to the Windows launcher .exe file that is us running right now.
 	 * 
-	 * @return A String like "c:\Program Files\LimeWire\LimeWire.exe"
+	 * @return A String like "c:\Program Files\LimeWire\LimeWire.exe".
+	 *         Blank on error.
 	 */
     public static final String getRunningPath() {
-    	return getRunningPathNative();
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return getRunningPathNative();
+    	return "";
     }
 
     /**
@@ -102,8 +104,10 @@ public class SystemUtils {
      * 
      * @return True if it does, false if it does not or there was an error
      */
-    public static final boolean windowsFirewallPresent() {
-    	return windowsFirewallPresentNative();
+    public static final boolean isWindowsFirewallPresent() {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return windowsFirewallPresentNative();
+    	return false;
     }
 
     /**
@@ -113,8 +117,10 @@ public class SystemUtils {
      *         False if the setting on the "General" tab is "Off (not recommended)".
      *         False on error.
      */
-    public static final boolean windowsFirewallEnabled() {
-    	return windowsFirewallEnabledNative();
+    public static final boolean isWindowsFirewallEnabled() {
+    	if (CommonUtils.isWindows() && isLoaded)
+    	    return windowsFirewallEnabledNative();
+    	return false;
     }
 
     /**
@@ -124,8 +130,10 @@ public class SystemUtils {
      *         False if the box is not checked.
      *         False on error.
      */
-    public static final boolean windowsFirewallExceptionsNotAllowed() {
-    	return windowsFirewallExceptionsNotAllowedNative();
+    public static final boolean areWindowsFirewallExceptionsNotAllowed() {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return windowsFirewallExceptionsNotAllowedNative();
+    	return false;
     }
 
     /**
@@ -134,18 +142,22 @@ public class SystemUtils {
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
      * @return     True if it has a listing on the Exceptions list, false if not or on error
      */
-    public static final boolean windowsFirewallIsProgramListed(String path) {
-    	return windowsFirewallIsProgramListedNative(path);
+    public static final boolean isProgramListedOnWindowsFirewall(String path) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return windowsFirewallIsProgramListedNative(path);
+    	return false;
     }
 
     /**
      * Determine if a program's listing on the Windows Firewall exceptions list has a check box making it enabled.
      * 
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
-     * @return     True if it's listing's check box is checked, false if nt or on error
+     * @return     True if it's listing's check box is checked, false if not or on error
      */
-    public static final boolean windowsFirewallIsProgramEnabled(String path) {
-    	return windowsFirewallIsProgramEnabledNative(path);
+    public static final boolean isProgramEnabledOnWindowsFirewall(String path) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return windowsFirewallIsProgramEnabledNative(path);
+    	return false;
     }
 
     /**
@@ -155,8 +167,10 @@ public class SystemUtils {
      * @param name The name of the program, like "LimeWire", this is the text that will identify the item on the list
      * @return     False if error
      */
-    public static final boolean windowsFirewallAdd(String path, String name) {
-    	return windowsFirewallAddNative(path, name);
+    public static final boolean addProgramToWindowsFirewall(String path, String name) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return windowsFirewallAddNative(path, name);
+    	return false;
     }
 
     /**
@@ -165,8 +179,10 @@ public class SystemUtils {
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
      * @return     False if error.
      */
-    public static final boolean windowsFirewallRemove(String path) {
-    	return windowsFirewallRemoveNative(path);
+    public static final boolean removeProgramFromWindowsFirewall(String path) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return windowsFirewallRemoveNative(path);
+    	return false;
     }
 
     // Native methods implemented in C++ code in WindowsFirewall.dll
