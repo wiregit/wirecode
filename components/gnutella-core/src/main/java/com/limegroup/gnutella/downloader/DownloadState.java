@@ -33,5 +33,19 @@ class DownloadState {
     void setHttp11(boolean http11) {
         this.http11 = http11;
     }
+    
+    public String toString() {
+        switch(state) {
+        case BEGIN: return "Begin";
+        case REQUESTING_THEX: return "Requesting Thex";
+        case DOWNLOADING_THEX: return "Downloading Thex";
+        case CONSUMING_BODY: return "Consuming Body";
+        case REQUESTING_HTTP: return "Requesting HTTP";
+        case QUEUED: return "Queued";
+        case DOWNLOADING: return "Downloading";
+        default:
+            return "Unknown: " + state;
+        }
+    }
 
 }

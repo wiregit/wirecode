@@ -23,9 +23,9 @@ import com.limegroup.gnutella.version.UpdateInformation;
 public class ActivityCallbackStub implements ActivityCallback {
     
     //don't delete corrupt file on detection
-    public static boolean delCorrupt = false;
+    public boolean delCorrupt = false;
     //if corruptness was queried
-    public static boolean corruptChecked = false;
+    public boolean corruptChecked = false;
 
     public void componentLoading(String component) {}
     public void connectionInitializing(Connection c) { }

@@ -675,10 +675,14 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
 	 * if necessary.
 	 */
     void consumeBody(IOStateObserver observer) {
-        if (!_bodyConsumed)
-            consumeBody(_contentLength, observer);
-        else
+        if (!_bodyConsumed) {
+            if(_contentLength != -1)
+                consumeBody(_contentLength, observer);
+            else
+                observer.handleIOException(new IOException("no content length"));
+        } else {
             observer.handleStatesFinished();
+        }
         _bodyConsumed = true;
     }
     
@@ -714,6 +718,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         
         _headerReader = reader;
         _requestingThex = true;
+        _bodyConsumed = false;
         _stateMachine.addStates(new IOState[] { writer, reader });
     }
     
@@ -725,12 +730,10 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         _requestingThex = false;
         try {
             int code = parseHTTPCode(_headerReader.getConnectLine(), _rfd);
-            if(code < 200 || code >= 300) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("invalid HTTP code: " + code);
-                _rfd.setTHEXFailed();
-            }
-            return parseThexHeaders(code);
+            boolean failed = false;
+            if(code < 200 || code >= 300)
+                failed = true;
+            return parseThexHeaders(code, failed);
         } catch(IOException failed) {
             return ConnectionStatus.getNoFile();
         }
@@ -738,13 +741,13 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
     }
     
     public void downloadThexBody(URN sha1, IOStateObserver observer) {
-        int length = getContentLengthFromHeaders();
-        _thexReader = new ThexReader(length, sha1, _root32, _rfd.getFileSize());
+        _thexReader = new ThexReader(_contentLength, sha1, _root32, _rfd.getFileSize());
         _observer = observer;
         _stateMachine.addState(_thexReader);
     }
     
     public HashTree getHashTree() {
+        _bodyConsumed = true;
         HashTree tree =  _thexReader.getHashTree();
         if(tree == null)
             _rfd.setTHEXFailed();
@@ -754,37 +757,21 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         return tree;
     }
     
-    private int getContentLengthFromHeaders() {
-        for(Iterator i = _headerReader.getHeaders().entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            String header = (String)next.getKey();
-            if(HTTPHeaderName.CONTENT_LENGTH.is(header)) {
-                String value = (String)next.getValue();
-                try {
-                    return Integer.parseInt(value.trim());
-                } catch(NumberFormatException nfe) {
-                    return -1;
-                }
-            }   
-        }
-        return -1;
-    }
-    
     /**
      * Parses the headers of a thex response.
      * Ensures a content-length is included,
      * and if queued returns a queued response.
      */
-    private ConnectionStatus parseThexHeaders(int code) throws IOException {
+    private ConnectionStatus parseThexHeaders(int code, boolean failed) throws IOException {
         if(LOG.isDebugEnabled())
             LOG.debug(_rfd + " consuming headers");
         
-        boolean hasContentLength = false;
+        _contentLength = -1;
         for(Iterator i = _headerReader.getHeaders().entrySet().iterator(); i.hasNext(); ) {
             Map.Entry next = (Map.Entry)i.next();
             String header = (String)next.getKey();
             if(HTTPHeaderName.CONTENT_LENGTH.is(header))
-                hasContentLength = true;
+                _contentLength = readContentLength((String)next.getValue());
             if(code == 503 && HTTPHeaderName.QUEUE.is(header)) {
                 String value = (String)next.getValue();
                 int queueInfo[] = { -1, -1, -1 };
@@ -792,12 +779,14 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                 int min = queueInfo[0];
                 int max = queueInfo[1];
                 int pos = queueInfo[2];
-                if(min != -1 && max != -1 && pos != -1)
+                if(min != -1 && max != -1 && pos != -1) {
+                    _bodyConsumed = true;
                     return ConnectionStatus.getQueued(pos, min);
+                }
             }
         }
         
-        if(!hasContentLength)
+        if(failed || _contentLength == -1)
             return ConnectionStatus.getNoFile();
         else
             return ConnectionStatus.getConnected();
@@ -829,6 +818,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
             throw new IOException();
         
         int code = parseHTTPCode(connectLine, _rfd);
+        _contentLength = -1;
         //Note: According to the specification there are 5 headers, LimeWire
         //ignores 2 of them - queue length, and maxUploadSlots.
         int[] refQueueInfo = {-1,-1,-1};
@@ -900,8 +890,10 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                 int min = refQueueInfo[0];
                 int max = refQueueInfo[1];
                 int pos = refQueueInfo[2];
-                if(min != -1 && max != -1 && pos != -1)
+                if(min != -1 && max != -1 && pos != -1) {
+                    _bodyConsumed = true;
                     throw new QueuedException(min,max,pos);
+                }
                     
                 // per the PFSP spec, a 503 should be returned. But if the
                 // uploader returns a "Avaliable-Ranges" header regardless of

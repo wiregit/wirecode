@@ -12,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -24,11 +23,9 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
  * Class that performs the logic of downloading a file from a single host.
@@ -200,27 +197,26 @@ public class DownloadWorker {
     /**
      * The name this worker has in toString & threads.
      */
-    private final String workerName;
+    private final String _workerName;
     
     /** The observer used for direct connection establishment. */
     private DirectConnector _connectObserver;
     
-    /** Lock waited on while queued. */
-    private final Object Q_LOCK = new Object();
-
-    private DownloadState currentState;
+    /** The current state of the non-blocking download. */
+    private DownloadState _currentState;
     
     DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd, VerifyingFile vf, Object lock) {
         _manager = manager;
         _rfd = rfd;
         _stealLock = lock;
         _commonOutFile = vf;
+        _currentState = new DownloadState();
         
         // if we'll be debugging, we want to distinguish the different workers
         if (LOG.isDebugEnabled()) {
-            workerName = "DownloadWorker for " + _manager.getSaveFile().getName() + " #" + System.identityHashCode(this);
+            _workerName = "DownloadWorker for " + _manager.getSaveFile().getName() + " #" + System.identityHashCode(this);
         } else {
-            workerName = "DownloaderWorker";
+            _workerName = "DownloaderWorker";
         }        
     }
     
@@ -257,7 +253,6 @@ public class DownloadWorker {
      */
     private void httpLoop() {
         LOG.debug("Starting HTTP Loop");
-        currentState = new DownloadState();
         incrementState(null);
     }
     
@@ -266,32 +261,32 @@ public class DownloadWorker {
      * This kicks off the next stage if necessary.
      */
     public void incrementState(ConnectionStatus status) {
-        LOG.debug("State Changed, Current: " + currentState.getCurrentState() + ", status: " + status);
+        LOG.debug("State Changed, Current: " + _currentState + ", status: " + status);
         
-        switch(currentState.getCurrentState()) {
+        switch(_currentState.getCurrentState()) {
         case DownloadState.DOWNLOADING:
             releaseRanges();
         case DownloadState.QUEUED:
         case DownloadState.BEGIN:
-            currentState.setHttp11(_rfd.isHTTP11());
-            currentState.setState(DownloadState.REQUESTING_THEX);
+            _currentState.setHttp11(_rfd.isHTTP11());
+            _currentState.setState(DownloadState.REQUESTING_THEX);
             if(requestTHEXIfNeeded())
                 break; // wait for callback
         
         case DownloadState.REQUESTING_THEX:
-            currentState.setState(DownloadState.DOWNLOADING_THEX);
+            _currentState.setState(DownloadState.DOWNLOADING_THEX);
             if(downloadThexIfNeeded())
                 break;
         
         case DownloadState.DOWNLOADING_THEX:
-            currentState.setState(DownloadState.CONSUMING_BODY);
+            _currentState.setState(DownloadState.CONSUMING_BODY);
             if(consumeBodyIfNecessary())
                 break; // wait for callback
             
         case DownloadState.CONSUMING_BODY:
             _downloader.forgetRanges();
             if(status == null || !status.isQueued()) {
-                currentState.setState(DownloadState.REQUESTING_HTTP);
+                _currentState.setState(DownloadState.REQUESTING_HTTP);
                 if(!assignAndRequest()) { // no data
                     finishHttpLoop();
                 }
@@ -302,7 +297,7 @@ public class DownloadWorker {
             httpRequestFinished(status);
             break;
         default:
-            throw new IllegalStateException("bad state: " + currentState.getCurrentState());
+            throw new IllegalStateException("bad state: " + _currentState);
         }
     }
     
@@ -318,20 +313,36 @@ public class DownloadWorker {
             }
 
             public void handleIOException(IOException iox) {
+                handleRFDFailure(_rfd);
                 finishHttpLoop();
             }
 
             public void shutdown() {
+                handleRFDFailure(_rfd);
                 finishHttpLoop();
             }           
         });
         return true;
     }
     
+    private void handleRFDFailure(RemoteFileDesc rfd) {
+        _rfd.incrementFailedCount();
+        
+        // if this RFD had a failure, try it again.
+        if( _rfd.getFailedCount() < 2 ) {
+            //set retry after, wait a little before retrying this RFD
+            _rfd.setRetryAfter(FAILED_RETRY_AFTER);
+            _manager.addRFD(_rfd);
+        } else //tried the location twice -- it really is bad
+            _manager.informMesh(_rfd, false);
+    }
+    
     private void httpRequestFinished(ConnectionStatus status) {
         assert status != null;
         
         LOG.debug("HTTP req finished, status: " + status);
+
+        _manager.addPossibleSources(_downloader.getLocationsReceived());
         
         if(status.isNoData() || status.isNoFile()) {
             finishHttpLoop();
@@ -339,10 +350,8 @@ public class DownloadWorker {
             if(!status.isConnected())
                 releaseRanges();
             
-            _manager.addPossibleSources(_downloader.getLocationsReceived());
-            
             if(status.isPartialData()) {
-                currentState.setState(DownloadState.BEGIN);
+                _currentState.setState(DownloadState.BEGIN);
                 incrementState(null);
             } else {
                 Assert.that( status.isQueued() || status.isConnected() );
@@ -350,7 +359,7 @@ public class DownloadWorker {
                 
                 if(status.isConnected()) {
                     _manager.removeQueuedWorker(this);
-                    currentState.setState(DownloadState.DOWNLOADING);
+                    _currentState.setState(DownloadState.DOWNLOADING);
                     beginDownload();
                 } else if (!queued) { // If we were told not to queue.
                     finishHttpLoop();
@@ -366,7 +375,7 @@ public class DownloadWorker {
             _downloader.doDownload(new IOStateObserver() {
                 public void handleStatesFinished() {
                     _rfd.resetFailedCount();
-                    if(currentState.isHttp11())
+                    if(_currentState.isHttp11())
                         DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
                     else
                         DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
@@ -388,7 +397,7 @@ public class DownloadWorker {
                 }
                 
                 private void error() {
-                    if(currentState.isHttp11())
+                    if(_currentState.isHttp11())
                         DownloadStat.FAILED_HTTP11.incrementStat();
                     else
                         DownloadStat.FAILED_HTTP10.incrementStat();
@@ -407,17 +416,10 @@ public class DownloadWorker {
                     synchronized (_manager) {
                         if (problem) {
                             _downloader.stop();
-                            _rfd.incrementFailedCount();
-                            // if we failed less than twice in succession,
-                            // try to use the file again much later.
-                            if (_rfd.getFailedCount() < 2) {
-                                _rfd.setRetryAfter(FAILED_RETRY_AFTER);
-                                _manager.addRFD(_rfd);
-                            } else
-                                _manager.informMesh(_rfd, false);
+                            handleRFDFailure(_rfd);
                         } else {
                             _manager.informMesh(_rfd, true);
-                            if (!currentState.isHttp11()) // no need to add http11 _activeWorkers to files
+                            if (!_currentState.isHttp11()) // no need to add http11 _activeWorkers to files
                                 _manager.addRFD(_rfd);
                         }
                     }
@@ -477,10 +479,12 @@ public class DownloadWorker {
             return false;
         
         ConnectionStatus status = _downloader.parseThexResponseHeaders();
-        if(status.isQueued()) {
+        LOG.debug("Status after parsing THEX headers: " + status);
+        
+        if(!status.isConnected()) {
+            // retry this RFD without THEX, since that's why it failed.
+            _rfd.setTHEXFailed();
             incrementState(status);
-        } else if(!status.isConnected()) {
-            finishHttpLoop();
         } else {
             _downloader.downloadThexBody(_manager.getSHA1Urn(), new IOStateObserver() {
                 public void handleStatesFinished() {
@@ -568,38 +572,33 @@ public class DownloadWorker {
         // we should be prepared.
         _manager.removeActiveWorker(this);
         
-        synchronized(currentState) {
+        synchronized(_currentState) {
             if(_interrupted) {
                 LOG.debug("Exiting from queueing");
                 return;
             }
             
             LOG.debug("Queueing");
-            currentState.setState(DownloadState.QUEUED);
+            _currentState.setState(DownloadState.QUEUED);
         }
         
         RouterService.schedule(new Runnable() {
             public void run() {
                 LOG.debug("Queue time up");
                 
-                boolean remQ = false;
-                synchronized(currentState) {
+                synchronized(_currentState) {
                     if(_interrupted) {
                         LOG.warn("WORKER: interrupted while waiting in queue " + _downloader);
-                        remQ = true;
+                        return;
                     }
                 }
                 
                 // downloader.stop() will already be called if it was interrupted.
-                if(remQ) {
-                    _manager.removeQueuedWorker(DownloadWorker.this);
-                } else {
-                    NIODispatcher.instance().invokeLater(new Runnable() {
-                        public void run() {
-                            incrementState(null);
-                        }
-                    });
-                }
+                NIODispatcher.instance().invokeLater(new Runnable() {
+                    public void run() {
+                        incrementState(null);
+                    }
+                });
             }
         }, status.getQueuePollTime(), 0);
     }
@@ -956,7 +955,7 @@ public class DownloadWorker {
         //If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if( !_downloader.getRemoteFileDesc().isPartialSource() ) {
-            if(currentState.isHttp11()) {
+            if(_currentState.isHttp11()) {
                 interval = _commonOutFile.leaseWhite(findChunkSize());
             } else
                 interval = _commonOutFile.leaseWhite();
@@ -968,7 +967,7 @@ public class DownloadWorker {
             try {
                 IntervalSet availableRanges = _downloader.getRemoteFileDesc().getAvailableRanges();
 
-                if (currentState.isHttp11()) {
+                if (_currentState.isHttp11()) {
                     interval = _commonOutFile.leaseWhite(availableRanges, findChunkSize());
                 } else
                     interval = _commonOutFile.leaseWhite(availableRanges);
@@ -1268,16 +1267,7 @@ public class DownloadWorker {
     }
     
     private ConnectionStatus handleIO(){
-        _rfd.incrementFailedCount();
-        
-        // if this RFD had an IOX while reading headers/downloading
-        // less than twice in succession, try it again.
-        if( _rfd.getFailedCount() < 2 ) {
-            //set retry after, wait a little before retrying this RFD
-            _rfd.setRetryAfter(FAILED_RETRY_AFTER);
-            _manager.addRFD(_rfd);
-        } else //tried the location twice -- it really is bad
-            _manager.informMesh(_rfd, false);
+        handleRFDFailure(_rfd);
         
         return ConnectionStatus.getNoFile();
     }
@@ -1288,7 +1278,11 @@ public class DownloadWorker {
      * interrupts this downloader.
      */
     void interrupt() {
-        _interrupted = true;
+        synchronized(_currentState) {
+            _interrupted = true;
+            if(_currentState.getCurrentState() == DownloadState.QUEUED)
+                _manager.removeQueuedWorker(this);
+        }
         
         if (_downloader != null)
             _downloader.stop();
@@ -1303,11 +1297,6 @@ public class DownloadWorker {
             else if(observer.getSocket() != null)
                 IOUtils.close(observer.getSocket());
         }
-        
-        // make sure that queued downloaders are stopped.
-        synchronized(Q_LOCK) {
-            Q_LOCK.notify();
-        }
     }
 
     
@@ -1320,7 +1309,7 @@ public class DownloadWorker {
     }
     
     public String toString() {
-        return workerName + " -> "+_rfd;  
+        return _workerName + " -> "+_rfd;  
     }
     
     /**

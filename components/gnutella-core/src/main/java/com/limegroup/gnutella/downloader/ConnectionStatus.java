@@ -22,7 +22,7 @@ public class ConnectionStatus {
     static final int TYPE_NO_DATA = 3;
     static final int TYPE_PARTIAL_DATA = 4;
     static final int TYPE_THEX_RESPONSE = 5;
-
+    
     /**
      * The status of this connection.
      */
@@ -230,6 +230,14 @@ public class ConnectionStatus {
     }
 
     public String toString() {
-        return ""+getType();
+        switch(STATUS) {
+        case TYPE_NO_FILE: return "No File";
+        case TYPE_QUEUED: return "Queued";
+        case TYPE_CONNECTED: return "Connected";
+        case TYPE_NO_DATA: return "No Data";
+        case TYPE_PARTIAL_DATA: return "Partial Data";
+        case TYPE_THEX_RESPONSE: return "Thex Response";
+        default: return "Unknown: " + STATUS;
+        }
     }
 }
