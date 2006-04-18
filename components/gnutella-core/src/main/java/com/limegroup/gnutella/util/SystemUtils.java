@@ -22,6 +22,7 @@ public class SystemUtils {
                 if(CommonUtils.isWindows2000orXP()) {
                     System.loadLibrary("WindowsV5PlusUtils");
                 }
+                System.loadLibrary("WindowsFirewall");
             }
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
@@ -86,4 +87,95 @@ public class SystemUtils {
     private static final native long idleTime();
     private static final native int setFileWriteable(String filename);
     private static final native int setOpenFileLimit0(int max);
+
+	/**
+	 * Get the path to the Windows launcher .exe file that is us running right now.
+	 * 
+	 * @return A String like "c:\Program Files\LimeWire\LimeWire.exe"
+	 */
+    public static final String getRunningPath() {
+    	return getRunningPathNative();
+    }
+
+    /**
+     * Determine if this Windows computer has Windows Firewall on it.
+     * 
+     * @return True if it does, false if it does not or there was an error
+     */
+    public static final boolean windowsFirewallPresent() {
+    	return windowsFirewallPresentNative();
+    }
+
+    /**
+     * Determine if the Windows Firewall is enabled.
+     * 
+     * @return True if the setting on the "General" tab is "On (recommended)".
+     *         False if the setting on the "General" tab is "Off (not recommended)".
+     *         False on error.
+     */
+    public static final boolean windowsFirewallEnabled() {
+    	return windowsFirewallEnabledNative();
+    }
+
+    /**
+     * Determine if the Windows Firewall is on with no exceptions.
+     * 
+     * @return True if the box on the "General" tab "Don't allow exceptions" is checked.
+     *         False if the box is not checked.
+     *         False on error.
+     */
+    public static final boolean windowsFirewallExceptionsNotAllowed() {
+    	return windowsFirewallExceptionsNotAllowedNative();
+    }
+
+    /**
+     * Determine if a program is listed on the Windows Firewall exceptions list.
+     * 
+     * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
+     * @return     True if it has a listing on the Exceptions list, false if not or on error
+     */
+    public static final boolean windowsFirewallIsProgramListed(String path) {
+    	return windowsFirewallIsProgramListedNative(path);
+    }
+
+    /**
+     * Determine if a program's listing on the Windows Firewall exceptions list has a check box making it enabled.
+     * 
+     * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
+     * @return     True if it's listing's check box is checked, false if nt or on error
+     */
+    public static final boolean windowsFirewallIsProgramEnabled(String path) {
+    	return windowsFirewallIsProgramEnabledNative(path);
+    }
+
+    /**
+     * Add a program to the Windows Firewall exceptions list.
+     * 
+     * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
+     * @param name The name of the program, like "LimeWire", this is the text that will identify the item on the list
+     * @return     False if error
+     */
+    public static final boolean windowsFirewallAdd(String path, String name) {
+    	return windowsFirewallAddNative(path, name);
+    }
+
+    /**
+     * Remove a program from the Windows Firewall exceptions list.
+     * 
+     * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
+     * @return     False if error.
+     */
+    public static final boolean windowsFirewallRemove(String path) {
+    	return windowsFirewallRemoveNative(path);
+    }
+
+    // Native methods implemented in C++ code in WindowsFirewall.dll
+    private static final native String getRunningPathNative();
+    private static final native boolean windowsFirewallPresentNative();
+    private static final native boolean windowsFirewallEnabledNative();
+    private static final native boolean windowsFirewallExceptionsNotAllowedNative();
+    private static final native boolean windowsFirewallIsProgramListedNative(String path);
+    private static final native boolean windowsFirewallIsProgramEnabledNative(String path);
+    private static final native boolean windowsFirewallAddNative(String path, String name);
+    private static final native boolean windowsFirewallRemoveNative(String path);
 }
