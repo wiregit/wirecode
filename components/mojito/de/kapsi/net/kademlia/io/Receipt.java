@@ -35,7 +35,7 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.util.InputOutputUtils;
 
-class Receipt {
+public class Receipt {
     
     private static final Log LOG = LogFactory.getLog(Receipt.class);
     
@@ -57,7 +57,7 @@ class Receipt {
     
     private boolean isRequest = false;
     
-    public Receipt(Context context, KUID nodeId, SocketAddress dst, 
+    Receipt(Context context, KUID nodeId, SocketAddress dst, 
             Message message, ResponseHandler handler) throws IOException {
         
         byte[] data = InputOutputUtils.serialize(message);
@@ -80,11 +80,15 @@ class Receipt {
         this.handler = handler;
     }
     
+    public boolean cancel() {
+        return context.getMessageDispatcher().cancel(this);
+    }
+    
     public boolean isRequest() {
         return isRequest;
     }
     
-    public boolean compareNodeID(KUID nodeId) {
+    boolean compareNodeID(KUID nodeId) {
         return this.nodeId == null || this.nodeId.equals(nodeId);
     }
     
@@ -104,15 +108,15 @@ class Receipt {
         return handler;
     }
     
-    public boolean send(DatagramChannel channel) throws IOException {
+    boolean send(DatagramChannel channel) throws IOException {
         return channel.send(data, dst) != 0;
     }
     
-    public void sent() {
+    void sent() {
         sent = System.currentTimeMillis();
     }
     
-    public void received() {
+    void received() {
         received = System.currentTimeMillis();
     }
     
@@ -128,7 +132,7 @@ class Receipt {
         return false;
     }
     
-    public void handleSuccess(KUID nodeId, SocketAddress src, 
+    void handleSuccess(KUID nodeId, SocketAddress src, 
             Message message) throws IOException {
         
         // A sends B a Ping
@@ -150,18 +154,37 @@ class Receipt {
         }
     }
     
-    public void handleTimeout() throws IOException {
+    void handleTimeout() throws IOException {
         if (handler != null) {
             handler.handleTimeout(nodeId, dst, time());
         }
+    }
+    
+    void handleCancel() {
+        
     }
     
     public int dataSize() {
         return dataSize;
     }
     
-    public void freeData() {
+    void freeData() {
         data = null;
+    }
+    
+    public int hashCode() {
+        return messageId.hashCode();
+    }
+    
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof Receipt)) {
+            return false;
+        }
+        
+        Receipt other = (Receipt)o;
+        return messageId.equals(other.messageId);
     }
     
     public String toString() {

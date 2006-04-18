@@ -28,6 +28,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -68,8 +69,7 @@ public class MessageDispatcher implements Runnable {
     private static final long CLEANUP_INTERVAL = 3L * 1000L;
     private static final long SLEEP = 50L;
     
-    private final Object OUTPUT_LOCK = new Object();
-    
+    private Object IO_LOCK = new Object();
     private LinkedList output = new LinkedList();
     private ReceiptMap input = new ReceiptMap(1024);
     
@@ -99,7 +99,6 @@ public class MessageDispatcher implements Runnable {
         storeHandler = new StoreRequestHandler(context);
         
         filter = new Filter();
-        
     }
     
     public int getReceivedMessagesCount() {
@@ -162,21 +161,23 @@ public class MessageDispatcher implements Runnable {
             selector.close(); 
         } catch (IOException ignore) {}
         
-        input.clear();
-        output.clear();
+        synchronized (IO_LOCK) {
+            input.clear();
+            output.clear();
+        }
     }
     
-    public void send(SocketAddress dst, Message message, 
+    public Receipt send(SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
-        send(null, dst, message, handler);
+        return send(null, dst, message, handler);
     }
     
-    public void send(ContactNode dst, Message message, 
+    public Receipt send(ContactNode dst, Message message, 
             ResponseHandler handler) throws IOException {
-        send(dst.getNodeID(), dst.getSocketAddress(), message, handler);
+        return send(dst.getNodeID(), dst.getSocketAddress(), message, handler);
     }
     
-    public void send(KUID nodeId, SocketAddress dst, Message message, 
+    public Receipt send(KUID nodeId, SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
         
         if (!isOpen()) {
@@ -194,20 +195,57 @@ public class MessageDispatcher implements Runnable {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
                         + " to ourself " + ContactNode.toString(nodeId, dst));
             }
-            return;
+            return null;
         }
         
-        if(handler == null) {
+        if (handler == null) {
             handler = defaultHandler;
         }
         
         Receipt receipt = new Receipt(context, nodeId, dst, message, handler);
         
-        synchronized(OUTPUT_LOCK) {
+        synchronized(IO_LOCK) {
             output.add(receipt);
             interestWrite(true);
         }          	
-
+        
+        return receipt;
+    }
+    
+    public boolean cancel(Receipt receipt) {
+        if (receipt == null) {
+            return false;
+        }
+        
+        boolean removed = false;
+        synchronized (IO_LOCK) {
+            int size = input.size();
+            input.remove(receipt.getMessageID());
+            removed = input.size() != size;
+            
+            if (!removed) {
+                removed = output.remove(receipt);
+            }
+        }
+        
+        if (removed) {
+            receipt.handleCancel();
+        }
+        
+        return removed;
+    }
+    
+    public boolean cancelAll(Collection c) {
+        boolean all = true;
+        synchronized (IO_LOCK) {
+            for(Iterator it = c.iterator(); it.hasNext(); ) {
+                Receipt receipt = (Receipt)it.next();
+                if (!cancel(receipt)) {
+                    all = false;
+                }
+            }
+        }
+        return all;
     }
     
     private void handleRequest(KUID nodeId, SocketAddress src, Message msg) throws IOException {
@@ -255,23 +293,25 @@ public class MessageDispatcher implements Runnable {
      * the output Queue
      */
     private int writeNext() throws IOException {
-        if (!output.isEmpty()) {
-            Receipt receipt = (Receipt)output.removeFirst();
-
-            if (receipt.send(channel)) {
-                receipt.sent();
-                networkStats.SENT_MESSAGES_COUNT.incrementStat();
-                networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
+        synchronized (IO_LOCK) {
+            if (!output.isEmpty()) {
+                Receipt receipt = (Receipt)output.removeFirst();
                 
-                if (receipt.isRequest()) {
-                    input.put(receipt.getMessageID(), receipt);
+                if (receipt.send(channel)) {
+                    receipt.sent();
+                    networkStats.SENT_MESSAGES_COUNT.incrementStat();
+                    networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
+                    
+                    if (receipt.isRequest()) {
+                        input.put(receipt.getMessageID(), receipt);
+                    }
+                    receipt.freeData();
+                } else {
+                    output.addFirst(receipt);
                 }
-                receipt.freeData();
-            } else {
-                output.addFirst(receipt);
             }
+            return output.size();
         }
-        return output.size();
     }
     
     private ByteBuffer buffer = ByteBuffer.allocate(Receipt.MAX_PACKET_SIZE);
@@ -291,8 +331,10 @@ public class MessageDispatcher implements Runnable {
             Receipt receipt = null;
             
             if (message instanceof ResponseMessage) {
-                receipt = (Receipt)input.remove(message.getMessageID());
-            
+                synchronized (IO_LOCK) {
+                    receipt = (Receipt)input.remove(message.getMessageID());
+                }
+                
                 if (receipt != null) {
                     receipt.received();
                 }
@@ -388,23 +430,23 @@ public class MessageDispatcher implements Runnable {
                 while(readNext() && isRunning());
                 interestRead(true); // We're always interested in reading
                 
-                synchronized(OUTPUT_LOCK) {
-                    
-                    // TODO propper throtteling.
-                    int remaining = 0;
-                    for(int i = 0; i < 10 && isRunning(); i++) {
-                        remaining = writeNext();
-                        if (remaining == 0) {
-                            break;
-                        }
-                    }
-                    interestWrite(remaining > 0);
-                }
-                
                 if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
-                    input.cleanup();
+                    synchronized (IO_LOCK) {
+                        input.cleanup();
+                    }
                     lastCleanup = System.currentTimeMillis();
                 }
+                
+                // TODO propper throtteling.
+                int remaining = 0;
+                for(int i = 0; i < 10 && isRunning(); i++) {
+                    remaining = writeNext();
+                    if (remaining == 0) {
+                        break;
+                    }
+                }
+                interestWrite(remaining > 0);
+                    
             } catch (ClosedChannelException err) {
                 // thrown as close() is called asynchron
                 //LOG.error(err);
