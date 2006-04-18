@@ -9,8 +9,10 @@ public final class CollectionUtils {
     
     public static String toString(Collection c) {
         StringBuffer buffer = new StringBuffer();
-        for(Iterator it = c.iterator(); it.hasNext(); ) {
-            buffer.append(it.next()).append("\n");
+        
+        Iterator it = c.iterator();
+        for(int i = 0; it.hasNext(); i++) {
+            buffer.append(i).append(": ").append(it.next()).append("\n");
         }
         
         if(buffer.length() > 1) {
