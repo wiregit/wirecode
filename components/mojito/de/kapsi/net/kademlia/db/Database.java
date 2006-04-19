@@ -176,7 +176,7 @@ public class Database {
     }
     
     public synchronized Collection getAllCollections() {
-        return Collections.unmodifiableCollection(database.values());
+        return Collections.unmodifiableCollection(new ArrayList(database.values()));
     }
     
     public boolean isOriginator(KeyValue value) 
@@ -190,8 +190,8 @@ public class Database {
             return false;
         }
         
-        KUID key = keyValue.getKey();
-        ContactNode closest = context.getRouteTable().select(key);
+        //KUID key = keyValue.getKey();
+        //ContactNode closest = context.getRouteTable().select(key);
         
         //TODO: we are not caching, expiration time constant for now
         
