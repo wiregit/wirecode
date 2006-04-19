@@ -161,7 +161,7 @@ public class Database {
     public synchronized boolean contains(KeyValue value) {
         KUID key = value.getKey();
         KeyValueCollection values = (KeyValueCollection)database.get(key);
-        if (value == null) {
+        if (values == null) {
             return false;
         }
         return values.contains(value);
