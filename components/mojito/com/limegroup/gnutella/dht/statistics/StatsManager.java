@@ -46,7 +46,9 @@ public class StatsManager {
     }
 
     public void addDHTNode(DHTStats stat) {
-        dhtNodeStats.add(stat);
+        synchronized (dhtNodeStats) {
+            dhtNodeStats.add(stat);
+        }
     }
 
     public void writeStatsToFiles() {
@@ -57,15 +59,19 @@ public class StatsManager {
             BufferedWriter lookupsWriter = new BufferedWriter(new FileWriter(lookupsFile));
             File routingTableFile = new File(outputDir+ROUTINGTABLE_FILE);
             BufferedWriter routingTableWriter = new BufferedWriter(new FileWriter(routingTableFile));
-            for (Iterator iter = dhtNodeStats.iterator(); iter.hasNext();) {
-                DHTStats stat = (DHTStats) iter.next();
-                //write node db
-                stat.dumpDataBase(dbWriter);
-                //write routing table
-                stat.dumpRouteTable(routingTableWriter);
-                //write other stats
-                stat.dumpStats(lookupsWriter);
+            
+            synchronized (dhtNodeStats) {
+                for (Iterator iter = dhtNodeStats.iterator(); iter.hasNext();) {
+                    DHTStats stat = (DHTStats) iter.next();
+                    //write node db
+                    stat.dumpDataBase(dbWriter);
+                    //write routing table
+                    stat.dumpRouteTable(routingTableWriter);
+                    //write other stats
+                    stat.dumpStats(lookupsWriter);
+                }
             }
+            
             dbWriter.close();
             routingTableWriter.close();
             lookupsWriter.close();
