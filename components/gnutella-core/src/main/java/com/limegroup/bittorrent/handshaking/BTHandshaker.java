@@ -35,12 +35,16 @@ ChannelWriter, ChannelReadObserver {
 	protected InterestScatteringByteChannel readChannel;
 	protected NIOSocket sock;
 	
-	protected boolean incomingDone, finishingHandshakes, shutdown;
+	protected boolean incomingDone, finishingHandshakes;
+	private volatile boolean shutdown;
 	
 	// remote host info
 	protected byte [] extBytes, peerId;
 	
 	public void handleRead() throws IOException {
+		if (shutdown)
+			return;
+		
 		long read = 0;
 		while((read = readChannel.read(incomingHandshake)) > 0 && 
 				incomingHandshake[incomingHandshake.length - 1].hasRemaining());
@@ -66,6 +70,9 @@ ChannelWriter, ChannelReadObserver {
 	protected abstract boolean verifyIncoming();
 	
 	public boolean handleWrite() throws IOException {
+		if (shutdown)
+			return false;
+		
 		// write out our handshake
 		int wrote = 0;
 		while ((wrote = writeChannel.write(outgoingHandshake)) > 0 &&
@@ -96,7 +103,7 @@ ChannelWriter, ChannelReadObserver {
 	}
 	
 	private void tryToFinishHandshakes() {
-		if (finishingHandshakes)
+		if (finishingHandshakes || shutdown)
 			return;
 
 		if (incomingDone && !outgoingHandshake.hasRemaining()) {
@@ -124,9 +131,11 @@ ChannelWriter, ChannelReadObserver {
 	}
 
 	public void shutdown() {
-		if (shutdown)
-			return;
-		shutdown = true;
+		synchronized(this) {
+			if (shutdown)
+				return;
+			shutdown = true;
+		}
 		
 		if (torrent != null)
 			torrent.getFetcher().handshakerDone(this);

@@ -2,7 +2,6 @@ package com.limegroup.bittorrent;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +18,7 @@ import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.messages.*;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.BitSet;
 
 /**
  * Class wrapping a Bittorrent connection. This class is not thread-safe.
@@ -545,14 +545,13 @@ public class BTConnection {
 	private void addAvailablePiece(int pieceNum) {
 		VerifyingFolder v = _info.getVerifyingFolder();
 		_availableRanges.set(pieceNum);
+
 		
+		// tell the remote host we are interested if we don't have that range!
 		if (v.hasBlock(pieceNum)) 
 			numMissing--;
 		else
 			sendInterested();
-		
-
-		// tell the remote host we are interested if we don't have that range!
 	}
 
 	/**
@@ -803,7 +802,6 @@ public class BTConnection {
 		}
 		
 		numMissing = _info.getVerifyingFolder().getNumMissing(_availableRanges);
-		LOG.debug("initial numMissing for "+this+" is "+numMissing+" they have "+_availableRanges.cardinality());
 	}
 
 	/**

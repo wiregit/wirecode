@@ -1,7 +1,6 @@
 package com.limegroup.bittorrent;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,12 +8,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
@@ -92,7 +88,7 @@ public class ManagedTorrent {
 	/*
 	 * the handle for all files.
 	 */
-	private VerifyingFolder _folder;
+	private volatile VerifyingFolder _folder;
 
 	/*
 	 * counts the number of consecutive tracker failures
@@ -190,30 +186,34 @@ public class ManagedTorrent {
 	}
 
 	/**
-	 * Starts the torrent synchronized so we wait until a previous runner has
-	 * finished before starting a new one.
+	 * Starts the torrent 
 	 */
-	public synchronized void start() {
-		if (!_stopped)
-			return;
-		_stopped = false;
-
+	public void start() {
+		if (LOG.isDebugEnabled())
+			LOG.debug("requesting torrent start", new Exception());
+		
 		enqueueTask(new Runnable() {
 			public void run() {
+				
+				if (!_stopped)
+					return;
+				_stopped = false;
+				
 				initializeTorrent();
 				initializeFolder();
+				
 				if (_stopped || _complete) //TODO: decide if we should connect to seed.
 					return;
+				
 				// kick off connectors if we already have some addresses
 				if (_peers.size() > 0)
-					_connectionFetcher.schedule(0);
+					_connectionFetcher.fetch();
+				
 				// connect to tracker
 				announceStart();
+				
 				// start the choking / unchoking of connections
 				scheduleRechoke();
-
-				if (LOG.isDebugEnabled())
-					LOG.debug("started connection fetcher");
 			}
 		});
 	}
@@ -223,36 +223,44 @@ public class ManagedTorrent {
 	 */
 	public void stop() {
 		if (LOG.isDebugEnabled())
-			LOG.debug("Stopping torrent", new Exception());
-		
-		_stopped = true;
+			LOG.debug("requested torrent stop", new Exception());
 		
 		enqueueTask(new Runnable() {
 			public void run() {
-
-				RouterService.getCallback().removeUpload(_uploader);
-
-				_folder.close();
-
-				for (int i = 0; i < _info.getTrackers().length; i++)
-					announceBlocking(_info.getTrackers()[i],
-							TrackerRequester.EVENT_STOP);
-
-				// close connections
-				for (Iterator iter = getConnections().iterator(); iter
-						.hasNext();) {
-					((BTConnection) iter.next()).close();
-				}
-				
-				_connectionFetcher.shutdown();
-
-				// we stopped, removing torrent from active list of
-				// TorrentManager
-				_manager.removeTorrent(ManagedTorrent.this, _complete);
-				if (LOG.isDebugEnabled())
-					LOG.debug("Torrent stopped!");
+				stopNow();
 			}
 		});
+	}
+	
+	/**
+	 * Performs the actual stop.  To be invoked only from the
+	 * torrent processing queue.
+	 */
+	private void stopNow() {
+		
+		if (_stopped)
+			return;
+		_stopped = true;
+		
+		RouterService.getCallback().removeUpload(_uploader);
+		
+		_folder.close();
+		
+		for (int i = 0; i < _info.getTrackers().length; i++)
+			announceBlocking(_info.getTrackers()[i],
+					TrackerRequester.EVENT_STOP);
+		
+		// close connections
+		for (Iterator iter = getConnections().iterator(); iter.hasNext();) 
+			((BTConnection) iter.next()).close();
+		
+		_connectionFetcher.shutdown();
+		
+		// we stopped, removing torrent from active list of
+		// TorrentManager
+		_manager.removeTorrent(this, _complete);
+		if (LOG.isDebugEnabled())
+			LOG.debug("Torrent stopped!");
 	}
 
 	/**
@@ -286,7 +294,8 @@ public class ManagedTorrent {
 			_peers.add(ep);
 		}
 		removeConnection(btc);
-		_connectionFetcher.schedule(0);
+		if (!_stopped)
+			_connectionFetcher.fetch();
 	}
 
 	private void initializeTorrent() {
@@ -466,7 +475,7 @@ public class ManagedTorrent {
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return false;
 		if (_peers.add(to)) {
-			_connectionFetcher.schedule(0);
+			_connectionFetcher.fetch();
 			return true;
 		}
 		return false;
@@ -635,33 +644,30 @@ public class ManagedTorrent {
 	private void saveFiles() {
 		if (_saved)
 			return;
-		// synchronizing on _folder because multiple threads are
-		// accessing the VerifyingFolder since we offloaded verifying, reading
-		// and writing from the main thread
-		synchronized (_folder) {
-			_folder.close();
-			if (LOG.isDebugEnabled())
-				LOG.debug("folder closed");
-			_couldNotSave = !_info.moveToCompleteFolder();
-			if (LOG.isDebugEnabled())
-				LOG.debug("could not save: " + _couldNotSave);
-			// folder has to be updated with the new files
-			_folder = _info.getVerifyingFolder();
-			if (LOG.isDebugEnabled())
-				LOG.debug("new veryfing folder");
 
-			try {
-				_folder.open();
-			} catch (IOException ioe) {
-				LOG.debug(ioe);
-				_couldNotSave = true;
-			}
+		_folder.close();
+		if (LOG.isDebugEnabled())
+			LOG.debug("folder closed");
+		_couldNotSave = !_info.moveToCompleteFolder();
+		if (LOG.isDebugEnabled())
+			LOG.debug("could not save: " + _couldNotSave);
+		
+		// folder has to be updated with the new files
+		_folder = _info.getVerifyingFolder();
+		if (LOG.isDebugEnabled())
+			LOG.debug("new veryfing folder");
+		
+		try {
+			_folder.open();
+		} catch (IOException ioe) {
+			LOG.debug(ioe);
+			_couldNotSave = true;
 		}
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder opened");
 
 		if (_couldNotSave)
-			stop();
+			stopNow();
 
 		// resume uploads
 		setGlobalChoke(false);
@@ -798,33 +804,27 @@ public class ManagedTorrent {
 				return;
 			}
 			
-			SortedSet fastest = new TreeSet(DOWNLOAD_SPEED_COMPARATOR);
+			List fastest = new ArrayList(connections.size());
 			for (Iterator iter = connections.iterator(); iter.hasNext();) {
 				BTConnection con = (BTConnection) iter.next();
 				if (con.isInterested() && con.shouldBeInterested())
 					fastest.add(con);
 			}
+			Collections.sort(fastest,DOWNLOAD_SPEED_COMPARATOR);
 			
 			// unchoke the fastest connections that are interested in us
 			int numFast = BittorrentSettings.TORRENT_MAX_UPLOADS.getValue() - 1;
-			if (fastest.size() > numFast) {
-				for (Iterator iter = fastest.iterator(); iter.hasNext();) {
-					Object element = (Object) iter.next();
-					if (numFast-- == 0) {
-						fastest = fastest.headSet(element);
-						break;
-					}
-				}
-			}
+			for(int i = fastest.size() - 1; i >= numFast; i--)
+				fastest.remove(i);
 			
-			// unchoke optimistically at least one connection
+			// unchoke optimistically at least one interested connection
 			int optimistic = Math.max(1,
 					BittorrentSettings.TORRENT_MIN_UPLOADS.getValue() - fastest.size());
 			
 			
 			for (Iterator iter = connections.iterator(); iter.hasNext();) {
 				BTConnection con = (BTConnection) iter.next();
-				if (fastest.contains(con)) 
+				if (fastest.remove(con)) 
 					con.sendUnchoke();
 				else if (optimistic > 0 && con.shouldBeInterested()) {
 					con.sendUnchoke(); // this is weird but that's how Bram does it

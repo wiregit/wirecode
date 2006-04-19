@@ -7,8 +7,6 @@ import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -25,6 +23,7 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.MultiIterator;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.BitSet;
 
 /**
  * This class extends VerifyingFile for the simple reason that I would like to
@@ -79,6 +78,11 @@ public class VerifyingFolder {
 	 * A BitSet for all blocks that are verified.
 	 */
 	private BitSet verifiedBlocks;
+	
+	/** a cached bitfield. LOCKING: this*/
+	private byte [] bitField;
+	/** whether the cached bitfield is dirty LOCKING: this */
+	private boolean bitFieldDirty = true;
 
 	/*
 	 * the number of corrupted bytes, encountered
@@ -162,7 +166,8 @@ public class VerifyingFolder {
 				writeBlockImpl(in, data);
 				freedPending = true;
 			} catch (IOException iox) {
-				storedException = iox;
+				if (isOpen())
+					storedException = iox;
 			} finally {
 				if (!freedPending) {
 					synchronized(VerifyingFolder.this) {
@@ -219,6 +224,7 @@ public class VerifyingFolder {
 			synchronized(this) {
 				if (verified) {
 					verifiedBlocks.set(in.getId());
+					bitFieldDirty = true;
 				} else 
 					_corruptedBytes += getPieceSize(in.getId());
 			}
@@ -295,8 +301,10 @@ public class VerifyingFolder {
 				// location as they are completed.. cool but not trivial
 				try {
 					synchronized(DISK_LOCK) {
-						_fos[index].close();
-						_fos[index] = new RandomAccessFile(file.PATH, "r");
+						if (isOpen()) {
+							_fos[index].close();
+							_fos[index] = new RandomAccessFile(file.PATH, "r");
+						}
 					}
 				} catch (FileNotFoundException bs) {
 					ErrorService.error(bs);
@@ -349,6 +357,9 @@ public class VerifyingFolder {
 			
 			_fos = new RandomAccessFile[_files.length];
 		}
+		
+		storedException = null;
+		
 		// whether the data on disk should be re-verified
 		boolean doVerification = this.getBlockSize() == 0;
 		
@@ -674,7 +685,6 @@ public class VerifyingFolder {
 
 	/**
 	 * Creates a bitfield
-	 * TODO: CACHE THIS!!!!
 	 * 
 	 * @return returns an array of byte where the i'th byte is 1 if we have
 	 *         written and verified the i'th piece of the torrent and 0
@@ -682,11 +692,16 @@ public class VerifyingFolder {
 	 *         
 	 */
 	public synchronized byte[] createBitField() {
-		byte[] field = new byte[(_info.getNumBlocks() + 7) / 8];
-		for(int i = verifiedBlocks.nextSetBit(0); i >= 0; i = verifiedBlocks.nextSetBit(i+1)) 
-			field[i / 8] = (byte) (field[i / 8] | (1 << (7 - i % 8)));
+		if (bitField == null) 
+			bitField = new byte[(_info.getNumBlocks() + 7) / 8];
+		
+		if (bitFieldDirty) {
+			for(int i = verifiedBlocks.nextSetBit(0); i >= 0; i = verifiedBlocks.nextSetBit(i+1)) 
+				bitField[i / 8] = (byte) (bitField[i / 8] | (1 << (7 - i % 8)));
+			bitFieldDirty = false;
+		}
 			
-		return field;
+		return bitField;
 	}
 
 	/**
@@ -732,6 +747,7 @@ public class VerifyingFolder {
 				if (verify(pieceNum)) { 
 					synchronized(VerifyingFolder.this) {
 						verifiedBlocks.set(pieceNum);
+						bitFieldDirty = true;
 					}
 					handleVerified(pieceNum);
 				}
