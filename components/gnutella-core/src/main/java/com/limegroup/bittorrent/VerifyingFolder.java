@@ -496,7 +496,8 @@ public class VerifyingFolder {
 							- offset);
 				} while (offset < length);
 			} catch (IOException bad) {
-				storedException = bad;
+				if (isOpen())
+					storedException = bad;
 				c.handleIOException(bad);
 			}
 			
@@ -761,7 +762,12 @@ public class VerifyingFolder {
 	 * @return number of bytes written and verified
 	 */
 	synchronized long getVerifiedBlockSize() {
-		return verifiedBlocks.cardinality() * (long)_info.getPieceLength();
+		long raw = verifiedBlocks.cardinality() * (long)_info.getPieceLength();
+		if (verifiedBlocks.get(_info.getNumBlocks() - 1)) {
+			raw = raw - _info.getPieceLength() + 
+				getPieceSize(_info.getNumBlocks() -1 );
+		}
+		return raw;
 	}
 	
 	/**
@@ -781,8 +787,8 @@ public class VerifyingFolder {
 	
 	synchronized Map getSerializableObject() {
 		Map toWrite = new HashMap();
-		toWrite.put("verified",verifiedBlocks);
-		toWrite.put("partial",partialBlocks);
+		toWrite.put("verified",verifiedBlocks.clone());
+		toWrite.put("partial",partialBlocks.clone());
 		return toWrite;
 	}
 	
