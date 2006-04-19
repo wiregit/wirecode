@@ -219,6 +219,18 @@ public class PlanetLab {
         System.out.println("Bootstrap: " + dst);
         System.out.println("Test: " + test);
         
+        new Thread(new Runnable() {
+            public void run() {
+                while(true) {
+                    try {
+                        Thread.sleep(15L * 60L * 1000L);
+                    } catch (InterruptedException e) {
+                    }
+                    statsManager.writeStatsToFiles();
+                }
+            }
+        }, "StatsWriterThread").start();
+        
         List dhts = null;
         switch(test) {
             case 0:
@@ -236,24 +248,12 @@ public class PlanetLab {
                 System.exit(-1);
                 break;
         }
-        
-        new Thread(new Runnable() {
-            public void run() {
-                while(true) {
-                    try {
-                        Thread.sleep(15L * 60L * 1000L);
-                    } catch (InterruptedException e) {
-                    }
-                    statsManager.writeStatsToFiles();
-                }
-            }
-        }, "StatsWriterThread").start();
     }
     
     private static void shutdown() {
         //statsManager.writeStatsToFiles();
         
-//        System.exit(0);
+        // System.exit(0);
     }
     
     public static class DHTController implements Runnable {
