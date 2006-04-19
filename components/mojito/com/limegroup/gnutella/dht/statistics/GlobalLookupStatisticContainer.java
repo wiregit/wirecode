@@ -2,10 +2,16 @@ package com.limegroup.gnutella.dht.statistics;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import de.kapsi.net.kademlia.Context;
 
 public class GlobalLookupStatisticContainer extends StatisticContainer {
+    
+    private static final int MAX_LOOKUPS = 20;
+    private LinkedList singleLookups = new LinkedList();
+    
 
     public GlobalLookupStatisticContainer(Context context) {
         super(context);
@@ -41,9 +47,24 @@ public class GlobalLookupStatisticContainer extends StatisticContainer {
    public Statistic GLOBAL_LOOKUP_TIME =
        new SimpleStatistic();
    
+   public void addSingleLookupStatistic(SingleLookupStatisticContainer lookupStat) {
+       synchronized (singleLookups) {
+           singleLookups.add(lookupStat);
+           if(singleLookups.size() > MAX_LOOKUPS) {
+               singleLookups.removeFirst();
+           }
+       }
+   }
+   
    public void writeStats(Writer writer) throws IOException {
        writer.write("Global lookups: \n");
        super.writeStats(writer);
+       synchronized (singleLookups) {
+           for (Iterator iter = singleLookups.iterator(); iter.hasNext();) {
+               StatisticContainer stat = (StatisticContainer) iter.next();
+               stat.writeStats(writer);
+           }
+       }
    }
 
 }

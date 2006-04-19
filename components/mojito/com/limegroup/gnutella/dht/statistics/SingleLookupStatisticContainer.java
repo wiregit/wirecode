@@ -13,9 +13,10 @@ public abstract class SingleLookupStatisticContainer extends StatisticContainer 
     
     
     protected SingleLookupStatisticContainer(Context context, KUID lookupKey) {
-        super(context);
+        super();
         this.lookupKey = lookupKey;
         this.globalLookupStats = context.getGlobalLookupStats();
+        globalLookupStats.addSingleLookupStatistic(this);
     }
     
     public void setHops(int hops) {

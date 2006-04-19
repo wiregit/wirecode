@@ -377,8 +377,8 @@ public class MessageDispatcher implements Runnable {
     public void run() {
         long lastCleanup = System.currentTimeMillis();
         
-        networkStats.SENT_MESSAGES_COUNT.clearData();
-        networkStats.RECEIVED_MESSAGES_COUNT.clearData();
+        /*networkStats.SENT_MESSAGES_COUNT.clearData();
+        networkStats.RECEIVED_MESSAGES_COUNT.clearData();*/
         
         while(isRunning()) {
             try {
