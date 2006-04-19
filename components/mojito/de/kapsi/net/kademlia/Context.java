@@ -114,7 +114,7 @@ public class Context implements Runnable {
     private LinkedList localSizeHistory = new LinkedList();
     private LinkedList remoteSizeHistory = new LinkedList();
     
-    private final Object contextLock = new Object();
+    //private final Object contextLock = new Object();
     
     public Context() {
         
@@ -238,27 +238,27 @@ public class Context implements Runnable {
     }
     
     public boolean isRunning() {
-        synchronized (contextLock) {
+        //synchronized (contextLock) {
             return running;
-        }
+        //}
     }
 
     public boolean isOpen() {
-        synchronized (contextLock) {
+        //synchronized (contextLock) {
             return messageDispatcher.isOpen();
-        }
+        //}
     }
     
     public void setBootstrapped(boolean bootstrapped) {
-        synchronized (contextLock) {
+        //synchronized (contextLock) {
             this.bootstrapped = bootstrapped;
-        }
+        //}
     }
     
     public boolean isBootstrapped() {
-        synchronized (contextLock) {
+        //synchronized (contextLock) {
             return isRunning() && bootstrapped;
-        }
+        //}
     }
     
     public int getReceivedMessagesCount() {
@@ -278,7 +278,7 @@ public class Context implements Runnable {
     }
     
     public void bind(SocketAddress address) throws IOException {
-        synchronized (contextLock) {
+        //synchronized (contextLock) {
             if (isOpen()) {
                 throw new IOException("DHT is already bound");
             }
@@ -299,12 +299,12 @@ public class Context implements Runnable {
             routeTable.add(localNode, false);
             
             messageDispatcher.bind(address);
-        }
+        //}
     }
     
     //TODO testing purposes only - remove
     public void bind(SocketAddress address, KUID localNodeID) throws IOException {
-        synchronized (contextLock) {
+        //synchronized (contextLock) {
             if (isOpen()) {
                 throw new IOException("DHT is already bound");
             }
@@ -313,11 +313,11 @@ public class Context implements Runnable {
             this.nodeId = localNodeID;
             
             messageDispatcher.bind(address);   
-        }
+        //}
     }
     
     public void close() throws IOException {
-        synchronized (contextLock) {
+        //synchronized (contextLock) {
             running = false;
             bootstrapped = false;
             
@@ -340,11 +340,11 @@ public class Context implements Runnable {
             estimatedSize = 0;
             localSizeHistory.clear();
             remoteSizeHistory.clear();
-        }
+        //}
     }
     
     public void run() {
-        synchronized (contextLock) {
+        //synchronized (contextLock) {
             if (!isOpen()) {
                 throw new RuntimeException("Cannot start DHT because it is not bound");
             }
@@ -374,7 +374,7 @@ public class Context implements Runnable {
             keyValuePublisherThread.start();
 
             messageDispatcherThread = Thread.currentThread();
-        }
+        //}
         
         messageDispatcher.run();
     }
