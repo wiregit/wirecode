@@ -35,8 +35,8 @@ public class EventDispatcher extends TimerTask implements Runnable {
 
     private static final Logger LOG = LogManager.getLogger(EventDispatcher.class);
    
-    private final Object LOCK = new Object();
-    private List events = new ArrayList();
+    private final Object eventQueueLock = new Object();
+    private List eventQueue = new ArrayList();
     
     private Context context;
     
@@ -55,8 +55,8 @@ public class EventDispatcher extends TimerTask implements Runnable {
             return;
         }
         
-        synchronized(LOCK) {
-            events.add(event);
+        synchronized(eventQueueLock) {
+            eventQueue.add(event);
         }
     }
     
@@ -72,11 +72,11 @@ public class EventDispatcher extends TimerTask implements Runnable {
         List dispatch = null;
         int size = 0;
         
-        synchronized(LOCK) {
-            dispatch = events;
+        synchronized(eventQueueLock) {
+            dispatch = eventQueue;
             size = dispatch.size();
             
-            events = new ArrayList(Math.max(10, size));
+            eventQueue = new ArrayList(Math.max(10, size));
         }
         
         for(int i = 0; i < size; i++) {

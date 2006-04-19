@@ -100,6 +100,7 @@ public class Context implements Runnable {
     
     private Timer scheduler = null;
     private Thread messageDispatcherThread = null;
+    private Thread keyValuePublisherThread = null;
     
     private DHTStats dhtStats = null;
     
@@ -112,6 +113,8 @@ public class Context implements Runnable {
     
     private LinkedList localSizeHistory = new LinkedList();
     private LinkedList remoteSizeHistory = new LinkedList();
+    
+    private final Object contextLock = new Object();
     
     public Context() {
         
@@ -235,19 +238,27 @@ public class Context implements Runnable {
     }
     
     public boolean isRunning() {
-        return running;
+        synchronized (contextLock) {
+            return running;
+        }
     }
 
     public boolean isOpen() {
-        return messageDispatcher.isOpen();
+        synchronized (contextLock) {
+            return messageDispatcher.isOpen();
+        }
     }
     
     public void setBootstrapped(boolean bootstrapped) {
-        this.bootstrapped = bootstrapped;
+        synchronized (contextLock) {
+            this.bootstrapped = bootstrapped;
+        }
     }
     
     public boolean isBootstrapped() {
-        return isRunning() && bootstrapped;
+        synchronized (contextLock) {
+            return isRunning() && bootstrapped;
+        }
     }
     
     public int getReceivedMessagesCount() {
@@ -267,59 +278,87 @@ public class Context implements Runnable {
     }
     
     public void bind(SocketAddress address) throws IOException {
-        if (isOpen()) {
-            throw new IOException("DHT is already bound");
+        synchronized (contextLock) {
+            if (isOpen()) {
+                throw new IOException("DHT is already bound");
+            }
+            
+            this.localAddress = address;
+            
+            byte[] id = ContextSettings.getLocalNodeID(address);
+            if (id == null) {
+                this.nodeId = KUID.createRandomNodeID(address);
+                ContextSettings.setLocalNodeID(address, nodeId.getBytes());
+            } else {
+                this.nodeId = KUID.createNodeID(id);
+            }
+            
+            //add ourselve to the routing table
+            ContactNode localNode = new ContactNode(nodeId, address);
+            localNode.setTimeStamp(Long.MAX_VALUE);
+            routeTable.add(localNode, false);
+            
+            messageDispatcher.bind(address);
         }
-        
-        messageDispatcher.bind(address);
-        this.localAddress = address;
-        
-        byte[] id = ContextSettings.getLocalNodeID(address);
-        if (id == null) {
-            nodeId = KUID.createRandomNodeID(address);
-            ContextSettings.setLocalNodeID(address, nodeId.getBytes());
-        } else {
-            nodeId = KUID.createNodeID(id);
-        }
-        
-        //add ourselve to the routing table
-        ContactNode localNode = new ContactNode(nodeId, address);
-        localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode, false);
     }
     
     //TODO testing purposes only - remove
-    public void bind(SocketAddress address,KUID localNodeID) throws IOException {
-        if (isOpen()) {
-            throw new IOException("DHT is already bound");
+    public void bind(SocketAddress address, KUID localNodeID) throws IOException {
+        synchronized (contextLock) {
+            if (isOpen()) {
+                throw new IOException("DHT is already bound");
+            }
+            
+            this.localAddress = address;
+            this.nodeId = localNodeID;
+            
+            messageDispatcher.bind(address);   
         }
-        messageDispatcher.bind(address);
-        this.localAddress = address;
-        nodeId = localNodeID;
     }
     
     public void close() throws IOException {
-        running = false;
-        messageDispatcher.close();
-        messageDispatcherThread = null;
+        synchronized (contextLock) {
+            running = false;
+            bootstrapped = false;
+            
+            if (keyValuePublisherThread != null) {
+                keyValuePublisher.stop();
+                keyValuePublisherThread = null;
+            }
+            
+            if (scheduler != null) {
+                scheduler.cancel();
+                scheduler = null;
+            }
+            
+            if (messageDispatcherThread != null) {
+                messageDispatcher.close();
+                messageDispatcherThread = null;
+            }
+            
+            lastEstimateTime = 0L;
+            estimatedSize = 0;
+            localSizeHistory.clear();
+            remoteSizeHistory.clear();
+        }
     }
     
     public void run() {
-        if (!isOpen()) {
-            throw new RuntimeException("DHT is not bound");
-        }
-        
-        if (isRunning()) {
-            LOG.error("DHT is already running!");
-            return;
-        }
-        
-        bootstrapped = true;
-        running = true;
-        try {
+        synchronized (contextLock) {
+            if (!isOpen()) {
+                throw new RuntimeException("Cannot start DHT because it is not bound");
+            }
             
+            if (isRunning()) {
+                LOG.error("An instance of this DHT Node is already running");
+                return;
+            }
+            
+            bootstrapped = true;
+            running = true;
+
             // TODO use ManagedThread
-            Thread keyValuePublisherThread 
+            keyValuePublisherThread 
                 = new Thread(keyValuePublisher, "KeyValuePublisherThread");
             keyValuePublisherThread.setDaemon(true);
             
@@ -335,40 +374,19 @@ public class Context implements Runnable {
             keyValuePublisherThread.start();
 
             messageDispatcherThread = Thread.currentThread();
-            messageDispatcher.run();
-            
-        } finally {
-            shutdown();
-        }
-    }
-
-    private void shutdown() {
-        if (keyValuePublisher != null) {
-            keyValuePublisher.stop();
         }
         
-        if (scheduler != null) {
-            scheduler.cancel();
-        }
-        scheduler = null;
-        
-        running = false;
-        bootstrapped = false;
-        
-        lastEstimateTime = 0L;
-        estimatedSize = 0;
-        localSizeHistory.clear();
-        remoteSizeHistory.clear();
+        messageDispatcher.run();
     }
     
     public void fireEvent(Runnable event) {
-        if (event == null) {
-            LOG.error("Discarding Event as it is null");
+        if (!isRunning()) {
+            LOG.error("Discarding Event as DHT is not running");
             return;
         }
         
-        if (!isRunning()) {
-            LOG.error("Discarding Event as DHT is not running");
+        if (event == null) {
+            LOG.error("Discarding Event as it is null");
             return;
         }
         

@@ -44,7 +44,6 @@ public class PlanetLab {
 
     private static final String[] TEST_VALUES = {
         "hello",
-        "world",
         "mark",
         "roger",
         "greg",
@@ -52,7 +51,8 @@ public class PlanetLab {
         "zlatin",
         "justin",
         "tim",
-        "karl"
+        "karl",
+        "kevin"
     };
     
     private static byte[] getBytes(String value) {

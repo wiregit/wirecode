@@ -68,10 +68,10 @@ public class MessageDispatcher implements Runnable {
     private static final long CLEANUP_INTERVAL = 3L * 1000L;
     private static final long SLEEP = 50L;
     
-    private final Object OUTPUT_LOCK = new Object();
+    private Object channelLock = new Object();
     
-    private LinkedList output = new LinkedList();
-    private ReceiptMap input = new ReceiptMap(1024);
+    private LinkedList outputQueue = new LinkedList();
+    private ReceiptMap messageMap = new ReceiptMap(1024);
     
     private Selector selector;
     private DatagramChannel channel;
@@ -99,7 +99,6 @@ public class MessageDispatcher implements Runnable {
         storeHandler = new StoreRequestHandler(context);
         
         filter = new Filter();
-        
     }
     
     public int getReceivedMessagesCount() {
@@ -118,52 +117,54 @@ public class MessageDispatcher implements Runnable {
         return (long)networkStats.SENT_MESSAGES_SIZE.getTotal();
     }
     
-    public void stop() throws IOException {
-        if (context.isRunning()) {
-            close();
-        }
-    }
-    
     public void bind(SocketAddress address) throws IOException {
-        if (isOpen()) {
-            throw new IOException("Already open");
+        synchronized (channelLock) {
+            if (isOpen()) {
+                throw new IOException("Already open");
+            }
+            
+            channel = DatagramChannel.open();
+            channel.configureBlocking(false);
+            
+            selector = Selector.open();
+            channel.register(selector, SelectionKey.OP_READ);
+            
+            DatagramSocket socket = channel.socket();
+            socket.setReuseAddress(false);
+            socket.setReceiveBufferSize(Receipt.MAX_PACKET_SIZE);
+            socket.setSendBufferSize(Receipt.MAX_PACKET_SIZE);
+            
+            socket.bind(address);
         }
-        
-        channel = DatagramChannel.open();
-        channel.configureBlocking(false);
-        
-        selector = Selector.open();
-        channel.register(selector, SelectionKey.OP_READ);
-        
-        DatagramSocket socket = channel.socket();
-        socket.setReuseAddress(false);
-        socket.setReceiveBufferSize(Receipt.MAX_PACKET_SIZE);
-        socket.setSendBufferSize(Receipt.MAX_PACKET_SIZE);
-        
-        socket.bind(address);
-    }
-    
-    public boolean isOpen() {
-        return channel != null && channel.isOpen();
-    }
-    
-    private boolean isRunning() {
-        return isOpen() && channel.isRegistered();
     }
     
     public void close() throws IOException {
-        if (!isOpen()) {
-            return;
+        synchronized (channelLock) {
+            if (!isOpen()) {
+                return;
+            }
+            
+            channel.close();
+            
+            try { 
+                selector.close(); 
+            } catch (IOException ignore) {}
+            
+            messageMap.clear();
+            outputQueue.clear();
         }
-        
-        channel.close();
-        
-        try { 
-            selector.close(); 
-        } catch (IOException ignore) {}
-        
-        input.clear();
-        output.clear();
+    }
+    
+    public boolean isOpen() {
+        synchronized (channelLock) {
+            return channel != null && channel.isOpen();
+        }
+    }
+    
+    private boolean isRunning() {
+        synchronized (channelLock) {
+            return isOpen() && channel.isRegistered();
+        }
     }
     
     public void send(SocketAddress dst, Message message, 
@@ -178,10 +179,6 @@ public class MessageDispatcher implements Runnable {
     
     public void send(KUID nodeId, SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
-        
-        if (!isOpen()) {
-            throw new IOException("Channel is not bound");
-        }
         
         // Make sure we're not sending messages to ourself.
         // The only exception are Pings/Pongs
@@ -203,11 +200,14 @@ public class MessageDispatcher implements Runnable {
         
         Receipt receipt = new Receipt(context, nodeId, dst, message, handler);
         
-        synchronized(OUTPUT_LOCK) {
-            output.add(receipt);
+        synchronized (channelLock) {
+            if (!isOpen()) {
+                throw new IOException("Cannot send Message because Channel is not open");
+            }
+            
+            outputQueue.add(receipt);
             interestWrite(true);
-        }          	
-
+        }
     }
     
     private void handleRequest(KUID nodeId, SocketAddress src, Message msg) throws IOException {
@@ -248,60 +248,6 @@ public class MessageDispatcher implements Runnable {
         networkStats.LATE_MESSAGES_COUNT.incrementStat();
         ContactNode node = new ContactNode(nodeId,src);
         context.getRouteTable().add(node,true);
-    }
-    
-    /**
-     * Returns the number of remaining Messages in
-     * the output Queue
-     */
-    private int writeNext() throws IOException {
-        if (!output.isEmpty()) {
-            Receipt receipt = (Receipt)output.removeFirst();
-
-            if (receipt.send(channel)) {
-                receipt.sent();
-                networkStats.SENT_MESSAGES_COUNT.incrementStat();
-                networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
-                
-                if (receipt.isRequest()) {
-                    input.put(receipt.getMessageID(), receipt);
-                }
-                receipt.freeData();
-            } else {
-                output.addFirst(receipt);
-            }
-        }
-        return output.size();
-    }
-    
-    private ByteBuffer buffer = ByteBuffer.allocate(Receipt.MAX_PACKET_SIZE);
-    
-    private boolean readNext() throws IOException {
-        SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
-        if (src != null) {
-            int length = buffer.position();
-            byte[] data = new byte[length];
-            buffer.flip();
-            buffer.get(data, 0, length);
-            
-            Message message = InputOutputUtils.deserialize(data);
-            networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
-            networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
-            
-            Receipt receipt = null;
-            
-            if (message instanceof ResponseMessage) {
-                receipt = (Receipt)input.remove(message.getMessageID());
-            
-                if (receipt != null) {
-                    receipt.received();
-                }
-            }
-            
-            processMessage(receipt, src, message);
-            return true;
-        }
-        return false;
     }
     
     private void processMessage(Receipt receipt, SocketAddress src, Message message) throws IOException {
@@ -374,42 +320,103 @@ public class MessageDispatcher implements Runnable {
         interest(SelectionKey.OP_WRITE, on);
     }
     
+    private ByteBuffer buffer = ByteBuffer.allocate(Receipt.MAX_PACKET_SIZE);
+    
+    private boolean readNext() throws IOException {
+        SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
+        if (src != null) {
+            int length = buffer.position();
+            byte[] data = new byte[length];
+            buffer.flip();
+            buffer.get(data, 0, length);
+            
+            Message message = InputOutputUtils.deserialize(data);
+            networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
+            networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
+            
+            Receipt receipt = null;
+            
+            if (message instanceof ResponseMessage) {
+                receipt = (Receipt)messageMap.remove(message.getMessageID());
+            
+                if (receipt != null) {
+                    receipt.received();
+                }
+            }
+            
+            processMessage(receipt, src, message);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Returns the number of remaining Messages in
+     * the output Queue
+     */
+    private int writeNext() throws IOException {
+        if (!outputQueue.isEmpty()) {
+            Receipt receipt = (Receipt)outputQueue.removeFirst();
+
+            if (receipt.send(channel)) {
+                receipt.sent();
+                networkStats.SENT_MESSAGES_COUNT.incrementStat();
+                networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
+                
+                if (receipt.isRequest()) {
+                    messageMap.put(receipt.getMessageID(), receipt);
+                }
+                receipt.freeData();
+            } else {
+                outputQueue.addFirst(receipt);
+            }
+        }
+        return outputQueue.size();
+    }
+    
     public void run() {
         long lastCleanup = System.currentTimeMillis();
         
         /*networkStats.SENT_MESSAGES_COUNT.clearData();
         networkStats.RECEIVED_MESSAGES_COUNT.clearData();*/
         
-        while(isRunning()) {
-            try {
+        while(true) {
+            
+            synchronized (channelLock) {
+                if (!isRunning()) {
+                    break;
+                }
                 
-                selector.select(SLEEP);
-                
-                while(readNext() && isRunning());
-                interestRead(true); // We're always interested in reading
-                
-                synchronized(OUTPUT_LOCK) {
+                try {
+                    selector.select(SLEEP);
                     
+                    // READ
+                    while(readNext());
+                    interestRead(true); // We're always interested in reading
+                    
+                    // WRITE
                     // TODO propper throtteling.
                     int remaining = 0;
-                    for(int i = 0; i < 10 && isRunning(); i++) {
+                    for(int i = 0; i < 10; i++) {
                         remaining = writeNext();
                         if (remaining == 0) {
                             break;
                         }
                     }
                     interestWrite(remaining > 0);
+                    
+                    // CLEANUP
+                    if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
+                        messageMap.cleanup();
+                        lastCleanup = System.currentTimeMillis();
+                    }
+                } catch (ClosedChannelException err) {
+                    LOG.error("MessageHandler ClosedChannelException: ", err);
+                } catch (IOException err) {
+                    LOG.error("MessageHandler IO exception: ", err);
                 }
                 
-                if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
-                    input.cleanup();
-                    lastCleanup = System.currentTimeMillis();
-                }
-            } catch (ClosedChannelException err) {
-                // thrown as close() is called asynchron
-                //LOG.error(err);
-            } catch (IOException err) {
-                LOG.fatal("MessageHandler IO exception: ",err);
+                channelLock.notify();
             }
         }
     }
