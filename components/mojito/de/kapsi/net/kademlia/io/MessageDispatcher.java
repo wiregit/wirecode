@@ -368,7 +368,7 @@ public class MessageDispatcher implements Runnable {
         
         if (receipt != null) {
             long time = receipt.time();
-            defaultHandler.handleResponse(nodeId, src, message, time); // BEFORE!
+            defaultHandler.handleResponse(null, nodeId, src, message, time); // BEFORE!
             
             if (receipt.getHandler() != defaultHandler) {
                 receipt.handleSuccess(nodeId, src, message);

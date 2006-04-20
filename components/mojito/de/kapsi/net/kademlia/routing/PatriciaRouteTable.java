@@ -49,6 +49,7 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
+import de.kapsi.net.kademlia.io.Receipt;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
@@ -849,8 +850,8 @@ public class PatriciaRouteTable implements RoutingTable {
             this.replacementBucket = replacementBucket;
         }
 
-        public void handleResponse(KUID nodeId, SocketAddress src, 
-                Message message, long time) throws IOException {
+        public void handleResponse(Receipt receipt, KUID nodeId, 
+                SocketAddress src, Message message, long time) throws IOException {
             
             if (done) {
                 return;
@@ -870,8 +871,8 @@ public class PatriciaRouteTable implements RoutingTable {
             //TODO: add bad node to IP Filter
         }
 
-        public void handleTimeout(KUID nodeId, SocketAddress dst, 
-                long time) throws IOException {
+        public void handleTimeout(Receipt receipt, KUID nodeId, 
+                SocketAddress dst, long time) throws IOException {
             
             if (done) {
                 return;

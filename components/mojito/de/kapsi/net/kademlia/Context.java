@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,8 +60,10 @@ import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindNodeResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindValueResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
+import de.kapsi.net.kademlia.handler.response.PingResponseHandler2;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
+import de.kapsi.net.kademlia.io.Receipt;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
@@ -391,6 +394,30 @@ public class Context implements Runnable {
         AbstractResponseHandler handler = new PingResponseHandler(this, l);
         networkStats.PINGS_SENT.incrementStat();
         messageDispatcher.send(node.getNodeID(), node.getSocketAddress(), ping, handler);
+    }
+    
+    private Map pingMap = new HashMap();
+    
+    public Receipt ping2(SocketAddress address, PingListener listener) throws IOException {
+        Receipt receipt = null;
+        
+        synchronized (pingMap) {
+            receipt = (Receipt)pingMap.get(address);
+            if (receipt != null) {
+                // TODO...
+                /*synchronized (receipt) {
+                    ((ResponseHandler)receipt.getHandler()).addListener(listener);
+                }*/
+            } else {
+                RequestMessage request = messageFactory.createPingRequest();
+                ResponseHandler handler = new PingResponseHandler2(this);
+                receipt = messageDispatcher.send(address, request, handler);
+                
+                pingMap.put(address, receipt);
+            }
+        }
+        
+        return receipt;
     }
     
     public void lookup(KUID lookup, FindNodeListener l) throws IOException {

@@ -173,7 +173,7 @@ public class Receipt {
         // Make sure B is not C
         if (compareNodeID(nodeId)) {
             if (handler != null) {
-                handler.handleResponse(nodeId, src, message, time());
+                handler.handleResponse(this, nodeId, src, message, time());
             }
         } else {
             if (LOG.isTraceEnabled()) {
@@ -187,7 +187,7 @@ public class Receipt {
     
     void handleTimeout() throws IOException {
         if (handler != null) {
-            handler.handleTimeout(nodeId, dst, time());
+            handler.handleTimeout(this, nodeId, dst, time());
         }
     }
     

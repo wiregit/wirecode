@@ -36,6 +36,7 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValueCollection;
+import de.kapsi.net.kademlia.io.Receipt;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
@@ -67,14 +68,14 @@ public class DefaultMessageHandler extends MessageHandler
         return NetworkSettings.TIMEOUT.getValue();
     }
 
-    public void handleResponse(KUID nodeId, SocketAddress src, 
-            Message message, long time) throws IOException {
+    public void handleResponse(Receipt receipt, KUID nodeId, 
+            SocketAddress src, Message message, long time) throws IOException {
         
         addLiveContactInfo(nodeId, src, message);
     }
 
-    public void handleTimeout(KUID nodeId, SocketAddress dst, 
-            long time) throws IOException {
+    public void handleTimeout(Receipt receipt, KUID nodeId, 
+            SocketAddress dst, long time) throws IOException {
         RoutingTable routeTable = getRouteTable();
         routeTable.handleFailure(nodeId);
     }
@@ -162,8 +163,8 @@ public class DefaultMessageHandler extends MessageHandler
             this.keyValues = keyValues;
         }
         
-        public void handleResponse(KUID nodeId, SocketAddress src, 
-                Message message, long time) throws IOException {
+        public void handleResponse(Receipt receipt, KUID nodeId, 
+                SocketAddress src, Message message, long time) throws IOException {
             
             if (done) {
                 return;
@@ -184,7 +185,7 @@ public class DefaultMessageHandler extends MessageHandler
             done = true;
         }
 
-        public void handleTimeout(KUID nodeId, SocketAddress dst, long time) 
+        public void handleTimeout(Receipt receipt, KUID nodeId, SocketAddress dst, long time) 
                 throws IOException {
             
             if (done) {

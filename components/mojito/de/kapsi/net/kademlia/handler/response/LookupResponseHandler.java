@@ -39,6 +39,7 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
+import de.kapsi.net.kademlia.io.Receipt;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
@@ -128,8 +129,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         this.timeout = timeout;
     }
     
-    public void handleResponse(KUID nodeId, SocketAddress src, 
-            Message message, long time) throws IOException {
+    public void handleResponse(Receipt receipt, KUID nodeId, 
+            SocketAddress src, Message message, long time) throws IOException {
         
         if (!isQueried(nodeId)) {
             if (LOG.isWarnEnabled()) {
@@ -212,7 +213,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
+    public void handleTimeout(Receipt receipt, KUID nodeId, SocketAddress dst, long time) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
         routeTable.handleFailure(nodeId);

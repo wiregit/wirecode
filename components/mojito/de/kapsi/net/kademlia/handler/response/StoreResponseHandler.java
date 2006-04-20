@@ -33,6 +33,7 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
+import de.kapsi.net.kademlia.io.Receipt;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
@@ -68,8 +69,8 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         this.keyValues = keyValues;
     }
 
-    public void handleResponse(KUID nodeId, SocketAddress src, 
-            Message message, long time) throws IOException {
+    public void handleResponse(Receipt receipt, KUID nodeId, 
+            SocketAddress src, Message message, long time) throws IOException {
         
         if (done) {
             return;
@@ -111,7 +112,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         errors = 0;
     }
 
-    public void handleTimeout(KUID nodeId, SocketAddress dst, long time) 
+    public void handleTimeout(Receipt receipt, KUID nodeId, SocketAddress dst, long time) 
             throws IOException {
         
         if (done) {

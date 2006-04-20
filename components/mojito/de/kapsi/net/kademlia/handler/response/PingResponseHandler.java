@@ -37,6 +37,7 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
+import de.kapsi.net.kademlia.io.Receipt;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
@@ -56,8 +57,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
         this.l = l;
     }
 
-    public void handleResponse(final KUID nodeId, final SocketAddress src, 
-            Message message, final long time) throws IOException {
+    public void handleResponse(Receipt receipt, final KUID nodeId, 
+            final SocketAddress src, Message message, final long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Ping to " + ContactNode.toString(nodeId, src) 
@@ -97,8 +98,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    public void handleTimeout(final KUID nodeId, final SocketAddress dst, 
-            long time) throws IOException {
+    public void handleTimeout(Receipt receipt, final KUID nodeId, 
+            final SocketAddress dst, long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Ping to " + ContactNode.toString(nodeId, dst) + " failed");
@@ -169,8 +170,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
             return null;
         }
         
-        public void handleResponse(KUID nodeId, SocketAddress src, 
-                    Message message, long time) throws IOException {
+        public void handleResponse(Receipt receipt, KUID nodeId, 
+                    SocketAddress src, Message message, long time) throws IOException {
             
             networkStats.PINGS_OK.incrementStat();
             
@@ -189,7 +190,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
             }
         }
 
-        public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
+        public void handleTimeout(Receipt receipt, KUID nodeId, SocketAddress dst, long time) throws IOException {
             
             networkStats.PINGS_FAILED.incrementStat();
             
