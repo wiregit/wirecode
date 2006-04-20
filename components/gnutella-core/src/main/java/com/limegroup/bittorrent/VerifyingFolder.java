@@ -746,9 +746,13 @@ public class VerifyingFolder {
 	 * verifies all the chunks that are associated with a list of files.
 	 */
 	private void verifyFiles(List l) {
+		int lastSet;
+		synchronized(this) {
+			lastSet = verifiedBlocks.length();
+		}
 		for (Iterator iter = l.iterator(); iter.hasNext();) {
 			TorrentFile f = (TorrentFile) iter.next();
-			for (int i = f.begin; i <= f.end; i++)
+			for (int i = Math.max(lastSet,f.begin); i <= f.end; i++) 
 				VERIFY_QUEUE.invokeLater(new VerifyJob(i),_info.getURN());
 		}
 	}
@@ -771,8 +775,9 @@ public class VerifyingFolder {
 			try {
 				
 				// try not to max out the cpu
+				// TODO: do it like in URN
 				if (VERIFY_QUEUE.size() > 0)
-					Thread.sleep(10);
+					Thread.sleep(10); 
 				
 				if (verify(pieceNum)) { 
 					synchronized(VerifyingFolder.this) {

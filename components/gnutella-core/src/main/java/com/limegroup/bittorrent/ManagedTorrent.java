@@ -10,8 +10,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,11 +89,6 @@ public class ManagedTorrent {
 	 * counts the number of consecutive tracker failures
 	 */
 	private int _trackerFailures = 0;
-
-	/*
-	 * this is true if the download is complete
-	 */
-	private volatile boolean _complete = false;
 
 	/*
 	 * if we could not save this file
@@ -179,7 +172,7 @@ public class ManagedTorrent {
 	 * @return true if the torrent is complete.
 	 */
 	public boolean isComplete() {
-		return _complete;
+		return _folder.isComplete();
 	}
 
 	/**
@@ -255,7 +248,7 @@ public class ManagedTorrent {
 		
 		// we stopped, removing torrent from active list of
 		// TorrentManager
-		_manager.removeTorrent(this, _complete);
+		_manager.removeTorrent(this, _folder.isComplete());
 		if (LOG.isDebugEnabled())
 			LOG.debug("Torrent stopped!");
 	}
@@ -331,16 +324,15 @@ public class ManagedTorrent {
 			return;
 		} 
 		
-		_complete = _folder.isComplete();
 
-		if (_complete)
+		if (_folder.isComplete())
 			saveCompleteFiles();
 	}
 
 	void verificationComplete() {
 		enqueueTask(new Runnable() {
 			public void run() {
-				if (!_stopped && !_complete) {
+				if (!_stopped && !_folder.isComplete()) {
 					announceStart();
 				}
 			}
@@ -366,7 +358,7 @@ public class ManagedTorrent {
 			LOG.debug("requesting ranges from " + btc.toString());
 		
 		// don't request if complete
-		if (_complete || _stopped)
+		if (_folder.isComplete() || _stopped)
 			return;
 		BTInterval in = _folder.leaseRandom(btc.getAvailableRanges());
 		if (in != null)
@@ -440,7 +432,7 @@ public class ManagedTorrent {
 		if (_stopped) {
 			if (_couldNotSave)
 				return Downloader.DISK_PROBLEM;
-			else if (_complete)
+			else if (_folder.isComplete())
 				return Downloader.COMPLETE;
 			else if (_trackerFailures > MAX_TRACKER_FAILURES)
 				return Downloader.GAVE_UP;
@@ -450,7 +442,7 @@ public class ManagedTorrent {
 				return Downloader.QUEUED;
 		}
 
-		if (_complete)
+		if (_folder.isComplete())
 			return Downloader.SEEDING;
 		if (_folder.isVerifying())
 			return Downloader.HASHING;
@@ -1064,7 +1056,7 @@ public class ManagedTorrent {
 					LOG.debug("making way for other downloader");
 				return true;
 			}
-		} else if (_complete && _manager.shouldYield()) {
+		} else if (_folder.isComplete() && _manager.shouldYield()) {
 			// we stop if we uploaded more than we downloaded
 			// AND there are other torrents waiting for a slot
 			if (LOG.isDebugEnabled())
