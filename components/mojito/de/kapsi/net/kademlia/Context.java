@@ -608,6 +608,7 @@ public class Context implements Runnable {
 
         public void pingTimeout(KUID nodeId, SocketAddress address) {
             ++failures;
+            networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Bootstrap ping timeout, failure "+failures);
             }

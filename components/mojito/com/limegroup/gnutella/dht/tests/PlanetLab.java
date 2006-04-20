@@ -166,7 +166,7 @@ public class PlanetLab {
                     });
                     
                     try { 
-                        lock.wait(10L*1000L); 
+                        lock.wait(5L*60L*1000L); 
                     } catch (InterruptedException err) {
                         err.printStackTrace();
                     }
@@ -303,75 +303,79 @@ public class PlanetLab {
             
             while(true) {
                 
-                try {
-                    if (value != null) {
-                        long publishDelay = System.currentTimeMillis() - lastPublishTime;
-                        
-                        if(publishDelay >= minRepublisher){
-                            
-                            lastPublishTime = System.currentTimeMillis();
-                            dht.put(toKUID(value), getBytes(value), new StoreListener() {
-                                public void store(List keyValues, Collection nodes) {
-                                    planetlabStats.PUBLISH_LOCATIONS.addData(nodes.size());
-                                }
-                            });
-                            planetlabStats.PUBLISH_COUNT.incrementStat();
-                        }
-                    }
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-                
-                long sleep = minChurn + GENERATOR.nextInt((int)(maxChurn-minChurn));
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {}
-                
-                try {
-                    running = false;
-                    dht.close();
-                    planetlabStats.CHURN_DISCONNECTS.incrementStat();
-                    
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                
-                sleep = minOffline + GENERATOR.nextInt((int)(maxOffline-minOffline));
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {}
-                
-                
-                synchronized (lock) {
+                //publisher node
+                if (value != null) {
                     try {
-                        dht.bind(address, localNodeId);
-                        new Thread(dht).start();
+                        /*long publishDelay = System.currentTimeMillis() - lastPublishTime;*/
+                        /*if(publishDelay >= minRepublisher){*/
                         
-                        dht.bootstrap(bootstrapServer, new BootstrapListener() {
-                            public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                            }
-
-                            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
-                                planetlabStats.CHURN_RECONNECTS.incrementStat();
-                                running = true;
-                                
-                                synchronized(lock) {
-                                    lock.notify();
-                                }
+                        lastPublishTime = System.currentTimeMillis();
+                        dht.put(toKUID(value), getBytes(value), new StoreListener() {
+                            public void store(List keyValues, Collection nodes) {
+                                planetlabStats.PUBLISH_LOCATIONS.addData(nodes.size());
                             }
                         });
+                        planetlabStats.PUBLISH_COUNT.incrementStat();
+                        //}
+                        try {
+                            Thread.sleep(minRepublisher);
+                        } catch (InterruptedException e) {}
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                } 
+                //retriever node
+                else {
+                    long sleep = minChurn + GENERATOR.nextInt((int)(maxChurn-minChurn));
+                    try {
+                        Thread.sleep(sleep);
+                    } catch (InterruptedException e) {}
+                    
+                    try {
+                        running = false;
+                        dht.close();
+                        planetlabStats.CHURN_DISCONNECTS.incrementStat();
+                        
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     
+                    sleep = minOffline + GENERATOR.nextInt((int)(maxOffline-minOffline));
                     try {
-                        lock.wait();
-                    } catch (InterruptedException e) {
+                        Thread.sleep(sleep);
+                    } catch (InterruptedException e) {}
+                    
+                    
+                    synchronized (lock) {
+                        try {
+                            dht.bind(address, localNodeId);
+                            new Thread(dht).start();
+                            
+                            dht.bootstrap(bootstrapServer, new BootstrapListener() {
+                                public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
+                                }
+                                
+                                public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+                                    planetlabStats.CHURN_RECONNECTS.incrementStat();
+                                    running = true;
+                                    
+                                    synchronized(lock) {
+                                        lock.notify();
+                                    }
+                                }
+                            });
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                        }
                     }
-                }
-                
-                try {
-                    if (value == null) { //Retriever DHTs
+                    
+                    try {
+                        /*if (value == null) { //Retriever DHTs*/
                         
                         sleep = minRetriever + GENERATOR.nextInt((int)(maxRetriever - minRetriever));
                         try {
@@ -391,9 +395,10 @@ public class PlanetLab {
                                 }
                             }
                         });
+                        //}
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         }

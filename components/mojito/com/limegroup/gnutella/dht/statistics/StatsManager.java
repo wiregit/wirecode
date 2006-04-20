@@ -55,8 +55,8 @@ public class StatsManager {
         try {
             File dbFile = new File(outputDir+LOCALDB_FILE);
             BufferedWriter dbWriter = new BufferedWriter(new FileWriter(dbFile));
-            File lookupsFile = new File(outputDir+STATS_FILE);
-            BufferedWriter lookupsWriter = new BufferedWriter(new FileWriter(lookupsFile));
+            File statsFile = new File(outputDir+STATS_FILE);
+            BufferedWriter stats = new BufferedWriter(new FileWriter(statsFile));
             File routingTableFile = new File(outputDir+ROUTINGTABLE_FILE);
             BufferedWriter routingTableWriter = new BufferedWriter(new FileWriter(routingTableFile));
             
@@ -68,13 +68,13 @@ public class StatsManager {
                     //write routing table
                     stat.dumpRouteTable(routingTableWriter);
                     //write other stats
-                    stat.dumpStats(lookupsWriter);
+                    stat.dumpStats(stats);
                 }
             }
             
             dbWriter.close();
             routingTableWriter.close();
-            lookupsWriter.close();
+            stats.close();
         }catch (IOException e) {
             e.printStackTrace();
         }

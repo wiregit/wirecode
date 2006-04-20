@@ -107,6 +107,12 @@ public class NetworkStatisticContainer extends StatisticContainer {
         new SimpleStatistic();
     
     /**
+     * <tt>Statistic</tt> for bootstrap ping failures
+     */
+    public Statistic BOOTSTRAP_PING_FAILURES =
+        new SimpleStatistic();
+    
+    /**
      * <tt>Statistic</tt> for the estimated network stats
      */
     public Statistic ESTIMATE_SIZE =
