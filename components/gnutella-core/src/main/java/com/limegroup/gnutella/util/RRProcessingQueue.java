@@ -25,13 +25,13 @@ public class RRProcessingQueue extends ProcessingQueue {
 	}
 
 	public synchronized void invokeLater(Runnable runner, Object queueId) {
-		List queue = (List)queues.get(queueId);
+		NamedQueue queue = (NamedQueue)queues.get(queueId);
 		if (queue == null) {
-			queue = new LinkedList();
+			queue = new NamedQueue(new LinkedList(), queueId);
 			queues.put(queueId, queue);
-			lists.enqueue(new NamedQueue(queue, queueId));
+			lists.enqueue(queue);
 		}
-		queue.add(runner);
+		queue.list.add(runner);
 		size++;
 			
 		notifyAndStart();
@@ -72,6 +72,14 @@ public class RRProcessingQueue extends ProcessingQueue {
 		queues.clear();
 		lists.clear();
 		size = 0;
+	}
+	
+	public synchronized void clear(Object name) {
+		NamedQueue toRemove = (NamedQueue)queues.remove(name);
+		if (toRemove == null)
+			return;
+		lists.removeAllOccurences(toRemove);
+		size -= toRemove.list.size();
 	}
 	
 	private class NamedQueue {

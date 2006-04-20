@@ -66,9 +66,6 @@ public class ManagedTorrent {
 	 */
 	private volatile boolean _stopped = true;
 	
-	/** Whether the torrent is being verified */
-	private volatile boolean verifying;
-
 	/*
 	 * The list of known good TorrentLocations that we are not connected to at
 	 * the moment get this' monitor befor accessing
@@ -202,7 +199,7 @@ public class ManagedTorrent {
 				initializeTorrent();
 				initializeFolder();
 				
-				if (_stopped || _complete || verifying) //TODO: decide if we should connect to seed.
+				if (_stopped || _folder.isVerifying()) 
 					return;
 				
 				// kick off connectors if we already have some addresses
@@ -268,8 +265,12 @@ public class ManagedTorrent {
 	 * there are any
 	 */
 	public void pause() {
-		stop();
-		_paused = true;
+		enqueueTask(new Runnable() {
+			public void run() {
+				_paused = true;
+				stopNow();
+			}
+		});
 	}
 
 	/**
@@ -337,16 +338,13 @@ public class ManagedTorrent {
 	}
 
 	void verificationComplete() {
-		verifying = false;
 		enqueueTask(new Runnable() {
 			public void run() {
-				announceStart();
+				if (!_stopped && !_complete) {
+					announceStart();
+				}
 			}
 		});
-	}
-	
-	void verificationStarted() {
-		verifying = true;
 	}
 	
 	private void announceStart() {
@@ -394,6 +392,9 @@ public class ManagedTorrent {
 	void notifyOfComplete(int in) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("got completed chunk " + in);
+		if (_folder.isVerifying())
+			return;
+		
 		final BTHave have = BTHave.createMessage(in);
 		Runnable haveNotifier = new Runnable() {
 			public void run() {
@@ -404,8 +405,8 @@ public class ManagedTorrent {
 			}
 		};
 		NIODispatcher.instance().invokeLater(haveNotifier);
-		_complete = _folder.isComplete();
-		if (_complete && !verifying) {
+		
+		if (_folder.isComplete()) {
 			LOG.info("file is complete");
 			enqueueTask(new Runnable(){
 				public void run(){
@@ -451,7 +452,7 @@ public class ManagedTorrent {
 
 		if (_complete)
 			return Downloader.SEEDING;
-		if (verifying)
+		if (_folder.isVerifying())
 			return Downloader.HASHING;
 		else if (_connections.size() > 0) {
 			if (isDownloading())

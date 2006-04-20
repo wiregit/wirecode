@@ -107,6 +107,9 @@ public class VerifyingFolder {
 	 * not fail if an operation on one of the files throws.
 	 */
 	private volatile IOException storedException;
+	
+	/** Whether the files on disk are currently being verified */
+	private volatile boolean isVerifying;
 
 	/**
 	 * constructs instance of this
@@ -141,6 +144,9 @@ public class VerifyingFolder {
 		BitSet verified = (BitSet) data.get("verified");
 		if (verified != null) 
 			verifiedBlocks = verified;
+		
+		Boolean wasVerifying = (Boolean) data.get("wasVerifying");
+		isVerifying = wasVerifying == null ? false : wasVerifying.booleanValue();
 	}
 	
 	
@@ -358,6 +364,7 @@ public class VerifyingFolder {
 	public void open() throws IOException {
 		open(null);
 	}
+	
 	/**
 	 * Opens this VerifyingFolder for writing. MUST be called before anything
 	 * else. If there is no completion size, this fails.
@@ -373,7 +380,7 @@ public class VerifyingFolder {
 		storedException = null;
 		
 		// whether the data on disk should be re-verified
-		boolean doVerification = this.getBlockSize() == 0;
+		isVerifying |= (getBlockSize() == 0);
 		
 		// position of the first byte of a file in the torrent
 		long pos = 0;
@@ -406,13 +413,13 @@ public class VerifyingFolder {
 					
 					// a file is missing, so this must be a new download.
 					// if it was not, we need to reverify every file.
-					if (!doVerification) {
+					if (!isVerifying) {
 						// pretend nothing was downloaded
 						synchronized(this) {
 							partialBlocks.clear(); 
 							verifiedBlocks.clear();
 						}
-						doVerification = true;
+						isVerifying = true;
 						i = -1; // restart the loop
 						continue;
 					}
@@ -425,7 +432,7 @@ public class VerifyingFolder {
 				}
 				
 				// if a file exists, try to verify it
-				if (doVerification && file.length() > 0) {
+				if (isVerifying && file.length() > 0) {
 					if (filesToVerify == null)
 						filesToVerify = new ArrayList(_files.length);
 					filesToVerify.add(_files[i]);
@@ -438,17 +445,24 @@ public class VerifyingFolder {
 		
 		// verify any files that needed verification
 		if (filesToVerify != null) {
-			if (torrent != null)
-				torrent.verificationStarted();
+			isVerifying = true;
 			verifyFiles(filesToVerify);
 			if (torrent != null) {
 				VERIFY_QUEUE.invokeLater(new Runnable(){
 					public void run() {
-						torrent.verificationComplete();
+						if (isOpen()) {
+							isVerifying = false;
+							torrent.verificationComplete();
+						}
 					}
 				}, _info.getURN());
 			}
-		}
+		} else
+			isVerifying = false;
+	}
+	
+	boolean isVerifying() {
+		return isVerifying;
 	}
 
 	/**
@@ -476,6 +490,7 @@ public class VerifyingFolder {
 			}
 			_fos = null;
 		}
+		VERIFY_QUEUE.clear(_info.getURN());
 	}
 
 	/**
@@ -749,9 +764,9 @@ public class VerifyingFolder {
 		}
 		
 		public void run() {
-			if (storedException != null)
-				return;
-			if (hasBlock(pieceNum))
+			if (storedException != null ||
+					!isOpen() ||
+					hasBlock(pieceNum))
 				return;
 			try {
 				
@@ -805,6 +820,7 @@ public class VerifyingFolder {
 		Map toWrite = new HashMap();
 		toWrite.put("verified",verifiedBlocks.clone());
 		toWrite.put("partial",partialBlocks.clone());
+		toWrite.put("wasVerifying", new Boolean(isVerifying));
 		return toWrite;
 	}
 	
