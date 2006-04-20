@@ -98,7 +98,7 @@ public class Context implements Runnable {
     private volatile boolean bootstrapped = false;
     private boolean running = false;
     
-    private Timer scheduler = null;
+    private Timer timer = null;
     private Thread messageDispatcherThread = null;
     private Thread keyValuePublisherThread = null;
     
@@ -326,9 +326,19 @@ public class Context implements Runnable {
                 keyValuePublisherThread = null;
             }
             
-            if (scheduler != null) {
-                scheduler.cancel();
-                scheduler = null;
+            if (eventDispatcher != null) {
+                eventDispatcher.cancel();
+                eventDispatcher = null;
+            }
+            
+            if (bucketRefresher != null) {
+                bucketRefresher.cancel();
+                bucketRefresher = null;
+            }
+            
+            if (timer != null) {
+                timer.cancel();
+                timer = null;
             }
             
             if (messageDispatcherThread != null) {
@@ -362,15 +372,15 @@ public class Context implements Runnable {
                 = new Thread(keyValuePublisher, "KeyValuePublisherThread");
             keyValuePublisherThread.setDaemon(true);
             
-            scheduler = new Timer(true);
+            timer = new Timer(true);
             
             eventDispatcher = new EventDispatcher(this);
             bucketRefresher = new RandomBucketRefresher(this);
             
-            scheduler.scheduleAtFixedRate(eventDispatcher, 0L, ContextSettings.DISPATCH_EVENTS_EVERY.getValue());
+            timer.scheduleAtFixedRate(eventDispatcher, 0L, ContextSettings.DISPATCH_EVENTS_EVERY.getValue());
             
             long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
-            scheduler.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
+            timer.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
             keyValuePublisherThread.start();
 
             messageDispatcherThread = Thread.currentThread();

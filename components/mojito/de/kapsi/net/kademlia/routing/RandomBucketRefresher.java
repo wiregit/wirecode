@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 
-public class RandomBucketRefresher extends TimerTask implements Runnable{
+public class RandomBucketRefresher extends TimerTask implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(RandomBucketRefresher.class);
     
@@ -37,7 +37,11 @@ public class RandomBucketRefresher extends TimerTask implements Runnable{
         this.context = context;
     }
     
-    public void run() {
+    public synchronized boolean cancel() {
+        return super.cancel();
+    }
+    
+    public synchronized void run() {
         if(LOG.isTraceEnabled()) {
             LOG.trace("Random bucket refresh");
         }
@@ -50,5 +54,4 @@ public class RandomBucketRefresher extends TimerTask implements Runnable{
             LOG.error("RandomBucketRefresher IO exception: ", ex);
         }
     }
-    
 }

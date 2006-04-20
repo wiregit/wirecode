@@ -593,7 +593,7 @@ public class PatriciaRouteTable implements RoutingTable {
     }
         
     public void refreshBuckets(boolean force) throws IOException{
-        refreshBuckets(force,null);
+        refreshBuckets(force, null);
     }
     
     public void refreshBuckets(boolean force, BootstrapListener l) throws IOException{
@@ -612,7 +612,7 @@ public class PatriciaRouteTable implements RoutingTable {
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
             //if we are bootstrapping, phase 1 allready took care of the local bucket
-            if(l!=null && liveNodes.contains(context.getLocalNodeID())) {
+            if(l != null && liveNodes.contains(context.getLocalNodeID())) {
                 continue;
             }
             

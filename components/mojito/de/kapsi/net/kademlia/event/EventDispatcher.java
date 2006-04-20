@@ -68,7 +68,12 @@ public class EventDispatcher extends TimerTask implements Runnable {
         }
     }
     
-    public void run() {
+    public synchronized boolean cancel() {
+        return super.cancel();
+    }
+    
+    public synchronized void run() {
+        
         List dispatch = null;
         int size = 0;
         
