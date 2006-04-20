@@ -574,6 +574,10 @@ public class Context implements Runnable {
         private SocketAddress address;
         private BootstrapListener listener;
         
+        private int failures;
+        
+        private List alternateNodesList;
+        
         public BootstrapManager(SocketAddress address, BootstrapListener listener) {
             this.address = address;
             this.listener = listener;
@@ -588,11 +592,48 @@ public class Context implements Runnable {
             } catch (IOException err) {
                 LOG.error(err);
                 initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time);
+                secondPhaseComplete(getLocalNodeID(), false, -1);
             }
         }
 
         public void pingTimeout(KUID nodeId, SocketAddress address) {
-            initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
+            ++failures;
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Bootstrap ping timeout, failure "+failures);
+            }
+            
+            if(failures < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                if(alternateNodesList == null) {
+                    alternateNodesList = routeTable.getAllNodesMRS();
+                }
+                
+                for (Iterator iter = alternateNodesList.iterator(); iter.hasNext();) {
+                    ContactNode node = (ContactNode) iter.next();
+                    if(!node.getNodeID().equals(getLocalNodeID()) 
+                            && !node.getSocketAddress().equals(address)) {
+                        
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Retrying bootstrap ping with node: ");
+                        }
+                        
+                        try {
+                            iter.remove();
+                            ping(node,this);
+                        } catch (IOException err) {
+                            LOG.error(err);
+                            initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1);
+                            secondPhaseComplete(getLocalNodeID(), false, -1);
+                        }
+                    }
+                }
+            }else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Giving up bootstrap after "+failures+" tries");
+                }
+                initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
+                secondPhaseComplete(getLocalNodeID(), false, -1);
+            }
+            
         }
 
         public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, final long time) {
@@ -606,7 +647,7 @@ public class Context implements Runnable {
                 routeTable.refreshBuckets(false, this);
             } catch (IOException err) {
                 LOG.error(err);
-                secondPhaseComplete(getLocalNodeID(), false, 0);
+                secondPhaseComplete(getLocalNodeID(), false, -1);
             }
         }
 

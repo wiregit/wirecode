@@ -670,6 +670,11 @@ public class PatriciaRouteTable implements RoutingTable {
     public List getAllNodes() {
         return nodesTrie.values();
     }
+    
+    public List getAllNodesMRS() {
+        List nodesList = nodesTrie.values();
+        return BucketUtils.sort(nodesList);
+    }
 
     public List getAllBuckets() {
         return bucketsTrie.values();
