@@ -43,19 +43,17 @@ public class Receipt {
     
     private Context context;
     
-    private final KUID nodeId;
-    private final SocketAddress dst;
+    private KUID nodeId;
+    private SocketAddress dst;
     
+    private Message message;
     private ByteBuffer data;
     private int dataSize;
     
-    private final KUID messageId;
-    private final ResponseHandler handler;
+    private ResponseHandler handler;
     
     private long sent = 0L;
     private long received = 0L;
-    
-    private boolean isRequest = false;
     
     Receipt(Context context, KUID nodeId, SocketAddress dst, 
             Message message, ResponseHandler handler) throws IOException {
@@ -71,11 +69,9 @@ public class Receipt {
         this.nodeId = nodeId;
         this.dst = dst;
         
-        dataSize = data.length;
+        this.message = message;
+        this.dataSize = data.length;
         this.data = ByteBuffer.wrap(data);
-        
-        this.messageId = message.getMessageID();
-        this.isRequest = (message instanceof RequestMessage);
         
         this.handler = handler;
     }
@@ -84,12 +80,12 @@ public class Receipt {
         return context.getMessageDispatcher().cancel(this);
     }
     
-    public boolean isRequest() {
-        return isRequest;
+    public Message getMessage() {
+        return message;
     }
     
-    boolean compareNodeID(KUID nodeId) {
-        return this.nodeId == null || this.nodeId.equals(nodeId);
+    public boolean isRequest() {
+        return (message instanceof RequestMessage);
     }
     
     public KUID getNodeID() {
@@ -101,23 +97,11 @@ public class Receipt {
     }
     
     public KUID getMessageID() {
-        return messageId;
+        return message.getMessageID();
     }
     
     public ResponseHandler getHandler() {
         return handler;
-    }
-    
-    boolean send(DatagramChannel channel) throws IOException {
-        return channel.send(data, dst) != 0;
-    }
-    
-    void sent() {
-        sent = System.currentTimeMillis();
-    }
-    
-    void received() {
-        received = System.currentTimeMillis();
     }
     
     public long time() {
@@ -130,6 +114,53 @@ public class Receipt {
             return delta >= handler.timeout();
         }
         return false;
+    }
+    
+    public int dataSize() {
+        return dataSize;
+    }
+    
+    public int hashCode() {
+        return getMessageID().hashCode();
+    }
+    
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof Receipt)) {
+            return false;
+        }
+        
+        Receipt other = (Receipt)o;
+        return getMessageID().equals(other.getMessageID());
+    }
+    
+    public String toString() {
+        return ContactNode.toString(nodeId, dst) + "/" + getMessageID();
+    }
+    
+    boolean compareNodeID(KUID nodeId) {
+        return this.nodeId == null || this.nodeId.equals(nodeId);
+    }
+    
+    boolean send(DatagramChannel channel) throws IOException {
+        if (channel.send(data, dst) != 0) {
+            freeData();
+            return true;
+        }
+        return false;
+    }
+    
+    void freeData() {
+        data = null;
+    }
+    
+    void sent() {
+        sent = System.currentTimeMillis();
+    }
+    
+    void received() {
+        received = System.currentTimeMillis();
     }
     
     void handleSuccess(KUID nodeId, SocketAddress src, 
@@ -162,32 +193,5 @@ public class Receipt {
     
     void handleCancel() {
         
-    }
-    
-    public int dataSize() {
-        return dataSize;
-    }
-    
-    void freeData() {
-        data = null;
-    }
-    
-    public int hashCode() {
-        return messageId.hashCode();
-    }
-    
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (!(o instanceof Receipt)) {
-            return false;
-        }
-        
-        Receipt other = (Receipt)o;
-        return messageId.equals(other.messageId);
-    }
-    
-    public String toString() {
-        return ContactNode.toString(nodeId, dst) + "/" + messageId;
     }
 }

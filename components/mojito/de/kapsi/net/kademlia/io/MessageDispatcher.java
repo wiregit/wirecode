@@ -70,8 +70,8 @@ public class MessageDispatcher implements Runnable {
     private static final long SLEEP = 50L;
     
     private Object IO_LOCK = new Object();
-    private LinkedList output = new LinkedList();
-    private ReceiptMap input = new ReceiptMap(1024);
+    private LinkedList outputQueue = new LinkedList();
+    private ReceiptMap messageMap = new ReceiptMap(1024);
     
     private Selector selector;
     private DatagramChannel channel;
@@ -162,8 +162,8 @@ public class MessageDispatcher implements Runnable {
         } catch (IOException ignore) {}
         
         synchronized (IO_LOCK) {
-            input.clear();
-            output.clear();
+            messageMap.clear();
+            outputQueue.clear();
         }
     }
     
@@ -205,7 +205,7 @@ public class MessageDispatcher implements Runnable {
         Receipt receipt = new Receipt(context, nodeId, dst, message, handler);
         
         synchronized(IO_LOCK) {
-            output.add(receipt);
+            outputQueue.add(receipt);
             interestWrite(true);
         }          	
         
@@ -219,12 +219,12 @@ public class MessageDispatcher implements Runnable {
         
         boolean removed = false;
         synchronized (IO_LOCK) {
-            int size = input.size();
-            input.remove(receipt.getMessageID());
-            removed = input.size() != size;
+            int size = messageMap.size();
+            messageMap.remove(receipt.getMessageID());
+            removed = messageMap.size() != size;
             
             if (!removed) {
-                removed = output.remove(receipt);
+                removed = outputQueue.remove(receipt);
             }
         }
         
@@ -294,23 +294,24 @@ public class MessageDispatcher implements Runnable {
      */
     private int writeNext() throws IOException {
         synchronized (IO_LOCK) {
-            if (!output.isEmpty()) {
-                Receipt receipt = (Receipt)output.removeFirst();
+            if (!outputQueue.isEmpty()) {
+                Receipt receipt = (Receipt)outputQueue.removeFirst();
                 
                 if (receipt.send(channel)) {
+                    // Wohoo! Message was sent!
                     receipt.sent();
                     networkStats.SENT_MESSAGES_COUNT.incrementStat();
                     networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
                     
                     if (receipt.isRequest()) {
-                        input.put(receipt.getMessageID(), receipt);
+                        messageMap.put(receipt.getMessageID(), receipt);
                     }
-                    receipt.freeData();
                 } else {
-                    output.addFirst(receipt);
+                    // Dang! Re-Try next time!
+                    outputQueue.addFirst(receipt);
                 }
             }
-            return output.size();
+            return outputQueue.size();
         }
     }
     
@@ -332,7 +333,7 @@ public class MessageDispatcher implements Runnable {
             
             if (message instanceof ResponseMessage) {
                 synchronized (IO_LOCK) {
-                    receipt = (Receipt)input.remove(message.getMessageID());
+                    receipt = (Receipt)messageMap.remove(message.getMessageID());
                 }
                 
                 if (receipt != null) {
@@ -432,7 +433,7 @@ public class MessageDispatcher implements Runnable {
                 
                 if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
                     synchronized (IO_LOCK) {
-                        input.cleanup();
+                        messageMap.cleanup();
                     }
                     lastCleanup = System.currentTimeMillis();
                 }
