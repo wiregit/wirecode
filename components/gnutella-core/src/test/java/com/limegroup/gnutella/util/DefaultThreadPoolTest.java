@@ -87,7 +87,7 @@ public class DefaultThreadPoolTest extends BaseTestCase {
         assertTrue(r1.getThread().isDaemon());
     }
     
-    static class Runner implements Runnable {
+    private static class Runner implements Runnable {
         private boolean ran;
         private Thread thread;
         private String name;

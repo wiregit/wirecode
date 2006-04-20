@@ -3,6 +3,7 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -22,8 +23,8 @@ import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.MultiIterator;
-import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.RRProcessingQueue;
 
 /**
  * This class extends VerifyingFile for the simple reason that I would like to
@@ -37,10 +38,18 @@ public class VerifyingFolder {
 	private static final Log LOG = LogFactory.getLog(VerifyingFolder.class);
 	
 	/**
-	 * The thread that does the actual verification & writing
+	 * The thread that does the reading, writing and
+	 * on-the-fly verification 
 	 */
-	private static final ProcessingQueue QUEUE = new ProcessingQueue(
-			"TorrentVerifier");
+	private static final RRProcessingQueue QUEUE = new RRProcessingQueue(
+			"TorrentDiskQueue");
+	
+	/**
+	 * Queue for verifying torrents that already exist on the hard
+	 * disk.
+	 */
+	private static final RRProcessingQueue VERIFY_QUEUE = 
+		new RRProcessingQueue("TorrentVerifier");
 	
 	/*
 	 * The files of this torrent as an array
@@ -144,7 +153,7 @@ public class VerifyingFolder {
 			requestedRanges.removeInterval(in);
 			pendingRanges.addInterval(in);
 		}
-		QUEUE.add(new WriteJob(in, data));
+		QUEUE.invokeLater(new WriteJob(in, data),"download");
 	}
 	
 	/**
@@ -346,11 +355,14 @@ public class VerifyingFolder {
 		return verifiedBlocks.get(block);
 	}
 
+	public void open() throws IOException {
+		open(null);
+	}
 	/**
 	 * Opens this VerifyingFolder for writing. MUST be called before anything
 	 * else. If there is no completion size, this fails.
 	 */
-	public void open() throws IOException {
+	public void open(final ManagedTorrent torrent) throws IOException {
 		synchronized(DISK_LOCK) {
 			if (_fos != null)
 				throw new IOException("Files already open!");
@@ -425,8 +437,18 @@ public class VerifyingFolder {
 		}
 		
 		// verify any files that needed verification
-		if (filesToVerify != null) 
+		if (filesToVerify != null) {
+			if (torrent != null)
+				torrent.verificationStarted();
 			verifyFiles(filesToVerify);
+			if (torrent != null) {
+				VERIFY_QUEUE.invokeLater(new Runnable(){
+					public void run() {
+						torrent.verificationComplete();
+					}
+				}, _info.getURN());
+			}
+		}
 	}
 
 	/**
@@ -469,7 +491,7 @@ public class VerifyingFolder {
 		IOException e = storedException;
 		if (e != null)
 			throw e;
-		QUEUE.add(new SendJob(in, c));
+		QUEUE.invokeLater(new SendJob(in, c),"upload");
 	}
 	
 	private class SendJob implements Runnable {
@@ -706,36 +728,21 @@ public class VerifyingFolder {
 	}
 
 	/**
-	 * verifies all the chunks that are associated with a file
-	 * TODO: figure out which thread this should be happening in.
+	 * verifies all the chunks that are associated with a list of files.
 	 */
 	private void verifyFiles(List l) {
 		for (Iterator iter = l.iterator(); iter.hasNext();) {
 			TorrentFile f = (TorrentFile) iter.next();
 			for (int i = f.begin; i <= f.end; i++)
-				verifyDelayed(i);
+				VERIFY_QUEUE.invokeLater(new VerifyJob(i),_info.getURN());
 		}
 	}
-	
+
 	/**
-	 * this is a temp solution to ensure that verifying resumed torrents
-	 * 1. doesn't max out the cpu
-	 * 2. has less priority than verifying currently downloaded chunks
-	 * a proper solution would eventually have explicitly coded priorities.
-	 * This method is meant to be used within tight loops.
+	 * A task that checks an already existing file on disk
+	 * against the .torrent metadata.  
 	 */
-	private void verifyDelayed(int i ) {
-		// 
-		try {
-			Thread.sleep(QUEUE.size() > 0 ? 10 : 10);
-		} catch (InterruptedException killed) {
-			return;
-		}
-		QUEUE.add(new VerifyJob(i));
-	}
-	
 	private class VerifyJob implements Runnable {
-		
 		private final int pieceNum;
 		public VerifyJob(int pieceNum) {
 			this.pieceNum = pieceNum;
@@ -744,7 +751,14 @@ public class VerifyingFolder {
 		public void run() {
 			if (storedException != null)
 				return;
+			if (hasBlock(pieceNum))
+				return;
 			try {
+				
+				// try not to max out the cpu
+				if (VERIFY_QUEUE.size() > 0)
+					Thread.sleep(10);
+				
 				if (verify(pieceNum)) { 
 					synchronized(VerifyingFolder.this) {
 						verifiedBlocks.set(pieceNum);
@@ -754,6 +768,8 @@ public class VerifyingFolder {
 				}
 			} catch (IOException bad) {
 				storedException = bad;
+			} catch (InterruptedException iex) {
+				storedException = new InterruptedIOException();
 			}
 		}
 	}

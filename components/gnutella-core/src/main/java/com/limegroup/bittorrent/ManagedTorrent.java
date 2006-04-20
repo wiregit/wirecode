@@ -202,7 +202,7 @@ public class ManagedTorrent {
 				initializeTorrent();
 				initializeFolder();
 				
-				if (_stopped || _complete) //TODO: decide if we should connect to seed.
+				if (_stopped || _complete || verifying) //TODO: decide if we should connect to seed.
 					return;
 				
 				// kick off connectors if we already have some addresses
@@ -318,8 +318,7 @@ public class ManagedTorrent {
 
 	private void initializeFolder() {
 		try {
-			verifying = true;
-			_folder.open();
+			_folder.open(this);
 		} catch (IOException ioe) {
 			// problem opening files cannot recover.
 			if (LOG.isDebugEnabled()) {
@@ -329,15 +328,27 @@ public class ManagedTorrent {
 			_couldNotSave = true;
 			_stopped = true;
 			return;
-		} finally {
-			verifying = false;
-		}
+		} 
+		
 		_complete = _folder.isComplete();
 
 		if (_complete)
 			saveCompleteFiles();
 	}
 
+	void verificationComplete() {
+		verifying = false;
+		enqueueTask(new Runnable() {
+			public void run() {
+				announceStart();
+			}
+		});
+	}
+	
+	void verificationStarted() {
+		verifying = true;
+	}
+	
 	private void announceStart() {
 		// announce ourselves to the trackers
 		for (int i = 0; i < _info.getTrackers().length; i++) {
@@ -440,14 +451,14 @@ public class ManagedTorrent {
 
 		if (_complete)
 			return Downloader.SEEDING;
+		if (verifying)
+			return Downloader.HASHING;
 		else if (_connections.size() > 0) {
 			if (isDownloading())
 				return Downloader.DOWNLOADING;
 			return Downloader.REMOTE_QUEUED;
 		} else if (_peers != null && _peers.size() > 0)
 			return Downloader.CONNECTING;
-		else if (verifying)
-			return Downloader.HASHING;
 		else if(_peers == null || _peers.size() == 0)
 			return Downloader.WAITING_FOR_TRACKER;
 		return Downloader.BUSY;

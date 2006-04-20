@@ -72,6 +72,7 @@ implements QueuePool{
 	public synchronized void clear() {
 		queues.clear();
 		lists.clear();
+		size = 0;
 	}
 	
 	private class NamedQueue {
