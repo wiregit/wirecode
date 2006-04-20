@@ -24,4 +24,12 @@ public interface IOState {
      * The given ByteBuffer should be used as scratch space for reading.
      */
     boolean process(Channel channel, ByteBuffer buffer) throws IOException;
+    
+    /**
+     * Returns the amount of data that has been processed by this IOState.
+     * This operation is optional.  It should return -1 if unsupported.
+     * 
+     * @return
+     */
+    long getAmountProcessed();
 }

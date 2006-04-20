@@ -86,7 +86,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Constructs a new HashTree out of the given nodes, root, sha1
      * and filesize.
      */
-    private HashTree(List allNodes, String sha1, long fileSize) {
+    HashTree(List allNodes, String sha1, long fileSize) {
         this(allNodes,sha1,fileSize,calculateNodeSize(fileSize,allNodes.size()-1));
     }
     
@@ -212,6 +212,10 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             LOG.trace("reading " + sha1 + "." + root32 + " dime data.");
         return new HashTree(HashTreeHandler.read(is, fileSize, root32),
                             sha1, fileSize);
+    }
+    
+    public static ThexReader createHashTreeReader(String sha1, String root32, long fileSize) {
+        return HashTreeHandler.createAsyncReader(sha1, fileSize, root32);
     }
     
     /**

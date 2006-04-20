@@ -2,31 +2,22 @@ package com.limegroup.gnutella.http;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.WritableByteChannel;
 
-import com.limegroup.gnutella.io.IOState;
+import com.limegroup.gnutella.io.WriteState;
 import com.limegroup.gnutella.statistics.Statistic;
 
-public abstract class WriteHeadersIOState implements IOState {
+public abstract class WriteHeadersIOState extends WriteState {
     /** The outgoing buffer, if we've made it.  (Null if we haven't.) */
     private ByteBuffer outgoing;
     /** The stat to add data to. */
     private final Statistic stat; 
+    /** The amount total that was written. */
+    private long amountWritten;
 
     /** Creates a new WriteHandshakeState using the given stat. */
     public WriteHeadersIOState(Statistic stat) {
         this.stat = stat;
-    }
-
-    /** Returns true. */
-    public boolean isWriting() {
-        return true;
-    }
-
-    /** Returns false. */
-    public boolean isReading() {
-        return false;
     }
 
     /**
@@ -39,13 +30,14 @@ public abstract class WriteHeadersIOState implements IOState {
      * This will return true if it needs to be called again to continue writing.
      * If it returns false, all data has been written and you can proceed to the next state.
      */
-    public boolean process(Channel channel, ByteBuffer buffer) throws IOException {
+    protected boolean processWrite(WritableByteChannel channel, ByteBuffer buffer) throws IOException {
         if(outgoing == null) {
             outgoing = createOutgoingData();
         }
         
         int written = ((WritableByteChannel)channel).write(outgoing);
         stat.addData(written);
+        amountWritten += written;
         
         if(!outgoing.hasRemaining()) {
             processWrittenHeaders();
@@ -53,6 +45,10 @@ public abstract class WriteHeadersIOState implements IOState {
         } else {
             return true;
         }
+    }
+    
+    public final long getAmountProcessed() {
+        return amountWritten;
     }
     
     /** Returns a ByteBuffer of data to write. */

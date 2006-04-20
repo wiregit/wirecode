@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,6 +49,7 @@ import com.limegroup.gnutella.io.IOState;
 import com.limegroup.gnutella.io.IOStateMachine;
 import com.limegroup.gnutella.io.IOStateObserver;
 import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.io.ReadState;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -175,7 +175,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
 	 * The content-length of the output, useful only for when we
 	 * want to read & discard the body of the HTTP message.
 	 */
-	private int _contentLength;
+	private long _contentLength;
 	
 	/**
 	 * Whether or not the body has been consumed.
@@ -741,14 +741,21 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
     }
     
     public void downloadThexBody(URN sha1, IOStateObserver observer) {
-        _thexReader = new ThexReader(_contentLength, sha1, _root32, _rfd.getFileSize());
+        _thexReader = HashTree.createHashTreeReader(sha1.httpStringValue(), _root32, _rfd.getFileSize());
         _observer = observer;
         _stateMachine.addState(_thexReader);
     }
     
     public HashTree getHashTree() {
-        _bodyConsumed = true;
-        HashTree tree =  _thexReader.getHashTree();
+        _contentLength -= _thexReader.getAmountProcessed();
+        if(_contentLength == 0)
+            _bodyConsumed = true;
+        HashTree tree =  null;
+        try {
+            tree = _thexReader.getHashTree();
+        } catch(IOException iox) {
+            LOG.warn("Failed to create tree", iox);
+        }
         if(tree == null)
             _rfd.setTHEXFailed();
         else
@@ -795,7 +802,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
     /**
      * Consumes the body portion of an HTTP Message.
      */
-    private void consumeBody(int contentLength, IOStateObserver observer) {
+    private void consumeBody(long contentLength, IOStateObserver observer) {
         if(LOG.isTraceEnabled())
             LOG.trace("enter consumeBody(" + contentLength + ")");
 
@@ -1476,14 +1483,14 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
     }
     
     
-    private class DownloadState implements IOState {
+    private class DownloadState extends ReadState {
         private long currPos = _initialReadingPoint;
 
-        public boolean process(Channel channel, ByteBuffer buffer) throws IOException {
+        protected boolean processRead(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
             boolean dataLeft = false;
             try {
                 LOG.debug("Doing read");
-                dataLeft = readImpl((ReadableByteChannel) channel, buffer);
+                dataLeft = readImpl(channel, buffer);
             } catch (IOException error) {
                 LOG.debug("Error while reading", error);
                 chunkCompleted();
@@ -1616,13 +1623,9 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
                 buffer.clear();
             }
         }
-        
-        
-        public boolean isReading() {
-            return true;
-        }
-        public boolean isWriting() {
-            return false;
+
+        public long getAmountProcessed() {
+            return -1;
         }
 	}
 

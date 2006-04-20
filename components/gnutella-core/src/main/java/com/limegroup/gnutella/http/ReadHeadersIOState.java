@@ -2,18 +2,17 @@ package com.limegroup.gnutella.http;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.ReadableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.IOState;
+import com.limegroup.gnutella.io.ReadState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.Statistic;
 
-public abstract class ReadHeadersIOState implements IOState {
+public abstract class ReadHeadersIOState extends ReadState {
     
     private static final Log LOG = LogFactory.getLog(ReadHeadersIOState.class);
 
@@ -27,6 +26,8 @@ public abstract class ReadHeadersIOState implements IOState {
     protected StringBuffer currentHeader = new StringBuffer(1024);
     /** The connect line. */
     protected String connectLine;
+    /** The amount of data read. */
+    private long amountRead;
     
     /** Constructs a new ReadHandshakeState using the given support & stat. */
     public ReadHeadersIOState(HeaderSupport support, Statistic stat) {
@@ -44,14 +45,15 @@ public abstract class ReadHeadersIOState implements IOState {
      * otherwise it will return false indiciating it's time to move on to the next
      * state.
      */
-    public boolean process(Channel channel, ByteBuffer buffer) throws IOException {
-        ReadableByteChannel rc = (ReadableByteChannel)channel;
+    protected boolean processRead(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
         boolean allDone = false;
         while(!allDone) {
             int read = 0;
             
-            while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0)
+            while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0) {
                 stat.addData(read);
+                amountRead += read;
+            }
             
             if(buffer.position() == 0) {
                 if(read == -1)
@@ -108,14 +110,8 @@ public abstract class ReadHeadersIOState implements IOState {
         }
     }
     
-    /** Returns false. */
-    public boolean isWriting() {
-        return false;
-    }
-    
-    /** Returns true. */
-    public boolean isReading() {
-        return true;
+    public long getAmountProcessed() {
+        return amountRead;
     }
     
     /**

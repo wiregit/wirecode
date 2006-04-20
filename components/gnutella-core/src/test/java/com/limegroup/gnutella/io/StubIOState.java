@@ -36,6 +36,10 @@ public class StubIOState implements IOState {
         
         return returnTrueOnProcess;
     }
+    
+    public long getAmountProcessed() {
+        return -1;
+    }
 
     public void setReading(boolean reading) {
         this.reading = reading;
