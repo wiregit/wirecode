@@ -104,7 +104,7 @@ public class SystemUtils {
      * 
      * @return True if it does, false if it does not or there was an error
      */
-    public static final boolean isWindowsFirewallPresent() {
+    public static final boolean isFirewallPresent() {
     	if (CommonUtils.isWindows() && isLoaded)
     		return windowsFirewallPresentNative();
     	return false;
@@ -117,7 +117,7 @@ public class SystemUtils {
      *         False if the setting on the "General" tab is "Off (not recommended)".
      *         False on error.
      */
-    public static final boolean isWindowsFirewallEnabled() {
+    public static final boolean isFirewallEnabled() {
     	if (CommonUtils.isWindows() && isLoaded)
     	    return windowsFirewallEnabledNative();
     	return false;
@@ -130,7 +130,7 @@ public class SystemUtils {
      *         False if the box is not checked.
      *         False on error.
      */
-    public static final boolean areWindowsFirewallExceptionsNotAllowed() {
+    public static final boolean isFirewallExceptionsNotAllowed() {
     	if (CommonUtils.isWindows() && isLoaded)
     		return windowsFirewallExceptionsNotAllowedNative();
     	return false;
@@ -142,7 +142,7 @@ public class SystemUtils {
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
      * @return     True if it has a listing on the Exceptions list, false if not or on error
      */
-    public static final boolean isProgramListedOnWindowsFirewall(String path) {
+    public static final boolean isProgramListedOnFirewall(String path) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return windowsFirewallIsProgramListedNative(path);
     	return false;
@@ -154,7 +154,7 @@ public class SystemUtils {
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
      * @return     True if it's listing's check box is checked, false if not or on error
      */
-    public static final boolean isProgramEnabledOnWindowsFirewall(String path) {
+    public static final boolean isProgramEnabledOnFirewall(String path) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return windowsFirewallIsProgramEnabledNative(path);
     	return false;
@@ -167,7 +167,7 @@ public class SystemUtils {
      * @param name The name of the program, like "LimeWire", this is the text that will identify the item on the list
      * @return     False if error
      */
-    public static final boolean addProgramToWindowsFirewall(String path, String name) {
+    public static final boolean addProgramToFirewall(String path, String name) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return windowsFirewallAddNative(path, name);
     	return false;
@@ -179,7 +179,7 @@ public class SystemUtils {
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
      * @return     False if error.
      */
-    public static final boolean removeProgramFromWindowsFirewall(String path) {
+    public static final boolean removeProgramFromFirewall(String path) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return windowsFirewallRemoveNative(path);
     	return false;
