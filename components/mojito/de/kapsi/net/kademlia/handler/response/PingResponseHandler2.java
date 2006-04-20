@@ -23,7 +23,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler {
 
     // TODO move it to abstract super class?
     public void handleTimeout(Receipt receipt, KUID nodeId, SocketAddress dst, long time) throws IOException {
-        if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
+        if (errors++ >= NetworkSettings.MAX_ERRORS.getValue()) {
             handleFinalTimeout(nodeId, dst, time);
             return;
         }
