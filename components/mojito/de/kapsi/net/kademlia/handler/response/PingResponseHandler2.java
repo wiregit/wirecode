@@ -24,10 +24,19 @@ public class PingResponseHandler2 extends AbstractResponseHandler {
     // TODO move it to abstract super class?
     public void handleTimeout(Receipt receipt, KUID nodeId, SocketAddress dst, long time) throws IOException {
         if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
+            handleFinalTimeout(nodeId, dst, time);
             return;
         }
         
+        // TODO since MessageID stays some MessageDispatcher modifications
+        // are necessary to avoid multiple messages beeing sent to destionation
         Message request = receipt.getMessage();
         context.getMessageDispatcher().send(nodeId, dst, request, this);
+    }
+    
+    // TODO if handleTimeout() is in super class then
+    // make this an abstract method in the super class
+    protected void handleFinalTimeout(KUID nodeId, SocketAddress dst, long time) {
+        // TODO call listner!
     }
 }
