@@ -762,12 +762,12 @@ public class VerifyingFolder {
 	 * @return number of bytes written and verified
 	 */
 	synchronized long getVerifiedBlockSize() {
-		long raw = verifiedBlocks.cardinality() * (long)_info.getPieceLength();
+		long ret = verifiedBlocks.cardinality() * (long)_info.getPieceLength();
 		if (verifiedBlocks.get(_info.getNumBlocks() - 1)) {
-			raw = raw - _info.getPieceLength() + 
+			ret = ret - _info.getPieceLength() + 
 				getPieceSize(_info.getNumBlocks() -1 );
 		}
-		return raw;
+		return ret;
 	}
 	
 	/**

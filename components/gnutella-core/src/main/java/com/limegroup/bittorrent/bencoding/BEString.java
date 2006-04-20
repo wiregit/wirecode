@@ -86,6 +86,7 @@ class BEString extends Token {
                 return true;
             }
             else if (l2 == 0) {
+            	size = 0;
             	result = "";
             	return true;
             }else
