@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RRProcessingQueue extends ProcessingQueue
-implements QueuePool{
+public class RRProcessingQueue extends ProcessingQueue {
 
 	private final Map queues = new HashMap();
 	private final RoundRobinQueue lists = new RoundRobinQueue();
