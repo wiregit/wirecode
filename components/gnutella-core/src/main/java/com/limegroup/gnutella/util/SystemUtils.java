@@ -106,7 +106,7 @@ public class SystemUtils {
      */
     public static final boolean isFirewallPresent() {
     	if (CommonUtils.isWindows() && isLoaded)
-    		return windowsFirewallPresentNative();
+    		return firewallPresentNative();
     	return false;
     }
 
@@ -119,7 +119,7 @@ public class SystemUtils {
      */
     public static final boolean isFirewallEnabled() {
     	if (CommonUtils.isWindows() && isLoaded)
-    	    return windowsFirewallEnabledNative();
+    	    return firewallEnabledNative();
     	return false;
     }
 
@@ -132,7 +132,7 @@ public class SystemUtils {
      */
     public static final boolean isFirewallExceptionsNotAllowed() {
     	if (CommonUtils.isWindows() && isLoaded)
-    		return windowsFirewallExceptionsNotAllowedNative();
+    		return firewallExceptionsNotAllowedNative();
     	return false;
     }
 
@@ -144,7 +144,7 @@ public class SystemUtils {
      */
     public static final boolean isProgramListedOnFirewall(String path) {
     	if (CommonUtils.isWindows() && isLoaded)
-    		return windowsFirewallIsProgramListedNative(path);
+    		return firewallIsProgramListedNative(path);
     	return false;
     }
 
@@ -156,7 +156,7 @@ public class SystemUtils {
      */
     public static final boolean isProgramEnabledOnFirewall(String path) {
     	if (CommonUtils.isWindows() && isLoaded)
-    		return windowsFirewallIsProgramEnabledNative(path);
+    		return firewallIsProgramEnabledNative(path);
     	return false;
     }
 
@@ -169,7 +169,7 @@ public class SystemUtils {
      */
     public static final boolean addProgramToFirewall(String path, String name) {
     	if (CommonUtils.isWindows() && isLoaded)
-    		return windowsFirewallAddNative(path, name);
+    		return firewallAddNative(path, name);
     	return false;
     }
 
@@ -181,17 +181,17 @@ public class SystemUtils {
      */
     public static final boolean removeProgramFromFirewall(String path) {
     	if (CommonUtils.isWindows() && isLoaded)
-    		return windowsFirewallRemoveNative(path);
+    		return firewallRemoveNative(path);
     	return false;
     }
 
     // Native methods implemented in C++ code in WindowsFirewall.dll
     private static final native String getRunningPathNative();
-    private static final native boolean windowsFirewallPresentNative();
-    private static final native boolean windowsFirewallEnabledNative();
-    private static final native boolean windowsFirewallExceptionsNotAllowedNative();
-    private static final native boolean windowsFirewallIsProgramListedNative(String path);
-    private static final native boolean windowsFirewallIsProgramEnabledNative(String path);
-    private static final native boolean windowsFirewallAddNative(String path, String name);
-    private static final native boolean windowsFirewallRemoveNative(String path);
+    private static final native boolean firewallPresentNative();
+    private static final native boolean firewallEnabledNative();
+    private static final native boolean firewallExceptionsNotAllowedNative();
+    private static final native boolean firewallIsProgramListedNative(String path);
+    private static final native boolean firewallIsProgramEnabledNative(String path);
+    private static final native boolean firewallAddNative(String path, String name);
+    private static final native boolean firewallRemoveNative(String path);
 }

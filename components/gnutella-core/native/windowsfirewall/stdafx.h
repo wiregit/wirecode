@@ -15,13 +15,13 @@
 extern "C" {
 #endif
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c);
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallPresentNative(JNIEnv *e, jclass c);
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallEnabledNative(JNIEnv *e, jclass c);
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallExceptionsNotAllowedNative(JNIEnv *e, jclass c);
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallIsProgramListedNative(JNIEnv *e, jclass c, jstring j);
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring j);
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallAddNative(JNIEnv *e, jclass c, jstring j1, jstring j2);
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallRemoveNative(JNIEnv *e, jclass c, jstring j);
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallPresentNative(JNIEnv *e, jclass c);
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallEnabledNative(JNIEnv *e, jclass c);
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallExceptionsNotAllowedNative(JNIEnv *e, jclass c);
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring j);
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring j);
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring j1, jstring j2);
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring j);
 #ifdef __cplusplus
 }
 #endif
@@ -44,7 +44,7 @@ public:
 	void Clear() { if (B) { SysFreeString(B); B = NULL; } }
 };
 
-// Add an application to the Windows Firewall authorized list
+// Add an application to the Windows Firewall exceptions list
 class CWindowsFirewall {
 public:
 

@@ -15,31 +15,31 @@ JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunnin
 	return MakeJavaString(e, GetRunningPath());
 }
 
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallPresentNative(JNIEnv *e, jclass c) {
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallPresentNative(JNIEnv *e, jclass c) {
 	return WindowsFirewallPresent();
 }
 
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallEnabledNative(JNIEnv *e, jclass c) {
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallEnabledNative(JNIEnv *e, jclass c) {
 	return WindowsFirewallEnabled();
 }
 
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallExceptionsNotAllowedNative(JNIEnv *e, jclass c) {
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallExceptionsNotAllowedNative(JNIEnv *e, jclass c) {
 	return WindowsFirewallExceptionsNotAllowed();
 }
 
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallIsProgramListedNative(JNIEnv *e, jclass c, jstring j) {
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring j) {
 	return WindowsFirewallIsProgramListed(GetString(e, j));
 }
 
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring j) {
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring j) {
 	return WindowsFirewallIsProgramEnabled(GetString(e, j));
 }
 
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallAddNative(JNIEnv *e, jclass c, jstring j1, jstring j2) {
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring j1, jstring j2) {
 	return WindowsFirewallAdd(GetString(e, j1), GetString(e, j2));
 }
 
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_windowsFirewallRemoveNative(JNIEnv *e, jclass c, jstring j) {
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring j) {
 	return WindowsFirewallRemove(GetString(e, j));
 }
 
@@ -52,7 +52,7 @@ CString GetString(JNIEnv *e, jstring j) {
 	const char *c = e->GetStringUTFChars(j, FALSE);
 
 	// Make a new Windows CString object with that text
-	CString s = c;
+	CString s = c; // The CString constructor copies the characters it reads at c into memory it manages
 
 	// Tell the JNI environment that we're done with the character pointer
 	e->ReleaseStringUTFChars(j, c);
@@ -175,16 +175,6 @@ bool WindowsFirewallRemove(LPCTSTR path) {
 	if (!firewall.RemoveProgram(path)) return false;
 	return true;
 }
-
-
-
-
-
-
-
-
-
-
 
 // Get access to the COM objects
 // Returns true if it works, false if there was an error
