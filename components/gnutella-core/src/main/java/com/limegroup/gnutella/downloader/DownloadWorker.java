@@ -54,7 +54,6 @@ public class DownloadWorker {
       3. Download the file by delegating to the HTTPDownloader, and then do 
          the book-keeping. Termination may be normal or abnormal.
           
-                                          (in a new Thread)
                 establishConnection   initializeAlternateLocations  
                      |               /          |             
                  [push|direct]      /        httpLoop
@@ -261,7 +260,8 @@ public class DownloadWorker {
      * This kicks off the next stage if necessary.
      */
     public void incrementState(ConnectionStatus status) {
-        LOG.debug("State Changed, Current: " + _currentState + ", status: " + status);
+        if(LOG.isTraceEnabled())
+            LOG.trace("State Changed, Current: " + _currentState + ", status: " + status);
         
         switch(_currentState.getCurrentState()) {
         case DownloadState.DOWNLOADING:
@@ -301,30 +301,32 @@ public class DownloadWorker {
         }
     }
     
+    /**
+     * Consumes the body of an HTTP Request if necessary.
+     * If consumption is needed, this will return true and schedule
+     * a callback to continue.  Otherwise it will return false.
+     * 
+     * @return true if the body is scheduled for consumption, false if processing should continue.
+     */
     private boolean consumeBodyIfNecessary() {
         if(_downloader.isBodyConsumed()) {
             LOG.debug("Not consuming body.");
             return false;
         }
         
-        _downloader.consumeBody(new IOStateObserver() {
-            public void handleStatesFinished() {
-                incrementState(null);
+        _downloader.consumeBody(new State() {
+            protected void handleState(boolean success) {
+                if(!success)
+                    handleRFDFailure(_rfd);
             }
-
-            public void handleIOException(IOException iox) {
-                handleRFDFailure(_rfd);
-                finishHttpLoop();
-            }
-
-            public void shutdown() {
-                handleRFDFailure(_rfd);
-                finishHttpLoop();
-            }           
         });
         return true;
     }
     
+    /**
+     * Handles a failure of an RFD.
+     * @param rfd
+     */
     private void handleRFDFailure(RemoteFileDesc rfd) {
         _rfd.incrementFailedCount();
         
@@ -337,10 +339,23 @@ public class DownloadWorker {
             _manager.informMesh(_rfd, false);
     }
     
+    /**
+     * Notification that assign&Request has finished.
+     * This will:
+     *   - Finish the download if no file was available.
+     *   - Loop again if the requested range was unavailable but other data is available.
+     *   - Queue up if we were instructed to be queued.
+     *   - Download if we were told to download.
+     *   
+     *  In all events, either the download completely finishes or a callback
+     *  is eventually notified of success or failure & the state continues
+     *  moving.
+     *  
+     * @param status
+     */
     private void httpRequestFinished(ConnectionStatus status) {
-        assert status != null;
-        
-        LOG.debug("HTTP req finished, status: " + status);
+        if(LOG.isDebugEnabled())
+            LOG.debug("HTTP req finished, status: " + status);
 
         _manager.addPossibleSources(_downloader.getLocationsReceived());
         
@@ -370,51 +385,43 @@ public class DownloadWorker {
         }
     }
     
+    /**
+     * Begins the process of downloading.  When downloading finishes,
+     * this will either finish the download (if an error occurred) or
+     * move to the next state.
+     * 
+     * A succesful download will reset the failed count on the RFD.
+     * A DiskException while downloading will notify the manager of
+     * a problem.
+     */
     private void beginDownload() {
         try {
-            _downloader.doDownload(new IOStateObserver() {
-                public void handleStatesFinished() {
-                    _rfd.resetFailedCount();
-                    if(_currentState.isHttp11())
-                        DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
-                    else
-                        DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
-                    finish(false);
-                }
-    
-                public void handleIOException(IOException iox) {
-                    if(iox instanceof DiskException)
-                        _manager.diskProblemOccured();
-                    else
-                        error();
-                        
-                    finish(true);
-                }
-    
-                public void shutdown() {
-                    error();
-                    finish(true);
-                }
-                
-                private void error() {
-                    if(_currentState.isHttp11())
-                        DownloadStat.FAILED_HTTP11.incrementStat();
-                    else
-                        DownloadStat.FAILED_HTTP10.incrementStat();
-                    _manager.workerFailed(DownloadWorker.this);
-                }
-                
-                private void finish(boolean problem) {
+            _downloader.doDownload(new State() {
+                protected void handleState(boolean success) {
+                    if(success) {
+                        _rfd.resetFailedCount();
+                        if(_currentState.isHttp11())
+                            DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
+                        else
+                            DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
+                    } else {
+                        if(_currentState.isHttp11())
+                            DownloadStat.FAILED_HTTP11.incrementStat();
+                        else
+                            DownloadStat.FAILED_HTTP10.incrementStat();
+                        _manager.workerFailed(DownloadWorker.this);
+                    }
+                    
                     // if we got too corrupted, notify the user
                     if (_commonOutFile.isHopeless())
                         _manager.promptAboutCorruptDownload();
     
                     int stop = _downloader.getInitialReadingPoint() + _downloader.getAmountRead();
                     if (LOG.isDebugEnabled())
-                        LOG.debug("    WORKER:+" + " terminating from " + _downloader + " at " + stop + " error? "
-                                + problem);
+                        LOG.debug("WORKER: terminating from " + _downloader + " at " + stop + " error? " + !success);
+                    
                     synchronized (_manager) {
-                        if (problem) {
+                        if (!success) {
                             _downloader.stop();
                             handleRFDFailure(_rfd);
                         } else {
@@ -423,11 +430,6 @@ public class DownloadWorker {
                                 _manager.addRFD(_rfd);
                         }
                     }
-                    
-                    if(!problem)
-                        incrementState(null);
-                    else
-                        finishHttpLoop();
                 }
             });
         } catch(SocketException se) {
@@ -435,45 +437,51 @@ public class DownloadWorker {
         }
     }
     
+    /**
+     * Determines if we should request a tiger tree from the remote computer.
+     * This will return true if a request is going to be performed and false
+     * otherwise.  If this returns true, a callback will eventually increment
+     * the state or finish the download completely.
+     * 
+     * @return true if the request is scheduled to be sent, false if processing should continue.
+     */
     private boolean requestTHEXIfNeeded() {
         boolean shouldRequest = false;
         synchronized (_commonOutFile) {
             if (!_commonOutFile.isHashTreeRequested()) {
                 HashTree ourTree = _commonOutFile.getHashTree();
     
-                // request THEX from te _downloader if (the tree we have
+                // request THEX from the _downloader if (the tree we have
                 // isn't good enough or we don't have a tree) and another
                 // worker isn't currently requesting one
                 shouldRequest = _downloader.hasHashTree()
                              && _manager.getSHA1Urn() != null
                              && (ourTree == null || !ourTree.isDepthGoodEnough());
-    
-                LOG.debug("going to request tree: " + shouldRequest + ", has: " + _downloader.hasHashTree() + ", ours: " + ourTree + ", good enough? " + (ourTree == null ? "null" : "" + ourTree.isDepthGoodEnough()));
-                
+                    
                 if (shouldRequest)
                     _commonOutFile.setHashTreeRequested(true);
             }
         }
 
         if (shouldRequest) {
-            _downloader.requestHashTree(_manager.getSHA1Urn(), new IOStateObserver() {
-                public void handleStatesFinished() {
-                    incrementState(null);
-                }
-
-                public void handleIOException(IOException iox) {
-                    finishHttpLoop();
-                }
-
-                public void shutdown() {
-                    finishHttpLoop();
-                }
+            _downloader.requestHashTree(_manager.getSHA1Urn(), new State() {
+                protected void handleState(boolean success) {}
             });
         }
         
         return shouldRequest;
     }
     
+    /**
+     * Begins a THEX download if it was just requested.
+     * 
+     * If the request failed, this will immediately increment the state
+     * so that the body of the response can be consumed.  Otherwise
+     * it will schedule a download to take place and increment
+     * the state when finished.
+     * 
+     * @return true if the download was scheduled, false if processing should continue.
+     */
     private boolean downloadThexIfNeeded() {
         if(!_downloader.isRequestingThex())
             return false;
@@ -486,23 +494,8 @@ public class DownloadWorker {
             _rfd.setTHEXFailed();
             incrementState(status);
         } else {
-            _downloader.downloadThexBody(_manager.getSHA1Urn(), new IOStateObserver() {
-                public void handleStatesFinished() {
-                    finishThexDownload();
-                    incrementState(null);
-                }
-
-                public void handleIOException(IOException iox) {
-                    finishThexDownload();
-                    finishHttpLoop();
-                }
-
-                public void shutdown() {
-                    finishThexDownload();
-                    finishHttpLoop();
-                }
-                
-                private void finishThexDownload() {
+            _downloader.downloadThexBody(_manager.getSHA1Urn(), new State() {
+                protected void handleState(boolean success) {
                     synchronized(_commonOutFile) {
                         _commonOutFile.setHashTreeRequested(false);
                         HashTree newTree = _downloader.getHashTree();
@@ -772,10 +765,30 @@ public class DownloadWorker {
         return true;
     }
     
+    /**
+     * Completes the assignAndRequest by incrementing the state using the
+     * ConnectionStatus that is generated by processing of the response headers.
+     * 
+     * @param x Any IOException encountered while processing
+     * @param range The range initially requested
+     * @param victim The possibly null victim to steal from. 
+     */
     private void completeAssignAndRequest(IOException x, Interval range, DownloadWorker victim) {
         incrementState(completeAssignAndRequestImpl(x, range, victim));
     }
     
+    /**
+     * Completes the assign & request process by parsing the response
+     * headers and completing either assignWhite or assignGrey.
+     * 
+     * If victim is null, it is assumed that we are completing assignGrey.
+     * Otherwise, we are completing assignWhite.
+     * 
+     * @param x Any IOException encountered while processing
+     * @param range The range initially requested
+     * @param victim The possibly null victim to steal from. 
+     * @return
+     */
     private ConnectionStatus completeAssignAndRequestImpl(IOException x, Interval range, DownloadWorker victim) {
         try {
             _downloader.parseHeaders();
@@ -875,8 +888,9 @@ public class DownloadWorker {
     }
     
     /**
-     * Assigns a white part of the file to a HTTPDownloader and returns it.
-     * This method has side effects.
+     * Schedules a request for the given interval.
+     * Upon completion of the request, completeAssignAndRequest will
+     * be called with the appropriate parameters.
      */
     private void assignWhite(Interval interval) {
         //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
@@ -901,6 +915,13 @@ public class DownloadWorker {
         });
     }
     
+    /**
+     * Completes assigning a white range to a downloader.
+     * If the downloader shortened any of the requested ranges,
+     * this will release the remaining pieces back to the VerifyingFile.
+     * 
+     * @param expectedRange
+     */
     private void completeAssignWhite(Interval expectedRange) {
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
@@ -995,12 +1016,12 @@ public class DownloadWorker {
     }
     
     /**
-     * Steals a grey area from the biggesr HTTPDownloader and gives it to
-     * the HTTPDownloader this method will return. 
-     * <p> 
-     * If there is less than MIN_SPLIT_SIZE left, we will assign the entire
-     * area to a new HTTPDownloader, if the current downloader is going too
-     * slow.
+     * Locates an interval from the slowest downloader and schedules
+     * a request with it.  If the current download has partial ranges,
+     * there is no slowest download, or the slowest downloader has no
+     * ranges available for stealing, this will return false and processing
+     * will immediately continue.  Otherwise, this will return true
+     * and completeAssignAndRequest will be called when the request completes.
      */
     private boolean assignGrey() {
         
@@ -1047,12 +1068,21 @@ public class DownloadWorker {
         return true;
     }
     
-    private void completeAssignGrey(DownloadWorker slowest, Interval slowestRange) throws IOException {
+    /**
+     * Completes assigning a grey portion to a downloader.
+     * This accounts for changes in the victim's downloaded range
+     * while we were requesting.
+     * 
+     * @param victim
+     * @param slowestRange
+     * @throws IOException
+     */
+    private void completeAssignGrey(DownloadWorker victim, Interval slowestRange) throws IOException {
         Interval newSlowestRange;
         int newStart;
-        synchronized(slowest.getDownloader()) {
+        synchronized(victim.getDownloader()) {
             // if the victim died or was stopped while the thief was connecting, we can't steal
-            if (!slowest.getDownloader().isActive()) {
+            if (!victim.getDownloader().isActive()) {
                 LOG.debug("victim is no longer active");
                 throw new NoSuchElementException();
             }
@@ -1060,7 +1090,7 @@ public class DownloadWorker {
             // see how much did the victim download while we were exchanging headers.
             // it is possible that in that time some other worker died and freed his ranges, and
             // the victim has already been assigned some new ranges.  If that happened we don't steal.
-            newSlowestRange = slowest.getDownloadInterval();
+            newSlowestRange = victim.getDownloadInterval();
             if (newSlowestRange.high != slowestRange.high) {
                 if (LOG.isDebugEnabled())
                     LOG.debug("victim is now downloading something else "+
@@ -1093,13 +1123,13 @@ public class DownloadWorker {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("WORKER:"+
                         " picking stolen grey "
-                        +newStart + "-"+slowestRange.high+" from ["+slowest+"] to [" + this + "]");
+                        +newStart + "-"+slowestRange.high+" from ["+victim+"] to [" + this + "]");
             }
             
             
             // tell the victim to stop downloading at the point the thief 
             // can start downloading
-            slowest.getDownloader().stopAt(newStart);
+            victim.getDownloader().stopAt(newStart);
         }
         
         // once we've told the victim where to stop, make our ranges release-able
@@ -1329,12 +1359,41 @@ public class DownloadWorker {
         }
     }
     
-    /** TODO: Call this when everything is finished. */
+    /**
+     * Completes the http loop of this downloader, effectively
+     * finishing its reign of downloading.
+     */
     private void finishHttpLoop() {
         releaseRanges();
         _manager.removeQueuedWorker(this);
         _downloader.stop();
         _manager.workerFinished(DownloadWorker.this);
+    }
+    
+    /**
+     * A simple IOStateObserver that will increment state upon completion
+     * and finish on close/shutdown, but offer the abillity for something
+     * to be done prior to moving on in each case.
+     */
+    private abstract class State implements IOStateObserver {
+        public final void handleIOException(IOException iox) {
+            handleState(false);
+            finishHttpLoop();
+        }
+
+        public final void handleStatesFinished() {
+            handleState(true);
+            incrementState(null);
+        }
+
+        public final void shutdown() {
+            handleState(false);
+            finishHttpLoop();
+        }
+
+        /** Handles per-state updating. */
+        protected abstract void handleState(boolean success);
+        
     }
     
     /**
