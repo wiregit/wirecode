@@ -19,12 +19,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.MultiIterator;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.RRProcessingQueue;
+import com.limegroup.gnutella.util.SystemUtils;
 
 /**
  * This class extends VerifyingFile for the simple reason that I would like to
@@ -122,14 +125,16 @@ public class VerifyingFolder {
 		_info = info;
 		_corruptedBytes = 0;
 		partialBlocks = new BlockRangeMap();
-		verifiedBlocks = new BitSet(_info.getNumBlocks());
 		requestedRanges = new BlockRangeMap();
 		pendingRanges = new BlockRangeMap();
 		
 		if (complete) 
-			verifiedBlocks.set(0,_info.getNumBlocks());
-		else if (data != null)
-			initialize(data);
+			verifiedBlocks = new FullBitSet();
+		else {
+			verifiedBlocks = new BitSet(_info.getNumBlocks());
+			if (data != null)
+				initialize(data);
+		}
 	}
 	
 	/**
@@ -235,11 +240,15 @@ public class VerifyingFolder {
 				partialBlocks.remove(in.blockId);
 		}
 		if (shouldVerify){
-			boolean verified = verify(in.getId());
+			boolean verified = false;
+			try {
+				verified = verify(in.getId(), false);
+			} catch (InterruptedException impossible) {
+				ErrorService.error(impossible);
+			}
 			synchronized(this) {
 				if (verified) {
-					verifiedBlocks.set(in.getId());
-					bitFieldDirty = true;
+					markPieceCompleted(in.getId());
 				} else 
 					_corruptedBytes += getPieceSize(in.getId());
 			}
@@ -248,10 +257,22 @@ public class VerifyingFolder {
 		}
 	}
 	
+	private synchronized void markPieceCompleted(int blockId) {
+		verifiedBlocks.set(blockId);
+		bitFieldDirty = true;
+		if (isComplete()) {
+			System.out.println("switching to full bitset");
+			verifiedBlocks = new FullBitSet();
+		}
+	}
+	
 	/**
+	 * @param pieceNum the piece to verify
+	 * @param slow whether to not max out cpu
 	 * @return if the block at pieceNum is ok.
 	 */
-	private boolean verify(int pieceNum) throws IOException {
+	private boolean verify(int pieceNum, boolean slow) 
+	throws IOException, InterruptedException {
 		MessageDigest md = _info.getMessageDigest();
 		md.reset();
 		int pieceSize = getPieceSize(pieceNum);
@@ -259,10 +280,25 @@ public class VerifyingFolder {
 		int read = 0;
 		long offset = (long)pieceNum * _info.getPieceLength();
 		while (read < pieceSize) {
+			
 			int readNow = read(offset, buf, 0, buf.length);
 			if (readNow == 0)
 				return false;
+			
+			long start = System.currentTimeMillis();
 			md.update(buf, 0, readNow);
+			
+			if (slow && SystemUtils.getIdleTime() < URN.MIN_IDLE_TIME &&
+					SharingSettings.FRIENDLY_HASHING.getValue()) {
+				long interval = System.currentTimeMillis() - start;
+				// go extra slow if there are active torrents
+				interval *= QUEUE.size() > 0 ? 5 : 3; 
+				if (interval > 0) 
+					Thread.sleep(interval);
+				else
+					Thread.yield();
+			}
+			
 			read += readNow;
 			offset += readNow;
 		}
@@ -520,6 +556,9 @@ public class VerifyingFolder {
 		public void run() {
 			if (!isOpen())
 				return;
+			IOException iex = storedException;
+			if (iex != null)
+				c.handleIOException(iex);
 			
 			if (LOG.isDebugEnabled())
 				LOG.debug("sending piece " + in);
@@ -734,8 +773,13 @@ public class VerifyingFolder {
 			bitField = new byte[(_info.getNumBlocks() + 7) / 8];
 		
 		if (bitFieldDirty) {
-			for(int i = verifiedBlocks.nextSetBit(0); i >= 0; i = verifiedBlocks.nextSetBit(i+1)) 
-				bitField[i / 8] = (byte) (bitField[i / 8] | (1 << (7 - i % 8)));
+			if (isComplete()) {
+				for(int i = 0; i < bitField.length; i++)
+					bitField[i] = (byte)0xFF;
+			} else {
+				for(int i = verifiedBlocks.nextSetBit(0); i >= 0; i = verifiedBlocks.nextSetBit(i+1)) 
+					bitField[i / 8] = (byte) (bitField[i / 8] | (1 << (7 - i % 8)));
+			}
 			bitFieldDirty = false;
 		}
 			
@@ -774,17 +818,13 @@ public class VerifyingFolder {
 				return;
 			try {
 				
-				// try not to max out the cpu
-				// TODO: do it like in URN
-				if (VERIFY_QUEUE.size() > 0)
-					Thread.sleep(10); 
-				
-				if (verify(pieceNum)) { 
-					synchronized(VerifyingFolder.this) {
-						verifiedBlocks.set(pieceNum);
-						bitFieldDirty = true;
-					}
+				if (verify(pieceNum, true)) {
+					markPieceCompleted(pieceNum);
 					handleVerified(pieceNum);
+				}
+				if (SystemUtils.getIdleTime() < URN.MIN_IDLE_TIME &&
+						SharingSettings.FRIENDLY_HASHING.getValue()) {
+					
 				}
 			} catch (IOException bad) {
 				storedException = bad;
@@ -838,6 +878,8 @@ public class VerifyingFolder {
 	 * and the other host doesn't have
 	 */
 	synchronized int getNumMissing(BitSet other) {
+		if (isComplete())
+			return verifiedBlocks.cardinality() - other.cardinality();
 		BitSet clone = (BitSet)verifiedBlocks.clone();
 		clone.andNot(other);
 		return clone.cardinality();
@@ -877,6 +919,20 @@ public class VerifyingFolder {
 				ret += (long)set.getSize();
 			}
 			return ret;
+		}
+	}
+	
+	private class FullBitSet extends BitSet {
+		public void set(int i) {}
+		public void clear(int i){}
+		public boolean get(int i) {
+			return true;
+		}
+		public int cardinality() {
+			return _info.getNumBlocks();
+		}
+		public int length() {
+			return _info.getNumBlocks();
 		}
 	}
 }
