@@ -59,7 +59,6 @@ import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
-import de.kapsi.net.kademlia.util.InputOutputUtils;
 
 public class MessageDispatcher implements Runnable {
     
@@ -322,6 +321,19 @@ public class MessageDispatcher implements Runnable {
     
     private ByteBuffer buffer = ByteBuffer.allocate(Receipt.MAX_PACKET_SIZE);
     
+    private Message readMessage() throws IOException, MessageFormatException {
+        SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
+        if (src != null) {
+            int length = buffer.position();
+            byte[] data = new byte[length];
+            buffer.flip();
+            buffer.get(data, 0, length);
+            
+            return InputOutputUtils.deserialize(data);
+        }
+        return null;
+    }
+    
     private boolean readNext() throws IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
@@ -330,25 +342,38 @@ public class MessageDispatcher implements Runnable {
             buffer.flip();
             buffer.get(data, 0, length);
             
-            Message message = InputOutputUtils.deserialize(data);
-            networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
-            networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
-            
+            Message message = null;
             Receipt receipt = null;
             
-            if (message instanceof ResponseMessage) {
-                receipt = (Receipt)messageMap.remove(message.getMessageID());
+            try {
+                message = InputOutputUtils.deserialize(data);
+                networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
+                networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
+                
+                if (message instanceof ResponseMessage) {
+                    receipt = (Receipt)messageMap.remove(message.getMessageID());
+                
+                    if (receipt != null) {
+                        receipt.received();
+                    }
+                }
+            } catch (MessageFormatException err) {
+                LOG.error("Message deserialization error", err);
+            }
             
-                if (receipt != null) {
-                    receipt.received();
+            if (message != null) {
+                try {
+                    processMessage(receipt, src, message);
+                } catch (Exception t) {
+                    LOG.error("Message processing error", t);
                 }
             }
             
-            processMessage(receipt, src, message);
             return true;
         }
         return false;
     }
+    
     
     /**
      * Returns the number of remaining Messages in
@@ -373,6 +398,7 @@ public class MessageDispatcher implements Runnable {
         }
         return outputQueue.size();
     }
+    
     
     public void run() {
         long lastCleanup = System.currentTimeMillis();
