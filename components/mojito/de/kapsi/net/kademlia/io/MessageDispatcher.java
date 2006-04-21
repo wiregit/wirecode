@@ -68,6 +68,7 @@ public class MessageDispatcher implements Runnable {
     private static final long SLEEP = 50L;
     
     private Object channelLock = new Object();
+    private Object queueLock = new Object();
     
     private LinkedList outputQueue = new LinkedList();
     private ReceiptMap messageMap = new ReceiptMap(1024);
@@ -204,8 +205,10 @@ public class MessageDispatcher implements Runnable {
                 throw new IOException("Cannot send Message because Channel is not open");
             }
             
-            outputQueue.add(receipt);
-            interestWrite(true);
+            synchronized (queueLock) {
+                outputQueue.add(receipt);
+                interestWrite(true);
+            }
         }
     }
     
@@ -388,20 +391,16 @@ public class MessageDispatcher implements Runnable {
         /*networkStats.SENT_MESSAGES_COUNT.clearData();
         networkStats.RECEIVED_MESSAGES_COUNT.clearData();*/
         
-        while(true) {
-            
-            synchronized (channelLock) {
-                if (!isRunning()) {
-                    break;
-                }
+        while(isRunning()) {
                 
-                try {
-                    selector.select(SLEEP);
-                    
-                    // READ
-                    while(readNext());
-                    interestRead(true); // We're always interested in reading
-                    
+            try {
+                selector.select(SLEEP);
+                
+                // READ
+                while(readNext());
+                interestRead(true); // We're always interested in reading
+                
+                synchronized (queueLock) {
                     // WRITE
                     // TODO propper throtteling.
                     int remaining = 0;
@@ -412,19 +411,18 @@ public class MessageDispatcher implements Runnable {
                         }
                     }
                     interestWrite(remaining > 0);
-                    
-                    // CLEANUP
-                    if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
-                        messageMap.cleanup();
-                        lastCleanup = System.currentTimeMillis();
-                    }
-                } catch (ClosedChannelException err) {
-                    LOG.error("MessageHandler ClosedChannelException: ", err);
-                } catch (IOException err) {
-                    LOG.error("MessageHandler IO exception: ", err);
                 }
                 
-                channelLock.notify();
+                // CLEANUP
+                if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
+                    messageMap.cleanup();
+                    lastCleanup = System.currentTimeMillis();
+                }
+            } catch (ClosedChannelException err) {
+                //LOG.error("MessageHandler ClosedChannelException: ", err);
+                break;
+            } catch (IOException err) {
+                LOG.error("MessageHandler IO exception: ", err);
             }
         }
     }
