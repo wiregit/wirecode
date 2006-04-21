@@ -32,12 +32,58 @@ import com.limegroup.gnutella.util.Sockets;
  */
 public class DownloadWorker {
     /*
-      Each potential downloader downloader follows these steps:
-      1. Establish a TCP connection to the host in the RFD.
-         If unable to connect, end this execution.
-         If able to connect, start a new Thread which executes the
-         rest of the process.
-      2. This step has two parts:
+      A worker follows these steps:
+      
+      CONNECTING:
+         Establish a TCP connection to the host in the RFD.
+         If unable to connect, exit.
+         If able to connect, continue processing the download.
+         
+         This step is characterized by following:
+          establishConnection -> [push|direct] -> startDownload
+         
+      DOWNLOADING:
+         The download enters a state machine, which loops forever until
+         either an error occurs or the download is finished.         
+         The flow is similar to:
+         
+         while(true) {
+             if(can request thex) {
+                 request and download thex             
+             if(needs to consume body)
+                 consume body             
+             assign and request             
+             if(ready to download)
+                 do download
+             else if(queued)
+                 wait queue time
+             else
+                 exit
+         }
+         
+         except it is performed asynchronously via a state machine.
+         
+         The states are entered via httpLoop and progress through
+         calls of incrementState(ConnectionStatus).  It moves through
+         the following steps:                
+            - requestThexIfNeeded
+            - downloadThexIfNeeded
+            - consumeBodyIfNeeded
+            - assignAndRequest
+                - assignWhite or assignGrey
+                - completeAssignAndRequest
+                - completeAssignWhite or completeAssignGrey
+            - httpRequestFinished
+                - beginDownload, handleQueued, or finishHttpLoop
+                
+            Each 'if needed' method can return true or false.  True means that
+            an operation is being performend and upon success or failure the
+            state machine will continue.  Success generally calls incrementState
+            again to move to the next state.  Failure generally calls finishHttpLoop
+            to stop the download.  False means the operation does not need to be
+            performed and the next state can be immediately processed.
+            
+            The assignAndRequest step has two parts:
             a.  Grab a part of the file to download. If there is unclaimed area on
                 the file grab that, otherwise try to steal claimed area from another 
                 worker
@@ -48,29 +94,12 @@ public class DownloadWorker {
                 they were in before we started trying. However, if the http 
                 handshaking was successful, the downloader can keep the 
                 part it obtained.
-          The two steps above must be atomic wrt other downloaders. 
-          Othersise, other downloaders in parallel will be  able to lease the 
-          same areas, or try to steal the same area from the same downloader.
-      3. Download the file by delegating to the HTTPDownloader, and then do 
-         the book-keeping. Termination may be normal or abnormal.
-          
-                establishConnection   initializeAlternateLocations  
-                     |               /          |             
-                 [push|direct]      /        httpLoop
-                     |             /            |             
-                startDownload-->--/      assignAndRequest <----------\ 
-                                                |                     \
-                                       assignGrey/assignWhite          \
-                                                |                       \
-                                              doDownload                 \
-                                              |         \                 |
-                                              |         requestHashTree   |
-                                              |          |                |
-                                              \- HTTPDownloader.download  |
-                                                  |                       |  
-                                                  \-------->--------------/
-                           
 
+            Both assignWhite & assignGrey will schedule the HTTP request (part b above)
+            and continue afterwards by calling completeAssignAndRequest even if the
+            request had an exception.  This is done so that any read headers can be
+            parsed and accounted for, such as alternate locations.
+    
     PUSH DOWNLOADS NOTE:
       For push downloads, the acceptDownload(file, Socket, index, clientGUI) 
       method of ManagedDownloader is called from DownloadManager.
@@ -248,7 +277,7 @@ public class DownloadWorker {
     }
     
     /**
-     * The main loop that runs this download.
+     * Begins the state machine for processing this download.
      */
     private void httpLoop() {
         LOG.debug("Starting HTTP Loop");
@@ -280,7 +309,7 @@ public class DownloadWorker {
         
         case DownloadState.DOWNLOADING_THEX:
             _currentState.setState(DownloadState.CONSUMING_BODY);
-            if(consumeBodyIfNecessary())
+            if(consumeBodyIfNeeded())
                 break; // wait for callback
             
         case DownloadState.CONSUMING_BODY:
@@ -308,7 +337,7 @@ public class DownloadWorker {
      * 
      * @return true if the body is scheduled for consumption, false if processing should continue.
      */
-    private boolean consumeBodyIfNecessary() {
+    private boolean consumeBodyIfNeeded() {
         if(_downloader.isBodyConsumed()) {
             LOG.debug("Not consuming body.");
             return false;
