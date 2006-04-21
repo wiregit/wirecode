@@ -321,19 +321,6 @@ public class MessageDispatcher implements Runnable {
     
     private ByteBuffer buffer = ByteBuffer.allocate(Receipt.MAX_PACKET_SIZE);
     
-    private Message readMessage() throws IOException, MessageFormatException {
-        SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
-        if (src != null) {
-            int length = buffer.position();
-            byte[] data = new byte[length];
-            buffer.flip();
-            buffer.get(data, 0, length);
-            
-            return InputOutputUtils.deserialize(data);
-        }
-        return null;
-    }
-    
     private boolean readNext() throws IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
