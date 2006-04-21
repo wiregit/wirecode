@@ -329,14 +329,12 @@ public class MessageDispatcher implements Runnable {
             buffer.flip();
             buffer.get(data, 0, length);
             
-            Message message = null;
-            Receipt receipt = null;
-            
             try {
-                message = InputOutputUtils.deserialize(data);
+                Message message = InputOutputUtils.deserialize(data);
                 networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
                 networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
                 
+                Receipt receipt = null;
                 if (message instanceof ResponseMessage) {
                     receipt = (Receipt)messageMap.remove(message.getMessageID());
                 
@@ -344,18 +342,15 @@ public class MessageDispatcher implements Runnable {
                         receipt.received();
                     }
                 }
+                
+                try {
+                    processMessage(receipt, src, message);
+                } catch (Exception e) {
+                    LOG.error("Message processing error", e);
+                }
             } catch (MessageFormatException err) {
                 LOG.error("Message deserialization error", err);
             }
-            
-            if (message != null) {
-                try {
-                    processMessage(receipt, src, message);
-                } catch (Exception t) {
-                    LOG.error("Message processing error", t);
-                }
-            }
-            
             return true;
         }
         return false;
