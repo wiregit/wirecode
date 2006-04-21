@@ -260,10 +260,8 @@ public class VerifyingFolder {
 	private synchronized void markPieceCompleted(int blockId) {
 		verifiedBlocks.set(blockId);
 		bitFieldDirty = true;
-		if (isComplete()) {
-			System.out.println("switching to full bitset");
+		if (isComplete()) 
 			verifiedBlocks = new FullBitSet();
-		}
 	}
 	
 	/**

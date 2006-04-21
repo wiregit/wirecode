@@ -126,6 +126,11 @@ public class ManagedTorrent {
 	private BTDownloader _downloader;
 
 	private BTUploader _uploader;
+	
+	/** 
+	 * A runnable that takes care of scheduled periodic rechoking
+	 */
+	private PeriodicChoker choker;
 
 	/**
 	 * Constructs new ManagedTorrent
@@ -195,17 +200,21 @@ public class ManagedTorrent {
 				if (_stopped || _folder.isVerifying()) 
 					return;
 				
-				// kick off connectors if we already have some addresses
-				if (_peers.size() > 0)
-					_connectionFetcher.fetch();
-				
-				// connect to tracker
-				announceStart();
-				
-				// start the choking / unchoking of connections
-				scheduleRechoke();
+				startConnecting();
 			}
 		});
+	}
+	
+	private void startConnecting() {
+		// kick off connectors if we already have some addresses
+		if (_peers.size() > 0)
+			_connectionFetcher.fetch();
+		
+		// connect to tracker
+		announceStart();
+		
+		// start the choking / unchoking of connections
+		scheduleRechoke();
 	}
 
 	/**
@@ -315,10 +324,9 @@ public class ManagedTorrent {
 			_folder.open(this);
 		} catch (IOException ioe) {
 			// problem opening files cannot recover.
-			if (LOG.isDebugEnabled()) {
-
+			if (LOG.isDebugEnabled()) 
 				LOG.debug("unrecoverable error", ioe);
-			}
+			
 			_couldNotSave = true;
 			_stopped = true;
 			return;
@@ -332,9 +340,8 @@ public class ManagedTorrent {
 	void verificationComplete() {
 		enqueueTask(new Runnable() {
 			public void run() {
-				if (!_stopped && !_folder.isComplete()) {
-					announceStart();
-				}
+				if (!_stopped && !_folder.isComplete()) 
+					startConnecting();
 			}
 		});
 	}
@@ -768,32 +775,38 @@ public class ManagedTorrent {
 	 * Schedules choking of connections
 	 */
 	private void scheduleRechoke() {
-		Runnable choker = new Runnable() {
-			private int run = 0;
-			public void run() {
-				if (_stopped)
-					return;
-				if (LOG.isDebugEnabled())
-					LOG.debug("scheduling rechoke");
-				
-				List l; 
-				if (run++ % 3 == 0) {
-					l = new ArrayList(_connections);
-					Collections.shuffle(l);
-				} else
-					l = _connections;
-				
-				
-				NIODispatcher.instance().invokeLater(new Rechoker(l));
-				
-				RouterService.schedule(this, RECHOKE_TIMEOUT, 0);
-			}
-		};
+		if (choker != null)
+			choker.stopped = true;
+		choker = new PeriodicChoker();
 		RouterService.schedule(choker, RECHOKE_TIMEOUT, 0);
 	}
 	
 	void rechoke() {
 		NIODispatcher.instance().invokeLater(new Rechoker(_connections));
+	}
+	
+	private class PeriodicChoker implements Runnable {
+		private int run = 0;
+		volatile boolean stopped;
+		public void run() {
+			if (stopped)
+				return;
+			
+			if (LOG.isDebugEnabled())
+				LOG.debug("scheduling rechoke");
+			
+			List l; 
+			if (run++ % 3 == 0) {
+				l = new ArrayList(_connections);
+				Collections.shuffle(l);
+			} else
+				l = _connections;
+			
+			
+			NIODispatcher.instance().invokeLater(new Rechoker(l));
+			
+			RouterService.schedule(this, RECHOKE_TIMEOUT, 0);
+		}
 	}
 	
 	private class Rechoker implements Runnable {
