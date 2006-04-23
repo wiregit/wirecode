@@ -22,7 +22,6 @@ public class SystemUtils {
                 if(CommonUtils.isWindows2000orXP()) {
                     System.loadLibrary("WindowsV5PlusUtils");
                 }
-                System.loadLibrary("WindowsFirewall");
             }
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
@@ -82,116 +81,9 @@ public class SystemUtils {
         if(isLoaded && (CommonUtils.isWindows() || CommonUtils.isMacOSX()))
             setFileWriteable(fileName);
     }
-
+            
+    
     private static final native long idleTime();
     private static final native int setFileWriteable(String filename);
     private static final native int setOpenFileLimit0(int max);
-
-	/**
-	 * Get the path to the Windows launcher .exe file that is us running right now.
-	 * 
-	 * @return A String like "c:\Program Files\LimeWire\LimeWire.exe".
-	 *         Blank on error.
-	 */
-    public static final String getRunningPath() {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return getRunningPathNative();
-    	return "";
-    }
-
-    /**
-     * Determine if this Windows computer has Windows Firewall on it.
-     * 
-     * @return True if it does, false if it does not or there was an error
-     */
-    public static final boolean isFirewallPresent() {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return firewallPresentNative();
-    	return false;
-    }
-
-    /**
-     * Determine if the Windows Firewall is enabled.
-     * 
-     * @return True if the setting on the "General" tab is "On (recommended)".
-     *         False if the setting on the "General" tab is "Off (not recommended)".
-     *         False on error.
-     */
-    public static final boolean isFirewallEnabled() {
-    	if (CommonUtils.isWindows() && isLoaded)
-    	    return firewallEnabledNative();
-    	return false;
-    }
-
-    /**
-     * Determine if the Windows Firewall is on with no exceptions.
-     * 
-     * @return True if the box on the "General" tab "Don't allow exceptions" is checked.
-     *         False if the box is not checked.
-     *         False on error.
-     */
-    public static final boolean isFirewallExceptionsNotAllowed() {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return firewallExceptionsNotAllowedNative();
-    	return false;
-    }
-
-    /**
-     * Determine if a program is listed on the Windows Firewall exceptions list.
-     * 
-     * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
-     * @return     True if it has a listing on the Exceptions list, false if not or on error
-     */
-    public static final boolean isProgramListedOnFirewall(String path) {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return firewallIsProgramListedNative(path);
-    	return false;
-    }
-
-    /**
-     * Determine if a program's listing on the Windows Firewall exceptions list has a check box making it enabled.
-     * 
-     * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
-     * @return     True if it's listing's check box is checked, false if not or on error
-     */
-    public static final boolean isProgramEnabledOnFirewall(String path) {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return firewallIsProgramEnabledNative(path);
-    	return false;
-    }
-
-    /**
-     * Add a program to the Windows Firewall exceptions list.
-     * 
-     * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
-     * @param name The name of the program, like "LimeWire", this is the text that will identify the item on the list
-     * @return     False if error
-     */
-    public static final boolean addProgramToFirewall(String path, String name) {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return firewallAddNative(path, name);
-    	return false;
-    }
-
-    /**
-     * Remove a program from the Windows Firewall exceptions list.
-     * 
-     * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
-     * @return     False if error.
-     */
-    public static final boolean removeProgramFromFirewall(String path) {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return firewallRemoveNative(path);
-    	return false;
-    }
-
-    // Native methods implemented in C++ code in WindowsFirewall.dll
-    private static final native String getRunningPathNative();
-    private static final native boolean firewallPresentNative();
-    private static final native boolean firewallEnabledNative();
-    private static final native boolean firewallExceptionsNotAllowedNative();
-    private static final native boolean firewallIsProgramListedNative(String path);
-    private static final native boolean firewallIsProgramEnabledNative(String path);
-    private static final native boolean firewallAddNative(String path, String name);
-    private static final native boolean firewallRemoveNative(String path);
 }
