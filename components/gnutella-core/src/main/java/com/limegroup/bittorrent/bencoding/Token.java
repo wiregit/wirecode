@@ -1,11 +1,9 @@
-
 package com.limegroup.bittorrent.bencoding;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-
 
 /**
  * this implements http://www.bittorrent.com/protocol.html  the part about bencoding
@@ -18,9 +16,8 @@ import java.nio.channels.ReadableByteChannel;
  * this class will eventually implement some interface from the IO package.. 
  * probably ReadObserver or ChannelReadObserver
  */
-
 public abstract class Token {
-    
+
     /**
      * Different token types we understand.
      */

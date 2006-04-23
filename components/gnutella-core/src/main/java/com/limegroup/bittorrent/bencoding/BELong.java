@@ -1,6 +1,5 @@
 package com.limegroup.bittorrent.bencoding;
 
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;

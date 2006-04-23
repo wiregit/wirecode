@@ -1,6 +1,5 @@
 package com.limegroup.bittorrent.bencoding;
 
-
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
