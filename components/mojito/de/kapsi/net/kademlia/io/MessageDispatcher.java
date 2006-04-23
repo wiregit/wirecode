@@ -135,6 +135,9 @@ public class MessageDispatcher implements Runnable {
             socket.setSendBufferSize(Receipt.MAX_PACKET_SIZE);
             
             socket.bind(address);
+            
+            outputQueue.clear();
+            messageMap.clear();
         }
     }
     
@@ -180,6 +183,10 @@ public class MessageDispatcher implements Runnable {
     public void send(KUID nodeId, SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
         
+        if (!isOpen()) {
+            throw new IOException("Cannot send Message because Channel is not open");
+        }
+        
         // Make sure we're not sending messages to ourself.
         // The only exception are Pings/Pongs
         if (nodeId != null 
@@ -200,15 +207,9 @@ public class MessageDispatcher implements Runnable {
         
         Receipt receipt = new Receipt(context, nodeId, dst, message, handler);
         
-        synchronized (channelLock) {
-            if (!isOpen()) {
-                throw new IOException("Cannot send Message because Channel is not open");
-            }
-            
-            synchronized (queueLock) {
-                outputQueue.add(receipt);
-                interestWrite(true);
-            }
+        synchronized (queueLock) {
+            outputQueue.add(receipt);
+            interestWrite(true);
         }
     }
     
