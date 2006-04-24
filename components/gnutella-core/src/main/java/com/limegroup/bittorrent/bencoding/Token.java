@@ -6,15 +6,21 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * this implements http://www.bittorrent.com/protocol.html  the part about bencoding
+ * The Token class is the base class for classes that represent pieces of bencoded data.
+ * The code here can read bencoded data, and parse it into objects that extend Token, like BEString and BEList.
  * 
- * Use:  create a Token, delegate any handleRead() calls until getResult() returns
- * a non-null value, cast the non-null value to whatever getType() returns.  Continue
- * processing the channel as usual because no extra data will be read or buffered anywhere
- * in the parser.
+ * How to parse bencoded data:
+ * (1) Create a Token, giving it a ReadableByteChannel for it to get data from.
+ * (2) When you discover there is data on the channel, call token.handleRead() to have the Token read the data from its channel.
+ * (3) Call token.getResult() to see if it returns an object.
+ * (4) Call getType() on the object to see what kind of object it is.
  * 
- * this class will eventually implement some interface from the IO package.. 
- * probably ReadObserver or ChannelReadObserver
+ * BitTorrent uses a simple and extensible data format called bencoding.
+ * More information about bencoding is on the Web at:
+ * http://en.wikipedia.org/wiki/Bencoding
+ * http://www.bittorrent.org/protocol.html in the section titled "The connectivity is as follows".
+ * 
+ * Token should implement an interface from the com.limegroup.gnutella.io package, like ReadObserver or ChannelReadObserver.
  */
 public abstract class Token {
 
@@ -154,15 +160,15 @@ public abstract class Token {
     }
 
     /**
-     * Gets a bencoded element from a ReadableByteChannel.
+     * Read the next bencoded element from our channel, parse it into an object like BEList that extends Token, and return it.
      * 
-     * @return a Token object that will represent the next element or null
-     * if there wasn't enough data available in the channel to determine what
-     * the next element would be 
-     * 
+     * @return The object we read and parsed.
+     *         null if the channel didn't give us a complete bencoded element.
      * @throws IOException if a read from the channel throws.
      */
     public static Token getNextToken(ReadableByteChannel chan) throws IOException {
+
+    	// Read the next byte from our channel
         try {
             int read = chan.read(ONE_BYTE); // Read one byte from our channel into the ONE_BYTE ByteBuffer
             if (read == 0)
@@ -173,6 +179,7 @@ public abstract class Token {
             ONE_BYTE.clear(); // Mark the ByteBuffer empty, doesn't erase the byte we read there
         }
 
+        // Sort on what letter it is, calling a constructor like BEDictionary() and returning the object it makes
         byte b = ONE_BYTE.array()[0]; // Get the byte we read
         if (b == I) // "i", this is the start of a bencoded number
             return new BELong(chan);
@@ -180,48 +187,71 @@ public abstract class Token {
             return new BEDictionary(chan);
         else if (b == L) // "l", this is the start of a bencoded list
             return new BEList(chan);
-        else if (b == E)
-            return Token.TERMINATOR;
-        else if (b >= ZERO && b <= NINE)
+        else if (b == E) // "e", this is the end of something
+            return Token.TERMINATOR; // Return the TERMINATOR Token object
+        else if (b >= ZERO && b <= NINE) // A number "0" through "9", this is the start of a length before a string
             return new BEString(b, chan);
         else
             throw new IOException("unrecognized token type " + (char)b);
     }
 
     /**
-     * Utility method which parses a BEncoded object from a byte[].
-     * It assumes the array contains the entire object.
+     * Parse bencoded data in a byte array into an object that extends Token.
+     * 
+     * @param data A byte array with a complete bencoded object.
+     * @return     An object that extends Token like BEList.
+     *             null if the byte array didn't contain a complete bencoded object.
      */
-    public static Object parse(byte []data) throws IOException {
-        Token t = getNextToken(new BufferChannel(data));
+    public static Object parse(byte[] data) throws IOException {
+        Token t = getNextToken(new BufferChannel(data)); // Wrap the array in a BufferChannel to give it to getNextToken(), which reads the first letter like "l"
         if (t == null)
-        	return null;
-        t.handleRead();
-        return t.getResult();
+        	return null; // No data
+        t.handleRead(); // Call handleRead() to get the object getNextToken() made to read the rest of the data
+        return t.getResult(); // Get and return the object it made
     }
-    
+
+    /**
+     * A BufferChannel wraps a byte array, putting a ReadableByteChannel interface on it.
+     */
     private static class BufferChannel implements ReadableByteChannel {
-        private final ByteBuffer src;
-        
-        BufferChannel(byte []data) {
-            src = ByteBuffer.wrap(data);
+
+    	/** A ByteBuffer with the data this BufferChannel holds. */
+    	private final ByteBuffer src;
+
+        /**
+         * Make a new BufferChannel, wrapping a byte array of data in a ReadableByteChannel interface.
+         * 
+         * @param data A byte array with the data
+         */
+        BufferChannel(byte[] data) {
+            src = ByteBuffer.wrap(data); // Make a ByteBuffer from the given data, and save it
         }
-        
+
+        /**
+         * Call read() to get the data from this BufferChannel object.
+         * 
+         * @param dst The destination ByteBuffer for this method to put the data the caller is reading from us
+         */
         public int read(ByteBuffer dst) throws IOException {
             if (!src.hasRemaining())
-                return -1;
+                return -1; // Return -1, the code for end of file
             int position = src.position();
-            src.limit(Math.min(src.capacity(),src.position() + dst.remaining()));
-            dst.put(src);
-            src.limit(src.capacity());
-            return src.position() - position;
+            src.limit(Math.min(src.capacity(), src.position() + dst.remaining())); // Set the limit to not overflow the given destination buffer
+            dst.put(src); // Copy data from src to dst
+            src.limit(src.capacity()); // Set the limit back to the end
+            return src.position() - position; // Return the number of bytes we copied from ourselves to the destination buffer
         }
-        
+
+        /** Close this BufferChannel, does nothing. */
         public void close() throws IOException {}
+
+        /**
+         * Determine if this BufferChannel is open.
+         * 
+         * @return Always returns true
+         */
         public boolean isOpen() {
             return true;
         }
-        
-        
     }
 }
