@@ -365,9 +365,6 @@ public class VerifyingFolder {
 	/**
 	 * Notifies that part of a block has been written to disk.
 	 * 
-	 * @param pieceNum the block number
-	 * @param offset the offset within the block
-	 * @param length the length of the written data
 	 * @return true if the block is now complete and ready to be verified.
 	 */
 	private boolean addBlockPart(BTInterval in) {
@@ -388,7 +385,6 @@ public class VerifyingFolder {
 	
 	private boolean isCompleteBlock(Interval in, int id) {
 		return in.low == 0 && in.high == getPieceSize(id) - 1;
-		
 	}
 	
 	public synchronized boolean hasBlock(int block) {

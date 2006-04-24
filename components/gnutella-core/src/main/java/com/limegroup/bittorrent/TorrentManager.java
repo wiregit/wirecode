@@ -105,7 +105,6 @@ public class TorrentManager implements ConnectionAcceptor {
 		PEER_ID[3] = (byte) qhdVendorName.charAt(3);
 		System.arraycopy(guid, 0, PEER_ID, 4, 16);
 
-		_currentDownload = _currentUpload = _averageDownload = _averageUpload = 0.f;
 		if (LOG.isDebugEnabled())
 			LOG.debug("TorrentManager created");
 	}
@@ -471,7 +470,7 @@ public class TorrentManager implements ConnectionAcceptor {
 		// we definitely need some kind of bandwidth throttle that can be
 		// applied to both HTTP and torrent uploads. The easiest way to
 		// achieve this would probably be to convert HTTP uploads to use NIO.
-		UPLOAD_THROTTLE.limit(UploadSettings.UPLOAD_SPEED.getValue() * 1000);
+		UPLOAD_THROTTLE.limit((int)UploadManager.getUploadSpeed());
 
 		Iterator iter = _waiting.iterator();
 		while (_active.size() < getMaxActiveTorrents() && iter.hasNext()) {

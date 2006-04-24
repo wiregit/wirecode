@@ -15,7 +15,7 @@ class BEString extends Token {
 	 * so for now we'll just limit it to 1MB
 	 * TODO: find a proper way to deal with this limit.
 	 */
-	private static final int MAX_STRING_SIZE = 1024*1024*1024;
+	private static final int MAX_STRING_SIZE = 1024*1024;
 	
     /** The first byte of the length of the string */
     private final byte firstSizeByte;

@@ -190,8 +190,9 @@ public class BTConnection {
 		// TODO: decide is this what we want?  maybe
 		ThrottleWriter throttle = new ThrottleWriter(_torrent
 				.getUploadThrottle());
-		throttle.setWriteChannel(new DelayedBufferWriter(1400));
-		_writer.setWriteChannel(throttle);
+		DelayedBufferWriter delayer = new DelayedBufferWriter(1400);
+		_writer.setWriteChannel(delayer);
+		delayer.setWriteChannel(throttle);
 		socket.setReadObserver(_reader);
 		socket.setWriteObserver(_writer);
 		_info = info;

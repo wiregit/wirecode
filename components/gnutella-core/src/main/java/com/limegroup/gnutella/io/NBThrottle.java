@@ -88,7 +88,7 @@ public class NBThrottle implements Throttle {
     private final int _processOp;
     
     /** The amount that is available every tick. */
-    private int _bytesPerTick;
+    private volatile int _bytesPerTick;
     
     /** The amount currently available in this tick. */
     private int _available;
