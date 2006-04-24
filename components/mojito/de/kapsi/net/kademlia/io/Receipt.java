@@ -33,7 +33,6 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
-import de.kapsi.net.kademlia.util.InputOutputUtils;
 
 class Receipt {
     

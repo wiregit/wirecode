@@ -16,6 +16,8 @@ public abstract class StatisticContainer{
         context.getDHTStats().addStatisticContainer(this);
     }
     
+    protected StatisticContainer() {}
+    
     public void writeStats(Writer writer) throws IOException {
         String delimiter = DHTNodeStat.FILE_DELIMITER;
         Class superclass = getClass().getSuperclass();

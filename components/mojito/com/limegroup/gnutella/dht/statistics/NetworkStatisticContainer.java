@@ -26,7 +26,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
      * <tt>Statistic</tt> for the size of all outgoing messages
      */
     public Statistic SENT_MESSAGES_SIZE =
-        new MessageSizeStatistic();
+        new SizeStatistic();
     
     /**
      * <tt>Statistic</tt> for all incoming messages
@@ -38,7 +38,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
      * <tt>Statistic</tt> for the size of all incoming messages
      */
     public Statistic RECEIVED_MESSAGES_SIZE =
-        new MessageSizeStatistic();
+        new SizeStatistic();
     
     /**
      * <tt>Statistic</tt> for late coming responses
@@ -106,8 +106,19 @@ public class NetworkStatisticContainer extends StatisticContainer {
     public Statistic BOOTSTRAP_TIME =
         new SimpleStatistic();
     
+    /**
+     * <tt>Statistic</tt> for bootstrap ping failures
+     */
+    public Statistic BOOTSTRAP_PING_FAILURES =
+        new SimpleStatistic();
     
-    protected class MessageSizeStatistic extends AbstractStatistic{
+    /**
+     * <tt>Statistic</tt> for the estimated network stats
+     */
+    public Statistic ESTIMATE_SIZE =
+        new SizeStatistic();
+    
+    protected class SizeStatistic extends AbstractStatistic{
         public void addData(int data) {
             super.addData(data);
             super.storeCurrentStat();

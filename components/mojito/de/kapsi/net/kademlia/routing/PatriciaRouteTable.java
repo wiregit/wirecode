@@ -193,7 +193,6 @@ public class PatriciaRouteTable implements RoutingTable {
      * @return true if the node was added, false otherwise
      */
     private boolean put(KUID nodeId, ContactNode node, boolean knowToBeAlive) {
-        boolean pingNode = false;
         boolean added = false;
         
         if (nodeId == null) {
@@ -225,13 +224,11 @@ public class PatriciaRouteTable implements RoutingTable {
                 }
                 bucket.incrementNodeCount();
                 bucket.removeReplacementNode(nodeId);
-                
                 if(knowToBeAlive) {
                     node.alive();
                     routingStats.LIVE_NODE_COUNT.incrementStat();
                     touchBucket(nodeId);
                 } else {
-                    pingNode = true;
                     routingStats.UNKNOWN_NODE_COUNT.incrementStat();
                 }
                 nodesTrie.put(nodeId,node);
@@ -300,25 +297,11 @@ public class PatriciaRouteTable implements RoutingTable {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("NOT splitting bucket "+ bucket+", adding node "+node+" to replacement cache");
                     }
-                    pingNode = addReplacementNode(bucket,node);
+                    addReplacementNode(bucket,node);
                     replaceBucketStaleNodes(bucket);
                 }
             }
-        } else if (existingNode.getTimeStamp() == 0L || existingNode.isDead()) {
-            // node existed but we don't kow if it's alive
-            pingNode = true;
-        } 
-        
-        if(!knowToBeAlive && pingNode && !node.equals(context.getLocalNode()) && !node.isPinged()) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Pinging node: "+node);
-            }
-            
-            try {
-                context.ping(node,null);
-            } catch (IOException e) {}
-        }
-        
+        }         
         return added;
     }
     
@@ -425,9 +408,8 @@ public class PatriciaRouteTable implements RoutingTable {
      * 
      * @param bucket
      * @param node
-     * @return true if the node has been added to the replacement cache, false otherwise
      */
-    public boolean addReplacementNode(BucketNode bucket,ContactNode node) {
+    public void addReplacementNode(BucketNode bucket,ContactNode node) {
         
         boolean added = false;
         
@@ -454,10 +436,7 @@ public class PatriciaRouteTable implements RoutingTable {
         if(added) {
             routingStats.REPLACEMENT_COUNT.incrementStat();
             pingBucketLastRecentlySeenNode(bucket);
-            return true;
-        } else {
-            return false;
-        }
+        } 
     }
     
     private void pingBucketLastRecentlySeenNode(BucketNode bucket) {
@@ -620,7 +599,7 @@ public class PatriciaRouteTable implements RoutingTable {
     }
         
     public void refreshBuckets(boolean force) throws IOException{
-        refreshBuckets(force,null);
+        refreshBuckets(force, null);
     }
     
     public void refreshBuckets(boolean force, BootstrapListener l) throws IOException{
@@ -639,7 +618,7 @@ public class PatriciaRouteTable implements RoutingTable {
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
             //if we are bootstrapping, phase 1 allready took care of the local bucket
-            if(l!=null && liveNodes.contains(context.getLocalNodeID())) {
+            if(l != null && liveNodes.contains(context.getLocalNodeID())) {
                 continue;
             }
             
@@ -696,6 +675,11 @@ public class PatriciaRouteTable implements RoutingTable {
 
     public List getAllNodes() {
         return nodesTrie.values();
+    }
+    
+    public List getAllNodesMRS() {
+        List nodesList = nodesTrie.values();
+        return BucketUtils.sort(nodesList);
     }
 
     public List getAllBuckets() {

@@ -48,7 +48,7 @@ public class ContextSettings extends LimeDHTProps {
         = FACTORY.createIntSetting("MAX_REMOTE_HISTORY_SIZE", 10);
     
     public static final BooleanSetting COUNT_REMOTE_SIZE
-        = FACTORY.createSettableBooleanSetting("COUNT_REMOTE_SIZE", false, "count_remote_size");
+        = FACTORY.createSettableBooleanSetting("COUNT_REMOTE_SIZE", true, "count_remote_size");
     
     public static void deleteNodeID(SocketAddress address) {
         String key = (address != null) ? address.toString() : "null";

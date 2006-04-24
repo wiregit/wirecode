@@ -83,6 +83,8 @@ public class Context implements Runnable {
     
     private KUID nodeId;
     private SocketAddress localAddress;
+    
+    private SocketAddress tmpExternalAddress;
     private SocketAddress externalAddress;
     
     private KeyPair keyPair;
@@ -98,8 +100,9 @@ public class Context implements Runnable {
     private volatile boolean bootstrapped = false;
     private boolean running = false;
     
-    private final Timer scheduler = new Timer(true);
+    private Timer timer = null;
     private Thread messageDispatcherThread = null;
+    private Thread keyValuePublisherThread = null;
     
     private DHTStats dhtStats = null;
     
@@ -112,6 +115,8 @@ public class Context implements Runnable {
     
     private LinkedList localSizeHistory = new LinkedList();
     private LinkedList remoteSizeHistory = new LinkedList();
+    
+    //private final Object contextLock = new Object();
     
     public Context() {
         
@@ -134,10 +139,8 @@ public class Context implements Runnable {
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
         messageDispatcher = new MessageDispatcher(this);
-        eventDispatcher = new EventDispatcher(this);
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
-        bucketRefresher = new RandomBucketRefresher(this);
     }
     
     public DHTStats getDHTStats() {
@@ -196,18 +199,21 @@ public class Context implements Runnable {
         return externalAddress;
     }
     
-    public void setExternalSocketAddress(SocketAddress externalAddress) 
-                throws IOException {       
-        
-        // Our external address is null? That means we don't 
-        // know it yet!
-        if (this.externalAddress == null 
-                || !externalAddress.equals(this.externalAddress)) {
-            
-            ContactNode localNode = (ContactNode)routeTable.get(nodeId);
-            if (localNode != null) {
-                this.externalAddress = externalAddress;
-                localNode.setSocketAddress(externalAddress);
+    public void setExternalSocketAddress(SocketAddress newExternalAddress)
+            throws IOException {
+        if (newExternalAddress != null) {
+            if (!newExternalAddress.equals(this.externalAddress)) {
+                if (tmpExternalAddress == null) {
+                    tmpExternalAddress = newExternalAddress;
+                } else if (tmpExternalAddress.equals(newExternalAddress)) {
+                    ContactNode localNode = (ContactNode) routeTable
+                            .get(nodeId);
+                    if (localNode != null) {
+                        this.externalAddress = newExternalAddress;
+                        localNode.setSocketAddress(newExternalAddress);
+                    }
+                    this.tmpExternalAddress = null;
+                }
             }
         }
     }
@@ -237,19 +243,27 @@ public class Context implements Runnable {
     }
     
     public boolean isRunning() {
-        return running;
+        //synchronized (contextLock) {
+            return running;
+        //}
     }
 
     public boolean isOpen() {
-        return messageDispatcher.isOpen();
+        //synchronized (contextLock) {
+            return messageDispatcher.isOpen();
+        //}
     }
     
     public void setBootstrapped(boolean bootstrapped) {
-        this.bootstrapped = bootstrapped;
+        //synchronized (contextLock) {
+            this.bootstrapped = bootstrapped;
+        //}
     }
     
     public boolean isBootstrapped() {
-        return isRunning() && bootstrapped;
+        //synchronized (contextLock) {
+            return isRunning() && bootstrapped;
+        //}
     }
     
     public int getReceivedMessagesCount() {
@@ -269,93 +283,130 @@ public class Context implements Runnable {
     }
     
     public void bind(SocketAddress address) throws IOException {
-        if (isOpen()) {
-            throw new IOException("DHT is already bound");
-        }
-        
-        messageDispatcher.bind(address);
-        this.localAddress = address;
-        
-        byte[] id = ContextSettings.getLocalNodeID(address);
-        if (id == null) {
-            nodeId = KUID.createRandomNodeID(address);
-            ContextSettings.setLocalNodeID(address, nodeId.getBytes());
-        } else {
-            nodeId = KUID.createNodeID(id);
-        }
-        
-        //add ourselve to the routing table
-        ContactNode localNode = new ContactNode(nodeId, address);
-        localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode, false);
+        //synchronized (contextLock) {
+            if (isOpen()) {
+                throw new IOException("DHT is already bound");
+            }
+            
+            this.localAddress = address;
+            
+            byte[] id = ContextSettings.getLocalNodeID(address);
+            if (id == null) {
+                this.nodeId = KUID.createRandomNodeID(address);
+                ContextSettings.setLocalNodeID(address, nodeId.getBytes());
+            } else {
+                this.nodeId = KUID.createNodeID(id);
+            }
+            
+            //add ourselve to the routing table
+            ContactNode localNode = new ContactNode(nodeId, address);
+            localNode.setTimeStamp(Long.MAX_VALUE);
+            routeTable.add(localNode, false);
+            
+            messageDispatcher.bind(address);
+        //}
     }
     
     //TODO testing purposes only - remove
-    public void bind(SocketAddress address,KUID localNodeID) throws IOException {
-        if (isOpen()) {
-            throw new IOException("DHT is already bound");
-        }
-        messageDispatcher.bind(address);
-        this.localAddress = address;
-        nodeId = localNodeID;
+    public void bind(SocketAddress address, KUID localNodeID) throws IOException {
+        //synchronized (contextLock) {
+            if (isOpen()) {
+                throw new IOException("DHT is already bound");
+            }
+            
+            this.localAddress = address;
+            this.nodeId = localNodeID;
+            
+            messageDispatcher.bind(address);   
+        //}
     }
     
     public void close() throws IOException {
-        running = false;
-        messageDispatcher.close();
-        messageDispatcherThread = null;
-    }
-    
-    public void run() {
-        if (!isOpen()) {
-            throw new RuntimeException("DHT is not bound");
-        }
-        
-        if (isRunning()) {
-            LOG.error("DHT is already running!");
-            return;
-        }
-        
-        bootstrapped = true;
-        running = true;
-        try {
-            
-            // TODO use ManagedThread
-            Thread keyValuePublisherThread 
-                = new Thread(keyValuePublisher, "KeyValuePublisherThread");
-            keyValuePublisherThread.setDaemon(true);
-            
-            scheduler.scheduleAtFixedRate(eventDispatcher, 0L, ContextSettings.DISPATCH_EVENTS_EVERY.getValue());
-            
-            long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
-            scheduler.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
-            keyValuePublisherThread.start();
-
-            messageDispatcherThread = Thread.currentThread();
-            messageDispatcher.run();
-            
-        } finally {
-            keyValuePublisher.stop();
-            scheduler.cancel();
-            
+        //synchronized (contextLock) {
             running = false;
             bootstrapped = false;
+            
+            if (keyValuePublisherThread != null) {
+                keyValuePublisher.stop();
+                keyValuePublisherThread = null;
+            }
+            
+            if (eventDispatcher != null) {
+                eventDispatcher.cancel();
+                eventDispatcher = null;
+            }
+            
+            if (bucketRefresher != null) {
+                bucketRefresher.cancel();
+                bucketRefresher = null;
+            }
+            
+            if (timer != null) {
+                timer.cancel();
+                timer = null;
+            }
+            
+            if (messageDispatcherThread != null) {
+                messageDispatcher.close();
+                messageDispatcherThread = null;
+            }
             
             lastEstimateTime = 0L;
             estimatedSize = 0;
             localSizeHistory.clear();
             remoteSizeHistory.clear();
-        }
+        //}
     }
+    
+    public void run() {
+        //synchronized (contextLock) {
+            if (!isOpen()) {
+                throw new RuntimeException("Cannot start DHT because it is not bound");
+            }
+            
+            if (isRunning()) {
+                LOG.error("An instance of this DHT Node is already running");
+                return;
+            }
+            
+            bootstrapped = true;
+            running = true;
 
+            // TODO use ManagedThread
+            keyValuePublisherThread 
+                = new Thread(keyValuePublisher, "KeyValuePublisherThread");
+            keyValuePublisherThread.setDaemon(true);
+            
+            timer = new Timer(true);
+            
+            eventDispatcher = new EventDispatcher(this);
+            bucketRefresher = new RandomBucketRefresher(this);
+            
+            timer.scheduleAtFixedRate(eventDispatcher, 0L, ContextSettings.DISPATCH_EVENTS_EVERY.getValue());
+            
+            long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
+            timer.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
+            keyValuePublisherThread.start();
+
+            messageDispatcherThread = Thread.currentThread();
+        //}
+        
+        messageDispatcher.run();
+    }
+    
     public void fireEvent(Runnable event) {
+        if (!isRunning()) {
+            LOG.error("Discarding Event as DHT is not running");
+            return;
+        }
+        
         if (event == null) {
             LOG.error("Discarding Event as it is null");
             return;
         }
         
-        if (!isRunning()) {
-            LOG.error("Discarding Event as DHT is not running");
+        if (eventDispatcher == null) {
+            LOG.error("EventDispatcher is null");
             return;
         }
         
@@ -441,6 +492,7 @@ public class Context implements Runnable {
             
             estimatedSize = getEstimatedSize();
             lastEstimateTime = System.currentTimeMillis();
+            networkStats.ESTIMATE_SIZE.addData(estimatedSize);
         }
         
         return estimatedSize;
@@ -549,6 +601,10 @@ public class Context implements Runnable {
         private SocketAddress address;
         private BootstrapListener listener;
         
+        private int failures;
+        
+        private List alternateNodesList;
+        
         public BootstrapManager(SocketAddress address, BootstrapListener listener) {
             this.address = address;
             this.listener = listener;
@@ -563,11 +619,49 @@ public class Context implements Runnable {
             } catch (IOException err) {
                 LOG.error(err);
                 initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time);
+                secondPhaseComplete(getLocalNodeID(), false, -1);
             }
         }
 
         public void pingTimeout(KUID nodeId, SocketAddress address) {
-            initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
+            ++failures;
+            networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Bootstrap ping timeout, failure "+failures);
+            }
+            
+            if(failures < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                if(alternateNodesList == null) {
+                    alternateNodesList = routeTable.getAllNodesMRS();
+                }
+                
+                for (Iterator iter = alternateNodesList.iterator(); iter.hasNext();) {
+                    ContactNode node = (ContactNode) iter.next();
+                    if(!node.getNodeID().equals(getLocalNodeID()) 
+                            && !node.getSocketAddress().equals(address)) {
+                        
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Retrying bootstrap ping with node: ");
+                        }
+                        
+                        try {
+                            iter.remove();
+                            ping(node,this);
+                        } catch (IOException err) {
+                            LOG.error(err);
+                            initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1);
+                            secondPhaseComplete(getLocalNodeID(), false, -1);
+                        }
+                    }
+                }
+            }else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Giving up bootstrap after "+failures+" tries");
+                }
+                initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
+                secondPhaseComplete(getLocalNodeID(), false, -1);
+            }
+            
         }
 
         public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, final long time) {
@@ -581,7 +675,7 @@ public class Context implements Runnable {
                 routeTable.refreshBuckets(false, this);
             } catch (IOException err) {
                 LOG.error(err);
-                secondPhaseComplete(getLocalNodeID(), false, 0);
+                secondPhaseComplete(getLocalNodeID(), false, -1);
             }
         }
 

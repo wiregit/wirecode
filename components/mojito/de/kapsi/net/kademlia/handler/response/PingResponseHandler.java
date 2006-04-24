@@ -20,11 +20,7 @@
 package de.kapsi.net.kademlia.handler.response;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,9 +34,7 @@ import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
-import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
-import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 public class PingResponseHandler extends AbstractResponseHandler {
     
@@ -67,25 +61,8 @@ public class PingResponseHandler extends AbstractResponseHandler {
         networkStats.PINGS_OK.incrementStat();
         
         PingResponse response = (PingResponse)message;
-        SocketAddress externalAddress = response.getSocketAddress();
         
-        if (externalAddress != null) {
-            InetAddress extAddr = ((InetSocketAddress)externalAddress).getAddress();
-            InetAddress srcAddr = ((InetSocketAddress)src).getAddress();
-            
-            if (!extAddr.equals(srcAddr) || NetworkSettings.ALLOW_MULTIPLE_NODES.getValue()) {
-                
-                SocketAddress currentAddress = context.getExternalSocketAddress();
-                if (!externalAddress.equals(currentAddress)) {
-                    
-                    ExternalAddressVerifier handler 
-                        = new ExternalAddressVerifier(context, nodeId, src, externalAddress);
-                    
-                    handler.pingRandomContactNode();
-                }
-            }
-        }
-        
+        context.setExternalSocketAddress(response.getSocketAddress());
         context.addEstimatedRemoteSize(response.getEstimatedSize());
         
         if (l != null) {
@@ -112,103 +89,6 @@ public class PingResponseHandler extends AbstractResponseHandler {
                     l.pingTimeout(nodeId, dst);
                 }
             });
-        }
-    }
-    
-    private class ExternalAddressVerifier extends AbstractResponseHandler {
-        
-        private boolean done = false;
-        private int errors = 0;
-        
-        private KUID nodeId;
-        private InetAddress addr;
-        
-        private SocketAddress externalAddress;
-        
-        private ExternalAddressVerifier(Context context, 
-                KUID nodeId, SocketAddress src, SocketAddress externalAddress) {
-            super(context);
-            
-            this.nodeId = nodeId;
-            this.addr = ((InetSocketAddress)src).getAddress();
-            
-            this.externalAddress = externalAddress;
-        }
-
-        private void pingRandomContactNode() throws IOException {
-            ContactNode node = getRandomContactNode();
-            if (node == null) {
-                return;
-            }
-            node.setPinged(true);
-            PingRequest request = context.getMessageFactory().createPingRequest();
-            context.getMessageDispatcher().send(node, request, this);
-        }
-        
-        private ContactNode getRandomContactNode() {
-            List nodes = context.getRouteTable().select(KUID.createRandomNodeID(), 10, true, false);
-            
-            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-                ContactNode node = (ContactNode)it.next();
-                KUID nodeId = node.getNodeID();
-                InetAddress addr = ((InetSocketAddress)node.getSocketAddress()).getAddress();
-                
-                // Make sure we don't ping:
-                // - Ourself since we don't know our external address
-                // - The same Node (ID) that told us the external address
-                // - The same Node (IP) that told us the external address
-                // - A node that we are allready pinging
-                if (!nodeId.equals(context.getLocalNodeID())
-                        && !nodeId.equals(this.nodeId)
-                        && !addr.equals(this.addr)
-                        && !node.isPinged()) {
-                    return node;
-                }
-            }
-            
-            return null;
-        }
-        
-        public void handleResponse(KUID nodeId, SocketAddress src, 
-                    Message message, long time) throws IOException {
-            
-            networkStats.PINGS_OK.incrementStat();
-            
-            if (done) {
-                return;
-            }
-            
-            done = true;
-            
-            PingResponse response = (PingResponse)message;
-            SocketAddress externalAddress = response.getSocketAddress();
-            
-            if (externalAddress != null 
-                    && externalAddress.equals(this.externalAddress)) {
-                context.setExternalSocketAddress(externalAddress);
-            }
-        }
-
-        public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
-            
-            networkStats.PINGS_FAILED.incrementStat();
-            
-            if (done) {
-                return;
-            }
-            
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(ContactNode.toString(nodeId, dst) + " did not respond");
-            }
-            
-            if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Max number of errors occured. Giving up!");
-                }
-                return;
-            }
-            
-            pingRandomContactNode();
         }
     }
 }

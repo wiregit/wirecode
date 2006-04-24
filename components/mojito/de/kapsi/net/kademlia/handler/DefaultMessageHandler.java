@@ -35,6 +35,7 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.Database;
+import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.db.KeyValueCollection;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -132,6 +133,18 @@ public class DefaultMessageHandler extends MessageHandler
                             }
                             databaseStats.STORE_FORWARD_COUNT.incrementStat();
                             keyValuesToForward.addAll(c);
+                        } else if(closestNodesToKey.size()==k){
+                            //if we are the furthest node: delete non-local value from local db
+                            ContactNode furthest = (ContactNode)closestNodesToKey.get(closestNodesToKey.size()-1);
+                            if(furthest.equals(context.getLocalNode())) {
+                                for (Iterator iterator = c.iterator(); iterator.hasNext();) {
+                                    KeyValue keyValue = (KeyValue) iterator.next();
+                                    if(!keyValue.isLocalKeyValue()) {
+                                        database.remove(keyValue);
+                                        databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
+                                    }
+                                }
+                            }
                         }
                     }
                 }

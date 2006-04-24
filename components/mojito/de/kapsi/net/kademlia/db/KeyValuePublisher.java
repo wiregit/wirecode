@@ -32,25 +32,28 @@ import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
-import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.util.CollectionUtils;
 
 public class KeyValuePublisher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(KeyValuePublisher.class);
     
-    private final Context context;
+    private Context context;
+    private Database database;
     
     private final DataBaseStatisticContainer databaseStats;
     
-    private volatile boolean running = false;
+    private boolean running = false;
     
     private int published = 0;
     private int evicted = 0;
     
-    private Object lock = new Object();
+    private Object publishLock = new Object();
     
     public KeyValuePublisher(Context context) {
         this.context = context;
+        this.database = context.getDatabase();
+        
         databaseStats = context.getDataBaseStats();
     }
     
@@ -59,122 +62,130 @@ public class KeyValuePublisher implements Runnable {
     }
     
     public void stop() {
-        running = false;
-        synchronized(lock) {
-            lock.notify();
+        synchronized (publishLock) {
+            running = false;
+            publishLock.notify();
+        }
+    }
+    
+    private void publishKeyValue(KeyValue keyValue) {
+        
+        // Check if KeyValue is still in DB because we're
+        // working with a copy of the Collection.
+        synchronized(database) {
+            
+            if (!database.contains(keyValue)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("KeyValue " + keyValue 
+                            + " is no longer stored in our database");
+                }
+                return;
+            }
+            
+            if (database.isKeyValueExpired(keyValue)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(keyValue + " is expired!");
+                }
+                
+                database.remove(keyValue);
+                evicted++;
+                databaseStats.EXPIRED_VALUES.incrementStat();
+                return;
+            }
+            
+            if (!keyValue.isLocalKeyValue()) {
+                LOG.trace(keyValue + " is not a local value");
+                return;
+            }
+            
+            if (!database.isRepublishingRequired(keyValue)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(keyValue 
+                            + " does not require republishing");
+                }
+                return;
+            }
+        }
+        
+        if (!isRunning()) {
+            return;
+        }
+        
+        databaseStats.REPUBLISHED_VALUES.incrementStat();
+        
+        try {
+            context.store(keyValue, new StoreListener() {
+                public void store(List keyValues, Collection nodes) {
+                    for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
+                        ((KeyValue)it.next()).setRepublishTime(System.currentTimeMillis());
+                        published++;
+                    }
+
+                    synchronized(publishLock) {
+                        publishLock.notify();
+                    }
+                    
+                    if (LOG.isTraceEnabled()) {
+                        if (!nodes.isEmpty()) {
+                            StringBuffer buffer = new StringBuffer("\nStoring ");
+                            buffer.append(keyValues).append(" at the following Nodes:\n");
+                            buffer.append(CollectionUtils.toString(nodes));
+                            LOG.trace(buffer);
+                        } else {
+                            LOG.trace("Failed to store " + keyValues);
+                        }
+                    }
+                }
+            });
+            
+            try {
+                publishLock.wait();
+            } catch (InterruptedException ignore) {}
+            
+        } catch (IOException err) {
+            LOG.error("KeyValuePublisher IO exception: ", err);
         }
     }
     
     public void run() {
-        if (running) {
-            LOG.error("Already running!");
-            return;
+        synchronized (publishLock) {
+            if (running) {
+                LOG.error("Already running!");
+                return;
+            }
+            running = true;
         }
         
         Iterator it = null;
         Database database = context.getDatabase();
         
-        running = true;
-        while(running) {
-            if (it == null) {
-                it = database.getAllValues().iterator();
-                
-                evicted = 0;
-                published = 0;
-            }
+        while(true) {
+            synchronized (publishLock) {
+                if (!running) {
+                    break;
+                }
             
-            if (!running) {
-                break;
-            }
-            
-            if (context.isBootstrapped() && it.hasNext()) {
-                KeyValue keyValue = (KeyValue)it.next();
-                
-                synchronized(database) {
-                    
-                    // this is neccessary because database.getAllValues()
-                    // creates a new Collection rather than returning a
-                    // reference to the internal data structure.
-                    if (!database.contains(keyValue)) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("KeyValue " + keyValue 
-                                    + " is no longer stored in our database");
-                        }
-                        continue;
-                    }
-                    
-                    if (database.isKeyValueExpired(keyValue)) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace(keyValue + " is expired!");
-                        }
+                if (context.isBootstrapped()) {
+                    if (it == null) {
+                        it = database.getAllValues().iterator();
                         
-                        database.remove(keyValue);
-                        evicted++;
-                        databaseStats.EXPIRED_VALUES.incrementStat();
-                        continue;
-                    }
-                    
-                    if (!keyValue.isLocalKeyValue()) {
-                        LOG.trace(keyValue + " is not a local value");
-                        continue;
-                    }
-                    
-                    if (!database.isRepublishingRequired(keyValue)) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace(keyValue 
-                                    + " does not require republishing");
-                        }
-                        continue;
+                        evicted = 0;
+                        published = 0;
                     }
                 }
-                databaseStats.REPUBLISHED_VALUES.incrementStat();
-                synchronized(lock) {
-                    try {
-                        context.store(keyValue, new StoreListener() {
-                            public void store(List keyValues, Collection nodes) {
-                                for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                                    ((KeyValue)it.next()).setRepublishTime(System.currentTimeMillis());
-                                    published++;
-                                }
-
-                                synchronized(lock) {
-                                    lock.notify();
-                                }
-                                
-                                if (LOG.isTraceEnabled()) {
-                                    if (!nodes.isEmpty()) {
-                                        StringBuffer buffer = new StringBuffer("\nStoring ");
-                                        buffer.append(keyValues).append(" at the following Nodes:\n");
-                                        
-                                        Iterator it = nodes.iterator();
-                                        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-                                        for(int i = 0; i < k && it.hasNext(); i++) {
-                                            buffer.append(i).append(": ").append(it.next()).append("\n");
-                                        }
-                                        
-                                        LOG.trace(buffer);
-                                        //System.out.println(buffer);
-                                    } else {
-                                        LOG.trace("Failed to store " + keyValues);
-                                    }
-                                }
-                            }
-                        });
-                        
-                        try {
-                            lock.wait();
-                        } catch (InterruptedException ignore) {}
-                        
-                    } catch (IOException err) {
-                        LOG.error("KeyValuePublisher IO exception: ", err);
-                    }
-                }
-            } else {
                 
-                it = null;
-                synchronized (lock) {
+                if (!running) {
+                    break;
+                }
+                
+                if (it != null && it.hasNext()) {
+                    KeyValue keyValue = (KeyValue)it.next();
+                    publishKeyValue(keyValue);
+                } else {
+                    it = null;
+                    
                     try {
-                        lock.wait(DatabaseSettings.REPUBLISH_INTERVAL.getValue());
+                        publishLock.wait(DatabaseSettings.REPUBLISH_INTERVAL.getValue());
                     } catch (InterruptedException ignore) {}
                 }
             }

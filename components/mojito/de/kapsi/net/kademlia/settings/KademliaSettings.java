@@ -25,5 +25,11 @@ public class KademliaSettings extends LimeDHTProps {
      */
     public static final LongSetting VALUE_LOOKUP_TIMEOUT
     = FACTORY.createLongSetting("VALUE_LOOKUP_TIMEOUT",45L*1000L);
+    
+    /**
+     * The max number of bootstrap failures
+     */
+    public static final IntSetting MAX_BOOTSTRAP_FAILURES
+    = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES",5);
 
 }

@@ -59,6 +59,10 @@ public class DHT implements Runnable {
         return context.size();
     }
     
+    public KUID getLocalNodeID() {
+        return context.getLocalNodeID();
+    }
+    
     public ContactNode getLocalNode() {
         return context.getLocalNode();
     }

@@ -44,7 +44,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
@@ -141,9 +140,6 @@ public class Database {
             database.remove(key);
         }
         
-        /*if (!bag.remove(value)) {
-            throw new IllegalStateException("Could not remove Value from Bag!");
-        }*/
         databaseStats.REMOVED_VALUES.incrementStat();
         return true;
     }
@@ -161,7 +157,7 @@ public class Database {
     public synchronized boolean contains(KeyValue value) {
         KUID key = value.getKey();
         KeyValueCollection values = (KeyValueCollection)database.get(key);
-        if (value == null) {
+        if (values == null) {
             return false;
         }
         return values.contains(value);
@@ -176,7 +172,7 @@ public class Database {
     }
     
     public synchronized Collection getAllCollections() {
-        return Collections.unmodifiableCollection(database.values());
+        return Collections.unmodifiableCollection(new ArrayList(database.values()));
     }
     
     public boolean isOriginator(KeyValue value) 
@@ -190,8 +186,8 @@ public class Database {
             return false;
         }
         
-        KUID key = keyValue.getKey();
-        ContactNode closest = context.getRouteTable().select(key);
+        //KUID key = keyValue.getKey();
+        //ContactNode closest = context.getRouteTable().select(key);
         
         //TODO: we are not caching, expiration time constant for now
         

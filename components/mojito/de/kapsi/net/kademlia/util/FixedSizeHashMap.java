@@ -61,10 +61,10 @@ public class FixedSizeHashMap extends LinkedHashMap implements Serializable {
     }
     
     public boolean isFull() {
-        return size() >= maxSize-1;
+        return size() >= maxSize;
     }
     
     protected boolean removeEldestEntry(Entry eldest) {
-        return size() >= maxSize;
+        return isFull();
     }
 }

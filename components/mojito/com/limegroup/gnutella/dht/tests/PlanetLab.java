@@ -21,20 +21,59 @@ package com.limegroup.gnutella.dht.tests;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import com.limegroup.gnutella.dht.statistics.PlanetLabTestsStatContainer;
 import com.limegroup.gnutella.dht.statistics.StatsManager;
 
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
+import de.kapsi.net.kademlia.event.FindValueListener;
+import de.kapsi.net.kademlia.event.StoreListener;
+import de.kapsi.net.kademlia.settings.DatabaseSettings;
 
 public class PlanetLab {
 
+    private static final String[] TEST_VALUES = {
+        "hello",
+        "mark",
+        "roger",
+        "greg",
+        "sam",
+        "zlatin",
+        "justin",
+        "tim",
+        "karl",
+        "kevin"
+    };
+    
+    private static byte[] getBytes(String value) {
+        try {
+            return value.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static KUID toKUID(String value) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            byte[] bytes = getBytes(value);
+            byte[] digest = md.digest(bytes);
+            return KUID.createValueID(digest);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     private static final StatsManager statsManager = StatsManager.INSTANCE;
     
     private static final String outputDir = "OUTBOUND/";
@@ -64,7 +103,7 @@ public class PlanetLab {
         return (DHT)createDHTs(port, 1).get(0);
     }
     
-    public static void bootstrap(List dhts, InetSocketAddress dst) {
+    public static void bootstrap(List dhts, final InetSocketAddress dst, final int testNumber) {
         System.out.println("Bootstrapping from " + dst);
         Random generator = new Random();
         
@@ -74,7 +113,7 @@ public class PlanetLab {
         
         for(int i = 0; i < dhts.size(); i++) {
             final int index = i;
-            DHT dht = (DHT)dhts.get(i);
+            final DHT dht = (DHT)dhts.get(i);
             
             try {
                 
@@ -82,7 +121,7 @@ public class PlanetLab {
                 synchronized(lock) {
                     
                     try {
-                        Thread.sleep(generator.nextInt(1000 * 60 * 10));
+                        Thread.sleep(generator.nextInt(1000 * 60 * 2));
                     } catch (InterruptedException err) {
                         err.printStackTrace();
                     }
@@ -113,11 +152,21 @@ public class PlanetLab {
                             synchronized(lock) {
                                 lock.notify();
                             }
+                            
+                            if(testNumber == 2) {
+                                if(index < TEST_VALUES.length){
+                                    DHTController controller = new DHTController(dht, dst, TEST_VALUES[index]);
+                                    new Thread(controller).start();
+                                }
+                            } else if (testNumber == 3) {
+                                DHTController controller = new DHTController(dht, dst, null);
+                                new Thread(controller).start();
+                            }
                         }
                     });
                     
                     try { 
-                        lock.wait(10L*1000L); 
+                        lock.wait(5L*60L*1000L); 
                     } catch (InterruptedException err) {
                         err.printStackTrace();
                     }
@@ -170,26 +219,190 @@ public class PlanetLab {
         System.out.println("Bootstrap: " + dst);
         System.out.println("Test: " + test);
         
+        new Thread(new Runnable() {
+            public void run() {
+                while(true) {
+                    try {
+                        Thread.sleep(15L * 60L * 1000L);
+                    } catch (InterruptedException e) {
+                    }
+                    statsManager.writeStatsToFiles();
+                }
+            }
+        }, "StatsWriterThread").start();
+        
+        List dhts = null;
         switch(test) {
             case 0:
                 DHT dht = createBootstrapDHT(port);
                 System.out.println("Bootstrap DHT " + dht + " is ready!");
                 break;
-            case 1:
-                List dhts = createDHTs(port, number);
-                bootstrap(dhts, dst);
+            case 1: //bootstrap test
+            case 2: //churn - publisher test
+            case 3: //churn - retriever test
+                dhts = createDHTs(port, number);
+                bootstrap(dhts, dst, test);
                 break;
             default:
                 System.err.print("Unknown test case: " + test);
                 System.exit(-1);
                 break;
         }
-        
     }
     
     private static void shutdown() {
-        statsManager.writeStatsToFiles();
+        //statsManager.writeStatsToFiles();
         
-//        System.exit(0);
+        // System.exit(0);
+    }
+    
+    public static class DHTController implements Runnable {
+        
+        private static final Random GENERATOR = new Random();
+        
+        private static final long minOffline = 1L * 60L * 1000L;
+        private static final long maxOffline = 5L * 60L * 1000L;
+        
+        private static final long minChurn = 5L * 60L * 1000L;
+        private static final long maxChurn = 10L * 60L * 1000L;
+        
+        private static final long minRepublisher = (long)(((float)2/3) * 
+            DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE);
+        
+        private static final long minRetriever = 1L * 60L * 1000L;
+        private static final long maxRetriever = 5L * 60L * 1000L;
+        
+        private DHT dht;
+        private SocketAddress bootstrapServer;
+        
+        private KUID localNodeId;
+        private SocketAddress address;
+        
+        private PlanetLabTestsStatContainer planetlabStats;
+        
+        private boolean running = true;
+        private String value;
+        
+        private long lastPublishTime;
+        
+        public DHTController(DHT dht, SocketAddress bootstrapServer, String value) {
+            this.dht = dht;
+            this.bootstrapServer = bootstrapServer;
+            
+            localNodeId = dht.getLocalNodeID();
+            address = dht.getLocalSocketAddrss();
+            
+            this.value = value;
+            
+            planetlabStats = new PlanetLabTestsStatContainer(dht.getContext());
+        }
+        
+        public void run() {
+            
+            final Object lock = new Object();
+            
+            while(true) {
+                
+                //publisher node:
+                //Publish values every minRepublisher minutes
+                if (value != null) {
+                    try {
+                        /*long publishDelay = System.currentTimeMillis() - lastPublishTime;*/
+                        /*if(publishDelay >= minRepublisher){*/
+                        
+                        lastPublishTime = System.currentTimeMillis();
+                        dht.put(toKUID(value), getBytes(value), new StoreListener() {
+                            public void store(List keyValues, Collection nodes) {
+                                planetlabStats.PUBLISH_LOCATIONS.addData(nodes.size());
+                            }
+                        });
+                        planetlabStats.PUBLISH_COUNT.incrementStat();
+                        //}
+                        try {
+                            Thread.sleep(minRepublisher);
+                        } catch (InterruptedException e) {}
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                } 
+                //retriever node:
+                //1.Stay online for minChurn to maxChurn minutes
+                //1.1 Try to retrieve values every minRetriever to maxRetriever minutes
+                //2. Disconnect - Reconnect (bootstrap)
+                //GOTO 1
+                else {
+                    long churn = minChurn + GENERATOR.nextInt((int)(maxChurn-minChurn));
+                    long startTime = System.currentTimeMillis();
+                    try {
+                        long livetime = 0L;
+                        while(livetime < churn) {
+                            long sleep = minRetriever + GENERATOR.nextInt((int)(maxRetriever - minRetriever));
+                            try {
+                                Thread.sleep(sleep);
+                            } catch (InterruptedException e) {
+                            }
+                            String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
+                            
+                            KUID key = toKUID(value);
+                            dht.get(key, new FindValueListener() {
+                                public void foundValue(KUID key, Collection values, long time) {
+                                    if(values == null || values.isEmpty()){
+                                        planetlabStats.RETRIEVE_FAILURES.incrementStat();
+                                    } else {
+                                        planetlabStats.RETRIEVE_SUCCESS.incrementStat();
+                                    }
+                                }
+                            });
+                            livetime = System.currentTimeMillis() - startTime;
+                        }
+                        //}
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    
+                    try {
+                        running = false;
+                        dht.close();
+                        planetlabStats.CHURN_DISCONNECTS.incrementStat();
+                        
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    
+                    long sleep = minOffline + GENERATOR.nextInt((int)(maxOffline-minOffline));
+                    try {
+                        Thread.sleep(sleep);
+                    } catch (InterruptedException e) {}
+                    
+                    synchronized (lock) {
+                        try {
+                            dht.bind(address, localNodeId);
+                            new Thread(dht).start();
+                            
+                            dht.bootstrap(bootstrapServer, new BootstrapListener() {
+                                public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
+                                }
+                                
+                                public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+                                    planetlabStats.CHURN_RECONNECTS.incrementStat();
+                                    running = true;
+                                    
+                                    synchronized(lock) {
+                                        lock.notify();
+                                    }
+                                }
+                            });
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                }
+            }
+        }
     }
 }

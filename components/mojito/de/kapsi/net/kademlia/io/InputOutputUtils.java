@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package de.kapsi.net.kademlia.util;
+package de.kapsi.net.kademlia.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import de.kapsi.net.kademlia.io.MessageInputStream;
-import de.kapsi.net.kademlia.io.MessageOutputStream;
 import de.kapsi.net.kademlia.messages.Message;
 
 public final class InputOutputUtils {
@@ -42,12 +40,16 @@ public final class InputOutputUtils {
        return baos.toByteArray();
    }
    
-   public static Message deserialize(byte[] data) throws IOException {
-       ByteArrayInputStream bais = new ByteArrayInputStream(data);
-       GZIPInputStream gz = new GZIPInputStream(bais);
-       MessageInputStream in = new MessageInputStream(gz);
-       Message message = in.readMessage();
-       in.close();
-       return message;
-   }
+   public static Message deserialize(byte[] data) throws MessageFormatException {
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+            GZIPInputStream gz = new GZIPInputStream(bais);
+            MessageInputStream in = new MessageInputStream(gz);
+            Message message = in.readMessage();
+            in.close();
+            return message;
+        } catch (IOException e) {
+            throw new MessageFormatException(e.getMessage());
+        }
+    }
 }

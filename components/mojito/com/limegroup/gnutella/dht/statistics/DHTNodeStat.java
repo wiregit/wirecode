@@ -40,14 +40,16 @@ public class DHTNodeStat implements DHTStats{
     /**
      * <tt>List</tt> of all statistics classes.
      */
-    private volatile List DHT_STATS = new LinkedList();
+    private List DHT_STATS = new LinkedList();
     
     public DHTNodeStat(Context context) {
         this.context = context;
     }
     
     public void addStatisticContainer(StatisticContainer statsContainer) {
-        DHT_STATS.add(statsContainer);
+        synchronized (DHT_STATS) {
+            DHT_STATS.add(statsContainer);
+        }
     }
     
     public void dumpDataBase(Writer writer) throws IOException{
@@ -64,9 +66,11 @@ public class DHTNodeStat implements DHTStats{
             nodeID = context.getLocalNodeID().toHexString();
         }
         writer.write(nodeID+"\n");
-        for (Iterator iter = DHT_STATS.iterator(); iter.hasNext();) {
-            StatisticContainer stat = (StatisticContainer) iter.next();
-            stat.writeStats(writer);
+        synchronized (DHT_STATS) {
+            for (Iterator iter = DHT_STATS.iterator(); iter.hasNext();) {
+                StatisticContainer stat = (StatisticContainer) iter.next();
+                stat.writeStats(writer);
+            }
         }
         writer.write("--------------------------------------------\n");
     }

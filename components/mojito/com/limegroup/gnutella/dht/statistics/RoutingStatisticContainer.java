@@ -26,13 +26,13 @@ public class RoutingStatisticContainer extends StatisticContainer {
      * <tt>Statistic</tt> for the total number of LIVE contacts added to the main routing table
      */
     public Statistic LIVE_NODE_COUNT =
-        new SimpleStatistic();
+        new NodeCountStatistic();
 
     /**
      * <tt>Statistic</tt> for the total number of UNKNOWN contacts added to the main routing table
      */
     public Statistic UNKNOWN_NODE_COUNT =
-        new SimpleStatistic();
+        new NodeCountStatistic();
     
     
     /**

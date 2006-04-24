@@ -11,7 +11,12 @@
 	
     <target name="build">
 	    	<javac srcdir="${basedir}" 
-				destdir="${basedir}">
+				destdir="${basedir}"
+		    		target="1.4"
+		    		source="1.4"
+	    			compiler="javac1.4"
+		    		debug="true"
+	    			optimize="false">
 			<classpath refid="default.classpath"/>
     	    </javac>
     </target>
@@ -27,9 +32,10 @@
 	<target name="planetLab" depends="clean, build">
 		<delete file="planetlab.jar"/>
 		<jar destfile="planetlab.jar" 
-			basedir="${basedir}"
-			includes="com/**, de/**"
-			excludes="**/bin/**">
+				basedir="${basedir}"
+				includes="com/**, de/**"
+				excludes="**/bin/**"
+				compress="false">
 			<manifest>
 			 	<attribute name="Main-Class" value="com.limegroup.gnutella.dht.tests.PlanetLab"/>
 			 	<attribute name="Class-Path" value=". commons-logging.jar log4j.jar"/>
