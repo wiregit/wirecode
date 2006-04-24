@@ -87,7 +87,6 @@ public class BEncoder {
     /**
      * Bencode a list of other objects that will get bencoded also.
      * Writes "l" for list, the bencoded-form of each of the given objects, and then "e" for end.
-     * Loops for each object in the given list, calling encode() above on each one.
      * 
      * @param output An OutputStream for this method to write bencoded data to
      * @param list   A Java List object to bencode and write

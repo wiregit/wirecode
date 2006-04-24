@@ -18,88 +18,143 @@ import java.nio.channels.ReadableByteChannel;
  */
 public abstract class Token {
 
-    /**
-     * Different token types we understand.
-     */
+	/** Marks a bencoded token meant for internal use only. */
     protected static final int INTERNAL = -1;
+    /** Marks a bencoded number, like "i87e". */
     public static final int LONG = 0;
+    /** Marks a bencoded string, like "5:hello". */
     public static final int STRING = 1;
+    /** Marks a bencoded list, a list of elements between "l" and "e". */
     public static final int LIST = 2;
-    public static final int DICTIONARY = 3; // cast to java.util.Map
-    
+    /** Marks a bencoded dictionary, a list of key and value pairs between "d" and "e". You can cast this object to Java.util.Map. */
+    public static final int DICTIONARY = 3;
+
+    /**
+     * The kind of text encoding to use.
+     * We'll use this like string.getBytes(ASCII) so Java will convert String objects to byte arrays using normal ASCII encoding.
+     */
     protected static final String ASCII = "ISO-8859-1";
-    protected static final byte I,D,L,E,ZERO,NINE;
+
+    /** The ASCII byte "i", identifies a bencoded number. */
+    protected static final byte I;
+    /** The ASCII byte "d", identifies a bencoded dictionary. */
+    protected static final byte D;
+    /** The ASCII byte "l", identifies a bencoded list. */
+    protected static final byte L;
+    /** The ASCII byte "e", marks the end of something in bencoding. */
+    protected static final byte E;
+    /** The ASCII byte "0". */
+    protected static final byte ZERO;
+    /** The ASCII byte "9". */
+    protected static final byte NINE;
+
     static {
-        byte i = 0;
+
+    	byte i = 0;
         byte d = 0;
         byte l = 0;
         byte e = 0;
         byte zero = 0;
         byte nine = 0;
+
         try {
-            i = "i".getBytes(ASCII)[0];
+
+        	i = "i".getBytes(ASCII)[0]; // Put the character in a String, convert it to an ASCII byte array, and read the first byte
             d = "d".getBytes(ASCII)[0];
             l = "l".getBytes(ASCII)[0];
             e = "e".getBytes(ASCII)[0];
             zero = "0".getBytes(ASCII)[0];
             nine = "9".getBytes(ASCII)[0];
+
         } catch (UnsupportedEncodingException impossible) {
-            // connect to error service eventually
+
+        	// TODO: connect to the error service
         }
-        I = i; D = d; L = l; E = e; ZERO = zero; NINE = nine;
+
+        // Save the bytes we generated in the static final members
+        I = i;
+        D = d;
+        L = l;
+        E = e;
+        ZERO = zero;
+        NINE = nine;
     }
-    
+
+    /** A ByteBuffer with room for a single byte. */
     private static final ByteBuffer ONE_BYTE = ByteBuffer.wrap(new byte[1]);
-    
-    /** 
-     * The channel to read the token from.
-     */
+
+    /** We'll read bencoded data from this channel. */
     protected final ReadableByteChannel chan;
-    
-    /**
-     * Reference where the parsed result will be stored.
-     */
+
+    /** When we parse some bencoded data into an object, we'll point result at the object we made. */
     protected Object result;
-    
-    
-    public Token(ReadableByteChannel chan) {
-        this.chan = chan;
-    }
-    
-    public abstract void handleRead() throws IOException;
-    
-    protected abstract boolean isDone();
-    
+
     /**
+     * Make a new Token object to represent a bencoded token we will read and parse.
+     * 
+     * @param chan The ReadableByteChannel we can read bencoded data from
+     */
+    public Token(ReadableByteChannel chan) {
+        this.chan = chan; // Save the given channel
+    }
+
+    /**
+     * Classes that extend Token should have a handleRead() method.
+     * Code will call handleRead() when it's time for us to read from our channel.
+     */
+    public abstract void handleRead() throws IOException;
+
+    /**
+     * Classes that extend Token should have a isDone() method.
+     * 
+     * @return True if we've read enough bencoded data to parse it into a complete object.
+     *         False if we're still waiting to read more bencoded data to finish our object.
+     */
+    protected abstract boolean isDone();
+
+    /**
+     * Find out what kind of bencoded element this is.
+     * In this Token base class, getType() returns Token.INTERNAL.
+     * Classes that extend Token will return their data type, like Token.STRING or Token.LIST.
+     * 
      * @return the type of the element, for easer casting.
      */
     public int getType() {
         return INTERNAL;
     }
-    
+
     /**
-     * @return the parsed element, null if its not parsed yet.
+     * Get the object we made from the bencoded data we read and parsed.
+     * 
+     * @return The Object we parsed.
+     *         null if we haven't read enough bencoded data to make it yet.
      */
     public Object getResult() {
         if (!isDone())
             return null;
         return result;
     }
-    
+
+    /**
+     * TERMINATOR is a Token object you can use to mark the end of a list of them.
+     * Its isDone() method returns true, and its result reference points to itself.
+     */
     static final EndElement TERMINATOR = new EndElement();
+
+    /** An EndElement is a Token object that marks the end of a list of Token objects. */
     private static class EndElement extends Token {
-        EndElement() {
-            super(null);
-            result = this;
+    	EndElement() {
+            super(null); // No channel to read from
+            result = this; // The object we parsed is this one
         }
-        public void handleRead() throws IOException {}
+        public void handleRead() throws IOException {} // handleRead() does nothing
         protected boolean isDone() {
-            return true;
+            return true; // Yes, we're done reading and parsing our object
         }
     }
-    
+
     /**
-     * Gets a bencoded element from a ReadableByteChannel.  
+     * Gets a bencoded element from a ReadableByteChannel.
      * 
      * @return a Token object that will represent the next element or null
      * if there wasn't enough data available in the channel to determine what
@@ -109,28 +164,28 @@ public abstract class Token {
      */
     public static Token getNextToken(ReadableByteChannel chan) throws IOException {
         try {
-            int read = chan.read(ONE_BYTE);
-            if (read == 0) 
-                return null;
+            int read = chan.read(ONE_BYTE); // Read one byte from our channel into the ONE_BYTE ByteBuffer
+            if (read == 0)
+                return null; // The channel gave us no data, so we have no parsed object to return
             if (read == -1)
                 throw new IOException("channel closed while trying to read next token");
         } finally {
-            ONE_BYTE.clear();
+            ONE_BYTE.clear(); // Mark the ByteBuffer empty, doesn't erase the byte we read there
         }
-        
-        byte b = ONE_BYTE.array()[0];
-        if (b == I)
+
+        byte b = ONE_BYTE.array()[0]; // Get the byte we read
+        if (b == I) // "i", this is the start of a bencoded number
             return new BELong(chan);
-        else if (b == D)
+        else if (b == D) // "d", this is the start of a bencoded dictionary
             return new BEDictionary(chan);
-        else if (b == L)
+        else if (b == L) // "l", this is the start of a bencoded list
             return new BEList(chan);
         else if (b == E)
             return Token.TERMINATOR;
         else if (b >= ZERO && b <= NINE)
-            return new BEString(b,chan);
+            return new BEString(b, chan);
         else
-            throw new IOException("unrecognized token type "+(char)b);
+            throw new IOException("unrecognized token type " + (char)b);
     }
 
     /**
