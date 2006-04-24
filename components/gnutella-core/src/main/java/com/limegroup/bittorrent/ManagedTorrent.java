@@ -18,6 +18,7 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UploadManager;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.NIODispatcher;
@@ -830,7 +831,7 @@ public class ManagedTorrent {
 			Collections.sort(fastest,DOWNLOAD_SPEED_COMPARATOR);
 			
 			// unchoke the fastest connections that are interested in us
-			int numFast = BittorrentSettings.TORRENT_MAX_UPLOADS.getValue() - 1;
+			int numFast = getNumUploads() - 1;
 			for(int i = fastest.size() - 1; i >= numFast; i--)
 				fastest.remove(i);
 			
@@ -851,6 +852,29 @@ public class ManagedTorrent {
 					con.sendChoke();
 			}
 		}
+	}
+	
+	/**
+	 * @return the number of uploads that should be unchoked
+	 * Note: Copied verbatim from mainline BT
+	 */
+	private static int getNumUploads() {
+		int uploads = BittorrentSettings.TORRENT_MAX_CONNECTIONS.getValue();
+		if (uploads > 0)
+			return uploads;
+		
+		float rate = UploadManager.getUploadSpeed();
+		if (rate == Float.MAX_VALUE)
+			return 7; //"unlimited, just guess something here..." - Bram
+		else if (rate < 9000)
+			return 2;
+		else if (rate < 15000)
+			return 3;
+		else if (rate < 42000)
+			return 4;
+		else 
+			return (int) Math.sqrt(rate * 0.6f);
+
 	}
 
 	/**
