@@ -106,6 +106,11 @@ public class NetworkStatisticContainer extends StatisticContainer {
     public Statistic BOOTSTRAP_TIME =
         new SimpleStatistic();
     
+    /**
+     * <tt>Statistic</tt> for response time
+     */
+    public Statistic RESPONSE_TIME =
+       new SimpleStatistic();
     
     protected class MessageSizeStatistic extends AbstractStatistic{
         public void addData(int data) {
@@ -113,5 +118,4 @@ public class NetworkStatisticContainer extends StatisticContainer {
             super.storeCurrentStat();
         }
     }
-
 }

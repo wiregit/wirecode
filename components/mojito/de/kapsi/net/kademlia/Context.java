@@ -40,6 +40,8 @@ import java.util.Timer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import sun.security.x509.NetscapeCertTypeExtension;
+
 import com.limegroup.gnutella.dht.statistics.DHTNodeStat;
 import com.limegroup.gnutella.dht.statistics.DHTStats;
 import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
@@ -53,7 +55,9 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.EventDispatcher;
 import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
+import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.event.ResponseListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindNodeResponseHandler;
@@ -146,6 +150,23 @@ public class Context implements Runnable {
         bucketRefresher = new RandomBucketRefresher(this);
         
         pingContext = new PingContext();
+        
+        ResponseListener listener = new ResponseListener() {
+            public void response(KUID nodeId, SocketAddress address, long time) {
+                networkStats.RESPONSE_TIME.addData((int)time);
+                
+                // TODO mark contact as alive
+            }
+
+            public void timeout(KUID nodeId, SocketAddress address, long time) {
+                if (nodeId != null) {
+                    // TODO handle Node error
+                }
+            }
+        };
+        
+        // pingContext.addResponseListener(listener);
+        // lookupContext.addResponseListener(listener);
     }
     
     public DHTStats getDHTStats() {
@@ -668,9 +689,62 @@ public class Context implements Runnable {
         }
     }
     
-    public class PingContext {
+    protected abstract class AbstractContext {
         
-        private Map delegateHandleMap = new HashMap();
+        private List listeners = new ArrayList();
+        
+        public void addResponseListener(ResponseListener listener) {
+            synchronized (listeners) {
+                listeners.add(listener);
+            }
+        }
+        
+        public void removePingListener(ResponseListener listener) {
+            synchronized (listeners) {
+                listeners.remove(listener);
+            }
+        }
+
+        public ResponseListener[] getAllResponseListeners() {
+            synchronized (listeners) {
+                return (ResponseListener[])listeners.toArray(new ResponseListener[0]);
+            }
+        }
+        
+        protected void fireResponse(final KUID nodeId, final SocketAddress address, final long time) {
+            fireEvent(new Runnable() {
+                public void run() {
+                    synchronized (listeners) {
+                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                            ResponseListener listener = (ResponseListener)it.next();
+                            listener.response(nodeId, address, time);
+                        }
+                    }
+                }
+            });
+        }
+        
+        protected void fireTimeout(final KUID nodeId, final SocketAddress address, final long time) {
+            fireEvent(new Runnable() {
+                public void run() {
+                    synchronized (listeners) {
+                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                            ResponseListener listener = (ResponseListener)it.next();
+                            listener.timeout(nodeId, address, time);
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    /**
+     * The PingContext takes care of concurrent Pings and makes sure
+     * a single Node cannot be pinged multiple times.
+     */
+    public class PingContext extends AbstractContext {
+        
+        private Map attachmentMap = new HashMap();
         private List listeners = new ArrayList();
         
         private PingContext() {
@@ -678,12 +752,12 @@ public class Context implements Runnable {
         }
         
         public void init() {
-            synchronized (listeners) {
+            /*synchronized (listeners) {
                 listeners.clear();
-            }
+            }*/
             
-            synchronized (delegateHandleMap) {
-                delegateHandleMap.clear();
+            synchronized (attachmentMap) {
+                attachmentMap.clear();
             }
         }
         
@@ -699,6 +773,12 @@ public class Context implements Runnable {
             }
         }
 
+        public PingListener[] getAllPingListeners() {
+            synchronized (listeners) {
+                return (PingListener[])listeners.toArray(new PingListener[0]);
+            }
+        }
+        
         public void ping(SocketAddress address) throws IOException {
             ping(null, address, null);
         }
@@ -716,44 +796,65 @@ public class Context implements Runnable {
         }
 
         public void ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
-            synchronized (delegateHandleMap) {
-                DelegateHandle delegateHandle = (DelegateHandle)delegateHandleMap.get(address);
-                if (delegateHandle == null) {
-                    PingRequest request = messageFactory.createPingRequest();
-
-                    delegateHandle = new DelegateHandle(new PingResponseHandler(Context.this, this));
+            synchronized (attachmentMap) {
+                Attachment attachment = (Attachment)attachmentMap.get(address);
+                if (attachment == null) {
                     
-                    delegateHandleMap.put(address, delegateHandle);
-                    messageDispatcher.send(nodeId, address, request, delegateHandle);
+                    PingRequest request = messageFactory.createPingRequest();
+                    ResponseHandler responseHandler = new PingResponseHandler(Context.this, this);
+                    
+                    attachment = new Attachment(responseHandler);
+                    attachmentMap.put(address, attachment);
+                    messageDispatcher.send(nodeId, address, request, responseHandler);
                     
                     networkStats.PINGS_SENT.incrementStat();
                 }
                 
                 if (listener != null) {
-                    delegateHandle.listeners.add(listener);
+                    attachment.listeners.add(listener);
                 }
             }
         }
         
-        public void handleSuccess(KUID nodeId, SocketAddress address, long time) {
-            DelegateHandle delegateHandle = null;
-            synchronized (delegateHandleMap) {
-                delegateHandle = (DelegateHandle)delegateHandleMap.remove(address);
+        public boolean cancel(ContactNode node) {
+            return cancel(node.getSocketAddress());
+        }
+        
+        public boolean cancel(SocketAddress address) {
+            Attachment attachment = null;
+            
+            synchronized (attachmentMap) {
+                attachment = (Attachment)attachmentMap.remove(address);
             }
             
-            fireSuccess(delegateHandle, nodeId, address, time);
+            if (attachment != null) {
+                // TODO implement cancel!
+                return true;
+            }
+            return false;
+        }
+        
+        public void handleSuccess(KUID nodeId, SocketAddress address, long time) {
+            Attachment attachment = null;
+            synchronized (attachmentMap) {
+                attachment = (Attachment)attachmentMap.remove(address);
+            }
+            
+            fireResponse(nodeId, address, time);
+            firePingSuccess(attachment, nodeId, address, time);
         }
         
         public void handleTimeout(KUID nodeId, SocketAddress address, Message message, long time) {
-            DelegateHandle delegateHandle = null;
-            synchronized (delegateHandleMap) {
-                delegateHandle = (DelegateHandle)delegateHandleMap.remove(address);
+            Attachment attachment = null;
+            synchronized (attachmentMap) {
+                attachment = (Attachment)attachmentMap.remove(address);
             }
             
-            fireTimeout(delegateHandle, nodeId, address, time);
+            fireTimeout(nodeId, address, time);
+            firePingTimeout(attachment, nodeId, address, time);
         }
         
-        private void fireSuccess(final DelegateHandle delegateHandle, 
+        private void firePingSuccess(final Attachment attachment, 
                 final KUID nodeId, final SocketAddress address, final long time) {
             
             fireEvent(new Runnable() {
@@ -765,8 +866,8 @@ public class Context implements Runnable {
                         }
                     }
                     
-                    if (delegateHandle != null) {
-                        for(Iterator it = delegateHandle.listeners.iterator(); it.hasNext(); ) {
+                    if (attachment != null) {
+                        for(Iterator it = attachment.listeners.iterator(); it.hasNext(); ) {
                             PingListener listener = (PingListener)it.next();
                             listener.pingSuccess(nodeId, address, time);
                         }
@@ -775,7 +876,7 @@ public class Context implements Runnable {
             });
         }
         
-        private void fireTimeout(final DelegateHandle delegateHandle, 
+        private void firePingTimeout(final Attachment attachment, 
                 final KUID nodeId, final SocketAddress address, final long time) {
             
             fireEvent(new Runnable() {
@@ -787,8 +888,8 @@ public class Context implements Runnable {
                         }
                     }
                     
-                    if (delegateHandle != null) {
-                        for(Iterator it = delegateHandle.listeners.iterator(); it.hasNext(); ) {
+                    if (attachment != null) {
+                        for(Iterator it = attachment.listeners.iterator(); it.hasNext(); ) {
                             PingListener listener = (PingListener)it.next();
                             listener.pingTimeout(nodeId, address, time);
                         }
@@ -798,34 +899,102 @@ public class Context implements Runnable {
         }
     }
     
-    private class DelegateHandle implements ResponseHandler {
+    public class LookupContext extends AbstractContext {
         
         private List listeners = new ArrayList();
         
+        private LookupContext() {}
+        
+        public void addLookupListener(LookupListener listener) {
+            synchronized (listeners) {
+                listeners.add(listener);
+            }
+        }
+        
+        public void removeLookupListener(LookupListener listener) {
+            synchronized (listeners) {
+                listeners.remove(listener);
+            }
+        }
+
+        public LookupListener[] getAllLookupListeners() {
+            synchronized (listeners) {
+                return (LookupListener[])listeners.toArray(new LookupListener[0]);
+            }
+        }
+        
+        public void lookup(KUID lookup) throws IOException {
+            lookup(lookup, null);
+        }
+        
+        public void lookup(KUID lookup, LookupListener listener) throws IOException {
+            if (lookup.isNodeID()) {
+                lookupNode(lookup, listener);
+            } else if (lookup.isValueID()) {
+                lookupValue(lookup, listener);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+        
+        private void lookupNode(KUID nodeId, LookupListener listener) throws IOException {
+            
+        }
+        
+        private void lookupValue(KUID nodeId, LookupListener listener) throws IOException {
+            
+        }
+        
+        public boolean cancel(KUID lookup) {
+            // TODO implement cancel
+            return false;
+        }
+
+        public void handleSuccess(KUID nodeId, SocketAddress address, long time) {
+            fireResponse(nodeId, address, time);
+        }
+        
+        public void handleTimeout(KUID nodeId, SocketAddress address, long time) {
+            fireTimeout(nodeId, address, time);
+        }
+
+        private void fireLookupFailed(Attachment attachment, KUID lookup, final long time) {
+            fireLookupEvent(attachment, lookup, Collections.EMPTY_LIST, time);
+        }
+        
+        private void fireLookupEvent(final Attachment attachment, final KUID lookup, final Collection results, final long time) {
+            fireEvent(new Runnable() {
+                public void run() {
+                    synchronized (listeners) {
+                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                            LookupListener listener = (LookupListener)it.next();
+                            listener.found(lookup, results, time);
+                        }
+                    }
+                    
+                    if (attachment != null) {
+                        for(Iterator it = attachment.listeners.iterator(); it.hasNext(); ) {
+                            LookupListener listener = (LookupListener)it.next();
+                            listener.found(lookup, results, time);
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    
+    /**
+     * 
+     */
+    private static class Attachment {
+        
         private ResponseHandler responseHandler;
         
-        private DelegateHandle(ResponseHandler responseHandler) {
-            this.responseHandler = responseHandler;
-        }
-
-        public void addTime(long time) {
-            responseHandler.addTime(time);
-        }
-
-        public void handleResponse(KUID nodeId, SocketAddress src, Message message, long time) throws IOException {
-            responseHandler.handleResponse(nodeId, src, message, time);
-        }
-
-        public void handleTimeout(KUID nodeId, SocketAddress dst, Message message, long time) throws IOException {
-            responseHandler.handleTimeout(nodeId, dst, message, time);
-        }
-
-        public long time() {
-            return responseHandler.time();
-        }
-
-        public long timeout() {
-            return responseHandler.timeout();
+        private List listeners = new ArrayList();
+        
+        private Attachment(ResponseHandler responeHandler) {
+            this.responseHandler = responeHandler;
         }
     }
 }
