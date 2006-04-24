@@ -29,6 +29,8 @@ class BEString extends Token {
     /** Buffer used for internal storage */
     private ByteBuffer buf;
     
+    private static final ByteBuffer EMPTY_STRING = ByteBuffer.allocate(0);
+    
     final static byte COLON;
     static {
         byte colon = 0;
@@ -86,6 +88,7 @@ class BEString extends Token {
             }
             else if (l2 == 0) {
             	size = 0;
+            	buf = EMPTY_STRING;
             	result = "";
             	return true;
             }else

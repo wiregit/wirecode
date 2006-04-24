@@ -160,6 +160,13 @@ public class BEncodeTest extends BaseTestCase {
             fail("invalid string should throw");
         } catch (IOException expected){}
         assertEquals(2,chan.src.position()); // should stop reading after the invalid char.
+        
+        // test an empty string
+        chan.setString("0:");
+        t = Token.getNextToken(chan);
+        assertEquals(Token.STRING,t.getType());
+        t.handleRead();
+        assertEquals("",t.getResult());
     }
     
     /**
