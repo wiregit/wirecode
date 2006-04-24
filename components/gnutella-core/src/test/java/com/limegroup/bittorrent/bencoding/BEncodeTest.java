@@ -384,7 +384,7 @@ public class BEncodeTest extends BaseTestCase {
         m2.put("key11",l);
         // this finishes the fancy object
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BEncoder.encode(baos,m);
+        BEncoder.encodeDict(baos,m);
         
         String s = new String(baos.toByteArray(),Token.ASCII);
         String expected = "d4:key1d5:key11l6:badger6:badgeri3el8:mushroom8:mushroomedee5:key12lee4:key2llll5:snakee5:snakeeeee";

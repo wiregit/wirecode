@@ -42,17 +42,19 @@ class BELong extends Token {
     BELong(ReadableByteChannel chan) {
         this(chan, E, (byte)0);
     }
-    
+
     /**
-     * Creates a new Token read to parse a Long using a custon terminating
-     * character
-     * @param terminator the character that will mark the end of the value
-     * @param firstByte the first character of the value, if read.
+     * Make a new BELong object that can get the number from bencoded data like "i23e" or "5:".
+     * 
+     * @param chan       A ReadableByteChannel the new BELong can read from to get more data.
+     * @param terminator The character we'll look for to mark the end of the numerals, like "e" or ":".
+     * @param firstByte  If you already ready the first digit from the channel, pass it here.
+     *                   If not, pass 0 for firstByte.
      */
     BELong(ReadableByteChannel chan, byte terminator, byte firstByte) {
-        super(chan);
-        this.terminator = terminator;
-        if (firstByte != 0) {
+        super(chan); // Save the channel this new object will read data from
+        this.terminator = terminator; // Save the character we'll watch for to end the number
+        if (firstByte != 0) { // The caller a
             if (firstByte < ZERO || firstByte > NINE)
                 throw new IllegalArgumentException("invalid first byte");
             sb.append(firstByte - ZERO); 

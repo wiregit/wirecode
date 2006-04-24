@@ -652,7 +652,7 @@ public class BTMetaInfo implements Serializable {
 		// we decoded it. This is intended that way by the protocol.
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			BEncoder.encode(baos, info);
+			BEncoder.encodeDict(baos, info);
 		} catch (IOException ioe) {
 			ErrorService.error(ioe);
 		}
