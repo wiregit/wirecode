@@ -303,7 +303,8 @@ public class PlanetLab {
             
             while(true) {
                 
-                //publisher node
+                //publisher node:
+                //Publish values every minRepublisher minutes
                 if (value != null) {
                     try {
                         /*long publishDelay = System.currentTimeMillis() - lastPublishTime;*/
@@ -324,12 +325,40 @@ public class PlanetLab {
                         e1.printStackTrace();
                     }
                 } 
-                //retriever node
+                //retriever node:
+                //1.Stay online for minChurn to maxChurn minutes
+                //1.1 Try to retrieve values every minRetriever to maxRetriever minutes
+                //2. Disconnect - Reconnect (bootstrap)
+                //GOTO 1
                 else {
-                    long sleep = minChurn + GENERATOR.nextInt((int)(maxChurn-minChurn));
+                    long churn = minChurn + GENERATOR.nextInt((int)(maxChurn-minChurn));
+                    long startTime = System.currentTimeMillis();
                     try {
-                        Thread.sleep(sleep);
-                    } catch (InterruptedException e) {}
+                        long livetime = 0L;
+                        while(livetime < churn) {
+                            long sleep = minRetriever + GENERATOR.nextInt((int)(maxRetriever - minRetriever));
+                            try {
+                                Thread.sleep(sleep);
+                            } catch (InterruptedException e) {
+                            }
+                            String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
+                            
+                            KUID key = toKUID(value);
+                            dht.get(key, new FindValueListener() {
+                                public void foundValue(KUID key, Collection values, long time) {
+                                    if(values == null || values.isEmpty()){
+                                        planetlabStats.RETRIEVE_FAILURES.incrementStat();
+                                    } else {
+                                        planetlabStats.RETRIEVE_SUCCESS.incrementStat();
+                                    }
+                                }
+                            });
+                            livetime = System.currentTimeMillis() - startTime;
+                        }
+                        //}
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     
                     try {
                         running = false;
@@ -340,11 +369,10 @@ public class PlanetLab {
                         e.printStackTrace();
                     }
                     
-                    sleep = minOffline + GENERATOR.nextInt((int)(maxOffline-minOffline));
+                    long sleep = minOffline + GENERATOR.nextInt((int)(maxOffline-minOffline));
                     try {
                         Thread.sleep(sleep);
                     } catch (InterruptedException e) {}
-                    
                     
                     synchronized (lock) {
                         try {
@@ -372,32 +400,6 @@ public class PlanetLab {
                             lock.wait();
                         } catch (InterruptedException e) {
                         }
-                    }
-                    
-                    try {
-                        /*if (value == null) { //Retriever DHTs*/
-                        
-                        sleep = minRetriever + GENERATOR.nextInt((int)(maxRetriever - minRetriever));
-                        try {
-                            Thread.sleep(sleep);
-                        } catch (InterruptedException e) {
-                        }
-                        
-                        String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
-                        
-                        KUID key = toKUID(value);
-                        dht.get(key, new FindValueListener() {
-                            public void foundValue(KUID key, Collection values, long time) {
-                                if(values == null || values.isEmpty()){
-                                    planetlabStats.RETRIEVE_FAILURES.incrementStat();
-                                } else {
-                                    planetlabStats.RETRIEVE_SUCCESS.incrementStat();
-                                }
-                            }
-                        });
-                        //}
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
                 }
             }
