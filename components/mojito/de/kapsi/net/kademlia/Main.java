@@ -251,7 +251,7 @@ public class Main {
                 }
             }
             
-            public void pingTimeout(KUID nodeId, SocketAddress address) {
+            public void pingTimeout(KUID nodeId, SocketAddress address, long time) {
                 if (nodeId != null) {
                     System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " failed");
                 } else {
@@ -270,11 +270,11 @@ public class Main {
         System.out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
             public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                System.out.println("*** Bootstraping phase 1" + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
+                System.out.println("*** Bootstraping phase 1 " + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
             }
 
             public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
-                System.out.println("*** Bootstraping phase 2" + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
+                System.out.println("*** Bootstraping phase 2 " + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
     }

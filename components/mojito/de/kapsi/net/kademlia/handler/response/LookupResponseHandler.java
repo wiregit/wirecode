@@ -39,13 +39,13 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
-import de.kapsi.net.kademlia.io.Receipt;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
@@ -113,24 +113,17 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
      */
     protected SingleLookupStatisticContainer lookupStat;
     
-    /**
-     * The global lookup timeout
-     */
-    private final long timeout;
-    
-    
     public LookupResponseHandler(Context context, KUID lookup, long timeout) {
-        super(context);
+        super(context, timeout, NetworkSettings.MIN_RETRIES.getValue());
         
         this.lookup = lookup;
         this.furthest = lookup.invert();
        
         this.resultSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        this.timeout = timeout;
     }
     
-    public void handleResponse(Receipt receipt, KUID nodeId, 
-            SocketAddress src, Message message, long time) throws IOException {
+    public void handleResponse(KUID nodeId, SocketAddress src, 
+            Message message, long time) throws IOException {
         
         if (!isQueried(nodeId)) {
             if (LOG.isWarnEnabled()) {
@@ -213,7 +206,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    public void handleTimeout(Receipt receipt, KUID nodeId, SocketAddress dst, long time) throws IOException {
+    public void handleTimeout(KUID nodeId, SocketAddress dst, Message message, long time) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
         routeTable.handleFailure(nodeId);
@@ -247,6 +240,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         lookupStep(hop);
     }
     
+    
+    protected void handleFinalTimeout(KUID nodeId, SocketAddress dst, Message message) throws IOException {
+    }
+
     /**
      * Starts the lookup
      */
@@ -303,10 +300,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         long diff = time();
         
-        if(timeout>0 && (diff > timeout)) {
+        if(timeout() > 0 && diff > timeout()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " terminates after "
-                        + hop + " hops. Lookup timeout reached after "+timeout+" seconds");
+                        + hop + " hops. Lookup timeout reached after " + timeout() + " seconds");
             }
             finishLookup(hop,diff);
         }

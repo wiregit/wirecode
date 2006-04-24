@@ -55,17 +55,16 @@ import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
-import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindNodeResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindValueResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
-import de.kapsi.net.kademlia.handler.response.PingResponseHandler2;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
-import de.kapsi.net.kademlia.io.Receipt;
+import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
 import de.kapsi.net.kademlia.routing.RandomBucketRefresher;
 import de.kapsi.net.kademlia.routing.RoutingTable;
@@ -86,6 +85,8 @@ public class Context implements Runnable {
     
     private KUID nodeId;
     private SocketAddress localAddress;
+    
+    private SocketAddress tmpExternalAddress;
     private SocketAddress externalAddress;
     
     private KeyPair keyPair;
@@ -97,6 +98,8 @@ public class Context implements Runnable {
     private MessageFactory messageFactory;
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
+    
+    private PingContext pingContext;
     
     private volatile boolean bootstrapped = false;
     private boolean running = false;
@@ -141,6 +144,8 @@ public class Context implements Runnable {
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
         bucketRefresher = new RandomBucketRefresher(this);
+        
+        pingContext = new PingContext();
     }
     
     public DHTStats getDHTStats() {
@@ -199,18 +204,20 @@ public class Context implements Runnable {
         return externalAddress;
     }
     
-    public void setExternalSocketAddress(SocketAddress externalAddress) 
-                throws IOException {       
-        
-        // Our external address is null? That means we don't 
-        // know it yet!
-        if (this.externalAddress == null 
-                || !externalAddress.equals(this.externalAddress)) {
-            
-            ContactNode localNode = (ContactNode)routeTable.get(nodeId);
-            if (localNode != null) {
-                this.externalAddress = externalAddress;
-                localNode.setSocketAddress(externalAddress);
+    public void setExternalSocketAddress(SocketAddress newExternalAddress) 
+                throws IOException {
+        if (newExternalAddress != null) {
+            if (!newExternalAddress.equals(this.externalAddress)) {
+                if (tmpExternalAddress == null) {
+                    tmpExternalAddress = newExternalAddress;
+                } else if (tmpExternalAddress.equals(newExternalAddress)) {
+                    ContactNode localNode = (ContactNode)routeTable.get(nodeId);
+                    if (localNode != null) {
+                        this.externalAddress = newExternalAddress;
+                        localNode.setSocketAddress(newExternalAddress);
+                    }
+                    this.tmpExternalAddress = null;
+                }
             }
         }
     }
@@ -319,6 +326,8 @@ public class Context implements Runnable {
             return;
         }
         
+        pingContext.init();
+        
         bootstrapped = true;
         running = true;
         try {
@@ -378,46 +387,20 @@ public class Context implements Runnable {
      * @param l the PingListener for incoming pongs
      * @throws IOException
      */
-    public void ping(SocketAddress address, PingListener l) throws IOException {
-        RequestMessage ping = messageFactory.createPingRequest();
-        AbstractResponseHandler handler = new PingResponseHandler(this, l);
-        networkStats.PINGS_SENT.incrementStat();
-        messageDispatcher.send(null, address, ping, handler);
+    public void ping(SocketAddress address) throws IOException {
+        pingContext.ping(address, null);
     }
     
-    public void ping(ContactNode node, PingListener l) throws IOException {
-        if(node.isPinged()) {
-            return;
-        }
-        node.setPinged(true);
-        RequestMessage ping = messageFactory.createPingRequest();
-        AbstractResponseHandler handler = new PingResponseHandler(this, l);
-        networkStats.PINGS_SENT.incrementStat();
-        messageDispatcher.send(node.getNodeID(), node.getSocketAddress(), ping, handler);
+    public void ping(SocketAddress address, PingListener listener) throws IOException {
+        pingContext.ping(address, listener);
     }
     
-    private Map pingMap = new HashMap();
+    public void ping(ContactNode node) throws IOException {
+        pingContext.ping(node, null);
+    }
     
-    public Receipt ping2(SocketAddress address, PingListener listener) throws IOException {
-        Receipt receipt = null;
-        
-        synchronized (pingMap) {
-            receipt = (Receipt)pingMap.get(address);
-            if (receipt != null) {
-                // TODO...
-                /*synchronized (receipt) {
-                    ((ResponseHandler)receipt.getHandler()).addListener(listener);
-                }*/
-            } else {
-                RequestMessage request = messageFactory.createPingRequest();
-                ResponseHandler handler = new PingResponseHandler2(this);
-                receipt = messageDispatcher.send(address, request, handler);
-                
-                pingMap.put(address, receipt);
-            }
-        }
-        
-        return receipt;
+    public void ping(ContactNode node, PingListener listener) throws IOException {
+        pingContext.ping(node, listener);
     }
     
     public void lookup(KUID lookup, FindNodeListener l) throws IOException {
@@ -593,7 +576,7 @@ public class Context implements Runnable {
             }
         }
 
-        public void pingTimeout(KUID nodeId, SocketAddress address) {
+        public void pingTimeout(KUID nodeId, SocketAddress address, long time) {
             initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
         }
 
@@ -682,6 +665,167 @@ public class Context implements Runnable {
             } catch (IOException err) {
                 LOG.error(err);
             }
+        }
+    }
+    
+    public class PingContext {
+        
+        private Map delegateHandleMap = new HashMap();
+        private List listeners = new ArrayList();
+        
+        private PingContext() {
+            
+        }
+        
+        public void init() {
+            synchronized (listeners) {
+                listeners.clear();
+            }
+            
+            synchronized (delegateHandleMap) {
+                delegateHandleMap.clear();
+            }
+        }
+        
+        public void addPingListener(PingListener listener) {
+            synchronized (listeners) {
+                listeners.add(listener);
+            }
+        }
+        
+        public void removePingListener(PingListener listener) {
+            synchronized (listeners) {
+                listeners.remove(listener);
+            }
+        }
+
+        public void ping(SocketAddress address) throws IOException {
+            ping(null, address, null);
+        }
+
+        public void ping(SocketAddress address, PingListener listener) throws IOException {
+            ping(null, address, listener);
+        }
+
+        public void ping(ContactNode node) throws IOException {
+            ping(node.getNodeID(), node.getSocketAddress(), null);
+        }
+        
+        public void ping(ContactNode node, PingListener listener) throws IOException {
+            ping(node.getNodeID(), node.getSocketAddress(), listener);
+        }
+
+        public void ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
+            synchronized (delegateHandleMap) {
+                DelegateHandle delegateHandle = (DelegateHandle)delegateHandleMap.get(address);
+                if (delegateHandle == null) {
+                    PingRequest request = messageFactory.createPingRequest();
+
+                    delegateHandle = new DelegateHandle(new PingResponseHandler(Context.this, this));
+                    
+                    delegateHandleMap.put(address, delegateHandle);
+                    messageDispatcher.send(nodeId, address, request, delegateHandle);
+                    
+                    networkStats.PINGS_SENT.incrementStat();
+                }
+                
+                if (listener != null) {
+                    delegateHandle.listeners.add(listener);
+                }
+            }
+        }
+        
+        public void handleSuccess(KUID nodeId, SocketAddress address, long time) {
+            DelegateHandle delegateHandle = null;
+            synchronized (delegateHandleMap) {
+                delegateHandle = (DelegateHandle)delegateHandleMap.remove(address);
+            }
+            
+            fireSuccess(delegateHandle, nodeId, address, time);
+        }
+        
+        public void handleTimeout(KUID nodeId, SocketAddress address, Message message, long time) {
+            DelegateHandle delegateHandle = null;
+            synchronized (delegateHandleMap) {
+                delegateHandle = (DelegateHandle)delegateHandleMap.remove(address);
+            }
+            
+            fireTimeout(delegateHandle, nodeId, address, time);
+        }
+        
+        private void fireSuccess(final DelegateHandle delegateHandle, 
+                final KUID nodeId, final SocketAddress address, final long time) {
+            
+            fireEvent(new Runnable() {
+                public void run() {
+                    synchronized (listeners) {
+                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                            PingListener listener = (PingListener)it.next();
+                            listener.pingSuccess(nodeId, address, time);
+                        }
+                    }
+                    
+                    if (delegateHandle != null) {
+                        for(Iterator it = delegateHandle.listeners.iterator(); it.hasNext(); ) {
+                            PingListener listener = (PingListener)it.next();
+                            listener.pingSuccess(nodeId, address, time);
+                        }
+                    }
+                }
+            });
+        }
+        
+        private void fireTimeout(final DelegateHandle delegateHandle, 
+                final KUID nodeId, final SocketAddress address, final long time) {
+            
+            fireEvent(new Runnable() {
+                public void run() {
+                    synchronized (listeners) {
+                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                            PingListener listener = (PingListener)it.next();
+                            listener.pingTimeout(nodeId, address, time);
+                        }
+                    }
+                    
+                    if (delegateHandle != null) {
+                        for(Iterator it = delegateHandle.listeners.iterator(); it.hasNext(); ) {
+                            PingListener listener = (PingListener)it.next();
+                            listener.pingTimeout(nodeId, address, time);
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    private class DelegateHandle implements ResponseHandler {
+        
+        private List listeners = new ArrayList();
+        
+        private ResponseHandler responseHandler;
+        
+        private DelegateHandle(ResponseHandler responseHandler) {
+            this.responseHandler = responseHandler;
+        }
+
+        public void addTime(long time) {
+            responseHandler.addTime(time);
+        }
+
+        public void handleResponse(KUID nodeId, SocketAddress src, Message message, long time) throws IOException {
+            responseHandler.handleResponse(nodeId, src, message, time);
+        }
+
+        public void handleTimeout(KUID nodeId, SocketAddress dst, Message message, long time) throws IOException {
+            responseHandler.handleTimeout(nodeId, dst, message, time);
+        }
+
+        public long time() {
+            return responseHandler.time();
+        }
+
+        public long timeout() {
+            return responseHandler.timeout();
         }
     }
 }

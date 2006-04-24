@@ -43,6 +43,7 @@ public interface PingListener {
      * 
      * @param nodeId Might be null if ID was unknown
      * @param address Address of the host we tried to ping
+     * @param time TODO
      */
-    public void pingTimeout(KUID nodeId, SocketAddress address);
+    public void pingTimeout(KUID nodeId, SocketAddress address, long time);
 }

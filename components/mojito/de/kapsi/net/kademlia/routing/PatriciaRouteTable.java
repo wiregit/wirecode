@@ -47,13 +47,8 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindNodeListener;
-import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
-import de.kapsi.net.kademlia.handler.ResponseHandler;
-import de.kapsi.net.kademlia.io.Receipt;
-import de.kapsi.net.kademlia.messages.Message;
-import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
@@ -87,6 +82,8 @@ public class PatriciaRouteTable implements RoutingTable {
         }
     };
     
+    
+    // TODO: Maybe no longer required!
     private Map loopLock = new FixedSizeHashMap(16);
     
     private Context context;
@@ -594,30 +591,20 @@ public class PatriciaRouteTable implements RoutingTable {
             // Kick off the spoof check. Ping the current contact and
             // if it responds then interpret it as an attempt to spoof
             // the node ID and if it doesn't then it is obviously dead.
-            ResponseHandler handler 
-                = new SpoofCheckHandler(context, 
-                    existingNode, node, replacement, bucket);
+            SpoofChecker checker 
+                = new SpoofChecker(existingNode, node, replacement, bucket);
             
-            doSpoofCheck(existingNode, handler);
+            try {
+                context.ping(existingNode, checker);
+                loopLock.put(existingNode.getNodeID(), checker);
+            } catch (IOException err) {
+                LOG.error("Coud not start spoof check", err);
+            }
         } else if(existingNode.isDead()) { //replace anyway and put in unknown state
             existingNode.setSocketAddress(node.getSocketAddress());
             existingNode.setUnknown();
         }
         return existingNode;
-    }
-    
-    private void doSpoofCheck(ContactNode contact, ResponseHandler handler) {
-        if(contact.isPinged()) {
-            return;
-        }
-        contact.setPinged(true);
-        RequestMessage request = context.getMessageFactory().createPingRequest();
-        try {
-            context.getMessageDispatcher().send(contact, request, handler);
-            loopLock.put(contact.getNodeID(), handler);
-        } catch (IOException e) {
-            LOG.error("Coud not start spoof check", e);
-        }
     }
         
     public void refreshBuckets(boolean force) throws IOException{
@@ -675,6 +662,8 @@ public class PatriciaRouteTable implements RoutingTable {
     public void clear() {
         nodesTrie.clear();
         bucketsTrie.clear();
+        loopLock.clear();
+        
         init(); // init the Bucket Trie!
     }
 
@@ -825,14 +814,10 @@ public class PatriciaRouteTable implements RoutingTable {
     }
     
     /**
-     * Handles a spoof check where we're trying to figure out
-     * wheather or not a Node is trying to spoof its Node ID.
+     * The SpoofChecker makes sure two Nodes cannot have the same
+     * NodeID at the same time.
      */
-    private class SpoofCheckHandler extends AbstractResponseHandler {
-        
-        private boolean done = false;
-        
-        private int errors = 0;
+    private class SpoofChecker implements PingListener {
         
         private ContactNode currentContact;
         private ContactNode newContact;
@@ -840,29 +825,21 @@ public class PatriciaRouteTable implements RoutingTable {
         private boolean replacementNode;
         private BucketNode replacementBucket;
         
-        public SpoofCheckHandler(Context context, ContactNode currentContact, ContactNode newContact, 
+        private SpoofChecker(ContactNode currentContact, ContactNode newContact, 
                 boolean replacementNode, BucketNode replacementBucket) {
-            super(context);
             
             this.currentContact = currentContact;
             this.newContact = newContact;
             this.replacementNode = replacementNode;
             this.replacementBucket = replacementBucket;
         }
-
-        public void handleResponse(Receipt receipt, KUID nodeId, 
-                SocketAddress src, Message message, long time) throws IOException {
-            
-            if (done) {
-                return;
-            }
-            
+        
+        public void pingSuccess(KUID nodeId, SocketAddress address, long time) {
             loopLock.remove(nodeId);
-            done = true;
             touchBucket(nodeId);
             if (LOG.isWarnEnabled()) {
-                LOG.warn("WARNING: "+newContact + " is trying to spoof its NodeID. " 
-                        + ContactNode.toString(nodeId, src) 
+                LOG.warn("WARNING: " + newContact + " is trying to spoof its NodeID. " 
+                        + ContactNode.toString(nodeId, address) 
                         + " responded in " + time + " ms");
             }
             routingStats.SPOOF_COUNT.incrementStat();
@@ -871,34 +848,21 @@ public class PatriciaRouteTable implements RoutingTable {
             //TODO: add bad node to IP Filter
         }
 
-        public void handleTimeout(Receipt receipt, KUID nodeId, 
-                SocketAddress dst, long time) throws IOException {
+        public void pingTimeout(KUID nodeId, SocketAddress address, long time) {
+            loopLock.remove(nodeId);
             
-            if (done) {
-                return;
+            // The current contact is obviously not responding
+            if (LOG.isInfoEnabled()) {
+                LOG.info(currentContact + " does not respond! Replacing it with " + newContact);
             }
+            currentContact.setSocketAddress(newContact.getSocketAddress());
+            currentContact.alive();
             
-            // Try at least x-times before giving up!
-            if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
-                
-                loopLock.remove(nodeId);
-                done = true;
-                
-                // The current contact is obviously not responding
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(currentContact + " does not respond! Replacing it with " + newContact);
-                }
-                currentContact.setSocketAddress(newContact.getSocketAddress());
-                currentContact.alive();
-                if(replacementNode && replacementBucket!=null) {
-                    // we have found a live contact in the bucket's replacement cache!
-                    // It's a good time to replace this bucket's dead entry with this node
-                    pingBucketLastRecentlySeenNode(replacementBucket);
-                }
-                return;
+            if(replacementNode && replacementBucket != null) {
+                // we have found a live contact in the bucket's replacement cache!
+                // It's a good time to replace this bucket's dead entry with this node
+                pingBucketLastRecentlySeenNode(replacementBucket);
             }
-                
-            doSpoofCheck(currentContact, this);
         }
     }
 }

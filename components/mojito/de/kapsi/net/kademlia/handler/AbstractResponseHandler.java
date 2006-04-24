@@ -19,29 +19,95 @@
  
 package de.kapsi.net.kademlia.handler;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+
 import de.kapsi.net.kademlia.Context;
+import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 public abstract class AbstractResponseHandler extends MessageHandler 
         implements ResponseHandler {
     
+    private int errors = 0;
+    
+    private long time;
     private long timeout;
     
+    private int maxErrors;
+    
     public AbstractResponseHandler(Context context) {
-        this(context, NetworkSettings.TIMEOUT.getValue());
+        this(context, -1L, -1);
     }
     
     public AbstractResponseHandler(Context context, long timeout) {
+        this(context, timeout, -1);
+    }
+    
+    public AbstractResponseHandler(Context context, int maxErrors) {
+        this(context, -1L, maxErrors);
+    }
+    
+    public AbstractResponseHandler(Context context, long timeout, int maxErrors) {
         super(context);
         
         if (timeout < 0L) {
-            throw new IllegalArgumentException("Timeout must be >= 0");
+            this.timeout = NetworkSettings.TIMEOUT.getValue();
+        } else {
+            this.timeout = timeout;
         }
         
-        this.timeout = timeout;
+        if (maxErrors < 0) {
+            if (NetworkSettings.USE_RANDOM_MAX_ERRORS.getValue()) {
+                // MIN_RETRIES <= x <= MAX_ERRORS
+                this.maxErrors = Math.max(NetworkSettings.MIN_RETRIES.getValue(), 
+                        (int)(Math.random() * NetworkSettings.MAX_ERRORS.getValue()));
+            } else {
+                this.maxErrors = NetworkSettings.MAX_ERRORS.getValue();
+            }
+        } else {
+            this.maxErrors = maxErrors;
+        }
     }
     
     public long timeout() {
         return timeout;
     }
+    
+    public void addTime(long time) {
+        this.time += time;
+    }
+    
+    public long time() {
+        return time;
+    }
+    
+    protected void resetErrors() {
+        errors = 0;
+    }
+    
+    public int getErrors() {
+        return errors;
+    }
+    
+    public int getMaxErrors() {
+        return maxErrors;
+    }
+    
+    public void handleTimeout(KUID nodeId, 
+            SocketAddress dst, Message message, long time) throws IOException {
+        
+        if (errors++ >= maxErrors) {
+            handleFinalTimeout(nodeId, dst, message);
+        } else {
+            handleResend(nodeId, dst, message);
+        }
+    }
+    
+    protected void handleResend(KUID nodeId, SocketAddress dst, Message message) throws IOException {
+        context.getMessageDispatcher().send(nodeId, dst, message, this);
+    }
+    
+    protected abstract void handleFinalTimeout(KUID nodeId, SocketAddress dst, Message message) throws IOException;
 }

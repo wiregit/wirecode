@@ -28,7 +28,6 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -69,7 +68,7 @@ public class MessageDispatcher implements Runnable {
     private static final long CLEANUP_INTERVAL = 3L * 1000L;
     private static final long SLEEP = 50L;
     
-    private Object IO_LOCK = new Object();
+    private Object queueLock = new Object();
     private LinkedList outputQueue = new LinkedList();
     private ReceiptMap messageMap = new ReceiptMap(1024);
     
@@ -161,23 +160,23 @@ public class MessageDispatcher implements Runnable {
             selector.close(); 
         } catch (IOException ignore) {}
         
-        synchronized (IO_LOCK) {
+        synchronized (queueLock) {
             messageMap.clear();
             outputQueue.clear();
         }
     }
     
-    public Receipt send(SocketAddress dst, Message message, 
+    public void send(SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
-        return send(null, dst, message, handler);
+        send(null, dst, message, handler);
     }
     
-    public Receipt send(ContactNode dst, Message message, 
+    public void send(ContactNode dst, Message message, 
             ResponseHandler handler) throws IOException {
-        return send(dst.getNodeID(), dst.getSocketAddress(), message, handler);
+        send(dst.getNodeID(), dst.getSocketAddress(), message, handler);
     }
     
-    public Receipt send(KUID nodeId, SocketAddress dst, Message message, 
+    public void send(KUID nodeId, SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
         
         if (!isOpen()) {
@@ -187,65 +186,25 @@ public class MessageDispatcher implements Runnable {
         // Make sure we're not sending messages to ourself.
         // The only exception are Pings/Pongs
         if (nodeId != null 
-                && nodeId.equals(context.getLocalNodeID())
-                && !(message instanceof PingRequest)
-                && !(message instanceof PingResponse)) {
+                && nodeId.equals(context.getLocalNodeID())) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
                         + " to ourself " + ContactNode.toString(nodeId, dst));
             }
-            return null;
+            return;
         }
         
         if (handler == null) {
             handler = defaultHandler;
         }
         
-        Receipt receipt = new Receipt(context, nodeId, dst, message, handler);
+        Receipt receipt = new Receipt(nodeId, dst, message, handler);
         
-        synchronized(IO_LOCK) {
+        synchronized(queueLock) {
             outputQueue.add(receipt);
             interestWrite(true);
-        }          	
-        
-        return receipt;
-    }
-    
-    public boolean cancel(Receipt receipt) {
-        if (receipt == null) {
-            return false;
         }
-        
-        boolean removed = false;
-        synchronized (IO_LOCK) {
-            int size = messageMap.size();
-            messageMap.remove(receipt.getMessageID());
-            removed = messageMap.size() != size;
-            
-            if (!removed) {
-                removed = outputQueue.remove(receipt);
-            }
-        }
-        
-        if (removed) {
-            receipt.handleCancel();
-        }
-        
-        return removed;
-    }
-    
-    public boolean cancelAll(Collection c) {
-        boolean all = true;
-        synchronized (IO_LOCK) {
-            for(Iterator it = c.iterator(); it.hasNext(); ) {
-                Receipt receipt = (Receipt)it.next();
-                if (!cancel(receipt)) {
-                    all = false;
-                }
-            }
-        }
-        return all;
     }
     
     private void handleRequest(KUID nodeId, SocketAddress src, Message msg) throws IOException {
@@ -293,7 +252,7 @@ public class MessageDispatcher implements Runnable {
      * the output Queue
      */
     private int writeNext() throws IOException {
-        synchronized (IO_LOCK) {
+        synchronized (queueLock) {
             if (!outputQueue.isEmpty()) {
                 Receipt receipt = (Receipt)outputQueue.removeFirst();
                 
@@ -301,7 +260,7 @@ public class MessageDispatcher implements Runnable {
                     // Wohoo! Message was sent!
                     receipt.sent();
                     networkStats.SENT_MESSAGES_COUNT.incrementStat();
-                    networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
+                    networkStats.SENT_MESSAGES_SIZE.addData(receipt.size()); // compressed size
                     
                     if (receipt.isRequest()) {
                         messageMap.put(receipt.getMessageID(), receipt);
@@ -332,7 +291,7 @@ public class MessageDispatcher implements Runnable {
             Receipt receipt = null;
             
             if (message instanceof ResponseMessage) {
-                synchronized (IO_LOCK) {
+                synchronized (queueLock) {
                     receipt = (Receipt)messageMap.remove(message.getMessageID());
                 }
                 
@@ -355,9 +314,7 @@ public class MessageDispatcher implements Runnable {
         // The only exception are Pings/Pongs
         if (nodeId != null 
                 && nodeId.equals(context.getLocalNodeID())
-                && src.equals(context.getLocalSocketAddress())
-                && !(message instanceof PingRequest)
-                && !(message instanceof PingResponse)) {
+                && src.equals(context.getLocalSocketAddress())) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
@@ -367,8 +324,7 @@ public class MessageDispatcher implements Runnable {
         }
         
         if (receipt != null) {
-            long time = receipt.time();
-            defaultHandler.handleResponse(null, nodeId, src, message, time); // BEFORE!
+            defaultHandler.handleResponse(nodeId, src, message, receipt.time()); // BEFORE!
             
             if (receipt.getHandler() != defaultHandler) {
                 receipt.handleSuccess(nodeId, src, message);
@@ -432,7 +388,7 @@ public class MessageDispatcher implements Runnable {
                 interestRead(true); // We're always interested in reading
                 
                 if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
-                    synchronized (IO_LOCK) {
+                    synchronized (queueLock) {
                         messageMap.cleanup();
                     }
                     lastCleanup = System.currentTimeMillis();

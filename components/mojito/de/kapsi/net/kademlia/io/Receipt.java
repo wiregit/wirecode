@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.ContactNode;
-import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
@@ -41,43 +40,33 @@ public class Receipt {
     
     public static final int MAX_PACKET_SIZE = 8192;
     
-    private Context context;
-    
     private KUID nodeId;
     private SocketAddress dst;
     
     private Message message;
     private ByteBuffer data;
-    private int dataSize;
+    private int size;
     
     private ResponseHandler handler;
     
     private long sent = 0L;
     private long received = 0L;
     
-    Receipt(Context context, KUID nodeId, SocketAddress dst, 
+    Receipt(KUID nodeId, SocketAddress dst, 
             Message message, ResponseHandler handler) throws IOException {
         
-        byte[] data = InputOutputUtils.serialize(message);
+        data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
+        size = data.limit();
         
-        if (data.length >= MAX_PACKET_SIZE) {
-            throw new IOException("Packet is too large: " + data.length);
+        if (size >= MAX_PACKET_SIZE) {
+            throw new IOException("Packet is too large: " + size + " >= " + MAX_PACKET_SIZE);
         }
-        
-        this.context = context;
         
         this.nodeId = nodeId;
         this.dst = dst;
         
         this.message = message;
-        this.dataSize = data.length;
-        this.data = ByteBuffer.wrap(data);
-        
         this.handler = handler;
-    }
-    
-    public boolean cancel() {
-        return context.getMessageDispatcher().cancel(this);
     }
     
     public Message getMessage() {
@@ -116,8 +105,8 @@ public class Receipt {
         return false;
     }
     
-    public int dataSize() {
-        return dataSize;
+    public int size() {
+        return size;
     }
     
     public int hashCode() {
@@ -151,7 +140,7 @@ public class Receipt {
         return false;
     }
     
-    void freeData() {
+    private void freeData() {
         data = null;
     }
     
@@ -173,7 +162,8 @@ public class Receipt {
         // Make sure B is not C
         if (compareNodeID(nodeId)) {
             if (handler != null) {
-                handler.handleResponse(this, nodeId, src, message, time());
+                handler.addTime(time());
+                handler.handleResponse(nodeId, src, message, time());
             }
         } else {
             if (LOG.isTraceEnabled()) {
@@ -187,7 +177,8 @@ public class Receipt {
     
     void handleTimeout() throws IOException {
         if (handler != null) {
-            handler.handleTimeout(this, nodeId, dst, time());
+            handler.addTime(time());
+            handler.handleTimeout(nodeId, dst, message, time());
         }
     }
     
