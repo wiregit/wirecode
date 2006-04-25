@@ -31,7 +31,7 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
@@ -46,7 +46,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         super(context);
     }
 
-    public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
+    public void handleRequest(KUID nodeId, SocketAddress src, RequestMessage message) throws IOException {
         
         LookupRequest request = (LookupRequest)message;
         KUID lookup = request.getLookupID();
@@ -68,7 +68,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
         
         FindNodeResponse response = context.getMessageFactory()
-                    .createFindNodeResponse(request.getMessageID(), queryKey, bucketList);
+                    .createFindNodeResponse(request, queryKey, bucketList);
         
         context.getMessageDispatcher().send(src, response, null);
     }

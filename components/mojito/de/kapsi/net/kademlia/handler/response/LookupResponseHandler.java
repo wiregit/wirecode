@@ -40,6 +40,8 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
@@ -123,7 +125,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     public void handleResponse(KUID nodeId, SocketAddress src, 
-            Message message, long time) throws IOException {
+            ResponseMessage message, long time) throws IOException {
         
         if (!isQueried(nodeId)) {
             if (LOG.isWarnEnabled()) {
@@ -206,7 +208,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    public void handleTimeout(KUID nodeId, SocketAddress dst, Message message, long time) throws IOException {
+    public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
         routeTable.handleFailure(nodeId);
@@ -292,7 +294,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             ++activeSearches;
             
             lookupStat.addRequest();
-            messageDispatcher.send(node, createMessage(lookup), this);
+            messageDispatcher.send(node, createMessage(node.getSocketAddress(), lookup), this);
         }
     }
     
@@ -370,12 +372,12 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 markAsQueried(node);
                 ++activeSearches;
                 lookupStat.addRequest();
-                messageDispatcher.send(node, createMessage(lookup), this);
+                messageDispatcher.send(node, createMessage(node.getSocketAddress(), lookup), this);
             }
         }
     }
     
-    protected abstract Message createMessage(KUID lookup);
+    protected abstract Message createMessage(SocketAddress dst, KUID lookup);
 
     protected abstract void finishValueLookup(KUID lookup, Collection keyValues, long time);
     

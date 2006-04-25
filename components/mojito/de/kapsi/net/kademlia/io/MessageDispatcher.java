@@ -207,7 +207,7 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    private void handleRequest(KUID nodeId, SocketAddress src, Message msg) throws IOException {
+    private void handleRequest(KUID nodeId, SocketAddress src, RequestMessage msg) throws IOException {
         RequestHandler requestHandler = null;
         
         if (msg instanceof PingRequest) {
@@ -229,7 +229,15 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    private void handleLateResponse(KUID nodeId, SocketAddress src, Message msg) throws IOException {
+    private void handleLateResponse(KUID nodeId, SocketAddress src, ResponseMessage msg) throws IOException {
+        
+        KUID messageId = msg.getMessageID();
+        if (!messageId.verify(src)) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(ContactNode.toString(nodeId, src) + " sent us an unrequested response!");
+            }
+            return;
+        }
         
         if (LOG.isTraceEnabled()) {
             if (msg instanceof PingResponse) {
@@ -244,7 +252,7 @@ public class MessageDispatcher implements Runnable {
         }
         networkStats.LATE_MESSAGES_COUNT.incrementStat();
         ContactNode node = new ContactNode(nodeId,src);
-        context.getRouteTable().add(node,true);
+        context.getRouteTable().add(node, true);
     }
     
     /**
@@ -323,13 +331,48 @@ public class MessageDispatcher implements Runnable {
             return;
         }
         
-        if (receipt != null) {
-            defaultHandler.handleResponse(nodeId, src, message, receipt.time()); // BEFORE!
+        if (message instanceof ResponseMessage) {
             
-            if (receipt.getHandler() != defaultHandler) {
-                receipt.handleSuccess(nodeId, src, message);
+            ResponseMessage response = (ResponseMessage)message;
+            
+            // Check if we ever sent a such request...
+            KUID messageId = response.getMessageID();
+            if (!messageId.verify(src)) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(ContactNode.toString(nodeId, src) + " sent us an unrequested response!");
+                }
+                
+                // IMPORTANT: We cannot add a penalty here! A malicious
+                // Node could fake its NodeID and SocketAddress, send us
+                // responses and we'd penalize a honest Node!
+                return;
             }
-        } else {
+            
+            // A null Receipt means it timed out and we're no
+            // longer handling the response. But it's nice to know
+            // the Node is still alive! Do something with the info!
+            
+            if (receipt != null) {
+                defaultHandler.handleResponse(nodeId, src, response, receipt.time()); // BEFORE!
+                if (receipt.getHandler() != defaultHandler) {
+                    receipt.handleSuccess(nodeId, src, response);
+                }
+                
+            } else {
+                // Make sure a singe Node cannot monopolize our resources
+                if (!filter.allow(src)) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(ContactNode.toString(nodeId, src) + " refused");
+                    }
+                    networkStats.FILTERED_MESSAGES.incrementStat();
+                    // return;
+                }
+                
+                handleLateResponse(nodeId, src, response);
+            }
+        } else if (message instanceof RequestMessage) {
+            
+            RequestMessage request = (RequestMessage)message;
             
             // Make sure a singe Node cannot monopolize our resources
             if (!filter.allow(src)) {
@@ -337,16 +380,13 @@ public class MessageDispatcher implements Runnable {
                     LOG.trace(ContactNode.toString(nodeId, src) + " refused");
                 }
                 networkStats.FILTERED_MESSAGES.incrementStat();
+                // return;
             }
             
-            if (message instanceof RequestMessage) {
-                handleRequest(nodeId, src, message);
-                defaultHandler.handleRequest(nodeId, src, message); // AFTER!
-            } else if (message instanceof ResponseMessage) {
-                handleLateResponse(nodeId, src, message);
-            } else if (LOG.isErrorEnabled()) {
-                LOG.error(message + " is neither Request nor Response");
-            }
+            handleRequest(nodeId, src, request);
+            defaultHandler.handleRequest(nodeId, src, request); // AFTER!
+        } else if (LOG.isFatalEnabled()) {
+            LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
         }
     }
     

@@ -13,6 +13,8 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.Context.PingContext;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 public class PingResponseHandler extends AbstractResponseHandler {
@@ -31,7 +33,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
     }
 
     public void handleResponse(KUID nodeId, 
-            SocketAddress src, Message message, long time) throws IOException {
+            SocketAddress src, ResponseMessage message, long time) throws IOException {
         
         networkStats.PINGS_OK.incrementStat();
         
@@ -41,7 +43,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         pingContext.handleSuccess(nodeId, src, time());
     }
 
-    public void handleTimeout(KUID nodeId, SocketAddress dst, Message message, long time) throws IOException {
+    public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         networkStats.PINGS_FAILED.incrementStat();
         super.handleTimeout(nodeId, dst, message, time);
     }

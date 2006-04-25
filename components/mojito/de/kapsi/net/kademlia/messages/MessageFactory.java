@@ -55,43 +55,43 @@ public class MessageFactory {
         return context.getLocalNodeID();
     }
     
-    private KUID createMessageID() {
-        return KUID.createRandomMessageID();
+    private KUID createMessageID(SocketAddress dst) {
+        return KUID.createRandomMessageID(dst);
     }
     
     private int getEstimatedSize() {
         return context.size();
     }
     
-    public PingRequest createPingRequest() {
-        return new PingRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID());
+    public PingRequest createPingRequest(SocketAddress dst) {
+        return new PingRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst));
     }
     
-    public PingResponse createPingResponse(KUID messageId, SocketAddress address) {
-        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, address, getEstimatedSize());
+    public PingResponse createPingResponse(RequestMessage request, SocketAddress address) {
+        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), address, getEstimatedSize());
     }
     
-    public FindNodeRequest createFindNodeRequest(KUID lookup) {
-        return new FindNodeRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), lookup);
+    public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookup) {
+        return new FindNodeRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst), lookup);
     }
     
-    public FindNodeResponse createFindNodeResponse(KUID messageId, QueryKey queryKey, List nodes) {
-        return new FindNodeResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, queryKey, nodes);
+    public FindNodeResponse createFindNodeResponse(RequestMessage request, QueryKey queryKey, List nodes) {
+        return new FindNodeResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), queryKey, nodes);
     }
     
-    public FindValueRequest createFindValueRequest(KUID lookup) {
-        return new FindValueRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), lookup);
+    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookup) {
+        return new FindValueRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst), lookup);
     }
     
-    public FindValueResponse createFindValueResponse(KUID messageId, Collection values) {
-        return new FindValueResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, values);
+    public FindValueResponse createFindValueResponse(RequestMessage request, Collection values) {
+        return new FindValueResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), values);
     }
     
-    public StoreRequest createStoreRequest(int remaining, QueryKey queryKey, Collection values) {
-        return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), remaining, queryKey, values);
+    public StoreRequest createStoreRequest(SocketAddress dst, int remaining, QueryKey queryKey, Collection values) {
+        return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst), remaining, queryKey, values);
     }
     
-    public StoreResponse createStoreResponse(KUID messageId, int requesting, Collection status) {
-        return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, requesting, status);
+    public StoreResponse createStoreResponse(RequestMessage request, int requesting, Collection status) {
+        return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), requesting, status);
     }
 }

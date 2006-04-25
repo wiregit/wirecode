@@ -38,6 +38,7 @@ import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValueCollection;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
@@ -76,19 +77,19 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleResponse(KUID nodeId, SocketAddress src, 
-            Message message, long time) throws IOException {
+            ResponseMessage message, long time) throws IOException {
         
         addLiveContactInfo(nodeId, src, message);
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
-            Message message, long time) throws IOException {
+            RequestMessage message, long time) throws IOException {
         RoutingTable routeTable = getRouteTable();
         routeTable.handleFailure(nodeId);
     }
 
     public void handleRequest(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
+            RequestMessage message) throws IOException {
         
         addLiveContactInfo(nodeId, src, message);
     }
@@ -146,7 +147,7 @@ public class DefaultMessageHandler extends MessageHandler
                 
                 if (!keyValuesToForward.isEmpty()) {
                     ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);
-                    RequestMessage request = context.getMessageFactory().createFindNodeRequest(nodeId);
+                    RequestMessage request = context.getMessageFactory().createFindNodeRequest(src, nodeId);
                     context.getMessageDispatcher().send(nodeId, src, request, handler);
                 }
             }
@@ -168,7 +169,7 @@ public class DefaultMessageHandler extends MessageHandler
         }
         
         public void handleResponse(KUID nodeId, SocketAddress src, 
-                Message message, long time) throws IOException {
+                ResponseMessage message, long time) throws IOException {
             
             FindNodeResponse response = (FindNodeResponse)message;
             

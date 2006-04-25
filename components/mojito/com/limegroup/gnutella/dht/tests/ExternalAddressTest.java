@@ -10,7 +10,7 @@ import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 public class ExternalAddressTest {
@@ -68,7 +68,7 @@ public class ExternalAddressTest {
         }
 
         public void handleRequest(KUID nodeId, SocketAddress src, 
-                Message message) throws IOException {
+                RequestMessage message) throws IOException {
             
             SocketAddress addr = externalAddress != null ? externalAddress : src;
             
@@ -76,7 +76,7 @@ public class ExternalAddressTest {
             System.out.println("Going to tell " + src + " that its external address is " + addr);
             
             PingResponse pong = context.getMessageFactory()
-                    .createPingResponse(message.getMessageID(), addr);
+                    .createPingResponse(message, addr);
     
             context.getMessageDispatcher().send(src, pong, null);
         }        

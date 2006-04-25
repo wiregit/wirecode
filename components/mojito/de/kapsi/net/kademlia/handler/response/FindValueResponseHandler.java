@@ -19,6 +19,7 @@
  
 package de.kapsi.net.kademlia.handler.response;
 
+import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Map;
 
@@ -45,8 +46,8 @@ public class FindValueResponseHandler extends LookupResponseHandler {
         return true;
     }
     
-    protected Message createMessage(KUID lookup) {
-        return context.getMessageFactory().createFindValueRequest(lookup);
+    protected Message createMessage(SocketAddress dst, KUID lookup) {
+        return context.getMessageFactory().createFindValueRequest(dst, lookup);
     }
 
     protected void finishValueLookup(final KUID lookup, final Collection keyValues, final long time) {

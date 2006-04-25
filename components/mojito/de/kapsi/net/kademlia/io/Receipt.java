@@ -32,6 +32,7 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.util.InputOutputUtils;
 
 public class Receipt {
@@ -153,7 +154,7 @@ public class Receipt {
     }
     
     void handleSuccess(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
+            ResponseMessage message) throws IOException {
         
         // A sends B a Ping
         // But B is offline and there is C who got B's IP from the ISP
@@ -178,7 +179,7 @@ public class Receipt {
     void handleTimeout() throws IOException {
         if (handler != null) {
             handler.addTime(time());
-            handler.handleTimeout(nodeId, dst, message, time());
+            handler.handleTimeout(nodeId, dst, (RequestMessage)message, time());
         }
     }
     

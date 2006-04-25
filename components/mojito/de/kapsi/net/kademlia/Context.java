@@ -40,8 +40,6 @@ import java.util.Timer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import sun.security.x509.NetscapeCertTypeExtension;
-
 import com.limegroup.gnutella.dht.statistics.DHTNodeStat;
 import com.limegroup.gnutella.dht.statistics.DHTStats;
 import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
@@ -449,7 +447,7 @@ public class Context implements Runnable {
         ResponseHandler handler = new StoreResponseHandler(this, queryKey, keyValues);
         
         RequestMessage request 
-            = messageFactory.createStoreRequest(keyValues.size(), 
+            = messageFactory.createStoreRequest(node.getSocketAddress(), keyValues.size(), 
                     queryKey, Collections.EMPTY_LIST);
         
         messageDispatcher.send(node, request, handler);
@@ -800,7 +798,7 @@ public class Context implements Runnable {
                 Attachment attachment = (Attachment)attachmentMap.get(address);
                 if (attachment == null) {
                     
-                    PingRequest request = messageFactory.createPingRequest();
+                    PingRequest request = messageFactory.createPingRequest(address);
                     ResponseHandler responseHandler = new PingResponseHandler(Context.this, this);
                     
                     attachment = new Attachment(responseHandler);

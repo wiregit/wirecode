@@ -25,6 +25,7 @@ import java.net.SocketAddress;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 public abstract class AbstractResponseHandler extends MessageHandler 
@@ -96,7 +97,7 @@ public abstract class AbstractResponseHandler extends MessageHandler
     }
     
     public void handleTimeout(KUID nodeId, 
-            SocketAddress dst, Message message, long time) throws IOException {
+            SocketAddress dst, RequestMessage message, long time) throws IOException {
         
         if (errors++ >= maxErrors) {
             handleFinalTimeout(nodeId, dst, message);

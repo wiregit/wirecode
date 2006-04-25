@@ -19,6 +19,7 @@
  
 package de.kapsi.net.kademlia.handler.response;
 
+import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Map;
 
@@ -40,8 +41,8 @@ public class FindNodeResponseHandler extends LookupResponseHandler {
         this.l = l;
     }
     
-    protected Message createMessage(KUID lookup) {
-        return context.getMessageFactory().createFindNodeRequest(lookup);
+    protected Message createMessage(SocketAddress dst, KUID lookup) {
+        return context.getMessageFactory().createFindNodeRequest(dst, lookup);
     }
     
     protected boolean isValueLookup() {

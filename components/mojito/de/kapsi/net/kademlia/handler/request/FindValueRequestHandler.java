@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
@@ -41,7 +41,7 @@ public class FindValueRequestHandler extends LookupRequestHandler {
         super(context);
     }
 
-    public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
+    public void handleRequest(KUID nodeId, SocketAddress src, RequestMessage message) throws IOException {
         
         if (message instanceof FindValueRequest) {
             LookupRequest request = (LookupRequest)message;
@@ -54,7 +54,7 @@ public class FindValueRequestHandler extends LookupRequestHandler {
                 }
                 
                 FindValueResponse response = context.getMessageFactory()
-                            .createFindValueResponse(request.getMessageID(), values);
+                            .createFindValueResponse(request, values);
                 context.getMessageDispatcher().send(src, response, null);
                 
                 return; // We're done here!

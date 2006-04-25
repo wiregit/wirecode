@@ -37,7 +37,7 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
@@ -53,7 +53,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
     }
     
     public void handleRequest(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
+            RequestMessage message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
         QueryKey queryKey = request.getQueryKey();
@@ -130,7 +130,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         int keyValues = Math.min(maxOnce, remaining);
         
         StoreResponse response 
-            = context.getMessageFactory().createStoreResponse(request.getMessageID(), keyValues, stats);
+            = context.getMessageFactory().createStoreResponse(request, keyValues, stats);
         context.getMessageDispatcher().send(src, response, null);
     }
 }
