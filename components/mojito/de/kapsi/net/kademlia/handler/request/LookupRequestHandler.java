@@ -57,7 +57,6 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         
         QueryKey queryKey = QueryKey.getQueryKey(src);
         List bucketList = Collections.EMPTY_LIST;
-        
         if (context.isBootstrapped()) {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             bucketList = context.getRouteTable().select(lookup, k, false, false);
