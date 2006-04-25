@@ -171,7 +171,7 @@ public class DownloadWorker {
      * The number of seconds to wait for a busy host (if it didn't give us a
      * retry after header) if we don't have any active downloaders.
      *
-     * Note that there are some acceptable problems with the way this
+     * Note that there are some acceptable problems with the way this 
      * values are used.  Namely, if we have sources X & Y and source
      * X is tried first, but is busy, its busy-time will be set to
      * 1 minute.  Then source Y is tried and is accepted, source X

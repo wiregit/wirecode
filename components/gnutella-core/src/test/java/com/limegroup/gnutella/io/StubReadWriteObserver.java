@@ -11,21 +11,24 @@ class StubReadWriteObserver implements IOErrorObserver, ReadWriteObserver {
     private boolean shutdown = false;
     private IOException iox = null;
     private int amountGiven = 0;
+    private int amountLeft = 0;
     
-    void setThrottle(Throttle throttle) {
-        this.throttle = throttle;
+    void setAmountGiven(int given) {
+        amountGiven = given;
+    }
+    
+    int getAmountLeft() {
+        return amountLeft;
     }
     
     public void handleRead() throws IOException {
         read++;
-        amountGiven = throttle.request();
-        throttle.release(Math.max(0, amountGiven - amtToUse));
+        amountLeft = Math.max(0, amountGiven - amtToUse);
     }
     
     public boolean handleWrite() throws IOException {
         wrote++;
-        amountGiven = throttle.request();
-        throttle.release(Math.max(0, amountGiven - amtToUse));
+        amountLeft = Math.max(0, amountGiven - amtToUse);
         return false;
     }
     
@@ -40,7 +43,6 @@ class StubReadWriteObserver implements IOErrorObserver, ReadWriteObserver {
     void setAmountToUse(int toUse) { amtToUse = toUse; }
     int read() { return read; }
     int wrote() { return wrote; }
-    int given() { return amountGiven; }
     IOException iox() { return iox; }
     boolean closed() { return shutdown; }
     

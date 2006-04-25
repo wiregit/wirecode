@@ -48,8 +48,11 @@ import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.io.IOState;
 import com.limegroup.gnutella.io.IOStateMachine;
 import com.limegroup.gnutella.io.IOStateObserver;
+import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.ReadState;
+import com.limegroup.gnutella.io.Throttle;
+import com.limegroup.gnutella.io.ThrottleReader;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -115,17 +118,8 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
      */
     static int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
     
-    /**
-     * The throttle to use for all TCP downloads.
-     */
-    private static final BandwidthThrottle THROTTLE =
-        new BandwidthThrottle(Float.MAX_VALUE, false);
-        
-    /**
-     * The throttle to use for UDP downloads.
-     */
-    private static final BandwidthThrottle UDP_THROTTLE =
-        new BandwidthThrottle(Float.MAX_VALUE, false);
+    /** The throttle. */
+    private static final Throttle THROTTLE = new NBThrottle(false, Float.MAX_VALUE);
 
     private RemoteFileDesc _rfd;
 	private long _index;
@@ -432,6 +426,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         
         _socket.setKeepAlive(true);
         _stateMachine = new IOStateMachine(this, new LinkedList(), BUF_LENGTH);
+        _stateMachine.setReadChannel(new ThrottleReader(THROTTLE));
         ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
         
@@ -1756,7 +1751,6 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
      */
     public static void setRate(float bytesPerSecond) {
         THROTTLE.setRate(bytesPerSecond);
-        UDP_THROTTLE.setRate(bytesPerSecond);
     }
     
     /**
@@ -1782,7 +1776,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
     }
     
     public static void setThrottleSwitching(boolean on) {
-        THROTTLE.setSwitching(on);
+        //THROTTLE.setSwitching(on);
         // DO NOT PUT SWITCHING ON THE UDP SIDE.
     }
 

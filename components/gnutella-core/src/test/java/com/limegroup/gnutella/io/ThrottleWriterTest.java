@@ -1,16 +1,13 @@
 package com.limegroup.gnutella.io;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
-import java.util.*;
-import java.util.zip.*;
-import java.net.*;
+import java.util.Random;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.connection.WriteBufferChannel;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * Tests that ThrottleWriter throttles data correctly.
@@ -68,7 +65,7 @@ public final class ThrottleWriterTest extends BaseTestCase {
         
         assertFalse(THROTTLE.didRequest());
         assertFalse(THROTTLE.didRelease());
-        assertTrue(WRITER.handleWrite()); // still data left to write.
+        assertTrue(doWrite()); // still data left to write.
         assertTrue(THROTTLE.didRequest());
         assertTrue(THROTTLE.didRelease());
         
@@ -87,7 +84,7 @@ public final class ThrottleWriterTest extends BaseTestCase {
         WRITER.bandwidthAvailable();
         assertTrue(SINK.interested());
         
-        assertFalse(WRITER.handleWrite()); // all data written
+        assertFalse(doWrite()); // all data written
         assertEquals(500, SINK.written()); // only wrote that we had.
         assertEquals(50, THROTTLE.getAvailable()); // throttle still has data
         assertEquals(1, THROTTLE.interests()); // didn't request interest again.
@@ -101,7 +98,7 @@ public final class ThrottleWriterTest extends BaseTestCase {
         WRITER.bandwidthAvailable();
         assertEquals(0, SINK.written());
         assertTrue(SINK.interested());
-        assertFalse(WRITER.handleWrite());
+        assertFalse(doWrite());
         assertEquals(1, THROTTLE.interests());
         assertEquals(200, SINK.written());
         assertEquals(0, THROTTLE.getAvailable());
@@ -118,7 +115,7 @@ public final class ThrottleWriterTest extends BaseTestCase {
         WRITER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests());
         
-        assertTrue(WRITER.handleWrite()); // data still leftover.
+        assertTrue(doWrite()); // data still leftover.
         assertEquals(100, SINK.written());
         assertEquals(150, SOURCE.remaining());
         assertEquals(200, THROTTLE.getAvailable());
@@ -130,7 +127,7 @@ public final class ThrottleWriterTest extends BaseTestCase {
         THROTTLE.setAvailable(200);
         WRITER.bandwidthAvailable();
         assertEquals(0, THROTTLE.interests());
-        assertFalse(WRITER.handleWrite());
+        assertFalse(doWrite());
         assertEquals(150, SINK.written());
         assertEquals(50, THROTTLE.getAvailable());
         assertEquals(0, THROTTLE.interests());
@@ -158,4 +155,11 @@ public final class ThrottleWriterTest extends BaseTestCase {
 	private ByteBuffer buffer(byte[] data) {
 	    return ByteBuffer.wrap(data);
 	}
+    
+    private boolean doWrite() throws IOException {
+        WRITER.requestBandwidth();
+        boolean ret = WRITER.handleWrite();
+        WRITER.releaseBandwidth();
+        return ret;
+    }
 }

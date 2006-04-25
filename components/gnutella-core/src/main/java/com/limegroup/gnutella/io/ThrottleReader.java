@@ -8,50 +8,48 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 /**
- * A writer that throttles data according to a throttle.
+ * A reader that throttles data according to a throttle.
  *
  * To work with the Throttle, this uses an attachment (which must be the same as the
  * attachment of the SelectionKey associated with the socket this is using).
  */
-public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
+public class ThrottleReader implements InterestReadChannel, ChannelReader, ThrottleListener {
     
-    private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
+    private static final Log LOG = LogFactory.getLog(ThrottleReader.class);
     
     /** The channel to write to & interest on. */    
-    private volatile InterestWriteChannel channel;
-    /** The last observer. */
-    private volatile WriteObserver observer;
+    private volatile InterestReadChannel channel;
     /** The throttle we're using. */
     private final Throttle throttle;
-    /** The amount of data we were told we can write. */
+    /** The amount of data we were told we can read. */
     private int available;    
     /** The object that the Throttle will recognize as the SelectionKey attachments */
     private Object attachment;
     
     /**
-     * Constructs a ThrottleWriter with the given Throttle.
+     * Constructs a ThrottleReader with the given Throttle.
      *
      * You MUST call setWriteChannel prior to using this.
      */
-    public ThrottleWriter(Throttle throttle) {
+    public ThrottleReader(Throttle throttle) {
         this(throttle, null);
     }
     
     /**
      * Constructs a new ThrottleWriter with the given throttle & channel.
      */
-    public ThrottleWriter(Throttle throttle, InterestWriteChannel channel) {
+    public ThrottleReader(Throttle throttle, InterestReadChannel channel) {
         this.throttle = throttle;
         this.channel = channel;
     }
     
     /** Retreives the sink. */
-    public InterestWriteChannel getWriteChannel() {
+    public InterestReadChannel getReadChannel() {
         return channel;
     }
     
     /** Sets the sink. */
-    public void setWriteChannel(InterestWriteChannel channel) {
+    public void setReadChannel(InterestReadChannel channel) {
         this.channel = channel;
         throttle.interest(this);
     }
@@ -70,13 +68,12 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
      * Tells the Throttle that we're interested in receiving bandwidthAvailable
      * events at some point in time.
      */
-    public void interest(WriteObserver observer, boolean status) {
-        if(status) {
-            this.observer = observer;
-            if(channel != null)
+    public void interest(boolean status) {
+        if(channel != null) {
+            if(status)
                 throttle.interest(this);
-        } else {
-            this.observer = null;
+            else
+                channel.interest(false);
         }
     }
     
@@ -87,7 +84,8 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
      */
     public boolean bandwidthAvailable() {
         if(channel.isOpen()) {
-            channel.interest(this, true);
+            LOG.debug("Bandwidth is available, notifying channel");
+            channel.interest(true);
             return true;
         } else {
             return false;
@@ -95,28 +93,35 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     }
     
     /**
-     * Writes data to the chain.
+     * Read data from the chain.
      *
-     * Only writes up to 'available' amount of data.
+     * Only reads up to 'available' amount of data.
      */
-    public int write(ByteBuffer buffer) throws IOException {
-        InterestWriteChannel chain = channel;
+    public int read(ByteBuffer buffer) throws IOException {
+        InterestReadChannel chain = channel;
         if(chain == null)
-            throw new IllegalStateException("writing with no chain!");
+            throw new IllegalStateException("reading with no chain!");
             
         if(available == 0)
             return 0;
 
         int priorLimit = buffer.limit();
-        if(buffer.remaining() > available)
+        if(buffer.remaining() > available) {
+            LOG.debug("Limting amount remaining to read from " + buffer.remaining() + " to " + available);
             buffer.limit(buffer.position() + available);
-            
-        int totalWrote = channel.write(buffer);
+        }
+
+        int totalRead = -1;
+        try {
+            totalRead = channel.read(buffer);
+        } finally {
+            buffer.limit(priorLimit);
+        }
         
-        available -= totalWrote;
-        buffer.limit(priorLimit);
+        available -= totalRead;
+        LOG.debug("Read: " + totalRead  + ", leaving: " + available + " left.");
         
-        return totalWrote;
+        return totalRead;
     }
     
     /** Closes the underlying channel. */
@@ -133,7 +138,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     }
     
     /**
-     * Requests some bandiwdth from the throttle.
+     * Requests some bandwidth from the throttle.
      */
     public void requestBandwidth() {
         available = throttle.request();
@@ -145,45 +150,5 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     public void releaseBandwidth() {
         throttle.release(available);
         available = 0;
-    }
-    
-    /**
-     * Writes up to 'available' data to the sink channel.
-     * requestBandwidth must be called prior to this to allow data
-     * to be written, and releaseBandwidth must be called afterwards
-     * to return unwritten data back to the Throttle.
-     */
-    public boolean handleWrite() throws IOException {
-        InterestWriteChannel chain = channel;
-        if(chain == null)
-            throw new IllegalStateException("writing with no source.");
-            
-        WriteObserver interested = observer;
-        if(available != 0) {
-            chain.interest(this, false);
-            if(interested != null)
-                interested.handleWrite();
-            interested = observer; // re-get it, since observer may have changed interest.
-            if(interested != null) {
-                throttle.interest(this);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
-    
-    /** Shuts down the last observer. */
-    public void shutdown() {
-        Shutdownable listener = observer;
-        if(listener != null)
-            listener.shutdown();
-    }
-    
-    /** Unused, Unsupported */
-    public void handleIOException(IOException x) {
-        throw new RuntimeException("Unsupported", x);
     }
 }

@@ -42,14 +42,14 @@ public final class NBThrottleTest extends BaseTestCase {
 
         // control.
 	    for(int i = 0; i < DATA.length; i++)
-	        assertEquals(0, DATA[i].STUB.available());
+	        assertEquals(0, DATA[i].STUB.bandwidthAvailableCalls());
 	}
 	
 	// nothing should have bandwidth if nothing was interested
 	public void testNoBandwidthIfNothingInterested() throws Exception {
         THROTTLE.tick(0);
 	    for(int i = 0; i < DATA.length; i++)
-	        assertEquals(0, DATA[i].STUB.available());
+	        assertEquals(0, DATA[i].STUB.bandwidthAvailableCalls());
     }   
 	
 	// only those that were interested should be given bandwidth.
@@ -60,7 +60,7 @@ public final class NBThrottleTest extends BaseTestCase {
 	    THROTTLE.tick(1000);
 	    
 	    for(int i = 0; i < DATA.length; i++)
-	        assertEquals(i%3==0 ? 1 : 0, DATA[i].STUB.available());
+	        assertEquals(i%3==0 ? 1 : 0, DATA[i].STUB.bandwidthAvailableCalls());
     }
     
     // only those that were NEWLY interested should be given bandwidth
@@ -78,7 +78,7 @@ public final class NBThrottleTest extends BaseTestCase {
         
         // if this wasn't working, i%3 && i%2 would give two availables.
 	    for(int i = 0; i < DATA.length; i++)
-	        assertEquals((i%3==0 || i%2 == 0)? 1 : 0, DATA[i].STUB.available());
+	        assertEquals((i%3==0 || i%2 == 0)? 1 : 0, DATA[i].STUB.bandwidthAvailableCalls());
     }
     
     // make sure that if bandwidth is still available, ticks within the tick interval
@@ -94,7 +94,7 @@ public final class NBThrottleTest extends BaseTestCase {
      
         // if this wasn't working (i%5 && !i%3) would give 0 available.   
 	    for(int i = 0; i < DATA.length; i++)
-	        assertEquals((i%3==0 || i%5 == 0)? 1 : 0, DATA[i].STUB.available());
+	        assertEquals((i%3==0 || i%5 == 0)? 1 : 0, DATA[i].STUB.bandwidthAvailableCalls());
     }
     
     // make sure it gives no bandwidth if it isn't active (within a selectableKeys call)
@@ -116,42 +116,42 @@ public final class NBThrottleTest extends BaseTestCase {
         THROTTLE.interest(DATA[0].STUB);
         THROTTLE.tick(1000);
         THROTTLE.selectableKeys(set(DATA[0].KEY));
-        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
+        assertEquals(BYTES_PER_TICK, DATA[0].STUB.given());
     } 
     
     // make sure that no bandwidth is given if we're ticked and bandwidth is used up.
     public void testNoBandwidthIfEmptyWithinTickInterval() throws Exception {
         THROTTLE.interest(DATA[0].STUB);
         THROTTLE.tick(1000);
-        assertEquals(1, DATA[0].STUB.available());
+        assertEquals(1, DATA[0].STUB.bandwidthAvailableCalls());
         THROTTLE.selectableKeys(set(DATA[0].KEY));
-        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
+        assertEquals(BYTES_PER_TICK, DATA[0].STUB.given());
         DATA[0].STUB.clear();
         
 	    THROTTLE.interest(DATA[1].STUB);
 	    THROTTLE.tick(1001);
-	    assertEquals(0, DATA[0].STUB.available());
-	    assertEquals(0, DATA[1].STUB.available());
+	    assertEquals(0, DATA[0].STUB.bandwidthAvailableCalls());
+	    assertEquals(0, DATA[1].STUB.bandwidthAvailableCalls());
     }
     
     // make sure bandwidth fills back up after tick interval
     public void testBandwidthFillsAfterTickInterval() throws Exception {
         THROTTLE.interest(DATA[0].STUB);
         THROTTLE.tick(1000);
-        assertEquals(1, DATA[0].STUB.available());
+        assertEquals(1, DATA[0].STUB.bandwidthAvailableCalls());
         THROTTLE.selectableKeys(set(DATA[0].KEY));
-        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
+        assertEquals(BYTES_PER_TICK, DATA[0].STUB.given());
         DATA[0].STUB.clear();
         
 	    THROTTLE.interest(DATA[1].STUB);
 	    THROTTLE.tick(1001);
-	    assertEquals(0, DATA[0].STUB.available());
-	    assertEquals(0, DATA[1].STUB.available());
+	    assertEquals(0, DATA[0].STUB.bandwidthAvailableCalls());
+	    assertEquals(0, DATA[1].STUB.bandwidthAvailableCalls());
 	    
 	    THROTTLE.tick(1000 + MILLIS_PER_TICK + 1);
-	    assertEquals(1, DATA[1].STUB.available());
+	    assertEquals(1, DATA[1].STUB.bandwidthAvailableCalls());
 	    THROTTLE.selectableKeys(set(DATA[1].KEY));
-        assertEquals(BYTES_PER_TICK, DATA[1].ATTACHMENT.given());
+        assertEquals(BYTES_PER_TICK, DATA[1].STUB.given());
     }
     
     // make sure that if the first interested ready host used up all the bandwidth,
@@ -164,8 +164,8 @@ public final class NBThrottleTest extends BaseTestCase {
         THROTTLE.tick(2000); 
         
         THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
-        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
-        assertEquals(0, DATA[1].ATTACHMENT.given());
+        assertEquals(BYTES_PER_TICK, DATA[0].STUB.given());
+        assertEquals(0, DATA[1].STUB.given());
         assertEquals(1, DATA[0].ATTACHMENT.wrote());
         assertEquals(0, DATA[1].ATTACHMENT.wrote());
     }
@@ -180,8 +180,8 @@ public final class NBThrottleTest extends BaseTestCase {
         
         DATA[0].ATTACHMENT.setAmountToUse(BYTES_PER_TICK - 100);
         THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
-        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
-        assertEquals(100, DATA[1].ATTACHMENT.given());
+        assertEquals(BYTES_PER_TICK, DATA[0].STUB.given());
+        assertEquals(100, DATA[1].STUB.given());
         assertEquals(1, DATA[0].ATTACHMENT.wrote());
         assertEquals(1, DATA[1].ATTACHMENT.wrote());
     }
@@ -195,8 +195,8 @@ public final class NBThrottleTest extends BaseTestCase {
         THROTTLE.tick(2000); 
         
         THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
-        assertEquals(BYTES_PER_TICK, DATA[0].ATTACHMENT.given());
-        assertEquals(0, DATA[1].ATTACHMENT.given());
+        assertEquals(BYTES_PER_TICK, DATA[0].STUB.given());
+        assertEquals(0, DATA[1].STUB.given());
         assertEquals(1, DATA[0].ATTACHMENT.wrote());
         assertEquals(0, DATA[1].ATTACHMENT.wrote());
         
@@ -205,8 +205,8 @@ public final class NBThrottleTest extends BaseTestCase {
         THROTTLE.tick(3000);
         DATA[1].ATTACHMENT.setAmountToUse(BYTES_PER_TICK - 50);
         THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
-        assertEquals(BYTES_PER_TICK, DATA[1].ATTACHMENT.given());
-        assertEquals(50, DATA[0].ATTACHMENT.given());
+        assertEquals(BYTES_PER_TICK, DATA[1].STUB.given());
+        assertEquals(50, DATA[0].STUB.given());
         assertEquals(1, DATA[1].ATTACHMENT.wrote());
         assertEquals(2, DATA[0].ATTACHMENT.wrote());
     }
@@ -215,7 +215,7 @@ public final class NBThrottleTest extends BaseTestCase {
     public void testUniterestedNotUsed() throws Exception {
         THROTTLE.tick(1000);
         THROTTLE.selectableKeys(set(DATA[0].KEY));
-        assertEquals(0, DATA[0].ATTACHMENT.given());
+        assertEquals(0, DATA[0].STUB.given());
         assertEquals(0, DATA[0].ATTACHMENT.wrote());
     }
 
@@ -226,15 +226,15 @@ public final class NBThrottleTest extends BaseTestCase {
         
         THROTTLE.interest(DATA[0].STUB);
         THROTTLE.tick(1000);
-        assertEquals(1, DATA[0].STUB.available());
+        assertEquals(1, DATA[0].STUB.bandwidthAvailableCalls());
         THROTTLE.selectableKeys(set(DATA[0].KEY));
                 
         THROTTLE.interest(DATA[1].STUB);
-        assertEquals(0, DATA[1].STUB.available());
+        assertEquals(0, DATA[1].STUB.bandwidthAvailableCalls());
         THROTTLE.tick(1076);
-        assertEquals(0, DATA[1].STUB.available());
+        assertEquals(0, DATA[1].STUB.bandwidthAvailableCalls());
         THROTTLE.tick(1077);
-        assertEquals(1, DATA[1].STUB.available());
+        assertEquals(1, DATA[1].STUB.bandwidthAvailableCalls());
     }
     
     private Set set(Object o) {
@@ -250,15 +250,17 @@ public final class NBThrottleTest extends BaseTestCase {
     
     private void fixDataThrottles() {
         for(int i = 0; i < DATA.length; i++)
-            DATA[i].ATTACHMENT.setThrottle(THROTTLE);
+            DATA[i].STUB.setThrottle(THROTTLE);
     }
 	
 	private static class Data {
-        private StubReadWriteObserver ATTACHMENT = new StubReadWriteObserver();
-        private StubThrottleListener STUB = new StubThrottleListener(ATTACHMENT);
-        private FakeSelectionKey KEY = new FakeSelectionKey(NIODispatcher.instance().new Attachment(ATTACHMENT));
+        private StubReadWriteObserver ATTACHMENT;
+        private StubThrottleListener STUB;
+        private FakeSelectionKey KEY;
         Data(Throttle throttle) {
-            ATTACHMENT.setThrottle(throttle);
+            ATTACHMENT  = new StubReadWriteObserver();
+            STUB = new StubThrottleListener(ATTACHMENT, throttle);
+            KEY =  new FakeSelectionKey(NIODispatcher.instance().new Attachment(ATTACHMENT));
         }
     }
     

@@ -31,11 +31,14 @@ import org.apache.commons.logging.Log;
  *    the next party in the chain (ultimately the Socket).
  *    Callback: ThrottleListener.bandwidthAvailable()
  *
- * 3) The listener must request data prior to writing, and write out only the amount
- *    that it requested.
+ * 3) The listener must request data prior to writing (in response to requestBandwidth), 
+ *    and write out only the amount that it requested.
+ *    Callback: ThrottleListener.requestBandwidth
  *    Call: Throttle.request()
  *
- * 4) The listener must release data that it was given from a request but did not write.
+ * 4) The listener must release data (in response to releaseBandwidth) that it was given
+ *    from a request but did not write.
+ *    Callback: ThrottleListener.releaseBandwidth
  *    Call: Throttle.release(amount)
  *
  * Extraneous: The ThrottleListener must have an 'attachment' set that is the same attachment
@@ -43,20 +46,22 @@ import org.apache.commons.logging.Log;
  *             necessary so that Throttle can match up SelectionKey ready events
  *             with ThrottleListener interest.
  *
- * The flow of a Throttle works like:
+ * The flow of a Throttle  works like:
  *      Throttle                            ThrottleListener                   NIODispatcher
  * 1)                                       Throttle.interest               
  * 2)   <adds to request list>
  * 3)                                                                         Throttle.tick
- * 4)   ThrottleListener.bandwidthAvailable
- * 5)                                       SocketChannel.interest
- * 6)   <moves from request to interest list>
+ * 4)  ThrottleListener.bandwidthAvailable
+ * 5)                                      SocketChannel.interest
+ * 6)  <moves from request to interest list>
  * 7)                                                                         Selector.select
  * 8)                                                                         Throttle.selectableKeys 
- * 9)                                       Throttle.request
- * 10)                                      SocketChannel.write
- * 11)                                      Throttle.release
- * 12)  <remove from interest>
+ * 9)  ThrottleListener.requestBandwidth
+ * 10)                                     Throttle.request
+ * 11)                                     SocketChannel.write [or SocketChannel.read]
+ * 12) ThrottleListener.releaseBandwidth
+ * 13)                                     Throttle.release
+ * 14) <remove from interest>
  *
  * If there are multiple listeners, steps 4 & 5 are repeated for each request, and steps 9 through 12
  * are performed on interested parties until there is no bandwidth available.  Another tick will
@@ -71,15 +76,16 @@ public class NBThrottle implements Throttle {
     
     private static final Log LOG = LogFactory.getLog(NBThrottle.class);
     
-    /** The maximum amount to ever give anyone. */
-    private static final int MAXIMUM_TO_GIVE = 1400;
-    /** The minimum amount to ever give anyone. */
-    private static final int MINIMUM_TO_GIVE = 30;
 
     private static final int DEFAULT_TICK_TIME = 100;
     
     /** The number of milliseconds in each tick. */
     private final int MILLIS_PER_TICK;
+
+    /** The maximum amount to ever give anyone. */
+    private final int MAXIMUM_TO_GIVE;
+    /** The minimum amount to ever give anyone. */
+    private final int MINIMUM_TO_GIVE;
     
     /** Whether or not this throttle is for writing. (If false, it's for reading.) */
     private final boolean _write;
@@ -162,12 +168,25 @@ public class NBThrottle implements Throttle {
     protected NBThrottle(boolean forWriting, float bytesPerSecond, 
                          boolean addToDispatcher, int millisPerTick) {
         MILLIS_PER_TICK = Math.min(100, Math.max(50,millisPerTick));
-        int ticksPerSecond = 1000 / millisPerTick;
+        int ticksPerSecond = 1000 / MILLIS_PER_TICK;
         _write = forWriting;
         _processOp = forWriting ? SelectionKey.OP_WRITE : SelectionKey.OP_READ;
-        _bytesPerTick = (int)((float)bytesPerSecond / ticksPerSecond);
+        _bytesPerTick = (int)(bytesPerSecond / ticksPerSecond);
         if(addToDispatcher)
             NIODispatcher.instance().addThrottle(this);
+        
+        if(forWriting) {
+            MAXIMUM_TO_GIVE = 1400;
+            MINIMUM_TO_GIVE = 30;
+        } else {
+            MAXIMUM_TO_GIVE = Integer.MAX_VALUE;
+            MINIMUM_TO_GIVE = 0;
+        }
+    }
+    
+    public void setRate(float bytesPerSecond) {
+        int ticksPerSecond = 1000 / MILLIS_PER_TICK;
+        _bytesPerTick = (int)(bytesPerSecond / ticksPerSecond);
     }
     
     /**
@@ -180,8 +199,10 @@ public class NBThrottle implements Throttle {
                 try {
                     if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
                         Object attachment = NIODispatcher.instance().attachment(key.attachment());
-                        if(_interested.containsKey(attachment))
+                        if(_interested.containsKey(attachment)) {
+                            LOG.debug("Adding: " + attachment + " to ready");
                             _ready.put(attachment, key);
+                        }
                     }
                 } catch(CancelledKeyException ignored) {
                     i.remove(); // it's cancelled, we can ignore it now & forever.
@@ -201,7 +222,13 @@ public class NBThrottle implements Throttle {
                     //LOG.trace("Removing closed but interested party: " + next.getKey());
                     i.remove();
                 } else if(key != null) {
-                    NIODispatcher.instance().process(now, key, key.attachment(), _processOp);
+                    LOG.debug("Processing: " + key.attachment());
+                    listener.requestBandwidth();
+                    try {
+                        NIODispatcher.instance().process(now, key, key.attachment(), _processOp);
+                    } finally {
+                        listener.releaseBandwidth();
+                    }
                     i.remove();
                     if(_available < MINIMUM_TO_GIVE)
                         break;
@@ -216,6 +243,7 @@ public class NBThrottle implements Throttle {
      */
     public void interest(ThrottleListener writer) {
         synchronized(_requests) {
+            LOG.debug("Adding: " + writer + " to requests");
             _requests.add(writer);
         }
     }
@@ -224,20 +252,20 @@ public class NBThrottle implements Throttle {
      * Requests some bytes to write.
      */
     public int request() {
-        if(!_active) // this is gonna happen from NIODispatcher's processing
+        if(!_active) // failsafe to ensure request only occurs when we want it
             return 0;
         
         int ret = Math.min(_available, MAXIMUM_TO_GIVE);
         _available -= ret;
-        //LOG.trace("GAVE: " + ret + ", REMAINING: " + _available + ", TO: " + attachment);
-        return ret; 
+        return ret;
     }
     
     /**
      * Releases some unwritten bytes back to the available pool.
      */
     public void release(int amount) {
-        _available += amount;
+        if(_active) // failsafe to ensure releasing only occurs when we want it
+            _available += amount;
         //LOG.trace("RETR: " + amount + ", REMAINING: " + _available + ", ALL: " + wroteAll + ", FROM: " + attachment);
     }
     
@@ -250,7 +278,7 @@ public class NBThrottle implements Throttle {
     void tick(long currentTime) {
         if(currentTime >= _nextTickTime) {
             _available = _bytesPerTick;
-	    _nextTickTime = currentTime + MILLIS_PER_TICK;
+            _nextTickTime = currentTime + MILLIS_PER_TICK;
             spreadBandwidth();
         } else if(_available > MINIMUM_TO_GIVE) {
             spreadBandwidth();
@@ -266,7 +294,11 @@ public class NBThrottle implements Throttle {
                 for(Iterator i = _requests.iterator(); i.hasNext(); ) {
                     ThrottleListener req = (ThrottleListener)i.next();
                     Object attachment = req.getAttachment();
+                    if(attachment == null)
+                        throw new IllegalStateException("must have an attachment");
+                    
                     if(!_interested.containsKey(attachment)) {
+                        LOG.debug("Moving: " + attachment + " from rquests to interested");
                         if(req.bandwidthAvailable())
                             _interested.put(attachment, req);
                         // else it'll be cleared when we loop later on.
