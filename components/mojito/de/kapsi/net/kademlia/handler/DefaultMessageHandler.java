@@ -133,16 +133,21 @@ public class DefaultMessageHandler extends MessageHandler
                             }
                             databaseStats.STORE_FORWARD_COUNT.incrementStat();
                             keyValuesToForward.addAll(c);
-                        } else if(closestNodesToKey.size()==k){
+                            
+                        } else if (closestNodesToKey.size()==k) {
                             //if we are the furthest node: delete non-local value from local db
                             ContactNode furthest = (ContactNode)closestNodesToKey.get(closestNodesToKey.size()-1);
                             if(furthest.equals(context.getLocalNode())) {
                                 for (Iterator iterator = c.iterator(); iterator.hasNext();) {
                                     KeyValue keyValue = (KeyValue) iterator.next();
                                     if(!keyValue.isLocalKeyValue()) {
-                                        database.remove(keyValue);
+                                        iterator.remove();
                                         databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
                                     }
+                                }
+                                
+                                if (c.isEmpty()) {
+                                    database.remove(c);
                                 }
                             }
                         }

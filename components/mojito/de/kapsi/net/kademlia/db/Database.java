@@ -144,6 +144,12 @@ public class Database {
         return true;
     }
     
+    public synchronized boolean remove(KeyValueCollection c) {
+        int size = database.size();
+        database.remove(c.getKey());
+        return database.size() != size;
+    }
+    
     public synchronized void removeAll(Collection c) {
         for(Iterator it = c.iterator(); it.hasNext(); ) {
             remove((KeyValue)it.next());
