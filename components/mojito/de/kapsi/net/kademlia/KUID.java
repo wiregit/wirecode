@@ -346,9 +346,15 @@ public class KUID implements Serializable, Comparable {
      * Returns the raw bytes of the current KUID
      */
     public byte[] getBytes() {
-        byte[] clone = new byte[id.length];
-        System.arraycopy(id, 0, clone, 0, id.length);
-        return clone;
+        return getBytes(0, new byte[id.length], 0, id.length);
+    }
+    
+    /**
+     * Returns the raw bytes of the current KUID from the specified interval
+     */
+    public byte[] getBytes(int srcPos, byte[] dest, int destPos, int length) {
+        System.arraycopy(id, srcPos, dest, destPos, length);
+        return dest;
     }
     
     public int hashCode() {
@@ -414,11 +420,6 @@ public class KUID implements Serializable, Comparable {
      */
     public int log2() {
         return toBigInteger().bitLength();
-    }
-    
-    public byte[] getBytes(int srcPos, byte[] dest, int destPos, int length) {
-        System.arraycopy(id, srcPos, dest, destPos, length);
-        return dest;
     }
     
     public String toString() {
