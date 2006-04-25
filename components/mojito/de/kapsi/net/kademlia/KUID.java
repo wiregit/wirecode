@@ -51,7 +51,7 @@ public class KUID implements Serializable, Comparable {
 
     public static final int LENGTH = 160; // bit
     
-    protected static final Random GENERATOR = new Random();
+    private static final Random GENERATOR = new Random();
     
     private static final int[] BITS = {
         0x80,

@@ -19,7 +19,11 @@
  
 package com.limegroup.gnutella.dht.tests;
 
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.util.ArrayUtils;
 
 public class KUIDTest {
@@ -44,8 +48,25 @@ public class KUIDTest {
         System.out.println(b.compareTo(a)); // 1
     }
     
-    public static void main(String[] args) {
+    public void testQueryKey() throws Exception {
+        InetSocketAddress address = new InetSocketAddress("localhost", 1234);
+        QueryKey queryKey1 = QueryKey.getQueryKey(address);
+        
+        KUID messageId = KUID.createRandomMessageID(address);
+        Method m = KUID.class.getDeclaredMethod("getQueryKey", new Class[0]);
+        m.setAccessible(true);
+        QueryKey queryKey2 = (QueryKey)m.invoke(messageId, new Object[0]);
+        
+        //System.out.println(ArrayUtils.toHexString(queryKey1.getBytes()));
+        //System.out.println(ArrayUtils.toHexString(queryKey2.getBytes()));
+        //System.out.println(messageId.toHexString());
+        
+        System.out.println(queryKey1.equals(queryKey2)); // true
+    }
+    
+    public static void main(String[] args) throws Exception {
         new KUIDTest().testIsCloser();
         new KUIDTest().testCompareTo();
+        new KUIDTest().testQueryKey();
     }
 }
