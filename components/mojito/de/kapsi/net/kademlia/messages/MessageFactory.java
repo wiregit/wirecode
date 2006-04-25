@@ -28,10 +28,12 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 
@@ -93,5 +95,13 @@ public class MessageFactory {
     
     public StoreResponse createStoreResponse(KUID messageId, int requesting, Collection status) {
         return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, requesting, status);
+    }
+    
+    public StatsRequest createStatsRequest(KUID messageId, byte[] signature, int request) {
+        return new StatsRequest(getVendor(), getVersion(), getLocalNodeID(), messageId, signature, request);
+    }
+
+    public StatsResponse createStatsResponse(KUID messageId, String statistics) {
+        return new StatsResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, statistics);
     }
 }

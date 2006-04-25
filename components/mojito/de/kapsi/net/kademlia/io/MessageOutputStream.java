@@ -35,10 +35,12 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 
@@ -178,6 +180,15 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    private void writeStatsRequest(StatsRequest request) throws IOException {
+        writeSignature(request.getSignature());
+        writeInt(request.getRequest());
+    }
+    
+    private void writeStatsResponse(StatsResponse response) throws IOException {
+        writeUTF(response.getStatistics());
+    }
+    
     public void write(Message msg) throws IOException {
         writeInt(msg.getVendor());
         writeShort(msg.getVersion());
@@ -208,6 +219,12 @@ public class MessageOutputStream extends DataOutputStream {
         } else if (msg instanceof StoreResponse) {
             writeByte(Message.STORE_RESPONSE);
             writeStoreResponse((StoreResponse)msg);
+        } else if (msg instanceof StatsRequest) {
+            writeByte(Message.STATS_REQUEST);
+            writeStatsRequest((StatsRequest)msg);
+        } else if (msg instanceof StatsResponse) {
+            writeByte(Message.STATS_RESPONSE);
+            writeStatsResponse((StatsResponse)msg);
         } else {
             throw new IOException("Unknown Message: " + msg);
         }

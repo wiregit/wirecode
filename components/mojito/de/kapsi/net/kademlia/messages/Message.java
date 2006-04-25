@@ -35,6 +35,9 @@ public abstract class Message {
     public static final int FIND_VALUE_REQUEST = 0x08;
     public static final int FIND_VALUE_RESPONSE = 0x09;
     
+    public static final int STATS_REQUEST = 0x0A;
+    public static final int STATS_RESPONSE = 0x0B;
+    
     protected final int vendor;
     protected final int version;
     

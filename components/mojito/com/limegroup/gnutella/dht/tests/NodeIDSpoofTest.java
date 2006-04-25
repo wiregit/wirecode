@@ -45,7 +45,6 @@ public class NodeIDSpoofTest {
         }
         int testNum = Integer.parseInt(args[0]);
         int port = 4000;
-        final Object lock = new Object();
         try {
             System.out.println("Starting bootstrap server");
             DHT dht = new DHT();

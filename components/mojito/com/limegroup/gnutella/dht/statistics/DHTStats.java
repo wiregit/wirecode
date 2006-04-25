@@ -21,6 +21,7 @@ package com.limegroup.gnutella.dht.statistics;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 
 public interface DHTStats {
 
@@ -30,5 +31,5 @@ public interface DHTStats {
     
     public void addStatisticContainer(StatisticContainer statsContainer);
     
-    public void dumpStats(Writer writer) throws IOException;
+    public void dumpStats(Writer writer, boolean writeSingLookups) throws IOException;
 }

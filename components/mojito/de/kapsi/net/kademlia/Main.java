@@ -175,7 +175,7 @@ public class Main {
                 } else if (line.matches(stats)) {
                     DHTStats dhtStats = dht.getContext().getDHTStats();
                     OutputStreamWriter writer = new OutputStreamWriter(System.out);
-                    dhtStats.dumpStats(writer);
+                    dhtStats.dumpStats(writer, true);
                 } else if (line.matches(restart)) {
                     if (!dht.isRunning()) {
                         dht = new DHT();

@@ -21,6 +21,7 @@ package com.limegroup.gnutella.dht.statistics;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +62,7 @@ public class DHTNodeStat implements DHTStats{
         }
     }
     
-    public void dumpStats(Writer writer) throws IOException{
+    public void dumpStats(Writer writer, boolean writeSingleLookups) throws IOException{
         if(nodeID == null) {
             nodeID = context.getLocalNodeID().toHexString();
         }
@@ -69,6 +70,9 @@ public class DHTNodeStat implements DHTStats{
         synchronized (DHT_STATS) {
             for (Iterator iter = DHT_STATS.iterator(); iter.hasNext();) {
                 StatisticContainer stat = (StatisticContainer) iter.next();
+                if(!writeSingleLookups && (stat instanceof SingleLookupStatisticContainer)) {
+                    continue;
+                }
                 stat.writeStats(writer);
             }
         }

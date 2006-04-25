@@ -68,7 +68,7 @@ public class StatsManager {
                     //write routing table
                     stat.dumpRouteTable(routingTableWriter);
                     //write other stats
-                    stat.dumpStats(stats);
+                    stat.dumpStats(stats, true);
                 }
             }
             

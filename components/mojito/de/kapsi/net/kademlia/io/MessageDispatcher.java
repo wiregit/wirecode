@@ -46,6 +46,7 @@ import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.request.FindNodeRequestHandler;
 import de.kapsi.net.kademlia.handler.request.FindValueRequestHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
+import de.kapsi.net.kademlia.handler.request.StatsRequestHandler;
 import de.kapsi.net.kademlia.handler.request.StoreRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -53,10 +54,12 @@ import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 
@@ -83,6 +86,7 @@ public class MessageDispatcher implements Runnable {
     private FindNodeRequestHandler findNodeHandler;
     private FindValueRequestHandler findValueHandler;
     private StoreRequestHandler storeHandler;
+    private StatsRequestHandler statsHandler;
     
     private Filter filter;
     
@@ -97,6 +101,7 @@ public class MessageDispatcher implements Runnable {
         findNodeHandler = new FindNodeRequestHandler(context);
         findValueHandler = new FindValueRequestHandler(context);
         storeHandler = new StoreRequestHandler(context);
+        statsHandler = new StatsRequestHandler(context);
         
         filter = new Filter();
     }
@@ -224,6 +229,8 @@ public class MessageDispatcher implements Runnable {
             requestHandler = findValueHandler;
         } else if (msg instanceof StoreRequest) {
             requestHandler = storeHandler;
+        } else if (msg instanceof StatsRequest) {
+            requestHandler = statsHandler;
         }
         
         if (requestHandler != null) {
@@ -246,6 +253,8 @@ public class MessageDispatcher implements Runnable {
                 LOG.trace("Received a late FindValue response from " + ContactNode.toString(nodeId, src));
             } else if (msg instanceof StoreResponse) {
                 LOG.trace("Received a late Store response from " + ContactNode.toString(nodeId, src));
+            } else if (msg instanceof StatsResponse) {
+                LOG.trace("Received a late Stats response from " + ContactNode.toString(nodeId, src));
             }
         }
         networkStats.LATE_MESSAGES_COUNT.incrementStat();

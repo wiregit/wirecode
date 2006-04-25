@@ -28,6 +28,9 @@ import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.util.Arrays;
 
+import com.limegroup.gnutella.dht.statistics.AbstractStatistic;
+import com.limegroup.gnutella.dht.statistics.Statistic;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -35,10 +38,12 @@ import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.CryptoHelper;
 import de.kapsi.net.kademlia.security.QueryKey;
@@ -215,6 +220,18 @@ public class MessageInputStream extends DataInputStream {
         return new StoreResponse(vendor, version, nodeId, messageId, requesting, Arrays.asList(stats));
     }
     
+    private Message readStatsResponse(int vendor, int version, KUID nodeId,
+            KUID messageId) throws IOException{
+        String stats = readUTF();
+        return new StatsResponse(vendor, version, nodeId, messageId, stats);
+    }
+    
+    private Message readStatsRequest(int vendor, int version, KUID nodeId, KUID messageId) throws IOException {
+        byte[] signature = readSignature();
+        int request = readInt();
+        return new StatsRequest(vendor, version, nodeId, messageId, signature, request);
+    }
+    
     public Message readMessage() throws IOException {
         int vendor = readInt();
         int version = readUnsignedShort();
@@ -240,6 +257,10 @@ public class MessageInputStream extends DataInputStream {
                 return readStoreRequest(vendor, version, nodeId, messageId);
             case Message.STORE_RESPONSE:
                 return readStoreResponse(vendor, version, nodeId, messageId);
+            case Message.STATS_REQUEST:
+                return readStatsRequest(vendor, version, nodeId, messageId);
+            case Message.STATS_RESPONSE:
+                return readStatsResponse(vendor, version, nodeId, messageId);
             default:
                 throw new IOException("Received unknown message type: " + messageType + " from ContactNode: " + nodeId);
         }

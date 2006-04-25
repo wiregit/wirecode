@@ -71,6 +71,12 @@ public class NetworkStatisticContainer extends StatisticContainer {
         new SimpleStatistic();
     
     /**
+     * <tt>Statistic</tt> for received StatsRequest messages
+     */
+    public Statistic STATS_REQUEST =
+        new SimpleStatistic();
+    
+    /**
      * <tt>Statistic</tt> for sent PONG messages
      */
     public Statistic PONGS_SENT =
