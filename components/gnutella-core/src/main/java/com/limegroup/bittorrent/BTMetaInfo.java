@@ -538,6 +538,8 @@ public class BTMetaInfo implements Serializable {
 			throw new ValueException("bad metainfo - no tracker");
 		String url = getString((byte[])t_announce);
 		try {
+			// Note: this kills UDP trackers so we will eventually
+			// use a different object.
 			_trackers = new URL[] { new URL(url) };
 		} catch (MalformedURLException mue) {
 			throw new ValueException("bad metainfo - bad tracker");

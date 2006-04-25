@@ -89,14 +89,7 @@ public class TrackerRequester {
 		if (url.getProtocol().startsWith("http")) {
 			String queryStr = createQueryString(info, torrent, event);
 			return connectHTTP(url, queryStr);
-		}
-		// TODO: UDPService only handles gnutella messages, but there is no way
-		// of wrapping most tracker requests with a gnutella Message class.
-		// Since UDP trackers are seldomly used this doesn't have a terribly
-		// high priority
-		else if (false && url.getProtocol().equals("udp"))
-			return connectUDP(url, info, torrent, event);
-		else
+		} else
 			return null;
 	}
 
@@ -211,31 +204,6 @@ public class TrackerRequester {
 		} finally {
 			if (get != null)
 				get.releaseConnection();
-		}
-	}
-
-	/**
-	 * UDP tracker protocol, - this does not seem to be widely used, Azureus
-	 * supports it and maybe a few others
-	 * 
-	 * @param url
-	 *            the "url://..." type url for the tracker
-	 * @param info
-	 *            BTMetaInfo for this torrent
-	 * @param torrent
-	 *            our ManagedTorrent
-	 * @param event
-	 *            the event to sent to the tracker
-	 * @return a TrackerResponse or null if we didn't get any response
-	 */
-	private static TrackerResponse connectUDP(URL url, BTMetaInfo info,
-			ManagedTorrent torrent, int event) {
-		try {
-			UDPTrackerRequest request = new UDPTrackerRequest(url, info,
-					torrent, event);
-			return request.connectUDP();
-		} catch (IOException ioe) {
-			return null;
 		}
 	}
 
