@@ -1,6 +1,5 @@
 package com.limegroup.bittorrent;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.Constants;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -61,7 +59,8 @@ public class TrackerResponse {
 		Map response = (Map) t_response;
 
 		if (response.containsKey("failure reason"))
-			FAILURE_REASON = response.get("failure reason").toString();
+			FAILURE_REASON = 
+				new String((byte [])response.get("failure reason")) ;
 		else
 			FAILURE_REASON = null;
 
@@ -69,8 +68,8 @@ public class TrackerResponse {
 			Object t_peers = response.get("peers");
 			if (t_peers instanceof List)
 				PEERS = parsePeers((List) t_peers);
-			else if (t_peers instanceof String)
-				PEERS = parsePeers((String) t_peers);
+			else if (t_peers instanceof byte [])
+				PEERS = parsePeers( (byte[]) t_peers);
 			else
 				throw new ValueException("bad tracker response - bad peers "
 						+ t_peers);
@@ -154,28 +153,6 @@ public class TrackerResponse {
 	}
 
 	/**
-	 * parsing List of peers from concise format for tracker response
-	 * 
-	 * @param data
-	 *            a <tt>String</tt> of peer data,
-	 *            String.getBytes(Constants.ASCII_ENCODING) will return a plain
-	 *            list of network order 4-byte ip addresses and 2-byte ports
-	 * 
-	 * @return <tt>List</tt> of <tt>TorrentLocation</tt>
-	 */
-	private static List parsePeers(String data) throws ValueException {
-		byte[] bytes = null;
-		try {
-			bytes = data.getBytes(Constants.ASCII_ENCODING);
-		} catch (UnsupportedEncodingException uee) {
-			if (LOG.isDebugEnabled())
-				LOG.debug(uee);
-			return Collections.EMPTY_LIST;
-		}
-		return parsePeers(bytes);
-	}
-
-	/**
 	 * parsing List of peers from pairs of big endian 4-byte ip address and
 	 * 2-byte ports
 	 * 
@@ -213,12 +190,12 @@ public class TrackerResponse {
 	 */
 	private static TorrentLocation parsePeer(Map peer) throws ValueException {
 		Object t_ip = peer.get("ip");
-		if (!(t_ip instanceof String))
+		if (!(t_ip instanceof byte []))
 			throw new ValueException("bad tracker response - bad peer ip "
 					+ t_ip);
 		InetAddress addr;
 		try {
-			addr = InetAddress.getByName(t_ip.toString());
+			addr = InetAddress.getByAddress((byte [])t_ip);
 		} catch (UnknownHostException uhe) {
 			throw new ValueException("bad tracker response - bad peer ip "
 					+ t_ip);
@@ -232,11 +209,14 @@ public class TrackerResponse {
 		int port = (int) ((Long) t_port).longValue();
 
 		Object t_peerId = peer.get("peer id");
-		if (t_peerId == null || t_peerId.toString().length() != 20)
-			throw new ValueException("bad tracker response - bad peer id "
-					+ t_peerId);
+		if ( ! (t_peerId instanceof byte []))
+			throw new ValueException("bad tracker response - bad peer id ");
+		
+		byte [] peerId = (byte []) t_peerId;
+		if (peerId.length != 20)
+			throw new ValueException("bad tracker response - bad peer id ");
 
-		return parsePeer(addr, port, t_peerId.toString());
+		return parsePeer(addr, port, peerId);
 
 	}
 
@@ -254,7 +234,7 @@ public class TrackerResponse {
 	 * @throws ValueException
 	 */
 	private static TorrentLocation parsePeer(InetAddress addr, int port,
-			String peerId) throws ValueException {
+			byte [] peerId) throws ValueException {
 		if (!NetworkUtils.isValidAddress(addr))
 			throw new ValueException("bad tracker response - bad peer ip "
 					+ addr);

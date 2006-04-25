@@ -534,27 +534,16 @@ public class BTMetaInfo implements Serializable {
 		// added by the addTracker() method, we will throw an exception if the
 		// tracker is invalid or does not even exist.
 		Object t_announce = metaInfo.get("announce");
-		if (!(t_announce instanceof String))
+		if (!(t_announce instanceof byte []))
 			throw new ValueException("bad metainfo - no tracker");
+		String url = getString((byte[])t_announce);
 		try {
-			_trackers = new URL[] { new URL(t_announce.toString()) };
+			_trackers = new URL[] { new URL(url) };
 		} catch (MalformedURLException mue) {
 			throw new ValueException("bad metainfo - bad tracker");
 		}
 
-		// as per extension spec it is possible that there are multiple trackers
-		// in the info file, those can be found under the announce-list key
-		Object t_announce_list = metaInfo.get("announce-list");
-		if ((t_announce_list instanceof List)) {
-			List announceList = (List) t_announce_list;
-			for (Iterator iter = announceList.iterator(); iter.hasNext();) {
-				try {
-					addTracker(new URL(iter.next().toString()));
-				} catch (MalformedURLException mue) {
-					// do nothing
-				}
-			}
-		}
+		// TODO: add proper support for multi-tracker torrents later.
 
 		// the main data from the meta info
 		Object t_info = metaInfo.get("info");
@@ -564,9 +553,9 @@ public class BTMetaInfo implements Serializable {
 
 		// the hashes from the meta info
 		Object t_pieces = info.get("pieces");
-		if (!(t_pieces instanceof String))
+		if (!(t_pieces instanceof byte []))
 			throw new ValueException("bad metainfo - no pieces key found");
-		_hashes = parsePieces(t_pieces.toString());
+		_hashes = parsePieces((byte [])t_pieces);
 
 		// piece length, also very important.
 		Object t_pieceLength = info.get("piece length");
@@ -579,22 +568,26 @@ public class BTMetaInfo implements Serializable {
 		// name of the torrent, also specifying the directory under which to
 		// save the torrents, as per extension spec, name.urf-8 specifies the
 		// utf-8 name of the torrent
+		String name = null;
 		Object t_name = info.get("name");
-		if (!(t_name instanceof String))
+		if (!(t_name instanceof byte []))
 			throw new ValueException("bad metainfo - bad name");
 
 		// if possible prefer the name.utf-8 key but we are already sure that
 		// we have a safe name value to fallback to
 		if (info.containsKey("name.utf-8")) {
 			try {
-				t_name = new String(info.get("name.utf-8").toString().getBytes(
-						Constants.ASCII_ENCODING), Constants.UTF_8_ENCODING);
+				name = new String((byte [])info.get("name.utf-8"), 
+						Constants.UTF_8_ENCODING);
 			} catch (UnsupportedEncodingException uee) {
 				// fail silently
 			}
 		}
+		
+		if (name == null)
+			name = getString((byte [])t_name);
 
-		_name = CommonUtils.convertFileName(t_name.toString());
+		_name = CommonUtils.convertFileName(name);
 
 		// we need to check the name of the torrent, security risk!
 		if (_name.length() == 0)
@@ -671,6 +664,15 @@ public class BTMetaInfo implements Serializable {
 		_totalSize = calculateTotalSize(_files);
 
 		initializeVerifyingFolder(null, false);
+	}
+	
+	private static String getString(byte [] bytes) {
+		try {
+			return new String(bytes, Constants.ASCII_ENCODING);
+		} catch (UnsupportedEncodingException impossible) {
+			ErrorService.error(impossible);
+			return null;
+		}
 	}
 
 	/**
@@ -781,41 +783,58 @@ public class BTMetaInfo implements Serializable {
 		long length = ((Long) t_length).longValue();
 
 		Object t_path = file.get("path");
-		if (!(t_path instanceof List) || ((List) t_path).size() == 0)
+		if (!(t_path instanceof List))
+			throw new ValueException("bad metainfo - bad path");
+		
+		List path = (List) t_path;
+		if (path.isEmpty())
 			throw new ValueException("bad metainfo - bad path");
 
-		Object t_path_utf8 = null;
+		Object t_path_utf8 = file.get("path.utf-8");
 		// the extension specs introduced the utf-8 path.
-		if (file.get("path.utf-8") instanceof List) {
-			t_path_utf8 = file.get("path.utf-8");
+		if ( ! (t_path_utf8 instanceof List)) {
+			// invalid - ignore
+			t_path_utf8 = null;
 		}
 
-		StringBuffer path = new StringBuffer(basePath);
+		StringBuffer paths = new StringBuffer(basePath);
 
-		// prefer the utf8 path if possible!
+		int numParsed = 0;
+		// prefer the utf8 path if possible
 		if (t_path_utf8 != null) {
-			for (Iterator iter = ((List) t_path_utf8).iterator(); iter
-					.hasNext();) {
-				path.append(File.separator);
-				String pathElement;
-				try {
-					pathElement = new String(iter.next().toString().getBytes(
-							Constants.ASCII_ENCODING), Constants.UTF_8_ENCODING);
-				} catch (UnsupportedEncodingException uee) {
-					// this should never happen!
-					pathElement = iter.next().toString();
+			
+			List pathUtf8 = (List) t_path_utf8;
+			if (pathUtf8.size() == path.size()) {
+				for (Iterator iter = pathUtf8.iterator(); iter.hasNext();) {
+					Object t_next = iter.next();
+					if ( ! (t_next instanceof byte []))
+						break; // fall through to regular path
+					
+					String pathElement;
+					try {
+						pathElement = new String((byte []) t_next, Constants.UTF_8_ENCODING);
+						paths.append(File.separator);
+						paths.append(CommonUtils.convertFileName(pathElement));
+						numParsed++;
+					} catch (UnsupportedEncodingException uee) {
+						break; // fall through silently
+					}
 				}
-				path.append(CommonUtils.convertFileName(pathElement));
-			}
-		} else {
-			for (Iterator iter = ((List) t_path).iterator(); iter.hasNext();) {
-				path.append(File.separator);
-				path
-						.append(CommonUtils.convertFileName(iter.next()
-								.toString()));
+			} // else # of files different? weird...
+		} 
+		
+		// if not all elements were found in
+		if (numParsed < path.size()) {
+			for (int i = numParsed; i < path.size(); i++) {
+				Object next = path.get(i);
+				if (! (next instanceof byte []))
+					throw new ValueException("bad paths");
+				String pathElement = getString((byte [])next);
+				paths.append(File.separator);
+				paths.append(CommonUtils.convertFileName(pathElement));
 			}
 		}
-		return new TorrentFile(length, path.toString());
+		return new TorrentFile(length, paths.toString());
 	}
 
 	/**
@@ -826,23 +845,14 @@ public class BTMetaInfo implements Serializable {
 	 * @return two dimensional byte array containing the hashes.
 	 * @throws ValueException
 	 */
-	private static byte[][] parsePieces(String str) throws ValueException {
-		if (str.length() % 20 != 0)
+	private static byte[][] parsePieces(byte [] pieces) throws ValueException {
+		if (pieces.length % 20 != 0)
 			throw new ValueException("bad metainfo - bad pieces key");
-		byte[][] ret = new byte[str.length() / 20][20];
-		byte[] bytes;
-
-		try {
-			bytes = str.getBytes(Constants.ASCII_ENCODING);
-		} catch (UnsupportedEncodingException uee) {
-			// this is not going to happen...
-			ErrorService.error(uee);
-			return null;
-		}
+		byte[][] ret = new byte[pieces.length / 20][20];
 
 		int k = 0;
-		for (int i = 0; i < bytes.length; i += 20) {
-			System.arraycopy(bytes, i, ret[k++], 0, 20);
+		for (int i = 0; i < pieces.length; i += 20) {
+			System.arraycopy(pieces, i, ret[k++], 0, 20);
 		}
 		return ret;
 	}

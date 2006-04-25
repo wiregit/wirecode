@@ -71,7 +71,9 @@ class BEDictionary extends BEList {
             if (key == null) {
                 keyToken.handleRead();
                 if (keyToken.getResult() != null) {
-                    key = (String)keyToken.getResult();
+                	// technically keys don't necesssarily need to be String objects
+                	// but in practice they are
+                    key = new String((byte [])keyToken.getResult(),Token.ASCII);
                     keyToken = null; 
                 }
                 else

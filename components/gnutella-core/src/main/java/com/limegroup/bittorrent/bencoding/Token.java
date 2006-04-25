@@ -223,7 +223,7 @@ public abstract class Token {
          * @param data A byte array with the data
          */
         BufferChannel(byte[] data) {
-            src = ByteBuffer.wrap(data);
+            src = ByteBuffer.wrap(data).compact();
         }
 
         /* Reads a sequence of bytes from this channel into the given buffer. */

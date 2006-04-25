@@ -110,7 +110,7 @@ ChannelWriter, ChannelReadObserver {
 			finishingHandshakes = true;
 			
 			TorrentLocation p = new TorrentLocation(sock.getInetAddress(), sock
-					.getPort(), new String(peerId),
+					.getPort(), peerId,
 					extBytes);
 			
 			BTConnection btc = new BTConnection(sock, torrent.getMetaInfo(), p,
