@@ -42,6 +42,34 @@ public class BufferUtils {
         return read;
     }
     
+    public static int transfer(ByteBuffer from, ByteBuffer to, boolean needsFlip) {
+        if(needsFlip)
+            return transfer(from, to);
+        else {
+        
+        if(from == null)
+            return 0;
+        
+        int read = 0;
+        if(from.hasRemaining()) {
+            int remaining = from.remaining();
+            int toRemaining = to.remaining();
+            if(toRemaining >= remaining) {
+                to.put(from);
+                read += remaining;
+            } else {
+                int limit = from.limit();
+                int position = from.position();
+                from.limit(position + toRemaining);
+                to.put(from);
+                read += toRemaining;
+                from.limit(limit);
+            }
+        }
+        return read;
+        }
+    }
+    
     public static long transfer(ByteBuffer from, ByteBuffer [] to,
     		int offset, int length) {
     	long read = 0;

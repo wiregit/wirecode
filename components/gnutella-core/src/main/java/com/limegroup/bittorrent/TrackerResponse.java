@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -12,8 +13,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 /**
  * Class parsing the response from a tracker
@@ -195,10 +199,14 @@ public class TrackerResponse {
 					+ t_ip);
 		InetAddress addr;
 		try {
-			addr = InetAddress.getByAddress((byte [])t_ip);
+			String ipS = new String((byte [])t_ip, Constants.ASCII_ENCODING);
+			addr = InetAddress.getByName(ipS);
 		} catch (UnknownHostException uhe) {
 			throw new ValueException("bad tracker response - bad peer ip "
 					+ t_ip);
+		} catch (UnsupportedEncodingException impossible) {
+			ErrorService.error(impossible);
+			return null;
 		}
 
 		Object t_port = peer.get("port");

@@ -223,12 +223,15 @@ public abstract class Token {
          * @param data A byte array with the data
          */
         BufferChannel(byte[] data) {
-            src = ByteBuffer.wrap(data).compact();
+            src = ByteBuffer.wrap(data);
         }
 
         /* Reads a sequence of bytes from this channel into the given buffer. */
         public int read(ByteBuffer dst) throws IOException {
-            return BufferUtils.transfer(src, dst);
+            int ret = BufferUtils.transfer(src, dst, false);
+            if (ret == 0 && !src.hasRemaining())
+            	return -1;
+            return ret;
         }
 
         /* Closes this channel. */
