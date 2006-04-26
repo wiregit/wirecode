@@ -16,15 +16,19 @@ public class AsyncDimeRecordReader extends ReadState {
     private static final Log LOG = LogFactory.getLog(AsyncDimeRecordReader.class);
     
     private ByteBuffer header;
-    private ByteBuffer options;
-    private ByteBuffer id;
-    private ByteBuffer type;
-    private ByteBuffer data;
-    private ByteBuffer padding;
+    private static final int OPTIONS = 0;
+    private static final int OPTIONS_P = 1;
+    private static final int ID = 2;
+    private static final int ID_P = 3;
+    private static final int TYPE = 4;
+    private static final int TYPE_P = 5;
+    private static final int DATA = 6;
+    private static final int DATA_P = 7;
+    private static final int TOTAL = 8;
+    private ByteBuffer[] parts;
     
     public AsyncDimeRecordReader() {
         header = ByteBuffer.allocate(12);
-        padding = ByteBuffer.allocate(4);
     }
     
     /**
@@ -35,13 +39,13 @@ public class AsyncDimeRecordReader extends ReadState {
      * @throws IOException
      */
     public DIMERecord getRecord() throws DIMEException {
-        if(data == null || data.hasRemaining() || padding.hasRemaining()) {
+        if(parts == null || parts[DATA].hasRemaining() || parts[DATA_P].hasRemaining()) {
             return null;
         } else {
             try {
             return new DIMERecord(header.get(0), header.get(1),
-                                  options.array(), id.array(),
-                                  type.array(), data.array());
+                                  parts[OPTIONS].array(), parts[ID].array(),
+                                  parts[TYPE].array(), parts[DATA].array());
             } catch(IllegalArgumentException iae) {
                 throw new DIMEException(iae);
             }
@@ -49,35 +53,30 @@ public class AsyncDimeRecordReader extends ReadState {
     }
 
     protected boolean processRead(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
-        // NOTE: Fill is designed to skip padding, but because the header mod 4 == 0,
-        //       no padding will ever be skipped for the header.
-        fill(null, header, rc, buffer);
         // Header must be completely read before continuing...
-        if(header.hasRemaining()) {
+        if(fill(header, rc, buffer)) {
             LOG.debug("Header not full, leaving.");
             return true;
         }
         
         // If we haven't created things yet, create them.
-        if(options == null)
+        if(parts == null)
             createOtherStructures();
 
-        fill(null, options, rc, buffer);
-        fill(options, id,   rc, buffer);
-        fill(id, type,      rc, buffer);
-        fill(type, data,    rc, buffer);
-        fill(data, null,    rc, buffer);
+        for(int i = 0; i < TOTAL; i++) {
+            if(i == 0 || !parts[i-1].hasRemaining()) {
+                if(fill(parts[i], rc, buffer))
+                    return true;
+            }
+        }
         
-        return data.hasRemaining() || padding.hasRemaining();
+        return false;
     }
     
     /**
-     * Attempts to read as much data as possible into 'current', only if 'prior' is null
-     * or has been filled.  Data will be transferred from 'buffer' into 'current' and then
+     * Attempts to read as much data as possible into 'current'.
+     * Data will be transferred from 'buffer' into 'current' and then
      * read from 'channel' into 'current'.
-     * 
-     * This will also ensure that any data that should be skipped for 'prior' is skipped before
-     * 'current' begins to be read.
      * 
      * An IOException will be thrown if more data needs to be read but the last read returned -1.
      * 
@@ -86,35 +85,18 @@ public class AsyncDimeRecordReader extends ReadState {
      * @param rc
      * @param buffer
      * @throws IOException
+     * @return true if current still has space to read
      */
-    private void fill(ByteBuffer prior, ByteBuffer current, ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
-        if(prior != null && prior.hasRemaining()) {
-            LOG.debug("Leaving because prior still needs data.");
-            return;
-        }
-        
-        int read = 0;
-        
-        if(prior != null) {
-            int paddedSize = DIMERecord.calculatePaddingLength(prior.capacity());
-            padding.limit(paddedSize); // it is okay to reset the limit.
-            if(paddedSize != 0) {
-                read = BufferUtils.readAll(rc, padding, buffer);
-                LOG.debug("Filling padding of: " + paddedSize + ", left to pad: " + padding.remaining());
-                if(padding.hasRemaining() && read == -1)
-                    throw new IOException("EOF");
-                if(padding.hasRemaining())
-                    return;
-            }
-        }
-        
-        if(current != null) {    
-            read = BufferUtils.readAll(rc, current, buffer);
-            LOG.debug("Filling current.  Left: " + current.remaining());
-            if(current.hasRemaining() && read == -1)
+    private boolean fill(ByteBuffer current, ReadableByteChannel rc, ByteBuffer buffer) throws IOException {        
+        int read = BufferUtils.readAll(rc, current, buffer);
+        LOG.debug("Filling current.  Left: " + current.remaining());
+        if(current.hasRemaining()) {
+            if(read == -1)
                 throw new IOException("EOF");
-            if(!current.hasRemaining())
-                padding.clear();
+            else
+                return true;
+        } else {
+            return false;
         }
     }
     
@@ -150,10 +132,15 @@ public class AsyncDimeRecordReader extends ReadState {
         if (dataLength < 0)
             throw new DIMEException("data too big.");
 
-        options = createBuffer(optionsLength);
-        id      = createBuffer(idLength);
-        type    = createBuffer(typeLength);
-        data    = createBuffer(dataLength);
+        parts = new ByteBuffer[TOTAL];
+        parts[OPTIONS]   = createBuffer(optionsLength);
+        parts[OPTIONS_P] = createBuffer(DIMERecord.calculatePaddingLength(optionsLength)); 
+        parts[ID]        = createBuffer(idLength);
+        parts[ID_P]      = createBuffer(DIMERecord.calculatePaddingLength(idLength));
+        parts[TYPE]      = createBuffer(typeLength);
+        parts[TYPE_P]    = createBuffer(DIMERecord.calculatePaddingLength(typeLength));
+        parts[DATA]      = createBuffer(dataLength);
+        parts[DATA_P]    = createBuffer(DIMERecord.calculatePaddingLength(dataLength));
     }
     
     private ByteBuffer createBuffer(int length) {
@@ -165,29 +152,11 @@ public class AsyncDimeRecordReader extends ReadState {
 
     public long getAmountProcessed() {
         long read = header.position();
-        read += count(options, id);
-        read += count(id, type);
-        read += count(type, data);
-        read += count(data, null);
-        return read;
-    }
-    
-    private long count(ByteBuffer buffer, ByteBuffer next) {
-        long count = 0;
-        if(buffer != null) {
-            count += buffer.position();
-            if(!buffer.hasRemaining()) {
-                if(next != null) {
-                    if(next.position() == 0)
-                        count += padding.position();
-                    else
-                        count += DIMERecord.calculatePaddingLength(buffer.capacity());
-                } else {
-                    count += padding.position();
-                }
-            }
+        if(parts != null) {
+            for(int i = 0; i < TOTAL; i++)
+                read += parts[i].position();
         }
-        return count;
+        return read;
     }
 
 }

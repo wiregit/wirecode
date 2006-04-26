@@ -91,7 +91,7 @@ import com.limegroup.gnutella.util.Sockets;
  * LOCKING: _writtenBadLocs and _badLocs are both synchronized on _badLocs
  */
 
-public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
+public class HTTPDownloader implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(HTTPDownloader.class);
     
@@ -178,7 +178,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
 
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private IOStateMachine _stateMachine;
-    private IOStateObserver _observer;
+    private Observer observerHandler;
     private SimpleReadHeaderState _headerReader;
     private boolean _requestingThex;
     private ThexReader _thexReader;
@@ -425,7 +425,8 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         }
         
         _socket.setKeepAlive(true);
-        _stateMachine = new IOStateMachine(this, new LinkedList(), BUF_LENGTH);
+        observerHandler = new Observer();
+        _stateMachine = new IOStateMachine(observerHandler, new LinkedList(), BUF_LENGTH);
         _stateMachine.setReadChannel(new ThrottleReader(THROTTLE));
         ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
@@ -489,7 +490,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
             _requestedInterval = new Interval(_initialReadingPoint, stop-1);
         }
 		
-        _observer = observer;
+        observerHandler.setDelegate(observer);
         
         Map headers = new LinkedHashMap();
         Set features = new HashSet();
@@ -698,7 +699,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
             LOG.debug("requesting HashTree for " + _thexUri + 
                       " from " +_host + ":" + _port);
         
-        _observer = observer;
+        observerHandler.setDelegate(observer);
         
         Map headers = new LinkedHashMap();
         headers.put("HOST", _host + ":" + _port);
@@ -737,11 +738,12 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
     
     public void downloadThexBody(URN sha1, IOStateObserver observer) {
         _thexReader = HashTree.createHashTreeReader(sha1.httpStringValue(), _root32, _rfd.getFileSize());
-        _observer = observer;
+        observerHandler.setDelegate(observer);
         _stateMachine.addState(_thexReader);
     }
     
     public HashTree getHashTree() {
+        LOG.debug("Retrieving hash tree, expected length: " + _contentLength + ", read: " + _thexReader.getAmountProcessed());
         _contentLength -= _thexReader.getAmountProcessed();
         if(_contentLength == 0)
             _bodyConsumed = true;
@@ -804,7 +806,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         if(contentLength < 0)
             observer.handleIOException(new IOException("unknown content-length, can't consume"));
             
-        _observer = observer;
+        observerHandler.setDelegate(observer);
         _stateMachine.addState(new ReadConsumer(contentLength));
     }
 
@@ -1473,7 +1475,7 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
      */
 	public void doDownload(IOStateObserver observer) throws SocketException {
         _socket.setSoTimeout(60 * 1000); // downloading, can stall upto 1 minute
-        _observer = observer;
+        observerHandler.setDelegate(observer);
         _stateMachine.addState(new DownloadState());
     }
     
@@ -1779,17 +1781,50 @@ public class HTTPDownloader implements BandwidthTracker, IOStateObserver {
         //THROTTLE.setSwitching(on);
         // DO NOT PUT SWITCHING ON THE UDP SIDE.
     }
-
-    public void handleIOException(IOException iox) {
-        _observer.handleIOException(iox);
-    }
-
-    public void handleStatesFinished() {
-        _observer.handleStatesFinished();
-    }
-
-    public void shutdown() {
-        _observer.shutdown();
+    
+    private static class Observer implements IOStateObserver {
+        private IOStateObserver delegate;
+        private boolean handled = false;
+        
+        public void handleIOException(IOException iox) {
+            synchronized(this) {
+                if(handled) {
+                    LOG.warn("Ignoring iox", iox);
+                    return;
+                }
+                handled = true;
+            }
+            delegate.handleIOException(iox);
+        }
+    
+        public void handleStatesFinished() {
+            synchronized(this) {
+                if(handled) {
+                    LOG.warn("Ignoring states finished", new Exception());
+                    return;
+                }
+                handled = true;
+            }
+            delegate.handleStatesFinished();
+        }
+    
+        public void shutdown() {
+            synchronized(this) {
+                if(handled) {
+                    LOG.warn("Ignoring shutdown", new Exception());
+                    return;
+                }
+                handled = true;
+            }
+            delegate.shutdown();
+        }
+        
+        void setDelegate(IOStateObserver observer) {
+            synchronized(this) {
+                handled = false;
+                delegate = observer;
+            }
+        }
     }
 }
 

@@ -25,6 +25,8 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
     private int available;    
     /** The object that the Throttle will recognize as the SelectionKey attachments */
     private Object attachment;
+    /** The last interest state, to interact well with the Throttle. */
+    private volatile boolean lastInterestState;
     
     /**
      * Constructs a ThrottleReader with the given Throttle.
@@ -69,12 +71,14 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
      * events at some point in time.
      */
     public void interest(boolean status) {
+        lastInterestState = status;
         if(channel != null) {
+            LOG.debug("Turning interest: " + status);
             if(status)
                 throttle.interest(this);
             else
                 channel.interest(false);
-        }
+        } else LOG.debug("Ingoring interest");
     }
     
     /**
@@ -83,7 +87,7 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
      * ever again.
      */
     public boolean bandwidthAvailable() {
-        if(channel.isOpen()) {
+        if(channel.isOpen() && lastInterestState) {
             LOG.debug("Bandwidth is available, notifying channel");
             channel.interest(true);
             return true;
@@ -142,6 +146,7 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
      */
     public void requestBandwidth() {
         available = throttle.request();
+        channel.interest(false);
     }
     
     /**
@@ -150,5 +155,7 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
     public void releaseBandwidth() {
         throttle.release(available);
         available = 0;
+        if(lastInterestState)
+            throttle.interest(this);
     }
 }

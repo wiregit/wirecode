@@ -19,6 +19,11 @@ public abstract class ReadState implements IOState {
         return processRead((ReadableByteChannel)channel, buffer);
     }
     
+    /**
+     * Reads data from the channel into the buffer. If this returns true, the state requires further processing.
+     * This should be called repeatedly until it returns false, at which point the next state should
+     * be used.
+     */
     protected abstract boolean processRead(ReadableByteChannel channel, ByteBuffer buffer) throws IOException;
 
 }

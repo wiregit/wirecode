@@ -419,6 +419,8 @@ public class DownloadTest extends BaseTestCase {
             VerifyingFile vf=ifm.getEntry(incomplete);
             assertNull("verifying file should be null", vf);
         }
+        
+        assertEquals(1, uploader1.getConnections());
     }
     
     public void testSimplePushDownload() throws Exception {

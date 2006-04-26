@@ -290,7 +290,7 @@ public class DownloadWorker {
      */
     public void incrementState(ConnectionStatus status) {
         if(LOG.isTraceEnabled())
-            LOG.trace("State Changed, Current: " + _currentState + ", status: " + status);
+            LOG.trace("WORKER: " + this + ", State Changed, Current: " + _currentState + ", status: " + status);
         
         switch(_currentState.getCurrentState()) {
         case DownloadState.DOWNLOADING:

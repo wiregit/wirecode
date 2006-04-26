@@ -242,8 +242,10 @@ public class NIODispatcher implements Runnable {
                 // respect to each other.  Otherwise, one thread can preempt another's
                 // interest setting, and one of the interested ops may be lost.
 			    synchronized(sk.attachment()) {
-                    if((op & SelectionKey.OP_READ) == SelectionKey.OP_READ)
+                    if((op & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
+                        LOG.debug("Changing read status to: " + on);
                         ((Attachment)sk.attachment()).changeReadStatus(on);
+                    }
                         
     				if(on)
     					sk.interestOps(sk.interestOps() | op);
@@ -574,7 +576,7 @@ public class NIODispatcher implements Runnable {
                 if(keys.isEmpty()) {
                     long now = System.currentTimeMillis();
                     if(startSelect == -1) {
-                        LOG.warn("No keys selected, starting spin check.");
+                        LOG.trace("No keys selected, starting spin check.");
                         checkTime = true;
                     } else if(startSelect + 30 >= now) {
                         if(LOG.isWarnEnabled())
@@ -601,8 +603,8 @@ public class NIODispatcher implements Runnable {
                 }
             }
             
-            if(LOG.isDebugEnabled())
-                LOG.debug("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ", (" + this + ").");
+            if(LOG.isTraceEnabled())
+                LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ", (" + this + ").");
             
             Collection allKeys;
             if(immediate) {
@@ -635,27 +637,42 @@ public class NIODispatcher implements Runnable {
         Attachment proxy = (Attachment)proxyAttachment;
         IOErrorObserver attachment = proxy.attachment;
         
+        // NOTE: handled is updated in proxy to prevent items that were processed
+        //       from throttles from being reprocessed.
+        //       it is reset to 0 whenever the item is being processed for the first
+        //       time in a given iteration.
+        
         if(proxy.lastMod == iteration) {
             proxy.hits++;
+            proxy.handled = 0;
         // do not count ones that we've already processed (such as throttled items)
-        } else if(proxy.lastMod < iteration)
+        } else if(proxy.lastMod < iteration) {
             proxy.hits = 0;
+            proxy.handled = 0;
+        }
             
         proxy.lastMod = iteration + 1;
-            
+        
         if(sk.isValid() && proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
             try {
                 try {
+                    int notHandled = ~proxy.handled;
                     int readyOps = sk.readyOps();
-                    if ((allowedOps & readyOps & SelectionKey.OP_ACCEPT) != 0) 
+                    if ((allowedOps & readyOps & notHandled & SelectionKey.OP_ACCEPT) != 0)  {
                         processAccept(now, sk, (AcceptChannelObserver)attachment, proxy);
-                    else if((allowedOps & readyOps & SelectionKey.OP_CONNECT) != 0)
+                        proxy.handled |= SelectionKey.OP_ACCEPT;
+                    } else if((allowedOps & readyOps & notHandled & SelectionKey.OP_CONNECT) != 0) {
                         processConnect(now, sk, (ConnectObserver)attachment, proxy);
-                    else {
-                        if ((allowedOps & readyOps & SelectionKey.OP_READ) != 0)
+                        proxy.handled |= SelectionKey.OP_CONNECT;
+                    } else {
+                        if ((allowedOps & readyOps & notHandled & SelectionKey.OP_READ) != 0) {
                             processRead(now, (ReadObserver)attachment, proxy);
-                        if ((allowedOps & readyOps & SelectionKey.OP_WRITE) != 0)
+                            proxy.handled |= SelectionKey.OP_READ;
+                        }
+                        if ((allowedOps & readyOps & notHandled & SelectionKey.OP_WRITE) != 0) {
                             processWrite(now, (WriteObserver)attachment, proxy);
+                            proxy.handled |= SelectionKey.OP_WRITE;
+                        }
                     }
                 } catch (CancelledKeyException err) {
                     LOG.warn("Ignoring cancelled key", err);
@@ -765,6 +782,7 @@ public class NIODispatcher implements Runnable {
         private final IOErrorObserver attachment;
         private long lastMod;
         private long hits;
+        private int handled;
         private SelectionKey key;
 
         private boolean timeoutActive = false;
