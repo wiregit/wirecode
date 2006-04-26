@@ -27,6 +27,7 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
+import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
@@ -72,6 +73,9 @@ public class MessageFactory {
     }
     
     public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookup) {
+        if (!lookup.isNodeID()) {
+            throw new IllegalArgumentException();
+        }
         return new FindNodeRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst), lookup);
     }
     
@@ -80,6 +84,9 @@ public class MessageFactory {
     }
     
     public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookup) {
+        if (!lookup.isValueID()) {
+            throw new IllegalArgumentException();
+        }
         return new FindValueRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst), lookup);
     }
     
@@ -93,5 +100,13 @@ public class MessageFactory {
     
     public StoreResponse createStoreResponse(RequestMessage request, int requesting, Collection status) {
         return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), requesting, status);
+    }
+    
+    public LookupRequest createLookupRequest(SocketAddress dst, KUID lookup) {
+        if (lookup.isNodeID()) {
+            return createFindNodeRequest(dst, lookup);
+        } else {
+            return createFindValueRequest(dst, lookup);
+        }
     }
 }

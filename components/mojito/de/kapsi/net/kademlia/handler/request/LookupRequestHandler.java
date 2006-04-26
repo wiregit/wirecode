@@ -34,7 +34,6 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
-import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
@@ -42,6 +41,9 @@ import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
 
+/**
+ * Handles FIND_NODE as well as FIND_VALUE requests
+ */
 public class LookupRequestHandler extends AbstractRequestHandler {
     
     private static final Log LOG = LogFactory.getLog(LookupRequestHandler.class);
@@ -66,7 +68,8 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
     }
     
-    private void handleFindNodeRequest(KUID nodeId, SocketAddress src, LookupRequest request) throws IOException {
+    private void handleFindNodeRequest(KUID nodeId, 
+            SocketAddress src, LookupRequest request) throws IOException {
         
         KUID lookup = request.getLookupID();
         
@@ -74,8 +77,8 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         List bucketList = Collections.EMPTY_LIST;
         
         if (context.isBootstrapped()) {
-            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-            bucketList = context.getRouteTable().select(lookup, k, false, false);
+            bucketList = context.getRouteTable().select(lookup, 
+                    KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);
         }
         
         if (LOG.isTraceEnabled()) {
@@ -88,13 +91,15 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         context.getMessageDispatcher().send(src, response, null);
     }
     
-    private void handleFindValueRequest(KUID nodeId, SocketAddress src, LookupRequest request) throws IOException {
+    private void handleFindValueRequest(KUID nodeId, 
+            SocketAddress src, LookupRequest request) throws IOException {
+        
         KUID lookup = request.getLookupID();
         
         Collection values = context.getDatabase().get(lookup);
         if (values != null && !values.isEmpty()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Hit! " + lookup + " = " + values);
+                LOG.trace("Hit! " + lookup + " = {" + CollectionUtils.toString(values) + "}");
             }
             
             FindValueResponse response = context.getMessageFactory()

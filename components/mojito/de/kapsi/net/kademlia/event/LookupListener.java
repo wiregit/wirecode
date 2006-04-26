@@ -25,5 +25,5 @@ import de.kapsi.net.kademlia.KUID;
 
 public interface LookupListener {
     
-    public void found(KUID lookup, Collection result, long time);
+    public void finishLookup(KUID lookup, Collection result, long time);
 }

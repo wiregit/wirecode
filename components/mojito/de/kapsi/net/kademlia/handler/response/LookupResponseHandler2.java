@@ -22,6 +22,7 @@ package de.kapsi.net.kademlia.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -59,7 +60,6 @@ public class LookupResponseHandler2 extends AbstractResponseHandler {
     private LookupManager lookupManager;
     
     private long startTime;
-    private long stopTime;
     
     private Set queried = new HashSet();
     
@@ -75,12 +75,14 @@ public class LookupResponseHandler2 extends AbstractResponseHandler {
     
     private int activeSearches = 0;
     
+    private boolean finished = false;
+    
     /**
      * The statistics for this lookup
      */
     private SingleLookupStatisticContainer lookupStat;
     
-    private LookupResponseHandler2(KUID lookup, Context context, LookupManager lookupManager) {
+    public LookupResponseHandler2(KUID lookup, Context context, LookupManager lookupManager) {
         super(context);
         
         if (!lookup.isNodeID() && !lookup.isValueID()) {
@@ -141,39 +143,54 @@ public class LookupResponseHandler2 extends AbstractResponseHandler {
     }
     
     public long time() {
-        return Math.max(0L, startTime - System.currentTimeMillis());
+        if (startTime > 0L) {
+            return System.currentTimeMillis() - startTime;
+        }
+        return 0L;
     }
     
     public void handleResponse(KUID nodeId, 
             SocketAddress src, ResponseMessage message, long time) throws IOException {
         
         lookupStat.addReply();
+        int hop = ((Integer)hopMap.get(nodeId)).intValue();
         
         if (message instanceof FindValueResponse) {
-            handleFindValueResponse(nodeId, src, (FindValueResponse)message, time);
+            handleFindValueResponse(nodeId, src, (FindValueResponse)message, time, hop);
         } else {
-            handleFindNodeResponse(nodeId, src, (FindNodeResponse)message, time);
+            handleFindNodeResponse(nodeId, src, (FindNodeResponse)message, time, hop);
         }
     }
     
     private void handleFindValueResponse(KUID nodeId, 
-            SocketAddress src, FindValueResponse response, long time) throws IOException {
+            SocketAddress src, FindValueResponse response, long time, int hop) throws IOException {
         
-        if (!isValueLookup()) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Received a KeyValue even though this is not a KeyValue lookup!");
+        if (isValueLookup()) {
+            long totalTime = time();
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(ContactNode.toString(nodeId, src)
+                        + " returned KeyValues for "
+                        + lookup + " after "
+                        + queried.size() + " queried Nodes and a total time of "
+                        + totalTime + "ms");
             }
             
-            // TODO continue lookup and call listeners if lookup finishes
-        } else {
+            if (!finished) {
+                lookupStat.setHops(hop);
+                lookupStat.setTime((int)totalTime);
+            }
+            finished = true;
             
+            fireFinishLookup(response.getValues(), totalTime);
+        } else {
+            // Some Idot sent us a FIND_VALUE response for a
+            // FIND_NODE lookup! Ignore?
         }
     }
 
     private void handleFindNodeResponse(KUID nodeId, 
-            SocketAddress src, FindNodeResponse response, long time) throws IOException {
-        
-        int hop = ((Integer)hopMap.get(nodeId)).intValue();
+            SocketAddress src, FindNodeResponse response, long time, int hop) throws IOException {
         
         Collection nodes = response.getValues();
         for(Iterator it = nodes.iterator(); it.hasNext(); ) {
@@ -184,7 +201,9 @@ public class LookupResponseHandler2 extends AbstractResponseHandler {
                     LOG.trace("Adding " + node + " to the yet-to-be queried list");
                 }
                 
-                addYetToBeQueried(node, hop+1);
+                if (!finished) {
+                    addYetToBeQueried(node, hop+1);
+                }
                 
                 // Add them to the routing table as not alive
                 // contacts. We're likely going to add them
@@ -193,16 +212,101 @@ public class LookupResponseHandler2 extends AbstractResponseHandler {
             }
         }
         
-        if (!nodes.isEmpty()) {
-            addResponse(new ContactNode(nodeId, src));
+        if (!finished) {
+            if (!nodes.isEmpty()) {
+                addResponse(new ContactNode(nodeId, src));
+            }
+            
+            --activeSearches;
+            lookupStep(hop);
         }
-        
-        --activeSearches;
-        lookupStep(hop);
     }
     
     private void lookupStep(int hop) throws IOException {
         
+        long time = time();
+        if (timeout() > 0L && time >= timeout()) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Lookup for " + lookup + " terminates after "
+                        + hop + " hops and " + time + "ms due to timeout.");
+            }
+            finishLookup(hop, time);
+            return;
+        } 
+        
+        if (activeSearches == 0) {
+            if (toQuery.isEmpty()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Lookup for " + lookup + " terminates after "
+                            + hop + " hops and " + time + "ms. No contacts left to query.");
+                }
+                finishLookup(hop, time);
+                return;
+            } else if (!context.isLocalNodeID(lookup) && responses.containsKey(lookup)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Lookup for " + lookup + " terminates after "
+                            + hop + " hops. Found traget ID!");
+                }
+                finishLookup(hop, time);
+                return;
+            }
+        }
+        
+        if (responses.size() >= resultSetSize) {
+            KUID worst = ((ContactNode)responses.select(furthest)).getNodeID();
+            
+            KUID best = null;            
+            if (!toQuery.isEmpty()) {
+                best = ((ContactNode)toQuery.select(lookup)).getNodeID();
+            }
+            
+            if (best == null || worst.isCloser(best, lookup)) {
+                if (activeSearches == 0) {
+                    if (LOG.isTraceEnabled()) {
+                        ContactNode bestResponse = (ContactNode)responses.select(lookup);
+                        LOG.trace("Lookup for " + lookup + " terminates after "
+                                + hop + " hops, " + time + "ms and " + queried.size() 
+                                + " queried Nodes with " + bestResponse + " as best match");
+                    }
+                    finishLookup(hop, time);
+                }
+                return;
+            }
+        }
+        
+        int numLookups = KademliaSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
+        if (numLookups > 0) {
+            List bucketList = toQuery.select(lookup, numLookups);
+            for(Iterator it = bucketList.iterator(); it.hasNext(); ) {
+                ContactNode node = (ContactNode)it.next();
+                
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Sending " + node + " a find request for " + lookup);
+                }
+                
+                doLookup(node);
+            }
+        }
+    }
+    
+    private void finishLookup(int hop, long time) {
+        lookupStat.setHops(hop);
+        lookupStat.setTime((int)time);
+        finished = true;
+        
+        if (isValueLookup()) {
+            fireFinishLookup(Collections.EMPTY_LIST, time);
+        } else {
+            
+            // addResponse(ContactNode) limits the size of the
+            // Trie to K and we can thus use the size method of it!
+            List nodes = responses.select(lookup, responses.size());
+            fireFinishLookup(nodes, time);
+        }
+    }
+    
+    private void fireFinishLookup(Collection results, long time) {
+        lookupManager.fireFinishLookup(lookup, results, time);
     }
     
     protected void handleResend(KUID nodeId, 

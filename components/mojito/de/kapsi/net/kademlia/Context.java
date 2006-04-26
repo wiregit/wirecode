@@ -60,6 +60,7 @@ import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindNodeResponseHandler;
 import de.kapsi.net.kademlia.handler.response.FindValueResponseHandler;
+import de.kapsi.net.kademlia.handler.response.LookupResponseHandler2;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
@@ -899,6 +900,8 @@ public class Context implements Runnable {
     
     public class LookupManager extends AbstractManager {
         
+        private Map attachmentMap = new HashMap();
+        
         private List listeners = new ArrayList();
         
         private LookupManager() {}
@@ -926,21 +929,24 @@ public class Context implements Runnable {
         }
         
         public void lookup(KUID lookup, LookupListener listener) throws IOException {
-            if (lookup.isNodeID()) {
-                lookupNode(lookup, listener);
-            } else if (lookup.isValueID()) {
-                lookupValue(lookup, listener);
-            } else {
+            if (!lookup.isNodeID() && !lookup.isValueID()) {
                 throw new IllegalArgumentException();
             }
-        }
-        
-        private void lookupNode(KUID nodeId, LookupListener listener) throws IOException {
             
-        }
-        
-        private void lookupValue(KUID nodeId, LookupListener listener) throws IOException {
-            
+            synchronized (attachmentMap) {
+                Attachment attachment = (Attachment)attachmentMap.get(lookup);
+                if (attachment == null) {
+                    LookupResponseHandler2 handler = new LookupResponseHandler2(lookup, Context.this, this);
+                    
+                    attachment = new Attachment(handler);
+                    handler.start();
+                    attachmentMap.put(lookup, attachment);
+                }
+                
+                if (listener != null) {
+                    attachment.listeners.add(listener);
+                }
+            }
         }
         
         public boolean cancel(KUID lookup) {
@@ -956,24 +962,31 @@ public class Context implements Runnable {
             fireTimeout(nodeId, address, time);
         }
 
-        private void fireLookupFailed(Attachment attachment, KUID lookup, final long time) {
-            fireLookupEvent(attachment, lookup, Collections.EMPTY_LIST, time);
+        public void fireFinishLookup(KUID lookup, Collection results, long time) {
+            Attachment attachment = null;
+            synchronized (attachmentMap) {
+                attachment = (Attachment)attachmentMap.remove(lookup);
+            }
+            
+            fireFinishLookup(attachment, lookup, results, time);
         }
         
-        private void fireLookupEvent(final Attachment attachment, final KUID lookup, final Collection results, final long time) {
+        private void fireFinishLookup(final Attachment attachment, 
+                final KUID lookup, final Collection results, final long time) {
+            
             fireEvent(new Runnable() {
                 public void run() {
                     synchronized (listeners) {
                         for(Iterator it = listeners.iterator(); it.hasNext(); ) {
                             LookupListener listener = (LookupListener)it.next();
-                            listener.found(lookup, results, time);
+                            listener.finishLookup(lookup, results, time);
                         }
                     }
                     
                     if (attachment != null) {
                         for(Iterator it = attachment.listeners.iterator(); it.hasNext(); ) {
                             LookupListener listener = (LookupListener)it.next();
-                            listener.found(lookup, results, time);
+                            listener.finishLookup(lookup, results, time);
                         }
                     }
                 }
