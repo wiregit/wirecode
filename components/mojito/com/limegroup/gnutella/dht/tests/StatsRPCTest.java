@@ -3,10 +3,12 @@ package com.limegroup.gnutella.dht.tests;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
@@ -36,7 +38,15 @@ public class StatsRPCTest {
             dht2.bind(sac2,nodeID);
             Thread t2 = new Thread(dht2, "DHT-2");
             t2.start();
-            
+            dht2.bootstrap(sac,new BootstrapListener() {
+                public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
+                public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {}
+            });
+            try {
+                Thread.sleep(3L*1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             StatsRequest req = dht.getContext().getMessageFactory().createStatsRequest(KUID.createRandomMessageID(),
                     new byte[0],StatsRequest.STATS);
             StatsListener listener = new StatsListener() {

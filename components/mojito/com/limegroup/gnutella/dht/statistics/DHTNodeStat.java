@@ -70,10 +70,12 @@ public class DHTNodeStat implements DHTStats{
         synchronized (DHT_STATS) {
             for (Iterator iter = DHT_STATS.iterator(); iter.hasNext();) {
                 StatisticContainer stat = (StatisticContainer) iter.next();
-                if(!writeSingleLookups && (stat instanceof SingleLookupStatisticContainer)) {
-                    continue;
+                if(!writeSingleLookups && (stat instanceof GlobalLookupStatisticContainer)) {
+                    GlobalLookupStatisticContainer lookupStat = (GlobalLookupStatisticContainer) stat;
+                    lookupStat.writeGlobalStats(writer);
+                } else {
+                    stat.writeStats(writer);
                 }
-                stat.writeStats(writer);
             }
         }
         writer.write("--------------------------------------------\n");

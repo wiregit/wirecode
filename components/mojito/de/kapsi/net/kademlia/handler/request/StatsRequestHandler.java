@@ -42,12 +42,13 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         networkStats.STATS_REQUEST.incrementStat();
         
         StatsRequest req = (StatsRequest) message;
-        int type = req.getRequest();
+        StringWriter writer = new StringWriter();
         
-        if(type == StatsRequest.DB) {
-            
+        if(req.isDBRequest()) {
+            context.getDHTStats().dumpDataBase(writer);
+        } else if (req.isRTRequest()){
+            context.getDHTStats().dumpRouteTable(writer);
         } else {
-            StringWriter writer = new StringWriter();
             context.getDHTStats().dumpStats(writer,false);
             StatsResponse response = context.getMessageFactory().createStatsResponse(message.getMessageID(),writer.toString());
             context.getMessageDispatcher().send(src,response,null);

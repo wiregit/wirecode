@@ -121,7 +121,7 @@ public class PlanetLab {
                 synchronized(lock) {
                     
                     try {
-                        Thread.sleep(generator.nextInt(1000 /* 60 */* 2));
+                        Thread.sleep(generator.nextInt(1000 * 60 * 2));
                     } catch (InterruptedException err) {
                         err.printStackTrace();
                     }

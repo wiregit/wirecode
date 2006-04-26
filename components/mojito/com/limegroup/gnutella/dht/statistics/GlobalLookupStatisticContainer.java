@@ -66,5 +66,10 @@ public class GlobalLookupStatisticContainer extends StatisticContainer {
            }
        }
    }
+   
+   public void writeGlobalStats(Writer writer) throws IOException {
+       writer.write("Global lookups: \n");
+       super.writeStats(writer);
+   }
 
 }

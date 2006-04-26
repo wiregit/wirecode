@@ -7,6 +7,7 @@ public class StatsRequest extends RequestMessage {
     
     public static final int STATS = 0x00;
     public static final int DB = 0x01;
+    public static final int RT = 0x02;
     
     private int request;
 
@@ -23,6 +24,10 @@ public class StatsRequest extends RequestMessage {
 
     public boolean isDBRequest() {
         return (request & DB) == DB;
+    }
+    
+    public boolean isRTRequest() {
+        return (request & RT) == RT;
     }
     
 }
