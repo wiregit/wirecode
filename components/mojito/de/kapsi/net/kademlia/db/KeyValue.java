@@ -210,6 +210,6 @@ public class KeyValue implements Serializable {
     }
     
     public String toString() {
-        return "KeyValue: " + key.toString() + " = " + new String(value);
+        return "KeyValue: " + key.toString() + " = " + new String(value) + " - originator: "+nodeId;
     }
 }

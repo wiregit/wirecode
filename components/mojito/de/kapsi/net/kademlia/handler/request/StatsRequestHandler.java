@@ -50,9 +50,9 @@ public class StatsRequestHandler extends AbstractRequestHandler {
             context.getDHTStats().dumpRouteTable(writer);
         } else {
             context.getDHTStats().dumpStats(writer,false);
-            StatsResponse response = context.getMessageFactory().createStatsResponse(message.getMessageID(),writer.toString());
-            context.getMessageDispatcher().send(src,response,null);
         }
+        StatsResponse response = context.getMessageFactory().createStatsResponse(message.getMessageID(),writer.toString());
+        context.getMessageDispatcher().send(src,response,null);
         
     }
 

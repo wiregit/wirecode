@@ -32,6 +32,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -48,14 +50,18 @@ public class StoreRequestHandler extends AbstractRequestHandler {
     
     private static final Log LOG = LogFactory.getLog(StoreRequestHandler.class);
     
+    private final NetworkStatisticContainer networkStats;
+    
     public StoreRequestHandler(Context context) {
         super(context);
+        this.networkStats = context.getNetworkStats();
     }
     
     public void handleRequest(KUID nodeId, SocketAddress src, 
             Message message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
+        networkStats.STORE_REQUESTS.incrementStat();
         QueryKey queryKey = request.getQueryKey();
         
         if (queryKey == null) {
@@ -63,6 +69,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                 LOG.error(ContactNode.toString(nodeId, src) 
                         + " does not provide a QueryKey");
             }
+            networkStats.STORE_REQUESTS_NO_QK.incrementStat();
             return;
         }
         
@@ -73,6 +80,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                         + ContactNode.toString(nodeId, src) 
                         + " but got " + queryKey);
             }
+            networkStats.STORE_REQUESTS_BAD_QK.incrementStat();
             return;
         }
         
@@ -115,13 +123,17 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             
             try {
                 if (context.getDatabase().add(keyValue)) {
+                    networkStats.STORE_REQUESTS_OK.incrementStat();
                     stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.SUCCEEDED));
                 } else {
+                    networkStats.STORE_REQUESTS_FAILURE.incrementStat();
                     stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
                 }
             } catch (SignatureException err) {
+                networkStats.STORE_REQUESTS_FAILURE.incrementStat();
                 stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
             } catch (InvalidKeyException err) {
+                networkStats.STORE_REQUESTS_FAILURE.incrementStat();
                 stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
             }
         }

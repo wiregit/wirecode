@@ -55,11 +55,14 @@ public class DHTNodeStat implements DHTStats{
     
     public void dumpDataBase(Writer writer) throws IOException{
         List KeyVals = context.getDatabase().getAllValues();
+        writer.write(nodeID+"\n");
         for (Iterator iter = KeyVals.iterator(); iter.hasNext();) {
             KeyValue keyval = (KeyValue) iter.next();
-            writeNodeStat(writer,keyval.toString());
+            writer.write(keyval.toString());
             writer.write("\n");
         }
+        writer.write("--------------------------------------------\n");
+        writer.flush();
     }
     
     public void dumpStats(Writer writer, boolean writeSingleLookups) throws IOException{
@@ -79,6 +82,7 @@ public class DHTNodeStat implements DHTStats{
             }
         }
         writer.write("--------------------------------------------\n");
+        writer.flush();
     }
 
     public void dumpRouteTable(Writer writer) throws IOException{
@@ -89,12 +93,6 @@ public class DHTNodeStat implements DHTStats{
         writer.write(nodeID);
         writer.write(FILE_DELIMITER+routeTable.toString());
         writer.write("\n");
-    }
-    
-    public void writeNodeStat(Writer writer,String stat) throws IOException {
-        if(nodeID == null) {
-            nodeID = context.getLocalNodeID().toHexString();
-        }
-        writer.write(nodeID + FILE_DELIMITER + stat);
+        writer.flush();
     }
 }

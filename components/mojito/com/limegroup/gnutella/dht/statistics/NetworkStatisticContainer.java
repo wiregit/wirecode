@@ -124,6 +124,36 @@ public class NetworkStatisticContainer extends StatisticContainer {
     public Statistic ESTIMATE_SIZE =
         new SizeStatistic();
     
+    /**
+     * <tt>Statistic</tt> for STORE_REQUESTS
+     */
+    public Statistic STORE_REQUESTS =
+        new SizeStatistic();
+    
+    /**
+     * <tt>Statistic</tt> for STORE_REQUESTS without a query key
+     */
+    public Statistic STORE_REQUESTS_NO_QK =
+        new SizeStatistic();
+    
+    /**
+     * <tt>Statistic</tt> for STORE_REQUESTS without a bad query key
+     */
+    public Statistic STORE_REQUESTS_BAD_QK =
+        new SizeStatistic();
+    
+    /**
+     * <tt>Statistic</tt> for STORE_REQUESTS without a bad query key
+     */
+    public Statistic STORE_REQUESTS_OK =
+        new SizeStatistic();
+    
+    /**
+     * <tt>Statistic</tt> for STORE_REQUESTS without a bad query key
+     */
+    public Statistic STORE_REQUESTS_FAILURE =
+        new SizeStatistic();
+    
     protected class SizeStatistic extends AbstractStatistic{
         public void addData(int data) {
             super.addData(data);

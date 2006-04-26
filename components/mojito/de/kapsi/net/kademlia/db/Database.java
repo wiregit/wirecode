@@ -212,8 +212,7 @@ public class Database {
 //        long expirationTime = creationTime 
 //            + DatabaseSettings.MILLIS_PER_DAY/KUID.LENGTH * log;
         
-        
-        long expirationTime = keyValue.getCreationTime() + DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE;
+        long expirationTime = keyValue.getCreationTime() + DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue();
         
         // TODO: this needs some finetuning. Anonymous KeyValues
         // expire 50% faster at the moment.
@@ -221,7 +220,7 @@ public class Database {
             if (keyValue.isAnonymous()
                     && !keyValue.verify(context.getMasterKey())
                     || !keyValue.isClose()) {
-                expirationTime = keyValue.getCreationTime() + DatabaseSettings.EXPIRATION_TIME_UNKNOWN;
+                expirationTime = keyValue.getCreationTime() + DatabaseSettings.EXPIRATION_TIME_UNKNOWN.getValue();
             }
         } catch (InvalidKeyException e) {
         } catch (SignatureException e) {
@@ -236,7 +235,7 @@ public class Database {
         }
         
         long time = keyValue.getRepublishTime() 
-                        + DatabaseSettings.MILLIS_PER_HOUR;
+                        + DatabaseSettings.MILLIS_PER_HOUR.getValue();
         
         return System.currentTimeMillis() >= time;
     }

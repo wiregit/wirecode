@@ -41,7 +41,10 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.event.StoreListener;
+import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
+import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.ArrayUtils;
@@ -114,12 +117,14 @@ public class Main {
         String stats = "stats";
         String restart = "restart";
         String quit = "quit";
+        String reqstats = "reqstats .+ \\d{1,5} (stats|rt|db)";
         
         String[] commands = {
                 help,
                 info,
                 svitch,
                 ping,
+                reqstats,
                 bootstrap,
                 put,
                 get,
@@ -154,6 +159,8 @@ public class Main {
                     info(dht);
                 } else if (line.matches(ping)) {
                     ping(dht, line.split(" "));
+                } else if (line.matches(reqstats)) {
+                    reqstats(dht, line.split(" "));
                 } else if (line.matches(bootstrap)) {
                     bootstrap(dht, line.split(" "));
                 } else if (line.matches(put)) {
@@ -259,6 +266,45 @@ public class Main {
                 }
             }
         });
+    }
+    
+    private static void reqstats(DHT dht, String[] line) throws IOException{
+        String host = line[1];
+        int port = Integer.parseInt(line[2]);
+        String typeString = line[3];
+        
+        SocketAddress addr = new InetSocketAddress(host, port);
+        
+        int type = StatsRequest.STATS;
+        if(typeString.equals("rt")) {
+            type = StatsRequest.RT;
+        } else if(typeString.equals("db")) {
+            type = StatsRequest.DB;
+        }
+        
+        System.out.println("Requesting stat... " + addr);
+        StatsRequest req = dht.getContext().getMessageFactory().createStatsRequest(
+                KUID.createRandomMessageID(),
+                new byte[0],
+                type);
+        
+        StatsListener listener = new StatsListener() {
+            public void nodeStatsResponse(KUID nodeId, SocketAddress address, String statistics, long time) {
+                if (nodeId != null) {
+                    System.out.println("*** Stats to " + ContactNode.toString(nodeId, address) + " succeeded: " + time + "ms");
+                } else {
+                    System.out.println("*** Stats to " + address + " succeeded: " + time + "ms");
+                }
+                System.out.println(statistics);
+            }
+
+            public void nodeStatsTimeout(KUID nodeId, SocketAddress address) {
+                System.out.println("*** Stats to " + address + " timeout!");
+            }
+            
+        };
+        
+        dht.getContext().getMessageDispatcher().send(addr, req, new StatsResponseHandler(dht.getContext(), listener));
     }
     
     private static void bootstrap(DHT dht, String[] line) throws Throwable {

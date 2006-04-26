@@ -107,6 +107,11 @@ public class PlanetLab {
         System.out.println("Bootstrapping from " + dst);
         Random generator = new Random();
         
+        if(testNumber == 4 || testNumber == 5) {
+            //5 minutes expiration
+            DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.setValue(5L * 60L * 1000L);
+        }
+        
         long start = System.currentTimeMillis();
         
         final Object lock = new Object();
@@ -121,7 +126,7 @@ public class PlanetLab {
                 synchronized(lock) {
                     
                     try {
-                        Thread.sleep(generator.nextInt(1000 * 60 * 2));
+                        Thread.sleep(generator.nextInt(1000 /* 60 */* 2));
                     } catch (InterruptedException err) {
                         err.printStackTrace();
                     }
@@ -153,7 +158,7 @@ public class PlanetLab {
                                 lock.notify();
                             }
                             
-                            if(testNumber == 2) {
+                            if(testNumber == 2 || testNumber == 4) {
                                 if(index < TEST_VALUES.length){
                                     DHTController controller = new DHTController(dht, dst, TEST_VALUES[index]);
                                     new Thread(controller).start();
@@ -240,6 +245,8 @@ public class PlanetLab {
             case 1: //bootstrap test
             case 2: //churn - publisher test
             case 3: //churn - retriever test
+            case 4: //key,value distribution test - publishers
+            case 5: //key,value distribution test - storers
                 dhts = createDHTs(port, number);
                 bootstrap(dhts, dst, test);
                 break;
@@ -267,7 +274,7 @@ public class PlanetLab {
         private static final long maxChurn = 10L * 60L * 1000L;
         
         private static final long minRepublisher = (long)(((float)2/3) * 
-            DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE);
+            DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue());
         
         private static final long minRetriever = 1L * 60L * 1000L;
         private static final long maxRetriever = 5L * 60L * 1000L;

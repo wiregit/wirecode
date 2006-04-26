@@ -65,7 +65,7 @@ public final class DatabaseSettings extends LimeDHTProps {
         = FACTORY.createLongSetting("EXPIRATION_TIME_CLOSEST_NODE", 60L * 60L * 1000L); //1 hour
     
     public static final LongSetting EXPIRATION_TIME_UNKNOWN
-        = FACTORY.createLongSetting("EXPIRATION_TIME_UNKNOWN", 30L * 60L * 1000L); //30 min
+        = FACTORY.createLongSetting("EXPIRATION_TIME_UNKNOWN", EXPIRATION_TIME_CLOSEST_NODE.getValue()/2); //30 min
     
     /**
      * The republishing interval in milliseconds.
