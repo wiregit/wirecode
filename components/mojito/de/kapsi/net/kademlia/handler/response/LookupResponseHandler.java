@@ -308,6 +308,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                         + hop + " hops. Lookup timeout reached after "+timeout+" seconds");
             }
             finishLookup(hop,diff);
+            return;
         }
         
         if(activeSearches == 0) {
@@ -321,7 +322,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 return;
             } 
             //Finish if we found the target node
-            else if((lookup!= context.getLocalNodeID()) && (responses.containsKey(lookup))) {
+            else if((!lookup.equals(context.getLocalNodeID())) && (responses.containsKey(lookup))) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookup + " terminates after "
                             + hop + " hops. Reached target ID! ");
