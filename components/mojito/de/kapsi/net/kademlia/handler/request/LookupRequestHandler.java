@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,8 +33,11 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
+import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
+import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
@@ -55,6 +59,17 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             LOG.trace(ContactNode.toString(nodeId, src) + " is trying to lookup " + lookup);
         }
         
+        if (request instanceof FindNodeRequest) {
+            handleFindNodeRequest(nodeId, src, request);
+        } else {
+            handleFindValueRequest(nodeId, src, request);
+        }
+    }
+    
+    private void handleFindNodeRequest(KUID nodeId, SocketAddress src, LookupRequest request) throws IOException {
+        
+        KUID lookup = request.getLookupID();
+        
         QueryKey queryKey = QueryKey.getQueryKey(src);
         List bucketList = Collections.EMPTY_LIST;
         
@@ -71,5 +86,23 @@ public class LookupRequestHandler extends AbstractRequestHandler {
                     .createFindNodeResponse(request, queryKey, bucketList);
         
         context.getMessageDispatcher().send(src, response, null);
+    }
+    
+    private void handleFindValueRequest(KUID nodeId, SocketAddress src, LookupRequest request) throws IOException {
+        KUID lookup = request.getLookupID();
+        
+        Collection values = context.getDatabase().get(lookup);
+        if (values != null && !values.isEmpty()) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Hit! " + lookup + " = " + values);
+            }
+            
+            FindValueResponse response = context.getMessageFactory()
+                        .createFindValueResponse(request, values);
+            context.getMessageDispatcher().send(src, response, null);
+        } else {
+            // OK, send ContactNodes instead!
+            handleFindNodeRequest(nodeId, src, request);
+        }
     }
 }

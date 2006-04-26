@@ -97,7 +97,7 @@ public class KUID implements Serializable, Comparable {
      * A random pad we're using to obfuscate the actual
      * QueryKey. Nodes must do a lookup to get the QK!
      */
-    private static byte[] RANDOM_PAD = new byte[4];
+    private static final byte[] RANDOM_PAD = new byte[4];
                                                 
     static {
         byte[] min = new byte[20];

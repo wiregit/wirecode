@@ -43,8 +43,7 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.DefaultMessageHandler;
 import de.kapsi.net.kademlia.handler.RequestHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
-import de.kapsi.net.kademlia.handler.request.FindNodeRequestHandler;
-import de.kapsi.net.kademlia.handler.request.FindValueRequestHandler;
+import de.kapsi.net.kademlia.handler.request.LookupRequestHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.handler.request.StoreRequestHandler;
 import de.kapsi.net.kademlia.messages.Message;
@@ -79,8 +78,7 @@ public class MessageDispatcher implements Runnable {
     
     private DefaultMessageHandler defaultHandler;
     private PingRequestHandler pingHandler;
-    private FindNodeRequestHandler findNodeHandler;
-    private FindValueRequestHandler findValueHandler;
+    private LookupRequestHandler lookupHandler;
     private StoreRequestHandler storeHandler;
     
     private Filter filter;
@@ -93,8 +91,7 @@ public class MessageDispatcher implements Runnable {
         
         defaultHandler = new DefaultMessageHandler(context);
         pingHandler = new PingRequestHandler(context);
-        findNodeHandler = new FindNodeRequestHandler(context);
-        findValueHandler = new FindValueRequestHandler(context);
+        lookupHandler = new LookupRequestHandler(context);
         storeHandler = new StoreRequestHandler(context);
         
         filter = new Filter();
@@ -212,10 +209,9 @@ public class MessageDispatcher implements Runnable {
         
         if (msg instanceof PingRequest) {
             requestHandler = pingHandler;
-        } else if (msg instanceof FindNodeRequest) {
-            requestHandler = findNodeHandler;
-        } else if (msg instanceof FindValueRequest) {
-            requestHandler = findValueHandler;
+        } else if (msg instanceof FindNodeRequest
+                || msg instanceof FindValueRequest) {
+            requestHandler = lookupHandler;
         } else if (msg instanceof StoreRequest) {
             requestHandler = storeHandler;
         }

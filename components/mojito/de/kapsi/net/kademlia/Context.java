@@ -101,7 +101,7 @@ public class Context implements Runnable {
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
     
-    private PingContext pingContext;
+    private PingManager pingContext;
     
     private volatile boolean bootstrapped = false;
     private boolean running = false;
@@ -147,7 +147,7 @@ public class Context implements Runnable {
         keyValuePublisher = new KeyValuePublisher(this);
         bucketRefresher = new RandomBucketRefresher(this);
         
-        pingContext = new PingContext();
+        pingContext = new PingManager();
         
         ResponseListener listener = new ResponseListener() {
             public void response(KUID nodeId, SocketAddress address, long time) {
@@ -205,6 +205,10 @@ public class Context implements Runnable {
             }
         }
         return localNode;
+    }
+    
+    public boolean isLocalNodeID(KUID nodeId) {
+        return nodeId.equals(this.nodeId);
     }
     
     public KUID getLocalNodeID() {
@@ -687,7 +691,7 @@ public class Context implements Runnable {
         }
     }
     
-    protected abstract class AbstractContext {
+    protected abstract class AbstractManager {
         
         private List listeners = new ArrayList();
         
@@ -740,20 +744,16 @@ public class Context implements Runnable {
      * The PingContext takes care of concurrent Pings and makes sure
      * a single Node cannot be pinged multiple times.
      */
-    public class PingContext extends AbstractContext {
+    public class PingManager extends AbstractManager {
         
         private Map attachmentMap = new HashMap();
         private List listeners = new ArrayList();
         
-        private PingContext() {
+        private PingManager() {
             
         }
         
         public void init() {
-            /*synchronized (listeners) {
-                listeners.clear();
-            }*/
-            
             synchronized (attachmentMap) {
                 attachmentMap.clear();
             }
@@ -897,11 +897,11 @@ public class Context implements Runnable {
         }
     }
     
-    public class LookupContext extends AbstractContext {
+    public class LookupManager extends AbstractManager {
         
         private List listeners = new ArrayList();
         
-        private LookupContext() {}
+        private LookupManager() {}
         
         public void addLookupListener(LookupListener listener) {
             synchronized (listeners) {

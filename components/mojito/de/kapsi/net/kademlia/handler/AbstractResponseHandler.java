@@ -72,6 +72,10 @@ public abstract class AbstractResponseHandler extends MessageHandler
         }
     }
     
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+    
     public long timeout() {
         return timeout;
     }
@@ -90,6 +94,10 @@ public abstract class AbstractResponseHandler extends MessageHandler
     
     public int getErrors() {
         return errors;
+    }
+    
+    public void setMaxErrors(int maxErrors) {
+        this.maxErrors = maxErrors;
     }
     
     public int getMaxErrors() {
