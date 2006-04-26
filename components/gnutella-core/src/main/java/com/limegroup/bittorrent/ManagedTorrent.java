@@ -46,14 +46,24 @@ public class ManagedTorrent {
 	private static final int MAX_TRACKER_FAILURES = 5;
 
 	/*
-	 * used to order BTConnections according to the average download speed.
+	 * used to order BTConnections according to the average 
+	 * download or upload speed.
 	 */
-	private static final Comparator DOWNLOAD_SPEED_COMPARATOR = new DownloadSpeedComparator();
+	private static final Comparator DOWNLOAD_SPEED_COMPARATOR = 
+		new SpeedComparator(true);
+	private static final Comparator UPLOAD_SPEED_COMPARATOR = 
+		new SpeedComparator(false);
+	
+	/*
+	 * orders BTConnections by the round they were unchoked.
+	 */
+	private static final Comparator UNCHOKE_COMPARATOR =
+		new UnchokeComparator();
 
 	/*
 	 * time in milliseconds between choking/unchoking of connections
 	 */
-	private static final int RECHOKE_TIMEOUT = 30 * 1000;
+	private static final int RECHOKE_TIMEOUT = 10 * 1000;
 
 	/*
 	 * the TorrentManager managing this torrent
@@ -104,7 +114,7 @@ public class ManagedTorrent {
 	/*
 	 * whether to choke all connections
 	 */
-	private volatile boolean _globalChoke = false;
+	private boolean _globalChoke = false;
 
 	/*
 	 * whether this download was paused.
@@ -131,7 +141,7 @@ public class ManagedTorrent {
 	/** 
 	 * A runnable that takes care of scheduled periodic rechoking
 	 */
-	private PeriodicChoker choker;
+	private volatile PeriodicChoker choker;
 
 	/**
 	 * Constructs new ManagedTorrent
@@ -256,6 +266,8 @@ public class ManagedTorrent {
 		
 		_connectionFetcher.shutdown();
 		
+		choker.stopped = true;
+		
 		// we stopped, removing torrent from active list of
 		// TorrentManager
 		_manager.removeTorrent(this, _folder.isComplete());
@@ -341,7 +353,7 @@ public class ManagedTorrent {
 	void verificationComplete() {
 		enqueueTask(new Runnable() {
 			public void run() {
-				if (!_stopped && !_folder.isComplete()) 
+				if (!_stopped) 
 					startConnecting();
 			}
 		});
@@ -630,16 +642,10 @@ public class ManagedTorrent {
 				
 				for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
 					BTConnection btc = (BTConnection) iter.next();
-					// close connections that aren't interested in any part of a
-					// complete torrent
-					if (!btc.isInterested())
-						btc.close();
-					else {
-						// cancel all requests, if there are any left. (This should not
-						// be the case at this point anymore)
-						btc.cancelAllRequests();
-						btc.sendNotInterested();
-					}
+					// cancel all requests, if there are any left. (This should not
+					// be the case at this point anymore)
+					btc.cancelAllRequests();
+					btc.sendNotInterested();
 				}
 			}
 		};
@@ -682,7 +688,11 @@ public class ManagedTorrent {
 			stopNow();
 
 		// resume uploads
-		setGlobalChoke(false);
+		NIODispatcher.instance().invokeLater(new Runnable() {
+			public void run() {
+				setGlobalChoke(false);
+			}
+		});
 
 		// remember attempt to save the file
 		_saved = true;
@@ -787,7 +797,8 @@ public class ManagedTorrent {
 	}
 	
 	private class PeriodicChoker implements Runnable {
-		private int run = 0;
+		volatile int round;
+		int unchokesSinceLast;
 		volatile boolean stopped;
 		public void run() {
 			if (stopped)
@@ -797,14 +808,14 @@ public class ManagedTorrent {
 				LOG.debug("scheduling rechoke");
 			
 			List l; 
-			if (run++ % 3 == 0) {
+			if (round++ % 3 == 0) {
 				l = new ArrayList(_connections);
 				Collections.shuffle(l);
 			} else
 				l = _connections;
 			
 			
-			NIODispatcher.instance().invokeLater(new Rechoker(l));
+			NIODispatcher.instance().invokeLater(new Rechoker(l, true));
 			
 			RouterService.schedule(this, RECHOKE_TIMEOUT, 0);
 		}
@@ -812,8 +823,14 @@ public class ManagedTorrent {
 	
 	private class Rechoker implements Runnable {
 		private final List connections;
+		private final boolean forceUnchokes;
 		Rechoker(List connections) {
+			this(connections, false);
+		}
+		
+		Rechoker(List connections, boolean forceUnchokes) {
 			this.connections = connections;
+			this.forceUnchokes = forceUnchokes;
 		}
 		
 		public void run() {
@@ -822,6 +839,13 @@ public class ManagedTorrent {
 				return;
 			}
 			
+			if (_folder.isComplete())
+				seedRechoke();
+			else
+				leechRechoke();
+		}
+		
+		private void leechRechoke() {
 			List fastest = new ArrayList(connections.size());
 			for (Iterator iter = connections.iterator(); iter.hasNext();) {
 				BTConnection con = (BTConnection) iter.next();
@@ -843,13 +867,66 @@ public class ManagedTorrent {
 			for (Iterator iter = connections.iterator(); iter.hasNext();) {
 				BTConnection con = (BTConnection) iter.next();
 				if (fastest.remove(con)) 
-					con.sendUnchoke();
+					con.sendUnchoke(choker.round);
 				else if (optimistic > 0 && con.shouldBeInterested()) {
-					con.sendUnchoke(); // this is weird but that's how Bram does it
+					con.sendUnchoke(choker.round); // this is weird but that's how Bram does it
 					if (con.isInterested()) 
 						optimistic--;
 				} else 
 					con.sendChoke();
+			}
+		}
+		
+		private void seedRechoke() {
+			int numForceUnchokes = 0;
+			if (forceUnchokes) {
+				int x = (getNumUploads() + 2) / 3;
+				numForceUnchokes = Math.max(0, x + choker.round % 3) / 3 -
+				choker.unchokesSinceLast;
+			}
+			
+			List preferred = new ArrayList();
+			int newLimit = choker.round - 3;
+			for (Iterator iter = connections.iterator(); iter.hasNext();) {
+				BTConnection con = (BTConnection) iter.next();
+				if (!con.isChoked() && con.isInterested() && 
+						con.shouldBeInterested()) {
+					if (con.getUnchokeRound() < newLimit)
+						con.setUnchokeRound(-1);
+					preferred.add(con);
+				}
+			}
+			
+			int numKept = getNumUploads() - numForceUnchokes;
+			if (preferred.size() > numKept) {
+				Collections.sort(preferred,UNCHOKE_COMPARATOR);
+				preferred = preferred.subList(0, numKept);
+			}
+			
+			int numNonPref = getNumUploads() - preferred.size();
+			
+			if (forceUnchokes)
+				choker.unchokesSinceLast = 0;
+			else
+				choker.unchokesSinceLast += numNonPref;
+			
+			for (Iterator iter = connections.iterator(); iter.hasNext();) {
+				BTConnection con = (BTConnection) iter.next();
+				if (preferred.contains(con))
+					continue;
+				if (!con.isInterested())
+					con.sendChoke();
+				else if (con.isChoked() && numNonPref > 0 && 
+						con.shouldBeInterested()) {
+						con.sendUnchoke(choker.round);
+						numNonPref--;
+				}
+				else {
+					if (numNonPref == 0 || !con.shouldBeInterested())
+						con.sendChoke();
+					else
+						numNonPref--;
+				}
 			}
 		}
 	}
@@ -859,7 +936,7 @@ public class ManagedTorrent {
 	 * Note: Copied verbatim from mainline BT
 	 */
 	private static int getNumUploads() {
-		int uploads = BittorrentSettings.TORRENT_MAX_CONNECTIONS.getValue();
+		int uploads = BittorrentSettings.TORRENT_MAX_UPLOADS.getValue();
 		if (uploads > 0)
 			return uploads;
 		
@@ -971,41 +1048,50 @@ public class ManagedTorrent {
 	}
 
 	/*
-	 * Compares two BTConnections by their average download speeds
+	 * Compares two BTConnections by their average download 
+	 * or upload speeds.  Higher speeds get preference.
 	 */
-	public static class DownloadSpeedComparator implements Comparator {
+	public static class SpeedComparator implements Comparator {
+		
+		private final boolean download;
+		public SpeedComparator(boolean download) {
+			this.download = download;
+		}
+		
 		// requires both objects to be of type BTConnection
 		public int compare(Object o1, Object o2) {
+			if (o1 == o2)
+				return 0;
+			
 			BTConnection c1 = (BTConnection) o1;
 			BTConnection c2 = (BTConnection) o2;
-			float bw = 0;
-			try {
-				bw = c1.getMessageReader().getBandwidthTracker()
-						.getMeasuredBandwidth()
-						- c2.getMessageReader().getBandwidthTracker()
-								.getMeasuredBandwidth();
-				if (bw > 0.1) // c1 greater, -> preference c1 over c2,
-					return -1;
-				else if (bw < -0.1)
-					return 1;
-			} catch (InsufficientDataException ide) {
-				// ignored
-			}
-
-			bw = c1.getMessageReader().getBandwidthTracker()
-					.getAverageBandwidth()
-					- c2.getMessageReader().getBandwidthTracker()
-							.getAverageBandwidth();
-			if (bw > 0)
+			
+			float bw1 = c1.getMeasuredBandwidth(download);
+			float bw2 = c2.getMeasuredBandwidth(download);
+			
+			if (bw1 == bw2)
+				return 0;
+			else if (bw1 > bw2)
 				return -1;
-			else if (bw < 0)
+			else
 				return 1;
-			return 0;
 		}
-
-		public boolean equals(Object o) {
-			// not implemented
-			return false;
+	}
+	
+	/**
+	 * A comparator that compares BT connections by the number of
+	 * unchoke round they were unchoked.  Connections with higher 
+	 * round get preference.
+	 */
+	private static class UnchokeComparator implements Comparator {
+		public int compare(Object a, Object b) {
+			if (a == b)
+				return 0;
+			BTConnection con1 = (BTConnection) a;
+			BTConnection con2 = (BTConnection) b;
+			if (con1.getUnchokeRound() != con2.getUnchokeRound())
+				return -1 * (con1.getUnchokeRound() - con2.getUnchokeRound());
+			return UPLOAD_SPEED_COMPARATOR.compare(con1, con2);
 		}
 	}
 

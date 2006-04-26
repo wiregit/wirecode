@@ -3,6 +3,7 @@ package com.limegroup.bittorrent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOSocket;
@@ -137,6 +139,11 @@ public class BTConnection {
 	 * The # of pieces the remote host is missing.
 	 */
 	private int numMissing;
+	
+	/**
+	 * The # of the round this connection was unchoked last time.
+	 */
+	private int unchokeRound;
 	
 
 	/**
@@ -295,11 +302,8 @@ public class BTConnection {
 		_torrent.connectionClosed(this);
 	}
 
-	/**
-	 * @return the BTMessageReader in use
-	 */
-	public BTMessageReader getMessageReader() {
-		return _reader;
+	public float getMeasuredBandwidth(boolean read) {
+		return read ? _reader.getBandwidth() : _writer.getBandwidth();
 	}
 
 	/**
@@ -358,11 +362,20 @@ public class BTConnection {
 	/**
 	 * Unchokes the connection
 	 */
-	void sendUnchoke() {
+	void sendUnchoke(int now) {
 		if (_isChoked) {
 			_writer.enqueue(BTUnchoke.createMessage());
+			unchokeRound = now;
 			_isChoked = false;
 		}
+	}
+	
+	int getUnchokeRound() {
+		return unchokeRound;
+	}
+	
+	void setUnchokeRound(int round) {
+		unchokeRound = round;
 	}
 
 	/**
@@ -828,5 +841,5 @@ public class BTConnection {
 	public String toString() {
 		return _endpoint.toString();
 	}
-
+	
 }

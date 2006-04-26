@@ -43,6 +43,11 @@ public class BTMessageWriter implements
 	
 	/** Whether this writer is shutdown */
 	private volatile boolean shutdown;
+	
+	/*
+	 * my own private BandwidthTracker
+	 */
+	private SimpleBandwidthTracker _tracker;
 
 	/**
 	 * Constructor
@@ -51,6 +56,7 @@ public class BTMessageWriter implements
 		_channel = null;
 		_queue = new LinkedList();
 		_connection = connection;
+		_tracker = new SimpleBandwidthTracker();
 	}
 
 	/**
@@ -148,7 +154,13 @@ public class BTMessageWriter implements
 	 */
 	public void count(int written) {
 		BandwidthStat.BITTORRENT_MESSAGE_UPSTREAM_BANDWIDTH.addData(written);
+		_tracker.count(written);
 		_connection.wroteBytes(written);
+	}
+	
+	float getBandwidth() {
+		_tracker.measureBandwidth();
+		return _tracker.getMeasuredBandwidth();
 	}
 
 	/**
