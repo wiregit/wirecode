@@ -79,9 +79,6 @@ public abstract class Token {
         NINE = nine;
     }
 
-    /** A ByteBuffer with room for a single byte. */
-    private static final ByteBuffer ONE_BYTE = ByteBuffer.wrap(new byte[1]);
-
     /** The channel this Token reads bencoded data from. */
     protected final ReadableByteChannel chan;
 
@@ -169,29 +166,27 @@ public abstract class Token {
     	 * If it's a "d" for dictionary for instance, it gives the channel to the BEDictionary constructor.
     	 */
 
-        try {
-            int read = chan.read(ONE_BYTE);
-            if (read == 0)
-                return null; // The channel gave us no data, so we have no parsed object to return
-            if (read == -1)
-                throw new IOException("channel closed while trying to read next token");
-        } finally {
-            ONE_BYTE.clear(); // Mark the ByteBuffer empty for the next time
-        }
-
-        byte b = ONE_BYTE.array()[0];
-        if (b == I)
+    	byte []b = new byte[1];
+    	ByteBuffer one_byte = ByteBuffer.wrap(b);
+    	int read = chan.read(one_byte);
+    	if (read == 0)
+    		return null; // The channel gave us no data, so we have no parsed object to return
+    	if (read == -1)
+    		throw new IOException("channel closed while trying to read next token");
+    		
+    		
+        if (b[0] == I)
             return new BELong(chan);
-        else if (b == D)
+        else if (b[0] == D)
             return new BEDictionary(chan);
-        else if (b == L)
+        else if (b[0] == L)
             return new BEList(chan);
-        else if (b == E)
+        else if (b[0] == E)
             return Token.TERMINATOR;
-        else if (b >= ZERO && b <= NINE)
-            return new BEString(b, chan);
+        else if (b[0] >= ZERO && b[0] <= NINE)
+            return new BEString(b[0], chan);
         else
-            throw new IOException("unrecognized token type " + (char)b);
+            throw new IOException("unrecognized token type " + (char)b[0]);
     }
 
     /**
