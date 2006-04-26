@@ -24,12 +24,6 @@ package de.kapsi.net.kademlia.settings;
  */
 public final class DatabaseSettings extends LimeDHTProps {
     
-    //public static final long MILLIS_PER_DAY = 24L * 60L * 60L * 1000L; // 24 horus
-    public static final long EXPIRATION_TIME_CLOSEST_NODE = 60L * 60L * 1000L; // 1 hour
-    public static final long EXPIRATION_TIME_UNKNOWN = 30L * 60L * 1000L; // 30 mins
-    
-    public static final long MILLIS_PER_HOUR = EXPIRATION_TIME_CLOSEST_NODE / 24L;
-    
     public static final String DATABASE_FILE = "Database.pat";
     
     private DatabaseSettings() {}
@@ -67,14 +61,21 @@ public final class DatabaseSettings extends LimeDHTProps {
     public static final IntSetting MAX_STORE_FORWARD_ONCE
         = FACTORY.createSettableIntSetting("MAX_STORE_FORWARD_ONCE", 5, "max_store_forward_once", 1, 10);
     
+    public static final LongSetting EXPIRATION_TIME_CLOSEST_NODE
+        = FACTORY.createLongSetting("EXPIRATION_TIME_CLOSEST_NODE", 60L * 60L * 1000L); //1 hour
+    
+    public static final LongSetting EXPIRATION_TIME_UNKNOWN
+        = FACTORY.createLongSetting("EXPIRATION_TIME_UNKNOWN", 30L * 60L * 1000L); //30 min
+    
     /**
      * The republishing interval in milliseconds.
      * 
-     * TODO it is currently set to 3 Minutes for TESTING purposes!
-     *    CHANGE IT OR IT WILL SCREW US!
-     *    
      * TODO reasonable min and max values
      */
     public static final LongSetting REPUBLISH_INTERVAL
-        = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", 30L*60L*1000L, "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
+    = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", EXPIRATION_TIME_CLOSEST_NODE.getValue()/2 , "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
+    
+    
+    public static final LongSetting MILLIS_PER_HOUR 
+        = FACTORY.createLongSetting("MILLIS_PER_HOUR",EXPIRATION_TIME_CLOSEST_NODE.getValue() / 24L);
 }
