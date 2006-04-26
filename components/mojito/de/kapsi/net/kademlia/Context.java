@@ -202,12 +202,18 @@ public class Context implements Runnable {
     public void setExternalSocketAddress(SocketAddress newExternalAddress)
             throws IOException {
         if (newExternalAddress != null) {
-            if (!newExternalAddress.equals(this.externalAddress)) {
+            
+            if (this.externalAddress == null) {
+                ContactNode localNode = (ContactNode) routeTable.get(nodeId);
+                if (localNode != null) {
+                    this.externalAddress = newExternalAddress;
+                    localNode.setSocketAddress(newExternalAddress);
+                }
+            } else if (!newExternalAddress.equals(this.externalAddress)) {
                 if (tmpExternalAddress == null) {
                     tmpExternalAddress = newExternalAddress;
                 } else if (tmpExternalAddress.equals(newExternalAddress)) {
-                    ContactNode localNode = (ContactNode) routeTable
-                            .get(nodeId);
+                    ContactNode localNode = (ContactNode) routeTable.get(nodeId);
                     if (localNode != null) {
                         this.externalAddress = newExternalAddress;
                         localNode.setSocketAddress(newExternalAddress);
