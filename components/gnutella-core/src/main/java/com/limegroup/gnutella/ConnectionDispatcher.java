@@ -93,6 +93,7 @@ public class ConnectionDispatcher {
         	if (LOG.isErrorEnabled())
         		LOG.error("Unknown protocol: " + word);
         	IOUtils.close(client);
+        	return;
         }
 
         delegator.delegate(word, client, newThread);
