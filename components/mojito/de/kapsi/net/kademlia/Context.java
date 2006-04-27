@@ -232,6 +232,21 @@ public class Context implements Runnable {
         }
     }
     
+    public boolean isFirewalled() {
+        ContactNode localNode = (ContactNode)routeTable.get(nodeId);
+        if (localNode != null) {
+            return localNode.isFirewalled();
+        }
+        return false; // TODO or maybe true?
+    }
+    
+    public void setFirewalled(boolean firewalled) {
+        ContactNode localNode = (ContactNode)routeTable.get(nodeId);
+        if (localNode != null) {
+            localNode.setFirewalled(firewalled);
+        }
+    }
+    
     public Database getDatabase() {
         return database;
     }
