@@ -58,7 +58,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
         PingRequest request = (PingRequest)message;
         
         PingResponse response = context.getMessageFactory()
-                .createPingResponse(message.getMessageID(), message.getSocketAddress());
+                .createPingResponse(message, message.getSocketAddress());
 
         context.getMessageDispatcher().send(message.getContactNode(), response, null);
         networkStats.PONGS_SENT.incrementStat();

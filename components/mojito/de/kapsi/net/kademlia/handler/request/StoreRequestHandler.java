@@ -138,7 +138,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         int keyValues = Math.min(maxOnce, remaining);
         
         StoreResponse response 
-            = context.getMessageFactory().createStoreResponse(request.getMessageID(), keyValues, stats);
+            = context.getMessageFactory().createStoreResponse(request, keyValues, stats);
         context.getMessageDispatcher().send(request.getContactNode(), response, null);
     }
 }

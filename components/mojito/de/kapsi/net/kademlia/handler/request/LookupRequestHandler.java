@@ -65,7 +65,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
         
         FindNodeResponse response = context.getMessageFactory()
-                    .createFindNodeResponse(request.getMessageID(), queryKey, bucketList);
+                    .createFindNodeResponse(request, queryKey, bucketList);
         
         context.getMessageDispatcher().send(message.getContactNode(), response, null);
     }

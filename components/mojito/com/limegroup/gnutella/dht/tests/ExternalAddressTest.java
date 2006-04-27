@@ -74,7 +74,7 @@ public class ExternalAddressTest {
             System.out.println("Going to tell " + message.getSocketAddress() + " that its external address is " + addr);
             
             PingResponse pong = context.getMessageFactory()
-                    .createPingResponse(message.getMessageID(), addr);
+                    .createPingResponse(message, addr);
     
             context.getMessageDispatcher().send(message.getContactNode(), pong, null);
         }        

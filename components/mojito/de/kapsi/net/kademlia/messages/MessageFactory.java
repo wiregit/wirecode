@@ -70,39 +70,39 @@ public class MessageFactory {
         return new PingRequest(getVendor(), getVersion(), getLocalNode(), createMessageID());
     }
     
-    public PingResponse createPingResponse(KUID messageId, SocketAddress address) {
-        return new PingResponse(getVendor(), getVersion(), getLocalNode(), messageId, address, getEstimatedSize());
+    public PingResponse createPingResponse(RequestMessage request, SocketAddress address) {
+        return new PingResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), address, getEstimatedSize());
     }
     
     public FindNodeRequest createFindNodeRequest(KUID lookup) {
         return new FindNodeRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(), lookup);
     }
     
-    public FindNodeResponse createFindNodeResponse(KUID messageId, QueryKey queryKey, List nodes) {
-        return new FindNodeResponse(getVendor(), getVersion(), getLocalNode(), messageId, queryKey, nodes);
+    public FindNodeResponse createFindNodeResponse(RequestMessage request, QueryKey queryKey, List nodes) {
+        return new FindNodeResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), queryKey, nodes);
     }
     
     public FindValueRequest createFindValueRequest(KUID lookup) {
         return new FindValueRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(), lookup);
     }
     
-    public FindValueResponse createFindValueResponse(KUID messageId, Collection values) {
-        return new FindValueResponse(getVendor(), getVersion(), getLocalNode(), messageId, values);
+    public FindValueResponse createFindValueResponse(RequestMessage request, Collection values) {
+        return new FindValueResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), values);
     }
     
     public StoreRequest createStoreRequest(int remaining, QueryKey queryKey, Collection values) {
         return new StoreRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(), remaining, queryKey, values);
     }
     
-    public StoreResponse createStoreResponse(KUID messageId, int requesting, Collection status) {
-        return new StoreResponse(getVendor(), getVersion(), getLocalNode(), messageId, requesting, status);
+    public StoreResponse createStoreResponse(RequestMessage request, int requesting, Collection status) {
+        return new StoreResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), requesting, status);
     }
     
-    public StatsRequest createStatsRequest(KUID messageId, byte[] signature, int request) {
-        return new StatsRequest(getVendor(), getVersion(), getLocalNode(), messageId, signature, request);
+    public StatsRequest createStatsRequest(byte[] signature, int request) {
+        return new StatsRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(), signature, request);
     }
 
-    public StatsResponse createStatsResponse(KUID messageId, String statistics) {
-        return new StatsResponse(getVendor(), getVersion(), getLocalNode(), messageId, statistics);
+    public StatsResponse createStatsResponse(RequestMessage request, String statistics) {
+        return new StatsResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), statistics);
     }
 }

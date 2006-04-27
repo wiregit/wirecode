@@ -279,10 +279,8 @@ public class Main {
         }
         
         System.out.println("Requesting stat... " + addr);
-        StatsRequest req = dht.getContext().getMessageFactory().createStatsRequest(
-                KUID.createRandomMessageID(),
-                new byte[0],
-                type);
+        StatsRequest req = dht.getContext().getMessageFactory()
+                .createStatsRequest(new byte[0], type);
         
         StatsListener listener = new StatsListener() {
             public void nodeStatsResponse(ContactNode node, String statistics, long time) {

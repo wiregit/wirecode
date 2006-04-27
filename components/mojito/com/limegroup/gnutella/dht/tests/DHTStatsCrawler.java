@@ -261,8 +261,8 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                         
                     } else {
                         ContactNode node = (ContactNode) iter.next();
-                        StatsRequest req = context.getMessageFactory().createStatsRequest(KUID.createRandomMessageID(),
-                                new byte[0], StatsRequest.STATS);
+                        StatsRequest req = context.getMessageFactory()
+                            .createStatsRequest(new byte[0], StatsRequest.STATS);
                         
                         try {
                             //statsQueried.add(node);

@@ -53,7 +53,7 @@ public class FindValueRequestHandler extends LookupRequestHandler {
                 }
                 
                 FindValueResponse response = context.getMessageFactory()
-                            .createFindValueResponse(request.getMessageID(), values);
+                            .createFindValueResponse(request, values);
                 context.getMessageDispatcher().send(message.getContactNode(), response, null);
                 
                 return; // We're done here!
