@@ -122,6 +122,8 @@ OPTIONS_RESTART_REQUIRED=LimeWire valikute rakendamine jõustub pärast mist.
 OPTIONS_BUTTON_REVERT_TO_DEFAULT=Taasta vaikolekud
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Taasta kõik tehase vaiksätted.
+#### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
+#? OPTIONS_LEARN_MORE_LABEL=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -536,6 +538,23 @@ MENU_TOOLS_OPTIONS_MNEMONIC=V
 #### MENU_TOOLS_OPTIONS_ACCESSIBLE=Display the Options Screen
 MENU_TOOLS_OPTIONS_ACCESSIBLE=Kuva valikute ekraan.
 
+#### MENU_FILTERS_TITLE=Filters
+#? MENU_FILTERS_TITLE=
+#### MENU_FILTERS_TITLE_MNEMONIC=S
+#? MENU_FILTERS_TITLE_MNEMONIC=
+#### MENU_FILTERS_CONFIGURE=Configure Content Filters
+#? MENU_FILTERS_CONFIGURE=
+#### MENU_FILTERS_CONFIGURE_MNEMONIC=C
+#? MENU_FILTERS_CONFIGURE_MNEMONIC=
+#### MENU_FILTERS_CONFIGURE_ACCESSIBLE=Configure LimeWire's Content Filtering Options
+#? MENU_FILTERS_CONFIGURE_ACCESSIBLE=
+#### MENU_FILTERS_LEARN_MORE=Learn More...
+#? MENU_FILTERS_LEARN_MORE=
+#### MENU_FILTERS_LEARN_MORE_ACCESSIBLE=Learn More about LimeWire's Content Filtering System
+#? MENU_FILTERS_LEARN_MORE_ACCESSIBLE=
+#### MENU_FILTERS_LEARN_MORE_MNEMONIC=L
+#? MENU_FILTERS_LEARN_MORE_MNEMONIC=
+
 #### MENU_HELP_TITLE=Help
 MENU_HELP_TITLE=Abi
 #### MENU_HELP_TITLE_MNEMONIC=H
@@ -682,12 +701,16 @@ SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Näita Magnet'i detaile
 SEARCH_PUBLIC_HTTP_PAGE_STRING=Veebileht faili(de) jaoks
 #### SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Repeat Search
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Korda otsingut
+#### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
+#? SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=
 #### SEARCH_PUBLIC_BLOCK_STRING=Block Host
 SEARCH_PUBLIC_BLOCK_STRING=Blokeeri võõrustaja
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=Tulemused
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Otsi edasi
+#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered. 
+#? SEARCH_RESULT_SECURE_TIP=
 #### SEARCH_SEARCHING_LABEL=Searching...
 SEARCH_SEARCHING_LABEL=Otsin...
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
@@ -1219,6 +1242,10 @@ DOWNLOAD_STATUS_SAVING=Salvestan faili...
 DOWNLOAD_STATUS_PAUSING=Peatan...
 #### DOWNLOAD_STATUS_PAUSED=Paused
 DOWNLOAD_STATUS_PAUSED=Peatatud
+#### DOWNLOAD_STATUS_INVALID=Content Removed
+#? DOWNLOAD_STATUS_INVALID=
+#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network.  To learn more, double-click on the download (or click preview).
+#? DOWNLOAD_INVALID_EXPLAIN=
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
 DOWNLOAD_AWAITING_SOURCES=Veel täpsemat otsingut võib vaja minna...
 # {0} the name of the skin
@@ -1329,6 +1356,8 @@ UPLOAD_TABLE_STRING_COMPLETE=Lõpetatud
 UPLOAD_TABLE_STRING_BANNED_GREEDY=Keela ahnepätsidel juurdepääs
 #### UPLOAD_TABLE_STRING_HASH_TREE=Uploading Hash Tree
 UPLOAD_TABLE_STRING_HASH_TREE=Üleslaadin hakitud puud
+#### UPLOAD_TABLE_STRING_VALIDATING=Validation Required
+#? UPLOAD_TABLE_STRING_VALIDATING=
 #### UPLOAD_TABLE_STRING_FNF=File Not Found
 UPLOAD_TABLE_STRING_FNF=Faili ei leitud
 #### UPLOAD_TABLE_STRING_QUEUED=Queued at
@@ -1567,6 +1596,8 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Faili koostisosi ei suudeta tuvastada.
 SETUP_LANGUAGE_TITLE=Keele valik
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_LANGUAGE_LABEL=Palun valige keel mida soovite, et LimeWire kasutaks.
+#### SETUP_MORE_INFO=Learn more about this option...
+#? SETUP_MORE_INFO=
 #### SETUP_WELCOME_TITLE=Welcome
 SETUP_WELCOME_TITLE=Teretulemast
 #### SETUP_WELCOME_LABEL=Welcome to the LimeWire setup wizard. LimeWire will guide you through a series of steps to configure LimeWire for optimum performance.
@@ -1587,14 +1618,10 @@ SETUP_STARTUP_TITLE=Süsteemi starter
 SETUP_STARTUP_LABEL=Kas sa soovid käivitada LimeWire automaatselt kui sa käivitad oma arvuti? Selle tulemusena LimeWire käivitub pärast kiiremini.
 #### SETUP_STARTUP_CHECKBOX=Start Automatically
 SETUP_STARTUP_CHECKBOX=Käivita automaatselt
-#### SETUP_FIREWALL_TITLE_ONE=Firewall Preparation
-SETUP_FIREWALL_TITLE_ONE=Tulemüüri etteseadistamine
-#### SETUP_FIREWALL_LABEL_ONE=LimeWire needs to receive information from the network in order to function properly. When you click next, some firewalls will ask your permission for LimeWire to use the network. You should allow LimeWire full access. Below is a picture of Windows Firewall asking to unblock LimeWire. Your firewall software may look different.
-SETUP_FIREWALL_LABEL_ONE=LimeWire peab saama võrgust informatsiooni, et funktsioneerida korralikult. Kui sa klikkid järgmine, mõned tulemüürid küsivad luba lasta LimeWirel ühenduda võrguga. Sa peaksid LimeWirel seda teha lubama: All on pilt, kus Windowsi Tulemüür küsib LimeWire avamise kohta. Sinu Tulemüüri tarkvara võib olla teistsugune.
-#### SETUP_FIREWALL_TITLE_TWO=Firewall Warning
-SETUP_FIREWALL_TITLE_TWO=Tulemüüri hoiatus
-#### SETUP_FIREWALL_LABEL_TWO=LimeWire is now requesting permission to use the network. If nothing appears, LimeWire has succesfully started listening to the network. If your software does pop up a warning, please allow LimeWire full access for best performance. Click 'Next' when finished.
-SETUP_FIREWALL_LABEL_TWO=LimeWire taotleb luba ühenduda võrku. Kui midagi muud ei ilmu on LimeWire õnnestunult ühendunud võrku. Kui sinu tarkvaral kargab esile hoiatus, palun luba LimeWirel täielik juurdepääs, tagamaks parim suutliku. Klikki 'Jätka' kui oled lõpetanud.
+#### SETUP_FIREWALL_TITLE=Firewall Setup
+#? SETUP_FIREWALL_TITLE=
+#### SETUP_FIREWALL_LABEL=LimeWire performs best with full access to the Internet. If firewall or security warnings appear, please unblock LimeWire and choose to remember the setting. Your firewall software may look different than the below picture.
+#? SETUP_FIREWALL_LABEL=
 #### SETUP_SCAN_TITLE=Scan for Files
 SETUP_SCAN_TITLE=Tsekki faile
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which folders you would like to share when the scan is complete.
@@ -1609,6 +1636,12 @@ SETUP_CONFIRM_TITLE=Kinnita tsekkamine
 SETUP_CONFIRM_LABEL=Me tuvastasime järgnevad kaustad, mida arvasime, et soovite jagada. Kui sa soovid jagada üht nendest kaustadest, lihtsalt kinnita seda määratud valikkastikeses. Jagatud kausta alamkaustad jagatakse samuti.
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWirel ei õnnestunud leida ühtegi faili mida võikisid jagada. Et jätkata LimeWire konfiguratsiooniga, klikki "Jätka".
+#### SETUP_FILTER_TITLE=Content Filtering
+#? SETUP_FILTER_TITLE=
+#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared.  By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content.  You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
+#? SETUP_FILTER_LABEL=
+#### SETUP_FILTER_CHECKBOX=Enable Content Filtering
+#? SETUP_FILTER_CHECKBOX=
 #### SETUP_FINISH_TITLE=Finish Setup
 SETUP_FINISH_TITLE=Lõpeta paigaldus
 #### SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed. Please press the "Finish" button to begin using LimeWire.
@@ -1746,8 +1779,6 @@ XML_videos__video__height__=Kõrgus
 XML_videos__video__width__=Laius
 #### XML_videos__video__bitrate__=Bitrate
 XML_videos__video__bitrate__=Bitimäär
-#### XML_videos__video__action__=Action
-XML_videos__video__action__=Hagi
 
 #### XML_images__image=Image
 #? XML_images__image=
@@ -2620,6 +2651,8 @@ OPTIONS_STARTUP_MAIN_TITLE=Süsteemi üleslaadimine
 OPTIONS_PROXY_MAIN_TITLE=Proksi
 #### OPTIONS_CONNECT_PREF_MAIN_TITLE=Locale Preferencing
 OPTIONS_CONNECT_PREF_MAIN_TITLE=Kohalikud eesõigused
+#### OPTIONS_CONTENT_FILTER_MAIN_TITLE=Content
+#? OPTIONS_CONTENT_FILTER_MAIN_TITLE=
 
 ################################################################################
 # Key/value pairs for the localization options window item
@@ -2969,23 +3002,31 @@ OPTIONS_ITUNES_PREFERENCE_LABEL=Sa võid LimeWirel lasta tõsta uued allalaetud 
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Jagamine
-#### OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
+#### OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.
 OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=Sa võid jagada muusikat kohtvõrgus ja muuta see saadavaks ka iTunes'ile kui ka teistele Digitalse Audio Juurdepääsu Protokolli (DAAP) lubavatele Pleieritele.\n\nKui esinevad probleemid iTunes'i jagamisega siis lülita sisse ühilduvus laad. See kasutab rohkem arvuti ressursse kuid parandab probleemi.
 #### OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share My Music:
 OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Jaga kaust minu muusika:
 #### OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared Name:
 OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Jagatu nimi:
-#### OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatibility Mode:
-OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Ühilduvus laad:
 
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Password Protection
 OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Turvalisuse võtmesõna
 #### OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
 OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=Sa saad piirata juurdepääsu sellele teenusele võtmesõnaga.
+#### OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_CHECKBOX_LABEL=Require Username:
+#? OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_CHECKBOX_LABEL=
 #### OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Sisesta võtmesõna:
+#### OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_LABEL=Username:
+#? OPTIONS_ITUNES_DAAP_PASSWORD_USERNAME_LABEL=
 #### OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Password:
 OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Võtmesõna:
+
+#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Buffer Size
+#? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=
+#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media.  If iTunes or other media players experience frequent rebuffering, increase this value.  A higher setting may use more memory.
+#? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
+
 
 ################################################################################
 # Key/Value pairs for url handler options
@@ -3342,6 +3383,20 @@ OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Kasuta tuvastust (ei tööta HTTP proksid
 OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Kasutajanimi:
 #### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password:
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Parool:
+
+
+
+
+################################################################################
+# Key/value pairs for the content filter options window item
+# in the options window
+################################################################################
+#### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
+#? OPTIONS_CONTENT_FILTER_TITLE=
+#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared.  By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
+#? OPTIONS_CONTENT_FILTER_LABEL=
+#### OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Enable Content Filters
+#? OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
