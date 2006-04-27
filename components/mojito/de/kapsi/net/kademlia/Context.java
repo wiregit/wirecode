@@ -81,12 +81,9 @@ public class Context implements Runnable {
     
     private PublicKey masterKey;
     
-    private KUID nodeId;
-    private SocketAddress localAddress;
-    
+    private ContactNode localNode;
     private SocketAddress tmpExternalAddress;
-    private SocketAddress externalAddress;
-    
+
     private KeyPair keyPair;
     
     private Database database;
@@ -172,14 +169,6 @@ public class Context implements Runnable {
     }
     
     public ContactNode getLocalNode() {
-        ContactNode localNode = (ContactNode)routeTable.get(nodeId);
-        if (localNode == null) {
-            if (externalAddress != null) {
-                localNode = new ContactNode(nodeId, externalAddress);
-            } else {
-                localNode = new ContactNode(nodeId, localAddress);
-            }
-        }
         return localNode;
     }
     
@@ -188,63 +177,42 @@ public class Context implements Runnable {
     }
     
     public boolean isLocalNodeID(KUID nodeId) {
-        return nodeId.equals(this.nodeId);
+        return nodeId.equals(localNode.getNodeID());
     }
     
     public KUID getLocalNodeID() {
-        return nodeId;
+        return localNode.getNodeID();
     }
     
     public SocketAddress getSocketAddress() {
-        return (externalAddress != null ? externalAddress : localAddress);
+        return localNode.getSocketAddress();
     }
     
     public SocketAddress getLocalSocketAddress() {
-        return localAddress;
-    }
-    
-    public SocketAddress getExternalSocketAddress() {
-        return externalAddress;
+        return messageDispatcher.getLocalSocketAddress();
     }
     
     public void setExternalSocketAddress(SocketAddress newExternalAddress)
             throws IOException {
         if (newExternalAddress != null) {
-            
-            if (this.externalAddress == null) {
-                ContactNode localNode = (ContactNode) routeTable.get(nodeId);
-                if (localNode != null) {
-                    this.externalAddress = newExternalAddress;
+            if (tmpExternalAddress == null) {
+                localNode.setSocketAddress(newExternalAddress);
+                tmpExternalAddress = newExternalAddress;
+            } else if (!newExternalAddress.equals(localNode.getSocketAddress())) {
+                if (tmpExternalAddress.equals(newExternalAddress)) {
                     localNode.setSocketAddress(newExternalAddress);
                 }
-            } else if (!newExternalAddress.equals(this.externalAddress)) {
-                if (tmpExternalAddress == null) {
-                    tmpExternalAddress = newExternalAddress;
-                } else if (tmpExternalAddress.equals(newExternalAddress)) {
-                    ContactNode localNode = (ContactNode) routeTable.get(nodeId);
-                    if (localNode != null) {
-                        this.externalAddress = newExternalAddress;
-                        localNode.setSocketAddress(newExternalAddress);
-                    }
-                    this.tmpExternalAddress = null;
-                }
+                tmpExternalAddress = newExternalAddress;
             }
         }
     }
     
     public boolean isFirewalled() {
-        ContactNode localNode = (ContactNode)routeTable.get(nodeId);
-        if (localNode != null) {
-            return localNode.isFirewalled();
-        }
-        return false; // TODO or maybe true?
+        return localNode.isFirewalled();
     }
     
     public void setFirewalled(boolean firewalled) {
-        ContactNode localNode = (ContactNode)routeTable.get(nodeId);
-        if (localNode != null) {
-            localNode.setFirewalled(firewalled);
-        }
+        localNode.setFirewalled(firewalled);
     }
     
     public Database getDatabase() {
@@ -317,18 +285,18 @@ public class Context implements Runnable {
                 throw new IOException("DHT is already bound");
             }
             
-            this.localAddress = address;
+            KUID nodeId = null;
             
             byte[] id = ContextSettings.getLocalNodeID(address);
             if (id == null) {
-                this.nodeId = KUID.createRandomNodeID(address);
+                nodeId = KUID.createRandomNodeID(address);
                 ContextSettings.setLocalNodeID(address, nodeId.getBytes());
             } else {
-                this.nodeId = KUID.createNodeID(id);
+                nodeId = KUID.createNodeID(id);
             }
             
             //add ourselve to the routing table
-            ContactNode localNode = new ContactNode(nodeId, address);
+            localNode = new ContactNode(nodeId, address);
             localNode.setTimeStamp(Long.MAX_VALUE);
             routeTable.add(localNode, false);
             
@@ -343,9 +311,7 @@ public class Context implements Runnable {
                 throw new IOException("DHT is already bound");
             }
             
-            this.localAddress = address;
-            this.nodeId = localNodeID;
-            
+            localNode = new ContactNode(localNodeID, address);
             messageDispatcher.bind(address);   
         //}
     }

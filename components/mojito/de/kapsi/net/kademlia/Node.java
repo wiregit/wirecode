@@ -28,6 +28,14 @@ public abstract class Node implements Serializable {
     private long timeStamp = 0L;
     
     public Node(KUID nodeId) {
+        if (nodeId == null) {
+            throw new NullPointerException("NodeID is null");
+        }
+        
+        if (!nodeId.isNodeID()) {
+            throw new IllegalArgumentException("NodeID is of wrong type: " + nodeId);
+        }
+        
         this.nodeId = nodeId;
     }
     

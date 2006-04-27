@@ -175,6 +175,12 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
+    public SocketAddress getLocalSocketAddress() {
+        synchronized (channelLock) {
+            return (channel != null ? channel.socket().getLocalSocketAddress() : null);
+        }
+    }
+    
     public void send(SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
         send(null, dst, message, handler);

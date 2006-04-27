@@ -45,10 +45,6 @@ public class ContactNode extends Node {
     public ContactNode(KUID nodeId, SocketAddress address, int flags) {
         super(nodeId);
         
-        if (!nodeId.isNodeID()) {
-            throw new IllegalArgumentException("NodeID is of wrong type: " + nodeId);
-        }
-        
         this.address = address;
         this.flags = flags;
     }

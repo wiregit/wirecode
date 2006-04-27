@@ -38,17 +38,17 @@ public class ExternalAddressTest {
         pingHandlerStub.externalAddress = new InetSocketAddress("10.254.0.251", 3000);
         context1.ping(new InetSocketAddress("localhost", 3000), null);
         Thread.sleep(1000);
-        System.out.println(pingHandlerStub.externalAddress.equals(context1.getExternalSocketAddress())); // false
+        System.out.println(pingHandlerStub.externalAddress.equals(context1.getSocketAddress())); // false
         
         pingHandlerStub.externalAddress = new InetSocketAddress("127.0.0.1", 2000);
         context1.ping(new InetSocketAddress("localhost", 3000), null);
         Thread.sleep(1000);
-        System.out.println(pingHandlerStub.externalAddress.equals(context1.getExternalSocketAddress())); // false
+        System.out.println(pingHandlerStub.externalAddress.equals(context1.getSocketAddress())); // false
         
         pingHandlerStub.externalAddress = new InetSocketAddress("10.254.0.251", 2000);
         context1.ping(new InetSocketAddress("localhost", 3000), null);
         Thread.sleep(1000);
-        System.out.println(pingHandlerStub.externalAddress.equals(context1.getExternalSocketAddress())); // true
+        System.out.println(pingHandlerStub.externalAddress.equals(context1.getSocketAddress())); // true
         
         dht1.close();
         dht2.close();
