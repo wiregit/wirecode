@@ -1,24 +1,16 @@
 package de.kapsi.net.kademlia.handler.request;
 
-import java.awt.List;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.SocketAddress;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
-import com.limegroup.gnutella.dht.statistics.SingleLookupStatisticContainer;
-import com.limegroup.gnutella.dht.statistics.Statistic;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.response.StatsResponse;
 
@@ -33,10 +25,10 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         networkStats = context.getNetworkStats();
     }
 
-    public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
+    public void handleRequest(RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(ContactNode.toString(nodeId, src) + " sent us a Stats Request");
+            LOG.trace(message.getContactNode() + " sent us a Stats Request");
         }
         
         networkStats.STATS_REQUEST.incrementStat();
@@ -49,11 +41,12 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         } else if (req.isRTRequest()){
             context.getDHTStats().dumpRouteTable(writer);
         } else {
-            context.getDHTStats().dumpStats(writer,false);
+            context.getDHTStats().dumpStats(writer, false);
         }
-        StatsResponse response = context.getMessageFactory().createStatsResponse(message.getMessageID(),writer.toString());
-        context.getMessageDispatcher().send(src,response,null);
         
+        StatsResponse response = context.getMessageFactory()
+            .createStatsResponse(message, writer.toString());
+        
+        context.getMessageDispatcher().send(message.getContactNode(), response, null);
     }
-
 }

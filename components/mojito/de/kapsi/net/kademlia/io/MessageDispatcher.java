@@ -175,6 +175,12 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
+    public SocketAddress getLocalSocketAddress() {
+        synchronized (channelLock) {
+            return (channel != null ? channel.socket().getLocalSocketAddress() : null);
+        }
+    }
+    
     public void send(SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
         send(null, dst, message, handler);
@@ -218,7 +224,62 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    private void handleRequest(KUID nodeId, SocketAddress src, Message msg) throws IOException {
+    private void processMessage(Receipt receipt, Message message) throws IOException {
+        
+        KUID nodeId = message.getNodeID();
+        SocketAddress src = message.getSocketAddress();
+        
+        // Make sure we're not receiving messages from ourself.
+        // The only exception are Pings/Pongs
+        if (nodeId != null 
+                && context.isLocalNodeID(nodeId)
+                && src.equals(context.getSocketAddress())
+                && !(message instanceof PingRequest)
+                && !(message instanceof PingResponse)) {
+            
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Received a message of type " + message.getClass().getName() 
+                        + " from ourself " + ContactNode.toString(nodeId, src));
+            }
+            return;
+        }
+        
+        if (receipt != null) {
+            handleResponse(receipt, (ResponseMessage)message);
+        } else {
+            
+            // Make sure a singe Node cannot monopolize our resources
+            if (!filter.allow(src)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(ContactNode.toString(nodeId, src) + " refused");
+                }
+                networkStats.FILTERED_MESSAGES.incrementStat();
+            }
+            
+            if (message instanceof RequestMessage) {
+                handleRequest((RequestMessage)message);
+            } else if (message instanceof ResponseMessage) {
+                handleLateResponse(nodeId, src, message);
+            } else if (LOG.isErrorEnabled()) {
+                LOG.error(message + " is neither Request nor Response");
+            }
+        }
+    }
+    
+    private void handleResponse(Receipt receipt, ResponseMessage response) throws IOException {
+        long time = receipt.time();
+        
+        try {
+            defaultHandler.handleResponse(response, time); // BEFORE!
+            if (receipt.getHandler() != defaultHandler) {
+                receipt.handleResponse(response);
+            }
+        } catch (Throwable t) {
+            LOG.error("MessageHandler handle response error: ", t);
+        }
+    }
+    
+    private void handleRequest(RequestMessage msg) throws IOException {
         RequestHandler requestHandler = null;
         
         if (msg instanceof PingRequest) {
@@ -235,9 +296,10 @@ public class MessageDispatcher implements Runnable {
         
         if (requestHandler != null) {
             try {
-                requestHandler.handleRequest(nodeId, src, msg);
+                requestHandler.handleRequest(msg);
+                defaultHandler.handleRequest(msg); // AFTER!
             } catch (Throwable t) {
-                LOG.error("MessageHandler handle request error: ",t);
+                LOG.error("MessageHandler handle request error: ", t);
             }
         }
     }
@@ -260,53 +322,6 @@ public class MessageDispatcher implements Runnable {
         networkStats.LATE_MESSAGES_COUNT.incrementStat();
         ContactNode node = new ContactNode(nodeId,src);
         context.getRouteTable().add(node,true);
-    }
-    
-    private void processMessage(Receipt receipt, SocketAddress src, Message message) throws IOException {
-        
-        KUID nodeId = message.getNodeID();
-        
-        // Make sure we're not receiving messages from ourself.
-        // The only exception are Pings/Pongs
-        if (nodeId != null 
-                && nodeId.equals(context.getLocalNodeID())
-                && src.equals(context.getLocalSocketAddress())
-                && !(message instanceof PingRequest)
-                && !(message instanceof PingResponse)) {
-            
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Received a message of type " + message.getClass().getName() 
-                        + " from ourself " + ContactNode.toString(nodeId, src));
-            }
-            return;
-        }
-        
-        if (receipt != null) {
-            long time = receipt.time();
-            defaultHandler.handleResponse(nodeId, src, message, time); // BEFORE!
-            
-            if (receipt.getHandler() != defaultHandler) {
-                receipt.handleSuccess(nodeId, src, message);
-            }
-        } else {
-            
-            // Make sure a singe Node cannot monopolize our resources
-            if (!filter.allow(src)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(ContactNode.toString(nodeId, src) + " refused");
-                }
-                networkStats.FILTERED_MESSAGES.incrementStat();
-            }
-            
-            if (message instanceof RequestMessage) {
-                handleRequest(nodeId, src, message);
-                defaultHandler.handleRequest(nodeId, src, message); // AFTER!
-            } else if (message instanceof ResponseMessage) {
-                handleLateResponse(nodeId, src, message);
-            } else if (LOG.isErrorEnabled()) {
-                LOG.error(message + " is neither Request nor Response");
-            }
-        }
     }
     
     private void interest(int ops, boolean on) {
@@ -343,7 +358,7 @@ public class MessageDispatcher implements Runnable {
             buffer.get(data, 0, length);
             
             try {
-                Message message = InputOutputUtils.deserialize(data);
+                Message message = InputOutputUtils.deserialize(src, data);
                 networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
                 networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
                 
@@ -357,7 +372,7 @@ public class MessageDispatcher implements Runnable {
                 }
                 
                 try {
-                    processMessage(receipt, src, message);
+                    processMessage(receipt, message);
                 } catch (Exception e) {
                     LOG.error("Message processing error", e);
                 }

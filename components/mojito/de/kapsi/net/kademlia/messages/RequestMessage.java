@@ -19,17 +19,18 @@
  
 package de.kapsi.net.kademlia.messages;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 
 public abstract class RequestMessage extends Message {
 
     public RequestMessage(int vendor, int version, 
-            KUID nodeId, KUID messageId) {
-        super(vendor, version, nodeId, messageId);
+            ContactNode node, KUID messageId) {
+        super(vendor, version, node, messageId);
     }
     
     public RequestMessage(int vendor, int version, 
-            KUID nodeId, KUID messageId, byte[] signature) {
-        super(vendor, version, nodeId, messageId, signature);
+            ContactNode node, KUID messageId, byte[] signature) {
+        super(vendor, version, node, messageId, signature);
     }
 }

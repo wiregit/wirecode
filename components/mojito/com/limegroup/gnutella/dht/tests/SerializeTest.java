@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.dht.tests;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
@@ -12,7 +11,6 @@ import java.util.zip.GZIPOutputStream;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class SerializeTest {

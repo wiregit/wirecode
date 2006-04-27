@@ -20,7 +20,6 @@
 package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -34,12 +33,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
@@ -57,8 +54,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         this.networkStats = context.getNetworkStats();
     }
     
-    public void handleRequest(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
+    public void handleRequest(RequestMessage message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
         networkStats.STORE_REQUESTS.incrementStat();
@@ -66,18 +62,18 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         if (queryKey == null) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(ContactNode.toString(nodeId, src) 
+                LOG.error(message.getContactNode() 
                         + " does not provide a QueryKey");
             }
             networkStats.STORE_REQUESTS_NO_QK.incrementStat();
             return;
         }
         
-        QueryKey expected = QueryKey.getQueryKey(src);
+        QueryKey expected = QueryKey.getQueryKey(message.getSocketAddress());
         if (!expected.equals(queryKey)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Expected " + expected + " from " 
-                        + ContactNode.toString(nodeId, src) 
+                        + message.getContactNode() 
                         + " but got " + queryKey);
             }
             networkStats.STORE_REQUESTS_BAD_QK.incrementStat();
@@ -89,10 +85,10 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         if (LOG.isTraceEnabled()) {
             if (!values.isEmpty()) {
-                LOG.trace(ContactNode.toString(nodeId, src) 
+                LOG.trace(message.getContactNode() 
                         + " requested us to store the KeyValues " + values);
             } else {
-                LOG.trace(ContactNode.toString(nodeId, src)
+                LOG.trace(message.getContactNode()
                         + " requested us to store " + remaining + " KeyValues");
             }
         }
@@ -142,7 +138,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         int keyValues = Math.min(maxOnce, remaining);
         
         StoreResponse response 
-            = context.getMessageFactory().createStoreResponse(request.getMessageID(), keyValues, stats);
-        context.getMessageDispatcher().send(src, response, null);
+            = context.getMessageFactory().createStoreResponse(request, keyValues, stats);
+        context.getMessageDispatcher().send(request.getContactNode(), response, null);
     }
 }

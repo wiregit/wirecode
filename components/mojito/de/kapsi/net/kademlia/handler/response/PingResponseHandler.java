@@ -33,7 +33,7 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 public class PingResponseHandler extends AbstractResponseHandler {
@@ -50,12 +50,10 @@ public class PingResponseHandler extends AbstractResponseHandler {
         this.l = l;
     }
 
-    public void handleResponse(final KUID nodeId, final SocketAddress src, 
-            Message message, final long time) throws IOException {
+    public void handleResponse(final ResponseMessage message, final long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Ping to " + ContactNode.toString(nodeId, src) 
-                    + " succeeded");
+            LOG.trace("Ping to " + message.getContactNode() + " succeeded");
         }
         
         networkStats.PINGS_OK.incrementStat();
@@ -66,16 +64,15 @@ public class PingResponseHandler extends AbstractResponseHandler {
         context.addEstimatedRemoteSize(response.getEstimatedSize());
         
         if (l != null) {
-            getEventDispatcher().add(new Runnable() {
+            context.fireEvent(new Runnable() {
                 public void run() {
-                    l.pingSuccess(nodeId, src, time);
+                    l.pingSuccess(message.getContactNode(), time);
                 }
             });
         }
     }
     
-    public void handleTimeout(final KUID nodeId, final SocketAddress dst, 
-            long time) throws IOException {
+    public void handleTimeout(final KUID nodeId, final SocketAddress dst, long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Ping to " + ContactNode.toString(nodeId, dst) + " failed");
@@ -84,7 +81,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         networkStats.PINGS_FAILED.incrementStat();
         
         if (l != null) {
-            getEventDispatcher().add(new Runnable() {
+            context.fireEvent(new Runnable() {
                 public void run() {
                     l.pingTimeout(nodeId, dst);
                 }

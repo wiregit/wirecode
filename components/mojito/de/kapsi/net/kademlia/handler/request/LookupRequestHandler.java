@@ -20,18 +20,16 @@
 package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
@@ -46,16 +44,16 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         super(context);
     }
 
-    public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
+    public void handleRequest(RequestMessage message) throws IOException {
         
         LookupRequest request = (LookupRequest)message;
         KUID lookup = request.getLookupID();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(ContactNode.toString(nodeId, src) + " is trying to lookup " + lookup);
+            LOG.trace(message.getContactNode() + " is trying to lookup " + lookup);
         }
         
-        QueryKey queryKey = QueryKey.getQueryKey(src);
+        QueryKey queryKey = QueryKey.getQueryKey(message.getSocketAddress());
         List bucketList = Collections.EMPTY_LIST;
         if (context.isBootstrapped()) {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
@@ -67,8 +65,8 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
         
         FindNodeResponse response = context.getMessageFactory()
-                    .createFindNodeResponse(request.getMessageID(), queryKey, bucketList);
+                    .createFindNodeResponse(request, queryKey, bucketList);
         
-        context.getMessageDispatcher().send(src, response, null);
+        context.getMessageDispatcher().send(message.getContactNode(), response, null);
     }
 }

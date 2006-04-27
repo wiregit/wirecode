@@ -39,6 +39,7 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.db.KeyValueCollection;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
@@ -68,44 +69,36 @@ public class DefaultMessageHandler extends MessageHandler
         return NetworkSettings.TIMEOUT.getValue();
     }
 
-    public void handleResponse(KUID nodeId, SocketAddress src, 
-            Message message, long time) throws IOException {
-        
-        addLiveContactInfo(nodeId, src, message);
+    public void handleResponse(ResponseMessage message, long time) throws IOException {
+        addLiveContactInfo(message.getContactNode(), message);
     }
 
-    public void handleTimeout(KUID nodeId, SocketAddress dst, 
-            long time) throws IOException {
-        RoutingTable routeTable = getRouteTable();
-        routeTable.handleFailure(nodeId);
+    public void handleTimeout(KUID nodeId, 
+            SocketAddress dst, long time) throws IOException {
+        context.getRouteTable().handleFailure(nodeId);
     }
 
-    public void handleRequest(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
-        
-        addLiveContactInfo(nodeId, src, message);
+    public void handleRequest(RequestMessage message) throws IOException {
+        addLiveContactInfo(message.getContactNode(), message);
     }
     
-    private void addLiveContactInfo(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
+    private void addLiveContactInfo(ContactNode node, Message message) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
-        
-        ContactNode node = new ContactNode(nodeId, src);
-        
+
         //only do store forward if it is a new node in our routing table or 
         //a node that is (re)connecting
         boolean newNode = routeTable.add(node, true);
-        if(!newNode && (message instanceof FindNodeRequest)) {
+        if (!newNode && (message instanceof FindNodeRequest)) {
             FindNodeRequest request = (FindNodeRequest) message;
-            newNode = request.getLookupID().equals(nodeId);
+            newNode = request.getLookupID().equals(node.getNodeID());
         }
 
         if(newNode) {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
-            List closestNodes = routeTable.select(nodeId, k, false, false);
+            List closestNodes = routeTable.select(node.getNodeID(), k, false, false);
             
             if (closestNodes.contains(context.getLocalNode())) {
                 List keyValuesToForward = new ArrayList();
@@ -121,7 +114,7 @@ public class DefaultMessageHandler extends MessageHandler
                         //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
                         List closestNodesToKey = routeTable.select(c.getKey(), k, false, false);
                         ContactNode closest = (ContactNode)closestNodesToKey.get(0);
-                        if (closest.equals(context.getLocalNode())   
+                        if (context.isLocalNode(closest)   
                                 || ((node.equals(closest)
                                         //maybe we haven't added him to the routing table
                                         || node.getNodeID().isCloser(closest.getNodeID(), c.getKey())) 
@@ -134,10 +127,10 @@ public class DefaultMessageHandler extends MessageHandler
                             databaseStats.STORE_FORWARD_COUNT.incrementStat();
                             keyValuesToForward.addAll(c);
                             
-                        } else if (closestNodesToKey.size()==k) {
+                        } else if (closestNodesToKey.size() == k) {
                             //if we are the furthest node: delete non-local value from local db
                             ContactNode furthest = (ContactNode)closestNodesToKey.get(closestNodesToKey.size()-1);
-                            if(furthest.equals(context.getLocalNode())) {
+                            if(context.isLocalNode(furthest)) {
                                 for (Iterator iterator = c.iterator(); iterator.hasNext();) {
                                     KeyValue keyValue = (KeyValue) iterator.next();
                                     if(!keyValue.isLocalKeyValue()) {
@@ -156,8 +149,8 @@ public class DefaultMessageHandler extends MessageHandler
                 
                 if (!keyValuesToForward.isEmpty()) {
                     ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);
-                    RequestMessage request = context.getMessageFactory().createFindNodeRequest(nodeId);
-                    context.getMessageDispatcher().send(nodeId, src, request, handler);
+                    RequestMessage request = context.getMessageFactory().createFindNodeRequest(node.getNodeID());
+                    context.getMessageDispatcher().send(node, request, handler);
                 }
             }
         }
@@ -180,8 +173,7 @@ public class DefaultMessageHandler extends MessageHandler
             this.keyValues = keyValues;
         }
         
-        public void handleResponse(KUID nodeId, SocketAddress src, 
-                Message message, long time) throws IOException {
+        public void handleResponse(ResponseMessage message, long time) throws IOException {
             
             if (done) {
                 return;
@@ -198,7 +190,7 @@ public class DefaultMessageHandler extends MessageHandler
             }
             
             QueryKey queryKey = response.getQueryKey();
-            context.store(new ContactNode(nodeId, src), queryKey, keyValues);
+            context.store(message.getContactNode(), queryKey, keyValues);
             done = true;
         }
 

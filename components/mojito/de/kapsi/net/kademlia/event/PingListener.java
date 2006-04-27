@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia.event;
 
 import java.net.SocketAddress;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 
 /**
@@ -31,12 +32,10 @@ public interface PingListener {
     
     /**
      * Called after a PING succeeded
-     * 
-     * @param nodeId NodeID of the host that replied
-     * @param address Address of the host that replied
+     * @param node The ContactNode that responded to our Ping
      * @param time Time in milliseconds
      */
-    public void pingSuccess(KUID nodeId, SocketAddress address, long time);
+    public void pingSuccess(ContactNode node, long time);
     
     /**
      * Called on a PING failure (timeout)

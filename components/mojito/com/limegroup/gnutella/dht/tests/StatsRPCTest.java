@@ -47,10 +47,12 @@ public class StatsRPCTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            StatsRequest req = dht.getContext().getMessageFactory().createStatsRequest(KUID.createRandomMessageID(),
-                    new byte[0],StatsRequest.STATS);
+            
+            StatsRequest req = dht.getContext().getMessageFactory()
+                    .createStatsRequest(new byte[0], StatsRequest.STATS);
+            
             StatsListener listener = new StatsListener() {
-                public void nodeStatsResponse(KUID nodeId, SocketAddress address, String statistics, long time) {
+                public void nodeStatsResponse(ContactNode node, String statistics, long time) {
                     System.out.println("Stats: "+statistics);
                 }
 

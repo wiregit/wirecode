@@ -1,22 +1,19 @@
 package de.kapsi.net.kademlia.event;
 
 import java.net.SocketAddress;
-import java.util.Collection;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 
 public interface StatsListener {
 
     /**
      * Called after a Stats request succeeded
-     * 
-     * @param nodeId NodeID of the host that replied
+     * @param node TODO
      * @param statistics The node statistics
-     * @param address Address of the host that replied
      * @param time Time in milliseconds
      */
-    public void nodeStatsResponse(KUID nodeId, SocketAddress address,
-            String statistics, long time);
+    public void nodeStatsResponse(ContactNode node, String statistics, long time);
     
 
     /**
