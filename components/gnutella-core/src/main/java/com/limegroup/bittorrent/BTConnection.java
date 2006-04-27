@@ -410,19 +410,17 @@ public class BTConnection {
 	 */
 	void sendHave(BTHave have) {
 		int pieceNum = have.getPieceNum();
+		
 		// As a minor optimization we will not inform the remote host of any
 		// pieces that it already has
-		// Else, simply remove the chunk from the available ranges, to optimize
-		// requesting ranges...
 		if (!_availableRanges.get(pieceNum)) {
 			numMissing++;
 			_writer.enqueue(have);
-		} else
-			_availableRanges.clear(pieceNum);
+		}  
 
 		// we should indicate that we are not interested anymore, so we are
 		// not unchoked when we do not want to request anything.
-		if (_availableRanges.isEmpty())
+		if (_info.getVerifyingFolder().getNumWeMiss(_availableRanges) == 0)
 			sendNotInterested();
 
 		// whether we canceled some requested ranges

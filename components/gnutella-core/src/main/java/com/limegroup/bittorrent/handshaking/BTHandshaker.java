@@ -38,8 +38,11 @@ ChannelWriter, ChannelReadObserver {
 	protected boolean incomingDone, finishingHandshakes;
 	private volatile boolean shutdown;
 	
-	// remote host info
-	protected byte [] extBytes, peerId;
+	protected final TorrentLocation loc;
+	
+	protected BTHandshaker(TorrentLocation loc) {
+		this.loc = loc;
+	}
 	
 	public void handleRead() throws IOException {
 		if (shutdown)
@@ -109,11 +112,9 @@ ChannelWriter, ChannelReadObserver {
 		if (incomingDone && !outgoingHandshake.hasRemaining()) {
 			finishingHandshakes = true;
 			
-			TorrentLocation p = new TorrentLocation(sock.getInetAddress(), sock
-					.getPort(), peerId,
-					extBytes);
-			
-			BTConnection btc = new BTConnection(sock, torrent.getMetaInfo(), p,
+			BTConnection btc = new BTConnection(sock, 
+					torrent.getMetaInfo(), 
+					loc,
 					torrent, true);
 			
 			if (LOG.isDebugEnabled())
@@ -125,7 +126,7 @@ ChannelWriter, ChannelReadObserver {
 			torrent.getFetcher().handshakerDone(this);
 		}
 	}
-
+	
 	public void handleIOException(IOException iox) {
 		shutdown();
 	}

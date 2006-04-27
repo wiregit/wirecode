@@ -18,14 +18,12 @@ public class OutgoingBTHandshaker extends BTHandshaker
 implements ConnectObserver {
 	private static final Log LOG = LogFactory.getLog(OutgoingBTHandshaker.class);
 	
-	private TorrentLocation loc;
-	
 	/**
 	 * creates an outgoing handshaker to the given location for
 	 * the given torrent.
 	 */
 	public OutgoingBTHandshaker(TorrentLocation loc, ManagedTorrent torrent) {
-		this.loc = loc;
+		super(loc);
 		this.torrent = torrent;
 	}
 	
@@ -45,14 +43,10 @@ implements ConnectObserver {
 	protected void initIncomingHandshake() {
 		incomingHandshake = new ByteBuffer[5];
 		incomingHandshake[0] = ByteBuffer.allocate(1); // 19
-		byte []tmp = new byte[19];
-		incomingHandshake[1] = ByteBuffer.wrap(tmp); // protocol identifier
-		extBytes = new byte[8];
-		incomingHandshake[2] = ByteBuffer.wrap(extBytes); // extention bytes
-		tmp = new byte[20];
-		incomingHandshake[3] = ByteBuffer.wrap(tmp); // infoHash
-		peerId = new byte[20];
-		incomingHandshake[4] = ByteBuffer.wrap(peerId); // peerID
+		incomingHandshake[1] = ByteBuffer.wrap(new byte[19]); // protocol identifier
+		incomingHandshake[2] = ByteBuffer.wrap(loc.getExtBytes()); 
+		incomingHandshake[3] = ByteBuffer.wrap(new byte[20]); // infoHash
+		incomingHandshake[4] = ByteBuffer.wrap(loc.getPeerID()); 
 	}
 	
 	protected boolean verifyIncoming() {
@@ -78,7 +72,9 @@ implements ConnectObserver {
 				if (!Arrays.equals(current.array(), torrent.getInfoHash()))
 					return false;
 				break;
-			case 4 : // peerId
+			case 4 : // peerId.  
+				// We do not check peerIds, because the remote user may have
+				// switched clients - so we just store the new one.
 				break;
 			}
 		}

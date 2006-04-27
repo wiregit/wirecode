@@ -6,6 +6,7 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.io.NIOSocket;
 
@@ -19,6 +20,10 @@ public class IncomingBTHandshaker extends BTHandshaker {
 	private final TorrentManager manager;
 	
 	public IncomingBTHandshaker(NIOSocket sock, TorrentManager manager) {
+		super(new TorrentLocation(sock.getInetAddress(), 
+				sock.getPort(),
+				new byte[8],
+				new byte[20]));
 		this.sock = sock;
 		this.manager = manager;
 	}
@@ -65,14 +70,10 @@ public class IncomingBTHandshaker extends BTHandshaker {
 
 	protected void initIncomingHandshake() {
 		incomingHandshake = new ByteBuffer[4];
-		byte []tmp = new byte[8];
-		incomingHandshake[0] = ByteBuffer.wrap(tmp);
-		extBytes = new byte[8];
-		incomingHandshake[1] = ByteBuffer.wrap(extBytes);
-		tmp = new byte[20];
-		incomingHandshake[2] = ByteBuffer.wrap(tmp);
-		peerId = new byte[20];
-		incomingHandshake[3] = ByteBuffer.wrap(peerId);
+		incomingHandshake[0] = ByteBuffer.wrap(new byte[8]); // protocol bytes
+		incomingHandshake[1] = ByteBuffer.wrap(loc.getExtBytes());
+		incomingHandshake[2] = ByteBuffer.wrap(new byte[20]); // infohash
+		incomingHandshake[3] = ByteBuffer.wrap(loc.getPeerID());
 	}
 
 }

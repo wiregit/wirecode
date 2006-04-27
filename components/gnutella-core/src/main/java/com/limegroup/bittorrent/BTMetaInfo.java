@@ -577,9 +577,10 @@ public class BTMetaInfo implements Serializable {
 
 		// if possible prefer the name.utf-8 key but we are already sure that
 		// we have a safe name value to fallback to
-		if (info.containsKey("name.utf-8")) {
+		Object t_name_utf8 = info.get("name.utf-8");
+		if (t_name_utf8 instanceof byte[]) {
 			try {
-				name = new String((byte [])info.get("name.utf-8"), 
+				name = new String((byte [])t_name_utf8, 
 						Constants.UTF_8_ENCODING);
 			} catch (UnsupportedEncodingException uee) {
 				// fail silently

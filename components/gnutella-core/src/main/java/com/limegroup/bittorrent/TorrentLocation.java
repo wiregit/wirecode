@@ -30,6 +30,11 @@ public class TorrentLocation extends Endpoint {
 
 	private static final int BUSY_WAIT_TIME = 5 * 60 * 1000;
 
+	/** 
+	 * The peer ID of the location.  It may get changed during the 
+	 * handshaking process, so this object should not be part of
+	 * any collection during handshaking.
+	 */
 	private final byte [] PEER_ID;
 
 	private final byte[] EXTENSION_BYTES;
@@ -37,8 +42,6 @@ public class TorrentLocation extends Endpoint {
 	private int _strikes = 0;
 
 	private long _nextRetryTime = 0;
-
-	private String _userAgent = null;
 
 	/*
 	 * constructors
@@ -66,6 +69,13 @@ public class TorrentLocation extends Endpoint {
 	 */
 	public byte [] getPeerID() {
 		return PEER_ID;
+	}
+	
+	/**
+	 * @return the extention bytes
+	 */
+	public byte [] getExtBytes() {
+		return EXTENSION_BYTES;
 	}
 
 	/**

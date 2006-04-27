@@ -654,9 +654,6 @@ public class VerifyingFolder {
 			clone.clear(element.intValue());
 		}
 		
-		if (LOG.isDebugEnabled())
-			LOG.debug("after removing pending, partial and requesting ranges, the remote has cardinality "+clone.cardinality());
-		
 		if (clone.cardinality() > 0) {
 			// the remote has new chunks we can get
 			int selected = -1;
@@ -715,10 +712,8 @@ public class VerifyingFolder {
 				// now, if we still have some parts of the chunk, get one of them
 				// if not and this is the last partial chunk, doubly-assign some
 				// part of it (is this endgame?)
-				if (needed.isEmpty() && !iterator.hasNext()) {
-					LOG.debug("requesting part of a block that is already requested...");
+				if (needed.isEmpty() && !iterator.hasNext()) 
 					needed = requested;
-				}
 			}
 			
 			if (needed.isEmpty()) 
@@ -877,6 +872,17 @@ public class VerifyingFolder {
 		BitSet clone = (BitSet)verifiedBlocks.clone();
 		clone.andNot(other);
 		return clone.cardinality();
+	}
+	
+	/**
+	 * @return the # of pieces that we do not have that
+	 * the other host has
+	 */
+	synchronized int getNumWeMiss(BitSet other) {
+		if (isComplete())
+			return 0;
+		other.andNot(verifiedBlocks);
+		return other.cardinality();
 	}
 	
 	private static class BlockRangeMap extends HashMap {

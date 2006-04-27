@@ -305,6 +305,7 @@ public class ManagedTorrent {
 
 	void connectionClosed(BTConnection btc) {
 		if (btc.isWorthRetrying()) {
+			// this forgets any strikes on the location
 			TorrentLocation ep = new TorrentLocation(btc.getEndpoint());
 			ep.strike();
 			_peers.add(ep);
@@ -385,13 +386,8 @@ public class ManagedTorrent {
 			btc.sendRequest(in);
 		else if (btc.getAvailableRanges().isEmpty()) {
 			if (LOG.isDebugEnabled())
-				LOG
-				.debug("leaseRarest returned null, btc connection not interesting anymore");
+				LOG.debug("connection not interesting anymore");
 			btc.sendNotInterested();
-		} else {
-			if (LOG.isDebugEnabled())
-				LOG
-				.debug("leaseRarest returned null, btc connection still interesting ??!?!?");
 		}
 	}
 
@@ -635,6 +631,7 @@ public class ManagedTorrent {
 		if (_saved)
 			return;
 
+		// stop uploads and cancel requests
 		Runnable r = new Runnable(){
 			public void run() {
 				LOG.debug("global choke");
@@ -650,7 +647,18 @@ public class ManagedTorrent {
 			}
 		};
 		NIODispatcher.instance().invokeLater(r);
+		
+		// save the files to the destination folder
 		saveFiles();
+		
+		// resume uploads
+		NIODispatcher.instance().invokeLater(new Runnable() {
+			public void run() {
+				setGlobalChoke(false);
+			}
+		});
+		
+		// tell the tracker we are a seed now
 		announceComplete();
 	}
 
@@ -686,13 +694,6 @@ public class ManagedTorrent {
 
 		if (_couldNotSave)
 			stopNow();
-
-		// resume uploads
-		NIODispatcher.instance().invokeLater(new Runnable() {
-			public void run() {
-				setGlobalChoke(false);
-			}
-		});
 
 		// remember attempt to save the file
 		_saved = true;
@@ -1093,11 +1094,6 @@ public class ManagedTorrent {
 				return -1 * (con1.getUnchokeRound() - con2.getUnchokeRound());
 			return UPLOAD_SPEED_COMPARATOR.compare(con1, con2);
 		}
-	}
-
-	public Throttle getDownloadThrottle() {
-		// TODO - in case we add a download throttle
-		return null;
 	}
 
 	public Throttle getUploadThrottle() {

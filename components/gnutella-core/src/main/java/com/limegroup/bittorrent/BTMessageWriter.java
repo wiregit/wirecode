@@ -34,7 +34,6 @@ public class BTMessageWriter implements
 
 	/** 
 	 * the internal message queue
-	 * LOCKING: this
 	 */
 	private final LinkedList _queue;
 
