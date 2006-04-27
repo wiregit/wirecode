@@ -192,7 +192,8 @@ public class MessageOutputStream extends DataOutputStream {
     public void write(Message msg) throws IOException {
         writeInt(msg.getVendor());
         writeShort(msg.getVersion());
-        writeKUID(msg.getNodeID());
+        writeByte(msg.getContactNode().getFlags());
+        writeKUID(msg.getContactNode().getNodeID());
         writeKUID(msg.getMessageID());
         
         if (msg instanceof PingRequest) {

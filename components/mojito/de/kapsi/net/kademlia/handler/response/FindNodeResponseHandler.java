@@ -56,7 +56,7 @@ public class FindNodeResponseHandler extends LookupResponseHandler {
             final Map queryKeys, final long time) {
         
         if (l != null) {
-            context.getEventDispatcher().add(new Runnable() {
+            context.fireEvent(new Runnable() {
                 public void run() {
                     l.foundNodes(lookup, nodes, queryKeys, time);
                 }

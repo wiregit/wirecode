@@ -183,6 +183,14 @@ public class Context implements Runnable {
         return localNode;
     }
     
+    public boolean isLocalNode(ContactNode node) {
+        return isLocalNodeID(node.getNodeID());
+    }
+    
+    public boolean isLocalNodeID(KUID nodeId) {
+        return nodeId.equals(this.nodeId);
+    }
+    
     public KUID getLocalNodeID() {
         return nodeId;
     }
@@ -616,7 +624,7 @@ public class Context implements Runnable {
             this.listener = listener;
         }
         
-        public void pingSuccess(KUID nodeId, SocketAddress address, final long time) {
+        public void pingSuccess(ContactNode node, final long time) {
             totalTime += time;
             
             try {

@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia.messages.response;
 
 import java.net.SocketAddress;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 
@@ -29,17 +30,17 @@ public class PingResponse extends ResponseMessage {
     private SocketAddress address;
     private int estimatedSize;
     
-    public PingResponse(int vendor, int version, KUID nodeId, 
+    public PingResponse(int vendor, int version, ContactNode node, 
             KUID messageId, SocketAddress address, int estimatedSize) {
-        super(vendor, version, nodeId, messageId);
+        super(vendor, version, node, messageId);
         
         this.address = address;
         this.estimatedSize = estimatedSize;
     }
     
-    public PingResponse(int vendor, int version, KUID nodeId, 
+    public PingResponse(int vendor, int version, ContactNode node, 
             KUID messageId, SocketAddress address, int estimatedSize, byte[] signature) {
-        super(vendor, version, nodeId, messageId, signature);
+        super(vendor, version, node, messageId, signature);
         
         this.address = address;
         this.estimatedSize = estimatedSize;

@@ -40,6 +40,7 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
@@ -128,13 +129,14 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         this.timeout = timeout;
     }
     
-    public void handleResponse(KUID nodeId, SocketAddress src, 
-            Message message, long time) throws IOException {
+    public void handleResponse(ResponseMessage message, long time) throws IOException {
         
-        if (!isQueried(nodeId)) {
+        ContactNode src = message.getContactNode();
+        
+        if (!isQueried(src.getNodeID())) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Got an unrequested response from " 
-                        + ContactNode.toString(nodeId, src) + " for " + lookup);
+                        + src + " for " + lookup);
             }
             return;
         }
@@ -142,14 +144,14 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         //TODO for now
         //this.time += time;
         lookupStat.addReply();
-        int hop = ((Integer)hopMap.get(nodeId)).intValue();
+        int hop = ((Integer)hopMap.get(src.getNodeID())).intValue();
         
         // VALUE lookup response
         if (isValueLookup() && message instanceof FindValueResponse) {
                 FindValueResponse response = (FindValueResponse)message;
                 
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(ContactNode.toString(nodeId, src) 
+                    LOG.trace(src 
                             + " returned KeyValues for " 
                             + lookup + " after " 
                             + queried.size() + " queried Nodes");
@@ -166,14 +168,13 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         
         // NODE/VALUE lookup response
         if (message instanceof FindNodeResponse) {
-            
-            
             FindNodeResponse response = (FindNodeResponse)message;
             Collection values = response.getValues();
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Got FindNode response from " + ContactNode.toString(nodeId, src) + 
+                LOG.trace("Got FindNode response from " + src + 
                         ", Nodes:\n"+ CollectionUtils.toString(values));
             }
+            
             for(Iterator it = values.iterator(); it.hasNext(); ) {
                 ContactNode node = (ContactNode)it.next();
                 
@@ -183,7 +184,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                         LOG.trace("Adding " + node + " to the yet-to-be queried list");
                     }
                     
-                    if(!finished) {
+                    if (!finished) {
                         addYetToBeQueried(node,hop+1);
                     }
                     
@@ -193,16 +194,16 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     context.getRouteTable().add(node, false);
                 }
             }
-            if(!finished) {
+            
+            if (!finished) {
                 // Don't add the ContactNode to responses if it didn't
                 // return any contacts because we have no QueryKey for it.
                 if (!values.isEmpty()) {
-                    ContactNode node = new ContactNode(nodeId, src);
-                    addResponse(node);
+                    addResponse(src);
                     
                     QueryKey queryKey = response.getQueryKey();
                     if (queryKey != null) {
-                        queryKeys.put(node, queryKey);
+                        queryKeys.put(src, queryKey);
                     }
                 }
                 

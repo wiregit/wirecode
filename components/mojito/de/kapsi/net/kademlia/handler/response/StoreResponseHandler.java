@@ -29,11 +29,10 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
@@ -68,8 +67,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         this.keyValues = keyValues;
     }
 
-    public void handleResponse(KUID nodeId, SocketAddress src, 
-            Message message, long time) throws IOException {
+    public void handleResponse(ResponseMessage message, long time) throws IOException {
         
         if (done) {
             return;
@@ -85,7 +83,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         
         if (requesting > 0 && index < keyValues.size()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace(ContactNode.toString(nodeId, src) 
+                LOG.trace(message.getContactNode() 
                         + " is requesting from us " + requesting + " KeyValues");
             }
             
@@ -102,7 +100,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
                 = (StoreRequest)context.getMessageFactory()
                     .createStoreRequest(remaining, queryKey, toSend);
             
-            context.getMessageDispatcher().send(nodeId, src, request, this);
+            context.getMessageDispatcher().send(message.getContactNode(), request, this);
             
             done = (remaining == 0);
         }

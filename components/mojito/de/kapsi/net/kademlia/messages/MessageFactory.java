@@ -23,6 +23,7 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.List;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
@@ -53,8 +54,8 @@ public class MessageFactory {
         return context.getVersion();
     }
     
-    private KUID getLocalNodeID() {
-        return context.getLocalNodeID();
+    private ContactNode getLocalNode() {
+        return context.getLocalNode();
     }
     
     private KUID createMessageID() {
@@ -66,42 +67,42 @@ public class MessageFactory {
     }
     
     public PingRequest createPingRequest() {
-        return new PingRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID());
+        return new PingRequest(getVendor(), getVersion(), getLocalNode(), createMessageID());
     }
     
     public PingResponse createPingResponse(KUID messageId, SocketAddress address) {
-        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, address, getEstimatedSize());
+        return new PingResponse(getVendor(), getVersion(), getLocalNode(), messageId, address, getEstimatedSize());
     }
     
     public FindNodeRequest createFindNodeRequest(KUID lookup) {
-        return new FindNodeRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), lookup);
+        return new FindNodeRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(), lookup);
     }
     
     public FindNodeResponse createFindNodeResponse(KUID messageId, QueryKey queryKey, List nodes) {
-        return new FindNodeResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, queryKey, nodes);
+        return new FindNodeResponse(getVendor(), getVersion(), getLocalNode(), messageId, queryKey, nodes);
     }
     
     public FindValueRequest createFindValueRequest(KUID lookup) {
-        return new FindValueRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), lookup);
+        return new FindValueRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(), lookup);
     }
     
     public FindValueResponse createFindValueResponse(KUID messageId, Collection values) {
-        return new FindValueResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, values);
+        return new FindValueResponse(getVendor(), getVersion(), getLocalNode(), messageId, values);
     }
     
     public StoreRequest createStoreRequest(int remaining, QueryKey queryKey, Collection values) {
-        return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(), remaining, queryKey, values);
+        return new StoreRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(), remaining, queryKey, values);
     }
     
     public StoreResponse createStoreResponse(KUID messageId, int requesting, Collection status) {
-        return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, requesting, status);
+        return new StoreResponse(getVendor(), getVersion(), getLocalNode(), messageId, requesting, status);
     }
     
     public StatsRequest createStatsRequest(KUID messageId, byte[] signature, int request) {
-        return new StatsRequest(getVendor(), getVersion(), getLocalNodeID(), messageId, signature, request);
+        return new StatsRequest(getVendor(), getVersion(), getLocalNode(), messageId, signature, request);
     }
 
     public StatsResponse createStatsResponse(KUID messageId, String statistics) {
-        return new StatsResponse(getVendor(), getVersion(), getLocalNodeID(), messageId, statistics);
+        return new StatsResponse(getVendor(), getVersion(), getLocalNode(), messageId, statistics);
     }
 }

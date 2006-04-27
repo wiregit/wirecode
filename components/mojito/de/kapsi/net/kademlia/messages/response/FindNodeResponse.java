@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia.messages.response;
 
 import java.util.List;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.security.QueryKey;
 
@@ -28,9 +29,9 @@ public class FindNodeResponse extends LookupResponse {
     
     private QueryKey queryKey;
     
-    public FindNodeResponse(int vendor, int version, KUID nodeId, 
+    public FindNodeResponse(int vendor, int version, ContactNode node, 
             KUID messageId, QueryKey queryKey, List bucketList) {
-        super(vendor, version, nodeId, messageId, bucketList);
+        super(vendor, version, node, messageId, bucketList);
         
         this.queryKey = queryKey;
     }

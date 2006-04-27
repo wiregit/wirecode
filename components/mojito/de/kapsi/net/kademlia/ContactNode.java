@@ -27,21 +27,50 @@ public class ContactNode extends Node {
     
     private static final long serialVersionUID = -5416538917308950549L;
 
-    protected SocketAddress address;
+    private static final int FIREWALLED = 0x01;
+    
+    private SocketAddress address;
+    private int flags;
     
     private int failures = 0;
     
     private long firstAliveTime = 0L;
     
-    private volatile boolean isPinged;
+    private boolean isPinged;
     
     public ContactNode(KUID nodeId, SocketAddress address) {
+        this(nodeId, address, 0);
+    }
+    
+    public ContactNode(KUID nodeId, SocketAddress address, int flags) {
         super(nodeId);
+        
+        if (!nodeId.isNodeID()) {
+            throw new IllegalArgumentException("NodeID is of wrong type: " + nodeId);
+        }
+        
         this.address = address;
+        this.flags = flags;
+    }
+    
+    public int getFlags() {
+        return flags;
+    }
+    
+    public void setFirewalled(boolean firewalled) {
+        if (firewalled) {
+            this.flags |= FIREWALLED;
+        } else {
+            this.flags &= ~FIREWALLED;
+        }
+    }
+    
+    public boolean isFirewalled() {
+        return (flags & FIREWALLED) == FIREWALLED;
     }
     
     public boolean failure() {
-        ++failures;
+        failures++;
         return isDead();
     }
     
@@ -103,16 +132,15 @@ public class ContactNode extends Node {
             return false;
         }
         
-        ContactNode other = (ContactNode)o;
-        return nodeId.equals(other.nodeId) 
-                    && address.equals(other.address);
+        return super.equals(o) 
+                && address.equals(((ContactNode)o).address);
     }
     
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(toString(nodeId, address))
+        buffer.append(toString(getNodeID(), address))
             .append(", failures: ").append(failures)
-            .append(", unknown?: ").append(getTimeStamp()==0);
+            .append(", unknown: ").append(getTimeStamp()==0);
         return buffer.toString();
     }
     

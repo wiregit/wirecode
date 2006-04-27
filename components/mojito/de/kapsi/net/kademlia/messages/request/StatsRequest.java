@@ -1,5 +1,6 @@
 package de.kapsi.net.kademlia.messages.request;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 
@@ -11,9 +12,9 @@ public class StatsRequest extends RequestMessage {
     
     private int request;
 
-    public StatsRequest(int vendor, int version, KUID nodeId, KUID messageId,
-            byte[] signature, int request) {
-        super(vendor, version, nodeId, messageId, signature);
+    public StatsRequest(int vendor, int version, 
+            ContactNode node, KUID messageId, byte[] signature, int request) {
+        super(vendor, version, node, messageId, signature);
         
         this.request = request;
     }

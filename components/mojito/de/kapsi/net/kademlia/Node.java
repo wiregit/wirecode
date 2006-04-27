@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 public abstract class Node implements Serializable {
     
-    protected final KUID nodeId;
+    private KUID nodeId;
     
     private long timeStamp = 0L;
     

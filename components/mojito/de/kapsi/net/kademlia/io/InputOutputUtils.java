@@ -22,6 +22,7 @@ package de.kapsi.net.kademlia.io;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -40,12 +41,12 @@ public final class InputOutputUtils {
        return baos.toByteArray();
    }
    
-   public static Message deserialize(byte[] data) throws MessageFormatException {
+   public static Message deserialize(SocketAddress src, byte[] data) throws MessageFormatException {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
             GZIPInputStream gz = new GZIPInputStream(bais);
             MessageInputStream in = new MessageInputStream(gz);
-            Message message = in.readMessage();
+            Message message = in.readMessage(src);
             in.close();
             return message;
         } catch (IOException e) {

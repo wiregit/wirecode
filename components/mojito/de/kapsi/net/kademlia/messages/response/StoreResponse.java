@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia.messages.response;
 
 import java.util.Collection;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 
@@ -32,9 +33,9 @@ public class StoreResponse extends ResponseMessage {
     private int requesting;
     private Collection storeStatus;
 
-    public StoreResponse(int vendor, int version, KUID nodeId, 
+    public StoreResponse(int vendor, int version, ContactNode node, 
             KUID messageId, int requesting, Collection storeStatus) {
-        super(vendor, version, nodeId, messageId);
+        super(vendor, version, node, messageId);
         
         this.requesting = requesting;
         this.storeStatus = storeStatus;

@@ -19,6 +19,9 @@
  
 package de.kapsi.net.kademlia.messages;
 
+import java.net.SocketAddress;
+
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 
 public abstract class Message {
@@ -41,28 +44,24 @@ public abstract class Message {
     protected final int vendor;
     protected final int version;
     
-    protected final KUID nodeId;
+    protected final ContactNode node;
     protected final KUID messageId;
     
     protected final byte[] signature;
     
-    public Message(int vendor, int version, KUID nodeId, KUID messageId) {
-        this(vendor, version, nodeId, messageId, null);
+    public Message(int vendor, int version, ContactNode node, KUID messageId) {
+        this(vendor, version, node, messageId, null);
     }
     
     public Message(int vendor, int version, 
-            KUID nodeId, KUID messageId, byte[] signature) {
+            ContactNode node, KUID messageId, byte[] signature) {
         
-        if (nodeId == null) {
-            throw new NullPointerException("NodeID is null");
+        if (node == null) {
+            throw new NullPointerException("Node is null");
         }
         
         if (messageId == null) {
             throw new NullPointerException("MessageID is null");
-        }
-        
-        if (!nodeId.isNodeID()) {
-            throw new IllegalArgumentException("NodeID is of wrong type: " + nodeId);
         }
         
         if (!messageId.isMessageID()) {
@@ -71,7 +70,7 @@ public abstract class Message {
         
         this.vendor = vendor;
         this.version = version;
-        this.nodeId = nodeId;
+        this.node = node;
         this.messageId = messageId;
         this.signature = signature;
     }
@@ -88,8 +87,16 @@ public abstract class Message {
         return messageId;
     }
     
+    public ContactNode getContactNode() {
+        return node;
+    }
+    
     public KUID getNodeID() {
-        return nodeId;
+        return getContactNode().getNodeID();
+    }
+    
+    public SocketAddress getSocketAddress() {
+        return getContactNode().getSocketAddress();
     }
     
     public byte[] getSignature() {

@@ -8,32 +8,22 @@ import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-
-import com.limegroup.gnutella.dht.statistics.DHTNodeStat;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
-import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
-import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
-import de.kapsi.net.kademlia.util.CollectionUtils;
-import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class DHTStatsCrawler implements Runnable, ResponseHandler {
     
@@ -138,8 +128,8 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         queried.add(context.getLocalNodeID());
         try {
             context.ping(bootstrap, new PingListener() {
-                public void pingSuccess(KUID nodeId, SocketAddress address, long time) {
-                    startCrawl(nodeId);
+                public void pingSuccess(ContactNode node, long time) {
+                    startCrawl(node.getNodeID());
                 }
 
                 public void pingTimeout(KUID nodeId, SocketAddress address) {
@@ -154,7 +144,7 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
     
     private void startCrawl(KUID nodeId) {
         try {
-            toQuery.add(new ContactNode(nodeId,bootstrap));
+            toQuery.add(new ContactNode(nodeId, bootstrap));
             FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(context.getLocalNodeID());
             ++numReq;
             context.getMessageDispatcher().send(bootstrap, req, this);
@@ -163,11 +153,11 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         }
     }
 
-    public void handleResponse(KUID nodeId, SocketAddress src, Message message, long time) throws IOException {
+    public void handleResponse(ResponseMessage message, long time) throws IOException {
         --numReq;
         ++numResponses;
-        System.out.println("Response from: " + nodeId + ", add: "+src);
-        responses.add(new ContactNode(nodeId,src));
+        System.out.println("Response from: " + message.getContactNode());
+        responses.add(message.getContactNode());
         synchronized (lock) {
             lock.notify();
         }
@@ -288,13 +278,13 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
             }
         }
         
-        public void nodeStatsResponse(KUID nodeId, SocketAddress address, String statistics, long time) {
+        public void nodeStatsResponse(ContactNode node, String statistics, long time) {
             --numReq;
             if(finished)return;
             try {
                 synchronized(statsWriter) {
-                    System.out.println("Reply from node :"+nodeId);
-                    statsWriter.write("Node: "+nodeId + ", "+address);
+                    System.out.println("Reply from node :" + node);
+                    statsWriter.write("Node: " + node.getNodeID() + ", " + node.getSocketAddress());
                     statsWriter.write("\n"+statistics+"\n");
                     statsWriter.flush();
                 }

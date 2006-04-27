@@ -22,6 +22,7 @@ package de.kapsi.net.kademlia.messages.response;
 import java.util.Collection;
 import java.util.Collections;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 
@@ -29,9 +30,9 @@ public abstract class LookupResponse extends ResponseMessage {
     
     protected final Collection values;
     
-    public LookupResponse(int vendor, int version, KUID nodeId,
+    public LookupResponse(int vendor, int version, ContactNode node,
             KUID messageId, Collection responseValues) {
-        super(vendor, version, nodeId, messageId);
+        super(vendor, version, node, messageId);
         
         this.values = Collections.unmodifiableCollection(responseValues);
     }

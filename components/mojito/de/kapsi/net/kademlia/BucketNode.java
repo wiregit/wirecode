@@ -102,8 +102,8 @@ public class BucketNode extends Node {
     }
  
     public List split() {
-        BucketNode leftBucket = new BucketNode(nodeId, depth+1);
-        BucketNode rightBucket = new BucketNode(nodeId.set(depth),depth+1);
+        BucketNode leftBucket = new BucketNode(getNodeID(), depth+1);
+        BucketNode rightBucket = new BucketNode(getNodeID().set(depth),depth+1);
         if(replacementCache != null && !replacementCache.isEmpty()) {
             if(LOG.isErrorEnabled()) {
                 LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
@@ -118,7 +118,7 @@ public class BucketNode extends Node {
     
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("Bucket: "+nodeId)
+        buffer.append("Bucket: " + getNodeID())
             .append(", depth: ").append(getDepth())
             .append(", size: ").append(getNodeCount())
             .append(", replacements: ").append(getReplacementCacheSize())
@@ -145,7 +145,7 @@ public class BucketNode extends Node {
             return false;
         }
         BucketNode other = (BucketNode)o;
-        return (nodeId.equals((other.nodeId))) && (depth == other.depth);
+        return super.equals(o) && (depth == other.depth);
     }
     
     /**

@@ -33,6 +33,7 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 
 class Receipt {
     
@@ -127,22 +128,21 @@ class Receipt {
         return false;
     }
     
-    public void handleSuccess(KUID nodeId, SocketAddress src, 
-            Message message) throws IOException {
+    public void handleResponse(ResponseMessage response) throws IOException {
         
         // A sends B a Ping
         // But B is offline and there is C who got B's IP from the ISP
         // C will respond to A's Ping
         // But C's NodeID is different
         // Make sure B is not C
-        if (compareNodeID(nodeId)) {
+        if (compareNodeID(response.getNodeID())) {
             if (handler != null) {
-                handler.handleResponse(nodeId, src, message, time());
+                handler.handleResponse(response, time());
             }
         } else {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Wrong NodeID! Expected " + this.nodeId + " but got " 
-                        + nodeId + " from " + src);
+                        + nodeId + " from " + response.getSocketAddress());
             }
             
             handleTimeout();

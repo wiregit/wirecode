@@ -49,8 +49,8 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.FindNodeListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
-import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
@@ -205,6 +205,11 @@ public class PatriciaRouteTable implements RoutingTable {
         
         if (!nodeId.equals(node.getNodeID())) {
             throw new IllegalArgumentException("NodeID and the ID returned by Node do not match");
+        }
+        
+        // Don't add firewalled Nodes
+        if (node.isFirewalled()) {
+            return false;
         }
         
         if (LOG.isTraceEnabled()) {
@@ -833,19 +838,18 @@ public class PatriciaRouteTable implements RoutingTable {
             this.replacementBucket = replacementBucket;
         }
 
-        public void handleResponse(KUID nodeId, SocketAddress src, 
-                Message message, long time) throws IOException {
+        public void handleResponse(ResponseMessage message, long time) throws IOException {
             
             if (done) {
                 return;
             }
             
-            loopLock.remove(nodeId);
+            loopLock.remove(message.getNodeID());
             done = true;
-            touchBucket(nodeId);
+            touchBucket(message.getNodeID());
             if (LOG.isWarnEnabled()) {
                 LOG.warn("WARNING: "+newContact + " is trying to spoof its NodeID. " 
-                        + ContactNode.toString(nodeId, src) 
+                        + message.getContactNode() 
                         + " responded in " + time + " ms");
             }
             routingStats.SPOOF_COUNT.incrementStat();
@@ -854,15 +858,14 @@ public class PatriciaRouteTable implements RoutingTable {
             //TODO: add bad node to IP Filter
         }
 
-        public void handleTimeout(KUID nodeId, SocketAddress dst, 
-                long time) throws IOException {
+        public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
             
             if (done) {
                 return;
             }
             
             // Try at least x-times before giving up!
-            if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
+            if (errors++ >= NetworkSettings.MAX_ERRORS.getValue()) {
                 
                 loopLock.remove(nodeId);
                 done = true;
@@ -871,9 +874,10 @@ public class PatriciaRouteTable implements RoutingTable {
                 if (LOG.isInfoEnabled()) {
                     LOG.info(currentContact + " does not respond! Replacing it with " + newContact);
                 }
+                
                 currentContact.setSocketAddress(newContact.getSocketAddress());
                 currentContact.alive();
-                if(replacementNode && replacementBucket!=null) {
+                if (replacementNode && replacementBucket != null) {
                     // we have found a live contact in the bucket's replacement cache!
                     // It's a good time to replace this bucket's dead entry with this node
                     pingBucketLastRecentlySeenNode(replacementBucket);

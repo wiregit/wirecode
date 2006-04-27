@@ -250,12 +250,8 @@ public class Main {
         
         System.out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
-            public void pingSuccess(KUID nodeId, SocketAddress address, long time) {
-                if (nodeId != null) {
-                    System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " succeeded: " + time + "ms");
-                } else {
-                    System.out.println("*** Ping to " + address + " succeeded: " + time + "ms");
-                }
+            public void pingSuccess(ContactNode node, long time) {
+                System.out.println("*** Ping to " + node + " succeeded: " + time + "ms");
             }
             
             public void pingTimeout(KUID nodeId, SocketAddress address) {
@@ -289,12 +285,8 @@ public class Main {
                 type);
         
         StatsListener listener = new StatsListener() {
-            public void nodeStatsResponse(KUID nodeId, SocketAddress address, String statistics, long time) {
-                if (nodeId != null) {
-                    System.out.println("*** Stats to " + ContactNode.toString(nodeId, address) + " succeeded: " + time + "ms");
-                } else {
-                    System.out.println("*** Stats to " + address + " succeeded: " + time + "ms");
-                }
+            public void nodeStatsResponse(ContactNode node, String statistics, long time) {
+                System.out.println("*** Stats to " + node + " succeeded: " + time + "ms");
                 System.out.println(statistics);
             }
 

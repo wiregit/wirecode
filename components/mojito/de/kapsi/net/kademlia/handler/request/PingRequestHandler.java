@@ -20,18 +20,15 @@
 package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
@@ -50,10 +47,10 @@ public class PingRequestHandler extends AbstractRequestHandler {
         networkStats = context.getNetworkStats();
     }
     
-    public void handleRequest(KUID nodeId, SocketAddress src, Message message) throws IOException {
+    public void handleRequest(RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(ContactNode.toString(nodeId, src) + " sent us a Ping");
+            LOG.trace(message.getContactNode() + " sent us a Ping");
         }
         
         networkStats.PING_REQUESTS.incrementStat();
@@ -61,9 +58,9 @@ public class PingRequestHandler extends AbstractRequestHandler {
         PingRequest request = (PingRequest)message;
         
         PingResponse response = context.getMessageFactory()
-                .createPingResponse(message.getMessageID(), src);
+                .createPingResponse(message.getMessageID(), message.getSocketAddress());
 
-        context.getMessageDispatcher().send(src, response, null);
+        context.getMessageDispatcher().send(message.getContactNode(), response, null);
         networkStats.PONGS_SENT.incrementStat();
     }
 }

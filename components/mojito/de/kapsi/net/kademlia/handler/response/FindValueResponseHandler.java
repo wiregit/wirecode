@@ -58,7 +58,7 @@ public class FindValueResponseHandler extends LookupResponseHandler {
         }
         
         if (l != null) {
-            context.getEventDispatcher().add(new Runnable() {
+            context.fireEvent(new Runnable() {
                 public void run() {
                     l.foundValue(lookup, keyValues, time);
                 }
