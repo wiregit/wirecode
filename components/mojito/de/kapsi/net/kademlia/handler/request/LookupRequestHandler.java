@@ -64,6 +64,8 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));
         }
         
+        context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
+        
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request, queryKey, bucketList);
         

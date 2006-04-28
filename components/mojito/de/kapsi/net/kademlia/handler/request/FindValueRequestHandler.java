@@ -25,6 +25,8 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
+
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -51,6 +53,7 @@ public class FindValueRequestHandler extends LookupRequestHandler {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Hit! " + lookup + " = " + values);
                 }
+                context.getNetworkStats().FIND_VALUE_REQUESTS_OK.incrementStat();
                 
                 FindValueResponse response = context.getMessageFactory()
                             .createFindValueResponse(request, values);
@@ -58,6 +61,7 @@ public class FindValueRequestHandler extends LookupRequestHandler {
                 
                 return; // We're done here!
             }
+            context.getNetworkStats().FIND_VALUE_REQUESTS_FAILURE.incrementStat();
         }
         
         super.handleRequest(message);

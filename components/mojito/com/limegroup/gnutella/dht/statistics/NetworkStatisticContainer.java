@@ -154,6 +154,17 @@ public class NetworkStatisticContainer extends StatisticContainer {
     public Statistic STORE_REQUESTS_FAILURE =
         new SizeStatistic();
     
+
+    public Statistic FIND_VALUE_REQUESTS_OK =
+        new SimpleStatistic();
+    
+    public Statistic FIND_VALUE_REQUESTS_FAILURE = 
+        new SimpleStatistic();
+    
+    public Statistic LOOKUP_REQUESTS = 
+        new SimpleStatistic();
+    
+        
     protected class SizeStatistic extends AbstractStatistic{
         public void addData(int data) {
             super.addData(data);

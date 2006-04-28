@@ -102,7 +102,7 @@ public interface RoutingTable {
     
     /**
      * Notifies the RoutingTable that the ContactNode with the provided
-     * KUID 
+     * KUID has failed to a request
      */
     public void handleFailure(KUID nodeId);
     

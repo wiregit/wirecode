@@ -60,16 +60,30 @@ import de.kapsi.net.kademlia.util.NetworkUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 import de.kapsi.net.kademlia.util.PatriciaTrie.KeySelector;
 
+/**
+ * This class is a Kademlia DHT routing table implementation 
+ * backed by Patricia tries, allowing us to save memory space 
+ * and perform fast lookups. The depth of the tree and number 
+ * of contacts stored by each node are defined by the replication 
+ * parameter K and the the symbol size parameter B.
+ *
+ */
 public class PatriciaRouteTable implements RoutingTable {
     
     private static final Log LOG = LogFactory.getLog(PatriciaRouteTable.class);
     
+    /**
+     * The Kademlia replication parameter.
+     */
     private static final int K = KademliaSettings.REPLICATION_PARAMETER.getValue();
     
+    /**
+     * The symbol size, i.e. the number of bits improved at each step.
+     */
     private static final int B = RouteTableSettings.DEPTH_LIMIT.getValue();
     
     /**
-     * Selects ContactNodes with one or more failures
+     * The <tt>KeySelector</tt> that selects <tt>ContactNodes</tt> with one or more failures.
      */
     private static final KeySelector SELECT_FAILED_CONTACTS = new KeySelector() {
         public boolean allow(Object key, Object value) {
@@ -78,7 +92,7 @@ public class PatriciaRouteTable implements RoutingTable {
     };
     
     /**
-     * Selects ContactNodes with no failures
+     * The <tt>KeySelector</tt> that selects <tt>ContactNodes</tt> with no failures.
      */
     private static final KeySelector SELECT_ALIVE_CONTACTS = new KeySelector() {
         public boolean allow(Object key, Object value) {
@@ -86,20 +100,47 @@ public class PatriciaRouteTable implements RoutingTable {
         }
     };
     
+    /**
+     * A <tt>Map</tt> of hosts we contact during the spoof check. 
+     * Avoids loops in this process.
+     */
     private Map loopLock = new FixedSizeHashMap(16);
     
+    /**
+     * The DHT's context.
+     */
     private Context context;
     
+    /**
+     * The main contacts trie.
+     */
     private PatriciaTrie nodesTrie;
     
+    /**
+     * The Buckets trie.
+     */
     private PatriciaTrie bucketsTrie;
 
+    /**
+     * The bucket of the current smallest subtree on the other side of the local node's bucket.
+     */
     private BucketNode smallestSubtreeBucket;
     
+    /**
+     * The number of consecutive node failures recorded.
+     */
     private int consecutiveFailures = 0;
     
+    /**
+     * The <tt>StatisticsContainer</tt> for the routing table stats.
+     */
     private final RoutingStatisticContainer routingStats;
     
+    /**
+     * Creates a new routing table backed by PatriciaTries
+     * 
+     * @param context
+     */
     public PatriciaRouteTable(Context context) {
         this.context = context;
         
@@ -121,6 +162,9 @@ public class PatriciaRouteTable implements RoutingTable {
         routingStats.BUCKET_COUNT.incrementStat();
     }
     
+    /* (non-Javadoc)
+     * @see de.kapsi.net.kademlia.routing.RoutingTable#load()
+     */
     public boolean load() {
         File file = new File(RouteTableSettings.ROUTETABLE_FILE);
         if (file.exists() && file.isFile() && file.canRead()) {
@@ -158,6 +202,9 @@ public class PatriciaRouteTable implements RoutingTable {
         return false;
     }
     
+    /* (non-Javadoc)
+     * @see de.kapsi.net.kademlia.routing.RoutingTable#store()
+     */
     public boolean store() {
         File file = new File(RouteTableSettings.ROUTETABLE_FILE);
         
@@ -182,14 +229,20 @@ public class PatriciaRouteTable implements RoutingTable {
         return false;
     }
     
+    /* (non-Javadoc)
+     * @see de.kapsi.net.kademlia.routing.RoutingTable#add(de.kapsi.net.kademlia.ContactNode, boolean)
+     */
     public boolean add(ContactNode node, boolean knowToBeAlive) {
         return put(node.getNodeID(), node, knowToBeAlive);
     }
     
     /**
-     * @param nodeId
-     * @param node
-     * @param knowToBeAlive
+     * Puts the contact in the Patricia trie if the bucket corresponding bucket is not full.
+     * If the bucket is full, it may be split and open-up space for new contacts.
+     * 
+     * @param nodeId The KUID of the node to be added
+     * @param node The ContactNode 
+     * @param knowToBeAlive Did we hear from the node directly or did we learn about it in a FIND_NODE lookup
      * @return true if the node was added, false otherwise
      */
     private boolean put(KUID nodeId, ContactNode node, boolean knowToBeAlive) {
@@ -310,12 +363,18 @@ public class PatriciaRouteTable implements RoutingTable {
         return added;
     }
     
+    /**
+     * Increment the failure count of the corresponding node. 
+     * If we have reached the maximum number of failures, evict the node
+     * and replace with a node from the replacement cache.
+     * 
+     */
     public void handleFailure(KUID nodeId) {
         
         if(nodeId == null) {
             return;
         }
-        //ignore failure if we start getting to many disconnections in a row
+        //ignore failure if we start getting too many disconnections in a row
         ++consecutiveFailures;
         if(consecutiveFailures > RouteTableSettings.MAX_CONSECUTIVE_FAILURES.getValue()) {
             if (LOG.isTraceEnabled()) {
@@ -547,8 +606,8 @@ public class PatriciaRouteTable implements RoutingTable {
                 // obviously to this local machine!? There isn't much
                 // we can do. Set it to the new address and hope it 
                 // doesn't use a different NIF everytime...
-                if (NetworkUtils.isLocalAddress(newAddress)
-                        && NetworkUtils.isLocalAddress(oldAddress)
+                if (NetworkUtils.isLocalHostAddress(newAddress)
+                        && NetworkUtils.isLocalHostAddress(oldAddress)
                         && newAddress.getPort()==oldAddress.getPort()) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Local maching loop detection for node: "+existingNode);
@@ -607,6 +666,9 @@ public class PatriciaRouteTable implements RoutingTable {
         refreshBuckets(force, null);
     }
     
+    /* (non-Javadoc)
+     * @see de.kapsi.net.kademlia.routing.RoutingTable#refreshBuckets(boolean, de.kapsi.net.kademlia.event.BootstrapListener)
+     */
     public void refreshBuckets(boolean force, BootstrapListener l) throws IOException{
         ArrayList bucketsLookups = new ArrayList();
         long now = System.currentTimeMillis();
@@ -781,6 +843,11 @@ public class PatriciaRouteTable implements RoutingTable {
         return buffer.toString();
     }
     
+    /**
+     * Listener for phase 2 of the bootstrap process: Called after the node has finished
+     * refreshing buckets furtherst away from his nodeId.
+     * 
+     */
     private class BootstrapPhaseTwoManager implements FindNodeListener {
 
         private List queryList;

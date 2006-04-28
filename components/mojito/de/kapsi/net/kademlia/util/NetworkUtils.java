@@ -32,14 +32,14 @@ public final class NetworkUtils {
     /**
      * Returns true if the SocketAddress is any of our local machine addresses.
      */
-    public static boolean isLocalAddress(SocketAddress addr) throws IOException {
-        return isLocalAddress(((InetSocketAddress)addr).getAddress());
+    public static boolean isLocalHostAddress(SocketAddress addr) throws IOException {
+        return isLocalHostAddress(((InetSocketAddress)addr).getAddress());
     }
     
     /**
      * Returns true if the InetAddress is any of our local machine addresses
      */
-    public static boolean isLocalAddress(InetAddress addr) throws IOException {
+    public static boolean isLocalHostAddress(InetAddress addr) throws IOException {
         return NetworkInterface.getByInetAddress(addr) != null;
     }
 }

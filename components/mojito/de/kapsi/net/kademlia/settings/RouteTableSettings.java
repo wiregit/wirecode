@@ -43,7 +43,9 @@ public final class RouteTableSettings extends LimeDHTProps {
     public static final LongSetting MIN_RECONNECTION_TIME
         = FACTORY.createSettableLongSetting("MIN_RECONNECTION_TIME", 1L*60L, "min_reconnect_time", 1L*60L, 1L*60L);
     
-    // TODO reasonable min and max values
+    /**
+     * The symbol size, i.e. the number of bits improved at each step
+     */
     public static final IntSetting DEPTH_LIMIT //a.k.a B
         = FACTORY.createSettableIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);
     
