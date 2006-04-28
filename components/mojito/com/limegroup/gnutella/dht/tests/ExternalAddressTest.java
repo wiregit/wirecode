@@ -7,7 +7,6 @@ import java.net.SocketAddress;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.DHT;
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -67,8 +66,7 @@ public class ExternalAddressTest {
             super(context);
         }
 
-        public void handleRequest(KUID nodeId, SocketAddress src, 
-                RequestMessage message) throws IOException {
+        public void handleRequest(RequestMessage message) throws IOException {
             
             SocketAddress addr = externalAddress != null ? externalAddress : src;
             

@@ -104,7 +104,7 @@ public class ContactNode extends Node {
         }
         
         ContactNode other = (ContactNode)o;
-        return nodeId.equals(other.nodeId) 
+        return super.equals(other) 
                     && address.equals(other.address);
     }
     
@@ -112,7 +112,7 @@ public class ContactNode extends Node {
         StringBuffer buffer = new StringBuffer();
         buffer.append(toString(nodeId, address))
             .append(", failures: ").append(failures)
-            .append(", unknown?: ").append(getTimeStamp()==0);
+            .append(", unknown: ").append(getTimeStamp()==0);
         return buffer.toString();
     }
     

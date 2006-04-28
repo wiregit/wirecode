@@ -19,6 +19,9 @@
  
 package de.kapsi.net.kademlia.messages;
 
+import java.net.SocketAddress;
+
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 
 public abstract class Message {
@@ -35,31 +38,27 @@ public abstract class Message {
     public static final int FIND_VALUE_REQUEST = 0x08;
     public static final int FIND_VALUE_RESPONSE = 0x09;
     
-    protected final int vendor;
-    protected final int version;
+    private int vendor;
+    private int version;
     
-    protected final KUID nodeId;
-    protected final KUID messageId;
+    private ContactNode node;
+    private KUID messageId;
     
-    protected final byte[] signature;
+    private byte[] signature;
     
-    public Message(int vendor, int version, KUID nodeId, KUID messageId) {
-        this(vendor, version, nodeId, messageId, null);
+    public Message(int vendor, int version, ContactNode node, KUID messageId) {
+        this(vendor, version, node, messageId, null);
     }
     
     public Message(int vendor, int version, 
-            KUID nodeId, KUID messageId, byte[] signature) {
+            ContactNode node, KUID messageId, byte[] signature) {
         
-        if (nodeId == null) {
-            throw new NullPointerException("NodeID is null");
+        if (node == null) {
+            throw new NullPointerException("ContactNode is null");
         }
         
         if (messageId == null) {
             throw new NullPointerException("MessageID is null");
-        }
-        
-        if (!nodeId.isNodeID()) {
-            throw new IllegalArgumentException("NodeID is of wrong type: " + nodeId);
         }
         
         if (!messageId.isMessageID()) {
@@ -68,7 +67,7 @@ public abstract class Message {
         
         this.vendor = vendor;
         this.version = version;
-        this.nodeId = nodeId;
+        this.node = node;
         this.messageId = messageId;
         this.signature = signature;
     }
@@ -85,8 +84,16 @@ public abstract class Message {
         return messageId;
     }
     
+    public ContactNode getContactNode() {
+        return node;
+    }
+    
     public KUID getNodeID() {
-        return nodeId;
+        return getContactNode().getNodeID();
+    }
+    
+    public SocketAddress getSocketAddress() {
+        return getContactNode().getSocketAddress();
     }
     
     public byte[] getSignature() {

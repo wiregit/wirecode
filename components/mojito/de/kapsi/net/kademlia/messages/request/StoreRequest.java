@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia.messages.request;
 
 import java.util.Collection;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.security.QueryKey;
@@ -33,9 +34,9 @@ public class StoreRequest extends RequestMessage {
     private Collection values;
     
     public StoreRequest(int vendor, int version, 
-            KUID nodeId, KUID messageId, int remaining, 
+            ContactNode node, KUID messageId, int remaining, 
             QueryKey queryKey, Collection values) {
-        super(vendor, version, nodeId, messageId);
+        super(vendor, version, node, messageId);
         
         if (remaining < 0 || remaining > 0xFFFF) {
             throw new IllegalArgumentException("Remaining: " + remaining);

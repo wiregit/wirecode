@@ -144,8 +144,9 @@ public class BucketNode extends Node {
         if (!(o instanceof BucketNode)) {
             return false;
         }
+        
         BucketNode other = (BucketNode)o;
-        return (nodeId.equals((other.nodeId))) && (depth == other.depth);
+        return super.equals(other) && (depth == other.depth);
     }
     
     /**

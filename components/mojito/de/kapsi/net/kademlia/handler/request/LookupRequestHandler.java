@@ -20,7 +20,6 @@
 package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
@@ -52,28 +50,27 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         super(context);
     }
 
-    public void handleRequest(KUID nodeId, SocketAddress src, RequestMessage message) throws IOException {
+    public void handleRequest(RequestMessage message) throws IOException {
         
         LookupRequest request = (LookupRequest)message;
         KUID lookup = request.getLookupID();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(ContactNode.toString(nodeId, src) + " is trying to lookup " + lookup);
+            LOG.trace(request.getContactNode() + " is trying to lookup " + lookup);
         }
         
         if (request instanceof FindNodeRequest) {
-            handleFindNodeRequest(nodeId, src, request);
+            handleFindNodeRequest(request);
         } else {
-            handleFindValueRequest(nodeId, src, request);
+            handleFindValueRequest(request);
         }
     }
     
-    private void handleFindNodeRequest(KUID nodeId, 
-            SocketAddress src, LookupRequest request) throws IOException {
+    private void handleFindNodeRequest(LookupRequest request) throws IOException {
         
         KUID lookup = request.getLookupID();
         
-        QueryKey queryKey = QueryKey.getQueryKey(src);
+        QueryKey queryKey = QueryKey.getQueryKey(request.getSocketAddress());
         List bucketList = Collections.EMPTY_LIST;
         
         if (context.isBootstrapped()) {
@@ -88,11 +85,10 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request, queryKey, bucketList);
         
-        context.getMessageDispatcher().send(src, response, null);
+        context.getMessageDispatcher().send(request.getContactNode(), response, null);
     }
     
-    private void handleFindValueRequest(KUID nodeId, 
-            SocketAddress src, LookupRequest request) throws IOException {
+    private void handleFindValueRequest(LookupRequest request) throws IOException {
         
         KUID lookup = request.getLookupID();
         
@@ -104,10 +100,10 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             
             FindValueResponse response = context.getMessageFactory()
                         .createFindValueResponse(request, values);
-            context.getMessageDispatcher().send(src, response, null);
+            context.getMessageDispatcher().send(request.getContactNode(), response, null);
         } else {
             // OK, send ContactNodes instead!
-            handleFindNodeRequest(nodeId, src, request);
+            handleFindNodeRequest(request);
         }
     }
 }

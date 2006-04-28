@@ -23,11 +23,11 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.List;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
-import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
@@ -52,8 +52,8 @@ public class MessageFactory {
         return context.getVersion();
     }
     
-    private KUID getLocalNodeID() {
-        return context.getLocalNodeID();
+    private ContactNode getLocalNode() {
+        return context.getLocalNode();
     }
     
     private KUID createMessageID(SocketAddress dst) {
@@ -65,48 +65,40 @@ public class MessageFactory {
     }
     
     public PingRequest createPingRequest(SocketAddress dst) {
-        return new PingRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst));
+        return new PingRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst));
     }
     
     public PingResponse createPingResponse(RequestMessage request, SocketAddress address) {
-        return new PingResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), address, getEstimatedSize());
+        return new PingResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), address, getEstimatedSize());
     }
     
     public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookup) {
         if (!lookup.isNodeID()) {
             throw new IllegalArgumentException();
         }
-        return new FindNodeRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst), lookup);
+        return new FindNodeRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), lookup);
     }
     
     public FindNodeResponse createFindNodeResponse(RequestMessage request, QueryKey queryKey, List nodes) {
-        return new FindNodeResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), queryKey, nodes);
+        return new FindNodeResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), queryKey, nodes);
     }
     
     public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookup) {
         if (!lookup.isValueID()) {
             throw new IllegalArgumentException();
         }
-        return new FindValueRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst), lookup);
+        return new FindValueRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), lookup);
     }
     
     public FindValueResponse createFindValueResponse(RequestMessage request, Collection values) {
-        return new FindValueResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), values);
+        return new FindValueResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), values);
     }
     
     public StoreRequest createStoreRequest(SocketAddress dst, int remaining, QueryKey queryKey, Collection values) {
-        return new StoreRequest(getVendor(), getVersion(), getLocalNodeID(), createMessageID(dst), remaining, queryKey, values);
+        return new StoreRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), remaining, queryKey, values);
     }
     
     public StoreResponse createStoreResponse(RequestMessage request, int requesting, Collection status) {
-        return new StoreResponse(getVendor(), getVersion(), getLocalNodeID(), request.getMessageID(), requesting, status);
-    }
-    
-    public LookupRequest createLookupRequest(SocketAddress dst, KUID lookup) {
-        if (lookup.isNodeID()) {
-            return createFindNodeRequest(dst, lookup);
-        } else {
-            return createFindValueRequest(dst, lookup);
-        }
+        return new StoreResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), requesting, status);
     }
 }

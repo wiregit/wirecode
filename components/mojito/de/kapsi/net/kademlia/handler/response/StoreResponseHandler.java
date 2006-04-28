@@ -28,11 +28,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
-import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
@@ -64,8 +62,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         this.keyValues = keyValues;
     }
 
-    public void handleResponse(KUID nodeId, SocketAddress src, 
-            ResponseMessage message, long time) throws IOException {
+    public void response(ResponseMessage message, long time) throws IOException {
 
         StoreResponse response = (StoreResponse)message;
         
@@ -77,7 +74,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         
         if (requesting > 0 && index < keyValues.size()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace(ContactNode.toString(nodeId, src) 
+                LOG.trace(response.getContactNode()
                         + " is requesting from us " + requesting + " KeyValues");
             }
             
@@ -93,16 +90,16 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             
             RequestMessage request 
                 = context.getMessageFactory()
-                    .createStoreRequest(src, remaining, queryKey, toSend);
+                    .createStoreRequest(response.getSocketAddress(), remaining, queryKey, toSend);
             
-            context.getMessageDispatcher().send(nodeId, src, request, this);
+            context.getMessageDispatcher().send(response.getContactNode(), request, this);
         }
         
         // reset the error counter
         resetErrors();
     }
     
-    protected void handleFinalTimeout(KUID nodeId, SocketAddress dst, Message message) throws IOException {
+    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Max number of errors occured. Giving up!");
         }

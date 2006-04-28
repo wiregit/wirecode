@@ -153,8 +153,7 @@ public class Receipt {
         received = System.currentTimeMillis();
     }
     
-    void handleSuccess(KUID nodeId, SocketAddress src, 
-            ResponseMessage message) throws IOException {
+    void handleResponse(ResponseMessage response) throws IOException {
         
         // A sends B a Ping
         // But B is offline and there is C who got B's IP from the ISP
@@ -164,12 +163,12 @@ public class Receipt {
         if (compareNodeID(nodeId)) {
             if (handler != null) {
                 handler.addTime(time());
-                handler.handleResponse(nodeId, src, message, time());
+                handler.handleResponse(response, time());
             }
         } else {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Wrong NodeID! Expected " + this.nodeId + " but got " 
-                        + nodeId + " from " + src);
+                        + response.getNodeID() + " from " + response.getSocketAddress());
             }
             
             handleTimeout();
@@ -181,9 +180,5 @@ public class Receipt {
             handler.addTime(time());
             handler.handleTimeout(nodeId, dst, (RequestMessage)message, time());
         }
-    }
-    
-    void handleCancel() {
-        
     }
 }

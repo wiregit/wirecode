@@ -21,11 +21,16 @@ package de.kapsi.net.kademlia.handler;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.event.ResponseListener;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 public abstract class AbstractResponseHandler extends MessageHandler 
@@ -37,6 +42,10 @@ public abstract class AbstractResponseHandler extends MessageHandler
     private long timeout;
     
     private int maxErrors;
+    
+    protected final List listeners = new ArrayList();
+    
+    private volatile boolean stop = false;
     
     public AbstractResponseHandler(Context context) {
         this(context, -1L, -1);
@@ -72,6 +81,14 @@ public abstract class AbstractResponseHandler extends MessageHandler
         }
     }
     
+    public void stop() {
+        stop = true;
+    }
+    
+    public boolean isStopped() {
+        return stop;
+    }
+    
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
@@ -104,19 +121,59 @@ public abstract class AbstractResponseHandler extends MessageHandler
         return maxErrors;
     }
     
-    public void handleTimeout(KUID nodeId, 
-            SocketAddress dst, RequestMessage message, long time) throws IOException {
+    public void handleResponse(ResponseMessage response, long time) throws IOException {
         
-        if (errors++ >= maxErrors) {
-            handleFinalTimeout(nodeId, dst, message);
+        response(response, time);
+        fireResponse(response, time);
+    }
+
+    public void handleTimeout(KUID nodeId, 
+            SocketAddress dst, RequestMessage request, long time) throws IOException {
+        
+        if (!isStopped()) {
+            if (errors++ >= maxErrors) {
+                timeout(nodeId, dst, request, time());
+                fireTimeout(nodeId, dst, request, time());
+            } else {
+                resend(nodeId, dst, request);
+            }
         } else {
-            handleResend(nodeId, dst, message);
+            timeout(nodeId, dst, request, time());
         }
     }
     
-    protected void handleResend(KUID nodeId, SocketAddress dst, Message message) throws IOException {
+    protected void resend(KUID nodeId, SocketAddress dst, Message message) throws IOException {
         context.getMessageDispatcher().send(nodeId, dst, message, this);
     }
     
-    protected abstract void handleFinalTimeout(KUID nodeId, SocketAddress dst, Message message) throws IOException;
+    protected abstract void response(ResponseMessage message, long time) throws IOException;
+    
+    protected abstract void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException;
+    
+    protected void fireResponse(final ResponseMessage response, final long time) {
+        context.fireEvent(new Runnable() {
+            public void run() {
+                if (!isStopped()) {
+                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                        ResponseListener listener = (ResponseListener)it.next();
+                        listener.response(response, time);
+                    }
+                }
+            }
+        });
+    }
+    
+    protected void fireTimeout(final KUID nodeId, final SocketAddress address, 
+            final RequestMessage request, final long time) {
+        context.fireEvent(new Runnable() {
+            public void run() {
+                if (!isStopped()) {
+                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                        ResponseListener listener = (ResponseListener)it.next();
+                        listener.timeout(nodeId, address, request, time);
+                    }
+                }
+            }
+        });
+    }
 }

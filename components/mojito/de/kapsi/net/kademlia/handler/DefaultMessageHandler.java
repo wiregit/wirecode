@@ -76,44 +76,37 @@ public class DefaultMessageHandler extends MessageHandler
         return NetworkSettings.TIMEOUT.getValue();
     }
 
-    public void handleResponse(KUID nodeId, SocketAddress src, 
-            ResponseMessage message, long time) throws IOException {
-        
-        addLiveContactInfo(nodeId, src, message);
+    public void handleResponse(ResponseMessage message, long time) throws IOException {
+        addLiveContactInfo(message.getContactNode(), message);
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
-        RoutingTable routeTable = getRouteTable();
-        routeTable.handleFailure(nodeId);
+        context.getRouteTable().handleFailure(nodeId);
     }
 
-    public void handleRequest(KUID nodeId, SocketAddress src, 
-            RequestMessage message) throws IOException {
-        
-        addLiveContactInfo(nodeId, src, message);
+    public void handleRequest(RequestMessage message) throws IOException {
+        addLiveContactInfo(message.getContactNode(), message);
     }
     
-    private void addLiveContactInfo(KUID nodeId, SocketAddress src, 
+    private void addLiveContactInfo(ContactNode node, 
             Message message) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
-        
-        ContactNode node = new ContactNode(nodeId, src);
         
         //only do store forward if it is a new node in our routing table or 
         //a node that is (re)connecting
         boolean newNode = routeTable.add(node, true);
         if(!newNode && (message instanceof FindNodeRequest)) {
             FindNodeRequest request = (FindNodeRequest) message;
-            newNode = request.getLookupID().equals(nodeId);
+            newNode = request.getLookupID().equals(node.getNodeID());
         }
 
         if(newNode) {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
-            List closestNodes = routeTable.select(nodeId, k, false, false);
+            List closestNodes = routeTable.select(node.getNodeID(), k, false, false);
             
             if (closestNodes.contains(context.getLocalNode())) {
                 List keyValuesToForward = new ArrayList();
@@ -147,8 +140,11 @@ public class DefaultMessageHandler extends MessageHandler
                 
                 if (!keyValuesToForward.isEmpty()) {
                     ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);
-                    RequestMessage request = context.getMessageFactory().createFindNodeRequest(src, nodeId);
-                    context.getMessageDispatcher().send(nodeId, src, request, handler);
+                    
+                    RequestMessage request = context.getMessageFactory()
+                        .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
+                    
+                    context.getMessageDispatcher().send(node, request, handler);
                 }
             }
         }
@@ -168,8 +164,7 @@ public class DefaultMessageHandler extends MessageHandler
             this.keyValues = keyValues;
         }
         
-        public void handleResponse(KUID nodeId, SocketAddress src, 
-                ResponseMessage message, long time) throws IOException {
+        public void response(ResponseMessage message, long time) throws IOException {
             
             FindNodeResponse response = (FindNodeResponse)message;
             
@@ -182,10 +177,10 @@ public class DefaultMessageHandler extends MessageHandler
             }
             
             QueryKey queryKey = response.getQueryKey();
-            context.store(new ContactNode(nodeId, src), queryKey, keyValues);
+            context.store(message.getContactNode(), queryKey, keyValues);
         }
 
-        protected void handleFinalTimeout(KUID nodeId, SocketAddress dst, Message message) throws IOException {
+        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
             
         }
     }

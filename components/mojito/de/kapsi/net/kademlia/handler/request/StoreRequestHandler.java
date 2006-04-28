@@ -20,7 +20,6 @@
 package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -32,9 +31,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -52,25 +49,24 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         super(context);
     }
     
-    public void handleRequest(KUID nodeId, SocketAddress src, 
-            RequestMessage message) throws IOException {
+    public void handleRequest(RequestMessage message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
         QueryKey queryKey = request.getQueryKey();
         
         if (queryKey == null) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(ContactNode.toString(nodeId, src) 
+                LOG.error(request.getContactNode() 
                         + " does not provide a QueryKey");
             }
             return;
         }
         
-        QueryKey expected = QueryKey.getQueryKey(src);
+        QueryKey expected = QueryKey.getQueryKey(request.getSocketAddress());
         if (!expected.equals(queryKey)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Expected " + expected + " from " 
-                        + ContactNode.toString(nodeId, src) 
+                        + request.getContactNode() 
                         + " but got " + queryKey);
             }
             return;
@@ -81,10 +77,10 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         if (LOG.isTraceEnabled()) {
             if (!values.isEmpty()) {
-                LOG.trace(ContactNode.toString(nodeId, src) 
+                LOG.trace(request.getContactNode() 
                         + " requested us to store the KeyValues " + values);
             } else {
-                LOG.trace(ContactNode.toString(nodeId, src)
+                LOG.trace(request.getContactNode() 
                         + " requested us to store " + remaining + " KeyValues");
             }
         }
@@ -131,6 +127,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         StoreResponse response 
             = context.getMessageFactory().createStoreResponse(request, keyValues, stats);
-        context.getMessageDispatcher().send(src, response, null);
+        context.getMessageDispatcher().send(request.getContactNode(), response, null);
     }
 }

@@ -51,23 +51,19 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.db.KeyValuePublisher;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.EventDispatcher;
-import de.kapsi.net.kademlia.event.FindNodeListener;
-import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
-import de.kapsi.net.kademlia.event.ResponseListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
-import de.kapsi.net.kademlia.handler.response.FindNodeResponseHandler;
-import de.kapsi.net.kademlia.handler.response.FindValueResponseHandler;
-import de.kapsi.net.kademlia.handler.response.LookupResponseHandler2;
+import de.kapsi.net.kademlia.handler.response.LookupResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
-import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
 import de.kapsi.net.kademlia.routing.RandomBucketRefresher;
 import de.kapsi.net.kademlia.routing.RoutingTable;
@@ -102,7 +98,8 @@ public class Context implements Runnable {
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
     
-    private PingManager pingContext;
+    private PingManager pingManager;
+    private LookupManager lookupManager;
     
     private volatile boolean bootstrapped = false;
     private boolean running = false;
@@ -148,9 +145,10 @@ public class Context implements Runnable {
         keyValuePublisher = new KeyValuePublisher(this);
         bucketRefresher = new RandomBucketRefresher(this);
         
-        pingContext = new PingManager();
+        pingManager = new PingManager();
+        lookupManager = new LookupManager();
         
-        ResponseListener listener = new ResponseListener() {
+        /*ResponseListener listener = new ResponseListener() {
             public void response(KUID nodeId, SocketAddress address, long time) {
                 networkStats.RESPONSE_TIME.addData((int)time);
                 
@@ -162,10 +160,10 @@ public class Context implements Runnable {
                     // TODO handle Node error
                 }
             }
-        };
+        };*/
         
-        // pingContext.addResponseListener(listener);
-        // lookupContext.addResponseListener(listener);
+        //pingContext.addResponseListener(listener);
+        //lookupContext.addResponseListener(listener);
     }
     
     public DHTStats getDHTStats() {
@@ -350,7 +348,8 @@ public class Context implements Runnable {
             return;
         }
         
-        pingContext.init();
+        pingManager.init();
+        lookupManager.init();
         
         bootstrapped = true;
         running = true;
@@ -395,12 +394,12 @@ public class Context implements Runnable {
             return;
         }
         
-        if (messageDispatcherThread != null 
+        /*if (messageDispatcherThread != null 
                 && Thread.currentThread() != messageDispatcherThread) {
             eventDispatcher.run(event);
-        } else {
+        } else {*/
             eventDispatcher.add(event);
-        }
+        //}
     }
     
     /**
@@ -412,31 +411,37 @@ public class Context implements Runnable {
      * @throws IOException
      */
     public void ping(SocketAddress address) throws IOException {
-        pingContext.ping(address, null);
+        pingManager.ping(address);
     }
     
     public void ping(SocketAddress address, PingListener listener) throws IOException {
-        pingContext.ping(address, listener);
+        pingManager.ping(address, listener);
     }
     
     public void ping(ContactNode node) throws IOException {
-        pingContext.ping(node, null);
+        pingManager.ping(node);
     }
     
     public void ping(ContactNode node, PingListener listener) throws IOException {
-        pingContext.ping(node, listener);
+        pingManager.ping(node, listener);
     }
     
-    public void lookup(KUID lookup, FindNodeListener l) throws IOException {
-        FindNodeResponseHandler handler 
-            = new FindNodeResponseHandler(this, lookup, l);
-        
-        handler.lookup();
+    public void get(KUID key, LookupListener listener) throws IOException {
+        lookupManager.lookup(key, listener);
+    }
+    
+    public void lookup(KUID lookup, LookupListener listener) throws IOException {
+        lookupManager.lookup(lookup, listener);
+    }
+    
+    public void lookup(KUID lookup) throws IOException {
+        lookupManager.lookup(lookup);
     }
     
     public void bootstrap(SocketAddress address, BootstrapListener listener) throws IOException {
         setBootstrapped(false);
-        ping(address, new BootstrapManager(address, listener));
+        BootstrapManager2 bootstrapper = new BootstrapManager2();
+        bootstrapper.bootstrap(address, listener);
     }
     
     /** store */
@@ -457,14 +462,7 @@ public class Context implements Runnable {
         
         messageDispatcher.send(node, request, handler);
     }
-    
-    public void get(KUID key, FindValueListener l) throws IOException {
-        FindValueResponseHandler handler 
-            = new FindValueResponseHandler(this, key, l);
-        
-        handler.lookup();
-    }
-    
+
     public int size() {
         if (!isRunning()) {
             return 0;
@@ -576,67 +574,96 @@ public class Context implements Runnable {
         return dataBaseStats;
     }
     
-    private class BootstrapManager implements BootstrapListener, PingListener, FindNodeListener {
+    private class BootstrapManager2 implements PingListener, LookupListener {
         
-        private long totalTime = 0L;
+        private long startTime = 0L;
         
-        private SocketAddress address;
-        private BootstrapListener listener;
+        private boolean phaseTwo = false;
+        private boolean foundNewNodes = false;
         
-        public BootstrapManager(SocketAddress address, BootstrapListener listener) {
-            this.address = address;
+        private de.kapsi.net.kademlia.event.BootstrapListener listener;
+        
+        private List buckets = Collections.EMPTY_LIST;
+        
+        private BootstrapManager2() {
+            
+        }
+        
+        private long time() {
+            return System.currentTimeMillis() - startTime;
+        }
+        
+        public void bootstrap(SocketAddress address, 
+                BootstrapListener listener) throws IOException {
+            
             this.listener = listener;
+            startTime = System.currentTimeMillis();
+            ping(address, this);
         }
         
-        public void pingSuccess(KUID nodeId, SocketAddress address, final long time) {
-            totalTime += time;
-            
+        public void response(ResponseMessage response, long time) {
             try {
-                // Ping was successful, start with lookup...
-                lookup(getLocalNodeID(), this);
+                if (response instanceof PingResponse) {
+                    lookup(getLocalNodeID(), this);
+                }
             } catch (IOException err) {
-                LOG.error(err);
-                initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, time);
+                LOG.error("Initial ping failed: ", err);
+                
+                firePhaseOneFinished();
+                firePhaseTwoFinished();
             }
         }
 
-        public void pingTimeout(KUID nodeId, SocketAddress address, long time) {
-            initialPhaseComplete(getLocalNodeID(), Collections.EMPTY_LIST, -1L);
-        }
-
-        public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, final long time) {
-            
-            totalTime += time;
-            initialPhaseComplete(getLocalNodeID(), nodes, totalTime);
-            
-            try {
-                // Begin with PHASE 2 of bootstrapping where we
-                // refresh the furthest away buckets...
-                routeTable.refreshBuckets(false, this);
-            } catch (IOException err) {
-                LOG.error(err);
-                secondPhaseComplete(getLocalNodeID(), false, 0);
+        public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+            if (request instanceof PingRequest) {
+                firePhaseOneFinished();
+                firePhaseTwoFinished();
             }
         }
-
-        public void initialPhaseComplete(final KUID nodeId, final Collection nodes, final long time) {
+        
+        public void found(KUID lookup, Collection c, long time) {
+            if (!phaseTwo) {
+                phaseTwo = true;
+                try {
+                    buckets = routeTable.refreshBuckets(true, this);
+                    firePhaseOneFinished();
+                } catch (IOException err) {
+                    LOG.error("Beginning second phase failed: ", err);
+                    
+                    firePhaseOneFinished();
+                    firePhaseTwoFinished();
+                }
+            } else {
+                buckets.remove(lookup);
+                if (!c.isEmpty()) {
+                    foundNewNodes = true;
+                }
+                
+                if (buckets.isEmpty()) {
+                    firePhaseTwoFinished();
+                }
+            }
+        }
+        
+        private void firePhaseOneFinished() {
             if (listener != null) {
+                final long time = time();
+                
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.initialPhaseComplete(nodeId, nodes, time);
+                        listener.phaseOneFinished(time);
                     }
                 });
             }
         }
-
-        public void secondPhaseComplete(final KUID nodeId, final boolean foundNodes, final long time) {
-            setBootstrapped(true);
-            totalTime += time;
-            networkStats.BOOTSTRAP_TIME.addData((int)totalTime);
+        
+        private void firePhaseTwoFinished() {
             if (listener != null) {
+                final long time = time();
+                
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.secondPhaseComplete(nodeId, foundNodes, totalTime);
+                        listener.phaseTwoFinished(foundNewNodes, time);
                     }
                 });
             }
@@ -692,71 +719,21 @@ public class Context implements Runnable {
         }
     }
     
-    protected abstract class AbstractManager {
-        
-        private List listeners = new ArrayList();
-        
-        public void addResponseListener(ResponseListener listener) {
-            synchronized (listeners) {
-                listeners.add(listener);
-            }
-        }
-        
-        public void removePingListener(ResponseListener listener) {
-            synchronized (listeners) {
-                listeners.remove(listener);
-            }
-        }
-
-        public ResponseListener[] getAllResponseListeners() {
-            synchronized (listeners) {
-                return (ResponseListener[])listeners.toArray(new ResponseListener[0]);
-            }
-        }
-        
-        protected void fireResponse(final KUID nodeId, final SocketAddress address, final long time) {
-            fireEvent(new Runnable() {
-                public void run() {
-                    synchronized (listeners) {
-                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                            ResponseListener listener = (ResponseListener)it.next();
-                            listener.response(nodeId, address, time);
-                        }
-                    }
-                }
-            });
-        }
-        
-        protected void fireTimeout(final KUID nodeId, final SocketAddress address, final long time) {
-            fireEvent(new Runnable() {
-                public void run() {
-                    synchronized (listeners) {
-                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                            ResponseListener listener = (ResponseListener)it.next();
-                            listener.timeout(nodeId, address, time);
-                        }
-                    }
-                }
-            });
-        }
-    }
-    
     /**
      * The PingContext takes care of concurrent Pings and makes sure
      * a single Node cannot be pinged multiple times.
      */
-    public class PingManager extends AbstractManager {
+    private class PingManager implements de.kapsi.net.kademlia.event.PingListener {
         
-        private Map attachmentMap = new HashMap();
+        private Map handlerMap = new HashMap();
         private List listeners = new ArrayList();
         
         private PingManager() {
-            
         }
         
         public void init() {
-            synchronized (attachmentMap) {
-                attachmentMap.clear();
+            synchronized (handlerMap) {
+                handlerMap.clear();
             }
         }
         
@@ -795,116 +772,94 @@ public class Context implements Runnable {
         }
 
         public void ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
-            synchronized (attachmentMap) {
-                Attachment attachment = (Attachment)attachmentMap.get(address);
-                if (attachment == null) {
+            synchronized (handlerMap) {
+                PingResponseHandler responseHandler = (PingResponseHandler)handlerMap.get(address);
+                if (responseHandler == null) {
+                    
+                    responseHandler = new PingResponseHandler(Context.this);
+                    responseHandler.addPingListener(this);
                     
                     PingRequest request = messageFactory.createPingRequest(address);
-                    ResponseHandler responseHandler = new PingResponseHandler(Context.this, this);
-                    
-                    attachment = new Attachment(responseHandler);
-                    attachmentMap.put(address, attachment);
                     messageDispatcher.send(nodeId, address, request, responseHandler);
                     
+                    handlerMap.put(address, responseHandler);
                     networkStats.PINGS_SENT.incrementStat();
                 }
                 
                 if (listener != null) {
-                    attachment.listeners.add(listener);
+                    responseHandler.addPingListener(listener);
                 }
             }
         }
         
+        public void response(final ResponseMessage response, final long time) {
+            networkStats.PINGS_OK.incrementStat();
+            
+            synchronized (handlerMap) {
+                handlerMap.remove(response.getSocketAddress());
+                fireEvent(new Runnable() {
+                    public void run() {
+                        synchronized (listeners) {
+                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                                PingListener listener = (PingListener)it.next();
+                                listener.response(response, time);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        public void timeout(final KUID nodeId, final SocketAddress address, RequestMessage request, final long time) {            
+            networkStats.PINGS_FAILED.incrementStat();
+            
+            synchronized (handlerMap) {
+                handlerMap.remove(address);
+                fireEvent(new Runnable() {
+                    public void run() {
+                        synchronized (listeners) {
+                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                                PingListener listener = (PingListener)it.next();
+                                listener.timeout(nodeId, address, null, time);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
         public boolean cancel(ContactNode node) {
             return cancel(node.getSocketAddress());
         }
         
         public boolean cancel(SocketAddress address) {
-            Attachment attachment = null;
-            
-            synchronized (attachmentMap) {
-                attachment = (Attachment)attachmentMap.remove(address);
-            }
-            
-            if (attachment != null) {
-                // TODO implement cancel!
-                return true;
+            synchronized (handlerMap) {
+                PingResponseHandler handler 
+                    = (PingResponseHandler)handlerMap.remove(address);
+                if (handler != null) {
+                    handler.stop();
+                    return true;
+                }
             }
             return false;
         }
-        
-        public void handleSuccess(KUID nodeId, SocketAddress address, long time) {
-            Attachment attachment = null;
-            synchronized (attachmentMap) {
-                attachment = (Attachment)attachmentMap.remove(address);
-            }
-            
-            fireResponse(nodeId, address, time);
-            firePingSuccess(attachment, nodeId, address, time);
-        }
-        
-        public void handleTimeout(KUID nodeId, SocketAddress address, Message message, long time) {
-            Attachment attachment = null;
-            synchronized (attachmentMap) {
-                attachment = (Attachment)attachmentMap.remove(address);
-            }
-            
-            fireTimeout(nodeId, address, time);
-            firePingTimeout(attachment, nodeId, address, time);
-        }
-        
-        private void firePingSuccess(final Attachment attachment, 
-                final KUID nodeId, final SocketAddress address, final long time) {
-            
-            fireEvent(new Runnable() {
-                public void run() {
-                    synchronized (listeners) {
-                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                            PingListener listener = (PingListener)it.next();
-                            listener.pingSuccess(nodeId, address, time);
-                        }
-                    }
-                    
-                    if (attachment != null) {
-                        for(Iterator it = attachment.listeners.iterator(); it.hasNext(); ) {
-                            PingListener listener = (PingListener)it.next();
-                            listener.pingSuccess(nodeId, address, time);
-                        }
-                    }
-                }
-            });
-        }
-        
-        private void firePingTimeout(final Attachment attachment, 
-                final KUID nodeId, final SocketAddress address, final long time) {
-            
-            fireEvent(new Runnable() {
-                public void run() {
-                    synchronized (listeners) {
-                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                            PingListener listener = (PingListener)it.next();
-                            listener.pingTimeout(nodeId, address, time);
-                        }
-                    }
-                    
-                    if (attachment != null) {
-                        for(Iterator it = attachment.listeners.iterator(); it.hasNext(); ) {
-                            PingListener listener = (PingListener)it.next();
-                            listener.pingTimeout(nodeId, address, time);
-                        }
-                    }
-                }
-            });
-        }
     }
     
-    public class LookupManager extends AbstractManager {
+    private class LookupManager implements de.kapsi.net.kademlia.event.LookupListener {
         
-        private Map attachmentMap = new HashMap();
+        private Map handlerMap = new HashMap();
         
         private List listeners = new ArrayList();
         
-        private LookupManager() {}
+        private LookupManager() {
+            
+        }
+        
+        public void init() {
+            synchronized (handlerMap) {
+                handlerMap.clear();
+            }
+        }
         
         public void addLookupListener(LookupListener listener) {
             synchronized (listeners) {
@@ -930,82 +885,82 @@ public class Context implements Runnable {
         
         public void lookup(KUID lookup, LookupListener listener) throws IOException {
             if (!lookup.isNodeID() && !lookup.isValueID()) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Lookup ID must be either a NodeID or ValueID");
             }
             
-            synchronized (attachmentMap) {
-                Attachment attachment = (Attachment)attachmentMap.get(lookup);
-                if (attachment == null) {
-                    LookupResponseHandler2 handler = new LookupResponseHandler2(lookup, Context.this, this);
+            synchronized (handlerMap) {
+                LookupResponseHandler handler = (LookupResponseHandler)handlerMap.get(lookup);
+                if (handler == null) {
+                    handler = new LookupResponseHandler(lookup, Context.this);
+                    handler.addLookupListener(this);
                     
-                    attachment = new Attachment(handler);
                     handler.start();
-                    attachmentMap.put(lookup, attachment);
+                    handlerMap.put(lookup, handler);
                 }
                 
                 if (listener != null) {
-                    attachment.listeners.add(listener);
+                    handler.addLookupListener(listener);
                 }
             }
         }
         
         public boolean cancel(KUID lookup) {
-            // TODO implement cancel
+            synchronized (handlerMap) {
+                LookupResponseHandler handler = (LookupResponseHandler)handlerMap.remove(lookup);
+                if (handler != null) {
+                    handler.stop();
+                    return true;
+                }
+            }
             return false;
         }
 
-        public void handleSuccess(KUID nodeId, SocketAddress address, long time) {
-            fireResponse(nodeId, address, time);
-        }
-        
-        public void handleTimeout(KUID nodeId, SocketAddress address, long time) {
-            fireTimeout(nodeId, address, time);
+        public void response(final ResponseMessage response, final long time) {
+            synchronized (handlerMap) {
+                fireEvent(new Runnable() {
+                    public void run() {
+                        synchronized (listeners) {
+                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                                LookupListener listener = (LookupListener)it.next();
+                                listener.response(response, time);
+                            }
+                        }
+                    }
+                });
+            }
         }
 
-        public void fireFinishLookup(KUID lookup, Collection results, long time) {
-            Attachment attachment = null;
-            synchronized (attachmentMap) {
-                attachment = (Attachment)attachmentMap.remove(lookup);
+        public void timeout(final KUID nodeId, final SocketAddress address, 
+                final RequestMessage request, final long time) {
+            synchronized (handlerMap) {
+                fireEvent(new Runnable() {
+                    public void run() {
+                        synchronized (listeners) {
+                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                                LookupListener listener = (LookupListener)it.next();
+                                listener.timeout(nodeId, address, request, time);
+                            }
+                        }
+                    }
+                });
             }
-            
-            fireFinishLookup(attachment, lookup, results, time);
         }
         
-        private void fireFinishLookup(final Attachment attachment, 
-                final KUID lookup, final Collection results, final long time) {
-            
-            fireEvent(new Runnable() {
-                public void run() {
-                    synchronized (listeners) {
-                        for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                            LookupListener listener = (LookupListener)it.next();
-                            listener.finishLookup(lookup, results, time);
+        public void found(final KUID lookup, final Collection c, final long time) {
+            synchronized (handlerMap) {
+                handlerMap.remove(lookup);
+                
+                fireEvent(new Runnable() {
+                    public void run() {
+                        synchronized (listeners) {
+                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                                LookupListener listener = (LookupListener)it.next();
+                                listener.found(lookup, c, time);
+                            }
                         }
                     }
-                    
-                    if (attachment != null) {
-                        for(Iterator it = attachment.listeners.iterator(); it.hasNext(); ) {
-                            LookupListener listener = (LookupListener)it.next();
-                            listener.finishLookup(lookup, results, time);
-                        }
-                    }
-                }
-            });
-        }
-    }
-    
-    
-    /**
-     * 
-     */
-    private static class Attachment {
-        
-        private ResponseHandler responseHandler;
-        
-        private List listeners = new ArrayList();
-        
-        private Attachment(ResponseHandler responeHandler) {
-            this.responseHandler = responeHandler;
+                });
+            }
         }
     }
 }

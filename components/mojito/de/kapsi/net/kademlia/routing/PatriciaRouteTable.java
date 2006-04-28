@@ -45,9 +45,10 @@ import de.kapsi.net.kademlia.BucketNode;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.FindNodeListener;
+import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
@@ -607,16 +608,17 @@ public class PatriciaRouteTable implements RoutingTable {
         return existingNode;
     }
         
-    public void refreshBuckets(boolean force) throws IOException{
-        refreshBuckets(force,null);
+    public List refreshBuckets(boolean force) throws IOException{
+        return refreshBuckets(force, null);
     }
     
-    public void refreshBuckets(boolean force, BootstrapListener l) throws IOException{
-        ArrayList bucketsLookups = new ArrayList();
+    public List refreshBuckets(boolean force, LookupListener listener) throws IOException{
+        List bucketsLookups = new ArrayList();
         long now = System.currentTimeMillis();
         
-        for (Iterator iter = bucketsTrie.values().iterator(); iter.hasNext();) {
+        for (Iterator iter = bucketsTrie.values().iterator(); iter.hasNext(); ) {
             BucketNode bucket = (BucketNode) iter.next();
+            
             long lastTouch = bucket.getTimeStamp();
             //update bucket if freshness limit has passed
             //OR if it is not full (not complete)
@@ -627,7 +629,7 @@ public class PatriciaRouteTable implements RoutingTable {
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
             //if we are bootstrapping, phase 1 allready took care of the local bucket
-            if(l!=null && liveNodes.contains(context.getLocalNodeID())) {
+            if(listener != null && liveNodes.contains(context.getLocalNode())) {
                 continue;
             }
             
@@ -645,18 +647,14 @@ public class PatriciaRouteTable implements RoutingTable {
             }
         }
         
-        if(bucketsLookups.isEmpty()) {
-            if (l != null) {
-                l.secondPhaseComplete(context.getLocalNodeID(), false, 0L);
-            }
-        } else {
-            BootstrapPhaseTwoManager listener = new BootstrapPhaseTwoManager(bucketsLookups, l);
-            for (Iterator iter = bucketsLookups.iterator(); iter.hasNext();) {
-                KUID lookupId = (KUID) iter.next();
+        if (!bucketsLookups.isEmpty()) {
+            for (Iterator iter = bucketsLookups.iterator(); iter.hasNext(); ) {
+                context.lookup((KUID) iter.next(), listener);
                 routingStats.BUCKET_REFRESH_COUNT.incrementStat();
-                context.lookup(lookupId, listener);
             }
         }
+        
+        return bucketsLookups;
     }
     
     public void clear() {
@@ -782,37 +780,6 @@ public class PatriciaRouteTable implements RoutingTable {
         return buffer.toString();
     }
     
-    private class BootstrapPhaseTwoManager implements FindNodeListener {
-
-        private List queryList;
-        
-        private BootstrapListener listener;
-        
-        private boolean foundNodes;
-        
-        private BootstrapPhaseTwoManager(List queryList, BootstrapListener listener) {
-            this.queryList = queryList;
-            this.listener = listener;
-        }
-        
-        public void foundNodes(final KUID lookup, Collection nodes, Map queryKeys, final long time) {
-            if(!foundNodes && !nodes.isEmpty()) {
-                foundNodes = true;
-            }
-            
-            queryList.remove(lookup);
-            if(queryList.isEmpty() 
-                    && listener != null) {
-                
-                context.fireEvent(new Runnable() {
-                    public void run() {
-                        listener.secondPhaseComplete(lookup, foundNodes, time);
-                    }
-                });   
-            }
-        }
-    }
-    
     /**
      * The SpoofChecker makes sure two Nodes cannot have the same
      * NodeID at the same time.
@@ -834,12 +801,12 @@ public class PatriciaRouteTable implements RoutingTable {
             this.replacementBucket = replacementBucket;
         }
         
-        public void pingSuccess(KUID nodeId, SocketAddress address, long time) {
-            loopLock.remove(nodeId);
-            touchBucket(nodeId);
+        public void response(ResponseMessage response, long time) {
+            loopLock.remove(response.getNodeID());
+            touchBucket(response.getNodeID());
             if (LOG.isWarnEnabled()) {
                 LOG.warn("WARNING: " + newContact + " is trying to spoof its NodeID. " 
-                        + ContactNode.toString(nodeId, address) 
+                        + response.getContactNode()
                         + " responded in " + time + " ms");
             }
             routingStats.SPOOF_COUNT.incrementStat();
@@ -848,7 +815,7 @@ public class PatriciaRouteTable implements RoutingTable {
             //TODO: add bad node to IP Filter
         }
 
-        public void pingTimeout(KUID nodeId, SocketAddress address, long time) {
+        public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
             loopLock.remove(nodeId);
             
             // The current contact is obviously not responding

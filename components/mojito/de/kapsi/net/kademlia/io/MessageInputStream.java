@@ -135,29 +135,29 @@ public class MessageInputStream extends DataInputStream {
     }
     
     private PingRequest readPing(int vendor, int version, 
-            KUID nodeId, KUID messageId) throws IOException {
+            ContactNode node, KUID messageId) throws IOException {
         
-        return new PingRequest(vendor, version, nodeId, messageId);
+        return new PingRequest(vendor, version, node, messageId);
     }
     
     private PingResponse readPong(int vendor, int version, 
-            KUID nodeId, KUID messageId) throws IOException {
+            ContactNode node, KUID messageId) throws IOException {
         
         SocketAddress addr = readSocketAddress();
         int estimatedSize = readInt();
         
         byte[] signature = readSignature();
-        return new PingResponse(vendor, version, nodeId, messageId, addr, estimatedSize, signature);
+        return new PingResponse(vendor, version, node, messageId, addr, estimatedSize, signature);
     }
     
     private FindNodeRequest readFindNodeRequest(int vendor, int version, 
-            KUID nodeId, KUID messageId) throws IOException {
+            ContactNode node, KUID messageId) throws IOException {
         KUID lookup = readKUID();
-        return new FindNodeRequest(vendor, version, nodeId, messageId, lookup);
+        return new FindNodeRequest(vendor, version, node, messageId, lookup);
     }
     
     private FindNodeResponse readFindNodeResponse(int vendor, int version, 
-            KUID nodeId, KUID messageId) throws IOException {
+            ContactNode node, KUID messageId) throws IOException {
         
         QueryKey queryKey = readQueryKey();
         int size = readUnsignedByte();
@@ -165,28 +165,28 @@ public class MessageInputStream extends DataInputStream {
         for(int i = 0; i < nodes.length; i++) {
             nodes[i] = readContactNode();
         }
-        return new FindNodeResponse(vendor, version, nodeId, messageId, queryKey, Arrays.asList(nodes));
+        return new FindNodeResponse(vendor, version, node, messageId, queryKey, Arrays.asList(nodes));
     }
     
     private FindValueRequest readFindValueRequest(int vendor, int version, 
-            KUID nodeId, KUID messageId) throws IOException {
+            ContactNode node, KUID messageId) throws IOException {
         KUID lookup = readKUID();
-        return new FindValueRequest(vendor, version, nodeId, messageId, lookup);
+        return new FindValueRequest(vendor, version, node, messageId, lookup);
     }
     
     private Message readFindValueResponse(int vendor, int version, 
-            KUID nodeId, KUID messageId) throws IOException {
+            ContactNode node, KUID messageId) throws IOException {
         
         int size = readUnsignedByte();
         KeyValue[] values = new KeyValue[size];
         for(int i = 0; i < values.length; i++) {
             values[i] = readKeyValue();
         }
-        return new FindValueResponse(vendor, version, nodeId, messageId, Arrays.asList(values));
+        return new FindValueResponse(vendor, version, node, messageId, Arrays.asList(values));
     }
     
     private StoreRequest readStoreRequest(int vendor, int version, 
-            KUID nodeId, KUID messageId) throws IOException {
+            ContactNode node, KUID messageId) throws IOException {
         
         QueryKey queryKey = readQueryKey();
         int remaining = readUnsignedShort();
@@ -196,11 +196,11 @@ public class MessageInputStream extends DataInputStream {
         for(int i = 0; i < values.length; i++) {
             values[i] = readKeyValue();
         }
-        return new StoreRequest(vendor, version, nodeId, messageId, remaining, queryKey, Arrays.asList(values));
+        return new StoreRequest(vendor, version, node, messageId, remaining, queryKey, Arrays.asList(values));
     }
     
     private StoreResponse readStoreResponse(int vendor, int version, 
-            KUID nodeId, KUID messageId) throws IOException {
+            ContactNode node, KUID messageId) throws IOException {
         
         int requesting = readUnsignedShort();
         
@@ -212,10 +212,10 @@ public class MessageInputStream extends DataInputStream {
             stats[i] = new StoreResponse.StoreStatus(key, status);
         }
         
-        return new StoreResponse(vendor, version, nodeId, messageId, requesting, Arrays.asList(stats));
+        return new StoreResponse(vendor, version, node, messageId, requesting, Arrays.asList(stats));
     }
     
-    public Message readMessage() throws IOException {
+    public Message readMessage(SocketAddress src) throws IOException {
         int vendor = readInt();
         int version = readUnsignedShort();
         KUID nodeId = readKUID();
@@ -223,23 +223,25 @@ public class MessageInputStream extends DataInputStream {
         
         int messageType = readUnsignedByte();
         
+        ContactNode node = new ContactNode(nodeId, src);
+        
         switch(messageType) {
             case Message.PING_REQUEST:
-                return readPing(vendor, version, nodeId, messageId);
+                return readPing(vendor, version, node, messageId);
             case Message.PING_RESPONSE:
-                return readPong(vendor, version, nodeId, messageId);
+                return readPong(vendor, version, node, messageId);
             case Message.FIND_NODE_REQUEST:
-                return readFindNodeRequest(vendor, version, nodeId, messageId);
+                return readFindNodeRequest(vendor, version, node, messageId);
             case Message.FIND_NODE_RESPONSE:
-                return readFindNodeResponse(vendor, version, nodeId, messageId);
+                return readFindNodeResponse(vendor, version, node, messageId);
             case Message.FIND_VALUE_REQUEST:
-                return readFindValueRequest(vendor, version, nodeId, messageId);
+                return readFindValueRequest(vendor, version, node, messageId);
             case Message.FIND_VALUE_RESPONSE:
-                return readFindValueResponse(vendor, version, nodeId, messageId);
+                return readFindValueResponse(vendor, version, node, messageId);
             case Message.STORE_REQUEST:
-                return readStoreRequest(vendor, version, nodeId, messageId);
+                return readStoreRequest(vendor, version, node, messageId);
             case Message.STORE_RESPONSE:
-                return readStoreResponse(vendor, version, nodeId, messageId);
+                return readStoreResponse(vendor, version, node, messageId);
             default:
                 throw new IOException("Received unknown message type: " + messageType + " from ContactNode: " + nodeId);
         }

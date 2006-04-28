@@ -16,14 +16,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 package de.kapsi.net.kademlia.event;
 
 import java.util.Collection;
 
 import de.kapsi.net.kademlia.KUID;
 
-public interface LookupListener {
+public interface LookupListener extends ResponseListener {
     
-    public void finishLookup(KUID lookup, Collection result, long time);
+    public void found(KUID lookup, Collection c, long time);
 }

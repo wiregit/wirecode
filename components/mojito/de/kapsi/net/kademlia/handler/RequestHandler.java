@@ -20,11 +20,9 @@
 package de.kapsi.net.kademlia.handler;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 
 public interface RequestHandler {
-    public void handleRequest(KUID nodeId, SocketAddress src, RequestMessage message) throws IOException;
+    public void handleRequest(RequestMessage message) throws IOException;
 }

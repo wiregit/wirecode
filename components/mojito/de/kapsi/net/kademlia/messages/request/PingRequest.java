@@ -19,12 +19,14 @@
  
 package de.kapsi.net.kademlia.messages.request;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 
 public class PingRequest extends RequestMessage {
        
-    public PingRequest(int vendor, int version, KUID nodeId, KUID messageId) {
-        super(vendor, version, nodeId, messageId);
+    public PingRequest(int vendor, int version, 
+            ContactNode node, KUID messageId) {
+        super(vendor, version, node, messageId);
     }
 }

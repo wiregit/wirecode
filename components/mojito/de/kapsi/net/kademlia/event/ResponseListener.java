@@ -16,16 +16,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 package de.kapsi.net.kademlia.event;
 
 import java.net.SocketAddress;
 
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 
+/**
+ * 
+ */
 public interface ResponseListener {
     
-    public void response(KUID nodeId, SocketAddress address, long time);
+    public void response(ResponseMessage response, long time);
     
-    public void timeout(KUID nodeId, SocketAddress address, long time);
+    public void timeout(KUID nodeId, SocketAddress address, 
+            RequestMessage request, long time);
 }

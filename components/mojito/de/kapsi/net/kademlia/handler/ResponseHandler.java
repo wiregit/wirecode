@@ -34,7 +34,7 @@ public interface ResponseHandler {
     
     public long timeout();
     
-    public void handleResponse(KUID nodeId, SocketAddress src, ResponseMessage message, long time) throws IOException;
+    public void handleResponse(ResponseMessage message, long time) throws IOException;
     
     public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException;
 }
