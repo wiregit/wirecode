@@ -685,7 +685,7 @@ public class PatriciaRouteTable implements RoutingTable {
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
             //if we are bootstrapping, phase 1 allready took care of the local bucket
-            if(l != null && liveNodes.contains(context.getLocalNodeID())) {
+            if(l != null && liveNodes.contains(context.getLocalNode())) {
                 continue;
             }
             
