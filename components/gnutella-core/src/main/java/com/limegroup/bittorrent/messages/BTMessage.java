@@ -119,9 +119,7 @@ public abstract class BTMessage {
 			BTMessageStatBytes.INCOMING_HAVE.addData(9);
 			return BTHave.readMessage(in);
 		case BITFIELD:
-			BTMessageStat.INCOMING_BITFIELD.incrementStat();
-			BTMessageStatBytes.INCOMING_BITFIELD.addData(5 + in.remaining());
-			return BTBitField.readMessage(in);
+			throw new BadBTMessageException("unexpected bitfield");
 		case REQUEST:
 			BTMessageStat.INCOMING_REQUEST.incrementStat();
 			BTMessageStatBytes.INCOMING_REQUEST.addData(17);

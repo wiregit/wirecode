@@ -7,13 +7,28 @@ import java.nio.ByteOrder;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
+import com.limegroup.bittorrent.messages.BTBitField;
 import com.limegroup.bittorrent.messages.BTMessage;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 public class BTMessageReader implements ChannelReadObserver {
 
-	// size of 32K piece message, we never request more
-	private static final int BUFFER_SIZE = 32 * 1024 + 9;
+	/*
+	 * Note on Buffering:
+	 * 
+	 *  The first message that will be read on a bittorrent connection
+	 *  is the Bitfield message.  It can have variable length, so until
+	 *  that message is received we do not know how big of a buffer we
+	 *  will need.
+	 *  
+	 *  After the bitfield is read, we can use a fixed size buffer for 
+	 *  the rest of the messages.
+	 *  
+	 *  TODO: implement splitting of BTPieces
+	 */
+	
+	// a small buffer for connections
+	private static final int BUFFER_SIZE = 2 * 1024;
 
 	// the channel we read from
 	private InterestReadChannel _channel;
@@ -35,7 +50,13 @@ public class BTMessageReader implements ChannelReadObserver {
 	
 	/** Whether this reader is shutdown */
 	private volatile boolean shutdown;
-
+	
+	/** Whether we are expecting or currently parsing a bitfield */
+	private boolean expectingBitField = true;
+	
+	/** A Bitfield message object to parse the BitField message */ 
+	private BTBitField bitField;
+	
 	/**
 	 * Constructor
 	 */
@@ -55,10 +76,12 @@ public class BTMessageReader implements ChannelReadObserver {
 		while(true) {
 			int read = 0;
 			int thisTime = 0;
-			while( (read = _channel.read(_in)) > 0 && _in.hasRemaining())
+			while( _in.hasRemaining() && (read = _channel.read(_in)) > 0 )
 				thisTime += read;
 			if (thisTime > 0)
 				count(thisTime);
+			else if (read == -1)
+				throw new IOException();
 			else
 				break;
 			
@@ -67,8 +90,14 @@ public class BTMessageReader implements ChannelReadObserver {
 			while(_in.hasRemaining()) {
 				if (_length == -1 && _in.remaining() >= 4)
 					readMessageLength();
-				if (_length > 0 && _in.remaining() >= _length)
-					readMessage();
+				if (_length > 0) {
+					if (expectingBitField)
+						readBitField();
+					else if (_in.remaining() >= _length)
+						readMessage();
+					else
+						break;
+				}
 				else
 					break;
 			}
@@ -97,6 +126,33 @@ public class BTMessageReader implements ChannelReadObserver {
 		_in.position(_in.limit());
 		_in.limit(oldLimit);
 		_length = -1;
+	}
+	
+	private void readBitField() {
+		if (!_in.hasRemaining())
+			return;
+		
+		if (bitField == null) {
+			// is this a bitfield?
+			if (_in.get(_in.position()) == BTMessage.BITFIELD) {
+				_in.position(_in.position() + 1); // advance the position
+				bitField = new BTBitField(_length - 1);
+			}
+			else {
+				// not a bitfield, other side has nothing
+				expectingBitField = false;
+				return;
+			}
+		}
+		
+		// if adding data from this buffer will be enough to fill the
+		// bitfield, parse it and process it.
+		if (bitField.addData(_in)) {
+			expectingBitField = false;
+			_connection.processMessage(bitField);
+			bitField = null;
+			_length = -1;
+		} 
 	}
 
 	/**
