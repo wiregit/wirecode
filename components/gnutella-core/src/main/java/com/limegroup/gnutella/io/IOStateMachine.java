@@ -161,7 +161,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
                     if(state == null) {
                         if(LOG.isDebugEnabled())
                             LOG.debug("Processing a read with no state");
-                        // We must read up data otherwise it could be lost
+                        // We must read up data otherwise it could be lost.
                         // (it would be lost if we were transfering observers
                         //  and the prior observer had already read data)
                         while(readBuffer.hasRemaining() && readSink.read(readBuffer) > 0);

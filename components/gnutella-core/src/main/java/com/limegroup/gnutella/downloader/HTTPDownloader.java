@@ -48,6 +48,7 @@ import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.io.IOState;
 import com.limegroup.gnutella.io.IOStateMachine;
 import com.limegroup.gnutella.io.IOStateObserver;
+import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.ReadState;
@@ -62,7 +63,6 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
-import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
@@ -1527,32 +1527,25 @@ public class HTTPDownloader implements BandwidthTracker {
                 
                 // Account for data already in the buffer.
                 int preread = Math.min(left, buffer.position());
-                if(preread != 0) {
+                if(preread != 0 && LOG.isDebugEnabled())
                     LOG.debug("Using preread data of: " + preread);
-                    if (_inNetwork)
-                        BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(preread);
-                    else
-                        BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(preread);
-                }
                 
                 if(left - preread > 0) {
                     // ensure we don't read more into the buffer than we want.
                     if(buffer.limit() > left)
                         buffer.limit(left);
-                    
-                    // TODO: Figure out how to throttle this crap.
-                    while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0) {
-                        if (_inNetwork)
-                            BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(read);
-                        else
-                            BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(read);
-                    }
+                   
+                    while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0);
                 
                     // ensure the limit is set back to normal.
                     buffer.limit(buffer.capacity());
                 }
                 
                 int totalRead = buffer.position();
+                if (_inNetwork)
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(totalRead);
+                else
+                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(totalRead);
                 
                 // If nothing could be read at all, leave.
                 if(totalRead == 0) {
@@ -1606,15 +1599,15 @@ public class HTTPDownloader implements BandwidthTracker {
     			    }
     			}                
                 
+                // TODO: Write to disk only when buffer is full.
+                
                 // write to disk outside of lock.
-                // TODO: write to disk only when buffer is full
                 LOG.debug("WORKER: " + this + ", left: " + (left-totalRead) +",  writing fp: " + filePosition +", ds: " + dataStart + ", dL: " + dataLength);
-                try {
-                    _incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array());
-                } catch (InterruptedException killed) {
-                    synchronized(this) {
-                        _isActive = false;
-                    }
+                if(!_incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array())) {
+                    InterestReadChannel irc = (InterestReadChannel)rc;
+                    irc.interest(false);
+                    _incompleteFile.writeBlockWithCallback(filePosition, dataStart, dataLength, buffer.array(), new DownloadRestarter(irc, buffer));
+                    return false;
                 }
                 
                 buffer.clear();
@@ -1625,6 +1618,23 @@ public class HTTPDownloader implements BandwidthTracker {
             return -1;
         }
 	}
+    
+    private static class DownloadRestarter implements VerifyingFile.WriteCallback {
+        private final InterestReadChannel irc;
+        private final ByteBuffer buffer;
+        
+        DownloadRestarter(InterestReadChannel irc, ByteBuffer buffer) {
+            this.irc = irc;
+            this.buffer = buffer;
+        }
+        
+        public void writeScheduled() {
+            buffer.clear();
+            irc.interest(true);
+        }
+        
+    }
+    
 
 
     /** 
@@ -1800,7 +1810,8 @@ public class HTTPDownloader implements BandwidthTracker {
         public void handleStatesFinished() {
             synchronized(this) {
                 if(handled) {
-                    LOG.warn("Ignoring states finished", new Exception());
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Ignoring states finished", new Exception());
                     return;
                 }
                 handled = true;
@@ -1811,7 +1822,8 @@ public class HTTPDownloader implements BandwidthTracker {
         public void shutdown() {
             synchronized(this) {
                 if(handled) {
-                    LOG.warn("Ignoring shutdown", new Exception());
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Ignoring shutdown", new Exception());
                     return;
                 }
                 handled = true;

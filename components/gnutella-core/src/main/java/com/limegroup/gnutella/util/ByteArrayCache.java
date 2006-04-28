@@ -58,6 +58,21 @@ public class ByteArrayCache {
     }
     
     /**
+     * Attempts to retrieve a new byte[].
+     * If the cache is empty and getCreated() is >= getMaxSize(), this will return null.
+     */
+    public synchronized byte[] getQuick() {
+        if (!CACHE.isEmpty()) {
+            return (byte[]) CACHE.pop();
+        } else if (_numCreated < _maxSize) {
+            _numCreated++;
+            return new byte[_length];
+        } else {
+            return null;
+        }
+    }
+    
+    /**
      * Returns a byte[] to this cache.
      * The byte[] MUST HAVE BEEN A byte[] RETURNED FROM get().
      */
@@ -71,6 +86,11 @@ public class ByteArrayCache {
         _numCreated -= CACHE.size();
         CACHE.clear();
         notifyAll();
+    }
+    
+    /** Determines if there's space in the cache for another byte[]. */
+    public synchronized boolean isBufferAvailable() {
+        return !CACHE.isEmpty() || _numCreated < _maxSize;
     }
     
     /** Returns the number of byte[]'s this cache has created. */
