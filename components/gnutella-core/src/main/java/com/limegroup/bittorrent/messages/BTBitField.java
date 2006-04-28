@@ -22,14 +22,12 @@ public class BTBitField extends BTMessage {
 	public static BTBitField readMessage(ByteBuffer payload) throws BadBTMessageException {
 		if (payload.remaining() == 0)
 			throw new BadBTMessageException("null payload in bitfield message!");
-		byte[] bitfield = new byte[payload.remaining()];
-		payload.get(bitfield);
-		return new BTBitField(bitfield);
+		return new BTBitField(payload);
 	}
 
-	private BTBitField(byte[] bitfield) {
+	private BTBitField(ByteBuffer payload) {
 		super(BITFIELD);
-		_payload = ByteBuffer.wrap(bitfield);
+		_payload = payload;
 	}
 
 	/**
@@ -42,14 +40,7 @@ public class BTBitField extends BTMessage {
 	 */
 	public static BTBitField createMessage(BTMetaInfo info) {
 		byte[] bitfield = info.createBitField();
-		return new BTBitField(bitfield);
-	}
-
-	/**
-	 * @return bitfield as byte array
-	 */
-	public byte[] getBitField() {
-		return _payload.array();
+		return new BTBitField(ByteBuffer.wrap(bitfield));
 	}
 
 	public ByteBuffer getPayload() {

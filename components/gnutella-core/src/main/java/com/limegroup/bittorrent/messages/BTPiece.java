@@ -11,7 +11,7 @@ import com.limegroup.bittorrent.BTInterval;
 public class BTPiece extends BTMessage {
 	private BTInterval in;
 
-	private byte[] _data;
+	private final byte[] _data;
 
 	/**
 	 * Constructs new BTPiece message

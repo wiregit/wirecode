@@ -42,10 +42,10 @@ implements ConnectObserver {
 	
 	protected void initIncomingHandshake() {
 		incomingHandshake = new ByteBuffer[5];
-		incomingHandshake[0] = ByteBuffer.wrap(new byte[1]); // 19
-		incomingHandshake[1] = ByteBuffer.wrap(new byte[19]); // protocol identifier
+		incomingHandshake[0] = ByteBuffer.allocate(1); // 19
+		incomingHandshake[1] = ByteBuffer.allocate(19); // protocol identifier
 		incomingHandshake[2] = ByteBuffer.wrap(loc.getExtBytes()); 
-		incomingHandshake[3] = ByteBuffer.wrap(new byte[20]); // infoHash
+		incomingHandshake[3] = ByteBuffer.allocate(20); // infoHash
 		incomingHandshake[4] = ByteBuffer.wrap(loc.getPeerID()); 
 	}
 	
@@ -57,7 +57,7 @@ implements ConnectObserver {
 			ByteBuffer current = incomingHandshake[currentBufIndex];
 			switch(currentBufIndex) {
 			case 0 : // 0x19
-				if (current.array()[0] != (byte)19) 
+				if (current.get(0) != (byte)19) 
 					return false;
 				break;
 			case 1 : // bittorrent protocol

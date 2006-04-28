@@ -403,7 +403,7 @@ public class ManagedTorrent {
 		if (_folder.isVerifying())
 			return;
 		
-		final BTHave have = BTHave.createMessage(in);
+		final BTHave have = new BTHave(in);
 		Runnable haveNotifier = new Runnable() {
 			public void run() {
 				for (Iterator iter = getConnections().iterator(); iter.hasNext();) {

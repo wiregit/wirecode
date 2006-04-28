@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -794,20 +795,20 @@ public class BTConnection {
 	 *            the byte array containing the payload of the bitfield message
 	 */
 	private void handleBitField(BTBitField message) {
-		byte[] field = message.getBitField();
+		ByteBuffer field = message.getPayload();
 
 		// the number of pieces
 		int numBits = _info.getNumBlocks();
 
 		int bitFieldLength = (numBits + 7) / 8;
 
-		if (field.length != bitFieldLength)
+		if (field.remaining() != bitFieldLength)
 			handleIOException(new BadBTMessageException(
 					"bad bitfield received! " + _endpoint.toString()));
 
 		for (int i = 0; i < numBits; i++) {
 			byte mask = (byte) (0x80 >>> (i % 8));
-			if ((mask & field[i / 8]) == mask) {
+			if ((mask & field.get(i / 8)) == mask) {
 				//TODO: do not send interested until all are added.
 				addAvailablePiece(i);
 			}

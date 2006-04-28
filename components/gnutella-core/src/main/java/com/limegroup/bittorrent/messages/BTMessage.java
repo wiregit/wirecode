@@ -72,6 +72,13 @@ public abstract class BTMessage {
 	 */
 	public abstract ByteBuffer getPayload();
 
+	/**
+	 * Notification that a keepAlive was received 
+	 */
+	public static void countKeepAlive() {
+		BTMessageStat.INCOMING_KEEP_ALIVE.incrementStat();
+		BTMessageStatBytes.INCOMING_KEEP_ALIVE.addData(4);
+	}
 
 	/**
 	 * Reads a BTMessage from a given <tt>ByteBuffer</tt>. Removes the ranges
@@ -85,22 +92,12 @@ public abstract class BTMessage {
 	 * @return new BTMessages of unknown type
 	 * @throws BadBTMessageException
 	 */
-	public static BTMessage parseMessage(ByteBuffer in, int length)
+	public static BTMessage parseMessage(ByteBuffer in, int type)
 			throws BadBTMessageException {
 		// in case this is a keep alive message, length is not necessarily > 0
 		// the reason we do not return here is that we reset the buffer below.
-		in.flip();
-		byte type = KEEP_ALIVE;
-		if (length > 0) {
-			// read message id
-			type = in.get();
-		}
-
+		
 		switch (type) {
-		case KEEP_ALIVE:
-			BTMessageStat.INCOMING_KEEP_ALIVE.incrementStat();
-			BTMessageStatBytes.INCOMING_KEEP_ALIVE.addData(4);
-			return null;
 		case CHOKE:
 			BTMessageStat.INCOMING_CHOKE.incrementStat();
 			BTMessageStatBytes.INCOMING_CHOKE.addData(5);

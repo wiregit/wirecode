@@ -4,27 +4,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.bittorrent.statistics.BTMessageStat;
-import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
 import com.limegroup.bittorrent.messages.BTMessage;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 public class BTMessageReader implements ChannelReadObserver {
-	/*
-	 * The standard buffer size.
-	 */
-	private static final int MIN_BUFFER_SIZE = 4;
 
 	// size of 32K piece message, we never request more
-	private static final int MAX_BUFFER_SIZE = 32 * 1024 + 9;
-
-	// we use this array to reduce the number of objects constructed.
-	private final byte[] _messageBuffer = new byte[MIN_BUFFER_SIZE];
+	private static final int BUFFER_SIZE = 32 * 1024 + 9;
 
 	// the channel we read from
 	private InterestReadChannel _channel;
@@ -37,7 +26,7 @@ public class BTMessageReader implements ChannelReadObserver {
 	private ByteBuffer _in;
 
 	// the length of the message we are currently reading.
-	private int _length;
+	private int _length = -1;
 
 	/*
 	 * my own private BandwidthTracker
@@ -51,7 +40,7 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * Constructor
 	 */
 	public BTMessageReader(BTConnection connection) {
-		resetBuffer();
+		_in = ByteBuffer.allocate(BUFFER_SIZE);
 		_connection = connection;
 		_tracker = new SimpleBandwidthTracker();
 	}
@@ -63,27 +52,51 @@ public class BTMessageReader implements ChannelReadObserver {
 		if (shutdown)
 			return;
 		
-		// all messages should have been read
-		Assert.that(_in.hasRemaining(), "ByteBuffer full!");
-
-		int read = 0;
-		do {
-			read = _channel.read(_in);
-			if (read > 0)
-				count(read);
-			if (!_in.hasRemaining()) {
-				if (_in.position() == _length) {
-					BTMessage message = BTMessage.parseMessage(_in, _length);
-					_connection.processMessage(message);
-					resetBuffer();
-				} else {
-					// we read the first for bytes of the message, containing
-					// the message size, - adjust _in to read the whole
-					// message
-					adjustBuffer();
-				}
+		while(true) {
+			int read = 0;
+			int thisTime = 0;
+			while( (read = _channel.read(_in)) > 0 && _in.hasRemaining())
+				thisTime += read;
+			if (thisTime > 0)
+				count(thisTime);
+			else
+				break;
+			
+			_in.flip();
+			
+			while(_in.hasRemaining()) {
+				if (_length == -1 && _in.remaining() >= 4)
+					readMessageLength();
+				if (_length > 0 && _in.remaining() >= _length)
+					readMessage();
+				else
+					break;
 			}
-		} while (read > 0);
+			
+			_in.compact();
+		}
+	}
+	
+	private void readMessageLength() throws BadBTMessageException {
+		_in.order(ByteOrder.BIG_ENDIAN);
+		_length = _in.getInt();
+		if (_length < 0 || _length > BUFFER_SIZE)
+			throw new BadBTMessageException("bad message size " + _length);
+		if (_length == 0) {
+			BTMessage.countKeepAlive();
+			_length = -1;
+		}
+	}
+	
+	private void readMessage() throws BadBTMessageException {
+		int oldLimit = _in.limit();
+		_in.limit(_length + _in.position());
+		int type = _in.get();
+		BTMessage message = BTMessage.parseMessage(_in.slice(), type);
+		_connection.processMessage(message);
+		_in.position(_in.limit());
+		_in.limit(oldLimit);
+		_length = -1;
 	}
 
 	/**
@@ -104,40 +117,6 @@ public class BTMessageReader implements ChannelReadObserver {
 	public float getBandwidth() {
 		_tracker.measureBandwidth();
 		return _tracker.getMeasuredBandwidth();
-	}
-
-	/**
-	 * Mother's little helper is called, whenever we read the first 4 bytes of a
-	 * new message from the network. Then we will create a new ByteBuffer _in to
-	 * store the complete message without the length header. The length of the
-	 * message that we read from the first 4 bytes of the message will be stored
-	 * in the _length field.
-	 * 
-	 * @throws BadBTMessageException
-	 *             if we encounter an illegal message length
-	 */
-	private void adjustBuffer() throws BadBTMessageException {
-		_in.flip();
-		_in.order(ByteOrder.BIG_ENDIAN);
-		_length = _in.getInt();
-		if (_length < 0 || _length > MAX_BUFFER_SIZE)
-			throw new BadBTMessageException("bad message size " + _length);
-		if (_length == 0) { // keep alive message, ignore
-			BTMessageStat.INCOMING_KEEP_ALIVE.incrementStat();
-			BTMessageStatBytes.INCOMING_KEEP_ALIVE.addData(4);
-			_in.clear();
-			_length = -1;
-		} else
-			_in = ByteBuffer.allocate(_length);
-	}
-
-	/**
-	 * Another little helper, reset _in and _length fields after reading a
-	 * complete message from network.
-	 */
-	private void resetBuffer() {
-		_in = ByteBuffer.wrap(_messageBuffer);
-		_length = -1;
 	}
 
 	/**

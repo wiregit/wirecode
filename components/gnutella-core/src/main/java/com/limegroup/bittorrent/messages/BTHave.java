@@ -14,7 +14,7 @@ public class BTHave extends BTMessage {
 	/**
 	 * Constructs new BTHave message
 	 */
-	private BTHave(int pieceNum) {
+	public BTHave(int pieceNum) {
 		super(HAVE);
 		_pieceNum = pieceNum;
 	}
@@ -45,21 +45,6 @@ public class BTHave extends BTMessage {
 		return new BTHave(pieceNum);
 	}
 
-	/**
-	 * factory method
-	 * 
-	 * @param pieceNum
-	 *            the number of the piece to advertise
-	 * @return new instance of BTHave
-	 */
-	public static BTHave createMessage(int pieceNum) {
-		ByteBuffer buf = ByteBuffer.allocate(4);
-		buf.order(ByteOrder.BIG_ENDIAN);
-		buf.putInt(pieceNum);
-		buf.clear();
-		return new BTHave(pieceNum);
-	}
-	
 	/**
 	 * return piece number
 	 */

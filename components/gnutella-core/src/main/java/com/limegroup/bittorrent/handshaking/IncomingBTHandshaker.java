@@ -70,9 +70,9 @@ public class IncomingBTHandshaker extends BTHandshaker {
 
 	protected void initIncomingHandshake() {
 		incomingHandshake = new ByteBuffer[4];
-		incomingHandshake[0] = ByteBuffer.wrap(new byte[8]); // protocol bytes
+		incomingHandshake[0] = ByteBuffer.allocate(8); // protocol bytes
 		incomingHandshake[1] = ByteBuffer.wrap(loc.getExtBytes());
-		incomingHandshake[2] = ByteBuffer.wrap(new byte[20]); // infohash
+		incomingHandshake[2] = ByteBuffer.allocate(20); // infohash
 		incomingHandshake[3] = ByteBuffer.wrap(loc.getPeerID());
 	}
 
