@@ -30,7 +30,7 @@ public class BTMessageWriter implements
 	private InterestWriteChannel _channel;
 
 	// ByteBuffer storing the message currently being written
-	private ByteBuffer _out = null;
+	private final ByteBuffer[] _out = new ByteBuffer[2];
 
 	/** 
 	 * the internal message queue
@@ -52,10 +52,10 @@ public class BTMessageWriter implements
 	 * Constructor
 	 */
 	public BTMessageWriter(BTConnection connection) {
-		_channel = null;
 		_queue = new LinkedList();
 		_connection = connection;
 		_tracker = new SimpleBandwidthTracker();
+		_out[0] = ByteBuffer.allocate(5);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class BTMessageWriter implements
 			LOG.debug("entering handleWrite call to "+_connection);
 		int written = 0;
 		do {
-			if (_out == null || _out.remaining() == 0) {
+			if (_out[1] == null || _out[1].remaining() == 0) {
 				if (!sendNextMessage()) {
 					if (LOG.isDebugEnabled())
 						LOG.debug("no more messages to send to "+_connection);
@@ -77,7 +77,13 @@ public class BTMessageWriter implements
 					return false;
 				}
 			}
-			written = _channel.write(_out);
+			// this should ideally be done with gathering writes, but
+			// because somewhere in the chain we have a delayer its ok.
+			written = _channel.write(_out[0]);
+			written += _channel.write(_out[1]);
+			if (!_out[1].hasRemaining())
+				_out[1] = null; // can be gc'd now
+			
 			if (written > 0) {
 				count(written);
 				if (LOG.isDebugEnabled())
@@ -184,15 +190,14 @@ public class BTMessageWriter implements
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("sending message "+message+" to "+_connection);
-		
-		ByteBuffer payload = message.getPayload();
-		_out = ByteBuffer.allocate(payload.remaining() + 5);
-		_out.order(ByteOrder.BIG_ENDIAN);
-		_out.putInt(payload.remaining() + 1); // message size
-		_out.put(message.getType());
-		_out.put(payload);
-		_out.flip();
-		countMessage(message, _out.remaining());
+
+		_out[1] = message.getPayload();
+		_out[0].clear();
+		_out[0].order(ByteOrder.BIG_ENDIAN);
+		_out[0].putInt(_out[1].remaining() + 1); // message size
+		_out[0].put(message.getType());
+		_out[0].flip();
+		countMessage(message, _out[1].remaining()+5);
 		if (_queue.isEmpty())
 			_connection.readyForWriting();
 		return true;

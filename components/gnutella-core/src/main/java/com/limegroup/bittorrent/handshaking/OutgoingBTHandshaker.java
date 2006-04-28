@@ -42,7 +42,7 @@ implements ConnectObserver {
 	
 	protected void initIncomingHandshake() {
 		incomingHandshake = new ByteBuffer[5];
-		incomingHandshake[0] = ByteBuffer.allocate(1); // 19
+		incomingHandshake[0] = ByteBuffer.wrap(new byte[1]); // 19
 		incomingHandshake[1] = ByteBuffer.wrap(new byte[19]); // protocol identifier
 		incomingHandshake[2] = ByteBuffer.wrap(loc.getExtBytes()); 
 		incomingHandshake[3] = ByteBuffer.wrap(new byte[20]); // infoHash
@@ -57,10 +57,8 @@ implements ConnectObserver {
 			ByteBuffer current = incomingHandshake[currentBufIndex];
 			switch(currentBufIndex) {
 			case 0 : // 0x19
-				current.flip();
-				if (current.get() != (byte)19) 
+				if (current.array()[0] != (byte)19) 
 					return false;
-				current.position(1); // mark it as full
 				break;
 			case 1 : // bittorrent protocol
 				if (!Arrays.equals(current.array(), BTConnectionFetcher.BITTORRENT_PROTOCOL_BYTES))

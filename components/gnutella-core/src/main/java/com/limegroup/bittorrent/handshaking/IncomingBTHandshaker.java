@@ -22,8 +22,8 @@ public class IncomingBTHandshaker extends BTHandshaker {
 	public IncomingBTHandshaker(NIOSocket sock, TorrentManager manager) {
 		super(new TorrentLocation(sock.getInetAddress(), 
 				sock.getPort(),
-				new byte[8],
-				new byte[20]));
+				new byte[20],
+				new byte[8]));
 		this.sock = sock;
 		this.manager = manager;
 	}
