@@ -24,7 +24,7 @@ import java.util.List;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.event.LookupListener;
+import de.kapsi.net.kademlia.Context.BootstrapManager;
 
 /**
  * RoutingTable interface that all LimeDHT route table implementations
@@ -121,16 +121,16 @@ public interface RoutingTable {
      * 
      * @param force wheather or not to force are Bucket refresh
      */
-    public List refreshBuckets(boolean force) throws IOException;
+    public void refreshBuckets(boolean force) throws IOException;
     
     /**
      * Refreshes the routing table's buckets
      * 
      * @param force true to refresh all buckets, false otherwise
-     * @param l the BootstrapListener callback
+     * @param manager the BootstrapManager callback
      * @throws IOException
      */
-    public List refreshBuckets(boolean force, LookupListener l) throws IOException;
+    public void refreshBuckets(boolean force, BootstrapManager manager) throws IOException;
     
     /**
      * Loads a RoutingTable from a File

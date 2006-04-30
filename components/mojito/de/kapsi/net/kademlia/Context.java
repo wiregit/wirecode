@@ -440,8 +440,7 @@ public class Context implements Runnable {
     
     public void bootstrap(SocketAddress address, BootstrapListener listener) throws IOException {
         setBootstrapped(false);
-        BootstrapManager2 bootstrapper = new BootstrapManager2();
-        bootstrapper.bootstrap(address, listener);
+        new BootstrapManager().bootstrap(address, listener);
     }
     
     /** store */
@@ -574,19 +573,18 @@ public class Context implements Runnable {
         return dataBaseStats;
     }
     
-    private class BootstrapManager2 implements PingListener, LookupListener {
+    public class BootstrapManager implements PingListener, LookupListener {
         
         private long startTime = 0L;
         
         private boolean phaseTwo = false;
         private boolean foundNewNodes = false;
         
-        private de.kapsi.net.kademlia.event.BootstrapListener listener;
+        private BootstrapListener listener;
         
         private List buckets = Collections.EMPTY_LIST;
         
-        private BootstrapManager2() {
-            
+        private BootstrapManager() {  
         }
         
         private long time() {
@@ -607,7 +605,7 @@ public class Context implements Runnable {
                     lookup(getLocalNodeID(), this);
                 }
             } catch (IOException err) {
-                LOG.error("Initial ping failed: ", err);
+                LOG.error("Bootstrap lookup failed: ", err);
                 
                 firePhaseOneFinished();
                 firePhaseTwoFinished();
@@ -616,6 +614,10 @@ public class Context implements Runnable {
 
         public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
             if (request instanceof PingRequest) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Initial bootstrap ping failed!");
+                }
+                
                 firePhaseOneFinished();
                 firePhaseTwoFinished();
             }
@@ -624,24 +626,31 @@ public class Context implements Runnable {
         public void found(KUID lookup, Collection c, long time) {
             if (!phaseTwo) {
                 phaseTwo = true;
+                firePhaseOneFinished();
+                
                 try {
-                    buckets = routeTable.refreshBuckets(true, this);
-                    firePhaseOneFinished();
+                    routeTable.refreshBuckets(true, this);
                 } catch (IOException err) {
                     LOG.error("Beginning second phase failed: ", err);
-                    
-                    firePhaseOneFinished();
                     firePhaseTwoFinished();
                 }
             } else {
-                buckets.remove(lookup);
                 if (!c.isEmpty()) {
                     foundNewNodes = true;
                 }
                 
+                buckets.remove(lookup);
                 if (buckets.isEmpty()) {
                     firePhaseTwoFinished();
                 }
+            }
+        }
+        
+        public void setBuckets(List buckets) {
+            this.buckets = buckets;
+            
+            if (buckets.isEmpty()) {
+                firePhaseTwoFinished();
             }
         }
         
@@ -666,6 +675,23 @@ public class Context implements Runnable {
                         listener.phaseTwoFinished(foundNewNodes, time);
                     }
                 });
+            }
+        }
+    }
+    
+    private class StoreManager2 implements LookupListener {
+        
+        public void response(ResponseMessage response, long time) {
+        }
+
+        public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+        }
+        
+        public void found(KUID lookup, Collection c, long time) {
+            if (!c.isEmpty()) {
+                
+            } else {
+                
             }
         }
     }
@@ -781,7 +807,7 @@ public class Context implements Runnable {
                     
                     PingRequest request = messageFactory.createPingRequest(address);
                     messageDispatcher.send(nodeId, address, request, responseHandler);
-                    
+
                     handlerMap.put(address, responseHandler);
                     networkStats.PINGS_SENT.incrementStat();
                 }

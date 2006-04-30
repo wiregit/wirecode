@@ -45,7 +45,7 @@ import de.kapsi.net.kademlia.BucketNode;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.event.LookupListener;
+import de.kapsi.net.kademlia.Context.BootstrapManager;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
@@ -608,11 +608,11 @@ public class PatriciaRouteTable implements RoutingTable {
         return existingNode;
     }
         
-    public List refreshBuckets(boolean force) throws IOException{
-        return refreshBuckets(force, null);
+    public void refreshBuckets(boolean force) throws IOException{
+        refreshBuckets(force, null);
     }
     
-    public List refreshBuckets(boolean force, LookupListener listener) throws IOException{
+    public void refreshBuckets(boolean force, BootstrapManager manager) throws IOException{
         List bucketsLookups = new ArrayList();
         long now = System.currentTimeMillis();
         
@@ -629,7 +629,7 @@ public class PatriciaRouteTable implements RoutingTable {
             List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
             //if we are bootstrapping, phase 1 allready took care of the local bucket
-            if(listener != null && liveNodes.contains(context.getLocalNode())) {
+            if(manager != null && liveNodes.contains(context.getLocalNode())) {
                 continue;
             }
             
@@ -647,14 +647,11 @@ public class PatriciaRouteTable implements RoutingTable {
             }
         }
         
-        if (!bucketsLookups.isEmpty()) {
-            for (Iterator iter = bucketsLookups.iterator(); iter.hasNext(); ) {
-                context.lookup((KUID) iter.next(), listener);
-                routingStats.BUCKET_REFRESH_COUNT.incrementStat();
-            }
+        manager.setBuckets(bucketsLookups);
+        for (Iterator iter = bucketsLookups.iterator(); iter.hasNext(); ) {
+            context.lookup((KUID) iter.next(), manager);
+            routingStats.BUCKET_REFRESH_COUNT.incrementStat();
         }
-        
-        return bucketsLookups;
     }
     
     public void clear() {

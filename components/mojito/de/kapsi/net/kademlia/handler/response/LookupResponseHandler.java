@@ -166,7 +166,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         if (startTime > 0L) {
             return System.currentTimeMillis() - startTime;
         }
-        return 0L;
+        return -1L;
     }
     
     protected void response(ResponseMessage message, long time) throws IOException {
