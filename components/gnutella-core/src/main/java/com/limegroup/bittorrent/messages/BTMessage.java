@@ -33,8 +33,9 @@ public abstract class BTMessage {
 
 	/**
 	 * Buffer used for messages without payload
+	 * TODO: use the one from BufferUtils once backported
 	 */
-	static final ByteBuffer EMPTY_PAYLOAD;
+	public static final ByteBuffer EMPTY_PAYLOAD;
 
 	// initialize ByteBuffer for this message
 	static {
