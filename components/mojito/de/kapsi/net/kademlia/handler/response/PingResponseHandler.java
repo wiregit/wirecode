@@ -2,8 +2,6 @@ package de.kapsi.net.kademlia.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,8 +19,6 @@ import de.kapsi.net.kademlia.messages.response.PingResponse;
 public class PingResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
-    
-    private List listeners = new ArrayList();
     
     public PingResponseHandler(Context context) {
         super(context);

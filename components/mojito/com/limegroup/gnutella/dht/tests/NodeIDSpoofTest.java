@@ -22,7 +22,6 @@ package com.limegroup.gnutella.dht.tests;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Collection;
 
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
@@ -89,10 +88,10 @@ public class NodeIDSpoofTest {
         Thread t3 = new Thread(dht3, "DHT-2");
         t3.start();
         dht3.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener() {
-            public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
+            public void phaseOneComplete(long time) {
             }
 
-            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+            public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println();
                 System.out.println("1) Sent count: " + dht2.getSentMessagesCount());
                 System.out.println("1) Recv count: " + dht2.getReceivedMessagesCount());
@@ -119,9 +118,9 @@ public class NodeIDSpoofTest {
         dht2.bind(sac2,nodeID);
         Thread t2 = new Thread(dht2, "DHT-1");
         t2.start();
-        dht2.bootstrap(new InetSocketAddress("localhost",port),new BootstrapListener(){
-            public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
-            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+        dht2.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener(){
+            public void phaseOneComplete(long time) {}
+            public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println("2");
                 //REPLACE!
                 try {

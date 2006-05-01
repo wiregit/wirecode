@@ -79,7 +79,11 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));
+            if (!bucketList.isEmpty()) {
+                LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));
+            } else {
+                LOG.trace("Sending back an empty List");
+            }
         }
         
         FindNodeResponse response = context.getMessageFactory()

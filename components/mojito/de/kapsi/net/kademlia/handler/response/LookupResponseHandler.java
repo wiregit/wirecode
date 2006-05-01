@@ -21,7 +21,6 @@ package de.kapsi.net.kademlia.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,6 +49,7 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.util.CollectionUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class LookupResponseHandler extends AbstractResponseHandler {
@@ -76,8 +76,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private int activeSearches = 0;
     
     private boolean finished = false;
-    
-    private List listeners = new ArrayList();
     
     /**
      * The statistics for this lookup
@@ -145,7 +143,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         // Get the first round of alpha nodes and send them requests
         List alphaList = toQuery.select(lookup, KademliaSettings.LOOKUP_PARAMETER.getValue());
         for(Iterator it = alphaList.iterator(); it.hasNext(); ) {
-            ContactNode node = ((ContactNodeEntry)it.next()).getContactNode();
+            ContactNode node = (ContactNode)it.next();
             
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Sending " + node + " a Find request for " + lookup);
@@ -298,7 +296,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             
             KUID best = null;            
             if (!toQuery.isEmpty()) {
-                best = ((ContactNodeEntry)toQuery.select(lookup)).getNodeID();
+                best = ((ContactNode)toQuery.select(lookup)).getNodeID();
             }
             
             if (best == null || worst.isCloser(best, lookup)) {
@@ -319,7 +317,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         if (numLookups > 0) {
             List toQueryList = toQuery.select(lookup, numLookups);
             for(Iterator it = toQueryList.iterator(); it.hasNext(); ) {
-                ContactNode node = ((ContactNodeEntry)it.next()).getContactNode();
+                ContactNode node = (ContactNode)it.next();
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Sending " + node + " a find request for " + lookup);
@@ -386,7 +384,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     private void addYetToBeQueried(ContactNode node, int hop) {
-        if (!isQueried(node) && context.isLocalNodeID(node.getNodeID())) {
+        if (!isQueried(node) && !context.isLocalNodeID(node.getNodeID())) {
             toQuery.put(node.getNodeID(), node);
             hopMap.put(node.getNodeID(), new Integer(hop));
         }
@@ -404,6 +402,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     private void fireFound(final Collection c, final long time) {
+        System.out.println(CollectionUtils.toString(c));
         context.fireEvent(new Runnable() {
             public void run() {
                 if (!isStopped()) {

@@ -39,7 +39,7 @@ import com.limegroup.gnutella.dht.statistics.DHTStats;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.LookupListener;
+import de.kapsi.net.kademlia.event.LookupAdapter;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -269,11 +269,11 @@ public class Main {
         
         System.out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void phaseOneFinished(long time) {
+            public void phaseOneComplete(long time) {
                 System.out.println("*** Bootstraping phase 1 finished in " + time + " ms");
             }
 
-            public void phaseTwoFinished(boolean foundNodes, long time) {
+            public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println("*** Bootstraping phase 2 " + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
@@ -333,27 +333,13 @@ public class Main {
         md.reset();
         
         if (line[0].equals("get")) {
-            dht.get(key, new LookupListener() {
-                
-                public void response(ResponseMessage response, long time) {
-                }
-
-                public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-                }
-
+            dht.get(key, new LookupAdapter() {
                 public void found(KUID key, Collection values, long time) {
                     System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
                 }
             });
         } else {
-            dht.getr(key, new LookupListener() {
-                
-                public void response(ResponseMessage response, long time) {
-                }
-
-                public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-                }
-                
+            dht.getr(key, new LookupAdapter() {
                 public void found(KUID key, Collection values, long time) {
                     System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
                 }
@@ -402,9 +388,10 @@ public class Main {
             this.dhts = dhts;
         }
 
-        public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
+        public void phaseOneComplete(long time) {
+        }
 
-        public synchronized void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+        public synchronized void phaseTwoComplete(boolean foundNodes, long time) {
             if (time >= 0) {
                 this.time += time;
             }

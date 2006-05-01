@@ -23,14 +23,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
 import com.limegroup.gnutella.dht.statistics.StatsManager;
 
 import de.kapsi.net.kademlia.DHT;
-import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 
 public class PlanetLab {
@@ -89,17 +87,13 @@ public class PlanetLab {
                     
                     dht.bootstrap(dst, new BootstrapListener() {
                         
-                        public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                            if (nodes.isEmpty()) {
-                                System.out.println(index + ": " + nodeId + " failed to bootstrap at PHASE 1");
-                            } else {
-//                                System.out.println(index + ": " + nodeId + " finished bootstraping PHASE 1 in " + time + " ms");
-                            }
+                        public void phaseOneComplete(long time) {
+                            System.out.println(index + ": bootstrap phase ONE finished");
                         }
 
-                        public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+                        public void phaseTwoComplete(boolean foundNodes, long time) {
                             StringBuffer buffer = new StringBuffer();
-                            buffer.append(index).append(": finished bootstrapping PHASE 2 in ");
+                            buffer.append(index).append(": finished bootstrapping phase TWO in ");
                             buffer.append(time).append(" ms ");
                             
                             if (foundNodes) {

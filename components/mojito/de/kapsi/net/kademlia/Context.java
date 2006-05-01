@@ -449,6 +449,21 @@ public class Context implements Runnable {
         new StoreManager().store(keyValue, listener);
     }
     
+    public void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
+        
+        if (queryKey == null) {
+            throw new NullPointerException("Cannot store KeyValues without QueryKey");
+        }
+        
+        ResponseHandler handler = new StoreResponseHandler(Context.this, queryKey, keyValues);
+        
+        RequestMessage request 
+            = messageFactory.createStoreRequest(node.getSocketAddress(), keyValues.size(), 
+                    queryKey, Collections.EMPTY_LIST);
+        
+        messageDispatcher.send(node, request, handler);
+    }
+    
     public int size() {
         if (!isRunning()) {
             return 0;
@@ -647,19 +662,21 @@ public class Context implements Runnable {
                 
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.phaseOneFinished(time);
+                        listener.phaseOneComplete(time);
                     }
                 });
             }
         }
         
         private void firePhaseTwoFinished() {
+            setBootstrapped(true);
+            
             if (listener != null) {
                 final long time = time();
                 
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.phaseTwoFinished(foundNewNodes, time);
+                        listener.phaseTwoComplete(foundNewNodes, time);
                     }
                 });
             }
@@ -670,6 +687,10 @@ public class Context implements Runnable {
         
         private List keyValues;
         private StoreListener listener;
+        
+        private StoreManager() {
+            
+        }
         
         private void store(KeyValue keyValue, StoreListener listener) throws IOException {
             this.keyValues = Arrays.asList(new KeyValue[]{keyValue});
@@ -710,7 +731,7 @@ public class Context implements Runnable {
                 }
                 
                 try {
-                    store(node, queryKey, keyValues);
+                    Context.this.store(node, queryKey, keyValues);
                     targets.add(node);
                 } catch (IOException err) {
                     LOG.error("", err);
@@ -724,16 +745,6 @@ public class Context implements Runnable {
                     }
                 });
             }
-        }
-        
-        private void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
-            ResponseHandler handler = new StoreResponseHandler(Context.this, queryKey, keyValues);
-            
-            RequestMessage request 
-                = messageFactory.createStoreRequest(node.getSocketAddress(), keyValues.size(), 
-                        queryKey, Collections.EMPTY_LIST);
-            
-            messageDispatcher.send(node, request, handler);
         }
     }
     
