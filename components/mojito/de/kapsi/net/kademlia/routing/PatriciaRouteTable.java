@@ -488,6 +488,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 if (oldNode.getTimeStamp() <= node.getTimeStamp()) {
                     iter.remove();
                     add = true;
+                    break;
                 }
             }
         } else {
