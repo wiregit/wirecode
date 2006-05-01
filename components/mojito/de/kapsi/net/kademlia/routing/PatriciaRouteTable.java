@@ -473,29 +473,29 @@ public class PatriciaRouteTable implements RoutingTable {
      * @param bucket
      * @param node
      */
-    public void addReplacementNode(BucketNode bucket, ContactNode node) {
-        boolean added = false;
+    private void addReplacementNode(BucketNode bucket, ContactNode node) {
+        boolean add = false;
         
         //first add to the replacement cache
         if(bucket.getReplacementCacheSize() 
-                == RouteTableSettings.MAX_CACHE_SIZE.getValue()) {
+                >= RouteTableSettings.MAX_CACHE_SIZE.getValue()) {
             
             Map replacementCache = bucket.getReplacementCache();
             //replace older cache entries with this one
             for (Iterator iter = replacementCache.values().iterator(); iter.hasNext();) {
                 ContactNode oldNode = (ContactNode) iter.next();
                 
-                if(oldNode.getTimeStamp() <= node.getTimeStamp()) {
+                if (oldNode.getTimeStamp() <= node.getTimeStamp()) {
                     iter.remove();
-                    added = true;
+                    add = true;
                 }
             }
         } else {
-            added = true;
+            add = true;
         }
         
         //a good time to ping least recently seen node
-        if (added) {
+        if (add) {
             bucket.addReplacementNode(node);
             routingStats.REPLACEMENT_COUNT.incrementStat();
             pingBucketLastRecentlySeenNode(bucket);
@@ -504,17 +504,14 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private void pingBucketLastRecentlySeenNode(BucketNode bucket) {
         
-        if(bucket == null) {
-            return;
-        }
-        
         List bucketList = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
         
         ContactNode leastRecentlySeen = 
             BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
         
         //don't ping ourselves or an allready pinged node
-        if(leastRecentlySeen.equals(context.getLocalNode())||leastRecentlySeen.isPinged()) {
+        if(leastRecentlySeen.equals(context.getLocalNode()) 
+                || leastRecentlySeen.isPinged()) {
             return;
         }
 
@@ -525,7 +522,7 @@ public class PatriciaRouteTable implements RoutingTable {
         
         try {
             //will get handled by DefaultMessageHandler
-            context.ping(leastRecentlySeen,null);
+            context.ping(leastRecentlySeen, null);
         } catch (IOException e) {
             LOG.error("Pinging the least recently seen Node failed", e);
         }
