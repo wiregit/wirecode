@@ -53,12 +53,13 @@ public class RoutingTableTest {
         new Thread(dht,"DHT").start();
         RoutingTable routingTable = dht.getContext().getRouteTable();
         
-        testBuckets(routingTable);
+//        testBuckets(routingTable);
 //        testReplaceNode(routingTable);
 //        testReplaceCachedNode(routingTable);
 //        testRemoveNode(routingTable);
 //        testLiveNodesOnly(routingTable);
 //        testreplaceBucketStaleNodes(routingTable);
+        testreplaceBucketUnknownNodes(routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
         try {
@@ -151,6 +152,20 @@ public class RoutingTableTest {
             ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",3000+i));
             routingTable.add(node,true);
         }
+    }
+    
+    public static void testreplaceBucketUnknownNodes(RoutingTable routingTable) {
+        byte[] prefix = new byte[1];
+        prefix[0] = (byte)(0x01);
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30010));
+        routingTable.add(node1,true);
+        System.out.println(routingTable.toString());
+        ContactNode node2 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30011));
+        routingTable.add(node2,true);
+        System.out.println(routingTable.toString());
+        ContactNode node3 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30012));
+        routingTable.add(node3,true);
+        System.out.println(routingTable.toString());
     }
     
     public static void testReplaceNode(RoutingTable routingTable) {

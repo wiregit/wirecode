@@ -26,7 +26,7 @@ public final class RouteTableSettings extends LimeDHTProps {
     
     // TODO reasonable min and max values
     public static final IntSetting MAX_CACHE_SIZE
-        = FACTORY.createSettableIntSetting("MAX_CACHE_SIZE", 32, "max_cache_size", 32, 256);
+        = FACTORY.createSettableIntSetting("MAX_CACHE_SIZE", 16, "max_cache_size", 1, 256);
     
     public static final BooleanSetting SKIP_STALE
         = FACTORY.createBooleanSetting("SKIP_STALE", true);

@@ -350,8 +350,26 @@ public class PatriciaRouteTable implements RoutingTable {
                     put(nodeId,node,knowToBeAlive);
                     
                 } 
-                //not splitting --> replacement cache. Also a good time to replace stale nodes
+                //not splitting --> replace bucket unknown entry or add to replacement cache. Also a good time to replace stale nodes
                 else {
+                    if(knowToBeAlive) {
+                        List bucketList = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
+                        ContactNode leastRecentlySeen = 
+                            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
+                        if(leastRecentlySeen.getTimeStamp() == 0L) {
+                            
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("NOT splitting bucket "+ bucket+", replacing unknown node "+leastRecentlySeen+" with node "+node);
+                            }
+                            
+                            node.alive();
+                            routingStats.LIVE_NODE_COUNT.incrementStat();
+                            touchBucket(bucket);
+                            nodesTrie.remove(leastRecentlySeen.getNodeID());
+                            nodesTrie.put(nodeId,node);
+                            return true;
+                        }
+                    } 
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("NOT splitting bucket "+ bucket+", adding node "+node+" to replacement cache");
                     }
