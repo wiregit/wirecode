@@ -65,7 +65,6 @@ public class DefaultMessageHandler extends MessageHandler
     }
     
     public void addTime(long time) {
-        
     }
     
     public long time() {
@@ -97,12 +96,12 @@ public class DefaultMessageHandler extends MessageHandler
         //only do store forward if it is a new node in our routing table or 
         //a node that is (re)connecting
         boolean newNode = routeTable.add(node, true);
-        if(!newNode && (message instanceof FindNodeRequest)) {
+        if (!newNode && (message instanceof FindNodeRequest)) {
             FindNodeRequest request = (FindNodeRequest) message;
             newNode = request.getLookupID().equals(node.getNodeID());
         }
 
-        if(newNode) {
+        if (newNode) {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?

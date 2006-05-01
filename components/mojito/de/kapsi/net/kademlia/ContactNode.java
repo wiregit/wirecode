@@ -21,19 +21,21 @@ package de.kapsi.net.kademlia;
 
 import java.net.SocketAddress;
 
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class ContactNode extends Node {
     
     private static final long serialVersionUID = -5416538917308950549L;
 
-    protected SocketAddress address;
+    private SocketAddress address;
     
     private int failures = 0;
     
     private long firstAliveTime = 0L;
     
-    private volatile boolean isPinged;
+    // TODO transient?!
+    private transient QueryKey queryKey;
     
     public ContactNode(KUID nodeId, SocketAddress address) {
         super(nodeId);
@@ -41,7 +43,7 @@ public class ContactNode extends Node {
     }
     
     public boolean failure() {
-        ++failures;
+        failures++;
         return isDead();
     }
     
@@ -49,17 +51,9 @@ public class ContactNode extends Node {
         return (failures > 0);
     }
     
-    public void setUnknown() {
+    public void unknownState() {
         failures = 0;
         setTimeStamp(0L);
-    }
-    
-    public boolean isPinged() {
-        return isPinged;
-    }
-
-    public void setPinged(boolean isPinged) {
-        this.isPinged = isPinged;
     }
 
     public boolean isDead() {
@@ -98,6 +92,14 @@ public class ContactNode extends Node {
         return o;
     }
     
+    /*public void setQueryKey(QueryKey queryKey) {
+        this.queryKey = queryKey;
+    }
+    
+    public QueryKey getQueryKey() {
+        return queryKey;
+    }*/
+    
     public boolean equals(Object o) {
         if (!(o instanceof ContactNode)) {
             return false;
@@ -110,7 +112,7 @@ public class ContactNode extends Node {
     
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(toString(nodeId, address))
+        buffer.append(toString(getNodeID(), getSocketAddress()))
             .append(", failures: ").append(failures)
             .append(", unknown: ").append(getTimeStamp()==0);
         return buffer.toString();

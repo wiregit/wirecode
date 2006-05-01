@@ -20,6 +20,7 @@
 package de.kapsi.net.kademlia;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,11 +50,11 @@ public class BucketNode extends Node {
     }
     
     public void incrementNodeCount() {
-        ++nodeCount;
+        nodeCount++;
     }
     
     public void decrementNodeCount() {
-        --nodeCount;
+        nodeCount--;
     }
 
     public void setNodeCount(int count) {
@@ -66,22 +67,26 @@ public class BucketNode extends Node {
     
     public void addReplacementNode(ContactNode node) {
         //lazy instantiation of the replacement cache to save mem space
-        if(replacementCache == null) {
+        if (replacementCache == null) {
             replacementCache = new Cache(RouteTableSettings.MAX_CACHE_SIZE.getValue());
         }
+        
         replacementCache.put(node.getNodeID(), node);
     }
     
     public ContactNode getReplacementNode(KUID nodeId) {
-        return (replacementCache != null ? (ContactNode)replacementCache.get(nodeId) : null);
+        return (ContactNode)getReplacementCache().get(nodeId);
     }
     
     public int getReplacementCacheSize() {
-        return (replacementCache != null ? replacementCache.size() : 0);
+        return getReplacementCache().size();
     }
     
     public Map getReplacementCache() {
-        return replacementCache;
+        if (replacementCache != null) {
+            return replacementCache;
+        }
+        return Collections.EMPTY_MAP;
     }
     
     public ContactNode getMostRecentlySeenCachedNode(boolean remove) {
@@ -92,9 +97,7 @@ public class BucketNode extends Node {
     }
     
     public ContactNode removeReplacementNode(KUID nodeId) {
-        if(replacementCache != null) {
-            return (ContactNode)replacementCache.remove(nodeId);
-        } else return null;
+        return (ContactNode)getReplacementCache().remove(nodeId);
     }
     
     public void touch() {
@@ -102,9 +105,9 @@ public class BucketNode extends Node {
     }
  
     public List split() {
-        BucketNode leftBucket = new BucketNode(nodeId, depth+1);
-        BucketNode rightBucket = new BucketNode(nodeId.set(depth),depth+1);
-        if(replacementCache != null && !replacementCache.isEmpty()) {
+        BucketNode leftBucket = new BucketNode(getNodeID(), depth+1);
+        BucketNode rightBucket = new BucketNode(getNodeID().set(depth), depth+1);
+        if (!replacementCache.isEmpty()) {
             if(LOG.isErrorEnabled()) {
                 LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
             }
@@ -118,7 +121,7 @@ public class BucketNode extends Node {
     
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("Bucket: "+nodeId)
+        buffer.append("Bucket: " + getNodeID())
             .append(", depth: ").append(getDepth())
             .append(", size: ").append(getNodeCount())
             .append(", replacements: ").append(getReplacementCacheSize())
