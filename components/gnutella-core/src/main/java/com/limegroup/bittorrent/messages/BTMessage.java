@@ -126,9 +126,7 @@ public abstract class BTMessage {
 			BTMessageStatBytes.INCOMING_REQUEST.addData(17);
 			return BTRequest.readMessage(in);
 		case PIECE:
-			BTMessageStat.INCOMING_PIECE.incrementStat();
-			BTMessageStatBytes.INCOMING_PIECE.addData(5 + in.remaining());
-			return BTPiece.readMessage(in);
+			throw new IllegalArgumentException("do not parse pieces here");
 		case CANCEL:
 			BTMessageStat.INCOMING_CANCEL.incrementStat();
 			BTMessageStatBytes.INCOMING_CANCEL.addData(17);

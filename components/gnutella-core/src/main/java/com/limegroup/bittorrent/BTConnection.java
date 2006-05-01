@@ -72,13 +72,13 @@ public class BTConnection {
 	private final BitSet _availableRanges;
 
 	/*
-	 * the List of LongInterval containing requests that we did not yet send but
+	 * the List of BTInterval containing requests that we did not yet send but
 	 * which we intend to send soon. Lock on this before accessing
 	 */
 	private final Set _toRequest;
 
 	/*
-	 * the LongInterval we requested but which was not yet satisfied.
+	 * the BTInterval we requested but which was not yet satisfied.
 	 */
 	private final Set _requesting;
 
@@ -743,6 +743,21 @@ public class BTConnection {
 		if (!_requested.isEmpty() && _writer.isIdle())
 			readyForWriting();
 	}
+	
+	/**
+	 * Notification that we are now receiving the specified piece
+	 * @return true if the piece was requested.
+	 */
+	boolean startReceivingPiece(BTInterval interval) {
+		if (!_requesting.remove(interval) && !_toRequest.remove(interval)) {
+			if (LOG.isDebugEnabled())
+				LOG.debug("received unexpected range " + interval + " from "
+						+ _socket.getInetAddress() + " expected "
+						+ _requesting + " " + _toRequest);
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * handles a piece message and writes its payload to disk
@@ -758,13 +773,7 @@ public class BTConnection {
 		
 		readBytes(data.length);
 		
-		if (!_requesting.remove(in) && !_toRequest.remove(in)) {
-			if (LOG.isDebugEnabled())
-				LOG.debug("received unexpected range " + in + " from "
-						+ _socket.getInetAddress() + " expected "
-						+ _requesting + " " + _toRequest);
-			return;
-		}
+		
 		try {
 			VerifyingFolder v = _info.getVerifyingFolder();
 			if (v.hasBlock(in.getId()))

@@ -16,6 +16,7 @@ import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
 import com.limegroup.bittorrent.messages.BTBitField;
 import com.limegroup.bittorrent.messages.BTMessage;
+import com.limegroup.bittorrent.messages.BTPiece;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 public class BTMessageReader implements ChannelReadObserver {
@@ -65,9 +66,9 @@ public class BTMessageReader implements ChannelReadObserver {
 		_in = ByteBuffer.allocate(BUFFER_SIZE);
 		_connection = connection;
 		_tracker = new SimpleBandwidthTracker();
-		currentState = new LengthState();
 		LENGTH_STATE = new LengthState();
 		TYPE_STATE = new TypeState();
+		currentState = LENGTH_STATE;
 	}
 
 	/**
@@ -293,17 +294,69 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * State that parses the Piece message. 
 	 */
 	private class PieceState implements BTReadMessageState {
-		// temp solution
-		ByteBuffer buf = ByteBuffer.allocate(_length);
+		int chunkId = -1;
+		int offset = -1;
+		int currentOffset;
+		
+		/** Whether we actually requested this piece */
+		boolean welcome;
+		
 		public BTReadMessageState addData() throws BadBTMessageException {
-			BufferUtils.transfer(_in, buf, false);
-			if (!buf.hasRemaining()) {
-				buf.flip();
-				BTMessage message = BTMessage.parseMessage(buf, BTMessage.PIECE);
-				_connection.processMessage(message);
+			if (_in.remaining() < 4 && (chunkId < 0 || offset < 0))
+				return null;
+			
+			// read chunk id
+			if (chunkId < 0) {
+				_in.order(ByteOrder.BIG_ENDIAN);
+				chunkId = _in.getInt();
+				return this; // shortcut :)
+			}
+			
+			// read offset
+			if (offset < 0) {
+				_in.order(ByteOrder.BIG_ENDIAN);
+				offset = _in.getInt();
+				currentOffset = offset;
+				
+				// check if the piece was requested
+				BTInterval complete = new BTInterval(offset, offset + _length - 9, chunkId); 
+				welcome = _connection.startReceivingPiece(complete);
+			}
+			
+			if (!_in.hasRemaining())
+				return null;
+			
+			int oldLimit = _in.limit();
+			int newLimit = Math.min(oldLimit, 
+					_in.position() + _length + offset - currentOffset - 8);
+			
+			_in.limit(newLimit);
+			BTInterval interval = new BTInterval(currentOffset, 
+					currentOffset + _in.remaining() - 1,
+					chunkId);
+			
+			currentOffset += _in.remaining();
+			
+			// if the piece was requested, we process it.
+			// otherwise we skip it.
+			if (welcome) {
+				byte []data = new byte[_in.remaining()];
+				_in.get(data);
+				BTPiece piece = new BTPiece(interval, data);
+				_connection.processMessage(piece);
+			} else
+				_in.position(_in.limit());
+			
+			_in.limit(oldLimit);
+			
+			if (currentOffset == offset + _length - 8) {
+				// we're done receiving this piece
+				BTMessageStat.INCOMING_PIECE.incrementStat();
+				BTMessageStatBytes.INCOMING_PIECE.addData(5 + _length);
 				return LENGTH_STATE;
 			}
-			return null;
+			else
+				return null;
 		}
 	}
 	
