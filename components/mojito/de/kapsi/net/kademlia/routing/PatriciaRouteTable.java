@@ -473,31 +473,30 @@ public class PatriciaRouteTable implements RoutingTable {
      * @param bucket
      * @param node
      */
-    public void addReplacementNode(BucketNode bucket,ContactNode node) {
-        
+    public void addReplacementNode(BucketNode bucket, ContactNode node) {
         boolean added = false;
         
-        Map replacementCache = bucket.getReplacementCache();
-
         //first add to the replacement cache
-        if(replacementCache!= null &&
-                replacementCache.size() == RouteTableSettings.MAX_CACHE_SIZE.getValue()) {
+        if(bucket.getReplacementCacheSize() 
+                == RouteTableSettings.MAX_CACHE_SIZE.getValue()) {
+            
+            Map replacementCache = bucket.getReplacementCache();
             //replace older cache entries with this one
             for (Iterator iter = replacementCache.values().iterator(); iter.hasNext();) {
                 ContactNode oldNode = (ContactNode) iter.next();
                 
                 if(oldNode.getTimeStamp() <= node.getTimeStamp()) {
-                    replacementCache.remove(oldNode);
-                    replacementCache.put(node.getNodeID(),node);
+                    iter.remove();
                     added = true;
                 }
             }
         } else {
-            bucket.addReplacementNode(node);
             added = true;
         }
+        
         //a good time to ping least recently seen node
-        if(added) {
+        if (added) {
+            bucket.addReplacementNode(node);
             routingStats.REPLACEMENT_COUNT.incrementStat();
             pingBucketLastRecentlySeenNode(bucket);
         } 
@@ -552,23 +551,16 @@ public class PatriciaRouteTable implements RoutingTable {
         if(existingNode == null) {
             // check replacement cache in closest bucket
             bucket = (BucketNode)bucketsTrie.select(nodeId);
-            Map replacementCache = bucket.getReplacementCache();
+            existingNode = bucket.getReplacementNode(nodeId);
             
-            if (replacementCache!= null && !replacementCache.isEmpty()) {
-                existingNode = (ContactNode) replacementCache.get(nodeId);
-                
-                // If it was neither in the RouteTable nor in the
-                // replacement cache then it's new and unknown! We 
-                // have to add it first!
-                if (existingNode == null) {
-                    return null;
-                }
-                
-                replacement = true;
-            } else {
+            if (existingNode == null) {
                 return null;
             }
+            
+            // ContactNode is from replacement cache!
+            replacement = true;
         }
+        
         //if we are here -> the node is already in the routing table
         if(alive) {
             existingNode.setPinged(false);
@@ -591,6 +583,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 touchBucket(nodeId);
                 return existingNode;
             }
+            
             //check if we have heard of the existing node recently
             long now = System.currentTimeMillis();
             long delay = now - existingNode.getTimeStamp();
@@ -600,6 +593,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 }
                 return existingNode;
             }
+            
             //START: SPOOF CHECK
             try {
                 // Huh? The addresses are not equal but both belong
