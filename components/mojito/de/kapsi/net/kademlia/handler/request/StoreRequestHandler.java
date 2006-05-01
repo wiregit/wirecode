@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.Context;
+import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -93,12 +94,13 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         // Add the KeyValues...
         for(Iterator it = values.iterator(); it.hasNext(); ) {
             KeyValue keyValue = (KeyValue)it.next();
-
+            KUID key = (KUID)keyValue.getKey();
+            
             // under the assumption that the requester sent us a lookup before
             // check if we are part of the closest alive nodes to this value
-            List nodesList = getRouteTable().select(keyValue.getKey(), k, false, false);
+            List nodesList = getRouteTable().select(key, k, false, false);
             if (!nodesList.contains(context.getLocalNode())) {
-                nodesList = getRouteTable().select(keyValue.getKey(), k, true, false);
+                nodesList = getRouteTable().select(key, k, true, false);
                 if (!nodesList.contains(context.getLocalNode())) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("We are not close to " + keyValue.getKey() + ". KeyValue will expire faster!");
@@ -111,14 +113,14 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             
             try {
                 if (context.getDatabase().add(keyValue)) {
-                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.SUCCEEDED));
+                    stats.add(new StoreResponse.StoreStatus(key, StoreResponse.SUCCEEDED));
                 } else {
-                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
+                    stats.add(new StoreResponse.StoreStatus(key, StoreResponse.FAILED));
                 }
             } catch (SignatureException err) {
-                stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
+                stats.add(new StoreResponse.StoreStatus(key, StoreResponse.FAILED));
             } catch (InvalidKeyException err) {
-                stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
+                stats.add(new StoreResponse.StoreStatus(key, StoreResponse.FAILED));
             }
         }
         

@@ -48,6 +48,7 @@ import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
@@ -126,7 +127,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             addYetToBeQueried((ContactNode)it.next(), 1);
         }
         
-        addResponse(context.getLocalNode());
+        addResponse(new ContactNodeEntry(context.getLocalNode()));
         markAsQueried(context.getLocalNode());
     }
     
@@ -144,7 +145,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         // Get the first round of alpha nodes and send them requests
         List alphaList = toQuery.select(lookup, KademliaSettings.LOOKUP_PARAMETER.getValue());
         for(Iterator it = alphaList.iterator(); it.hasNext(); ) {
-            ContactNode node = (ContactNode)it.next();
+            ContactNode node = ((ContactNodeEntry)it.next()).getContactNode();
             
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Sending " + node + " a Find request for " + lookup);
@@ -234,7 +235,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         
         if (!finished) {
             if (!nodes.isEmpty()) {
-                addResponse(response.getContactNode());
+                addResponse(new ContactNodeEntry(response));
             }
             
             activeSearches--;
@@ -279,7 +280,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 }
                 finishLookup(hop, time);
                 return;
-            } else if (!context.isLocalNodeID(lookup) && responses.containsKey(lookup)) {
+                
+            } else if (!context.isLocalNodeID(lookup) 
+                    && responses.containsKey(lookup)) {
+                
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookup + " terminates after "
                             + hop + " hops. Found traget ID!");
@@ -290,17 +294,17 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         if (responses.size() >= resultSetSize) {
-            KUID worst = ((ContactNode)responses.select(furthest)).getNodeID();
+            KUID worst = ((ContactNodeEntry)responses.select(furthest)).getNodeID();
             
             KUID best = null;            
             if (!toQuery.isEmpty()) {
-                best = ((ContactNode)toQuery.select(lookup)).getNodeID();
+                best = ((ContactNodeEntry)toQuery.select(lookup)).getNodeID();
             }
             
             if (best == null || worst.isCloser(best, lookup)) {
                 if (activeSearches == 0) {
                     if (LOG.isTraceEnabled()) {
-                        ContactNode bestResponse = (ContactNode)responses.select(lookup);
+                        ContactNode bestResponse = ((ContactNodeEntry)responses.select(lookup)).getContactNode();
                         LOG.trace("Lookup for " + lookup + " terminates after "
                                 + hop + " hops, " + time + "ms and " + queried.size() 
                                 + " queried Nodes with " + bestResponse + " as best match");
@@ -313,9 +317,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         
         int numLookups = KademliaSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
         if (numLookups > 0) {
-            List bucketList = toQuery.select(lookup, numLookups);
-            for(Iterator it = bucketList.iterator(); it.hasNext(); ) {
-                ContactNode node = (ContactNode)it.next();
+            List toQueryList = toQuery.select(lookup, numLookups);
+            for(Iterator it = toQueryList.iterator(); it.hasNext(); ) {
+                ContactNode node = ((ContactNodeEntry)it.next()).getContactNode();
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Sending " + node + " a find request for " + lookup);
@@ -388,10 +392,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    private void addResponse(ContactNode node) {
-        responses.put(node.getNodeID(), node);
+    private void addResponse(ContactNodeEntry entry) {
+        responses.put(entry.getNodeID(), entry);
+        
         if (responses.size() > resultSetSize) {
-            ContactNode worst = (ContactNode)responses.select(furthest);
+            ContactNode worst = ((ContactNodeEntry)responses.select(furthest)).getContactNode();
             responses.remove(worst.getNodeID());
             //hopMap.remove(node.getNodeID()); // TODO
         }
@@ -409,5 +414,48 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 }
             }
         });
+    }
+    
+    public static class ContactNodeEntry implements Map.Entry {
+        
+        private ContactNode node;
+        private QueryKey queryKey;
+        
+        private ContactNodeEntry(ContactNode node) {
+            this(node, null);
+        }
+        
+        private ContactNodeEntry(FindNodeResponse response) {
+            this(response.getContactNode(), response.getQueryKey());
+        }
+        
+        private ContactNodeEntry(ContactNode node, QueryKey queryKey) {
+            this.queryKey = queryKey;
+            this.node = node;
+        }
+        
+        public ContactNode getContactNode() {
+            return node;
+        }
+        
+        public Object getKey() {
+            return getContactNode();
+        }
+        
+        private KUID getNodeID() {
+            return getContactNode().getNodeID();
+        }
+        
+        public QueryKey getQueryKey() {
+            return queryKey;
+        }
+        
+        public Object getValue() {
+            return getQueryKey();
+        }
+        
+        public Object setValue(Object o) {
+            throw new UnsupportedOperationException("This is an immutable class");
+        }
     }
 }

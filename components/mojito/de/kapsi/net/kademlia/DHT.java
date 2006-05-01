@@ -28,6 +28,7 @@ import java.util.Collection;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
+import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.routing.RoutingTable;
@@ -132,21 +133,21 @@ public class DHT implements Runnable {
         }
     }
     
-    public Collection get(KUID key, FindValueListener l) throws IOException {
+    public Collection get(KUID key, LookupListener listener) throws IOException {
         Collection values = context.getDatabase().get(key);
         if (values != null) {
-            if (l != null) {
-                l.foundValue(key, values, 0L);
+            if (listener != null) {
+                listener.found(key, values, 0L);
             }
             return values;
         } else {
-            return getr(key, l);
+            return getr(key, listener);
         }
     }
     
     // TODO only for debugging purposes public
-    Collection getr(KUID key, FindValueListener l) throws IOException {
-        context.get(key, l);
+    Collection getr(KUID key, LookupListener listener) throws IOException {
+        context.get(key, listener);
         return null;
     }
     
@@ -155,8 +156,8 @@ public class DHT implements Runnable {
     }*/
     
     // TODO for debugging purposes only
-    void lookup(KUID lookup, FindNodeListener l) throws IOException {
-        context.lookup(lookup, l);
+    void lookup(KUID lookup, LookupListener listener) throws IOException {
+        context.lookup(lookup, listener);
     }
     
     // TODO for debugging purposes only

@@ -39,8 +39,11 @@ import com.limegroup.gnutella.dht.statistics.DHTStats;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
+import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.ArrayUtils;
@@ -242,15 +245,13 @@ public class Main {
         
         System.out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
-            public void pingSuccess(KUID nodeId, SocketAddress address, long time) {
-                if (nodeId != null) {
-                    System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " succeeded: " + time + "ms");
-                } else {
-                    System.out.println("*** Ping to " + address + " succeeded: " + time + "ms");
-                }
-            }
             
-            public void pingTimeout(KUID nodeId, SocketAddress address, long time) {
+            
+            public void response(ResponseMessage response, long time) {
+                System.out.println("*** Ping to " + response.getContactNode() + " succeeded: " + time + "ms");
+            }
+
+            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
                 if (nodeId != null) {
                     System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " failed");
                 } else {
@@ -268,11 +269,11 @@ public class Main {
         
         System.out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                System.out.println("*** Bootstraping phase 1 " + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
+            public void phaseOneFinished(long time) {
+                System.out.println("*** Bootstraping phase 1 finished in " + time + " ms");
             }
 
-            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+            public void phaseTwoFinished(boolean foundNodes, long time) {
                 System.out.println("*** Bootstraping phase 2 " + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
@@ -332,23 +333,29 @@ public class Main {
         md.reset();
         
         if (line[0].equals("get")) {
-            dht.get(key, new FindValueListener() {
-                public void foundValue(KUID key, Collection values, long time) {
-                    if (values != null) {
-                        System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                    } else {
-                        System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                    }
+            dht.get(key, new LookupListener() {
+                
+                public void response(ResponseMessage response, long time) {
+                }
+
+                public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+                }
+
+                public void found(KUID key, Collection values, long time) {
+                    System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
                 }
             });
         } else {
-            dht.getr(key, new FindValueListener() {
-                public void foundValue(KUID key, Collection values, long time) {
-                    if (values != null) {
-                        System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                    } else {
-                        System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                    }
+            dht.getr(key, new LookupListener() {
+                
+                public void response(ResponseMessage response, long time) {
+                }
+
+                public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+                }
+                
+                public void found(KUID key, Collection values, long time) {
+                    System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
                 }
             });
         }

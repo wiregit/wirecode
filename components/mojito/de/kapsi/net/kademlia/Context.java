@@ -58,6 +58,7 @@ import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.LookupResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
+import de.kapsi.net.kademlia.handler.response.LookupResponseHandler.ContactNodeEntry;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -444,24 +445,10 @@ public class Context implements Runnable {
     }
     
     /** store */
-    public void store(KeyValue keyValue, StoreListener l) throws IOException {       
-        lookup(keyValue.getKey(), new StoreManager(keyValue, l));
+    public void store(KeyValue keyValue, StoreListener listener) throws IOException {       
+        new StoreManager().store(keyValue, listener);
     }
     
-    public void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
-        if (queryKey == null) {
-            throw new IllegalArgumentException("Cannot store KeyValues without a QueryKey");
-        }
-        
-        ResponseHandler handler = new StoreResponseHandler(this, queryKey, keyValues);
-        
-        RequestMessage request 
-            = messageFactory.createStoreRequest(node.getSocketAddress(), keyValues.size(), 
-                    queryKey, Collections.EMPTY_LIST);
-        
-        messageDispatcher.send(node, request, handler);
-    }
-
     public int size() {
         if (!isRunning()) {
             return 0;
@@ -679,69 +666,74 @@ public class Context implements Runnable {
         }
     }
     
-    private class StoreManager2 implements LookupListener {
+    private class StoreManager implements LookupListener {
+        
+        private List keyValues;
+        private StoreListener listener;
+        
+        private void store(KeyValue keyValue, StoreListener listener) throws IOException {
+            this.keyValues = Arrays.asList(new KeyValue[]{keyValue});
+            this.listener = listener;
+            
+            lookup((KUID)keyValue.getKey(), this);
+        }
         
         public void response(ResponseMessage response, long time) {
         }
 
-        public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+        public void timeout(KUID nodeId, SocketAddress address, 
+                RequestMessage request, long time) {
         }
         
         public void found(KUID lookup, Collection c, long time) {
-            if (!c.isEmpty()) {
+            // List of ContactNodes where we stored the KeyValues.
+            final List targets = new ArrayList(c.size());
+            
+            for(Iterator it = c.iterator(); it.hasNext(); ) {
+                ContactNodeEntry entry = (ContactNodeEntry)it.next();
+                ContactNode node = entry.getContactNode();
+                QueryKey queryKey = entry.getQueryKey();
                 
-            } else {
-                
-            }
-        }
-    }
-    
-    private class StoreManager implements FindNodeListener {
-        
-        private KeyValue keyValue;
-        private StoreListener listener;
-        
-        public StoreManager(KeyValue keyValue, StoreListener listener) {
-            this.keyValue = keyValue;
-            this.listener = listener;
-        }
-        
-        public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time) {
-            try {
-                List keyValues = Arrays.asList(new KeyValue[]{keyValue});
-                
-                // List of ContactNodes where we stored the KeyValues.
-                List targets = new ArrayList(nodes.size());
-                
-                for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-                    ContactNode node = (ContactNode)it.next();
-                    QueryKey queryKey = (QueryKey)queryKeys.get(node);
-                    
-                    if(node.getNodeID().equals(getLocalNodeID())) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Skipping local Node as KeyValue is already stored at this Node");
-                        }
-                        continue;
+                if (isLocalNodeID(node.getNodeID())) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Skipping local Node as KeyValue is already stored at this Node");
                     }
-                    
-                    if (queryKey == null) {
-                        if (LOG.isErrorEnabled()) {
-                            LOG.error("Cannot store " + keyValues + " at " 
-                                    + node + " because we have no QueryKey for it");
-                        }
-                        continue;
+                    continue;
+                }
+                
+                if (queryKey == null) {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("Cannot store " + keyValues + " at " 
+                                + node + " because we have no QueryKey for it");
                     }
-                    
+                    continue;
+                }
+                
+                try {
                     store(node, queryKey, keyValues);
                     targets.add(node);
+                } catch (IOException err) {
+                    LOG.error("", err);
                 }
-                
-                if (listener != null) {
-                    listener.store(keyValues, targets);
-                }
-            } catch (IOException err) {
-                LOG.error(err);
             }
+            
+            if (listener != null) {
+                fireEvent(new Runnable() {
+                    public void run() {
+                        listener.store(keyValues, targets);
+                    }
+                });
+            }
+        }
+        
+        private void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
+            ResponseHandler handler = new StoreResponseHandler(Context.this, queryKey, keyValues);
+            
+            RequestMessage request 
+                = messageFactory.createStoreRequest(node.getSocketAddress(), keyValues.size(), 
+                        queryKey, Collections.EMPTY_LIST);
+            
+            messageDispatcher.send(node, request, handler);
         }
     }
     

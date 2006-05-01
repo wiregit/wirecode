@@ -25,5 +25,22 @@ import de.kapsi.net.kademlia.KUID;
 
 public interface LookupListener extends ResponseListener {
     
+    /**
+     * Called after a lookup has finished.
+     * 
+     * Collection <tt>c</tt> is a collection of Map.Entries. The
+     * mapping depends on the lookup key type.
+     * 
+     * If it's a Node ID lookup then is the Entry an instanceof
+     * LookupResponseHandler.ContactNodeEntry, Entry.getKey() returns the
+     * ContactNode and Entry.getValue() returns the QueryKey.
+     * 
+     * If it's a Value ID lookup then is the Entry an instance of KeyValue, 
+     * Entry.getKey() returns the Value ID and Entry.getValue() returns the 
+     * value which is a byte Array.
+     * 
+     * In both cases is Entry.setValue() not implemented and will throw an
+     * UnsupportedOperationException!
+     */
     public void found(KUID lookup, Collection c, long time);
 }

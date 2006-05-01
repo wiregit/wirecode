@@ -58,8 +58,8 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeKeyValue(KeyValue keyValue) throws IOException {
-        writeKUID(keyValue.getKey());
-        byte[] b = keyValue.getValue();
+        writeKUID((KUID)keyValue.getKey());
+        byte[] b = (byte[])keyValue.getValue();
         writeShort(b.length);
         write(b, 0, b.length);
         
