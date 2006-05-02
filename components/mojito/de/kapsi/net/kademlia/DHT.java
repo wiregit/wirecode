@@ -134,11 +134,15 @@ public class DHT implements Runnable {
         }
     }
     
-    public Collection get(KUID key, FindValueListener l) throws IOException {
-        Collection values = context.getDatabase().get(key);
+    public Collection get(final KUID key, final FindValueListener l) throws IOException {
+        final Collection values = context.getDatabase().get(key);
         if (values != null) {
             if (l != null) {
-                l.foundValue(key, values, 0L);
+                context.fireEvent(new Runnable() {
+                    public void run() {
+                        l.foundValue(key, values, 0L);
+                    }
+                });
             }
             return values;
         } else {
