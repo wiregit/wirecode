@@ -7,7 +7,6 @@ import java.nio.ByteOrder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
@@ -259,34 +258,55 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * State that parses the Bitfield message. 
 	 */
 	private class BitfieldState implements BTReadMessageState {
-		/** 
-		 * Buffer that grows while the BitField is read
-		 * from network. 
-		 * This is deliberately not pre-allocated even though we 
-		 * know how large it will eventually get.
+		/* 
+		 * If the BitField is small enough to fit our current buffer,
+		 * we create it and process it in-place.
+		 * 
+		 * Otherwise, we use a BufferByteArrayOutputStream 
+		 * that grows as data arrives on the wire. It is deliberately 
+		 * not pre-allocated even though we know how large it will 
+		 * eventually get.
 		 */
-		private BufferByteArrayOutputStream bbaos = 
-			new BufferByteArrayOutputStream();
+		private BufferByteArrayOutputStream bbaos;
 		
 		public BTReadMessageState addData() throws BadBTMessageException {
-			
 			int limit = _in.limit();
-			int toWrite = Math.min(_in.position() + _length - bbaos.size(), 
-					_in.limit());
-			_in.limit(toWrite);
-			bbaos.write(_in);
-			_in.limit(limit);
-			if (bbaos.size() == _length) { 
-				BTBitField field = 
-					new BTBitField(ByteBuffer.wrap(bbaos.toByteArray()));
-				BTMessageStat.INCOMING_BITFIELD.incrementStat();
-				BTMessageStatBytes.INCOMING_BITFIELD.addData(5 + 
-						_length);
-				_connection.processMessage(field);
-				return LENGTH_STATE;
-			}
 			
+			// if the entire BitField was received just process it
+			if (bbaos == null && _in.remaining() >= _length) {
+				LOG.debug("parsing BitField in-place");
+				_in.limit(_in.position() + _length);
+				countAndProcess(_in.slice());
+				_in.position(_in.limit());
+				_in.limit(limit);
+				return LENGTH_STATE;
+			} else {
+				if (bbaos == null)
+					bbaos = new BufferByteArrayOutputStream();
+				
+				int toWrite = Math.min(_in.position() + _length - bbaos.size(), 
+						_in.limit());
+				_in.limit(toWrite);
+				bbaos.write(_in);
+				_in.limit(limit);
+				
+				if (LOG.isDebugEnabled())
+					LOG.debug("parsing bitfield incrementally, so far " + bbaos.size());
+				
+				if (bbaos.size() == _length) { 
+					countAndProcess(ByteBuffer.wrap(bbaos.toByteArray()));
+					return LENGTH_STATE;
+				}
+			}
 			return null;
+		}
+			
+		private void countAndProcess(ByteBuffer b) {
+			BTBitField field = new BTBitField(b);
+			BTMessageStat.INCOMING_BITFIELD.incrementStat();
+			BTMessageStatBytes.INCOMING_BITFIELD.addData(5 + 
+					_length);
+			_connection.processMessage(field);
 		}
 	}
 

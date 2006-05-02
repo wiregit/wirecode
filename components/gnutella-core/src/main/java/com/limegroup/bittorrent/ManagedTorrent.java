@@ -15,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UploadManager;
@@ -266,7 +265,8 @@ public class ManagedTorrent {
 		
 		_connectionFetcher.shutdown();
 		
-		choker.stopped = true;
+		if (choker != null)
+			choker.stopped = true;
 		
 		// we stopped, removing torrent from active list of
 		// TorrentManager

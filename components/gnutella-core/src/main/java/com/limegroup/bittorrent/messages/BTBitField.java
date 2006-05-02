@@ -19,14 +19,6 @@ public class BTBitField extends BTMessage {
 	}
 
 	/**
-	 * creates a BitField message that is ready to 
-	 * be filled with data read from the network.
-	 */
-	public BTBitField() {
-		super(BITFIELD);
-	}
-	
-	/**
 	 * factory method, creates a new BitField message
 	 * 
 	 * @param info
