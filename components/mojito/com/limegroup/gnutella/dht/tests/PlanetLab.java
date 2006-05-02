@@ -41,8 +41,22 @@ import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
 
 public class PlanetLab {
+    
+    private static long minOffline = 1L * 60L * 1000L;
+    private static long maxOffline = 5L * 60L * 1000L;
+    
+    private static long minChurn = 5L * 60L * 1000L;
+    private static long maxChurn = 10L * 60L * 1000L;
+    
+    private static long minRepublisher = (long)(((float)2/3) * 
+        DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue());
+    
+    private static long minRetriever = 1L * 60L * 1000L;
+    private static long maxRetriever = 5L * 60L * 1000L;
+    
+    private static long maxRunTime = Long.MAX_VALUE;
 
-    private static final String[] TEST_VALUES = {
+    private static String[] TEST_VALUES = {
         "hello",
         "mark",
         "roger",
@@ -166,6 +180,14 @@ public class PlanetLab {
                             } else if (testNumber == 3) {
                                 DHTController controller = new DHTController(dht, dst, null);
                                 new Thread(controller).start();
+                            } else if (testNumber == 6) { //hotspot test
+                                minChurn = Long.MAX_VALUE - 1L;
+                                maxChurn = Long.MAX_VALUE;
+                                minRetriever = 1L * 1000L; //retrieve values every 1 to 3 seconds
+                                maxRetriever = 3L * 1000L;
+                                TEST_VALUES = new String[]{"hello"};
+                                DHTController controller = new DHTController(dht, dst, null);
+                                new Thread(controller).start();
                             }
                         }
                     });
@@ -214,7 +236,7 @@ public class PlanetLab {
         InetSocketAddress dst = null;
         int test = 0;
         
-        if (number > 1) {
+        if (number >= 1) {
             dst = new InetSocketAddress(args[2], Integer.parseInt(args[3]));
             test = Integer.parseInt(args[4]);
         }
@@ -247,6 +269,7 @@ public class PlanetLab {
             case 3: //churn - retriever test
             case 4: //key,value distribution test - publishers
             case 5: //key,value distribution test - storers
+            case 6: //Hotspot test - retrievers
                 dhts = createDHTs(port, number);
                 bootstrap(dhts, dst, test);
                 break;
@@ -266,18 +289,6 @@ public class PlanetLab {
     public static class DHTController implements Runnable {
         
         private static final Random GENERATOR = new Random();
-        
-        private static final long minOffline = 1L * 60L * 1000L;
-        private static final long maxOffline = 5L * 60L * 1000L;
-        
-        private static final long minChurn = 5L * 60L * 1000L;
-        private static final long maxChurn = 10L * 60L * 1000L;
-        
-        private static final long minRepublisher = (long)(((float)2/3) * 
-            DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue());
-        
-        private static final long minRetriever = 1L * 60L * 1000L;
-        private static final long maxRetriever = 5L * 60L * 1000L;
         
         private DHT dht;
         private SocketAddress bootstrapServer;
@@ -307,6 +318,8 @@ public class PlanetLab {
         public void run() {
             
             final Object lock = new Object();
+            
+            final Object lock2 = new Object();
             
             while(true) {
                 
@@ -340,33 +353,38 @@ public class PlanetLab {
                 else {
                     long churn = minChurn + GENERATOR.nextInt((int)(maxChurn-minChurn));
                     long startTime = System.currentTimeMillis();
+                    long livetime = 0L;
                     try {
-                        long livetime = 0L;
                         while(livetime < churn) {
-                            long sleep = minRetriever + GENERATOR.nextInt((int)(maxRetriever - minRetriever));
-                            try {
-                                Thread.sleep(sleep);
-                            } catch (InterruptedException e) {
-                            }
-                            String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
-                            
-                            KUID key = toKUID(value);
-                            dht.get(key, new FindValueListener() {
-                                public void foundValue(KUID key, Collection values, long time) {
-                                    if(values == null || values.isEmpty()){
-                                        planetlabStats.RETRIEVE_FAILURES.incrementStat();
-                                    } else {
-                                        planetlabStats.RETRIEVE_SUCCESS.incrementStat();
+                            synchronized (lock2) {
+                                long sleep = minRetriever + GENERATOR.nextInt((int)(maxRetriever - minRetriever));
+                                try {
+                                    Thread.sleep(sleep);
+                                } catch (InterruptedException e) {}
+                                String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
+                                
+                                KUID key = toKUID(value);
+                                dht.get(key, new FindValueListener() {
+                                    public void foundValue(KUID key, Collection values, long time) {
+                                        if(values == null || values.isEmpty()){
+                                            planetlabStats.RETRIEVE_FAILURES.incrementStat();
+                                        } else {
+                                            planetlabStats.RETRIEVE_SUCCESS.incrementStat();
+                                        }
+                                        synchronized(lock2) {
+                                            lock2.notify();
+                                        }
                                     }
-                                }
-                            });
+                                });
+                                try {
+                                    lock2.wait();
+                                } catch (InterruptedException e) {}
+                            }
                             livetime = System.currentTimeMillis() - startTime;
                         }
-                        //}
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    
                     try {
                         running = false;
                         dht.close();
