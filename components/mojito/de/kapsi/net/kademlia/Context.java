@@ -404,12 +404,7 @@ public class Context implements Runnable {
             return;
         }
         
-        if (messageDispatcherThread != null 
-                && Thread.currentThread() != messageDispatcherThread) {
-            eventDispatcher.run(event);
-        } else {
-            eventDispatcher.add(event);
-        }
+        eventDispatcher.add(event);
     }
     
     /**
