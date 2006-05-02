@@ -417,7 +417,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     private void addYetToBeQueried(ContactNode node, int hop) {
-        if(!queried.contains(node) 
+        if(!queried.contains(node.getNodeID()) 
                 && !node.equals(context.getLocalNode())) {
             toQuery.put(node.getNodeID(), node);
             hopMap.put(node.getNodeID(),new Integer(hop));
