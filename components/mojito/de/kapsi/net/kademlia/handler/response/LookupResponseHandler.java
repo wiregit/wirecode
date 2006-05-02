@@ -459,7 +459,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         public String toString() {
-            return node.toString() + " queryKey: " + queryKey;
+            return node.toString() + ", queryKey: " + queryKey;
         }
     }
 }

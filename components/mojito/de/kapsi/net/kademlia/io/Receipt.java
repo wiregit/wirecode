@@ -33,6 +33,14 @@ import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
+import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
+import de.kapsi.net.kademlia.messages.request.FindValueRequest;
+import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.messages.request.StoreRequest;
+import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
+import de.kapsi.net.kademlia.messages.response.FindValueResponse;
+import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.util.InputOutputUtils;
 
 public class Receipt {
@@ -133,6 +141,21 @@ public class Receipt {
         return this.nodeId == null || this.nodeId.equals(nodeId);
     }
     
+    boolean compareResponseType(ResponseMessage response) {
+        if (message instanceof PingRequest) {
+            return response instanceof PingResponse;
+        } else if (message instanceof FindNodeRequest) {
+            return response instanceof FindNodeResponse;
+        } else if (message instanceof FindValueRequest) {
+            return (response instanceof FindNodeResponse) 
+                || (response instanceof FindValueResponse);
+        } else if (message instanceof StoreRequest) {
+            return response instanceof StoreResponse;
+        }
+        
+        return false;
+    }
+    
     boolean send(DatagramChannel channel) throws IOException {
         if (channel.send(data, dst) != 0) {
             freeData();
@@ -160,18 +183,27 @@ public class Receipt {
         // C will respond to A's Ping
         // But C's NodeID is different
         // Make sure B is not C
-        if (compareNodeID(nodeId)) {
-            if (handler != null) {
-                handler.addTime(time());
-                handler.handleResponse(response, time());
-            }
-        } else {
+        if (!compareNodeID(nodeId)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Wrong NodeID! Expected " + this.nodeId + " but got " 
                         + response.getNodeID() + " from " + response.getSocketAddress());
             }
             
             handleTimeout();
+            return;
+        } else if (!compareResponseType(response)) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Wrong response type! Got " + response.getClass().getName() 
+                        + " for " + message.getClass().getName());
+            }
+            
+            handleTimeout();
+            return;
+        }
+        
+        if (handler != null) {
+            handler.addTime(time());
+            handler.handleResponse(response, time());
         }
     }
     
