@@ -393,6 +393,20 @@ public class KUID implements Serializable, Comparable {
     }
     
     /**
+     * Converts the current KUID into a Node ID if it isn't already.
+     */
+    public KUID toNodeID() {
+        return (isNodeID() ? this : new KUID(NODE_ID, id));
+    }
+    
+    /**
+     * Converts the current KUID into a Value ID if it isn't already.
+     */
+    public KUID toValueID() {
+        return (isValueID() ? this : new KUID(VALUE_ID, id));
+    }
+    
+    /**
      * Returns the current KUID as hex String
      */
     public String toHexString() {

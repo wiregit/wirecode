@@ -49,7 +49,6 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.util.CollectionUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class LookupResponseHandler extends AbstractResponseHandler {
@@ -212,6 +211,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private void handleFindNodeResponse(FindNodeResponse response, long time, int hop) throws IOException {
         
         Collection nodes = response.getValues();
+        System.out.println("Size: " + nodes.size());
+        
         for(Iterator it = nodes.iterator(); it.hasNext(); ) {
             ContactNode node = (ContactNode)it.next();
             
@@ -384,7 +385,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     private void addYetToBeQueried(ContactNode node, int hop) {
-        if (!isQueried(node) && !context.isLocalNodeID(node.getNodeID())) {
+        if (!isQueried(node) 
+                && !context.isLocalNodeID(node.getNodeID())) {
             toQuery.put(node.getNodeID(), node);
             hopMap.put(node.getNodeID(), new Integer(hop));
         }
@@ -402,7 +404,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     private void fireFound(final Collection c, final long time) {
-        System.out.println(CollectionUtils.toString(c));
         context.fireEvent(new Runnable() {
             public void run() {
                 if (!isStopped()) {
@@ -455,6 +456,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         
         public Object setValue(Object o) {
             throw new UnsupportedOperationException("This is an immutable class");
+        }
+        
+        public String toString() {
+            return node.toString() + " queryKey: " + queryKey;
         }
     }
 }

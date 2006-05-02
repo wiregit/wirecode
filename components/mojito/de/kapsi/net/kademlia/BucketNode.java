@@ -107,7 +107,7 @@ public class BucketNode extends Node {
     public List split() {
         BucketNode leftBucket = new BucketNode(getNodeID(), depth+1);
         BucketNode rightBucket = new BucketNode(getNodeID().set(depth), depth+1);
-        if (!replacementCache.isEmpty()) {
+        if (!getReplacementCache().isEmpty()) {
             if(LOG.isErrorEnabled()) {
                 LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
             }

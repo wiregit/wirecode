@@ -431,12 +431,12 @@ public class Context implements Runnable {
         lookupManager.lookup(key, listener);
     }
     
-    public void lookup(KUID lookup, LookupListener listener) throws IOException {
-        lookupManager.lookup(lookup, listener);
-    }
-    
     public void lookup(KUID lookup) throws IOException {
         lookupManager.lookup(lookup);
+    }
+    
+    public void lookup(KUID lookup, LookupListener listener) throws IOException {
+        lookupManager.lookup(lookup, listener);
     }
     
     public void bootstrap(SocketAddress address, BootstrapListener listener) throws IOException {
@@ -696,7 +696,8 @@ public class Context implements Runnable {
             this.keyValues = Arrays.asList(new KeyValue[]{keyValue});
             this.listener = listener;
             
-            lookup((KUID)keyValue.getKey(), this);
+            KUID nodeId = ((KUID)keyValue.getKey()).toNodeID();
+            lookup(nodeId, this);
         }
         
         public void response(ResponseMessage response, long time) {

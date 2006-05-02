@@ -395,7 +395,7 @@ public class PatriciaRouteTable implements RoutingTable {
     
     private boolean removeNodeAndReplace(KUID nodeId, BucketNode bucket,boolean force) {
         ContactNode replacement = bucket.getMostRecentlySeenCachedNode(true);
-        if(replacement != null) {
+        if (replacement != null) {
             nodesTrie.remove(nodeId);
             bucket.decrementNodeCount();
             put(replacement.getNodeID(),replacement,false);
@@ -404,7 +404,7 @@ public class PatriciaRouteTable implements RoutingTable {
             }
             touchBucket(bucket);
             return true;
-        } else if(force){
+        } else if (force) {
             nodesTrie.remove(nodeId);
             bucket.decrementNodeCount();
             if (LOG.isTraceEnabled()) {
@@ -446,6 +446,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 if (oldNode.getTimeStamp() <= node.getTimeStamp()) {
                     iter.remove();
                     add = true;
+                    break;
                 }
             }
         } else {
