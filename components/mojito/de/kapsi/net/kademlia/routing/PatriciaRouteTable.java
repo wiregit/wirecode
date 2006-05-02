@@ -55,6 +55,7 @@ import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 import de.kapsi.net.kademlia.util.BucketUtils;
+import de.kapsi.net.kademlia.util.CollectionUtils;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
@@ -169,6 +170,10 @@ public class PatriciaRouteTable implements RoutingTable {
         File file = new File(RouteTableSettings.ROUTETABLE_FILE);
         if (file.exists() && file.isFile() && file.canRead()) {
             
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Loading routing table from file "+file);
+            };
+            
             ObjectInputStream in = null;
             try {
                 FileInputStream fin = new FileInputStream(file);
@@ -176,15 +181,32 @@ public class PatriciaRouteTable implements RoutingTable {
                 in = new ObjectInputStream(gzin);
                 
                 KUID nodeId = (KUID)in.readObject();
-                if (!nodeId.equals(context.getLocalNodeID())) {
-                    return false;
-                }
-                
                 PatriciaTrie bucketsTrie = (PatriciaTrie)in.readObject();
                 PatriciaTrie nodeTrie = (PatriciaTrie)in.readObject();
-                this.bucketsTrie = bucketsTrie;
-                this.nodesTrie = nodeTrie;
+                //local nodeID changed?
+                if (!nodeId.equals(context.getLocalNodeID())) {
+                    //rebuild routing table, inserting the most recently seen nodes first, 
+                    //then the least recently failed and finally the most recently failed
+                    
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Node ID changed, rebuilding routing table");
+                    };
+                    
+                    List nodesList = nodeTrie.values();
+                    nodesList = BucketUtils.sortLastDeadOrAlive(nodesList);
+                    for (Iterator iter = nodesList.iterator(); iter.hasNext();) {
+                        ContactNode node = (ContactNode) iter.next();
+                        if(node.getNodeID().equals(nodeId)) continue;
+                        put(node.getNodeID(),node,false);
+                    }
+                } else {
+                    this.bucketsTrie = bucketsTrie;
+                    this.nodesTrie = nodeTrie;
+                }
                 
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Finished loading routing table. Now refreshing buckets");
+                };
                 //refresh the buckets
                 refreshBuckets(true);
                 
@@ -218,6 +240,11 @@ public class PatriciaRouteTable implements RoutingTable {
             out.writeObject(bucketsTrie);
             out.writeObject(nodesTrie);
             out.flush();
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Finished storing routing table");
+            };
+            
             return true;
         } catch (FileNotFoundException e) {
             LOG.error("PatriciaRouteTable file not found exception: ", e);

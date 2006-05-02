@@ -34,7 +34,7 @@ public class ContactNode extends Node {
     
     private int failures = 0;
     
-    private long firstAliveTime = 0L;
+    private long lastDeadOrAliveTime = 0L;
     
     private boolean isPinged;
     
@@ -67,6 +67,7 @@ public class ContactNode extends Node {
     
     public boolean failure() {
         failures++;
+        lastDeadOrAliveTime = System.currentTimeMillis();
         return isDead();
     }
     
@@ -77,6 +78,7 @@ public class ContactNode extends Node {
     public void setUnknown() {
         failures = 0;
         setTimeStamp(0L);
+        lastDeadOrAliveTime = 0L;
     }
     
     public boolean isPinged() {
@@ -101,6 +103,10 @@ public class ContactNode extends Node {
         return false;
     }
     
+    public long getLastDeadOrAliveTime() {
+        return lastDeadOrAliveTime;
+    }
+
     public int getFailureCount() {
         return failures;
     }
@@ -108,9 +114,7 @@ public class ContactNode extends Node {
     public void alive() {
         super.alive();
         failures = 0;
-        if(firstAliveTime == 0L) {
-            firstAliveTime = System.currentTimeMillis();
-        }
+        lastDeadOrAliveTime = System.currentTimeMillis();
     }
     
     public SocketAddress getSocketAddress() {
@@ -140,6 +144,13 @@ public class ContactNode extends Node {
         return buffer.toString();
     }
     
+    
+    
+    public void setTimeStamp(long timestamp) {
+        super.setTimeStamp(timestamp);
+        lastDeadOrAliveTime = timestamp;
+    }
+
     public static String toString(KUID nodeId, SocketAddress address) {
         if (nodeId != null) {
             if (address != null) {

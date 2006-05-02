@@ -25,7 +25,7 @@ public abstract class Node implements Serializable {
     
     private KUID nodeId;
     
-    private long timeStamp = 0L;
+    private transient long timeStamp = 0L;
     
     public Node(KUID nodeId) {
         if (nodeId == null) {

@@ -29,6 +29,7 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.routing.RoutingTable;
+import de.kapsi.net.kademlia.settings.ContextSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
@@ -40,7 +41,7 @@ public class RoutingTableTest {
      * @param args
      */
     public static void main(String[] args) {
-        KademliaSettings.REPLICATION_PARAMETER.setValue(2);
+        KademliaSettings.REPLICATION_PARAMETER.setValue(4);
         RouteTableSettings.MAX_LIVE_NODE_FAILURES.setValue(2);
         
         DHT dht = new DHT();
@@ -59,7 +60,8 @@ public class RoutingTableTest {
 //        testRemoveNode(routingTable);
 //        testLiveNodesOnly(routingTable);
 //        testreplaceBucketStaleNodes(routingTable);
-        testreplaceBucketUnknownNodes(routingTable);
+//        testreplaceBucketUnknownNodes(routingTable);
+        testStoreLoadRoutingTable(dht, routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
         try {
@@ -194,8 +196,48 @@ public class RoutingTableTest {
         routingTable.handleFailure(node1.getNodeID());
         routingTable.handleFailure(node1.getNodeID());
         routingTable.handleFailure(node1.getNodeID());
-        
     }
     
+
+    public static void testStoreLoadRoutingTable(DHT dht, RoutingTable routingTable){
+        byte[] prefix = new byte[1];
+        prefix[0] = (byte)(0x01);
+        ContactNode node3;
+        ContactNode node4;
+        try {
+            ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30010));
+            routingTable.add(node1,true);
+            Thread.sleep(50);
+            ContactNode node2 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30011));
+            routingTable.add(node2,true);
+            Thread.sleep(50);
+            node3 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30012));
+            routingTable.add(node3,true);
+            Thread.sleep(50);
+            node4 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30013));
+            routingTable.add(node4,true);
+            node4.failure();
+            Thread.sleep(50);
+            node1.failure();
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+        System.out.println(routingTable.toString());
+        routingTable.store();
+        routingTable.clear();
+        System.out.println(routingTable.toString());
+        try {
+            dht.close();
+            dht = new DHT();
+            KUID newNodeId = KUID.createRandomNodeID(addr);
+            ContextSettings.setLocalNodeID(addr,newNodeId.getBytes());
+            dht.bind(addr);
+            routingTable = dht.getContext().getRouteTable();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        routingTable.load();
+        System.out.println(routingTable.toString());
+    }
     
 }

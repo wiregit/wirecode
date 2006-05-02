@@ -65,4 +65,43 @@ public final class BucketUtils {
         });
         return bucketList;
     }
+    
+    /**
+     * Sorts the contacts from most recently seen to
+     * least recently seen based on their <tt>LastDeadOrAliveTime</tt>.
+     * 
+     * Used when loading the routing table
+     */
+    public static List sortLastDeadOrAlive(List nodesList) {
+        Collections.sort(nodesList, new Comparator() {
+            public int compare(Object a, Object b) {
+                ContactNode n1 = (ContactNode)a;
+                ContactNode n2 = (ContactNode)b;
+                long t1 = n1.getLastDeadOrAliveTime();
+                long t2 = n2.getLastDeadOrAliveTime();
+                if(!n1.hasFailed() && !n2.hasFailed()) {
+                    if (t1 == t2) {
+                        return 0;
+                    } else if (t1 > t2) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                } else if(n1.hasFailed() && !n2.hasFailed()) {
+                    return 1;
+                } else if (!n1.hasFailed() && n2.hasFailed()) {
+                    return -1;
+                } else {
+                    if (t1 == t2) {
+                        return 0;
+                    } else if (t1 > t2) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                }
+            }
+        });
+        return nodesList;
+    }
 }

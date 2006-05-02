@@ -299,7 +299,6 @@ public class Context implements Runnable {
             localNode = new ContactNode(nodeId, address);
             localNode.setTimeStamp(Long.MAX_VALUE);
             routeTable.add(localNode, false);
-            
             messageDispatcher.bind(address);
         //}
     }
