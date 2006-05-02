@@ -1,17 +1,15 @@
-package com.limegroup.gnutella.http;
+package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
-import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ReadState;
 
-public class ReadConsumer extends ReadState {
+public class ReadSkipState extends ReadState {
     
     private long leftToRead;
     
-    public ReadConsumer(long length) {
+    public ReadSkipState(long length) {
         this.leftToRead = length;
     }
     

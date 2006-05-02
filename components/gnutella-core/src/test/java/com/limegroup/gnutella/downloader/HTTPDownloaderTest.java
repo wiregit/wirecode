@@ -2,12 +2,16 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Collections;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -156,11 +160,9 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
         down.stop();
 
 
-		str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n\r\nx";
+		str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n";
 		down = newHTTPDownloader(str);
 		readHeaders(down);
-		assertEquals('x', 
-		    ((ByteReader)PrivilegedAccessor.getValue(down,"_byteReader")).read());
 		down.stop();
 		
 		str = "200 OK\r\n";
@@ -185,13 +187,20 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
     }
     
     private static HTTPDownloader newHTTPDownloader(String s) throws Throwable {
-        return (HTTPDownloader)PrivilegedAccessor.invokeConstructor(
-            HTTPDownloader.class, new Object[] {s});
+        s += "\r\n";
+        SimpleReadHeaderState reader = new SimpleReadHeaderState(null);
+        reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
+        RemoteFileDesc rfd = new RemoteFileDesc("", 1, 1, "file", 1, new byte[16], 1, 
+                                                false, 1, false, null, Collections.EMPTY_SET,
+                                                false, false, "", 1, Collections.EMPTY_SET, 1);
+        HTTPDownloader d = new HTTPDownloader(rfd, null, false);
+        PrivilegedAccessor.setValue(d, "_headerReader", reader);
+        return d;
     }
     
     private static void readHeaders(HTTPDownloader d) throws Throwable {
         try {
-            PrivilegedAccessor.invokeMethod(d, "readHeaders", null);
+            PrivilegedAccessor.invokeMethod(d, "parseHeaders", null);
         } catch(Exception e) {
             if ( e.getCause() != null ) 
                 throw e.getCause();

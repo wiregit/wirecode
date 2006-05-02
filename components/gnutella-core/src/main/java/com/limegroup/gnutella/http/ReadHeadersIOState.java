@@ -51,7 +51,8 @@ public abstract class ReadHeadersIOState extends ReadState {
             int read = 0;
             
             while(buffer.hasRemaining() && (read = rc.read(buffer)) > 0) {
-                stat.addData(read);
+                if(stat != null)
+                    stat.addData(read);
                 amountRead += read;
             }
             

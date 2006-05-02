@@ -19,21 +19,22 @@ public class BufferUtils {
     /**
      * Cleans some data from the buffer.
      * Returns how much more needs to be deleted.
+     * 
+     * The data in buffer is expected to be in 'reading' position.
+     * That is, position should be at the end of the data, limit should be capacity.
      */
     public static long delete(ByteBuffer buffer, long amountToDelete) {
         if (buffer.position() <= amountToDelete) {
             amountToDelete -= buffer.position();
             buffer.clear();
         } else {
-            int keep = (int) amountToDelete - buffer.position();
-            // assume keep is 3, we want to ditch ABCD but keep EFG
-            // now: [ABCDEFG* ] where * is position, ] is limit and capacity
+            // begin: [ABCDEFG* ] where * is position, ] is limit and capacity
             buffer.flip();
-            // now: [*BCDEFG^ ] where * is position, ^ is limit, ] is capacity
-            buffer.position(buffer.limit() - keep);
-            // now: [ABCD*FG^ ] where * is position, ^ is limit, ] is capacity
+            // now  : [*BCDEFG^ ] where * is position, ^ is limit, ] is capacity
+            buffer.position((int)amountToDelete);
+            // now  : [ABCD*FG^ ] where * is position, ^ is limit, ] is capacity
             buffer.compact();
-            // now: [EFG* ] where * is position, ] is limit and capacity
+            // end  : [EFG*     ] where * is position, ] is limit and capacity
 
             amountToDelete = 0;
         }

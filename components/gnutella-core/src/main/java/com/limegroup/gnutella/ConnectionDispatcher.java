@@ -72,7 +72,8 @@ public class ConnectionDispatcher {
      * 
      * @param word
      * @param client
-     * @param newThread
+     * @param newThread whether or not a new thread is necessary when dispatching
+     *                  to a blocking protocol.
      */
     public void dispatch(final String word, final Socket client, boolean newThread) {
         try {
@@ -106,8 +107,8 @@ public class ConnectionDispatcher {
         // Conversely, if 'newThread' is false, the connection has already been given its own
         // thread, so the fact that acceptConnection will block is okay.
         //
-        // The others perform no blocking operations, so either way, it is okay to process
-        // them immediately.
+        // The protocols within this switch perform no blocking operations, it is always 
+        // okay to process them immediately.
         switch(protocol) {
         case GNUTELLA:
             HTTPStat.GNUTELLA_REQUESTS.incrementStat();
@@ -126,6 +127,10 @@ public class ConnectionDispatcher {
             HTTPStat.CHAT_REQUESTS.incrementStat();
             ChatManager.instance().accept(client);
             return;
+        case GIV:
+            HTTPStat.GIV_REQUESTS.incrementStat();
+            RouterService.getDownloadManager().acceptDownload(client);
+            return;            
         case UNKNOWN:
             HTTPStat.UNKNOWN_REQUESTS.incrementStat();
             if (LOG.isErrorEnabled())
@@ -150,10 +155,6 @@ public class ConnectionDispatcher {
                     HTTPStat.HEAD_REQUESTS.incrementStat();
                     RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.HEAD, client, false);
                     break;
-                case GIV:
-                    HTTPStat.GIV_REQUESTS.incrementStat();
-                    RouterService.getDownloadManager().acceptDownload(client);
-                    break;
                 case MAGNET:
                     HTTPStat.MAGNET_REQUESTS.incrementStat();  
                     ExternalControl.fireMagnet(client);
@@ -165,7 +166,7 @@ public class ConnectionDispatcher {
                 
                 // We must not close the connection at this point, because some things may
                 // have only done a temporary blocking operation and then handed the socket
-                // off to a callback (such as DownloadManager parsing the GIV).
+                // off to a callback.
             }
         };
         

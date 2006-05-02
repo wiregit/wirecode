@@ -39,7 +39,13 @@ import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.io.AbstractChannelInterestRead;
+import com.limegroup.gnutella.io.BufferUtils;
+import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.ConnectObserver;
+import com.limegroup.gnutella.io.InterestReadChannel;
+import com.limegroup.gnutella.io.NBSocket;
+import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -936,25 +942,18 @@ public class DownloadManager implements BandwidthTracker {
      *     @requires "GIV " was just read from s
      */
     public void acceptDownload(Socket socket) {
-        String file = null;
+        ((NIOMultiplexor)socket).setReadObserver(new GivParser(socket));
+    }
+    
+    private void handleGIV(Socket socket, GIVLine line) {
+        String file = line.file;
         int index = 0;
-        byte[] clientGUID = null;
-
-        try {
-            // 1. Read GIV line BEFORE acquiring lock, since this may block.
-            GIVLine line = parseGIV(socket);
-            file = line.file;
-            index = line.index;
-            clientGUID = line.clientGUID;
-        } catch (IOException e) {
-            IOUtils.close(socket);
-            return;
-        }
+        byte[] clientGUID = line.clientGUID;
+        
         
         // if the push was sent through udp, make sure we cancel the failover push.
         cancelUDPFailover(clientGUID);
         
-        // 2. Attempt to give to an existing downloader.
         synchronized (this) {
             if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), socket))
                 return;
@@ -972,8 +971,6 @@ public class DownloadManager implements BandwidthTracker {
         }
         
         // Will only get here if no matching push existed.
-
-        // 3. We never requested the file or already got it. Kill it.
         IOUtils.close(socket);
     }
 
@@ -1425,61 +1422,68 @@ public class DownloadManager implements BandwidthTracker {
             this.clientGUID=clientGUID;
         }
     }
+    
+    private class GivParser extends AbstractChannelInterestRead {
+        private final Socket socket;
+        private final StringBuffer sb = new StringBuffer();
+        
+        GivParser(Socket socket) {
+            this.socket = socket;
+        }
 
-    /** 
-     * Returns the file, index, and client GUID from the GIV request from s.
-     * The input stream of s is positioned just after the GIV request,
-     * immediately before any HTTP.  If s is closed or the line couldn't
-     * be parsed, throws IOException.
-     *     @requires "GIV " just read from s
-     *     @modifies s's input stream.
-     */
-    private static GIVLine parseGIV(Socket s) throws IOException {
-        //1. Read  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
-        String command;
-        try {
-            //The try-catch below is a work-around for JDK bug 4091706.
-            InputStream istream=null;
+        protected int getBufferSize() {
+            return 1024;
+        }
+
+        public void handleRead() throws IOException {
+            // Fill up our buffer as much we can.
+            while(true) {
+                int read = 0;
+                while(buffer.hasRemaining() && (read = source.read(buffer)) > 0);
+                if(buffer.position() == 0) {
+                    if(read == -1)
+                        close();
+                    break;
+                }
+                
+                buffer.flip();
+                GIVLine giv = null;
+                if(BufferUtils.readLine(buffer, sb))
+                    giv = parseLine(sb.toString());
+                
+                buffer.compact();
+                if(giv != null) {
+                    handleGIV(socket, giv);
+                    break;
+                }
+            }
+        }
+        
+        private GIVLine parseLine(String command) throws IOException{
+            //2. Parse and return the fields.
             try {
-                istream = s.getInputStream();
-            } catch (Exception e) {
+                //a) Extract file index.  IndexOutOfBoundsException
+                //   or NumberFormatExceptions will be thrown here if there's
+                //   a problem.  They're caught below.
+                int i=command.indexOf(":");
+                int index=Integer.parseInt(command.substring(0,i));
+                //b) Extract clientID.  This can throw
+                //   IndexOutOfBoundsException or
+                //   IllegalArgumentException, which is caught below.
+                int j=command.indexOf("/", i);
+                byte[] guid=GUID.fromHexString(command.substring(i+1,j));
+                //c). Extract file name.
+                String filename=URLDecoder.decode(command.substring(j+1));
+    
+                return new GIVLine(filename, index, guid);
+            } catch (IndexOutOfBoundsException e) {
                 throw new IOException();
-            }
-            ByteReader br = new ByteReader(istream);
-            command = br.readLine();      // read in the first line
-            if (command==null)
+            } catch (NumberFormatException e) {
                 throw new IOException();
-            String next=br.readLine();    // read in empty line
-            if (next==null || (! next.equals(""))) {
+            } catch (IllegalArgumentException e) {
                 throw new IOException();
-            }
-        } catch (IOException e) {      
-            throw e;                   
-        }   
-
-        //2. Parse and return the fields.
-        try {
-            //a) Extract file index.  IndexOutOfBoundsException
-            //   or NumberFormatExceptions will be thrown here if there's
-            //   a problem.  They're caught below.
-            int i=command.indexOf(":");
-            int index=Integer.parseInt(command.substring(0,i));
-            //b) Extract clientID.  This can throw
-            //   IndexOutOfBoundsException or
-            //   IllegalArgumentException, which is caught below.
-            int j=command.indexOf("/", i);
-            byte[] guid=GUID.fromHexString(command.substring(i+1,j));
-            //c). Extract file name.
-            String filename=URLDecoder.decode(command.substring(j+1));
-
-            return new GIVLine(filename, index, guid);
-        } catch (IndexOutOfBoundsException e) {
-            throw new IOException();
-        } catch (NumberFormatException e) {
-            throw new IOException();
-        } catch (IllegalArgumentException e) {
-            throw new IOException();
-        }          
+            }          
+        }
     }
 
 

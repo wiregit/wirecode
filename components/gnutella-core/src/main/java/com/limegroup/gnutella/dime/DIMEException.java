@@ -12,6 +12,7 @@ public class DIMEException extends IOException {
     }
     
     public DIMEException(Throwable cause) {
+        super(cause.getMessage());
         initCause(cause);
     }
 

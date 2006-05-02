@@ -42,7 +42,6 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
-import com.limegroup.gnutella.http.ReadConsumer;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.io.IOState;
@@ -51,6 +50,7 @@ import com.limegroup.gnutella.io.IOStateObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.io.ReadSkipState;
 import com.limegroup.gnutella.io.ReadState;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.gnutella.io.ThrottleReader;
@@ -807,7 +807,7 @@ public class HTTPDownloader implements BandwidthTracker {
             observer.handleIOException(new IOException("unknown content-length, can't consume"));
             
         observerHandler.setDelegate(observer);
-        _stateMachine.addState(new ReadConsumer(contentLength));
+        _stateMachine.addState(new ReadSkipState(contentLength));
     }
 
     /*
@@ -1482,8 +1482,17 @@ public class HTTPDownloader implements BandwidthTracker {
     
     private class DownloadState extends ReadState {
         private long currPos = _initialReadingPoint;
+        private volatile boolean doingWrite;
+        
+        
+        void writeDone() {
+            doingWrite = false;
+        }
 
         protected boolean processRead(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
+            if(doingWrite)
+                return false;
+            
             boolean dataLeft = false;
             try {
                 LOG.debug("Doing read");
@@ -1606,7 +1615,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(!_incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array())) {
                     InterestReadChannel irc = (InterestReadChannel)rc;
                     irc.interest(false);
-                    _incompleteFile.writeBlockWithCallback(filePosition, dataStart, dataLength, buffer.array(), new DownloadRestarter(irc, buffer));
+                    doingWrite = true;
+                    _incompleteFile.writeBlockWithCallback(filePosition, dataStart, dataLength, buffer.array(),
+                                                           new DownloadRestarter(irc, buffer, this));
                     return false;
                 }
                 
@@ -1620,22 +1631,22 @@ public class HTTPDownloader implements BandwidthTracker {
 	}
     
     private static class DownloadRestarter implements VerifyingFile.WriteCallback {
+        private final DownloadState downloader;
         private final InterestReadChannel irc;
         private final ByteBuffer buffer;
         
-        DownloadRestarter(InterestReadChannel irc, ByteBuffer buffer) {
+        DownloadRestarter(InterestReadChannel irc, ByteBuffer buffer, DownloadState downloader) {
             this.irc = irc;
             this.buffer = buffer;
+            this.downloader = downloader;
         }
         
         public void writeScheduled() {
             buffer.clear();
+            downloader.writeDone();
             irc.interest(true);
         }
-        
     }
-    
-
 
     /** 
      * Stops this immediately.  This method is always safe to call.
