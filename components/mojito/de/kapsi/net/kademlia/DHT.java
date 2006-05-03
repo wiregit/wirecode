@@ -122,7 +122,12 @@ public class DHT implements Runnable {
         return context;
     }
     
-    public void put(KUID key, byte[] value, StoreListener l) 
+    public void put(KUID key, byte[] value) 
+            throws IOException {
+        put(key, value, null);
+    }
+    
+    public void put(KUID key, byte[] value, StoreListener listener) 
             throws IOException {
         
         try {
@@ -131,7 +136,7 @@ public class DHT implements Runnable {
             Database database = context.getDatabase();
             synchronized(database) {
                 if(database.add(keyValue)){
-                    context.store(keyValue, l);
+                    context.store(keyValue, listener);
                     keyValue.setRepublishTime(System.currentTimeMillis());
                 }
             }

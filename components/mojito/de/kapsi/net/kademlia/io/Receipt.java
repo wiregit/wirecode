@@ -41,7 +41,6 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
-import de.kapsi.net.kademlia.util.InputOutputUtils;
 
 public class Receipt {
     

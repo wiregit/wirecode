@@ -41,16 +41,18 @@ public final class InputOutputUtils {
        return baos.toByteArray();
    }
    
-   public static Message deserialize(SocketAddress src, byte[] data) throws MessageFormatException {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(data);
-            GZIPInputStream gz = new GZIPInputStream(bais);
-            MessageInputStream in = new MessageInputStream(gz);
-            Message message = in.readMessage(src);
-            in.close();
-            return message;
-        } catch (IOException e) {
-            throw new MessageFormatException(e.getMessage());
-        }
-    }
+   public static Message deserialize(SocketAddress src, byte[] data) 
+           throws MessageFormatException, IOException {
+       ByteArrayInputStream bais = new ByteArrayInputStream(data);
+       
+       try {
+           GZIPInputStream gz = new GZIPInputStream(bais);
+           MessageInputStream in = new MessageInputStream(gz);
+           Message message = in.readMessage(src);
+           in.close();
+           return message;
+       } catch (IOException err) {
+           throw new MessageFormatException(err);
+       }
+   }
 }

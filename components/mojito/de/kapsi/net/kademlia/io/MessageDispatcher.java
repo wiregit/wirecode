@@ -58,7 +58,6 @@ import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
-import de.kapsi.net.kademlia.util.InputOutputUtils;
 
 public class MessageDispatcher implements Runnable {
     
@@ -157,8 +156,9 @@ public class MessageDispatcher implements Runnable {
             selector.close(); 
         } catch (IOException ignore) {}
         
+        messageMap.clear();
+        
         synchronized (queueLock) {
-            messageMap.clear();
             outputQueue.clear();
         }
     }
@@ -204,13 +204,9 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    /**
-     * Returns the number of remaining Messages in
-     * the output Queue
-     */
-    private int writeNext() throws IOException {
+    public void processWrite() throws IOException {
         synchronized (queueLock) {
-            if (!outputQueue.isEmpty()) {
+            while(!outputQueue.isEmpty()) {
                 Receipt receipt = (Receipt)outputQueue.removeFirst();
                 
                 if (receipt.send(channel)) {
@@ -225,15 +221,46 @@ public class MessageDispatcher implements Runnable {
                 } else {
                     // Dang! Re-Try next time!
                     outputQueue.addFirst(receipt);
+                    break;
                 }
             }
-            return outputQueue.size();
+            
+            interestWrite(!outputQueue.isEmpty());
         }
     }
     
     private ByteBuffer buffer = ByteBuffer.allocate(Receipt.MAX_PACKET_SIZE);
     
-    private boolean readNext() throws IOException {
+    private void processRead() throws IOException {
+        while(isRunning()) {
+            Message message = null;
+            try {
+                message = readMessage();
+            } catch (MessageFormatException err) {
+                LOG.error("Message Format Exception: ", err);
+                continue;
+            }
+            
+            if (message == null) {
+                break;
+            }
+            
+            Receipt receipt = null;
+            if (message instanceof ResponseMessage) {
+                receipt = (Receipt)messageMap.remove(message.getMessageID());
+                
+                if (receipt != null) {
+                    receipt.received();
+                }
+            }
+            
+            processMessage(receipt, message);
+        }
+        
+        interestRead(true); // We're always interested in reading
+    }
+    
+    private Message readMessage() throws MessageFormatException, IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
             int length = buffer.position();
@@ -244,26 +271,12 @@ public class MessageDispatcher implements Runnable {
             Message message = InputOutputUtils.deserialize(src, data);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
             networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
-            
-            Receipt receipt = null;
-            
-            if (message instanceof ResponseMessage) {
-                synchronized (queueLock) {
-                    receipt = (Receipt)messageMap.remove(message.getMessageID());
-                }
-                
-                if (receipt != null) {
-                    receipt.received();
-                }
-            }
-            
-            processMessage(receipt, message);
-            return true;
+            return message;
         }
-        return false;
+        return null;
     }
     
-    private void processMessage(Receipt receipt, Message message) throws IOException {
+    private void processMessage(Receipt receipt, Message message) {
         
         KUID nodeId = message.getNodeID();
         SocketAddress src = message.getSocketAddress();
@@ -271,7 +284,7 @@ public class MessageDispatcher implements Runnable {
         // Make sure we're not receiving messages from ourself.
         // The only exception are Pings/Pongs
         if (nodeId != null 
-                && nodeId.equals(context.getLocalNodeID())
+                && context.isLocalNodeID(nodeId)
                 && src.equals(context.getLocalSocketAddress())) {
             
             if (LOG.isErrorEnabled()) {
@@ -290,8 +303,7 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    private void processResponse(Receipt receipt, 
-            ResponseMessage response) throws IOException {
+    private void processResponse(Receipt receipt, ResponseMessage response) {
         
         // Check if we ever sent a such request...
         if (!response.verify()) {
@@ -309,27 +321,31 @@ public class MessageDispatcher implements Runnable {
         // longer handling the response. But it's nice to know
         // the Node is still alive! Do something with the info!
         
-        if (receipt != null) {
-            defaultHandler.handleResponse(response, receipt.time()); // BEFORE!
-            if (receipt.getHandler() != defaultHandler) {
-                receipt.handleResponse(response);
-            }
-            
-        } else {
-            // Make sure a singe Node cannot monopolize our resources
-            if (!filter.allow(response.getSocketAddress())) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(response.getContactNode() + " refused");
+        try {
+            if (receipt != null) {
+                defaultHandler.handleResponse(response, receipt.time()); // BEFORE!
+                if (receipt.getHandler() != defaultHandler) {
+                    receipt.handleResponse(response);
                 }
-                networkStats.FILTERED_MESSAGES.incrementStat();
-                // return;
+                
+            } else {
+                // Make sure a singe Node cannot monopolize our resources
+                if (!filter.allow(response.getSocketAddress())) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(response.getContactNode() + " refused");
+                    }
+                    networkStats.FILTERED_MESSAGES.incrementStat();
+                    // return;
+                }
+                
+                handleLateResponse(response);
             }
-            
-            handleLateResponse(response);
+        } catch (Throwable t) {
+            LOG.error("Response handler error: ", t);
         }
     }
     
-    private void processRequest(RequestMessage request) throws IOException {
+    private void processRequest(RequestMessage request) {
         // Make sure a singe Node cannot monopolize our resources
         if (!filter.allow(request.getSocketAddress())) {
             if (LOG.isTraceEnabled()) {
@@ -355,12 +371,12 @@ public class MessageDispatcher implements Runnable {
                 requestHandler.handleRequest(request);
                 defaultHandler.handleRequest(request); // AFTER!
             } catch (Throwable t) {
-                LOG.error("MessageHandler handle request error: ",t);
+                LOG.error("Request handler error: ",t);
             }
         }
     }
     
-    private void handleLateResponse(ResponseMessage response) throws IOException {
+    private void handleLateResponse(ResponseMessage response) {
         
         ContactNode node = response.getContactNode();
         
@@ -411,12 +427,12 @@ public class MessageDispatcher implements Runnable {
         
         while(isRunning()) {
             try {
-                
                 selector.select(SLEEP);
                 
-                while(readNext() && isRunning());
-                interestRead(true); // We're always interested in reading
+                // READ
+                processRead();
                 
+                // CLEANUP
                 if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
                     synchronized (queueLock) {
                         messageMap.cleanup();
@@ -424,16 +440,9 @@ public class MessageDispatcher implements Runnable {
                     lastCleanup = System.currentTimeMillis();
                 }
                 
-                // TODO propper throtteling.
-                int remaining = 0;
-                for(int i = 0; i < 10 && isRunning(); i++) {
-                    remaining = writeNext();
-                    if (remaining == 0) {
-                        break;
-                    }
-                }
-                interestWrite(remaining > 0);
-                    
+                // WRITE
+                processWrite();
+                
             } catch (ClosedChannelException err) {
                 // thrown as close() is called asynchron
                 //LOG.error(err);
