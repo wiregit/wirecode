@@ -38,6 +38,7 @@ import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.routing.RoutingTable;
+import de.kapsi.net.kademlia.settings.ContextSettings;
 
 public class DHT implements Runnable {
     
@@ -142,7 +143,7 @@ public class DHT implements Runnable {
     }
     
     public Collection get(KUID key) throws IOException {
-        return get(key, 0L);
+        return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
     }
     
     public Collection get(KUID key, long timeout) throws IOException {
