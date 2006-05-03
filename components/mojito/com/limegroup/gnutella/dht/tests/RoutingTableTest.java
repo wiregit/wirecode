@@ -41,7 +41,7 @@ public class RoutingTableTest {
      * @param args
      */
     public static void main(String[] args) {
-        KademliaSettings.REPLICATION_PARAMETER.setValue(4);
+        KademliaSettings.REPLICATION_PARAMETER.setValue(2);
         RouteTableSettings.MAX_LIVE_NODE_FAILURES.setValue(2);
         
         DHT dht = new DHT();
@@ -61,7 +61,8 @@ public class RoutingTableTest {
 //        testLiveNodesOnly(routingTable);
 //        testreplaceBucketStaleNodes(routingTable);
 //        testreplaceBucketUnknownNodes(routingTable);
-        testStoreLoadRoutingTable(dht, routingTable);
+//        testStoreLoadRoutingTable(dht, routingTable);
+        testMergeBuckets(routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
         try {
@@ -237,6 +238,29 @@ public class RoutingTableTest {
             e.printStackTrace();
         }
         routingTable.load();
+        System.out.println(routingTable.toString());
+    }
+    
+    public static void testMergeBuckets(RoutingTable routingTable) {
+//        byte[] prefix = new byte[1];
+//        prefix[0] = (byte)(0x01);
+        ContactNode node1 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        routingTable.add(node1,true);
+        ContactNode node2 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        routingTable.add(node2,true);
+        ContactNode node3 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        routingTable.add(node3,true);
+        ContactNode node4 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        routingTable.add(node4,true);
+        ContactNode node5 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        routingTable.add(node5,true);
+        ContactNode node6 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        routingTable.add(node6,true);
+        System.out.println(routingTable.toString());
+        routingTable.handleFailure(node4.getNodeID());
+        routingTable.handleFailure(node4.getNodeID());
+        routingTable.handleFailure(node5.getNodeID());
+        routingTable.handleFailure(node5.getNodeID());
         System.out.println(routingTable.toString());
     }
     

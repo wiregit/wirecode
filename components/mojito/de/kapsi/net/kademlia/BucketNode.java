@@ -56,6 +56,10 @@ public class BucketNode extends Node {
     public void decrementNodeCount() {
         --nodeCount;
     }
+    
+    public boolean isEmpty() {
+        return (nodeCount == 0);
+    }
 
     public void setNodeCount(int count) {
         nodeCount = count;
