@@ -332,19 +332,11 @@ public class Main {
         }
         md.reset();
         
-        if (line[0].equals("get")) {
-            dht.get(key, new LookupAdapter() {
-                public void found(KUID key, Collection values, long time) {
-                    System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                }
-            });
-        } else {
-            dht.getr(key, new LookupAdapter() {
-                public void found(KUID key, Collection values, long time) {
-                    System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                }
-            });
-        }
+        dht.get(key, new LookupAdapter() {
+            public void found(KUID key, Collection values, long time) {
+                System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
+            }
+        });
     }
     
     private static void load(DHT dht, String[] line) {

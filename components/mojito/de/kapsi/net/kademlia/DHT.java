@@ -24,6 +24,10 @@ import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.Collection;
+import java.util.Collections;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -31,9 +35,13 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 
 public class DHT implements Runnable {
+    
+    private static final Log LOG = LogFactory.getLog(DHT.class);
     
     private Context context;
     
@@ -133,22 +141,46 @@ public class DHT implements Runnable {
         }
     }
     
-    public Collection get(KUID key, LookupListener listener) throws IOException {
-        Collection values = context.getDatabase().get(key);
-        if (values != null) {
-            if (listener != null) {
-                listener.found(key, values, 0L);
-            }
-            return values;
-        } else {
-            return getr(key, listener);
-        }
+    public Collection get(KUID key) throws IOException {
+        return get(key, 0L);
     }
     
-    // TODO only for debugging purposes public
-    Collection getr(KUID key, LookupListener listener) throws IOException {
+    public Collection get(KUID key, long timeout) throws IOException {
+        final Collection[] values = new Collection[] {
+            Collections.EMPTY_LIST
+        };
+        
+        synchronized (values) {
+            context.get(key, new LookupListener() {
+                public void response(ResponseMessage response, long time) {}
+
+                public void timeout(KUID nodeId, SocketAddress address, 
+                        RequestMessage request, long time) {}
+                
+                public void found(KUID lookup, Collection c, long time) {
+                    values[0] = c;
+                    synchronized (values) {
+                        values.notify();
+                    }
+                }
+            });
+            
+            try {
+                values.wait(timeout);
+            } catch (InterruptedException err) {
+                LOG.error(err);
+            }
+        }
+        
+        return values[0];
+    }
+    
+    public void get(KUID key, LookupListener listener) throws IOException {
+        if (listener == null) {
+            throw new NullPointerException("LookupListener is null");
+        }
+        
         context.get(key, listener);
-        return null;
     }
     
     /*public boolean remove(Value value) {
