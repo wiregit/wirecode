@@ -62,8 +62,7 @@ public class BTDownloader implements Downloader {
 
 	public boolean isInactive() {
 		return _torrent.isPaused() || 
-		_torrent.hasStopped() || 
-		_torrent.isComplete();
+		(_torrent.hasStopped() && !_torrent.isComplete());
 	}
 
 	public int getInactivePriority() {
@@ -180,7 +179,13 @@ public class BTDownloader implements Downloader {
 	}
 
 	public boolean isCompleted() {
-		return _torrent.isComplete();
+		switch(_torrent.getState()) {
+		case Downloader.COMPLETE:
+		case Downloader.ABORTED:
+		case Downloader.DISK_PROBLEM:
+			return true;
+		}
+		return false;
 	}
 
 	public long getAmountVerified() {

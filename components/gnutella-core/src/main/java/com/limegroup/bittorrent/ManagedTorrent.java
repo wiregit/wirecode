@@ -72,7 +72,7 @@ public class ManagedTorrent {
 	/*
 	 * Indicates whether this download was stopped.
 	 */
-	private volatile boolean _stopped = true;
+	private volatile boolean _stopped, _started;
 	
 	/*
 	 * The list of known good TorrentLocations that we are not connected to at
@@ -200,9 +200,10 @@ public class ManagedTorrent {
 		enqueueTask(new Runnable() {
 			public void run() {
 				
-				if (!_stopped)
+				if (_started)
 					return;
 				_stopped = false;
+				_started = true;
 				
 				initializeTorrent();
 				initializeFolder();
@@ -297,6 +298,7 @@ public class ManagedTorrent {
 
 		if (!_couldNotSave) {
 			_paused = false;
+			_started = false;
 			_manager.wakeUp(this);
 			return true;
 		}
@@ -445,21 +447,22 @@ public class ManagedTorrent {
 	 * @see com.limegroup.gnutella.Downloader#getState()
 	 */
 	public int getState() {
+		if (_folder.isComplete())
+			return Downloader.COMPLETE;
+		
 		if (_stopped) {
 			if (_couldNotSave)
 				return Downloader.DISK_PROBLEM;
-			else if (_folder.isComplete())
-				return Downloader.COMPLETE;
 			else if (_trackerFailures > MAX_TRACKER_FAILURES)
 				return Downloader.GAVE_UP;
 			else if (_paused)
 				return Downloader.PAUSED;
+			else if (_started)
+				return Downloader.ABORTED;
 			else
 				return Downloader.QUEUED;
 		}
 
-		if (_folder.isComplete())
-			return Downloader.SEEDING;
 		if (_folder.isVerifying())
 			return Downloader.HASHING;
 		else if (_connections.size() > 0) {
@@ -469,7 +472,7 @@ public class ManagedTorrent {
 		} else if (_peers != null && _peers.size() > 0)
 			return Downloader.CONNECTING;
 		else if(_peers == null || _peers.size() == 0)
-			return Downloader.WAITING_FOR_TRACKER;
+			return Downloader.WAITING_FOR_RESULTS;
 		return Downloader.BUSY;
 	}
 

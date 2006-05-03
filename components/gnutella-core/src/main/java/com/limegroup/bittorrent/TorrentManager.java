@@ -38,6 +38,13 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.FileUtils;
 
+/**
+ * Class which manages the torrents that are currently being downloaded 
+ * and handles serialization and dispatching of incoming BT connections.
+ *   
+ * It duplicates a lot of code with DownloadManager and will eventually 
+ * be removed. 
+ */
 public class TorrentManager implements ConnectionAcceptor {
 	/*
 	 * the upload throttle we are using
@@ -50,9 +57,9 @@ public class TorrentManager implements ConnectionAcceptor {
 	private static final Log LOG = LogFactory.getLog(TorrentManager.class);
 
 	/**
-	 * The time in milliseconds between checkpointing downloads.dat. The more
+	 * The time in milliseconds between checkpointing torrents.dat. The more
 	 * often this is written, the less the lost data during a crash, but the
-	 * greater the chance that downloads.dat itself is corrupt.
+	 * greater the chance that torrents.dat itself is corrupt.
 	 */
 	private int SNAPSHOT_CHECKPOINT_TIME = 60 * 1000;
 
@@ -142,23 +149,18 @@ public class TorrentManager implements ConnectionAcceptor {
 
 		Runnable checkpointer = new Runnable() {
 			public void run() {
-				if (_active.size() > 0) { // optimization
-					// If the write failed, move the backup to the real.
-					if (!writeSnapshot())
-						copyBackupToReal();
+				synchronized(TorrentManager.this) {
+					if (_active.size() > 0 || _waiting.size() > 0) {
+						// If the write failed, move the backup to the real.
+						if (!writeSnapshot())
+							copyBackupToReal();
+					}
 				}
 			}
 		};
 		RouterService.schedule(checkpointer, SNAPSHOT_CHECKPOINT_TIME,
 				SNAPSHOT_CHECKPOINT_TIME);
 
-		Runnable waitingPimp = new Runnable() {
-			public void run() {
-				wakeUp();
-			}
-		};
-		RouterService.schedule(waitingPimp, 10 * 1000, 10 * 1000);
-		
 		// register ourselves as an acceptor.
 		StringBuffer word = new StringBuffer();
 		word.append((char)19);
@@ -293,7 +295,6 @@ public class TorrentManager implements ConnectionAcceptor {
 				BTMetaInfo info = (BTMetaInfo) iter.next();
 				ManagedTorrent torrent = new ManagedTorrent(info, this);
 				addTorrent(torrent); // 1
-				_callback.addDownload(torrent.getDownloader()); // 2
 			}
 			if (LOG.isDebugEnabled())
 				LOG.debug("snapshot read");
@@ -307,8 +308,7 @@ public class TorrentManager implements ConnectionAcceptor {
 	 * adds a Torrent. If we have an open slot, the torrent will be started
 	 * immediately. Otherwise it will be queued.
 	 * 
-	 * @param mt
-	 *            the <tt>ManagedTorrent</tt> to add.
+	 * @param mt the <tt>ManagedTorrent</tt> to add.
 	 */
 	public synchronized void addTorrent(ManagedTorrent mt) {
 		if (_active.contains(mt) || _waiting.contains(mt))
@@ -426,10 +426,7 @@ public class TorrentManager implements ConnectionAcceptor {
 	}
 
 	/**
-	 * Removes an active torrent from the list of active torrents and queues it
-	 * up unless it is not complete. If it is complete, it will be discarded. If
-	 * the Torrent is not active, it will be removed from the list of waiting
-	 * torrents.
+	 * Removes an active torrent from the list of active torrents.
 	 * 
 	 * @param mt
 	 *            the <tt>ManagedTorrent</tt> to remove
@@ -439,6 +436,9 @@ public class TorrentManager implements ConnectionAcceptor {
 			return;
 		_active.remove(mt);
 		_waiting.remove(mt);
+		
+		// remove from the gui as well.
+		torrentComplete(mt); 
 
 		writeSnapshot();
 		// wake up this to maintain the desired parallelism
@@ -461,8 +461,7 @@ public class TorrentManager implements ConnectionAcceptor {
 	 *            the <tt>ManagedTorrent</tt> that will be started
 	 */
 	public synchronized void wakeUp(ManagedTorrent torrent) {
-		if (_active.size() < getMaxActiveTorrents()
-				&& _waiting.contains(torrent)) {
+		if (_active.size() < getMaxActiveTorrents()) {
 			_waiting.remove(torrent);
 			_active.add(torrent);
 			torrent.start();
@@ -493,8 +492,7 @@ public class TorrentManager implements ConnectionAcceptor {
 	}
 
 	/**
-	 * shutdown all torrents, try to send word to all the trackers, so we don't
-	 * stop the torrent without a word.
+	 * shutdown all torrents.
 	 */
 	public synchronized void shutdown() {
 		for (Iterator iter = _active.iterator(); iter.hasNext();) {
@@ -503,20 +501,10 @@ public class TorrentManager implements ConnectionAcceptor {
 	}
 
 	/**
-	 * we will give torrents slight preference over http downloaders by reducing
-	 * the number of allowed http downloads by the number of active torrents.
-	 * 
-	 * @return number of active torrents
-	 */
-	public synchronized int getNumActiveTorrents() {
-		return _active.size();
-	}
-
-	/**
 	 * measures the bandwidth of all active torrents
 	 */
 	public synchronized void measureBandwidth() {
-		float currentTotalUp, currentTotalDown;
+		float currentTotalUp, currentTotalDown; 
 		currentTotalDown = currentTotalUp = 0.f;
 		boolean shouldCountAvg = false;
 		for (Iterator iter = _active.iterator(); iter.hasNext();) {
