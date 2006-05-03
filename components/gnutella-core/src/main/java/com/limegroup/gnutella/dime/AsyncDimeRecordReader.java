@@ -88,7 +88,7 @@ public class AsyncDimeRecordReader extends ReadState {
      * @return true if current still has space to read
      */
     private boolean fill(ByteBuffer current, ReadableByteChannel rc, ByteBuffer buffer) throws IOException {        
-        int read = BufferUtils.readAll(rc, current, buffer);
+        int read = BufferUtils.readAll(buffer, rc, current);
         LOG.debug("Filling current.  Left: " + current.remaining());
         if(current.hasRemaining()) {
             if(read == -1)

@@ -63,7 +63,7 @@ import org.apache.commons.logging.Log;
  * 13)                                     Throttle.release
  * 14) <remove from interest>
  *
- * If there are multiple listeners, steps 4 & 5 are repeated for each request, and steps 9 through 12
+ * If there are multiple listeners, steps 4 & 5 are repeated for each request, and steps 9 through 14
  * are performed on interested parties until there is no bandwidth available.  Another tick will
  * generate more bandwidth, which will allow previously interested parties to request/write/release.
  * Because interested parties are processed in FIFO order, all parties will receive equal access to

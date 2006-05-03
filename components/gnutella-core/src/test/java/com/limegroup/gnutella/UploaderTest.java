@@ -1036,7 +1036,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static HTTPDownloader addUploader(final UploadManager upman, 
                                               RemoteFileDesc rfd,
                                               String ip,
-                                              boolean block) throws IOException{
+                                              boolean block) throws Exception{
         //Allow some fudging to prevent race conditons.
         try { Thread.sleep(1000); } catch (InterruptedException e) { }
 
@@ -1092,7 +1092,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     private static void addThexHeader(HTTPDownloader dl) throws Exception {
         PrivilegedAccessor.invokeMethod(dl, "parseTHEXHeader",
-                "X-Thex-URI: " + fm.get((int)dl.getIndex()).getHashTree().httpStringValue());
+                fm.get((int)dl.getIndex()).getHashTree().httpStringValue());
     }
     
     private static void kill(HTTPDownloader downloader) {
@@ -1105,6 +1105,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         synchronized(observer) {
             dloader.connectHTTP(start, stop, queue, 0, observer);
             observer.wait();
+            dloader.parseHeaders();
         }
     }
     
@@ -1117,9 +1118,11 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             if(status.isConnected()) {
                 dloader.downloadThexBody(dloader.getRemoteFileDesc().getSHA1Urn(), observer);
                 observer.wait();
+                return dloader.getHashTree();
+            } else {
+                return null;
             }
         }
-        return dloader.getHashTree();
     }
     
     

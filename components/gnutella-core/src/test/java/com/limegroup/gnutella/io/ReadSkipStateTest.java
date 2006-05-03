@@ -45,93 +45,34 @@ public class ReadSkipStateTest extends BaseTestCase {
         assertEquals(47, BUFFER.flip().remaining());
         assertEquals(data, 53, 47, BUFFER.array(), 0, 47);
     }
-    /*
+    
     public void testComplexProcess() throws Exception {
-        String testString = "FIRST LINE\r\n" +
-                            "Header1: Value1\r\n" +
-                            "Header2: Value2\r\n" +
-                            "UnknownData\r\n" +
-                            "\r\n" +
-                            "Extra Data Leftover";
-        ByteBuffer buffer = ByteBuffer.wrap(testString.getBytes());
-        ReadBufferChannel channel = new ReadBufferChannel(buffer);
+        byte[] data = data(100);
+        ByteBuffer dbuf = ByteBuffer.wrap(data);
+        ReadBufferChannel channel = new ReadBufferChannel(dbuf);
+        ReadSkipState state = new ReadSkipState(53);
 
-        ByteBuffer scratch = ByteBuffer.allocate(2048);
-        HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        ReadHandshakeTester tester = new ReadHandshakeTester(support);
-        
-        buffer.limit("FIRS".length());
-        assertTrue(tester.process(channel, scratch));
-        assertFalse(tester.isProcessedConnectLine());
-        assertFalse(tester.isProcessedHeaders());
-        assertEquals("FIRS", tester.getCurrentHeader());
-        assertFalse(tester.isDoneConnect());
-        
-        buffer.limit("FIRST LINE\r\n".length());
-        assertTrue(tester.process(channel, scratch));
-        assertTrue(tester.isProcessedConnectLine());
-        assertFalse(tester.isProcessedHeaders());
-        assertEquals("", tester.getCurrentHeader());
-        assertEquals("FIRST LINE", tester.getConnectLine());
-        assertTrue(tester.isDoneConnect());
-        
-        buffer.limit("FIRST LINE\r\nHeader1: Value1".length());
-        assertTrue(tester.process(channel, scratch));
-        assertFalse(tester.isProcessedHeaders());
-        assertEquals("Header1: Value1", tester.getCurrentHeader());
-        assertEquals(0, support.getReadHandshakeResponse().props().size());
-        
-        buffer.limit("FIRST LINE\r\nHeader1: Value1\r\n".length());
-        assertTrue(tester.process(channel, scratch));
-        assertFalse(tester.isProcessedHeaders());
-        assertEquals("", tester.getCurrentHeader());
-        assertEquals(1, support.getReadHandshakeResponse().props().size());
-        assertEquals("Value1", support.getReadHandshakeResponse().props().get("Header1"));
-        
-        buffer.limit("FIRST LINE\r\nHeader1: Value1\r\nHeader2: Value2\r\nUnknownData\r\n".length());
-        assertTrue(tester.process(channel, scratch));
-        assertFalse(tester.isProcessedHeaders());
-        assertEquals("", tester.getCurrentHeader());
-        assertEquals(2, support.getReadHandshakeResponse().props().size());
-        assertEquals("Value1", support.getReadHandshakeResponse().props().get("Header1"));
-        assertEquals("Value2", support.getReadHandshakeResponse().props().get("Header2"));
-        
-        buffer.limit(testString.length());
-        assertFalse(tester.process(channel, scratch));
-        assertTrue(tester.isProcessedHeaders());
-        assertEquals("", tester.getCurrentHeader());
-        assertEquals(2, support.getReadHandshakeResponse().props().size());
-        assertEquals("Value1", support.getReadHandshakeResponse().props().get("Header1"));
-        assertEquals("Value2", support.getReadHandshakeResponse().props().get("Header2"));
-        
-        assertEquals("Extra Data Leftover".length(), scratch.position());
-        scratch.flip();
-        assertEquals("Extra Data Leftover", new String(scratch.array(), 0, scratch.limit()));
+        dbuf.limit(49);
+        assertTrue(state.process(channel, BUFFER));
+        assertTrue(state.process(channel, BUFFER));
+        dbuf.limit(55);
+        assertFalse(state.process(channel, BUFFER));
+        assertFalse(dbuf.hasRemaining());
+        assertEquals(2, BUFFER.flip().remaining());
+        assertEquals(data, 53, 2, BUFFER.array(), 0, 2);
     }
     
     public void testEOF() throws Exception {
-        String testString = "FIRST LINE\r\n" +
-                            "Header1: Value1\r\n" +
-                            "Header2: Value2\r\n";
-        ByteBuffer buffer = ByteBuffer.wrap(testString.getBytes());
-        ReadBufferChannel channel = new ReadBufferChannel(buffer, true);
+        byte[] data = data(100);
+        ByteBuffer dbuf = ByteBuffer.wrap(data);
+        ReadBufferChannel channel = new ReadBufferChannel(dbuf, true);
+        ReadSkipState state = new ReadSkipState(101);
 
-        ByteBuffer scratch = ByteBuffer.allocate(2048);
-        HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        ReadHandshakeTester tester = new ReadHandshakeTester(support);
         try {
-            tester.process(channel, scratch);
-            fail("should have IOXd");
+            state.process(channel, BUFFER);
+            fail("expected exception");
         } catch(IOException iox) {
             assertEquals("EOF", iox.getMessage());
         }
-        
-        assertTrue(tester.isProcessedConnectLine());
-        assertFalse(tester.isProcessedHeaders());
-
-        Properties props = support.getReadHandshakeResponse().props();
-        assertEquals(2, props.size());
-        assertEquals("Value1", props.get("Header1"));
-        assertEquals("Value2", props.get("Header2"));
-    } */
+    }
 }

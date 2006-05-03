@@ -951,9 +951,11 @@ public class UploadManager implements BandwidthTracker {
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
-        boolean wontAccept = size >= maxQueueSize || 
-			rqc.isDupe(sha1);
+        boolean wontAccept = size >= maxQueueSize || rqc.isDupe(sha1);
         int ret = -1;
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("Greedy: " + isGreedy + ", size: " + size + ", pos: " + posInQueue + ", maxS: " + maxQueueSize + ", dupe: " + rqc.isDupe(sha1));
 
         // if this uploader is greedy and at least on other client is queued
         // send him another limit reached reply.
@@ -988,8 +990,7 @@ public class UploadManager implements BandwidthTracker {
                 LOG.debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");
             if(limitReached || wontAccept) { 
                 if(LOG.isDebugEnabled())
-                    LOG.debug(uploader+" limited? "+limitReached+" wontAccept? "
-                      +wontAccept);
+                    LOG.debug(uploader+" limited? "+limitReached+" wontAccept? " +wontAccept);
                 return REJECTED; //we rejected this uploader
             }
             addToQueue(socket);

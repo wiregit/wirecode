@@ -42,93 +42,90 @@ public class BufferUtils {
     }
     
     /**
-     * Transfers all data from 'temporary' to 'dest', and then reads as much data
-     * as possible from 'channel' into 'dest'.
+     * Transfers all data from 'bufferSrc' to 'dst', then reads as much data
+     * as possible from 'channelSrc' to 'dst'.
      * This returns the last amount of data that could be read from the channel.
      * It does NOT return the total amount of data transferred.
      * 
-     * @param channel
-     * @param dest
-     * @param temporary
+     * @param bufferSrc
+     * @param channelSrc
+     * @param dst
      * @return The last amount of data that could be read from the channel.
      * @throws IOException
      */
-    public static int readAll(ReadableByteChannel channel, ByteBuffer dest, ByteBuffer temporary) throws IOException {
-        transfer(temporary, dest);
+    public static int readAll(ByteBuffer bufferSrc, ReadableByteChannel channelSrc, ByteBuffer dst) throws IOException {
+        transfer(bufferSrc, dst, true);
         int read = 0;
-        while(dest.hasRemaining() && (read = channel.read(dest)) > 0);
+        while(dst.hasRemaining() && (read = channelSrc.read(dst)) > 0);
         return read;
     }
     
     /**
-     * Transfers as much data as possible from from to to.
-     * The data in 'to' will be flipped prior to transferring & then compacted.
+     * Transfers as much data as possible from src to dst.
+     * The data in 'src' will be flipped prior to transferring & then compacted.
      * Returns however much data was transferred.
+     * 
+     * @param src
+     * @param dst
+     * @return The amount of data transferred
      */
-    public static int transfer(ByteBuffer from, ByteBuffer to) {
-        if(from == null)
-            return 0;
-        
-        int read = 0;
+    public static int transfer(ByteBuffer src, ByteBuffer dst) {
+        return transfer(src, dst, true);
+    }
 
-        if(from.position() > 0) {
-            from.flip();
-            int remaining = from.remaining();
-            int toRemaining = to.remaining();
-            if(toRemaining >= remaining) {
-                to.put(from);
-                read += remaining;
+    /**
+     * Transfers as much data as possible from src to dst.
+     * Returns how much data was transferred.
+     * The data in 'src' will NOT be flipped prior to transferring if needsFlip is false.
+     * 
+     * @param src
+     * @param dst
+     * @param needsFlip whether or not to flip src
+     * @return The amount of data transferred
+     */
+    public static int transfer(ByteBuffer src, ByteBuffer dst, boolean needsFlip) {
+        int read = 0;
+        if (src != null) {
+            if (needsFlip) {
+                if (src.position() > 0) {
+                    src.flip();
+                    read = doTransfer(src, dst);
+                    src.compact();
+                }
             } else {
-                int limit = from.limit();
-                int position = from.position();
-                from.limit(position + toRemaining);
-                to.put(from);
-                read += toRemaining;
-                from.limit(limit);
+                if (src.hasRemaining())
+                    read = doTransfer(src, dst);
             }
-            from.compact();
         }
         
         return read;
     }
-
+    
     /**
-     * Transfers as much data as possible from from to to.
-     * Returns how much data was transferred.
-     * The data in 'to' will NOT be flipped prior to transferring.
+     * Transfers data from 'src' to 'dst'.  This assumes that there
+     * is data in src and that it is non-null.  This also assumes that
+     * 'src' is already flipped & 'dst' is ready for writing.
      * 
-     * @param from
-     * @param to
-     * @return
+     * @param src
+     * @param dst
+     * @return The amount of data transferred
      */
-    public static int transfer(ByteBuffer from, ByteBuffer to, boolean needsFlip) {
-        if(needsFlip)
-            return transfer(from, to);
-        else {
-        
-        if(from == null)
-            return 0;
-        
+    private static int doTransfer(ByteBuffer src, ByteBuffer dst) {
         int read = 0;
-
-        if(from.hasRemaining()) {
-            int remaining = from.remaining();
-            int toRemaining = to.remaining();
-            if(toRemaining >= remaining) {
-                to.put(from);
-                read += remaining;
-            } else {
-                int limit = from.limit();
-                int position = from.position();
-                from.limit(position + toRemaining);
-                to.put(from);
-                read += toRemaining;
-                from.limit(limit);
-            }
+        int remaining = src.remaining();
+        int toRemaining = dst.remaining();
+        if(toRemaining >= remaining) {
+            dst.put(src);
+            read += remaining;
+        } else {
+            int limit = src.limit();
+            int position = src.position();
+            src.limit(position + toRemaining);
+            dst.put(src);
+            read += toRemaining;
+            src.limit(limit);
         }
-        
         return read;
-        }
     }
     
     /**

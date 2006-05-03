@@ -814,7 +814,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * Reads the headers from this, setting _initialReadingPoint and
      * _amountToRead.  Throws any of the exceptions listed in connect().  
      */
-	void parseHeaders() throws IOException {
+	public void parseHeaders() throws IOException {
         String connectLine = _headerReader.getConnectLine();
         Properties headers = _headerReader.getHeaders();
         
