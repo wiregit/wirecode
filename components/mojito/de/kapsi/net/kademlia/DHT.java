@@ -176,6 +176,10 @@ public class DHT implements Runnable {
     }
     
     public void get(KUID key, LookupListener listener) throws IOException {
+        if (!key.isValueID()) {
+            throw new IllegalArgumentException("Key must be a Value ID");
+        }
+        
         if (listener == null) {
             throw new NullPointerException("LookupListener is null");
         }
