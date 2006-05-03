@@ -270,7 +270,7 @@ public class ManagedTorrent {
 		
 		// we stopped, removing torrent from active list of
 		// TorrentManager
-		_manager.removeTorrent(this, _folder.isComplete());
+		_manager.removeTorrent(this);
 		if (LOG.isDebugEnabled())
 			LOG.debug("Torrent stopped!");
 	}
@@ -348,7 +348,7 @@ public class ManagedTorrent {
 		
 
 		if (_folder.isComplete())
-			saveCompleteFiles();
+			completeTorrentDownload();
 	}
 
 	void verificationComplete() {
@@ -384,7 +384,7 @@ public class ManagedTorrent {
 		BTInterval in = _folder.leaseRandom(btc.getAvailableRanges());
 		if (in != null)
 			btc.sendRequest(in);
-		else if (btc.getAvailableRanges().isEmpty()) {
+		else if (_folder.getNumWeMiss(btc.getAvailableRanges()) == 0) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("connection not interesting anymore");
 			btc.sendNotInterested();
@@ -418,7 +418,7 @@ public class ManagedTorrent {
 			LOG.info("file is complete");
 			enqueueTask(new Runnable(){
 				public void run(){
-					saveCompleteFiles();
+					completeTorrentDownload();
 				}
 			});
 		}
@@ -627,7 +627,7 @@ public class ManagedTorrent {
 	/**
 	 * saves the complete files to the shared folder
 	 */
-	private void saveCompleteFiles() {
+	private void completeTorrentDownload() {
 		if (_saved)
 			return;
 
@@ -660,6 +660,9 @@ public class ManagedTorrent {
 		
 		// tell the tracker we are a seed now
 		announceComplete();
+		
+		// tell the manager I am complete
+		_manager.torrentComplete(this);
 	}
 
 	/**

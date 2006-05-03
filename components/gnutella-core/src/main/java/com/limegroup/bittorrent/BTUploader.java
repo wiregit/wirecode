@@ -113,7 +113,7 @@ public class BTUploader implements Uploader {
 	}
 
 	public boolean isInactive() {
-		return false;
+		return _torrent.hasStopped() || _torrent.isPaused();
 	}
 
 	public void measureBandwidth() {

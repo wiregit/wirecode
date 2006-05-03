@@ -38,8 +38,7 @@ import com.limegroup.bittorrent.bencoding.BEncoder;
 import com.limegroup.bittorrent.bencoding.Token;
 
 /**
- * This class wraps a .torrent file. Since it is serialized to disk, you have to
- * be careful when adding non-transient attributes.
+ * This class wraps a .torrent file. 
  */
 public class BTMetaInfo implements Serializable {
 	private static final Log LOG = LogFactory.getLog(BTMetaInfo.class);

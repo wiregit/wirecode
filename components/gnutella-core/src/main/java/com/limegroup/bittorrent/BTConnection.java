@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOSocket;
@@ -24,29 +22,29 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.BitSet;
 
 /**
- * Class wrapping a Bittorrent connection. This class is not thread-safe.
+ * Class wrapping a Bittorrent connection.
  */
 public class BTConnection {
 	private static final Log LOG = LogFactory.getLog(BTConnection.class);
 
-	/*
+	/**
 	 * This is the max size of a block that we will ever request. Requesting
 	 * larger ranges is not encouraged by the protocol.
 	 */
 	private static final int BLOCK_SIZE = 16384;
 
-	/*
+	/**
 	 * This is the max size of a block that we will ever upload, requests larger
 	 * than this are dropped.
 	 */
 	private static final int MAX_BLOCK_SIZE = 64 * 1024;
 
-	/*
+	/**
 	 * the number of requests to send to any host without waiting for reply
 	 */
 	private static final int MAX_REQUESTS = 4;
 
-	/*
+	/**
 	 * connections that die after less than a minute won't be retried
 	 */
 	private static final long MIN_RETRYABLE_LIFE_TIME = 60 * 1000;
@@ -57,49 +55,49 @@ public class BTConnection {
 	private final NIOSocket _socket;
 
 	/*
-	 * this stores the incoming data in a buffer to be read later
+	 * Reader for the messages
 	 */
 	private BTMessageReader _reader;
 
 	/*
-	 * this stores the outgoing data for writing
+	 * Writer for the messages
 	 */
 	private BTMessageWriter _writer;
 
-	/*
-	 * The ranges the remote host offers, always lock on this before accessing
+	/**
+	 * The pieces the remote host has
 	 */
 	private final BitSet _availableRanges;
 
-	/*
-	 * the List of BTInterval containing requests that we did not yet send but
-	 * which we intend to send soon. Lock on this before accessing
+	/**
+	 * the Set of BTInterval containing requests that we did not yet send but
+	 * which we intend to send soon. 
 	 */
 	private final Set _toRequest;
 
-	/*
-	 * the BTInterval we requested but which was not yet satisfied.
+	/**
+	 * the Set of BTIntervals we requested but which was not yet satisfied.
 	 */
 	private final Set _requesting;
 
-	/*
-	 * the List of BTInterval containing the ranges requested by the remote
-	 * host, we avoid queueing up all requested pieces in the MESSAGE_QUEUE to
+	/**
+	 * the Set of BTInterval requested by the remote
+	 * host, we avoid queueing up all requested pieces in the writer to
 	 * save memory
 	 */
 	private final Set _requested;
 
-	/*
+	/**
 	 * the metaInfo of this torrent
 	 */
 	private final BTMetaInfo _info;
 
-	/*
+	/**
 	 * the id of the remote client
 	 */
 	private final TorrentLocation _endpoint;
 
-	/*
+	/**
 	 * whether or not this is an outgoing connection
 	 */
 	private final boolean _outgoing;
@@ -109,29 +107,29 @@ public class BTConnection {
 	 */
 	private final ManagedTorrent _torrent;
 
-	/*
+	/**
 	 * whether we choke them: if we are choking, all requests from the remote
 	 * host will be ignored
 	 */
 	private boolean _isChoked;
 
-	/*
+	/**
 	 * whether they choke us: only send requests if they are not choking us
 	 */
 	private volatile boolean _isChoking;
 
-	/*
+	/**
 	 * Indicates whether the remote host is interested in one of the ranges we
 	 * offer.
 	 */
 	private boolean _isInterested;
 
-	/*
+	/**
 	 * Indicates whether or not the remote host offers ranges we want
 	 */
 	private volatile boolean _isInteresting;
 
-	/*
+	/**
 	 * the time when this Connection was created
 	 */
 	private final long _startTime;
@@ -146,7 +144,6 @@ public class BTConnection {
 	 */
 	private int unchokeRound;
 	
-
 	/**
 	 * Constructs instance of this
 	 * 
@@ -156,27 +153,8 @@ public class BTConnection {
 	 *            exchanged successfully
 	 * @param info
 	 *            the BTMetaInfo holding all information for this torrent
-	 * @param peerId
-	 *            the array of byte containing the 20 byte peer id of the remote
-	 *            host
-	 */
-	public BTConnection(NIOSocket sock, BTMetaInfo info, TorrentLocation ep,
-			ManagedTorrent torrent) {
-		this(sock, info, ep, torrent, false);
-	}
-
-	/**
-	 * Constructs instance of this
-	 * 
-	 * @param sock
-	 *            the Socket to the remote host. We assume that the Bittorrent
-	 *            connection is already initialized and the headers were
-	 *            exchanged successfully
-	 * @param info
-	 *            the BTMetaInfo holding all information for this torrent
-	 * @param peerId
-	 *            the array of byte containing the 20 byte peer id of the remote
-	 *            host
+	 * @param torrent
+	 * 			  the ManagedTorrent to whom this connection belongs.
 	 * @param isOutgoing
 	 *            whether or not this is an outgoing connection
 	 */
@@ -194,8 +172,6 @@ public class BTConnection {
 		_reader = new BTMessageReader(this);
 		_writer = new BTMessageWriter(this);
 		
-		// we put the throttle on top, this puts the delayer on top
-		// TODO: decide is this what we want?  maybe
 		ThrottleWriter throttle = new ThrottleWriter(_torrent
 				.getUploadThrottle());
 		DelayedBufferWriter delayer = new DelayedBufferWriter(1400);
@@ -211,28 +187,28 @@ public class BTConnection {
 		_isInterested = false;
 		_isInteresting = false;
 
-		// always send this as the first message
-		sendBitfield();
+		// if we have downloaded anything send a bitfield
+		if (_info.getVerifyingFolder().getVerifiedBlockSize() > 0)
+			sendBitfield();
 	}
 
-	// PUBLIC INTERFACE
 
+	/**
+	 * @return true if we are choking the remote host
+	 */
 	public boolean isChoked() {
 		return _isChoked;
 	}
 	
 	/**
-	 * Accessor, returning true if the remote host is choking us.
+	 * @return true if the remote host is choking us.
 	 */
 	public boolean isChoking() {
 		return _isChoking;
 	}
 
 	/**
-	 * Accessor for whether or not the remote host is interested in the content
-	 * we offer.
-	 * 
-	 * @return true if the remote host is interested, false if not.
+	 * @return true if the remote host is interested in us
 	 */
 	public boolean isInterested() {
 		return _isInterested;
@@ -247,19 +223,12 @@ public class BTConnection {
 	}
 	
 	/**
-	 * Accessor for the _interesting attribute
-	 * 
-	 * @return true if the remote host may have ranges that want to download,
-	 *         false if not
+	 * @return true if the remote host may have ranges that we want 
 	 */
 	public boolean isInteresting() {
 		return _isInteresting;
 	}
 	
-	public boolean hasRequested() {
-		return !_requested.isEmpty();
-	}
-
 	/**
 	 * @return true if we initiated this connection
 	 */
@@ -267,6 +236,9 @@ public class BTConnection {
 		return _outgoing;
 	}
 
+	/**
+	 * @return true if the connection should be retried.
+	 */
 	public boolean isWorthRetrying() {
 		// don't retry connections that were aborted immediately after starting
 		// them, they were most likely terminated for a reason...
@@ -274,9 +246,7 @@ public class BTConnection {
 	}
 
 	/**
-	 * Accessor for the <tt>Endpoint</tt> we are connected to
-	 * 
-	 * @return <tt>TorrentLocation</tt>
+	 * @return <tt>TorrentLocation</tt> we are connected to
 	 */
 	public TorrentLocation getEndpoint() {
 		return _endpoint;
@@ -303,30 +273,30 @@ public class BTConnection {
 		_torrent.connectionClosed(this);
 	}
 
+	/**
+	 * @return the measured bandwidth on this connection for
+	 * downloadining or uploading
+	 */
 	public float getMeasuredBandwidth(boolean read) {
 		return read ? _reader.getBandwidth() : _writer.getBandwidth();
 	}
 
 	/**
-	 * @return true if the socket is still connected.
+	 * notification that some bytes have been read on this connection
 	 */
-	public boolean isConnected() {
-		return _socket.isConnected();
-	}
-
-	public void readBytes(int read) {
+	private void readBytes(int read) {
 		_torrent.getDownloader().readBytes(read);
 	}
 
+	/**
+	 * notification that some bytes have been written on this connection
+	 */
 	public void wroteBytes(int written) {
 		_torrent.getUploader().wroteBytes(written);
 	}
 
 	/**
 	 * Handles IOExceptions for this connection
-	 * 
-	 * @param iox
-	 *            the exception to handle
 	 */
 	public void handleIOException(IOException iox) {
 		if (iox instanceof BadBTMessageException)
@@ -334,19 +304,6 @@ public class BTConnection {
 		if (LOG.isDebugEnabled())
 			LOG.debug(iox);
 		close();
-	}
-
-	/**
-	 * processes message off-thread.
-	 * 
-	 * @param message
-	 *            the incoming BTMessage to handle
-	 */
-	public void processMessage(final BTMessage message) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("received message: " + message + " from " + _endpoint);
-		handleMessage(message);
-
 	}
 
 	/**
@@ -366,22 +323,27 @@ public class BTConnection {
 	void sendUnchoke(int now) {
 		if (_isChoked) {
 			_writer.enqueue(BTUnchoke.createMessage());
-			unchokeRound = now;
+			setUnchokeRound(now);
 			_isChoked = false;
 		}
 	}
 	
+	/**
+	 * @return the round during which the connection was last unchoked
+	 */
 	int getUnchokeRound() {
 		return unchokeRound;
 	}
 	
+	/**
+	 * sets the round during which the connection was choked
+	 */
 	void setUnchokeRound(int round) {
 		unchokeRound = round;
 	}
 
 	/**
-	 * Indicates that we are interested in downloading pieces. Sets
-	 * _isInteresting to true
+	 * Informs the remote that we are interested in downloading. 
 	 */
 	void sendInterested() {
 		if (!_isInteresting) {
@@ -392,8 +354,7 @@ public class BTConnection {
 	}
 
 	/**
-	 * Indicates that the remote host does not have any pieces we would want to
-	 * download. Sets _isInteresting to false.
+	 * Informs the remote we are not interested in downloading.
 	 */
 	void sendNotInterested() {
 		if (_isInteresting) {
@@ -403,11 +364,9 @@ public class BTConnection {
 	}
 
 	/**
-	 * Tells the remote host, that we have a new piece. IMPORTANT: make sure to
-	 * call this method only for complete pieces.
+	 * Tells the remote host, that we have a new piece. 
 	 * 
-	 * @param have
-	 *            the <tt>BTHave</tt> message representing a complete piece.
+	 * @param have the <tt>BTHave</tt> message representing a complete piece.
 	 */
 	void sendHave(BTHave have) {
 		int pieceNum = have.getPieceNum();
@@ -424,7 +383,8 @@ public class BTConnection {
 		if (_info.getVerifyingFolder().getNumWeMiss(_availableRanges) == 0)
 			sendNotInterested();
 
-		// whether we canceled some requested ranges
+		// whether we canceled some ranges that were requested or we were
+		// about to request
 		boolean modified = false;
 
 		// remove all subranges that we may be requesting
@@ -446,24 +406,23 @@ public class BTConnection {
 		}
 
 		// if we removed any ranges, choose some more rages to request...
+		// TODO: add some limiting of the number of downloads here
 		if (!_torrent.isComplete() && modified && _isInteresting
 				&& _toRequest.isEmpty())
 			_torrent.request(this);
 	}
 
 	/**
-	 * Sends a bitfield message to the remote host, this will be done only once
-	 * after the connection was created.
+	 * Sends a bitfield message to the remote host.
 	 */
-	void sendBitfield() {
+	private void sendBitfield() {
 		_writer.enqueue(BTBitField.createMessage(_info));
 	}
 
 	/**
 	 * Requests a piece from the remote host
 	 * 
-	 * @param in
-	 *            an <tt>LongInterval</tt> specifying the ranges we want to
+	 * @param in an <tt>BTInterval</tt> specifying the ranges we want to
 	 *            request.
 	 */
 	void sendRequest(BTInterval in) {
@@ -500,13 +459,14 @@ public class BTConnection {
 	 * the torrent
 	 */
 	void readyForWriting() {
-		if (_isChoked || _requested.size() <= 0) {
+		if (_isChoked || _requested.isEmpty()) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("cannot write while choked, requested size is "
-						+ _requested);
+						+ _requested.size());
 			return;
 		}
 		
+		// pick a request at sort-of-random
 		Iterator iter = _requested.iterator();
 		BTInterval in = (BTInterval) iter.next();
 		iter.remove();
@@ -538,39 +498,32 @@ public class BTConnection {
 	}
 	
 	/**
-	 * Accessor for the LongIntervalSet of available ranges
+	 * Accessor for the BitSet of available ranges
 	 * 
-	 * @return LongIntervalSet containing all ranges the remote host offers
+	 * @return BitSet containing all ranges the remote host offers
 	 */
 	BitSet getAvailableRanges() {
 		return _availableRanges;
 	}
 
-	
-	
 	/**
-	 * Adds a range to the list of available ranges and resets _isInteresting to
-	 * true if we do not have this range ourselves
+	 * Adds a piece to the list of available pieces and marks the
+	 * connection interesting if we do not have this piece ourselves
 	 * 
-	 * @param pieceNum
-	 *            the piece number that is available
+	 * @param pieceNum the piece number that is available
 	 */
 	private void addAvailablePiece(int pieceNum) {
 		VerifyingFolder v = _info.getVerifyingFolder();
 		_availableRanges.set(pieceNum);
 
 		
-		// tell the remote host we are interested if we don't have that range!
+		// tell the remote host we are interested if we don't have that range
 		if (v.hasBlock(pieceNum)) 
 			numMissing--;
 		else
 			sendInterested();
 	}
 
-	/**
-	 * private utility method clearing all requested ranges and informing the
-	 * VerifyingFolder that these ranges can now be requested again.
-	 */
 	private void clearRequests() {
 		for (Iterator iter = _toRequest.iterator(); iter.hasNext();)
 			clearRequest((BTInterval) iter.next());
@@ -586,17 +539,16 @@ public class BTConnection {
 	/**
 	 * private utility method clearing a certain range
 	 * 
-	 * @param in
-	 *            an <tt>LongInterval</tt> representing the range to clear.
+	 * @param in an <tt>BTInterval</tt> representing the range to clear.
 	 */
 	private void clearRequest(BTInterval in) {
 		_info.getVerifyingFolder().releaseChunk(in.getId());
 	}
 
-	/**
-	 * private helper trying to ensure there are exactly two open requests sent
-	 * to the remote host all the time. Gets more ranges to request from the
-	 * ManagedTorrent if necessary
+	/*
+	 * private helper trying to ensure there are exactly MAX_REQUESTS open 
+	 * requests sent to the remote host all the time. Gets more ranges to 
+	 * request from the ManagedTorrent if necessary
 	 */
 	private void enqueueRequests() {
 		// the reason we randomize the list of requests to be sent is that we
@@ -616,17 +568,11 @@ public class BTConnection {
 	}
 
 	/**
-	 * @param message the incoming message
+	 * @param message the incoming message to process.
 	 */
-	private void handleMessage(BTMessage message) {
+	public void processMessage(BTMessage message) {
 		switch (message.getType()) {
 		case BTMessage.CHOKE:
-			// we queue all requests up again, maybe we get unchoked
-			// again, - if not this will be resolved in endgame mode
-			for (Iterator iter = _requesting.iterator(); iter.hasNext();) {
-				_toRequest.add(iter.next());
-				iter.remove();
-			}
 			_isChoking = true;
 			break;
 
@@ -651,9 +597,6 @@ public class BTConnection {
 			_isInterested = false;
 			if (!_isChoked)
 				_torrent.rechoke();
-			// connections that aren't interested any more are choked
-			// instantly
-			sendChoke();
 			// if we have all pieces and the remote is not interested,
 			// disconnect, - they have obviously completed their download, too
 			if (_torrent.isComplete())
@@ -663,11 +606,9 @@ public class BTConnection {
 		case BTMessage.BITFIELD:
 			handleBitField((BTBitField) message);
 			break;
-
 		case BTMessage.HAVE:
 			handleHave((BTHave) message);
 			break;
-
 		case BTMessage.PIECE:
 			handlePiece((BTPiece) message);
 			break;
@@ -681,16 +622,16 @@ public class BTConnection {
 	}
 
 	/**
-	 * This method handles a cancel message
-	 * 
-	 * @param payload
-	 *            the array of byte containing the payload of the message
+	 * Removes the range specified in the <tt>BTCancel</tt> message
+	 * from the list of requests.
+	 * Note: if we are already sending this range, there's nothing
+	 * that can be done.
 	 */
 	private void handleCancel(BTCancel message) {
 		BTInterval in = message.getInterval();
+		_requested.remove(in); 
 		
-		// removes the range from the list of requests. If we are already
-		// sending the piece, there is nothing we can do about it
+		// remove any sub-ranges as well
 		for (Iterator iter = _requested.iterator(); iter.hasNext();) {
 			BTInterval current = (BTInterval) iter.next();
 			if (in.getId() == current.getId() &&
@@ -700,18 +641,13 @@ public class BTConnection {
 	}
 
 	/**
-	 * Parses and handles a request message
-	 * 
-	 * @param payload
-	 *            the array of byte containing the payload of the message
-	 * @throws IOException
+	 * Processes a request for a range.   
 	 */
 	private void handleRequest(BTRequest message) {
-		// we do not accept request from choked connections, if we just choked
-		// a connection, we may still receive some requests, though
+		// we do not process requests from choked connections; if we 
+		// just choked a connection, we may still receive some requests.
 		if (_isChoked) {
-			if (LOG.isDebugEnabled())
-				LOG.debug("got request while choked");
+			LOG.debug("got request while choked");
 			return;
 		}
 
@@ -727,7 +663,7 @@ public class BTConnection {
 				LOG.debug("got bad request " + message);
 			return;
 		}
-		// we skip all requests for ranges larger than MAX_BLOCK_SIZED as
+		// we skip all requests for ranges larger than MAX_BLOCK_SIZE as
 		// proposed by the BitTorrent spec.
 		if (in.high - in.low + 1 > MAX_BLOCK_SIZE) {
 			if (LOG.isDebugEnabled())
@@ -735,8 +671,6 @@ public class BTConnection {
 			return;
 		}
 
-		
-		// skip the message if we don't have that range
 		if (_info.getVerifyingFolder().hasBlock(in.getId())) 
 			_requested.add(in);
 		
@@ -749,6 +683,8 @@ public class BTConnection {
 	 * @return true if the piece was requested.
 	 */
 	boolean startReceivingPiece(BTInterval interval) {
+		// its ok to remove the piece from the list of pieces we request
+		// because if the receiving fails the connection will be closed.
 		if (!_requesting.remove(interval) && !_toRequest.remove(interval)) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("received unexpected range " + interval + " from "
@@ -760,12 +696,7 @@ public class BTConnection {
 	}
 
 	/**
-	 * handles a piece message and writes its payload to disk
-	 * 
-	 * @param payload
-	 *            the byte array containing the payload of the message
-	 * @throws IOException
-	 *             if there was a problem writing to disk
+	 * handles a piece message and sends its payload to disk
 	 */
 	private void handlePiece(BTPiece message) {
 		final BTInterval in = message.getInterval();
@@ -783,9 +714,11 @@ public class BTConnection {
 					in,
 					data);
 		} catch (IOException ioe) {
+			close();
 			// inform the user and stop the download
 			IOUtils.handleException(ioe, null);
 			_torrent.stop();
+			return;
 		}
 		
 		// get new ranges to request if necessary
@@ -798,10 +731,7 @@ public class BTConnection {
 	}
 
 	/**
-	 * handles a bitfield and reads in the available ranges contained therein
-	 * 
-	 * @param field
-	 *            the byte array containing the payload of the bitfield message
+	 * handles a bitfield and reads in the available pieces contained therein
 	 */
 	private void handleBitField(BTBitField message) {
 		ByteBuffer field = message.getPayload();
@@ -818,7 +748,6 @@ public class BTConnection {
 		for (int i = 0; i < numBits; i++) {
 			byte mask = (byte) (0x80 >>> (i % 8));
 			if ((mask & field.get(i / 8)) == mask) {
-				//TODO: do not send interested until all are added.
 				addAvailablePiece(i);
 			}
 		}
@@ -828,16 +757,11 @@ public class BTConnection {
 
 	/**
 	 * handles a have message and adds the available range contained therein
-	 * 
-	 * @param payload
-	 *            the byte array carrying the payload of the message
 	 */
 	private void handleHave(BTHave message) {
-		int pieceNum = message.getPieceNum();
-		addAvailablePiece(pieceNum);
+		addAvailablePiece(message.getPieceNum());
 	}
 
-	// overriding Object
 	public boolean equals(Object o) {
 		if (o instanceof BTConnection) {
 			BTConnection other = (BTConnection) o;

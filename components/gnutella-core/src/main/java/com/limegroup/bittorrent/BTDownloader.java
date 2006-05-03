@@ -40,10 +40,15 @@ public class BTDownloader implements Downloader {
 		_tracker = new SimpleBandwidthTracker();
 	}
 
+	/**
+	 * Stops a torrent download.  If the torrent is in
+	 * seeding state, it does nothing.
+	 * (To stop a seeding torrent it must be stopped from the
+	 * uploads pane)
+	 */
 	public void stop() {
-		if (!_torrent.hasStopped())
+		if (!_torrent.hasStopped() && !_torrent.isComplete())
 			_torrent.stop();
-		RouterService.getTorrentManager().removeTorrent(_torrent, true);
 	}
 
 	public void pause() {
@@ -56,7 +61,9 @@ public class BTDownloader implements Downloader {
 	}
 
 	public boolean isInactive() {
-		return _torrent.isPaused() || _torrent.hasStopped();
+		return _torrent.isPaused() || 
+		_torrent.hasStopped() || 
+		_torrent.isComplete();
 	}
 
 	public int getInactivePriority() {

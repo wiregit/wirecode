@@ -32,7 +32,6 @@ import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -326,6 +325,17 @@ public class TorrentManager implements ConnectionAcceptor {
 		}
 		_callback.addDownload(mt.getDownloader());
 	}
+	
+	/**
+	 * Notification that a torrent has completed its download.
+	 */
+	synchronized void torrentComplete(ManagedTorrent mt) {
+		/*
+		 * we keep the torrent in the active list because it is
+		 * still seeding, but remove it from the downloads window.
+		 */
+		_callback.removeDownload(mt.getDownloader());
+	}
 
 	/**
 	 * This method determines if a torrent should make way for another waiting
@@ -424,14 +434,11 @@ public class TorrentManager implements ConnectionAcceptor {
 	 * @param mt
 	 *            the <tt>ManagedTorrent</tt> to remove
 	 */
-	public synchronized void removeTorrent(ManagedTorrent mt, boolean clear) {
+	public synchronized void removeTorrent(ManagedTorrent mt) {
 		if (!_active.contains(mt) && !_waiting.contains(mt))
 			return;
 		_active.remove(mt);
 		_waiting.remove(mt);
-		if (!clear) {
-			_waiting.add(mt);
-		}
 
 		writeSnapshot();
 		// wake up this to maintain the desired parallelism
