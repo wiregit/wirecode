@@ -328,9 +328,14 @@ public class PatriciaTrie implements Serializable {
         }
         
         // Found key's length-th bit differs from our
-        // key which means it cannot be the prefix!
-        if (isBitSet(key, length)
-                != isBitSet(entry.key, length)) {
+        // key which means it cannot be the prefix...
+        if (isBitSet(key, length) != isBitSet(entry.key, length)) {
+            return Collections.EMPTY_LIST;
+        }
+        
+        // ... or there are less than 'length' equal bits
+        int bitIndex = keyCreator.bitIndex(key, entry.key);
+        if (bitIndex >= 0 && bitIndex < length) {
             return Collections.EMPTY_LIST;
         }
         

@@ -499,11 +499,13 @@ public class PatriciaRouteTable implements RoutingTable {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Removed nodeId: "+nodeId+" from bucket: "+bucket);
             }
-            if(bucket.getNodeCount() == 0) {
+            
+            if (bucket.isEmpty()) {
                 int depth = bucket.getDepth();
-                BucketNode otherBucket;
-                BucketNode parentBucket;
-                if(bucket.getNodeID().isBitSet(depth-1)) {
+                BucketNode otherBucket = null;
+                BucketNode parentBucket = null;
+                
+                if (bucket.getNodeID().isBitSet(depth-1)) {
                     otherBucket = (BucketNode) bucketsTrie.get(bucket.getNodeID().unset(depth-1));
                     parentBucket = new BucketNode(otherBucket.getNodeID(),depth-1);
                 } else {
