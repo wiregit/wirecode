@@ -201,7 +201,7 @@ public class MessageDispatcher implements Runnable {
         // Make sure we're not sending messages to ourself.
         // The only exception are Pings/Pongs
         if (nodeId != null 
-                && nodeId.equals(context.getLocalNodeID())
+                && context.isLocalNodeID(nodeId)
                 && !(message instanceof PingRequest)
                 && !(message instanceof PingResponse)) {
             
@@ -240,6 +240,7 @@ public class MessageDispatcher implements Runnable {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
                         + " from ourself " + ContactNode.toString(nodeId, src));
+                
             }
             return;
         }

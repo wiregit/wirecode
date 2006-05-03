@@ -76,6 +76,4 @@ public final class DatabaseSettings extends LimeDHTProps {
     = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", EXPIRATION_TIME_CLOSEST_NODE.getValue()/2 , "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
     
     
-    public static final LongSetting MILLIS_PER_HOUR 
-        = FACTORY.createLongSetting("MILLIS_PER_HOUR",EXPIRATION_TIME_CLOSEST_NODE.getValue() / 24L);
 }

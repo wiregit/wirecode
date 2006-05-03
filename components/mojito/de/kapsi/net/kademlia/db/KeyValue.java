@@ -45,13 +45,18 @@ public class KeyValue implements Serializable {
     private boolean localKeyValue = false;
     
     private long creationTime;
-    private long republishTime;
+    private long lastPublishTime;
     
     private byte[] signature;
     
     private int hashCode = -1;
     
     private boolean isClose = true;
+    
+    /**
+     * The number of locations we have stored this value at
+     */
+    private int numLocs;
     
     public static KeyValue createLocalKeyValue(KUID key, byte[] value) {
         return createKeyValue(key, value, null, null, null, true);
@@ -170,12 +175,12 @@ public class KeyValue implements Serializable {
         this.creationTime = creationTime;
     }
     
-    public long getRepublishTime() {
-        return republishTime;
+    public long getLastPublishTime() {
+        return lastPublishTime;
     }
     
-    public void setRepublishTime(long republishTime) {
-        this.republishTime = republishTime;
+    public void setLastPublishTime(long publishTime) {
+        this.lastPublishTime = publishTime;
     }
     
     public int hashCode() {
@@ -188,6 +193,14 @@ public class KeyValue implements Serializable {
         return hashCode;
     }
     
+    public int getNumLocs() {
+        return numLocs;
+    }
+
+    public void setNumLocs(int numLocs) {
+        this.numLocs = numLocs;
+    }
+
     public boolean equals(Object o) {
         if (!(o instanceof KeyValue)) {
             return false;

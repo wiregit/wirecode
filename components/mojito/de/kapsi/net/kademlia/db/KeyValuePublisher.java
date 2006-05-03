@@ -117,7 +117,9 @@ public class KeyValuePublisher implements Runnable {
             context.store(keyValue, new StoreListener() {
                 public void store(List keyValues, Collection nodes) {
                     for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                        ((KeyValue)it.next()).setRepublishTime(System.currentTimeMillis());
+                        KeyValue keyValue = (KeyValue) it.next();
+                        keyValue.setLastPublishTime(System.currentTimeMillis());
+                        keyValue.setNumLocs(nodes.size());
                         published++;
                     }
 
@@ -185,7 +187,8 @@ public class KeyValuePublisher implements Runnable {
                     it = null;
                     
                     try {
-                        publishLock.wait(DatabaseSettings.REPUBLISH_INTERVAL.getValue());
+                        //run republisher every 5 minutes
+                        publishLock.wait(5L * 60L * 1000L);
                     } catch (InterruptedException ignore) {}
                 }
             }

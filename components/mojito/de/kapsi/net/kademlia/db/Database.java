@@ -47,6 +47,7 @@ import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
@@ -234,8 +235,11 @@ public class Database {
             return false;
         }
         
-        long time = keyValue.getRepublishTime() 
-                        + DatabaseSettings.MILLIS_PER_HOUR.getValue();
+        long nextPublishTime = Math.max((((long)(keyValue.getNumLocs() * DatabaseSettings.REPUBLISH_INTERVAL.getValue())/
+                (long)KademliaSettings.REPLICATION_PARAMETER.getValue())), 2L * 60L * 1000L); //never republish more than every 2 minutes
+            
+        
+        long time = keyValue.getLastPublishTime() + nextPublishTime;
         
         return System.currentTimeMillis() >= time;
     }

@@ -124,7 +124,6 @@ public class DHT implements Runnable {
             synchronized(database) {
                 if(database.add(keyValue)){
                     context.store(keyValue, l);
-                    keyValue.setRepublishTime(System.currentTimeMillis());
                 }
             }
         } catch (SignatureException err) {

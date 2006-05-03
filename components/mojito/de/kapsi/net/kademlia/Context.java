@@ -732,6 +732,8 @@ public class Context implements Runnable {
                     targets.add(node);
                 }
                 
+                keyValue.setNumLocs(targets.size());
+                
                 if (listener != null) {
                     listener.store(keyValues, targets);
                 }

@@ -409,7 +409,6 @@ public class PlanetLab {
                                 }
                                 
                                 public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
-                                    planetlabStats.CHURN_RECONNECTS.incrementStat();
                                     running = true;
                                     
                                     synchronized(lock) {
@@ -423,6 +422,7 @@ public class PlanetLab {
                         
                         try {
                             lock.wait();
+                            planetlabStats.CHURN_RECONNECTS.incrementStat();
                         } catch (InterruptedException e) {
                         }
                     }
