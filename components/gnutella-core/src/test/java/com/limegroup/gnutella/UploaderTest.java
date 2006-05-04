@@ -387,6 +387,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
         assertNotNull(connectThex(d4, true));
         
+        
         // d5 will connect and get queued.
         HTTPDownloader d5 = addUploader(upManager, rfd2, "1.1.1.5", true);
         try {
@@ -403,6 +404,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         //even though 5 is queued, he should be able to get the thex tree.
         assertNotNull(connectThex(d5, false));
+        
         // no need to check the tree, is checked in lots of other tests.
         
         //but, when he tries to get the file again, he stays queued.
@@ -410,9 +412,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             2, upManager.getNumQueuedUploads());
         assertEquals("should have 2 active uploads",
             2, upManager.uploadsInProgress());
-            
-        Thread.sleep((UploadManager.MIN_POLL_TIME+
-                      UploadManager.MAX_POLL_TIME)/2);
+        
         try {
             connectDloader(d5, false, rfd2, true);
             fail("should have been queued");

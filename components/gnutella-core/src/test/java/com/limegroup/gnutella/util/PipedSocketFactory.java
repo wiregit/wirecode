@@ -41,8 +41,8 @@ public class PipedSocketFactory {
     private final ServerSocket ss;
     private final String hostA;
     private final String hostB;
-    private NBSocket socketA;
-    private NBSocket socketB;
+    private NIOSocket socketA;
+    private NIOSocket socketB;
     
         
     /**
@@ -62,54 +62,29 @@ public class PipedSocketFactory {
         if(socketA == null)
             setupSockets();
         
-        return new DelegatingSocket((NIOSocket)socketA, hostA, hostB);
+        return socketA;
     }
 
     public Socket getSocketB() throws Exception {
         if(socketB == null)
             setupSockets();
         
-        return new DelegatingSocket((NIOSocket)socketB, hostB, hostA);
+        return socketB;
     }
     
     private void setupSockets() throws Exception {
-        socketA = new NIOSocket(InetAddress.getLocalHost(), ss.getLocalPort());
+        socketA = new FakedNIOSocket(InetAddress.getLocalHost(), ss.getLocalPort(), hostA, hostB);
         socketB = (NIOSocket)ss.accept();
     }
     
-    private static class DelegatingSocket extends NBSocket implements NIOMultiplexor, ReadWriteObserver, ConnectObserver {
-        private final NIOSocket delegate;
+    private static class FakedNIOSocket extends NIOSocket {
         private final String local;
         private final String remote;
         
-        DelegatingSocket(NIOSocket delegate, String local, String remote) {
-            this.delegate = delegate;
+        FakedNIOSocket(InetAddress host, int port, String local, String remote) throws IOException {
+            super(host, port);
             this.local = local;
             this.remote = remote;
-        }
-
-        public void bind(SocketAddress bindpoint) throws IOException {
-            delegate.bind(bindpoint);
-        }
-
-        public void close() throws IOException {
-            delegate.close();
-        }
-
-        public void connect(SocketAddress endpoint, int timeout) throws IOException {
-            delegate.connect(endpoint, timeout);
-        }
-
-        public void connect(SocketAddress endpoint) throws IOException {
-            delegate.connect(endpoint);
-        }
-
-        public boolean equals(Object obj) {
-            return delegate.equals(obj);
-        }
-
-        public SocketChannel getChannel() {
-            return delegate.getChannel();
         }
 
         public InetAddress getInetAddress() {
@@ -120,184 +95,12 @@ public class PipedSocketFactory {
             }
         }
 
-        public InputStream getInputStream() throws IOException {
-            return delegate.getInputStream();
-        }
-
-        public boolean getKeepAlive() throws SocketException {
-            return delegate.getKeepAlive();
-        }
-
         public InetAddress getLocalAddress() {
             try {
                 return InetAddress.getByName(local);
             } catch(UnknownHostException uhe) {
                 throw new RuntimeException(uhe);
             }
-        }
-
-        public int getLocalPort() {
-            return delegate.getLocalPort();
-        }
-
-        public SocketAddress getLocalSocketAddress() {
-            return delegate.getLocalSocketAddress();
-        }
-
-        public boolean getOOBInline() throws SocketException {
-            return delegate.getOOBInline();
-        }
-
-        public OutputStream getOutputStream() throws IOException {
-            return delegate.getOutputStream();
-        }
-
-        public int getPort() {
-            return delegate.getPort();
-        }
-
-        public int getReceiveBufferSize() throws SocketException {
-            return delegate.getReceiveBufferSize();
-        }
-
-        public SocketAddress getRemoteSocketAddress() {
-            return delegate.getRemoteSocketAddress();
-        }
-
-        public boolean getReuseAddress() throws SocketException {
-            return delegate.getReuseAddress();
-        }
-
-        public int getSendBufferSize() throws SocketException {
-            return delegate.getSendBufferSize();
-        }
-
-        public int getSoLinger() throws SocketException {
-            return delegate.getSoLinger();
-        }
-
-        public int getSoTimeout() throws SocketException {
-            return delegate.getSoTimeout();
-        }
-
-        public boolean getTcpNoDelay() throws SocketException {
-            return delegate.getTcpNoDelay();
-        }
-
-        public int getTrafficClass() throws SocketException {
-            return delegate.getTrafficClass();
-        }
-
-        public int hashCode() {
-            return delegate.hashCode();
-        }
-
-        public boolean isBound() {
-            return delegate.isBound();
-        }
-
-        public boolean isClosed() {
-            return delegate.isClosed();
-        }
-
-        public boolean isConnected() {
-            return delegate.isConnected();
-        }
-
-        public boolean isInputShutdown() {
-            return delegate.isInputShutdown();
-        }
-
-        public boolean isOutputShutdown() {
-            return delegate.isOutputShutdown();
-        }
-
-        public void sendUrgentData(int data) throws IOException {
-            delegate.sendUrgentData(data);
-        }
-
-        public void setKeepAlive(boolean on) throws SocketException {
-            delegate.setKeepAlive(on);
-        }
-
-        public void setOOBInline(boolean on) throws SocketException {
-            delegate.setOOBInline(on);
-        }
-
-        public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
-            delegate.setPerformancePreferences(connectionTime, latency, bandwidth);
-        }
-
-        public void setReceiveBufferSize(int size) throws SocketException {
-            delegate.setReceiveBufferSize(size);
-        }
-
-        public void setReuseAddress(boolean on) throws SocketException {
-            delegate.setReuseAddress(on);
-        }
-
-        public void setSendBufferSize(int size) throws SocketException {
-            delegate.setSendBufferSize(size);
-        }
-
-        public void setSoLinger(boolean on, int linger) throws SocketException {
-            delegate.setSoLinger(on, linger);
-        }
-
-        public void setSoTimeout(int timeout) throws SocketException {
-            delegate.setSoTimeout(timeout);
-        }
-
-        public void setTcpNoDelay(boolean on) throws SocketException {
-            delegate.setTcpNoDelay(on);
-        }
-
-        public void setTrafficClass(int tc) throws SocketException {
-            delegate.setTrafficClass(tc);
-        }
-
-        public void shutdownInput() throws IOException {
-            delegate.shutdownInput();
-        }
-
-        public void shutdownOutput() throws IOException {
-            delegate.shutdownOutput();
-        }
-
-        public String toString() {
-            return delegate.toString();
-        }
-
-        public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) {
-            return delegate.connect(addr, timeout, observer);
-        }
-
-        public void setReadObserver(ChannelReadObserver reader) {
-            delegate.setReadObserver(reader);
-        }
-
-        public void setWriteObserver(ChannelWriter writer) {
-            delegate.setWriteObserver(writer);
-        }
-
-        public void handleRead() throws IOException {
-            delegate.handleRead();
-        }
-
-        public void handleIOException(IOException iox) {
-            delegate.handleIOException(iox);
-        }
-
-        public void shutdown() {
-            delegate.shutdown();
-        }
-
-        public boolean handleWrite() throws IOException {
-            return delegate.handleWrite();
-        }
-
-        public void handleConnect(Socket socket) throws IOException {
-            delegate.handleConnect(this);
         }
     }
 }

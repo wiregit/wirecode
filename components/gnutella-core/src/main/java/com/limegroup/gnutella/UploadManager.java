@@ -386,11 +386,12 @@ public class UploadManager implements BandwidthTracker {
                 int oldTimeout = socket.getSoTimeout();
                 if(queued!=QUEUED)
                     socket.setSoTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
+                else
+                    socket.setSoTimeout(MAX_POLL_TIME);
                     
                 //dont read a word of size more than 4 
                 //as we will handle only the next "HEAD" or "GET" request
-                String word = IOUtils.readWord(
-                    iStream, 4);
+                String word = IOUtils.readWord(iStream, 4);
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader+" next request arrived ");
                 socket.setSoTimeout(oldTimeout);
@@ -711,6 +712,7 @@ public class UploadManager implements BandwidthTracker {
                 queued = checkAndQueue(uploader, socket);
         } else {
             queued = BYPASS_QUEUE;
+            unsetQueue(socket);
         }
         
         // Act upon the queued state.
@@ -723,7 +725,6 @@ public class UploadManager implements BandwidthTracker {
             	break;
             case QUEUED:
                 uploader.setState(Uploader.QUEUED);
-                socket.setSoTimeout(MAX_POLL_TIME);
                 break;
             case ACCEPTED:
                 assertAsConnecting( uploader.getState() );
@@ -913,6 +914,14 @@ public class UploadManager implements BandwidthTracker {
 
 
 	/////////////////// Private Interface for Testing Limits /////////////////
+    
+    private synchronized void unsetQueue(Socket socket) {
+        int posInQueue = positionInQueue(socket);
+        if(posInQueue != -1) {
+            KeyValue kv = (KeyValue)_queuedUploads.get(posInQueue);
+            kv.setValue(new Long(0));   
+        }
+    }
 
     /** Checks whether the given upload may proceed based on number of slots,
      *  position in upload queue, etc.  Updates the upload queue as necessary.
@@ -1019,7 +1028,7 @@ public class UploadManager implements BandwidthTracker {
             ret = QUEUED;//queued
         }
         if(LOG.isDebugEnabled())
-            LOG.debug(uploader+" checking if given uploader is can be accomodated ");
+            LOG.debug(uploader+" checking if given uploader can be accomodated ");
         // If we have atleast one slot available, see if the position
         // in the queue is small enough to be accepted.
         if(hasFreeSlot(posInQueue + uploadsInProgress())) {
