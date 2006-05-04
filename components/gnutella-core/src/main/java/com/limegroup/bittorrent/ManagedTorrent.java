@@ -28,6 +28,7 @@ import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ThreadFactory;
 
 public class ManagedTorrent {
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
@@ -91,7 +92,12 @@ public class ManagedTorrent {
 	/**
 	 * counts the number of consecutive tracker failures
 	 */
-	private int _trackerFailures = 0;
+	private volatile int _trackerFailures = 0;
+	
+	/**
+	 * the next time we'll contact the tracker.
+	 */
+	private volatile long _nextTrackerRequestTime;
 
 	/**
 	 * if a problem occured with disk operations.
@@ -248,10 +254,11 @@ public class ManagedTorrent {
 	 * torrent processing queue.
 	 */
 	private void stopNow() {
-		
 		if (_stopped)
 			return;
 		_stopped = true;
+		if (!_started)
+			return;
 		
 		RouterService.getCallback().removeUpload(_uploader);
 		
@@ -371,6 +378,8 @@ public class ManagedTorrent {
 	}
 	
 	private void announceStart() {
+		_trackerFailures = 0;
+		_nextTrackerRequestTime = 0;
 		// announce ourselves to the trackers
 		for (int i = 0; i < _info.getTrackers().length; i++) {
 			announceBlocking(_info.getTrackers()[i],
@@ -506,47 +515,38 @@ public class ManagedTorrent {
 
 	/**
 	 * This method handles the response from a tracker
-	 * 
-	 * @param is
 	 */
 	private void handleTrackerResponse(TrackerResponse response, URL url) {
 		LOG.debug("handling tracker response " + url.toString());
 
 		long minWaitTime = BittorrentSettings.TRACKER_MIN_REASK_INTERVAL
 				.getValue() * 1000;
-		try {
-			// will be caught below.
-			if (response == null) {
-				LOG.debug("null response");
-				throw new IOException();
-			}
-
-			for (Iterator iter = response.PEERS.iterator(); iter.hasNext();) {
-				TorrentLocation next = (TorrentLocation) iter.next();
-				addEndpoint(next);
-			}
-
-			minWaitTime = response.INTERVAL * 1000;
-
-			if (response.FAILURE_REASON != null && _trackerFailures == 0) {
-				MessageService.showError("TORRENTS_TRACKER_FAILURE", _info
-						.getName()
-						+ "\n" + response.FAILURE_REASON);
-				throw new IOException("Tracker request failed.");
-			}
-			_trackerFailures = 0;
-		} catch (ValueException ve) {
-			if (LOG.isDebugEnabled())
-				LOG.debug(ve);
+		
+		if (response != null) {
+				for (Iterator iter = response.PEERS.iterator(); iter.hasNext();) {
+					TorrentLocation next = (TorrentLocation) iter.next();
+					addEndpoint(next);
+				}
+				
+				minWaitTime = response.INTERVAL * 1000;
+				
+				if (response.FAILURE_REASON != null) {
+					if (_trackerFailures++ == 0) {
+						// tell the user what the tracker said only the first time.
+						MessageService.showError("TORRENTS_TRACKER_FAILURE", 
+								_info.getName() + "\n" +
+								response.FAILURE_REASON);
+					}
+				} else
+					_trackerFailures = 0;
+		} else 
 			_trackerFailures++;
-		} catch (IOException ioe) {
-			if (LOG.isDebugEnabled())
-				LOG.debug(ioe);
-			_trackerFailures++;
-		}
 
-		if (!_stopped && _trackerFailures < MAX_TRACKER_FAILURES) {
-			scheduleTrackerRequest(minWaitTime, url);
+		if (!_stopped) {
+			if (shouldStop())
+				stop();
+			else
+				scheduleTrackerRequest(minWaitTime, url);
 		}
 	}
 
@@ -713,25 +713,23 @@ public class ManagedTorrent {
 	/**
 	 * schedules a new TrackerRequest
 	 * 
-	 * @param minDelay
-	 *            the time in milliseconds to wait before sending another
+	 * @param minDelay the time in milliseconds to wait before sending another
 	 *            request
-	 * @param url
-	 *            the URL of the tracker
+	 * @param url the URL of the tracker
 	 */
 	private void scheduleTrackerRequest(long minDelay, final URL url) {
 		Runnable announcer = new Runnable() {
 			public void run() {
+				if (_stopped)
+					return;
+				
 				if (LOG.isDebugEnabled())
 					LOG.debug("announcing to " + url.toString());
 				announce(url);
 			}
 		};
-		// a tracker request can take quite a few seconds (easily up to 30)
-		// it will slow us down since we cannot enqueue any further pieces
-		// during that time - it may become necessary to do tracker requests
-		// in their own thread
 		RouterService.schedule(announcer, minDelay, 0);
+		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 
 	/**
@@ -767,6 +765,10 @@ public class ManagedTorrent {
 			}
 		}
 		return ret;
+	}
+	
+	long getNextTrackerRequestTime() {
+		return _nextTrackerRequestTime;
 	}
 
 	TorrentLocation getTorrentLocation() {
@@ -984,25 +986,21 @@ public class ManagedTorrent {
 	/**
 	 * Announces ourselves to a tracker
 	 * 
-	 * @param url
-	 *            the URL of the tracker
+	 * @param url the URL of the tracker
 	 */
 	private void announce(final URL url) {
+		
 		// offload tracker requests, - it simply takes too long even to execute
 		// it in our timer thread
 		Runnable trackerRequest = new Runnable() {
 			public void run() {
 				if (LOG.isDebugEnabled())
 					LOG.debug("announce thread for " + url.toString());
-				if (!_stopped)
-					return;
 				announceBlocking(url, TrackerRequester.EVENT_NONE);
 			}
 		};
-		ManagedThread thread = new ManagedThread(trackerRequest,
+		ThreadFactory.startThread(trackerRequest,
 				"TrackerRequest");
-		thread.setDaemon(true);
-		thread.start();
 	}
 
 	/**
@@ -1171,7 +1169,7 @@ public class ManagedTorrent {
 	/**
 	 * whether or not continuing is hopeless
 	 */
-	boolean shouldStop() {
+	private boolean shouldStop() {
 		if (_connections.size() == 0 && _peers.size() == 0) {
 			if (_trackerFailures > MAX_TRACKER_FAILURES) {
 				if (LOG.isDebugEnabled())

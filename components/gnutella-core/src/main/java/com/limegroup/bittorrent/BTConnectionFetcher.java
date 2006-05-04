@@ -92,11 +92,6 @@ public class BTConnectionFetcher  {
 		if (shutdown)
 			return;
 		
-		if (_torrent.shouldStop()) {
-			_torrent.stop();
-			return;
-		}
-		
 		while (!_torrent.hasStopped() && 
 				fetchers.size() < MAX_CONNECTORS &&
 				_torrent.needsMoreConnections() && 

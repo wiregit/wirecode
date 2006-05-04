@@ -61,8 +61,16 @@ public class BTDownloader implements Downloader {
 	}
 
 	public boolean isInactive() {
-		return _torrent.isPaused() || 
-		(_torrent.hasStopped() && !_torrent.isComplete());
+		// unlike regular downloads, aborted torrents can be
+		// resumed but queued ones cannot.
+		switch(getState()) {
+        case GAVE_UP:
+        case ABORTED:
+        case BUSY:
+        case PAUSED:
+            return true;
+        }
+        return false;
 	}
 
 	public int getInactivePriority() {
@@ -95,9 +103,15 @@ public class BTDownloader implements Downloader {
 		return _tracker.getTotalAmount();
 	}
 
+	/**
+	 * We only know how much time we'll be in the state between
+	 * tracker requests.
+	 */
 	public int getRemainingStateTime() {
-		// we don't have anything like that.
-		return 0;
+		if (getState() != Downloader.WAITING_FOR_RESULTS)
+			return 0;
+		return Math.max(0,(int)(_torrent.getNextTrackerRequestTime() - 
+				System.currentTimeMillis()) / 1000);
 	}
 
 	public String getFileName() {
