@@ -96,9 +96,13 @@ public class Main {
         long time = 0L;
         for(int i = 1; i < dhts.size(); i++) {
             long t = ((DHT)dhts.get(i)).bootstrap(((DHT)dhts.get(i-1)).getSocketAddress());
-            time += t;
             
-            System.out.println("Node #" + i + " finished bootstrapping in " + t + "ms");
+            if (t >= 0L) {
+                time += t;
+                System.out.println("Node #" + i + " finished bootstrapping in " + t + "ms");
+            } else {
+                System.out.println("Node #" + i + " failed to bootstrap");
+            }
         }
         System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
