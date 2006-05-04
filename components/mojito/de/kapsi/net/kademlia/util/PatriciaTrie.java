@@ -334,6 +334,12 @@ public class PatriciaTrie implements Serializable {
             return Collections.EMPTY_LIST;
         }
         
+        // ... or there are less than 'length' equal bits
+        int bitIndex = keyCreator.bitIndex(key, entry.key);
+        if (bitIndex >= 0 && bitIndex < length) {
+            return Collections.EMPTY_LIST;
+        }
+        
         if (length < entry.bitIndex) {
             //System.out.println("Has Subtree");
             return valuesInRangeR(entry, -1, keySelector, new ArrayList());

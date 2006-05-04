@@ -93,7 +93,14 @@ public class Main {
             }
         }
         
-        new BootstrapUtil(dhts).bootstrap();
+        long time = 0L;
+        for(int i = 1; i < dhts.size(); i++) {
+            long t = ((DHT)dhts.get(i)).bootstrap(((DHT)dhts.get(i-1)).getSocketAddress());
+            time += t;
+            
+            System.out.println("Node #" + i + " finished bootstrapping in " + t + "ms");
+        }
+        System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
         int current = 0;
         DHT dht = (DHT)dhts.get(current);
@@ -364,45 +371,6 @@ public class Main {
         } else {
             Context context = dht.getContext();
             context.getDatabase().store();
-        }
-    }
-    
-    private static class BootstrapUtil implements BootstrapListener {
-        
-        private List dhts;
-        private int index = 1;
-        
-        private long time = 0L;
-        
-        private boolean finished = false;
-        
-        public BootstrapUtil(List dhts) {
-            this.dhts = dhts;
-        }
-
-        public void phaseOneComplete(long time) {
-        }
-
-        public synchronized void phaseTwoComplete(boolean foundNodes, long time) {
-            if (time >= 0) {
-                this.time += time;
-            }
-            
-            bootstrap();
-        }
-
-        public synchronized void bootstrap() {
-            if (index < dhts.size()) {
-                try {
-                    ((DHT)dhts.get(index)).bootstrap(((DHT)dhts.get(index-1)).getSocketAddress(), this);
-                    index++;
-                } catch (IOException err) {
-                    err.printStackTrace();
-                }
-            } else if (!finished && !dhts.isEmpty()) {
-                finished = true;
-                System.out.println("*** Bootstraping finished in " + time + " ms ");
-            }
         }
     }
 }

@@ -107,6 +107,35 @@ public class DHT implements Runnable {
         context.close();
     }
     
+    public long bootstrap(SocketAddress address) throws IOException {
+        return bootstrap(address, ContextSettings.SYNC_BOOTSTRAP_TIMEOUT.getValue());
+    }
+
+    public long bootstrap(SocketAddress address, long timeout) throws IOException {
+        final long[] time = new long[]{ -1L };
+        synchronized (time) {
+            context.bootstrap(address, new BootstrapListener() {
+                public void phaseOneComplete(long time) {
+                }
+
+                public void phaseTwoComplete(boolean foundNodes, long t) {
+                    time[0] = t;
+                    synchronized (time) {
+                        time.notify();
+                    }
+                }
+            });
+            
+            try {
+                time.wait(timeout);
+            } catch (InterruptedException err) {
+                LOG.error(err);
+            }
+        }
+        
+        return time[0];
+    }
+
     public void bootstrap(SocketAddress address, BootstrapListener l) 
             throws IOException {
         context.bootstrap(address, l);
@@ -193,7 +222,7 @@ public class DHT implements Runnable {
         context.get(key, listener);
     }
     
-    /*public boolean remove(Value value) {
+    /*public boolean remove(KUID key) {
         return context.getDatabase().remove(value);
     }*/
     
