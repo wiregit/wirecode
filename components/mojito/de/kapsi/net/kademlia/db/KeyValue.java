@@ -27,12 +27,13 @@ import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Arrays;
+import java.util.Map;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.security.CryptoHelper;
 
-public class KeyValue implements Serializable {
+public class KeyValue implements Map.Entry, Serializable {
     
     private static final long serialVersionUID = -666238398053901179L;
     
@@ -129,12 +130,16 @@ public class KeyValue implements Serializable {
         return isClose;
     }
     
-    public KUID getKey() {
+    public Object getKey() {
         return key;
     }
     
-    public byte[] getValue() {
+    public Object getValue() {
         return value;
+    }
+    
+    public Object setValue(Object o) {
+        throw new UnsupportedOperationException("");
     }
     
     public KUID getNodeID() {

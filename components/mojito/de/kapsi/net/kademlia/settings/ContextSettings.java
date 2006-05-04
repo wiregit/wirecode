@@ -50,6 +50,12 @@ public class ContextSettings extends LimeDHTProps {
     public static final BooleanSetting COUNT_REMOTE_SIZE
         = FACTORY.createSettableBooleanSetting("COUNT_REMOTE_SIZE", true, "count_remote_size");
     
+    public static final LongSetting SYNC_GET_VALUE_TIMEOUT
+        = FACTORY.createLongSetting("SYNC_GET_VALUE_TIMEOUT", 60L * 1000L);
+    
+    public static final LongSetting SYNC_BOOTSTRAP_TIMEOUT
+        = FACTORY.createLongSetting("SYNC_BOOTSTRAP_TIMEOUT", 3L * 60L * 1000L);
+    
     public static void deleteNodeID(SocketAddress address) {
         String key = (address != null) ? address.toString() : "null";
         try {

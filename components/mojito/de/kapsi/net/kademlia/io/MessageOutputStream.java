@@ -60,8 +60,8 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeKeyValue(KeyValue keyValue) throws IOException {
-        writeKUID(keyValue.getKey());
-        byte[] b = keyValue.getValue();
+        writeKUID((KUID)keyValue.getKey());
+        byte[] b = (byte[])keyValue.getValue();
         writeShort(b.length);
         write(b, 0, b.length);
         
@@ -121,6 +121,7 @@ public class MessageOutputStream extends DataOutputStream {
     
     private void writePing(PingRequest ping) throws IOException {
         /* NOTHING TO WRITE */
+        //writeInt(0);
     }
     
     private void writePong(PingResponse pong) throws IOException {

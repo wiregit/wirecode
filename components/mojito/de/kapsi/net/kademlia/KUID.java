@@ -32,6 +32,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Random;
 
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.util.ArrayUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie.KeyCreator;
 
@@ -92,6 +93,12 @@ public class KUID implements Serializable, Comparable {
     /** All bits 1 Message ID */
     public static final KUID MAX_MESSAGE_ID;
     
+    /**
+     * A random pad we're using to obfuscate the actual
+     * QueryKey. Nodes must do a lookup to get the QK!
+     */
+    private static final byte[] RANDOM_PAD = new byte[4];
+                                                
     static {
         byte[] min = new byte[20];
         
@@ -109,10 +116,12 @@ public class KUID implements Serializable, Comparable {
         
         MIN_MESSAGE_ID = new KUID(MESSAGE_ID, min);
         MAX_MESSAGE_ID = new KUID(MESSAGE_ID, max);
+        
+        GENERATOR.nextBytes(RANDOM_PAD);
     }
     
     protected final int type;
-    protected final byte[] id;
+    private byte[] id;
     
     private int hashCode;
     
@@ -337,9 +346,15 @@ public class KUID implements Serializable, Comparable {
      * Returns the raw bytes of the current KUID
      */
     public byte[] getBytes() {
-        byte[] clone = new byte[id.length];
-        System.arraycopy(id, 0, clone, 0, id.length);
-        return clone;
+        return getBytes(0, new byte[id.length], 0, id.length);
+    }
+    
+    /**
+     * Returns the raw bytes of the current KUID from the specified interval
+     */
+    public byte[] getBytes(int srcPos, byte[] dest, int destPos, int length) {
+        System.arraycopy(id, srcPos, dest, destPos, length);
+        return dest;
     }
     
     public int hashCode() {
@@ -375,6 +390,20 @@ public class KUID implements Serializable, Comparable {
             KUID other = (KUID)o;
             return type == other.type && Arrays.equals(id, other.id);
         }
+    }
+    
+    /**
+     * Converts the current KUID into a Node ID if it isn't already.
+     */
+    public KUID toNodeID() {
+        return (isNodeID() ? this : new KUID(NODE_ID, id));
+    }
+    
+    /**
+     * Converts the current KUID into a Value ID if it isn't already.
+     */
+    public KUID toValueID() {
+        return (isValueID() ? this : new KUID(VALUE_ID, id));
     }
     
     /**
@@ -497,12 +526,63 @@ public class KUID implements Serializable, Comparable {
     }
     
     /**
-     * Creates and returns a random Message ID
+     * Creates a random message ID.
      */
     public static KUID createRandomMessageID() {
+        return createRandomMessageID(null);
+    }
+    
+    /**
+     * Creates a random message ID and piggy packs a QueryKey to it.
+     */
+    public static KUID createRandomMessageID(SocketAddress dest) {
         byte[] id = new byte[LENGTH/8];
         GENERATOR.nextBytes(id);
+        
+        if (dest instanceof InetSocketAddress) {
+            byte[] queryKey = QueryKey.getQueryKey(dest).getBytes();
+            
+            // Obfuscate it with our random pad!
+            for(int i = 0; i < RANDOM_PAD.length; i++) {
+                queryKey[i] ^= RANDOM_PAD[i];
+            }
+            
+            System.arraycopy(queryKey, 0, id, 0, queryKey.length);
+        }
+        
         return createMessageID(id);
+    }
+    
+    /**
+     * Extracts and returns the QueryKey from the KUID if the
+     * KUID is a message ID and null if it's a KUID of a different
+     * type.
+     */
+    private QueryKey getQueryKey() {
+        if (!isMessageID()) {
+            return null;
+        }
+        
+        byte[] queryKey = new byte[4];
+        System.arraycopy(id, 0, queryKey, 0, queryKey.length);
+        
+        // De-Obfuscate it with our random pad!
+        for(int i = 0; i < RANDOM_PAD.length; i++) {
+            queryKey[i] ^= RANDOM_PAD[i];
+        }
+        
+        return QueryKey.getQueryKey(queryKey);
+    }
+    
+    /**
+     * Returns wheather or not we're the originator of the message ID.
+     */
+    public boolean verify(SocketAddress src) {
+        if (!isMessageID() || !(src instanceof InetSocketAddress)) {
+            return false;
+        }
+        
+        return getQueryKey().isFor(src);
     }
     
     /**

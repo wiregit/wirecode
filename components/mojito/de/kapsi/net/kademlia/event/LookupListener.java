@@ -20,19 +20,27 @@
 package de.kapsi.net.kademlia.event;
 
 import java.util.Collection;
-import java.util.Map;
 
 import de.kapsi.net.kademlia.KUID;
 
-public interface FindNodeListener {
+public interface LookupListener extends ResponseListener {
     
     /**
-     * Called after a FIND_NODE lookup has finished.
+     * Called after a lookup has finished.
      * 
-     * @param lookup The ID we were looking for
-     * @param nodes Collection of ContactNodes that were found (K closest to lookup ID sorted by closeness)
-     * @param queryKeys Map of ContactNode -> QueryKeys
-     * @param time Time in milliseconds
+     * Collection <tt>c</tt> is a collection of Map.Entries. The
+     * mapping depends on the lookup key type.
+     * 
+     * If it's a Node ID lookup then is the Entry an instanceof
+     * LookupResponseHandler.ContactNodeEntry, Entry.getKey() returns the
+     * ContactNode and Entry.getValue() returns the QueryKey.
+     * 
+     * If it's a Value ID lookup then is the Entry an instance of KeyValue, 
+     * Entry.getKey() returns the Value ID and Entry.getValue() returns the 
+     * value which is a byte Array.
+     * 
+     * In both cases is Entry.setValue() not implemented and will throw an
+     * UnsupportedOperationException!
      */
-    public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time);
+    public void found(KUID lookup, Collection c, long time);
 }

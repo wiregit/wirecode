@@ -23,13 +23,19 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 
+
 public interface ResponseHandler {
+    
+    public void addTime(long time);
+    
+    public long time();
     
     public long timeout();
     
     public void handleResponse(ResponseMessage message, long time) throws IOException;
-
-    public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException;
+    
+    public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException;
 }

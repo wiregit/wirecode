@@ -19,18 +19,19 @@
  
 package de.kapsi.net.kademlia.event;
 
-import java.util.Collection;
+import java.net.SocketAddress;
 
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 
-public interface FindValueListener {
+/**
+ * 
+ */
+public interface ResponseListener {
     
-    /**
-     * Called after a FIND_VALUE lookup has finished.
-     * 
-     * @param key The key we were looking for
-     * @param values Collection of KeyValues
-     * @param time Time in milliseconds
-     */
-    public void foundValue(KUID key, Collection values, long time);
+    public void response(ResponseMessage response, long time);
+    
+    public void timeout(KUID nodeId, SocketAddress address, 
+            RequestMessage request, long time);
 }

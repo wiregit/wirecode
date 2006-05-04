@@ -84,52 +84,40 @@ public class KeyValueCollection implements Collection, Serializable {
             KUID nodeId = keyValue.getNodeID();
             KeyValue current = (KeyValue)values.get(nodeId);
             
-            if (current != null 
-                    && (!isTrustworthy || !isLocalKeyValue)) {
-                
-                SocketAddress currentSrc = current.getSocketAddress();
-                if (currentSrc != null 
-                        && !currentSrc.equals(keyValue.getSocketAddress())) {
+            if (current == null) {
+                if (isFull() && (!isTrustworthy || !isLocalKeyValue)) {
                     if (LOG.isTraceEnabled()) {
-                        LOG.trace("Cannot replace " + current + " with " + keyValue);
+                        LOG.trace("Cannot store " + keyValue + " because KeyValueCollection is full");
                     }
                     return false;
                 }
-            }
-            
-            if (current != null) {
+            } else if (!isLocalKeyValue) {
                 
-                if (!isTrustworthy && isTrustworthy(current)) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Cannot replace " + current + " with " + keyValue);
+                if (!isTrustworthy) {
+                    
+                    if (isTrustworthy(current)) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Cannot replace " + current + " with " 
+                                    + keyValue + " because new KeyValue is not trustworthy");
+                        }
+                        return false;
                     }
-                    return false;
-                }
-                
-                SocketAddress currentSrc = current.getSocketAddress();
-                if (currentSrc != null 
-                        && !currentSrc.equals(keyValue.getSocketAddress())) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Cannot replace " + current + " with " + keyValue);
+                    
+                    SocketAddress currentSrc = current.getSocketAddress();
+                    if (currentSrc != null 
+                            && !currentSrc.equals(keyValue.getSocketAddress())) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Cannot replace " + current + " with " 
+                                    + keyValue + " because originator addresses do not match");
+                        }
+                        return false;
                     }
-                    return false;
                 }
-            }
-            
-            
-            if (isFull() && current == null 
-                    && (!isTrustworthy || !isLocalKeyValue)) {
-                
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("KeyValueCollection is full and " + keyValue 
-                            + " is neither trustworthy nor a local KeyValue");
-                }
-                return false;
             }
             
             if (LOG.isTraceEnabled()) {
                 if (current != null) {
-                    LOG.trace("Updating KeyValue " + current + " with " + keyValue);
+                    LOG.trace("Replacing " + current + " with " + keyValue);
                 } else {
                     LOG.trace("Adding KeyValue " + keyValue);
                 }

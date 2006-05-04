@@ -65,6 +65,13 @@ public class DefaultMessageHandler extends MessageHandler
         databaseStats = context.getDataBaseStats();
     }
     
+    public void addTime(long time) {
+    }
+    
+    public long time() {
+        return 0L;
+    }
+    
     public long timeout() {
         return NetworkSettings.TIMEOUT.getValue();
     }
@@ -73,8 +80,8 @@ public class DefaultMessageHandler extends MessageHandler
         addLiveContactInfo(message.getContactNode(), message);
     }
 
-    public void handleTimeout(KUID nodeId, 
-            SocketAddress dst, long time) throws IOException {
+    public void handleTimeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time) throws IOException {
         context.getRouteTable().handleFailure(nodeId);
     }
 
@@ -82,7 +89,8 @@ public class DefaultMessageHandler extends MessageHandler
         addLiveContactInfo(message.getContactNode(), message);
     }
     
-    private void addLiveContactInfo(ContactNode node, Message message) throws IOException {
+    private void addLiveContactInfo(ContactNode node, 
+            Message message) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
 
@@ -94,7 +102,7 @@ public class DefaultMessageHandler extends MessageHandler
             newNode = request.getLookupID().equals(node.getNodeID());
         }
 
-        if(newNode) {
+        if (newNode) {
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
@@ -148,8 +156,10 @@ public class DefaultMessageHandler extends MessageHandler
                 }
                 
                 if (!keyValuesToForward.isEmpty()) {
-                    ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);
-                    RequestMessage request = context.getMessageFactory().createFindNodeRequest(node.getNodeID());
+                    ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);           
+                    RequestMessage request = context.getMessageFactory()
+                        .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
+                    
                     context.getMessageDispatcher().send(node, request, handler);
                 }
             }
@@ -165,19 +175,12 @@ public class DefaultMessageHandler extends MessageHandler
 
         private List keyValues;
         
-        private boolean done = false;
-        private int errors = 0;
-        
         public StoreForwardResponseHandler(Context context, List keyValues) {
             super(context);
             this.keyValues = keyValues;
         }
         
-        public void handleResponse(ResponseMessage message, long time) throws IOException {
-            
-            if (done) {
-                return;
-            }
+        public void response(ResponseMessage message, long time) throws IOException {
             
             FindNodeResponse response = (FindNodeResponse)message;
             
@@ -191,25 +194,10 @@ public class DefaultMessageHandler extends MessageHandler
             
             QueryKey queryKey = response.getQueryKey();
             context.store(message.getContactNode(), queryKey, keyValues);
-            done = true;
         }
 
-        public void handleTimeout(KUID nodeId, SocketAddress dst, long time) 
-                throws IOException {
+        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
             
-            if (done) {
-                return;
-            }
-            
-            if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Max number of errors has occured. Giving up!");
-                }
-                return;
-            }
-            
-            RequestMessage request = context.getMessageFactory().createFindNodeRequest(nodeId);
-            context.getMessageDispatcher().send(nodeId, dst, request, this);
         }
     }
 }

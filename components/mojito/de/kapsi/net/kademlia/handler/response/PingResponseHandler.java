@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package de.kapsi.net.kademlia.handler.response;
 
 import java.io.IOException;
@@ -25,67 +25,71 @@ import java.net.SocketAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
-
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
-import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
+import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 public class PingResponseHandler extends AbstractResponseHandler {
     
-    private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);
+    private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
     
-    private PingListener l;
-    
-    private final NetworkStatisticContainer networkStats;
-    
-    public PingResponseHandler(Context context, PingListener l) {
+    public PingResponseHandler(Context context) {
         super(context);
-        networkStats = context.getNetworkStats();
-        this.l = l;
     }
 
-    public void handleResponse(final ResponseMessage message, final long time) throws IOException {
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Ping to " + message.getContactNode() + " succeeded");
-        }
-        
-        networkStats.PINGS_OK.incrementStat();
-        
-        PingResponse response = (PingResponse)message;
-        
-        context.setExternalSocketAddress(response.getSocketAddress());
-        context.addEstimatedRemoteSize(response.getEstimatedSize());
-        
-        if (l != null) {
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    l.pingSuccess(message.getContactNode(), time);
-                }
-            });
-        }
+    public void addPingListener(PingListener listener) {
+        listeners.add(listener);
     }
     
-    public void handleTimeout(final KUID nodeId, final SocketAddress dst, long time) throws IOException {
+    public void removePingListener(PingListener listener) {
+        listeners.remove(listener);
+    }
+
+    public PingListener[] getPingListeners() {
+        return (PingListener[])listeners.toArray(new PingListener[0]);
+    }
+
+    protected void response(ResponseMessage message, long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Ping to " + ContactNode.toString(nodeId, dst) + " failed");
+            LOG.trace("Received pong from " + message.getContactNode() 
+                    + " after " + getErrors() + " errors and a total time of " + time() + "ms");
         }
         
-        networkStats.PINGS_FAILED.incrementStat();
+        PingResponse response = (PingResponse)message;
+        context.setExternalSocketAddress(response.getSocketAddress());
+    }
+
+    public void handleTimeout(KUID nodeId, 
+            SocketAddress dst, RequestMessage message, long time) throws IOException {
         
-        if (l != null) {
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    l.pingTimeout(nodeId, dst);
-                }
-            });
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Ping to " + ContactNode.toString(nodeId, dst) 
+                    + " failed after " + time + "ms");
+        }
+
+        super.handleTimeout(nodeId, dst, message, time);
+    }
+    
+    protected void resend(KUID nodeId, SocketAddress dst, Message message) throws IOException {
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Re-sending Ping to " + ContactNode.toString(nodeId, dst));
+        }
+        
+        super.resend(nodeId, dst, message);
+    }
+
+    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Giving up to ping " + ContactNode.toString(nodeId, dst) 
+                    + " after " + getMaxErrors() + " errors and a total time of "+ time() + "ms");
         }
     }
 }

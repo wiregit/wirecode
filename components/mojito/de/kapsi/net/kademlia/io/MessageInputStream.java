@@ -231,6 +231,7 @@ public class MessageInputStream extends DataInputStream {
     }
     
     public Message readMessage(SocketAddress src) throws IOException {
+
         int vendor = readInt();
         int version = readUnsignedShort();
         int flags = readUnsignedByte();
@@ -240,7 +241,7 @@ public class MessageInputStream extends DataInputStream {
         int messageType = readUnsignedByte();
         
         ContactNode node = new ContactNode(nodeId, src, flags);
-        
+
         switch(messageType) {
             case Message.PING_REQUEST:
                 return readPing(vendor, version, node, messageId);

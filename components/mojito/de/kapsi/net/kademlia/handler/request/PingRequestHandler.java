@@ -34,7 +34,6 @@ import de.kapsi.net.kademlia.messages.response.PingResponse;
 
 /**
  * 
- * @author Roger Kapsi
  */
 public class PingRequestHandler extends AbstractRequestHandler {
 
@@ -58,9 +57,9 @@ public class PingRequestHandler extends AbstractRequestHandler {
         PingRequest request = (PingRequest)message;
         
         PingResponse response = context.getMessageFactory()
-                .createPingResponse(message, message.getSocketAddress());
+                .createPingResponse(request, request.getSocketAddress());
 
-        context.getMessageDispatcher().send(message.getContactNode(), response, null);
+        context.getMessageDispatcher().send(request.getContactNode(), response, null);
         networkStats.PONGS_SENT.incrementStat();
     }
 }

@@ -89,7 +89,7 @@ public class Database {
             return false;
         }
         
-        KUID key = keyValue.getKey();
+        KUID key = (KUID)keyValue.getKey();
         KeyValueCollection values = (KeyValueCollection)database.get(key);
         if (values == null) {
             values = new KeyValueCollection(context, key, DatabaseSettings.MAX_KEY_VALUES.getValue());
@@ -129,11 +129,11 @@ public class Database {
         return Collections.unmodifiableCollection(values);
     }
     
-    public synchronized boolean remove(KeyValue value) {
-        KUID key = value.getKey();
+    public synchronized boolean remove(KeyValue keyValue) {
+        KUID key = (KUID)keyValue.getKey();
         KeyValueCollection values = (KeyValueCollection)database.get(key);
         if (values == null 
-                || !values.remove(value)) {
+                || !values.remove(keyValue)) {
             return false;
         }
         
@@ -161,13 +161,13 @@ public class Database {
         return database.get(key) != null;
     }
     
-    public synchronized boolean contains(KeyValue value) {
-        KUID key = value.getKey();
+    public synchronized boolean contains(KeyValue keyValue) {
+        KUID key = (KUID)keyValue.getKey();
         KeyValueCollection values = (KeyValueCollection)database.get(key);
-        if (values == null) {
+        if (keyValue == null) {
             return false;
         }
-        return values.contains(value);
+        return values.contains(keyValue);
     }
     
     public synchronized List getAllValues() {

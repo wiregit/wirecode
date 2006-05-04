@@ -16,14 +16,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package de.kapsi.net.kademlia.handler.request;
 
-import de.kapsi.net.kademlia.Context;
+package de.kapsi.net.kademlia.event;
 
-public class FindNodeRequestHandler extends LookupRequestHandler {
-    
-    public FindNodeRequestHandler(Context context) {
-        super(context);
+import java.net.SocketAddress;
+import java.util.Collection;
+
+import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
+
+public class LookupAdapter implements LookupListener {
+
+    public void found(KUID lookup, Collection c, long time) {
+    }
+
+    public void response(ResponseMessage response, long time) {
+    }
+
+    public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
     }
 }

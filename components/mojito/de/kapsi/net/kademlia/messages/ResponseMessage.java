@@ -33,4 +33,8 @@ public abstract class ResponseMessage extends Message {
             ContactNode node, KUID messageId, byte[] signature) {
         super(vendor, version, node, messageId, signature);
     }
+    
+    public boolean verify() {
+        return getMessageID().verify(getSocketAddress());
+    }
 }

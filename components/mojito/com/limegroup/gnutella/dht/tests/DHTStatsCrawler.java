@@ -20,6 +20,7 @@ import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
@@ -128,11 +129,11 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         queried.add(context.getLocalNodeID());
         try {
             context.ping(bootstrap, new PingListener() {
-                public void pingSuccess(ContactNode node, long time) {
-                    startCrawl(node.getNodeID());
+                public void response(ResponseMessage response, long time) {
+                    startCrawl(response.getNodeID());
                 }
 
-                public void pingTimeout(KUID nodeId, SocketAddress address) {
+                public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
                     System.out.println("Crawl failed: bootstrap host dead");
                     System.exit(0);
                 }
@@ -145,7 +146,7 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
     private void startCrawl(KUID nodeId) {
         try {
             toQuery.add(new ContactNode(nodeId, bootstrap));
-            FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(context.getLocalNodeID());
+            FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(bootstrap, context.getLocalNodeID());
             ++numReq;
             context.getMessageDispatcher().send(bootstrap, req, this);
         } catch (IOException e) {
@@ -179,7 +180,7 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         
     }
 
-    public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
+    public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         --numReq;
         ++timeouts;
         sendQueries();
@@ -189,6 +190,14 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         return 30*1000L;
     }
     
+    
+    public void addTime(long time) {
+    }
+    
+    public long time() {
+        return 0L;
+    }
+
     public void sendQueries() throws IOException{
         if(toQuery.size() == 0 && numReq == 0) {
             long delay = System.currentTimeMillis() - this.time; 
@@ -215,10 +224,10 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                     continue;
                 }
                 queried.add(node.getNodeID());
-                FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(node.getNodeID());
+                FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
                 ++numReq;
                 System.out.println("Sending request to: " + node);
-                context.getMessageDispatcher().send(node.getSocketAddress(), req, this);
+                context.getMessageDispatcher().send(node, req, this);
             }
         }
     }
@@ -262,14 +271,14 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                     } else {
                         ContactNode node = (ContactNode) iter.next();
                         StatsRequest req = context.getMessageFactory()
-                            .createStatsRequest(new byte[0], StatsRequest.STATS);
+                            .createStatsRequest(node.getSocketAddress(), new byte[0], StatsRequest.STATS);
                         
                         try {
                             //statsQueried.add(node);
                             iter.remove();
                             ++numReq;
                             System.out.println("Asking node :"+node+" for stats");
-                            context.getMessageDispatcher().send(node.getSocketAddress(), req, new StatsResponseHandler(context,this));
+                            context.getMessageDispatcher().send(node, req, new StatsResponseHandler(context,this));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

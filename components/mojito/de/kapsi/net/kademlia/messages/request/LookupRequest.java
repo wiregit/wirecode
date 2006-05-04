@@ -25,7 +25,7 @@ import de.kapsi.net.kademlia.messages.RequestMessage;
 
 public abstract class LookupRequest extends RequestMessage {
     
-    protected final KUID lookupId;
+    private KUID lookupId;
     
     public LookupRequest(int vendor, int version, ContactNode node, 
             KUID messageId, KUID lookupId) {

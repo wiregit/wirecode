@@ -28,64 +28,61 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.ContactNode;
-import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
+import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
+import de.kapsi.net.kademlia.messages.request.FindValueRequest;
+import de.kapsi.net.kademlia.messages.request.PingRequest;
+import de.kapsi.net.kademlia.messages.request.StoreRequest;
+import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
+import de.kapsi.net.kademlia.messages.response.FindValueResponse;
+import de.kapsi.net.kademlia.messages.response.PingResponse;
+import de.kapsi.net.kademlia.messages.response.StoreResponse;
 
-class Receipt {
+public class Receipt {
     
     private static final Log LOG = LogFactory.getLog(Receipt.class);
     
     public static final int MAX_PACKET_SIZE = 8192;
     
-    private Context context;
+    private KUID nodeId;
+    private SocketAddress dst;
     
-    private final KUID nodeId;
-    private final SocketAddress dst;
-    
+    private Message message;
     private ByteBuffer data;
-    private int dataSize;
+    private int size;
     
-    private final KUID messageId;
-    private final ResponseHandler handler;
+    private ResponseHandler handler;
     
     private long sent = 0L;
     private long received = 0L;
     
-    private boolean isRequest = false;
-    
-    public Receipt(Context context, KUID nodeId, SocketAddress dst, 
+    Receipt(KUID nodeId, SocketAddress dst, 
             Message message, ResponseHandler handler) throws IOException {
         
-        byte[] data = InputOutputUtils.serialize(message);
+        data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
+        size = data.limit();
         
-        if (data.length >= MAX_PACKET_SIZE) {
-            throw new IOException("Packet is too large: " + data.length);
+        if (size >= MAX_PACKET_SIZE) {
+            throw new IOException("Packet is too large: " + size + " >= " + MAX_PACKET_SIZE);
         }
-        
-        this.context = context;
         
         this.nodeId = nodeId;
         this.dst = dst;
         
-        dataSize = data.length;
-        this.data = ByteBuffer.wrap(data);
-        
-        this.messageId = message.getMessageID();
-        this.isRequest = (message instanceof RequestMessage);
-        
+        this.message = message;
         this.handler = handler;
     }
     
-    public boolean isRequest() {
-        return isRequest;
+    public Message getMessage() {
+        return message;
     }
     
-    public boolean compareNodeID(KUID nodeId) {
-        return this.nodeId == null || this.nodeId.equals(nodeId);
+    public boolean isRequest() {
+        return (message instanceof RequestMessage);
     }
     
     public KUID getNodeID() {
@@ -97,23 +94,11 @@ class Receipt {
     }
     
     public KUID getMessageID() {
-        return messageId;
+        return message.getMessageID();
     }
     
     public ResponseHandler getHandler() {
         return handler;
-    }
-    
-    public boolean send(DatagramChannel channel) throws IOException {
-        return channel.send(data, dst) != 0;
-    }
-    
-    public void sent() {
-        sent = System.currentTimeMillis();
-    }
-    
-    public void received() {
-        received = System.currentTimeMillis();
     }
     
     public long time() {
@@ -128,42 +113,103 @@ class Receipt {
         return false;
     }
     
-    public void handleResponse(ResponseMessage response) throws IOException {
+    public int size() {
+        return size;
+    }
+    
+    public int hashCode() {
+        return getMessageID().hashCode();
+    }
+    
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof Receipt)) {
+            return false;
+        }
+        
+        Receipt other = (Receipt)o;
+        return getMessageID().equals(other.getMessageID());
+    }
+    
+    public String toString() {
+        return ContactNode.toString(nodeId, dst) + "/" + getMessageID();
+    }
+    
+    boolean compareNodeID(KUID nodeId) {
+        return this.nodeId == null || this.nodeId.equals(nodeId);
+    }
+    
+    boolean compareResponseType(ResponseMessage response) {
+        if (message instanceof PingRequest) {
+            return response instanceof PingResponse;
+        } else if (message instanceof FindNodeRequest) {
+            return response instanceof FindNodeResponse;
+        } else if (message instanceof FindValueRequest) {
+            return (response instanceof FindNodeResponse) 
+                || (response instanceof FindValueResponse);
+        } else if (message instanceof StoreRequest) {
+            return response instanceof StoreResponse;
+        }
+        
+        return false;
+    }
+    
+    boolean send(DatagramChannel channel) throws IOException {
+        if (channel.send(data, dst) != 0) {
+            freeData();
+            return true;
+        }
+        return false;
+    }
+    
+    private void freeData() {
+        data = null;
+    }
+    
+    void sent() {
+        sent = System.currentTimeMillis();
+    }
+    
+    void received() {
+        received = System.currentTimeMillis();
+    }
+    
+    void handleResponse(ResponseMessage response) throws IOException {
         
         // A sends B a Ping
         // But B is offline and there is C who got B's IP from the ISP
         // C will respond to A's Ping
         // But C's NodeID is different
         // Make sure B is not C
-        if (compareNodeID(response.getNodeID())) {
-            if (handler != null) {
-                handler.handleResponse(response, time());
-            }
-        } else {
+        if (!compareNodeID(nodeId)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Wrong NodeID! Expected " + this.nodeId + " but got " 
-                        + nodeId + " from " + response.getSocketAddress());
+                        + response.getNodeID() + " from " + response.getSocketAddress());
             }
             
             handleTimeout();
+            return;
+        } else if (!compareResponseType(response)) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Wrong response type! Got " + response.getClass().getName() 
+                        + " for " + message.getClass().getName());
+            }
+            
+            handleTimeout();
+            return;
         }
-    }
-    
-    public void handleTimeout() throws IOException {
+        
         if (handler != null) {
-            handler.handleTimeout(nodeId, dst, time());
+            handler.addTime(time());
+            handler.handleResponse(response, time());
         }
     }
     
-    public int dataSize() {
-        return dataSize;
-    }
-    
-    public void freeData() {
-        data = null;
-    }
-    
-    public String toString() {
-        return ContactNode.toString(nodeId, dst) + "/" + messageId;
+    void handleTimeout() throws IOException {
+        if (handler != null) {
+            handler.addTime(time());
+            handler.handleTimeout(nodeId, dst, (RequestMessage)message, time());
+        }
     }
 }

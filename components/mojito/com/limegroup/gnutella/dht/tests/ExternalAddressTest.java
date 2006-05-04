@@ -69,7 +69,7 @@ public class ExternalAddressTest {
         public void handleRequest(RequestMessage message) throws IOException {
             
             SocketAddress addr = externalAddress != null ? externalAddress : message.getSocketAddress();
-            
+
             System.out.println("Received Ping from " + message.getSocketAddress());
             System.out.println("Going to tell " + message.getSocketAddress() + " that its external address is " + addr);
             

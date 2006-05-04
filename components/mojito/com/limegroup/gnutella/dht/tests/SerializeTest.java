@@ -9,7 +9,6 @@ import java.net.InetSocketAddress;
 import java.util.zip.GZIPOutputStream;
 
 import de.kapsi.net.kademlia.ContactNode;
-import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.routing.RoutingTable;

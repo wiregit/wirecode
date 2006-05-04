@@ -33,9 +33,9 @@ public abstract class Node implements Serializable {
         }
         
         if (!nodeId.isNodeID()) {
-            throw new IllegalArgumentException("NodeID is of wrong type: " + nodeId);
+            throw new IllegalArgumentException("ID must be of type NodeID");
         }
-        
+
         this.nodeId = nodeId;
     }
     

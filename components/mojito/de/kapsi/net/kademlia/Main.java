@@ -39,11 +39,13 @@ import com.limegroup.gnutella.dht.statistics.DHTStats;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.FindValueListener;
+import de.kapsi.net.kademlia.event.LookupAdapter;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
@@ -94,7 +96,18 @@ public class Main {
             }
         }
         
-        new BootstrapUtil(dhts).bootstrap();
+        long time = 0L;
+        for(int i = 1; i < dhts.size(); i++) {
+            long t = ((DHT)dhts.get(i)).bootstrap(((DHT)dhts.get(i-1)).getSocketAddress());
+            
+            if (t >= 0L) {
+                time += t;
+                System.out.println("Node #" + i + " finished bootstrapping in " + t + "ms");
+            } else {
+                System.out.println("Node #" + i + " failed to bootstrap");
+            }
+        }
+        System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
         int current = 0;
         DHT dht = (DHT)dhts.get(current);
@@ -250,11 +263,11 @@ public class Main {
         
         System.out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
-            public void pingSuccess(ContactNode node, long time) {
-                System.out.println("*** Ping to " + node + " succeeded: " + time + "ms");
+            public void response(ResponseMessage response, long time) {
+                System.out.println("*** Ping to " + response.getContactNode() + " succeeded: " + time + "ms");
             }
-            
-            public void pingTimeout(KUID nodeId, SocketAddress address) {
+
+            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
                 if (nodeId != null) {
                     System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " failed");
                 } else {
@@ -280,7 +293,7 @@ public class Main {
         
         System.out.println("Requesting stat... " + addr);
         StatsRequest req = dht.getContext().getMessageFactory()
-                .createStatsRequest(new byte[0], type);
+                .createStatsRequest(addr, new byte[0], type);
         
         StatsListener listener = new StatsListener() {
             public void nodeStatsResponse(ContactNode node, String statistics, long time) {
@@ -305,11 +318,11 @@ public class Main {
         
         System.out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                System.out.println("*** Bootstraping phase 1 " + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
+            public void phaseOneComplete(long time) {
+                System.out.println("*** Bootstraping phase 1 finished in " + time + " ms");
             }
 
-            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+            public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println("*** Bootstraping phase 2 " + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
@@ -368,27 +381,11 @@ public class Main {
         }
         md.reset();
         
-        if (line[0].equals("get")) {
-            dht.get(key, new FindValueListener() {
-                public void foundValue(KUID key, Collection values, long time) {
-                    if (values != null) {
-                        System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                    } else {
-                        System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                    }
-                }
-            });
-        } else {
-            dht.getr(key, new FindValueListener() {
-                public void foundValue(KUID key, Collection values, long time) {
-                    if (values != null) {
-                        System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                    } else {
-                        System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                    }
-                }
-            });
-        }
+        dht.get(key, new LookupAdapter() {
+            public void found(KUID key, Collection values, long time) {
+                System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
+            }
+        });
     }
     
     private static void load(DHT dht, String[] line) {
@@ -416,44 +413,6 @@ public class Main {
         } else {
             Context context = dht.getContext();
             context.getDatabase().store();
-        }
-    }
-    
-    private static class BootstrapUtil implements BootstrapListener {
-        
-        private List dhts;
-        private int index = 1;
-        
-        private long time = 0L;
-        
-        private boolean finished = false;
-        
-        public BootstrapUtil(List dhts) {
-            this.dhts = dhts;
-        }
-
-        public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
-
-        public synchronized void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
-            if (time >= 0) {
-                this.time += time;
-            }
-            
-            bootstrap();
-        }
-
-        public synchronized void bootstrap() {
-            if (index < dhts.size()) {
-                try {
-                    ((DHT)dhts.get(index)).bootstrap(((DHT)dhts.get(index-1)).getSocketAddress(), this);
-                    index++;
-                } catch (IOException err) {
-                    err.printStackTrace();
-                }
-            } else if (!finished && !dhts.isEmpty()) {
-                finished = true;
-                System.out.println("*** Bootstraping finished in " + time + " ms ");
-            }
         }
     }
 }

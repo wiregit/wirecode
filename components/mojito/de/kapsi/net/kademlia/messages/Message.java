@@ -41,13 +41,13 @@ public abstract class Message {
     public static final int STATS_REQUEST = 0x0A;
     public static final int STATS_RESPONSE = 0x0B;
     
-    protected final int vendor;
-    protected final int version;
+    private int vendor;
+    private int version;
+
+    private ContactNode node;
+    private KUID messageId;
     
-    protected final ContactNode node;
-    protected final KUID messageId;
-    
-    protected final byte[] signature;
+    private byte[] signature;
     
     public Message(int vendor, int version, ContactNode node, KUID messageId) {
         this(vendor, version, node, messageId, null);
@@ -57,7 +57,7 @@ public abstract class Message {
             ContactNode node, KUID messageId, byte[] signature) {
         
         if (node == null) {
-            throw new NullPointerException("Node is null");
+            throw new NullPointerException("ContactNode is null");
         }
         
         if (messageId == null) {

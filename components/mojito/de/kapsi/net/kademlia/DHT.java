@@ -24,17 +24,25 @@ import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.Collection;
+import java.util.Collections;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.FindNodeListener;
-import de.kapsi.net.kademlia.event.FindValueListener;
+import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.routing.RoutingTable;
+import de.kapsi.net.kademlia.settings.ContextSettings;
 
 public class DHT implements Runnable {
+    
+    private static final Log LOG = LogFactory.getLog(DHT.class);
     
     private Context context;
     
@@ -99,6 +107,35 @@ public class DHT implements Runnable {
         context.close();
     }
     
+    public long bootstrap(SocketAddress address) throws IOException {
+        return bootstrap(address, ContextSettings.SYNC_BOOTSTRAP_TIMEOUT.getValue());
+    }
+
+    public long bootstrap(SocketAddress address, long timeout) throws IOException {
+        final long[] time = new long[]{ -1L };
+        synchronized (time) {
+            context.bootstrap(address, new BootstrapListener() {
+                public void phaseOneComplete(long time) {
+                }
+
+                public void phaseTwoComplete(boolean foundNodes, long t) {
+                    time[0] = t;
+                    synchronized (time) {
+                        time.notify();
+                    }
+                }
+            });
+            
+            try {
+                time.wait(timeout);
+            } catch (InterruptedException err) {
+                LOG.error(err);
+            }
+        }
+        
+        return time[0];
+    }
+
     public void bootstrap(SocketAddress address, BootstrapListener l) 
             throws IOException {
         context.bootstrap(address, l);
@@ -114,7 +151,12 @@ public class DHT implements Runnable {
         return context;
     }
     
-    public void put(KUID key, byte[] value, StoreListener l) 
+    public void put(KUID key, byte[] value) 
+            throws IOException {
+        put(key, value, null);
+    }
+    
+    public void put(KUID key, byte[] value, StoreListener listener) 
             throws IOException {
         
         try {
@@ -122,8 +164,8 @@ public class DHT implements Runnable {
                 KeyValue.createLocalKeyValue(key, value, getLocalNode());
             Database database = context.getDatabase();
             synchronized(database) {
-                if(database.add(keyValue)){
-                    context.store(keyValue, l);
+                if (database.add(keyValue)) {
+                    context.store(keyValue, listener);
                 }
             }
         } catch (SignatureException err) {
@@ -133,35 +175,59 @@ public class DHT implements Runnable {
         }
     }
     
-    public Collection get(final KUID key, final FindValueListener l) throws IOException {
-        final Collection values = context.getDatabase().get(key);
-        if (values != null) {
-            if (l != null) {
-                context.fireEvent(new Runnable() {
-                    public void run() {
-                        l.foundValue(key, values, 0L);
+    public Collection get(KUID key) throws IOException {
+        return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
+    }
+    
+    public Collection get(KUID key, long timeout) throws IOException {
+        final Collection[] values = new Collection[] {
+            Collections.EMPTY_LIST
+        };
+        
+        synchronized (values) {
+            context.get(key, new LookupListener() {
+                public void response(ResponseMessage response, long time) {}
+
+                public void timeout(KUID nodeId, SocketAddress address, 
+                        RequestMessage request, long time) {}
+                
+                public void found(KUID lookup, Collection c, long time) {
+                    values[0] = c;
+                    synchronized (values) {
+                        values.notify();
                     }
-                });
+                }
+            });
+            
+            try {
+                values.wait(timeout);
+            } catch (InterruptedException err) {
+                LOG.error(err);
             }
-            return values;
-        } else {
-            return getr(key, l);
         }
+        
+        return values[0];
     }
     
-    // TODO only for debugging purposes public
-    Collection getr(KUID key, FindValueListener l) throws IOException {
-        context.get(key, l);
-        return null;
+    public void get(KUID key, LookupListener listener) throws IOException {
+        if (!key.isValueID()) {
+            throw new IllegalArgumentException("Key must be a Value ID");
+        }
+        
+        if (listener == null) {
+            throw new NullPointerException("LookupListener is null");
+        }
+        
+        context.get(key, listener);
     }
     
-    /*public boolean remove(Value value) {
+    /*public boolean remove(KUID key) {
         return context.getDatabase().remove(value);
     }*/
     
     // TODO for debugging purposes only
-    void lookup(KUID lookup, FindNodeListener l) throws IOException {
-        context.lookup(lookup, l);
+    void lookup(KUID lookup, LookupListener listener) throws IOException {
+        context.lookup(lookup, listener);
     }
     
     // TODO for debugging purposes only

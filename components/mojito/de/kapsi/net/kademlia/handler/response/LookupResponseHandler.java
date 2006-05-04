@@ -16,12 +16,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package de.kapsi.net.kademlia.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,375 +33,353 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.dht.statistics.FindNodeLookupStatisticContainer;
+import com.limegroup.gnutella.dht.statistics.FindValueLookupStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.SingleLookupStatisticContainer;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
-import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
-import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
-import de.kapsi.net.kademlia.util.CollectionUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
-/**
- * 
- */
-public abstract class LookupResponseHandler extends AbstractResponseHandler {
+public class LookupResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     
-    /** The Key we're looking for */
-    protected final KUID lookup;
+    private KUID lookup;
+    private KUID furthest;
     
-    /** The Key that is furthest away from the lookup Key */
-    private final KUID furthest;
+    private long startTime;
     
-    /** Set of queried KUIDs */
     private Set queried = new HashSet();
     
-    /** Trie of <KUID,ContactNode> from whom we got replies */
-    private PatriciaTrie responses = new PatriciaTrie();
-    
-    /** Trie of <KUID,ContactNode> to query */
     private PatriciaTrie toQuery = new PatriciaTrie();
     
-    /** 
-     * Map of ContactNode -> QueryKey
-     */
-    private Map queryKeys = new HashMap();
+    private PatriciaTrie responses = new PatriciaTrie();
     
-    /**
-     * A map of the hops for this lookup
-     */
     private Map hopMap = new HashMap();
     
+    private int resultSetSize;
     
-    /**
-     * The number of searches that are currently active
-     */
+    private int responseCount = 0;
+    
     private int activeSearches = 0;
-       
-    /**
-     * The number of closest nodes returned for a node lookup
-     */
-    private int resultSize = 0;
-
-    /**
-     * The start time of the lookup
-     */
-    private long startTime = 0L;
     
-    /**
-     * Wheather or not this lookup has terminated
-     */
     private boolean finished = false;
-    
-    /**
-     * A flag to make sure a lookup instance cannot be
-     * started multiple times.
-     */
-    private boolean active = false;
     
     /**
      * The statistics for this lookup
      */
-    protected SingleLookupStatisticContainer lookupStat;
+    private SingleLookupStatisticContainer lookupStat;
     
-    /**
-     * The global lookup timeout
-     */
-    private final long timeout;
-    
-    
-    public LookupResponseHandler(Context context, KUID lookup, long timeout) {
+    public LookupResponseHandler(KUID lookup, Context context) {
         super(context);
+        
+        if (!lookup.isNodeID() && !lookup.isValueID()) {
+            throw new IllegalArgumentException("Lookup ID bust be either a NodeID or ValueID");
+        }
         
         this.lookup = lookup;
         this.furthest = lookup.invert();
-       
-        this.resultSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        this.timeout = timeout;
+        
+        init();
     }
-    
-    public void handleResponse(ResponseMessage message, long time) throws IOException {
-        
-        ContactNode src = message.getContactNode();
-        
-        if (!isQueried(src.getNodeID())) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Got an unrequested response from " 
-                        + src + " for " + lookup);
-            }
-            return;
-        }
-        
-        //TODO for now
-        //this.time += time;
-        lookupStat.addReply();
-        int hop = ((Integer)hopMap.get(src.getNodeID())).intValue();
-        
-        // VALUE lookup response
-        if (isValueLookup() && message instanceof FindValueResponse) {
-                FindValueResponse response = (FindValueResponse)message;
-                
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(src 
-                            + " returned KeyValues for " 
-                            + lookup + " after " 
-                            + queried.size() + " queried Nodes");
-                }
-                
-                if (!finished) {
-                    long diff = time();
-                    lookupStat.setHops(hop);
-                    lookupStat.setTime((int)diff);
-                    finishValueLookup(lookup, response.getValues(), diff);
-                }
-                finished = true;
-        }
-        
-        // NODE/VALUE lookup response
-        if (message instanceof FindNodeResponse) {
-            FindNodeResponse response = (FindNodeResponse)message;
-            Collection values = response.getValues();
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Got FindNode response from " + src + 
-                        ", Nodes:\n"+ CollectionUtils.toString(values));
-            }
-            
-            for(Iterator it = values.iterator(); it.hasNext(); ) {
-                ContactNode node = (ContactNode)it.next();
-                
-                if (!isQueried(node) 
-                        && !isYetToBeQueried(node)) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Adding " + node + " to the yet-to-be queried list");
-                    }
-                    
-                    if (!finished) {
-                        addYetToBeQueried(node,hop+1);
-                    }
-                    
-                    // Add them to the routing table as not alive
-                    // contacts. We're likely going to add them
-                    // anyways!
-                    context.getRouteTable().add(node, false);
-                }
-            }
-            
-            if (!finished) {
-                // Don't add the ContactNode to responses if it didn't
-                // return any contacts because we have no QueryKey for it.
-                if (!values.isEmpty()) {
-                    addResponse(src);
-                    
-                    QueryKey queryKey = response.getQueryKey();
-                    if (queryKey != null) {
-                        queryKeys.put(src, queryKey);
-                    }
-                }
-                
-                --activeSearches;
-                lookupStep(hop);
-            }
-        }
-    }
-    
-    public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
-        
-        RoutingTable routeTable = getRouteTable();
-        routeTable.handleFailure(nodeId);
-        
-        if (!isQueried(nodeId)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("LookupRequestHandler did not query " 
-                        + ContactNode.toString(nodeId, dst));
-            }
-            return;
-        }
 
-        lookupStat.addTimeout();
-        if (finished) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Lookup for " + lookup + " is finished. Got response from "+ContactNode.toString(nodeId, dst));
-            }
-            return;
-        }
-        //TODO for now
-        //this.time += time;
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(ContactNode.toString(nodeId, dst) 
-                    + " did not respond to our Find request");
-        }
-        
-        int hop = ((Integer)hopMap.get(nodeId)).intValue();
-        
-        --activeSearches;
-        lookupStep(hop);
+    public void addLookupListener(LookupListener listener) {
+        listeners.add(listener);
     }
     
-    /**
-     * Starts the lookup
-     */
-    public synchronized void lookup() throws IOException {
+    public void removeLookupListener(LookupListener listener) {
+        listeners.remove(listener);
+    }
+
+    public LookupListener[] getPingListeners() {
+        return (LookupListener[])listeners.toArray(new LookupListener[0]);
+    }
+    
+    private void init() {
+
+        resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        setMaxErrors(0); // Don't retry on timeout - takes too long!
+
+        if (isValueLookup()) {
+            setTimeout(KademliaSettings.VALUE_LOOKUP_TIMEOUT.getValue());
+            lookupStat = new FindValueLookupStatisticContainer(context, lookup);
+        } else {
+            setTimeout(KademliaSettings.NODE_LOOKUP_TIMEOUT.getValue());
+            lookupStat = new FindNodeLookupStatisticContainer(context, lookup);
+        }
         
+        List bucketList = context.getRouteTable().select(lookup, resultSetSize, false, true);
+        for(Iterator it = bucketList.iterator(); it.hasNext(); ) {
+            addYetToBeQueried((ContactNode)it.next(), 1);
+        }
+        
+        addResponse(new ContactNodeEntry(context.getLocalNode()));
+        markAsQueried(context.getLocalNode());
+    }
+    
+    public KUID getLookupID() {
+        return lookup;
+    }
+    
+    public boolean isValueLookup() {
+        return lookup.isValueID();
+    }
+    
+    public void start() throws IOException {
         startTime = System.currentTimeMillis();
         
-        if (active) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("This lookup for " + lookup + " is already active!");
-            }
-            return;
-        }
-        
-        active = true;
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Starting a new Lookup for " + lookup);
-        }
-        
-        MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-        
-        // Select the K closest Nodes from the K bucket list
-        List bucketList = context.getRouteTable().select(lookup, resultSize, false, true);
-        
-        // Add the Nodes to the yet-to-be query list
-        for(int i = bucketList.size()-1; i >= 0; i--) {
-            addYetToBeQueried((ContactNode)bucketList.get(i),1);
-        }
-        
-        markAsQueried(context.getLocalNode());
-        addResponse(context.getLocalNode());
-        
-        // Get the first round of alpha nodes
+        // Get the first round of alpha nodes and send them requests
         List alphaList = toQuery.select(lookup, KademliaSettings.LOOKUP_PARAMETER.getValue());
-        
-        // send alpha requests
-        for(int i = 0; i < alphaList.size(); i++) {
-            ContactNode node = (ContactNode)alphaList.get(i);
+        for(Iterator it = alphaList.iterator(); it.hasNext(); ) {
+            ContactNode node = (ContactNode)it.next();
             
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Sending " + node + " a Find request for " + lookup);
             }
             
-            markAsQueried(node);
-            ++activeSearches;
+            doLookup(node);
+        }
+    }
+    
+    public void stop() {
+        super.stop();
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Stopping lookup for " + lookup);
+        }
+    }
+    
+    public long time() {
+        if (startTime > 0L) {
+            return System.currentTimeMillis() - startTime;
+        }
+        return -1L;
+    }
+    
+    protected void response(ResponseMessage message, long time) throws IOException {
+        
+        lookupStat.addReply();
+        
+        if (!isStopped()) {
+            int hop = ((Integer)hopMap.get(message.getNodeID())).intValue();
+            if (message instanceof FindValueResponse) {
+                handleFindValueResponse((FindValueResponse)message, time, hop);
+            } else {
+                handleFindNodeResponse((FindNodeResponse)message, time, hop);
+            }
+        }
+    }
+    
+    private void handleFindValueResponse(FindValueResponse response, long time, int hop) throws IOException {
+        
+        if (isValueLookup()) {
+            long totalTime = time();
             
-            lookupStat.addRequest();
-            messageDispatcher.send(node, createMessage(lookup), this);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(response.getContactNode()
+                        + " returned KeyValues for "
+                        + lookup + " after "
+                        + queried.size() + " queried Nodes and a total time of "
+                        + totalTime + "ms");
+            }
+            
+            if (!finished) {
+                lookupStat.setHops(hop);
+                lookupStat.setTime((int)totalTime);
+                ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_OK.incrementStat();
+            }
+            finished = true;
+            
+            fireFound(response.getValues(), totalTime);
+        } else {
+            // Some Idot sent us a FIND_VALUE response for a
+            // FIND_NODE lookup! Ignore?
+        }
+    }
+
+    private void handleFindNodeResponse(FindNodeResponse response, long time, int hop) throws IOException {
+        
+        Collection nodes = response.getValues();
+        
+        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+            ContactNode node = (ContactNode)it.next();
+            
+            if (!isQueried(node) && !isYetToBeQueried(node)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Adding " + node + " to the yet-to-be queried list");
+                }
+                
+                if (!finished) {
+                    addYetToBeQueried(node, hop+1);
+                }
+                
+                // Add them to the routing table as not alive
+                // contacts. We're likely going to add them
+                // anyways!
+                context.getRouteTable().add(node, false);
+            }
+        }
+        
+        if (!finished) {
+            if (!nodes.isEmpty()) {
+                addResponse(new ContactNodeEntry(response));
+            }
+            
+            activeSearches--;
+            lookupStep(hop);
+        }
+    }
+    
+    protected void timeout(KUID nodeId, 
+            SocketAddress dst, RequestMessage message, long time) throws IOException {
+        
+        lookupStat.addTimeout();
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(ContactNode.toString(nodeId, dst) 
+                    + " did not respond to our FIND request");
+        }
+        
+        if (!isStopped()) {
+            int hop = ((Integer)hopMap.get(nodeId)).intValue();
+            activeSearches--;
+            lookupStep(hop);
         }
     }
     
     private void lookupStep(int hop) throws IOException {
         
-        long diff = time();
-        
-        if(timeout>0 && (diff > timeout)) {
+        long time = time();
+        if (timeout() > 0L && time >= timeout()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " terminates after "
-                        + hop + " hops. Lookup timeout reached after "+timeout+" seconds");
+                        + hop + " hops and " + time + "ms due to timeout.");
             }
-            finishLookup(hop,diff);
+
+            finishLookup(hop, time);
             return;
         }
         
-        if(activeSearches == 0) {
-            //stop if we have nothing more to query and no more active searches
-            if(toQuery.isEmpty()) {
+        if (activeSearches == 0) {
+            if (toQuery.isEmpty()) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookup + " terminates after "
-                            + hop + " hops. No contacts left to query ");
+                            + hop + " hops and " + time + "ms. No contacts left to query.");
                 }
-                finishLookup(hop,diff);
+                finishLookup(hop, time);
                 return;
-            } 
             //Finish if we found the target node
-            else if((!lookup.equals(context.getLocalNodeID())) && (responses.containsKey(lookup))) {
+            } else if (!context.isLocalNodeID(lookup) 
+                    && responses.containsKey(lookup)) {
+                
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookup + " terminates after "
-                            + hop + " hops. Reached target ID! ");
+                            + hop + " hops. Found traget ID!");
                 }
-                finishLookup(hop,diff);
+                finishLookup(hop, time);
                 return;
             }
         }
-        //stop if we have enough values and the yet-to-query list does not contain
-        //a closer node to the target than the furthest away that we have
-        //and this is the last of the last set of concurrent searches
-        if(responses.size() == resultSize) {
-            ContactNode worstResponse = (ContactNode)responses.select(furthest);
-            ContactNode bestToQuery = (ContactNode)toQuery.select(lookup);
-
-            if(bestToQuery == null || 
-                    worstResponse.getNodeID().isCloser(bestToQuery.getNodeID(), lookup)) {
+        
+        if (responses.size() >= resultSetSize) {
+            KUID worst = ((ContactNodeEntry)responses.select(furthest)).getNodeID();
             
-                
-                if(activeSearches == 0) {
-                    if (LOG.isTraceEnabled()) {
-                        ContactNode bestResponse = (ContactNode)responses.select(lookup);
-                        LOG.trace("Lookup for " + lookup + " terminates with " 
-                                + bestResponse + " as the best match after "+
-                                hop + " hops and "
-                                + queried.size() + " queried Nodes");
-                    }
-                    finishLookup(hop,diff);
+            KUID best = null;            
+            if (!toQuery.isEmpty()) {
+                try {
+                    best = ((ContactNode)toQuery.select(lookup)).getNodeID();
+                } catch (NullPointerException err) {
+                    err.printStackTrace();
+                    System.out.println(toQuery);
                 }
-                
+            }
+            
+            if (best == null || worst.isCloser(best, lookup)) {
+                if (activeSearches == 0) {
+                    if (LOG.isTraceEnabled()) {
+                        ContactNode bestResponse = ((ContactNodeEntry)responses.select(lookup)).getContactNode();
+                        LOG.trace("Lookup for " + lookup + " terminates after "
+                                + hop + " hops, " + time + "ms and " + queried.size() 
+                                + " queried Nodes with " + bestResponse + " as best match");
+                    }
+                    finishLookup(hop, time);
+                }
                 return;
             }
-        } 
+        }
+        
         int numLookups = KademliaSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
-        if(numLookups > 0) {
-            List bucketList = toQuery.select(lookup, numLookups);
-            final int size = bucketList.size();
-            
-            MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-            
-            for(int i = 0; i < size; i++) {
-                ContactNode node = (ContactNode)bucketList.get(i);
+        if (numLookups > 0) {
+            List toQueryList = toQuery.select(lookup, numLookups);
+            for(Iterator it = toQueryList.iterator(); it.hasNext(); ) {
+                ContactNode node = (ContactNode)it.next();
                 
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Sending " + node + " a Find request for " + lookup);
+                    LOG.trace("Sending " + node + " a find request for " + lookup);
                 }
                 
-                markAsQueried(node);
-                ++activeSearches;
-                lookupStat.addRequest();
-                messageDispatcher.send(node, createMessage(lookup), this);
+                doLookup(node);
             }
         }
     }
     
-    protected abstract Message createMessage(KUID lookup);
-
-    protected abstract void finishValueLookup(KUID lookup, Collection keyValues, long time);
-    
-    protected abstract void finishNodeLookup(KUID lookup, Collection nodes, Map queryKeys, long time);
-    
-    protected abstract boolean isValueLookup();
-    
-    public long time() {
-        return (System.currentTimeMillis() - startTime);
+    private void finishLookup(int hop, long time) {
+        lookupStat.setHops(hop);
+        lookupStat.setTime((int)time);
+        finished = true;
+        
+        //Thread.dumpStack();
+        
+        if (isValueLookup()) {
+            ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_FAILURE.incrementStat();
+            fireFound(Collections.EMPTY_LIST, time);
+        } else {
+            
+            // addResponse(ContactNode) limits the size of the
+            // Trie to K and we can thus use the size method of it!
+            List nodes = responses.select(lookup, responses.size());
+            fireFound(nodes, time);
+        }
     }
     
-    private void finishLookup(int hop, long duration) {
-        lookupStat.setHops(hop);
-        lookupStat.setTime((int)duration);
-        finished = true;
+    protected void resend(KUID nodeId, 
+            SocketAddress dst, Message message) throws IOException {
+        super.resend(nodeId, dst, message);
+    }
+
+    public void handleTimeout(KUID nodeId, 
+            SocketAddress dst, RequestMessage message, long time) throws IOException {
+        super.handleTimeout(nodeId, dst, message, time);
+    }
+    
+    private void doLookup(ContactNode node) throws IOException {
+        markAsQueried(node);
+        context.getMessageDispatcher().send(node, createRequest(node.getSocketAddress()), this);
+        lookupStat.addRequest();
+        activeSearches++;
+    }
+    
+    private RequestMessage createRequest(SocketAddress address) {
         if (isValueLookup()) {
-            finishValueLookup(lookup, null, duration);
+            return context.getMessageFactory().createFindValueRequest(address, lookup);
         } else {
-            List nodes = responses.select(lookup, responses.size());
-            finishNodeLookup(lookup, nodes, queryKeys, duration);
+            return context.getMessageFactory().createFindNodeRequest(address, lookup);
         }
+    }
+    
+    private boolean isQueried(ContactNode node) {
+        return queried.contains(node.getNodeID());
     }
     
     private void markAsQueried(ContactNode node) {
@@ -408,33 +387,86 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         toQuery.remove(node.getNodeID());
     }
     
-    private boolean isQueried(KUID nodeId) {
-        return queried.contains(nodeId);
-    }
-    
-    private boolean isQueried(ContactNode node) {
-        return queried.contains(node.getNodeID());
-    }
-    
-    private void addYetToBeQueried(ContactNode node, int hop) {
-        if(!queried.contains(node.getNodeID()) 
-                && !node.equals(context.getLocalNode())) {
-            toQuery.put(node.getNodeID(), node);
-            hopMap.put(node.getNodeID(),new Integer(hop));
-        }
-    }
-    
     private boolean isYetToBeQueried(ContactNode node) {
         return toQuery.containsKey(node.getNodeID());
     }
     
-    private void addResponse(ContactNode node) {
-        responses.put(node.getNodeID(), node);
-        //if the list is full discard the furthest node and put this one
-        if(responses.size() > resultSize) {
-            ContactNode worst = (ContactNode)responses.select(furthest);
+    private void addYetToBeQueried(ContactNode node, int hop) {
+        if (!isQueried(node) 
+                && !context.isLocalNodeID(node.getNodeID())) {
+            toQuery.put(node.getNodeID(), node);
+            hopMap.put(node.getNodeID(), new Integer(hop));
+        }
+    }
+    
+    private void addResponse(ContactNodeEntry entry) {
+        responses.put(entry.getNodeID(), entry);
+        
+        if (responses.size() > resultSetSize) {
+            ContactNode worst = ((ContactNodeEntry)responses.select(furthest)).getContactNode();
             responses.remove(worst.getNodeID());
-            queryKeys.remove(worst);
-        } 
+            //hopMap.remove(node.getNodeID()); // TODO
+        }
+        responseCount++;
+    }
+    
+    private void fireFound(final Collection c, final long time) {
+        context.fireEvent(new Runnable() {
+            public void run() {
+                if (!isStopped()) {
+                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                        LookupListener listener = (LookupListener)it.next();
+                        listener.found(lookup, c, time);
+                    }
+                }
+            }
+        });
+    }
+    
+    public static class ContactNodeEntry implements Map.Entry {
+        
+        private ContactNode node;
+        private QueryKey queryKey;
+        
+        private ContactNodeEntry(ContactNode node) {
+            this(node, null);
+        }
+        
+        private ContactNodeEntry(FindNodeResponse response) {
+            this(response.getContactNode(), response.getQueryKey());
+        }
+        
+        private ContactNodeEntry(ContactNode node, QueryKey queryKey) {
+            this.queryKey = queryKey;
+            this.node = node;
+        }
+        
+        public ContactNode getContactNode() {
+            return node;
+        }
+        
+        public Object getKey() {
+            return getContactNode();
+        }
+        
+        private KUID getNodeID() {
+            return getContactNode().getNodeID();
+        }
+        
+        public QueryKey getQueryKey() {
+            return queryKey;
+        }
+        
+        public Object getValue() {
+            return getQueryKey();
+        }
+        
+        public Object setValue(Object o) {
+            throw new UnsupportedOperationException("This is an immutable class");
+        }
+        
+        public String toString() {
+            return node.toString() + ", queryKey: " + queryKey;
+        }
     }
 }

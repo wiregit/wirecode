@@ -31,7 +31,6 @@ import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.event.StoreListener;
-import de.kapsi.net.kademlia.settings.DatabaseSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
 
 public class KeyValuePublisher implements Runnable {

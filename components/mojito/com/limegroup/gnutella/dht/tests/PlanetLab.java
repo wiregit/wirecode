@@ -36,7 +36,7 @@ import com.limegroup.gnutella.dht.statistics.StatsManager;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.FindValueListener;
+import de.kapsi.net.kademlia.event.LookupAdapter;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
 
@@ -147,17 +147,13 @@ public class PlanetLab {
                     
                     dht.bootstrap(dst, new BootstrapListener() {
                         
-                        public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                            if (nodes.isEmpty()) {
-                                System.out.println(index + ": " + nodeId + " failed to bootstrap at PHASE 1");
-                            } else {
-//                                System.out.println(index + ": " + nodeId + " finished bootstraping PHASE 1 in " + time + " ms");
-                            }
+                        public void phaseOneComplete(long time) {
+                            System.out.println(index + ": bootstrap phase ONE finished");
                         }
 
-                        public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+                        public void phaseTwoComplete(boolean foundNodes, long time) {
                             StringBuffer buffer = new StringBuffer();
-                            buffer.append(index).append(": finished bootstrapping PHASE 2 in ");
+                            buffer.append(index).append(": finished bootstrapping phase TWO in ");
                             buffer.append(time).append(" ms ");
                             
                             if (foundNodes) {
@@ -364,9 +360,10 @@ public class PlanetLab {
                                 String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
                                 
                                 KUID key = toKUID(value);
-                                dht.get(key, new FindValueListener() {
-                                    public void foundValue(KUID key, Collection values, long time) {
-                                        if(values == null || values.isEmpty()){
+                                
+                                dht.get(key, new LookupAdapter() {
+                                    public void found(KUID lookup, Collection c, long time) {
+                                        if(c.isEmpty()){
                                             planetlabStats.RETRIEVE_FAILURES.incrementStat();
                                         } else {
                                             planetlabStats.RETRIEVE_SUCCESS.incrementStat();
@@ -376,6 +373,7 @@ public class PlanetLab {
                                         }
                                     }
                                 });
+                                
                                 try {
                                     lock2.wait();
                                 } catch (InterruptedException e) {}
@@ -405,12 +403,10 @@ public class PlanetLab {
                             new Thread(dht).start();
                             
                             dht.bootstrap(bootstrapServer, new BootstrapListener() {
-                                public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                                }
-                                
-                                public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+                                public void phaseOneComplete(long time) {}
+
+                                public void phaseTwoComplete(boolean foundNodes, long time) {
                                     running = true;
-                                    
                                     synchronized(lock) {
                                         lock.notify();
                                     }
