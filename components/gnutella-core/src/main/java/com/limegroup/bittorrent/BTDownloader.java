@@ -112,17 +112,6 @@ public class BTDownloader implements Downloader {
 		return _info.getVerifyingFolder().getBlockSize();
 	}
 
-	public Iterator getHosts() {
-		Set ret = new HashSet();
-		for (Iterator iter = _torrent.getConnections().iterator(); iter
-				.hasNext();) {
-			BTConnection btc = (BTConnection) iter.next();
-			if (! btc.isChoking())
-				ret.add(btc.getEndpoint());
-		}
-		return ret.iterator();
-	}
-
 	public String getVendor() {
 		return "BitTorrent";
 	}
@@ -152,7 +141,7 @@ public class BTDownloader implements Downloader {
 	}
 
 	public int getNumberOfAlternateLocations() {
-		return _torrent.getNumAltLocs();
+		return getPossibleHostCount();
 	}
 
 	public int getNumberOfInvalidAlternateLocations() {

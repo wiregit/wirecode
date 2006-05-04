@@ -111,6 +111,11 @@ public class VerifyingFolder {
 	 */
 	private volatile IOException storedException;
 	
+	/**
+	 * The <tt>ManagedTorrent</tt> this folder belongs to.
+	 */
+	private volatile ManagedTorrent torrent;
+	
 	/** Whether the files on disk are currently being verified */
 	private volatile boolean isVerifying;
 
@@ -164,7 +169,7 @@ public class VerifyingFolder {
 			requestedRanges.removeInterval(in);
 			pendingRanges.addInterval(in);
 		}
-		QUEUE.invokeLater(new WriteJob(in, data),"download");
+		QUEUE.invokeLater(new WriteJob(in, data),_info.getURN());
 	}
 	
 	/**
@@ -181,13 +186,18 @@ public class VerifyingFolder {
 		}
 		
 		public void run() {
+			if (storedException != null)
+				return;
+			
 			boolean freedPending = false;
 			try {
 				writeBlockImpl(in, data);
 				freedPending = true;
 			} catch (IOException iox) {
-				if (isOpen())
+				if (isOpen()) {
 					storedException = iox;
+					notifyDiskProblem();
+				}
 			} finally {
 				if (!freedPending) {
 					synchronized(VerifyingFolder.this) {
@@ -315,7 +325,9 @@ public class VerifyingFolder {
 	}
 	
 	private void notifyOfChunkCompletion(int pieceNum) {
-		_info.notifyOfComplete(pieceNum);
+		ManagedTorrent t = torrent;
+		if (t != null)
+			t.notifyOfComplete(pieceNum);
 	}
 	
 	private void closeAnyCompletedFiles(int pieceNum) {
@@ -391,10 +403,6 @@ public class VerifyingFolder {
 		return verifiedBlocks.get(block);
 	}
 
-	public void open() throws IOException {
-		open(null);
-	}
-	
 	/**
 	 * Opens this VerifyingFolder for writing. MUST be called before anything
 	 * else. If there is no completion size, this fails.
@@ -407,6 +415,7 @@ public class VerifyingFolder {
 			_fos = new RandomAccessFile[_files.length];
 		}
 		
+		this.torrent = torrent;
 		storedException = null;
 		
 		// whether the data on disk should be re-verified
@@ -520,7 +529,10 @@ public class VerifyingFolder {
 			}
 			_fos = null;
 		}
+		torrent = null;
+		// kill all jobs for this torrent
 		VERIFY_QUEUE.clear(_info.getURN());
+		QUEUE.clear(_info.getURN());
 	}
 
 	/**
@@ -536,7 +548,7 @@ public class VerifyingFolder {
 		IOException e = storedException;
 		if (e != null)
 			throw e;
-		QUEUE.invokeLater(new SendJob(in, c),"upload");
+		QUEUE.invokeLater(new SendJob(in, c),_info.getURN());
 	}
 	
 	private class SendJob implements Runnable {
@@ -550,9 +562,8 @@ public class VerifyingFolder {
 		public void run() {
 			if (!isOpen())
 				return;
-			IOException iex = storedException;
-			if (iex != null)
-				c.handleIOException(iex);
+			if (storedException != null)
+				return;
 			
 			if (LOG.isDebugEnabled())
 				LOG.debug("sending piece " + in);
@@ -566,13 +577,20 @@ public class VerifyingFolder {
 							- offset);
 				} while (offset < length);
 			} catch (IOException bad) {
-				if (isOpen())
+				if (isOpen()) {
 					storedException = bad;
-				c.handleIOException(bad);
+					notifyDiskProblem();
+				}
 			}
 			
 			c.pieceRead(in, buf);
 		}
+	}
+	
+	private void notifyDiskProblem() {
+		ManagedTorrent t = torrent;
+		if (t != null)
+			t.diskExceptionHappened();
 	}
 	/**
 	 * reads a number of bytes from a torrent must obtain monitor 
@@ -817,8 +835,11 @@ public class VerifyingFolder {
 				}
 			} catch (IOException bad) {
 				storedException = bad;
-			} catch (InterruptedException iex) {
+			} catch (InterruptedException iex) { // should not happen
 				storedException = new InterruptedIOException();
+			} finally {
+				if (storedException != null && isOpen())
+					notifyDiskProblem();
 			}
 		}
 	}

@@ -259,19 +259,6 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * This method will notify the ManagedTorrent belonging to this torrent
-	 * about completed ranges, and add the range to the local list of completed
-	 * ranges.
-	 * 
-	 * @param in
-	 *            the <tt>LongInterval</tt> thathas been completeted.
-	 */
-	public void notifyOfComplete(int pieceNum) {
-		if (_torrent != null)
-			_torrent.notifyOfComplete(pieceNum);
-	}
-
-	/**
 	 * Associates this meta info with a ManagedTorrent
 	 * 
 	 * @param torrent

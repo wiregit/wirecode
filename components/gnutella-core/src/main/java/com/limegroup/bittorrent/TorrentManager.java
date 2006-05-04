@@ -416,6 +416,7 @@ public class TorrentManager implements ConnectionAcceptor {
 			}
 			ManagedTorrent mt = new ManagedTorrent(info, this);
 			addTorrent(mt);
+			writeSnapshot();
 			return mt.getDownloader();
 		} catch (IOException e) {
 			if (LOG.isDebugEnabled())
@@ -435,7 +436,8 @@ public class TorrentManager implements ConnectionAcceptor {
 		if (!_active.contains(mt) && !_waiting.contains(mt))
 			return;
 		_active.remove(mt);
-		_waiting.remove(mt);
+		if (mt.isPaused())
+			_waiting.add(mt);
 		
 		// remove from the gui as well.
 		torrentComplete(mt); 

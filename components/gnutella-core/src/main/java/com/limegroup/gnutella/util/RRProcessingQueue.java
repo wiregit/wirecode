@@ -5,7 +5,12 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class RRProcessingQueue extends ProcessingQueue {
+	
+	private static final Log LOG = LogFactory.getLog(RRProcessingQueue.class);
 
 	private final Map queues = new HashMap();
 	private final RoundRobinQueue lists = new RoundRobinQueue();
@@ -69,6 +74,9 @@ public class RRProcessingQueue extends ProcessingQueue {
 	}
 	
 	public synchronized void clear() {
+		if (LOG.isDebugEnabled())
+			LOG.debug("removing all "+size +" jobs from "+queues.size()+" queues");
+		
 		queues.clear();
 		lists.clear();
 		size = 0;
@@ -79,6 +87,10 @@ public class RRProcessingQueue extends ProcessingQueue {
 		if (toRemove == null)
 			return;
 		lists.removeAllOccurences(toRemove);
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("removing "+toRemove.list.size()+" jobs out of "+size);
+		
 		size -= toRemove.list.size();
 	}
 	

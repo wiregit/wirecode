@@ -24,7 +24,6 @@ import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
-import com.limegroup.gnutella.util.CoWList;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -32,12 +31,6 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 
 public class ManagedTorrent {
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
-
-	/*
-	 * extension bytes
-	 */
-	static final byte[] ZERO_BYTES = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00 };
 
 	/*
 	 * the number of failures after which we consider giving up
@@ -64,7 +57,7 @@ public class ManagedTorrent {
 	 */
 	private static final int RECHOKE_TIMEOUT = 10 * 1000;
 
-	/*
+	/**
 	 * the TorrentManager managing this torrent
 	 */
 	private final TorrentManager _manager;
@@ -74,62 +67,65 @@ public class ManagedTorrent {
 	 */
 	private volatile boolean _stopped, _started;
 	
-	/*
+	/**
 	 * The list of known good TorrentLocations that we are not connected to at
 	 * the moment get this' monitor befor accessing
 	 */
 	private Set _peers;
 
-	/*
+	/**
 	 * The list of known bad TorrentLocations
 	 */
 	private Set _badPeers;
 
-	/*
+	/**
 	 * the meta info for this torrent
 	 */
 	private BTMetaInfo _info;
 
-	/*
+	/**
 	 * the handle for all files.
 	 */
 	private volatile VerifyingFolder _folder;
 
-	/*
+	/**
 	 * counts the number of consecutive tracker failures
 	 */
 	private int _trackerFailures = 0;
 
-	/*
-	 * if we could not save this file
+	/**
+	 * if a problem occured with disk operations.
 	 */
-	private boolean _couldNotSave = false;
+	private volatile boolean _diskProblem;
 
-	/*
+	/**
 	 * 
 	 */
 	private volatile BTConnectionFetcher _connectionFetcher;
 
-	/*
+	/**
 	 * whether to choke all connections
 	 */
 	private boolean _globalChoke = false;
 
-	/*
+	/**
 	 * whether this download was paused.
 	 */
 	private boolean _paused = false;
 
-	/*
+	/**
 	 * it is possible that a complete download is restarted (for what purpose so
 	 * ever) so we need to remember that we already saved the file.
 	 */
 	private boolean _saved = false;
 
-	/*
-	 * get this' monitor befor accessing
+	/**
+	 * The list of BTConnections that this torrent has.
+	 * LOCKING: the list is synchronized on itself; it is modified
+	 * only from the NIODispatcher thread, so no locking is required
+	 * when iterating on that thread.
 	 */
-	private List _connections;
+	private final List _connections;
 
 	private ProcessingQueue _processingQueue;
 
@@ -157,7 +153,7 @@ public class ManagedTorrent {
 		_info.setManagedTorrent(this);
 		_manager = manager;
 		_folder = info.getVerifyingFolder();
-		_connections = new CoWList(CoWList.ARRAY_LIST);
+		_connections = Collections.synchronizedList(new ArrayList());
 		_processingQueue = new ProcessingQueue("ManagedTorrent");
 		_downloader = new BTDownloader(this, _info);
 		_uploader = new BTUploader(this, _info);
@@ -242,6 +238,11 @@ public class ManagedTorrent {
 		});
 	}
 	
+	public void diskExceptionHappened() {
+		_diskProblem = true;
+		stop();
+	}
+	
 	/**
 	 * Performs the actual stop.  To be invoked only from the
 	 * torrent processing queue.
@@ -260,14 +261,21 @@ public class ManagedTorrent {
 			announceBlocking(_info.getTrackers()[i],
 					TrackerRequester.EVENT_STOP);
 		
-		// close connections
-		for (Iterator iter = getConnections().iterator(); iter.hasNext();) 
-			((BTConnection) iter.next()).close();
-		
-		_connectionFetcher.shutdown();
-		
 		if (choker != null)
 			choker.stopped = true;
+		
+		// close connections
+		Runnable closer = new Runnable() {
+			public void run() {
+				_connectionFetcher.shutdown();
+				while(!_connections.isEmpty()) {
+					BTConnection toClose = 
+						(BTConnection) _connections.get(_connections.size() - 1);
+					toClose.close(); // this removes itself from the list.
+				}
+			}
+		};
+		NIODispatcher.instance().invokeLater(closer);
 		
 		// we stopped, removing torrent from active list of
 		// TorrentManager
@@ -296,7 +304,7 @@ public class ManagedTorrent {
 		if (!_stopped)
 			return false;
 
-		if (!_couldNotSave) {
+		if (!_diskProblem) {
 			_paused = false;
 			_started = false;
 			_manager.wakeUp(this);
@@ -318,7 +326,7 @@ public class ManagedTorrent {
 	}
 
 	private void initializeTorrent() {
-		_couldNotSave = false;
+		_diskProblem = false;
 		_globalChoke = false;
 		_paused = false;
 		_badPeers = Collections.synchronizedSet(
@@ -343,7 +351,7 @@ public class ManagedTorrent {
 			if (LOG.isDebugEnabled()) 
 				LOG.debug("unrecoverable error", ioe);
 			
-			_couldNotSave = true;
+			_diskProblem = true;
 			_stopped = true;
 			return;
 		} 
@@ -408,7 +416,7 @@ public class ManagedTorrent {
 		final BTHave have = new BTHave(in);
 		Runnable haveNotifier = new Runnable() {
 			public void run() {
-				for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
+				for (Iterator iter = _connections.iterator(); iter.hasNext();) {
 					BTConnection btc = (BTConnection) iter.next();
 					btc.sendHave(have);
 				}
@@ -426,21 +434,6 @@ public class ManagedTorrent {
 		}
 	}
 
-	/**
-	 * @return a Set of <tt>TorrentLocation</tt> containing all endpoints we
-	 *         have outgoing connections to
-	 */
-	public int getNumAltLocs() {
-		int ret = 0;
-		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
-			BTConnection btc = (BTConnection) iter.next();
-
-			if (btc.isOutgoing())
-				ret++;
-		}
-		return ret;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -449,20 +442,21 @@ public class ManagedTorrent {
 	public int getState() {
 		if (_folder.isComplete())
 			return Downloader.COMPLETE;
+		if (_diskProblem)
+			return Downloader.DISK_PROBLEM;
 		
 		if (_stopped) {
-			if (_couldNotSave)
-				return Downloader.DISK_PROBLEM;
-			else if (_trackerFailures > MAX_TRACKER_FAILURES)
+			if (_trackerFailures > MAX_TRACKER_FAILURES)
 				return Downloader.GAVE_UP;
 			else if (_paused)
 				return Downloader.PAUSED;
 			else if (_started)
 				return Downloader.ABORTED;
-			else
-				return Downloader.QUEUED;
 		}
-
+		
+		if (!_started)
+			return Downloader.QUEUED;
+		
 		if (_folder.isVerifying())
 			return Downloader.HASHING;
 		else if (_connections.size() > 0) {
@@ -477,9 +471,11 @@ public class ManagedTorrent {
 	}
 
 	private boolean isDownloading() {
-		for (Iterator iter = getConnections().iterator(); iter.hasNext();)
-			if (!((BTConnection) iter.next()).isChoking())
-				return true;
+		synchronized(_connections) {
+			for (Iterator iter = _connections.iterator(); iter.hasNext();)
+				if (!((BTConnection) iter.next()).isChoking())
+					return true;
+		}
 		return false;
 	}
 
@@ -640,7 +636,7 @@ public class ManagedTorrent {
 				LOG.debug("global choke");
 				setGlobalChoke(true);
 				
-				for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
+				for (Iterator iter = _connections.iterator(); iter.hasNext();) {
 					BTConnection btc = (BTConnection) iter.next();
 					// cancel all requests, if there are any left. (This should not
 					// be the case at this point anymore)
@@ -680,9 +676,9 @@ public class ManagedTorrent {
 		_folder.close();
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder closed");
-		_couldNotSave = !_info.moveToCompleteFolder();
+		_diskProblem = !_info.moveToCompleteFolder();
 		if (LOG.isDebugEnabled())
-			LOG.debug("could not save: " + _couldNotSave);
+			LOG.debug("could not save: " + _diskProblem);
 		
 		// folder has to be updated with the new files
 		_folder = _info.getVerifyingFolder();
@@ -690,15 +686,15 @@ public class ManagedTorrent {
 			LOG.debug("new veryfing folder");
 		
 		try {
-			_folder.open();
+			_folder.open(this);
 		} catch (IOException ioe) {
 			LOG.debug(ioe);
-			_couldNotSave = true;
+			_diskProblem = true;
 		}
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder opened");
 
-		if (_couldNotSave)
+		if (_diskProblem)
 			stopNow();
 
 		// remember attempt to save the file
@@ -744,12 +740,14 @@ public class ManagedTorrent {
 	 * @return true if we are apparently already connected to a certain location
 	 */
 	private boolean isConnectedTo(TorrentLocation to) {
-		for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
-			BTConnection btc = (BTConnection) iter.next();
-			// compare by address only. there's no way of comparing ports
-			// or peer ids
-			if (btc.getEndpoint().getAddress().equals(to.getAddress()))
-				return true;
+		synchronized(_connections) {
+			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
+				BTConnection btc = (BTConnection) iter.next();
+				// compare by address only. there's no way of comparing ports
+				// or peer ids
+				if (btc.getEndpoint().getAddress().equals(to.getAddress()))
+					return true;
+			}
 		}
 		return false;
 	}
@@ -816,7 +814,9 @@ public class ManagedTorrent {
 			
 			List l; 
 			if (round++ % 3 == 0) {
-				l = new ArrayList(_connections);
+				synchronized(_connections) {
+					l = new ArrayList(_connections);
+				}
 				Collections.shuffle(l);
 			} else
 				l = _connections;
@@ -973,7 +973,7 @@ public class ManagedTorrent {
 	private void setGlobalChoke(boolean choke) {
 		_globalChoke = choke;
 		if (choke) {
-			for (Iterator iter = getConnections().iterator(); iter.hasNext();) {
+			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
 				BTConnection btc = (BTConnection) iter.next();
 				btc.sendChoke();
 			}
@@ -1136,10 +1136,12 @@ public class ManagedTorrent {
 
 	public  int getNumBusyPeers() {
 		int busy = 0;
-		for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-			BTConnection con = (BTConnection) iter.next();
-			if (!con.isInteresting())
-				busy++;
+		synchronized(_connections) {
+			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
+				BTConnection con = (BTConnection) iter.next();
+				if (!con.isInteresting())
+					busy++;
+			}
 		}
 		return busy;
 	}
