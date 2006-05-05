@@ -351,7 +351,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 }
                 
                 if (context.isLocalNodeID(node.getNodeID())) {
-                    
+                    LOG.error("Cannot send Lookup request to ourself!");
+                    continue;
                 }
                 
                 markAsQueried(node);
