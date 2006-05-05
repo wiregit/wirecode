@@ -129,7 +129,13 @@ public class KeyValueCollection implements Collection, Serializable {
             
             if (LOG.isTraceEnabled()) {
                 if (current != null) {
-                    LOG.trace("Updating KeyValue " + current + " with " + keyValue);
+                    if(keyValue.getValue().length == 0) {
+                        LOG.trace("Removing KeyValue " + current);
+                        values.remove(nodeId);
+                        return true;
+                    } else {
+                        LOG.trace("Updating KeyValue " + current + " with " + keyValue);
+                    }
                 } else {
                     LOG.trace("Adding KeyValue " + keyValue);
                 }
