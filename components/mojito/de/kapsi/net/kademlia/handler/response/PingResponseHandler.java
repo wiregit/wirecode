@@ -63,7 +63,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         }
         
         PingResponse response = (PingResponse)message;
-        context.setExternalSocketAddress(response.getSocketAddress());
+        context.setExternalSocketAddress(response.getExternalSocketAddress());
     }
 
     public void handleTimeout(KUID nodeId, 

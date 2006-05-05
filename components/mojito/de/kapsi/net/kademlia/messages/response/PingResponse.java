@@ -27,28 +27,28 @@ import de.kapsi.net.kademlia.messages.ResponseMessage;
 
 public class PingResponse extends ResponseMessage {
     
-    private SocketAddress address;
+    private SocketAddress externalAddress;
     private int estimatedSize;
     
     public PingResponse(int vendor, int version, ContactNode node, 
             KUID messageId, SocketAddress address, int estimatedSize) {
         super(vendor, version, node, messageId);
         
-        this.address = address;
+        this.externalAddress = address;
         this.estimatedSize = estimatedSize;
     }
     
     public PingResponse(int vendor, int version, ContactNode node, 
-            KUID messageId, SocketAddress address, int estimatedSize, byte[] signature) {
+            KUID messageId, SocketAddress externalAddress, int estimatedSize, byte[] signature) {
         super(vendor, version, node, messageId, signature);
         
-        this.address = address;
+        this.externalAddress = externalAddress;
         this.estimatedSize = estimatedSize;
     }
     
     /** My external address */
-    public SocketAddress getSocketAddress() {
-        return address;
+    public SocketAddress getExternalSocketAddress() {
+        return externalAddress;
     }
     
     public int getEstimatedSize() {
@@ -56,6 +56,6 @@ public class PingResponse extends ResponseMessage {
     }
     
     public String toString() {
-        return "Pong: " + address;
+        return "Pong: " + externalAddress;
     }
 }

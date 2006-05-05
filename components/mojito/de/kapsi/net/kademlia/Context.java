@@ -187,7 +187,7 @@ public class Context implements Runnable {
     }
     
     public boolean isLocalNodeID(KUID nodeId) {
-        return nodeId.equals(localNode.getNodeID());
+        return nodeId != null && nodeId.equals(localNode.getNodeID());
     }
     
     public KUID getLocalNodeID() {

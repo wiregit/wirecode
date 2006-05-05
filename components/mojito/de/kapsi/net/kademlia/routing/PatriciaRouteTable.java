@@ -160,7 +160,7 @@ public class PatriciaRouteTable implements RoutingTable {
         routingStats.BUCKET_COUNT.incrementStat();
     }
     
-    public boolean load() {
+    public synchronized boolean load() {
         File file = new File(RouteTableSettings.ROUTETABLE_FILE);
         if (file.exists() && file.isFile() && file.canRead()) {
             
@@ -218,10 +218,7 @@ public class PatriciaRouteTable implements RoutingTable {
         return false;
     }
     
-    /* (non-Javadoc)
-     * @see de.kapsi.net.kademlia.routing.RoutingTable#store()
-     */
-    public boolean store() {
+    public synchronized boolean store() {
         File file = new File(RouteTableSettings.ROUTETABLE_FILE);
         
         ObjectOutputStream out = null;
@@ -250,10 +247,7 @@ public class PatriciaRouteTable implements RoutingTable {
         return false;
     }
     
-    /* (non-Javadoc)
-     * @see de.kapsi.net.kademlia.routing.RoutingTable#add(de.kapsi.net.kademlia.ContactNode, boolean)
-     */
-    public boolean add(ContactNode node, boolean knowToBeAlive) {
+    public synchronized boolean add(ContactNode node, boolean knowToBeAlive) {
         return put(node.getNodeID(), node, knowToBeAlive);
     }
     
@@ -410,7 +404,7 @@ public class PatriciaRouteTable implements RoutingTable {
      * and replace with a node from the replacement cache.
      * 
      */
-    public void handleFailure(KUID nodeId) {
+    public synchronized void handleFailure(KUID nodeId) {
         
         // NodeID might be null if we sent a ping to
         // an unknown Node (i.e. we knew only the
@@ -527,7 +521,7 @@ public class PatriciaRouteTable implements RoutingTable {
         }
     }
     
-    public int updateBucketNodeCount(BucketNode bucket) {
+    private int updateBucketNodeCount(BucketNode bucket) {
         int newCount = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1).size();
         bucket.setNodeCount(newCount);
         return newCount;
@@ -606,7 +600,7 @@ public class PatriciaRouteTable implements RoutingTable {
      * 
      * @return true if the contact exists and has been updated, false otherwise
      */
-    public ContactNode updateExistingNode(KUID nodeId, ContactNode node, boolean alive) {
+    private ContactNode updateExistingNode(KUID nodeId, ContactNode node, boolean alive) {
         boolean replacement = false;
         BucketNode bucket = null;
         
@@ -712,11 +706,11 @@ public class PatriciaRouteTable implements RoutingTable {
         return existingNode;
     }
         
-    public void refreshBuckets(boolean force) throws IOException{
+    public synchronized void refreshBuckets(boolean force) throws IOException{
         refreshBuckets(force, null);
     }
     
-    public void refreshBuckets(boolean force, BootstrapManager manager) throws IOException{
+    public synchronized void refreshBuckets(boolean force, BootstrapManager manager) throws IOException{
         List bucketsLookups = new ArrayList();
         long now = System.currentTimeMillis();
         
@@ -761,7 +755,7 @@ public class PatriciaRouteTable implements RoutingTable {
         }
     }
     
-    public void clear() {
+    public synchronized void clear() {
         nodesTrie.clear();
         bucketsTrie.clear();
         loopLock.clear();
@@ -769,11 +763,11 @@ public class PatriciaRouteTable implements RoutingTable {
         init(); // init the Bucket Trie!
     }
 
-    public boolean containsNode(KUID nodeId) {
+    public synchronized boolean containsNode(KUID nodeId) {
         return nodesTrie.containsKey(nodeId);
     }
 
-    public ContactNode get(KUID nodeId, boolean checkAndUpdateCache) {
+    public synchronized ContactNode get(KUID nodeId, boolean checkAndUpdateCache) {
         ContactNode node = (ContactNode)nodesTrie.get(nodeId);
         if (node == null && checkAndUpdateCache) {
             BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
@@ -782,20 +776,20 @@ public class PatriciaRouteTable implements RoutingTable {
         return node;
     }
 
-    public ContactNode get(KUID nodeId) {
+    public synchronized ContactNode get(KUID nodeId) {
         return get(nodeId, false);
     }
 
-    public List getAllNodes() {
+    public synchronized List getAllNodes() {
         return nodesTrie.values();
     }
     
-    public List getAllNodesMRS() {
+    public synchronized List getAllNodesMRS() {
         List nodesList = nodesTrie.values();
         return BucketUtils.sort(nodesList);
     }
 
-    public List getAllBuckets() {
+    public synchronized List getAllBuckets() {
         return bucketsTrie.values();
     }
 
@@ -812,7 +806,7 @@ public class PatriciaRouteTable implements RoutingTable {
         return false;
     }
 
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return nodesTrie.isEmpty();
     }
 
@@ -822,7 +816,7 @@ public class PatriciaRouteTable implements RoutingTable {
      * sort method to sort the Nodes from least-recently 
      * to most-recently seen.
      */
-    public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact) {
+    public synchronized List select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact) {
         //only touch bucket if we know we are going to contact it's nodes
         if(willContact) {
             touchBucket(lookup);
@@ -835,15 +829,15 @@ public class PatriciaRouteTable implements RoutingTable {
         }
     }
     
-    public ContactNode select(KUID lookup) {
+    public synchronized ContactNode select(KUID lookup) {
         return (ContactNode)nodesTrie.select(lookup);
     }
     
-    public int size() {
+    public synchronized int size() {
         return nodesTrie.size();
     }
 
-    public int getBucketCount() {
+    public synchronized int getBucketCount() {
         return bucketsTrie.size();
     }
     
@@ -861,7 +855,7 @@ public class PatriciaRouteTable implements RoutingTable {
         bucket.touch();
     }
     
-    public String toString() {
+    public synchronized String toString() {
         Collection bucketsList = getAllBuckets();
         StringBuffer buffer = new StringBuffer("\n");
         buffer.append("-------------\nLocal node:"+context.getLocalNode()+"\n");

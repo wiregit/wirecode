@@ -76,6 +76,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     
     private boolean finished = false;
     
+    private long lookupTimeout;
+    
     /**
      * The statistics for this lookup
      */
@@ -91,7 +93,24 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         this.lookup = lookup;
         this.furthest = lookup.invert();
         
-        init();
+        resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        setMaxErrors(0); // Don't retry on timeout - takes too long!
+
+        if (isValueLookup()) {
+            lookupTimeout = KademliaSettings.VALUE_LOOKUP_TIMEOUT.getValue();
+            lookupStat = new FindValueLookupStatisticContainer(context, lookup);
+        } else {
+            lookupTimeout = KademliaSettings.NODE_LOOKUP_TIMEOUT.getValue();
+            lookupStat = new FindNodeLookupStatisticContainer(context, lookup);
+        }
+        
+        List bucketList = context.getRouteTable().select(lookup, resultSetSize, false, true);
+        for(Iterator it = bucketList.iterator(); it.hasNext(); ) {
+            addYetToBeQueried((ContactNode)it.next(), 1);
+        }
+        
+        addResponse(new ContactNodeEntry(context.getLocalNode()));
+        markAsQueried(context.getLocalNode());
     }
 
     public void addLookupListener(LookupListener listener) {
@@ -104,28 +123,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
 
     public LookupListener[] getPingListeners() {
         return (LookupListener[])listeners.toArray(new LookupListener[0]);
-    }
-    
-    private void init() {
-
-        resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        setMaxErrors(0); // Don't retry on timeout - takes too long!
-
-        if (isValueLookup()) {
-            setTimeout(KademliaSettings.VALUE_LOOKUP_TIMEOUT.getValue());
-            lookupStat = new FindValueLookupStatisticContainer(context, lookup);
-        } else {
-            setTimeout(KademliaSettings.NODE_LOOKUP_TIMEOUT.getValue());
-            lookupStat = new FindNodeLookupStatisticContainer(context, lookup);
-        }
-        
-        List bucketList = context.getRouteTable().select(lookup, resultSetSize, false, true);
-        for(Iterator it = bucketList.iterator(); it.hasNext(); ) {
-            addYetToBeQueried((ContactNode)it.next(), 1);
-        }
-        
-        addResponse(new ContactNodeEntry(context.getLocalNode()));
-        markAsQueried(context.getLocalNode());
     }
     
     public KUID getLookupID() {
@@ -261,7 +258,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private void lookupStep(int hop) throws IOException {
         
         long time = time();
-        if (timeout() > 0L && time >= timeout()) {
+        if (lookupTimeout > 0L && time >= lookupTimeout) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookup + " terminates after "
                         + hop + " hops and " + time + "ms due to timeout.");
@@ -297,12 +294,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             
             KUID best = null;            
             if (!toQuery.isEmpty()) {
-                try {
-                    best = ((ContactNode)toQuery.select(lookup)).getNodeID();
-                } catch (NullPointerException err) {
-                    err.printStackTrace();
-                    System.out.println(toQuery);
-                }
+                best = ((ContactNode)toQuery.select(lookup)).getNodeID();
             }
             
             if (best == null || worst.isCloser(best, lookup)) {

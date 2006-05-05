@@ -70,8 +70,11 @@ public class MessageFactory {
         return new PingRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst));
     }
     
-    public PingResponse createPingResponse(RequestMessage request, SocketAddress address) {
-        return new PingResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), address, getEstimatedSize());
+    public PingResponse createPingResponse(RequestMessage request, SocketAddress externalAddress) {
+        if (context.getSocketAddress().equals(externalAddress)) {
+            throw new IllegalArgumentException("Cannot tell other Node that its external address is the same as yours!");
+        }
+        return new PingResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), externalAddress, getEstimatedSize());
     }
     
     public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookup) {

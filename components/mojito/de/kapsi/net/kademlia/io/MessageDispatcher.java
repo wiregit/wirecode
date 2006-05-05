@@ -186,8 +186,7 @@ public class MessageDispatcher implements Runnable {
         
         // Make sure we're not sending messages to ourself.
         // The only exception are Pings/Pongs
-        if (nodeId != null 
-                && nodeId.equals(context.getLocalNodeID())) {
+        if (context.isLocalNodeID(nodeId)) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
@@ -287,9 +286,8 @@ public class MessageDispatcher implements Runnable {
         
         // Make sure we're not receiving messages from ourself.
         // The only exception are Pings/Pongs
-        if (nodeId != null 
-                && context.isLocalNodeID(nodeId)
-                && src.equals(context.getLocalSocketAddress())) {
+        if (context.isLocalNodeID(nodeId)
+                || src.equals(context.getSocketAddress())) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
