@@ -292,6 +292,9 @@ public class DownloadWorker {
         if(LOG.isTraceEnabled())
             LOG.trace("WORKER: " + this + ", State Changed, Current: " + _currentState + ", status: " + status);
         
+        if(_interrupted)
+            finishHttpLoop();
+        
         switch(_currentState.getCurrentState()) {
         case DownloadState.DOWNLOADING:
             releaseRanges();
@@ -516,8 +519,6 @@ public class DownloadWorker {
             return false;
         
         ConnectionStatus status = _downloader.parseThexResponseHeaders();
-        LOG.debug("Status after parsing THEX headers: " + status);
-        
         if(!status.isConnected()) {
             // retry this RFD without THEX, since that's why it failed.
             _rfd.setTHEXFailed();
@@ -1340,8 +1341,11 @@ public class DownloadWorker {
         synchronized(_currentState) {
             _interrupted = true;
             if(_currentState.getCurrentState() == DownloadState.QUEUED)
-                _manager.removeQueuedWorker(this);
+                finishHttpLoop();
         }
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("Stopping while state is: " + _currentState);
         
         if (_downloader != null)
             _downloader.stop();
@@ -1457,7 +1461,7 @@ public class DownloadWorker {
                dl.connectTCP(0);
                DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
             } catch(IOException iox) {
-              //  LOG.debug(_rfd + " -- IOX after starting connected from PushConnector.");
+                //LOG.debug(_rfd + " -- IOX after starting connected from PushConnector.");
                 DownloadStat.PUSH_FAILURE_LOST.incrementStat();
                 failed();
                 return;
@@ -1468,7 +1472,7 @@ public class DownloadWorker {
 
         /** Notification that the push failed. */
         public void shutdown() {
-           // LOG.debug(_rfd + " -- Handling shutdown from PushConnector");            
+            //LOG.debug(_rfd + " -- Handling shutdown from PushConnector");            
             DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
             failed();
         }
@@ -1519,7 +1523,7 @@ public class DownloadWorker {
         public void handleConnect(Socket socket) {
             this.connectingSocket = null;
             
-           // LOG.debug(_rfd + " -- Handling connect from DirectConnector");
+            //LOG.debug(_rfd + " -- Handling connect from DirectConnector");
             NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - createTime));
             DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
             HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
@@ -1540,7 +1544,7 @@ public class DownloadWorker {
             this.shutdown = true;
             this.connectingSocket = null;
             
-           // LOG.debug(_rfd + " -- Handling shutdown from DirectConnnector");
+            //LOG.debug(_rfd + " -- Handling shutdown from DirectConnnector");
             DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
             if(pushConnectOnFailure) {
                 connectWithPush(new PushConnector(false, false));

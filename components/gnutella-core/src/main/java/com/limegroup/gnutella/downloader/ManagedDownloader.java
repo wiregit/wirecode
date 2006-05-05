@@ -23,9 +23,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
+import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -53,7 +53,6 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -66,7 +65,6 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -325,13 +323,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private volatile List /* of DownloadWorker */ _activeWorkers;
     
     /**
-     * A List of worker threads in progress.  Used to make sure that we do
+     * A List of workers in progress.  Used to make sure that we do
      * not terminate in fireDownloadWorkers without hope if threads are
      * connecting to hosts but not have not yet been added to _activeWorkers.
      * 
-     * Also, if the download completes and any of the threads are sleeping 
-     * because it has been queued by the uploader, those threads need to be 
-     * killed.
+     * Also, if the download completes and any workers are queued, those
+     * workers need to be signalled to stop.
+     * 
      * LOCKING: synchronize on this
      */
     private List /*of DownloadWorker*/ _workers;
@@ -762,6 +760,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         ThreadFactory.startThread(new Runnable() {
             public void run() {
                 try {
+                    dloaderManagerThread = Thread.currentThread();
                     validateDownload();
                     receivedNewSources = false;
                     int status = performDownload();
@@ -2546,7 +2545,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                     }
                     
                 } else if (LOG.isDebugEnabled())
-                    LOG.debug("no blocks but can't steal - sleeping.  parts required: " + commonOutFile.listMissingPieces());
+                    LOG.debug("no blocks but can't steal - sleeping."); //  parts required: " + commonOutFile.listMissingPieces());
                 
                 //wait for a notification before we continue.
                 try {

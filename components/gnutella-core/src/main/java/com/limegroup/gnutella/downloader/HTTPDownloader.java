@@ -743,7 +743,7 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     public HashTree getHashTree() {
-        LOG.debug("Retrieving hash tree, expected length: " + _contentLength + ", read: " + _thexReader.getAmountProcessed());
+        //LOG.debug("Retrieving hash tree, expected length: " + _contentLength + ", read: " + _thexReader.getAmountProcessed());
         _contentLength -= _thexReader.getAmountProcessed();
         if(_contentLength == 0)
             _bodyConsumed = true;
@@ -1495,7 +1495,7 @@ public class HTTPDownloader implements BandwidthTracker {
             
             boolean dataLeft = false;
             try {
-                LOG.debug("Doing read");
+                //LOG.debug("Doing read");
                 dataLeft = readImpl(channel, buffer);
             } catch (IOException error) {
                 LOG.debug("Error while reading", error);
@@ -1611,7 +1611,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // TODO: Write to disk only when buffer is full.
                 
                 // write to disk outside of lock.
-                LOG.debug("WORKER: " + this + ", left: " + (left-totalRead) +",  writing fp: " + filePosition +", ds: " + dataStart + ", dL: " + dataLength);
+                //LOG.debug("WORKER: " + this + ", left: " + (left-totalRead) +",  writing fp: " + filePosition +", ds: " + dataStart + ", dL: " + dataLength);
                 if(!_incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array())) {
                     InterestReadChannel irc = (InterestReadChannel)rc;
                     irc.interest(false);
@@ -1808,17 +1808,21 @@ public class HTTPDownloader implements BandwidthTracker {
         private boolean handled = false;
         
         public void handleIOException(IOException iox) {
+            IOStateObserver del;
             synchronized(this) {
                 if(handled) {
                     LOG.warn("Ignoring iox", iox);
                     return;
                 }
                 handled = true;
+                del = delegate;
             }
-            delegate.handleIOException(iox);
+            if(del != null)
+             del.handleIOException(iox);
         }
     
         public void handleStatesFinished() {
+            IOStateObserver del;
             synchronized(this) {
                 if(handled) {
                     if(LOG.isWarnEnabled())
@@ -1826,11 +1830,14 @@ public class HTTPDownloader implements BandwidthTracker {
                     return;
                 }
                 handled = true;
+                del = delegate;
             }
-            delegate.handleStatesFinished();
+            if(del != null)
+                del.handleStatesFinished();
         }
     
         public void shutdown() {
+            IOStateObserver del;
             synchronized(this) {
                 if(handled) {
                     if(LOG.isWarnEnabled())
@@ -1838,8 +1845,10 @@ public class HTTPDownloader implements BandwidthTracker {
                     return;
                 }
                 handled = true;
+                del = delegate;
             }
-            delegate.shutdown();
+            if(del != null)
+                del.shutdown();
         }
         
         void setDelegate(IOStateObserver observer) {

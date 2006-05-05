@@ -200,7 +200,7 @@ public class NBThrottle implements Throttle {
                     if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
                         Object attachment = NIODispatcher.instance().attachment(key.attachment());
                         if(_interested.containsKey(attachment)) {
-                            LOG.debug("Adding: " + attachment + " to ready");
+                            //LOG.debug("Adding: " + attachment + " to ready");
                             _ready.put(attachment, key);
                         }
                     }
@@ -222,7 +222,7 @@ public class NBThrottle implements Throttle {
                     //LOG.trace("Removing closed but interested party: " + next.getKey());
                     i.remove();
                 } else if(key != null) {
-                    LOG.debug("Processing: " + key.attachment());
+                    //LOG.debug("Processing: " + key.attachment());
                     listener.requestBandwidth();
                     try {
                         NIODispatcher.instance().process(now, key, key.attachment(), _processOp);
@@ -243,7 +243,7 @@ public class NBThrottle implements Throttle {
      */
     public void interest(ThrottleListener writer) {
         synchronized(_requests) {
-            LOG.debug("Adding: " + writer + " to requests");
+            //LOG.debug("Adding: " + writer + " to requests");
             _requests.add(writer);
         }
     }
@@ -298,7 +298,7 @@ public class NBThrottle implements Throttle {
                         throw new IllegalStateException("must have an attachment");
                     
                     if(!_interested.containsKey(attachment)) {
-                        LOG.debug("Moving: " + attachment + " from rquests to interested");
+                        //LOG.debug("Moving: " + attachment + " from rquests to interested");
                         if(req.bandwidthAvailable())
                             _interested.put(attachment, req);
                         // else it'll be cleared when we loop later on.
