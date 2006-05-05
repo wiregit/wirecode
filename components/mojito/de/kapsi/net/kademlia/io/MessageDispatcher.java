@@ -200,8 +200,7 @@ public class MessageDispatcher implements Runnable {
         
         // Make sure we're not sending messages to ourself.
         // The only exception are Pings/Pongs
-        if (nodeId != null 
-                && context.isLocalNodeID(nodeId)
+        if (context.isLocalNodeID(nodeId)
                 && !(message instanceof PingRequest)
                 && !(message instanceof PingResponse)) {
             
@@ -231,8 +230,7 @@ public class MessageDispatcher implements Runnable {
         
         // Make sure we're not receiving messages from ourself.
         // The only exception are Pings/Pongs
-        if (nodeId != null 
-                && context.isLocalNodeID(nodeId)
+        if (context.isLocalNodeID(nodeId)
                 && src.equals(context.getSocketAddress())
                 && !(message instanceof PingRequest)
                 && !(message instanceof PingResponse)) {
