@@ -28,10 +28,8 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -70,8 +68,6 @@ public class MessageDispatcher implements Runnable {
     
     private LinkedList outputQueue = new LinkedList();
     private ReceiptMap messageMap = new ReceiptMap(1024);
-    
-    private List eventQueue = new ArrayList();
     
     private Selector selector;
     private DatagramChannel channel;
@@ -165,10 +161,6 @@ public class MessageDispatcher implements Runnable {
         
         synchronized (outputQueue) {
             outputQueue.clear();
-        }
-        
-        synchronized (eventQueue) {
-            eventQueue.clear();
         }
     }
     
@@ -437,28 +429,6 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    public void fireEvent(Runnable event) {
-        synchronized (eventQueue) {
-            eventQueue.add(event);
-        }
-    }
-    
-    private void processEvents() {
-        List process = null;
-        synchronized (eventQueue) {
-            process = eventQueue;
-            eventQueue = new ArrayList(Math.max(10, eventQueue.size()));
-        }
-        
-        for(Iterator it = process.iterator(); it.hasNext(); ) {
-            try {
-                ((Runnable)it.next()).run();
-            } catch (Throwable t) {
-                LOG.error(t);
-            }
-        }
-    }
-    
     public void run() {
 
         networkStats.SENT_MESSAGES_COUNT.clearData();
@@ -470,9 +440,6 @@ public class MessageDispatcher implements Runnable {
                 
                 // READ
                 processRead();
-                
-                // FIRE EVENTS
-                processEvents();
                 
                 // CLEANUP
                 processCleanup();
