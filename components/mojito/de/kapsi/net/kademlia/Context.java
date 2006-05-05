@@ -464,9 +464,9 @@ public class Context implements Runnable {
         messageDispatcher.send(node, request, handler);
     }
     
-    public void get(KUID key, FindValueListener l) throws IOException {
+    public void get(KUID key, boolean exhaustive, FindValueListener l) throws IOException {
         FindValueResponseHandler handler 
-            = new FindValueResponseHandler(this, key, l);
+            = new FindValueResponseHandler(this, key, exhaustive, l);
         
         handler.lookup();
     }

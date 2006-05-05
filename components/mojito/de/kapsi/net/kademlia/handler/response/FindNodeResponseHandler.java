@@ -24,6 +24,7 @@ import java.util.Map;
 
 import com.limegroup.gnutella.dht.statistics.FindNodeLookupStatisticContainer;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.FindNodeListener;
@@ -48,7 +49,19 @@ public class FindNodeResponseHandler extends LookupResponseHandler {
         return false;
     }
     
+    protected void addNodeValues(ContactNode node, Collection keyValues) {
+        throw new RuntimeException("This handler is responsible for FIND_NODE responses");
+    }
+
+    protected boolean isExhaustive() {
+        return true;
+    }
+
     protected void finishValueLookup(KUID lookup, Collection keyValues, long time) {
+        throw new RuntimeException("This handler is responsible for FIND_NODE responses");
+    }
+    
+    protected void finishValueLookup(KUID lookup, long time) {
         throw new RuntimeException("This handler is responsible for FIND_NODE responses");
     }
 

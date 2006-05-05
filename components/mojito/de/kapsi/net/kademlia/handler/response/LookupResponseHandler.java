@@ -136,7 +136,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         // VALUE lookup response
         if (isValueLookup() && message instanceof FindValueResponse) {
             FindValueResponse response = (FindValueResponse)message;
-            
+                
             if (LOG.isTraceEnabled()) {
                 LOG.trace(src 
                         + " returned KeyValues for " 
@@ -145,16 +145,22 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             }
             
             if (!finished) {
-                long diff = time();
-                lookupStat.setHops(hop);
-                lookupStat.setTime((int)diff);
-                finishValueLookup(lookup, response.getValues(), diff);
+                if(!isExhaustive()) {
+                    long diff = time();
+                    lookupStat.setHops(hop);
+                    lookupStat.setTime((int)diff);
+                    finishValueLookup(lookup, response.getValues(), diff);
+                    finished = true;
+                } else {
+                    addNodeValues(src,response.getValues());
+                    activeSearches--;
+                    lookupStep(hop);
+                }
             }
-            finished = true;
         }
         
         // NODE/VALUE lookup response
-        if (message instanceof FindNodeResponse) {
+        else if (message instanceof FindNodeResponse) {
             FindNodeResponse response = (FindNodeResponse)message;
             Collection values = response.getValues();
             if (LOG.isTraceEnabled()) {
@@ -359,9 +365,15 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
 
     protected abstract void finishValueLookup(KUID lookup, Collection keyValues, long time);
     
+    protected abstract void finishValueLookup(final KUID lookup, final long time);
+    
     protected abstract void finishNodeLookup(KUID lookup, Collection nodes, Map queryKeys, long time);
     
     protected abstract boolean isValueLookup();
+    
+    protected abstract boolean isExhaustive();
+    
+    protected abstract void addNodeValues(ContactNode node, Collection keyValues);
     
     public long time() {
         return (System.currentTimeMillis() - startTime);
@@ -372,7 +384,12 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         lookupStat.setTime((int)duration);
         finished = true;
         if (isValueLookup()) {
-            finishValueLookup(lookup, null, duration);
+            if(isExhaustive()) {
+                finishValueLookup(lookup, duration);
+            }
+            else{
+                finishValueLookup(lookup, null, duration);
+            }
         } else {
             List nodes = responses.select(lookup, responses.size());
             finishNodeLookup(lookup, nodes, queryKeys, duration);

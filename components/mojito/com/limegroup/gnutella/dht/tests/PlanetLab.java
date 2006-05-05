@@ -28,6 +28,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.limegroup.gnutella.dht.statistics.PlanetLabTestsStatContainer;
@@ -364,7 +365,7 @@ public class PlanetLab {
                                 String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
                                 
                                 KUID key = toKUID(value);
-                                dht.get(key, new FindValueListener() {
+                                dht.get(key, false, new FindValueListener() {
                                     public void foundValue(KUID key, Collection values, long time) {
                                         if(values == null || values.isEmpty()){
                                             planetlabStats.RETRIEVE_FAILURES.incrementStat();
@@ -375,6 +376,17 @@ public class PlanetLab {
                                             lock2.notify();
                                         }
                                     }
+                                    public void foundValue(KUID key, long time, Map nodesValues) {
+                                        if(nodesValues == null || nodesValues.isEmpty()){
+                                            planetlabStats.RETRIEVE_FAILURES.incrementStat();
+                                        } else {
+                                            planetlabStats.RETRIEVE_SUCCESS.incrementStat();
+                                        }
+                                        synchronized(lock2) {
+                                            lock2.notify();
+                                        }
+                                    }
+                                    
                                 });
                                 try {
                                     lock2.wait();

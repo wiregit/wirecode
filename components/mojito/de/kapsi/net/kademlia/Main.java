@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.limegroup.gnutella.dht.statistics.DHTStats;
 
@@ -107,6 +108,7 @@ public class Main {
         String put = "put (key|kuid) (\\w|\\d)+ (value|file) .+";
         String get = "get (key|kuid) (\\w|\\d)+";
         String getr = "getr (key|kuid) (\\w|\\d)+";
+        String getall = "get exhaustive (key|kuid) (\\w|\\d)+";
         String listDB = "list db";
         String listRT = "list rt";
         String storeRT = "store rt";
@@ -168,6 +170,8 @@ public class Main {
                 } else if (line.matches(get)) {
                     get(dht, line.split(" "));
                 } else if (line.matches(getr)) {
+                    get(dht, line.split(" "));
+                } else if (line.matches(getall)) {
                     get(dht, line.split(" "));
                 } else if (line.matches(listDB) || line.matches(listRT)) {
                     list(dht, line.split(" "));
@@ -360,16 +364,58 @@ public class Main {
         MessageDigest md = MessageDigest.getInstance("SHA1");
         
         KUID key = null;
-        
-        if (line[1].equals("kuid")) {
-            key = KUID.createValueID(ArrayUtils.parseHexString(line[2]));
+        boolean exhaustive = line[1].equals("exhaustive");
+        if(exhaustive) {
+            if (line[2].equals("kuid")) {
+                key = KUID.createValueID(ArrayUtils.parseHexString(line[3]));
+            } else {
+                key = KUID.createValueID(md.digest(line[3].getBytes("UTF-8")));
+            }
         } else {
-            key = KUID.createValueID(md.digest(line[2].getBytes("UTF-8")));
+            if (line[1].equals("kuid")) {
+                key = KUID.createValueID(ArrayUtils.parseHexString(line[2]));
+            } else {
+                key = KUID.createValueID(md.digest(line[2].getBytes("UTF-8")));
+            }
         }
         md.reset();
         
         if (line[0].equals("get")) {
-            dht.get(key, new FindValueListener() {
+            if(exhaustive) {
+                dht.get(key, true, new FindValueListener() {
+                    public void foundValue(KUID key, Collection values, long time) {
+                        if (values != null) {
+                            System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
+                        } else {
+                            System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
+                        }
+                    }
+                    public void foundValue(KUID key, long time, Map nodesValues) {
+                        if(nodesValues != null) {
+                            System.out.println("*** Found KeyValue " + key + " in " + time + " ms, values: ");
+                            for (Iterator iter = nodesValues.keySet().iterator(); iter.hasNext();) {
+                                ContactNode node = (ContactNode) iter.next();
+                                System.out.println("Node: "+ node + ", Values: "+ nodesValues.get(node));
+                            }
+                        } else {
+                            System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
+                        }
+                    }
+                });
+            } else {
+                dht.get(key, false, new FindValueListener() {
+                    public void foundValue(KUID key, Collection values, long time) {
+                        if (values != null) {
+                            System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
+                        } else {
+                            System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
+                        }
+                    }
+                    public void foundValue(KUID key, long time, Map nodesValues) {}
+                });
+            }
+        } else if (line[0].equals("getr")){
+            dht.getr(key, false, new FindValueListener() {
                 public void foundValue(KUID key, Collection values, long time) {
                     if (values != null) {
                         System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
@@ -377,18 +423,9 @@ public class Main {
                         System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
                     }
                 }
+                public void foundValue(KUID key, long time, Map nodesValues) {}
             });
-        } else {
-            dht.getr(key, new FindValueListener() {
-                public void foundValue(KUID key, Collection values, long time) {
-                    if (values != null) {
-                        System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                    } else {
-                        System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                    }
-                }
-            });
-        }
+        } 
     }
     
     private static void load(DHT dht, String[] line) {

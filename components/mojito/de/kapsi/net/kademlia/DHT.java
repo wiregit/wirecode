@@ -124,6 +124,7 @@ public class DHT implements Runnable {
             synchronized(database) {
                 if(database.add(keyValue)){
                     context.store(keyValue, l);
+                    keyValue.setLastPublishTime(System.currentTimeMillis());
                 }
             }
         } catch (SignatureException err) {
@@ -133,9 +134,9 @@ public class DHT implements Runnable {
         }
     }
     
-    public Collection get(final KUID key, final FindValueListener l) throws IOException {
+    public Collection get(final KUID key, boolean exhaustive, final FindValueListener l) throws IOException {
         final Collection values = context.getDatabase().get(key);
-        if (values != null) {
+        if (values != null && !exhaustive) {
             if (l != null) {
                 context.fireEvent(new Runnable() {
                     public void run() {
@@ -145,13 +146,13 @@ public class DHT implements Runnable {
             }
             return values;
         } else {
-            return getr(key, l);
+            return getr(key, exhaustive, l);
         }
     }
     
     // TODO only for debugging purposes public
-    Collection getr(KUID key, FindValueListener l) throws IOException {
-        context.get(key, l);
+    Collection getr(KUID key, boolean exhaustive, FindValueListener l) throws IOException {
+        context.get(key, exhaustive, l);
         return null;
     }
     

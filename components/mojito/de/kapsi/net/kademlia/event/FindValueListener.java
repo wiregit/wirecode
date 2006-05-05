@@ -20,6 +20,7 @@
 package de.kapsi.net.kademlia.event;
 
 import java.util.Collection;
+import java.util.Map;
 
 import de.kapsi.net.kademlia.KUID;
 
@@ -33,4 +34,13 @@ public interface FindValueListener {
      * @param time Time in milliseconds
      */
     public void foundValue(KUID key, Collection values, long time);
+    
+    /**
+     * Called after an exhaustive FIND_VALUE lookup has finished.
+     * 
+     * @param key The key we were looking for
+     * @param values the Map of <Node,KeyValues>
+     * @param time Time in milliseconds
+     */
+    public void foundValue(KUID key, long time, Map nodesValues);
 }
