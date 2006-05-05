@@ -147,7 +147,6 @@ public class MessageInputStream extends DataInputStream {
         
         SocketAddress addr = readSocketAddress();
         int estimatedSize = readInt();
-        
         byte[] signature = readSignature();
         return new PingResponse(vendor, version, node, messageId, addr, estimatedSize, signature);
     }

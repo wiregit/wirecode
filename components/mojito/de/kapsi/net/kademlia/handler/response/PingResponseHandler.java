@@ -60,7 +60,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         
         PingResponse response = (PingResponse)message;
         
-        context.setExternalSocketAddress(response.getSocketAddress());
+        context.setExternalSocketAddress(response.getExternalSocketAddress());
         context.addEstimatedRemoteSize(response.getEstimatedSize());
         
         if (l != null) {

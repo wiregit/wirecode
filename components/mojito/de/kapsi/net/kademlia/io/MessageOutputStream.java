@@ -124,7 +124,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writePong(PingResponse pong) throws IOException {
-        writeSocketAddress(pong.getSocketAddress());
+        writeSocketAddress(pong.getExternalSocketAddress());
         writeInt(pong.getEstimatedSize());
         writeSignature(pong.getSignature());
     }

@@ -70,8 +70,8 @@ public class MessageFactory {
         return new PingRequest(getVendor(), getVersion(), getLocalNode(), createMessageID());
     }
     
-    public PingResponse createPingResponse(RequestMessage request, SocketAddress address) {
-        return new PingResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), address, getEstimatedSize());
+    public PingResponse createPingResponse(RequestMessage request, SocketAddress externalAddress) {
+        return new PingResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), externalAddress, getEstimatedSize());
     }
     
     public FindNodeRequest createFindNodeRequest(KUID lookup) {

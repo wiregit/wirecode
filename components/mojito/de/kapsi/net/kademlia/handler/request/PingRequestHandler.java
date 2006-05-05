@@ -32,10 +32,6 @@ import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
-/**
- * 
- * @author Roger Kapsi
- */
 public class PingRequestHandler extends AbstractRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);

@@ -349,6 +349,7 @@ public class MessageDispatcher implements Runnable {
     private boolean readNext() throws IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
+            
             int length = buffer.position();
             byte[] data = new byte[length];
             buffer.flip();
