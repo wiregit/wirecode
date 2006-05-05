@@ -30,4 +30,9 @@ public class MessageFormatException extends IOException {
     public MessageFormatException(String s) {
         super(s);
     }
+    
+    public MessageFormatException(Throwable cause) {
+        super();
+        initCause(cause);
+    }
 }

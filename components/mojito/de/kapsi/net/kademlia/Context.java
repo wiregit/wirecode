@@ -569,7 +569,7 @@ public class Context implements Runnable {
         return dataBaseStats;
     }
     
-public class BootstrapManager implements PingListener, LookupListener {
+    public class BootstrapManager implements PingListener, LookupListener {
         
         private long startTime = 0L;
         
