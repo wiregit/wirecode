@@ -196,7 +196,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                     }
                 }
                 
-                --activeSearches;
+                activeSearches--;
                 lookupStep(hop);
             }
         }
@@ -245,8 +245,6 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             LOG.trace("Starting a new Lookup for " + lookup);
         }
         
-        MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-        
         // Select the K closest Nodes from the K bucket list
         List bucketList = context.getRouteTable().select(lookup, resultSize, false, true);
         
@@ -264,16 +262,7 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         // send alpha requests
         for(int i = 0; i < alphaList.size(); i++) {
             ContactNode node = (ContactNode)alphaList.get(i);
-            
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Sending " + node + " a Find request for " + lookup);
-            }
-            
-            markAsQueried(node);
-            ++activeSearches;
-            
-            lookupStat.addRequest();
-            messageDispatcher.send(node, createMessage(lookup), this);
+            doLookup(node);
         }
     }
     
@@ -339,27 +328,30 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
         int numLookups = KademliaSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
         if(numLookups > 0) {
             List bucketList = toQuery.select(lookup, numLookups);
-            
-            MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-            
             int size = bucketList.size();
             for(int i = 0; i < size; i++) {
                 ContactNode node = (ContactNode)bucketList.get(i);
-                
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Sending " + node + " a Find request for " + lookup);
-                }
-                
-                if (context.isLocalNodeID(node.getNodeID())) {
-                    LOG.error("Cannot send Lookup request to ourself!");
-                    continue;
-                }
-                
-                markAsQueried(node);
-                ++activeSearches;
-                lookupStat.addRequest();
-                messageDispatcher.send(node, createMessage(lookup), this);
+                doLookup(node);
             }
+        }
+    }
+    
+    private void doLookup(ContactNode node) throws IOException {
+        
+        if (context.isLocalNodeID(node.getNodeID())) {
+            LOG.error("Cannot send Lookup request to ourself!");
+            Thread.dumpStack();
+            return;
+        }
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Sending " + node + " a Find request for " + lookup);
+        }
+        
+        if (context.getMessageDispatcher().send(node, createMessage(lookup), this)) {
+            markAsQueried(node);
+            activeSearches++;
+            lookupStat.addRequest();
         }
     }
     

@@ -181,17 +181,17 @@ public class MessageDispatcher implements Runnable {
         }
     }
     
-    public void send(SocketAddress dst, Message message, 
+    public boolean send(SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
-        send(null, dst, message, handler);
+        return send(null, dst, message, handler);
     }
     
-    public void send(ContactNode dst, Message message, 
+    public boolean send(ContactNode dst, Message message, 
             ResponseHandler handler) throws IOException {
-        send(dst.getNodeID(), dst.getSocketAddress(), message, handler);
+        return send(dst.getNodeID(), dst.getSocketAddress(), message, handler);
     }
     
-    public void send(KUID nodeId, SocketAddress dst, Message message, 
+    public boolean send(KUID nodeId, SocketAddress dst, Message message, 
             ResponseHandler handler) throws IOException {
         
         if (!isOpen()) {
@@ -206,7 +206,7 @@ public class MessageDispatcher implements Runnable {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
                         + " to ourself " + ContactNode.toString(nodeId, dst));
             }
-            return;
+            return false;
         }
         
         if(handler == null) {
@@ -219,6 +219,8 @@ public class MessageDispatcher implements Runnable {
             outputQueue.add(receipt);
             interestWrite(true);
         }
+        
+        return true;
     }
     
     private void processMessage(Receipt receipt, Message message) throws IOException {
