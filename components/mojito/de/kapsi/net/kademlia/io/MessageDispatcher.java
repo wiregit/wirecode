@@ -28,8 +28,10 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -66,9 +68,10 @@ public class MessageDispatcher implements Runnable {
     private static final long CLEANUP_INTERVAL = 3L * 1000L;
     private static final long SLEEP = 50L;
     
-    private Object queueLock = new Object();
     private LinkedList outputQueue = new LinkedList();
     private ReceiptMap messageMap = new ReceiptMap(1024);
+    
+    private List eventQueue = new ArrayList();
     
     private Selector selector;
     private DatagramChannel channel;
@@ -82,7 +85,9 @@ public class MessageDispatcher implements Runnable {
     
     private Filter filter;
     
-    protected final NetworkStatisticContainer networkStats;
+    private NetworkStatisticContainer networkStats;
+    
+    private long lastCleanup = 0L;
     
     public MessageDispatcher(Context context) {
         this.context = context;
@@ -158,8 +163,12 @@ public class MessageDispatcher implements Runnable {
         
         messageMap.clear();
         
-        synchronized (queueLock) {
+        synchronized (outputQueue) {
             outputQueue.clear();
+        }
+        
+        synchronized (eventQueue) {
+            eventQueue.clear();
         }
     }
     
@@ -201,14 +210,14 @@ public class MessageDispatcher implements Runnable {
         
         Receipt receipt = new Receipt(nodeId, dst, message, handler);
         
-        synchronized(queueLock) {
+        synchronized(outputQueue) {
             outputQueue.add(receipt);
             interestWrite(true);
         }
     }
     
     public void processWrite() throws IOException {
-        synchronized (queueLock) {
+        synchronized (outputQueue) {
             while(!outputQueue.isEmpty()) {
                 Receipt receipt = (Receipt)outputQueue.removeFirst();
                 
@@ -421,9 +430,37 @@ public class MessageDispatcher implements Runnable {
         interest(SelectionKey.OP_WRITE, on);
     }
     
-    public void run() {
-        long lastCleanup = System.currentTimeMillis();
+    private void processCleanup() {
+        if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
+            messageMap.cleanup();
+            lastCleanup = System.currentTimeMillis();
+        }
+    }
+    
+    public void fireEvent(Runnable event) {
+        synchronized (eventQueue) {
+            eventQueue.add(event);
+        }
+    }
+    
+    private void processEvents() {
+        List process = null;
+        synchronized (eventQueue) {
+            process = eventQueue;
+            eventQueue = new ArrayList(Math.max(10, eventQueue.size()));
+        }
         
+        for(Iterator it = process.iterator(); it.hasNext(); ) {
+            try {
+                ((Runnable)it.next()).run();
+            } catch (Throwable t) {
+                LOG.error(t);
+            }
+        }
+    }
+    
+    public void run() {
+
         networkStats.SENT_MESSAGES_COUNT.clearData();
         networkStats.RECEIVED_MESSAGES_COUNT.clearData();
         
@@ -434,17 +471,14 @@ public class MessageDispatcher implements Runnable {
                 // READ
                 processRead();
                 
+                // FIRE EVENTS
+                processEvents();
+                
                 // CLEANUP
-                if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
-                    synchronized (queueLock) {
-                        messageMap.cleanup();
-                    }
-                    lastCleanup = System.currentTimeMillis();
-                }
+                processCleanup();
                 
                 // WRITE
                 processWrite();
-                
             } catch (ClosedChannelException err) {
                 // thrown as close() is called asynchron
                 //LOG.error(err);

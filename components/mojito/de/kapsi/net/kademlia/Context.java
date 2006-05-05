@@ -50,7 +50,6 @@ import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.db.KeyValuePublisher;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.EventDispatcher;
 import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
@@ -91,7 +90,6 @@ public class Context implements Runnable {
     private Database database;
     private RoutingTable routeTable;
     private MessageDispatcher messageDispatcher;
-    private EventDispatcher eventDispatcher;
     private MessageFactory messageFactory;
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
@@ -103,7 +101,6 @@ public class Context implements Runnable {
     private boolean running = false;
     
     private Timer timer = null;
-    private Thread messageDispatcherThread = null;
     private Thread keyValuePublisherThread = null;
     
     private DHTStats dhtStats = null;
@@ -237,10 +234,6 @@ public class Context implements Runnable {
         return messageDispatcher;
     }
     
-    public EventDispatcher getEventDispatcher() {
-        return eventDispatcher;
-    }
-    
     public KeyValuePublisher getPublisher() {
         return keyValuePublisher;
     }
@@ -335,11 +328,6 @@ public class Context implements Runnable {
                 keyValuePublisherThread = null;
             }
             
-            if (eventDispatcher != null) {
-                eventDispatcher.cancel();
-                eventDispatcher = null;
-            }
-            
             if (bucketRefresher != null) {
                 bucketRefresher.cancel();
                 bucketRefresher = null;
@@ -350,10 +338,7 @@ public class Context implements Runnable {
                 timer = null;
             }
             
-            if (messageDispatcherThread != null) {
-                messageDispatcher.close();
-                messageDispatcherThread = null;
-            }
+            messageDispatcher.close();
             
             lastEstimateTime = 0L;
             estimatedSize = 0;
@@ -386,14 +371,10 @@ public class Context implements Runnable {
             
             timer = new Timer(true);
             
-            eventDispatcher = new EventDispatcher(this);
-            timer.scheduleAtFixedRate(eventDispatcher, 0L, ContextSettings.DISPATCH_EVENTS_EVERY.getValue());
-            
             long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
             timer.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
             keyValuePublisherThread.start();
 
-            messageDispatcherThread = Thread.currentThread();
             messageDispatcher.run();
             
         } finally {
@@ -412,12 +393,7 @@ public class Context implements Runnable {
             return;
         }
         
-        if (eventDispatcher == null) {
-            LOG.error("EventDispatcher is null");
-            return;
-        }
-        
-        eventDispatcher.add(event);
+        messageDispatcher.fireEvent(event);
     }
     
     /**

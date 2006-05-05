@@ -35,9 +35,6 @@ public class ContextSettings extends LimeDHTProps {
     
     private ContextSettings() {}
     
-    public static final LongSetting DISPATCH_EVENTS_EVERY
-        = FACTORY.createLongSetting("DISPATCH_EVENTS_EVERY", 50L);
-    
     public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
         = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", /*60L **/ 1000L);
     
