@@ -38,12 +38,10 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
-import de.kapsi.net.kademlia.io.MessageDispatcher;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
-import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
@@ -339,8 +337,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     private void doLookup(ContactNode node) throws IOException {
         
         if (context.isLocalNodeID(node.getNodeID())) {
-            LOG.error("Cannot send Lookup request to ourself!");
-            Thread.dumpStack();
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Lookup request to ourself! ValueLookup: " + isValueLookup());
+                Thread.dumpStack();
+            }
             return;
         }
         
