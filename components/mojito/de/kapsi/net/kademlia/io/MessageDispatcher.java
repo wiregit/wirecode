@@ -231,13 +231,13 @@ public class MessageDispatcher implements Runnable {
         // Make sure we're not receiving messages from ourself.
         // The only exception are Pings/Pongs
         if (context.isLocalNodeID(nodeId)
-                && src.equals(context.getSocketAddress())) {
+                || src.equals(context.getSocketAddress())) {
             
             if (LOG.isErrorEnabled()) {
-                LOG.error("Received a message of type " + message.getClass().getName() 
-                        + " from ourself " + ContactNode.toString(nodeId, src));
-                
+                LOG.error("Received a message of type " + message.getClass().getName()
+                        + " from ourself: " + ContactNode.toString(nodeId, src) + "/" + context.getLocalNode());
             }
+            
             return;
         }
         
