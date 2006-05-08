@@ -1,4 +1,4 @@
-﻿################################################################################
+################################################################################
 # Messages Bundle for LimeWire 4.9.8
 # Specialization for: Hebrew - Israel
 # Thanks to: Haber (Lucian, Dina, Assaf and Ori). Updated by Gil Tsuri.
@@ -55,17 +55,17 @@ HAS_TIPS_OF_THE_DAY=false
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=אישור
 #### GENERAL_OK_BUTTON_TIP=Apply Operation
-GENERAL_OK_BUTTON_TIP=לאשר ביצוע הפעולה.
+GENERAL_OK_BUTTON_TIP=בצע הפעולה.
 #### GENERAL_CANCEL_BUTTON_LABEL=Cancel
 GENERAL_CANCEL_BUTTON_LABEL=ביטול
 #### GENERAL_CANCEL_BUTTON_TIP=Cancel Operation
-GENERAL_CANCEL_BUTTON_TIP=ביטול ביצוע הפעולה.
+GENERAL_CANCEL_BUTTON_TIP=בטל הפעולה.
 #### GENERAL_APPLY_BUTTON_LABEL=Apply
 GENERAL_APPLY_BUTTON_LABEL=יישום
 #### GENERAL_APPLY_BUTTON_TIP=Apply Operation
-GENERAL_APPLY_BUTTON_TIP=יישום הפעולה.
+GENERAL_APPLY_BUTTON_TIP=יישם הפעולה.
 #### GENERAL_CLOSE_BUTTON_LABEL=Close
-GENERAL_CLOSE_BUTTON_LABEL=סגירה
+GENERAL_CLOSE_BUTTON_LABEL=סגור
 #### GENERAL_CLOSE_BUTTON_TIP=Close the Window
 GENERAL_CLOSE_BUTTON_TIP=סגירת החלון.
 #### GENERAL_BACK_BUTTON_LABEL=<< Back
@@ -85,7 +85,7 @@ GENERAL_BROWSE_HOST_TIP=הצג כל הקבצים שנבחרו.
 #### GENERAL_ADVANCED_SUB_MENU=Advanced
 GENERAL_ADVANCED_SUB_MENU=תת תפריט מתקדם
 #### GENERAL_CLEAR_BUTTON_LABEL=Clear
-#? GENERAL_CLEAR_BUTTON_LABEL=
+ GENERAL_CLEAR_BUTTON_LABEL=נקה
 
 ################################################################################
 # Key/value pairs for right-click context menus.
@@ -93,7 +93,7 @@ GENERAL_ADVANCED_SUB_MENU=תת תפריט מתקדם
 #### CONTEXT_MENU_UNDO=Undo
 CONTEXT_MENU_UNDO=בטל
 #### CONTEXT_MENU_CUT=Cut
-CONTEXT_MENU_CUT=חתוך
+CONTEXT_MENU_CUT=גזר
 #### CONTEXT_MENU_COPY=Copy
 CONTEXT_MENU_COPY=העתק
 #### CONTEXT_MENU_PASTE=Paste
@@ -107,23 +107,23 @@ CONTEXT_MENU_SELECT_ALL=בחר הכל
 #### OPTIONS_BUTTONS_OK_LABEL=OK
 OPTIONS_BUTTONS_OK_LABEL=אישור
 #### OPTIONS_BUTTONS_OK_TIP=Apply Your Changes and Close Window
-OPTIONS_BUTTONS_OK_TIP=יישום השינויים וסוגר החלון.
+OPTIONS_BUTTONS_OK_TIP=יישם השינויים וסגור החלון.
 #### OPTIONS_BUTTONS_CANCEL_LABEL=Cancel
 OPTIONS_BUTTONS_CANCEL_LABEL=ביטול
 #### OPTIONS_BUTTONS_CANCEL_TIP=Cancel Your Changes and Close Window
-OPTIONS_BUTTONS_CANCEL_TIP=ביטול השינויים וסוגר החלון.
+OPTIONS_BUTTONS_CANCEL_TIP=בטל השינויים וסגור החלון.
 #### OPTIONS_BUTTONS_APPLY_LABEL=Apply
 OPTIONS_BUTTONS_APPLY_LABEL=יישום
 #### OPTIONS_BUTTONS_APPLY_TIP=Apply Your Changes
 OPTIONS_BUTTONS_APPLY_TIP=יישום השינויים.
 #### OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
-OPTIONS_RESTART_REQUIRED=בעת הפעלה מחדש של התוכנה השינויים יוככנסו לתוכף.
+OPTIONS_RESTART_REQUIRED=בעת הפעלה מחדש של התוכנה השינויים יוככנסו לתוקף.
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore Defaults
 OPTIONS_BUTTON_REVERT_TO_DEFAULT=שיחזור ברירת המחדל
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=שיחזור קביעת הייצרן.
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
-#? OPTIONS_LEARN_MORE_LABEL=
+OPTIONS_LEARN_MORE_LABEL= עוד על אודות אפשרות זאת.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -151,7 +151,7 @@ GENERAL_TIME_SPENT=זמן עבר
 #### GENERAL_REVERT_TO_DEFAULT=Revert To Default
 GENERAL_REVERT_TO_DEFAULT=שיחזור לברירת מחדל
 #### GENERAL_MORE_OPTIONS=More Options
-GENERAL_MORE_OPTIONS=ברירות נוספות
+GENERAL_MORE_OPTIONS=אפשרויות נוספות
 
 # StatusLine, Statistics and GUIUtils
 #### GENERAL_UNIT_TERABYTES=TB
@@ -177,7 +177,7 @@ APP_TITLE=LimeWire: מאפשר שיתוף מידע
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=אודות LimeWire
 #### ABOUT_LABEL_START=LimeWire
-#? ABOUT_LABEL_START=
+ABOUT_LABEL_START= LimeWire
 #### ABOUT_LABEL_END=Copyright (c)2000-2005 Lime Wire LLC
 ABOUT_LABEL_END=זכויות שמורות ל (c)2000-2005 Lime Wire LLC
 #### ABOUT_LABEL_TITLE=About LimeWire
@@ -201,23 +201,23 @@ ABOUT_BUTTON_TIP=סגור חלון אודות.
 #### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 #? ABOUT_INTRODUCTION=
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
-#? ABOUT_DEV_BLURB=
+ABOUT_DEV_BLURB=ליימווייר הוא גם, כמובן, תוצאה של אין ספור שעות עבודה של צוות הפיתוח:
 #### ABOUT_BIZDEV_BLURB=Behind the scenes business strategy and day-to-day affairs are handled by LimeWire's business developers:
-#? ABOUT_BIZDEV_BLURB=
+ABOUT_BIZDEV_BLURB=מאחורי הקלעים, התכנון העסקי והעניינים היומיומיים מנוהלים ע"י צוות הפיתוח העסקי:
 #### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
-#? ABOUT_WEBDEV_BLURB=
+ABOUT_WEBDEV_BLURB=<a href="http://www.limewire.com/"> אתר האינטרנט</a> של ליימווייר והעיצוב הגרפי של ליימווייר הם תוצאותיה של העבודה הקשה של צוות האינטרנט:
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
-#? ABOUT_SUPPORT_BLURB=
+ABOUT_SUPPORT_BLURB=שאלות על ליימווייר פרו נענות בחריצות ע"י צוות התמיכה הטכנית:
 #### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following developers have worked on the LimeWire team in the past but have since moved on to other projects:
-#? ABOUT_PREVIOUS_DEV_BLURB=
+ABOUT_PREVIOUS_DEV_BLURB=בנוסף, המפתחים הבאים עבדו בעבר בצוות של ליימווייר אך מאז התקדמו לפרוייקטים אחרים:
 #### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
 #? ABOUT_CONTRIBUTORS_BLURB=
 #### ABOUT_I18N_BLURB=LimeWire would also like to thank the many contributors to the internationalization project, both for the application itself and for the LimeWire web site.
-#? ABOUT_I18N_BLURB=
+ABOUT_I18N_BLURB=ליימווייר רוצה גם כן להודות למשתתפים הרבים לפיתוח הבינלאומי, הן לתוכנה עצמה, הן לאתר אינטרנט של ליימווייר.
 #### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks. These include:
-#? ABOUT_COMMUNITY_BLURB=
+ABOUT_COMMUNITY_BLURB=מספר חברים בקהיליית Gnutella זכאים לתודה מיוחדת, וביניהם:
 #### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
-#? ABOUT_CONCLUSION=
+ABOUT_CONCLUSION=לבסוף, ליימווייר רוצה להודות רבות למפתחים, למשתמשים ולכל מי שהביא רעיונות למיזם. מבלי משתמשי ליימווייר, רשת הליימווייר לא הייתה מתקיימת.
 
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
@@ -225,7 +225,7 @@ ABOUT_BUTTON_TIP=סגור חלון אודות.
 #### TOTD_TITLE=Tip of the Day
 TOTD_TITLE=העצת היום
 #### TOTD_INTRODUCTION=Did You Know...
-TOTD_INTRODUCTION=האם ידעת לך...
+TOTD_INTRODUCTION=הידעת...
 #### TOTD_SHOW_AT_STARTUP=Show Tips At Startup
 TOTD_SHOW_AT_STARTUP=הצג עצה בעת ההפעלה
 #### TOTD_NEXT=Next Tip
@@ -241,7 +241,7 @@ TOTD_CLOSE=סגור
 # Key/value pairs for the Getting Started image
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
-GETTING_STARTED_TITLE=הפעלה
+GETTING_STARTED_TITLE=להתחיל
 #### GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
 GETTING_STARTED_CONTENTS=שימוש בתוכנה LimeWire הינו פשוט, הקלד שם הקובץ או חלק מימנו בשדה המיועד לכך ולחץ על כפתור ה"איתור", ניתן לקצר התהליך ע"י בחירת סוג הקובץ (מוזיקה, וידאו, ...)
 
@@ -287,7 +287,7 @@ DOWNLOAD_TITLE=הרדות
 #### UPLOAD_TITLE=Uploads
 UPLOAD_TITLE=שליחות
 #### CONSOLE_TITLE=Console
-#? CONSOLE_TITLE=
+CONSOLE_TITLE=מסוף בקרה
 
 ################################################################################
 # Key/value pairs for the tooltips of the main windows
@@ -301,7 +301,7 @@ CONNECTIONS_TIP=קשירה ללקוחות אחרים.
 #### LIBRARY_TIP=View Repository of Saved Files
 LIBRARY_TIP=הצגת הקבצים השמורים.
 #### CONSOLE_TIP=View Log Messages
-#? CONSOLE_TIP=
+CONSOLE_TIP=הצג יומן הודעות
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -404,11 +404,11 @@ MENU_NAV_LIB_MNEMONIC=L
 #### MENU_NAV_LIB_ACCESSIBLE=Display the Library Screen
 MENU_NAV_LIB_ACCESSIBLE=הצג מסך הסיפריה.
 #### MENU_NAV_CONSOLE=Console
-#? MENU_NAV_CONSOLE=
+MENU_NAV_CONSOLE=מסוף בקרה
 #### MENU_NAV_CONSOLE_MNEMONIC=O
 #? MENU_NAV_CONSOLE_MNEMONIC=
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
-#? MENU_NAV_CONSOLE_ACCESSIBLE=
+MENU_NAV_CONSOLE_ACCESSIBLE=הצג את מסך הבקרה
 
 
 #### MENU_VIEW_TITLE=View
@@ -452,11 +452,11 @@ MENU_VIEW_LIBRARY_MNEMONIC=L
 #### MENU_VIEW_LIBRARY_ACCESSIBLE=Show Library Window
 MENU_VIEW_LIBRARY_ACCESSIBLE=הצג חלון הסיפריה.
 #### MENU_VIEW_CONSOLE=Console
-#? MENU_VIEW_CONSOLE=
+MENU_VIEW_CONSOLE=מסוף בקרה
 #### MENU_VIEW_CONSOLE_MNEMONIC=O
 #? MENU_VIEW_CONSOLE_MNEMONIC=
 #### MENU_VIEW_CONSOLE_ACCESSIBLE=Show Console Window
-#? MENU_VIEW_CONSOLE_ACCESSIBLE=
+MENU_VIEW_CONSOLE_ACCESSIBLE=הצג חלון הבקרה
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 MENU_VIEW_THEMES_TITLE=השתמש ברקע (A)
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
@@ -539,17 +539,17 @@ MENU_TOOLS_OPTIONS_MNEMONIC=O
 MENU_TOOLS_OPTIONS_ACCESSIBLE=הצג מסך האפשרויות.
 
 #### MENU_FILTERS_TITLE=Filters
-#? MENU_FILTERS_TITLE=
+MENU_FILTERS_TITLE=מסננים
 #### MENU_FILTERS_TITLE_MNEMONIC=S
 #? MENU_FILTERS_TITLE_MNEMONIC=
 #### MENU_FILTERS_CONFIGURE=Configure Content Filters
-#? MENU_FILTERS_CONFIGURE=
+MENU_FILTERS_CONFIGURE=הגדר מסנני תוכן
 #### MENU_FILTERS_CONFIGURE_MNEMONIC=C
 #? MENU_FILTERS_CONFIGURE_MNEMONIC=
 #### MENU_FILTERS_CONFIGURE_ACCESSIBLE=Configure LimeWire's Content Filtering Options
 #? MENU_FILTERS_CONFIGURE_ACCESSIBLE=
 #### MENU_FILTERS_LEARN_MORE=Learn More...
-#? MENU_FILTERS_LEARN_MORE=
+MENU_FILTERS_LEARN_MORE=עוד...
 #### MENU_FILTERS_LEARN_MORE_ACCESSIBLE=Learn More about LimeWire's Content Filtering System
 #? MENU_FILTERS_LEARN_MORE_ACCESSIBLE=
 #### MENU_FILTERS_LEARN_MORE_MNEMONIC=L
@@ -674,15 +674,15 @@ SEARCH_STOP_BUTTON_LABEL=עצור
 #### SEARCH_STOP_BUTTON_TIP=Stop Collecting Search Results for Selected Tab
 SEARCH_STOP_BUTTON_TIP=עצוראת החיפוש.
 #### SEARCH_SPAM_MARK_AS_LABEL=Mark As
-#? SEARCH_SPAM_MARK_AS_LABEL=
+SEARCH_SPAM_MARK_AS_LABEL=ציין כ-
 #### SEARCH_SPAM_BUTTON_LABEL=Junk
-#? SEARCH_SPAM_BUTTON_LABEL=
+SEARCH_SPAM_BUTTON_LABEL=זבל
 #### SEARCH_NOT_SPAM_BUTTON_LABEL=Not Junk
-#? SEARCH_NOT_SPAM_BUTTON_LABEL=
+SEARCH_NOT_SPAM_BUTTON_LABEL=לא זבל
 #### SEARCH_SPAM_BUTTON_TIP=Mark selected search results as Junk
-#? SEARCH_SPAM_BUTTON_TIP=
+SEARCH_SPAM_BUTTON_TIP=ציין את החיפושים המודגשים כזבל
 #### SEARCH_NOT_SPAM_BUTTON_TIP=Mark selected search results as Not Junk
-#? SEARCH_NOT_SPAM_BUTTON_TIP=
+SEARCH_NOT_SPAM_BUTTON_TIP=ציין את החיפושים המוגדשים כלא זבל
 #### SEARCH_PUBLIC_KILL_STRING=Close Search
 SEARCH_PUBLIC_KILL_STRING=סגור חלון החיפוש
 #### SEARCH_PUBLIC_LAUNCH_STRING=Launch Action
@@ -702,13 +702,13 @@ SEARCH_PUBLIC_HTTP_PAGE_STRING=רשימת אתרים (שנמצאו)
 #### SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Repeat Search
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=חיפוש חוזר
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
-#? SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=
+SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=תוצאות נוספות
 #### SEARCH_PUBLIC_BLOCK_STRING=Block Host
 SEARCH_PUBLIC_BLOCK_STRING=חסום המארח
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=תוצאות
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
-#? SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=
+SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=חפש עוד
 #### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered. 
 #? SEARCH_RESULT_SECURE_TIP=
 #### SEARCH_SEARCHING_LABEL=Searching...
@@ -722,7 +722,7 @@ SEARCH_VIRUS_MSG_THREE=בכל זאת להוריד אותו?
 #### SEARCH_SHOW_MESSAGE_MSG=Don't show this message again
 SEARCH_SHOW_MESSAGE_MSG=אל תציג עוד פעם את ההודעה
 #### SEARCH_DOWNLOAD_DIALOG_CONFIRM=Download Request
-#? SEARCH_DOWNLOAD_DIALOG_CONFIRM=
+SEARCH_DOWNLOAD_DIALOG_CONFIRM=הורד בקשה
 #### SEARCH_DEFAULT_FIELD_TITLE=Filename
 SEARCH_DEFAULT_FIELD_TITLE=שם הקובץ
 #### SEARCH_MULTIPLE_HOSTS=Multiple
@@ -843,9 +843,9 @@ RESULT_PANEL_VENDOR=ספק
 #### RESULT_PANEL_ADDED=Created
 RESULT_PANEL_ADDED=נוצר
 #### RESULT_PANEL_LICENSE=License
-#? RESULT_PANEL_LICENSE=
+RESULT_PANEL_LICENSE=רשיון
 #### RESULT_PANEL_SPAM=Junk Rating
-#? RESULT_PANEL_SPAM=
+RESULT_PANEL_SPAM=דירוג הזבל
 
 #Filter labels
 #### SEARCH_FILTER_ALL=All
@@ -862,21 +862,21 @@ DOWNLOAD_LAUNCH_BUTTON_LABEL=תצוגה מקדימה
 #### DOWNLOAD_LAUNCH_BUTTON_TIP=Preview Selected Downloads
 DOWNLOAD_LAUNCH_BUTTON_TIP=תצוגה מקדימה של ההורדות הניבחרות.
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Launch
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=פתח
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Launch Selected Downloads
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=פתח את הקבצים המודגשים
 #### DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Launch Download
-#? DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=
+DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=פתח את הקובף
 #### DOWNLOAD_KILL_BUTTON_LABEL=Cancel
 DOWNLOAD_KILL_BUTTON_LABEL=מחיקת הורדה
 #### DOWNLOAD_KILL_BUTTON_TIP=Cancel Selected Downloads
 DOWNLOAD_KILL_BUTTON_TIP=עצור הורדת הקבצים הניבחרים.
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Clear
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=
+DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=נקה
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Clear Selected Downloads
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=
+DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=נקה את הקבצים המודגשים
 #### DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Clear Download
-#? DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=
+DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=נקה את הקובץ
 #### DOWNLOAD_RESUME_BUTTON_LABEL=Resume
 DOWNLOAD_RESUME_BUTTON_LABEL=חידוש
 #### DOWNLOAD_RESUME_BUTTON_TIP=Reattempt Selected Downloads
@@ -890,7 +890,7 @@ DOWNLOAD_CLEAR_BUTTON_LABEL=נקה קבצים לא פעילים
 #### DOWNLOAD_CLEAR_BUTTON_TIP=Remove Inactive Downloads
 DOWNLOAD_CLEAR_BUTTON_TIP=מחק קבצים לא פעילים.
 #### DOWNLOAD_PAUSE_BUTTON_LABEL=Pause
-#? DOWNLOAD_PAUSE_BUTTON_LABEL=
+DOWNLOAD_PAUSE_BUTTON_LABEL=הפסק
 #### DOWNLOAD_PAUSE_BUTTON_TIP=Pause Selected Downloads
 #? DOWNLOAD_PAUSE_BUTTON_TIP=
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Change File Location...
