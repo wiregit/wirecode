@@ -93,7 +93,7 @@ public abstract class MessageDispatcher {
         buffer = ByteBuffer.allocate(Message.MAX_MESSAGE_SIZE);
     }
     
-    public abstract void bind(SocketAddress addr) throws IOException;
+    public abstract void bind(SocketAddress address) throws IOException;
     
     public abstract void start();
     
@@ -289,7 +289,7 @@ public abstract class MessageDispatcher {
         process(new RequestProcessor(request));
     }
     
-    public void handleWrite() throws IOException {
+    public boolean handleWrite() throws IOException {
         synchronized (outputQueue) {
             while(!outputQueue.isEmpty() && isRunning()) {
                 Tag tag = (Tag)outputQueue.removeFirst();
@@ -313,6 +313,7 @@ public abstract class MessageDispatcher {
             }
             
             interestWrite(!outputQueue.isEmpty());
+            return !outputQueue.isEmpty();
         }
     }
     

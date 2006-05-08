@@ -45,12 +45,12 @@ import com.limegroup.gnutella.dht.statistics.DHTStats;
 import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.db.KeyValuePublisher;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.EventDispatcher;
 import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StoreListener;
@@ -59,8 +59,8 @@ import de.kapsi.net.kademlia.handler.response.LookupResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.handler.response.LookupResponseHandler.ContactNodeEntry;
+import de.kapsi.net.kademlia.io.LimeMessageDispatcherImpl;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
-import de.kapsi.net.kademlia.io.MessageDispatcherImpl;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
@@ -92,7 +92,6 @@ public class Context implements Runnable {
     private Database database;
     private RoutingTable routeTable;
     private MessageDispatcher messageDispatcher;
-    private EventDispatcher eventDispatcher;
     private MessageFactory messageFactory;
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
@@ -118,6 +117,8 @@ public class Context implements Runnable {
     private LinkedList localSizeHistory = new LinkedList();
     private LinkedList remoteSizeHistory = new LinkedList();
     
+    private ProcessingQueue eventQueue = new ProcessingQueue("DHT-EventDispatcher", true);
+    
     //private final Object contextLock = new Object();
     
     public Context() {
@@ -140,7 +141,7 @@ public class Context implements Runnable {
 
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
-        messageDispatcher = new MessageDispatcherImpl(this);
+        messageDispatcher = new LimeMessageDispatcherImpl(this);
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
 
@@ -241,10 +242,6 @@ public class Context implements Runnable {
         return messageDispatcher;
     }
     
-    public EventDispatcher getEventDispatcher() {
-        return eventDispatcher;
-    }
-    
     public KeyValuePublisher getPublisher() {
         return keyValuePublisher;
     }
@@ -339,10 +336,7 @@ public class Context implements Runnable {
                 keyValuePublisherThread = null;
             }
             
-            if (eventDispatcher != null) {
-                eventDispatcher.cancel();
-                eventDispatcher = null;
-            }
+            eventQueue.clear();
             
             if (bucketRefresher != null) {
                 bucketRefresher.cancel();
@@ -393,9 +387,6 @@ public class Context implements Runnable {
             
             timer = new Timer(true);
             
-            eventDispatcher = new EventDispatcher(this);
-            timer.scheduleAtFixedRate(eventDispatcher, 0L, ContextSettings.DISPATCH_EVENTS_EVERY.getValue());
-            
             long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
             timer.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
             keyValuePublisherThread.start();
@@ -403,7 +394,7 @@ public class Context implements Runnable {
             messageDispatcher.start();
             
         } finally {
-            try { close(); } catch (IOException err) {}
+            //try { close(); } catch (IOException err) {}
         }
     }
     
@@ -417,13 +408,8 @@ public class Context implements Runnable {
             LOG.error("Discarding Event as it is null");
             return;
         }
-        
-        if (eventDispatcher == null) {
-            LOG.error("EventDispatcher is null");
-            return;
-        }
-        
-        eventDispatcher.add(event);
+
+        eventQueue.add(event);
     }
     
     /**
