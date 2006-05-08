@@ -82,6 +82,8 @@ public class Context {
     private static final int VENDOR = 0xDEADBEEF;
     private static final int VERSION = 0;
     
+    private static Timer TIMER = new Timer(true);
+    
     private PublicKey masterKey;
     
     private ContactNode localNode;
@@ -101,9 +103,6 @@ public class Context {
     
     private volatile boolean bootstrapped = false;
     private boolean running = false;
-    
-    private Timer timer = null;
-    private Thread keyValuePublisherThread = null;
     
     private DHTStats dhtStats = null;
     
@@ -366,10 +365,8 @@ public class Context {
             = getThreadFactory().createThread(messageDispatcher, getName() + "-MessageDispatcherThread");
         messageDispatcherThread.setDaemon(true);
     
-        timer = new Timer(true);
-        
         long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
-        timer.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
+        TIMER.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
         
         keyValuePublisherThread.start();
         messageDispatcherThread.start();
@@ -386,11 +383,6 @@ public class Context {
         if (bucketRefresher != null) {
             bucketRefresher.cancel();
             bucketRefresher = null;
-        }
-        
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
         }
         
         messageDispatcher.stop();
