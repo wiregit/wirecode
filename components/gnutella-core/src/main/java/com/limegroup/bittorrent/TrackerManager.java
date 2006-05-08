@@ -17,6 +17,11 @@ public class TrackerManager {
 	private static final Log LOG = LogFactory.getLog(TrackerManager.class);
 	
 	/**
+	 * the number of failures after which we consider giving up
+	 */
+	private static final int MAX_TRACKER_FAILURES = 5;
+	
+	/**
 	 * The trackers we know that track this torrent download.
 	 * Note: It will be read much more often than updated. 
 	 * Note2: This is not proper multi-tracker support. 
@@ -121,9 +126,13 @@ public class TrackerManager {
 		trackerQueue.invokeLater(trackerRequest);
 	}
 	
-	public int getTrackerFailures() {
+	/**
+	 * @return whether we've failed to connect to any tracker
+	 * too many times and should give up.
+	 */
+	public boolean isHopeless() {
 		if (trackers.isEmpty())
-			return 0;
+			return true;
 		
 		int least = Integer.MAX_VALUE;
 		for(Iterator iter = trackers.iterator(); iter.hasNext();) {
@@ -131,12 +140,12 @@ public class TrackerManager {
 			
 			// shortcut
 			if (t.getFailures() == 0)
-				return 0;
+				return false;
 			
 			if (t.getFailures() < least)
 				least = t.getFailures();
 		}
-		return least;
+		return least >= MAX_TRACKER_FAILURES;
 	}
 	
 	public void scheduleTrackerRequest(long minDelay, final Tracker t) {
@@ -191,7 +200,7 @@ public class TrackerManager {
 
 		if (torrent.isActive()) {
 			if (torrent.shouldStop()) {
-				torrent.giveUp();
+				torrent.stopVoluntarily();
 			} else
 				scheduleTrackerRequest(minWaitTime, t);
 		}

@@ -445,8 +445,6 @@ public class TorrentManager implements ConnectionAcceptor {
 		if (!_active.contains(mt) && !_waiting.contains(mt))
 			return;
 		_active.remove(mt);
-		if (mt.isPaused())
-			_waiting.add(mt);
 		
 		// remove from the gui as well.
 		torrentComplete(mt); 
@@ -493,7 +491,7 @@ public class TorrentManager implements ConnectionAcceptor {
 		Iterator iter = _waiting.iterator();
 		while (_active.size() < getMaxActiveTorrents() && iter.hasNext()) {
 			ManagedTorrent mt = (ManagedTorrent) iter.next();
-			if (mt.getState() != ManagedTorrent.GAVE_UP
+			if (mt.getState() != ManagedTorrent.TRACKER_FAILURE
 					&& mt.getState() != ManagedTorrent.DISK_PROBLEM
 					&& mt.getState() != ManagedTorrent.PAUSED) {
 				_active.add(mt);

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UploadManager;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.NIODispatcher;
@@ -24,8 +22,11 @@ import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ThreadPool;
 
 public class ManagedTorrent {
+	
+	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 	
 	/**
 	 * States of a torrent download.  Some of them are identical
@@ -41,35 +42,14 @@ public class ManagedTorrent {
 	static final int PAUSED = 8;
 	static final int STOPPED = 9;
 	static final int DISK_PROBLEM = 10;
-	static final int GAVE_UP = 11;
+	static final int TRACKER_FAILURE = 11;
 	
-	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
+	private static final ThreadPool INVOKER = 
+		new NIODispatcherThreadPool();
 
-	/*
-	 * the number of failures after which we consider giving up
-	 */
-	private static final int MAX_TRACKER_FAILURES = 5;
-
-	/*
-	 * used to order BTConnections according to the average 
-	 * download or upload speed.
-	 */
-	private static final Comparator DOWNLOAD_SPEED_COMPARATOR = 
-		new SpeedComparator(true);
-	private static final Comparator UPLOAD_SPEED_COMPARATOR = 
-		new SpeedComparator(false);
+	/** the executor of our tasks. */
+	private ThreadPool invoker = INVOKER;
 	
-	/*
-	 * orders BTConnections by the round they were unchoked.
-	 */
-	private static final Comparator UNCHOKE_COMPARATOR =
-		new UnchokeComparator();
-
-	/*
-	 * time in milliseconds between choking/unchoking of connections
-	 */
-	private static final int RECHOKE_TIMEOUT = 10 * 1000;
-
 	/**
 	 * the TorrentManager managing this torrent
 	 */
@@ -97,21 +77,14 @@ public class ManagedTorrent {
 	private volatile VerifyingFolder _folder;
 
 	/**
-	 * if a problem occured with disk operations.
+	 * The manager of tracker requests.
 	 */
-	private volatile boolean _diskProblem;
-	
-	private final TrackerManager trackerManager;
+	private TrackerManager trackerManager;
 	
 	/**
-	 * 
+	 * The fetcher of connections.
 	 */
 	private volatile BTConnectionFetcher _connectionFetcher;
-
-	/**
-	 * whether to choke all connections
-	 */
-	private boolean _globalChoke = false;
 
 	/**
 	 * it is possible that a complete download is restarted (for what purpose so
@@ -127,6 +100,10 @@ public class ManagedTorrent {
 	 */
 	private final List _connections;
 
+	/** 
+	 * Queue that changes the state of this torrent and does 
+	 * the moving of files to the complete location.
+	 */
 	private ProcessingQueue torrentStateQueue;
 
 	private BTDownloader _downloader;
@@ -136,7 +113,7 @@ public class ManagedTorrent {
 	/** 
 	 * A runnable that takes care of scheduled periodic rechoking
 	 */
-	private volatile PeriodicChoker choker;
+	private Choker choker;
 	
 	/** 
 	 * The current state of this torrent.
@@ -167,6 +144,7 @@ public class ManagedTorrent {
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
 		trackerManager = new TrackerManager(this);
+		choker = new Choker(this, invoker);
 	}
 
 	void setState(int newState) {
@@ -234,7 +212,7 @@ public class ManagedTorrent {
 		trackerManager.announceStart();
 		
 		// start the choking / unchoking of connections
-		scheduleRechoke();
+		choker.scheduleRechoke();
 	}
 
 	/**
@@ -285,8 +263,7 @@ public class ManagedTorrent {
 		
 		_folder.close();
 		
-		if (choker != null)
-			choker.stopped = true;
+		choker.stop();
 		
 		// close connections
 		Runnable closer = new Runnable() {
@@ -299,7 +276,7 @@ public class ManagedTorrent {
 				}
 			}
 		};
-		NIODispatcher.instance().invokeLater(closer);
+		invoker.invokeLater(closer);
 		
 		trackerManager.announceStop();
 		
@@ -354,8 +331,6 @@ public class ManagedTorrent {
 	}
 
 	private void initializeTorrent() {
-		_diskProblem = false;
-		_globalChoke = false;
 		_badPeers = Collections.synchronizedSet(
 				new FixedSizeExpiringSet(500, 60 * 60 * 1000));
 		_peers = Collections.synchronizedSet(new HashSet());
@@ -442,7 +417,7 @@ public class ManagedTorrent {
 				}
 			}
 		};
-		NIODispatcher.instance().invokeLater(haveNotifier);
+		invoker.invokeLater(haveNotifier);
 		
 		if (_folder.isComplete()) {
 			LOG.info("file is complete");
@@ -486,10 +461,13 @@ public class ManagedTorrent {
 	}
 
 	
-	void giveUp() {
+	void stopVoluntarily() {
 		enqueueTask(new Runnable() {
 			public void run() {
-				_state = GAVE_UP;
+				if (_state == SEEDING)
+					_state = STOPPED;
+				else
+					_state = TRACKER_FAILURE;
 				stopNow();
 			}
 		});
@@ -556,12 +534,13 @@ public class ManagedTorrent {
 		if (_saved)
 			return;
 
-		// stop uploads and cancel requests
+		// stop uploads 
+		LOG.debug("global choke");
+		choker.setGlobalChoke(true);
+		
+		// cancel requests
 		Runnable r = new Runnable(){
 			public void run() {
-				LOG.debug("global choke");
-				setGlobalChoke(true);
-				
 				for (Iterator iter = _connections.iterator(); iter.hasNext();) {
 					BTConnection btc = (BTConnection) iter.next();
 					// cancel all requests, if there are any left. (This should not
@@ -571,17 +550,13 @@ public class ManagedTorrent {
 				}
 			}
 		};
-		NIODispatcher.instance().invokeLater(r);
+		invoker.invokeLater(r);
 		
 		// save the files to the destination folder
 		saveFiles();
 		
 		// resume uploads
-		NIODispatcher.instance().invokeLater(new Runnable() {
-			public void run() {
-				setGlobalChoke(false);
-			}
-		});
+		choker.setGlobalChoke(false);
 		
 		// tell the tracker we are a seed now
 		trackerManager.announceComplete();
@@ -603,9 +578,9 @@ public class ManagedTorrent {
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder closed");
 		_state = SAVING;
-		_diskProblem = !_info.moveToCompleteFolder();
+		boolean diskProblem = !_info.moveToCompleteFolder();
 		if (LOG.isDebugEnabled())
-			LOG.debug("could not save: " + _diskProblem);
+			LOG.debug("could not save: " + diskProblem);
 		
 		// folder has to be updated with the new files
 		_folder = _info.getVerifyingFolder();
@@ -616,12 +591,12 @@ public class ManagedTorrent {
 			_folder.open(this);
 		} catch (IOException ioe) {
 			LOG.debug(ioe);
-			_diskProblem = true;
+			diskProblem = true;
 		}
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder opened");
 
-		if (_diskProblem) {
+		if (diskProblem) {
 			_state = DISK_PROBLEM;
 			stopNow();
 		} else
@@ -688,200 +663,11 @@ public class ManagedTorrent {
 		return null;
 	}
 
-	/**
-	 * Schedules choking of connections
-	 */
-	private void scheduleRechoke() {
-		if (choker != null)
-			choker.stopped = true;
-		choker = new PeriodicChoker();
-		RouterService.schedule(choker, RECHOKE_TIMEOUT, 0);
-	}
 	
 	void rechoke() {
-		NIODispatcher.instance().invokeLater(new Rechoker(_connections));
+		choker.rechoke();
 	}
 	
-	private class PeriodicChoker implements Runnable {
-		volatile int round;
-		int unchokesSinceLast;
-		volatile boolean stopped;
-		public void run() {
-			if (stopped)
-				return;
-			
-			if (LOG.isDebugEnabled())
-				LOG.debug("scheduling rechoke");
-			
-			List l; 
-			if (round++ % 3 == 0) {
-				synchronized(_connections) {
-					l = new ArrayList(_connections);
-				}
-				Collections.shuffle(l);
-			} else
-				l = _connections;
-			
-			
-			NIODispatcher.instance().invokeLater(new Rechoker(l, true));
-			
-			RouterService.schedule(this, RECHOKE_TIMEOUT, 0);
-		}
-	}
-	
-	private class Rechoker implements Runnable {
-		private final List connections;
-		private final boolean forceUnchokes;
-		Rechoker(List connections) {
-			this(connections, false);
-		}
-		
-		Rechoker(List connections, boolean forceUnchokes) {
-			this.connections = connections;
-			this.forceUnchokes = forceUnchokes;
-		}
-		
-		public void run() {
-			if (_globalChoke) {
-				LOG.debug("global choke");
-				return;
-			}
-			
-			if (_folder.isComplete())
-				seedRechoke();
-			else
-				leechRechoke();
-		}
-		
-		private void leechRechoke() {
-			List fastest = new ArrayList(connections.size());
-			for (Iterator iter = connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
-				if (con.isInterested() && con.shouldBeInterested())
-					fastest.add(con);
-			}
-			Collections.sort(fastest,DOWNLOAD_SPEED_COMPARATOR);
-			
-			// unchoke the fastest connections that are interested in us
-			int numFast = getNumUploads() - 1;
-			for(int i = fastest.size() - 1; i >= numFast; i--)
-				fastest.remove(i);
-			
-			// unchoke optimistically at least one interested connection
-			int optimistic = Math.max(1,
-					BittorrentSettings.TORRENT_MIN_UPLOADS.getValue() - fastest.size());
-			
-			
-			for (Iterator iter = connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
-				if (fastest.remove(con)) 
-					con.sendUnchoke(choker.round);
-				else if (optimistic > 0 && con.shouldBeInterested()) {
-					con.sendUnchoke(choker.round); // this is weird but that's how Bram does it
-					if (con.isInterested()) 
-						optimistic--;
-				} else 
-					con.sendChoke();
-			}
-		}
-		
-		private void seedRechoke() {
-			int numForceUnchokes = 0;
-			if (forceUnchokes) {
-				int x = (getNumUploads() + 2) / 3;
-				numForceUnchokes = Math.max(0, x + choker.round % 3) / 3 -
-				choker.unchokesSinceLast;
-			}
-			
-			List preferred = new ArrayList();
-			int newLimit = choker.round - 3;
-			for (Iterator iter = connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
-				if (!con.isChoked() && con.isInterested() && 
-						con.shouldBeInterested()) {
-					if (con.getUnchokeRound() < newLimit)
-						con.setUnchokeRound(-1);
-					preferred.add(con);
-				}
-			}
-			
-			int numKept = getNumUploads() - numForceUnchokes;
-			if (preferred.size() > numKept) {
-				Collections.sort(preferred,UNCHOKE_COMPARATOR);
-				preferred = preferred.subList(0, numKept);
-			}
-			
-			int numNonPref = getNumUploads() - preferred.size();
-			
-			if (forceUnchokes)
-				choker.unchokesSinceLast = 0;
-			else
-				choker.unchokesSinceLast += numNonPref;
-			
-			for (Iterator iter = connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
-				if (preferred.contains(con))
-					continue;
-				if (!con.isInterested())
-					con.sendChoke();
-				else if (con.isChoked() && numNonPref > 0 && 
-						con.shouldBeInterested()) {
-						con.sendUnchoke(choker.round);
-						numNonPref--;
-				}
-				else {
-					if (numNonPref == 0 || !con.shouldBeInterested())
-						con.sendChoke();
-					else
-						numNonPref--;
-				}
-			}
-		}
-	}
-	
-	/**
-	 * @return the number of uploads that should be unchoked
-	 * Note: Copied verbatim from mainline BT
-	 */
-	private static int getNumUploads() {
-		int uploads = BittorrentSettings.TORRENT_MAX_UPLOADS.getValue();
-		if (uploads > 0)
-			return uploads;
-		
-		float rate = UploadManager.getUploadSpeed();
-		if (rate == Float.MAX_VALUE)
-			return 7; //"unlimited, just guess something here..." - Bram
-		else if (rate < 9000)
-			return 2;
-		else if (rate < 15000)
-			return 3;
-		else if (rate < 42000)
-			return 4;
-		else 
-			return (int) Math.sqrt(rate * 0.6f);
-
-	}
-
-	/**
-	 * Chokes all connections instantly and does not unchoke any of them until
-	 * it is set to false again. This effectively suspends all uploads and it is
-	 * used while we are moving the files from the incomplete folder to the
-	 * complete folder.
-	 * 
-	 * @param choke
-	 *            whether to choke all connections.
-	 */
-	private void setGlobalChoke(boolean choke) {
-		_globalChoke = choke;
-		if (choke) {
-			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-				BTConnection btc = (BTConnection) iter.next();
-				btc.sendChoke();
-			}
-		} else
-			rechoke();
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -913,54 +699,6 @@ public class ManagedTorrent {
 		ManagedTorrent mt = (ManagedTorrent) o;
 
 		return Arrays.equals(mt.getInfoHash(), getInfoHash());
-	}
-
-	/*
-	 * Compares two BTConnections by their average download 
-	 * or upload speeds.  Higher speeds get preference.
-	 */
-	public static class SpeedComparator implements Comparator {
-		
-		private final boolean download;
-		public SpeedComparator(boolean download) {
-			this.download = download;
-		}
-		
-		// requires both objects to be of type BTConnection
-		public int compare(Object o1, Object o2) {
-			if (o1 == o2)
-				return 0;
-			
-			BTConnection c1 = (BTConnection) o1;
-			BTConnection c2 = (BTConnection) o2;
-			
-			float bw1 = c1.getMeasuredBandwidth(download);
-			float bw2 = c2.getMeasuredBandwidth(download);
-			
-			if (bw1 == bw2)
-				return 0;
-			else if (bw1 > bw2)
-				return -1;
-			else
-				return 1;
-		}
-	}
-	
-	/**
-	 * A comparator that compares BT connections by the number of
-	 * unchoke round they were unchoked.  Connections with higher 
-	 * round get preference.
-	 */
-	private static class UnchokeComparator implements Comparator {
-		public int compare(Object a, Object b) {
-			if (a == b)
-				return 0;
-			BTConnection con1 = (BTConnection) a;
-			BTConnection con2 = (BTConnection) b;
-			if (con1.getUnchokeRound() != con2.getUnchokeRound())
-				return -1 * (con1.getUnchokeRound() - con2.getUnchokeRound());
-			return UPLOAD_SPEED_COMPARATOR.compare(con1, con2);
-		}
 	}
 
 	public Throttle getUploadThrottle() {
@@ -1051,11 +789,8 @@ public class ManagedTorrent {
 	 */
 	boolean shouldStop() {
 		if (_connections.size() == 0 && _peers.size() == 0) {
-			int trackerFailures = trackerManager.getTrackerFailures();
-			if (trackerFailures > MAX_TRACKER_FAILURES) {
-				if (LOG.isDebugEnabled())
-					LOG.debug("giving up, trackerFailures "
-							+ trackerFailures);
+			if (trackerManager.isHopeless()) {
+				LOG.debug("giving up, too many trackerFailures ");
 				return true;
 			} else if (_manager.shouldYield()) {
 				if (LOG.isDebugEnabled())
@@ -1079,5 +814,11 @@ public class ManagedTorrent {
 	
 	public BTConnectionFetcher getFetcher() {
 		return _connectionFetcher;
+	}
+	
+	private static class NIODispatcherThreadPool implements ThreadPool {
+		public void invokeLater(Runnable r) {
+			NIODispatcher.instance().invokeLater(r);
+		}
 	}
 }

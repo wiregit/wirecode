@@ -60,13 +60,12 @@ public class BTDownloader implements Downloader {
 	}
 
 	public boolean isInactive() {
-		// unlike regular downloads, aborted torrents can be
+		// unlike regular downloads, aborted and given up torrents can be
 		// resumed but queued ones cannot.
-		switch(getState()) {
-        case GAVE_UP:
-        case ABORTED:
-        case BUSY:
-        case PAUSED:
+		switch(_torrent.getState()) {
+        case ManagedTorrent.PAUSED:
+        case ManagedTorrent.STOPPED:
+        case ManagedTorrent.TRACKER_FAILURE:
             return true;
         }
         return false;
@@ -130,8 +129,8 @@ public class BTDownloader implements Downloader {
 				return ABORTED;
 		case ManagedTorrent.DISK_PROBLEM:
 			return DISK_PROBLEM;
-		case ManagedTorrent.GAVE_UP:
-			return GAVE_UP;
+		case ManagedTorrent.TRACKER_FAILURE:
+			return WAITING_FOR_USER; // let the user trigger a scrape
 		}
 		throw new IllegalStateException("unknown torrent state");
 	}
