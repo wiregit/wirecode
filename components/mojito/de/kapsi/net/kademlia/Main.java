@@ -86,7 +86,7 @@ public class Main {
                     dht.bind(new InetSocketAddress(port+i));
                 }
                 
-                new Thread(dht, "DHT-" + i).start();
+                dht.start();
 
                 dhts.add(dht);
                 System.out.println(i + ": " + ((DHT)dhts.get(dhts.size()-1)).getLocalNode());
@@ -190,7 +190,7 @@ public class Main {
                     load(dht, line.split(" "));
                 } else if (line.matches(kill)) {
                     if (dht.isRunning()) {
-                        dht.close();
+                        dht.stop();
                     }
                 } else if (line.matches(stats)) {
                     DHTStats dhtStats = dht.getContext().getDHTStats();
@@ -204,12 +204,12 @@ public class Main {
                         } else {
                             dht.bind(new InetSocketAddress(port+current));
                         }
-                        new Thread(dht, "DHT-" + current).start();
+                        dht.start();
                         dhts.set(current, dht);
                     }
                 } else if (line.matches(quit)) {
                     for(int i = 0; i < dhts.size(); i++) {
-                        ((DHT)dhts.get(i)).close();
+                        ((DHT)dhts.get(i)).stop();
                     }
                     System.exit(0);
                 } else {

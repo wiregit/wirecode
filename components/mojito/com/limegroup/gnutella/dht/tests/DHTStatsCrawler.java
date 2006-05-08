@@ -114,9 +114,9 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         DHT dht = new DHT();
         try {
             dht.bind(new InetSocketAddress(localPort));
-            Thread t = new Thread(dht, "DHT-Crawler");
-            t.setDaemon(false);
-            t.start();
+            
+            dht.setName("DHT-Crawler");
+            dht.start();
         } catch (IOException e) {
             e.printStackTrace();
         }

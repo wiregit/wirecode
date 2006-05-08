@@ -23,19 +23,17 @@ public class StatsRPCTest {
         int port = 4000;
         try {
             System.out.println("Starting stats server");
-            DHT dht = new DHT();
+            DHT dht = new DHT("DHT-StatsServer");
             SocketAddress sac = new InetSocketAddress("localhost",port); 
             dht.bind(sac);
-            Thread t = new Thread(dht, "DHT-StatsServer");
-            t.start();
+            dht.start();
             System.out.println("Stats server is ready");
             System.out.println("Starting Node");
             SocketAddress sac2 = new InetSocketAddress("localhost",port+1);
             KUID nodeID = KUID.createRandomNodeID(sac2);
-            final DHT dht2 = new DHT();
+            final DHT dht2 = new DHT("DHT-2");
             dht2.bind(sac2,nodeID);
-            Thread t2 = new Thread(dht2, "DHT-2");
-            t2.start();
+            dht2.start();
             
             dht2.bootstrap(sac);
             

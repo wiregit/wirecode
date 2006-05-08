@@ -49,8 +49,9 @@ public class NodeIDSpoofTest {
             DHT dht = new DHT();
             SocketAddress sac = new InetSocketAddress(port); 
             dht.bind(sac);
-            Thread t = new Thread(dht, "DHT-bootstrap");
-            t.start();
+            
+            dht.setName("DHT-bootstrap");
+            dht.start();
             System.out.println("bootstrap server is ready");
             
             switch(testNum) {
@@ -76,16 +77,16 @@ public class NodeIDSpoofTest {
         KUID nodeID = KUID.createRandomNodeID(sac2);
         final DHT dht2 = new DHT();
         dht2.bind(sac2,nodeID);
-        Thread t2 = new Thread(dht2, "DHT-1");
-        t2.start();
+        dht2.setName("DHT-1");
+        dht2.start();
         dht2.bootstrap(new InetSocketAddress("localhost",port), null);
         System.out.println("2");
         
         //spoofer
         final DHT dht3 = new DHT();
         dht3.bind(new InetSocketAddress(port+2),nodeID);
-        Thread t3 = new Thread(dht3, "DHT-2");
-        t3.start();
+        dht3.setName("DHT-2");
+        dht3.start();
         dht3.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener() {
             public void phaseOneComplete(long time) {
             }
@@ -115,19 +116,19 @@ public class NodeIDSpoofTest {
         final KUID nodeID = KUID.createRandomNodeID(sac2);
         final DHT dht2 = new DHT();
         dht2.bind(sac2,nodeID);
-        Thread t2 = new Thread(dht2, "DHT-1");
-        t2.start();
+        dht2.setName("DHT-1");
+        dht2.start();
         dht2.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener(){
             public void phaseOneComplete(long time) {}
             public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println("2");
                 //REPLACE!
                 try {
-                    dht2.close();
+                    dht2.stop();
                     DHT dht3 = new DHT();
                     dht3.bind(new InetSocketAddress(port+2),nodeID);
-                    Thread t3 = new Thread(dht3, "DHT-2");
-                    t3.start();
+                    dht3.setName("DHT-3");
+                    dht3.start();
                     dht3.bootstrap(new InetSocketAddress("localhost",port),null);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block

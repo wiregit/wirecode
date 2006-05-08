@@ -97,12 +97,11 @@ public class PlanetLab {
         List dhts = new ArrayList(number);
         for(int i = 0; i < number; i++) {
             try {
-                DHT dht = new DHT();
+                DHT dht = new DHT("DHT-" + i);
                 statsManager.addDHTNode(dht.getContext().getDHTStats());
                 dht.bind(new InetSocketAddress(port+i));
                 
-                Thread t = new Thread(dht, "DHT-" + i);
-                t.start();
+                dht.start();
                 
                 dhts.add(dht);
             } catch (Exception err) {
@@ -385,7 +384,7 @@ public class PlanetLab {
                     }
                     try {
                         running = false;
-                        dht.close();
+                        dht.stop();
                         planetlabStats.CHURN_DISCONNECTS.incrementStat();
                         
                     } catch (IOException e) {
@@ -400,7 +399,7 @@ public class PlanetLab {
                     synchronized (lock) {
                         try {
                             dht.bind(address, localNodeId);
-                            new Thread(dht).start();
+                            dht.start();
                             
                             dht.bootstrap(bootstrapServer, new BootstrapListener() {
                                 public void phaseOneComplete(long time) {}

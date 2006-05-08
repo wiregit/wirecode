@@ -58,7 +58,7 @@ import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 
-public abstract class MessageDispatcher {
+public abstract class MessageDispatcher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     
@@ -94,8 +94,6 @@ public abstract class MessageDispatcher {
     }
     
     public abstract void bind(SocketAddress address) throws IOException;
-    
-    public abstract void start();
     
     public abstract void stop();
     

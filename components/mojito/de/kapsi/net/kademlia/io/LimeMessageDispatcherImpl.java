@@ -67,10 +67,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
     }
 
     public void start() {
-        DatagramChannel channel = getDatagramChannel();
-        if (channel != null) {
-            NIODispatcher.instance().registerReadWrite(channel, this);
-        }
+        
     }
 
     public void stop() {
@@ -99,5 +96,12 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
 
     public void handleIOException(IOException iox) {
         LOG.error(iox);
+    }
+    
+    public void run() {
+        DatagramChannel channel = getDatagramChannel();
+        if (channel != null) {
+            NIODispatcher.instance().registerReadWrite(channel, this);
+        }
     }
 }

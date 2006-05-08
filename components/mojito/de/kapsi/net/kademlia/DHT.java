@@ -40,7 +40,7 @@ import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.ContextSettings;
 
-public class DHT implements Runnable {
+public class DHT {
     
     private static final Log LOG = LogFactory.getLog(DHT.class);
     
@@ -50,6 +50,18 @@ public class DHT implements Runnable {
         context = new Context();
     }
     
+    public DHT(String name) {
+        context = new Context(name);
+    }
+    
+    public void setName(String name) {
+        context.setName(name);
+    }
+    
+    public String getName() {
+        return context.getName();
+    }
+    
     public void bind(SocketAddress address) throws IOException {
         context.bind(address);
     }
@@ -57,10 +69,6 @@ public class DHT implements Runnable {
     //  TODO testing purposes only - remove
     public void bind(SocketAddress address,KUID localNodeID) throws IOException {
         context.bind(address,localNodeID);
-    }
-    
-    public void run() {
-        context.run();
     }
     
     public int size() {
@@ -103,8 +111,16 @@ public class DHT implements Runnable {
         return context.isRunning();
     }
     
-    public void close() throws IOException {
-        context.close();
+    public void start() {
+        context.start();
+    }
+    
+    public void stop() throws IOException {
+        context.stop();
+    }
+    
+    public void setThreadFactory(ThreadFactory threadFactory) {
+        context.setThreadFactory(threadFactory);
     }
     
     public long bootstrap(SocketAddress address) throws IOException {

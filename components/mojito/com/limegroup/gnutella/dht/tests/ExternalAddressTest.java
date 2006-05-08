@@ -18,12 +18,16 @@ public class ExternalAddressTest {
         DHT dht1 = new DHT();
         dht1.bind(new InetSocketAddress(2000));
         Context context1 = dht1.getContext();
-        new Thread(dht1, "DHT-1").start();
+        
+        dht1.setName("DHT-1");
+        dht1.start();
         
         DHT dht2 = new DHT();
         dht2.bind(new InetSocketAddress(3000));
         Context context3 = dht2.getContext();
-        new Thread(dht2, "DHT-3").start();
+        
+        dht2.setName("DHT-3");
+        dht2.start();
         
         Thread.sleep(3000);
         
@@ -50,8 +54,8 @@ public class ExternalAddressTest {
         Thread.sleep(1000);
         System.out.println(pingHandlerStub.externalAddress.equals(context1.getSocketAddress())); // true
         
-        dht1.close();
-        dht2.close();
+        dht1.stop();
+        dht2.stop();
     }
     
     public static void main(String[] args) throws Exception {

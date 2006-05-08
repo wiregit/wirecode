@@ -51,7 +51,7 @@ public class RoutingTableTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        new Thread(dht,"DHT").start();
+        dht.start();
         RoutingTable routingTable = dht.getContext().getRouteTable();
         
 //        testBuckets(routingTable);
@@ -66,7 +66,7 @@ public class RoutingTableTest {
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
         try {
-            dht.close();
+            dht.stop();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -228,7 +228,7 @@ public class RoutingTableTest {
         routingTable.clear();
         System.out.println(routingTable.toString());
         try {
-            dht.close();
+            dht.stop();
             dht = new DHT();
             KUID newNodeId = KUID.createRandomNodeID(addr);
             ContextSettings.setLocalNodeID(addr,newNodeId.getBytes());

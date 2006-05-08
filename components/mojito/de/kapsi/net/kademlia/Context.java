@@ -59,8 +59,8 @@ import de.kapsi.net.kademlia.handler.response.LookupResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.handler.response.LookupResponseHandler.ContactNodeEntry;
-import de.kapsi.net.kademlia.io.LimeMessageDispatcherImpl;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
+import de.kapsi.net.kademlia.io.MessageDispatcherImpl;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
@@ -75,7 +75,7 @@ import de.kapsi.net.kademlia.settings.ContextSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
-public class Context implements Runnable {
+public class Context {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
@@ -119,7 +119,9 @@ public class Context implements Runnable {
     
     private ProcessingQueue eventQueue = new ProcessingQueue("DHT-EventDispatcher", true);
     
-    //private final Object contextLock = new Object();
+    private ThreadFactory threadFactory = new DefaultThreadFactory();
+    
+    private String name;
     
     public Context() {
         
@@ -141,7 +143,7 @@ public class Context implements Runnable {
 
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
-        messageDispatcher = new LimeMessageDispatcherImpl(this);
+        messageDispatcher = new MessageDispatcherImpl(this);
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
 
@@ -149,6 +151,19 @@ public class Context implements Runnable {
         
         pingManager = new PingManager();
         lookupManager = new LookupManager();
+    }
+    
+    public Context(String name) {
+        this();
+        setName(name);
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getName() {
+        return (name != null ? name : "DHT");
     }
     
     public DHTStats getDHTStats() {
@@ -250,28 +265,20 @@ public class Context implements Runnable {
         return messageFactory;
     }
     
-    public boolean isRunning() {
-        //synchronized (contextLock) {
-            return running;
-        //}
+    public synchronized boolean isRunning() {
+        return running;
     }
 
     public boolean isOpen() {
-        //synchronized (contextLock) {
-            return messageDispatcher.isOpen();
-        //}
+        return messageDispatcher.isOpen();
     }
     
     public void setBootstrapped(boolean bootstrapped) {
-        //synchronized (contextLock) {
-            this.bootstrapped = bootstrapped;
-        //}
+        this.bootstrapped = bootstrapped;
     }
     
     public boolean isBootstrapped() {
-        //synchronized (contextLock) {
-            return isRunning() && bootstrapped;
-        //}
+        return isRunning() && bootstrapped;
     }
     
     public int getReceivedMessagesCount() {
@@ -290,80 +297,51 @@ public class Context implements Runnable {
         return messageDispatcher.getSentMessagesSize();
     }
     
+    public void setThreadFactory(ThreadFactory threadFactory) {
+        if (threadFactory == null) {
+            threadFactory = new DefaultThreadFactory();
+        }
+        
+        this.threadFactory = threadFactory;
+    }
+    
+    public ThreadFactory getThreadFactory() {
+        return threadFactory;
+    }
+    
     public void bind(SocketAddress address) throws IOException {
-        //synchronized (contextLock) {
-            if (isOpen()) {
-                throw new IOException("DHT is already bound");
-            }
-            
-            KUID nodeId = null;
-            
-            byte[] id = ContextSettings.getLocalNodeID(address);
-            if (id == null) {
-                nodeId = KUID.createRandomNodeID(address);
-                ContextSettings.setLocalNodeID(address, nodeId.getBytes());
-            } else {
-                nodeId = KUID.createNodeID(id);
-            }
-            
-            //add ourselve to the routing table
-            localNode = new ContactNode(nodeId, address);
-            localNode.setTimeStamp(Long.MAX_VALUE);
-            routeTable.add(localNode, false);
-            messageDispatcher.bind(address);
-        //}
+        if (isOpen()) {
+            throw new IOException("DHT is already bound");
+        }
+        
+        KUID nodeId = null;
+        
+        byte[] id = ContextSettings.getLocalNodeID(address);
+        if (id == null) {
+            nodeId = KUID.createRandomNodeID(address);
+            ContextSettings.setLocalNodeID(address, nodeId.getBytes());
+        } else {
+            nodeId = KUID.createNodeID(id);
+        }
+        
+        //add ourselve to the routing table
+        localNode = new ContactNode(nodeId, address);
+        localNode.setTimeStamp(Long.MAX_VALUE);
+        routeTable.add(localNode, false);
+        messageDispatcher.bind(address);
     }
     
     //TODO testing purposes only - remove
     public void bind(SocketAddress address, KUID localNodeID) throws IOException {
-        //synchronized (contextLock) {
-            if (isOpen()) {
-                throw new IOException("DHT is already bound");
-            }
-            
-            localNode = new ContactNode(localNodeID, address);
-            messageDispatcher.bind(address);   
-        //}
+        if (isOpen()) {
+            throw new IOException("DHT is already bound");
+        }
+        
+        localNode = new ContactNode(localNodeID, address);
+        messageDispatcher.bind(address);
     }
     
-    public void close() throws IOException {
-        //synchronized (contextLock) {
-            running = false;
-            bootstrapped = false;
-            
-            if (keyValuePublisherThread != null) {
-                keyValuePublisher.stop();
-                keyValuePublisherThread = null;
-            }
-            
-            eventQueue.clear();
-            
-            if (bucketRefresher != null) {
-                bucketRefresher.cancel();
-                bucketRefresher = null;
-            }
-            
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
-            }
-            
-            messageDispatcher.stop();
-            
-            lastEstimateTime = 0L;
-            estimatedSize = 0;
-            
-            synchronized (localSizeHistory) {
-                localSizeHistory.clear();
-            }
-            
-            synchronized (remoteSizeHistory) {
-                remoteSizeHistory.clear();
-            }
-        //}
-    }
-    
-    public void run() {
+    public synchronized void start() {
         if (!isOpen()) {
             throw new RuntimeException("DHT is not bound");
         }
@@ -378,23 +356,54 @@ public class Context implements Runnable {
         
         bootstrapped = true;
         running = true;
-        try {
-            
-            // TODO use ManagedThread
-            Thread keyValuePublisherThread 
-                = new Thread(keyValuePublisher, "KeyValuePublisherThread");
-            keyValuePublisherThread.setDaemon(true);
-            
-            timer = new Timer(true);
-            
-            long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
-            timer.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
-            keyValuePublisherThread.start();
 
-            messageDispatcher.start();
-            
-        } finally {
-            //try { close(); } catch (IOException err) {}
+        // TODO use ManagedThread
+        Thread keyValuePublisherThread 
+            = getThreadFactory().createThread(keyValuePublisher, getName() + "-KeyValuePublisherThread");
+        keyValuePublisherThread.setDaemon(true);
+        
+        Thread messageDispatcherThread 
+            = getThreadFactory().createThread(messageDispatcher, getName() + "-MessageDispatcherThread");
+        messageDispatcherThread.setDaemon(true);
+    
+        timer = new Timer(true);
+        
+        long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
+        timer.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
+        
+        keyValuePublisherThread.start();
+        messageDispatcherThread.start();
+    }
+    
+    public synchronized void stop() {
+        running = false;
+        bootstrapped = false;
+        
+        keyValuePublisher.stop();
+        
+        eventQueue.clear();
+        
+        if (bucketRefresher != null) {
+            bucketRefresher.cancel();
+            bucketRefresher = null;
+        }
+        
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        
+        messageDispatcher.stop();
+        
+        lastEstimateTime = 0L;
+        estimatedSize = 0;
+        
+        synchronized (localSizeHistory) {
+            localSizeHistory.clear();
+        }
+        
+        synchronized (remoteSizeHistory) {
+            remoteSizeHistory.clear();
         }
     }
     
@@ -1008,6 +1017,12 @@ public class Context implements Runnable {
                     }
                 });
             }
+        }
+    }
+    
+    private static class DefaultThreadFactory implements ThreadFactory {
+        public Thread createThread(Runnable runnable, String name) {
+            return new Thread(runnable, name);
         }
     }
 }

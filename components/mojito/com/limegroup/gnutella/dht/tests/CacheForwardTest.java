@@ -41,8 +41,12 @@ public class CacheForwardTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        new Thread(originalRequesterDHT,"DHT-1").start();
-        new Thread(firstStorer,"DHT-2").start();
+        
+        originalRequesterDHT.setName("DHT-1");
+        originalRequesterDHT.start();
+        
+        firstStorer.setName("DHT-2");
+        firstStorer.start();
         
         try {
             firstStorer.bootstrap(originalRequesterDHT.getSocketAddress(),null);
@@ -50,7 +54,9 @@ public class CacheForwardTest {
             //replace with first bits of first storer to make sure it lands there first
             originalRequesterDHT.put(KUID.createValueID(valueID),"test".getBytes("UTF-8"),null);
             Thread.sleep(5000);
-            new Thread(secondStorer,"DHT-3").start();
+            
+            secondStorer.setName("DHT-3");
+            secondStorer.start();
             secondStorer.bootstrap(firstStorer.getSocketAddress(),null);
         } catch (IOException e) {
             // TODO Auto-generated catch block
