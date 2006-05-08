@@ -277,6 +277,22 @@ public class Context implements Runnable {
         //}
     }
     
+    public int getReceivedMessagesCount() {
+        return messageDispatcher.getReceivedMessagesCount();
+    }
+    
+    public long getReceivedMessagesSize() {
+        return messageDispatcher.getReceivedMessagesSize();
+    }
+    
+    public int getSentMessagesCount() {
+        return messageDispatcher.getSentMessagesCount();
+    }
+    
+    public long getSentMessagesSize() {
+        return messageDispatcher.getSentMessagesSize();
+    }
+    
     public void bind(SocketAddress address) throws IOException {
         //synchronized (contextLock) {
             if (isOpen()) {

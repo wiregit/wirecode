@@ -76,7 +76,7 @@ public class ExternalAddressTest {
             PingResponse pong = context.getMessageFactory()
                     .createPingResponse(message, addr);
     
-            context.getMessageDispatcher().send(message.getContactNode(), pong, null);
+            context.getMessageDispatcher().send(message.getContactNode(), pong);
         }        
     }
 }

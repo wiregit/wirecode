@@ -101,6 +101,22 @@ public abstract class MessageDispatcher {
     
     public abstract boolean isRunning();
     
+    public int getReceivedMessagesCount() {
+        return (int)networkStats.RECEIVED_MESSAGES_COUNT.getTotal();
+    }
+    
+    public long getReceivedMessagesSize() {
+        return (long)networkStats.RECEIVED_MESSAGES_SIZE.getTotal();
+    }
+    
+    public int getSentMessagesCount() {
+        return (int)networkStats.SENT_MESSAGES_COUNT.getTotal();
+    }
+    
+    public long getSentMessagesSize() {
+        return (long)networkStats.SENT_MESSAGES_SIZE.getTotal();
+    }
+    
     public void setDatagramChannel(DatagramChannel channel) {
         this.channel = channel;
     }
