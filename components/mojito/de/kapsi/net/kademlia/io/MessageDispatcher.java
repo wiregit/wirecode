@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia.io;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.Iterator;
@@ -68,7 +69,7 @@ public abstract class MessageDispatcher implements Runnable {
     
     private NetworkStatisticContainer networkStats;
     
-    private Context context;
+    protected final Context context;
     
     private DefaultMessageHandler defaultHandler;
     private PingRequestHandler pingHandler;
@@ -165,6 +166,8 @@ public abstract class MessageDispatcher implements Runnable {
         SocketAddress dst = tag.getSocketAddres();
         Message message = tag.getMessage();
         
+        // TODO Add NetworkUtils.isValidPort() and Address checks!
+        
         // Make sure we're not sending messages to ourself
         if (context.isLocalNodeID(nodeId)
                 || context.isLocalAddress(dst)) {
@@ -173,6 +176,8 @@ public abstract class MessageDispatcher implements Runnable {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
                         + " to ourself " + ContactNode.toString(nodeId, dst));
             }
+            
+            tag.handleError(new IOException("Cannot send message to yourself"));
             return false;
         }
         
@@ -292,21 +297,25 @@ public abstract class MessageDispatcher implements Runnable {
             while(!outputQueue.isEmpty() && isRunning()) {
                 Tag tag = (Tag)outputQueue.removeFirst();
                 
-                if (tag.send(channel)) {
-                    // Wohoo! Message was sent!
-                    networkStats.SENT_MESSAGES_COUNT.incrementStat();
-                    networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize()); // compressed size
-                    
-                    Receipt receipt = tag.getReceipt();
-                    if (receipt != null) {
-                        synchronized (receiptMap) {
-                            receiptMap.add(receipt);
+                try {
+                    if (tag.send(channel)) {
+                        // Wohoo! Message was sent!
+                        networkStats.SENT_MESSAGES_COUNT.incrementStat();
+                        networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize()); // compressed size
+                        
+                        Receipt receipt = tag.getReceipt();
+                        if (receipt != null) {
+                            synchronized (receiptMap) {
+                                receiptMap.add(receipt);
+                            }
                         }
+                    } else {
+                        // Dang! Re-Try next time!
+                        outputQueue.addFirst(tag);
+                        break;
                     }
-                } else {
-                    // Dang! Re-Try next time!
-                    outputQueue.addFirst(tag);
-                    break;
+                } catch (SocketException err) {
+                    tag.handleError(err);
                 }
             }
             

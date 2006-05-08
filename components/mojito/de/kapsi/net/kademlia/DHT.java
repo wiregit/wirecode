@@ -123,12 +123,37 @@ public class DHT {
         context.setThreadFactory(threadFactory);
     }
     
+    public void addPingListener(PingListener listener) {
+        context.addPingListener(listener);
+    }
+    
+    public void removePingListener(PingListener listener) {
+        context.removePingListener(listener);
+    }
+    
+    public PingListener[] getPingListeners() {
+        return context.getPingListeners();
+    }
+    
+    public void addLookupListener(LookupListener listener) {
+        context.addLookupListener(listener);
+    }
+    
+    public void removeLookupListener(LookupListener listener) {
+        context.removeLookupListener(listener);
+    }
+    
+    public LookupListener[] getLookupListeners() {
+        return context.getLookupListeners();
+    }
+    
     public long bootstrap(SocketAddress address) throws IOException {
         return bootstrap(address, ContextSettings.SYNC_BOOTSTRAP_TIMEOUT.getValue());
     }
 
     public long bootstrap(SocketAddress address, long timeout) throws IOException {
         final long[] time = new long[]{ -1L };
+        
         synchronized (time) {
             context.bootstrap(address, new BootstrapListener() {
                 public void phaseOneComplete(long time) {
@@ -158,8 +183,47 @@ public class DHT {
     }
     
     // TODO for debugging purposes only
-    void ping(SocketAddress dst, PingListener l) throws IOException {
-        context.ping(dst, l);
+    long ping(SocketAddress dst) throws IOException {
+        return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
+    }
+    
+    // TODO for debugging purposes only
+    long ping(SocketAddress dst, long timeout) throws IOException {
+        final long[] time = new long[]{ -1L };
+        
+        synchronized (time) {
+            context.ping(dst, new PingListener() {
+                public void response(ResponseMessage response, long t) {
+                    time[0] = t;
+                    synchronized (time) {
+                        time.notify();
+                    }
+                }
+
+                public void timeout(KUID nodeId, SocketAddress address, 
+                        RequestMessage request, long t) {
+                    synchronized (time) {
+                        time.notify();
+                    }
+                }
+            });
+            
+            try {
+                time.wait(timeout);
+            } catch (InterruptedException err) {
+                LOG.error(err);
+            }
+        }
+        
+        return time[0];
+    }
+    
+    // TODO for debugging purposes only
+    void ping(SocketAddress dst, PingListener listener) throws IOException {
+        if (listener == null) {
+            throw new NullPointerException("PingListener is null");
+        }
+        context.ping(dst, listener);
     }
     
     // TODO remove - for test purposes only

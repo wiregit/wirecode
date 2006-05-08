@@ -50,6 +50,9 @@ public class ContextSettings extends LimeDHTProps {
     public static final BooleanSetting COUNT_REMOTE_SIZE
         = FACTORY.createSettableBooleanSetting("COUNT_REMOTE_SIZE", true, "count_remote_size");
     
+    public static final LongSetting SYNC_PING_TIMEOUT
+        = FACTORY.createLongSetting("SYNC_PING_TIMEOUT", 60L * 1000L);
+    
     public static final LongSetting SYNC_GET_VALUE_TIMEOUT
         = FACTORY.createLongSetting("SYNC_GET_VALUE_TIMEOUT", 60L * 1000L);
     

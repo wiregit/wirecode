@@ -22,6 +22,9 @@ package de.kapsi.net.kademlia.handler;
 import java.io.IOException;
 import java.net.SocketAddress;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
@@ -29,6 +32,8 @@ import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 public final class NoOpResponseHandler implements ResponseHandler {
 
+    private static final Log LOG = LogFactory.getLog(NoOpResponseHandler.class);
+    
     private long time = 0L;
     
     private long timeout;
@@ -63,5 +68,9 @@ public final class NoOpResponseHandler implements ResponseHandler {
 
     public long timeout() {
         return timeout;
+    }
+    
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        LOG.error(e);
     }
 }

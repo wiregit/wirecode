@@ -62,7 +62,6 @@ public class StatsResponseHandler extends AbstractResponseHandler {
         }
     }
 
-
     protected void timeout(final KUID nodeId, final SocketAddress dst, 
             final RequestMessage message, final long time) throws IOException {
         if (LOG.isTraceEnabled()) {
@@ -77,5 +76,13 @@ public class StatsResponseHandler extends AbstractResponseHandler {
                 }
             });
         }
+    }
+    
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        if (LOG.isErrorEnabled()) {
+            LOG.error("Sending a stats request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+        }
+        
+        fireTimeout(nodeId, dst, message, -1L);
     }
 }

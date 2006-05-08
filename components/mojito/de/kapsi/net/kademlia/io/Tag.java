@@ -146,6 +146,12 @@ class Tag {
         }
     }
     
+    public void handleError(Exception e) {
+        if (responseHandler != null) {
+            responseHandler.handleError(nodeId, dst, (RequestMessage)message, e);
+        }
+    }
+    
     public class Receipt {
         
         private long received = -1L;
@@ -221,6 +227,12 @@ class Tag {
         
         public ResponseHandler getResponseHandler() {
             return responseHandler;
+        }
+        
+        public void handleError(Exception e) {
+            if (responseHandler != null) {
+                responseHandler.handleError(nodeId, dst, (RequestMessage)message, e);
+            }
         }
     }
 }

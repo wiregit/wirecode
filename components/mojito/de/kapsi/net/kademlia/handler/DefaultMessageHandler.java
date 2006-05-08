@@ -89,6 +89,10 @@ public class DefaultMessageHandler extends MessageHandler
         addLiveContactInfo(message.getContactNode(), message);
     }
     
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        // never called
+    }
+    
     private void addLiveContactInfo(ContactNode node, 
             Message message) throws IOException {
         
@@ -196,8 +200,16 @@ public class DefaultMessageHandler extends MessageHandler
             context.store(message.getContactNode(), queryKey, keyValues);
         }
 
-        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+        protected void timeout(KUID nodeId, SocketAddress dst, 
+                RequestMessage message, long time) throws IOException {
+        }
+        
+        public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Sending a store-forward request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+            }
             
+            fireTimeout(nodeId, dst, message, -1L);
         }
     }
 }

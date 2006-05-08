@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -356,7 +357,6 @@ public class Context {
         bootstrapped = true;
         running = true;
 
-        // TODO use ManagedThread
         Thread keyValuePublisherThread 
             = getThreadFactory().createThread(keyValuePublisher, getName() + "-KeyValuePublisherThread");
         keyValuePublisherThread.setDaemon(true);
@@ -366,7 +366,7 @@ public class Context {
         messageDispatcherThread.setDaemon(true);
     
         long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
-        TIMER.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
+        scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
         
         keyValuePublisherThread.start();
         messageDispatcherThread.start();
@@ -399,6 +399,14 @@ public class Context {
         }
     }
     
+    public void scheduleAtFixedRate(final Runnable runnable, long delay, long period) {
+        TIMER.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                runnable.run();
+            }
+        }, delay, period);
+    }
+    
     public void fireEvent(Runnable event) {
         if (!isRunning()) {
             LOG.error("Discarding Event as DHT is not running");
@@ -411,6 +419,30 @@ public class Context {
         }
 
         eventQueue.add(event);
+    }
+    
+    public void addPingListener(PingListener listener) {
+        pingManager.addPingListener(listener);
+    }
+    
+    public void removePingListener(PingListener listener) {
+        pingManager.removePingListener(listener);
+    }
+    
+    public PingListener[] getPingListeners() {
+        return pingManager.getPingListeners();
+    }
+    
+    public void addLookupListener(LookupListener listener) {
+        lookupManager.addLookupListener(listener);
+    }
+    
+    public void removeLookupListener(LookupListener listener) {
+        lookupManager.removeLookupListener(listener);
+    }
+    
+    public LookupListener[] getLookupListeners() {
+        return lookupManager.getLookupListeners();
     }
     
     /**
@@ -771,7 +803,7 @@ public class Context {
      * The PingContext takes care of concurrent Pings and makes sure
      * a single Node cannot be pinged multiple times.
      */
-    private class PingManager implements de.kapsi.net.kademlia.event.PingListener {
+    private class PingManager implements PingListener {
         
         private Map handlerMap = new HashMap();
         private List listeners = new ArrayList();
@@ -797,7 +829,7 @@ public class Context {
             }
         }
 
-        public PingListener[] getAllPingListeners() {
+        public PingListener[] getPingListeners() {
             synchronized (listeners) {
                 return (PingListener[])listeners.toArray(new PingListener[0]);
             }
@@ -827,14 +859,17 @@ public class Context {
                     responseHandler = new PingResponseHandler(Context.this);
                     responseHandler.addPingListener(this);
                     
+                    if (listener != null) {
+                        responseHandler.addPingListener(listener);
+                    }
+                    
                     PingRequest request = messageFactory.createPingRequest(address);
                     messageDispatcher.send(nodeId, address, request, responseHandler);
 
                     handlerMap.put(address, responseHandler);
                     networkStats.PINGS_SENT.incrementStat();
-                }
-                
-                if (listener != null) {
+                    
+                } else if (listener != null) {
                     responseHandler.addPingListener(listener);
                 }
             }
@@ -893,7 +928,7 @@ public class Context {
         }
     }
     
-    private class LookupManager implements de.kapsi.net.kademlia.event.LookupListener {
+    private class LookupManager implements LookupListener {
         
         private Map handlerMap = new HashMap();
         
@@ -921,7 +956,7 @@ public class Context {
             }
         }
 
-        public LookupListener[] getAllLookupListeners() {
+        public LookupListener[] getLookupListeners() {
             synchronized (listeners) {
                 return (LookupListener[])listeners.toArray(new LookupListener[0]);
             }
@@ -942,11 +977,14 @@ public class Context {
                     handler = new LookupResponseHandler(lookup, Context.this);
                     handler.addLookupListener(this);
                     
+                    if (listener != null) {
+                        handler.addLookupListener(listener);
+                    }
+                    
                     handler.start();
                     handlerMap.put(lookup, handler);
-                }
-                
-                if (listener != null) {
+                    
+                } else if (listener != null) {
                     handler.addLookupListener(listener);
                 }
             }

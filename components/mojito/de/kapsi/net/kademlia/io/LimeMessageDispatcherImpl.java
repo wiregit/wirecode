@@ -38,10 +38,22 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
 
     private static final Log LOG = LogFactory.getLog(LimeMessageDispatcherImpl.class);
     
+    private static final long CLEANUP = 3L * 1000L;
+    
     private ProcessingQueue processQueue = new ProcessingQueue("LimeDHTMessageDispatcherQueue", true);
+    
+    private boolean running = false;
     
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
+        
+        context.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+                if (isRunning()) {
+                    handleClenup();
+                }
+            }
+        }, CLEANUP, CLEANUP);
     }
 
     protected boolean allow(Message message) {
@@ -66,11 +78,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
         setDatagramChannel(channel);
     }
 
-    public void start() {
-        
-    }
-
     public void stop() {
+        running = false;
         setDatagramChannel(null);
     }
     
@@ -83,7 +92,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
     }
 
     public boolean isRunning() {
-        return true;
+        return running;
     }
 
     protected void process(Runnable runnable) {
@@ -99,6 +108,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
     }
     
     public void run() {
+        running = true;
+        
         DatagramChannel channel = getDatagramChannel();
         if (channel != null) {
             NIODispatcher.instance().registerReadWrite(channel, this);

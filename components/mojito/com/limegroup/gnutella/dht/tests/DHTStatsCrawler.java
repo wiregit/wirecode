@@ -186,6 +186,15 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         sendQueries();
     }
 
+    
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        try {
+            handleTimeout(nodeId, dst, message, -1L);
+        } catch (IOException err) {
+            err.printStackTrace();
+        }
+    }
+
     public long timeout() {
         return 30*1000L;
     }

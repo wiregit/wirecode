@@ -28,6 +28,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
@@ -103,5 +104,13 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Max number of errors occured. Giving up!");
         }
+    }
+    
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        if (LOG.isErrorEnabled()) {
+            LOG.error("Sending a store request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+        }
+        
+        fireTimeout(nodeId, dst, message, -1L);
     }
 }

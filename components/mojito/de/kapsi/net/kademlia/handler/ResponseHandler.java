@@ -38,4 +38,6 @@ public interface ResponseHandler {
     public void handleResponse(ResponseMessage message, long time) throws IOException;
     
     public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException;
+    
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
 }

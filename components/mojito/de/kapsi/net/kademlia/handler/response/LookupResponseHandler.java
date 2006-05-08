@@ -254,6 +254,14 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
     }
     
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        if (LOG.isErrorEnabled()) {
+            LOG.error("Sending a lookup request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+        }
+        
+        fireTimeout(nodeId, dst, message, -1L);
+    }
+    
     private void lookupStep(int hop) throws IOException {
         
         long time = time();

@@ -101,4 +101,12 @@ public class PingResponseHandler extends AbstractResponseHandler {
                     + " after " + getMaxErrors() + " errors and a total time of "+ time() + "ms");
         }
     }
+    
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        if (LOG.isErrorEnabled()) {
+            LOG.error("Sending a ping to " + ContactNode.toString(nodeId, dst) + " failed", e);
+        }
+        
+        fireTimeout(nodeId, dst, message, -1L);
+    }
 }
