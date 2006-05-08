@@ -1,3 +1,22 @@
+/*
+ * Lime Kademlia Distributed Hash Table (DHT)
+ * Copyright (C) 2006 LimeWire LLC
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package de.kapsi.net.kademlia.io;
 
 import java.io.IOException;
@@ -5,6 +24,7 @@ import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -20,6 +40,8 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     private static final Log LOG = LogFactory.getLog(MessageDispatcherImpl.class);
     
     private static final long SLEEP = 50L;
+    
+    private static final long CLEANUP = 3L * 1000L;
     
     private Selector selector;
     
@@ -59,7 +81,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 getDatagramChannel().close();
             }
         } catch (IOException err) {
-            LOG.error("", err);
+            LOG.error("An error occured during stopping", err);
         }
     }
     
@@ -105,6 +127,8 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     public void run() {
         
+        long lastCleanup = System.currentTimeMillis();
+        
         while(isRunning()) {
             
             try {
@@ -117,9 +141,15 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 handleWrite();
                 
                 // CLEANUP
-                handleClenup();
+                if (System.currentTimeMillis()-lastCleanup >= CLEANUP) {
+                    handleClenup();
+                    lastCleanup = System.currentTimeMillis();
+                }
+            } catch (ClosedSelectorException err) {
+                // thrown as close() is called asynchronously
+                //LOG.error(err);
             } catch (ClosedChannelException err) {
-                // thrown as close() is called asynchron
+                // thrown as close() is called asynchronously
                 //LOG.error(err);
             } catch (IOException err) {
                 LOG.fatal("MessageHandler IO exception: ",err);

@@ -342,8 +342,14 @@ public class Context implements Runnable {
             
             lastEstimateTime = 0L;
             estimatedSize = 0;
-            localSizeHistory.clear();
-            remoteSizeHistory.clear();
+            
+            synchronized (localSizeHistory) {
+                localSizeHistory.clear();
+            }
+            
+            synchronized (remoteSizeHistory) {
+                remoteSizeHistory.clear();
+            }
         //}
     }
     
@@ -529,20 +535,23 @@ public class Context implements Runnable {
         }
         estimatedSize = Math.max(1, estimatedSize);
         
-        localSizeHistory.add(new Integer(estimatedSize));
-        if (localSizeHistory.size() >= ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
-            localSizeHistory.removeFirst();
-        }
+        int localSize = 0;
+        synchronized (localSizeHistory) {
+            localSizeHistory.add(new Integer(estimatedSize));
+            if (localSizeHistory.size() >= ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
+                localSizeHistory.removeFirst();
+            }
         
-        int localSizeSum = 0;
-        for(Iterator it = localSizeHistory.iterator(); it.hasNext(); ) {
-            localSizeSum += ((Integer)it.next()).intValue();
+            int localSizeSum = 0;
+            for(Iterator it = localSizeHistory.iterator(); it.hasNext(); ) {
+                localSizeSum += ((Integer)it.next()).intValue();
+            }
+            
+            // If somebody is playing around with MAX_HISTORY_SIZE
+            // then localSizeHistory.size() might be zero which
+            // would cause a div by zero error
+            localSize = (!localSizeHistory.isEmpty() ? localSizeSum/localSizeHistory.size() : 0);
         }
-        
-        // If somebody is playing around with MAX_HISTORY_SIZE
-        // then localSizeHistory.size() might be zero which
-        // would cause a div by zero error
-        int localSize = (!localSizeHistory.isEmpty() ? localSizeSum/localSizeHistory.size() : 0);
         
         int combinedSize = localSize;
         if (ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
@@ -577,7 +586,7 @@ public class Context implements Runnable {
         return dataBaseStats;
     }
     
-public class BootstrapManager implements PingListener, LookupListener {
+    public class BootstrapManager implements PingListener, LookupListener {
         
         private long startTime = 0L;
         

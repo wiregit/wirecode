@@ -198,17 +198,44 @@ public abstract class MessageDispatcher {
             }
             
             if (message instanceof ResponseMessage) {
+                ResponseMessage response = (ResponseMessage)message;
+                
+                // Check the QueryKey in the message ID to figure
+                // out weather or not we have ever sent a Request
+                // to that Host!
+                if (!response.verifyQueryKey()) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(response.getContactNode() + " sent us an unrequested response!");
+                    }
+                    return;
+                }
+                 
                 Receipt receipt = null;
                 
                 synchronized(receiptMap) {
-                    receipt = (Receipt)receiptMap.remove(message.getMessageID());
+                    receipt = (Receipt)receiptMap.get(message.getMessageID());
+                    
+                    if (receipt != null) {
+                        receipt.received();
+                
+                        // The QueryKey check should catch all malicious
+                        // and some buggy Nodes. Do some additional sanity
+                        // checks to make sure the NodeID, IP:Port and 
+                        // response type have the extpected values.
+                        if (!receipt.sanityCheck(response)) {
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn("Response from " + response.getContactNode() 
+                                        + " did not pass the sanity check");
+                            }
+                            return;
+                        }
+                        
+                        // OK, all checks passed. We can remove the receipt now!
+                        receiptMap.remove(message.getMessageID());
+                    }
                 }
                 
-                if (receipt != null) {
-                    receipt.received();
-                }
-                
-                processResponse(receipt, (ResponseMessage)message);
+                processResponse(receipt, response);
                 
             } else if (message instanceof RequestMessage) {
                 processRequest((RequestMessage)message);
@@ -349,67 +376,21 @@ public abstract class MessageDispatcher {
         }
         
         public void run() {
-            // Check the QueryKey in the message ID to figure
-            // out weather or not we have ever sent a Request
-            // to that Host!
-            
-            if (response.verifyQueryKey()) {
-                // A null Receipt means it timed out and we're no
-                // longer handling the response. But it's nice to know
-                // the Node is still alive! Do something with the info!
-                
-                if (receipt != null) {
-                    
-                    // The QueryKey check should catch all malicious
-                    // and some buggy Nodes. Do some additional sanity
-                    // checks to make sure the NodeID, IP:Port and 
-                    // response type have the extpected values.
-                    if (receipt.sanityCheck(response)) {
-                        try {
-                            processResponse();
-                        } catch (IOException err) {
-                            LOG.error("", err);
-                        }
-                    } else {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Response from " + response.getContactNode() 
-                                    + " did not pass the sanity check");
-                        }
-                        
-                        try {
-                            processError();
-                        } catch (IOException err) {
-                            LOG.error("", err);
-                        }
-                    }
-                } else {
-                    processLateResponse();
-                }
+            if (receipt != null) {
+                processResponse();
             } else {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(response.getContactNode() + " sent us an unrequested response!");
+                processLateResponse();
+            }
+        }
+        
+        private void processResponse() {
+            try {
+                defaultHandler.handleResponse(response, receipt.time());
+                if (receipt.getResponseHandler() != defaultHandler) {
+                    receipt.getResponseHandler().handleResponse(response, receipt.time());
                 }
-            }
-        }
-        
-        private void processResponse() throws IOException {
-            defaultHandler.handleResponse(response, receipt.time());
-            if (receipt.getResponseHandler() != defaultHandler) {
-                receipt.getResponseHandler().handleResponse(response, receipt.time());
-            }
-        }
-        
-        // TODO: currently handled like a timeout but that's
-        // not quite right.
-        private void processError() throws IOException {
-            KUID nodeId = receipt.getNodeID();
-            SocketAddress dst = receipt.getSocketAddress();
-            RequestMessage msg = receipt.getRequestMessage();
-            long time = receipt.time();
-            
-            defaultHandler.handleTimeout(nodeId, dst, msg, time);
-            if (receipt.getResponseHandler() != defaultHandler) {
-                receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
+            } catch (IOException err) {
+                LOG.error("An error occured dusring processing the response", err);
             }
         }
         
