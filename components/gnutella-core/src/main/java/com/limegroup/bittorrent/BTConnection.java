@@ -717,7 +717,7 @@ public class BTConnection {
 			close();
 			// inform the user and stop the download
 			IOUtils.handleException(ioe, null);
-			_torrent.stop();
+			_torrent.diskExceptionHappened();
 			return;
 		}
 		

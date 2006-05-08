@@ -20,15 +20,10 @@ import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 
-public class TrackerRequester {
-	private static final Log LOG = LogFactory.getLog(TrackerRequester.class);
+public class Tracker {
+	private static final Log LOG = LogFactory.getLog(Tracker.class);
 
-	/*
-	 * if a tracker request takes too long it may cause other delays, e.g. in
-	 * our choking because we did not offload tracker requests to their own
-	 * thread yet
-	 */
-	// 25 seconds
+	/* 25 seconds */
 	private static final int HTTP_TRACKER_TIMEOUT = 25 * 1000;
 
 	/*
@@ -60,34 +55,55 @@ public class TrackerRequester {
 	private static final String EQUALS = "=";
 
 	private static final String AND = "&";
-
-	/**
-	 * same as request(URL, BTMetaInfo, ManagedTorrent, EVENT_NONE)
-	 */
-	public static TrackerResponse request(URL url, BTMetaInfo info,
-			ManagedTorrent torrent) {
-		return request(url, info, torrent, EVENT_NONE);
+	
+	private final URL url;
+	
+	private final BTMetaInfo info;
+	
+	private final ManagedTorrent torrent;
+	
+	private int failures;
+	
+	public Tracker(URL url, BTMetaInfo info, ManagedTorrent torrent) {
+		this.url = url;
+		this.info = info;
+		this.torrent = torrent;
 	}
 
 	/**
+	 * Notifies the tracker that a request to it failed.
+	 * @return how many times it had failed previously.
+	 */
+	public void recordFailure() {
+		failures++;
+	}
+	
+	/**
+	 * Notifies the tracker that a request completed successfully.
+	 */
+	public void recordSuccess() {
+		failures = 0;
+	}
+	
+	/**
+	 * @return how many consecutive failures we have for this
+	 * tracker.
+	 */
+	public int getFailures() {
+		return failures;
+	}
+	
+	/**
 	 * Does a tracker request for a certain event code
 	 * 
-	 * 
-	 * @param url
-	 *            the <tt>Url</tt> object for the tracker
-	 * @param info
-	 *            the <tt>BTMetaInfo</tt> for the torrent
-	 * @param torrent
-	 *            the <tt>ManagedTorrent</tt> for the torrent download
 	 * @param event
 	 *            the event code to send to the tracker
 	 * @return TrackerResponse holding the data the tracker sent or null if the
 	 *         tracker did not send any data
 	 */
-	public static TrackerResponse request(URL url, BTMetaInfo info,
-			ManagedTorrent torrent, int event) {
+	public TrackerResponse request(int event) {
 		if (url.getProtocol().startsWith("http")) {
-			String queryStr = createQueryString(info, torrent, event);
+			String queryStr = createQueryString(event);
 			return connectHTTP(url, queryStr);
 		} else
 			return null;
@@ -104,8 +120,7 @@ public class TrackerRequester {
 	 *            the event code to send
 	 * @return string, the HTTP GET query string we send to the tracker
 	 */
-	private static String createQueryString(BTMetaInfo info,
-			ManagedTorrent torrent, int event) {
+	private String createQueryString(int event) {
 		StringBuffer buf = new StringBuffer();
 		try {
 			String infoHash = URLEncoder.encode(new String(info.getInfoHash(),

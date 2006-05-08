@@ -92,6 +92,11 @@ public class TorrentManager implements ConnectionAcceptor {
 	 * the callback handling uploaders and downloaders
 	 */
 	private ActivityCallback _callback;
+	
+	/**
+	 * Whether this is shutting down.
+	 */
+	private volatile boolean shuttingDown;
 
 	/**
 	 * Constructs instance of TorrentManager
@@ -313,6 +318,7 @@ public class TorrentManager implements ConnectionAcceptor {
 	public synchronized void addTorrent(ManagedTorrent mt) {
 		if (_active.contains(mt) || _waiting.contains(mt))
 			return;
+		mt.setState(ManagedTorrent.QUEUED);
 		if (_active.size() >= getMaxActiveTorrents()) {
 			_waiting.add(mt);
 			if (LOG.isDebugEnabled())
@@ -433,6 +439,9 @@ public class TorrentManager implements ConnectionAcceptor {
 	 *            the <tt>ManagedTorrent</tt> to remove
 	 */
 	public synchronized void removeTorrent(ManagedTorrent mt) {
+		if (shuttingDown)
+			return;
+		
 		if (!_active.contains(mt) && !_waiting.contains(mt))
 			return;
 		_active.remove(mt);
@@ -467,7 +476,8 @@ public class TorrentManager implements ConnectionAcceptor {
 			_waiting.remove(torrent);
 			_active.add(torrent);
 			torrent.start();
-		}
+		} else if (!_waiting.contains(torrent))
+			_waiting.add(torrent);
 	}
 
 	/**
@@ -483,9 +493,9 @@ public class TorrentManager implements ConnectionAcceptor {
 		Iterator iter = _waiting.iterator();
 		while (_active.size() < getMaxActiveTorrents() && iter.hasNext()) {
 			ManagedTorrent mt = (ManagedTorrent) iter.next();
-			if (mt.getState() != Downloader.GAVE_UP
-					&& mt.getState() != Downloader.DISK_PROBLEM
-					&& mt.getState() != Downloader.PAUSED) {
+			if (mt.getState() != ManagedTorrent.GAVE_UP
+					&& mt.getState() != ManagedTorrent.DISK_PROBLEM
+					&& mt.getState() != ManagedTorrent.PAUSED) {
 				_active.add(mt);
 				mt.start();
 				iter.remove();
@@ -497,9 +507,11 @@ public class TorrentManager implements ConnectionAcceptor {
 	 * shutdown all torrents.
 	 */
 	public synchronized void shutdown() {
+		shuttingDown = true;
 		for (Iterator iter = _active.iterator(); iter.hasNext();) {
 			((ManagedTorrent) iter.next()).stop();
 		}
+		writeSnapshot();
 	}
 
 	/**

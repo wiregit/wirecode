@@ -45,8 +45,7 @@ public class BTConnectionFetcher  {
 	/*
 	 * extension bytes
 	 */
-	static final byte[] EXTENSION_BYTES = new byte[] { 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x02 };
+	private static final byte[] EXTENSION_BYTES = new byte[8];
 
 	/*
 	 * Max concurrent connection attempts
@@ -92,7 +91,7 @@ public class BTConnectionFetcher  {
 		if (shutdown)
 			return;
 		
-		while (!_torrent.hasStopped() && 
+		while (_torrent.isActive() && 
 				fetchers.size() < MAX_CONNECTORS &&
 				_torrent.needsMoreConnections() && 
 				_torrent.hasNonBusyLocations()) {

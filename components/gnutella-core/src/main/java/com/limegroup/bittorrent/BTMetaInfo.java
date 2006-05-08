@@ -340,6 +340,8 @@ public class BTMetaInfo implements Serializable {
 		System.arraycopy(_trackers, 0, newTrackers, 0, _trackers.length);
 		newTrackers[_trackers.length] = url;
 		_trackers = newTrackers;
+		if (_torrent != null)
+			_torrent.trackerAdded(new Tracker(url, this, _torrent));
 		return true;
 	}
 
@@ -711,6 +713,7 @@ public class BTMetaInfo implements Serializable {
 		_completeFile = (File) toRead.get("_completeFile");
 		_infoMap = (Map) toRead.get("_infoMap");
 		_infoHash = (byte []) toRead.get("_infoHash");
+		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
 		_trackers = (URL []) toRead.get("_trackers");
 		Long totalSize = (Long)toRead.get("_totalSize");
 		

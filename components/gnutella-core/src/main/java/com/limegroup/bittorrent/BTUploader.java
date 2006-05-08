@@ -2,6 +2,7 @@ package com.limegroup.bittorrent;
 
 import java.io.IOException;
 
+import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
@@ -63,7 +64,7 @@ public class BTUploader implements Uploader {
 	}
 
 	public int getState() {
-		if (_torrent.hasStopped())
+		if (!_torrent.isActive())
 			return Uploader.INTERRUPTED;
 		return Uploader.UPLOADING;
 	}
@@ -113,7 +114,12 @@ public class BTUploader implements Uploader {
 	}
 
 	public boolean isInactive() {
-		return _torrent.hasStopped() || _torrent.isPaused();
+		switch(_torrent.getState()) {
+		case ManagedTorrent.PAUSED:
+		case ManagedTorrent.STOPPED:
+			return true;
+		}
+		return false;
 	}
 
 	public void measureBandwidth() {
@@ -121,7 +127,7 @@ public class BTUploader implements Uploader {
 	}
 
 	public float getMeasuredBandwidth() {
-		if (_torrent.hasStopped())
+		if (!_torrent.isActive())
 			return 0.f;
 		measureBandwidth();
 		return _tracker.getMeasuredBandwidth();

@@ -1,7 +1,6 @@
 package com.limegroup.bittorrent;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,8 +13,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.bittorrent.TorrentManager;
@@ -25,12 +22,27 @@ import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.util.ThreadFactory;
 
 public class ManagedTorrent {
+	
+	/**
+	 * States of a torrent download.  Some of them are identical
+	 * to Downloader states.
+	 */
+	static final int WAITING_FOR_TRACKER = 1;
+	static final int VERIFYING = 2;
+	static final int CONNECTING = 3;
+	static final int DOWNLOADING = 4;
+	static final int SAVING = 5;
+	static final int SEEDING = 6;
+	static final int QUEUED = 7;
+	static final int PAUSED = 8;
+	static final int STOPPED = 9;
+	static final int DISK_PROBLEM = 10;
+	static final int GAVE_UP = 11;
+	
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 
 	/*
@@ -62,11 +74,6 @@ public class ManagedTorrent {
 	 * the TorrentManager managing this torrent
 	 */
 	private final TorrentManager _manager;
-
-	/*
-	 * Indicates whether this download was stopped.
-	 */
-	private volatile boolean _stopped, _started;
 	
 	/**
 	 * The list of known good TorrentLocations that we are not connected to at
@@ -90,20 +97,12 @@ public class ManagedTorrent {
 	private volatile VerifyingFolder _folder;
 
 	/**
-	 * counts the number of consecutive tracker failures
-	 */
-	private volatile int _trackerFailures = 0;
-	
-	/**
-	 * the next time we'll contact the tracker.
-	 */
-	private volatile long _nextTrackerRequestTime;
-
-	/**
 	 * if a problem occured with disk operations.
 	 */
 	private volatile boolean _diskProblem;
-
+	
+	private final TrackerManager trackerManager;
+	
 	/**
 	 * 
 	 */
@@ -113,11 +112,6 @@ public class ManagedTorrent {
 	 * whether to choke all connections
 	 */
 	private boolean _globalChoke = false;
-
-	/**
-	 * whether this download was paused.
-	 */
-	private boolean _paused = false;
 
 	/**
 	 * it is possible that a complete download is restarted (for what purpose so
@@ -133,7 +127,7 @@ public class ManagedTorrent {
 	 */
 	private final List _connections;
 
-	private ProcessingQueue _processingQueue;
+	private ProcessingQueue torrentStateQueue;
 
 	private BTDownloader _downloader;
 
@@ -143,6 +137,11 @@ public class ManagedTorrent {
 	 * A runnable that takes care of scheduled periodic rechoking
 	 */
 	private volatile PeriodicChoker choker;
+	
+	/** 
+	 * The current state of this torrent.
+	 */
+	private volatile int _state = QUEUED;
 
 	/**
 	 * Constructs new ManagedTorrent
@@ -159,14 +158,21 @@ public class ManagedTorrent {
 		_info.setManagedTorrent(this);
 		_manager = manager;
 		_folder = info.getVerifyingFolder();
+		if (_folder.isVerifying())
+			_state = VERIFYING;
 		_connections = Collections.synchronizedList(new ArrayList());
-		_processingQueue = new ProcessingQueue("ManagedTorrent");
+		torrentStateQueue = new ProcessingQueue("ManagedTorrent");
 		_downloader = new BTDownloader(this, _info);
 		_uploader = new BTUploader(this, _info);
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
+		trackerManager = new TrackerManager(this);
 	}
 
+	void setState(int newState) {
+		_state = newState;
+	}
+	
 	/**
 	 * Accessor for the info hash
 	 * 
@@ -202,15 +208,12 @@ public class ManagedTorrent {
 		enqueueTask(new Runnable() {
 			public void run() {
 				
-				if (_started)
-					return;
-				_stopped = false;
-				_started = true;
+				LOG.debug("executing torrent start");
 				
 				initializeTorrent();
 				initializeFolder();
 				
-				if (_stopped || _folder.isVerifying()) 
+				if (_state == SEEDING || _state == VERIFYING) 
 					return;
 				
 				startConnecting();
@@ -219,12 +222,16 @@ public class ManagedTorrent {
 	}
 	
 	private void startConnecting() {
-		// kick off connectors if we already have some addresses
-		if (_peers.size() > 0)
-			_connectionFetcher.fetch();
 		
-		// connect to tracker
-		announceStart();
+		// kick off connectors if we already have some addresses
+		if (_peers.size() > 0) {
+			_state = CONNECTING;
+			_connectionFetcher.fetch();
+		} else
+			_state = WAITING_FOR_TRACKER;
+		
+		// connect to tracker(s)
+		trackerManager.announceStart();
 		
 		// start the choking / unchoking of connections
 		scheduleRechoke();
@@ -239,14 +246,30 @@ public class ManagedTorrent {
 		
 		enqueueTask(new Runnable() {
 			public void run() {
+				
+				if (!isActive())
+					return;
+				
+				_state = STOPPED;
+				
 				stopNow();
 			}
 		});
 	}
 	
+	/**
+	 * Notifies the torrent that a disk error has happened
+	 * and terminates it.
+	 */
 	public void diskExceptionHappened() {
-		_diskProblem = true;
-		stop();
+		enqueueTask(new Runnable() {
+			public void run() {
+				if (_state == DISK_PROBLEM)
+					return;
+				_state = DISK_PROBLEM;
+				stopNow();
+			}
+		});
 	}
 	
 	/**
@@ -254,19 +277,13 @@ public class ManagedTorrent {
 	 * torrent processing queue.
 	 */
 	private void stopNow() {
-		if (_stopped)
-			return;
-		_stopped = true;
-		if (!_started)
-			return;
 		
 		RouterService.getCallback().removeUpload(_uploader);
+		// we stopped, removing torrent from active list of
+		// TorrentManager
+		_manager.removeTorrent(this);
 		
 		_folder.close();
-		
-		for (int i = 0; i < _info.getTrackers().length; i++)
-			announceBlocking(_info.getTrackers()[i],
-					TrackerRequester.EVENT_STOP);
 		
 		if (choker != null)
 			choker.stopped = true;
@@ -284,11 +301,9 @@ public class ManagedTorrent {
 		};
 		NIODispatcher.instance().invokeLater(closer);
 		
-		// we stopped, removing torrent from active list of
-		// TorrentManager
-		_manager.removeTorrent(this);
-		if (LOG.isDebugEnabled())
-			LOG.debug("Torrent stopped!");
+		trackerManager.announceStop();
+		
+		LOG.debug("Torrent stopped!");
 	}
 
 	/**
@@ -298,7 +313,7 @@ public class ManagedTorrent {
 	public void pause() {
 		enqueueTask(new Runnable() {
 			public void run() {
-				_paused = true;
+				_state = PAUSED;
 				stopNow();
 			}
 		});
@@ -308,16 +323,22 @@ public class ManagedTorrent {
 	 * Resumes the torrent, if there is a free slot
 	 */
 	public boolean resume() {
-		if (!_stopped)
-			return false;
-
-		if (!_diskProblem) {
-			_paused = false;
-			_started = false;
-			_manager.wakeUp(this);
-			return true;
+		boolean canResume = false;
+		switch(_state) {
+		case PAUSED :
+		case STOPPED :
+			canResume = true;
 		}
-		return false;
+		if (!canResume)
+			return false;
+		
+		enqueueTask(new Runnable() {
+			public void run(){
+				_state = QUEUED;
+				_manager.wakeUp(ManagedTorrent.this);
+			}
+		});
+		return true;
 	}
 
 	void connectionClosed(BTConnection btc) {
@@ -328,14 +349,13 @@ public class ManagedTorrent {
 			_peers.add(ep);
 		}
 		removeConnection(btc);
-		if (!_stopped)
+		if (_state == DOWNLOADING || _state == CONNECTING)
 			_connectionFetcher.fetch();
 	}
 
 	private void initializeTorrent() {
 		_diskProblem = false;
 		_globalChoke = false;
-		_paused = false;
 		_badPeers = Collections.synchronizedSet(
 				new FixedSizeExpiringSet(500, 60 * 60 * 1000));
 		_peers = Collections.synchronizedSet(new HashSet());
@@ -358,35 +378,26 @@ public class ManagedTorrent {
 			if (LOG.isDebugEnabled()) 
 				LOG.debug("unrecoverable error", ioe);
 			
-			_diskProblem = true;
-			_stopped = true;
+			_state = DISK_PROBLEM;
 			return;
 		} 
 		
 
 		if (_folder.isComplete())
 			completeTorrentDownload();
+		else if (_folder.isVerifying())
+			_state = VERIFYING;
 	}
 
 	void verificationComplete() {
 		enqueueTask(new Runnable() {
 			public void run() {
-				if (!_stopped) 
+				if (_state == VERIFYING) 
 					startConnecting();
 			}
 		});
 	}
 	
-	private void announceStart() {
-		_trackerFailures = 0;
-		_nextTrackerRequestTime = 0;
-		// announce ourselves to the trackers
-		for (int i = 0; i < _info.getTrackers().length; i++) {
-			announceBlocking(_info.getTrackers()[i],
-					TrackerRequester.EVENT_START);
-		}
-	}
-
 	/**
 	 * Handles requesting ranges from the remote host
 	 * 
@@ -398,7 +409,7 @@ public class ManagedTorrent {
 			LOG.debug("requesting ranges from " + btc.toString());
 		
 		// don't request if complete
-		if (_folder.isComplete() || _stopped)
+		if (_folder.isComplete() || !isActive())
 			return;
 		BTInterval in = _folder.leaseRandom(btc.getAvailableRanges());
 		if (in != null)
@@ -443,51 +454,10 @@ public class ManagedTorrent {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.limegroup.gnutella.Downloader#getState()
-	 */
-	public int getState() {
-		if (_folder.isComplete())
-			return Downloader.COMPLETE;
-		if (_diskProblem)
-			return Downloader.DISK_PROBLEM;
-		
-		if (_stopped) {
-			if (_trackerFailures > MAX_TRACKER_FAILURES)
-				return Downloader.GAVE_UP;
-			else if (_paused)
-				return Downloader.PAUSED;
-			else if (_started)
-				return Downloader.ABORTED;
-		}
-		
-		if (!_started)
-			return Downloader.QUEUED;
-		
-		if (_folder.isVerifying())
-			return Downloader.HASHING;
-		else if (_connections.size() > 0) {
-			if (isDownloading())
-				return Downloader.DOWNLOADING;
-			return Downloader.REMOTE_QUEUED;
-		} else if (_peers != null && _peers.size() > 0)
-			return Downloader.CONNECTING;
-		else if(_peers == null || _peers.size() == 0)
-			return Downloader.WAITING_FOR_RESULTS;
-		return Downloader.BUSY;
+	int getState() {
+		return _state;
 	}
-
-	private boolean isDownloading() {
-		synchronized(_connections) {
-			for (Iterator iter = _connections.iterator(); iter.hasNext();)
-				if (!((BTConnection) iter.next()).isChoking())
-					return true;
-		}
-		return false;
-	}
-
+	
 	/**
 	 * adds location to try
 	 * 
@@ -503,6 +473,8 @@ public class ManagedTorrent {
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return false;
 		if (_peers.add(to)) {
+			if (_state == WAITING_FOR_TRACKER)
+				_state = CONNECTING;
 			_connectionFetcher.fetch();
 			return true;
 		}
@@ -513,43 +485,16 @@ public class ManagedTorrent {
 		_badPeers.add(to);
 	}
 
-	/**
-	 * This method handles the response from a tracker
-	 */
-	private void handleTrackerResponse(TrackerResponse response, URL url) {
-		LOG.debug("handling tracker response " + url.toString());
-
-		long minWaitTime = BittorrentSettings.TRACKER_MIN_REASK_INTERVAL
-				.getValue() * 1000;
-		
-		if (response != null) {
-				for (Iterator iter = response.PEERS.iterator(); iter.hasNext();) {
-					TorrentLocation next = (TorrentLocation) iter.next();
-					addEndpoint(next);
-				}
-				
-				minWaitTime = response.INTERVAL * 1000;
-				
-				if (response.FAILURE_REASON != null) {
-					if (_trackerFailures++ == 0) {
-						// tell the user what the tracker said only the first time.
-						MessageService.showError("TORRENTS_TRACKER_FAILURE", 
-								_info.getName() + "\n" +
-								response.FAILURE_REASON);
-					}
-				} else
-					_trackerFailures = 0;
-		} else 
-			_trackerFailures++;
-
-		if (!_stopped) {
-			if (shouldStop())
-				stop();
-			else
-				scheduleTrackerRequest(minWaitTime, url);
-		}
+	
+	void giveUp() {
+		enqueueTask(new Runnable() {
+			public void run() {
+				_state = GAVE_UP;
+				stopNow();
+			}
+		});
 	}
-
+	
 	/**
 	 * @return true if we need any more connections
 	 */
@@ -562,40 +507,7 @@ public class ManagedTorrent {
 	}
 
 	/**
-	 * @param ep
-	 *            the TorrentLocation for the connection to add
-	 * @return true if we want this connection, false if not.
-	 */
-	boolean allowIncomingConnection(TorrentLocation ep) {
-		// happens if we stopped this torrent but we still receive an incoming
-		// connection because it took some time to read the headers & stuff
-		if (_stopped)
-			return false;
-
-		// this could still happen, although we don't usually accept any
-		// locations we are already connected to.
-		if (isConnectedTo(ep))
-			return false;
-
-		// don't allow connections to self
-		if (NetworkUtils.isMe(ep.getAddress(), ep.getPort()))
-			return false;
-
-		// we do a little bit of preferencing here, - we support some features
-		// others don't - and really, LimeWire users should help each other.
-		// we won't do any nasty stuff like preferring LimeWire's when
-		// uploading b/c that would just be mean
-		if (ep.isLimePeer()) {
-			return _connections.size() < BittorrentSettings.TORRENT_RESERVED_LIME_SLOTS
-					.getValue()
-					+ BittorrentSettings.TORRENT_MAX_CONNECTIONS.getValue();
-		}
-		return _connections.size() < BittorrentSettings.TORRENT_MAX_CONNECTIONS
-				.getValue();
-	}
-
-	/**
-	 * private helper method, adding connection
+	 * adding connection
 	 */
 	public void addConnection(final BTConnection btc) {
 		if (LOG.isDebugEnabled())
@@ -603,13 +515,19 @@ public class ManagedTorrent {
 		// this check prevents a few exceptions that may be thrown if a
 		// connection initialization is completed after we have already stopped
 		// happens especially when a user quits a torrent manually.
-		if (_stopped) {
+		if (_state == CONNECTING || 
+				_state == DOWNLOADING) {
+			
+			_connections.add(btc);
+			
+			if (_state == CONNECTING)
+				_state = DOWNLOADING;
+			
+			if (LOG.isDebugEnabled())
+				LOG.debug("added connection " + btc.toString());
+			
+		} else
 			btc.close();
-			return;
-		}
-		_connections.add(btc);
-		if (LOG.isDebugEnabled())
-			LOG.debug("added connection " + btc.toString());
 	}
 
 	/**
@@ -621,12 +539,20 @@ public class ManagedTorrent {
 		_connections.remove(btc);
 		if (btc.isInterested() && !btc.isChoked())
 			rechoke();
+		if (_connections.isEmpty() && _state == DOWNLOADING) {
+			if (_peers.isEmpty())
+				_state = WAITING_FOR_TRACKER;
+			else
+				_state = CONNECTING;
+		}
+			
 	}
 
 	/**
 	 * saves the complete files to the shared folder
 	 */
 	private void completeTorrentDownload() {
+		_state = SEEDING;
 		if (_saved)
 			return;
 
@@ -658,7 +584,7 @@ public class ManagedTorrent {
 		});
 		
 		// tell the tracker we are a seed now
-		announceComplete();
+		trackerManager.announceComplete();
 		
 		// tell the manager I am complete
 		_manager.torrentComplete(this);
@@ -676,6 +602,7 @@ public class ManagedTorrent {
 		_folder.close();
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder closed");
+		_state = SAVING;
 		_diskProblem = !_info.moveToCompleteFolder();
 		if (LOG.isDebugEnabled())
 			LOG.debug("could not save: " + _diskProblem);
@@ -694,44 +621,16 @@ public class ManagedTorrent {
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder opened");
 
-		if (_diskProblem)
+		if (_diskProblem) {
+			_state = DISK_PROBLEM;
 			stopNow();
+		} else
+			_state = SEEDING; 
 
 		// remember attempt to save the file
 		_saved = true;
 	}
 	
-	private void announceComplete() {
-		//TODO: should we announce how much we've downloaded if we just resumed
-		// the torrent?  Its not mentioned in the spec...
-		for (int i = 0; i < _info.getTrackers().length; i++) {
-			announceBlocking(_info.getTrackers()[i],
-					TrackerRequester.EVENT_COMPLETE);
-		}
-	}
-
-	/**
-	 * schedules a new TrackerRequest
-	 * 
-	 * @param minDelay the time in milliseconds to wait before sending another
-	 *            request
-	 * @param url the URL of the tracker
-	 */
-	private void scheduleTrackerRequest(long minDelay, final URL url) {
-		Runnable announcer = new Runnable() {
-			public void run() {
-				if (_stopped)
-					return;
-				
-				if (LOG.isDebugEnabled())
-					LOG.debug("announcing to " + url.toString());
-				announce(url);
-			}
-		};
-		RouterService.schedule(announcer, minDelay, 0);
-		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
-	}
-
 	/**
 	 * @param to
 	 *            a <tt>TorrentLocation</tt> to check
@@ -768,7 +667,7 @@ public class ManagedTorrent {
 	}
 	
 	long getNextTrackerRequestTime() {
-		return _nextTrackerRequestTime;
+		return trackerManager.getNextTrackerRequestTime();
 	}
 
 	TorrentLocation getTorrentLocation() {
@@ -983,42 +882,6 @@ public class ManagedTorrent {
 			rechoke();
 	}
 
-	/**
-	 * Announces ourselves to a tracker
-	 * 
-	 * @param url the URL of the tracker
-	 */
-	private void announce(final URL url) {
-		
-		// offload tracker requests, - it simply takes too long even to execute
-		// it in our timer thread
-		Runnable trackerRequest = new Runnable() {
-			public void run() {
-				if (LOG.isDebugEnabled())
-					LOG.debug("announce thread for " + url.toString());
-				announceBlocking(url, TrackerRequester.EVENT_NONE);
-			}
-		};
-		ThreadFactory.startThread(trackerRequest,
-				"TrackerRequest");
-	}
-
-	/**
-	 * Announce ourselve to a tracker
-	 * 
-	 * @param url
-	 *            the <tt>URL</tt> for the tracker
-	 * @param event
-	 *            the event to send to the tracker, see TrackerRequester class
-	 */
-	private void announceBlocking(final URL url, final int event) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("connecting to tracker " + url.toString()+" for event "+event);
-		TrackerResponse tr = TrackerRequester.request(url, _info,
-				ManagedTorrent.this, event);
-		handleTrackerResponse(tr, url);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1041,7 +904,7 @@ public class ManagedTorrent {
 	 * @return true if paused
 	 */
 	public boolean isPaused() {
-		return _paused;
+		return _state == PAUSED;
 	}
 
 	public boolean equals(Object o) {
@@ -1104,16 +967,25 @@ public class ManagedTorrent {
 		return _manager.getUploadThrottle();
 	}
 
-	public void enqueueTask(Runnable runnable) {
-		_processingQueue.add(runnable);
+	private void enqueueTask(Runnable runnable) {
+		torrentStateQueue.add(runnable);
 	}
 
 	public boolean isConnected() {
 		return _connections.size() > 0;
 	}
 
-	public boolean hasStopped() {
-		return _stopped;
+	public boolean isActive() {
+		switch(_state) {
+		case CONNECTING:
+		case DOWNLOADING:
+		case SEEDING: 
+		case WAITING_FOR_TRACKER:
+		case VERIFYING:
+		case SAVING:
+			return true;
+		}
+		return false;
 	}
 
 	public List getConnections() {
@@ -1167,14 +1039,23 @@ public class ManagedTorrent {
 	}
 	
 	/**
+	 * Notification that a new tracker has been added to the torrent.
+	 * @param t the new <tt>Tracker</tt>
+	 */
+	void trackerAdded(Tracker t) {
+		trackerManager.add(t);
+	}
+	
+	/**
 	 * whether or not continuing is hopeless
 	 */
-	private boolean shouldStop() {
+	boolean shouldStop() {
 		if (_connections.size() == 0 && _peers.size() == 0) {
-			if (_trackerFailures > MAX_TRACKER_FAILURES) {
+			int trackerFailures = trackerManager.getTrackerFailures();
+			if (trackerFailures > MAX_TRACKER_FAILURES) {
 				if (LOG.isDebugEnabled())
 					LOG.debug("giving up, trackerFailures "
-							+ _trackerFailures);
+							+ trackerFailures);
 				return true;
 			} else if (_manager.shouldYield()) {
 				if (LOG.isDebugEnabled())

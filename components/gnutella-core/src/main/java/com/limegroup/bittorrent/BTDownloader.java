@@ -2,10 +2,8 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -47,7 +45,8 @@ public class BTDownloader implements Downloader {
 	 * uploads pane)
 	 */
 	public void stop() {
-		if (!_torrent.hasStopped() && !_torrent.isComplete())
+		if (_torrent.isActive() &&
+				_torrent.getState() != ManagedTorrent.SEEDING)
 			_torrent.stop();
 	}
 
@@ -95,8 +94,46 @@ public class BTDownloader implements Downloader {
 		return getFile();
 	}
 
+	/*
+	 *  (non-Javadoc)
+	 * @see com.limegroup.gnutella.Downloader#getState()
+	 * 
+	 * Specifically, this maps the states of a torrent
+	 * download to the states of a regular download.
+	 */
 	public int getState() {
-		return _torrent.getState();
+		// aborted seeding torrents are shown as complete in the
+		// downloads pane.
+		if (_torrent.isComplete()) 
+			return COMPLETE;
+		switch(_torrent.getState()) {
+		case ManagedTorrent.WAITING_FOR_TRACKER :
+			return WAITING_FOR_RESULTS;
+		case ManagedTorrent.VERIFYING:
+			return HASHING;
+		case ManagedTorrent.CONNECTING:
+			return CONNECTING;
+		case ManagedTorrent.DOWNLOADING:
+			return DOWNLOADING;
+		case ManagedTorrent.SAVING:
+			return SAVING;
+		case ManagedTorrent.SEEDING:
+			return COMPLETE;
+		case ManagedTorrent.QUEUED:
+			return QUEUED;
+		case ManagedTorrent.PAUSED:
+			return PAUSED;
+		case ManagedTorrent.STOPPED:
+			if (_torrent.isComplete())
+				return COMPLETE;
+			else
+				return ABORTED;
+		case ManagedTorrent.DISK_PROBLEM:
+			return DISK_PROBLEM;
+		case ManagedTorrent.GAVE_UP:
+			return GAVE_UP;
+		}
+		throw new IllegalStateException("unknown torrent state");
 	}
 	
 	public long getTotalAmountDownloaded() {
@@ -182,7 +219,7 @@ public class BTDownloader implements Downloader {
 	}
 
 	public boolean isCompleted() {
-		switch(_torrent.getState()) {
+		switch(getState()) {
 		case Downloader.COMPLETE:
 		case Downloader.ABORTED:
 		case Downloader.DISK_PROBLEM:
