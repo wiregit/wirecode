@@ -60,6 +60,7 @@ import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.handler.response.LookupResponseHandler.ContactNodeEntry;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
+import de.kapsi.net.kademlia.io.MessageDispatcherImpl;
 import de.kapsi.net.kademlia.messages.MessageFactory;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
@@ -103,7 +104,6 @@ public class Context implements Runnable {
     private boolean running = false;
     
     private Timer timer = null;
-    private Thread messageDispatcherThread = null;
     private Thread keyValuePublisherThread = null;
     
     private DHTStats dhtStats = null;
@@ -140,7 +140,7 @@ public class Context implements Runnable {
 
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
-        messageDispatcher = new MessageDispatcher(this);
+        messageDispatcher = new MessageDispatcherImpl(this);
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
 
@@ -188,6 +188,10 @@ public class Context implements Runnable {
     
     public boolean isLocalNodeID(KUID nodeId) {
         return nodeId != null && nodeId.equals(localNode.getNodeID());
+    }
+    
+    public boolean isLocalAddress(SocketAddress address) {
+        return getSocketAddress().equals(address);
     }
     
     public KUID getLocalNodeID() {
@@ -273,22 +277,6 @@ public class Context implements Runnable {
         //}
     }
     
-    public int getReceivedMessagesCount() {
-        return messageDispatcher.getReceivedMessagesCount();
-    }
-    
-    public long getReceivedMessagesSize() {
-        return messageDispatcher.getReceivedMessagesSize();
-    }
-    
-    public int getSentMessagesCount() {
-        return messageDispatcher.getSentMessagesCount();
-    }
-    
-    public long getSentMessagesSize() {
-        return messageDispatcher.getSentMessagesSize();
-    }
-    
     public void bind(SocketAddress address) throws IOException {
         //synchronized (contextLock) {
             if (isOpen()) {
@@ -350,10 +338,7 @@ public class Context implements Runnable {
                 timer = null;
             }
             
-            if (messageDispatcherThread != null) {
-                messageDispatcher.close();
-                messageDispatcherThread = null;
-            }
+            messageDispatcher.stop();
             
             lastEstimateTime = 0L;
             estimatedSize = 0;
@@ -393,8 +378,7 @@ public class Context implements Runnable {
             timer.scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
             keyValuePublisherThread.start();
 
-            messageDispatcherThread = Thread.currentThread();
-            messageDispatcher.run();
+            messageDispatcher.start();
             
         } finally {
             try { close(); } catch (IOException err) {}

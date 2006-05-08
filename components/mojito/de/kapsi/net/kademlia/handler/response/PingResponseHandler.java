@@ -30,7 +30,6 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
-import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
@@ -87,7 +86,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         super.handleTimeout(nodeId, dst, message, time);
     }
     
-    protected void resend(KUID nodeId, SocketAddress dst, Message message) throws IOException {
+    protected void resend(KUID nodeId, SocketAddress dst, RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Re-sending Ping to " + ContactNode.toString(nodeId, dst));

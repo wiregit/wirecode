@@ -92,7 +92,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request, queryKey, bucketList);
         
-        context.getMessageDispatcher().send(request.getContactNode(), response, null);
+        context.getMessageDispatcher().send(request.getContactNode(), response);
     }
     
     private void handleFindValueRequest(LookupRequest request) throws IOException {
@@ -107,7 +107,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             
             FindValueResponse response = context.getMessageFactory()
                         .createFindValueResponse(request, values);
-            context.getMessageDispatcher().send(request.getContactNode(), response, null);
+            context.getMessageDispatcher().send(request.getContactNode(), response);
         } else {
             // OK, send ContactNodes instead!
             handleFindNodeRequest(request);

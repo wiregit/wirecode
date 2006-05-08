@@ -28,7 +28,6 @@ import java.util.List;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.ResponseListener;
-import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
@@ -142,7 +141,7 @@ public abstract class AbstractResponseHandler extends MessageHandler
         }
     }
     
-    protected void resend(KUID nodeId, SocketAddress dst, Message message) throws IOException {
+    protected void resend(KUID nodeId, SocketAddress dst, RequestMessage message) throws IOException {
         context.getMessageDispatcher().send(nodeId, dst, message, this);
     }
     

@@ -66,6 +66,6 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         StatsResponse response = context.getMessageFactory()
             .createStatsResponse(message, writer.toString());
         
-        context.getMessageDispatcher().send(message.getContactNode(), response, null);
+        context.getMessageDispatcher().send(message.getContactNode(), response);
     }
 }

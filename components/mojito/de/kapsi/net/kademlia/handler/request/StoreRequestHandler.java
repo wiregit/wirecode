@@ -141,6 +141,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         StoreResponse response 
             = context.getMessageFactory().createStoreResponse(request, keyValues, stats);
-        context.getMessageDispatcher().send(request.getContactNode(), response, null);
+        context.getMessageDispatcher().send(request.getContactNode(), response);
     }
 }

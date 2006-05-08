@@ -577,7 +577,7 @@ public class KUID implements Serializable, Comparable {
     /**
      * Returns wheather or not we're the originator of the message ID.
      */
-    public boolean verify(SocketAddress src) {
+    public boolean verifyQueryKey(SocketAddress src) {
         if (!isMessageID() || !(src instanceof InetSocketAddress)) {
             return false;
         }

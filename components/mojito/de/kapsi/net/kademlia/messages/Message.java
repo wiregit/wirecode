@@ -26,6 +26,8 @@ import de.kapsi.net.kademlia.KUID;
 
 public abstract class Message {
     
+    public static final int MAX_MESSAGE_SIZE = 8192;
+
     public static final int PING_REQUEST = 0x01;
     public static final int PING_RESPONSE = 0x02;
     
@@ -44,19 +46,19 @@ public abstract class Message {
     private int vendor;
     private int version;
 
-    private ContactNode node;
+    private ContactNode source;
     private KUID messageId;
     
     private byte[] signature;
     
-    public Message(int vendor, int version, ContactNode node, KUID messageId) {
-        this(vendor, version, node, messageId, null);
+    public Message(int vendor, int version, ContactNode source, KUID messageId) {
+        this(vendor, version, source, messageId, null);
     }
     
     public Message(int vendor, int version, 
-            ContactNode node, KUID messageId, byte[] signature) {
+            ContactNode source, KUID messageId, byte[] signature) {
         
-        if (node == null) {
+        if (source == null) {
             throw new NullPointerException("ContactNode is null");
         }
         
@@ -70,7 +72,7 @@ public abstract class Message {
         
         this.vendor = vendor;
         this.version = version;
-        this.node = node;
+        this.source = source;
         this.messageId = messageId;
         this.signature = signature;
     }
@@ -88,7 +90,7 @@ public abstract class Message {
     }
     
     public ContactNode getContactNode() {
-        return node;
+        return source;
     }
     
     public KUID getNodeID() {

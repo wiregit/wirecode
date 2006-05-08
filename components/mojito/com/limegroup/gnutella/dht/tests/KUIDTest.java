@@ -62,10 +62,10 @@ public class KUIDTest {
         //System.out.println(messageId.toHexString());
         
         System.out.println(queryKey1.equals(queryKey2)); // true
-        System.out.println(messageId1.verify(address1)); // true
+        System.out.println(messageId1.verifyQueryKey(address1)); // true
         
         // TODO: currently true because QK is a fake implementation
-        System.out.println(messageId1.verify(new InetSocketAddress("www.limewire.org", 1234))); // false
+        System.out.println(messageId1.verifyQueryKey(new InetSocketAddress("www.limewire.org", 1234))); // false
     }
     
     public static void main(String[] args) throws Exception {

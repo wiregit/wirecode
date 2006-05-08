@@ -34,7 +34,7 @@ public abstract class ResponseMessage extends Message {
         super(vendor, version, node, messageId, signature);
     }
     
-    public boolean verify() {
-        return getMessageID().verify(getSocketAddress());
+    public boolean verifyQueryKey() {
+        return getMessageID().verifyQueryKey(getSocketAddress());
     }
 }

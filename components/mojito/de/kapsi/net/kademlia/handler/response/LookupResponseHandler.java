@@ -42,7 +42,6 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
-import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
@@ -346,7 +345,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     protected void resend(KUID nodeId, 
-            SocketAddress dst, Message message) throws IOException {
+            SocketAddress dst, RequestMessage message) throws IOException {
         super.resend(nodeId, dst, message);
     }
 
