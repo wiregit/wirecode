@@ -2,7 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -11,8 +10,6 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 

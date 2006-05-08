@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.BaseTestCase;

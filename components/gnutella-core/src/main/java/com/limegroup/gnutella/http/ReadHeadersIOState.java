@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.ReadState;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.Statistic;
 
 public abstract class ReadHeadersIOState extends ReadState {
@@ -20,6 +19,11 @@ public abstract class ReadHeadersIOState extends ReadState {
     protected final HeaderSupport support;
     /** Statistic to add bandwidth data to. */
     private final Statistic stat;
+    /** The maximum size of a header we'll read. */
+    private final int maxHeaderSize;
+    /** The maximum number of headers we'll read. */
+    private final int maxHeaders;
+    
     /** Whether or not we've finished reading the initial connect line. */
     protected boolean doneConnect;
     /** The current header we're in the process of reading. */
@@ -28,11 +32,14 @@ public abstract class ReadHeadersIOState extends ReadState {
     protected String connectLine;
     /** The amount of data read. */
     private long amountRead;
-    
+        
     /** Constructs a new ReadHandshakeState using the given support & stat. */
-    public ReadHeadersIOState(HeaderSupport support, Statistic stat) {
+    public ReadHeadersIOState(HeaderSupport support, Statistic stat,
+                              int maxHeaders, int maxHeaderSize) {
         this.support = support;
         this.stat = stat;
+        this.maxHeaders = maxHeaders;
+        this.maxHeaderSize = maxHeaderSize;
     }
 
     /**
@@ -87,7 +94,7 @@ public abstract class ReadHeadersIOState extends ReadState {
                     currentHeader.delete(0, currentHeader.length()); // reset for the next header.
 
                     // Make sure we don't try and read forever.
-                    if(support.getHeadersReadSize() > ConnectionSettings.MAX_HANDSHAKE_HEADERS.getValue())
+                    if(support.getHeadersReadSize() > maxHeaders)
                         throw new IOException("too many headers");
                 }
             }
@@ -99,7 +106,7 @@ public abstract class ReadHeadersIOState extends ReadState {
             // header, because it's not really so important there.  We know the
             // data cannot be bigger than the buffer's size, and the buffer's size isn't
             // too extraordinarily large, so this works out okay.
-            if(currentHeader.length() > ConnectionSettings.MAX_HANDSHAKE_LINE_SIZE.getValue())
+            if(currentHeader.length() > maxHeaderSize)
                 throw new IOException("header too big");
         }
         

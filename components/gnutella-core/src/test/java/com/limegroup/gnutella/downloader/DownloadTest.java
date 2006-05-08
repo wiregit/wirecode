@@ -35,7 +35,6 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.UDPService;

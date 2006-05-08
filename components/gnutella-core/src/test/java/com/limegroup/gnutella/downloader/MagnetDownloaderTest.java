@@ -6,11 +6,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;

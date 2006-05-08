@@ -3,6 +3,7 @@ package com.limegroup.gnutella.handshaking;
 import java.io.IOException;
 
 import com.limegroup.gnutella.http.ReadHeadersIOState;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
@@ -12,7 +13,10 @@ import com.limegroup.gnutella.statistics.HandshakingStat;
 abstract class ReadHandshakeState extends ReadHeadersIOState {
     
     protected ReadHandshakeState(HandshakeSupport support) {
-        super(support, BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH);
+        super(support,
+              BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH,
+              ConnectionSettings.MAX_HANDSHAKE_HEADERS.getValue(),
+              ConnectionSettings.MAX_HANDSHAKE_LINE_SIZE.getValue());
     }
     
     /** The first state in an incoming handshake. */

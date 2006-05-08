@@ -7,7 +7,6 @@ import java.util.Collections;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -188,7 +187,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
     
     private static HTTPDownloader newHTTPDownloader(String s) throws Throwable {
         s += "\r\n";
-        SimpleReadHeaderState reader = new SimpleReadHeaderState(null);
+        SimpleReadHeaderState reader = new SimpleReadHeaderState(null, 100, 2048);
         reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
         RemoteFileDesc rfd = new RemoteFileDesc("", 1, 1, "file", 1, new byte[16], 1, 
                                                 false, 1, false, null, Collections.EMPTY_SET,

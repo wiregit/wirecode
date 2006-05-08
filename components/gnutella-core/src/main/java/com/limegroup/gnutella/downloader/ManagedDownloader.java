@@ -925,10 +925,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Handles state changes when inactive.
      */
     public synchronized void handleInactivity() {
-        if(LOG.isTraceEnabled())
-            LOG.trace("handling inactivity. state: " + 
-                      getState() + ", hasnew: " + hasNewSources() + 
-                      ", left: " + getRemainingStateTime());
+//        if(LOG.isTraceEnabled())
+            //LOG.trace("handling inactivity. state: " + 
+                      //getState() + ", hasnew: " + hasNewSources() + 
+                      //", left: " + getRemainingStateTime());
         
         switch(getState()) {
         case BUSY:
@@ -1500,8 +1500,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         prepareRFD(rfd,cache);
         
         if (ranker.addToPool(rfd)){
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfd: " + rfd);
+            //if(LOG.isTraceEnabled())
+                //LOG.trace("added rfd: " + rfd);
             receivedNewSources = true;
         }
         
@@ -1519,13 +1519,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 continue;
             }
             prepareRFD(rfd,cache);
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfd: " + rfd);
+         //   if(LOG.isTraceEnabled())
+         //       LOG.trace("added rfd: " + rfd);
         }
         
         if ( ranker.addToPool(c) ) {
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfds: " + c);
+         //   if(LOG.isTraceEnabled())
+        //        LOG.trace("added rfds: " + c);
             receivedNewSources = true;
         }
         
@@ -2477,7 +2477,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             
             // are we just about to finish downloading the file?
             
-            LOG.debug("About to wait for pending if needed");
+         //   LOG.debug("About to wait for pending if needed");
             
             try {            
                 commonOutFile.waitForPendingIfNeeded();
@@ -2490,7 +2490,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 return DISK_PROBLEM;
             }
             
-            LOG.debug("Finished waiting for pending");
+          //  LOG.debug("Finished waiting for pending");
             
             
             // Finished.
@@ -2519,7 +2519,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 
                 if(LOG.isDebugEnabled())
                     LOG.debug("MANAGER: kicking off workers, activeWorkers: " + 
-                            _activeWorkers.size() + ", allWorkers: " + _workers.size());
+                            _activeWorkers.size() + ", allWorkers: " + _workers.size() +
+                            ", queuedWorkers: " + queuedWorkers.size() + ", swarm cap: " + getSwarmCapacity());
+                
                 
                 //OK. We are going to create a thread for each RFD. The policy for
                 //the worker threads is to have one more thread than the max swarm
@@ -2571,9 +2573,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * or we have some rfds to re-try
      */
     private boolean shouldStartWorker() {
-        return (commonOutFile.hasFreeBlocksToAssign() > 0 || victimsExist() ) &&
-             ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
-             ranker.hasMore();
+        return (commonOutFile.hasFreeBlocksToAssign() > 0 || victimsExist()) &&
+               ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
+               ranker.hasMore();
     }
     
     /**
@@ -2965,7 +2967,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         DownloadWorker doomed = null;
         
         // No replacement required?...
-        if(getNumDownloaders() <= getSwarmCapacity() && queuePos == -1) {
+        int numDownloaders = getNumDownloaders();
+        int swarmCapacity = getSwarmCapacity();
+        
+        if(numDownloaders <= swarmCapacity && queuePos == -1) {
             return true;
         } 
 
@@ -2976,7 +2981,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             return true;
         }
 
-        if (getNumDownloaders() >= getSwarmCapacity()) {
+        if (numDownloaders >= swarmCapacity) {
             // Search for the queued thread with a slot worse than ours.
             int highest = queuePos; // -1 if we aren't queued.            
             for(Iterator i = queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
@@ -2993,7 +2998,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 LOG.debug("not queueing myself");
                 return false;
             } else if (LOG.isDebugEnabled())
-                LOG.debug(" will replace "+doomed);
+                LOG.debug("will replace "+doomed);
             
             //OK. let's kill this guy 
             doomed.interrupt();

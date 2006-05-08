@@ -660,7 +660,9 @@ public class HTTPDownloader implements BandwidthTracker {
                              BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH);
         SimpleReadHeaderState reader = new SimpleReadHeaderState(
                 _inNetwork ? BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH :
-                             BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH);
+                             BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH,
+                             DownloadSettings.MAX_HEADERS.getValue(),
+                             DownloadSettings.MAX_HEADER_SIZE.getValue());
         
         _stateMachine.addStates(new IOState[] { writer, reader } );
         _headerReader = reader;
@@ -710,7 +712,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 headers,
                 BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH);
         SimpleReadHeaderState reader = new SimpleReadHeaderState(
-                BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH);
+                BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH,
+                DownloadSettings.MAX_HEADERS.getValue(),
+                DownloadSettings.MAX_HEADER_SIZE.getValue());
         
         _headerReader = reader;
         _requestingThex = true;
@@ -789,6 +793,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 }
             }
         }
+        
+        if(_contentLength == 0)
+            _bodyConsumed = true;
         
         if(failed || _contentLength == -1)
             return ConnectionStatus.getNoFile();
@@ -1479,8 +1486,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _stateMachine.addState(new DownloadState());
     }
     
-    
-    private class DownloadState extends ReadState {
+        private class DownloadState extends ReadState {
         private long currPos = _initialReadingPoint;
         private volatile boolean doingWrite;
         
@@ -1806,6 +1812,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private static class Observer implements IOStateObserver {
         private IOStateObserver delegate;
         private boolean handled = false;
+        private boolean error = false;
         
         public void handleIOException(IOException iox) {
             IOStateObserver del;
@@ -1815,6 +1822,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     return;
                 }
                 handled = true;
+                error = true;
                 del = delegate;
             }
             if(del != null)
@@ -1841,10 +1849,11 @@ public class HTTPDownloader implements BandwidthTracker {
             synchronized(this) {
                 if(handled) {
                     if(LOG.isWarnEnabled())
-                        LOG.warn("Ignoring shutdown", new Exception());
+                        LOG.warn("Ignoring shutdown.");
                     return;
                 }
                 handled = true;
+                error = true;
                 del = delegate;
             }
             if(del != null)
@@ -1852,9 +1861,15 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         
         void setDelegate(IOStateObserver observer) {
+            boolean hadError = false;
             synchronized(this) {
                 handled = false;
+                hadError = error;
                 delegate = observer;
+            }
+            
+            if(hadError) {
+                observer.shutdown();
             }
         }
     }

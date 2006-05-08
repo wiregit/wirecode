@@ -7,8 +7,8 @@ import com.limegroup.gnutella.statistics.Statistic;
 
 public class SimpleReadHeaderState extends ReadHeadersIOState {
     
-    public SimpleReadHeaderState(Statistic stat) {
-        super(new HeaderSupport(), stat);
+    public SimpleReadHeaderState(Statistic stat, int maxHeaders, int maxHeaderSize) {
+        super(new HeaderSupport(), stat, maxHeaders, maxHeaderSize);
     }
 
     protected void processConnectLine() throws IOException {

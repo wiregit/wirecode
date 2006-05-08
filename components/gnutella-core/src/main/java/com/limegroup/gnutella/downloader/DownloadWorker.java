@@ -252,6 +252,8 @@ public class DownloadWorker {
      * Starts this DownloadWorker's connection establishment.
      */
     public void start() {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Starting worker: " + _workerName);
         establishConnection();
     }
     
@@ -292,8 +294,10 @@ public class DownloadWorker {
         if(LOG.isTraceEnabled())
             LOG.trace("WORKER: " + this + ", State Changed, Current: " + _currentState + ", status: " + status);
         
-        if(_interrupted)
+        if(_interrupted) {
             finishHttpLoop();
+            return;
+        }
         
         switch(_currentState.getCurrentState()) {
         case DownloadState.DOWNLOADING:
@@ -707,7 +711,7 @@ public class DownloadWorker {
      */
     private void connectDirectly(DirectConnector observer) {
         if (!_interrupted) {
-            LOG.trace("WORKER: attempt asynchronous direct connection");
+            LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
             _connectObserver = observer;
             try {
                 Socket socket = Sockets.connect(_rfd.getHost(), _rfd.getPort(), NORMAL_CONNECT_TIME, observer);
@@ -716,6 +720,8 @@ public class DownloadWorker {
             } catch (IOException iox) {
                 observer.shutdown();
             }
+        } else {
+            _manager.workerFinished(this);
         }
     }
     
@@ -726,7 +732,7 @@ public class DownloadWorker {
      */
     private void connectWithPush(HTTPConnectObserver observer) {
         if(!_interrupted) {
-            LOG.trace("WORKER: attempt push connection");
+            LOG.trace("WORKER: attempt push connection to: " + _rfd);
             _connectObserver = null;
             
             //When the push is complete and we have a socket ready to use
@@ -739,6 +745,8 @@ public class DownloadWorker {
                     _manager.unregisterPushObserver(mrfd, true);
                 }
             }, _rfd.isFromAlternateLocation() ? UDP_PUSH_CONNECT_TIME : PUSH_CONNECT_TIME, 0);
+        } else {
+            _manager.workerFinished(this);
         }
     }
     
@@ -1345,7 +1353,7 @@ public class DownloadWorker {
         }
         
         if(LOG.isDebugEnabled())
-            LOG.debug("Stopping while state is: " + _currentState);
+            LOG.debug("Stopping while state is: " + _currentState + ", this: " + toString());
         
         if (_downloader != null)
             _downloader.stop();
