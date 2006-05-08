@@ -502,30 +502,6 @@ public class PatriciaRouteTable implements RoutingTable {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Removed nodeId: "+nodeId+" from bucket: "+bucket);
             }
-            
-            if (bucket.isEmpty()) {
-                int depth = bucket.getDepth();
-                BucketNode otherBucket = null;
-                BucketNode parentBucket = null;
-                
-                if (bucket.getNodeID().isBitSet(depth-1)) {
-                    otherBucket = (BucketNode) bucketsTrie.get(bucket.getNodeID().unset(depth-1));
-                    parentBucket = new BucketNode(otherBucket.getNodeID(),depth-1);
-                } else {
-                    otherBucket = (BucketNode) bucketsTrie.get(bucket.getNodeID().set(depth-1));
-                    parentBucket = new BucketNode(bucket.getNodeID(),depth-1);
-                }
-                
-                parentBucket.setNodeCount(otherBucket.getNodeCount());
-                bucketsTrie.remove(otherBucket.getNodeID());
-                bucketsTrie.remove(bucket.getNodeID());
-                bucketsTrie.put(parentBucket.getNodeID(),parentBucket);
-                
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Merged buckets to single bucket: "+parentBucket);
-                }
-            }
-            
             return true;
         } else {
             return false;
