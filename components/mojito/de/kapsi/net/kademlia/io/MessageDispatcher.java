@@ -22,6 +22,7 @@ package de.kapsi.net.kademlia.io;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
@@ -391,17 +392,21 @@ public class MessageDispatcher implements Runnable {
         if (!outputQueue.isEmpty()) {
             Receipt receipt = (Receipt)outputQueue.removeFirst();
 
-            if (receipt.send(channel)) {
-                receipt.sent();
-                networkStats.SENT_MESSAGES_COUNT.incrementStat();
-                networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
-                
-                if (receipt.isRequest()) {
-                    messageMap.put(receipt.getMessageID(), receipt);
+            try {
+                if (receipt.send(channel)) {
+                    receipt.sent();
+                    networkStats.SENT_MESSAGES_COUNT.incrementStat();
+                    networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
+                    
+                    if (receipt.isRequest()) {
+                        messageMap.put(receipt.getMessageID(), receipt);
+                    }
+                    receipt.freeData();
+                } else {
+                    outputQueue.addFirst(receipt);
                 }
-                receipt.freeData();
-            } else {
-                outputQueue.addFirst(receipt);
+            } catch (SocketException err) {
+                LOG.error("Failed to send a message due to a SocketException", err);
             }
         }
         return outputQueue.size();
