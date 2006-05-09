@@ -20,8 +20,6 @@
 package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -119,18 +117,10 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                 }
             }
             
-            try {
-                if (context.getDatabase().add(keyValue)) {
-                    networkStats.STORE_REQUESTS_OK.incrementStat();
-                    stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.SUCCEEDED));
-                } else {
-                    networkStats.STORE_REQUESTS_FAILURE.incrementStat();
-                    stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.FAILED));
-                }
-            } catch (SignatureException err) {
-                networkStats.STORE_REQUESTS_FAILURE.incrementStat();
-                stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.FAILED));
-            } catch (InvalidKeyException err) {
+            if (context.getDatabase().add(keyValue)) {
+                networkStats.STORE_REQUESTS_OK.incrementStat();
+                stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.SUCCEEDED));
+            } else {
                 networkStats.STORE_REQUESTS_FAILURE.incrementStat();
                 stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.FAILED));
             }

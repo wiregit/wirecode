@@ -21,8 +21,6 @@ package de.kapsi.net.kademlia;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -243,19 +241,13 @@ public class DHT {
     public void put(KUID key, byte[] value, StoreListener listener) 
             throws IOException {
         
-        try {
-            KeyValue keyValue = 
-                KeyValue.createLocalKeyValue(key, value, getLocalNode());
-            Database database = context.getDatabase();
-            synchronized(database) {
-                if (database.add(keyValue)) {
-                    context.store(keyValue, listener);
-                }
+        KeyValue keyValue = 
+            KeyValue.createLocalKeyValue(key, value, getLocalNode());
+        Database database = context.getDatabase();
+        synchronized(database) {
+            if (database.add(keyValue)) {
+                context.store(keyValue, listener);
             }
-        } catch (SignatureException err) {
-            throw new RuntimeException(err);
-        } catch (InvalidKeyException err) {
-            throw new RuntimeException(err);
         }
     }
     

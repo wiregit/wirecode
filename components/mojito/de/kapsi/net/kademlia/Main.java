@@ -383,7 +383,11 @@ public class Main {
         
         dht.get(key, new LookupAdapter() {
             public void found(KUID key, Collection values, long time) {
-                System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
+                StringBuffer buffer = new StringBuffer();
+                buffer.append(key).append(" in ").append(time).append("ms\n");
+                buffer.append(values);
+                buffer.append("\n");
+                System.out.println(buffer.toString());
             }
         });
     }

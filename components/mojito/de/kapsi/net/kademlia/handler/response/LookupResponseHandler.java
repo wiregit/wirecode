@@ -48,6 +48,7 @@ import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
+import de.kapsi.net.kademlia.util.KeyValueCollection;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class LookupResponseHandler extends AbstractResponseHandler {
@@ -211,7 +212,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 finished = true;
             }
 
-            fireFound(response.getValues(), totalTime);
+            fireFound(new KeyValueCollection(response), totalTime);
         } else {
             // Some Idot sent us a FIND_VALUE response for a
             // FIND_NODE lookup! Ignore?

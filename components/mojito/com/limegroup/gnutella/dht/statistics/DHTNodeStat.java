@@ -21,6 +21,7 @@ package com.limegroup.gnutella.dht.statistics;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,7 +54,7 @@ public class DHTNodeStat implements DHTStats{
     }
     
     public void dumpDataBase(Writer writer) throws IOException{
-        List KeyVals = context.getDatabase().getAllValues();
+        Collection KeyVals = context.getDatabase().getAllValues();
         writer.write(nodeID+"\n");
         for (Iterator iter = KeyVals.iterator(); iter.hasNext();) {
             KeyValue keyval = (KeyValue) iter.next();

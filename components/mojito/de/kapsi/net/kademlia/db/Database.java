@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -51,135 +51,106 @@ import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
-public class Database {
-    
+public class Database implements Serializable {
+
+    private static final long serialVersionUID = 3736527702913131617L;
+
     private static final Log LOG = LogFactory.getLog(Database.class);
-    
-    private Context context;
-    private DataBaseStatisticContainer databaseStats;
-    
+
     private DatabaseMap database;
+
+    private Context context;
+
+    private DataBaseStatisticContainer databaseStats;
     
     public Database(Context context) {
         this.context = context;
-        databaseStats = context.getDataBaseStats();
         
         database = new DatabaseMap(DatabaseSettings.MAX_DATABASE_SIZE.getValue());
+        
+        databaseStats = context.getDataBaseStats();
     }
-    
-    public int getMaxSize() {
-        return database.getMaxSize();
-    }
-    
-    public int size() {
+
+    public synchronized int size() {
         return database.size();
     }
-    
-    public boolean isFull() {
-        return size() >= getMaxSize();
+
+    public synchronized boolean isEmpty() {
+        return database.isEmpty();
     }
-    
-    public synchronized boolean add(KeyValue keyValue) 
-            throws SignatureException, InvalidKeyException {
-        
-        if (isKeyValueExpired(keyValue)) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(keyValue + " is expired!");
-            }
-            return false;
+
+    public synchronized boolean isFull() {
+        return database.isFull();
+    }
+
+    public synchronized boolean add(KeyValue keyValue) {
+        KUID key = keyValue.getKey();
+        KeyValueBag bag = (KeyValueBag) database.get(key);
+        if (bag == null) {
+            bag = new KeyValueBag(key);
+            database.put(key, bag);
         }
-        
-        KUID key = (KUID)keyValue.getKey();
-        KeyValueCollection values = (KeyValueCollection)database.get(key);
-        if (values == null) {
-            values = new KeyValueCollection(context, key, DatabaseSettings.MAX_KEY_VALUES.getValue());
-            database.put(key, values);
-        }
+
         databaseStats.STORED_VALUES.incrementStat();
-        return values.add(keyValue);
+        return bag.add(keyValue);
     }
-    
-    public synchronized int addAll(Collection c) 
-            throws SignatureException, InvalidKeyException {
-        
-        int count = 0;
-        for(Iterator it = c.iterator(); it.hasNext(); ) {
-            if (add((KeyValue)it.next())) {
-                count++;
-            }
-        }
-        return count;
-    }
-    
-    public synchronized Collection get(KUID key) {
-        KeyValueCollection values = (KeyValueCollection)database.get(key);
-        if (values == null) {
-            return null;
-        }
-        databaseStats.RETRIEVED_VALUES.incrementStat();
-        return Collections.unmodifiableCollection(values);
-    }
-    
-    public synchronized Collection select(KUID key) {
-        KeyValueCollection values = (KeyValueCollection)database.select(key);
-        if (values == null) {
-            return null;
-        }
-        
-        return Collections.unmodifiableCollection(values);
-    }
-    
+
     public synchronized boolean remove(KeyValue keyValue) {
-        KUID key = (KUID)keyValue.getKey();
-        KeyValueCollection values = (KeyValueCollection)database.get(key);
-        if (values == null 
-                || !values.remove(keyValue)) {
-            return false;
+        KUID key = keyValue.getKey();
+        KeyValueBag bag = (KeyValueBag) database.get(key);
+        if (bag != null && bag.remove(keyValue)) {
+            if (bag.isEmpty()) {
+                database.remove(key);
+            }
+            
+            databaseStats.REMOVED_VALUES.incrementStat();
+            return true;
         }
-        
-        if (values.isEmpty()) {
-            database.remove(key);
-        }
-        
-        databaseStats.REMOVED_VALUES.incrementStat();
-        return true;
+        return false;
     }
-    
-    public synchronized boolean remove(KeyValueCollection c) {
-        int size = database.size();
-        database.remove(c.getKey());
-        return database.size() != size;
-    }
-    
-    public synchronized void removeAll(Collection c) {
-        for(Iterator it = c.iterator(); it.hasNext(); ) {
-            remove((KeyValue)it.next());
-        }
-    }
-    
-    public synchronized boolean contains(KUID key) {
-        return database.get(key) != null;
-    }
-    
+
     public synchronized boolean contains(KeyValue keyValue) {
-        KUID key = (KUID)keyValue.getKey();
-        KeyValueCollection values = (KeyValueCollection)database.get(key);
-        if (keyValue == null) {
-            return false;
+        KUID key = keyValue.getKey();
+        KeyValueBag bag = (KeyValueBag) database.get(key);
+        if (bag != null && bag.contains(keyValue)) {
+            return true;
         }
-        return values.contains(keyValue);
+        return false;
     }
-    
-    public synchronized List getAllValues() {
-        ArrayList list = new ArrayList((int)(size() * 1.25f));
+
+    public synchronized Collection get(KUID key) {
+        KeyValueBag bag = (KeyValueBag) database.get(key);
+        if (bag != null) {
+            databaseStats.RETRIEVED_VALUES.incrementStat();
+            return Collections.unmodifiableCollection(bag.values());
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    public synchronized Collection select(KUID key) {
+        KeyValueBag bag = (KeyValueBag) database.select(key);
+        if (bag != null) {
+            databaseStats.RETRIEVED_VALUES.incrementStat();
+            return Collections.unmodifiableCollection(bag.values());
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    public synchronized Collection getKeyValueBags() {
+        ArrayList bags = new ArrayList(size());
         for(Iterator it = database.values().iterator(); it.hasNext(); ) {
-            list.addAll(((KeyValueCollection)it.next()));
+            bags.add((KeyValueBag)it.next());
         }
-        return list;
+        return Collections.unmodifiableCollection(bags);
     }
     
-    public synchronized Collection getAllCollections() {
-        return Collections.unmodifiableCollection(new ArrayList(database.values()));
+    public synchronized Collection getAllValues() {
+        ArrayList keyValues = new ArrayList((int)(size() * 1.5f));
+        for(Iterator it = database.values().iterator(); it.hasNext(); ) {
+            KeyValueBag bag = (KeyValueBag)it.next();
+            keyValues.addAll(bag.values());
+        }
+        return Collections.unmodifiableCollection(keyValues);
     }
     
     public boolean isOriginator(KeyValue value) 
@@ -187,68 +158,71 @@ public class Database {
         PublicKey pubKey = context.getKeyPair().getPublic();
         return value.verify(pubKey);
     }
-    
+
     public boolean isKeyValueExpired(KeyValue keyValue) {
         if (keyValue.isLocalKeyValue()) {
             return false;
         }
-        
-        //KUID key = keyValue.getKey();
-        //ContactNode closest = context.getRouteTable().select(key);
-        
-        //TODO: we are not caching, expiration time constant for now
-        
+
+        // KUID key = keyValue.getKey();
+        // ContactNode closest = context.getRouteTable().select(key);
+
+        // TODO: we are not caching, expiration time constant for now
+
         // If RouteTable is empty. TODO: is expired or not?
-//        if (closest == null) {
-//            return false;
-//        }
-        
-        
-//        KUID closestId = closest.getNodeID();
-//        KUID currentId = context.getLocalNodeID();
-//        KUID xorId = currentId.xor(closestId);
-//        int log = xorId.log();
-//        
-//        long creationTime = keyValue.getCreationTime();
-//        long expirationTime = creationTime 
-//            + DatabaseSettings.MILLIS_PER_DAY/KUID.LENGTH * log;
-        
-        long expirationTime = keyValue.getCreationTime() + DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue();
-        
+        // if (closest == null) {
+        // return false;
+        // }
+
+        // KUID closestId = closest.getNodeID();
+        // KUID currentId = context.getLocalNodeID();
+        // KUID xorId = currentId.xor(closestId);
+        // int log = xorId.log();
+        //
+        // long creationTime = keyValue.getCreationTime();
+        // long expirationTime = creationTime
+        // + DatabaseSettings.MILLIS_PER_DAY/KUID.LENGTH * log;
+
+        long expirationTime = keyValue.getCreationTime()
+                + DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue();
+
         // TODO: this needs some finetuning. Anonymous KeyValues
         // expire 50% faster at the moment.
         try {
             if (keyValue.isAnonymous()
                     && !keyValue.verify(context.getMasterKey())
                     || !keyValue.isClose()) {
-                expirationTime = keyValue.getCreationTime() + DatabaseSettings.EXPIRATION_TIME_UNKNOWN.getValue();
+                expirationTime = keyValue.getCreationTime()
+                        + DatabaseSettings.EXPIRATION_TIME_UNKNOWN.getValue();
             }
         } catch (InvalidKeyException e) {
         } catch (SignatureException e) {
         }
-        
+
         return System.currentTimeMillis() >= expirationTime;
     }
-    
+
     public boolean isRepublishingRequired(KeyValue keyValue) {
         if (!keyValue.isLocalKeyValue()) {
             return false;
         }
+
+        long t = (long)((keyValue.getNumLocs() 
+                * DatabaseSettings.REPUBLISH_INTERVAL.getValue()) 
+                    / KademliaSettings.REPLICATION_PARAMETER.getValue());
         
-        long nextPublishTime = Math.max((((long)(keyValue.getNumLocs() * DatabaseSettings.REPUBLISH_INTERVAL.getValue())/
-                (long)KademliaSettings.REPLICATION_PARAMETER.getValue())), 2L * 60L * 1000L); //never republish more than every 2 minutes
-            
-        
+        // never republish more than every X minutes
+        long nextPublishTime = Math.max(t, DatabaseSettings.MIN_REPUBLISH_INTERVAL.getValue());
         long time = keyValue.getLastPublishTime() + nextPublishTime;
-        
+
         return System.currentTimeMillis() >= time;
     }
-    
+
     public synchronized boolean store() {
         File file = new File(DatabaseSettings.DATABASE_FILE);
-        
+
         ObjectOutputStream out = null;
-        
+
         try {
             FileOutputStream fos = new FileOutputStream(file);
             GZIPOutputStream gzout = new GZIPOutputStream(fos);
@@ -258,56 +232,68 @@ public class Database {
             out.flush();
             return true;
         } catch (FileNotFoundException e) {
-            LOG.error("Database File not found error: ",e);
+            LOG.error("Database File not found error: ", e);
         } catch (IOException e) {
             LOG.error("Database IO error: ", e);
         } finally {
-            try { if (out != null) { out.close(); } } catch (IOException ignore) {}
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException ignore) {
+            }
         }
         return false;
     }
-    
+
     public synchronized boolean load() {
         File file = new File(DatabaseSettings.DATABASE_FILE);
         if (file.exists() && file.isFile() && file.canRead()) {
-            
+
             ObjectInputStream in = null;
             try {
                 FileInputStream fin = new FileInputStream(file);
                 GZIPInputStream gzin = new GZIPInputStream(fin);
                 in = new ObjectInputStream(gzin);
-                
-                KUID nodeId = (KUID)in.readObject();
+
+                KUID nodeId = (KUID) in.readObject();
                 if (!nodeId.equals(context.getLocalNodeID())) {
                     return false;
                 }
-                
-                DatabaseMap database = (DatabaseMap)in.readObject();
-                for(Iterator it = database.values().iterator(); it.hasNext(); ) {
-                    // Set the context
-                    ((KeyValueCollection)it.next()).setContext(context);
-                }
-                this.database = database;
+
+                this.database = (DatabaseMap) in.readObject();
                 return true;
             } catch (FileNotFoundException e) {
-                LOG.error("Database File not found error: ",e);
+                LOG.error("Database File not found error: ", e);
             } catch (IOException e) {
                 LOG.error("Database IO error: ", e);
             } catch (ClassNotFoundException e) {
                 LOG.error("Database Class not found error: ", e);
             } finally {
-                try { if (in != null) { in.close(); } } catch (IOException ignore) {}
+                try {
+                    if (in != null) {
+                        in.close();
+                    }
+                } catch (IOException ignore) {
+                }
             }
         }
         return false;
     }
-    
-    private static class DatabaseMap extends FixedSizeHashMap implements Serializable {
-        
+
+    private boolean isTrustworthy(KeyValue keyValue) throws SignatureException,
+            InvalidKeyException {
+        PublicKey masterKey = context.getMasterKey();
+        return masterKey != null && keyValue.verify(masterKey);
+    }
+
+    private static class DatabaseMap extends FixedSizeHashMap implements
+            Serializable {
+
         private static final long serialVersionUID = -4796278962768822384L;
-        
+
         private PatriciaTrie trie;
-        
+
         public DatabaseMap(int maxSize) {
             super(1024, 0.75f, true, maxSize);
             trie = new PatriciaTrie();
@@ -317,21 +303,169 @@ public class Database {
             trie.put(key, value);
             return super.put(key, value);
         }
-        
+
         public Object remove(Object key) {
             trie.remove(key);
             return super.remove(key);
         }
-        
+
         public Object select(Object key) {
             return trie.select(key);
         }
-        
+
         protected boolean removeEldestEntry(Entry eldest) {
             if (super.removeEldestEntry(eldest)) {
                 remove(eldest.getKey());
             }
             return false;
+        }
+    }
+
+    public class KeyValueBag implements Serializable {
+
+        private static final long serialVersionUID = -1814254075001306181L;
+
+        private KUID key;
+
+        private FixedSizeHashMap values;
+
+        private KeyValueBag(KUID key) {
+            this.key = key;
+            values = new FixedSizeHashMap(DatabaseSettings.MAX_KEY_VALUES.getValue());
+        }
+
+        public KUID getKey() {
+            return key;
+        }
+
+        private boolean add(KeyValue keyValue) {
+            try {
+                boolean isTrustworthy = isTrustworthy(keyValue);
+                boolean isLocalKeyValue = keyValue.isLocalKeyValue();
+
+                KUID nodeId = keyValue.getNodeID();
+                KeyValue current = (KeyValue) values.get(nodeId);
+
+                if (current == null) {
+                    if (values.isFull() && (!isTrustworthy || !isLocalKeyValue)) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Cannot store " + keyValue
+                                    + " because KeyValueCollection is full");
+                        }
+                        return false;
+                    }
+                } else if (!isLocalKeyValue) {
+
+                    if (!isTrustworthy) {
+
+                        if (isTrustworthy(current)) {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Cannot replace "
+                                                + current
+                                                + " with "
+                                                + keyValue
+                                                + " because new KeyValue is not trustworthy");
+                            }
+                            return false;
+                        }
+
+                        SocketAddress currentSrc = current.getSocketAddress();
+                        if (currentSrc != null
+                                && !currentSrc.equals(keyValue
+                                        .getSocketAddress())) {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Cannot replace "
+                                                + current
+                                                + " with "
+                                                + keyValue
+                                                + " because originator addresses do not match");
+                            }
+                            return false;
+                        }
+                    }
+                }
+
+                if (LOG.isTraceEnabled()) {
+                    if (current != null) {
+                        LOG.trace("Replacing " + current + " with " + keyValue);
+                    } else {
+                        LOG.trace("Adding KeyValue " + keyValue);
+                    }
+                }
+
+                values.put(nodeId, keyValue);
+                return true;
+
+            } catch (InvalidKeyException e) {
+                throw new RuntimeException(e);
+            } catch (SignatureException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public boolean contains(KeyValue keyValue) {
+            KUID nodeId = keyValue.getNodeID();
+            KeyValue current = (KeyValue) values.get(nodeId);
+            if (current == null) {
+                return false;
+            }
+            return current.equals(keyValue);
+        }
+
+        private boolean remove(KeyValue keyValue) {
+            KUID nodeId = keyValue.getNodeID();
+            KeyValue current = (KeyValue) values.remove(nodeId);
+            if (current == null) {
+                return false;
+            }
+
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Removed KeyValue " + current);
+            }
+
+            return true;
+        }
+
+        public boolean isEmpty() {
+            return values.isEmpty();
+        }
+
+        public int size() {
+            return values.size();
+        }
+
+        private void clear() {
+            values.clear();
+        }
+
+        public Collection values() {
+            return Collections.unmodifiableCollection(values.values());
+        }
+
+        public KeyValue[] toArray() {
+            return (KeyValue[]) values().toArray(new KeyValue[0]);
+        }
+        
+        public int removeAll(boolean nonLocalOnly) {
+            synchronized (Database.this) {
+                int size = size();
+                if (nonLocalOnly) {
+                    for(Iterator it = values.values().iterator(); it.hasNext(); ) {
+                        KeyValue keyValue = (KeyValue)it.next();
+                        if (!keyValue.isLocalKeyValue()) {
+                            it.remove();
+                        }
+                    }
+                } else {
+                    clear();
+                }
+                
+                if (isEmpty()) {
+                    database.remove(key);
+                }
+                
+                return (size - size());
+            }
         }
     }
 }
