@@ -76,7 +76,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleResponse(ResponseMessage message, long time) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message, time);
+        addLiveContactInfo(message.getContactNode(), message);
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
@@ -85,7 +85,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleRequest(RequestMessage message) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message, -1L);
+        addLiveContactInfo(message.getContactNode(), message);
     }
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
@@ -93,7 +93,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
     
     private void addLiveContactInfo(ContactNode node, 
-            Message message, long time) throws IOException {
+            Message message) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
         
