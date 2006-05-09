@@ -118,6 +118,7 @@ public class Main {
         String ping = "ping .+ \\d{1,5}";
         String bootstrap = "bootstrap .+ \\d{1,5}";
         String put = "put (key|kuid) (\\w|\\d)+ (value|file) .+";
+        String remove = "remove (key|kuid) (\\w|\\d)+";
         String get = "get (key|kuid) (\\w|\\d)+";
         String getr = "getr (key|kuid) (\\w|\\d)+";
         String listDB = "list db";
@@ -140,6 +141,7 @@ public class Main {
                 reqstats,
                 bootstrap,
                 put,
+                remove,
                 get,
                 getr,
                 listDB,
@@ -178,6 +180,8 @@ public class Main {
                     bootstrap(dht, line.split(" "));
                 } else if (line.matches(put)) {
                     put(dht, line.split(" "));
+                } else if (line.matches(remove)) {
+                    remove(dht, line.split(" "));
                 } else if (line.matches(get)) {
                     get(dht, line.split(" "));
                 } else if (line.matches(getr)) {
@@ -239,7 +243,7 @@ public class Main {
         
         if(line[1].equals("db")) {
             Database database = dht.getDatabase();
-            Collection values = database.getAllValues();
+            Collection values = database.getValues();
             for(Iterator it = values.iterator(); it.hasNext(); ) {
                 KeyValue value = (KeyValue)it.next();
                 
@@ -358,6 +362,35 @@ public class Main {
             public void store(List keyValues, Collection nodes) {
                 StringBuffer buffer = new StringBuffer();
                 buffer.append("STORED KEY_VALUES: ").append(keyValues).append("\n");
+                int i = 0;
+                for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+                    Node node = (Node) iter.next();
+                    buffer.append(i).append(": ").append(node).append("\n");
+                    i++;
+                }
+                System.out.println(buffer.toString());
+            }
+        });
+    }
+    
+    private static void remove(DHT dht, final String[] line) throws Throwable {
+        MessageDigest md = MessageDigest.getInstance("SHA1");
+        
+        KUID key = null;
+        byte[] value = null;
+        
+        if (line[1].equals("kuid")) {
+            key = KUID.createValueID(ArrayUtils.parseHexString(line[2]));
+        } else {
+            key = KUID.createValueID(md.digest(line[2].getBytes("UTF-8")));
+        }
+        md.reset();
+        
+        System.out.println("Storing... " + key);
+        dht.remove(key, new StoreListener() {
+            public void store(List keyValues, Collection nodes) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("REMOVED KEY_VALUES: ").append(keyValues).append("\n");
                 int i = 0;
                 for (Iterator iter = nodes.iterator(); iter.hasNext();) {
                     Node node = (Node) iter.next();

@@ -21,6 +21,9 @@ package de.kapsi.net.kademlia;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -233,22 +236,58 @@ public class DHT {
         return context;
     }
     
-    public void put(KUID key, byte[] value) 
-            throws IOException {
-        put(key, value, null);
+    public Collection getKeys() {
+        return context.getDatabase().getKeys();
     }
     
-    public void put(KUID key, byte[] value, StoreListener listener) 
+    public Collection getValues() {
+        return context.getDatabase().getValues();
+    }
+    
+    public boolean put(KUID key, byte[] value) 
+            throws IOException {
+        return put(key, value, null, null);
+    }
+    
+    public boolean put(KUID key, byte[] value, StoreListener listener) 
+            throws IOException {
+        return put(key, value, listener, null);
+    }
+    
+    public boolean put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) 
             throws IOException {
         
-        KeyValue keyValue = 
-            KeyValue.createLocalKeyValue(key, value, getLocalNode());
-        Database database = context.getDatabase();
-        synchronized(database) {
-            if (database.add(keyValue)) {
-                context.store(keyValue, listener);
+        try {
+            KeyValue keyValue = 
+                KeyValue.createLocalKeyValue(key, value, getLocalNode());
+            
+            if (privateKey == null) {
+                keyValue.sign(context.getKeyPair());
+            } else {
+                keyValue.sign(privateKey);
             }
+            
+            Database database = context.getDatabase();
+            synchronized(database) {
+                if (value.length > 0) {
+                    if (database.add(keyValue)) {
+                        context.store(keyValue, listener);
+                        return true;
+                    }
+                } else {
+                    if (database.remove(keyValue) 
+                            || database.isTrustworthy(keyValue)) {
+                        context.store(keyValue, listener);
+                        return true;
+                    }
+                }
+            }
+        } catch (InvalidKeyException e) {
+            LOG.error(e);
+        } catch (SignatureException e) {
+            LOG.error(e);
         }
+        return false;
     }
     
     public Collection get(KUID key) throws IOException {
@@ -297,10 +336,19 @@ public class DHT {
         context.get(key, listener);
     }
     
-    /*public boolean remove(KUID key) {
-        return context.getDatabase().remove(value);
-    }*/
+    public boolean remove(KUID key) throws IOException {
+        return remove(key, null, null);
+    }
     
+    public boolean remove(KUID key, StoreListener listener) throws IOException {
+        return remove(key, listener, null);
+    }
+
+    public boolean remove(KUID key, StoreListener listener, PrivateKey privateKey) throws IOException {
+        // To remove a KeyValue you just store an empty value!
+        return put(key, new byte[0], listener, privateKey);
+    }
+
     // TODO for debugging purposes only
     void lookup(KUID lookup, LookupListener listener) throws IOException {
         context.lookup(lookup, listener);

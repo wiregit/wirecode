@@ -169,7 +169,7 @@ public class KeyValuePublisher implements Runnable {
             
                 if (context.isBootstrapped()) {
                     if (it == null) {
-                        it = database.getAllValues().iterator();
+                        it = database.getValues().iterator();
                         
                         evicted = 0;
                         published = 0;

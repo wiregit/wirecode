@@ -54,7 +54,7 @@ public class DHTNodeStat implements DHTStats{
     }
     
     public void dumpDataBase(Writer writer) throws IOException{
-        Collection KeyVals = context.getDatabase().getAllValues();
+        Collection KeyVals = context.getDatabase().getValues();
         writer.write(nodeID+"\n");
         for (Iterator iter = KeyVals.iterator(); iter.hasNext();) {
             KeyValue keyval = (KeyValue) iter.next();

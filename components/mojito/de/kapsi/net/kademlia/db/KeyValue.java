@@ -20,10 +20,10 @@
 package de.kapsi.net.kademlia.db;
 
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -114,11 +114,27 @@ public class KeyValue implements Serializable {
         return localKeyValue;
     }
     
+    public void sign(KeyPair keyPair)
+            throws InvalidKeyException, SignatureException {
+        sign(keyPair.getPrivate());
+    }
+
+    public void sign(PrivateKey privateKey) 
+            throws InvalidKeyException, SignatureException {
+        signature = CryptoHelper.sign(privateKey, this);
+    }
+    
+    public boolean verify(KeyPair keyPair) 
+            throws SignatureException, InvalidKeyException {
+        return verify(keyPair.getPublic());
+    }
+    
     public boolean verify(PublicKey pubKey) 
             throws SignatureException, InvalidKeyException {
-        
-        return pubKey != null && signature != null 
-                    && CryptoHelper.verify(pubKey, value, signature);
+        if (pubKey != null && signature != null) {
+            return CryptoHelper.verify(pubKey, this);
+        }
+        return false;
     }
     
     public void setClose(boolean close) {
@@ -143,20 +159,6 @@ public class KeyValue implements Serializable {
     
     public SocketAddress getSocketAddress() {
         return address;
-    }
-    
-    public InetAddress getInetAddress() {
-        if (address == null) {
-            return null;
-        }
-        return ((InetSocketAddress)address).getAddress();
-    }
-    
-    public int getPort() {
-        if (address == null) {
-            return -1;
-        }
-        return ((InetSocketAddress)address).getPort();
     }
     
     public boolean isSigned() {
@@ -223,6 +225,6 @@ public class KeyValue implements Serializable {
     }
     
     public String toString() {
-        return "KeyValue: " + key.toString() + " = " + new String(value) + " - originator: "+nodeId;
+        return "KeyValue: " + key.toString() + " = " + new String(value) + " - originator: " + nodeId;
     }
 }

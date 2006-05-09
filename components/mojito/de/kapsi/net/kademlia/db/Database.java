@@ -84,15 +84,19 @@ public class Database implements Serializable {
     }
 
     public synchronized boolean add(KeyValue keyValue) {
-        KUID key = keyValue.getKey();
-        KeyValueBag bag = (KeyValueBag) database.get(key);
-        if (bag == null) {
-            bag = new KeyValueBag(key);
-            database.put(key, bag);
+        if (keyValue.getValue().length > 0) {
+            KUID key = keyValue.getKey();
+            KeyValueBag bag = (KeyValueBag) database.get(key);
+            if (bag == null) {
+                bag = new KeyValueBag(key);
+                database.put(key, bag);
+            }
+    
+            databaseStats.STORED_VALUES.incrementStat();
+            return bag.add(keyValue);
+        } else {
+            return remove(keyValue);
         }
-
-        databaseStats.STORED_VALUES.incrementStat();
-        return bag.add(keyValue);
     }
 
     public synchronized boolean remove(KeyValue keyValue) {
@@ -136,21 +140,28 @@ public class Database implements Serializable {
         return Collections.EMPTY_LIST;
     }
 
+    public synchronized Collection getKeys() {
+        ArrayList keys = new ArrayList(size());
+        for(Iterator it = database.values().iterator(); it.hasNext(); ) {
+            keys.add(((KeyValueBag)it.next()).getKey());
+        }
+        return Collections.unmodifiableCollection(keys);
+    }
+    
+    public synchronized Collection getValues() {
+        ArrayList keyValues = new ArrayList((int)(size() * 1.5f));
+        for(Iterator it = database.values().iterator(); it.hasNext(); ) {
+            keyValues.addAll(((KeyValueBag)it.next()).values());
+        }
+        return Collections.unmodifiableCollection(keyValues);
+    }
+    
     public synchronized Collection getKeyValueBags() {
         ArrayList bags = new ArrayList(size());
         for(Iterator it = database.values().iterator(); it.hasNext(); ) {
             bags.add((KeyValueBag)it.next());
         }
         return Collections.unmodifiableCollection(bags);
-    }
-    
-    public synchronized Collection getAllValues() {
-        ArrayList keyValues = new ArrayList((int)(size() * 1.5f));
-        for(Iterator it = database.values().iterator(); it.hasNext(); ) {
-            KeyValueBag bag = (KeyValueBag)it.next();
-            keyValues.addAll(bag.values());
-        }
-        return Collections.unmodifiableCollection(keyValues);
     }
     
     public boolean isOriginator(KeyValue value) 
@@ -281,8 +292,8 @@ public class Database implements Serializable {
         return false;
     }
 
-    private boolean isTrustworthy(KeyValue keyValue) throws SignatureException,
-            InvalidKeyException {
+    public boolean isTrustworthy(KeyValue keyValue) 
+            throws SignatureException, InvalidKeyException {
         PublicKey masterKey = context.getMasterKey();
         return masterKey != null && keyValue.verify(masterKey);
     }
@@ -403,6 +414,10 @@ public class Database implements Serializable {
             }
         }
 
+        public KeyValue get(KUID nodeId) {
+            return (KeyValue)values.get(nodeId);
+        }
+        
         public boolean contains(KeyValue keyValue) {
             KUID nodeId = keyValue.getNodeID();
             KeyValue current = (KeyValue) values.get(nodeId);
@@ -413,17 +428,34 @@ public class Database implements Serializable {
         }
 
         private boolean remove(KeyValue keyValue) {
-            KUID nodeId = keyValue.getNodeID();
-            KeyValue current = (KeyValue) values.remove(nodeId);
-            if (current == null) {
+            try {
+                KUID nodeId = keyValue.getNodeID();
+                KeyValue current = (KeyValue) values.get(nodeId);
+                if (current == null) {
+                    return false;
+                }
+                SocketAddress currentSrc = current.getSocketAddress();
+                
+                boolean isTrustworthy = isTrustworthy(keyValue);
+                boolean isLocalKeyValue = keyValue.isLocalKeyValue();
+                
+                if (isTrustworthy 
+                        || (isLocalKeyValue && current.isLocalKeyValue())
+                        || (currentSrc != null && currentSrc.equals(keyValue.getSocketAddress()))) {
+                    
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Removed KeyValue " + current);
+                    }
+                    
+                    values.remove(nodeId);
+                    return true;
+                }
                 return false;
+            } catch (InvalidKeyException e) {
+                throw new RuntimeException(e);
+            } catch (SignatureException e) {
+                throw new RuntimeException(e);
             }
-
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Removed KeyValue " + current);
-            }
-
-            return true;
         }
 
         public boolean isEmpty() {
