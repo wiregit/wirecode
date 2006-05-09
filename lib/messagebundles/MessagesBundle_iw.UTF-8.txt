@@ -1,4 +1,4 @@
-################################################################################
+﻿################################################################################
 # Messages Bundle for LimeWire 4.9.8
 # Specialization for: Hebrew - Israel
 # Thanks to: Haber (Lucian, Dina, Assaf and Ori). Updated by Gil Tsuri.
@@ -85,7 +85,7 @@ GENERAL_BROWSE_HOST_TIP=הצג כל הקבצים שנבחרו.
 #### GENERAL_ADVANCED_SUB_MENU=Advanced
 GENERAL_ADVANCED_SUB_MENU=תת תפריט מתקדם
 #### GENERAL_CLEAR_BUTTON_LABEL=Clear
- GENERAL_CLEAR_BUTTON_LABEL=נקה
+GENERAL_CLEAR_BUTTON_LABEL=נקה
 
 ################################################################################
 # Key/value pairs for right-click context menus.
@@ -123,7 +123,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=שיחזור ברירת המחדל
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=שיחזור קביעת הייצרן.
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
-OPTIONS_LEARN_MORE_LABEL= עוד על אודות אפשרות זאת.
+OPTIONS_LEARN_MORE_LABEL=עוד על אודות אפשרות זאת.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -177,7 +177,7 @@ APP_TITLE=LimeWire: מאפשר שיתוף מידע
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=אודות LimeWire
 #### ABOUT_LABEL_START=LimeWire
-ABOUT_LABEL_START= LimeWire
+ABOUT_LABEL_START=LimeWire
 #### ABOUT_LABEL_END=Copyright (c)2000-2005 Lime Wire LLC
 ABOUT_LABEL_END=זכויות שמורות ל (c)2000-2005 Lime Wire LLC
 #### ABOUT_LABEL_TITLE=About LimeWire
@@ -2350,7 +2350,7 @@ ERROR_INTERNAL_OK=אישור
 #? ERROR_INTERNAL_ALWAYS_REVIEW=
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 #? ERROR_INTERNAL_ALWAYS_DISCARD=
-#### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
+#### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 #? ERROR_INTERNAL_SERVLET_FAILED=
 
 ################################################################################
