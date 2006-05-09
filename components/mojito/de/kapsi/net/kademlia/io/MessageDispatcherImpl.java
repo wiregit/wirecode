@@ -32,6 +32,8 @@ import java.nio.channels.Selector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.ProcessingQueue;
+
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.messages.Message;
 
@@ -46,9 +48,12 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     private Selector selector;
     private Filter filter;
     
+    private ProcessingQueue processingQueue;
+    
     public MessageDispatcherImpl(Context context) {
         super(context);
         
+        processingQueue = new ProcessingQueue(context.getName() + "-MessageDispatcherPQ", true);
         filter = new Filter();
     }
     
@@ -74,6 +79,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     public void start() {
+        processingQueue.clear();
         run();
     }
     
@@ -97,11 +103,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     protected void process(Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (Exception err) {
-            LOG.error("An exception occured during processing", err);
-        }
+        processingQueue.add(runnable);
     }
     
     private void interest(int ops, boolean on) {

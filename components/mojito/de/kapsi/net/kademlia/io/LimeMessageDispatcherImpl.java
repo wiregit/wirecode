@@ -40,12 +40,14 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
     
     private static final long CLEANUP = 3L * 1000L;
     
-    private ProcessingQueue processQueue = new ProcessingQueue("LimeDHTMessageDispatcherQueue", true);
+    private ProcessingQueue processingQueue;
     
     private boolean running = false;
     
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
+        
+        processingQueue = new ProcessingQueue(context.getName() + "-LimeMessageDispatcherPQ", true);
         
         context.scheduleAtFixedRate(new Runnable() {
             public void run() {
@@ -96,7 +98,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
     }
 
     protected void process(Runnable runnable) {
-        processQueue.add(runnable);
+        processingQueue.add(runnable);
     }
 
     public void shutdown() {
@@ -112,6 +114,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
         
         DatagramChannel channel = getDatagramChannel();
         if (channel != null) {
+            processingQueue.clear();
             NIODispatcher.instance().registerReadWrite(channel, this);
         }
     }
