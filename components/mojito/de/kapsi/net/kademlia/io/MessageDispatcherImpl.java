@@ -78,11 +78,6 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         setDatagramChannel(channel);
     }
     
-    public void start() {
-        processingQueue.clear();
-        run();
-    }
-    
     public void stop() {
         try {
             if (selector != null) {
@@ -92,6 +87,8 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         } catch (IOException err) {
             LOG.error("An error occured during stopping", err);
         }
+        
+        processingQueue.clear();
     }
     
     public boolean isRunning() {
