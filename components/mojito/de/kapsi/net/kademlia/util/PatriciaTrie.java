@@ -31,7 +31,7 @@ import java.util.Map;
  * 
  * @author Roger Kapsi
  */
-public class PatriciaTrie implements Serializable {
+public class PatriciaTrie implements Trie, Serializable {
     
     private static final long serialVersionUID = 110232526181493307L;
 
@@ -764,9 +764,5 @@ public class PatriciaTrie implements Serializable {
         
         /** Returns the n-th different bit between key and found */
         public int bitIndex(Object key, Object found);
-    }
-    
-    public static interface KeySelector {
-        public boolean allow(Object key, Object value);
     }
 }

@@ -55,7 +55,7 @@ import de.kapsi.net.kademlia.util.BucketUtils;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
 import de.kapsi.net.kademlia.util.NetworkUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
-import de.kapsi.net.kademlia.util.PatriciaTrie.KeySelector;
+import de.kapsi.net.kademlia.util.Trie.KeySelector;
 
 /**
  * This class is a Kademlia DHT routing table implementation 
