@@ -19,12 +19,20 @@ public abstract class SingleLookupStatisticContainer extends StatisticContainer 
         globalLookupStats.addSingleLookupStatistic(this);
     }
     
-    public void setHops(int hops) {
+    public void setHops(int hops, boolean findValue) {
+        if(findValue) {
+            globalLookupStats.GLOBAL_FIND_VALUE_LOOKUP_HOPS.incrementStat();
+            globalLookupStats.GLOBAL_FIND_VALUE_LOOKUP_HOPS.storeCurrentStat();
+        }
         globalLookupStats.GLOBAL_LOOKUP_HOPS.addData(hops);
         globalLookupStats.GLOBAL_LOOKUP_HOPS.storeCurrentStat();
     }
     
-    public void setTime(int time) {
+    public void setTime(int time, boolean findValue) {
+        if(findValue) {
+            globalLookupStats.GLOBAL_FIND_VALUE_LOOKUP_TIME.addData(time);
+            globalLookupStats.GLOBAL_FIND_VALUE_LOOKUP_TIME.storeCurrentStat();
+        }
         globalLookupStats.GLOBAL_LOOKUP_TIME.addData(time);
         globalLookupStats.GLOBAL_LOOKUP_TIME.storeCurrentStat();
     }

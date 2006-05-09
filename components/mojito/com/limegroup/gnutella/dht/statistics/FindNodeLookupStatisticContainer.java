@@ -42,13 +42,13 @@ public class FindNodeLookupStatisticContainer extends SingleLookupStatisticConta
     }
     
     public void setHops(int hops) {
-        super.setHops(hops);
+        super.setHops(hops, false);
         FIND_NODE_LOOKUP_HOPS.addData(hops);
         FIND_NODE_LOOKUP_HOPS.storeCurrentStat();
     }
     
     public void setTime(int time) {
-        super.setTime(time);
+        super.setTime(time, false);
         FIND_NODE_LOOKUP_TIME.addData(time);
         FIND_NODE_LOOKUP_TIME.storeCurrentStat();
     }

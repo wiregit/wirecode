@@ -147,8 +147,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
             if (!finished) {
                 if(!isExhaustive()) {
                     long diff = time();
-                    lookupStat.setHops(hop);
-                    lookupStat.setTime((int)diff);
+                    lookupStat.setHops(hop, true);
+                    lookupStat.setTime((int)diff, true);
                     finishValueLookup(lookup, response.getValues(), diff);
                     finished = true;
                 } else {
@@ -380,10 +380,10 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     private void finishLookup(int hop, long duration) {
-        lookupStat.setHops(hop);
-        lookupStat.setTime((int)duration);
         finished = true;
         if (isValueLookup()) {
+            lookupStat.setHops(hop, true);
+            lookupStat.setTime((int)duration, true);
             if(isExhaustive()) {
                 finishValueLookup(lookup, duration);
             }
@@ -391,6 +391,8 @@ public abstract class LookupResponseHandler extends AbstractResponseHandler {
                 finishValueLookup(lookup, null, duration);
             }
         } else {
+            lookupStat.setHops(hop, false);
+            lookupStat.setTime((int)duration, false);
             List nodes = responses.select(lookup, responses.size());
             finishNodeLookup(lookup, nodes, queryKeys, duration);
         }

@@ -47,6 +47,18 @@ public class GlobalLookupStatisticContainer extends StatisticContainer {
    public Statistic GLOBAL_LOOKUP_TIME =
        new SimpleStatistic();
    
+   /**
+    * <tt>Statistic</tt> for the FIND_VALUE times
+    */
+   public Statistic GLOBAL_FIND_VALUE_LOOKUP_TIME =
+       new SimpleStatistic();
+   
+   /**
+    * <tt>Statistic</tt> for the FIND_VALUE hops
+    */
+   public Statistic GLOBAL_FIND_VALUE_LOOKUP_HOPS =
+       new SimpleStatistic();
+   
    public void addSingleLookupStatistic(SingleLookupStatisticContainer lookupStat) {
        synchronized (singleLookups) {
            singleLookups.add(lookupStat);
