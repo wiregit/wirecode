@@ -56,6 +56,8 @@ class Tag {
     
     private long sent = -1L;
     
+    private long timeout = -1L;
+    
     public Tag(ContactNode node, ResponseMessage message) 
             throws IOException {
         
@@ -102,6 +104,7 @@ class Tag {
         }
         
         this.responseHandler = responseHandler;
+        this.timeout = responseHandler.timeout();
     }
     
     public int getSize() {
@@ -185,7 +188,7 @@ class Tag {
         }
         
         public boolean timeout() {
-            return System.currentTimeMillis() - sent >= responseHandler.timeout();
+            return System.currentTimeMillis() - sent >= timeout;
         }
         
         private boolean compareNodeID(ResponseMessage response) {
