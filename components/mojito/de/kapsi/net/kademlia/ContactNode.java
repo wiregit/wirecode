@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia;
 
 import java.net.SocketAddress;
 
+import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class ContactNode extends Node {
@@ -36,6 +37,8 @@ public class ContactNode extends Node {
     
     private long lastDeadOrAliveTime = 0L;
     
+    private transient long roundTripTime = -1L;
+    
     public ContactNode(KUID nodeId, SocketAddress address) {
         this(nodeId, address, 0);
     }
@@ -47,10 +50,29 @@ public class ContactNode extends Node {
         this.flags = flags;
     }
     
+    public long getAdaptativeTimeOut() {
+        //for now, based on failures and previous round trip time
+        long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
+        if(roundTripTime < 0 || isDead()) {
+            return maxTimeout;
+        } else {
+            return Math.min(((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * roundTripTime) + 
+                failures * roundTripTime), maxTimeout);
+        }
+    }
+    
     public int getFlags() {
         return flags;
     }
     
+    public long getRoundTripTime() {
+        return roundTripTime;
+    }
+
+    public void setRoundTripTime(long rountTripTime) {
+        this.roundTripTime = rountTripTime;
+    }
+
     public void setFirewalled(boolean firewalled) {
         if (firewalled) {
             this.flags |= FIREWALLED;
@@ -141,8 +163,6 @@ public class ContactNode extends Node {
             .append(", unknown: ").append(getTimeStamp()==0);
         return buffer.toString();
     }
-    
-    
     
     public void setTimeStamp(long timestamp) {
         super.setTimeStamp(timestamp);

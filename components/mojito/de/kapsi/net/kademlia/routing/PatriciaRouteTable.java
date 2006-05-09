@@ -603,10 +603,7 @@ public class PatriciaRouteTable implements RoutingTable {
         if (alive) {
             //if the existing node is marked as dead, replace anyway
             if (existingNode.isDead()) {
-                existingNode.setSocketAddress(node.getSocketAddress());
-                existingNode.alive();
-                touchBucket(nodeId);
-                return existingNode;
+                return updateContactInfo(existingNode, node, true);
             }
             
             // Same Address? OK, update timestamp
@@ -616,9 +613,7 @@ public class PatriciaRouteTable implements RoutingTable {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Updating timestamp for node: "+existingNode);
                 }
-                existingNode.alive();
-                touchBucket(nodeId);
-                return existingNode;
+                return updateContactInfo(existingNode, node, true);
             }
             
             //check if we have heard of the existing node recently
@@ -643,9 +638,7 @@ public class PatriciaRouteTable implements RoutingTable {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Local maching loop detection for node: "+existingNode);
                     }
-                    existingNode.setSocketAddress(newAddress);
-                    existingNode.alive();
-                    return existingNode;
+                    return updateContactInfo(existingNode, node, true);
                 }
             } catch (IOException ignore) {}
             
@@ -677,7 +670,21 @@ public class PatriciaRouteTable implements RoutingTable {
                 LOG.error("Coud not start spoof check", err);
             }
         } else if(existingNode.isDead()) { //replace anyway and put in unknown state
-            existingNode.setSocketAddress(node.getSocketAddress());
+            return updateContactInfo(existingNode, node, false);
+        }
+        return existingNode;
+    }
+    
+    private ContactNode updateContactInfo(ContactNode existingNode, ContactNode newNode, boolean alive) {
+        if(alive) {
+            existingNode.setSocketAddress(newNode.getSocketAddress());
+            if(newNode.getRoundTripTime() > 0L) {
+                existingNode.setRoundTripTime(newNode.getRoundTripTime());
+            }
+            existingNode.alive();
+            touchBucket(existingNode.getNodeID());
+        } else {
+            existingNode.setSocketAddress(newNode.getSocketAddress());
             existingNode.unknownState();
         }
         return existingNode;
@@ -902,8 +909,7 @@ public class PatriciaRouteTable implements RoutingTable {
             if (LOG.isInfoEnabled()) {
                 LOG.info(currentContact + " does not respond! Replacing it with " + newContact);
             }
-            currentContact.setSocketAddress(newContact.getSocketAddress());
-            currentContact.alive();
+            updateContactInfo(currentContact, newContact, true);
             
             if(replacementNode && replacementBucket != null) {
                 // we have found a live contact in the bucket's replacement cache!

@@ -24,6 +24,9 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.NoOpResponseHandler;
@@ -43,6 +46,8 @@ import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 
 class Tag {
+    
+    private static final Log LOG = LogFactory.getLog(Tag.class);
     
     private KUID nodeId;
     private SocketAddress dst;
@@ -76,15 +81,20 @@ class Tag {
     
     public Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) 
             throws IOException {
-        this(null, dst, message, handler);
+        this(null, dst, message, handler, -1L);
     }
     
     public Tag(ContactNode node, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
-        this(node.getNodeID(), node.getSocketAddress(), message, responseHandler);
+        this(node.getNodeID(), node.getSocketAddress(), message, responseHandler, node.getAdaptativeTimeOut());
     }
     
     public Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
+            throws IOException {
+        this(nodeId, dst, message, responseHandler, -1L);
+    }
+    
+    public Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler, long timeout) 
             throws IOException {
         
         data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
@@ -104,7 +114,7 @@ class Tag {
         }
         
         this.responseHandler = responseHandler;
-        this.timeout = responseHandler.timeout();
+        this.timeout = timeout;
     }
     
     public int getSize() {
@@ -188,7 +198,18 @@ class Tag {
         }
         
         public boolean timeout() {
-            return System.currentTimeMillis() - sent >= timeout;
+            long time = System.currentTimeMillis() - sent;
+            if(timeout < 0L) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Default timeout: " + timeout+ ", node: "+nodeId);
+                }
+                return time >= responseHandler.timeout();
+            } else {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Timeout: " + timeout + ", node: "+nodeId);
+                }
+                return time >= timeout;
+            }
         }
         
         private boolean compareNodeID(ResponseMessage response) {

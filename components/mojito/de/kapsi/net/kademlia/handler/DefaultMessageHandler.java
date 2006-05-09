@@ -72,11 +72,11 @@ public class DefaultMessageHandler extends MessageHandler
     }
     
     public long timeout() {
-        return NetworkSettings.TIMEOUT.getValue();
+        return NetworkSettings.MAX_TIMEOUT.getValue();
     }
 
     public void handleResponse(ResponseMessage message, long time) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message);
+        addLiveContactInfo(message.getContactNode(), message, time);
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
@@ -85,7 +85,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleRequest(RequestMessage message) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message);
+        addLiveContactInfo(message.getContactNode(), message, -1L);
     }
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
@@ -93,10 +93,11 @@ public class DefaultMessageHandler extends MessageHandler
     }
     
     private void addLiveContactInfo(ContactNode node, 
-            Message message) throws IOException {
+            Message message, long roundTripTime) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
-
+        
+        node.setRoundTripTime(roundTripTime);
         //only do store forward if it is a new node in our routing table or 
         //a node that is (re)connecting
         boolean newNode = routeTable.add(node, true);

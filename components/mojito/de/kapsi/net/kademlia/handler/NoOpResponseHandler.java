@@ -44,7 +44,7 @@ public final class NoOpResponseHandler implements ResponseHandler {
     
     public NoOpResponseHandler(long timeout) {
         if (timeout < 0L) {
-            this.timeout = NetworkSettings.TIMEOUT.getValue();
+            this.timeout = NetworkSettings.MAX_TIMEOUT.getValue();
         } else {
             this.timeout = timeout;
         }

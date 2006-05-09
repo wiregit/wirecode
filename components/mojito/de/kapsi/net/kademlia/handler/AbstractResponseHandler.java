@@ -62,7 +62,7 @@ public abstract class AbstractResponseHandler extends MessageHandler
         super(context);
         
         if (timeout < 0L) {
-            this.timeout = NetworkSettings.TIMEOUT.getValue();
+            this.timeout = NetworkSettings.MAX_TIMEOUT.getValue();
         } else {
             this.timeout = timeout;
         }
