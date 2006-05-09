@@ -93,11 +93,10 @@ public class DefaultMessageHandler extends MessageHandler
     }
     
     private void addLiveContactInfo(ContactNode node, 
-            Message message, long roundTripTime) throws IOException {
+            Message message, long time) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
         
-        node.setRoundTripTime(roundTripTime);
         //only do store forward if it is a new node in our routing table or 
         //a node that is (re)connecting
         boolean newNode = routeTable.add(node, true);

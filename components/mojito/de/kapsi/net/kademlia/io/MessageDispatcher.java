@@ -249,6 +249,9 @@ public abstract class MessageDispatcher implements Runnable {
                             return;
                         }
                         
+                        // Set the Round Trip Time (RTT)
+                        message.getContactNode().setRoundTripTime(receipt.time());
+                        
                         // OK, all checks passed. We can remove the receipt now!
                         receiptMap.remove(message.getMessageID());
                     }
