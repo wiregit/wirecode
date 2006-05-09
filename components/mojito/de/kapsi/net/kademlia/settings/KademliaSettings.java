@@ -49,5 +49,5 @@ public class KademliaSettings extends LimeDHTProps {
      * Whether or not a value lookup is exhaustive
      */
     public static final BooleanSetting EXHAUSTIVE_VALUE_LOOKUP
-        = FACTORY.createBooleanSetting("EXHAUSTIVE_VALUE_LOOKUP", true);
+        = FACTORY.createBooleanSetting("EXHAUSTIVE_VALUE_LOOKUP", false);
 }
