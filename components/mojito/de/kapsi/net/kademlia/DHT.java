@@ -269,17 +269,10 @@ public class DHT {
             
             Database database = context.getDatabase();
             synchronized(database) {
-                if (value.length > 0) {
-                    if (database.add(keyValue)) {
-                        context.store(keyValue, listener);
-                        return true;
-                    }
-                } else {
-                    if (database.remove(keyValue) 
-                            || database.isTrustworthy(keyValue)) {
-                        context.store(keyValue, listener);
-                        return true;
-                    }
+                if (database.add(keyValue) 
+                        || database.isTrustworthy(keyValue)) {
+                    context.store(keyValue, listener);
+                    return true;
                 }
             }
         } catch (InvalidKeyException e) {
@@ -287,6 +280,7 @@ public class DHT {
         } catch (SignatureException e) {
             LOG.error(e);
         }
+        
         return false;
     }
     
