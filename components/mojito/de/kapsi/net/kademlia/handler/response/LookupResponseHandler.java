@@ -353,8 +353,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         lookupStat.setTime((int)time);
         finished = true;
         
-        //Thread.dumpStack();
-        
         if (isValueLookup()) {
             ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_FAILURE.incrementStat();
             fireFound(Collections.EMPTY_LIST, time);
@@ -369,7 +367,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     
     protected void resend(KUID nodeId, 
             SocketAddress dst, RequestMessage message) throws IOException {
-        super.resend(nodeId, dst, message);
+        
+        // This method is never callled if max errors is set to 0!
+        // Setting max errors to something else than 0 in lookups
+        // is algorithmically incorrect!
+        //super.resend(nodeId, dst, message);
     }
 
     public void handleTimeout(KUID nodeId, 
