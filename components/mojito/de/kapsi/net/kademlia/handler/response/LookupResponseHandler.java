@@ -75,6 +75,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     
     private boolean finished = false;
     
+    private int foundValueLocs = 0;
+    
     private long lookupTimeout;
     
     /**
@@ -130,6 +132,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     
     public boolean isValueLookup() {
         return lookup.isValueID();
+    }
+    
+    public boolean isExhaustiveValueLookup() {
+        return KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
     }
     
     public void start() throws IOException {
@@ -190,13 +196,21 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                         + totalTime + "ms");
             }
             
-            if (!finished) {
+            
+            if (foundValueLocs == 0) {
                 lookupStat.setHops(hop);
                 lookupStat.setTime((int)totalTime);
                 ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_OK.incrementStat();
             }
-            finished = true;
+            foundValueLocs++;
             
+            if (isExhaustiveValueLookup()) {
+                activeSearches--;
+                lookupStep(hop);
+            } else {
+                finished = true;
+            }
+
             fireFound(response.getValues(), totalTime);
         } else {
             // Some Idot sent us a FIND_VALUE response for a

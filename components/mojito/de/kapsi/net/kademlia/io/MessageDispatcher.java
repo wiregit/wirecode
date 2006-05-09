@@ -220,7 +220,7 @@ public abstract class MessageDispatcher implements Runnable {
                 ResponseMessage response = (ResponseMessage)message;
                 
                 // Check the QueryKey in the message ID to figure
-                // out weather or not we have ever sent a Request
+                // out whether or not we have ever sent a Request
                 // to that Host!
                 if (!response.verifyQueryKey()) {
                     if (LOG.isWarnEnabled()) {

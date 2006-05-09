@@ -759,7 +759,7 @@ public class PatriciaTrie implements Trie, Serializable {
         /** Returns the length of the Key in bits. */
         public int length();
         
-        /** Returns weather or not a bit is set */
+        /** Returns whether or not a bit is set */
         public boolean isBitSet(Object key, int bitIndex);
         
         /** Returns the n-th different bit between key and found */
