@@ -44,9 +44,12 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     private static final long CLEANUP = 3L * 1000L;
     
     private Selector selector;
+    private Filter filter;
     
     public MessageDispatcherImpl(Context context) {
         super(context);
+        
+        filter = new Filter();
     }
     
     public void bind(SocketAddress address) throws IOException {
@@ -90,7 +93,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
 
     protected boolean allow(Message message) {
-        return true;
+        return filter.allow(message.getSocketAddress());
     }
     
     protected void process(Runnable runnable) {

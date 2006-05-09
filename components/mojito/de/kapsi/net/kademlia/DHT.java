@@ -147,6 +147,10 @@ public class DHT {
         return context.getLookupListeners();
     }
     
+    public void setMessageDispatcher(Class messageDispatcher) {
+        context.setMessageDispatcher(messageDispatcher);
+    }
+    
     public long bootstrap(SocketAddress address) throws IOException {
         return bootstrap(address, ContextSettings.SYNC_BOOTSTRAP_TIMEOUT.getValue());
     }

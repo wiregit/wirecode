@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.security.KeyPair;
@@ -164,6 +165,23 @@ public class Context {
     
     public String getName() {
         return (name != null ? name : "DHT");
+    }
+    
+    public synchronized void setMessageDispatcher(Class clazz) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
+        }
+
+        if (clazz == null) {
+            clazz = MessageDispatcherImpl.class;
+        }
+        
+        try {
+            Constructor c = clazz.getConstructor(new Class[]{Context.class});
+            messageDispatcher = (MessageDispatcher)c.newInstance(new Object[]{this});
+        } catch (Exception err) {
+            throw new RuntimeException(err);
+        }
     }
     
     public DHTStats getDHTStats() {
