@@ -368,7 +368,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     protected void resend(KUID nodeId, 
             SocketAddress dst, RequestMessage message) throws IOException {
         
-        // This method is never callled if max errors is set to 0!
+        // This method is never called if max errors is set to 0!
         // Setting max errors to something else than 0 in lookups
         // is algorithmically incorrect!
         //super.resend(nodeId, dst, message);
