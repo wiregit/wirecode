@@ -284,7 +284,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                     + " did not respond to our FIND request");
         }
         
-        if (!isStopped()) {
+        if (!isStopped() && !finished) {
             int hop = ((Integer)hopMap.get(nodeId)).intValue();
             activeSearches--;
             lookupStep(hop);
