@@ -49,35 +49,50 @@ import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.KeyValueCollection;
+import de.kapsi.net.kademlia.util.NetworkUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie;
 
 public class LookupResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     
+    /** The key we're looking for */
     private KUID lookup;
+    
+    /** Inverted lookup key (furthest away) */
     private KUID furthest;
     
+    /** The time when this lookup was started */
     private long startTime;
     
+    /** Set of queried KUIDs */
     private Set queried = new HashSet();
     
+    /** Trie of ContactNodes we're going to query */
     private PatriciaTrie toQuery = new PatriciaTrie();
     
+    /** Trie of ContactNodes that did respond */
     private PatriciaTrie responses = new PatriciaTrie();
     
+    /** A Map we're using to count the number of hops */
     private Map hopMap = new HashMap();
     
+    /** The expected result set size (aka K) */
     private int resultSetSize;
     
+    /** The total number of responses we got */
     private int responseCount = 0;
     
+    /** The number of currently active searches */
     private int activeSearches = 0;
     
+    /** Whether or not the lookup has finished */
     private boolean finished = false;
     
+    /** The number of value locations we've found if this is a value lookup */
     private int foundValueLocs = 0;
     
+    /** Global lookup timeout */
     private long lookupTimeout;
     
     /**
@@ -222,11 +237,18 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private void handleFindNodeResponse(FindNodeResponse response, long time, int hop) throws IOException {
         
         Collection nodes = response.getValues();
-        
         for(Iterator it = nodes.iterator(); it.hasNext(); ) {
             ContactNode node = (ContactNode)it.next();
             
-            if (!isQueried(node) && !isYetToBeQueried(node)) {
+            if (!NetworkUtils.isValidSocketAddress(node.getSocketAddress())) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(response.getContactNode() + " sent us a ContactNode with an invalid IP/Port " + node);
+                }
+                continue;
+            }
+            
+            if (!isQueried(node) 
+                    && !isYetToBeQueried(node)) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Adding " + node + " to the yet-to-be queried list");
                 }
@@ -394,27 +416,34 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
     }
     
+    /** Returns whether or not the Node has been queried */
     private boolean isQueried(ContactNode node) {
         return queried.contains(node.getNodeID());
     }
     
+    /** Marks the Node as queried */
     private void markAsQueried(ContactNode node) {
         queried.add(node.getNodeID());
         toQuery.remove(node.getNodeID());
     }
     
+    /** Returns whether or not the Node is in the to-query Trie */
     private boolean isYetToBeQueried(ContactNode node) {
         return toQuery.containsKey(node.getNodeID());
     }
     
-    private void addYetToBeQueried(ContactNode node, int hop) {
+    /** Adds the Node to the to-query Trie */
+    private boolean addYetToBeQueried(ContactNode node, int hop) {
         if (!isQueried(node) 
                 && !context.isLocalNodeID(node.getNodeID())) {
             toQuery.put(node.getNodeID(), node);
             hopMap.put(node.getNodeID(), new Integer(hop));
+            return true;
         }
+        return false;
     }
     
+    /** Adds the ContactNodeEntry to the response Trie */
     private void addResponse(ContactNodeEntry entry) {
         responses.put(entry.getNodeID(), entry);
         
@@ -439,6 +468,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         });
     }
     
+    /**
+     * 
+     */
     public static class ContactNodeEntry implements Map.Entry {
         
         private ContactNode node;

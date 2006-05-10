@@ -58,6 +58,7 @@ import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
+import de.kapsi.net.kademlia.util.NetworkUtils;
 
 public abstract class MessageDispatcher implements Runnable {
     
@@ -183,6 +184,15 @@ public abstract class MessageDispatcher implements Runnable {
             return false;
         }
         
+        if (!NetworkUtils.isValidSocketAddress(dst)) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("The IP/Port of " + ContactNode.toString(nodeId, dst) + " is not valid");
+            }
+            
+            tag.handleError(new IOException("Invalid IP/Port: " + ContactNode.toString(nodeId, dst)));
+            return false;
+        }
+        
         synchronized(outputQueue) {
             outputQueue.add(tag);
             interestWrite(true);
@@ -214,6 +224,13 @@ public abstract class MessageDispatcher implements Runnable {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Received a message of type " + message.getClass().getName() 
                             + " from ourself " + ContactNode.toString(nodeId, src));
+                }
+                return;
+            }
+            
+            if (!NetworkUtils.isValidSocketAddress(src)) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(ContactNode.toString(nodeId, src) + " has an invalid IP/Port");
                 }
                 return;
             }
