@@ -38,8 +38,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
 
     private static final Log LOG = LogFactory.getLog(LimeMessageDispatcherImpl.class);
     
-    private static final long CLEANUP = 3L * 1000L;
-    
     private ProcessingQueue processingQueue;
     
     private boolean running = false;
@@ -82,6 +80,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
 
     public void stop() {
         running = false;
+        processingQueue.clear();
         setDatagramChannel(null);
     }
     

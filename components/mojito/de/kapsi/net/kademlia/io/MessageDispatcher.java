@@ -63,6 +63,8 @@ public abstract class MessageDispatcher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     
+    protected static final long CLEANUP = 100L;
+    
     private LinkedList outputQueue = new LinkedList();
     
     private ReceiptMap receiptMap = new ReceiptMap(512);

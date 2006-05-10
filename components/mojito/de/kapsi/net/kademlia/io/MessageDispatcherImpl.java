@@ -41,9 +41,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
 
     private static final Log LOG = LogFactory.getLog(MessageDispatcherImpl.class);
     
-    private static final long SLEEP = 50L;
-    
-    private static final long CLEANUP = 3L * 1000L;
+    private static final long SELECTOR_SLEEP = 50L;
     
     private Selector selector;
     private Filter filter;
@@ -134,7 +132,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         while(isRunning()) {
             
             try {
-                selector.select(SLEEP);
+                selector.select(SELECTOR_SLEEP);
                 
                 // READ
                 handleRead();
