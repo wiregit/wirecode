@@ -36,4 +36,8 @@ public class LookupAdapter implements LookupListener {
 
     public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
     }
+    
+    public void failure(KUID lookup, long time) {
+        
+    }
 }

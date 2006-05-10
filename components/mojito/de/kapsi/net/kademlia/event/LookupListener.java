@@ -33,4 +33,6 @@ public interface LookupListener extends ResponseListener {
      * 
      */
     public void found(KUID lookup, Collection c, long time);
+    
+    public void failure(KUID lookup, long time);
 }

@@ -220,6 +220,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             }
             foundValueLocs++;
             
+            fireFound(new KeyValueCollection(response), totalTime);
+            
             if (isExhaustiveValueLookup()) {
                 activeSearches--;
                 lookupStep(hop);
@@ -227,7 +229,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 finished = true;
             }
 
-            fireFound(new KeyValueCollection(response), totalTime);
         } else {
             // Some Idot sent us a FIND_VALUE response for a
             // FIND_NODE lookup! Ignore?
@@ -377,7 +378,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         
         if (isValueLookup()) {
             ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_FAILURE.incrementStat();
-            fireFound(Collections.EMPTY_LIST, time);
+            fireFailure(time);
         } else {
             
             // addResponse(ContactNode) limits the size of the
@@ -462,6 +463,19 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                     for(Iterator it = listeners.iterator(); it.hasNext(); ) {
                         LookupListener listener = (LookupListener)it.next();
                         listener.found(lookup, c, time);
+                    }
+                }
+            }
+        });
+    }
+    
+    private void fireFailure(final long time) {
+        context.fireEvent(new Runnable() {
+            public void run() {
+                if (!isStopped()) {
+                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                        LookupListener listener = (LookupListener)it.next();
+                        listener.failure(lookup, time);
                     }
                 }
             }

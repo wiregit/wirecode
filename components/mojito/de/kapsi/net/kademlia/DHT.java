@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
+import de.kapsi.net.kademlia.event.LookupAdapter;
 import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
@@ -310,14 +311,15 @@ public class DHT {
         };
         
         synchronized (values) {
-            context.get(key, new LookupListener() {
-                public void response(ResponseMessage response, long time) {}
-
-                public void timeout(KUID nodeId, SocketAddress address, 
-                        RequestMessage request, long time) {}
-                
+            context.get(key, new LookupAdapter() {
                 public void found(KUID lookup, Collection c, long time) {
                     values[0] = c;
+                    synchronized (values) {
+                        values.notify();
+                    }
+                }
+
+                public void failure(KUID lookup, long time) {
                     synchronized (values) {
                         values.notify();
                     }

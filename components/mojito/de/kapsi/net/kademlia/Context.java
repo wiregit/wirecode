@@ -723,6 +723,9 @@ public class Context {
             }
         }
         
+        public void failure(KUID lookup, long time) {
+        }
+
         public void setBuckets(List buckets) {
             this.buckets = buckets;
             
@@ -825,6 +828,9 @@ public class Context {
                     }
                 });
             }
+        }
+
+        public void failure(KUID lookup, long time) {
         }
     }
     
@@ -1071,6 +1077,23 @@ public class Context {
                             for(Iterator it = listeners.iterator(); it.hasNext(); ) {
                                 LookupListener listener = (LookupListener)it.next();
                                 listener.found(lookup, c, time);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        public void failure(final KUID lookup, final long time) {
+            synchronized (handlerMap) {
+                handlerMap.remove(lookup);
+                
+                fireEvent(new Runnable() {
+                    public void run() {
+                        synchronized (listeners) {
+                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                                LookupListener listener = (LookupListener)it.next();
+                                listener.failure(lookup, time);
                             }
                         }
                     }

@@ -431,6 +431,10 @@ public class Main {
                 buffer.append("\n");
                 System.out.println(buffer.toString());
             }
+
+            public void failure(KUID lookup, long time) {
+                System.out.println(lookup + " was not found");
+            }
         });
     }
     
