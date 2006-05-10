@@ -86,6 +86,7 @@ public class Main {
                     dht.bind(new InetSocketAddress(port+i));
                 }
                 
+                dht.setName("DHT" + i);
                 dht.start();
 
                 dhts.add(dht);
