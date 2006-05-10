@@ -55,10 +55,12 @@ import de.kapsi.net.kademlia.db.KeyValuePublisher;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.LookupResponseHandler;
 import de.kapsi.net.kademlia.handler.response.PingResponseHandler;
+import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StoreResponseHandler;
 import de.kapsi.net.kademlia.handler.response.LookupResponseHandler.ContactNodeEntry;
 import de.kapsi.net.kademlia.io.MessageDispatcher;
@@ -522,6 +524,15 @@ public class Context {
                     queryKey, Collections.EMPTY_LIST);
         
         messageDispatcher.send(node, request, handler);
+    }
+    
+    public void stats(SocketAddress address, int request, StatsListener listener) throws IOException {
+        RequestMessage msg = messageFactory.createStatsRequest(address, new byte[0], request);
+        StatsResponseHandler handler = new StatsResponseHandler(this);
+        if (listener != null) {
+            handler.addStatsListener(listener);
+        }
+        messageDispatcher.send(address, msg, handler);
     }
     
     public int size() {

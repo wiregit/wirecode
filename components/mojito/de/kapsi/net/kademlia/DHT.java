@@ -35,6 +35,7 @@ import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.PingListener;
+import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
@@ -237,6 +238,13 @@ public class DHT {
             throw new NullPointerException("PingListener is null");
         }
         context.ping(dst, listener);
+    }
+    
+    public void stats(SocketAddress dst, int request, StatsListener listener) throws IOException {
+        if (listener == null) {
+            throw new NullPointerException("PingListener is null");
+        }
+        context.stats(dst, request, listener);
     }
     
     // TODO remove - for test purposes only

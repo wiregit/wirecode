@@ -32,33 +32,30 @@ import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
-import de.kapsi.net.kademlia.messages.response.StatsResponse;
 
 public class StatsResponseHandler extends AbstractResponseHandler {
 
     private static final Log LOG = LogFactory.getLog(StatsResponseHandler.class);
     
-    private StatsListener l;
-    
-    public StatsResponseHandler(Context context, StatsListener l) {
+    public StatsResponseHandler(Context context) {
         super(context);
-        this.l = l;
     }
 
+    public void addStatsListener(StatsListener listener) {
+        listeners.add(listener);
+    }
+    
+    public void removeStatsListener(StatsListener listener) {
+        listeners.remove(listener);
+    }
+
+    public StatsListener[] getStatsListeners() {
+        return (StatsListener[])listeners.toArray(new StatsListener[0]);
+    }
     
     protected void response(final ResponseMessage message, final long time) throws IOException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Stats request to " + message.getContactNode() + " succeeded");
-        }
-        
-        final StatsResponse response = (StatsResponse) message;
-        
-        if (l != null) {
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    l.nodeStatsResponse(response.getContactNode(), response.getStatistics(), time);
-                }
-            });
         }
     }
 
@@ -67,14 +64,6 @@ public class StatsResponseHandler extends AbstractResponseHandler {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Stats request to " + ContactNode.toString(nodeId, dst) 
                     + " failed");
-        }
-        
-        if (l != null) {
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    l.nodeStatsTimeout(nodeId, dst);
-                }
-            });
         }
     }
     

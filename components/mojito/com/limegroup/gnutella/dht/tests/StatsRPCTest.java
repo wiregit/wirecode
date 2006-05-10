@@ -8,8 +8,10 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.StatsListener;
-import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 
 public class StatsRPCTest {
 
@@ -37,19 +39,24 @@ public class StatsRPCTest {
             
             dht2.bootstrap(sac);
             
-            StatsRequest req = dht.getContext().getMessageFactory()
-                    .createStatsRequest(sac2, new byte[0], StatsRequest.STATS);
-            
             StatsListener listener = new StatsListener() {
-                public void nodeStatsResponse(ContactNode node, String statistics, long time) {
-                    System.out.println("Stats: "+statistics);
+                public void response(ResponseMessage response, long time) {
+                    StringBuffer buffer = new StringBuffer();
+                    buffer.append("*** Stats to ").append(response.getContactNode())
+                        .append(" succeeded in ").append(time).append("ms\n");
+                    buffer.append(((StatsResponse)response).getStatistics());
+                    System.out.println(buffer.toString());
                 }
 
-                public void nodeStatsTimeout(KUID nodeId, SocketAddress address) {
-                    System.out.println("Stats timeout");
+                public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+                    StringBuffer buffer = new StringBuffer();
+                    buffer.append("*** Stats to ").append(ContactNode.toString(nodeId, address))
+                        .append(" failed with timeout");
+                    System.out.println(buffer.toString());
                 }
             };
-            dht.getContext().getMessageDispatcher().send(sac2, req, new StatsResponseHandler(dht.getContext(),listener));
+            
+            dht.stats(sac2, StatsRequest.STATS, listener);
             
         } catch (IOException e) {
             e.printStackTrace();

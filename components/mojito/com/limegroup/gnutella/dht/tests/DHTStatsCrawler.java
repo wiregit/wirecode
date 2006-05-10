@@ -25,6 +25,7 @@ import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 
 public class DHTStatsCrawler implements Runnable, ResponseHandler {
     
@@ -287,7 +288,11 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                             iter.remove();
                             ++numReq;
                             System.out.println("Asking node :"+node+" for stats");
-                            context.getMessageDispatcher().send(node, req, new StatsResponseHandler(context,this));
+                            
+                            StatsResponseHandler handler = new StatsResponseHandler(context);
+                            handler.addStatsListener(this);
+                            
+                            context.getMessageDispatcher().send(node, req, handler);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -296,10 +301,16 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
             }
         }
         
-        public void nodeStatsResponse(ContactNode node, String statistics, long time) {
-            --numReq;
-            if(finished)return;
+        
+        public void response(ResponseMessage response, long time) {
+            numReq--;
+            if(finished)
+                return;
+            
             try {
+                ContactNode node = response.getContactNode();
+                String statistics = ((StatsResponse)response).getStatistics();
+                
                 synchronized(statsWriter) {
                     System.out.println("Reply from node :" + node);
                     statsWriter.write("Node: " + node.getNodeID() + ", " + node.getSocketAddress());
@@ -310,10 +321,11 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                 e.printStackTrace();
             }
         }
-        
-        public void nodeStatsTimeout(KUID nodeId, SocketAddress address) {
-            --numReq;
-            if(finished)return;
+
+        public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+            numReq--;
+            if(finished)
+                return;
             try {
                 synchronized(statsWriter) {
                     System.out.println("Timeout from node :"+nodeId);

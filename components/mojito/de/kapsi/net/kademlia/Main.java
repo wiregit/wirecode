@@ -43,10 +43,10 @@ import de.kapsi.net.kademlia.event.LookupAdapter;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.event.StoreListener;
-import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.ArrayUtils;
@@ -303,22 +303,24 @@ public class Main {
         }
         
         System.out.println("Requesting stat... " + addr);
-        StatsRequest req = dht.getContext().getMessageFactory()
-                .createStatsRequest(addr, new byte[0], type);
-        
         StatsListener listener = new StatsListener() {
-            public void nodeStatsResponse(ContactNode node, String statistics, long time) {
-                System.out.println("*** Stats to " + node + " succeeded: " + time + "ms");
-                System.out.println(statistics);
+            public void response(ResponseMessage response, long time) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("*** Stats to ").append(response.getContactNode())
+                    .append(" succeeded in ").append(time).append("ms\n");
+                buffer.append(((StatsResponse)response).getStatistics());
+                System.out.println(buffer.toString());
             }
 
-            public void nodeStatsTimeout(KUID nodeId, SocketAddress address) {
-                System.out.println("*** Stats to " + address + " timeout!");
+            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("*** Stats to ").append(ContactNode.toString(nodeId, address))
+                    .append(" failed with timeout");
+                System.out.println(buffer.toString());
             }
-            
         };
         
-        dht.getContext().getMessageDispatcher().send(addr, req, new StatsResponseHandler(dht.getContext(), listener));
+        dht.stats(addr, type, listener);
     }
     
     private static void bootstrap(DHT dht, String[] line) throws Throwable {
