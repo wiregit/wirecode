@@ -139,14 +139,6 @@ public class ContactNode extends Node {
         return o;
     }
     
-    /*public void setQueryKey(QueryKey queryKey) {
-        this.queryKey = queryKey;
-    }
-    
-    public QueryKey getQueryKey() {
-        return queryKey;
-    }*/
-    
     public boolean equals(Object o) {
         if (!(o instanceof ContactNode)) {
             return false;
@@ -160,7 +152,12 @@ public class ContactNode extends Node {
         StringBuffer buffer = new StringBuffer();
         buffer.append(toString(getNodeID(), getSocketAddress()))
             .append(", failures: ").append(failures)
-            .append(", unknown: ").append(getTimeStamp()==0);
+            .append(", unknown: ").append(getTimeStamp()==0L);
+        
+        if (isFirewalled()) {
+            buffer.append(", firewalled: ").append(isFirewalled());
+        }
+        
         return buffer.toString();
     }
     

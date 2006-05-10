@@ -133,6 +133,7 @@ public class Main {
         String restart = "restart";
         String quit = "quit";
         String reqstats = "reqstats .+ \\d{1,5} (stats|rt|db)";
+        String firewalled = "firewalled";
         
         String[] commands = {
                 help,
@@ -155,7 +156,8 @@ public class Main {
                 stats,
                 restart,
                 quit,
-                reqstats
+                reqstats,
+                firewalled
         };
         
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -173,6 +175,9 @@ public class Main {
                     int index = Integer.parseInt(line.split(" ")[1]);
                     dht = (DHT)dhts.get(index);
                     current = index;
+                    info(dht);
+                } else if (line.matches(firewalled)) {
+                    dht.setFirewalled(!dht.isFirewalled());
                     info(dht);
                 } else if (line.matches(ping)) {
                     ping(dht, line.split(" "));

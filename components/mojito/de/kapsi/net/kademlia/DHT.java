@@ -63,6 +63,14 @@ public class DHT {
         return context.getName();
     }
     
+    public void setFirewalled(boolean firewalled) {
+        context.setFirewalled(firewalled);
+    }
+    
+    public boolean isFirewalled() {
+        return context.isFirewalled();
+    }
+    
     public void bind(SocketAddress address) throws IOException {
         context.bind(address);
     }
@@ -182,9 +190,9 @@ public class DHT {
         return time[0];
     }
 
-    public void bootstrap(SocketAddress address, BootstrapListener l) 
+    public void bootstrap(SocketAddress address, BootstrapListener listener) 
             throws IOException {
-        context.bootstrap(address, l);
+        context.bootstrap(address, listener);
     }
     
     // TODO for debugging purposes only
