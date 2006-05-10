@@ -53,7 +53,7 @@ public class ContactNode extends Node {
     public long getAdaptativeTimeOut() {
         //for now, based on failures and previous round trip time
         long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
-        if(roundTripTime < 0 || isDead()) {
+        if(roundTripTime <= 0 || isDead()) {
             return maxTimeout;
         } else {
             return Math.min(((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * roundTripTime) + 
