@@ -154,7 +154,8 @@ public class Main {
                 kill,
                 stats,
                 restart,
-                quit
+                quit,
+                reqstats
         };
         
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));

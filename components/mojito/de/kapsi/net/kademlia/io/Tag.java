@@ -214,7 +214,8 @@ class Tag {
         
         private boolean compareNodeID(ResponseMessage response) {
             if (nodeId == null) {
-                return (message instanceof PingRequest);
+                return (message instanceof PingRequest)
+                    || (message instanceof StatsRequest);
             } else {
                 return nodeId.equals(response.getNodeID());
             }

@@ -169,8 +169,6 @@ public abstract class MessageDispatcher implements Runnable {
         SocketAddress dst = tag.getSocketAddres();
         Message message = tag.getMessage();
         
-        // TODO Add NetworkUtils.isValidPort() and Address checks!
-        
         // Make sure we're not sending messages to ourself
         if (context.isLocalNodeID(nodeId)
                 || context.isLocalAddress(dst)) {
