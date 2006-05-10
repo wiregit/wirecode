@@ -20,6 +20,18 @@ public class StatusBarSettings extends LimeProps {
         FACTORY.createBooleanSetting("SHARED_FILES_DISPLAY_ENABLED", true);
 
     /**
+     * Whether or not language status should be displayed when not using English.
+     */
+    public static BooleanSetting LANGUAGE_DISPLAY_ENABLED =
+    	FACTORY.createBooleanSetting("LANGUAGE_DISPLAY_ENABLED", true);
+    
+    /**
+     * Whether or not language status should be displayed when using English.
+     */
+    public static BooleanSetting LANGUAGE_DISPLAY_ENGLISH_ENABLED =
+        FACTORY.createBooleanSetting("LANGUAGE_DISPLAY_ENGLISH_ENABLED", false);
+    
+    /**
      * Whether or not firewall status should be displayed.
      */
     public static BooleanSetting FIREWALL_DISPLAY_ENABLED =
