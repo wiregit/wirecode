@@ -701,6 +701,10 @@ public class Context {
         }
         
         public void found(KUID lookup, Collection c, long time) {
+            
+        }
+        
+        public void finish(KUID lookup, Collection c, long time) {
             if (!phaseTwo) {
                 phaseTwo = true;
                 firePhaseOneFinished();
@@ -721,9 +725,6 @@ public class Context {
                     firePhaseTwoFinished();
                 }
             }
-        }
-        
-        public void failure(KUID lookup, long time) {
         }
 
         public void setBuckets(List buckets) {
@@ -786,6 +787,10 @@ public class Context {
         }
         
         public void found(KUID lookup, Collection c, long time) {
+            
+        }
+        
+        public void finish(KUID lookup, Collection c, long time) {
             // List of ContactNodes where we stored the KeyValues.
             final List targets = new ArrayList(c.size());
             
@@ -828,9 +833,6 @@ public class Context {
                     }
                 });
             }
-        }
-
-        public void failure(KUID lookup, long time) {
         }
     }
     
@@ -1084,7 +1086,7 @@ public class Context {
             }
         }
         
-        public void failure(final KUID lookup, final long time) {
+        public void finish(final KUID lookup, final Collection c, final long time) {
             synchronized (handlerMap) {
                 handlerMap.remove(lookup);
                 
@@ -1093,7 +1095,7 @@ public class Context {
                         synchronized (listeners) {
                             for(Iterator it = listeners.iterator(); it.hasNext(); ) {
                                 LookupListener listener = (LookupListener)it.next();
-                                listener.failure(lookup, time);
+                                listener.finish(lookup, c, time);
                             }
                         }
                     }

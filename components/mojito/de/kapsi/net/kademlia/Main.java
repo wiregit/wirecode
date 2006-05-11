@@ -432,8 +432,13 @@ public class Main {
                 System.out.println(buffer.toString());
             }
 
-            public void failure(KUID lookup, long time) {
-                System.out.println(lookup + " was not found");
+            public void finish(KUID lookup, Collection c, long time) {
+                if (c.isEmpty()) {
+                    System.out.println(lookup + " was not found after " + time + "ms");
+                } else {
+                    System.out.println("Lookup for " + lookup + " finished after " 
+                            + time + "ms and " + c.size() + " found locations");
+                }
             }
         });
     }

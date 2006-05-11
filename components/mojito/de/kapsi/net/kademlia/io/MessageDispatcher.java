@@ -187,7 +187,7 @@ public abstract class MessageDispatcher implements Runnable {
                 LOG.error("The IP/Port of " + ContactNode.toString(nodeId, dst) + " is not valid");
             }
             
-            tag.handleError(new IOException("Invalid IP/Port: " + ContactNode.toString(nodeId, dst)));
+            tag.handleError(new IllegalSocketAddressException("Invalid IP/Port: " + ContactNode.toString(nodeId, dst)));
             return false;
         }
         

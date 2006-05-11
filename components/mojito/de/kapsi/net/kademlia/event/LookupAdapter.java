@@ -28,16 +28,15 @@ import de.kapsi.net.kademlia.messages.ResponseMessage;
 
 public class LookupAdapter implements LookupListener {
 
-    public void found(KUID lookup, Collection c, long time) {
-    }
-
     public void response(ResponseMessage response, long time) {
     }
 
     public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
     }
     
-    public void failure(KUID lookup, long time) {
-        
+    public void found(KUID lookup, Collection c, long time) {
+    }
+    
+    public void finish(KUID lookup, Collection c, long time) {
     }
 }

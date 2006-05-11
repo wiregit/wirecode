@@ -312,14 +312,8 @@ public class DHT {
         
         synchronized (values) {
             context.get(key, new LookupAdapter() {
-                public void found(KUID lookup, Collection c, long time) {
+                public void finish(KUID lookup, Collection c, long time) {
                     values[0] = c;
-                    synchronized (values) {
-                        values.notify();
-                    }
-                }
-
-                public void failure(KUID lookup, long time) {
                     synchronized (values) {
                         values.notify();
                     }

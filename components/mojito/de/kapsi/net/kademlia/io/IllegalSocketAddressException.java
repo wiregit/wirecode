@@ -16,23 +16,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package de.kapsi.net.kademlia.event;
 
-import java.util.Collection;
+package de.kapsi.net.kademlia.io;
 
-import de.kapsi.net.kademlia.KUID;
+import java.net.SocketException;
 
-public interface LookupListener extends ResponseListener {
-    
-    /**
-     * Called after a lookup has finished.
-     * 
-     * Collection <tt>c</tt> is either a collection of Map.Entries or
-     * a Collection instanceof KeyValueCollection.
-     * 
-     */
-    public void found(KUID lookup, Collection c, long time);
-    
-    public void finish(KUID lookup, Collection c, long time);
+public class IllegalSocketAddressException extends SocketException {
+
+    private static final long serialVersionUID = 5043640414346690375L;
+
+    public IllegalSocketAddressException() {
+        super();
+    }
+
+    public IllegalSocketAddressException(String s) {
+        super(s);
+    }
 }

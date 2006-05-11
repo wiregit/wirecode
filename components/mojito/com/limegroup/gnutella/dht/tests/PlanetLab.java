@@ -361,7 +361,7 @@ public class PlanetLab {
                                 KUID key = toKUID(value);
                                 
                                 dht.get(key, new LookupAdapter() {
-                                    public void found(KUID lookup, Collection c, long time) {
+                                    public void finish(KUID lookup, Collection c, long time) {
                                         if(c.isEmpty()){
                                             planetlabStats.RETRIEVE_FAILURES.incrementStat();
                                         } else {
