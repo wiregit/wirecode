@@ -486,6 +486,8 @@ MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=初期設定のスキンを使用する
 MENU_VIEW_LANGS_TITLE=言語を変更 
 #### MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 MENU_VIEW_LANGS_TITLE_MNEMONIC=H
+#### MENU_VIEW_LANGS_TITLE_ACCESSIBLE=Select your Language Prefereces
+#? MENU_VIEW_LANGS_TITLE_ACCESSIBLE=
 #### MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
 MENU_VIEW_LANGS_RESTART_REQUIRED=選択した言語を使用するには、LimeWireを再起動させること
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help Translate LimeWire
@@ -618,6 +620,8 @@ MENU_HELP_ERROR_ACCESSIBLE=テスト用のポップアップ・エラーを生�
 STATUS_BAR_SHOW_CONNECTION_QUALITY=接続レベルを表示
 #### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
 STATUS_BAR_SHOW_SHARED_FILES_COUNT=共有ファイル数を表示
+#### STATUS_BAR_SHOW_LANGUAGE_STATUS=Show Language Status
+#? STATUS_BAR_SHOW_LANGUAGE_STATUS=
 #### STATUS_BAR_SHOW_FIREWALL_STATUS=Show Firewall Status
 STATUS_BAR_SHOW_FIREWALL_STATUS=ファイアウォール・ステータスを表示
 #### STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Show Bandwidth Consumption
@@ -1709,6 +1713,12 @@ JAVA_UPGRADE_TITLE=使用しているJavaをアップグレード
 JAVA_UPGRADE_MESSAGE=LimeWireがユーザーが古いバージョンのJavaを使用していることを検知しました。LimeWireは新しいバージョンのJavaでより良く見え作動します。特徴としては、マウスのスクロール・ホイールを支持、ウィンドウズXPの見栄え、その他多くの改良点があります。
 #### JAVA_UPGRADE_QUESTION=Would you like to get your free Java upgrade?
 JAVA_UPGRADE_QUESTION=無料でJavaのアップグレードを行いたいですか？
+
+################################################################################
+# Key/Value pairs for the change language window.
+################################################################################
+#### LANGUAGE_LOADING=Loading Languages
+#? LANGUAGE_LOADING=
 
 ###################################################################
 # Key/value pairs for XML

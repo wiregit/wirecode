@@ -483,6 +483,8 @@ MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Использовать стандар�
 #? MENU_VIEW_LANGS_TITLE=
 #### MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 #? MENU_VIEW_LANGS_TITLE_MNEMONIC=
+#### MENU_VIEW_LANGS_TITLE_ACCESSIBLE=Select your Language Prefereces
+#? MENU_VIEW_LANGS_TITLE_ACCESSIBLE=
 #### MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
 #? MENU_VIEW_LANGS_RESTART_REQUIRED=
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help Translate LimeWire
@@ -615,6 +617,8 @@ MENU_HELP_ERROR_ACCESSIBLE=Сгенерировать сообщение об о
 #? STATUS_BAR_SHOW_CONNECTION_QUALITY=
 #### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
 #? STATUS_BAR_SHOW_SHARED_FILES_COUNT=
+#### STATUS_BAR_SHOW_LANGUAGE_STATUS=Show Language Status
+#? STATUS_BAR_SHOW_LANGUAGE_STATUS=
 #### STATUS_BAR_SHOW_FIREWALL_STATUS=Show Firewall Status
 #? STATUS_BAR_SHOW_FIREWALL_STATUS=
 #### STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Show Bandwidth Consumption
@@ -1706,6 +1710,12 @@ JAVA_UPGRADE_TITLE=Обновите вашу версию Java
 JAVA_UPGRADE_MESSAGE=LimeWire обнаружил что вы успользуете устаревшую версию Java. LimeWire выглядит и работает лучше с последними версиями Java.
 #### JAVA_UPGRADE_QUESTION=Would you like to get your free Java upgrade?
 JAVA_UPGRADE_QUESTION=Вы хотите обновить вашу версию Java?
+
+################################################################################
+# Key/Value pairs for the change language window.
+################################################################################
+#### LANGUAGE_LOADING=Loading Languages
+#? LANGUAGE_LOADING=
 
 ###################################################################
 # Key/value pairs for XML
