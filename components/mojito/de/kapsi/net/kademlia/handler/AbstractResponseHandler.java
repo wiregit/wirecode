@@ -130,7 +130,10 @@ public abstract class AbstractResponseHandler extends MessageHandler
             SocketAddress dst, RequestMessage request, long time) throws IOException {
         
         if (!isStopped()) {
-            if (errors++ >= maxErrors) {
+            // maxErrors is actually the total number of
+            // retries. Since the first try failed there
+            // are maxErrors-1 retries left.
+            if (errors++ >= (maxErrors-1)) {
                 timeout(nodeId, dst, request, time());
                 fireTimeout(nodeId, dst, request, time());
             } else {

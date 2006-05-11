@@ -431,6 +431,7 @@ public abstract class MessageDispatcher implements Runnable {
             try {
                 defaultHandler.handleResponse(response, receipt.time());
                 if (receipt.getResponseHandler() != defaultHandler) {
+                    receipt.getResponseHandler().addTime(receipt.time());
                     receipt.getResponseHandler().handleResponse(response, receipt.time());
                 }
             } catch (IOException err) {
@@ -520,6 +521,7 @@ public abstract class MessageDispatcher implements Runnable {
                 
                 defaultHandler.handleTimeout(nodeId, dst, msg, time);
                 if (receipt.getResponseHandler() != defaultHandler) {
+                    receipt.getResponseHandler().addTime(time);
                     receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
                 }
             } catch (Exception e) {
