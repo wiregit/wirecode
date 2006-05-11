@@ -173,6 +173,8 @@ class HTMLOutput {
 "     programming knowledge and little computer savviness beyond using a word\n" +
 "     processor.<br />\n" +
 "     <br />\n" +
+"      <!--#include virtual=\"/translationbounties.shtml\" -->\n" +
+"     <br />\n" +
 "     <b>HOW LIMEWIRE SUPPORTS MULTIPLE LANGUAGES</b><br />\n" +
 "     <br />\n" +
 "     First, view this <a\n" +
