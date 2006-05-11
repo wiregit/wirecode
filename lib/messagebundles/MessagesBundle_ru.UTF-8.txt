@@ -104,18 +104,6 @@ CONTEXT_MENU_DELETE=Удалить
 CONTEXT_MENU_SELECT_ALL=Выделить всё
 
 #Options
-#### OPTIONS_BUTTONS_OK_LABEL=OK
-OPTIONS_BUTTONS_OK_LABEL=OK
-#### OPTIONS_BUTTONS_OK_TIP=Apply Your Changes and Close Window
-OPTIONS_BUTTONS_OK_TIP=Задействовать изменения и закрыть окно
-#### OPTIONS_BUTTONS_CANCEL_LABEL=Cancel
-OPTIONS_BUTTONS_CANCEL_LABEL=Отказ
-#### OPTIONS_BUTTONS_CANCEL_TIP=Cancel Your Changes and Close Window
-OPTIONS_BUTTONS_CANCEL_TIP=Отказаться от изменений и закрыть окно
-#### OPTIONS_BUTTONS_APPLY_LABEL=Apply
-OPTIONS_BUTTONS_APPLY_LABEL=Применить
-#### OPTIONS_BUTTONS_APPLY_TIP=Apply Your Changes
-OPTIONS_BUTTONS_APPLY_TIP=Задействовать изменения
 #### OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
 OPTIONS_RESTART_REQUIRED=Некоторые настройки вступят в силу после перезапуска LimeWire.
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore Defaults
@@ -178,22 +166,6 @@ GENERAL_UNIT_KBPSEC=KB/сек
 ABOUT_TITLE=О программе
 #### ABOUT_LABEL_START=LimeWire
 ABOUT_LABEL_START=LimeWire Client
-#### ABOUT_LABEL_END=Copyright (c)2000-2005 Lime Wire LLC
-ABOUT_LABEL_END=Copyright (c)2000-2005 Lime Wire LLC
-#### ABOUT_LABEL_TITLE=About LimeWire
-ABOUT_LABEL_TITLE=О программе
-#### ABOUT_CREDITS_LABEL=Credits
-#? ABOUT_CREDITS_LABEL=
-#### ABOUT_CREDITS_TIP=Display Credits Information about LimeWire
-#? ABOUT_CREDITS_TIP=
-#### ABOUT_NOTICE_LABEL=Notice
-#? ABOUT_NOTICE_LABEL=
-#### ABOUT_NOTICE_TIP=Display Distribution and Contact Information
-#? ABOUT_NOTICE_TIP=
-#### ABOUT_LICENSE_LABEL=License
-ABOUT_LICENSE_LABEL=Лицензия
-#### ABOUT_LICENSE_TIP=Display the License Agreement about This Software
-ABOUT_LICENSE_TIP=Просмотр лцензионного соглашения
 #### ABOUT_SCROLL_CHECK_BOX_LABEL=Automatically Scroll
 ABOUT_SCROLL_CHECK_BOX_LABEL=Прокручивать текст
 #### ABOUT_BUTTON_TIP=Close This Window
@@ -316,10 +288,6 @@ MENU_FILE_CLOSE=Закрыть (C)
 MENU_FILE_CLOSE_MNEMONIC=C
 #### MENU_FILE_CLOSE_ACCESSIBLE=Close the Program
 MENU_FILE_CLOSE_ACCESSIBLE=Закрыть программу
-#### MENU_FILE_QUIT=Quit
-MENU_FILE_QUIT=Выход (Q)
-#### MENU_FILE_QUIT_MNEMONIC=Q
-MENU_FILE_QUIT_MNEMONIC=Q
 #### MENU_FILE_CONNECT=Connect
 MENU_FILE_CONNECT=Соединиться (O)
 #### MENU_FILE_CONNECT_MNEMONIC=O
@@ -332,48 +300,6 @@ MENU_FILE_DISCONNECT=Отключиться (I)
 MENU_FILE_DISCONNECT_MNEMONIC=I
 #### MENU_FILE_DISCONNECT_ACCESSIBLE=Disconnect from the Network
 MENU_FILE_DISCONNECT_ACCESSIBLE=Отключиться от сети
-#### MENU_FILE_LIBRARY_NEW_FOLDER=New Folder
-MENU_FILE_LIBRARY_NEW_FOLDER=Новая папка (N)
-#### MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
-MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
-#### MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Add a Folder to the Selected Library Folder
-MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Создать новую папку в выбранной папке
-#### MENU_FILE_LIBRARY_UNSHARE_FOLDER=Stop Sharing Folder
-MENU_FILE_LIBRARY_UNSHARE_FOLDER=Отменить доступ к папке (P)
-#### MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
-MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
-#### MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Stop Sharing the Selected Library Folder
-MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Отменить доступ к выбранной папке
-#### MENU_FILE_LIBRARY_RENAME_FOLDER=Rename Folder
-MENU_FILE_LIBRARY_RENAME_FOLDER=Переименовать папку (R)
-#### MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
-MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
-#### MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Rename the Selected Library Folder
-MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Переименовать выбранную папку
-#### MENU_FILE_LIBRARY_LAUNCH_FILES=Launch File(s)
-MENU_FILE_LIBRARY_LAUNCH_FILES=Запустить файл(ы) (L)
-#### MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
-MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
-#### MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Launch the Selected File(s)
-MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Запустить выбранные файл(ы)
-#### MENU_FILE_LIBRARY_DELETE_FILES=Delete File(s)
-MENU_FILE_LIBRARY_DELETE_FILES=Удалить файл(ы) (E)
-#### MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
-MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
-#### MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Delete the Selected File(s)
-MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Удалить выбранные файл(ы)
-#### MENU_FILE_LIBRARY_REFRESH=Refresh
-MENU_FILE_LIBRARY_REFRESH=Обновить (S)
-#### MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
-MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
-#### MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Reload the Library
-MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Обновить
-#### MENU_FILE_LIBRARY_EXPLORE=Explore
-MENU_FILE_LIBRARY_EXPLORE=Исследовать (X)
-#### MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
-MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
-#### MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Open Library Folder
-MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Открыть папку
 
 #### MENU_NAV_TITLE=Navigation
 MENU_NAV_TITLE=Навигация (N)
@@ -489,16 +415,10 @@ MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Использовать стандар�
 #? MENU_VIEW_LANGS_RESTART_REQUIRED=
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help Translate LimeWire
 #? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=
-#### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=T
-#? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=
-#### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language
-#? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=
 #### MENU_VIEW_SEARCH_TITLE=Search
 MENU_VIEW_SEARCH_TITLE=Поиск (S)
 #### MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
 MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
-#### MENU_VIEW_SEARCH_ACCESSIBLE=Search Tab Options
-MENU_VIEW_SEARCH_ACCESSIBLE=Поиск
 #### MENU_VIEW_SEARCH_FILTERS=Result Filters
 MENU_VIEW_SEARCH_FILTERS=Фильтры результатов (F)
 #### MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
@@ -585,18 +505,6 @@ MENU_HELP_FORUM=Форум (M)
 MENU_HELP_FORUM_MNEMONIC=M
 #### MENU_HELP_FORUM_ACCESSIBLE=Access the LimeWire Users' Forum
 MENU_HELP_FORUM_ACCESSIBLE=Войти на форум пользователей LimeWire
-#### MENU_HELP_FRIEND=Tell a Friend
-MENU_HELP_FRIEND=Рассказать другу (T)
-#### MENU_HELP_FRIEND_MNEMONIC=T
-MENU_HELP_FRIEND_MNEMONIC=T
-#### MENU_HELP_FRIEND_ACCESSIBLE=Tell a Friend about LimeWire
-MENU_HELP_FRIEND_ACCESSIBLE=Рассказать другу о LimeWire
-#### MENU_HELP_REVIEW=Review LimeWire
-MENU_HELP_REVIEW=Предложить обзор (R)
-#### MENU_HELP_REVIEW_MNEMONIC=R
-MENU_HELP_REVIEW_MNEMONIC=R
-#### MENU_HELP_REVIEW_ACCESSIBLE=Submit a Review of LimeWire
-MENU_HELP_REVIEW_ACCESSIBLE=Предложить обзор/рецензию о LimeWire
 #### MENU_HELP_ABOUT=About LimeWire
 MENU_HELP_ABOUT=О программе... (A)
 #### MENU_HELP_ABOUT_MNEMONIC=A
@@ -653,22 +561,10 @@ SEARCH_DOWNLOAD_BUTTON_LABEL=Загрузить
 SEARCH_DOWNLOAD_BUTTON_TIP=Загрузить все выбранные файлы
 #### SEARCH_DOWNLOAD_AS_LABEL=Download As...
 SEARCH_DOWNLOAD_AS_LABEL=Загрузить как...
-#### SEARCH_WISHLIST_BUTTON_LABEL=Add To Wishlist
-SEARCH_WISHLIST_BUTTON_LABEL=Добавить в желаемое
-#### SEARCH_WISHLIST_BUTTON_TIP=Spawn a "LimeWire Robot" to Look for the Content
-SEARCH_WISHLIST_BUTTON_TIP=Запустить "робота LimeWire" для поиска желаемого контента
 #### SEARCH_BROWSE_HOST_BUTTON_LABEL=Browse Host
 SEARCH_BROWSE_HOST_BUTTON_LABEL=Просмотреть хост
 #### SEARCH_BROWSE_HOST_BUTTON_TIP=View All Files on Selected Computer
 SEARCH_BROWSE_HOST_BUTTON_TIP=Просмотреть все файлы на выбранном компьютере
-#### SEARCH_CHAT_BUTTON_LABEL=Chat...
-SEARCH_CHAT_BUTTON_LABEL=Чат...
-#### SEARCH_CHAT_BUTTON_TIP=Chat with Selected Host
-SEARCH_CHAT_BUTTON_TIP=Поговорить с пользователем на выбранном хосте
-#### SEARCH_BUY_CD_LABEL=Buy...
-SEARCH_BUY_CD_LABEL=Купить...
-#### SEARCH_BUY_CD_TIP=Buy Selected Item
-SEARCH_BUY_CD_TIP=Купить
 #### SEARCH_SEARCH_BUTTON_LABEL=Search
 SEARCH_SEARCH_BUTTON_LABEL=Искать
 #### SEARCH_SEARCH_BUTTON_TIP=Search the Network for the Given Words
@@ -701,8 +597,6 @@ SEARCH_PUBLIC_CHAT_STRING=Чат с хостом
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi-поиск...
 #### SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Show Magnet Details
 SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet-ссылка для файла
-#### SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
-SEARCH_PUBLIC_HTTP_PAGE_STRING=Web-страница для файла(ов)
 #### SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Repeat Search
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Повторить поиск
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
@@ -715,26 +609,16 @@ SEARCH_RESULT_TABLE_LABEL=Результаты
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Искать ещё
 #### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered. 
 #? SEARCH_RESULT_SECURE_TIP=
-#### SEARCH_SEARCHING_LABEL=Searching...
-SEARCH_SEARCHING_LABEL=Ищу...
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=Один из выбранных файлов является выполняемой
 #### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
 SEARCH_VIRUS_MSG_TWO=программой и может содержать вирус.
 #### SEARCH_VIRUS_MSG_THREE=you sure you want to download it?
 SEARCH_VIRUS_MSG_THREE=Вы уверены что хототе загрузить этот файл?
-#### SEARCH_SHOW_MESSAGE_MSG=Don't show this message again
-SEARCH_SHOW_MESSAGE_MSG=Больше не показывать это сообщение
-#### SEARCH_DOWNLOAD_DIALOG_CONFIRM=Download Request
-SEARCH_DOWNLOAD_DIALOG_CONFIRM=Загрузка
 #### SEARCH_DEFAULT_FIELD_TITLE=Filename
 SEARCH_DEFAULT_FIELD_TITLE=Имя файла
 #### SEARCH_MULTIPLE_HOSTS=Multiple
 SEARCH_MULTIPLE_HOSTS=Многочисленные
-#### AUTO_DL_CHECKBOX_STRING=Automatically Download
-AUTO_DL_CHECKBOX_STRING=Загружать автоматически
-#### AUTO_DL_CHECKBOX_TOOLTIP=LimeWire will download your files for you
-AUTO_DL_CHECKBOX_TOOLTIP=LimeWire будет загружать файлы для вас
 #### SEARCH_TYPE_KEYWORD=Keyword
 SEARCH_TYPE_KEYWORD=Ключевые слова
 #### SEARCH_TYPE_WHATSNEW=What's New
@@ -978,12 +862,6 @@ MEDIA_FORWARD_BUTTON_TIP=Следующий
 #### MEDIA_REWIND_BUTTON_TIP=Previous
 MEDIA_REWIND_BUTTON_TIP=Предыдущий
 
-#anu added
-#### PASSWORD_DIALOG_USERNAME_FIELD_LABEL=Username
-PASSWORD_DIALOG_USERNAME_FIELD_LABEL=Имя пользователя
-#### PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Password
-PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Пароль
-
 ################################################################################
 # Key/value pairs for DownloaderDialog
 ################################################################################
@@ -1114,16 +992,12 @@ SHARE_FILE_ALREADY_SHARED=Доступ к файлу "{0}" уже открыт.
 ################################################################################
 # Key/value pairs for Statistics String...
 ################################################################################
-#### STATISTICS_AVAILABLE=available
-STATISTICS_AVAILABLE=доступно
 #### STATISTICS_FILES=Files
 STATISTICS_FILES=Файлов
 #### STATISTICS_FILES_TOOLTIP=files
 STATISTICS_FILES_TOOLTIP=файлов
 #### STATISTICS_FILES_TOOLTIP_PENDING=files (Loading...)
 STATISTICS_FILES_TOOLTIP_PENDING=файлов (инициализация...)
-#### STATISTICS_DISCONNECTED=Disconnected / no files available
-STATISTICS_DISCONNECTED=Неподключено / файлы не доступны
 #### STATISTICS_SHARING_TOOLTIP=You are sharing
 STATISTICS_SHARING_TOOLTIP=Открыт доступ к
 #### STATISTICS_CONNECTION_DISCONNECTED=Disconnected
@@ -1316,10 +1190,6 @@ UPLOAD_KILL_BUTTON_TIP=Прервать выбранные выгрузки
 UPLOAD_CLEAR_BUTTON_LABEL=Убрать неактивные
 #### UPLOAD_CLEAR_BUTTON_TIP=Remove Inactive Uploads
 UPLOAD_CLEAR_BUTTON_TIP=Убрать неактивные выгрузки
-#### UPLOAD_CHAT_BUTTON_LABEL=Chat with Host
-UPLOAD_CHAT_BUTTON_LABEL=Чат с хостом
-#### UPLOAD_CHAT_BUTTON_TIP=Chat with Another User of the Selected Host
-UPLOAD_CHAT_BUTTON_TIP=Поговорить с пользователем на выбранном хосте
 #### UPLOAD_TABLE_STRING_NAME=Name
 UPLOAD_TABLE_STRING_NAME=Имя
 #### UPLOAD_TABLE_STRING_HOST=Host
@@ -1346,8 +1216,6 @@ UPLOAD_TABLE_STRING_UPLOADING=Выгрузка
 UPLOAD_TABLE_STRING_LIMITREACHED=Достигнут лимит выгрузок
 #### UPLOAD_TABLE_STRING_FREELOADER=Freeloader Uploading
 UPLOAD_TABLE_STRING_FREELOADER=Freeloader выгружает
-#### UPLOAD_TABLE_STRING_PUSHFAILED=Couldn't Connect
-UPLOAD_TABLE_STRING_PUSHFAILED=Не могу соединиться
 #### UPLOAD_TABLE_STRING_INTERRUPTED=Transfer Interrupted
 UPLOAD_TABLE_STRING_INTERRUPTED=Передача прервана
 #### UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=Range Unavailable
@@ -1366,8 +1234,6 @@ UPLOAD_TABLE_STRING_HASH_TREE=Выгрузка дерева хешей
 UPLOAD_TABLE_STRING_FNF=Файл не найден
 #### UPLOAD_TABLE_STRING_QUEUED=Queued at
 UPLOAD_TABLE_STRING_QUEUED=В очереди как
-#### UPLOAD_STRING_KBPSEC=KB/s
-UPLOAD_STRING_KBPSEC=KB/s
 #### UPLOAD_ACTIVE=Active
 UPLOAD_ACTIVE=активно
 #### UPLOAD_QUEUED=Queued
@@ -1423,8 +1289,6 @@ CV_COLUMN_MESSAGE=Сообщений (I/O)
 CV_COLUMN_BANDWIDTH=Траффик (I/O)
 #### CV_COLUMN_DROPPED=Dropped (I/O)
 CV_COLUMN_DROPPED=Потеряно (I/O)
-#### CV_COLUMN_HOSTS=Hosts
-CV_COLUMN_HOSTS=Хосты
 #### CV_COLUMN_PROTOCOL=Protocol
 CV_COLUMN_PROTOCOL=Протокол
 #### CV_COLUMN_VENDOR=Vendor/Version
@@ -1445,10 +1309,6 @@ CV_BUTTON_TOOLTIP_REMOVE=Удалить выбранные соединения
 CV_BUTTON_ADD=Добавить
 #### CV_BUTTON_TOOLTIP_ADD=Create a New Outgoing Connection
 CV_BUTTON_TOOLTIP_ADD=Создать новое исходящее соединение
-#### CV_LABEL_KEEP_BEGIN=Keep approximately
-CV_LABEL_KEEP_BEGIN=Поддерживать примерно
-#### CV_LABEL_KEEP_END=connections up.
-CV_LABEL_KEEP_END=активных соединений.
 #### CV_TABLE_STRING_CONNECTING=Connecting...
 CV_TABLE_STRING_CONNECTING=Подключаюсь...
 #### CV_TABLE_STRING_CONNECTINGS=Connecting
@@ -1481,8 +1341,6 @@ CV_STRING_CLIENT=[Лист]
 CV_STRING_ULTRAPEER=[Ultrapeer]
 #### CV_STRING_STATUS=Connection Status:
 CV_STRING_STATUS=Статус соединения:
-#### CV_TABLE_STRING_KBPSEC=KB/s
-CV_TABLE_STRING_KBPSEC=KB/сек
 #### CV_ADD_HOST_LABEL=Host:
 CV_ADD_HOST_LABEL=Хост:
 #### CV_ADD_PORT_LABEL=Port:
@@ -1497,10 +1355,6 @@ CV_ADD_PORT_LABEL=Порт:
 LIBRARY_TABLE_ICON=Значок
 #### LIBRARY_TABLE_NAME=Name
 LIBRARY_TABLE_NAME=Имя
-#### LIBRARY_TABLE_TITLE=Title
-LIBRARY_TABLE_TITLE=Название
-#### LIBRARY_TABLE_ARTIST=Artist
-LIBRARY_TABLE_ARTIST=Исполнитель
 #### LIBRARY_TABLE_SIZE=Size
 LIBRARY_TABLE_SIZE=Размер
 #### LIBRARY_TABLE_TYPE=Type
@@ -1517,16 +1371,12 @@ LIBRARY_TABLE_LICENSE=Лицензия
 LIBRARY_TABLE_UPLOAD_COUNT=Выгрузки
 #### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
 LIBRARY_TABLE_SEARCH_POPUP_MENU=Поиск
-#### LIBRARY_TREE_NEW_FOLDER_LABEL=New Folder
-LIBRARY_TREE_NEW_FOLDER_LABEL=Новая папка
 #### LIBRARY_TREE_SHARE_FOLDER_LABEL=Share Folder
 LIBRARY_TREE_SHARE_FOLDER_LABEL=Открыть доступ к папке
 #### LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Stop Sharing Folder
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Отменить доступ
 #### LIBRARY_TABLE_SHARING_SUB_MENU=Sharing
 LIBRARY_TABLE_SHARING_SUB_MENU=Доступ
-#### LIBRARY_TREE_RENAME_FOLDER_LABEL=Rename
-LIBRARY_TREE_RENAME_FOLDER_LABEL=Переименовать
 #### LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Add Folder Contents to Playlist
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=В плейлист
 #### LIBRARY_TREE_SAVED_DIRECTORY=Saved Files
@@ -1547,12 +1397,6 @@ LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Список всех �
 #? CONSOLE_SAVE_BUTTON_LABEL=
 #### CONSOLE_DIALOG_SAVE_TITLE=Save As
 #? CONSOLE_DIALOG_SAVE_TITLE=
-
-################################################################################
-# Key/value pairs for burn cd link
-################################################################################
-#### LIBRARY_BURN_LABEL=Burn CD...
-LIBRARY_BURN_LABEL=Записать на CD...
 
 ###################################################################
 # Key/value pairs for PlayListGUI
@@ -1575,8 +1419,6 @@ PLAYLIST_OPTIONS_SHUFFLE=Случайный порядок
 PLAYLIST_DIALOG_OPEN_TITLE=Выберите плейлист (.m3u)
 #### PLAYLIST_DIALOG_SAVE_TITLE=Save Playlist As
 PLAYLIST_DIALOG_SAVE_TITLE=Сохранить плейлист как...
-#### PLAYLIST_DIALOG_SAVE_SAVE=Save
-PLAYLIST_DIALOG_SAVE_SAVE=Сохранить
 #### PLAYLIST_CANNOT_PLAY_FILE=LimeWire cannot play the file
 PLAYLIST_CANNOT_PLAY_FILE=LimeWire не может проиграть файл
 #### PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
@@ -1840,22 +1682,6 @@ META_EDITOR_DELETE_LABEL=Удалить
 META_EDITOR_EDITING_LABEL=Редактировать аннотации для типа:
 #### META_EDITOR_ADDING_LABEL=Add annotation of type:
 META_EDITOR_ADDING_LABEL=Добавить аннотации для типа:
-#MetaSearchFrame
-#### META_SEARCH_TITLE=MetaSearch Input Window
-META_SEARCH_TITLE=Окно ввода Мета-поиска
-#### META_SEARCH_STRING=Search String
-META_SEARCH_STRING=Строка поиска
-#### META_SEARCH_CANCEL_BUTTON_LABEL=Cancel
-META_SEARCH_CANCEL_BUTTON_LABEL=Отказ
-#### META_SEARCH_SEARCH_BUTTON_LABEL=Search
-META_SEARCH_SEARCH_BUTTON_LABEL=Искать
-#ViewChooserDialog
-#### VIEW_CHOOSER_TITLE=Choose View
-VIEW_CHOOSER_TITLE=Выберите вид
-#### VIEW_CHOOSER_OK_BUTTON_LABEL=OK
-VIEW_CHOOSER_OK_BUTTON_LABEL=OK
-#### VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Cancel
-VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Отказ
 #IndentingPanel
 #### XML_SEARCH_MORE_OPTIONS_LABEL=More Search Options
 XML_SEARCH_MORE_OPTIONS_LABEL=Дополнительные опции поиска
@@ -1868,8 +1694,6 @@ META_EDITOR_OK_BUTTON_LABEL=OK
 META_EDITOR_CANCEL_BUTTON_LABEL=Отказ
 #### META_EDITOR_ADVANCED_BUTTON_LABEL=Advanced
 META_EDITOR_ADVANCED_BUTTON_LABEL=Дополнительно
-#### META_EDITOR_RESET_LABEL=Reset
-META_EDITOR_RESET_LABEL=Вернуть
 
 #### META_EDITOR_AUDIO_LABEL=Audio
 META_EDITOR_AUDIO_LABEL=Аудио
@@ -1976,12 +1800,6 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 #? CC_PUBLISHER_WORK_TITLE_LABEL=
 #### CC_PUBLISHER_DESCRIPTION_LABEL=Description:
 #? CC_PUBLISHER_DESCRIPTION_LABEL=
-#### CC_PUBLISHER_LICENSE_LABEL=License Type:
-#? CC_PUBLISHER_LICENSE_LABEL=
-#### CC_PUBLISHER_LICENSE_CC=Creative Commons
-#? CC_PUBLISHER_LICENSE_CC=
-#### CC_PUBLISHER_LICENSE_PUBLIC=Public Domain
-#? CC_PUBLISHER_LICENSE_PUBLIC=
 #### CC_PUBLISHER_LICENSE_ALLOWCOM_LABEL=Allow commercial use of your work?
 #? CC_PUBLISHER_LICENSE_ALLOWCOM_LABEL=
 #### CC_PUBLISHER_LICENSE_ALLOWMOD_LABEL=Allow modification of your work?
@@ -2000,8 +1818,6 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 #? CC_PUBLISHER_RDF_OUTPUT=
 #### CC_PUBLISHER_COPY_BUTTON=Copy to Clipboard
 #? CC_PUBLISHER_COPY_BUTTON=
-#### CC_PUBLISHER_RDFNOTGENERATED_WARNING=You have to generate an up-to-date license RDF to create the verification link for you Creative Commons license.\n\nAre you sure you want to continue without generating the license?
-#? CC_PUBLISHER_RDFNOTGENERATED_WARNING=
 #### CC_PUBLISHER_REMOVELICENSE_LABEL=Are you sure you want to permanently remove the license from your local copy of this file?
 #? CC_PUBLISHER_REMOVELICENSE_LABEL=
 #### CC_PUBLISHER_LICENSEREMOVED_LABEL=Please press OK to permanently remove license.
@@ -2023,8 +1839,6 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 #? INTERNETARCHIVE_UPLOADER_INIT=
 #### INTERNETARCHIVE_UPLOADER_CONNECTED=Connected...
 #? INTERNETARCHIVE_UPLOADER_CONNECTED=
-#### INTERNETARCHIVE_UPLOADER_DIR_CHANGED=Directory changed...
-#? INTERNETARCHIVE_UPLOADER_DIR_CHANGED=
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=Uploading file
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=of
@@ -2047,8 +1861,6 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 LIST_EDITOR_ADD_BUTTON=Добавить...
 #### LIST_EDITOR_ADD_BUTTON_2=Add
 LIST_EDITOR_ADD_BUTTON_2=Добавить
-#### LIST_EDITOR_BROWSE_BUTTON=Browse...
-LIST_EDITOR_BROWSE_BUTTON=Просмотреть...
 #### LIST_EDITOR_REMOVE_BUTTON=Remove
 LIST_EDITOR_REMOVE_BUTTON=Удалить
 #### LIST_EDITOR_ADD_BUTTON_TIP=Add New List Item
@@ -2239,14 +2051,10 @@ MESSAGE_CAPTION=Сообщение
 MESSAGE_ERROR_CAPTION=Ошибка
 #### MESSAGE_WARNING_CAPTION=Warning
 MESSAGE_WARNING_CAPTION=Предупреждение
-#### MESSAGE_SHARE_SAVE_DIR=Would you like to add the save folder to your list of shared folders? Subfolders of this folder will also be shared.
-MESSAGE_SHARE_SAVE_DIR=Хотите ли вы открыть доступ к папке для сохранения загруженных файлов? Доступ будет открыт также и к вложенным папкам.
 #### MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Are you sure you want to stop sharing this folder?
 MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Отменить доступ к этой папке?
 #### MESSAGE_CANNOT_UNSHARE_DIRECTORY=LimeWire cannot stop sharing this folder.
 MESSAGE_CANNOT_UNSHARE_DIRECTORY=LimeWire не может отменить доступ к этой папке.
-#### MESSAGE_OVERWRITE_EXISTING_FILE=Overwrite existing file
-MESSAGE_OVERWRITE_EXISTING_FILE=Перезаписать существующий файл
 #### MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire will not launch the specified file for security reasons.
 MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire не будет запускать указанный файл из соображений безопасности.
 #### MESSAGE_CONFIRM_FILE_DELETE=Are you sure you want to delete the selected file(s)?
@@ -2255,12 +2063,6 @@ MESSAGE_CONFIRM_FILE_DELETE=Удалить выбранный файл?
 MESSAGE_UNABLE_TO_DELETE_FILE_START=Не могу удалить файл
 #### MESSAGE_UNABLE_TO_DELETE_FILE_END=. It may be in use by another application.
 MESSAGE_UNABLE_TO_DELETE_FILE_END=. Возможно, он используется другим приложением.
-#### MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Unable to delete the folder
-MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Не могу удалить папку
-#### MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Unable to rename the folder
-MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Не могу переименовать папку
-#### MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. It may be in use by another application.
-MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. Возможно, она используется другим приложением.
 #### MESSAGE_UNABLE_TO_RENAME_FILE_START=Unable to rename the file
 MESSAGE_UNABLE_TO_RENAME_FILE_START=Не могу переименовать файл
 #### MESSAGE_UNABLE_TO_RENAME_FILE_END=. It may be in use by another application.
@@ -2275,19 +2077,10 @@ MESSAGE_INVALID_SAVE_DIRECTORY=Указанную папку невозможн�
 MESSAGE_FILE_CORRUPT=LimeWire определил, что данный файл испорчен. Имя файла:
 #### MESSAGE_CONTINUE_DOWNLOAD=Do you want to continue the download?
 MESSAGE_CONTINUE_DOWNLOAD=Вы хотите продолжить загрузку?
-#### MESSAGE_LANG_CHANGE=Please note that you must restart LimeWire for the language to change. Also, make sure that you have the required fonts for the selected language.
-#? MESSAGE_LANG_CHANGE=
 #### MESSAGE_SENSITIVE_SHARE_TOP=You are attempting to share a folder that is likely to contain sensitive information:
 MESSAGE_SENSITIVE_SHARE_TOP=Возможно, эта папка содержит важную информацию, к которой не следует открывать доступ:
 #### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
 MESSAGE_SENSITIVE_SHARE_BOTTOM=Открыть доступ к этой папке?
-
-################################################################################
-# Key/Value pairs for the invalid save directory window that is displayed
-# when the user does not have a valid save directory.
-################################################################################
-#### INVALID_SAVE_DIR_LABEL=The stored folder for saving files is not valid. Please enter a new folder in the folder chooser.
-INVALID_SAVE_DIR_LABEL=Выбранная папка для сохранения файлов недействительна. Пожалуйста, выберите другую.
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
@@ -2380,22 +2173,11 @@ ERROR_DAAP_RUN_ERROR=Произошла ошибка при инициализа
 ERROR_NO_PORTS_AVAILABLE=LimeWire не может назначить порт для обработки входящих соединений. Некоторые возможности LimeWire могут не работать.
 #### ERROR_PORT_UNAVAILABLE=Port not available. Please select a different port.
 ERROR_PORT_UNAVAILABLE=Порт не доступен. Пожалуйста, выберите другой порт.
-#### ERROR_KEEP_ALIVE=LimeWire does not allow you to maintain this many connections, as it creates excess traffic that clogs the network.
-ERROR_KEEP_ALIVE=LimeWire не разрешает вам обслуживать так много соединений, так как это создаст избыточный траффик мешающий нормальной работе сети.
-#### ERROR_TOO_LOW_FOR_ULTRAPEER=Ultrapeers with leaf nodes need at least six connections.
-#? ERROR_TOO_LOW_FOR_ULTRAPEER=
-#### ERROR_TOO_HIGH_FOR_LEAF=Leaves only need one connection, since they are connected to an Ultrapeer.
-#? ERROR_TOO_HIGH_FOR_LEAF=
 #### ERROR_PORT=Could not find a port to use for incoming connections.\nPlease specify a port from the configuration window.
 ERROR_PORT=Не могу назначить порт для обработки входящих соединений.\nПожалуйста, укажите порт в окне конфигурации.
-#### ERROR_INCOMING_CONNECTIONS=Could not listen to socket for incoming connections; aborting.
-#? ERROR_INCOMING_CONNECTIONS=
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=Строка поиска должна содержать как минимум три символа.
-#### ERROR_NETWORK_FLOODING=This search may return lots of results and slow the network. Are you sure you want to continue?
-ERROR_NETWORK_FLOODING=Этот поиск может дать очень много результатов, это может замедлить работу сети. Вы уверены что хотите продолжить?
-#### ERROR_BROWSE_FAILED=Could not browse files on the requested host. This machine is probably not accepting more incoming connections.
-ERROR_BROWSE_FAILED=Не могу просмотреть файлы на заданном хосте. Возможно, эта машина не может принять ваше входящее соединение.
+
 #### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=Неверная папка для сохранения файлов. Пожалуйста, используйте другую или вернитесь к умалчиваемой.
 #### ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Your save folder is not valid. It may have been deleted, you may not have permissions to write to it, or there may be another problem. Please choose a different folder.
@@ -2406,12 +2188,8 @@ ERROR_INVALID_SAVE_DIRECTORY_SELECTION=Выбранная папка для со
 ERROR_INVALID_SHARED_DIRECTORY=Неверная папка для раздаваемых файлов. Пожалуйста, используйте другую или вернитесь к умалчиваемой.
 #### ERROR_FORCE_IP_PORT_RANGE=You must enter a port between 1 and 65535 when manually forcing your port.
 ERROR_FORCE_IP_PORT_RANGE=Вы должны ввести номер порта в диапазоне от 1 до 65535 для форсирования вашего IP-адреса.
-#### ERROR_CONNECT_STRING=Connect strings must be at least length 1, contain one space, and may not contain 'GIV', 'GET', or any other HTTP keywords.
-#? ERROR_CONNECT_STRING=
 #### ERROR_PORT_RANGE=Please enter a port between 1 and 65535.
 ERROR_PORT_RANGE=Пожалуйста, введите номер порта в диапазоне от 1 до 65535.
-#### ERROR_INVALID_GROUP=You need to select a valid group.
-#? ERROR_INVALID_GROUP=
 #### ERROR_ALREADY_DOWNLOADING=You are already downloading this file to
 ERROR_ALREADY_DOWNLOADING=Вы уже загружаете
 #### FORMATTED_ERROR_ALREADY_DOWNLOADING=You are already downloading this file to "{0}".
@@ -2428,8 +2206,6 @@ ERROR_CANT_RESUME_START=Файл
 ERROR_CANT_RESUME_END=не является недозагруженным файлом и его загрузка не может быть продолжена.
 #### ERROR_OPEN_URL=LimeWire could not locate your web browser to display the following webpage:
 #? ERROR_OPEN_URL=
-#### ERROR_ACCESSING_SAVE_DIRECTORY=Could not access the save folder. Please select a new save folder in the Options menu and try again.
-ERROR_ACCESSING_SAVE_DIRECTORY=Нет доступа к папке для сохранения файлов. Пожалуйста, зайдите в настройки, выберите другую папку для сохранения и повторите попытку.
 #### ERROR_DEL_META_USER=Cannot remove unsaved info.
 ERROR_DEL_META_USER=Не могу удалить несохранённую информацию.
 #### ERROR_DEL_META_SYSTEM=Unable to remove data.
@@ -2470,12 +2246,6 @@ ERROR_THEME_OUT_OF_DATE_LATER=Позже
 ERROR_BAD_MAGNET_LINK=Не могу обработать некорректную MAGNET-ссылку.
 #### ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
 ERROR_INVALID_URLS_IN_MAGNET=Один или несколько URL-ов в MAGNET-ссылке некорректны. Файл может не загрузиться.
-#### ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
-ERROR_ITUNES_SCRIPT=LimeWire не может загрузить скрипт интеграции с iTunes, интеграция с iTunes будет отключена. Включить её можно в настройках в разделе iTunes.
-#### ERROR_ITUNES_LINK=LimeWire was unable to load the necessary components for iTunes and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
-ERROR_ITUNES_LINK=LimeWire не может загрузить необходимые компоненты для iTunes, интеграция с iTunes будет отключена. Включить её можно в настройках в разделе iTunes.
-#### ERROR_ITUNES_INTEGRATION=An error has occurred with LimeWire's iTunes integration. To prevent further errors, LimeWire has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
-ERROR_ITUNES_INTEGRATION=Произошла ошибка в системе интеграции с iTunes, для предотвращения дальнейших ошибок интеграция с iTunes будет отключена. Включить её можно в настройках в разделе iTunes.
 #### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
 ERROR_PROPS_CORRUPTED=Файл настроек испорчен. LimeWire вернётся к настройкам по умолчани.
 #### ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
@@ -2488,8 +2258,6 @@ ERROR_XML_SEARCH_TOO_LARGE=В поисковом запросе слишком �
 #? ERROR_CCPUBLISHER_MISSING_YEAR=
 #### ERROR_CCPUBLISHER_MISSING_HOLDER=Please enter the copyright holder of the file you want to publish.
 #? ERROR_CCPUBLISHER_MISSING_HOLDER=
-#### ERROR_CCPUBLISHER_MISSING_COMMERCIAL=Please enter the title of the file you want to publish.
-#? ERROR_CCPUBLISHER_MISSING_COMMERCIAL=
 #### ERROR_CCPUBLISHER_MISSING_URL=Please enter a verification URL for the license.
 #? ERROR_CCPUBLISHER_MISSING_URL=
 #### ERROR_CCPUBLISHER_DESCRIPTION_START=The description for this file is too short. Please enter at least {0} words.
@@ -2581,8 +2349,6 @@ LICENSE_UNKNOWN_INVALID=Этот файл может требовать лице
 # the visual names of the panes in the options tree
 # package com.limegroup.gnutella.gui.options
 ################################################################################
-#### OPTIONS_LOCALIZE_MAIN_TITLE=Localize
-#? OPTIONS_LOCALIZE_MAIN_TITLE=
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=Сохранение
 #### OPTIONS_SHARED_MAIN_TITLE=Sharing
@@ -2625,10 +2391,6 @@ OPTIONS_GUI_MAIN_TITLE=Вид
 OPTIONS_POPUPS_MAIN_TITLE=Всплывающие сообщения
 #### OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocompletion
 OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Автодополнение текста
-#### OPTIONS_THEME_MAIN_TITLE=Skin
-#? OPTIONS_THEME_MAIN_TITLE=
-#### OPTIONS_SKIN_MAIN_TITLE=Skin
-#? OPTIONS_SKIN_MAIN_TITLE=
 #### OPTIONS_SEARCH_MAIN_TITLE=Searching
 OPTIONS_SEARCH_MAIN_TITLE=Поиск
 #### OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Basic
@@ -2647,35 +2409,16 @@ OPTIONS_RESULTS_MAIN_TITLE=Ключевые слова
 OPTIONS_MESSAGES_MAIN_TITLE=Хосты
 #### OPTIONS_ADVANCED_MAIN_TITLE=Advanced
 OPTIONS_ADVANCED_MAIN_TITLE=Расширенные
-#### OPTIONS_COMPRESSION_MAIN_TITLE=Compression
-OPTIONS_COMPRESSION_MAIN_TITLE=Сжатие
 #### OPTIONS_PREFERENCING_MAIN_TITLE=Preferencing
 OPTIONS_PREFERENCING_MAIN_TITLE=Предпочтение
 #### OPTIONS_FIREWALL_MAIN_TITLE=Firewall Config
 OPTIONS_FIREWALL_MAIN_TITLE=Файрволл
-#### OPTIONS_PRIVATE_NET_MAIN_TITLE=Private Network
-OPTIONS_PRIVATE_NET_MAIN_TITLE=Личная сеть
 #### OPTIONS_STARTUP_MAIN_TITLE=System Startup
 OPTIONS_STARTUP_MAIN_TITLE=Старт системы
 #### OPTIONS_PROXY_MAIN_TITLE=Proxy
 OPTIONS_PROXY_MAIN_TITLE=Прокси
-#### OPTIONS_CONNECT_PREF_MAIN_TITLE=Locale Preferencing
-#? OPTIONS_CONNECT_PREF_MAIN_TITLE=
 #### OPTIONS_CONTENT_FILTER_MAIN_TITLE=Content
 #? OPTIONS_CONTENT_FILTER_MAIN_TITLE=
-
-################################################################################
-# Key/value pairs for the localization options window item
-# in the options window
-################################################################################
-#### OPTIONS_LOCALIZE_TITLE=International Localization
-#? OPTIONS_LOCALIZE_TITLE=
-#### OPTIONS_LOCALIZE_LABEL=You can customize LimeWire so that its displays your own language and its usage in your country. The country or territory specified can also be used to locate you on the worldwide network.
-#? OPTIONS_LOCALIZE_LABEL=
-#### OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=Language
-#? OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=
-#### OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=Country
-#? OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=
 
 ################################################################################
 # Key/value pairs for the save directory options window item
@@ -2705,10 +2448,6 @@ OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Выбрать папку
 OPTIONS_SAVE_RESET_BUTTON_LABEL=Сброс
 #### OPTIONS_SAVE_RESET_BUTTON_TIP=Reset to Default Download Folder
 OPTIONS_SAVE_RESET_BUTTON_TIP=Использовать общую папку загрузки
-#### OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_LABEL=Browse...
-OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_LABEL=Просмотр...
-#### OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_TIP=Choose Another Folder
-OPTIONS_SAVE_MEDIATYPE_DIR_BROWSE_BUTTON_TIP=Выберите другую папку
 #### OPTIONS_SAVE_MEDIATYPE=Media Type
 OPTIONS_SAVE_MEDIATYPE=Тип файлов
 #### OPTIONS_SAVE_DIRECTORY=Save Folder
@@ -2729,12 +2468,6 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Сколько дней хранит�
 OPTIONS_SHARED_DIRS_TITLE=Папки переданные в общий доступ
 #### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
 OPTIONS_SHARED_DIRS_LABEL=Вы можете выбрать папки, доступ к которым будет открыт. Файлы из этих папок отображаются в библиотеке.
-#### OPTIONS_SHARED_DIRS_BOX_LABEL=Folders:
-OPTIONS_SHARED_DIRS_BOX_LABEL=Папки:
-#### OPTIONS_SHARED_DIRS_BUTTON_LABEL=Add Folder...
-OPTIONS_SHARED_DIRS_BUTTON_LABEL=Добавить папку
-#### OPTIONS_SHARED_DIRS_BUTTON_TIP=Add a Folder to Share
-OPTIONS_SHARED_DIRS_BUTTON_TIP=Добавить папку в раздачу
 #### OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Share Finished Downloads:
 OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Открывать доступ к выполненным загрузкам:
 #### OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=Download Sharing
@@ -2884,10 +2617,6 @@ OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Максимальное количество в
 ################################################################################
 # Key/Value pairs for the options for the soft maximum number of uploads
 ################################################################################
-#### OPTIONS_UPLOAD_SOFT_MAX_TITLE=Start Upload Slots
-#? OPTIONS_UPLOAD_SOFT_MAX_TITLE=
-#### OPTIONS_UPLOAD_SOFT_MAX_LABEL=Always allow at least this many uploads. Once this limit is reached, allow more uploads only if bandwidth is available. Setting this value too low may prevent you from reaching your upload capacity, hurting other users.
-#? OPTIONS_UPLOAD_SOFT_MAX_LABEL=
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
 #? OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=
 
@@ -3104,78 +2833,8 @@ OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Разрешить автодопо
 ################################################################################
 # Key/Value pairs for theme options
 ################################################################################
-#### OPTIONS_THEME_TITLE=Skin Options
-#? OPTIONS_THEME_TITLE=
-#### OPTIONS_THEME_LABEL=You can select from alternate skins for LimeWire.
-#? OPTIONS_THEME_LABEL=
-#### OPTIONS_THEME_BROWSE_BUTTON_TIP=Locate Skin File
-#? OPTIONS_THEME_BROWSE_BUTTON_TIP=
-#### OPTIONS_THEME_DEFAULT_BUTTON_TIP=Use Default Skin File
-#? OPTIONS_THEME_DEFAULT_BUTTON_TIP=
-#### OPTIONS_THEME_BOX_LABEL=File:
-#? OPTIONS_THEME_BOX_LABEL=
-#### OPTIONS_THEME_FILE_LABEL=You can choose your current skin.
-#? OPTIONS_THEME_FILE_LABEL=
-#### OPTIONS_THEME_FILE_CHOOSER_TITLE=Choose Your skin
-#? OPTIONS_THEME_FILE_CHOOSER_TITLE=
-#### THEME_FILE_DESCRIPTION=LimeWire Skin Files (*.lwtp)
-#? THEME_FILE_DESCRIPTION=
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 #? THEME_CHANGED_MESSAGE=
-
-################################################################################
-# Key/Value pairs for skin options
-################################################################################
-#### OPTIONS_SKIN_TITLE=Skin Options
-#? OPTIONS_SKIN_TITLE=
-#### OPTIONS_SKIN_LABEL=Choose LimeWire's skin. Using SkinLF developed by L2FProd.com (http://www.L2FProd.com/).
-#? OPTIONS_SKIN_LABEL=
-#### OPTIONS_SKIN_BROWSE_BOX_LABEL=Skin:
-#? OPTIONS_SKIN_BROWSE_BOX_LABEL=
-#### OPTIONS_SKIN_BROWSE_BUTTON_LABEL=Browse Skins...
-#? OPTIONS_SKIN_BROWSE_BUTTON_LABEL=
-#### OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=Preview
-#? OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=
-#### OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=No Skin
-#? OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=
-#### OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=Download...
-#? OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=
-#### OPTIONS_SKIN_BROWSE_BUTTON_TIP=Choose Another Skin
-#? OPTIONS_SKIN_BROWSE_BUTTON_TIP=
-#### OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Preview Selected Skin
-#? OPTIONS_SKIN_PREVIEW_BUTTON_TIP=
-#### OPTIONS_SKIN_DEFAULT_BUTTON_TIP=Do Not Skin LimeWire
-#? OPTIONS_SKIN_DEFAULT_BUTTON_TIP=
-#### OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=Download New Skins from www.javootoo.com...
-#? OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=
-#### SKIN_APPLY_MESSAGE=Skin changes only take effect after restarting LimeWire...
-#? SKIN_APPLY_MESSAGE=
-#### SKIN_RESTART_NEEDED=LimeWire must be restarted for this skin change to take effect.
-#? SKIN_RESTART_NEEDED=
-
-################################################################################
-# Key/Value pairs for browse for new skins option pane
-################################################################################
-#### OPTIONS_BROWSE_SKIN_TITLE=Browse For New Skins
-#? OPTIONS_BROWSE_SKIN_TITLE=
-#### OPTIONS_BROWSE_SKIN_LABEL=Find skins at http://www.javootoo.com
-#? OPTIONS_BROWSE_SKIN_LABEL=
-
-################################################################################
-# Key/value pairs for the skin options window
-################################################################################
-#### SKIN_EDITOR_PREVIEW_BUTTON=Preview
-#? SKIN_EDITOR_PREVIEW_BUTTON=
-#### SKIN_EDITOR_REMOVE_BUTTON=Use Default
-#? SKIN_EDITOR_REMOVE_BUTTON=
-#### SKIN_EDITOR_BROWSE_BUTTON=Browse...
-SKIN_EDITOR_BROWSE_BUTTON=Просмотр...
-#### SKIN_EDITOR_PREVIEW_BUTTON_TIP=Preview Skin
-#? SKIN_EDITOR_PREVIEW_BUTTON_TIP=
-#### SKIN_EDITOR_REMOVE_BUTTON_TIP=Use the Default Skin
-#? SKIN_EDITOR_REMOVE_BUTTON_TIP=
-#### SKIN_EDITOR_BROWSE_BUTTON_TIP=Browse for Skins
-#? SKIN_EDITOR_BROWSE_BUTTON_TIP=
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
@@ -3259,18 +2918,6 @@ OPTIONS_ALLOW_MESSAGES_TITLE=Разрешённые хосты
 OPTIONS_ALLOW_MESSAGES_LABEL=Вы можете разрешить сообщения/результаты с указанных хостов. Укажите их IP-адреса или шаблоны IP-адресов. Этот список нужен только для перекрытия списка запрещённых хостов.
 
 ################################################################################
-# Key/Value pairs for disabling compression support
-################################################################################
-#### OPTIONS_COMPRESSION_TITLE=Compression Capabilities
-#? OPTIONS_COMPRESSION_TITLE=
-#### OPTIONS_COMPRESSION_LABEL=Traffic compression will reduce the bandwidth used, but may also increase the CPU burden. If your computer is acting much slower than normal, try disabling these options.
-#? OPTIONS_COMPRESSION_LABEL=
-#### OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=Disable Outgoing Compression
-#? OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=
-#### OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=Disable Incoming Compression
-#? OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=
-
-################################################################################
 # Key/Value pairs for the options for setting connection preferences
 # in the advanced panel of the options window
 ################################################################################
@@ -3323,35 +2970,6 @@ OPTIONS_ROUTER_TITLE=Конфигурация маршрутизатора
 #? OPTIONS_ROUTER_PORT=
 #### OPTIONS_ROUTER_NOTHING=Do Nothing (Not Recommended)
 #? OPTIONS_ROUTER_NOTHING=
-
-################################################################################
-# Key/Value pairs for the options for setting the connection strings
-# in the advanced panel in the options window
-################################################################################
-#### OPTIONS_CONNECT_STRING_TITLE=Private Network
-#? OPTIONS_CONNECT_STRING_TITLE=
-#### OPTIONS_CONNECT_STRING_LABEL=You can set the connection handshake for a private Gnutella network. Other Gnutella hosts you connect to will need the same handshake.
-#? OPTIONS_CONNECT_STRING_LABEL=
-#### OPTIONS_CONNECT_STRING_STRING_LABEL=Connect String:
-#? OPTIONS_CONNECT_STRING_STRING_LABEL=
-#### OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Connect Ok String:
-#? OPTIONS_CONNECT_STRING_OK_STRING_LABEL=
-
-################################################################################
-# Key/Value pairs for browse for the Private Net options pane
-################################################################################
-#### OPTIONS_PRIVATE_NET_TITLE=Private Network
-#? OPTIONS_PRIVATE_NET_TITLE=
-#### OPTIONS_PRIVATE_NET_LABEL=Configure Private Network Options for LimeWire.
-#? OPTIONS_PRIVATE_NET_LABEL=
-#### OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Connect to a Private Network?
-#? OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=
-#### OPTIONS_PRIVATE_CACHE_IP_LABEL=Hostname
-OPTIONS_PRIVATE_CACHE_IP_LABEL=Хостимя
-#### OPTIONS_PRIVATE_CACHE_PORT_LABEL=Port
-OPTIONS_PRIVATE_CACHE_PORT_LABEL=Порт
-#### OPTIONS_PRIVATE_CACHE_NAME_LABEL=Name
-OPTIONS_PRIVATE_CACHE_NAME_LABEL=Имя
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -3458,45 +3076,6 @@ STATS_ADVANCED_CHECK_BOX_LABEL=Показывать расширенную ст�
 # Advanced Gnutella messages panes
 #### GNUTELLA_MESSAGES=Gnutella
 GNUTELLA_MESSAGES=Gnutella
-
-###################################################################
-# Key/value pairs for network state statistics panel
-###################################################################
-#### STATS_NETWORK_INFO_TITLE=Network Information
-STATS_NETWORK_INFO_TITLE=Информация о сети
-
-#### STATS_CONNECTION_TITLE=Connections
-STATS_CONNECTION_TITLE=Соединения
-#### STATS_UPLOADS=Current Uploads:
-STATS_UPLOADS=Текущие выгрузки:
-#### STATS_DOWNLOADS=Current Downloads:
-STATS_DOWNLOADS=Текущие загрузки:
-#### STATS_NET=Current Hosts:
-STATS_NET=Текущие хосты:
-#### STATS_HOSTS=Total Hosts:
-STATS_HOSTS=Всего хостов:
-#### STATS_FILES=Total Files:
-STATS_FILES=Всего файлов:
-#### STATS_FILE_SIZE=Total File MBs:
-STATS_FILE_SIZE=Общий размер файлов, в мегабайтах:
-
-#### STATS_NETWORK_TITLE=Net
-STATS_NETWORK_TITLE=Сеть
-#### STATS_TOTAL_MESSAGES=Total messages:
-STATS_TOTAL_MESSAGES=Всего сообщений:
-#### STATS_LOCAL_SEARCHES=Local searches:
-STATS_LOCAL_SEARCHES=Локальные поиски:
-#### STATS_ROUTING_ERRORS=Routing errors:
-STATS_ROUTING_ERRORS=Ошибки маршрутизации:
-#### STATS_DROPPED_MESSAGES=Dropped messages:
-STATS_DROPPED_MESSAGES=Недоставленные сообщения:
-#### STATS_DOWNLOAD_COUNT=Download count:
-STATS_DOWNLOAD_COUNT=Кол-во загрузок:
-#### STATS_UPLOAD_COUNT=Upload count:
-STATS_UPLOAD_COUNT=Кол-во выгрузок:
-
-#### STATS_BUTTON_LABEL=Update
-STATS_BUTTON_LABEL=Обновить
 
 ################################################################################
 # Key/value pairs for bandwidth statistics panes
