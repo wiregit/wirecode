@@ -158,7 +158,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         return KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
     }
     
-    public void start() throws IOException {
+    public synchronized void start() throws IOException {
         startTime = System.currentTimeMillis();
         
         // Get the first round of alpha nodes and send them requests
@@ -202,11 +202,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         return -1L;
     }
     
-    protected void response(ResponseMessage message, long time) throws IOException {
+    protected synchronized void response(ResponseMessage message, long time) throws IOException {
         
-        lookupStat.addReply();
-        
-        if (!isStopped()) {
+        if (!isStopped() && activeSearches > 0) {
+            lookupStat.addReply();
             activeSearches--;
             
             int hop = ((Integer)hopMap.get(message.getNodeID())).intValue();
@@ -232,12 +231,13 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    protected void timeout(KUID nodeId, 
+    protected synchronized void timeout(KUID nodeId, 
             SocketAddress dst, RequestMessage message, long time) throws IOException {
         
-        lookupStat.addTimeout();
-        
-        if (!isStopped()) {
+        if (!isStopped() && activeSearches > 0) {
+            lookupStat.addTimeout();
+            activeSearches--;
+            
             if (LOG.isTraceEnabled()) {
                 if (isValueLookup()) {
                     LOG.trace(ContactNode.toString(nodeId, dst) 
@@ -248,7 +248,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 }
             }
         
-            activeSearches--;
             
             int hop = ((Integer)hopMap.get(nodeId)).intValue();
             lookupStep(hop);
@@ -257,6 +256,30 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 finishLookup(time(), hop);
             }
         }
+    }
+    
+    public void handleError(final KUID nodeId, final SocketAddress dst, final RequestMessage message, Exception e) {
+        if (LOG.isErrorEnabled()) {
+            if (isValueLookup()) {
+                LOG.error("Sending a FIND_VALUE request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+            } else {
+                LOG.error("Sending a FIND_NODE request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+            }
+        }
+        
+        if (e instanceof SocketException) {
+            context.fireEvent(new Runnable() {
+                public void run() {
+                    try {
+                        timeout(nodeId, dst, message, -1L);
+                    } catch (IOException err) {
+                        LOG.error(err);
+                    }
+                }
+            });
+        }
+        
+        fireTimeout(nodeId, dst, message, -1L);
     }
     
     private void handleFindValueResponse(FindValueResponse response, long time, int hop) throws IOException {
@@ -346,14 +369,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         lookupStep(hop);
-    }
-    
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-        if (LOG.isErrorEnabled()) {
-            LOG.error("Sending a lookup request to " + ContactNode.toString(nodeId, dst) + " failed", e);
-        }
-        
-        fireTimeout(nodeId, dst, message, -1L);
     }
     
     private void lookupStep(int hop) throws IOException {

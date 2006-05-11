@@ -120,7 +120,7 @@ public class Context {
     private LinkedList localSizeHistory = new LinkedList();
     private LinkedList remoteSizeHistory = new LinkedList();
     
-    private ProcessingQueue eventQueue = new ProcessingQueue("DHT-EventDispatcher", true);
+    private ProcessingQueue eventQueue;
     
     private ThreadFactory threadFactory = new DefaultThreadFactory();
     
@@ -377,6 +377,8 @@ public class Context {
         bootstrapped = true;
         running = true;
 
+        eventQueue = new ProcessingQueue(getName() + "-EventDispatcher", true);
+        
         Thread keyValuePublisherThread 
             = getThreadFactory().createThread(keyValuePublisher, getName() + "-KeyValuePublisherThread");
         keyValuePublisherThread.setDaemon(true);
@@ -792,7 +794,7 @@ public class Context {
         
         public void finish(KUID lookup, Collection c, long time) {
             // List of ContactNodes where we stored the KeyValues.
-            final List targets = new ArrayList(c.size());
+            final List storeTargets = new ArrayList(c.size());
             
             for(Iterator it = c.iterator(); it.hasNext(); ) {
                 ContactNodeEntry entry = (ContactNodeEntry)it.next();
@@ -803,6 +805,7 @@ public class Context {
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Skipping local Node as KeyValue is already stored at this Node");
                     }
+                    storeTargets.add(node);
                     continue;
                 }
                 
@@ -816,20 +819,20 @@ public class Context {
                 
                 try {
                     Context.this.store(node, queryKey, keyValues);
-                    targets.add(node);
+                    storeTargets.add(node);
                 } catch (IOException err) {
                     LOG.error("", err);
                 }
             }
             
             for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                ((KeyValue)it.next()).setNumLocs(targets.size());
+                ((KeyValue)it.next()).setNumLocs(storeTargets.size());
             }
             
             if (listener != null) {
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.store(keyValues, targets);
+                        listener.store(keyValues, storeTargets);
                     }
                 });
             }
