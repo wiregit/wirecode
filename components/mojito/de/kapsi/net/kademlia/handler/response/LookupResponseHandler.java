@@ -215,7 +215,12 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                     handleFindValueResponse((FindValueResponse)message, time, hop);
                 } else {
                     // Some Idot sent us a FIND_VALUE response for a
-                    // FIND_NODE lookup! Ignore?
+                    // FIND_NODE lookup! Ignore? We're losing one
+                    // parallel lookup (temporarily) if we do nothing.
+                    // I think it's better to kick off a new lookup
+                    // now rather than to wait for a yet another
+                    // response/lookup that would re-activate this one.
+                    lookupStep(hop);
                 }
             } else {
                 handleFindNodeResponse((FindNodeResponse)message, time, hop);
