@@ -39,7 +39,6 @@ import com.limegroup.gnutella.dht.statistics.DHTStats;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.LookupAdapter;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.event.StoreListener;
@@ -50,6 +49,7 @@ import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.ArrayUtils;
+import de.kapsi.net.kademlia.util.KeyValueCollection;
 
 public class Main {
     
@@ -423,7 +423,7 @@ public class Main {
         }
         md.reset();
         
-        dht.get(key, new LookupAdapter() {
+        /*dht.get(key, new LookupAdapter() {
             public void found(KUID key, Collection values, long time) {
                 StringBuffer buffer = new StringBuffer();
                 buffer.append(key).append(" in ").append(time).append("ms\n");
@@ -440,7 +440,27 @@ public class Main {
                             + time + "ms and " + c.size() + " found locations");
                 }
             }
-        });
+        });*/
+        
+        long start = System.currentTimeMillis();
+        Collection c = dht.get(key);
+        long time = System.currentTimeMillis() - start;
+        
+        if (!c.isEmpty()) {
+            StringBuffer buffer = new StringBuffer();
+            buffer.append(key).append(" in ").append(time).append("ms\n");
+            for(Iterator it = c.iterator(); it.hasNext(); ) {
+                KeyValueCollection kvc = (KeyValueCollection)it.next();
+                buffer.append(kvc);
+                buffer.append("\n");
+            }
+            buffer.append("Locations: ").append(c.size());
+            System.out.println(buffer.toString());
+        } else {
+            System.out.println(key + " was not found after " + time + "ms");
+        }
+        
+        System.out.println();
     }
     
     private static void load(DHT dht, String[] line) {
