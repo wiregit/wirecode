@@ -76,7 +76,6 @@ import com.limegroup.gnutella.security.SecurityUtils;
      *  0x1C and 0x00, to accomidate clients that poorly parse GGEP.
      */
     public byte[] getKeyBytes(InetAddress ip, int port) {
-        byte[] toEncrypt = new byte[8];
         // get all the input bytes....
         byte[] ipBytes = ip.getAddress();
         int ipInt = 0;
