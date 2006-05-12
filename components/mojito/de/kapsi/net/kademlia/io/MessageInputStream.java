@@ -237,10 +237,11 @@ public class MessageInputStream extends DataInputStream {
         int flags = readUnsignedByte();
         KUID nodeId = readKUID();
         KUID messageId = readKUID();
+        byte instanceId = readByte();
         
         int messageType = readUnsignedByte();
         
-        ContactNode node = new ContactNode(nodeId, src, flags);
+        ContactNode node = new ContactNode(nodeId, src, flags, instanceId);
 
         switch(messageType) {
             case Message.PING_REQUEST:

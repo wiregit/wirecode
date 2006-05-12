@@ -35,6 +35,7 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.Database;
+import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.db.Database.KeyValueBag;
 import de.kapsi.net.kademlia.messages.Message;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -96,16 +97,21 @@ public class DefaultMessageHandler extends MessageHandler
             Message message) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
-        
-        //only do store forward if it is a new node in our routing table or 
-        //a node that is (re)connecting
-        boolean newNode = routeTable.add(node, true);
-        if (!newNode && (message instanceof FindNodeRequest)) {
-            FindNodeRequest request = (FindNodeRequest) message;
-            newNode = request.getLookupID().equals(node.getNodeID());
+        boolean newNode = false;
+        //only do store forward if it is a new node in our routing table (we are (re)connecting to the network) 
+        //or a node that is reconnecting
+        ContactNode existingNode = routeTable.get(node.getNodeID());
+        if(existingNode == null || existingNode.getInstanceID() != node.getInstanceID()) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Node "+node+" is new or has changed his instanceID, will check for store forward!");   
+            }
+            newNode = true;
         }
+        //add node to the routing table -- update timestamp and info if needed
+        routeTable.add(node, true);
 
         if (newNode) {
+            
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
@@ -136,8 +142,13 @@ public class DefaultMessageHandler extends MessageHandler
                                 LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   
                             }
                             databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                            keyValuesToForward.addAll(bag.values());
-                            
+                            for (Iterator iterator = bag.values().iterator(); iterator.hasNext();) {
+                                KeyValue keyValue = (KeyValue) iterator.next();
+                                KUID originatorID = keyValue.getNodeID();
+                                if(originatorID != null && !originatorID.equals(node)) {
+                                    keyValuesToForward.add(keyValue);
+                                }
+                            }
                         } else if (closestNodesToKey.size() == k) {
                             //if we are the furthest node: delete non-local value from local db
                             ContactNode furthest = (ContactNode)closestNodesToKey.get(closestNodesToKey.size()-1);

@@ -127,7 +127,11 @@ public class Context {
     private String name;
     
     public Context() {
-        
+        this("DHT");
+    }
+    
+    public Context(String name) {
+        this.name = name;
         try {
             File file = new File("public.key");
             if (file.exists() && file.isFile()) {
@@ -156,17 +160,12 @@ public class Context {
         lookupManager = new LookupManager();
     }
     
-    public Context(String name) {
-        this();
-        setName(name);
-    }
-    
     public void setName(String name) {
         this.name = name;
     }
     
     public String getName() {
-        return (name != null ? name : "DHT");
+        return name;
     }
     
     public synchronized void setMessageDispatcher(Class clazz) {
@@ -343,11 +342,13 @@ public class Context {
         } else {
             nodeId = KUID.createNodeID(id);
         }
-        
+        int instanceID = ContextSettings.getLocalNodeInstanceID(nodeId);
+        int newID = (instanceID + 1) % 0xFF;
         //add ourselve to the routing table
-        localNode = new ContactNode(nodeId, address);
+        localNode = new ContactNode(nodeId, address, 0, newID);
         localNode.setTimeStamp(Long.MAX_VALUE);
         routeTable.add(localNode, false);
+        ContextSettings.setLocalNodeInstanceID(nodeId, newID);
         messageDispatcher.bind(address);
     }
     

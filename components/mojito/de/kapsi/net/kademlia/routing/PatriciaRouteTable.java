@@ -681,6 +681,7 @@ public class PatriciaRouteTable implements RoutingTable {
             if(newNode.getRoundTripTime() > 0L) {
                 existingNode.setRoundTripTime(newNode.getRoundTripTime());
             }
+            existingNode.setInstanceID(newNode.getInstanceID());
             existingNode.alive();
             touchBucket(existingNode.getNodeID());
         } else {
