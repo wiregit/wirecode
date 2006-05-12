@@ -132,6 +132,7 @@ public class Context {
     
     public Context(String name) {
         this.name = name;
+        
         try {
             File file = new File("public.key");
             if (file.exists() && file.isFile()) {

@@ -82,7 +82,7 @@ public class Main {
         
         for(int i = 0; i < count; i++) {
             try {
-                DHT dht = new DHT();
+                DHT dht = new DHT("DHT" + i);
                 
                 /*if (i % 2 == 0) {
                     dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
@@ -94,7 +94,6 @@ public class Main {
                     dht.bind(new InetSocketAddress(port+i));
                 }
                 
-                dht.setName("DHT" + i);
                 dht.start();
 
                 dhts.add(dht);
