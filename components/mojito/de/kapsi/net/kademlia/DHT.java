@@ -243,7 +243,7 @@ public class DHT {
     
     public void stats(SocketAddress dst, int request, StatsListener listener) throws IOException {
         if (listener == null) {
-            throw new NullPointerException("PingListener is null");
+            throw new NullPointerException("StatsListener is null");
         }
         context.stats(dst, request, listener);
     }
