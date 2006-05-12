@@ -200,13 +200,14 @@ class Tag {
         public boolean timeout() {
             long time = System.currentTimeMillis() - sent;
             if(timeout < 0L) {
+                long t = responseHandler.timeout();
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Default timeout: " + timeout+ ", node: "+nodeId);
+                    LOG.debug("Default timeout: " + t + "ms for " + ContactNode.toString(nodeId, dst));
                 }
-                return time >= responseHandler.timeout();
+                return time >= t;
             } else {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Timeout: " + timeout + ", node: "+nodeId);
+                    LOG.debug("Timeout: " + timeout + "ms for " + ContactNode.toString(nodeId, dst));
                 }
                 return time >= timeout;
             }
