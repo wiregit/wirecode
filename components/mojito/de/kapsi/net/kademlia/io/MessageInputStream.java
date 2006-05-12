@@ -237,7 +237,7 @@ public class MessageInputStream extends DataInputStream {
         int flags = readUnsignedByte();
         KUID nodeId = readKUID();
         KUID messageId = readKUID();
-        byte instanceId = readByte();
+        int instanceId = readUnsignedByte();
         
         int messageType = readUnsignedByte();
         

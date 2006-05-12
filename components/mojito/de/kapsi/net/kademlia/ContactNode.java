@@ -37,7 +37,7 @@ public class ContactNode extends Node {
     
     private long lastDeadOrAliveTime = 0L;
     
-    private int instanceID;
+    private int instanceId;
     
     private transient long roundTripTime = -1L;
     
@@ -53,7 +53,7 @@ public class ContactNode extends Node {
         
         this.address = address;
         this.flags = flags;
-        this.instanceID = instanceID;
+        this.instanceId = instanceID;
     }
     
     public long getAdaptativeTimeOut() {
@@ -68,11 +68,11 @@ public class ContactNode extends Node {
     }
     
     public int getInstanceID() {
-        return instanceID;
+        return instanceId;
     }
     
-    public void setInstanceID(int iid) {
-        this.instanceID = iid;
+    public void setInstanceID(int instanceId) {
+        this.instanceId = instanceId;
     }
 
     public int getFlags() {
@@ -166,7 +166,7 @@ public class ContactNode extends Node {
         StringBuffer buffer = new StringBuffer();
         buffer.append(toString(getNodeID(), getSocketAddress()))
             .append(", failures: ").append(failures)
-            .append(", instanceID: ").append(instanceID)
+            .append(", instanceId: ").append(instanceId)
             .append(", unknown: ").append(getTimeStamp()==0L);
         
         if (isFirewalled()) {
