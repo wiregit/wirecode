@@ -139,8 +139,9 @@ public class Context {
                 masterKey = CryptoHelper.loadMasterKey(file);
             }
         } catch (Exception err) {
-            throw new RuntimeException(err);
+            LOG.fatal("Loading the MasterKey failed!", err);
         }
+        
         dhtStats = new DHTNodeStat(this);
         
         networkStats = new NetworkStatisticContainer(this);
