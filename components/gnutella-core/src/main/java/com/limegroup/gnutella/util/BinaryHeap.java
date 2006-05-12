@@ -211,7 +211,12 @@ public class BinaryHeap
         } 
         //Overflow
         else {
-            ret=array[currentSize];
+        	if (array[currentSize].compareTo(x) > 0) {
+        		return x;
+        	}
+        	else {
+        		ret=array[currentSize];
+        	}
         }
 
         //Assume that the object is placed in the currentSize+1 location Compare

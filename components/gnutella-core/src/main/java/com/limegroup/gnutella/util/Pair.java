@@ -5,7 +5,7 @@
 
 package com.limegroup.gnutella.util;
 
-public class Pair {
+public class Pair implements Comparable {
     private int _key;
     private Object _elem;
 	
@@ -18,8 +18,9 @@ public class Pair {
     public Object getElement() {return _elem;}
     public void setKey(int key) {_key = key;}
     public void setElement(Object elem) {_elem = elem;}
-    public void print() {
-		//File f = (File)_elem;
-		//String path = f.getAbsolutePath();
-    }    
+
+	public int compareTo(Object o) {
+		Pair p = (Pair)o;
+		return _key - p._key;
+	}
 }
