@@ -42,11 +42,14 @@ import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.event.StoreListener;
+import de.kapsi.net.kademlia.io.LimeMessageDispatcherImpl;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
+import de.kapsi.net.kademlia.settings.ContextSettings;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.ArrayUtils;
 import de.kapsi.net.kademlia.util.KeyValueCollection;
@@ -80,6 +83,11 @@ public class Main {
         for(int i = 0; i < count; i++) {
             try {
                 DHT dht = new DHT();
+                
+                /*if (i % 2 == 0) {
+                    dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
+                }*/
+                
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
                 } else {
@@ -134,6 +142,7 @@ public class Main {
         String quit = "quit";
         String reqstats = "reqstats .+ \\d{1,5} (stats|rt|db)";
         String firewalled = "firewalled";
+        String exhaustive = "exhaustive";
         
         String[] commands = {
                 help,
@@ -157,7 +166,8 @@ public class Main {
                 restart,
                 quit,
                 reqstats,
-                firewalled
+                firewalled,
+                exhaustive
         };
         
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -179,6 +189,9 @@ public class Main {
                 } else if (line.matches(firewalled)) {
                     dht.setFirewalled(!dht.isFirewalled());
                     info(dht);
+                } else if (line.equals(exhaustive)) {
+                    KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.setValue(
+                            !KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
                 } else if (line.matches(ping)) {
                     ping(dht, line.split(" "));
                 } else if (line.matches(reqstats)) {
@@ -386,8 +399,7 @@ public class Main {
         MessageDigest md = MessageDigest.getInstance("SHA1");
         
         KUID key = null;
-        byte[] value = null;
-        
+
         if (line[1].equals("kuid")) {
             key = KUID.createValueID(ArrayUtils.parseHexString(line[2]));
         } else {
@@ -395,7 +407,7 @@ public class Main {
         }
         md.reset();
         
-        System.out.println("Storing... " + key);
+        System.out.println("Removing... " + key);
         dht.remove(key, new StoreListener() {
             public void store(List keyValues, Collection nodes) {
                 StringBuffer buffer = new StringBuffer();

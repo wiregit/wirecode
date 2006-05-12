@@ -37,10 +37,7 @@ import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
 import de.kapsi.net.kademlia.event.LookupAdapter;
-import de.kapsi.net.kademlia.event.LookupListener;
 import de.kapsi.net.kademlia.event.StoreListener;
-import de.kapsi.net.kademlia.messages.RequestMessage;
-import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
 
 public class PlanetLab {

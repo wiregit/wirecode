@@ -23,8 +23,6 @@ import java.net.SocketAddress;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import com.limegroup.gnutella.settings.ByteSetting;
-
 import de.kapsi.net.kademlia.KUID;
 
 public class ContextSettings extends LimeDHTProps {

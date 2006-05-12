@@ -42,18 +42,19 @@ public class ContactNode extends Node {
     private transient long roundTripTime = -1L;
     
     public ContactNode(KUID nodeId, SocketAddress address) {
-        this(nodeId, address, 0);
+        this(nodeId, address, 0, 0);
     }
     
     public ContactNode(KUID nodeId, SocketAddress address, int flags) {
         this(nodeId, address, flags, 0);
     }
-    public ContactNode(KUID nodeId, SocketAddress address, int flags, int instanceID) {
+    
+    public ContactNode(KUID nodeId, SocketAddress address, int flags, int instanceId) {
         super(nodeId);
         
         this.address = address;
         this.flags = flags;
-        this.instanceId = instanceID;
+        this.instanceId = instanceId;
     }
     
     public long getAdaptativeTimeOut() {

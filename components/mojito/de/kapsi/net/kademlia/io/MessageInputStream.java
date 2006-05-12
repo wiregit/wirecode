@@ -238,7 +238,6 @@ public class MessageInputStream extends DataInputStream {
         KUID nodeId = readKUID();
         KUID messageId = readKUID();
         int instanceId = readUnsignedByte();
-        
         int messageType = readUnsignedByte();
         
         ContactNode node = new ContactNode(nodeId, src, flags, instanceId);

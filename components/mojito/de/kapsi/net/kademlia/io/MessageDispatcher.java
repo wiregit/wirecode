@@ -64,6 +64,9 @@ public abstract class MessageDispatcher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     
+    protected static final int INPUT_BUFFER_SIZE = 64 * 1024;
+    protected static final int OUTPUT_BUFFER_SIZE = 64 * 1024;
+    
     protected static final long CLEANUP = 100L;
     
     private LinkedList outputQueue = new LinkedList();

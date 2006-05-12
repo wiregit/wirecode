@@ -70,8 +70,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
         
         DatagramSocket socket = channel.socket();
         socket.setReuseAddress(false);
-        socket.setReceiveBufferSize(Message.MAX_MESSAGE_SIZE);
-        socket.setSendBufferSize(Message.MAX_MESSAGE_SIZE);
+        socket.setReceiveBufferSize(INPUT_BUFFER_SIZE);
+        socket.setSendBufferSize(OUTPUT_BUFFER_SIZE);
         
         socket.bind(address);
         

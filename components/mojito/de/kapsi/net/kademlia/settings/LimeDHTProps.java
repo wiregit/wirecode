@@ -19,7 +19,6 @@
 
 package de.kapsi.net.kademlia.settings;
 
-import com.limegroup.gnutella.settings.ByteSetting;
 
 /**
  * 
