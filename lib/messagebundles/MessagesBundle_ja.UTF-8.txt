@@ -696,6 +696,19 @@ SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME="新しい情報"検索： {0}
 #### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
 SEARCH_XML_FIELD_ACTION_NAME={0}を検索：  {1}
 
+################################################################################
+# CheckBoxList actions
+################################################################################
+#### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
+#? CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=
+#### CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=Marks all Items as Selected
+#? CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=
+#### CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=Deselect All
+#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=
+#### CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=Deselects all Items in the List
+#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=
+
+
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
 MEDIA_ANY_TYPE=全種類
@@ -1441,8 +1454,12 @@ PLAYLIST_FILE_PARSE_PROBLEM=そのファイルは解析できない
 # Key/value pairs for the LimeWire initialization wizard that is run
 # if you don't have a limewire.props file
 ################################################################################
+#### SETUP_DIALOG_TITLE=Limewire Setup Dialog
+#? SETUP_DIALOG_TITLE=
 #### SETUP_LANGUAGE_TITLE=Language Options
 SETUP_LANGUAGE_TITLE=言語オプション
+#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language: 
+#? SETUP_CHOOSE_LANGUAGE_LABEL=
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_LANGUAGE_LABEL=使用する言語を選択
 #### SETUP_MORE_INFO=Learn more about this option...
@@ -1459,6 +1476,8 @@ SETUP_SAVE_TITLE=保存先フォルダ
 SETUP_SAVE_LABEL=ダウンロードしたファイルを保存するフォルダを選択して下さい。このフォルダは初期設定で他のグヌーテラ・ユーザーと共有されます。
 #### SETUP_SPEED_TITLE=Connection Speed
 SETUP_SPEED_TITLE=接続速度
+#### SETUP_SPEED_TITLED_BORDER=Select Speed
+#? SETUP_SPEED_TITLED_BORDER=
 #### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
 SETUP_SPEED_LABEL=インターネット接続回線の速度を選択して下さい。ネットワークのパフォーマンスを最適化するために、この速度の正しい設定が重要です。もしお使いの接続回線がはっきり分からないか、リスト上にない場合は、単にどれか一つ適当なものを選択して下さい。
 #### SETUP_STARTUP_TITLE=System Startup
@@ -1475,14 +1494,24 @@ SETUP_STARTUP_CHECKBOX=自動で起動
 SETUP_SCAN_TITLE=ファイルを検索
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which folders you would like to share when the scan is complete.
 SETUP_SCAN_LABEL=LimeWire にハードディスク内の他にあるメディア・ファイルを検索させますか。検索すれば共有したいフォルダを、簡単に選べます。
+#### SETUP_SCAN_TITLED_BORDER=Scan Hard Drive?
+#? SETUP_SCAN_TITLED_BORDER=
 #### SETUP_WAIT_TITLE=Scanning Hard Drive
 SETUP_WAIT_TITLE=ハードディスクを読み取り中
+#### SETUP_WAIT_PROGRESS_STRING=Scanning Hard Drive...
+#? SETUP_WAIT_PROGRESS_STRING=
 #### SETUP_WAIT_LABEL=Please wait as LimeWire scans your hard drive...
 SETUP_WAIT_LABEL=ハードディスクを検索するまで待機...
+#### SETUP_WAIT_SCAN_CANCELLED_LABEL=Scan cancelled
+#? SETUP_WAIT_SCAN_CANCELLED_LABEL=
+#### SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=Cancel Scan
+#? SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=
 #### SETUP_CONFIRM_TITLE=Confirm Scan
 SETUP_CONFIRM_TITLE=読み取りを確認
 #### SETUP_CONFIRM_LABEL=We identified the folders below as ones that you might like to share. If you would like to share one of these folders, simply check its associated checkbox. Subfolders of shared folders will also be shared.
 SETUP_CONFIRM_LABEL=共有候補のフォルダが以下の様に見つかりました。このうちの一つを共有したいなら、チェックボックスを有効化。すると、選択したフォルダのサブフォルダも同様に共有されます。
+#### SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=The selected folders below (and their subfolders) will be shared.
+#? SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=共有可能なファイルが見つかりませんでした。設定を続けるには、"次へ"をクリック。
 #### SETUP_FILTER_TITLE=Content Filtering
@@ -1515,7 +1544,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=フォルダを選択
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
 # limewire.props is not present or when the "INSTALLED" setting is false
 ################################################################################
-#### INIT_SAVE_DIRECTORY_FIELD_LABEL=Folder:
+#### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=フォルダ：
 #### INIT_SAVE_BROWSE_BUTTON_LABEL=Browse...
 INIT_SAVE_BROWSE_BUTTON_LABEL=参照...

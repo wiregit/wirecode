@@ -693,6 +693,19 @@ SEARCH_BLOCK_HOST=Θέλετε να μπλοκάρετε τα αποτελέσμ
 #### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
 #? SEARCH_XML_FIELD_ACTION_NAME=
 
+################################################################################
+# CheckBoxList actions
+################################################################################
+#### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
+#? CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=
+#### CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=Marks all Items as Selected
+#? CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=
+#### CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=Deselect All
+#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=
+#### CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=Deselects all Items in the List
+#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=
+
+
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
 MEDIA_ANY_TYPE=Κάθε τύπου
@@ -1438,8 +1451,12 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Το αρχείο δεν μπορεί να ανα�
 # Key/value pairs for the LimeWire initialization wizard that is run
 # if you don't have a limewire.props file
 ################################################################################
+#### SETUP_DIALOG_TITLE=Limewire Setup Dialog
+#? SETUP_DIALOG_TITLE=
 #### SETUP_LANGUAGE_TITLE=Language Options
 SETUP_LANGUAGE_TITLE=Επιλογές γλώσσας
+#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language: 
+#? SETUP_CHOOSE_LANGUAGE_LABEL=
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_LANGUAGE_LABEL=Παρακαλώ επιλέξτε την γλώσσα που θα θέλατε να χρησιμοποιεί το LimeWire.
 #### SETUP_MORE_INFO=Learn more about this option...
@@ -1456,6 +1473,8 @@ SETUP_SAVE_TITLE=Αποθήκευση καταλόγου
 SETUP_SAVE_LABEL=Παρακαλώ επιλέξτε ένα φάκελο μέσα στον οποίο θα θέλατε το LimeWire να αποθηκεύει τα αρχεία που κατεβάζετε. Αυτός ο φάκελος επίσης θα μοιράζεται με άλλους χρήστες του gnutella.
 #### SETUP_SPEED_TITLE=Connection Speed
 SETUP_SPEED_TITLE=Ταχύτητα σύνδεσης
+#### SETUP_SPEED_TITLED_BORDER=Select Speed
+#? SETUP_SPEED_TITLED_BORDER=
 #### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
 SETUP_SPEED_LABEL=Παρακαλώ επιλέξτε την ταχύτητα της σύνδεσής σας στο Internet. Επιλέγοντας τη σωστή ταχύτητα αυτής της σύνδεσης θα έχετε την καλύτερη δυνατή απόδοση του δικτύου. Εάν δεν είστε σίγουρος για τον τύπο της σύνδεσής σας, ή εάν ο τύπος της σύνδεσής σας δεν υπάρχει στη λίστα, απλά επιλέξτε οποιαδήποτε άλλη που σας φαίνεται πιο κοντινή.
 #### SETUP_STARTUP_TITLE=System Startup
@@ -1472,14 +1491,24 @@ SETUP_STARTUP_CHECKBOX=Εκκίνηση αυτόματα
 SETUP_SCAN_TITLE=Έρευνα για αρχεία
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which folders you would like to share when the scan is complete.
 SETUP_SCAN_LABEL=Θα θέλατε το LimeWire να κάνει μία γρήγορη έρευνα στο δίσκο σας για άλλα αρχεία; Θα έχετε την ευκαιρία να προσδιορίσετε ποιες διευθύνσεις θα θέλετε να μοιράζεστε, όταν η έρευνα τελειώσει.
+#### SETUP_SCAN_TITLED_BORDER=Scan Hard Drive?
+#? SETUP_SCAN_TITLED_BORDER=
 #### SETUP_WAIT_TITLE=Scanning Hard Drive
 SETUP_WAIT_TITLE=Σάρωση σκληρού δίσκου
+#### SETUP_WAIT_PROGRESS_STRING=Scanning Hard Drive...
+#? SETUP_WAIT_PROGRESS_STRING=
 #### SETUP_WAIT_LABEL=Please wait as LimeWire scans your hard drive...
 SETUP_WAIT_LABEL=Παρακαλώ περιμένετε καθώς το LimeWire σαρώνει τον δίσκο σας...
+#### SETUP_WAIT_SCAN_CANCELLED_LABEL=Scan cancelled
+#? SETUP_WAIT_SCAN_CANCELLED_LABEL=
+#### SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=Cancel Scan
+#? SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=
 #### SETUP_CONFIRM_TITLE=Confirm Scan
 SETUP_CONFIRM_TITLE=Επιβεβαίωση σάρωσης
 #### SETUP_CONFIRM_LABEL=We identified the folders below as ones that you might like to share. If you would like to share one of these folders, simply check its associated checkbox. Subfolders of shared folders will also be shared.
 SETUP_CONFIRM_LABEL=Εντοπίσαμε τους παρακάτω καταλόγους πιστεύοντας πως θα θέλατε να τους μοιραστείτε. Αν θα θέλατε να μοιραστείτε ένα από τους καταλόγους αυτούς, τσεκάρετε απλώς το σχετικό κουτάκι. Υποκατάλογοι των μοιραζόμενων καταλόγων θα μοιραστούν επίσης.
+#### SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=The selected folders below (and their subfolders) will be shared.
+#? SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=Το LimeWire αδυνατεί να εντοπίσει οποιαδήποτε αρχεία που μοιράζονται. Για να συνεχίσετε να ρυθμίζετε το LimeWire, πατήστε «Επόμενο».
 #### SETUP_FILTER_TITLE=Content Filtering
@@ -1512,7 +1541,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=Επιλέξτε κατάλογο
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
 # limewire.props is not present or when the "INSTALLED" setting is false
 ################################################################################
-#### INIT_SAVE_DIRECTORY_FIELD_LABEL=Folder:
+#### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=Κατάλογος:
 #### INIT_SAVE_BROWSE_BUTTON_LABEL=Browse...
 INIT_SAVE_BROWSE_BUTTON_LABEL=Περιήγηση...

@@ -693,6 +693,19 @@ SEARCH_WHATSNEW_HIDE_ADULT=忽略 成人 内容
 #### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
 #? SEARCH_XML_FIELD_ACTION_NAME=
 
+################################################################################
+# CheckBoxList actions
+################################################################################
+#### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
+#? CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=
+#### CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=Marks all Items as Selected
+#? CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=
+#### CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=Deselect All
+#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=
+#### CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=Deselects all Items in the List
+#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=
+
+
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
 MEDIA_ANY_TYPE=任何 类型
@@ -1438,8 +1451,12 @@ PLAYLIST_DIALOG_SAVE_TITLE=保存 播放列表 到...
 # Key/value pairs for the LimeWire initialization wizard that is run
 # if you don't have a limewire.props file
 ################################################################################
+#### SETUP_DIALOG_TITLE=Limewire Setup Dialog
+#? SETUP_DIALOG_TITLE=
 #### SETUP_LANGUAGE_TITLE=Language Options
 #? SETUP_LANGUAGE_TITLE=
+#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language: 
+#? SETUP_CHOOSE_LANGUAGE_LABEL=
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 #? SETUP_LANGUAGE_LABEL=
 #### SETUP_MORE_INFO=Learn more about this option...
@@ -1456,6 +1473,8 @@ SETUP_SAVE_TITLE=保存 文件夹
 SETUP_SAVE_LABEL=请 选择 你 希望 保存 下载 文件的 文件夹. 此 文件夹 缺省的 与其他 Gnutella 用户 同享.
 #### SETUP_SPEED_TITLE=Connection Speed
 SETUP_SPEED_TITLE=连接 速度
+#### SETUP_SPEED_TITLED_BORDER=Select Speed
+#? SETUP_SPEED_TITLED_BORDER=
 #### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
 SETUP_SPEED_LABEL=请 选择 你的 因特网 连接 速度. 正确的 设定此 速度 对于优化 网络 非常重要. 如果 你 不能 确认 你 是何种 网络 连接 类型或者 网络 类型 没有 列出, 只 需简单地 选择 看上去最合适的 .
 #### SETUP_STARTUP_TITLE=System Startup
@@ -1472,14 +1491,24 @@ SETUP_SPEED_LABEL=请 选择 你的 因特网 连接 速度. 正确的 设定此
 SETUP_SCAN_TITLE=扫描 文件
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which folders you would like to share when the scan is complete.
 SETUP_SCAN_LABEL=你 想要 LimeWire 迅速为其他媒介 文件 扫描 你的 硬盘 吗? 你 将有机会确切说明当扫描完成时, 你 想分享哪份 文件夹.
+#### SETUP_SCAN_TITLED_BORDER=Scan Hard Drive?
+#? SETUP_SCAN_TITLED_BORDER=
 #### SETUP_WAIT_TITLE=Scanning Hard Drive
 SETUP_WAIT_TITLE=正在 扫描硬盘
+#### SETUP_WAIT_PROGRESS_STRING=Scanning Hard Drive...
+#? SETUP_WAIT_PROGRESS_STRING=
 #### SETUP_WAIT_LABEL=Please wait as LimeWire scans your hard drive...
 SETUP_WAIT_LABEL=LimeWire 正在 扫描 你的 硬盘, 请等待...
+#### SETUP_WAIT_SCAN_CANCELLED_LABEL=Scan cancelled
+#? SETUP_WAIT_SCAN_CANCELLED_LABEL=
+#### SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=Cancel Scan
+#? SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=
 #### SETUP_CONFIRM_TITLE=Confirm Scan
 SETUP_CONFIRM_TITLE=确认扫描
 #### SETUP_CONFIRM_LABEL=We identified the folders below as ones that you might like to share. If you would like to share one of these folders, simply check its associated checkbox. Subfolders of shared folders will also be shared.
 SETUP_CONFIRM_LABEL=我们鉴定那些 文件夹 下面的 东西有 共享的 可能. 如果 你 想 共享 这些 文件夹, 仅仅检查它相关的 选择 框. 共享的 文件夹的 子 文件夹 目录 也将被 共享.
+#### SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=The selected folders below (and their subfolders) will be shared.
+#? SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 #? SETUP_CONFIRM_LABEL_NO_DIRECTORIES=
 #### SETUP_FILTER_TITLE=Content Filtering
@@ -1512,7 +1541,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=选择 文件夹
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
 # limewire.props is not present or when the "INSTALLED" setting is false
 ################################################################################
-#### INIT_SAVE_DIRECTORY_FIELD_LABEL=Folder:
+#### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=文件夹:
 #### INIT_SAVE_BROWSE_BUTTON_LABEL=Browse...
 INIT_SAVE_BROWSE_BUTTON_LABEL=浏览...
