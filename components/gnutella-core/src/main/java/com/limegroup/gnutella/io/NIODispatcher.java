@@ -243,7 +243,6 @@ public class NIODispatcher implements Runnable {
                 // interest setting, and one of the interested ops may be lost.
 			    synchronized(sk.attachment()) {
                     if((op & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
-                        LOG.debug("Changing read status to: " + on);
                         ((Attachment)sk.attachment()).changeReadStatus(on);
                     }
                         

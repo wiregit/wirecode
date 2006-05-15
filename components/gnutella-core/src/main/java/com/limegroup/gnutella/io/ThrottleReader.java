@@ -73,12 +73,11 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
     public void interest(boolean status) {
         lastInterestState = status;
         if(channel != null) {
-            LOG.debug("Turning interest: " + status);
             if(status)
                 throttle.interest(this);
             else
                 channel.interest(false);
-        } else LOG.debug("Ingoring interest");
+        }
     }
     
     /**
@@ -88,7 +87,6 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
      */
     public boolean bandwidthAvailable() {
         if(channel.isOpen() && lastInterestState) {
-            LOG.debug("Bandwidth is available, notifying channel");
             channel.interest(true);
             return true;
         } else {
@@ -111,7 +109,7 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
 
         int priorLimit = buffer.limit();
         if(buffer.remaining() > available) {
-            LOG.debug("Limting amount remaining to read from " + buffer.remaining() + " to " + available);
+            //LOG.debug("Limting amount remaining to read from " + buffer.remaining() + " to " + available);
             buffer.limit(buffer.position() + available);
         }
 
@@ -123,7 +121,7 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
         }
         
         available -= totalRead;
-        LOG.debug("Read: " + totalRead  + ", leaving: " + available + " left.");
+        //LOG.debug("Read: " + totalRead  + ", leaving: " + available + " left.");
         
         return totalRead;
     }
