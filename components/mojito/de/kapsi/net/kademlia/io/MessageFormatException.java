@@ -23,6 +23,8 @@ import java.io.IOException;
 
 public class MessageFormatException extends IOException {
 
+    private static final long serialVersionUID = 4569597968567312626L;
+
     public MessageFormatException() {
         super();
     }
@@ -33,6 +35,11 @@ public class MessageFormatException extends IOException {
     
     public MessageFormatException(Throwable cause) {
         super();
+        initCause(cause);
+    }
+    
+    public MessageFormatException(String message, Throwable cause) {
+        super(message);
         initCause(cause);
     }
 }

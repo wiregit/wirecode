@@ -52,7 +52,7 @@ public final class InputOutputUtils {
             in.close();
             return message;
         } catch (IOException e) {
-            throw new MessageFormatException(e);
+            throw new MessageFormatException(src + " sent a malformed message", e);
         }
     }
 }
