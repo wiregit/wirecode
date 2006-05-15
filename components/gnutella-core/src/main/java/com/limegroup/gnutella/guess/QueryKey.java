@@ -155,6 +155,15 @@ public final class QueryKey {
         out.write(_queryKey);
     }
 
+    /**
+     * Returns the QueryKey as byte array
+     */
+    public byte[] getBytes() {
+        byte[] b = new byte[_queryKey.length];
+        System.arraycopy(_queryKey, 0, b, 0, _queryKey.length);
+        return b;
+    }
+    
     /** Returns a String with the QueryKey represented in hexadecimal.
      */
     public String toString() {
@@ -237,6 +246,4 @@ public final class QueryKey {
     public static QueryKeyGenerator createKeyGenerator() {
         return new TEAQueryKeyGenerator();
     }
-    
-
 }
