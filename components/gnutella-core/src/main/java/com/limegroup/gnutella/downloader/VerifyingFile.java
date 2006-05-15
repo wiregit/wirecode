@@ -4,12 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,9 +65,12 @@ public class VerifyingFile {
      */
     static final int DEFAULT_CHUNK_SIZE = 131072; //128 KB = 128 * 1024 B = 131072 bytes
     
-    /** 
-     * A cache for byte[]s.
+    /**
+     * A list of DelayedWrites that will write when space becomes available in the cache.
      */
+    private static final List DELAYED = new LinkedList();
+    
+    /**  A cache for byte[]s. */
     private static final ByteArrayCache CACHE = new ByteArrayCache(512, HTTPDownloader.BUF_LENGTH);
     static {
         RouterService.schedule(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000);
@@ -227,45 +228,79 @@ public class VerifyingFile {
     }
 
     /**
-     * Writes bytes to the underlying file.
-     * @throws InterruptedException if the downloader gets killed during the process
+     * Writes bytes to the underlying file
      */
-    public void writeBlock(long pos, byte[] data) throws InterruptedException {
-        writeBlock(pos, 0, data.length, data);
+    public boolean writeBlock(long pos, byte[] data) throws InterruptedException {
+        return writeBlock(pos, 0, data.length, data);
     }
     
+    public void writeBlockWithCallback(long currPos, int start, int length, byte[] buf, WriteCallback callback) {
+        if (writeBlock(currPos, start, length, buf)) {
+            callback.writeScheduled();
+        } else {
+            synchronized (CACHE) {
+                DELAYED.add(new DelayedWrite(currPos, start, length, buf, callback, this));
+            }
+        }
+    }
+
     /**
      * Writes bytes to the underlying file.
-     * @throws InterruptedException if the downloader gets killed during the process
+     * 
      * @param currPos the position in the file to write to
      * @param start the start position in the buffer to read from
      * @param length the length of data in the buffer to use
      * @param buf the buffer of data
+     * @return true if this scheduled a write or wasn't open, false if it couldn't.
      */
-    public void writeBlock(long currPos, int start, int length, byte[] buf) 
-      throws InterruptedException {
+    public boolean writeBlock(long currPos, int start, int length, byte[] buf) {
+        if(DELAYED.isEmpty())
+            return writeBlockImpl(currPos, start, length, buf);
+        else // do not try to write if something else is waiting.
+            return false;
+    }
 
+    /**
+     * Writes bytes to the underlying file.
+     * 
+     * @param currPos the position in the file to write to
+     * @param start the start position in the buffer to read from
+     * @param length the length of data in the buffer to use
+     * @param buf the buffer of data
+     * @return true if this scheduled a write or wasn't open, false if it couldn't.
+     */
+    private boolean writeBlockImpl(long currPos, int start, int length, byte[] buf) {
         if (LOG.isTraceEnabled())
             LOG.trace("trying to write block at offset " + currPos + " with size " + length);
         
         if(length == 0) //nothing to write? return
-            return;
+            return true;
         
         if(fos == null)
             throw new IllegalStateException("no fos!");
         
         if (!isOpen())
-            return;
-		
+            return true;
+        
+        byte[] temp = CACHE.getQuick();
+        if(temp == null)
+            return false;
+        
+        if(temp.length < length)
+            Assert.that(false, "bad length: " + length + ", needed <= " + temp.length);
+        System.arraycopy(buf, start, temp, 0, length);
+        
 		Interval intvl = new Interval(currPos, currPos + length - 1);        
         synchronized(this) {
     		/// some stuff to help debugging ///
     		if (!leasedBlocks.contains(intvl)) {
-    			Assert.that(false, "trying to write an interval "+intvl+
+                releaseChunk(temp);
+                Assert.that(false, "trying to write an interval "+intvl+
                         " that wasn't leased.\n"+dumpState());
             }
     		
     		if (partialBlocks.contains(intvl) || savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
+                releaseChunk(temp);
                 Assert.that(false,"trying to write an interval "+intvl+
                         " that was already written"+dumpState());
     		}
@@ -275,11 +310,10 @@ public class VerifyingFile {
             // add only the ranges that aren't already verified into pending.
             // this is necessary because full-scanning may have added unforeseen
             // blocks into verified.
-            
-            // technically the code in the if block would work for all cases,
-            // but it's kind of inefficient to do lots of work all the time,
-            // when the if is only necessary after a full-scan.
             if(verifiedBlocks.containsAny(intvl)) {
+                // technically the code in this if block would work for all cases,
+                // but it's kind of inefficient to do lots of work all the time,
+                // when the if is only necessary after a full-scan.
                 IntervalSet remaining = new IntervalSet();
                 remaining.add(intvl);
                 remaining.delete(verifiedBlocks);
@@ -289,12 +323,11 @@ public class VerifyingFile {
             }
         }
         
-        byte[] temp = CACHE.get();
-        Assert.that(temp.length >= length);
-        System.arraycopy(buf, start, temp, 0, length);
         QUEUE.add(new ChunkHandler(temp, intvl));
-
+        return true;
     }
+    
+    
     
     /**
      * Set whether or not we're going to do a one-time full scan
@@ -473,6 +506,17 @@ public class VerifyingFile {
             return verifiedBlocks.getSize() + savedCorruptBlocks.getSize() + 
             partialBlocks.getSize()== completedSize;
         }
+    }
+    
+    /** Returns all missing pieces. */
+    public synchronized String listMissingPieces() {
+        IntervalSet all = new IntervalSet();
+        all.add(new Interval(0, completedSize-1));
+        all.delete(verifiedBlocks);
+        all.delete(savedCorruptBlocks);
+        if(hashTree == null)
+            all.delete(partialBlocks);
+        return all.toString() + ", pending: " + pendingBlocks.toString() + ", has tree? " + (hashTree != null) + ", verified: " + verifiedBlocks + ", savedCorrupt: " + savedCorruptBlocks + ", partial: " + partialBlocks;
     }
     
     /**
@@ -750,7 +794,7 @@ public class VerifyingFile {
             Interval last = (Interval) partial.get(partial.size() - 1);
             if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug("adding the last chunk for verification");
+                     LOG.debug("adding the last chunk for verification");
                 
                 verifyable.add(new Interval(lastChunkOffset, last.high));
             }
@@ -798,8 +842,7 @@ public class VerifyingFile {
                     storedException = diskIO;
                 }
             } finally {
-                // return the buffer to the cache
-                CACHE.release(buf);
+                releaseChunk(buf);
                 
                 synchronized(VerifyingFile.this) {
                     if (!freedPending)
@@ -809,6 +852,32 @@ public class VerifyingFile {
             }
         }
 	}
+    
+    private static void runDelayedWrites() {
+        while(CACHE.isBufferAvailable()) {
+            DelayedWrite dw;
+            
+            synchronized(CACHE) {
+                if(DELAYED.isEmpty())
+                    return;
+                dw = (DelayedWrite)DELAYED.get(0);
+            }
+
+            // write & notify outside of lock
+            if(!dw.write())
+                throw new IllegalStateException("couldn't write!");
+            
+            synchronized(CACHE) {
+                DELAYED.remove(0);
+            }
+            
+        }
+    }
+    
+    private static void releaseChunk(byte[] buf) {
+        CACHE.release(buf);
+        runDelayedWrites();
+    }
     
     /**  A simple Runnable that schedules a verification of the file. */
     private class EmptyVerifier implements Runnable {
@@ -843,5 +912,36 @@ public class VerifyingFile {
     	public void run() {
     		CHUNK_CACHE.clear();
     	}
+    }
+    
+    static interface WriteCallback {
+        public void writeScheduled();
+    }
+    
+    private static class DelayedWrite {
+        private final long currPos;
+        private final int start;
+        private final int length;
+        private final byte[] buf;
+        private final WriteCallback callback;
+        private final VerifyingFile vf;
+        
+        DelayedWrite(long currPos, int start, int length, byte[] buf, WriteCallback callback, VerifyingFile vf) {
+            this.currPos = currPos;
+            this.start = start;
+            this.length = length;
+            this.buf = buf;
+            this.callback = callback;
+            this.vf = vf;
+        }
+        
+        private boolean write() {
+            if(vf.writeBlockImpl(currPos, start, length, buf)) {
+                callback.writeScheduled();
+                return true;
+            } else {
+                return false;
+            }
+        } 
     }
 }

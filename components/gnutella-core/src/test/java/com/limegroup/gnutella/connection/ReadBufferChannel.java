@@ -37,6 +37,23 @@ public class ReadBufferChannel implements InterestReadChannel {
         this(ByteBuffer.wrap(source, off, len));
     }
     
+    public void setBuffer(ByteBuffer data) {
+        this.buffer = data;
+    }
+    
+    public void setUseEOF(boolean eof) {
+        this.useEOF = eof;
+    }
+    
+    public void clear() {
+        this.closed = false;
+        this.interest = false;
+    }
+    
+    public ByteBuffer getBuffer() {
+        return buffer;
+    }
+    
     public int read(ByteBuffer toBuffer) {
         int read = 0;
         

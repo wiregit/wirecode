@@ -7,11 +7,12 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.http.HeaderSupport;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.StringSetting;
 import com.limegroup.gnutella.util.NetworkUtils;
 
-class HandshakeSupport {
+class HandshakeSupport extends HeaderSupport {
 
     /** Connection string. */
     private String GNUTELLA_CONNECT_06 = "GNUTELLA CONNECT/0.6";
@@ -104,7 +105,7 @@ class HandshakeSupport {
      * Returns true if this wasn't a blank line and more headers are expected,
      * returns false if this was a blank line and no more headers are expected.
      */
-    boolean processReadHeader(String line) {
+    public boolean processReadHeader(String line) {
         if(line.equals(""))
             return false;
         
@@ -168,10 +169,8 @@ class HandshakeSupport {
         RouterService.getAcceptor().setExternalAddress(ia);
     }
     
-
-    
     /** Returns the number of headers we've read so far. */
-    int getHeadersReadSize() {
+    public int getHeadersReadSize() {
         return readHeaders.size();
     }
     

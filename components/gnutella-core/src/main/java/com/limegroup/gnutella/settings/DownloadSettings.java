@@ -76,6 +76,14 @@ public class DownloadSettings extends LimeProps {
     public static final IntSetting WORKER_INTERVAL =
         FACTORY.createSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",1,20000);
     
+    /** The maximum number of headers we'll read when parsing a download */
+    public static final IntSetting MAX_HEADERS =
+        FACTORY.createSettableIntSetting("MAX_DOWNLOAD_HEADERS", 20, "download.maxHeaders", 5, 50);
+    
+    /** The maximum size of a single header we'll read when parsing a download. */
+    public static final IntSetting MAX_HEADER_SIZE =
+        FACTORY.createSettableIntSetting("MAX_DOWWNLOAD_HEADER_SIZE", 2048, "download.maxHeaderSize", 512, 5096);
+    
     /**
      * Use a download SelectionStrategy tailored for previewing if the file's extension is
      * in this list.

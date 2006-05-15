@@ -7,6 +7,7 @@ import java.util.Properties;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.ReadBufferChannel;
+import com.limegroup.gnutella.io.IOState;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class ReadHandshakeStateTest extends BaseTestCase {
@@ -143,7 +144,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA CONNECT/0.6\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadRequestState(support);
+        IOState state = new ReadHandshakeState.ReadRequestState(support);
         assertTrue(state.process(channel, scratch));
     }
     
@@ -151,7 +152,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA CONNECT/0.5\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadRequestState(support);
+        IOState state = new ReadHandshakeState.ReadRequestState(support);
         try {
             state.process(channel, scratch);
             fail("should have IOXd");
@@ -164,7 +165,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("HTTP/1.1 GET\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadRequestState(support);
+        IOState state = new ReadHandshakeState.ReadRequestState(support);
         try {
             state.process(channel, scratch);
             fail("should have IOXd");
@@ -177,7 +178,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA CONNECT/0.7\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadRequestState(support);
+        IOState state = new ReadHandshakeState.ReadRequestState(support);
         assertTrue(state.process(channel, scratch));
     }
     
@@ -185,7 +186,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6 200 OK\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadResponseState(support);
+        IOState state = new ReadHandshakeState.ReadResponseState(support);
         assertTrue(state.process(channel, scratch));
     }
     
@@ -193,7 +194,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6 400 Failed\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadResponseState(support);
+        IOState state = new ReadHandshakeState.ReadResponseState(support);
         assertTrue(state.process(channel, scratch));
     }    
     
@@ -201,7 +202,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.5\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadResponseState(support);
+        IOState state = new ReadHandshakeState.ReadResponseState(support);
         try {
             state.process(channel, scratch);
             fail("should have IOXd");
@@ -214,7 +215,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("HTTP/1.1 200 OK\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadResponseState(support);
+        IOState state = new ReadHandshakeState.ReadResponseState(support);
         try {
             state.process(channel, scratch);
             fail("should have IOXd");
@@ -227,7 +228,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6 200 OK\r\n\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadResponseState(support);
+        IOState state = new ReadHandshakeState.ReadResponseState(support);
         assertFalse(state.process(channel, scratch));
     }
     
@@ -235,7 +236,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6 303 Failed\r\n\r\n".getBytes());
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
-        HandshakeState state = new ReadHandshakeState.ReadResponseState(support);
+        IOState state = new ReadHandshakeState.ReadResponseState(support);
         try {
             state.process(channel, scratch);
             fail("should have failed!");
@@ -249,7 +250,7 @@ public class ReadHandshakeStateTest extends BaseTestCase {
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         support.processReadHeader("Crawler: 0.1");
-        HandshakeState state = new ReadHandshakeState.ReadResponseState(support);
+        IOState state = new ReadHandshakeState.ReadResponseState(support);
         try {
             state.process(channel, scratch);
             fail("should have IOXd");

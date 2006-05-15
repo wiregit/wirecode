@@ -6,8 +6,22 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.channels.SocketChannel;
+
+import com.limegroup.gnutella.io.ChannelReadObserver;
+import com.limegroup.gnutella.io.ChannelWriter;
+import com.limegroup.gnutella.io.ConnectObserver;
+import com.limegroup.gnutella.io.NBSocket;
+import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.io.NIOServerSocket;
+import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.ReadWriteObserver;
 
 /** 
  * Returns two sockets A and B, so that the input of A is connected to 
@@ -23,96 +37,70 @@ import java.net.UnknownHostException;
  * </pre>
  */
 public class PipedSocketFactory {
-    OutputStream _aOut;
-    InputStream  _aIn;
-
-    OutputStream _bOut;
-    InputStream  _bIn;
-
-    InetAddress  _hostA;
-    InetAddress  _hostB;
     
-    boolean aOutClosed;
-    boolean bOutClosed;
-    boolean aInClosed;
-    boolean bInClosed;
+    private final ServerSocket ss;
+    private final String hostA;
+    private final String hostB;
+    private NIOSocket socketA;
+    private NIOSocket socketB;
+    
         
     /**
      * @param hostA the address to use for socket A
      * @param hostB the address to use for socket B
      */
     public PipedSocketFactory(String hostA, String hostB) 
-            throws IOException, UnknownHostException {
-        PipedOutputStream aOut=new PipedOutputStream() {
-            public void close() throws IOException {
-                super.close();
-                aOutClosed = true;
-                PipedSocketFactory.this.close();
-            }
-        };
-        PipedInputStream bIn=new PipedInputStream(aOut) {
-            public void close() throws IOException {
-                super.close();
-                bInClosed = true;
-                PipedSocketFactory.this.close();
-            }
-        };
-        PipedOutputStream bOut=new PipedOutputStream() {
-            public void close() throws IOException {
-                super.close();
-                bOutClosed = true;
-                PipedSocketFactory.this.close();
-            }
-        };
-        PipedInputStream aIn=new PipedInputStream(bOut) {
-            public void close() throws IOException {
-                super.close();
-                aInClosed = true;
-                PipedSocketFactory.this.close();
-            }
-        };
+      throws IOException, UnknownHostException {
+        this.hostA = hostA;
+        this.hostB = hostB;
+        ss = new NIOServerSocket();
+        ss.setReuseAddress(true);
+        ss.bind(new InetSocketAddress(0));
+    }
+
+    public Socket getSocketA() throws Exception {
+        if(socketA == null)
+            setupSockets();
         
-        _aIn=aIn;
-        _bIn=bIn;
-        _aOut = aOut;
-        _bOut = bOut;
-            
-        _hostA=InetAddress.getByName(hostA);
-        _hostB=InetAddress.getByName(hostB);            
+        return socketA;
+    }
+
+    public Socket getSocketB() throws Exception {
+        if(socketB == null)
+            setupSockets();
+        
+        return socketB;
     }
     
-    private void close() throws IOException {
-        if(!aInClosed)
-            _aIn.close();
-        if(!bInClosed)
-            _bIn.close();
-        if(!aOutClosed)
-            _aOut.close();
-        if(!bOutClosed)
-            _bOut.close();
+    private void setupSockets() throws Exception {
+        socketA = new FakedNIOSocket(InetAddress.getLocalHost(), ss.getLocalPort(), hostA, hostB);
+        socketB = (NIOSocket)ss.accept();
     }
+    
+    private static class FakedNIOSocket extends NIOSocket {
+        private final String local;
+        private final String remote;
+        
+        FakedNIOSocket(InetAddress host, int port, String local, String remote) throws IOException {
+            super(host, port);
+            this.local = local;
+            this.remote = remote;
+        }
 
-    public Socket getSocketA() {
-        return new Socket() {
-            public InetAddress getInetAddress() { return _hostB; }
-            public InetAddress getLocalAddress() { return _hostA; }
-            public InputStream getInputStream() { return _aIn; }
-            public OutputStream getOutputStream() { return _aOut; }
-            public void close() throws IOException { 
-                PipedSocketFactory.this.close();
+        public InetAddress getInetAddress() {
+            try {
+                return InetAddress.getByName(remote);
+            } catch(UnknownHostException uhe) {
+                throw new RuntimeException(uhe);
             }
-        };
-    }
+        }
 
-    public Socket getSocketB() {
-        return new Socket() {
-            public InetAddress getInetAddress() { return _hostA; }
-            public InetAddress getLocalAddress() { return _hostB; }
-            public InputStream getInputStream() { return _bIn; }
-            public OutputStream getOutputStream() { return _bOut; }
-            public void close() throws IOException {
-                PipedSocketFactory.this.close();
+        public InetAddress getLocalAddress() {
+            try {
+                return InetAddress.getByName(local);
+            } catch(UnknownHostException uhe) {
+                throw new RuntimeException(uhe);
             }
-        };
+        }
     }
 }

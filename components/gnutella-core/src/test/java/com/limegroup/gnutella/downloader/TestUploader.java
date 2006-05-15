@@ -10,8 +10,6 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -691,6 +689,7 @@ public class TestUploader extends AssertComparisons {
             String str = "HTTP/1.1 200 OK\r\n" +
                          "ugly-header: ugly-value\r\n" + 
                          "hot diggity doo\r\n" +
+                         "Content-Length: " + TestFile.tree().getOutputLength() + "\r\n" + 
                          "\r\n";
             out.write(str.getBytes());
             TestFile.tree().write(out);

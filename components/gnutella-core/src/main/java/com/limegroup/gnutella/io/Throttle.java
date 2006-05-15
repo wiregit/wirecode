@@ -19,5 +19,10 @@ public interface Throttle {
      * Releases some unwritten requested data back to the throttle.
      */
     public void release(int amount);
+    
+    /**
+     * Sets the rate of the throttle.
+     */
+    public void setRate(float rate);
 }
     

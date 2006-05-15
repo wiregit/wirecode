@@ -35,7 +35,6 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.UDPService;
@@ -404,7 +403,7 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setSendThexTree(true);
         
         TigerTreeCache.instance().purgeTree(rfd.getSHA1Urn());
-        Downloader download=RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
+        RouterService.download(rfds, Collections.EMPTY_LIST, null, false);
         
         waitForComplete();
         assertEquals(6,uploader1.getRequestsReceived());
@@ -419,6 +418,8 @@ public class DownloadTest extends BaseTestCase {
             VerifyingFile vf=ifm.getEntry(incomplete);
             assertNull("verifying file should be null", vf);
         }
+        
+        assertEquals(1, uploader1.getConnections());
     }
     
     public void testSimplePushDownload() throws Exception {
@@ -887,8 +888,8 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
         
-        // the tree will fail, but it'll pick up the content-length
-        // and discard the rest of the bad data.
+        // should pass after a bit because it retries the host
+        // who gave it the bad length.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
@@ -976,7 +977,7 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         
         RouterService.download(new RemoteFileDesc[]{rfd1, rfd2}, Collections.EMPTY_LIST, null, false);
-        waitForCorrupt();
+        waitForComplete();
 
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
@@ -2198,38 +2199,12 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
     }
     
-    /** Tests what happens if the content authority says no. */
-    public void testContentInvalid() throws Exception {
-        LOG.info("-Testing partial downloads...");
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
-        RemoteFileDesc[] rfds = {rfd1};
-        uploader1.setRate(50);
-        
-        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
-        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
-        RouterService.download(rfds,false,null);
-        Thread.sleep(1000);
-        RouterService.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
-        waitForInvalid();       
-    }
-    
-    /**
-     * This test MUST BE LAST because it leaves a file around.
-     * I suppose it could be cleaned up ... but oh well.
-     * Easier to make it last.
-     */
     public void testPartialDownloads() throws IOException {
         LOG.info("-Testing partial downloads...");
         uploader1.setPartial(true);
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd1};
-        Downloader downloader = null;
-        try {
-            downloader = RouterService.download(rfds,false,null);
-        } catch (SaveLocationException sle) {
-            assertTrue("downloader already downloading??, error code: " + sle.getErrorCode(),
-					false);
-        }
+        Downloader downloader = RouterService.download(rfds,false,null);
         waitForBusy(downloader);
         assertEquals("Downloader did not go to busy after getting ranges",
                      Downloader.BUSY, downloader.getState());
@@ -2287,6 +2262,22 @@ public class DownloadTest extends BaseTestCase {
        assertEquals(1,l.pings);
        
        l.interrupt();
+    }
+    
+    /** Tests what happens if the content authority says no. 
+     * LEAVE AS LAST -- (it does weird things otherwise) */
+    public void testContentInvalid() throws Exception {
+        LOG.info("-Testing partial downloads...");
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+        uploader1.setRate(50);
+        
+        ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
+        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
+        RouterService.download(rfds,false,null);
+        Thread.sleep(1000);
+        RouterService.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
+        waitForInvalid();       
     }
 
     /*

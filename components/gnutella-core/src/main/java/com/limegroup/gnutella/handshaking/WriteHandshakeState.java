@@ -2,64 +2,23 @@ package com.limegroup.gnutella.handshaking;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
-import java.nio.channels.WritableByteChannel;
 import java.util.Properties;
 
+import com.limegroup.gnutella.http.WriteHeadersIOState;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /** Superclass for HandshakeStates that are written out. */
-public abstract class WriteHandshakeState extends HandshakeState {
-    /** The outgoing buffer, if we've made it.  (Null if we haven't.) */
-    private ByteBuffer outgoing;
-
-    /** Creates a new WriteHandshakeState using the given support. */
-    public WriteHandshakeState(HandshakeSupport support) {
-        super(support);
-    }
-
-    /** Returns true. */
-    boolean isWriting() {
-        return true;
-    }
-
-    /** Returns false. */
-    boolean isReading() {
-        return false;
-    }
-
-    /**
-     * Writes output to the channel.  This farms out the creation of the output
-     * to the abstract method createOutgoingData().  That method will only be called once
-     * to get the initial outgoing data.  Once all data has been written, the abstract
-     * processWrittenHeaders() method will be called, so that subclasses can act upon
-     * what they've just written.
-     * 
-     * This will return true if it needs to be called again to continue writing.
-     * If it returns false, all data has been written and you can proceed to the next state.
-     */
-    boolean process(Channel channel, ByteBuffer buffer) throws IOException {
-        if(outgoing == null) {
-            outgoing = createOutgoingData();
-        }
-        
-        int written = ((WritableByteChannel)channel).write(outgoing);
-        BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(written);
-        
-        if(!outgoing.hasRemaining()) {
-            processWrittenHeaders();
-            return false;
-        } else {
-            return true;
-        }
+public abstract class WriteHandshakeState extends WriteHeadersIOState {
+    
+    /** The handshake support. */
+    protected final HandshakeSupport support;
+    
+    protected WriteHandshakeState(HandshakeSupport support) {
+        super(BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH);
+        this.support = support;
     }
     
-    /** Returns a ByteBuffer of data to write. */
-    protected abstract ByteBuffer createOutgoingData() throws IOException;
-    
-    /** Processes the headers we wrote, after writing them.  May throw IOException if we need to disco. */
-    protected abstract void processWrittenHeaders() throws IOException;
 
     /** The second state in an incoming handshake, or the third state in an outgoing handshake. */
     static class WriteResponseState extends WriteHandshakeState {

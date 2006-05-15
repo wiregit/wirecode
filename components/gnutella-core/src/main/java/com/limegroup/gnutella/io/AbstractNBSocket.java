@@ -95,6 +95,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                         lastChannel = (ChannelReader)lastChannel.getReadChannel();
                     
                     if(oldReader instanceof InterestReadChannel && oldReader != newReader) {
+                        if(lastChannel instanceof ThrottleListener)
+                            ((ThrottleListener)lastChannel).setAttachment(AbstractNBSocket.this);
+                        
                         lastChannel.setReadChannel((InterestReadChannel)oldReader);
                         reader.handleRead(); // read up any buffered data.
                         oldReader.shutdown(); // shutdown the now unused reader.

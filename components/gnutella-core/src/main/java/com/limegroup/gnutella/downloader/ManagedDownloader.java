@@ -23,9 +23,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
+import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -53,7 +53,6 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
@@ -66,7 +65,6 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -325,13 +323,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private volatile List /* of DownloadWorker */ _activeWorkers;
     
     /**
-     * A List of worker threads in progress.  Used to make sure that we do
+     * A List of workers in progress.  Used to make sure that we do
      * not terminate in fireDownloadWorkers without hope if threads are
      * connecting to hosts but not have not yet been added to _activeWorkers.
      * 
-     * Also, if the download completes and any of the threads are sleeping 
-     * because it has been queued by the uploader, those threads need to be 
-     * killed.
+     * Also, if the download completes and any workers are queued, those
+     * workers need to be signalled to stop.
+     * 
      * LOCKING: synchronize on this
      */
     private List /*of DownloadWorker*/ _workers;
@@ -762,6 +760,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         ThreadFactory.startThread(new Runnable() {
             public void run() {
                 try {
+                    dloaderManagerThread = Thread.currentThread();
                     validateDownload();
                     receivedNewSources = false;
                     int status = performDownload();
@@ -926,10 +925,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Handles state changes when inactive.
      */
     public synchronized void handleInactivity() {
-        if(LOG.isTraceEnabled())
-            LOG.trace("handling inactivity. state: " + 
-                      getState() + ", hasnew: " + hasNewSources() + 
-                      ", left: " + getRemainingStateTime());
+//        if(LOG.isTraceEnabled())
+            //LOG.trace("handling inactivity. state: " + 
+                      //getState() + ", hasnew: " + hasNewSources() + 
+                      //", left: " + getRemainingStateTime());
         
         switch(getState()) {
         case BUSY:
@@ -1501,8 +1500,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         prepareRFD(rfd,cache);
         
         if (ranker.addToPool(rfd)){
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfd: " + rfd);
+            //if(LOG.isTraceEnabled())
+                //LOG.trace("added rfd: " + rfd);
             receivedNewSources = true;
         }
         
@@ -1520,13 +1519,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 continue;
             }
             prepareRFD(rfd,cache);
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfd: " + rfd);
+         //   if(LOG.isTraceEnabled())
+         //       LOG.trace("added rfd: " + rfd);
         }
         
         if ( ranker.addToPool(c) ) {
-            if(LOG.isTraceEnabled())
-                LOG.trace("added rfds: " + c);
+         //   if(LOG.isTraceEnabled())
+        //        LOG.trace("added rfds: " + c);
             receivedNewSources = true;
         }
         
@@ -2478,7 +2477,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             
             // are we just about to finish downloading the file?
             
-            LOG.debug("About to wait for pending if needed");
+         //   LOG.debug("About to wait for pending if needed");
             
             try {            
                 commonOutFile.waitForPendingIfNeeded();
@@ -2491,7 +2490,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 return DISK_PROBLEM;
             }
             
-            LOG.debug("Finished waiting for pending");
+          //  LOG.debug("Finished waiting for pending");
             
             
             // Finished.
@@ -2519,31 +2518,36 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 }
                 
                 if(LOG.isDebugEnabled())
-                    LOG.debug("MANAGER: kicking off workers, dloadsCount: " + 
-                            _activeWorkers.size() + ", threads: " + _workers.size());
+                    LOG.debug("MANAGER: kicking off workers, activeWorkers: " + 
+                            _activeWorkers.size() + ", allWorkers: " + _workers.size() +
+                            ", queuedWorkers: " + queuedWorkers.size() + ", swarm cap: " + getSwarmCapacity());
+                
                 
                 //OK. We are going to create a thread for each RFD. The policy for
                 //the worker threads is to have one more thread than the max swarm
                 //limit, which if successfully starts downloading or gets a better
                 //queued slot than some other worker kills the lowest worker in some
-                //remote queue.
-                if (shouldStartWorker()){
+                // remote queue.
+                if (shouldStartWorker()) {
                     // see if we need to update our ranker
                     ranker = getSourceRanker(ranker);
-                    
+
                     RemoteFileDesc rfd = ranker.getBest();
-                    
+
                     if (rfd != null) {
                         // If the rfd was busy, that means all possible RFDs
                         // are busy - store for later
-                        if( rfd.isBusy() ) 
+                        if (rfd.isBusy()) {
                             addRFD(rfd);
-                         else 
+                        } else {
+                            if(LOG.isDebugEnabled())
+                                LOG.debug("Staring worker for RFD: " + rfd);
                             startWorker(rfd);
+                        }
                     }
                     
                 } else if (LOG.isDebugEnabled())
-                    LOG.debug("no blocks but can't steal - sleeping");
+                    LOG.debug("no blocks but can't steal - sleeping."); //  parts required: " + commonOutFile.listMissingPieces());
                 
                 //wait for a notification before we continue.
                 try {
@@ -2569,9 +2573,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * or we have some rfds to re-try
      */
     private boolean shouldStartWorker() {
-        return (commonOutFile.hasFreeBlocksToAssign() > 0 || victimsExist() ) &&
-             ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
-             ranker.hasMore();
+        return (commonOutFile.hasFreeBlocksToAssign() > 0 || victimsExist()) &&
+               ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
+               ranker.hasMore();
     }
     
     /**
@@ -2946,26 +2950,27 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /**
-     * Interrupts a remotely queued thread if we this status is connected,
+     * Interrupts a remotely queued worker if we this status is connected,
      * or if the status is queued and our queue position is better than
      * an existing queued status.
      *
-     * @param status The ConnectionStatus of this downloader.
-     *
-     * @return true if this thread should be kept around, false otherwise --
-     * explicitly, there is no need to kill any threads, or if the currentThread
-     * is already in the queuedWorkers, or if we did kill a thread worse than
-     * this thread.  
+     * @return true if this worker should be kept around, false otherwise --
+     * explicitly, there is no need to kill any queued workers, or if the DownloadWorker
+     * is already in the queuedWorkers, or if we did kill a worker whose position is
+     * worse than this worker.
      */
     synchronized boolean killQueuedIfNecessary(DownloadWorker worker, int queuePos) {
         if (LOG.isDebugEnabled())
-            LOG.debug("deciding whether to queue worker "+worker+ " at position "+queuePos);
+            LOG.debug("deciding whether to kill a queued host for (" + queuePos + ") worker "+worker);
         
         //Either I am queued or downloading, find the highest queued thread
         DownloadWorker doomed = null;
         
         // No replacement required?...
-        if(getNumDownloaders() <= getSwarmCapacity() && queuePos == -1) {
+        int numDownloaders = getNumDownloaders();
+        int swarmCapacity = getSwarmCapacity();
+        
+        if(numDownloaders <= swarmCapacity && queuePos == -1) {
             return true;
         } 
 
@@ -2976,7 +2981,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             return true;
         }
 
-        if (getNumDownloaders() >= getSwarmCapacity()) {
+        if (numDownloaders >= swarmCapacity) {
             // Search for the queued thread with a slot worse than ours.
             int highest = queuePos; // -1 if we aren't queued.            
             for(Iterator i = queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
@@ -2993,7 +2998,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 LOG.debug("not queueing myself");
                 return false;
             } else if (LOG.isDebugEnabled())
-                LOG.debug(" will replace "+doomed);
+                LOG.debug("will replace "+doomed);
             
             //OK. let's kill this guy 
             doomed.interrupt();

@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -198,17 +197,52 @@ public class VerifyingFileTest extends BaseTestCase {
     
     private void writeImpl(int pos, byte[] chunk) throws Exception {
         if (chunk.length > HTTPDownloader.BUF_LENGTH) {
-            int written = 0;
-            while (written < chunk.length) {
-                int toWrite = Math.min(chunk.length - written, HTTPDownloader.BUF_LENGTH);
-                byte [] temp = new byte[toWrite];
-                System.arraycopy(chunk,written,temp,0,toWrite);
-                written += toWrite;
-                vf.writeBlock(pos,temp);
-                pos += toWrite;
+            Writer writer = new Writer(pos, chunk, 0);
+            writer.write();
+            writer.waitForComplete();
+        } else {
+            if(!vf.writeBlock(pos,chunk))
+                fail("can't write: " + pos);
+        }
+    }
+        
+    private static class Writer implements VerifyingFile.WriteCallback {
+        private int filePos;
+        private int start;
+        private byte[] data;
+        private int lastWrote;
+        
+        Writer(int filePos, byte[] chunk, int start) {
+            this.filePos = filePos;
+            this.start = start;
+            this.data = chunk;
+        }
+        
+        synchronized void write() {
+            while (start < data.length) {
+                final int toWrite = Math.min(data.length - start, HTTPDownloader.BUF_LENGTH);
+                if(!vf.writeBlock(filePos, start, toWrite, data)) {
+                    lastWrote = toWrite;
+                    vf.writeBlockWithCallback(filePos, start, toWrite, data, this);
+                    break;
+                } else {
+                    start += toWrite;
+                    filePos += toWrite;
+                }
             }
-        } else
-            vf.writeBlock(pos,chunk);
+            this.notify();
+        }
+        
+        public synchronized void writeScheduled() {
+            start += lastWrote;
+            filePos += lastWrote;
+            write();
+        }
+        
+        public synchronized void waitForComplete() throws InterruptedException {
+            while(start < data.length)
+                wait();
+        }
     }
     
     /**
@@ -339,7 +373,7 @@ public class VerifyingFileTest extends BaseTestCase {
         
         raf.readFully(chunk);
         writeImpl(0,chunk);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         assertTrue(vf.isComplete());
     }
     

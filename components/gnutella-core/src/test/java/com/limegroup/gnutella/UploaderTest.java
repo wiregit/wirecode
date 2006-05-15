@@ -22,6 +22,7 @@ import com.limegroup.gnutella.downloader.TryAgainLaterException;
 import com.limegroup.gnutella.downloader.UnknownCodeException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.io.StubIOStateObserver;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
@@ -29,6 +30,7 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
@@ -383,8 +385,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             
         // should queue next guy, but 'cause its thex we wont.
         HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
-        ConnectionStatus status = connectThex(d4, true);
-        assertTrue(status.isThexResponse());
+        assertNotNull(connectThex(d4, true));
+        
         
         // d5 will connect and get queued.
         HTTPDownloader d5 = addUploader(upManager, rfd2, "1.1.1.5", true);
@@ -401,8 +403,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             2, upManager.uploadsInProgress());
         
         //even though 5 is queued, he should be able to get the thex tree.
-        status = connectThex(d5, false);
-        assertTrue(status.isThexResponse());
+        assertNotNull(connectThex(d5, false));
+        
         // no need to check the tree, is checked in lots of other tests.
         
         //but, when he tries to get the file again, he stays queued.
@@ -410,9 +412,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             2, upManager.getNumQueuedUploads());
         assertEquals("should have 2 active uploads",
             2, upManager.uploadsInProgress());
-            
-        Thread.sleep((UploadManager.MIN_POLL_TIME+
-                      UploadManager.MAX_POLL_TIME)/2);
+        
         try {
             connectDloader(d5, false, rfd2, true);
             fail("should have been queued");
@@ -1036,7 +1036,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static HTTPDownloader addUploader(final UploadManager upman, 
                                               RemoteFileDesc rfd,
                                               String ip,
-                                              boolean block) throws IOException{
+                                              boolean block) throws Exception{
         //Allow some fudging to prevent race conditons.
         try { Thread.sleep(1000); } catch (InterruptedException e) { }
 
@@ -1075,30 +1075,56 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     private static void connectDloader(HTTPDownloader dloader, boolean tcp, 
-                                       RemoteFileDesc rfd,boolean queue) throws 
-                                       TryAgainLaterException, IOException {  
+                                       RemoteFileDesc rfd,boolean queue) throws Exception {  
         if(tcp)
             dloader.connectTCP(0); //may throw TryAgainLater, etc.
-        dloader.connectHTTP(0,rfd.getSize(),queue);
+        connectHTTP(dloader, 0, rfd.getSize(), queue);
     }
     
-    private static ConnectionStatus connectThex(HTTPDownloader dloader,
+    private static HashTree connectThex(HTTPDownloader dloader,
                                                 boolean tcp)
                                                 throws Exception {
         if(tcp)
             dloader.connectTCP(0);
         addThexHeader(dloader);
-        return dloader.requestHashTree(dloader.getRemoteFileDesc().getSHA1Urn());
+        return requestHashTree(dloader);
     }
     
     private static void addThexHeader(HTTPDownloader dl) throws Exception {
         PrivilegedAccessor.invokeMethod(dl, "parseTHEXHeader",
-                "X-Thex-URI: " + fm.get((int)dl.getIndex()).getHashTree().httpStringValue());
+                fm.get((int)dl.getIndex()).getHashTree().httpStringValue());
     }
     
     private static void kill(HTTPDownloader downloader) {
         downloader.stop();
         try { Thread.sleep(1000); } catch (InterruptedException ignored) { }
     }
+    
+    private static void connectHTTP(HTTPDownloader dloader, int start, int stop, boolean queue) throws Exception {
+        StubIOStateObserver observer = new StubIOStateObserver();
+        synchronized(observer) {
+            dloader.connectHTTP(start, stop, queue, 0, observer);
+            observer.wait();
+            dloader.parseHeaders();
+        }
+    }
+    
+    private static HashTree requestHashTree(HTTPDownloader dloader) throws Exception {
+        StubIOStateObserver observer = new StubIOStateObserver();
+        synchronized(observer) {
+            dloader.requestHashTree(dloader.getRemoteFileDesc().getSHA1Urn(), observer);
+            observer.wait();
+            ConnectionStatus status = dloader.parseThexResponseHeaders();
+            if(status.isConnected()) {
+                dloader.downloadThexBody(dloader.getRemoteFileDesc().getSHA1Urn(), observer);
+                observer.wait();
+                return dloader.getHashTree();
+            } else {
+                return null;
+            }
+        }
+    }
+    
+    
     
 }

@@ -462,7 +462,7 @@ public class DIMERecord {
     /**
      * Validates the first two bytes.
      */
-    private static void validateFirstBytes(byte one, byte two) {
+    static void validateFirstBytes(byte one, byte two) {
         if((one & VERSION_MASK) != VERSION)
             throw new IllegalArgumentException("invalid version: " + 
                                      (((one & VERSION_MASK) >> 3) & 0x1F));
@@ -535,7 +535,7 @@ public class DIMERecord {
     /**
      * Calculates how much data should be padded for the given length.
      */
-    private static int calculatePaddingLength(int length) {
+    static int calculatePaddingLength(int length) {
         return (length % 4 == 0) ? 0 : (4 - length % 4);
     }
     

@@ -133,12 +133,25 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     }
     
     /**
-     * Requests some space from the Throttle to write data.
-     *
-     * A global 'available' variable is set, and it is assumed that
-     * the interested party will try writing to us.  Our chained-write
-     * is limited to the available amount, and available is decremented.
-     * We then release the amount of space that we couldn't write.
+     * Requests some bandiwdth from the throttle.
+     */
+    public void requestBandwidth() {
+        available = throttle.request();
+    }
+    
+    /**
+     * Releases available bandwidth back to the throttle.
+     */
+    public void releaseBandwidth() {
+        throttle.release(available);
+        available = 0;
+    }
+    
+    /**
+     * Writes up to 'available' data to the sink channel.
+     * requestBandwidth must be called prior to this to allow data
+     * to be written, and releaseBandwidth must be called afterwards
+     * to return unwritten data back to the Throttle.
      */
     public boolean handleWrite() throws IOException {
         InterestWriteChannel chain = channel;
@@ -146,21 +159,10 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
             throw new IllegalStateException("writing with no source.");
             
         WriteObserver interested = observer;
-            
-        available = throttle.request();
-        // If nothing is available, DO NOT CHANGE INTEREST WITHOUT
-        // TRYING TO WRITE.  Otherwise, because of a bug(?) in selecting,
-        // we will not be immediately notified again that data can be
-        // written.  If we leave the interest alone then we will be
-        // notified again.
         if(available != 0) {
-            try {
-                chain.interest(this, false);
-                if(interested != null)
-                    interested.handleWrite();
-            } finally {
-                throttle.release(available);
-            }
+            chain.interest(this, false);
+            if(interested != null)
+                interested.handleWrite();
             interested = observer; // re-get it, since observer may have changed interest.
             if(interested != null) {
                 throttle.interest(this);

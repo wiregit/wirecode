@@ -221,6 +221,9 @@ class HashTreeHandler {
 
         //////////////////////    READING   /////////////////////
 
+    static ThexReader createAsyncReader(String sha1, long fileSize, String root32) {
+        return new AsyncHashTreeHandler(sha1, fileSize, root32);
+    }
 
     /**
      * Reads a HashTree in DIME format from an input stream.
@@ -240,8 +243,27 @@ class HashTreeHandler {
       throws IOException {
         LOG.trace("creating HashTreeHandler from network");
         DIMEParser parser = new DIMEParser(is);
-        DIMERecord xmlRecord = parser.nextRecord();
-        DIMERecord treeRecord = parser.nextRecord();
+        return nodesFromRecords(parser, fileSize, root32);
+    }
+    
+    /**
+     * Returns a list of nodes from a list of dime records.
+     * 
+     * @param xmlRecord
+     * @param treeRecord
+     * @param fileSize
+     * @param root32
+     * @return
+     * @throws IOException
+     */
+    static List nodesFromRecords(Iterator iterator, long fileSize, String root32) throws IOException {
+        if(!iterator.hasNext())
+            throw new IOException("no xml record");
+        DIMERecord xmlRecord = (DIMERecord)iterator.next();
+        if(!iterator.hasNext())
+            throw new IOException("no tree record");
+        DIMERecord treeRecord = (DIMERecord)iterator.next();
+        
         if(LOG.isDebugEnabled()) {
             LOG.debug("xml id: [" + xmlRecord.getIdentifier() + "]");
             LOG.debug("xml type: [" + xmlRecord.getTypeString() + "]");
@@ -250,11 +272,11 @@ class HashTreeHandler {
             LOG.debug("xml type num: [" + xmlRecord.getTypeId() + "]");
             LOG.debug("tree type num: [" + treeRecord.getTypeId() + "]");
         }
-
-        while(parser.hasNext()) {
+        
+        while(iterator.hasNext()) {
             if(LOG.isWarnEnabled())
                 LOG.warn("more elements in the dime record.");
-            parser.nextRecord(); // ignore them.
+            iterator.next(); // ignore them.
         }
                 
         String xml = new String(xmlRecord.getData(), "UTF-8");

@@ -200,15 +200,15 @@ public class IOUtils {
     public static void close(Socket s) {
         if(s != null) {
             try {
+                s.close();
+            } catch(IOException ignored) {}
+            
+            try {
                 close(s.getInputStream());
             } catch(IOException ignored) {}
 
             try {
                 close(s.getOutputStream());
-            } catch(IOException ignored) {}
-
-            try {
-                s.close();
             } catch(IOException ignored) {}
         }
     }
