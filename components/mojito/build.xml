@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<project name="DHT" default="build" basedir=".">
-    <description>Kademlia + PATRICA = Love :-)</description>
+<project name="MojitoDHT" default="build" basedir=".">
+    <description>MojitoDHT</description>
 
 	<property name="basedir" value="."/>
 	<property name="jars" value="${basedir}/lib"/>
@@ -29,6 +29,16 @@
 		</delete>
 	</target>
 	
+	<target name="jar" depends="clean, build">
+		<delete file="mojito.jar"/>
+		<jar destfile="mojito.jar" 
+				basedir="${basedir}"
+				includes="com/**"
+				excludes="**/bin/** **/tests/** **/statistics/**"
+				compress="false">
+		</jar>
+	</target>
+		
 	<target name="planetLab" depends="clean, build">
 		<delete file="planetlab.jar"/>
 		<jar destfile="planetlab.jar" 
