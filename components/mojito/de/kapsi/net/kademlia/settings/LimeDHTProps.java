@@ -19,6 +19,7 @@
 
 package de.kapsi.net.kademlia.settings;
 
+
 /**
  * 
  */
@@ -73,6 +74,10 @@ public class LimeDHTProps /* extends AbstractSettings */ {
         public LongSetting createSettableLongSetting(String key, long value, String simppKey, long min, long max) {
             return new LongSetting(value);
         }
+        
+        public synchronized ByteSetting createByteSetting(String key, byte value) {
+            return new ByteSetting(value);
+        }
     }
     
     public static class BooleanSetting {
@@ -87,6 +92,13 @@ public class LimeDHTProps /* extends AbstractSettings */ {
         public IntSetting(int value) { this.value = value; }
         public void setValue(int value) { this.value = value; }
         public int getValue() { return value; }
+    }
+    
+    public static class ByteSetting {
+        private byte value;
+        public ByteSetting(byte value) { this.value = value; }
+        public void setValue(byte value) { this.value = value; }
+        public byte getValue() { return value; }
     }
     
     public static class LongSetting {

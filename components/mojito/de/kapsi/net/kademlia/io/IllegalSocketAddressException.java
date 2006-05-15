@@ -16,31 +16,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package de.kapsi.net.kademlia.event;
 
-import java.util.Collection;
-import java.util.Map;
+package de.kapsi.net.kademlia.io;
 
-import de.kapsi.net.kademlia.KUID;
+import java.net.SocketException;
 
-public interface FindValueListener {
-    
-    /**
-     * Called after a FIND_VALUE lookup has finished.
-     * 
-     * @param key The key we were looking for
-     * @param values Collection of KeyValues
-     * @param time Time in milliseconds
-     */
-    public void foundValue(KUID key, Collection values, long time);
-    
-    /**
-     * Called after an exhaustive FIND_VALUE lookup has finished.
-     * 
-     * @param key The key we were looking for
-     * @param values the Map of <Node,KeyValues>
-     * @param time Time in milliseconds
-     */
-    public void foundValue(KUID key, long time, Map nodesValues);
+public class IllegalSocketAddressException extends SocketException {
+
+    private static final long serialVersionUID = 5043640414346690375L;
+
+    public IllegalSocketAddressException() {
+        super();
+    }
+
+    public IllegalSocketAddressException(String s) {
+        super(s);
+    }
 }

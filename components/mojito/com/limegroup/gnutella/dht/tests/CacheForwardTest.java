@@ -28,11 +28,11 @@ import de.kapsi.net.kademlia.KUID;
 public class CacheForwardTest {
 
     public void testCacheForward() {
-        DHT originalRequesterDHT = new DHT();
+        DHT originalRequesterDHT = new DHT("DHT-1");
         
-        DHT firstStorer = new DHT();
+        DHT firstStorer = new DHT("DHT-2");
         
-        DHT secondStorer = new DHT();
+        DHT secondStorer = new DHT("DHT-3");
         try {
             originalRequesterDHT.bind(new InetSocketAddress("localhost",3000));
             firstStorer.bind(new InetSocketAddress("localhost",3001));
@@ -41,17 +41,31 @@ public class CacheForwardTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        new Thread(originalRequesterDHT,"DHT-1").start();
-        new Thread(firstStorer,"DHT-2").start();
+        
+        originalRequesterDHT.start();
+        firstStorer.start();
         
         try {
             firstStorer.bootstrap(originalRequesterDHT.getSocketAddress(),null);
             byte[] valueID = firstStorer.getLocalNode().getNodeID().getBytes();
             //replace with first bits of first storer to make sure it lands there first
             originalRequesterDHT.put(KUID.createValueID(valueID),"test".getBytes("UTF-8"),null);
-            Thread.sleep(5000);
-            new Thread(secondStorer,"DHT-3").start();
+            Thread.sleep(1000);
+            //try the normal store forward
+            secondStorer.start();
             secondStorer.bootstrap(firstStorer.getSocketAddress(),null);
+            Thread.sleep(5000);
+            //now change instanceID and retry -- should store forward again
+            secondStorer.stop();
+            Thread.sleep(1000);
+            secondStorer.bind(new InetSocketAddress("localhost",3002));
+            secondStorer.start();
+            secondStorer.bootstrap(firstStorer.getSocketAddress(),null);
+            Thread.sleep(10000);
+            //now contact host with same instanceID -- should not store forward
+            System.out.println("Second storer will send ping!");
+            secondStorer.getContext().ping(firstStorer.getLocalNode());
+            Thread.sleep(10000);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

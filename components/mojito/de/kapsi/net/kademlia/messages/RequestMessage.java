@@ -22,7 +22,7 @@ package de.kapsi.net.kademlia.messages;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 
-public abstract class RequestMessage extends Message {
+public abstract class RequestMessage extends AbstractDHTMessage {
 
     public RequestMessage(int vendor, int version, 
             ContactNode node, KUID messageId) {

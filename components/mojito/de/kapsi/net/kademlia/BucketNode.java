@@ -50,11 +50,11 @@ public class BucketNode extends Node {
     }
     
     public void incrementNodeCount() {
-        ++nodeCount;
+        nodeCount++;
     }
     
     public void decrementNodeCount() {
-        --nodeCount;
+        nodeCount--;
     }
 
     public void setNodeCount(int count) {
@@ -70,6 +70,7 @@ public class BucketNode extends Node {
         if (replacementCache == null) {
             replacementCache = new Cache(RouteTableSettings.MAX_CACHE_SIZE.getValue());
         }
+        
         replacementCache.put(node.getNodeID(), node);
     }
     
@@ -113,7 +114,7 @@ public class BucketNode extends Node {
     public List split() {
         BucketNode leftBucket = new BucketNode(getNodeID(), depth+1);
         BucketNode rightBucket = new BucketNode(getNodeID().set(depth), depth+1);
-        if(replacementCache != null && !replacementCache.isEmpty()) {
+        if (!getReplacementCache().isEmpty()) {
             if(LOG.isErrorEnabled()) {
                 LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
             }
@@ -153,8 +154,9 @@ public class BucketNode extends Node {
         if (!(o instanceof BucketNode)) {
             return false;
         }
-        BucketNode other = (BucketNode)o;
-        return super.equals(o) && (depth == other.depth);
+        
+        return super.equals(o) 
+            && (depth == ((BucketNode)o).depth);
     }
     
     /**

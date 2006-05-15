@@ -33,22 +33,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import com.limegroup.gnutella.dht.statistics.DHTStats;
 
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.FindValueListener;
 import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.event.StoreListener;
-import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
+import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.util.ArrayUtils;
+import de.kapsi.net.kademlia.util.KeyValueCollection;
 
 public class Main {
     
@@ -78,14 +80,19 @@ public class Main {
         
         for(int i = 0; i < count; i++) {
             try {
-                DHT dht = new DHT();
+                DHT dht = new DHT("DHT" + i);
+                
+                /*if (i % 2 == 0) {
+                    dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
+                }*/
+                
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
                 } else {
                     dht.bind(new InetSocketAddress(port+i));
                 }
                 
-                new Thread(dht, "DHT-" + i).start();
+                dht.start();
 
                 dhts.add(dht);
                 System.out.println(i + ": " + ((DHT)dhts.get(dhts.size()-1)).getLocalNode());
@@ -95,7 +102,18 @@ public class Main {
             }
         }
         
-        new BootstrapUtil(dhts).bootstrap();
+        long time = 0L;
+        for(int i = 1; i < dhts.size(); i++) {
+            long t = ((DHT)dhts.get(i)).bootstrap(((DHT)dhts.get(i-1)).getSocketAddress());
+            
+            if (t >= 0L) {
+                time += t;
+                System.out.println("Node #" + i + " finished bootstrapping in " + t + "ms");
+            } else {
+                System.out.println("Node #" + i + " failed to bootstrap");
+            }
+        }
+        System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
         int current = 0;
         DHT dht = (DHT)dhts.get(current);
@@ -106,6 +124,7 @@ public class Main {
         String ping = "ping .+ \\d{1,5}";
         String bootstrap = "bootstrap .+ \\d{1,5}";
         String put = "put (key|kuid) (\\w|\\d)+ (value|file) .+";
+        String remove = "remove (key|kuid) (\\w|\\d)+";
         String get = "get (key|kuid) (\\w|\\d)+";
         String getr = "getr (key|kuid) (\\w|\\d)+";
         String getall = "get exhaustive (key|kuid) (\\w|\\d)+";
@@ -120,6 +139,8 @@ public class Main {
         String restart = "restart";
         String quit = "quit";
         String reqstats = "reqstats .+ \\d{1,5} (stats|rt|db)";
+        String firewalled = "firewalled";
+        String exhaustive = "exhaustive";
         
         String[] commands = {
                 help,
@@ -129,6 +150,7 @@ public class Main {
                 reqstats,
                 bootstrap,
                 put,
+                remove,
                 get,
                 getr,
                 listDB,
@@ -140,7 +162,10 @@ public class Main {
                 kill,
                 stats,
                 restart,
-                quit
+                quit,
+                reqstats,
+                firewalled,
+                exhaustive
         };
         
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -159,6 +184,12 @@ public class Main {
                     dht = (DHT)dhts.get(index);
                     current = index;
                     info(dht);
+                } else if (line.matches(firewalled)) {
+                    dht.setFirewalled(!dht.isFirewalled());
+                    info(dht);
+                } else if (line.equals(exhaustive)) {
+                    KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.setValue(
+                            !KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
                 } else if (line.matches(ping)) {
                     ping(dht, line.split(" "));
                 } else if (line.matches(reqstats)) {
@@ -167,6 +198,8 @@ public class Main {
                     bootstrap(dht, line.split(" "));
                 } else if (line.matches(put)) {
                     put(dht, line.split(" "));
+                } else if (line.matches(remove)) {
+                    remove(dht, line.split(" "));
                 } else if (line.matches(get)) {
                     get(dht, line.split(" "));
                 } else if (line.matches(getr)) {
@@ -181,7 +214,7 @@ public class Main {
                     load(dht, line.split(" "));
                 } else if (line.matches(kill)) {
                     if (dht.isRunning()) {
-                        dht.close();
+                        dht.stop();
                     }
                 } else if (line.matches(stats)) {
                     DHTStats dhtStats = dht.getContext().getDHTStats();
@@ -195,12 +228,12 @@ public class Main {
                         } else {
                             dht.bind(new InetSocketAddress(port+current));
                         }
-                        new Thread(dht, "DHT-" + current).start();
+                        dht.start();
                         dhts.set(current, dht);
                     }
                 } else if (line.matches(quit)) {
                     for(int i = 0; i < dhts.size(); i++) {
-                        ((DHT)dhts.get(i)).close();
+                        ((DHT)dhts.get(i)).stop();
                     }
                     System.exit(0);
                 } else {
@@ -230,7 +263,7 @@ public class Main {
         
         if(line[1].equals("db")) {
             Database database = dht.getDatabase();
-            Collection values = database.getAllValues();
+            Collection values = database.getValues();
             for(Iterator it = values.iterator(); it.hasNext(); ) {
                 KeyValue value = (KeyValue)it.next();
                 
@@ -254,11 +287,11 @@ public class Main {
         
         System.out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
-            public void pingSuccess(ContactNode node, long time) {
-                System.out.println("*** Ping to " + node + " succeeded: " + time + "ms");
+            public void response(ResponseMessage response, long time) {
+                System.out.println("*** Ping to " + response.getSource() + " succeeded: " + time + "ms");
             }
-            
-            public void pingTimeout(KUID nodeId, SocketAddress address) {
+
+            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
                 if (nodeId != null) {
                     System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " failed");
                 } else {
@@ -283,22 +316,24 @@ public class Main {
         }
         
         System.out.println("Requesting stat... " + addr);
-        StatsRequest req = dht.getContext().getMessageFactory()
-                .createStatsRequest(new byte[0], type);
-        
         StatsListener listener = new StatsListener() {
-            public void nodeStatsResponse(ContactNode node, String statistics, long time) {
-                System.out.println("*** Stats to " + node + " succeeded: " + time + "ms");
-                System.out.println(statistics);
+            public void response(ResponseMessage response, long time) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("*** Stats to ").append(response.getSource())
+                    .append(" succeeded in ").append(time).append("ms\n");
+                buffer.append(((StatsResponse)response).getStatistics());
+                System.out.println(buffer.toString());
             }
 
-            public void nodeStatsTimeout(KUID nodeId, SocketAddress address) {
-                System.out.println("*** Stats to " + address + " timeout!");
+            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("*** Stats to ").append(ContactNode.toString(nodeId, address))
+                    .append(" failed with timeout");
+                System.out.println(buffer.toString());
             }
-            
         };
         
-        dht.getContext().getMessageDispatcher().send(addr, req, new StatsResponseHandler(dht.getContext(), listener));
+        dht.stats(addr, type, listener);
     }
     
     private static void bootstrap(DHT dht, String[] line) throws Throwable {
@@ -309,11 +344,11 @@ public class Main {
         
         System.out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                System.out.println("*** Bootstraping phase 1 " + (!nodes.isEmpty() ? "succeded" : "failed") + " in " + time + " ms");
+            public void phaseOneComplete(long time) {
+                System.out.println("*** Bootstraping phase 1 finished in " + time + " ms");
             }
 
-            public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+            public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println("*** Bootstraping phase 2 " + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
             }
         });
@@ -360,6 +395,34 @@ public class Main {
         });
     }
     
+    private static void remove(DHT dht, final String[] line) throws Throwable {
+        MessageDigest md = MessageDigest.getInstance("SHA1");
+        
+        KUID key = null;
+
+        if (line[1].equals("kuid")) {
+            key = KUID.createValueID(ArrayUtils.parseHexString(line[2]));
+        } else {
+            key = KUID.createValueID(md.digest(line[2].getBytes("UTF-8")));
+        }
+        md.reset();
+        
+        System.out.println("Removing... " + key);
+        dht.remove(key, new StoreListener() {
+            public void store(List keyValues, Collection nodes) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("REMOVED KEY_VALUES: ").append(keyValues).append("\n");
+                int i = 0;
+                for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+                    Node node = (Node) iter.next();
+                    buffer.append(i).append(": ").append(node).append("\n");
+                    i++;
+                }
+                System.out.println(buffer.toString());
+            }
+        });
+    }
+    
     private static void get(DHT dht, String[] line) throws Throwable {
         MessageDigest md = MessageDigest.getInstance("SHA1");
         
@@ -380,52 +443,44 @@ public class Main {
         }
         md.reset();
         
-        if (line[0].equals("get")) {
-            if(exhaustive) {
-                dht.get(key, true, new FindValueListener() {
-                    public void foundValue(KUID key, Collection values, long time) {
-                        if (values != null) {
-                            System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                        } else {
-                            System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                        }
-                    }
-                    public void foundValue(KUID key, long time, Map nodesValues) {
-                        if(nodesValues != null) {
-                            System.out.println("*** Found KeyValue " + key + " in " + time + " ms, values: ");
-                            for (Iterator iter = nodesValues.keySet().iterator(); iter.hasNext();) {
-                                ContactNode node = (ContactNode) iter.next();
-                                System.out.println("Node: "+ node + ", Values: "+ nodesValues.get(node));
-                            }
-                        } else {
-                            System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                        }
-                    }
-                });
-            } else {
-                dht.get(key, false, new FindValueListener() {
-                    public void foundValue(KUID key, Collection values, long time) {
-                        if (values != null) {
-                            System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                        } else {
-                            System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                        }
-                    }
-                    public void foundValue(KUID key, long time, Map nodesValues) {}
-                });
+        /*dht.get(key, new LookupAdapter() {
+            public void found(KUID key, Collection values, long time) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append(key).append(" in ").append(time).append("ms\n");
+                buffer.append(values);
+                buffer.append("\n");
+                System.out.println(buffer.toString());
             }
-        } else if (line[0].equals("getr")){
-            dht.getr(key, false, new FindValueListener() {
-                public void foundValue(KUID key, Collection values, long time) {
-                    if (values != null) {
-                        System.out.println("*** Found KeyValue " + key + " = " + values + " in " + time + " ms");
-                    } else {
-                        System.out.println("*** Lookup for KeyValue " + key + " failed after " + time + " ms");
-                    }
+
+            public void finish(KUID lookup, Collection c, long time) {
+                if (c.isEmpty()) {
+                    System.out.println(lookup + " was not found after " + time + "ms");
+                } else {
+                    System.out.println("Lookup for " + lookup + " finished after " 
+                            + time + "ms and " + c.size() + " found locations");
                 }
-                public void foundValue(KUID key, long time, Map nodesValues) {}
-            });
-        } 
+            }
+        });*/
+        
+        long start = System.currentTimeMillis();
+        Collection c = dht.get(key);
+        long time = System.currentTimeMillis() - start;
+        
+        if (!c.isEmpty()) {
+            StringBuffer buffer = new StringBuffer();
+            buffer.append(key).append(" in ").append(time).append("ms\n");
+            for(Iterator it = c.iterator(); it.hasNext(); ) {
+                KeyValueCollection kvc = (KeyValueCollection)it.next();
+                buffer.append(kvc);
+                buffer.append("\n");
+            }
+            buffer.append("Locations: ").append(c.size());
+            System.out.println(buffer.toString());
+        } else {
+            System.out.println(key + " was not found after " + time + "ms");
+        }
+        
+        System.out.println();
     }
     
     private static void load(DHT dht, String[] line) {
@@ -453,44 +508,6 @@ public class Main {
         } else {
             Context context = dht.getContext();
             context.getDatabase().store();
-        }
-    }
-    
-    private static class BootstrapUtil implements BootstrapListener {
-        
-        private List dhts;
-        private int index = 1;
-        
-        private long time = 0L;
-        
-        private boolean finished = false;
-        
-        public BootstrapUtil(List dhts) {
-            this.dhts = dhts;
-        }
-
-        public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {}
-
-        public synchronized void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
-            if (time >= 0) {
-                this.time += time;
-            }
-            
-            bootstrap();
-        }
-
-        public synchronized void bootstrap() {
-            if (index < dhts.size()) {
-                try {
-                    ((DHT)dhts.get(index)).bootstrap(((DHT)dhts.get(index-1)).getSocketAddress(), this);
-                    index++;
-                } catch (IOException err) {
-                    err.printStackTrace();
-                }
-            } else if (!finished && !dhts.isEmpty()) {
-                finished = true;
-                System.out.println("*** Bootstraping finished in " + time + " ms ");
-            }
         }
     }
 }

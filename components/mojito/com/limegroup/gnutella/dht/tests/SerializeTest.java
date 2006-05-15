@@ -54,7 +54,7 @@ public class SerializeTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        new Thread(dht,"DHT").start();
+        dht.start();
         
         Thread.sleep(3*1000);
         
@@ -80,7 +80,7 @@ public class SerializeTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        new Thread(dht,"DHT").start();
+        dht.start();
         
 //        Thread.sleep(3*1000);
         RoutingTable rtable = dht.getContext().getRouteTable();

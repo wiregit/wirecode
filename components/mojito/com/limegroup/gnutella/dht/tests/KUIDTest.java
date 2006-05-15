@@ -19,7 +19,11 @@
  
 package com.limegroup.gnutella.dht.tests;
 
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.util.ArrayUtils;
 
 public class KUIDTest {
@@ -44,8 +48,29 @@ public class KUIDTest {
         System.out.println(b.compareTo(a)); // 1
     }
     
-    public static void main(String[] args) {
+    public void testQueryKey() throws Exception {
+        InetSocketAddress address1 = new InetSocketAddress("localhost", 1234);
+        QueryKey queryKey1 = QueryKey.getQueryKey(address1);
+        
+        KUID messageId1 = KUID.createRandomMessageID(address1);
+        Method m = KUID.class.getDeclaredMethod("getQueryKey", new Class[0]);
+        m.setAccessible(true);
+        QueryKey queryKey2 = (QueryKey)m.invoke(messageId1, new Object[0]);
+        
+        //System.out.println(ArrayUtils.toHexString(queryKey1.getBytes()));
+        //System.out.println(ArrayUtils.toHexString(queryKey2.getBytes()));
+        //System.out.println(messageId.toHexString());
+        
+        System.out.println(queryKey1.equals(queryKey2)); // true
+        System.out.println(messageId1.verifyQueryKey(address1)); // true
+        
+        // TODO: currently true because QK is a fake implementation
+        System.out.println(messageId1.verifyQueryKey(new InetSocketAddress("www.limewire.org", 1234))); // false
+    }
+    
+    public static void main(String[] args) throws Exception {
         new KUIDTest().testIsCloser();
         new KUIDTest().testCompareTo();
+        new KUIDTest().testQueryKey();
     }
 }

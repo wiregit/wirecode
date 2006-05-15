@@ -31,7 +31,7 @@ import java.util.Iterator;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
@@ -60,8 +60,8 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeKeyValue(KeyValue keyValue) throws IOException {
-        writeKUID(keyValue.getKey());
-        byte[] b = keyValue.getValue();
+        writeKUID((KUID)keyValue.getKey());
+        byte[] b = (byte[])keyValue.getValue();
         writeShort(b.length);
         write(b, 0, b.length);
         
@@ -121,6 +121,7 @@ public class MessageOutputStream extends DataOutputStream {
     
     private void writePing(PingRequest ping) throws IOException {
         /* NOTHING TO WRITE */
+        //writeInt(0);
     }
     
     private void writePong(PingResponse pong) throws IOException {
@@ -189,42 +190,43 @@ public class MessageOutputStream extends DataOutputStream {
         writeUTF(response.getStatistics());
     }
     
-    public void write(Message msg) throws IOException {
+    public void write(DHTMessage msg) throws IOException {
         writeInt(msg.getVendor());
         writeShort(msg.getVersion());
-        writeByte(msg.getContactNode().getFlags());
-        writeKUID(msg.getContactNode().getNodeID());
+        writeByte(msg.getSource().getFlags());
+        writeKUID(msg.getSource().getNodeID());
         writeKUID(msg.getMessageID());
+        writeByte(msg.getSource().getInstanceID());
         
         if (msg instanceof PingRequest) {
-            writeByte(Message.PING_REQUEST);
+            writeByte(DHTMessage.PING_REQUEST);
             writePing((PingRequest)msg);
         } else if (msg instanceof PingResponse) {
-            writeByte(Message.PING_RESPONSE);
+            writeByte(DHTMessage.PING_RESPONSE);
             writePong((PingResponse)msg);
         } else if (msg instanceof FindNodeRequest) {
-            writeByte(Message.FIND_NODE_REQUEST);
+            writeByte(DHTMessage.FIND_NODE_REQUEST);
             writeFindNodeRequest((FindNodeRequest)msg);
         } else if (msg instanceof FindNodeResponse) {
-            writeByte(Message.FIND_NODE_RESPONSE);
+            writeByte(DHTMessage.FIND_NODE_RESPONSE);
             writeFindNodeResponse((FindNodeResponse)msg);
         } else if (msg instanceof FindValueRequest) {
-            writeByte(Message.FIND_VALUE_REQUEST);
+            writeByte(DHTMessage.FIND_VALUE_REQUEST);
             writeFindValueRequest((FindValueRequest)msg);
         } else if (msg instanceof FindValueResponse) {
-            writeByte(Message.FIND_VALUE_RESPONSE);
+            writeByte(DHTMessage.FIND_VALUE_RESPONSE);
             writeFindValueResponse((FindValueResponse)msg);
         } else if (msg instanceof StoreRequest) {
-            writeByte(Message.STORE_REQUEST);
+            writeByte(DHTMessage.STORE_REQUEST);
             writeStoreRequest((StoreRequest)msg);
         } else if (msg instanceof StoreResponse) {
-            writeByte(Message.STORE_RESPONSE);
+            writeByte(DHTMessage.STORE_RESPONSE);
             writeStoreResponse((StoreResponse)msg);
         } else if (msg instanceof StatsRequest) {
-            writeByte(Message.STATS_REQUEST);
+            writeByte(DHTMessage.STATS_REQUEST);
             writeStatsRequest((StatsRequest)msg);
         } else if (msg instanceof StatsResponse) {
-            writeByte(Message.STATS_RESPONSE);
+            writeByte(DHTMessage.STATS_RESPONSE);
             writeStatsResponse((StatsResponse)msg);
         } else {
             throw new IOException("Unknown Message: " + msg);

@@ -32,6 +32,9 @@ import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 
+/**
+ * 
+ */
 public class PingRequestHandler extends AbstractRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);
@@ -46,7 +49,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
     public void handleRequest(RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getContactNode() + " sent us a Ping");
+            LOG.trace(message.getSource() + " sent us a Ping");
         }
         
         networkStats.PING_REQUESTS.incrementStat();
@@ -54,9 +57,9 @@ public class PingRequestHandler extends AbstractRequestHandler {
         PingRequest request = (PingRequest)message;
         
         PingResponse response = context.getMessageFactory()
-                .createPingResponse(message, message.getSocketAddress());
+                .createPingResponse(request, request.getSourceAddress());
 
-        context.getMessageDispatcher().send(message.getContactNode(), response, null);
+        context.getMessageDispatcher().send(request.getSource(), response);
         networkStats.PONGS_SENT.incrementStat();
     }
 }

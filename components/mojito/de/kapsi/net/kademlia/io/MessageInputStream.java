@@ -31,7 +31,7 @@ import java.util.Arrays;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.FindValueRequest;
 import de.kapsi.net.kademlia.messages.request.PingRequest;
@@ -145,10 +145,10 @@ public class MessageInputStream extends DataInputStream {
     private PingResponse readPong(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         
-        SocketAddress addr = readSocketAddress();
+        SocketAddress externalAddress = readSocketAddress();
         int estimatedSize = readInt();
         byte[] signature = readSignature();
-        return new PingResponse(vendor, version, node, messageId, addr, estimatedSize, signature);
+        return new PingResponse(vendor, version, node, messageId, externalAddress, estimatedSize, signature);
     }
     
     private FindNodeRequest readFindNodeRequest(int vendor, int version, 
@@ -175,7 +175,7 @@ public class MessageInputStream extends DataInputStream {
         return new FindValueRequest(vendor, version, node, messageId, lookup);
     }
     
-    private Message readFindValueResponse(int vendor, int version, 
+    private DHTMessage readFindValueResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         
         int size = readUnsignedByte();
@@ -216,50 +216,51 @@ public class MessageInputStream extends DataInputStream {
         return new StoreResponse(vendor, version, node, messageId, requesting, Arrays.asList(stats));
     }
     
-    private Message readStatsResponse(int vendor, int version, ContactNode node,
+    private DHTMessage readStatsResponse(int vendor, int version, ContactNode node,
             KUID messageId) throws IOException{
         String stats = readUTF();
         return new StatsResponse(vendor, version, node, messageId, stats);
     }
     
-    private Message readStatsRequest(int vendor, int version, 
+    private DHTMessage readStatsRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         byte[] signature = readSignature();
         int request = readInt();
         return new StatsRequest(vendor, version, node, messageId, signature, request);
     }
     
-    public Message readMessage(SocketAddress src) throws IOException {
+    public DHTMessage readMessage(SocketAddress src) throws IOException {
+
         int vendor = readInt();
         int version = readUnsignedShort();
         int flags = readUnsignedByte();
         KUID nodeId = readKUID();
         KUID messageId = readKUID();
-        
+        int instanceId = readUnsignedByte();
         int messageType = readUnsignedByte();
         
-        ContactNode node = new ContactNode(nodeId, src, flags);
-        
+        ContactNode node = new ContactNode(nodeId, src, flags, instanceId);
+
         switch(messageType) {
-            case Message.PING_REQUEST:
+            case DHTMessage.PING_REQUEST:
                 return readPing(vendor, version, node, messageId);
-            case Message.PING_RESPONSE:
+            case DHTMessage.PING_RESPONSE:
                 return readPong(vendor, version, node, messageId);
-            case Message.FIND_NODE_REQUEST:
+            case DHTMessage.FIND_NODE_REQUEST:
                 return readFindNodeRequest(vendor, version, node, messageId);
-            case Message.FIND_NODE_RESPONSE:
+            case DHTMessage.FIND_NODE_RESPONSE:
                 return readFindNodeResponse(vendor, version, node, messageId);
-            case Message.FIND_VALUE_REQUEST:
+            case DHTMessage.FIND_VALUE_REQUEST:
                 return readFindValueRequest(vendor, version, node, messageId);
-            case Message.FIND_VALUE_RESPONSE:
+            case DHTMessage.FIND_VALUE_RESPONSE:
                 return readFindValueResponse(vendor, version, node, messageId);
-            case Message.STORE_REQUEST:
+            case DHTMessage.STORE_REQUEST:
                 return readStoreRequest(vendor, version, node, messageId);
-            case Message.STORE_RESPONSE:
+            case DHTMessage.STORE_RESPONSE:
                 return readStoreResponse(vendor, version, node, messageId);
-            case Message.STATS_REQUEST:
+            case DHTMessage.STATS_REQUEST:
                 return readStatsRequest(vendor, version, node, messageId);
-            case Message.STATS_RESPONSE:
+            case DHTMessage.STATS_RESPONSE:
                 return readStatsResponse(vendor, version, node, messageId);
             default:
                 throw new IOException("Received unknown message type: " + messageType + " from ContactNode: " + nodeId);

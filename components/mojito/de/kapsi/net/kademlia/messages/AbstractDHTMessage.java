@@ -24,24 +24,7 @@ import java.net.SocketAddress;
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 
-public abstract class Message {
-    
-    public static final int MAX_MESSAGE_SIZE = 1492;
-
-    public static final int PING_REQUEST = 0x01;
-    public static final int PING_RESPONSE = 0x02;
-    
-    public static final int STORE_REQUEST = 0x03;
-    public static final int STORE_RESPONSE = 0x04;
-    
-    public static final int FIND_NODE_REQUEST = 0x05;
-    public static final int FIND_NODE_RESPONSE = 0x06;
-    
-    public static final int FIND_VALUE_REQUEST = 0x08;
-    public static final int FIND_VALUE_RESPONSE = 0x09;
-    
-    public static final int STATS_REQUEST = 0x0A;
-    public static final int STATS_RESPONSE = 0x0B;
+public abstract class AbstractDHTMessage implements DHTMessage {
     
     private int vendor;
     private int version;
@@ -51,11 +34,11 @@ public abstract class Message {
     
     private byte[] signature;
     
-    public Message(int vendor, int version, ContactNode source, KUID messageId) {
+    public AbstractDHTMessage(int vendor, int version, ContactNode source, KUID messageId) {
         this(vendor, version, source, messageId, null);
     }
     
-    public Message(int vendor, int version, 
+    public AbstractDHTMessage(int vendor, int version, 
             ContactNode source, KUID messageId, byte[] signature) {
         
         if (source == null) {
@@ -89,16 +72,20 @@ public abstract class Message {
         return messageId;
     }
     
-    public ContactNode getContactNode() {
+    public void setSource(ContactNode source) {
+        this.source = source;
+    }
+    
+    public ContactNode getSource() {
         return source;
     }
     
-    public KUID getNodeID() {
-        return getContactNode().getNodeID();
+    public KUID getSourceNodeID() {
+        return getSource().getNodeID();
     }
     
-    public SocketAddress getSocketAddress() {
-        return getContactNode().getSocketAddress();
+    public SocketAddress getSourceAddress() {
+        return getSource().getSocketAddress();
     }
     
     public byte[] getSignature() {

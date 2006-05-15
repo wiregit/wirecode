@@ -19,29 +19,6 @@
  
 package de.kapsi.net.kademlia.event;
 
-import java.net.SocketAddress;
+public interface PingListener extends ResponseListener {
 
-import de.kapsi.net.kademlia.ContactNode;
-import de.kapsi.net.kademlia.KUID;
-
-/**
- * The PingListener is called by {@see de.kapsi.net.kademlia.handler.response.PingResponseHandler} 
- * on successful pings (i.e. we received a pong) or on failures (which can only be a timeout).
- */
-public interface PingListener {
-    
-    /**
-     * Called after a PING succeeded
-     * @param node The ContactNode that responded to our Ping
-     * @param time Time in milliseconds
-     */
-    public void pingSuccess(ContactNode node, long time);
-    
-    /**
-     * Called on a PING failure (timeout)
-     * 
-     * @param nodeId Might be null if ID was unknown
-     * @param address Address of the host we tried to ping
-     */
-    public void pingTimeout(KUID nodeId, SocketAddress address);
 }

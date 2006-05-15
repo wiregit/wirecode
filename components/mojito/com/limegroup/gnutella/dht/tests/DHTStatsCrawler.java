@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -21,10 +20,12 @@ import de.kapsi.net.kademlia.event.PingListener;
 import de.kapsi.net.kademlia.event.StatsListener;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
 import de.kapsi.net.kademlia.handler.response.StatsResponseHandler;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.StatsRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
+import de.kapsi.net.kademlia.messages.response.StatsResponse;
 
 public class DHTStatsCrawler implements Runnable, ResponseHandler {
     
@@ -95,7 +96,8 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
             e.printStackTrace();
             return;
         }
-//        statsWriter = new OutputStreamWriter(System.out);
+
+//        statsWriter = new OutputStreamWriter(System.out); 
         DHTStatsCrawler crawler = new DHTStatsCrawler(port, dst, statsWriter, dbWriter, rtWriter);
         crawler.run();
         StatsGatherer gatherer = crawler.new StatsGatherer(statsWriter);
@@ -115,9 +117,10 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         DHT dht = new DHT();
         try {
             dht.bind(new InetSocketAddress(localPort));
-            Thread t = new Thread(dht, "DHT-Crawler");
-            t.setDaemon(false);
-            t.start();
+            
+            dht.setName("DHT-Crawler");
+            dht.setFirewalled(true);
+            dht.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,11 +133,11 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         queried.add(context.getLocalNodeID());
         try {
             context.ping(bootstrap, new PingListener() {
-                public void pingSuccess(ContactNode node, long time) {
-                    startCrawl(node.getNodeID());
+                public void response(ResponseMessage response, long time) {
+                    startCrawl(response.getSourceNodeID());
                 }
 
-                public void pingTimeout(KUID nodeId, SocketAddress address) {
+                public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
                     System.out.println("Crawl failed: bootstrap host dead");
                     System.exit(0);
                 }
@@ -147,9 +150,12 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
     private void startCrawl(KUID nodeId) {
         try {
             toQuery.add(new ContactNode(nodeId, bootstrap));
-            FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(context.getLocalNodeID());
-            ++numReq;
+            FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(bootstrap, context.getLocalNodeID());
+            //and the opposite
+            FindNodeRequest req2 = context.getMessageFactory().createFindNodeRequest(bootstrap, context.getLocalNodeID().invert());
+            numReq += 2;
             context.getMessageDispatcher().send(bootstrap, req, this);
+            context.getMessageDispatcher().send(bootstrap, req2, this);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -158,7 +164,8 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
     public void handleResponse(ResponseMessage message, long time) throws IOException {
         --numReq;
         ++numResponses;
-        responses.add(message.getContactNode());
+        responses.add(message.getSource());
+
         synchronized (lock) {
             lock.notify();
         }
@@ -179,16 +186,33 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         
     }
 
-    public void handleTimeout(KUID nodeId, SocketAddress dst, long time) throws IOException {
+    public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         --numReq;
         ++timeouts;
         sendQueries();
+    }
+
+    
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        try {
+            handleTimeout(nodeId, dst, message, -1L);
+        } catch (IOException err) {
+            err.printStackTrace();
+        }
     }
 
     public long timeout() {
         return 30*1000L;
     }
     
+    
+    public void addTime(long time) {
+    }
+    
+    public long time() {
+        return 0L;
+    }
+
     public void sendQueries() throws IOException{
         if(toQuery.size() == 0 && numReq == 0) {
             long delay = System.currentTimeMillis() - this.time; 
@@ -196,8 +220,8 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
             System.out.println("Responses size: "+numResponses+", timeouts: "+timeouts);
             System.out.println("Added to query: " + addedToQuery);
             System.out.println("Queried: " + queried.size());
-            synchronized (lock) {
-                finished = true;
+            synchronized (lock) { 
+                finished = true; 
             }
         } else {
             for (Iterator iter = toQuery.iterator(); iter.hasNext();) {
@@ -208,9 +232,13 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                     continue;
                 }
                 queried.add(node.getNodeID());
-                FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(node.getNodeID());
-                ++numReq;
-                context.getMessageDispatcher().send(node.getSocketAddress(), req, this);
+
+                FindNodeRequest req = context.getMessageFactory().createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
+                //and the other side
+                FindNodeRequest req2 = context.getMessageFactory().createFindNodeRequest(node.getSocketAddress(), node.getNodeID().invert());
+                numReq+=2;
+                context.getMessageDispatcher().send(node, req, this);
+                context.getMessageDispatcher().send(node, req2, this);
             }
         }
     }
@@ -223,6 +251,8 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         private int numReq;
         
         private Set toQuery = new HashSet();
+        
+        private Set queried = new HashSet();
         
         private Writer statsWriter;
         
@@ -238,22 +268,31 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    toQuery.addAll(responses);
+                    
+                    for (Iterator iter = responses.iterator(); iter.hasNext();) {
+                        ContactNode node = (ContactNode) iter.next();
+                        if(!queried.contains(node)) {
+                            toQuery.add(node);
+                        }
+                    }
                     responses.clear();
-                    for (Iterator iter = toQuery.iterator(); iter.hasNext();) {
-                        if(numReq > beta) {
-                            break;
-                        } else { 
-                            ContactNode node = (ContactNode) iter.next();
-                            StatsRequest req = context.getMessageFactory()
-                            .createStatsRequest(new byte[0], StatsRequest.STATS);
-                            
-                            try {
-                                iter.remove();
-                                ++numReq;
-                                context.getMessageDispatcher().send(node.getSocketAddress(), req, new StatsResponseHandler(context,this));
-                            } catch (IOException e) {
-                                e.printStackTrace();
+
+                    for (Iterator iter = toQuery.iterator(); iter.hasNext();) { 
+                        if(numReq > beta) { 
+                            break; 
+                        } else {  
+                            ContactNode node = (ContactNode) iter.next(); 
+                            StatsRequest req = context.getMessageFactory().createStatsRequest(node.getSocketAddress(), 
+                                    new byte[0], StatsRequest.DB); 
+                            try { 
+                                iter.remove(); 
+                                queried.add(node);
+                                ++numReq; 
+                                StatsResponseHandler handler = new StatsResponseHandler(context);
+                                handler.addStatsListener(this);
+                                context.getMessageDispatcher().send(node.getSocketAddress(), req, handler); 
+                            } catch (IOException e) { 
+                                e.printStackTrace(); 
                             }
                         }
                     }
@@ -261,54 +300,62 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
             }
         }
         
-        public void nodeStatsResponse(ContactNode node, String statistics, long time) {
-            --numReq;
+        public void response(ResponseMessage response, long time) {
+            numReq--;
+            
             try {
+                ContactNode node = response.getSource();
+                String statistics = ((StatsResponse)response).getStatistics();
+                
                 synchronized(statsWriter) {
                     statsWriter.write("Node: " + node.getNodeID() + ", " + node.getSocketAddress());
                     statsWriter.write("\n"+statistics+"\n");
                     statsWriter.flush();
                 }
-                synchronized(lock) {
-                    if(finished && toQuery.size() == 0 && numReq == 0) {
-                        finish();
-                    }
-                    lock.notify();
+                
+                synchronized(lock) { 
+                    if(finished && toQuery.size() == 0 && numReq == 0) { 
+                        finish(); 
+                    } 
+                    lock.notify(); 
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        
-        public void nodeStatsTimeout(KUID nodeId, SocketAddress address) {
-            ++timeouts;
-            --numReq;
+
+        public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+            ++timeouts; 
+            numReq--;
+            if(finished)
+                return;
             try {
                 synchronized(statsWriter) {
                     System.out.println("Timeout from node :"+nodeId);
                     statsWriter.write("Node: "+nodeId + ", "+address+" TIMEOUT");
                     statsWriter.flush();
                 }
-                synchronized(lock) {
-                    if(finished && toQuery.size() == 0 && numReq == 0) {
-                        finish();
-                    }
-                    lock.notify();
+
+                synchronized(lock) { 
+                    if(finished && toQuery.size() == 0 && numReq == 0) { 
+                        finish(); 
+                    } 
+                    lock.notify(); 
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         
-        private void finish() {
-            synchronized(statsWriter) {
-                try {
-                    statsWriter.close();
-                    System.exit(0);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        private void finish() { 
+            synchronized(statsWriter) { 
+                try { 
+                    statsWriter.close(); 
+                    System.exit(0); 
+                } catch (IOException e) { 
+                    e.printStackTrace(); 
+                } 
+            } 
+        } 
     }
 }

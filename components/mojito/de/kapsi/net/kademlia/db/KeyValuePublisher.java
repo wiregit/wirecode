@@ -31,6 +31,7 @@ import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.event.StoreListener;
+import de.kapsi.net.kademlia.settings.DatabaseSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
 
 public class KeyValuePublisher implements Runnable {
@@ -168,7 +169,7 @@ public class KeyValuePublisher implements Runnable {
             
                 if (context.isBootstrapped()) {
                     if (it == null) {
-                        it = database.getAllValues().iterator();
+                        it = database.getValues().iterator();
                         
                         evicted = 0;
                         published = 0;
@@ -186,8 +187,7 @@ public class KeyValuePublisher implements Runnable {
                     it = null;
                     
                     try {
-                        //run republisher every 5 minutes
-                        publishLock.wait(5L * 60L * 1000L);
+                        publishLock.wait(DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue());
                     } catch (InterruptedException ignore) {}
                 }
             }

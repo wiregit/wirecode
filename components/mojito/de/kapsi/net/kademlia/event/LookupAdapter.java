@@ -16,23 +16,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package de.kapsi.net.kademlia.event;
 
+import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.Map;
 
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 
-public interface FindNodeListener {
+public class LookupAdapter implements LookupListener {
+
+    public void response(ResponseMessage response, long time) {
+    }
+
+    public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+    }
     
-    /**
-     * Called after a FIND_NODE lookup has finished.
-     * 
-     * @param lookup The ID we were looking for
-     * @param nodes Collection of ContactNodes that were found (K closest to lookup ID sorted by closeness)
-     * @param queryKeys Map of ContactNode -> QueryKeys
-     * @param time Time in milliseconds
-     */
-    public void foundNodes(KUID lookup, Collection nodes, Map queryKeys, long time);
+    public void found(KUID lookup, Collection c, long time) {
+    }
+    
+    public void finish(KUID lookup, Collection c, long time) {
+    }
 }

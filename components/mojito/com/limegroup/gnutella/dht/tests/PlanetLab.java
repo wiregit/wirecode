@@ -28,7 +28,6 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import com.limegroup.gnutella.dht.statistics.PlanetLabTestsStatContainer;
@@ -37,7 +36,7 @@ import com.limegroup.gnutella.dht.statistics.StatsManager;
 import de.kapsi.net.kademlia.DHT;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.event.BootstrapListener;
-import de.kapsi.net.kademlia.event.FindValueListener;
+import de.kapsi.net.kademlia.event.LookupAdapter;
 import de.kapsi.net.kademlia.event.StoreListener;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
 
@@ -98,12 +97,11 @@ public class PlanetLab {
         List dhts = new ArrayList(number);
         for(int i = 0; i < number; i++) {
             try {
-                DHT dht = new DHT();
+                DHT dht = new DHT("DHT-" + i);
                 statsManager.addDHTNode(dht.getContext().getDHTStats());
                 dht.bind(new InetSocketAddress(port+i));
                 
-                Thread t = new Thread(dht, "DHT-" + i);
-                t.start();
+                dht.start();
                 
                 dhts.add(dht);
             } catch (Exception err) {
@@ -148,17 +146,13 @@ public class PlanetLab {
                     
                     dht.bootstrap(dst, new BootstrapListener() {
                         
-                        public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                            if (nodes.isEmpty()) {
-                                System.out.println(index + ": " + nodeId + " failed to bootstrap at PHASE 1");
-                            } else {
-//                                System.out.println(index + ": " + nodeId + " finished bootstraping PHASE 1 in " + time + " ms");
-                            }
+                        public void phaseOneComplete(long time) {
+                            System.out.println(index + ": bootstrap phase ONE finished");
                         }
 
-                        public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+                        public void phaseTwoComplete(boolean foundNodes, long time) {
                             StringBuffer buffer = new StringBuffer();
-                            buffer.append(index).append(": finished bootstrapping PHASE 2 in ");
+                            buffer.append(index).append(": finished bootstrapping phase TWO in ");
                             buffer.append(time).append(" ms ");
                             
                             if (foundNodes) {
@@ -365,9 +359,10 @@ public class PlanetLab {
                                 String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
                                 
                                 KUID key = toKUID(value);
-                                dht.get(key, false, new FindValueListener() {
-                                    public void foundValue(KUID key, Collection values, long time) {
-                                        if(values == null || values.isEmpty()){
+                                
+                                dht.get(key, new LookupAdapter() {
+                                    public void finish(KUID lookup, Collection c, long time) {
+                                        if(c.isEmpty()){
                                             planetlabStats.RETRIEVE_FAILURES.incrementStat();
                                         } else {
                                             planetlabStats.RETRIEVE_SUCCESS.incrementStat();
@@ -376,17 +371,6 @@ public class PlanetLab {
                                             lock2.notify();
                                         }
                                     }
-                                    public void foundValue(KUID key, long time, Map nodesValues) {
-                                        if(nodesValues == null || nodesValues.isEmpty()){
-                                            planetlabStats.RETRIEVE_FAILURES.incrementStat();
-                                        } else {
-                                            planetlabStats.RETRIEVE_SUCCESS.incrementStat();
-                                        }
-                                        synchronized(lock2) {
-                                            lock2.notify();
-                                        }
-                                    }
-                                    
                                 });
                                 try {
                                     lock2.wait();
@@ -399,7 +383,7 @@ public class PlanetLab {
                     }
                     try {
                         running = false;
-                        dht.close();
+                        dht.stop();
                         planetlabStats.CHURN_DISCONNECTS.incrementStat();
                         
                     } catch (IOException e) {
@@ -414,15 +398,13 @@ public class PlanetLab {
                     synchronized (lock) {
                         try {
                             dht.bind(address, localNodeId);
-                            new Thread(dht).start();
+                            dht.start();
                             
                             dht.bootstrap(bootstrapServer, new BootstrapListener() {
-                                public void initialPhaseComplete(KUID nodeId, Collection nodes, long time) {
-                                }
-                                
-                                public void secondPhaseComplete(KUID nodeId, boolean foundNodes, long time) {
+                                public void phaseOneComplete(long time) {}
+
+                                public void phaseTwoComplete(boolean foundNodes, long time) {
                                     running = true;
-                                    
                                     synchronized(lock) {
                                         lock.notify();
                                     }
@@ -442,4 +424,5 @@ public class PlanetLab {
             }
         }
     }
+    
 }

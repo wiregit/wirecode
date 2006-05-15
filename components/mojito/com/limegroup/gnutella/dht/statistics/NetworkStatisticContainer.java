@@ -171,5 +171,4 @@ public class NetworkStatisticContainer extends StatisticContainer {
             super.storeCurrentStat();
         }
     }
-
 }

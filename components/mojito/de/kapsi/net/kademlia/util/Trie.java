@@ -16,24 +16,33 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package de.kapsi.net.kademlia.messages.request;
 
-import de.kapsi.net.kademlia.ContactNode;
-import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.messages.RequestMessage;
+package de.kapsi.net.kademlia.util;
 
-public abstract class LookupRequest extends RequestMessage {
+import java.util.List;
+
+public interface Trie {
     
-    private KUID lookupId;
+    public Object put(Object key, Object value);
+    public Object get(Object key);
+    public Object remove(Object key);
+    public boolean containsKey(Object key);
+    //public boolean containsValue(Object value);
+    public int size();
+    public boolean isEmpty();
+    public void clear();
     
-    public LookupRequest(int vendor, int version, ContactNode node, 
-            KUID messageId, KUID lookupId) {
-        super(vendor, version, node, messageId);
-        this.lookupId = lookupId;
-    }
+    public List keys();
+    public List values();
     
-    public KUID getLookupID() {
-        return lookupId;
+    public List range(Object key, int length);
+    public List range(Object key, int length, KeySelector selector);
+    
+    public Object select(Object key);
+    public List select(Object key, int count);
+    public List select(Object key, int count, KeySelector selector);
+    
+    public static interface KeySelector {
+        public boolean allow(Object key, Object value);
     }
 }

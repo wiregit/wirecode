@@ -59,7 +59,7 @@ public class DataBaseStatisticContainer extends StatisticContainer {
         new SimpleStatistic();
     
     /**
-     * <tt>Statistic</tt> for weather or not we're close to a Key
+     * <tt>Statistic</tt> for whether or not we're close to a Key
      */
     public Statistic NOT_MEMBER_OF_CLOSEST_SET =
         new SimpleStatistic();

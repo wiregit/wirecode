@@ -1,10 +1,7 @@
 package com.limegroup.gnutella.dht.tests;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.DHT;
@@ -27,7 +24,7 @@ public class DataBaseTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        new Thread(dht,"DHT").start();
+        dht.start();
         testRemoveValueDB(dht.getContext());
     }
     

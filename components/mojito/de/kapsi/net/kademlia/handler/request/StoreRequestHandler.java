@@ -20,8 +20,6 @@
 package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
 
 import de.kapsi.net.kademlia.Context;
+import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
@@ -62,18 +61,18 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         if (queryKey == null) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(message.getContactNode() 
+                LOG.error(request.getSource() 
                         + " does not provide a QueryKey");
             }
             networkStats.STORE_REQUESTS_NO_QK.incrementStat();
             return;
         }
         
-        QueryKey expected = QueryKey.getQueryKey(message.getSocketAddress());
+        QueryKey expected = QueryKey.getQueryKey(request.getSourceAddress());
         if (!expected.equals(queryKey)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Expected " + expected + " from " 
-                        + message.getContactNode() 
+                        + request.getSource() 
                         + " but got " + queryKey);
             }
             networkStats.STORE_REQUESTS_BAD_QK.incrementStat();
@@ -85,10 +84,10 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         if (LOG.isTraceEnabled()) {
             if (!values.isEmpty()) {
-                LOG.trace(message.getContactNode() 
+                LOG.trace(request.getSource() 
                         + " requested us to store the KeyValues " + values);
             } else {
-                LOG.trace(message.getContactNode()
+                LOG.trace(request.getSource() 
                         + " requested us to store " + remaining + " KeyValues");
             }
         }
@@ -101,12 +100,13 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         // Add the KeyValues...
         for(Iterator it = values.iterator(); it.hasNext(); ) {
             KeyValue keyValue = (KeyValue)it.next();
-
+            KUID key = (KUID)keyValue.getKey();
+            
             // under the assumption that the requester sent us a lookup before
             // check if we are part of the closest alive nodes to this value
-            List nodesList = getRouteTable().select(keyValue.getKey(), k, false, false);
+            List nodesList = getRouteTable().select(key, k, false, false);
             if (!nodesList.contains(context.getLocalNode())) {
-                nodesList = getRouteTable().select(keyValue.getKey(), k, true, false);
+                nodesList = getRouteTable().select(key, k, true, false);
                 if (!nodesList.contains(context.getLocalNode())) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("We are not close to " + keyValue.getKey() + ". KeyValue will expire faster!");
@@ -117,20 +117,12 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                 }
             }
             
-            try {
-                if (context.getDatabase().add(keyValue)) {
-                    networkStats.STORE_REQUESTS_OK.incrementStat();
-                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.SUCCEEDED));
-                } else {
-                    networkStats.STORE_REQUESTS_FAILURE.incrementStat();
-                    stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
-                }
-            } catch (SignatureException err) {
+            if (context.getDatabase().add(keyValue)) {
+                networkStats.STORE_REQUESTS_OK.incrementStat();
+                stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.SUCCEEDED));
+            } else {
                 networkStats.STORE_REQUESTS_FAILURE.incrementStat();
-                stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
-            } catch (InvalidKeyException err) {
-                networkStats.STORE_REQUESTS_FAILURE.incrementStat();
-                stats.add(new StoreResponse.StoreStatus(keyValue.getKey(), StoreResponse.FAILED));
+                stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.FAILED));
             }
         }
         
@@ -139,6 +131,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         StoreResponse response 
             = context.getMessageFactory().createStoreResponse(request, keyValues, stats);
-        context.getMessageDispatcher().send(request.getContactNode(), response, null);
+        context.getMessageDispatcher().send(request.getSource(), response);
     }
 }

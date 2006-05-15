@@ -23,21 +23,20 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractResponseHandler;
+import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
-import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
-import de.kapsi.net.kademlia.settings.NetworkSettings;
 
 /**
  * Currently unused. Could be used to ACK/NACK store
@@ -46,9 +45,6 @@ import de.kapsi.net.kademlia.settings.NetworkSettings;
 public class StoreResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
-    
-    private int errors = 0;
-    private boolean done = false;
     
     private int index = 0;
     private int length = 0;
@@ -67,12 +63,8 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         this.keyValues = keyValues;
     }
 
-    public void handleResponse(ResponseMessage message, long time) throws IOException {
-        
-        if (done) {
-            return;
-        }
-        
+    public void response(ResponseMessage message, long time) throws IOException {
+
         StoreResponse response = (StoreResponse)message;
         
         int maxOnce = DatabaseSettings.MAX_STORE_FORWARD_ONCE.getValue();
@@ -83,7 +75,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         
         if (requesting > 0 && index < keyValues.size()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace(message.getContactNode() 
+                LOG.trace(response.getSource()
                         + " is requesting from us " + requesting + " KeyValues");
             }
             
@@ -96,41 +88,29 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             }
             
             int remaining = keyValues.size()-index-length;
-            StoreRequest request 
-                = (StoreRequest)context.getMessageFactory()
-                    .createStoreRequest(remaining, queryKey, toSend);
             
-            context.getMessageDispatcher().send(message.getContactNode(), request, this);
+            RequestMessage request 
+                = context.getMessageFactory()
+                    .createStoreRequest(response.getSourceAddress(), remaining, queryKey, toSend);
             
-            done = (remaining == 0);
+            context.getMessageDispatcher().send(response.getSource(), request, this);
         }
         
         // reset the error counter
-        errors = 0;
+        resetErrors();
     }
-
-    public void handleTimeout(KUID nodeId, SocketAddress dst, long time) 
-            throws IOException {
-        
-        if (done) {
-            return;
+    
+    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Max number of errors occured. Giving up!");
+        }
+    }
+    
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        if (LOG.isErrorEnabled()) {
+            LOG.error("Sending a store request to " + ContactNode.toString(nodeId, dst) + " failed", e);
         }
         
-        if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Max number of errors occured. Giving up!");
-            }
-            return;
-        }
-        
-        int remaining = keyValues.size()-index;
-        
-        if (remaining > 0) {
-            StoreRequest request 
-                = (StoreRequest)context.getMessageFactory()
-                    .createStoreRequest(remaining, queryKey, Collections.EMPTY_LIST);
-        
-            context.getMessageDispatcher().send(nodeId, dst, request, this);
-        }
+        fireTimeout(nodeId, dst, message, -1L);
     }
 }

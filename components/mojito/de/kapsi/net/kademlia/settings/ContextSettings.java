@@ -23,10 +23,14 @@ import java.net.SocketAddress;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import de.kapsi.net.kademlia.KUID;
+
 public class ContextSettings extends LimeDHTProps {
     
     private static final String LOCAL_NODE_ID_KEY = "LOCAL_NODE_ID";
     private static final String NODE_ID_TIMEOUT_KEY = "NODE_ID_TIMEOUT";
+    
+    private static final String NODE_INSTANCE_ID_KEY = "NODE_INSTANCE_ID";
     
     private static final long NODE_ID_TIMEOUT = 30L * 60L * 1000L; // 30 Minutes
     
@@ -36,7 +40,7 @@ public class ContextSettings extends LimeDHTProps {
     private ContextSettings() {}
     
     public static final LongSetting DISPATCH_EVENTS_EVERY
-        = FACTORY.createLongSetting("DISPATCH_EVENTS_EVERY", 50L);
+        = FACTORY.createLongSetting("DISPATCH_EVENTS_EVERY", 25L);
     
     public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
         = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", /*60L **/ 1000L);
@@ -49,6 +53,15 @@ public class ContextSettings extends LimeDHTProps {
     
     public static final BooleanSetting COUNT_REMOTE_SIZE
         = FACTORY.createSettableBooleanSetting("COUNT_REMOTE_SIZE", true, "count_remote_size");
+    
+    public static final LongSetting SYNC_PING_TIMEOUT
+        = FACTORY.createLongSetting("SYNC_PING_TIMEOUT", 60L * 1000L);
+    
+    public static final LongSetting SYNC_GET_VALUE_TIMEOUT
+        = FACTORY.createLongSetting("SYNC_GET_VALUE_TIMEOUT", 60L * 1000L);
+    
+    public static final LongSetting SYNC_BOOTSTRAP_TIMEOUT
+        = FACTORY.createLongSetting("SYNC_BOOTSTRAP_TIMEOUT", 3L * 60L * 1000L);
     
     public static void deleteNodeID(SocketAddress address) {
         String key = (address != null) ? address.toString() : "null";
@@ -85,5 +98,25 @@ public class ContextSettings extends LimeDHTProps {
         Preferences node = SETTINGS.node(key);
         node.putByteArray(LOCAL_NODE_ID_KEY, localId);
         node.putLong(NODE_ID_TIMEOUT_KEY, System.currentTimeMillis());
+    }
+    
+    public static int getLocalNodeInstanceID(KUID localNodeID) {
+        String key = localNodeID.toString();
+        try {
+            if(SETTINGS.nodeExists(key)) {
+                Preferences node = SETTINGS.node(key);
+                return node.getInt(NODE_INSTANCE_ID_KEY,0);
+            } else {
+                return 0;
+            }
+        } catch (BackingStoreException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    
+    public static void setLocalNodeInstanceID(KUID nodeID, int instanceID) {
+        Preferences node = SETTINGS.node(nodeID.toString());
+        node.putInt(NODE_INSTANCE_ID_KEY, instanceID);
     }
 }

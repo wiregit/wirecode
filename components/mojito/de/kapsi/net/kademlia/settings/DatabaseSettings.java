@@ -67,6 +67,9 @@ public final class DatabaseSettings extends LimeDHTProps {
     public static final LongSetting EXPIRATION_TIME_UNKNOWN
         = FACTORY.createLongSetting("EXPIRATION_TIME_UNKNOWN", EXPIRATION_TIME_CLOSEST_NODE.getValue()/2); //30 min
     
+    public static final LongSetting MIN_REPUBLISH_INTERVAL
+        = FACTORY.createLongSetting("MIN_REPUBLISH_INTERVAL", 2L * 60L * 1000L);
+    
     /**
      * The republishing interval in milliseconds.
      * 
@@ -75,4 +78,8 @@ public final class DatabaseSettings extends LimeDHTProps {
     public static final LongSetting REPUBLISH_INTERVAL
         = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", EXPIRATION_TIME_CLOSEST_NODE.getValue()/2 , 
                 "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
+    
+    public static final LongSetting RUN_REPUBLISHER_EVERY
+        = FACTORY.createSettableLongSetting("RUN_REPUBLISHER_EVERY", 5L*60L*1000L, 
+                "run_republisher_every", 5L*60L*1000L, 30L*60L*1000L);
 }

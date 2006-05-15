@@ -27,8 +27,17 @@ public final class NetworkSettings extends LimeDHTProps {
     public static final IntSetting PORT
         = FACTORY.createIntSetting("PORT", 31337);
     
-    public static final LongSetting TIMEOUT
-        = FACTORY.createSettableLongSetting("TIMEOUT", 10000L, "timeout", 5000L, 30000L);
+    public static final LongSetting MAX_TIMEOUT
+        = FACTORY.createSettableLongSetting("MAX_TIMEOUT", 10000L, "max_timeout", 5000L, 30000L);
+    
+    public static final IntSetting MIN_TIMEOUT_RTT_FACTOR
+        = FACTORY.createSettableIntSetting("MIN_TIMEOUT_RTT_FACTOR", 2, "min_timeout_rtt_factor", 1, 10);
+    
+    public static final BooleanSetting USE_RANDOM_MAX_ERRORS
+        = FACTORY.createSettableBooleanSetting("USE_RANDOM_MAX_ERRORS", false, "use_random_max_errors"); 
+    
+    public static final IntSetting MIN_RETRIES
+        = FACTORY.createSettableIntSetting("MIN_RETRIES", 0, "min_retries", 0, 10);
     
     public static final IntSetting MAX_ERRORS
         = FACTORY.createSettableIntSetting("MAX_ERRORS", 3, "max_errors", 0, 10);

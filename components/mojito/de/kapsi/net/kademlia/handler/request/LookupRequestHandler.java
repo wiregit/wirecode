@@ -20,6 +20,7 @@
 package de.kapsi.net.kademlia.handler.request;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,12 +31,19 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
+import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
 
+
+
+/**
+ * Handles FIND_NODE as well as FIND_VALUE requests
+ */
 public class LookupRequestHandler extends AbstractRequestHandler {
     
     private static final Log LOG = LogFactory.getLog(LookupRequestHandler.class);
@@ -50,18 +58,33 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getContactNode() + " is trying to lookup " + lookup);
+            LOG.trace(request.getSource() + " is trying to lookup " + lookup);
         }
         
-        QueryKey queryKey = QueryKey.getQueryKey(message.getSocketAddress());
+        if (request instanceof FindNodeRequest) {
+            handleFindNodeRequest(request);
+        } else {
+            handleFindValueRequest(request);
+        }
+    }
+    
+    private void handleFindNodeRequest(LookupRequest request) throws IOException {
+        
+        KUID lookup = request.getLookupID();
+        QueryKey queryKey = QueryKey.getQueryKey(request.getSourceAddress());
+        
         List bucketList = Collections.EMPTY_LIST;
         if (context.isBootstrapped()) {
-            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-            bucketList = context.getRouteTable().select(lookup, k, false, false);
+            bucketList = context.getRouteTable().select(lookup, 
+                    KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);
         }
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));
+            if (!bucketList.isEmpty()) {
+                LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));
+            } else {
+                LOG.trace("Sending back an empty List");
+            }
         }
         
         context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
@@ -69,6 +92,25 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request, queryKey, bucketList);
         
-        context.getMessageDispatcher().send(message.getContactNode(), response, null);
+        context.getMessageDispatcher().send(request.getSource(), response);
+    }
+    
+    private void handleFindValueRequest(LookupRequest request) throws IOException {
+        
+        KUID lookup = request.getLookupID();
+        
+        Collection values = context.getDatabase().get(lookup);
+        if (values != null && !values.isEmpty()) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Hit! " + lookup + " = {" + CollectionUtils.toString(values) + "}");
+            }
+            
+            FindValueResponse response = context.getMessageFactory()
+                        .createFindValueResponse(request, values);
+            context.getMessageDispatcher().send(request.getSource(), response);
+        } else {
+            // OK, send ContactNodes instead!
+            handleFindNodeRequest(request);
+        }
     }
 }

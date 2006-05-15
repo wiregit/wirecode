@@ -44,6 +44,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import de.kapsi.net.kademlia.db.KeyValue;
+
 public final class CryptoHelper {
     
     private static final String KEY_STORE = "JKS";
@@ -157,6 +159,33 @@ public final class CryptoHelper {
         }
     }
     
+    public static byte[] sign(KeyPair keyPair, KeyValue keyValue)
+            throws SignatureException, InvalidKeyException {
+        return sign(keyPair.getPrivate(), keyValue);
+    }
+    
+    public static synchronized byte[] sign(PrivateKey privateKey, KeyValue keyValue)
+            throws SignatureException, InvalidKeyException {
+        
+        try {
+            if (SIGNATURE == null) {
+                SIGNATURE = Signature.getInstance(SIGNATURE_ALGORITHM);
+            }
+            
+            SIGNATURE.initSign(privateKey);
+            
+            byte[] key = keyValue.getKey().getBytes();
+            SIGNATURE.update(key, 0, key.length);
+            
+            byte[] value = keyValue.getValue();
+            SIGNATURE.update(value, 0, value.length);
+            
+            return SIGNATURE.sign();
+        } catch (NoSuchAlgorithmException err) {
+            throw new RuntimeException(err);
+        }
+    }
+    
     public static boolean verify(KeyPair keyPair, byte[] data, byte[] signature) 
             throws SignatureException, InvalidKeyException {
         return verify(keyPair.getPublic(), data, signature);
@@ -176,6 +205,38 @@ public final class CryptoHelper {
             
             SIGNATURE.initVerify(publicKey);
             SIGNATURE.update(data, 0, data.length);
+            return SIGNATURE.verify(signature);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static boolean verify(KeyPair keyPair, KeyValue keyValue)
+            throws SignatureException, InvalidKeyException {
+        return verify(keyPair.getPublic(), keyValue);
+    }
+
+    public static synchronized boolean verify(PublicKey publicKey, KeyValue keyValue) 
+            throws SignatureException, InvalidKeyException {
+
+        byte[] signature = keyValue.getSignature();
+        if (signature == null) {
+            return false;
+        }
+
+        try {
+            if (SIGNATURE == null) {
+                SIGNATURE = Signature.getInstance(SIGNATURE_ALGORITHM);
+            }
+
+            SIGNATURE.initVerify(publicKey);
+            
+            byte[] key = keyValue.getKey().getBytes();
+            SIGNATURE.update(key, 0, key.length);
+            
+            byte[] value = keyValue.getValue();
+            SIGNATURE.update(value, 0, value.length);
+            
             return SIGNATURE.verify(signature);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

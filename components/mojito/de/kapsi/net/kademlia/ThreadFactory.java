@@ -16,25 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package de.kapsi.net.kademlia.messages;
 
-import de.kapsi.net.kademlia.ContactNode;
-import de.kapsi.net.kademlia.KUID;
 
-public abstract class ResponseMessage extends AbstractDHTMessage {
+package de.kapsi.net.kademlia;
 
-    public ResponseMessage(int vendor, int version, 
-            ContactNode node, KUID messageId) {
-        super(vendor, version, node, messageId);
-    }
-    
-    public ResponseMessage(int vendor, int version, 
-            ContactNode node, KUID messageId, byte[] signature) {
-        super(vendor, version, node, messageId, signature);
-    }
-    
-    public boolean verifyQueryKey() {
-        return getMessageID().verifyQueryKey(getSourceAddress());
-    }
+public interface ThreadFactory {
+    public Thread createThread(Runnable runnable, String name);
 }

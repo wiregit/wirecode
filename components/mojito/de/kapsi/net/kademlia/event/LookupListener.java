@@ -17,13 +17,22 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package de.kapsi.net.kademlia.handler.request;
+package de.kapsi.net.kademlia.event;
 
-import de.kapsi.net.kademlia.Context;
+import java.util.Collection;
 
-public class FindNodeRequestHandler extends LookupRequestHandler {
+import de.kapsi.net.kademlia.KUID;
+
+public interface LookupListener extends ResponseListener {
     
-    public FindNodeRequestHandler(Context context) {
-        super(context);
-    }
+    /**
+     * Called after a lookup has finished.
+     * 
+     * Collection <tt>c</tt> is either a collection of Map.Entries or
+     * a Collection instanceof KeyValueCollection.
+     * 
+     */
+    public void found(KUID lookup, Collection c, long time);
+    
+    public void finish(KUID lookup, Collection c, long time);
 }

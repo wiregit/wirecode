@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.dht.tests;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.util.ArrayUtils;
@@ -159,10 +161,60 @@ public class PatriciaTest {
         System.out.println(trie.select(inverted, 1));
     }
     
+    public void testRandomRemove() {
+        PatriciaTrie trie = new PatriciaTrie();
+        
+        for(int i = 0; i < 100000; i++) {
+            Set keys = new HashSet();
+            
+            for(int j = 0; j < 1000; j++) {
+                KUID key = KUID.createRandomNodeID();
+                keys.add(key);
+                trie.put(key, key);
+            }
+            
+            if (keys.size() != trie.size()) {
+                throw new IllegalStateException(keys.size() + " != " + trie.size());
+            }
+            
+            for(Iterator it = keys.iterator(); it.hasNext(); ) {
+                KUID key = (KUID)it.next();
+                it.remove();
+                
+                KUID rem = (KUID)trie.remove(key);
+                
+                if (rem == null) {
+                    throw new IllegalStateException("null");
+                }
+                
+                if (!key.equals(rem)) {
+                    throw new IllegalStateException("Expected: " + key + " but got: " + rem);
+                }
+                
+                for(Iterator jt = keys.iterator(); jt.hasNext(); ) {
+                    key = (KUID)jt.next();
+                    
+                    if (!trie.containsKey(key)) {
+                        throw new IllegalStateException(key + " not found in Trie");
+                    }
+                }
+            }
+            
+            if (trie.size() != 0) {
+                throw new IllegalStateException("Trie is not empty");
+            }
+            
+            if (i % 1000 == 0) {
+                System.out.println(100f * i / 100000 + "%");
+            }
+        }
+    }
+    
     public static void main(String[] args) {
-        new PatriciaTest().testNames();
+        /*new PatriciaTest().testNames();
         new PatriciaTest().testRange();
         new PatriciaTest().testSelect();
-        new PatriciaTest().testMultipleSelect();
+        new PatriciaTest().testMultipleSelect();*/
+        new PatriciaTest().testRandomRemove();
     }
 }

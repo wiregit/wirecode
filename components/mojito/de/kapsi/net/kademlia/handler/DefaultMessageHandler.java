@@ -36,11 +36,10 @@ import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
-import de.kapsi.net.kademlia.db.KeyValueCollection;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.db.Database.KeyValueBag;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
-import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.QueryKey;
@@ -65,36 +64,55 @@ public class DefaultMessageHandler extends MessageHandler
         databaseStats = context.getDataBaseStats();
     }
     
+    public void addTime(long time) {
+    }
+    
+    public long time() {
+        return 0L;
+    }
+    
     public long timeout() {
-        return NetworkSettings.TIMEOUT.getValue();
+        return NetworkSettings.MAX_TIMEOUT.getValue();
     }
 
     public void handleResponse(ResponseMessage message, long time) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message);
+        addLiveContactInfo(message.getSource(), message);
     }
 
-    public void handleTimeout(KUID nodeId, 
-            SocketAddress dst, long time) throws IOException {
+    public void handleTimeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time) throws IOException {
         context.getRouteTable().handleFailure(nodeId);
     }
 
     public void handleRequest(RequestMessage message) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message);
+        addLiveContactInfo(message.getSource(), message);
     }
     
-    private void addLiveContactInfo(ContactNode node, Message message) throws IOException {
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        // never called
+    }
+    
+    private void addLiveContactInfo(ContactNode node, 
+            DHTMessage message) throws IOException {
+        
+        if(node.isFirewalled()) return;
         
         RoutingTable routeTable = getRouteTable();
-
-        //only do store forward if it is a new node in our routing table or 
-        //a node that is (re)connecting
-        boolean newNode = routeTable.add(node, true);
-        if (!newNode && (message instanceof FindNodeRequest)) {
-            FindNodeRequest request = (FindNodeRequest) message;
-            newNode = request.getLookupID().equals(node.getNodeID());
+        boolean newNode = false;
+        //only do store forward if it is a new node in our routing table (we are (re)connecting to the network) 
+        //or a node that is reconnecting
+        ContactNode existingNode = routeTable.get(node.getNodeID());
+        if(existingNode == null || existingNode.getInstanceID() != node.getInstanceID()) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Node "+node+" is new or has changed his instanceID, will check for store forward!");   
+            }
+            newNode = true;
         }
+        //add node to the routing table -- update timestamp and info if needed
+        routeTable.add(node, true);
 
-        if(newNode) {
+        if (newNode) {
+            
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
@@ -105,19 +123,19 @@ public class DefaultMessageHandler extends MessageHandler
                 
                 Database database = context.getDatabase();
                 synchronized(database) {
-                    Collection keyValues = database.getAllCollections();
-                    for (Iterator iter = keyValues.iterator(); iter.hasNext(); ) {
-                        KeyValueCollection c = (KeyValueCollection)iter.next();
+                    Collection bags = database.getKeyValueBags();
+                    for (Iterator iter = bags.iterator(); iter.hasNext(); ) {
+                        KeyValueBag bag = (KeyValueBag)iter.next();
                         
                         //To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
                         //or if it's ID is closer than any other ID (except the new closest one of course)
                         //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                        List closestNodesToKey = routeTable.select(c.getKey(), k, false, false);
+                        List closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
                         ContactNode closest = (ContactNode)closestNodesToKey.get(0);
                         if (context.isLocalNode(closest)   
                                 || ((node.equals(closest)
                                         //maybe we haven't added him to the routing table
-                                        || node.getNodeID().isCloser(closest.getNodeID(), c.getKey())) 
+                                        || node.getNodeID().isCloser(closest.getNodeID(), bag.getKey())) 
                                         && (closestNodesToKey.size() > 1)
                                         && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                             
@@ -125,31 +143,29 @@ public class DefaultMessageHandler extends MessageHandler
                                 LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   
                             }
                             databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                            keyValuesToForward.addAll(c);
-                            
+                            for (Iterator iterator = bag.values().iterator(); iterator.hasNext();) {
+                                KeyValue keyValue = (KeyValue) iterator.next();
+                                KUID originatorID = keyValue.getNodeID();
+                                if(originatorID != null && !originatorID.equals(node)) {
+                                    keyValuesToForward.add(keyValue);
+                                }
+                            }
                         } else if (closestNodesToKey.size() == k) {
                             //if we are the furthest node: delete non-local value from local db
                             ContactNode furthest = (ContactNode)closestNodesToKey.get(closestNodesToKey.size()-1);
                             if(context.isLocalNode(furthest)) {
-                                for (Iterator iterator = c.iterator(); iterator.hasNext();) {
-                                    KeyValue keyValue = (KeyValue) iterator.next();
-                                    if(!keyValue.isLocalKeyValue()) {
-                                        iterator.remove();
-                                        databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
-                                    }
-                                }
-                                
-                                if (c.isEmpty()) {
-                                    database.remove(c);
-                                }
+                                int count = bag.removeAll(true);
+                                databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                             }
                         }
                     }
                 }
                 
                 if (!keyValuesToForward.isEmpty()) {
-                    ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);
-                    RequestMessage request = context.getMessageFactory().createFindNodeRequest(node.getNodeID());
+                    ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);           
+                    RequestMessage request = context.getMessageFactory()
+                        .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
+                    
                     context.getMessageDispatcher().send(node, request, handler);
                 }
             }
@@ -165,19 +181,12 @@ public class DefaultMessageHandler extends MessageHandler
 
         private List keyValues;
         
-        private boolean done = false;
-        private int errors = 0;
-        
         public StoreForwardResponseHandler(Context context, List keyValues) {
             super(context);
             this.keyValues = keyValues;
         }
         
-        public void handleResponse(ResponseMessage message, long time) throws IOException {
-            
-            if (done) {
-                return;
-            }
+        public void response(ResponseMessage message, long time) throws IOException {
             
             FindNodeResponse response = (FindNodeResponse)message;
             
@@ -190,26 +199,19 @@ public class DefaultMessageHandler extends MessageHandler
             }
             
             QueryKey queryKey = response.getQueryKey();
-            context.store(message.getContactNode(), queryKey, keyValues);
-            done = true;
+            context.store(message.getSource(), queryKey, keyValues);
         }
 
-        public void handleTimeout(KUID nodeId, SocketAddress dst, long time) 
-                throws IOException {
-            
-            if (done) {
-                return;
+        protected void timeout(KUID nodeId, SocketAddress dst, 
+                RequestMessage message, long time) throws IOException {
+        }
+        
+        public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Sending a store-forward request to " + ContactNode.toString(nodeId, dst) + " failed", e);
             }
             
-            if (++errors >= NetworkSettings.MAX_ERRORS.getValue()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Max number of errors has occured. Giving up!");
-                }
-                return;
-            }
-            
-            RequestMessage request = context.getMessageFactory().createFindNodeRequest(nodeId);
-            context.getMessageDispatcher().send(nodeId, dst, request, this);
+            fireTimeout(nodeId, dst, message, -1L);
         }
     }
 }

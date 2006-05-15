@@ -25,6 +25,10 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 
+/**
+ * TODO Move this code to LimeWire's NetworkUtils class. We must
+ * also check IPv6 compatibilty!
+ */
 public final class NetworkUtils {
     
     private NetworkUtils() {}
@@ -42,4 +46,25 @@ public final class NetworkUtils {
     public static boolean isLocalHostAddress(InetAddress addr) throws IOException {
         return NetworkInterface.getByInetAddress(addr) != null;
     }
+    
+    /**
+     * Returns whether or not the specified InetAddress and Port is valid.
+     */
+    public static boolean isValidSocketAddress(SocketAddress address) {
+        InetAddress addr = ((InetSocketAddress)address).getAddress();
+        int port = ((InetSocketAddress)address).getPort();
+        
+        return com.limegroup.gnutella.util.NetworkUtils.isValidAddress(addr)
+            && com.limegroup.gnutella.util.NetworkUtils.isValidPort(port);
+    }
+    
+    /*public static boolean isLocalSocketAddress(SocketAddress address) {
+        InetAddress addr = ((InetSocketAddress)address).getAddress();
+        return com.limegroup.gnutella.util.NetworkUtils.isLocalAddress(addr);
+    }
+    
+    public static boolean isPrivateSocketAddress(SocketAddress address) {
+        InetAddress addr = ((InetSocketAddress)address).getAddress();
+        return com.limegroup.gnutella.util.NetworkUtils.isPrivateAddress(addr);
+    }*/
 }

@@ -16,19 +16,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package de.kapsi.net.kademlia.io;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.CancelledKeyException;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -44,12 +39,12 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.DefaultMessageHandler;
 import de.kapsi.net.kademlia.handler.RequestHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
-import de.kapsi.net.kademlia.handler.request.FindNodeRequestHandler;
-import de.kapsi.net.kademlia.handler.request.FindValueRequestHandler;
+import de.kapsi.net.kademlia.handler.request.LookupRequestHandler;
 import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.handler.request.StatsRequestHandler;
 import de.kapsi.net.kademlia.handler.request.StoreRequestHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.io.Tag.Receipt;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
@@ -63,49 +58,53 @@ import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.util.FixedSizeHashMap;
+import de.kapsi.net.kademlia.util.NetworkUtils;
 
-public class MessageDispatcher implements Runnable {
+public abstract class MessageDispatcher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     
-    private static final long CLEANUP_INTERVAL = 3L * 1000L;
-    private static final long SLEEP = 50L;
+    protected static final int INPUT_BUFFER_SIZE = 64 * 1024;
+    protected static final int OUTPUT_BUFFER_SIZE = 64 * 1024;
     
-    private Object channelLock = new Object();
-    private Object queueLock = new Object();
+    protected static final long CLEANUP = 100L;
     
     private LinkedList outputQueue = new LinkedList();
-    private ReceiptMap messageMap = new ReceiptMap(1024);
     
-    private Selector selector;
-    private DatagramChannel channel;
+    private ReceiptMap receiptMap = new ReceiptMap(512);
     
-    private Context context;
+    private NetworkStatisticContainer networkStats;
+    
+    protected final Context context;
     
     private DefaultMessageHandler defaultHandler;
     private PingRequestHandler pingHandler;
-    private FindNodeRequestHandler findNodeHandler;
-    private FindValueRequestHandler findValueHandler;
+    private LookupRequestHandler lookupHandler;
     private StoreRequestHandler storeHandler;
     private StatsRequestHandler statsHandler;
     
-    private Filter filter;
+    private DatagramChannel channel;
     
-    protected final NetworkStatisticContainer networkStats;
+    private ByteBuffer buffer;
     
     public MessageDispatcher(Context context) {
         this.context = context;
-        networkStats = context.getNetworkStats();
         
+        networkStats = context.getNetworkStats();
         defaultHandler = new DefaultMessageHandler(context);
         pingHandler = new PingRequestHandler(context);
-        findNodeHandler = new FindNodeRequestHandler(context);
-        findValueHandler = new FindValueRequestHandler(context);
+        lookupHandler = new LookupRequestHandler(context);
         storeHandler = new StoreRequestHandler(context);
         statsHandler = new StatsRequestHandler(context);
         
-        filter = new Filter();
+        buffer = ByteBuffer.allocate(DHTMessage.MAX_MESSAGE_SIZE);
     }
+    
+    public abstract void bind(SocketAddress address) throws IOException;
+    
+    public abstract void stop();
+    
+    public abstract boolean isRunning();
     
     public int getReceivedMessagesCount() {
         return (int)networkStats.RECEIVED_MESSAGES_COUNT.getTotal();
@@ -123,231 +122,175 @@ public class MessageDispatcher implements Runnable {
         return (long)networkStats.SENT_MESSAGES_SIZE.getTotal();
     }
     
-    public void bind(SocketAddress address) throws IOException {
-        synchronized (channelLock) {
-            if (isOpen()) {
-                throw new IOException("Already open");
-            }
-            
-            channel = DatagramChannel.open();
-            channel.configureBlocking(false);
-            
-            selector = Selector.open();
-            channel.register(selector, SelectionKey.OP_READ);
-            
-            DatagramSocket socket = channel.socket();
-            socket.setReuseAddress(false);
-            socket.setReceiveBufferSize(Receipt.MAX_PACKET_SIZE);
-            socket.setSendBufferSize(Receipt.MAX_PACKET_SIZE);
-            
-            socket.bind(address);
-            
-            outputQueue.clear();
-            messageMap.clear();
-        }
+    public void setDatagramChannel(DatagramChannel channel) {
+        this.channel = channel;
     }
     
-    public void close() throws IOException {
-        synchronized (channelLock) {
-            if (!isOpen()) {
-                return;
-            }
-            
-            channel.close();
-            
-            try { 
-                selector.close(); 
-            } catch (IOException ignore) {}
-            
-            messageMap.clear();
-            outputQueue.clear();
-        }
+    public DatagramChannel getDatagramChannel() {
+        return channel;
     }
     
     public boolean isOpen() {
-        synchronized (channelLock) {
-            return channel != null && channel.isOpen();
-        }
-    }
-    
-    private boolean isRunning() {
-        synchronized (channelLock) {
-            return isOpen() && channel.isRegistered();
-        }
+        DatagramChannel c = channel;
+        return c != null && c.isOpen();
     }
     
     public SocketAddress getLocalSocketAddress() {
-        synchronized (channelLock) {
-            return (channel != null ? channel.socket().getLocalSocketAddress() : null);
+        DatagramChannel c = channel;
+        if (c != null) {
+            return c.socket().getLocalSocketAddress();
         }
+        return null;
     }
     
-    public boolean send(SocketAddress dst, Message message, 
-            ResponseHandler handler) throws IOException {
-        return send(null, dst, message, handler);
+    public boolean send(ContactNode node, ResponseMessage response) 
+            throws IOException {
+        return send(new Tag(node, response)); 
     }
     
-    public boolean send(ContactNode dst, Message message, 
-            ResponseHandler handler) throws IOException {
-        return send(dst.getNodeID(), dst.getSocketAddress(), message, handler);
+    public boolean send(SocketAddress dst, RequestMessage request, 
+            ResponseHandler responseHandler) throws IOException {
+        return send(new Tag(dst, request, responseHandler));
     }
     
-    public boolean send(KUID nodeId, SocketAddress dst, Message message, 
-            ResponseHandler handler) throws IOException {
-        
+    public boolean send(KUID nodeId, SocketAddress dst, RequestMessage request, 
+            ResponseHandler responseHandler) throws IOException {
+        return send(new Tag(nodeId, dst, request, responseHandler));
+    }
+    
+    public boolean send(ContactNode node, RequestMessage request, 
+            ResponseHandler responseHandler) throws IOException {
+        return send(new Tag(node, request, responseHandler));
+    }
+    
+    private boolean send(Tag tag) throws IOException {
         if (!isOpen()) {
-            throw new IOException("Cannot send Message because Channel is not open");
+            throw new IOException("Channel is not open!");
         }
         
-        // Make sure we're not sending messages to ourself.
-        // The only exception are Pings/Pongs
-        if (context.isLocalNodeID(nodeId)) {
+        KUID nodeId = tag.getNodeID();
+        SocketAddress dst = tag.getSocketAddres();
+        DHTMessage message = tag.getMessage();
+        
+        // Make sure we're not sending messages to ourself
+        if (context.isLocalNodeID(nodeId)
+                || context.isLocalAddress(dst)) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
                         + " to ourself " + ContactNode.toString(nodeId, dst));
             }
+            tag.handleError(new IOException("Cannot send message to yourself"));
             return false;
         }
         
-        if(handler == null) {
-            handler = defaultHandler;
+        if (!NetworkUtils.isValidSocketAddress(dst)) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("The IP/Port of " + ContactNode.toString(nodeId, dst) + " is not valid");
+            }
+            
+            tag.handleError(new IllegalSocketAddressException("Invalid IP/Port: " + ContactNode.toString(nodeId, dst)));
+            return false;
         }
         
-        Receipt receipt = new Receipt(context, nodeId, dst, message, handler);
-        
-        synchronized (queueLock) {
-            outputQueue.add(receipt);
+        synchronized(outputQueue) {
+            outputQueue.add(tag);
             interestWrite(true);
         }
         
         return true;
     }
     
-    private void processMessage(Receipt receipt, Message message) throws IOException {
-        
-        KUID nodeId = message.getNodeID();
-        SocketAddress src = message.getSocketAddress();
-        
-        // Make sure we're not receiving messages from ourself.
-        // The only exception are Pings/Pongs
-        if (context.isLocalNodeID(nodeId)
-                || src.equals(context.getSocketAddress())) {
-            
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Received a message of type " + message.getClass().getName()
-                        + " from ourself: " + ContactNode.toString(nodeId, src) + "/" + context.getLocalNode());
-            }
-            
-            return;
-        }
-        
-        if (receipt != null) {
-            handleResponse(receipt, (ResponseMessage)message);
-        } else {
-            
-            // Make sure a singe Node cannot monopolize our resources
-            if (!filter.allow(src)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(ContactNode.toString(nodeId, src) + " refused");
-                }
-                networkStats.FILTERED_MESSAGES.incrementStat();
-            }
-            
-            if (message instanceof RequestMessage) {
-                handleRequest((RequestMessage)message);
-            } else if (message instanceof ResponseMessage) {
-                handleLateResponse(nodeId, src, message);
-            } else if (LOG.isErrorEnabled()) {
-                LOG.error(message + " is neither Request nor Response");
-            }
-        }
-    }
-    
-    private void handleResponse(Receipt receipt, ResponseMessage response) throws IOException {
-        long time = receipt.time();
-        
-        try {
-            defaultHandler.handleResponse(response, time); // BEFORE!
-            if (receipt.getHandler() != defaultHandler) {
-                receipt.handleResponse(response);
-            }
-        } catch (Throwable t) {
-            LOG.error("MessageHandler handle response error: ", t);
-        }
-    }
-    
-    private void handleRequest(RequestMessage msg) throws IOException {
-        RequestHandler requestHandler = null;
-        
-        if (msg instanceof PingRequest) {
-            requestHandler = pingHandler;
-        } else if (msg instanceof FindNodeRequest) {
-            requestHandler = findNodeHandler;
-        } else if (msg instanceof FindValueRequest) {
-            requestHandler = findValueHandler;
-        } else if (msg instanceof StoreRequest) {
-            requestHandler = storeHandler;
-        } else if (msg instanceof StatsRequest) {
-            requestHandler = statsHandler;
-        }
-        
-        if (requestHandler != null) {
+    public void handleRead() throws IOException {
+        while(isRunning()) {
+            DHTMessage message = null;
             try {
-                requestHandler.handleRequest(msg);
-                defaultHandler.handleRequest(msg); // AFTER!
-            } catch (Throwable t) {
-                LOG.error("MessageHandler handle request error: ", t);
+                message = readMessage();
+            } catch (MessageFormatException err) {
+                LOG.error("Message Format Exception: ", err);
+                continue;
             }
-        }
-    }
-    
-    private void handleLateResponse(KUID nodeId, SocketAddress src, Message msg) throws IOException {
-        
-        if (LOG.isTraceEnabled()) {
-            if (msg instanceof PingResponse) {
-                LOG.trace("Received a late Pong from " + ContactNode.toString(nodeId, src));
-            } else if (msg instanceof FindNodeResponse) {
-                LOG.trace("Received a late FindNode response from " + ContactNode.toString(nodeId, src));
-            } else if (msg instanceof FindValueResponse) {
-                LOG.trace("Received a late FindValue response from " + ContactNode.toString(nodeId, src));
-            } else if (msg instanceof StoreResponse) {
-                LOG.trace("Received a late Store response from " + ContactNode.toString(nodeId, src));
-            } else if (msg instanceof StatsResponse) {
-                LOG.trace("Received a late Stats response from " + ContactNode.toString(nodeId, src));
+            
+            if (message == null) {
+                break;
             }
-        }
-        networkStats.LATE_MESSAGES_COUNT.incrementStat();
-        ContactNode node = new ContactNode(nodeId,src);
-        context.getRouteTable().add(node,true);
-    }
-    
-    private void interest(int ops, boolean on) {
-        try {
-            SelectionKey sk = channel.keyFor(selector);
-            if (sk != null && sk.isValid()) {
-                synchronized(channel.blockingLock()) {
-                    if (on) {
-                        sk.interestOps(sk.interestOps() | ops);
-                    } else {
-                        sk.interestOps(sk.interestOps() & ~ops);
+            
+            // Make sure we're not receiving messages from ourself.
+            KUID nodeId = message.getSourceNodeID();
+            SocketAddress src = message.getSourceAddress();
+            if (context.isLocalNodeID(nodeId)
+                    || context.isLocalAddress(src)) {
+                
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Received a message of type " + message.getClass().getName() 
+                            + " from ourself " + ContactNode.toString(nodeId, src));
+                }
+                return;
+            }
+            
+            if (!NetworkUtils.isValidSocketAddress(src)) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(ContactNode.toString(nodeId, src) + " has an invalid IP/Port");
+                }
+                return;
+            }
+            
+            if (message instanceof ResponseMessage) {
+                ResponseMessage response = (ResponseMessage)message;
+                
+                // Check the QueryKey in the message ID to figure
+                // out whether or not we have ever sent a Request
+                // to that Host!
+                if (!response.verifyQueryKey()) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(response.getSource() + " sent us an unrequested response!");
+                    }
+                    return;
+                }
+                 
+                Receipt receipt = null;
+                
+                synchronized(receiptMap) {
+                    receipt = (Receipt)receiptMap.get(message.getMessageID());
+                    
+                    if (receipt != null) {
+                        receipt.received();
+                
+                        // The QueryKey check should catch all malicious
+                        // and some buggy Nodes. Do some additional sanity
+                        // checks to make sure the NodeID, IP:Port and 
+                        // response type have the extpected values.
+                        if (!receipt.sanityCheck(response)) {
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn("Response from " + response.getSource() 
+                                        + " did not pass the sanity check");
+                            }
+                            return;
+                        }
+                        
+                        // Set the Round Trip Time (RTT)
+                        message.getSource().setRoundTripTime(receipt.time());
+                        
+                        // OK, all checks passed. We can remove the receipt now!
+                        receiptMap.remove(message.getMessageID());
                     }
                 }
+                
+                processResponse(receipt, response);
+                
+            } else if (message instanceof RequestMessage) {
+                processRequest((RequestMessage)message);
+                
+            } else if (LOG.isFatalEnabled()) {
+                LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
             }
-        } catch (CancelledKeyException ignore) {}
-    }
-
-    private void interestRead(boolean on) {
-        interest(SelectionKey.OP_READ, on);
-    }
-    
-    private void interestWrite(boolean on) {
-        interest(SelectionKey.OP_WRITE, on);
+        }
+        
+        // We're always interested in reading!
+        interestRead(true);
     }
     
-    private ByteBuffer buffer = ByteBuffer.allocate(Receipt.MAX_PACKET_SIZE);
-    
-    private boolean readNext() throws IOException {
+    private DHTMessage readMessage() throws MessageFormatException, IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
             
@@ -356,104 +299,72 @@ public class MessageDispatcher implements Runnable {
             buffer.flip();
             buffer.get(data, 0, length);
             
-            try {
-                Message message = InputOutputUtils.deserialize(src, data);
-                networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
-                networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
-                
-                Receipt receipt = null;
-                if (message instanceof ResponseMessage) {
-                    receipt = (Receipt)messageMap.remove(message.getMessageID());
-                
-                    if (receipt != null) {
-                        receipt.received();
-                    }
-                }
+            DHTMessage message = InputOutputUtils.deserialize(src, data);
+            networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
+            networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
+            return message;
+        }
+        return null;
+    }
+    
+    private void processResponse(Receipt receipt, ResponseMessage response) {
+        process(new ResponseProcessor(receipt, response));
+    }
+    
+    private void processRequest(RequestMessage request) {
+        process(new RequestProcessor(request));
+    }
+    
+    public boolean handleWrite() throws IOException {
+        synchronized (outputQueue) {
+            while(!outputQueue.isEmpty() && isRunning()) {
+                Tag tag = (Tag)outputQueue.removeFirst();
                 
                 try {
-                    processMessage(receipt, message);
-                } catch (Exception e) {
-                    LOG.error("Message processing error", e);
-                }
-            } catch (MessageFormatException err) {
-                LOG.error("Message deserialization error", err);
-            }
-            return true;
-        }
-        return false;
-    }
-    
-    
-    /**
-     * Returns the number of remaining Messages in
-     * the output Queue
-     */
-    private int writeNext() throws IOException {
-        if (!outputQueue.isEmpty()) {
-            Receipt receipt = (Receipt)outputQueue.removeFirst();
-
-            try {
-                if (receipt.send(channel)) {
-                    receipt.sent();
-                    networkStats.SENT_MESSAGES_COUNT.incrementStat();
-                    networkStats.SENT_MESSAGES_SIZE.addData(receipt.dataSize()); // compressed size
-                    
-                    if (receipt.isRequest()) {
-                        messageMap.put(receipt.getMessageID(), receipt);
-                    }
-                    receipt.freeData();
-                } else {
-                    outputQueue.addFirst(receipt);
-                }
-            } catch (SocketException err) {
-                LOG.error("Failed to send a message due to a SocketException", err);
-            }
-        }
-        return outputQueue.size();
-    }
-    
-    
-    public void run() {
-        long lastCleanup = System.currentTimeMillis();
-        
-        /*networkStats.SENT_MESSAGES_COUNT.clearData();
-        networkStats.RECEIVED_MESSAGES_COUNT.clearData();*/
-        
-        while(isRunning()) {
-                
-            try {
-                selector.select(SLEEP);
-                
-                // READ
-                while(readNext());
-                interestRead(true); // We're always interested in reading
-                
-                synchronized (queueLock) {
-                    // WRITE
-                    // TODO propper throtteling.
-                    int remaining = 0;
-                    for(int i = 0; i < 10; i++) {
-                        remaining = writeNext();
-                        if (remaining == 0) {
-                            break;
+                    if (tag.send(channel)) {
+                        // Wohoo! Message was sent!
+                        networkStats.SENT_MESSAGES_COUNT.incrementStat();
+                        networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize()); // compressed size
+                        
+                        Receipt receipt = tag.getReceipt();
+                        if (receipt != null) {
+                            synchronized (receiptMap) {
+                                receiptMap.add(receipt);
+                            }
                         }
+                    } else {
+                        // Dang! Re-Try next time!
+                        outputQueue.addFirst(tag);
+                        break;
                     }
-                    interestWrite(remaining > 0);
+                } catch (SocketException err) {
+                    LOG.error("Failed to send a message due to a SocketException", err);
+                    tag.handleError(err);
                 }
-                
-                // CLEANUP
-                if ((System.currentTimeMillis()-lastCleanup) >= CLEANUP_INTERVAL) {
-                    messageMap.cleanup();
-                    lastCleanup = System.currentTimeMillis();
-                }
-            } catch (ClosedChannelException err) {
-                //LOG.error("MessageHandler ClosedChannelException: ", err);
-                break;
-            } catch (IOException err) {
-                LOG.error("MessageHandler IO exception: ", err);
             }
+            
+            interestWrite(!outputQueue.isEmpty());
+            return !outputQueue.isEmpty();
         }
     }
+    
+    protected void handleClenup() {
+        process(new Runnable() {
+            public void run() {
+                synchronized (receiptMap) {
+                    receiptMap.cleanup();
+                }
+            }
+        });
+    }
+    
+    protected abstract void interestRead(boolean on);
+    
+    protected abstract void interestWrite(boolean on);
+    
+    protected abstract void process(Runnable runnable);
+    
+    protected abstract boolean allow(DHTMessage message);
     
     private class ReceiptMap extends FixedSizeHashMap {
         
@@ -463,9 +374,12 @@ public class MessageDispatcher implements Runnable {
             super(maxSize);
         }
 
+        public void add(Receipt receipt) {
+            put(receipt.getMessageID(), receipt);
+        }
+        
         public void cleanup() {
-            Iterator it = entrySet().iterator();
-            while(it.hasNext()) {
+            for(Iterator it = entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)it.next();
                 Receipt receipt = (Receipt)entry.getValue();
                 
@@ -474,33 +388,149 @@ public class MessageDispatcher implements Runnable {
                     it.remove();
                     networkStats.RECEIPTS_TIMEOUT.incrementStat();
                     
-                    try {
-                        receipt.handleTimeout();
-                    } catch (Throwable t) {
-                        LOG.error("ReceiptMap cleanup error: ",t);
-                    }
+                    process(new TimeoutProcessor(receipt));
                 }
             }
         }
         
         protected boolean removeEldestEntry(Map.Entry eldest) {
             Receipt receipt = (Receipt)eldest.getValue();
-            if (super.removeEldestEntry(eldest) 
-                    || receipt.timeout()) {
+            
+            boolean timeout = receipt.timeout();
+            if (super.removeEldestEntry(eldest) || timeout) {
                 receipt.received();
-                if(receipt.timeout()) {
+                
+                if(timeout) {
                     networkStats.RECEIPTS_TIMEOUT.incrementStat();
                 } else {
                     networkStats.RECEIPTS_EVICTED.incrementStat();
                 }
-                try {
-                    receipt.handleTimeout();
-                } catch (Throwable t) {
-                    LOG.error("ReceiptMap removeEldestEntry error: ",t);
-                }
+                
+                process(new TimeoutProcessor(receipt));
                 return true;
             }
             return false;
+        }
+    }
+    
+    private class ResponseProcessor implements Runnable {
+        
+        private Receipt receipt;
+        private ResponseMessage response;
+        
+        private ResponseProcessor(Receipt receipt, ResponseMessage response) {
+            this.receipt = receipt;
+            this.response = response;
+        }
+        
+        public void run() {
+            if (receipt != null) {
+                processResponse();
+            } else {
+                processLateResponse();
+            }
+        }
+        
+        private void processResponse() {
+            try {
+                defaultHandler.handleResponse(response, receipt.time());
+                if (receipt.getResponseHandler() != defaultHandler) {
+                    receipt.getResponseHandler().addTime(receipt.time());
+                    receipt.getResponseHandler().handleResponse(response, receipt.time());
+                }
+            } catch (IOException err) {
+                LOG.error("An error occured dusring processing the response", err);
+            }
+        }
+        
+        private void processLateResponse() {
+            
+            ContactNode node = response.getSource();
+            
+            if (LOG.isTraceEnabled()) {
+                if (response instanceof PingResponse) {
+                    LOG.trace("Received a late Pong from " + node);
+                } else if (response instanceof FindNodeResponse) {
+                    LOG.trace("Received a late FindNode response from " + node);
+                } else if (response instanceof FindValueResponse) {
+                    LOG.trace("Received a late FindValue response from " + node);
+                } else if (response instanceof StoreResponse) {
+                    LOG.trace("Received a late Store response from " + node);
+                } else if (response instanceof StatsResponse) {
+                    LOG.trace("Received a late Stats response from " + node);
+                }
+            }
+            
+            networkStats.LATE_MESSAGES_COUNT.incrementStat();
+            context.getRouteTable().add(node, true);
+        }
+    }
+    
+    private class RequestProcessor implements Runnable {
+        
+        private RequestMessage request;
+        
+        private RequestProcessor(RequestMessage request) {
+            this.request = request;
+        }
+        
+        public void run() {
+            // Make sure a singe Node cannot monopolize our resources
+            if (!allow(request)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(request.getSource() + " refused");
+                }
+                networkStats.FILTERED_MESSAGES.incrementStat();
+                // return;
+            }
+            
+            RequestHandler requestHandler = null;
+            
+            if (request instanceof PingRequest) {
+                requestHandler = pingHandler;
+            } else if (request instanceof FindNodeRequest
+                    || request instanceof FindValueRequest) {
+                requestHandler = lookupHandler;
+            } else if (request instanceof StoreRequest) {
+                requestHandler = storeHandler;
+            } else if (request instanceof StatsRequest) {
+                requestHandler = statsHandler;
+            }
+            
+            if (requestHandler != null) {
+                try {
+                    requestHandler.handleRequest(request);
+                    defaultHandler.handleRequest(request); // AFTER!
+                } catch (Exception e) {
+                    LOG.error("An exception occured during processing the request", e);
+                }
+            }
+        }
+    }
+    
+    private class TimeoutProcessor implements Runnable {
+        
+        private Receipt receipt;
+        
+        private TimeoutProcessor(Receipt receipt) {
+            this.receipt = receipt;
+        }
+        
+        public void run() {
+            try {
+                KUID nodeId = receipt.getNodeID();
+                SocketAddress dst = receipt.getSocketAddress();
+                RequestMessage msg = receipt.getRequestMessage();
+                long time = receipt.time();
+                
+                defaultHandler.handleTimeout(nodeId, dst, msg, time);
+                if (receipt.getResponseHandler() != defaultHandler) {
+                    receipt.getResponseHandler().addTime(time);
+                    receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
+                }
+            } catch (Exception e) {
+                LOG.error("ReceiptMap removeEldestEntry error: ", e);
+            }
         }
     }
 }

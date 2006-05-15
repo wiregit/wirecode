@@ -21,6 +21,7 @@ package de.kapsi.net.kademlia;
 
 import java.net.SocketAddress;
 
+import de.kapsi.net.kademlia.settings.NetworkSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;
 
 public class ContactNode extends Node {
@@ -36,23 +37,57 @@ public class ContactNode extends Node {
     
     private long lastDeadOrAliveTime = 0L;
     
-    private boolean isPinged;
+    private int instanceId;
+    
+    private transient long roundTripTime = -1L;
     
     public ContactNode(KUID nodeId, SocketAddress address) {
-        this(nodeId, address, 0);
+        this(nodeId, address, 0, 0);
     }
     
     public ContactNode(KUID nodeId, SocketAddress address, int flags) {
+        this(nodeId, address, flags, 0);
+    }
+    
+    public ContactNode(KUID nodeId, SocketAddress address, int flags, int instanceId) {
         super(nodeId);
         
         this.address = address;
         this.flags = flags;
+        this.instanceId = instanceId;
     }
     
+    public long getAdaptativeTimeOut() {
+        //for now, based on failures and previous round trip time
+        long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
+        if(roundTripTime <= 0 || isDead()) {
+            return maxTimeout;
+        } else {
+            return Math.min(((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * roundTripTime) + 
+                failures * roundTripTime), maxTimeout);
+        }
+    }
+    
+    public int getInstanceID() {
+        return instanceId;
+    }
+    
+    public void setInstanceID(int instanceId) {
+        this.instanceId = instanceId;
+    }
+
     public int getFlags() {
         return flags;
     }
     
+    public long getRoundTripTime() {
+        return roundTripTime;
+    }
+
+    public void setRoundTripTime(long rountTripTime) {
+        this.roundTripTime = rountTripTime;
+    }
+
     public void setFirewalled(boolean firewalled) {
         if (firewalled) {
             this.flags |= FIREWALLED;
@@ -75,18 +110,10 @@ public class ContactNode extends Node {
         return (failures > 0);
     }
     
-    public void setUnknown() {
+    public void unknownState() {
         failures = 0;
         setTimeStamp(0L);
         lastDeadOrAliveTime = 0L;
-    }
-    
-    public boolean isPinged() {
-        return isPinged;
-    }
-
-    public void setPinged(boolean isPinged) {
-        this.isPinged = isPinged;
     }
 
     public boolean isDead() {
@@ -138,13 +165,17 @@ public class ContactNode extends Node {
     
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(toString(getNodeID(), address))
+        buffer.append(toString(getNodeID(), getSocketAddress()))
             .append(", failures: ").append(failures)
-            .append(", unknown: ").append(getTimeStamp()==0);
+            .append(", instanceId: ").append(instanceId)
+            .append(", unknown: ").append(getTimeStamp()==0L);
+        
+        if (isFirewalled()) {
+            buffer.append(", firewalled: ").append(isFirewalled());
+        }
+        
         return buffer.toString();
     }
-    
-    
     
     public void setTimeStamp(long timestamp) {
         super.setTimeStamp(timestamp);

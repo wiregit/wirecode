@@ -17,24 +17,21 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package de.kapsi.net.kademlia.messages;
+package de.kapsi.net.kademlia.event;
 
-import de.kapsi.net.kademlia.ContactNode;
+import java.net.SocketAddress;
+
 import de.kapsi.net.kademlia.KUID;
+import de.kapsi.net.kademlia.messages.RequestMessage;
+import de.kapsi.net.kademlia.messages.ResponseMessage;
 
-public abstract class ResponseMessage extends AbstractDHTMessage {
-
-    public ResponseMessage(int vendor, int version, 
-            ContactNode node, KUID messageId) {
-        super(vendor, version, node, messageId);
-    }
+/**
+ * 
+ */
+public interface ResponseListener {
     
-    public ResponseMessage(int vendor, int version, 
-            ContactNode node, KUID messageId, byte[] signature) {
-        super(vendor, version, node, messageId, signature);
-    }
+    public void response(ResponseMessage response, long time);
     
-    public boolean verifyQueryKey() {
-        return getMessageID().verifyQueryKey(getSourceAddress());
-    }
+    public void timeout(KUID nodeId, SocketAddress address, 
+            RequestMessage request, long time);
 }
