@@ -86,7 +86,8 @@ public abstract class Message implements Serializable, Comparable {
                     || func==F_PUSH
                     || func==F_QUERY || func==F_QUERY_REPLY
                     || func==F_VENDOR_MESSAGE 
-                    || func == F_VENDOR_MESSAGE_STABLE,
+                    || func == F_VENDOR_MESSAGE_STABLE
+                    || func == F_UDP_CONNECTION,
                     "Bad function code");
 
         if (func==F_PUSH) Assert.that(length==26, "Bad push length: "+length);
