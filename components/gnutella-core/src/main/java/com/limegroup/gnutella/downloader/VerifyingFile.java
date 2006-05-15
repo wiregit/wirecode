@@ -903,7 +903,6 @@ public class VerifyingFile {
         public void run() {
             LOG.info("clearing cache");
             CACHE.clear();
-            runDelayedWrites();
             QUEUE.add(new ChunkCacheCleaner());
         }
     }

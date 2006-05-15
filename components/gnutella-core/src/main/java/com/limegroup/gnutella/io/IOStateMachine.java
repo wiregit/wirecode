@@ -209,21 +209,25 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
             currentState = (IOState)states.remove(0);
             if(LOG.isDebugEnabled())
                 LOG.debug("Incrementing state to: " + currentState);
+            
             if(currentState.isReading() && !reading) {
                 writeSink.interest(this, false);
-                if(readSink != null) {
+                if(readSink != null)
                     readSink.interest(true);
-                    // Process reading immediately, else
-                    // data already in the buffer may be
-                    // ignored while waiting on more data
-                    // in the socket.
-                    processCurrentState(currentState, true);
-                }
-            } else if(currentState.isWriting() && !writing) {
+            }
+            
+            if(currentState.isWriting() && !writing) {
                 readSink.interest(false);
                 if(writeSink != null)
                     writeSink.interest(this, true);
             }
+            
+            // Process reading immediately, else
+            // data already in the buffer may be
+            // ignored while waiting on more data
+            // in the socket.
+            if(currentState.isReading()) 
+                processCurrentState(currentState, true);
         }
     }
 
