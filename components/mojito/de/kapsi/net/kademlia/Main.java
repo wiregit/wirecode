@@ -285,7 +285,7 @@ public class Main {
         System.out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
             public void response(ResponseMessage response, long time) {
-                System.out.println("*** Ping to " + response.getContactNode() + " succeeded: " + time + "ms");
+                System.out.println("*** Ping to " + response.getSource() + " succeeded: " + time + "ms");
             }
 
             public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
@@ -316,7 +316,7 @@ public class Main {
         StatsListener listener = new StatsListener() {
             public void response(ResponseMessage response, long time) {
                 StringBuffer buffer = new StringBuffer();
-                buffer.append("*** Stats to ").append(response.getContactNode())
+                buffer.append("*** Stats to ").append(response.getSource())
                     .append(" succeeded in ").append(time).append("ms\n");
                 buffer.append(((StatsResponse)response).getStatistics());
                 System.out.println(buffer.toString());

@@ -49,7 +49,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
     public void handleRequest(RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getContactNode() + " sent us a Ping");
+            LOG.trace(message.getSource() + " sent us a Ping");
         }
         
         networkStats.PING_REQUESTS.incrementStat();
@@ -57,9 +57,9 @@ public class PingRequestHandler extends AbstractRequestHandler {
         PingRequest request = (PingRequest)message;
         
         PingResponse response = context.getMessageFactory()
-                .createPingResponse(request, request.getSocketAddress());
+                .createPingResponse(request, request.getSourceAddress());
 
-        context.getMessageDispatcher().send(request.getContactNode(), response);
+        context.getMessageDispatcher().send(request.getSource(), response);
         networkStats.PONGS_SENT.incrementStat();
     }
 }

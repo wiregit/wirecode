@@ -42,7 +42,7 @@ public class StatsRPCTest {
             StatsListener listener = new StatsListener() {
                 public void response(ResponseMessage response, long time) {
                     StringBuffer buffer = new StringBuffer();
-                    buffer.append("*** Stats to ").append(response.getContactNode())
+                    buffer.append("*** Stats to ").append(response.getSource())
                         .append(" succeeded in ").append(time).append("ms\n");
                     buffer.append(((StatsResponse)response).getStatistics());
                     System.out.println(buffer.toString());

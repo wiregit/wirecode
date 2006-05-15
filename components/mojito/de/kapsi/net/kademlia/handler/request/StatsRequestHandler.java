@@ -47,7 +47,7 @@ public class StatsRequestHandler extends AbstractRequestHandler {
     public void handleRequest(RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getContactNode() + " sent us a Stats Request");
+            LOG.trace(message.getSource() + " sent us a Stats Request");
         }
         
         networkStats.STATS_REQUEST.incrementStat();
@@ -66,6 +66,6 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         StatsResponse response = context.getMessageFactory()
             .createStatsResponse(message, writer.toString());
         
-        context.getMessageDispatcher().send(message.getContactNode(), response);
+        context.getMessageDispatcher().send(message.getSource(), response);
     }
 }

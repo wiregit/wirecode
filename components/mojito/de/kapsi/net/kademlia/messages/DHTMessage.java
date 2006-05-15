@@ -49,11 +49,11 @@ public interface DHTMessage {
     
     public KUID getMessageID();
     
-    public ContactNode getContactNode();
+    public ContactNode getSource();
     
-    public KUID getNodeID();
+    public KUID getSourceNodeID();
     
-    public SocketAddress getSocketAddress();
+    public SocketAddress getSourceAddress();
     
     public byte[] getSignature();
 }

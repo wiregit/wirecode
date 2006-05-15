@@ -94,7 +94,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
 
     protected boolean allow(DHTMessage message) {
-        return filter.allow(message.getSocketAddress());
+        return filter.allow(message.getSourceAddress());
     }
     
     protected void process(Runnable runnable) {

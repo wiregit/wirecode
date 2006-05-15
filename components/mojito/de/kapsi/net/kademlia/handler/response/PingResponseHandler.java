@@ -57,16 +57,16 @@ public class PingResponseHandler extends AbstractResponseHandler {
     protected void response(ResponseMessage message, long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Received pong from " + message.getContactNode() 
+            LOG.trace("Received pong from " + message.getSource() 
                     + " after " + getErrors() + " errors and a total time of " + time() + "ms");
         }
         
         PingResponse response = (PingResponse)message;
         SocketAddress externalAddress = response.getExternalSocketAddress();
         
-        if (message.getSocketAddress().equals(externalAddress)) {
+        if (message.getSourceAddress().equals(externalAddress)) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(message.getContactNode() + " is trying to set our external address to its address!");
+                LOG.error(message.getSource() + " is trying to set our external address to its address!");
             }
             return;
         }

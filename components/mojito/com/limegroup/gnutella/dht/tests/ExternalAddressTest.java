@@ -72,15 +72,15 @@ public class ExternalAddressTest {
 
         public void handleRequest(RequestMessage message) throws IOException {
             
-            SocketAddress addr = externalAddress != null ? externalAddress : message.getSocketAddress();
+            SocketAddress addr = externalAddress != null ? externalAddress : message.getSourceAddress();
 
-            System.out.println("Received Ping from " + message.getSocketAddress());
-            System.out.println("Going to tell " + message.getSocketAddress() + " that its external address is " + addr);
+            System.out.println("Received Ping from " + message.getSourceAddress());
+            System.out.println("Going to tell " + message.getSourceAddress() + " that its external address is " + addr);
             
             PingResponse pong = context.getMessageFactory()
                     .createPingResponse(message, addr);
     
-            context.getMessageDispatcher().send(message.getContactNode(), pong);
+            context.getMessageDispatcher().send(message.getSource(), pong);
         }        
     }
 }

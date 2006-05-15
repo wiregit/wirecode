@@ -72,16 +72,20 @@ public abstract class AbstractDHTMessage implements DHTMessage {
         return messageId;
     }
     
-    public ContactNode getContactNode() {
+    public void setSource(ContactNode source) {
+        this.source = source;
+    }
+    
+    public ContactNode getSource() {
         return source;
     }
     
-    public KUID getNodeID() {
-        return getContactNode().getNodeID();
+    public KUID getSourceNodeID() {
+        return getSource().getNodeID();
     }
     
-    public SocketAddress getSocketAddress() {
-        return getContactNode().getSocketAddress();
+    public SocketAddress getSourceAddress() {
+        return getSource().getSocketAddress();
     }
     
     public byte[] getSignature() {

@@ -218,14 +218,14 @@ class Tag {
                 return (message instanceof PingRequest)
                     || (message instanceof StatsRequest);
             } else {
-                return nodeId.equals(response.getNodeID());
+                return nodeId.equals(response.getSourceNodeID());
             }
         }
         
         // This is actually not really necessary. The QueryKey in
         // MessageID should take care of it.
         private boolean compareSocketAddress(ResponseMessage response) {
-            return Tag.this.dst.equals(response.getSocketAddress());
+            return Tag.this.dst.equals(response.getSourceAddress());
         }
         
         private boolean compareResponseType(ResponseMessage response) {

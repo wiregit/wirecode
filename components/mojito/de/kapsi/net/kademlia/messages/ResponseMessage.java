@@ -35,6 +35,6 @@ public abstract class ResponseMessage extends AbstractDHTMessage {
     }
     
     public boolean verifyQueryKey() {
-        return getMessageID().verifyQueryKey(getSocketAddress());
+        return getMessageID().verifyQueryKey(getSourceAddress());
     }
 }

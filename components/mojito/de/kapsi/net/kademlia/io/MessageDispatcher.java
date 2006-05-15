@@ -217,8 +217,8 @@ public abstract class MessageDispatcher implements Runnable {
             }
             
             // Make sure we're not receiving messages from ourself.
-            KUID nodeId = message.getNodeID();
-            SocketAddress src = message.getSocketAddress();
+            KUID nodeId = message.getSourceNodeID();
+            SocketAddress src = message.getSourceAddress();
             if (context.isLocalNodeID(nodeId)
                     || context.isLocalAddress(src)) {
                 
@@ -244,7 +244,7 @@ public abstract class MessageDispatcher implements Runnable {
                 // to that Host!
                 if (!response.verifyQueryKey()) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(response.getContactNode() + " sent us an unrequested response!");
+                        LOG.warn(response.getSource() + " sent us an unrequested response!");
                     }
                     return;
                 }
@@ -263,14 +263,14 @@ public abstract class MessageDispatcher implements Runnable {
                         // response type have the extpected values.
                         if (!receipt.sanityCheck(response)) {
                             if (LOG.isWarnEnabled()) {
-                                LOG.warn("Response from " + response.getContactNode() 
+                                LOG.warn("Response from " + response.getSource() 
                                         + " did not pass the sanity check");
                             }
                             return;
                         }
                         
                         // Set the Round Trip Time (RTT)
-                        message.getContactNode().setRoundTripTime(receipt.time());
+                        message.getSource().setRoundTripTime(receipt.time());
                         
                         // OK, all checks passed. We can remove the receipt now!
                         receiptMap.remove(message.getMessageID());
@@ -444,7 +444,7 @@ public abstract class MessageDispatcher implements Runnable {
         
         private void processLateResponse() {
             
-            ContactNode node = response.getContactNode();
+            ContactNode node = response.getSource();
             
             if (LOG.isTraceEnabled()) {
                 if (response instanceof PingResponse) {
@@ -477,7 +477,7 @@ public abstract class MessageDispatcher implements Runnable {
             // Make sure a singe Node cannot monopolize our resources
             if (!allow(request)) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(request.getContactNode() + " refused");
+                    LOG.trace(request.getSource() + " refused");
                 }
                 networkStats.FILTERED_MESSAGES.incrementStat();
                 // return;

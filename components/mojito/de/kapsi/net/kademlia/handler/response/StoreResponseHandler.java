@@ -75,7 +75,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         
         if (requesting > 0 && index < keyValues.size()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace(response.getContactNode()
+                LOG.trace(response.getSource()
                         + " is requesting from us " + requesting + " KeyValues");
             }
             
@@ -91,9 +91,9 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             
             RequestMessage request 
                 = context.getMessageFactory()
-                    .createStoreRequest(response.getSocketAddress(), remaining, queryKey, toSend);
+                    .createStoreRequest(response.getSourceAddress(), remaining, queryKey, toSend);
             
-            context.getMessageDispatcher().send(response.getContactNode(), request, this);
+            context.getMessageDispatcher().send(response.getSource(), request, this);
         }
         
         // reset the error counter

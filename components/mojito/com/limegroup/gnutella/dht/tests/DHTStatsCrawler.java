@@ -131,7 +131,7 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         try {
             context.ping(bootstrap, new PingListener() {
                 public void response(ResponseMessage response, long time) {
-                    startCrawl(response.getNodeID());
+                    startCrawl(response.getSourceNodeID());
                 }
 
                 public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
@@ -158,8 +158,8 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
     public void handleResponse(ResponseMessage message, long time) throws IOException {
         --numReq;
         ++numResponses;
-        System.out.println("Response from: " + message.getContactNode());
-        responses.add(message.getContactNode());
+        System.out.println("Response from: " + message.getSource());
+        responses.add(message.getSource());
         synchronized (lock) {
             lock.notify();
         }
@@ -308,7 +308,7 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                 return;
             
             try {
-                ContactNode node = response.getContactNode();
+                ContactNode node = response.getSource();
                 String statistics = ((StatsResponse)response).getStatistics();
                 
                 synchronized(statsWriter) {

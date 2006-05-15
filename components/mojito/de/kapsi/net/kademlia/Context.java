@@ -922,7 +922,7 @@ public class Context {
             networkStats.PINGS_OK.incrementStat();
             
             synchronized (handlerMap) {
-                handlerMap.remove(response.getSocketAddress());
+                handlerMap.remove(response.getSourceAddress());
                 fireEvent(new Runnable() {
                     public void run() {
                         synchronized (listeners) {

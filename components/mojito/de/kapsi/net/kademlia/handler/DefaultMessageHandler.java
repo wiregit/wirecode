@@ -76,7 +76,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleResponse(ResponseMessage message, long time) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message);
+        addLiveContactInfo(message.getSource(), message);
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
@@ -85,7 +85,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleRequest(RequestMessage message) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message);
+        addLiveContactInfo(message.getSource(), message);
     }
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
@@ -197,7 +197,7 @@ public class DefaultMessageHandler extends MessageHandler
             }
             
             QueryKey queryKey = response.getQueryKey();
-            context.store(message.getContactNode(), queryKey, keyValues);
+            context.store(message.getSource(), queryKey, keyValues);
         }
 
         protected void timeout(KUID nodeId, SocketAddress dst, 
