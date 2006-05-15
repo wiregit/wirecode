@@ -199,6 +199,12 @@ public class ApplicationSettings extends LimeProps {
                 !CommonUtils.isWindows() && !CommonUtils.isAnyMac());
     
     /**
+     * Whether or not to use 'secure results' to screen search results.
+     */
+    public static final BooleanSetting USE_SECURE_RESULTS =
+        FACTORY.createBooleanSetting("USE_SECURE_RESULTS", true);
+    
+    /**
      * Gets the current language setting.
      */
     public static String getLanguage() {

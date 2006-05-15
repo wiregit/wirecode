@@ -20,6 +20,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -238,7 +239,8 @@ public final class SearchResultHandler {
             
             // If there was an action, only allow it if it's a secure message.
             LimeXMLDocument doc = response.getDocument();
-            if(doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
+            if(ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
+               doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
                 continue;
             }
                 

@@ -121,7 +121,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         if(!validResponses)
             return;
         
-        if(reply.hasSecureData()) {
+        if(reply.hasSecureData() && ApplicationSettings.USE_SECURE_RESULTS.getValue()) {
             RouterService.getSecureMessageVerifier().verify(reply, this);
         } else {
             routeQueryReplyInternal(reply);
