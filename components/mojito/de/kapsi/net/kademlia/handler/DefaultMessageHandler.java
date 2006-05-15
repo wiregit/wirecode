@@ -95,6 +95,8 @@ public class DefaultMessageHandler extends MessageHandler
     private void addLiveContactInfo(ContactNode node, 
             DHTMessage message) throws IOException {
         
+        if(node.isFirewalled()) return;
+        
         RoutingTable routeTable = getRouteTable();
         boolean newNode = false;
         //only do store forward if it is a new node in our routing table (we are (re)connecting to the network) 
