@@ -26,14 +26,14 @@ import java.net.SocketAddress;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 
 public final class InputOutputUtils {
 
     private InputOutputUtils() {
     }
 
-    public static byte[] serialize(Message message) throws IOException {
+    public static byte[] serialize(DHTMessage message) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
         GZIPOutputStream gz = new GZIPOutputStream(baos);
         MessageOutputStream out = new MessageOutputStream(gz);
@@ -42,13 +42,13 @@ public final class InputOutputUtils {
         return baos.toByteArray();
     }
 
-    public static Message deserialize(SocketAddress src, byte[] data)
+    public static DHTMessage deserialize(SocketAddress src, byte[] data)
             throws MessageFormatException {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
             GZIPInputStream gz = new GZIPInputStream(bais);
             MessageInputStream in = new MessageInputStream(gz);
-            Message message = in.readMessage(src);
+            DHTMessage message = in.readMessage(src);
             in.close();
             return message;
         } catch (IOException e) {

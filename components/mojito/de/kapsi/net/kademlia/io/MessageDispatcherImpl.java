@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 
 public class MessageDispatcherImpl extends MessageDispatcher implements Runnable {
 
@@ -93,7 +93,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         return isOpen() && getDatagramChannel().isRegistered();
     }
 
-    protected boolean allow(Message message) {
+    protected boolean allow(DHTMessage message) {
         return filter.allow(message.getSocketAddress());
     }
     

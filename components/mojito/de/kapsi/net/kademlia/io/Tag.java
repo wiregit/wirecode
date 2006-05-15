@@ -31,7 +31,7 @@ import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.NoOpResponseHandler;
 import de.kapsi.net.kademlia.handler.ResponseHandler;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
@@ -52,7 +52,7 @@ class Tag {
     private KUID nodeId;
     private SocketAddress dst;
     
-    private Message message;
+    private DHTMessage message;
     
     private ByteBuffer data;
     private int size;
@@ -69,8 +69,8 @@ class Tag {
         data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
         size = data.limit();
         
-        if (size >= Message.MAX_MESSAGE_SIZE) {
-            throw new IOException("Packet is too large: " + size + " >= " + Message.MAX_MESSAGE_SIZE);
+        if (size >= DHTMessage.MAX_MESSAGE_SIZE) {
+            throw new IOException("Packet is too large: " + size + " >= " + DHTMessage.MAX_MESSAGE_SIZE);
         }
         
         this.nodeId = node.getNodeID();
@@ -100,8 +100,8 @@ class Tag {
         data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
         size = data.limit();
         
-        if (size >= Message.MAX_MESSAGE_SIZE) {
-            throw new IOException("Packet is too large: " + size + " >= " + Message.MAX_MESSAGE_SIZE);
+        if (size >= DHTMessage.MAX_MESSAGE_SIZE) {
+            throw new IOException("Packet is too large: " + size + " >= " + DHTMessage.MAX_MESSAGE_SIZE);
         }
         
         this.nodeId = nodeId;
@@ -133,7 +133,7 @@ class Tag {
         return dst;
     }
     
-    public Message getMessage() {
+    public DHTMessage getMessage() {
         return message;
     }
     

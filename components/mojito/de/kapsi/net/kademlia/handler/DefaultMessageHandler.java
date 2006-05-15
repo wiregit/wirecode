@@ -37,7 +37,7 @@ import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.Database;
 import de.kapsi.net.kademlia.db.KeyValue;
 import de.kapsi.net.kademlia.db.Database.KeyValueBag;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
@@ -93,7 +93,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
     
     private void addLiveContactInfo(ContactNode node, 
-            Message message) throws IOException {
+            DHTMessage message) throws IOException {
         
         RoutingTable routeTable = getRouteTable();
         boolean newNode = false;

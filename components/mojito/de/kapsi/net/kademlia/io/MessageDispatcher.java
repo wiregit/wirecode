@@ -44,7 +44,7 @@ import de.kapsi.net.kademlia.handler.request.PingRequestHandler;
 import de.kapsi.net.kademlia.handler.request.StatsRequestHandler;
 import de.kapsi.net.kademlia.handler.request.StoreRequestHandler;
 import de.kapsi.net.kademlia.io.Tag.Receipt;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
@@ -97,7 +97,7 @@ public abstract class MessageDispatcher implements Runnable {
         storeHandler = new StoreRequestHandler(context);
         statsHandler = new StatsRequestHandler(context);
         
-        buffer = ByteBuffer.allocate(Message.MAX_MESSAGE_SIZE);
+        buffer = ByteBuffer.allocate(DHTMessage.MAX_MESSAGE_SIZE);
     }
     
     public abstract void bind(SocketAddress address) throws IOException;
@@ -170,7 +170,7 @@ public abstract class MessageDispatcher implements Runnable {
         
         KUID nodeId = tag.getNodeID();
         SocketAddress dst = tag.getSocketAddres();
-        Message message = tag.getMessage();
+        DHTMessage message = tag.getMessage();
         
         // Make sure we're not sending messages to ourself
         if (context.isLocalNodeID(nodeId)
@@ -204,7 +204,7 @@ public abstract class MessageDispatcher implements Runnable {
     
     public void handleRead() throws IOException {
         while(isRunning()) {
-            Message message = null;
+            DHTMessage message = null;
             try {
                 message = readMessage();
             } catch (MessageFormatException err) {
@@ -291,7 +291,7 @@ public abstract class MessageDispatcher implements Runnable {
         interestRead(true);
     }
     
-    private Message readMessage() throws MessageFormatException, IOException {
+    private DHTMessage readMessage() throws MessageFormatException, IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
             int length = buffer.position();
@@ -299,7 +299,7 @@ public abstract class MessageDispatcher implements Runnable {
             buffer.flip();
             buffer.get(data, 0, length);
             
-            Message message = InputOutputUtils.deserialize(src, data);
+            DHTMessage message = InputOutputUtils.deserialize(src, data);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
             networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
             return message;
@@ -363,7 +363,7 @@ public abstract class MessageDispatcher implements Runnable {
     
     protected abstract void process(Runnable runnable);
     
-    protected abstract boolean allow(Message message);
+    protected abstract boolean allow(DHTMessage message);
     
     private class ReceiptMap extends FixedSizeHashMap {
         

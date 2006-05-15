@@ -32,7 +32,7 @@ import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
 import de.kapsi.net.kademlia.Context;
-import de.kapsi.net.kademlia.messages.Message;
+import de.kapsi.net.kademlia.messages.DHTMessage;
 
 public class LimeMessageDispatcherImpl extends MessageDispatcher implements ReadWriteObserver {
 
@@ -56,7 +56,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
         }, CLEANUP, CLEANUP);
     }
 
-    protected boolean allow(Message message) {
+    protected boolean allow(DHTMessage message) {
         return true;
     }
 
