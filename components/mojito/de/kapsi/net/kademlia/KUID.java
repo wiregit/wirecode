@@ -32,7 +32,8 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Random;
 
-import de.kapsi.net.kademlia.security.QueryKey;
+import com.limegroup.gnutella.guess.QueryKey;
+
 import de.kapsi.net.kademlia.util.ArrayUtils;
 import de.kapsi.net.kademlia.util.PatriciaTrie.KeyCreator;
 
@@ -571,7 +572,7 @@ public class KUID implements Serializable, Comparable {
             queryKey[i] ^= RANDOM_PAD[i];
         }
         
-        return QueryKey.getQueryKey(queryKey);
+        return QueryKey.getQueryKey(queryKey, true);
     }
     
     /**

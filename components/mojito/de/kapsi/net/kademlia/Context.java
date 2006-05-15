@@ -47,6 +47,7 @@ import com.limegroup.gnutella.dht.statistics.DHTStats;
 import com.limegroup.gnutella.dht.statistics.DataBaseStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
+import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
 import de.kapsi.net.kademlia.db.Database;
@@ -74,7 +75,6 @@ import de.kapsi.net.kademlia.routing.PatriciaRouteTable;
 import de.kapsi.net.kademlia.routing.RandomBucketRefresher;
 import de.kapsi.net.kademlia.routing.RoutingTable;
 import de.kapsi.net.kademlia.security.CryptoHelper;
-import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.ContextSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.settings.RouteTableSettings;

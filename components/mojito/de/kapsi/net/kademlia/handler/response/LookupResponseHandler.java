@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.dht.statistics.FindNodeLookupStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.FindValueLookupStatisticContainer;
 import com.limegroup.gnutella.dht.statistics.SingleLookupStatisticContainer;
+import com.limegroup.gnutella.guess.QueryKey;
 
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
@@ -48,7 +49,6 @@ import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.ResponseMessage;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
-import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.KeyValueCollection;
 import de.kapsi.net.kademlia.util.NetworkUtils;

@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.statistics.NetworkStatisticContainer;
+import com.limegroup.gnutella.guess.QueryKey;
 
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -38,7 +39,6 @@ import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
 import de.kapsi.net.kademlia.messages.RequestMessage;
 import de.kapsi.net.kademlia.messages.request.StoreRequest;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
-import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.DatabaseSettings;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 

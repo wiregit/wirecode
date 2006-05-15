@@ -27,6 +27,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.guess.QueryKey;
+
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.handler.AbstractRequestHandler;
@@ -35,7 +37,6 @@ import de.kapsi.net.kademlia.messages.request.FindNodeRequest;
 import de.kapsi.net.kademlia.messages.request.LookupRequest;
 import de.kapsi.net.kademlia.messages.response.FindNodeResponse;
 import de.kapsi.net.kademlia.messages.response.FindValueResponse;
-import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.settings.KademliaSettings;
 import de.kapsi.net.kademlia.util.CollectionUtils;
 

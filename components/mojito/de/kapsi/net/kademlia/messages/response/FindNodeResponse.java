@@ -21,9 +21,10 @@ package de.kapsi.net.kademlia.messages.response;
 
 import java.util.List;
 
+import com.limegroup.gnutella.guess.QueryKey;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.security.QueryKey;
 
 public class FindNodeResponse extends LookupResponse {
     

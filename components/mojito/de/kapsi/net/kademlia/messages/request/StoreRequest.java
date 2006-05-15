@@ -21,10 +21,11 @@ package de.kapsi.net.kademlia.messages.request;
 
 import java.util.Collection;
 
+import com.limegroup.gnutella.guess.QueryKey;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.messages.RequestMessage;
-import de.kapsi.net.kademlia.security.QueryKey;
 
 public class StoreRequest extends RequestMessage {
 

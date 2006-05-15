@@ -28,6 +28,8 @@ import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.util.Arrays;
 
+import com.limegroup.gnutella.guess.QueryKey;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.KUID;
 import de.kapsi.net.kademlia.db.KeyValue;
@@ -43,7 +45,6 @@ import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
 import de.kapsi.net.kademlia.security.CryptoHelper;
-import de.kapsi.net.kademlia.security.QueryKey;
 
 public class MessageInputStream extends DataInputStream {
     
@@ -133,7 +134,7 @@ public class MessageInputStream extends DataInputStream {
         
         byte[] queryKey = new byte[length];
         readFully(queryKey, 0, queryKey.length);
-        return QueryKey.getQueryKey(queryKey);
+        return QueryKey.getQueryKey(queryKey, true);
     }
     
     private PingRequest readPing(int vendor, int version, 

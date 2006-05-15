@@ -22,8 +22,9 @@ package com.limegroup.gnutella.dht.tests;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
+import com.limegroup.gnutella.guess.QueryKey;
+
 import de.kapsi.net.kademlia.KUID;
-import de.kapsi.net.kademlia.security.QueryKey;
 import de.kapsi.net.kademlia.util.ArrayUtils;
 
 public class KUIDTest {

@@ -23,6 +23,8 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.List;
 
+import com.limegroup.gnutella.guess.QueryKey;
+
 import de.kapsi.net.kademlia.ContactNode;
 import de.kapsi.net.kademlia.Context;
 import de.kapsi.net.kademlia.KUID;
@@ -36,7 +38,6 @@ import de.kapsi.net.kademlia.messages.response.FindValueResponse;
 import de.kapsi.net.kademlia.messages.response.PingResponse;
 import de.kapsi.net.kademlia.messages.response.StatsResponse;
 import de.kapsi.net.kademlia.messages.response.StoreResponse;
-import de.kapsi.net.kademlia.security.QueryKey;
 
 public class MessageFactory {
     
