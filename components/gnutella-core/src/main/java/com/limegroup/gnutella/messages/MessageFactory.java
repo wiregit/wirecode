@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
+import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
@@ -339,14 +340,14 @@ public class MessageFactory {
     private static class VendorMessageParser implements MessageParser {
         public Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
-            return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload, network);
+            return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
         }
     }
     
     private static class VendorMessageStableParser implements MessageParser {
         public Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
-            return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload, network);
+            return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
         }
     }
     
