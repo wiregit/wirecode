@@ -469,12 +469,8 @@ public class Main {
         if (!c.isEmpty()) {
             StringBuffer buffer = new StringBuffer();
             buffer.append(key).append(" in ").append(time).append("ms\n");
-            for(Iterator it = c.iterator(); it.hasNext(); ) {
-                KeyValueCollection kvc = (KeyValueCollection)it.next();
-                buffer.append(kvc);
-                buffer.append("\n");
-            }
-            buffer.append("Locations: ").append(c.size());
+            buffer.append(c);
+            buffer.append("\n");
             System.out.println(buffer.toString());
         } else {
             System.out.println(key + " was not found after " + time + "ms");

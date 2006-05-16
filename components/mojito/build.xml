@@ -47,7 +47,7 @@
 				excludes="**/bin/**"
 				compress="false">
 			<manifest>
-			 	<attribute name="Main-Class" value="com.limegroup.gnutella.dht.tests.PlanetLab"/>
+			 	<attribute name="Main-Class" value="com.limegroup.mojito.tests.PlanetLab"/>
 			 	<attribute name="Class-Path" value=". commons-logging.jar log4j.jar core.jar"/>
 			</manifest>
 		</jar>

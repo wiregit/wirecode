@@ -306,6 +306,14 @@ public class DHT {
         return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
     }
     
+    /**
+     * Synchronous get method. Returns when the first value is found.
+     * 
+     * @param key The key to look for
+     * @param timeout The lookup timeout
+     * @return The first value found
+     * @throws IOException
+     */
     public Collection get(KUID key, long timeout) throws IOException {
         final Collection[] values = new Collection[] {
             Collections.EMPTY_LIST
@@ -313,7 +321,7 @@ public class DHT {
         
         synchronized (values) {
             context.get(key, new LookupAdapter() {
-                public void finish(KUID lookup, Collection c, long time) {
+                public void found(KUID lookup, Collection c, long time) {
                     values[0] = c;
                     synchronized (values) {
                         values.notify();
