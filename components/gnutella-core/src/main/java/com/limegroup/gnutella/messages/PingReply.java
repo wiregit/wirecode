@@ -33,7 +33,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends GnutellaMessage implements Serializable, IpPort {
+public class PingReply extends Message implements Serializable, IpPort {
     
     /**
      * The list of extra ip/ports contained in this reply.
@@ -676,7 +676,7 @@ public class PingReply extends GnutellaMessage implements Serializable, IpPort {
      */
     private PingReply(byte[] guid, byte ttl, byte hops, byte[] payload,
                       GGEP ggep, InetAddress ip) {
-        super(guid, GnutellaMessage.F_PING_REPLY, ttl, hops, payload.length);
+        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
         PAYLOAD = payload;
         PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));
         FILES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD,6));

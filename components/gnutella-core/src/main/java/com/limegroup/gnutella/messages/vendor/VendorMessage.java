@@ -8,7 +8,7 @@ import java.util.Arrays;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GnutellaMessage;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
@@ -17,7 +17,7 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
  *  This message is abstract because it provides common methods for ALL
  *  VendorMessages, but it makes no sense to instantiate a VendorMessage.
  */
-public abstract class VendorMessage extends GnutellaMessage {
+public abstract class VendorMessage extends Message {
 
     //Functional IDs defined by Gnutella VendorMessage protocol....
     protected static final int F_MESSAGES_SUPPORTED = 0;

@@ -21,7 +21,7 @@ import com.limegroup.gnutella.util.NameValue;
  * A Gnutella ping message.
  */
 
-public class PingRequest extends GnutellaMessage {
+public class PingRequest extends Message {
 
     /**
      * various flags related to the SCP ggep field
@@ -46,14 +46,14 @@ public class PingRequest extends GnutellaMessage {
      * Creates a normal ping from data read on the network
      */
     public PingRequest(byte[] guid, byte ttl, byte hops) {
-        super(guid, GnutellaMessage.F_PING, ttl, hops, 0);
+        super(guid, Message.F_PING, ttl, hops, 0);
     }
 
     /**
      * Creates an incoming group ping. Used only by boot-strap server
      */
     protected PingRequest(byte[] guid, byte ttl, byte hops, byte length) {
-        super(guid, GnutellaMessage.F_PING, ttl, hops, length);
+        super(guid, Message.F_PING, ttl, hops, length);
     }
 
     /**
@@ -62,7 +62,7 @@ public class PingRequest extends GnutellaMessage {
      * @param payload the headers etc. which the big pings contain.
      */
     public PingRequest(byte[] guid, byte ttl, byte hops, byte[] payload) {
-        super(guid, GnutellaMessage.F_PING, ttl, hops, payload.length);
+        super(guid, Message.F_PING, ttl, hops, payload.length);
         this.payload = payload;
     }
 

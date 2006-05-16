@@ -15,7 +15,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * A Gnutella push request, used to download files behind a firewall.
  */
 
-public class PushRequest extends GnutellaMessage implements Serializable {
+public class PushRequest extends Message implements Serializable {
     private static final int STANDARD_PAYLOAD_SIZE=26;
 
     public static final long FW_TRANS_INDEX = Integer.MAX_VALUE - 2;
@@ -31,7 +31,7 @@ public class PushRequest extends GnutellaMessage implements Serializable {
      */
     public PushRequest(byte[] guid, byte ttl, byte hops,
              byte[] payload, int network) throws BadPacketException {
-        super(guid, GnutellaMessage.F_PUSH, ttl, hops, payload.length, network);
+        super(guid, Message.F_PUSH, ttl, hops, payload.length, network);
         if (payload.length < STANDARD_PAYLOAD_SIZE) {
             ReceivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("Payload too small: "+payload.length);
@@ -72,7 +72,7 @@ public class PushRequest extends GnutellaMessage implements Serializable {
      */
     public PushRequest(byte[] guid, byte ttl,
             byte[] clientGUID, long index, byte[] ip, int port, int network) {
-    	super(guid, GnutellaMessage.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE,network);
+    	super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE,network);
     	
     	if(clientGUID.length != 16) {
 			throw new IllegalArgumentException("invalid guid length: "+

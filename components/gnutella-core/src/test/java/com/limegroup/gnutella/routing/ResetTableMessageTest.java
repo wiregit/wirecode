@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.GnutellaMessage;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.BaseTestCase;
 
@@ -46,7 +46,7 @@ public class ResetTableMessageTest extends BaseTestCase {
 
         //Read from bytes
         byte[] message=new byte[23+6];
-        message[16]=GnutellaMessage.F_ROUTE_TABLE_UPDATE;            //function code
+        message[16]=Message.F_ROUTE_TABLE_UPDATE;            //function code
         message[17]=(byte)3;                                 //TTL
         message[19]=(byte)6;                                 //payload length
         message[23+0]=(byte)RouteTableMessage.RESET_VARIANT; //reset variant

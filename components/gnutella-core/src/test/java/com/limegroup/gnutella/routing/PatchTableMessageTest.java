@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.GnutellaMessage;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.BaseTestCase;
 
@@ -58,7 +58,7 @@ public class PatchTableMessageTest extends BaseTestCase {
 
         //Read from bytes
         byte[] message=new byte[23+5+2];
-        message[16]=GnutellaMessage.F_ROUTE_TABLE_UPDATE;            //function code
+        message[16]=Message.F_ROUTE_TABLE_UPDATE;            //function code
         message[17]=(byte)1;                                 //TTL
         message[19]=(byte)7;                                 //payload length
         message[23+0]=(byte)RouteTableMessage.PATCH_VARIANT; //patch variant

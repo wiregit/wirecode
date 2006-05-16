@@ -50,7 +50,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * This class also encapsulates xml metadata.  See the description of the QHD 
  * below for more details.
  */
-public class QueryReply extends GnutellaMessage implements SecureMessage {
+public class QueryReply extends Message implements SecureMessage {
     //WARNING: see note in Message about IP addresses.
 
     // some parameters about xml, namely the max size of a xml collection string.
@@ -258,13 +258,13 @@ public class QueryReply extends GnutellaMessage implements SecureMessage {
     /** Creates a new query reply with data read from the network. */
     public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload) 
 		throws BadPacketException {
-    	this(guid,ttl,hops,payload,GnutellaMessage.N_UNKNOWN);
+    	this(guid,ttl,hops,payload,Message.N_UNKNOWN);
                                        
     }
     
     public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload,int network) 
     	throws BadPacketException{
-    	super(guid, GnutellaMessage.F_QUERY_REPLY, ttl, hops, payload.length,network);
+    	super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length,network);
         this._payload=payload;
         
 		if(!NetworkUtils.isValidPort(getPort())) {
@@ -302,7 +302,7 @@ public class QueryReply extends GnutellaMessage implements SecureMessage {
 	 */
     public QueryReply(byte[] guid, QueryReply reply){
         //call the super constructor with new GUID
-        super(guid, GnutellaMessage.F_QUERY_REPLY, reply.getTTL(), reply.getHops(),
+        super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(),
 			  reply.getLength());
         //set the payload field
         this._payload = reply._payload;
@@ -320,7 +320,7 @@ public class QueryReply extends GnutellaMessage implements SecureMessage {
              boolean supportsChat, boolean supportsBH,
              boolean isMulticastReply, boolean supportsFWTransfer, 
              Set proxies) {
-        super(guid, GnutellaMessage.F_QUERY_REPLY, ttl, (byte)0,
+        super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
 

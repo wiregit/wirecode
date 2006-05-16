@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -45,7 +46,7 @@ import com.limegroup.gnutella.xml.SchemaNotFoundException;
  * from this LimeWire.  These requeries have specially marked GUIDs
  * that allow us to identify them as requeries.
  */
-public class QueryRequest extends GnutellaMessage implements Serializable{
+public class QueryRequest extends Message implements Serializable{
 
     // these specs may seem backwards, but they are not - ByteOrder.short2leb
     // puts the low-order byte first, so over the network 0x0080 would look
@@ -207,7 +208,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
                                 DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-                                GnutellaMessage.N_UNKNOWN, false, 0, false, 0);
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -229,7 +230,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
                                 DEFAULT_URN_QUERY, "",  UrnType.SHA1_SET, 
                                 sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-                                GnutellaMessage.N_UNKNOWN, false, 0, false, 0);
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 	/**
@@ -256,7 +257,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-                                Message.N_UNKNOWN, false, 0, false, 0);
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -284,7 +285,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-                                Message.N_UNKNOWN, false, 0, false, 0);
+								Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -312,7 +313,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-                                Message.N_UNKNOWN, false, 0, false, 0);
+								Message.N_UNKNOWN, false, 0, false, 0);
 	}
 	
 	/**
@@ -332,7 +333,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
                                 DEFAULT_URN_QUERY, "",
 	                            urnTypeSet, urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
-                                Message.N_UNKNOWN, false, 0, false, 0);
+	                            Message.N_UNKNOWN, false, 0, false, 0);
     }
 	    
 	
@@ -744,7 +745,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
-                                GnutellaMessage.N_UNKNOWN, false, 0, false, 0);
+								Message.N_UNKNOWN, false, 0, false, 0);
     }
 
 
@@ -774,7 +775,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
                                 "", UrnType.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
-                                Message.N_UNKNOWN, false, 0, false, 0);
+								Message.N_UNKNOWN, false, 0, false, 0);
     }
 
 
@@ -844,7 +845,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
 				FileManager.INDEXING_QUERY, "", 
                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
                 !RouterService.acceptedIncomingConnection(), 
-                Message.N_UNKNOWN, false, 0, false, 0);
+				Message.N_UNKNOWN, false, 0, false, 0);
 	}
 	
 
@@ -1071,7 +1072,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
         // don't worry about getting the length right at first
-        super(guid, GnutellaMessage.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
+        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
 		if((query == null || query.length() == 0) &&
 		   (richQuery == null || richQuery.length() == 0) &&
@@ -1276,7 +1277,7 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
     private QueryRequest(
       byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
 		throws BadPacketException {
-        super(guid, GnutellaMessage.F_QUERY, ttl, hops, payload.length, network);
+        super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
 		if(payload == null) {
 			throw new BadPacketException("no payload");
 		}
@@ -1291,9 +1292,9 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
             ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
 			short sp = ByteOrder.leb2short(bais);
 			tempMinSpeed = ByteOrder.ushort2int(sp);
-            tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8");
+            tempQuery = new String(readNullTerminatedBytes(bais), "UTF-8");
             // handle extensions, which include rich query and URN stuff
-            byte[] extsBytes = super.readNullTerminatedBytes(bais);
+            byte[] extsBytes = readNullTerminatedBytes(bais);
             HUGEExtension huge = new HUGEExtension(extsBytes);
             GGEP ggep = huge.getGGEP();
 
@@ -1692,6 +1693,69 @@ public class QueryRequest extends GnutellaMessage implements Serializable{
         return originated;
     }
 
+    /**
+     * @effects Writes given extension string to given stream, adding
+     * delimiter if necessary, reporting whether next call should add
+     * delimiter. ext may be null or zero-length, in which case this is noop
+     */
+    protected boolean writeGemExtension(OutputStream os, 
+                                        boolean addPrefixDelimiter, 
+                                        byte[] extBytes) throws IOException {
+        if (extBytes == null || (extBytes.length == 0)) {
+            return addPrefixDelimiter;
+        }
+        if(addPrefixDelimiter) {
+            os.write(0x1c);
+        }
+        os.write(extBytes);
+        return true; // any subsequent extensions should have delimiter 
+    }
+    
+     /**
+     * @effects Writes given extension string to given stream, adding
+     * delimiter if necessary, reporting whether next call should add
+     * delimiter. ext may be null or zero-length, in which case this is noop
+     */
+    protected boolean writeGemExtension(OutputStream os, 
+                                        boolean addPrefixDelimiter, 
+                                        String ext) throws IOException {
+        if (ext != null)
+            return writeGemExtension(os, addPrefixDelimiter, ext.getBytes());
+        else
+            return writeGemExtension(os, addPrefixDelimiter, new byte[0]);
+    }
+    
+    /**
+     * @effects Writes each extension string in exts to given stream,
+     * adding delimiters as necessary. exts may be null or empty, in
+     *  which case this is noop
+     */
+    protected boolean writeGemExtensions(OutputStream os, 
+                                         boolean addPrefixDelimiter, 
+                                         Iterator iter) throws IOException {
+        if (iter == null) {
+            return addPrefixDelimiter;
+        }
+        while(iter.hasNext()) {
+            addPrefixDelimiter = writeGemExtension(os, addPrefixDelimiter, 
+                                                   iter.next().toString());
+        }
+        return addPrefixDelimiter; // will be true is anything at all was written 
+    }
+    
+    /**
+     * @effects utility function to read null-terminated byte[] from stream
+     */
+    protected byte[] readNullTerminatedBytes(InputStream is) 
+        throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int i;
+        while ((is.available()>0)&&(i=is.read())!=0) {
+            baos.write(i);
+        }
+        return baos.toByteArray();
+    }
+    
 	public int hashCode() {
 		if(_hashCode == 0) {
 			int result = 17;
