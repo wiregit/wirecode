@@ -120,6 +120,7 @@ public class TrackerManager {
 			public void run() {
 				if (LOG.isDebugEnabled())
 					LOG.debug("announce thread for " + t.toString());
+				torrent.setScraping();
 				announceBlocking(t, Tracker.EVENT_NONE);
 			}
 		};

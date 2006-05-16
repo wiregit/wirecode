@@ -20,6 +20,7 @@ import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
+import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.ThreadPool;
@@ -43,6 +44,7 @@ public class ManagedTorrent {
 	static final int STOPPED = 9;
 	static final int DISK_PROBLEM = 10;
 	static final int TRACKER_FAILURE = 11;
+	static final int SCRAPING = 12; //scraping == requesting from tracker
 	
 	private static final ThreadPool INVOKER = 
 		new NIODispatcherThreadPool();
@@ -114,7 +116,7 @@ public class ManagedTorrent {
 	/** 
 	 * The current state of this torrent.
 	 */
-	private volatile int _state = QUEUED;
+	private IntWrapper _state = new IntWrapper(QUEUED);
 	
 	/**
 	 * A listener for the life of this torrent, if any.
@@ -142,7 +144,7 @@ public class ManagedTorrent {
 		_manager = manager;
 		_folder = info.getVerifyingFolder();
 		if (_folder.isVerifying())
-			_state = VERIFYING;
+			_state.setInt(VERIFYING);
 		_connections = Collections.synchronizedList(new ArrayList());
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
@@ -163,7 +165,18 @@ public class ManagedTorrent {
 	}
 	
 	void setState(int newState) {
-		_state = newState;
+		_state.setInt(newState);
+	}
+	
+	/**
+	 * if the torrent is currently waiting for the next tracker request,
+	 * tell it that the request has started.
+	 */
+	void setScraping() {
+		synchronized(_state) {
+			if (_state.getInt() == WAITING_FOR_TRACKER)
+				_state.setInt(SCRAPING);
+		}
 	}
 	
 	/**
@@ -198,15 +211,22 @@ public class ManagedTorrent {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requesting torrent start", new Exception());
 		
+		if (_state.getInt() != QUEUED)
+			throw new IllegalStateException();
+		
 		diskInvoker.invokeLater(new Runnable() {
 			public void run() {
+				
+				if (_state.getInt() != QUEUED) // something happened, do not start.
+					return;
 				
 				LOG.debug("executing torrent start");
 				
 				initializeTorrent();
 				initializeFolder();
 				
-				if (_state == SEEDING || _state == VERIFYING) 
+				int state = _state.getInt();
+				if (state == SEEDING || state == VERIFYING) 
 					return;
 				
 				startConnecting();
@@ -215,13 +235,21 @@ public class ManagedTorrent {
 	}
 	
 	private void startConnecting() {
-		
-		// kick off connectors if we already have some addresses
-		if (_peers.size() > 0) {
-			_state = CONNECTING;
+		boolean shouldFetch = false;
+		synchronized(_state) {
+			if (_state.getInt() != VERIFYING && _state.getInt() != QUEUED)
+				throw new IllegalArgumentException("cannot start connecting");
+			
+			// kick off connectors if we already have some addresses
+			if (_peers.size() > 0) {
+				_state.setInt(CONNECTING);
+				shouldFetch = true;
+			} else
+				_state.setInt(SCRAPING);
+		}
+
+		if (shouldFetch)
 			_connectionFetcher.fetch();
-		} else
-			_state = WAITING_FOR_TRACKER;
 		
 		// connect to tracker(s)
 		trackerManager.announceStart();
@@ -234,13 +262,11 @@ public class ManagedTorrent {
 	 * Stops the torrent
 	 */
 	public void stop() {
-		if (LOG.isDebugEnabled())
-			LOG.debug("requested torrent stop", new Exception());
 				
 		if (!isActive())
-			return;
+			throw new IllegalStateException("torrent cannot be stopped");
 		
-		_state = STOPPED;
+		_state.setInt(STOPPED);
 		
 		stopImpl();
 	}
@@ -250,9 +276,11 @@ public class ManagedTorrent {
 	 * and terminates it.
 	 */
 	public void diskExceptionHappened() {
-		if (_state == DISK_PROBLEM)
-			return;
-		_state = DISK_PROBLEM;
+		synchronized(_state) {
+			if (_state.getInt() == DISK_PROBLEM)
+				return;
+			_state.setInt(DISK_PROBLEM);
+		}
 		stopImpl();
 	}
 	
@@ -260,6 +288,9 @@ public class ManagedTorrent {
 	 * Performs the actual stop.  It does not modify the torrent state.
 	 */
 	private void stopImpl() {
+		
+		if (!stopState())
+			throw new IllegalArgumentException("stopping in wrong state "+_state);
 		
 		synchronized(lifeCycleListeners) {
 			for (Iterator iter = lifeCycleListeners.iterator();iter.hasNext();)
@@ -298,34 +329,52 @@ public class ManagedTorrent {
 		
 		LOG.debug("Torrent stopped!");
 	}
+	
+	/**
+	 * @return if the current state is a stopped state.
+	 */
+	private boolean stopState() {
+		switch(_state.getInt()) {
+			case PAUSED:
+			case STOPPED:
+			case DISK_PROBLEM:
+			case TRACKER_FAILURE:
+				return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Forces this ManagedTorrent to make way for other ManagedTorrents, if
 	 * there are any
+	 * 
+	 * The torrent must be active or queued.
 	 */
 	public void pause() {
-		if (_state == PAUSED)
-			return;
-		boolean wasActive = isActive();
-		_state = PAUSED;
+		boolean wasActive = false;
+		synchronized(_state) {
+			if (!isActive() && _state.getInt() != QUEUED)
+				throw new IllegalStateException("torrent not pausable");
+			
+			wasActive = isActive();
+			_state.setInt(PAUSED);
+		}
 		if (wasActive)
 			stopImpl();
 	}
 
 	/**
 	 * Resumes the torrent, if there is a free slot
+	 * 
+	 * The torrent must be paused or stopped.
 	 */
 	public boolean resume() {
-		boolean canResume = false;
-		switch(_state) {
-		case PAUSED :
-		case STOPPED :
-			canResume = true;
+		synchronized(_state) {
+			if (_state.getInt() != PAUSED && _state.getInt() != STOPPED)
+				throw new IllegalStateException("torrent not resumable");
+			
+			_state.setInt(QUEUED);
 		}
-		if (!canResume)
-			return false;
-		
-		_state = QUEUED;
 		_manager.wakeUp(ManagedTorrent.this);
 		return true;
 	}
@@ -338,7 +387,8 @@ public class ManagedTorrent {
 			_peers.add(ep);
 		}
 		removeConnection(btc);
-		if (_state == DOWNLOADING || _state == CONNECTING)
+		int state = _state.getInt();
+		if (state == DOWNLOADING || state == CONNECTING)
 			_connectionFetcher.fetch();
 	}
 
@@ -368,7 +418,7 @@ public class ManagedTorrent {
 			if (LOG.isDebugEnabled()) 
 				LOG.debug("unrecoverable error", ioe);
 			
-			_state = DISK_PROBLEM;
+			_state.setInt(DISK_PROBLEM);
 			return;
 		} 
 		
@@ -376,13 +426,13 @@ public class ManagedTorrent {
 		if (_folder.isComplete())
 			completeTorrentDownload();
 		else if (_folder.isVerifying())
-			_state = VERIFYING;
+			_state.setInt(VERIFYING);
 	}
 
 	void verificationComplete() {
 		diskInvoker.invokeLater(new Runnable() {
 			public void run() {
-				if (_state == VERIFYING) 
+				if (_state.getInt() == VERIFYING) 
 					startConnecting();
 			}
 		});
@@ -445,7 +495,7 @@ public class ManagedTorrent {
 	}
 
 	int getState() {
-		return _state;
+		return _state.getInt();
 	}
 	
 	/**
@@ -463,8 +513,10 @@ public class ManagedTorrent {
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return false;
 		if (_peers.add(to)) {
-			if (_state == WAITING_FOR_TRACKER)
-				_state = CONNECTING;
+			synchronized(_state) {
+				if (_state.getInt() == SCRAPING)
+					_state.setInt(CONNECTING);
+			}
 			_connectionFetcher.fetch();
 			return true;
 		}
@@ -477,10 +529,12 @@ public class ManagedTorrent {
 
 	
 	void stopVoluntarily() {
-		if (_state == SEEDING)
-			_state = STOPPED;
-		else
-			_state = TRACKER_FAILURE;
+		synchronized(_state) {
+			if (_state.getInt() == SEEDING)
+				_state.setInt(STOPPED);
+			else
+				_state.setInt(TRACKER_FAILURE);
+		}
 		stopImpl();
 	}
 	
@@ -501,20 +555,25 @@ public class ManagedTorrent {
 	public void addConnection(final BTConnection btc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add connection " + btc.toString());
-		// this check prevents a few exceptions that may be thrown if a
-		// connection initialization is completed after we have already stopped
-		// happens especially when a user quits a torrent manually.
-		if (_state == CONNECTING || 
-				_state == DOWNLOADING) {
-			
-			_connections.add(btc);
-			
-			if (_state == CONNECTING)
-				_state = DOWNLOADING;
-			
+		
+		// This check prevents a few exceptions that may be thrown if a
+		// connection initialization is completed after we have already stopped.
+		// May happen when a user quits a torrent manually.
+		boolean shouldAdd = false;
+		synchronized(_state) {
+			if (_state.getInt() == CONNECTING || 
+					_state.getInt() == DOWNLOADING) {
+				
+				if (_state.getInt() == CONNECTING)
+					_state.setInt(DOWNLOADING);
+				shouldAdd = true;
+			}
+		}
+		
+		if (shouldAdd) {
+				_connections.add(btc);
 			if (LOG.isDebugEnabled())
 				LOG.debug("added connection " + btc.toString());
-			
 		} else
 			btc.close();
 	}
@@ -528,20 +587,23 @@ public class ManagedTorrent {
 		_connections.remove(btc);
 		if (btc.isInterested() && !btc.isChoked())
 			rechoke();
-		if (_connections.isEmpty() && _state == DOWNLOADING) {
-			if (_peers.isEmpty())
-				_state = WAITING_FOR_TRACKER;
-			else
-				_state = CONNECTING;
+		boolean connectionsEmpty = _connections.isEmpty();
+		boolean peersEmpty = _peers.isEmpty();
+		synchronized(_state) {
+			if (connectionsEmpty && _state.getInt() == DOWNLOADING) {
+				if (peersEmpty)
+					_state.setInt(WAITING_FOR_TRACKER);
+				else
+					_state.setInt(CONNECTING);
+			}
 		}
-			
 	}
 
 	/**
 	 * saves the complete files to the shared folder
 	 */
 	private void completeTorrentDownload() {
-		_state = SEEDING;
+		_state.setInt(SEEDING);
 		if (_saved)
 			return;
 
@@ -590,7 +652,7 @@ public class ManagedTorrent {
 		_folder.close();
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder closed");
-		_state = SAVING;
+		_state.setInt(SAVING);
 		boolean diskProblem = !_info.moveToCompleteFolder();
 		if (LOG.isDebugEnabled())
 			LOG.debug("could not save: " + diskProblem);
@@ -610,10 +672,10 @@ public class ManagedTorrent {
 			LOG.debug("folder opened");
 
 		if (diskProblem) {
-			_state = DISK_PROBLEM;
+			_state.setInt(DISK_PROBLEM);
 			stopImpl();
 		} else
-			_state = SEEDING; 
+			_state.setInt(SEEDING); 
 
 		// remember attempt to save the file
 		_saved = true;
@@ -703,7 +765,7 @@ public class ManagedTorrent {
 	 * @return true if paused
 	 */
 	public boolean isPaused() {
-		return _state == PAUSED;
+		return _state.getInt() == PAUSED;
 	}
 
 	public boolean equals(Object o) {
@@ -723,11 +785,12 @@ public class ManagedTorrent {
 	}
 
 	public boolean isActive() {
-		switch(_state) {
+		switch(_state.getInt()) {
 		case CONNECTING:
 		case DOWNLOADING:
 		case SEEDING: 
 		case WAITING_FOR_TRACKER:
+		case SCRAPING:
 		case VERIFYING:
 		case SAVING:
 			return true;

@@ -131,6 +131,8 @@ public class BTDownloader implements Downloader, TorrentLifecycleListener {
 			return DISK_PROBLEM;
 		case ManagedTorrent.TRACKER_FAILURE:
 			return WAITING_FOR_USER; // let the user trigger a scrape
+		case ManagedTorrent.SCRAPING:
+			return ITERATIVE_GUESSING; // bad name but practically the same
 		}
 		throw new IllegalStateException("unknown torrent state");
 	}
