@@ -3,18 +3,80 @@ package com.limegroup.gnutella.messages;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 import com.limegroup.gnutella.util.DataUtils;
 
+/**
+ * Factory to turn binary input as read from Network to Message
+ * Objects.
+ */
 public class MessageFactory {
-
+    
+    private static final Log LOG = LogFactory.getLog(MessageFactory.class);
+    
+    private static final Map PARSERS = new HashMap();
+    
+    /**
+     * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
+     * the TTL is set to SOFT_MAX-hops.
+     */
+    public static final byte SOFT_MAX 
+        = ConnectionSettings.SOFT_MAX.getValue();
+    
+    static {
+        setParser(Message.F_PING, new PingRequestParser());
+        setParser(Message.F_PING_REPLY, new PingReplyParser());
+        setParser(Message.F_QUERY, new QueryRequestParser());
+        setParser(Message.F_QUERY_REPLY, new QueryReplyParser());
+        setParser(Message.F_PUSH, new PushRequestParser());
+        setParser(Message.F_ROUTE_TABLE_UPDATE, new RouteTableUpdateParser());
+        setParser(Message.F_VENDOR_MESSAGE, new VendorMessageParser());
+        setParser(Message.F_VENDOR_MESSAGE_STABLE, new VendorMessageStableParser());
+        setParser(Message.F_UDP_CONNECTION, new UDPConnectionParser());
+    }
+    
+    /**
+     * Registers a MessageParser under the provided functionId.
+     * 
+     * @param functionId The ID of the function (MessageParser)
+     * @param parser The MessageParser
+     */
+    public static void setParser(int functionId, MessageParser parser) {
+        if (parser == null) {
+            throw new NullPointerException("MessageParser is null");
+        }
+        
+        Integer func = new Integer(functionId);
+        if (PARSERS.containsKey(func) && LOG.isErrorEnabled()) {
+            Class clazz = PARSERS.get(func).getClass();
+            LOG.error("There is already a MessageParser of type " 
+                    + clazz + " registered for functionId " + func);
+        }
+        
+        PARSERS.put(func, parser);
+    }
+    
+    /**
+     * Returns a MessageParser for the provided functionId or null
+     * if no such MessageParser is registered.
+     */
+    public static MessageParser getParser(int functionId) {
+        return (MessageParser)PARSERS.get(new Integer(functionId));
+    }
+    
     /**
      * Reads a Gnutella message from the specified input stream. The returned
      * message can be any one of the recognized Gnutella message, such as
@@ -30,8 +92,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in) throws BadPacketException,
             IOException {
-        return MessageFactory.read(in, new byte[23], Message.N_UNKNOWN,
-                Message.SOFT_MAX);
+        return MessageFactory.read(in, new byte[23], Message.N_UNKNOWN, SOFT_MAX);
     }
 
     /**
@@ -49,8 +110,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in, byte softMax)
             throws BadPacketException, IOException {
-        return MessageFactory
-                .read(in, new byte[23], Message.N_UNKNOWN, softMax);
+        return MessageFactory.read(in, new byte[23], Message.N_UNKNOWN, softMax);
     }
 
     /**
@@ -68,7 +128,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in, int network)
             throws BadPacketException, IOException {
-        return MessageFactory.read(in, new byte[23], network, Message.SOFT_MAX);
+        return MessageFactory.read(in, new byte[23], network, SOFT_MAX);
     }
 
     /**
@@ -90,7 +150,7 @@ public class MessageFactory {
      */
     public static Message read(InputStream in, int network, byte[] buf)
             throws BadPacketException, IOException {
-        return MessageFactory.read(in, buf, network, Message.SOFT_MAX);
+        return MessageFactory.read(in, buf, network, SOFT_MAX);
     }
 
     /**
@@ -203,52 +263,99 @@ public class MessageFactory {
 
         // Delayed GUID allocation
         byte[] guid = new byte[16];
-        for (int i = 0; i < 16; i++)
-            // TODO3: can optimize
-            guid[i] = header[i];
-
+        System.arraycopy(header, 0, guid, 0, guid.length /* 16 */);
+        
         // Dispatch based on opcode.
-        int length = payload.length;
-        switch (func) {
-        // TODO: all the length checks should be encapsulated in the various
-        // constructors; Message shouldn't know anything about the various
-        // messages except for their function codes. I've started this
-        // refactoring with PushRequest and PingReply.
-        case Message.F_PING:
-            if (length > 0) // Big ping
+        MessageParser parser = getParser(func);
+        if (parser == null) {
+            ReceivedErrorStat.INVALID_CODE.incrementStat();
+            throw new BadPacketException("Unrecognized function code: " + func);
+        }
+        
+        return parser.parse(guid, ttl, hops, payload, network);
+    }
+    
+    public static interface MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException;
+    }
+    
+    private static class PingRequestParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
+            if (payload.length > 0) { // Big ping
                 return new PingRequest(guid, ttl, hops, payload);
-            return new PingRequest(guid, ttl, hops);
-
-        case Message.F_PING_REPLY:
+            } else {
+                return new PingRequest(guid, ttl, hops);
+            }
+        }
+    }
+    
+    private static class PingReplyParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
             return PingReply.createFromNetwork(guid, ttl, hops, payload);
-        case Message.F_QUERY:
-            if (length < 3)
-                break;
-            return QueryRequest.createNetworkQuery(guid, ttl, hops, payload,
-                    network);
-        case Message.F_QUERY_REPLY:
-            if (length < 26)
-                break;
+        }
+    }
+    
+    private static class QueryRequestParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
+            if (payload.length < 3) {
+                throw new BadPacketException("Query request too short: " + payload.length);
+            }
+            
+            return QueryRequest.createNetworkQuery(guid, ttl, hops, payload, network);
+        }
+    }
+    
+    private static class QueryReplyParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
+            if (payload.length < 26) {
+                throw new BadPacketException("Query reply too short: " + payload.length);
+            }
+            
             return new QueryReply(guid, ttl, hops, payload, network);
-        case Message.F_PUSH:
+        }
+    }
+    
+    private static class PushRequestParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
             return new PushRequest(guid, ttl, hops, payload, network);
-        case Message.F_ROUTE_TABLE_UPDATE:
+        }
+    }
+    
+    private static class RouteTableUpdateParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
             // The exact subclass of RouteTableMessage returned depends on
             // the variant stored within the payload. So leave it to the
             // static read(..) method of RouteTableMessage to actually call
             // the right constructor.
             return RouteTableMessage.read(guid, ttl, hops, payload);
-        case Message.F_VENDOR_MESSAGE:
-            return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload,
-                    network);
-        case Message.F_VENDOR_MESSAGE_STABLE:
-            return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload,
-                    network);
-        case Message.F_UDP_CONNECTION:
+        }
+    }
+    
+    private static class VendorMessageParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
+            return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload, network);
+        }
+    }
+    
+    private static class VendorMessageStableParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
+            return VendorMessage.deriveVendorMessage(guid, ttl, hops, payload, network);
+        }
+    }
+    
+    private static class UDPConnectionParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
             return UDPConnectionMessage.createMessage(guid, ttl, hops, payload);
         }
-
-        ReceivedErrorStat.INVALID_CODE.incrementStat();
-        throw new BadPacketException("Unrecognized function code: " + func);
     }
 }
