@@ -196,6 +196,10 @@ public class CoWList implements List {
         return l.toArray(arg0);
     }
     
+    public String toString() {
+        return l.toString();
+    }
+    
     private static class ReflectiveCreator implements ListCreator {
         private final Class listType;
         public ReflectiveCreator(Class c) {

@@ -278,12 +278,31 @@ public class FileDesc implements FileDetails {
     public List getLimeXMLDocuments() {
         return _limeXMLDocs;
     }
-	
-	public LimeXMLDocument getXMLDocument() {
+    
+    /**
+     * Returns the first LimeXMLDocument or null if the 
+     * document List is empty.
+     */
+    public LimeXMLDocument getXMLDocument() {
         List docs = getLimeXMLDocuments();
-		return docs.isEmpty() ? null 
-			: (LimeXMLDocument)docs.get(0);
-	}
+                return docs.isEmpty() ? null 
+                        : (LimeXMLDocument)docs.get(0);
+    }
+    
+    /**
+     * Returns a LimeXMLDocument whose schema URI is equal to
+     * the passed schema URI or null if no such LimeXMLDocument
+     * exists.
+     */
+    public LimeXMLDocument getXMLDocument(String schemaURI) {
+        for(Iterator it = getLimeXMLDocuments().iterator(); it.hasNext(); ) {
+            LimeXMLDocument doc = (LimeXMLDocument)it.next();
+            if (doc.getSchemaURI().equalsIgnoreCase(schemaURI)) {
+                return doc;
+            }
+        }
+        return null;
+    }
     
     /**
      * Determines if a license exists on this FileDesc.
