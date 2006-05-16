@@ -3,7 +3,6 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
@@ -11,13 +10,6 @@ import java.util.Iterator;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
-import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
-import com.limegroup.gnutella.util.DataUtils;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses
@@ -46,18 +38,10 @@ public abstract class Message implements Serializable, Comparable {
     public static final int N_UDP = 2;
     public static final int N_MULTICAST = 3;
 
-    /**
-     * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
-     * the TTL is set to SOFT_MAX-hops.
-     */
-    public static final byte SOFT_MAX = 
-        ConnectionSettings.SOFT_MAX.getValue();
-
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     public static byte[] makeGuid() {
         return GUID.makeGuid();
     }
-
 
     ////////////////////////// Instance Data //////////////////////
 
@@ -152,8 +136,7 @@ public abstract class Message implements Serializable, Comparable {
      * Writes a message out, using the buffer as the temporary header.
      */
     public void write(OutputStream out, byte[] buf) throws IOException {
-        for (int i=0; i<16; i++) //TODO3: can optimize
-            buf[i]=guid[i];
+        System.arraycopy(guid, 0, buf, 0, guid.length /* 16 */);
         buf[16]=func;
         buf[17]=ttl;
         buf[18]=hops;
