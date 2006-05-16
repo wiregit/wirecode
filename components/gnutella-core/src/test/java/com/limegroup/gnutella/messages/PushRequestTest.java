@@ -41,7 +41,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void testBigPush() throws Exception {        
         byte[] bytes=new byte[23+26+10];
-        bytes[16]=Message.F_PUSH;
+        bytes[16]=GnutellaMessage.F_PUSH;
         bytes[17]=(byte)2;     //ttl .. ttl + hops must be <= 3
         bytes[18]=(byte)1;     //hops
         bytes[19]=(byte)26+10; //payload length
@@ -57,7 +57,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
             pr.getTotalLength() );
         assertEquals("unexpected length", bytes.length-23,
             pr.getLength());
-        assertEquals("unexpected func", Message.F_PUSH, pr.getFunc());
+        assertEquals("unexpected func", GnutellaMessage.F_PUSH, pr.getFunc());
         assertEquals("unexpected hops", (byte)1, pr.getHops());
         assertEquals("unexpected ttl", (byte)2, pr.getTTL());
 
@@ -89,7 +89,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void testPushTooSmall() throws Exception {
         byte[] bytes=new byte[23+25];  //one byte too small
-        bytes[16]=Message.F_PUSH;
+        bytes[16]=GnutellaMessage.F_PUSH;
         bytes[17]=(byte)3;     //hops
         bytes[18]=(byte)3;     //ttl
         bytes[19]=(byte)25;    //payload length

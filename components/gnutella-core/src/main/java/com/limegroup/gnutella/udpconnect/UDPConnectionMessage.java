@@ -6,12 +6,13 @@ import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.GnutellaMessage;
 import com.limegroup.gnutella.messages.Message;
 
 /** Outline of message to allow a reliable udp protocol to be built on top of
  *  Gnutella messages.
  */
-public abstract class UDPConnectionMessage extends Message {
+public abstract class UDPConnectionMessage extends GnutellaMessage {
 
     // Referenced from message
     // public static final byte F_UDP_CONNECTION = (byte)0x41;

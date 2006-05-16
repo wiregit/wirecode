@@ -37,15 +37,15 @@ public class MessageFactory {
         = ConnectionSettings.SOFT_MAX.getValue();
     
     static {
-        setParser(Message.F_PING, new PingRequestParser());
-        setParser(Message.F_PING_REPLY, new PingReplyParser());
-        setParser(Message.F_QUERY, new QueryRequestParser());
-        setParser(Message.F_QUERY_REPLY, new QueryReplyParser());
-        setParser(Message.F_PUSH, new PushRequestParser());
-        setParser(Message.F_ROUTE_TABLE_UPDATE, new RouteTableUpdateParser());
-        setParser(Message.F_VENDOR_MESSAGE, new VendorMessageParser());
-        setParser(Message.F_VENDOR_MESSAGE_STABLE, new VendorMessageStableParser());
-        setParser(Message.F_UDP_CONNECTION, new UDPConnectionParser());
+        setParser(GnutellaMessage.F_PING, new PingRequestParser());
+        setParser(GnutellaMessage.F_PING_REPLY, new PingReplyParser());
+        setParser(GnutellaMessage.F_QUERY, new QueryRequestParser());
+        setParser(GnutellaMessage.F_QUERY_REPLY, new QueryReplyParser());
+        setParser(GnutellaMessage.F_PUSH, new PushRequestParser());
+        setParser(GnutellaMessage.F_ROUTE_TABLE_UPDATE, new RouteTableUpdateParser());
+        setParser(GnutellaMessage.F_VENDOR_MESSAGE, new VendorMessageParser());
+        setParser(GnutellaMessage.F_VENDOR_MESSAGE_STABLE, new VendorMessageStableParser());
+        setParser(GnutellaMessage.F_UDP_CONNECTION, new UDPConnectionParser());
     }
     
     /**
@@ -244,8 +244,8 @@ public class MessageFactory {
         } else if (ttl < 0) {
             ReceivedErrorStat.INVALID_TTL.incrementStat();
             throw new BadPacketException("Negative (or very large) TTL");
-        } else if ((hops > softMax) && (func != Message.F_QUERY_REPLY)
-                && (func != Message.F_PING_REPLY)) {
+        } else if ((hops > softMax) && (func != GnutellaMessage.F_QUERY_REPLY)
+                && (func != GnutellaMessage.F_PING_REPLY)) {
             ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
             throw new BadPacketException("func: " + func + ", ttl: " + ttl
                     + ", hops: " + hops);
@@ -253,8 +253,8 @@ public class MessageFactory {
             ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
             throw new BadPacketException(
                     "TTL+hops exceeds hard max; probably spam");
-        } else if ((ttl + hops > softMax) && (func != Message.F_QUERY_REPLY)
-                && (func != Message.F_PING_REPLY)) {
+        } else if ((ttl + hops > softMax) && (func != GnutellaMessage.F_QUERY_REPLY)
+                && (func != GnutellaMessage.F_PING_REPLY)) {
             ttl = (byte) (softMax - hops); // overzealous client;
             // readjust accordingly
             Assert.that(ttl >= 0); // should hold since hops<=softMax ==>

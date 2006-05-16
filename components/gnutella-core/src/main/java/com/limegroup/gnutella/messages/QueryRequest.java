@@ -45,7 +45,7 @@ import com.limegroup.gnutella.xml.SchemaNotFoundException;
  * from this LimeWire.  These requeries have specially marked GUIDs
  * that allow us to identify them as requeries.
  */
-public class QueryRequest extends Message implements Serializable{
+public class QueryRequest extends GnutellaMessage implements Serializable{
 
     // these specs may seem backwards, but they are not - ByteOrder.short2leb
     // puts the low-order byte first, so over the network 0x0080 would look
@@ -207,7 +207,7 @@ public class QueryRequest extends Message implements Serializable{
                                 DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                GnutellaMessage.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -229,7 +229,7 @@ public class QueryRequest extends Message implements Serializable{
                                 DEFAULT_URN_QUERY, "",  UrnType.SHA1_SET, 
                                 sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                GnutellaMessage.N_UNKNOWN, false, 0, false, 0);
 
 	}
 	/**
@@ -256,7 +256,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -284,7 +284,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Message.N_UNKNOWN, false, 0, false, 0);
 
 	}
 
@@ -312,7 +312,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Message.N_UNKNOWN, false, 0, false, 0);
 	}
 	
 	/**
@@ -332,7 +332,7 @@ public class QueryRequest extends Message implements Serializable{
                                 DEFAULT_URN_QUERY, "",
 	                            urnTypeSet, urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
-	                            Message.N_UNKNOWN, false, 0, false, 0);
+                                Message.N_UNKNOWN, false, 0, false, 0);
     }
 	    
 	
@@ -744,7 +744,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                GnutellaMessage.N_UNKNOWN, false, 0, false, 0);
     }
 
 
@@ -774,7 +774,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
                                 "", UrnType.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0, false, 0);
+                                Message.N_UNKNOWN, false, 0, false, 0);
     }
 
 
@@ -844,7 +844,7 @@ public class QueryRequest extends Message implements Serializable{
 				FileManager.INDEXING_QUERY, "", 
                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
                 !RouterService.acceptedIncomingConnection(), 
-				Message.N_UNKNOWN, false, 0, false, 0);
+                Message.N_UNKNOWN, false, 0, false, 0);
 	}
 	
 
@@ -1071,7 +1071,7 @@ public class QueryRequest extends Message implements Serializable{
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
         // don't worry about getting the length right at first
-        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
+        super(guid, GnutellaMessage.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
 		if((query == null || query.length() == 0) &&
 		   (richQuery == null || richQuery.length() == 0) &&
@@ -1276,7 +1276,7 @@ public class QueryRequest extends Message implements Serializable{
     private QueryRequest(
       byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
 		throws BadPacketException {
-        super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
+        super(guid, GnutellaMessage.F_QUERY, ttl, hops, payload.length, network);
 		if(payload == null) {
 			throw new BadPacketException("no payload");
 		}

@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.GnutellaMessage;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * A queue of messages organized by type.  Used by ManagedConnection to
@@ -147,18 +148,18 @@ public class CompositeQueue implements MessageQueue {
     private int calculatePriority(Message m) {
         byte opcode=m.getFunc();
         switch (opcode) {
-            case Message.F_QUERY:
+            case GnutellaMessage.F_QUERY:
                 return ((QueryRequest)m).isOriginated() ? 
                     PRIORITY_OUR_QUERY : PRIORITY_QUERY;
-            case Message.F_QUERY_REPLY: 
+            case GnutellaMessage.F_QUERY_REPLY: 
                 return PRIORITY_QUERY_REPLY;
-            case Message.F_PING_REPLY: 
+            case GnutellaMessage.F_PING_REPLY: 
                 return (m.getHops()==0 && m.getTTL()<=2) ? 
                     PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
-            case Message.F_PING: 
+            case GnutellaMessage.F_PING: 
                 return (m.getHops()==0 && m.getTTL()==1) ? 
                     PRIORITY_WATCHDOG : PRIORITY_PING;
-            case Message.F_PUSH: 
+            case GnutellaMessage.F_PUSH: 
                 return PRIORITY_PUSH;                
             default: 
                 return PRIORITY_OTHER;  //includes QRP Tables

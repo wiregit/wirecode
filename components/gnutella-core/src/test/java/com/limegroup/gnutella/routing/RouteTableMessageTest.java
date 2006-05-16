@@ -6,6 +6,7 @@ import java.io.InputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.GnutellaMessage;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -30,7 +31,7 @@ public class RouteTableMessageTest extends BaseTestCase {
 	public void testLegacy() throws Exception {
         //Read bytes with bad variant
         byte[] message=new byte[23+2];
-        message[16]=Message.F_ROUTE_TABLE_UPDATE;            //function code
+        message[16]=GnutellaMessage.F_ROUTE_TABLE_UPDATE;            //function code
         message[17]=(byte)3;                                 //TTL
         message[19]=(byte)2;                                 //payload length
         message[23+0]=(byte)0xFF;                            //bogus variant

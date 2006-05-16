@@ -32,7 +32,7 @@ public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] g = GUID.makeGuid();
         for(int i=0;i<16;i++) 
             bytes[i] = g[i];
-        bytes[16] = Message.F_PING_REPLY;
+        bytes[16] = GnutellaMessage.F_PING_REPLY;
         bytes[17] = (byte) 2;//ttl
         bytes[18] = (byte) 2; //hops
         bytes[19] = (byte)0;

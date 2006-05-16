@@ -77,7 +77,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] guid = GUID.makeGuid();//get a GUID
         System.arraycopy(guid,0,buffer,0,guid.length);//copy GUID
         int currByte = guid.length;
-        buffer[currByte] = Message.F_PING;
+        buffer[currByte] = GnutellaMessage.F_PING;
         currByte++;
         buffer[currByte] = 0x0001; // TTL 
         currByte++;
@@ -117,7 +117,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] guid = GUID.makeGuid();//get a GUID
         System.arraycopy(guid,0,buffer,0,guid.length);//copy GUID
         int currByte = guid.length;
-        buffer[currByte] = Message.F_PING;
+        buffer[currByte] = GnutellaMessage.F_PING;
         currByte++;
         buffer[currByte] = 0x0004; // TTL 
         currByte++;

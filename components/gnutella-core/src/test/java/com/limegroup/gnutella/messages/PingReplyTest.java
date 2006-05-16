@@ -528,7 +528,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void testPongTooSmall() throws Exception {
         byte[] bytes=new byte[23+25];  //one byte too small
-        bytes[16]=Message.F_PING_REPLY;
+        bytes[16]=GnutellaMessage.F_PING_REPLY;
         bytes[17]=(byte)3;     //hops
         bytes[18]=(byte)3;     //ttl
         bytes[19]=(byte)13;    //payload length
