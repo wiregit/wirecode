@@ -315,10 +315,13 @@ public class TorrentManager implements ConnectionAcceptor {
 	 * 
 	 * @param mt the <tt>ManagedTorrent</tt> to add.
 	 */
-	public synchronized void addTorrent(ManagedTorrent mt) {
+	public synchronized Downloader addTorrent(ManagedTorrent mt) {
 		if (_active.contains(mt) || _waiting.contains(mt))
-			return;
+			return null;
 		mt.setState(ManagedTorrent.QUEUED);
+		
+		Downloader downloader = createTorrentFacades(mt, mt.getMetaInfo());
+		
 		if (_active.size() >= getMaxActiveTorrents()) {
 			_waiting.add(mt);
 			if (LOG.isDebugEnabled())
@@ -329,20 +332,22 @@ public class TorrentManager implements ConnectionAcceptor {
 				LOG.debug("torrent added to active");
 			_active.add(mt);
 		}
-		_callback.addDownload(mt.getDownloader());
+		_callback.addDownload(downloader);
+		return downloader;
 	}
 	
 	/**
-	 * Notification that a torrent has completed its download.
+	 * creates the facades to the torrent 
+	 * @return the downloader facade
 	 */
-	synchronized void torrentComplete(ManagedTorrent mt) {
-		/*
-		 * we keep the torrent in the active list because it is
-		 * still seeding, but remove it from the downloads window.
-		 */
-		_callback.removeDownload(mt.getDownloader());
+	private Downloader createTorrentFacades(ManagedTorrent mt, BTMetaInfo info) {
+		TorrentLifecycleListener listener = new BTUploader(mt, info);
+		mt.addLifecycleListener(listener);
+		listener = new BTDownloader(mt, info);
+		mt.addLifecycleListener(listener);
+		return (Downloader) listener;
 	}
-
+	
 	/**
 	 * This method determines if a torrent should make way for another waiting
 	 * torrent.
@@ -417,13 +422,13 @@ public class TorrentManager implements ConnectionAcceptor {
 					for (int i = 0; i < info.getTrackers().length; i++)
 						torrent.getMetaInfo().addTracker(info.getTrackers()[i]);
 					// but we don't start a new download.
-					return torrent.getDownloader();
+					return createTorrentFacades(torrent, info);
 				}
 			}
 			ManagedTorrent mt = new ManagedTorrent(info, this);
-			addTorrent(mt);
+			Downloader ret = addTorrent(mt);
 			writeSnapshot();
-			return mt.getDownloader();
+			return ret;
 		} catch (IOException e) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("bad torrent file", e);
@@ -446,10 +451,6 @@ public class TorrentManager implements ConnectionAcceptor {
 			return;
 		_active.remove(mt);
 		
-		// remove from the gui as well.
-		torrentComplete(mt); 
-
-		writeSnapshot();
 		// wake up this to maintain the desired parallelism
 		wakeUp();
 	}
@@ -522,10 +523,10 @@ public class TorrentManager implements ConnectionAcceptor {
 		for (Iterator iter = _active.iterator(); iter.hasNext();) {
 			shouldCountAvg = true;
 			ManagedTorrent mt = (ManagedTorrent) iter.next();
-			mt.getUploader().measureBandwidth();
-			mt.getDownloader().measureBandwidth();
-			currentTotalDown += mt.getDownloader().getMeasuredBandwidth();
-			currentTotalUp += mt.getUploader().getMeasuredBandwidth();
+			mt.getBandwidthTracker(true).measureBandwidth();
+			mt.getBandwidthTracker(false).measureBandwidth();
+			currentTotalDown += mt.getBandwidthTracker(false).getMeasuredBandwidth();
+			currentTotalUp += mt.getBandwidthTracker(true).getMeasuredBandwidth();
 		}
 		if (shouldCountAvg) {
 			_averageDownload = (_averageDownload * _numMeasures + currentTotalDown) / (_numMeasures +1);

@@ -2,8 +2,8 @@ package com.limegroup.bittorrent;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 
@@ -13,7 +13,7 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
  * 
  * TODO find a proper solution.
  */
-public class BTUploader implements Uploader {
+public class BTUploader implements Uploader, TorrentLifecycleListener {
 	private ManagedTorrent _torrent;
 	
 	private BTMetaInfo _info;
@@ -139,5 +139,19 @@ public class BTUploader implements Uploader {
 	
 	void wroteBytes(int written) {
 		_tracker.count(written);
+	}
+	
+	public void torrentStarted(ManagedTorrent t) {
+		if (t == _torrent)
+			RouterService.getCallback().addUpload(this);
+	}
+	
+	public void torrentStopped(ManagedTorrent t) {
+		if (t == _torrent)
+			RouterService.getCallback().removeUpload(this);
+	}
+	
+	public void torrentComplete(ManagedTorrent t){
+		// nothing.
 	}
 }

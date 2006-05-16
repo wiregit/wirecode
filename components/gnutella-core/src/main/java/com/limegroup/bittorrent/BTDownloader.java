@@ -18,7 +18,7 @@ import com.limegroup.gnutella.URN;
  * 
  * TODO find a proper solution.
  */
-public class BTDownloader implements Downloader {
+public class BTDownloader implements Downloader, TorrentLifecycleListener {
 	private final ManagedTorrent _torrent;
 
 	private final BTMetaInfo _info;
@@ -218,10 +218,11 @@ public class BTDownloader implements Downloader {
 	}
 
 	public boolean isCompleted() {
-		switch(getState()) {
-		case Downloader.COMPLETE:
-		case Downloader.ABORTED:
-		case Downloader.DISK_PROBLEM:
+		switch(_torrent.getState()) {
+		case ManagedTorrent.SEEDING:
+		case ManagedTorrent.STOPPED:
+		case ManagedTorrent.DISK_PROBLEM:
+		case ManagedTorrent.TRACKER_FAILURE:
 			return true;
 		}
 		return false;
@@ -294,4 +295,20 @@ public class BTDownloader implements Downloader {
 	public Object setAttribute(String key, Object value) {
 		return attributes.put(key, value);
 	}
+
+	public void torrentComplete(ManagedTorrent t) {
+		if (_torrent == t)
+			RouterService.getCallback().removeDownload(this);
+	}
+
+	public void torrentStarted(ManagedTorrent t) {
+		// nothing
+		
+	}
+
+	public void torrentStopped(ManagedTorrent t) {
+		if (_torrent == t)
+			RouterService.getCallback().removeDownload(this);
+	}
+	
 }

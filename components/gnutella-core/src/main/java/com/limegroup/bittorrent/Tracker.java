@@ -148,11 +148,11 @@ public class Tracker {
 
 		addGetField(buf, "port", String.valueOf(RouterService.getPort()));
 
-		addGetField(buf, "downloaded", String.valueOf(torrent.getDownloader()
-				.getAmountRead()));
+		addGetField(buf, "downloaded", 
+				String.valueOf(torrent.getBandwidthTracker(false).getTotalAmount()));
 
-		addGetField(buf, "uploaded", String.valueOf(torrent.getUploader()
-				.getTotalAmountUploaded()));
+		addGetField(buf, "uploaded", 
+				String.valueOf(torrent.getBandwidthTracker(true).getTotalAmount()));
 
 		addGetField(buf, "left", String.valueOf(info.getTotalSize()
 				- info.getVerifyingFolder().getBlockSize()));

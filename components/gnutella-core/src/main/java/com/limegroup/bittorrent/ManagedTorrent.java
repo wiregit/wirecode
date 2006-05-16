@@ -29,7 +29,7 @@ public class ManagedTorrent {
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 	
 	/**
-	 * States of a torrent download.  Some of them are identical
+	 * States of a torrent download.  Some of them are functionally equivalent
 	 * to Downloader states.
 	 */
 	static final int WAITING_FOR_TRACKER = 1;
@@ -48,7 +48,13 @@ public class ManagedTorrent {
 		new NIODispatcherThreadPool();
 
 	/** the executor of our tasks. */
-	private ThreadPool invoker = INVOKER;
+	private ThreadPool networkInvoker = INVOKER;
+	
+	/** 
+	 * Executor that changes the state of this torrent and does 
+	 * the moving of files to the complete location.
+	 */
+	private ThreadPool diskInvoker = new ProcessingQueue("ManagedTorrent");
 	
 	/**
 	 * the TorrentManager managing this torrent
@@ -101,16 +107,6 @@ public class ManagedTorrent {
 	private final List _connections;
 
 	/** 
-	 * Queue that changes the state of this torrent and does 
-	 * the moving of files to the complete location.
-	 */
-	private ProcessingQueue torrentStateQueue;
-
-	private BTDownloader _downloader;
-
-	private BTUploader _uploader;
-	
-	/** 
 	 * A runnable that takes care of scheduled periodic rechoking
 	 */
 	private Choker choker;
@@ -119,6 +115,16 @@ public class ManagedTorrent {
 	 * The current state of this torrent.
 	 */
 	private volatile int _state = QUEUED;
+	
+	/**
+	 * A listener for the life of this torrent, if any.
+	 */
+	private final List lifeCycleListeners = Collections.synchronizedList(new ArrayList(2));
+	
+	/**
+	 * Counters for how much this has uploaded and downloaded
+	 */
+	private final SimpleBandwidthTracker up, down;
 
 	/**
 	 * Constructs new ManagedTorrent
@@ -138,15 +144,24 @@ public class ManagedTorrent {
 		if (_folder.isVerifying())
 			_state = VERIFYING;
 		_connections = Collections.synchronizedList(new ArrayList());
-		torrentStateQueue = new ProcessingQueue("ManagedTorrent");
-		_downloader = new BTDownloader(this, _info);
-		_uploader = new BTUploader(this, _info);
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
 		trackerManager = new TrackerManager(this);
-		choker = new Choker(this, invoker);
+		choker = new Choker(this, networkInvoker);
+		up = new SimpleBandwidthTracker();
+		down = new SimpleBandwidthTracker();
 	}
 
+	/**
+	 * adds a listener to the life events of this torrent
+	 */
+	void addLifecycleListener(TorrentLifecycleListener listener) {
+		synchronized(lifeCycleListeners) {
+			if (!lifeCycleListeners.contains(listener))
+				lifeCycleListeners.add(listener);
+		}
+	}
+	
 	void setState(int newState) {
 		_state = newState;
 	}
@@ -183,7 +198,7 @@ public class ManagedTorrent {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requesting torrent start", new Exception());
 		
-		enqueueTask(new Runnable() {
+		diskInvoker.invokeLater(new Runnable() {
 			public void run() {
 				
 				LOG.debug("executing torrent start");
@@ -221,18 +236,13 @@ public class ManagedTorrent {
 	public void stop() {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requested torrent stop", new Exception());
+				
+		if (!isActive())
+			return;
 		
-		enqueueTask(new Runnable() {
-			public void run() {
-				
-				if (!isActive())
-					return;
-				
-				_state = STOPPED;
-				
-				stopNow();
-			}
-		});
+		_state = STOPPED;
+		
+		stopImpl();
 	}
 	
 	/**
@@ -240,30 +250,38 @@ public class ManagedTorrent {
 	 * and terminates it.
 	 */
 	public void diskExceptionHappened() {
-		enqueueTask(new Runnable() {
-			public void run() {
-				if (_state == DISK_PROBLEM)
-					return;
-				_state = DISK_PROBLEM;
-				stopNow();
-			}
-		});
+		if (_state == DISK_PROBLEM)
+			return;
+		_state = DISK_PROBLEM;
+		stopImpl();
 	}
 	
 	/**
-	 * Performs the actual stop.  To be invoked only from the
-	 * torrent processing queue.
+	 * Performs the actual stop.  It does not modify the torrent state.
 	 */
-	private void stopNow() {
+	private void stopImpl() {
 		
-		RouterService.getCallback().removeUpload(_uploader);
+		synchronized(lifeCycleListeners) {
+			for (Iterator iter = lifeCycleListeners.iterator();iter.hasNext();)
+				((TorrentLifecycleListener)iter.next()).torrentStopped(this);
+		}
+		
+		
 		// we stopped, removing torrent from active list of
 		// TorrentManager
 		_manager.removeTorrent(this);
 		
-		_folder.close();
-		
 		choker.stop();
+		trackerManager.announceStop();
+		
+		// close the files and write the snapshot
+		Runnable saver = new Runnable() {
+			public void run() {
+				_folder.close();
+				_manager.writeSnapshot();
+			}
+		};
+		diskInvoker.invokeLater(saver);
 		
 		// close connections
 		Runnable closer = new Runnable() {
@@ -276,9 +294,7 @@ public class ManagedTorrent {
 				}
 			}
 		};
-		invoker.invokeLater(closer);
-		
-		trackerManager.announceStop();
+		networkInvoker.invokeLater(closer);
 		
 		LOG.debug("Torrent stopped!");
 	}
@@ -288,12 +304,12 @@ public class ManagedTorrent {
 	 * there are any
 	 */
 	public void pause() {
-		enqueueTask(new Runnable() {
-			public void run() {
-				_state = PAUSED;
-				stopNow();
-			}
-		});
+		if (_state == PAUSED)
+			return;
+		boolean wasActive = isActive();
+		_state = PAUSED;
+		if (wasActive)
+			stopImpl();
 	}
 
 	/**
@@ -309,12 +325,8 @@ public class ManagedTorrent {
 		if (!canResume)
 			return false;
 		
-		enqueueTask(new Runnable() {
-			public void run(){
-				_state = QUEUED;
-				_manager.wakeUp(ManagedTorrent.this);
-			}
-		});
+		_state = QUEUED;
+		_manager.wakeUp(ManagedTorrent.this);
 		return true;
 	}
 
@@ -337,7 +349,10 @@ public class ManagedTorrent {
 		if (_info.getLocations() != null)
 			_peers.addAll(_info.getLocations());
 
-		RouterService.getCallback().addUpload(_uploader);
+		synchronized(lifeCycleListeners) {
+			for (Iterator iter = lifeCycleListeners.iterator();iter.hasNext();)
+				((TorrentLifecycleListener)iter.next()).torrentStarted(this);
+		}
 		
 		_connectionFetcher = new BTConnectionFetcher(this, _manager.getPeerId());
 
@@ -365,7 +380,7 @@ public class ManagedTorrent {
 	}
 
 	void verificationComplete() {
-		enqueueTask(new Runnable() {
+		diskInvoker.invokeLater(new Runnable() {
 			public void run() {
 				if (_state == VERIFYING) 
 					startConnecting();
@@ -417,11 +432,11 @@ public class ManagedTorrent {
 				}
 			}
 		};
-		invoker.invokeLater(haveNotifier);
+		networkInvoker.invokeLater(haveNotifier);
 		
 		if (_folder.isComplete()) {
 			LOG.info("file is complete");
-			enqueueTask(new Runnable(){
+			diskInvoker.invokeLater(new Runnable(){
 				public void run(){
 					completeTorrentDownload();
 				}
@@ -462,15 +477,11 @@ public class ManagedTorrent {
 
 	
 	void stopVoluntarily() {
-		enqueueTask(new Runnable() {
-			public void run() {
-				if (_state == SEEDING)
-					_state = STOPPED;
-				else
-					_state = TRACKER_FAILURE;
-				stopNow();
-			}
-		});
+		if (_state == SEEDING)
+			_state = STOPPED;
+		else
+			_state = TRACKER_FAILURE;
+		stopImpl();
 	}
 	
 	/**
@@ -550,7 +561,7 @@ public class ManagedTorrent {
 				}
 			}
 		};
-		invoker.invokeLater(r);
+		networkInvoker.invokeLater(r);
 		
 		// save the files to the destination folder
 		saveFiles();
@@ -561,8 +572,10 @@ public class ManagedTorrent {
 		// tell the tracker we are a seed now
 		trackerManager.announceComplete();
 		
-		// tell the manager I am complete
-		_manager.torrentComplete(this);
+		synchronized(lifeCycleListeners) {
+			for (Iterator iter = lifeCycleListeners.iterator();iter.hasNext();)
+				((TorrentLifecycleListener)iter.next()).torrentComplete(this);
+		}
 	}
 
 	/**
@@ -598,7 +611,7 @@ public class ManagedTorrent {
 
 		if (diskProblem) {
 			_state = DISK_PROBLEM;
-			stopNow();
+			stopImpl();
 		} else
 			_state = SEEDING; 
 
@@ -705,10 +718,6 @@ public class ManagedTorrent {
 		return _manager.getUploadThrottle();
 	}
 
-	private void enqueueTask(Runnable runnable) {
-		torrentStateQueue.add(runnable);
-	}
-
 	public boolean isConnected() {
 		return _connections.size() > 0;
 	}
@@ -754,12 +763,8 @@ public class ManagedTorrent {
 		return busy;
 	}
 
-	public BTUploader getUploader() {
-		return _uploader;
-	}
-
-	public BTDownloader getDownloader() {
-		return _downloader;
+	public SimpleBandwidthTracker getBandwidthTracker(boolean up) {
+		return up ? this.up : this.down;
 	}
 
 
@@ -802,11 +807,10 @@ public class ManagedTorrent {
 			// AND there are other torrents waiting for a slot
 			if (LOG.isDebugEnabled())
 				LOG.debug("uploaded data "
-						+ _uploader.getTotalAmountUploaded()
+						+ up.getTotalAmount()
 						+ " downloaded data "
-						+ _downloader.getTotalAmountDownloaded());
-			if (_uploader.getTotalAmountUploaded() > _downloader
-					.getTotalAmountDownloaded())
+						+ down.getTotalAmount());
+			if (up.getTotalAmount() > down.getTotalAmount())
 				return true;
 		}
 		return false;

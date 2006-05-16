@@ -285,14 +285,14 @@ public class BTConnection {
 	 * notification that some bytes have been read on this connection
 	 */
 	private void readBytes(int read) {
-		_torrent.getDownloader().readBytes(read);
+		_torrent.getBandwidthTracker(false).count(read);
 	}
 
 	/**
 	 * notification that some bytes have been written on this connection
 	 */
 	public void wroteBytes(int written) {
-		_torrent.getUploader().wroteBytes(written);
+		_torrent.getBandwidthTracker(true).count(written);
 	}
 
 	/**
