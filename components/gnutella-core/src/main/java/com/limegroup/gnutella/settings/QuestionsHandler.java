@@ -132,4 +132,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting SKIP_FIRST_DOWNLOAD_WARNING =
         FACTORY.createIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", 0);
+	
+	/**
+	 * Setting for whether to show the question dialog when files have been
+	 * dropped somewhere on limewire.
+	 */
+	public static final BooleanSetting SHARE_DROPPED_FILES =
+		FACTORY.createBooleanSetting("SHARE_DROPPED_FILES", false);
 }
