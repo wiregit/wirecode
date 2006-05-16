@@ -204,7 +204,7 @@ public final class MessageWriterTest extends BaseTestCase {
     }
 	
 	private Message read(InputStream in) throws Exception {
-	    return Message.read(in, (byte)100);
+	    return MessageFactory.read(in, (byte)100);
     }
     
     private Message read(ByteBuffer buffer) throws Exception {

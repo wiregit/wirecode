@@ -9,14 +9,13 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -155,7 +154,7 @@ public class UDPPushTest extends BaseTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)Message.read(bais);
+		PushRequest pr = (PushRequest)MessageFactory.read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		Thread.sleep(5200);
@@ -186,7 +185,7 @@ public class UDPPushTest extends BaseTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)Message.read(bais);
+		PushRequest pr = (PushRequest)MessageFactory.read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		Thread.sleep(5200);
@@ -218,7 +217,7 @@ public class UDPPushTest extends BaseTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)Message.read(bais);
+		PushRequest pr = (PushRequest)MessageFactory.read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		socket = new Socket(InetAddress.getLocalHost(),10000);
@@ -265,12 +264,12 @@ public class UDPPushTest extends BaseTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)Message.read(bais);
+		PushRequest pr = (PushRequest)MessageFactory.read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		udpsocket.receive(push);
 		bais = new ByteArrayInputStream(push.getData());
-		pr = (PushRequest)Message.read(bais);
+		pr = (PushRequest)MessageFactory.read(bais);
 		assertEquals(rfd2.getIndex(),pr.getIndex());
 		
 		Thread.sleep(2000);
@@ -311,12 +310,12 @@ public class UDPPushTest extends BaseTestCase {
 		udpsocket.receive(push);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
-		PushRequest pr = (PushRequest)Message.read(bais);
+		PushRequest pr = (PushRequest)MessageFactory.read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
 		udpsocket.receive(push);
 		bais = new ByteArrayInputStream(push.getData());
-		pr = (PushRequest)Message.read(bais);
+		pr = (PushRequest)MessageFactory.read(bais);
 		assertEquals(rfd2.getIndex(),pr.getIndex());
 		
 		Thread.sleep(2000);

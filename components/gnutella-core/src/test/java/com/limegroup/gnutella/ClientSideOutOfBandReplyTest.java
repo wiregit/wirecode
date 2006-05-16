@@ -14,18 +14,16 @@ import java.net.Socket;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.search.QueryHandler;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -131,7 +129,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = Message.read(in);
+            Message m = MessageFactory.read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -183,7 +181,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = Message.read(in);
+            Message m = MessageFactory.read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -218,7 +216,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 bad.printStackTrace();
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = Message.read(in);
+            Message m = MessageFactory.read(in);
             if (m instanceof LimeACKVendorMessage)
                 assertTrue("we got an ack, weren't supposed to!!", false);
         }
@@ -272,7 +270,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 fail("Did not get ack", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = Message.read(in);
+            Message m = MessageFactory.read(in);
             if (m instanceof LimeACKVendorMessage)
                 ack = (LimeACKVendorMessage) m;
         }
@@ -318,7 +316,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
                 bad.printStackTrace();
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
-            Message m = Message.read(in);
+            Message m = MessageFactory.read(in);
             if (m instanceof LimeACKVendorMessage)
                 assertTrue("we got an ack, weren't supposed to!!", false);
         }

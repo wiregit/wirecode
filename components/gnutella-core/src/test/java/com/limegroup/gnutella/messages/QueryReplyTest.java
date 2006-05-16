@@ -451,7 +451,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -498,7 +498,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -553,7 +553,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)MessageFactory.read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -885,7 +885,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             qr.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) Message.read(bais);
+            QueryReply readQR = (QueryReply) MessageFactory.read(bais);
 
             // test read from network            
             Set retProxies = readQR.getPushProxies();
@@ -949,7 +949,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             qReply.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) Message.read(bais);
+            QueryReply readQR = (QueryReply) MessageFactory.read(bais);
             
             List readHits = readQR.getResultsAsList();
             assertEquals("wrong # of results", hits.length, readHits.size());
@@ -1002,7 +1002,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             qReply.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) Message.read(bais);
+            QueryReply readQR = (QueryReply) MessageFactory.read(bais);
             
             List readHits = readQR.getResultsAsList();
             assertEquals("wrong # of results", hits.length, readHits.size());

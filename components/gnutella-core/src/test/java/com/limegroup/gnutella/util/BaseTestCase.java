@@ -31,6 +31,7 @@ import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnCallback;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -801,7 +802,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 return null;
             try {
                 socket.setSoTimeout(timeout);
-                Message m=Message.read(socket.getInputStream(), Message.N_TCP);
+                Message m=MessageFactory.read(socket.getInputStream(), Message.N_TCP);
                 if(type.isInstance(m))
                     return m;
                 else if(m == null) //interruptedIOException thrown

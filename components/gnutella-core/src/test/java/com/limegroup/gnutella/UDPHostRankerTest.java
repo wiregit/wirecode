@@ -15,6 +15,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.search.HostData;
@@ -71,7 +72,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) Message.read(in);
+            PingRequest ping = (PingRequest) MessageFactory.read(in);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PingReply pong = PingReply.create(ping.getGUID(), (byte)1);
             pong.write(baos);

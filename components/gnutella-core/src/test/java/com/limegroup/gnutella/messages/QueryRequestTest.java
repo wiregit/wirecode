@@ -337,7 +337,7 @@ public final class QueryRequestTest extends BaseTestCase {
         qr.write(baos);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        QueryRequest qrRead = (QueryRequest) Message.read(bais);
+        QueryRequest qrRead = (QueryRequest) MessageFactory.read(bais);
     }
 
 
@@ -635,7 +635,7 @@ public final class QueryRequestTest extends BaseTestCase {
 
 		QueryRequest qrTest = null;
 		try {
-			qrTest = (QueryRequest)Message.read(bais);
+			qrTest = (QueryRequest)MessageFactory.read(bais);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("unexpected exception: "+e);
@@ -896,7 +896,7 @@ public final class QueryRequestTest extends BaseTestCase {
             baos = new ByteArrayOutputStream();
             outQuery.write(baos);
             bais = new ByteArrayInputStream(baos.toByteArray());
-            inQuery = (QueryRequest) Message.read(bais);
+            inQuery = (QueryRequest) MessageFactory.read(bais);
             assertTrue(inQuery.isWhatIsNewRequest());
             assertEquals(inQuery, outQuery);
         }
@@ -907,7 +907,7 @@ public final class QueryRequestTest extends BaseTestCase {
             baos = new ByteArrayOutputStream();
             outQuery.write(baos);
             bais = new ByteArrayInputStream(baos.toByteArray());
-            inQuery = (QueryRequest) Message.read(bais);
+            inQuery = (QueryRequest) MessageFactory.read(bais);
             assertTrue(inQuery.isWhatIsNewRequest());
             assertEquals(inQuery, outQuery);
         }
@@ -991,7 +991,7 @@ public final class QueryRequestTest extends BaseTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         query.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        QueryRequest qr = (QueryRequest) Message.read(bais);
+        QueryRequest qr = (QueryRequest) MessageFactory.read(bais);
         if (flag == 0) assertTrue(query.desiresAll());
         if ((flag & QueryRequest.AUDIO_MASK) > 0)
             assertTrue(qr.desiresAudio());

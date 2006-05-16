@@ -14,6 +14,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -79,7 +80,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in);		
+                    Message message = MessageFactory.read(in);		
                     if (message == null) continue;
                     if (message instanceof QueryReply) {
                         synchronized (_qrLock) {

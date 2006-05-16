@@ -11,15 +11,16 @@ import java.net.SocketException;
 import java.util.Random;
 import java.util.Vector;
 
+import junit.framework.Test;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.guess.QueryKeyGenerator;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -350,7 +351,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in);		
+                    Message message = MessageFactory.read(in);		
                     if(message == null) continue;
                     if (message instanceof PingRequest) {
                         PingRequest pr = (PingRequest)message;

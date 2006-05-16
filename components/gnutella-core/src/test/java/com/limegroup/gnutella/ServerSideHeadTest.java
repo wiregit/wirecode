@@ -2,16 +2,15 @@ package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -97,7 +96,7 @@ public class ServerSideHeadTest extends BaseTestCase {
     	socket1.receive(received);
     	
     	HeadPong pong = (HeadPong) 
-			Message.read(new ByteArrayInputStream(received.getData()));
+			MessageFactory.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     	
@@ -107,7 +106,7 @@ public class ServerSideHeadTest extends BaseTestCase {
     	received = new DatagramPacket(new byte[1024],1024);
     	socket2.receive(received);
     	pong = (HeadPong) 
-			Message.read(new ByteArrayInputStream(received.getData()));
+			MessageFactory.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping2.getGUID(),pong.getGUID()));
     	
@@ -119,7 +118,7 @@ public class ServerSideHeadTest extends BaseTestCase {
     	received = new DatagramPacket(new byte[1024],1024);
     	socket1.receive(received);
     	pong = (HeadPong) 
-			Message.read(new ByteArrayInputStream(received.getData()));
+			MessageFactory.read(new ByteArrayInputStream(received.getData()));
     	
     	assertTrue(Arrays.equals(ping1.getGUID(),pong.getGUID()));
     }

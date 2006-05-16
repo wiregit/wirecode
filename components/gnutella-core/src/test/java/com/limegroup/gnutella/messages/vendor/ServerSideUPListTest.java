@@ -27,7 +27,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -516,7 +516,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		InputStream in = new ByteArrayInputStream(pack.getData());
  		UDPCrawlerPong reply = null;
  		try {
- 			reply = (UDPCrawlerPong)Message.read(in);
+ 			reply = (UDPCrawlerPong)MessageFactory.read(in);
  		}catch(BadPacketException bad) {
  			System.out.println("the size of the received response is "+
  						pack.getData().length);

@@ -8,18 +8,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Iterator;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
-import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.IOUtils;
@@ -137,7 +135,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = Message.read(in);
+                Message m = MessageFactory.read(in);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);
@@ -285,7 +283,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             try {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                Message m = Message.read(in);
+                Message m = MessageFactory.read(in);
                 if (m instanceof PingRequest) {
                     PingRequest reply = (PingRequest) m; 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);

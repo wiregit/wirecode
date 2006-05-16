@@ -20,6 +20,7 @@ import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -716,7 +716,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = Message.read(in);
+                    m = MessageFactory.read(in);
                     m.hop();
                     if (m instanceof PingRequest)
                         gotPing = ((PingRequest) m).isQueryKeyRequest();
@@ -845,7 +845,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
                 UDP_ACCESS[0].receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                m = Message.read(in);
+                m = MessageFactory.read(in);
                 m.hop();
                 if (m instanceof PingRequest)
                     gotPing = ((PingRequest) m).isQueryKeyRequest();
@@ -890,7 +890,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
                 UDP_ACCESS[0].receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
-                m = Message.read(in);
+                m = MessageFactory.read(in);
                 if (m instanceof QueryRequest) {
                     QueryRequest qReq = (QueryRequest) m;
                     Set queryURNs = qReq.getQueryUrns();
@@ -1053,7 +1053,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = Message.read(in);
+                    m = MessageFactory.read(in);
                     if (m instanceof QueryRequest) {
                         QueryRequest qReq = (QueryRequest) m;
                         Set queryURNs = qReq.getQueryUrns();
@@ -1327,7 +1327,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
                     UDP_ACCESS[i].receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
-                    m = Message.read(in);
+                    m = MessageFactory.read(in);
                     m.hop();
                     if (m instanceof PingRequest)
                         gotPing = ((PingRequest) m).isQueryKeyRequest();

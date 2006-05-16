@@ -7,6 +7,7 @@ import java.io.InputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
@@ -59,6 +60,6 @@ public class ResetTableMessageTest extends BaseTestCase {
 
     static ResetTableMessage read(byte[] bytes) throws Exception {
         InputStream in=new ByteArrayInputStream(bytes);
-        return (ResetTableMessage)Message.read(in);
+        return (ResetTableMessage)MessageFactory.read(in);
     }
 }

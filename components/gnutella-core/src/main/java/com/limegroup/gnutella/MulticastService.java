@@ -6,12 +6,13 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
-import java.net.InetSocketAddress;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -208,7 +209,7 @@ public final class MulticastService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in, Message.N_MULTICAST, HEADER_BUF);
+                    Message message = MessageFactory.read(in, Message.N_MULTICAST, HEADER_BUF);
                     if(message == null)
                         continue;
                     MessageDispatcher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
