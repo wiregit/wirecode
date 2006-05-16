@@ -69,8 +69,20 @@ public interface Message extends Comparable {
      *  are higher priority. */
     public void setPriority(int priority);
     
+    /**
+     * @modifies out
+     * @effects Writes an encoding of this to out.  Does NOT flush out.
+     */
     public void write(OutputStream out) throws IOException;
+    
+    /**
+     * Writes a message out, using the buffer as the temporary header.
+     */
     public void write(OutputStream out, byte[] buf) throws IOException;
+    
+    /**
+     * Writes a message quickly, without using temporary buffers or crap.
+     */
     public void writeQuickly(OutputStream out) throws IOException;
     
     /**
