@@ -16,6 +16,12 @@ public interface TorrentLifecycleListener {
 	public void torrentComplete(ManagedTorrent t);
 	
 	/**
+	 * Notification that the torrent has seeded enough to
+	 * hit at least 1:1 data uploaded:downloaded ratio
+	 */
+	public void torrentHitRatio(ManagedTorrent t);
+	
+	/**
 	 * Notification that the torrent has stopped
 	 */
 	public void torrentStopped(ManagedTorrent t);

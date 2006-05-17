@@ -17,6 +17,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -128,8 +129,7 @@ public class Tracker {
 			addGetField(buf, "info_hash", infoHash);
 
 			String peerId = URLEncoder
-					.encode(new String(RouterService.getTorrentManager()
-							.getPeerId(), Constants.ASCII_ENCODING),
+					.encode("LIME" +ApplicationSettings.CLIENT_ID.getValue(),
 							Constants.ASCII_ENCODING);
 			addGetField(buf, "peer_id", peerId);
 

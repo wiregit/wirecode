@@ -1,36 +1,43 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.io.ObjectStreamField;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.limegroup.gnutella.DownloadCallback;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.AbstractDownloader;
 
 /**
- * This class enables the GUI to treat a Torrent like any other download. I'm
- * not actually happy with this solution but I don't want to spend time on the GUI
- * 
- * TODO find a proper solution.
+ * This class enables the rest of LW to treat this as a regular download.
  */
-public class BTDownloader implements Downloader, TorrentLifecycleListener {
-	private final ManagedTorrent _torrent;
+public class BTDownloader extends AbstractDownloader
+implements TorrentLifecycleListener {
+	
+    private static final ObjectStreamField[] serialPersistentFields = 
+    	ObjectStreamClass.NO_FIELDS;
+    
+	private static final String METAINFO = "metainfo";
+	
+	private ManagedTorrent _torrent;
 
-	private final BTMetaInfo _info;
+	private BTMetaInfo _info;
 
 	private SimpleBandwidthTracker _tracker;
 	
-    /**
-     * A map of attributes associated with the download. The attributes
-     * may be used by GUI, to keep some additional information about
-     * the download.
-     */
-    protected Map attributes = new HashMap();
+	private DownloadManager manager;
 	
 	public BTDownloader(ManagedTorrent torrent, BTMetaInfo info) {
 		_torrent = torrent;
@@ -75,10 +82,6 @@ public class BTDownloader implements Downloader, TorrentLifecycleListener {
 			return true;
 		}
 		return false;
-	}
-
-	public int getInactivePriority() {
-		return RouterService.getTorrentManager().getPositionInQueue(_torrent);
 	}
 
 	public boolean resume() {
@@ -282,16 +285,7 @@ public class BTDownloader implements Downloader, TorrentLifecycleListener {
 		return _torrent.getMetaInfo().getURN();
 	}
 	
-	public Object removeAttribute(String key){
-		return attributes.remove(key);
-	}
-	
-	public Object getAttribute(String key) {
-		return attributes.get(key);
-	}
-
 	public int getAmountPending() {
-		//TODO: this locking isn't good...
 		return _info.getVerifyingFolder().getAmountPending();
 	}
 
@@ -300,13 +294,9 @@ public class BTDownloader implements Downloader, TorrentLifecycleListener {
 		return _torrent.getNumConnections();
 	}
 
-	public Object setAttribute(String key, Object value) {
-		return attributes.put(key, value);
-	}
-
 	public void torrentComplete(ManagedTorrent t) {
 		if (_torrent == t)
-			RouterService.getCallback().removeDownload(this);
+			manager.remove(this, true);
 	}
 
 	public void torrentStarted(ManagedTorrent t) {
@@ -314,9 +304,73 @@ public class BTDownloader implements Downloader, TorrentLifecycleListener {
 		
 	}
 
+	public void torrentHitRatio(ManagedTorrent t){} // we don't care
+	
 	public void torrentStopped(ManagedTorrent t) {
-		if (_torrent == t)
-			RouterService.getCallback().removeDownload(this);
+		if (_torrent == t) 
+			manager.remove(this, t.isComplete());
 	}
 	
+	private void writeObject(ObjectOutputStream out) 
+	throws IOException {
+		Map m = new HashMap();
+		m.put(ATTRIBUTES, attributes);
+		m.put(METAINFO, _info);
+		out.writeObject(m);
+	}
+	
+	private void readObject(ObjectInputStream in)
+	throws IOException, ClassNotFoundException {
+		Map m = (Map)in.readObject();
+		attributes = (Map)m.get(ATTRIBUTES);
+		_info = (BTMetaInfo)m.get(METAINFO);
+		if (attributes == null || _info == null)
+			throw new IOException("invalid serailized data");
+		
+	}
+
+	public void initialize(DownloadManager manager, 
+			FileManager fm, 
+			DownloadCallback callback) {
+		this.manager = manager;
+		_torrent = new ManagedTorrent(_info); 
+		_torrent.addLifecycleListener(this);
+		BTUploader uploader = new BTUploader(_torrent,_info);
+		_torrent.addLifecycleListener(uploader);
+	}
+	
+	public void startDownload() {
+		_torrent.start();
+	}
+	
+	public void handleInactivity() {
+		// nothing happens when we're inactive
+	}
+	
+	public boolean shouldBeRestarted() {
+		return true; // we're always willing to be restarted
+	}
+	
+	public boolean isCancelled() {
+		return false; // can't be
+	}
+	
+	public boolean isAlive() {
+		return false; // doesn't apply to torrents
+	}
+
+	public boolean conflicts(URN urn, String fileName, int fileSize) {
+		String myName = _info.getCompleteFile().getName(); //TODO: look over this
+		return myName.equals(fileName) && 
+			_info.getTotalSize() == fileSize &&
+			_info.getURN().equals(urn);
+	}
+
+	public boolean conflictsWithIncompleteFile(File incomplete) {
+		return false; // we do our own checking for pre-existing incompletes
+	}
+
+	public void finish() {
+		// nothing, torrents get stopped through the uploader facade only
+	}
 }

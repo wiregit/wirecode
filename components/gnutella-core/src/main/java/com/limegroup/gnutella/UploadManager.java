@@ -1142,7 +1142,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 	 * amount of active uploaders is passed off to it.
 	 * REQUIRES: this' monitor is held
 	 */
-	private boolean hasFreeSlot(int current) {
+	public boolean hasFreeSlot(int current) {
         //Allow another upload if (a) we currently have fewer than
         //SOFT_MAX_UPLOADS uploads or (b) some upload has more than
         //MINIMUM_UPLOAD_SPEED KB/s.  But never allow more than MAX_UPLOADS.

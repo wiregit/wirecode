@@ -15,10 +15,12 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -28,6 +30,12 @@ import com.limegroup.gnutella.util.ThreadPool;
 public class ManagedTorrent {
 	
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
+	
+	/**
+	 * the upload throttle we are using
+	 */
+	private static final Throttle UPLOAD_THROTTLE = new NBThrottle(true,
+			UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.getValue());
 	
 	/**
 	 * States of a torrent download.  Some of them are functionally equivalent
@@ -57,11 +65,6 @@ public class ManagedTorrent {
 	 * the moving of files to the complete location.
 	 */
 	private ThreadPool diskInvoker = new ProcessingQueue("ManagedTorrent");
-	
-	/**
-	 * the TorrentManager managing this torrent
-	 */
-	private final TorrentManager _manager;
 	
 	/**
 	 * The list of known good TorrentLocations that we are not connected 
@@ -122,6 +125,8 @@ public class ManagedTorrent {
 	 * Counters for how much this has uploaded and downloaded
 	 */
 	private final SimpleBandwidthTracker up, down;
+	
+	
 
 	/**
 	 * Constructs new ManagedTorrent
@@ -133,10 +138,9 @@ public class ManagedTorrent {
 	 * @param callback
 	 *            the <tt>ActivityCallback</tt>
 	 */
-	public ManagedTorrent(BTMetaInfo info, TorrentManager manager) {
+	public ManagedTorrent(BTMetaInfo info) {
 		_info = info;
 		_info.setManagedTorrent(this);
-		_manager = manager;
 		_folder = info.getVerifyingFolder();
 		if (_folder.isVerifying())
 			_state.setInt(VERIFYING);
@@ -293,9 +297,6 @@ public class ManagedTorrent {
 		}
 		
 		
-		// we stopped, removing torrent from active list of
-		// TorrentManager
-		_manager.removeTorrent(this);
 		
 		choker.stop();
 		trackerManager.announceStop();
@@ -305,7 +306,6 @@ public class ManagedTorrent {
 			public void run() {
 				_folder.close();
 				_state.setInt(finalState);
-				_manager.writeSnapshot();
 			}
 		};
 		diskInvoker.invokeLater(saver);
@@ -371,7 +371,6 @@ public class ManagedTorrent {
 			
 			_state.setInt(QUEUED);
 		}
-		_manager.wakeUp(ManagedTorrent.this);
 		return true;
 	}
 
@@ -400,7 +399,7 @@ public class ManagedTorrent {
 				((TorrentLifecycleListener)iter.next()).torrentStarted(this);
 		}
 		
-		_connectionFetcher = new BTConnectionFetcher(this, _manager.getPeerId());
+		_connectionFetcher = new BTConnectionFetcher(this);
 
 		if (LOG.isDebugEnabled())
 			LOG.debug("Starting torrent");
@@ -776,7 +775,7 @@ public class ManagedTorrent {
 	}
 
 	public Throttle getUploadThrottle() {
-		return _manager.getUploadThrottle();
+		return UPLOAD_THROTTLE;
 	}
 
 	public boolean isConnected() {
@@ -885,27 +884,16 @@ public class ManagedTorrent {
 	 * whether or not continuing is hopeless
 	 */
 	boolean shouldStop() {
-		if (_connections.size() == 0 && _peers.size() == 0) {
-			if (trackerManager.isHopeless()) {
-				LOG.debug("giving up, too many trackerFailures ");
-				return true;
-			} else if (_manager.shouldYield()) {
-				if (LOG.isDebugEnabled())
-					LOG.debug("making way for other downloader");
-				return true;
-			}
-		} else if (_folder.isComplete() && _manager.shouldYield()) {
-			// we stop if we uploaded more than we downloaded
-			// AND there are other torrents waiting for a slot
-			if (LOG.isDebugEnabled())
-				LOG.debug("uploaded data "
-						+ up.getTotalAmount()
-						+ " downloaded data "
-						+ down.getTotalAmount());
-			if (up.getTotalAmount() > down.getTotalAmount())
-				return true;
-		}
-		return false;
+		return _connections.size() == 0 && _peers.size() == 0;
+	}
+	
+	/**
+	 * @return whether the torrent is complete and has uploaded at
+	 * least as much as downloaded.
+	 */
+	boolean hasGoodRatio() {
+		return _folder.isComplete() && 
+		up.getTotalAmount() > down.getTotalAmount();
 	}
 	
 	public BTConnectionFetcher getFetcher() {

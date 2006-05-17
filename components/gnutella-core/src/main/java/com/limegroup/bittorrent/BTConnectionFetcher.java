@@ -18,6 +18,8 @@ import com.limegroup.bittorrent.handshaking.OutgoingBTHandshaker;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Sockets;
 
 public class BTConnectionFetcher  {
@@ -74,14 +76,15 @@ public class BTConnectionFetcher  {
 	private volatile boolean shutdown;
 	
 	
-	BTConnectionFetcher(ManagedTorrent torrent, byte[]peerId) {
+	BTConnectionFetcher(ManagedTorrent torrent) {
 		_torrent = torrent;
 		ByteBuffer handshake = ByteBuffer.allocate(68);
 		handshake.put((byte) BITTORRENT_PROTOCOL.length()); // 19
 		handshake.put(BITTORRENT_PROTOCOL_BYTES); // "BitTorrent protocol"
 		handshake.put(EXTENSION_BYTES);
 		handshake.put(_torrent.getInfoHash());
-		handshake.put(peerId);
+		handshake.put("LIME".getBytes());
+		handshake.put(ApplicationSettings.CLIENT_ID.getValue().getBytes());
 		handshake.flip();
 		
 		_handshake = handshake.asReadOnlyBuffer(); // this actually does nothing :(

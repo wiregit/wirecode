@@ -494,7 +494,6 @@ implements MeshHandler, AltLocListener {
     
     protected static final String DEFAULT_FILENAME = "defaultFileName";
     protected static final String FILE_SIZE = "fileSize";
-    protected static final String ATTRIBUTES = "attributes";
     /**
 	 * The key under which the saveFile File is stored in the attribute map
      * used in serializing and deserializing ManagedDownloaders. 

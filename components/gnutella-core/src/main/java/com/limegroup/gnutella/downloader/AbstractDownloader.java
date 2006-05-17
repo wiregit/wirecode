@@ -14,6 +14,8 @@ import com.limegroup.gnutella.URN;
 
 public abstract class AbstractDownloader implements Downloader, Serializable {
 
+	protected static final String ATTRIBUTES = "attributes";
+	
 	/**
 	 * The current priority of this download -- only valid if inactive.
 	 * Has no bearing on the download itself, and is used only so that the
@@ -121,5 +123,4 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	
 	public abstract void initialize(DownloadManager m, 
 			FileManager fm, DownloadCallback ac);
-	
 }

@@ -200,7 +200,7 @@ public class TrackerManager {
 			t.recordFailure();
 
 		if (torrent.isActive()) {
-			if (torrent.shouldStop()) {
+			if (isHopeless() && torrent.shouldStop()) {
 				torrent.stopVoluntarily();
 			} else
 				scheduleTrackerRequest(minWaitTime, t);

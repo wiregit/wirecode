@@ -47,6 +47,7 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -179,7 +180,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
      * The runnable that pumps inactive downloads to the correct state.
      */
     private Runnable _waitingPump;
-
+    
     //////////////////////// Creation and Saving /////////////////////////
 
     /** 
@@ -328,7 +329,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
             AbstractDownloader md = (AbstractDownloader)i.next();
             if(md.isAlive()) {
                 continue;
-            } else if(md.isCancelled() ||md.isCompleted()) {
+            } else if(md.isCancelled() || md.isCompleted()) {
                 i.remove();
                 cleanupCompletedDownload(md, false);
             } else if(hasFreeSlot() && (md.shouldBeRestarted())) {
@@ -370,7 +371,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     public IncompleteFileManager getIncompleteFileManager() {
         return incompleteFileManager;
     }    
-
+ 
     public synchronized int downloadsInProgress() {
         return active.size() + waiting.size();
     }
@@ -526,7 +527,6 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 AbstractDownloader downloader=(AbstractDownloader)iter.next();
-                DownloadCallback dc = callback;
                 
                 // ignore RequeryDownloaders -- they're legacy
                 if(downloader instanceof RequeryDownloader)

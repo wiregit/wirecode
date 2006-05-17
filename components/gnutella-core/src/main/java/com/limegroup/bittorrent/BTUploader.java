@@ -151,7 +151,11 @@ public class BTUploader implements Uploader, TorrentLifecycleListener {
 			RouterService.getCallback().removeUpload(this);
 	}
 	
+	public void torrentHitRatio(ManagedTorrent t) {
+		// TODO: check if this should yield to seeding torrents. 
+	}
+	
 	public void torrentComplete(ManagedTorrent t){
-		// nothing.
+		// TODO: check if this should yield to downloading torrents.
 	}
 }

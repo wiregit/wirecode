@@ -298,7 +298,7 @@ public class TorrentManager implements ConnectionAcceptor {
 		try {
 			for (Iterator iter = buf.iterator(); iter.hasNext();) {
 				BTMetaInfo info = (BTMetaInfo) iter.next();
-				ManagedTorrent torrent = new ManagedTorrent(info, this);
+				ManagedTorrent torrent = new ManagedTorrent(info);
 				addTorrent(torrent); // 1
 			}
 			if (LOG.isDebugEnabled())
@@ -425,7 +425,7 @@ public class TorrentManager implements ConnectionAcceptor {
 					return createTorrentFacades(torrent, info);
 				}
 			}
-			ManagedTorrent mt = new ManagedTorrent(info, this);
+			ManagedTorrent mt = new ManagedTorrent(info);
 			Downloader ret = addTorrent(mt);
 			writeSnapshot();
 			return ret;
@@ -453,15 +453,6 @@ public class TorrentManager implements ConnectionAcceptor {
 		
 		// wake up this to maintain the desired parallelism
 		wakeUp();
-	}
-
-	/**
-	 * Accessor for the peer id.
-	 * 
-	 * @return "LIME" + our GUID as ascii encoded bytes.
-	 */
-	public byte[] getPeerId() {
-		return PEER_ID;
 	}
 
 	/**
