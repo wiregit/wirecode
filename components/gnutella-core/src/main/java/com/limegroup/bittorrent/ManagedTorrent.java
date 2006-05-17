@@ -64,8 +64,8 @@ public class ManagedTorrent {
 	private final TorrentManager _manager;
 	
 	/**
-	 * The list of known good TorrentLocations that we are not connected to at
-	 * the moment get this' monitor befor accessing
+	 * The list of known good TorrentLocations that we are not connected 
+	 * or connecting to at the moment
 	 */
 	private Set _peers;
 
@@ -268,7 +268,7 @@ public class ManagedTorrent {
 		
 		_state.setInt(STOPPED);
 		
-		stopImpl();
+		stopImpl(STOPPED);
 	}
 	
 	/**
@@ -281,13 +281,13 @@ public class ManagedTorrent {
 				return;
 			_state.setInt(DISK_PROBLEM);
 		}
-		stopImpl();
+		stopImpl(DISK_PROBLEM);
 	}
 	
 	/**
 	 * Performs the actual stop.  It does not modify the torrent state.
 	 */
-	private void stopImpl() {
+	private void stopImpl(final int finalState) {
 		
 		if (!stopState())
 			throw new IllegalArgumentException("stopping in wrong state "+_state);
@@ -309,6 +309,7 @@ public class ManagedTorrent {
 		Runnable saver = new Runnable() {
 			public void run() {
 				_folder.close();
+				_state.setInt(finalState);
 				_manager.writeSnapshot();
 			}
 		};
@@ -360,7 +361,7 @@ public class ManagedTorrent {
 			_state.setInt(PAUSED);
 		}
 		if (wasActive)
-			stopImpl();
+			stopImpl(PAUSED);
 	}
 
 	/**
@@ -423,7 +424,9 @@ public class ManagedTorrent {
 		} 
 		
 
-		if (_folder.isComplete())
+		// if we happen to have the complete torrent in the incomplete folder
+		// move it to the complete folder.
+		if (_folder.isComplete()) 
 			completeTorrentDownload();
 		else if (_folder.isVerifying())
 			_state.setInt(VERIFYING);
@@ -488,7 +491,8 @@ public class ManagedTorrent {
 			LOG.info("file is complete");
 			diskInvoker.invokeLater(new Runnable(){
 				public void run(){
-					completeTorrentDownload();
+					if (isDownloading())
+						completeTorrentDownload();
 				}
 			});
 		}
@@ -529,13 +533,17 @@ public class ManagedTorrent {
 
 	
 	void stopVoluntarily() {
+		int finalState = 0;
 		synchronized(_state) {
-			if (_state.getInt() == SEEDING)
+			if (!isActive())
+				return;
+			if (_state.getInt() == SEEDING) 
 				_state.setInt(STOPPED);
 			else
 				_state.setInt(TRACKER_FAILURE);
+			finalState = _state.getInt();
 		}
-		stopImpl();
+		stopImpl(finalState);
 	}
 	
 	/**
@@ -603,10 +611,7 @@ public class ManagedTorrent {
 	 * saves the complete files to the shared folder
 	 */
 	private void completeTorrentDownload() {
-		_state.setInt(SEEDING);
-		if (_saved)
-			return;
-
+		
 		// stop uploads 
 		LOG.debug("global choke");
 		choker.setGlobalChoke(true);
@@ -646,9 +651,10 @@ public class ManagedTorrent {
 	 * saving the files, it should be okay
 	 */
 	private void saveFiles() {
-		if (_saved)
-			return;
 
+		if (!_folder.isOpen())
+			return;
+		
 		_folder.close();
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder closed");
@@ -672,13 +678,11 @@ public class ManagedTorrent {
 			LOG.debug("folder opened");
 
 		if (diskProblem) {
-			_state.setInt(DISK_PROBLEM);
-			stopImpl();
+			diskExceptionHappened();
 		} else
 			_state.setInt(SEEDING); 
 
 		// remember attempt to save the file
-		_saved = true;
 	}
 	
 	/**
@@ -784,15 +788,45 @@ public class ManagedTorrent {
 		return _connections.size() > 0;
 	}
 
-	public boolean isActive() {
+	/**
+	 * @return if the torrent is active - either downloading or 
+	 * seeding, saving, verifying...
+	 */
+	boolean isActive() {
+		synchronized(_state) {
+			if (isDownloading())
+				return true;
+			switch(_state.getInt()) {
+			case SEEDING: 
+			case VERIFYING:
+			case SAVING:
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	boolean isPausable() {
+		synchronized(_state) {
+			if (isDownloading())
+				return true;
+			switch(_state.getInt()) {
+			case QUEUED:
+			case VERIFYING:
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
+	 * @return if the torrent is currently in one of the downloading states.
+	 */
+	boolean isDownloading() {
 		switch(_state.getInt()) {
+		case WAITING_FOR_TRACKER:
+		case SCRAPING: 
 		case CONNECTING:
 		case DOWNLOADING:
-		case SEEDING: 
-		case WAITING_FOR_TRACKER:
-		case SCRAPING:
-		case VERIFYING:
-		case SAVING:
 			return true;
 		}
 		return false;

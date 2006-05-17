@@ -51,8 +51,17 @@ public interface Downloader extends BandwidthTracker {
     public boolean isPaused();
     
     /**
-     * Determines if this downloader is in an inactive state that can be resumed
-     * from.
+     * @return if this downloader can be paused.
+     */
+    public boolean isPausable();
+    
+    /**
+     * @return if this downloader can be resumed.
+     */
+    public boolean isResumable();
+    
+    /**
+     * Determines if this downloader is in an inactive state 
      */
     public boolean isInactive();
 	

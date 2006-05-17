@@ -1633,6 +1633,16 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return paused == true;
     }
     
+    public boolean isPausable() {
+    	int state = getState();
+    	return !isPaused() && !isCompleted() && state != SAVING && state != HASHING;
+    }
+    
+    public boolean isResumable() {
+    	// inactive but not queued
+    	return isInactive() && state != QUEUED;
+    }
+    
     /**
      * Stops this download.
      */

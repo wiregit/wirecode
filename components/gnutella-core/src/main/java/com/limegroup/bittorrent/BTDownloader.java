@@ -58,17 +58,23 @@ public class BTDownloader implements Downloader, TorrentLifecycleListener {
 	public boolean isPaused() {
 		return _torrent.isPaused();
 	}
+	
+	public boolean isPausable() {
+		return _torrent.isPausable();
+	}
 
 	public boolean isInactive() {
-		// unlike regular downloads, aborted and given up torrents can be
-		// resumed but queued ones cannot.
+		return isResumable() || _torrent.getState() == ManagedTorrent.QUEUED;
+	}
+	
+	public boolean isResumable() {
 		switch(_torrent.getState()) {
-        case ManagedTorrent.PAUSED:
-        case ManagedTorrent.STOPPED:
-        case ManagedTorrent.TRACKER_FAILURE:
-            return true;
-        }
-        return false;
+		case ManagedTorrent.PAUSED:
+		case ManagedTorrent.STOPPED:
+		case ManagedTorrent.TRACKER_FAILURE:
+			return true;
+		}
+		return false;
 	}
 
 	public int getInactivePriority() {
