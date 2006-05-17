@@ -98,7 +98,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * unconnected. <b>Furthermore, it is necessary to explicitly call
  * initialize(..) after reading a ManagedDownloader from disk.</b>
  */
-public class ManagedDownloader implements Downloader, MeshHandler, AltLocListener, Serializable {
+public class ManagedDownloader extends AbstractDownloader
+implements MeshHandler, AltLocListener {
     /*
       IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
@@ -489,21 +490,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     private long lastQuerySent;
     
-    /**
-     * The current priority of this download -- only valid if inactive.
-     * Has no bearing on the download itself, and is used only so that the
-     * download doesn't have to be indexed in DownloadManager's inactive list
-     * every second, for GUI updates.
-     */
-    private volatile int inactivePriority;
-    
-    /**
-     * A map of attributes associated with the download. The attributes
-     * may be used by GUI, to keep some additional information about
-     * the download.
-     */
-    protected Map attributes = new HashMap();
-
     protected Map propertiesMap;
     
     protected static final String DEFAULT_FILENAME = "defaultFileName";
@@ -1550,6 +1536,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public boolean hasNewSources() {
         return !paused && receivedNewSources;
+    }
+    
+    public boolean shouldBeRestarted() {
+    	return hasNewSources() || getRemainingStateTime() <= 0;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -2763,26 +2753,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             this.stateTime=System.currentTimeMillis()+time;
     }
     
-    /**
-     * Sets the inactive priority of this download.
-     */
-    public void setInactivePriority(int priority) {
-        inactivePriority = priority;
-    }
-    
-    /**
-     * Gets the inactive priority of this download.
-     */
-    public int getInactivePriority() {
-        return inactivePriority;
-    }
-
-
-    /*************************************************************************
-     * Accessors that delegate to dloader. Synchronized because dloader can
-     * change.
-     *************************************************************************/
-
     /** @return the GUID of the query that spawned this downloader.  may be null.
      */
     public GUID getQueryGUID() {
@@ -3111,40 +3081,5 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
            Math.random() > 0.5f)
             return true;
         return false;
-    }
-    
-    /**
-     * Sets a new attribute associated with the download.
-     * The attributes are used eg. by GUI to store some extra
-     * information about the download.
-     * @param key A key used to identify the attribute.
-     * @patam value The value of the key.
-     * @return A prvious value of the attribute, or <code>null</code>
-     *         if the attribute wasn't set.
-     */
-    public Object setAttribute( String key, Object value ) {
-        return attributes.put( key, value );
-    }
-
-    /**
-     * Gets a value of attribute associated with the download.
-     * The attributes are used eg. by GUI to store some extra
-     * information about the download.
-     * @param key A key which identifies the attribue.
-     * @return The value of the specified attribute,
-     *         or <code>null</code> if value was not specified.
-     */
-    public Object getAttribute( String key ) {
-        return attributes.get( key );
-    }
-
-    /**
-     * Removes an attribute associated with this download.
-     * @param key A key which identifies the attribute do remove.
-     * @return A value of the attribute or <code>null</code> if
-     *         attribute was not set.
-     */
-    public Object removeAttribute( String key ) {
-        return attributes.remove( key );
     }
 }

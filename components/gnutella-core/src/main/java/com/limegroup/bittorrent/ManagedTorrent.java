@@ -95,12 +95,6 @@ public class ManagedTorrent {
 	private volatile BTConnectionFetcher _connectionFetcher;
 
 	/**
-	 * it is possible that a complete download is restarted (for what purpose so
-	 * ever) so we need to remember that we already saved the file.
-	 */
-	private boolean _saved = false;
-
-	/**
 	 * The list of BTConnections that this torrent has.
 	 * LOCKING: the list is synchronized on itself; it is modified
 	 * only from the NIODispatcher thread, so no locking is required
@@ -116,12 +110,13 @@ public class ManagedTorrent {
 	/** 
 	 * The current state of this torrent.
 	 */
-	private IntWrapper _state = new IntWrapper(QUEUED);
+	private final IntWrapper _state = new IntWrapper(QUEUED);
 	
 	/**
 	 * A listener for the life of this torrent, if any.
 	 */
-	private final List lifeCycleListeners = Collections.synchronizedList(new ArrayList(2));
+	private final List lifeCycleListeners = 
+		Collections.synchronizedList(new ArrayList(2));
 	
 	/**
 	 * Counters for how much this has uploaded and downloaded
