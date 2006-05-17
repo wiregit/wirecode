@@ -132,4 +132,13 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting SKIP_FIRST_DOWNLOAD_WARNING =
         FACTORY.createIntSetting("SHOW_FIRST_DOWNLOAD_WARNING", 0);
+    
+    /**
+	 * Default action for situations when trying to download existing file.
+	 * 0 - ask - default
+	 * 1 - append (#)
+	 * 2 - save as
+	 */
+    public static final IntSetting DEFAULT_ACTION_FILE_EXISTS =
+        FACTORY.createIntSetting("DEFAULT_ACTION_FILE_EXISTS", 0);
 }
