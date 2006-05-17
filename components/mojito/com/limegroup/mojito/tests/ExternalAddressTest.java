@@ -25,7 +25,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHT;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.handler.request.PingRequestHandler;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -35,14 +35,14 @@ import com.limegroup.mojito.messages.response.PingResponse;
 public class ExternalAddressTest {
     
     public void testSettingExternalAddress() throws Exception {
-        DHT dht1 = new DHT();
+        MojitoDHT dht1 = new MojitoDHT();
         dht1.bind(new InetSocketAddress(2000));
         Context context1 = dht1.getContext();
         
         dht1.setName("DHT-1");
         dht1.start();
         
-        DHT dht2 = new DHT();
+        MojitoDHT dht2 = new MojitoDHT();
         dht2.bind(new InetSocketAddress(3000));
         Context context3 = dht2.getContext();
         

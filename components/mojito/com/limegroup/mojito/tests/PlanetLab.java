@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import com.limegroup.mojito.DHT;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupAdapter;
@@ -97,7 +97,7 @@ public class PlanetLab {
         List dhts = new ArrayList(number);
         for(int i = 0; i < number; i++) {
             try {
-                DHT dht = new DHT("DHT-" + i);
+                MojitoDHT dht = new MojitoDHT("DHT-" + i);
                 statsManager.addDHTNode(dht.getContext().getDHTStats());
                 dht.bind(new InetSocketAddress(port+i));
                 
@@ -112,8 +112,8 @@ public class PlanetLab {
         return dhts;
     }
     
-    public static DHT createBootstrapDHT(int port) {
-        return (DHT)createDHTs(port, 1).get(0);
+    public static MojitoDHT createBootstrapDHT(int port) {
+        return (MojitoDHT)createDHTs(port, 1).get(0);
     }
     
     public static void bootstrap(List dhts, final InetSocketAddress dst, final int testNumber) {
@@ -131,7 +131,7 @@ public class PlanetLab {
         
         for(int i = 0; i < dhts.size(); i++) {
             final int index = i;
-            final DHT dht = (DHT)dhts.get(i);
+            final MojitoDHT dht = (MojitoDHT)dhts.get(i);
             
             try {
                 
@@ -256,7 +256,7 @@ public class PlanetLab {
         List dhts = null;
         switch(test) {
             case 0:
-                DHT dht = createBootstrapDHT(port);
+                MojitoDHT dht = createBootstrapDHT(port);
                 System.out.println("Bootstrap DHT " + dht + " is ready!");
                 break;
             case 1: //bootstrap test
@@ -285,7 +285,7 @@ public class PlanetLab {
         
         private static final Random GENERATOR = new Random();
         
-        private DHT dht;
+        private MojitoDHT dht;
         private SocketAddress bootstrapServer;
         
         private KUID localNodeId;
@@ -298,7 +298,7 @@ public class PlanetLab {
         
         private long lastPublishTime;
         
-        public DHTController(DHT dht, SocketAddress bootstrapServer, String value) {
+        public DHTController(MojitoDHT dht, SocketAddress bootstrapServer, String value) {
             this.dht = dht;
             this.bootstrapServer = bootstrapServer;
             

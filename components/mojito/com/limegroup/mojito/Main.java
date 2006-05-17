@@ -80,7 +80,7 @@ public class Main {
         
         for(int i = 0; i < count; i++) {
             try {
-                DHT dht = new DHT("DHT" + i);
+                MojitoDHT dht = new MojitoDHT("DHT" + i);
                 
                 /*if (i % 2 == 0) {
                     dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
@@ -95,7 +95,7 @@ public class Main {
                 dht.start();
 
                 dhts.add(dht);
-                System.out.println(i + ": " + ((DHT)dhts.get(dhts.size()-1)).getLocalNode());
+                System.out.println(i + ": " + ((MojitoDHT)dhts.get(dhts.size()-1)).getLocalNode());
             } catch (IOException err) {
                 System.err.println("Failed to start/connect DHT #" + i);
                 err.printStackTrace();
@@ -104,7 +104,7 @@ public class Main {
         
         long time = 0L;
         for(int i = 1; i < dhts.size(); i++) {
-            long t = ((DHT)dhts.get(i)).bootstrap(((DHT)dhts.get(i-1)).getSocketAddress());
+            long t = ((MojitoDHT)dhts.get(i)).bootstrap(((MojitoDHT)dhts.get(i-1)).getSocketAddress());
             
             if (t >= 0L) {
                 time += t;
@@ -116,7 +116,7 @@ public class Main {
         System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
         int current = 0;
-        DHT dht = (DHT)dhts.get(current);
+        MojitoDHT dht = (MojitoDHT)dhts.get(current);
         
         String help = "help";
         String info = "info";
@@ -181,7 +181,7 @@ public class Main {
                     info(dht);
                 } else if (line.matches(svitch)) {
                     int index = Integer.parseInt(line.split(" ")[1]);
-                    dht = (DHT)dhts.get(index);
+                    dht = (MojitoDHT)dhts.get(index);
                     current = index;
                     info(dht);
                 } else if (line.matches(firewalled)) {
@@ -222,7 +222,7 @@ public class Main {
                     dhtStats.dumpStats(writer, true);
                 } else if (line.matches(restart)) {
                     if (!dht.isRunning()) {
-                        dht = new DHT();
+                        dht = new MojitoDHT();
                         if (addr != null) {
                             dht.bind(new InetSocketAddress(addr, port+current));
                         } else {
@@ -233,7 +233,7 @@ public class Main {
                     }
                 } else if (line.matches(quit)) {
                     for(int i = 0; i < dhts.size(); i++) {
-                        ((DHT)dhts.get(i)).stop();
+                        ((MojitoDHT)dhts.get(i)).stop();
                     }
                     System.exit(0);
                 } else {
@@ -250,7 +250,7 @@ public class Main {
         }
     }
     
-    private static void info(DHT dht) throws Throwable {
+    private static void info(MojitoDHT dht) throws Throwable {
         System.out.println("Local ContactNode: " + dht.getLocalNode());
         System.out.println("Is running: " + dht.isRunning());
         System.out.println("Database Size: " + dht.getDatabase().size());
@@ -258,7 +258,7 @@ public class Main {
         System.out.println("Size: " + dht.size());
     }
     
-    private static void list(DHT dht, String[] line) throws Throwable {
+    private static void list(MojitoDHT dht, String[] line) throws Throwable {
         StringBuffer buffer = new StringBuffer("\n");
         
         if(line[1].equals("db")) {
@@ -279,7 +279,7 @@ public class Main {
         System.out.println(buffer);
     }
     
-    private static void ping(DHT dht, String[] line) throws Throwable {
+    private static void ping(MojitoDHT dht, String[] line) throws Throwable {
         String host = line[1];
         int port = Integer.parseInt(line[2]);
         
@@ -301,7 +301,7 @@ public class Main {
         });
     }
     
-    private static void reqstats(DHT dht, String[] line) throws IOException{
+    private static void reqstats(MojitoDHT dht, String[] line) throws IOException{
         String host = line[1];
         int port = Integer.parseInt(line[2]);
         String typeString = line[3];
@@ -336,7 +336,7 @@ public class Main {
         dht.stats(addr, type, listener);
     }
     
-    private static void bootstrap(DHT dht, String[] line) throws Throwable {
+    private static void bootstrap(MojitoDHT dht, String[] line) throws Throwable {
         String host = line[1];
         int port = Integer.parseInt(line[2]);
         
@@ -354,7 +354,7 @@ public class Main {
         });
     }
     
-    private static void put(DHT dht, final String[] line) throws Throwable {
+    private static void put(MojitoDHT dht, final String[] line) throws Throwable {
         MessageDigest md = MessageDigest.getInstance("SHA1");
         
         KUID key = null;
@@ -395,7 +395,7 @@ public class Main {
         });
     }
     
-    private static void remove(DHT dht, final String[] line) throws Throwable {
+    private static void remove(MojitoDHT dht, final String[] line) throws Throwable {
         MessageDigest md = MessageDigest.getInstance("SHA1");
         
         KUID key = null;
@@ -423,7 +423,7 @@ public class Main {
         });
     }
     
-    private static void get(DHT dht, String[] line) throws Throwable {
+    private static void get(MojitoDHT dht, String[] line) throws Throwable {
         MessageDigest md = MessageDigest.getInstance("SHA1");
         
         KUID key = null;
@@ -483,7 +483,7 @@ public class Main {
         System.out.println();
     }
     
-    private static void load(DHT dht, String[] line) {
+    private static void load(MojitoDHT dht, String[] line) {
         if (line[1].equals("rt")) {
             Context context = dht.getContext();
             if (context.getRouteTable().load()) {
@@ -501,7 +501,7 @@ public class Main {
         }
     }
     
-    private static void store(DHT dht, String[] line) {
+    private static void store(MojitoDHT dht, String[] line) {
         if (line[1].equals("rt")) {
             Context context = dht.getContext();
             context.getRouteTable().store();

@@ -22,18 +22,18 @@ package com.limegroup.mojito.tests;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import com.limegroup.mojito.DHT;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.KUID;
 
 
 public class CacheForwardTest {
 
     public void testCacheForward() {
-        DHT originalRequesterDHT = new DHT("DHT-1");
+        MojitoDHT originalRequesterDHT = new MojitoDHT("DHT-1");
         
-        DHT firstStorer = new DHT("DHT-2");
+        MojitoDHT firstStorer = new MojitoDHT("DHT-2");
         
-        DHT secondStorer = new DHT("DHT-3");
+        MojitoDHT secondStorer = new MojitoDHT("DHT-3");
         try {
             originalRequesterDHT.bind(new InetSocketAddress("localhost",3000));
             firstStorer.bind(new InetSocketAddress("localhost",3001));

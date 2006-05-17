@@ -33,7 +33,7 @@ import java.util.Set;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHT;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StatsListener;
@@ -134,7 +134,7 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         this.statsWriter = statsWriter;
         this.dbWriter = dbWriter;
         this.rtWriter = rtWriter;
-        DHT dht = new DHT();
+        MojitoDHT dht = new MojitoDHT();
         try {
             dht.bind(new InetSocketAddress(localPort));
             

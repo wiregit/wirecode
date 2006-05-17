@@ -44,17 +44,17 @@ import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.settings.ContextSettings;
 
 
-public class DHT {
+public class MojitoDHT {
     
-    private static final Log LOG = LogFactory.getLog(DHT.class);
+    private static final Log LOG = LogFactory.getLog(MojitoDHT.class);
     
     private Context context;
     
-    public DHT() {
+    public MojitoDHT() {
         context = new Context();
     }
     
-    public DHT(String name) {
+    public MojitoDHT(String name) {
         context = new Context(name);
     }
     

@@ -24,7 +24,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.DHT;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -45,7 +45,7 @@ public class StatsRPCTest {
         int port = 4000;
         try {
             System.out.println("Starting stats server");
-            DHT dht = new DHT("DHT-StatsServer");
+            MojitoDHT dht = new MojitoDHT("DHT-StatsServer");
             SocketAddress sac = new InetSocketAddress("localhost",port); 
             dht.bind(sac);
             dht.start();
@@ -53,7 +53,7 @@ public class StatsRPCTest {
             System.out.println("Starting Node");
             SocketAddress sac2 = new InetSocketAddress("localhost",port+1);
             KUID nodeID = KUID.createRandomNodeID(sac2);
-            final DHT dht2 = new DHT("DHT-2");
+            final MojitoDHT dht2 = new MojitoDHT("DHT-2");
             dht2.bind(sac2,nodeID);
             dht2.start();
             
