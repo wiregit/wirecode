@@ -272,12 +272,64 @@ public abstract class MessageRouter {
     private long _lastQueryKeyTime;
     
     /**
+     * Map of Message.class -> MessageHandler
+     */
+    private Map messageHandlers = new HashMap();
+    
+    /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
         _clientGUID=RouterService.getMyGUID();
+        
+        setHandler(PingRequest.class, new PingRequestHandler());
+        setHandler(PingReply.class, new PingReplyHandler());
+        setHandler(QueryRequest.class, new QueryRequestHandler());
+        setHandler(QueryReply.class, new QueryReplyHandler());
+        setHandler(PushRequest.class, new PushRequestHandler());
+        setHandler(ResetTableMessage.class, new ResetTableMessageHandler());
+        setHandler(PatchTableMessage.class, new PatchTableMessageHandler());
+        setHandler(TCPConnectBackVendorMessage.class, new TCPConnectBackVendorMessageHandler());
+        setHandler(UDPConnectBackVendorMessage.class, new UDPConnectBackVendorMessageHandler());
+        setHandler(TCPConnectBackRedirect.class, new TCPConnectBackRedirectHandler());
+        setHandler(UDPConnectBackRedirect.class, new UDPConnectBackRedirectHandler());
+        setHandler(PushProxyRequest.class, new PushProxyRequestHandler());
+        setHandler(QueryStatusResponse.class, new QueryStatusResponseHandler());
+        setHandler(GiveStatsVendorMessage.class, new GiveStatsVendorMessageHandler());
+        setHandler(StatisticVendorMessage.class, new StatisticVendorMessageHandler());
+        setHandler(HeadPing.class, new HeadPingHandler());
+        setHandler(SimppRequestVM.class, new SimppRequestVMHandler());
+        setHandler(SimppVM.class, new SimppVMHandler());
+        setHandler(UpdateRequest.class, new UpdateRequestHandler());
+        setHandler(UpdateResponse.class, new UpdateResponseHandler());
+        setHandler(HeadPong.class, new HeadPongHandler());
+        setHandler(VendorMessage.class, new VendorMessageHandler());
     }
 
+    public void setHandler(Class clazz, MessageHandler handler) {
+        if (clazz == null) {
+            throw new NullPointerException("Class is null");
+        }
+        
+        if (handler == null) {
+            throw new NullPointerException("MessageHandler is null");
+        }
+        
+        Object o = messageHandlers.put(clazz, handler);
+        if (o != null && LOG.isErrorEnabled()) {
+            LOG.error("There was already a MessageHandler of type " + o.getClass()
+                    + " registered for Messages of type " + clazz);
+        }
+    }
+    
+    public MessageHandler getHandler(Message message) {
+        return getHandler(message.getClass());
+    }
+    
+    public MessageHandler getHandler(Class clazz) {
+        return (MessageHandler)messageHandlers.get(clazz);
+    }
+    
     /**
      * Links the MessageRouter up with the other back end pieces
      */
@@ -387,89 +439,9 @@ public abstract class MessageRouter {
         // Increment hops and decrease TTL.
         msg.hop();
 	   
-        if(msg instanceof PingRequest) {
-            ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
-            handlePingRequestPossibleDuplicate((PingRequest)msg, 
-											   receivingConnection);
-		} else if (msg instanceof PingReply) {
-			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
-            handlePingReply((PingReply)msg, receivingConnection);
-		} else if (msg instanceof QueryRequest) {
-			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
-            handleQueryRequestPossibleDuplicate(
-                (QueryRequest)msg, receivingConnection);
-		} else if (msg instanceof QueryReply) {
-			ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
-            // if someone sent a TCP QueryReply with the MCAST header,
-            // that's bad, so ignore it.
-            QueryReply qmsg = (QueryReply)msg;
-            handleQueryReply(qmsg, receivingConnection);            
-		} else if (msg instanceof PushRequest) {
-			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
-            handlePushRequest((PushRequest)msg, receivingConnection);
-		} else if (msg instanceof ResetTableMessage) {
-			ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handleResetTableMessage((ResetTableMessage)msg,
-                                    receivingConnection);
-		} else if (msg instanceof PatchTableMessage) {
-			ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handlePatchTableMessage((PatchTableMessage)msg,
-                                    receivingConnection);            
-        }
-        else if (msg instanceof TCPConnectBackVendorMessage) {
-            ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
-            handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
-                                        receivingConnection);
-        }
-        else if (msg instanceof UDPConnectBackVendorMessage) {
-			ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
-            handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
-                                        receivingConnection);
-        }
-        else if (msg instanceof TCPConnectBackRedirect) {
-            handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
-                                         receivingConnection);
-        }
-        else if (msg instanceof UDPConnectBackRedirect) {
-            handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
-                                         receivingConnection);
-        }
-        else if (msg instanceof PushProxyRequest) {
-            handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
-        }
-        else if (msg instanceof QueryStatusResponse) {
-            handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
-        }
-        else if (msg instanceof GiveStatsVendorMessage) {
-            //TODO: add the statistics recording code
-            handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
-        }
-        else if(msg instanceof StatisticVendorMessage) {
-            //TODO: add the statistics recording code
-            handleStatisticsMessage(
-                            (StatisticVendorMessage)msg, receivingConnection);
-        }
-        else if (msg instanceof HeadPing) {
-        	//TODO: add the statistics recording code
-        	handleHeadPing((HeadPing)msg, receivingConnection);
-        }
-        else if(msg instanceof SimppRequestVM) {
-            handleSimppRequest((SimppRequestVM)msg, receivingConnection);
-        }
-        else if(msg instanceof SimppVM) {
-            handleSimppVM((SimppVM)msg);
-        } 
-        else if(msg instanceof UpdateRequest) {
-            handleUpdateRequest((UpdateRequest)msg, receivingConnection);
-        }
-        else if(msg instanceof UpdateResponse) {
-            handleUpdateResponse((UpdateResponse)msg, receivingConnection);
-        }
-        else if (msg instanceof HeadPong) {  
-            handleHeadPong((HeadPong)msg, receivingConnection); 
-        } 
-        else if (msg instanceof VendorMessage) {
-            receivingConnection.handleVendorMessage((VendorMessage)msg);
+        MessageHandler handler = getHandler(msg);
+        if (handler != null) {
+            handler.handleMessage(msg, receivingConnection);
         }
         
         //This may trigger propogation of query route tables.  We do this AFTER
@@ -479,6 +451,168 @@ public abstract class MessageRouter {
         notifyMessageListener(msg, receivingConnection);
     }
 
+    
+    
+    public static interface MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection);
+    }
+    
+    private class PingRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
+            handlePingRequestPossibleDuplicate((PingRequest)msg, 
+                                               receivingConnection);
+        }
+    }
+    
+    private class PingReplyHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
+            handlePingReply((PingReply)msg, receivingConnection);
+        }
+    }
+    
+    private class QueryRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
+            handleQueryRequestPossibleDuplicate(
+                (QueryRequest)msg, receivingConnection);
+        }
+    }
+    
+    private class QueryReplyHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
+            // if someone sent a TCP QueryReply with the MCAST header,
+            // that's bad, so ignore it.
+            QueryReply qmsg = (QueryReply)msg;
+            handleQueryReply(qmsg, receivingConnection);
+        }
+    }
+    
+    private class PushRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
+            handlePushRequest((PushRequest)msg, receivingConnection);
+        }
+    }
+    
+    private class ResetTableMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            handleResetTableMessage((ResetTableMessage)msg,
+                                    receivingConnection);
+        }
+    }
+    
+    private class PatchTableMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            handlePatchTableMessage((PatchTableMessage)msg,
+                                    receivingConnection); 
+        }
+    }
+    
+    private class TCPConnectBackVendorMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
+            handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
+                                        receivingConnection);
+        }
+    }
+    
+    private class UDPConnectBackVendorMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
+            handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
+                                        receivingConnection);
+        }
+    }
+    
+    private class TCPConnectBackRedirectHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
+                    receivingConnection);
+        }
+    }
+    
+    private class UDPConnectBackRedirectHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
+                    receivingConnection);
+        }
+    }
+    
+    private class PushProxyRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
+        }
+    }
+    
+    private class QueryStatusResponseHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
+        }
+    }
+    
+    private class GiveStatsVendorMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            // TODO: add the statistics recording code
+            handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
+        }
+    }
+    
+    private class StatisticVendorMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            // TODO: add the statistics recording code
+            handleStatisticsMessage(
+                            (StatisticVendorMessage)msg, receivingConnection);
+        }
+    }
+    
+    private class HeadPingHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            //TODO: add the statistics recording code
+            handleHeadPing((HeadPing)msg, receivingConnection);
+        }
+    }
+    
+    private class SimppRequestVMHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handleSimppRequest((SimppRequestVM)msg, receivingConnection);
+        }
+    }
+    
+    private class SimppVMHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handleSimppVM((SimppVM)msg);
+        }
+    }
+    
+    private class UpdateRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handleUpdateRequest((UpdateRequest)msg, receivingConnection);
+        }
+    }
+    
+    private class UpdateResponseHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handleUpdateResponse((UpdateResponse)msg, receivingConnection);
+        }
+    }
+    
+    private class HeadPongHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            handleHeadPong((HeadPong)msg, receivingConnection); 
+        }
+    }
+    
+    private class VendorMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+            receivingConnection.handleVendorMessage((VendorMessage)msg);
+        }
+    }
+    
     /**
      * Notifies any message listeners of this message's guid about the message.
      * This holds no locks.

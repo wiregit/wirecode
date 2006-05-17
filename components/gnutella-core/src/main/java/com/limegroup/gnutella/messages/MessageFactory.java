@@ -233,6 +233,14 @@ public class MessageFactory {
         // GnutellaDev page. This also catches those TTLs and hops whose
         // high bit is set to 0.
         byte func = header[16];
+        
+        // Get Parser based on opcode.
+        MessageParser parser = getParser(func);
+        if (parser == null) {
+            ReceivedErrorStat.INVALID_CODE.incrementStat();
+            throw new BadPacketException("Unrecognized function code: " + func);
+        }
+        
         byte ttl = header[17];
         byte hops = header[18];
 
@@ -263,13 +271,6 @@ public class MessageFactory {
         // Delayed GUID allocation
         byte[] guid = new byte[16];
         System.arraycopy(header, 0, guid, 0, guid.length /* 16 */);
-        
-        // Dispatch based on opcode.
-        MessageParser parser = getParser(func);
-        if (parser == null) {
-            ReceivedErrorStat.INVALID_CODE.incrementStat();
-            throw new BadPacketException("Unrecognized function code: " + func);
-        }
         
         return parser.parse(guid, ttl, hops, payload, network);
     }

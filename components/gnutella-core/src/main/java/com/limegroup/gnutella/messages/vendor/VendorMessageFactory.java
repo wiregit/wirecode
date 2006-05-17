@@ -77,14 +77,11 @@ public class VendorMessageFactory {
             PARSERS.put(vendorId, selectors);
         }
         
-        Integer key = new Integer(selector);
-        if (LOG.isErrorEnabled() && selectors.containsKey(key)) {
-            Class clazz = selectors.get(key).getClass();
-            LOG.error("There is already a VendorMessageParser of type " 
-                + clazz + " registered for selector " + selector);
+        Object o = selectors.put(new Integer(selector), parser);
+        if (o != null && LOG.isErrorEnabled()) {
+            LOG.error("There was already a VendorMessageParser of type " 
+                + o.getClass() + " registered for selector " + selector);
         }
-        
-        selectors.put(key, parser);
     }
     
     public static VendorMessageParser getParser(int selector, byte[] vendorId) {
