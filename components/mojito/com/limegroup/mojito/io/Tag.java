@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.NoOpResponseHandler;
+import com.limegroup.mojito.handler.RequestHandler;
 import com.limegroup.mojito.handler.ResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -118,6 +119,11 @@ class Tag {
         this.timeout = timeout;
     }
     
+    public boolean isRequest() {
+        return responseHandler != null 
+                && (message instanceof RequestMessage);
+    }
+    
     public int getSize() {
         return size;
     }
@@ -140,11 +146,16 @@ class Tag {
     
     public boolean send(DatagramChannel channel) throws IOException {
         if (channel.send(data, dst) != 0) {
-            sent = System.currentTimeMillis();
-            data = null;
+            sent();
             return true;
         }
         return false;
+    }
+    
+    public Receipt sent() {
+        sent = System.currentTimeMillis();
+        data = null;
+        return getReceipt();
     }
     
     public Receipt getReceipt() throws IllegalStateException {
@@ -152,8 +163,7 @@ class Tag {
             throw new IllegalStateException("Message has not been sent yet!");
         }
         
-        if (responseHandler != null 
-                && message instanceof RequestMessage) {
+        if (isRequest()) {
             return new Receipt();
         } else {
             return null;
@@ -188,6 +198,10 @@ class Tag {
         
         public RequestMessage getRequestMessage() {
             return (RequestMessage)Tag.this.getMessage();
+        }
+        
+        public int getSentMessageSize() {
+            return getSize();
         }
         
         public void received() {

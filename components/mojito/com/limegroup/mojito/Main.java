@@ -34,12 +34,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.io.LimeMessageDispatcherImpl2;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.request.StatsRequest;
@@ -74,6 +77,11 @@ public class Main {
             }
         }
         
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        ConnectionSettings.PORT.setValue(port);
+        ConnectionSettings.FORCED_PORT.setValue(port);
+        
         InetAddress addr = host != null ? InetAddress.getByName(host) : null;
         
         ArrayList dhts = new ArrayList();
@@ -82,9 +90,12 @@ public class Main {
             try {
                 DHT dht = new DHT("DHT" + i);
                 
-                /*if (i % 2 == 0) {
-                    dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
-                }*/
+                dht.setMessageDispatcher(LimeMessageDispatcherImpl2.class);
+                dht.setThreadFactory(new ThreadFactory() {
+                    public Thread createThread(Runnable runnable, String name) {
+                        return new ManagedThread(runnable, name);
+                    }
+                });
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
