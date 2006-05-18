@@ -36,9 +36,13 @@ public class LimeDHTMessage extends VendorMessage {
     
     public static LimeDHTMessage createMessage(DHTMessage msg) throws BadPacketException, IOException {
         byte[] payload = InputOutputUtils.serialize(msg);
-        return new LimeDHTMessage(makeGuid(), (byte)1, (byte)0, F_LIME_VENDOR_ID, F_LIME_DHT_MESSAGE, 0, payload, N_UDP);
+        return createMessage(payload);
     }
     
+    public static LimeDHTMessage createMessage(byte[] payload) throws BadPacketException, IOException {
+        return new LimeDHTMessage(makeGuid(), (byte)1, (byte)0, F_LIME_VENDOR_ID, F_LIME_DHT_MESSAGE, 0, payload, N_UDP);
+    }
+
     public DHTMessage getDHTMessage(SocketAddress src) throws MessageFormatException {
         return InputOutputUtils.deserialize(src, getPayload());
     }

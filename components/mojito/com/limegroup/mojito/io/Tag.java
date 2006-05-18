@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.NoOpResponseHandler;
-import com.limegroup.mojito.handler.RequestHandler;
 import com.limegroup.mojito.handler.ResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -142,6 +141,10 @@ class Tag {
     
     public DHTMessage getMessage() {
         return message;
+    }
+    
+    public ByteBuffer getData() {
+        return data;
     }
     
     public boolean send(DatagramChannel channel) throws IOException {

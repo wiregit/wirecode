@@ -31,13 +31,22 @@ import com.limegroup.mojito.messages.DHTMessage;
 
 public final class InputOutputUtils {
 
+    private static final boolean COMPRESS = true;
+    
     private InputOutputUtils() {
     }
 
     public static byte[] serialize(DHTMessage message) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
-        GZIPOutputStream gz = new GZIPOutputStream(baos);
-        MessageOutputStream out = new MessageOutputStream(gz);
+        
+        MessageOutputStream out = null;
+        if (COMPRESS) {
+            GZIPOutputStream gz = new GZIPOutputStream(baos);
+            out = new MessageOutputStream(gz);
+        } else {
+            out = new MessageOutputStream(baos);
+        }
+        
         out.write(message);
         out.close();
         return baos.toByteArray();
@@ -47,8 +56,15 @@ public final class InputOutputUtils {
             throws MessageFormatException {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
-            GZIPInputStream gz = new GZIPInputStream(bais);
-            MessageInputStream in = new MessageInputStream(gz);
+            
+            MessageInputStream in = null;
+            if (COMPRESS) {
+                GZIPInputStream gz = new GZIPInputStream(bais);
+                in = new MessageInputStream(gz);
+            } else {
+                in = new MessageInputStream(bais);
+            }
+            
             DHTMessage message = in.readMessage(src);
             in.close();
             return message;

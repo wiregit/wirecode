@@ -193,10 +193,10 @@ public abstract class MessageDispatcher implements Runnable {
             return false;
         }
         
-        return enqueueForSend(tag);
+        return enqueueOutput(tag);
     }
     
-    protected boolean enqueueForSend(Tag tag) {
+    protected boolean enqueueOutput(Tag tag) {
         synchronized(outputQueue) {
             outputQueue.add(tag);
             interestWrite(true);
@@ -335,7 +335,7 @@ public abstract class MessageDispatcher implements Runnable {
                 try {
                     if (tag.send(channel)) {
                         // Wohoo! Message was sent!
-                        enqueueForReceive(tag);
+                        registerInput(tag);
                     } else {
                         // Dang! Re-Try next time!
                         outputQueue.addFirst(tag);
@@ -352,7 +352,7 @@ public abstract class MessageDispatcher implements Runnable {
         }
     }
     
-    protected void enqueueForReceive(Tag tag) {
+    protected void registerInput(Tag tag) {
         networkStats.SENT_MESSAGES_COUNT.incrementStat();
         networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize());
         

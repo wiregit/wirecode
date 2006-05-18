@@ -97,13 +97,13 @@ public class LimeMessageDispatcherImpl2 extends MessageDispatcher
         processingQueue.clear();
     }
     
-    protected boolean enqueueForSend(Tag tag) {
+    protected boolean enqueueOutput(Tag tag) {
         try {
             InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
-            LimeDHTMessage msg = LimeDHTMessage.createMessage(tag.getMessage());
+            LimeDHTMessage msg = LimeDHTMessage.createMessage(tag.getData().array());
             UDPService.instance().send(msg, dst);
             tag.sent();
-            enqueueForReceive(tag);
+            registerInput(tag);
             return true;
         } catch (BadPacketException e) {
             LOG.error("", e);
