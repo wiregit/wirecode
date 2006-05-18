@@ -878,10 +878,22 @@ MEDIA_REWIND_BUTTON_TIP=Eelmine
 ################################################################################
 # Key/value pairs for DownloaderDialog
 ################################################################################
+#### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
+#? DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=
+#### DOWNLOADER_DIALOG_DEFAULT_ACTION_APPEND_LABEL=Always Append (#)
+#? DOWNLOADER_DIALOG_DEFAULT_ACTION_APPEND_LABEL=
+#### DOWNLOADER_DIALOG_DEFAULT_ACTION_ASK_LABEL=Always Ask
+#? DOWNLOADER_DIALOG_DEFAULT_ACTION_ASK_LABEL=
+#### DOWNLOADER_DIALOG_DEFAULT_ACTION_LABEL=Choose a Default Action:
+#? DOWNLOADER_DIALOG_DEFAULT_ACTION_LABEL=
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Save As...
 DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Salvesta eraldi...
-#### DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Choose a Different Location for the Download
+#### DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Choose a different location for the Download
 DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Vali muu koht tirimiseks.
+#### DOWNLOADER_DIALOG_APPEND_ACTION_NAME=Append (#)
+#? DOWNLOADER_DIALOG_APPEND_ACTION_NAME=
+#### DOWNLOADER_DIALOG_APPEND_ACTION_SHORT_DESCRIPTION=Appends (#) to filename
+#? DOWNLOADER_DIALOG_APPEND_ACTION_SHORT_DESCRIPTION=
 #### DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Cancel the Download
 DOWNLOADER_DIALOG_CANCEL_ACTION_SHORT_DESCRIPTION=Hülga tirimine.
 #### DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Overwrite
@@ -2384,6 +2396,10 @@ LICENSE_UNKNOWN_INVALID=See fail võib vajada litsensi, et avaneda ja sisu vaada
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=Salvestan
+#### OPTIONS_SAVE_BASIC_MAIN_TITLE=Basic
+#? OPTIONS_SAVE_BASIC_MAIN_TITLE=
+#### OPTIONS_SAVE_ADVANCED_MAIN_TITLE=Advanced
+#? OPTIONS_SAVE_ADVANCED_MAIN_TITLE=
 #### OPTIONS_SHARED_MAIN_TITLE=Sharing
 OPTIONS_SHARED_MAIN_TITLE=Jagan
 #### OPTIONS_SPEED_MAIN_TITLE=Speed
@@ -2851,6 +2867,20 @@ OPTIONS_POPUPS_TITLE=Teatajad
 OPTIONS_POPUPS_LABEL=Näita teateid millele oled valinud kas 'Ära mulle seda teadet enam edasta' või 'Alati kasuta seda vastust'.
 #### OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert to Default:
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Taasta algseadistus:
+
+################################################################################
+# Key/value pairs for default action when trying to download existing file
+################################################################################
+#### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=
+#### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_LABEL=You can choose the default action that LimeWire will perform when you try to download a file that already exists on disk.
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_LABEL=
+#### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_SAVE_AS_LABEL=Always Show the 'Save As' Dialog
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_SAVE_AS_LABEL=
+#### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_APPEND_LABEL=Always Append (#) to the Filename
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_APPEND_LABEL=
+#### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=Always Ask What to do
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
