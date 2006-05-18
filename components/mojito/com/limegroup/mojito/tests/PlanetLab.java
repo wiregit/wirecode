@@ -381,14 +381,9 @@ public class PlanetLab {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    try {
-                        running = false;
-                        dht.stop();
-                        planetlabStats.CHURN_DISCONNECTS.incrementStat();
-                        
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    running = false;
+                    dht.stop();
+                    planetlabStats.CHURN_DISCONNECTS.incrementStat();
                     
                     long sleep = minOffline + GENERATOR.nextInt((int)(maxOffline-minOffline));
                     try {

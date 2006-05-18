@@ -127,7 +127,7 @@ public class MojitoDHT {
         context.start();
     }
     
-    public void stop() throws IOException {
+    public void stop() {
         context.stop();
     }
     

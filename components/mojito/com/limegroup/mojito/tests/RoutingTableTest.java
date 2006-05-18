@@ -66,12 +66,7 @@ public class RoutingTableTest {
         testMergeBuckets(routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
-        try {
-            dht.stop();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        dht.stop();
         System.exit(0);
     }
     

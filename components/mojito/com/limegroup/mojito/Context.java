@@ -263,6 +263,8 @@ public class Context {
     }
     
     public void setFirewalled(boolean firewalled) {
+        //TODO: if status has changed from firewalled to non-firewalled
+        //then re-bootstrap to the network
         localNode.setFirewalled(firewalled);
     }
     
