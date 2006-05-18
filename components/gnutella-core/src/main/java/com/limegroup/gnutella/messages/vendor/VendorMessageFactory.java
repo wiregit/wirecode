@@ -3,7 +3,6 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -14,13 +13,14 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutella.util.IntHashMap;
 
 public class VendorMessageFactory {
     
     private static final Log LOG = LogFactory.getLog(VendorMessageFactory.class);
     
     /** Map (VendorID -> Map (selector -> Parser)) */
-    private static final Map PARSERS = new TreeMap(new ByteArrayComparator());
+    private static final Map VENDORS = new TreeMap(new ByteArrayComparator());
     
     private static final BadPacketException UNRECOGNIZED_EXCEPTION =
         new BadPacketException("Unrecognized Vendor Message");
@@ -71,13 +71,13 @@ public class VendorMessageFactory {
             throw new NullPointerException("VendorMessageParser is null");
         }
         
-        Map selectors = (Map)PARSERS.get(vendorId);
+        IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
         if (selectors == null) {
-            selectors = new HashMap();
-            PARSERS.put(vendorId, selectors);
+            selectors = new IntHashMap();
+            VENDORS.put(vendorId, selectors);
         }
         
-        Object o = selectors.put(new Integer(selector), parser);
+        Object o = selectors.put(selector, parser);
         if (o != null && LOG.isErrorEnabled()) {
             LOG.error("There was already a VendorMessageParser of type " 
                 + o.getClass() + " registered for selector " + selector);
@@ -85,11 +85,11 @@ public class VendorMessageFactory {
     }
     
     public static VendorMessageParser getParser(int selector, byte[] vendorId) {
-        Map selectors = (Map)PARSERS.get(vendorId);
+        IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
         if (selectors == null) {
             return null;
         }
-        return (VendorMessageParser)selectors.get(new Integer(selector));
+        return (VendorMessageParser)selectors.get(selector);
     }
     
     public static VendorMessage deriveVendorMessage(byte[] guid, byte ttl,

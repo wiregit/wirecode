@@ -2,29 +2,59 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.net.InetSocketAddress;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.TreeMap;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.vendor.ContentResponse;
+import com.limegroup.gnutella.messages.vendor.GiveStatsVendorMessage;
+import com.limegroup.gnutella.messages.vendor.HeadPing;
+import com.limegroup.gnutella.messages.vendor.HeadPong;
+import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
+import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
+import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
+import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
+import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
+import com.limegroup.gnutella.messages.vendor.SimppVM;
+import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
+import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
+import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
+import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
+import com.limegroup.gnutella.messages.vendor.UpdateRequest;
+import com.limegroup.gnutella.messages.vendor.UpdateResponse;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
@@ -35,7 +65,6 @@ import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.StatisticsSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
@@ -43,20 +72,16 @@ import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
-import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.upelection.PromotionManager;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.FixedsizeHashMap;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.NoMoreStorageException;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.version.UpdateHandler;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 
 /**
@@ -272,9 +297,19 @@ public abstract class MessageRouter {
     private long _lastQueryKeyTime;
     
     /**
-     * Map of Message.class -> MessageHandler
+     * Class -> MessageHandler
      */
-    private Map messageHandlers = new HashMap();
+    private Map messageHandlers = new IdentityHashMap();
+    
+    /**
+     * Class -> (UDP) MessageHandler
+     */
+    private Map udpMessageHandlers = new IdentityHashMap();
+    
+    /**
+     * Class -> (Multicast) MessageHandler
+     */
+    private Map multicastMessageHandlers = new IdentityHashMap();
     
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -282,31 +317,51 @@ public abstract class MessageRouter {
     protected MessageRouter() {
         _clientGUID=RouterService.getMyGUID();
         
-        setHandler(PingRequest.class, new PingRequestHandler());
-        setHandler(PingReply.class, new PingReplyHandler());
-        setHandler(QueryRequest.class, new QueryRequestHandler());
-        setHandler(QueryReply.class, new QueryReplyHandler());
-        setHandler(PushRequest.class, new PushRequestHandler());
-        setHandler(ResetTableMessage.class, new ResetTableMessageHandler());
-        setHandler(PatchTableMessage.class, new PatchTableMessageHandler());
-        setHandler(TCPConnectBackVendorMessage.class, new TCPConnectBackVendorMessageHandler());
-        setHandler(UDPConnectBackVendorMessage.class, new UDPConnectBackVendorMessageHandler());
-        setHandler(TCPConnectBackRedirect.class, new TCPConnectBackRedirectHandler());
-        setHandler(UDPConnectBackRedirect.class, new UDPConnectBackRedirectHandler());
-        setHandler(PushProxyRequest.class, new PushProxyRequestHandler());
-        setHandler(QueryStatusResponse.class, new QueryStatusResponseHandler());
-        setHandler(GiveStatsVendorMessage.class, new GiveStatsVendorMessageHandler());
-        setHandler(StatisticVendorMessage.class, new StatisticVendorMessageHandler());
-        setHandler(HeadPing.class, new HeadPingHandler());
-        setHandler(SimppRequestVM.class, new SimppRequestVMHandler());
-        setHandler(SimppVM.class, new SimppVMHandler());
-        setHandler(UpdateRequest.class, new UpdateRequestHandler());
-        setHandler(UpdateResponse.class, new UpdateResponseHandler());
-        setHandler(HeadPong.class, new HeadPongHandler());
-        setHandler(VendorMessage.class, new VendorMessageHandler());
+        setMessageHandler(PingRequest.class, new PingRequestHandler());
+        setMessageHandler(PingReply.class, new PingReplyHandler());
+        setMessageHandler(QueryRequest.class, new QueryRequestHandler());
+        setMessageHandler(QueryReply.class, new QueryReplyHandler());
+        setMessageHandler(PushRequest.class, new PushRequestHandler());
+        setMessageHandler(ResetTableMessage.class, new ResetTableHandler());
+        setMessageHandler(PatchTableMessage.class, new PatchTableHandler());
+        setMessageHandler(TCPConnectBackVendorMessage.class, new TCPConnectBackHandler());
+        setMessageHandler(UDPConnectBackVendorMessage.class, new UDPConnectBackHandler());
+        setMessageHandler(TCPConnectBackRedirect.class, new TCPConnectBackRedirectHandler());
+        setMessageHandler(UDPConnectBackRedirect.class, new UDPConnectBackRedirectHandler());
+        setMessageHandler(PushProxyRequest.class, new PushProxyRequestHandler());
+        setMessageHandler(QueryStatusResponse.class, new QueryStatusResponseHandler());
+        setMessageHandler(GiveStatsVendorMessage.class, new GiveStatsHandler());
+        setMessageHandler(StatisticVendorMessage.class, new StatisticsHandler());
+        setMessageHandler(HeadPing.class, new HeadPingHandler());
+        setMessageHandler(SimppRequestVM.class, new SimppRequestVMHandler());
+        setMessageHandler(SimppVM.class, new SimppVMHandler());
+        setMessageHandler(UpdateRequest.class, new UpdateRequestHandler());
+        setMessageHandler(UpdateResponse.class, new UpdateResponseHandler());
+        setMessageHandler(HeadPong.class, new HeadPongHandler());
+        setMessageHandler(VendorMessage.class, new VendorMessageHandler());
+        
+        setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
+        setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler());
+        setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
+        setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
+        setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
+        setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
+        setUDPMessageHandler(ReplyNumberVendorMessage.class, new UDPReplyNumberMessageHandler());
+        setUDPMessageHandler(GiveStatsVendorMessage.class, new UDPGiveStatsHandler());
+        setUDPMessageHandler(StatisticVendorMessage.class, new UDPStatisticsMessageHandler());
+        setUDPMessageHandler(UDPCrawlerPing.class, new UDPUDPCrawlerPingHandler());
+        setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
+        setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
+        setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
+        
+        setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
+        //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
+        setMulticastMessageHandler(PingRequest.class, new MulticastPingRequestHandler());
+        //setMulticastMessageHandler(PingReply.class, new MulticastPingReplyHandler());
+        setMulticastMessageHandler(PushRequest.class, new MulticastPushRequestHandler());
     }
 
-    public void setHandler(Class clazz, MessageHandler handler) {
+    private static void setHandler(Map handlers, Class clazz, MessageHandler handler) {
         if (clazz == null) {
             throw new NullPointerException("Class is null");
         }
@@ -315,19 +370,39 @@ public abstract class MessageRouter {
             throw new NullPointerException("MessageHandler is null");
         }
         
-        Object o = messageHandlers.put(clazz, handler);
+        Object o = handlers.put(clazz, handler);
         if (o != null && LOG.isErrorEnabled()) {
-            LOG.error("There was already a MessageHandler of type " + o.getClass()
-                    + " registered for Messages of type " + clazz);
+            LOG.error("There was already a MessageHandler of type " 
+                + o.getClass() + " registered for " + clazz);
         }
     }
     
-    public MessageHandler getHandler(Message message) {
-        return getHandler(message.getClass());
+    private static Object getHandler(Map handlers, Class clazz) {
+        return handlers.get(clazz);
     }
     
-    public MessageHandler getHandler(Class clazz) {
-        return (MessageHandler)messageHandlers.get(clazz);
+    public void setMessageHandler(Class clazz, MessageHandler handler) {
+        setHandler(messageHandlers, clazz, handler);
+    }
+    
+    public MessageHandler getMessageHandler(Class clazz) {
+        return (MessageHandler)getHandler(messageHandlers, clazz);
+    }
+    
+    public void setUDPMessageHandler(Class clazz, MessageHandler handler) {
+        setHandler(udpMessageHandlers, clazz, handler);
+    }
+    
+    public MessageHandler getUDPMessageHandler(Class clazz) {
+        return (MessageHandler)getHandler(udpMessageHandlers, clazz);
+    }
+    
+    public void setMulticastMessageHandler(Class clazz, MessageHandler handler) {
+        setHandler(multicastMessageHandlers, clazz, handler);
+    }
+    
+    public MessageHandler getMulticastMessageHandler(Class clazz) {
+        return (MessageHandler)getHandler(multicastMessageHandlers, clazz);
     }
     
     /**
@@ -439,9 +514,14 @@ public abstract class MessageRouter {
         // Increment hops and decrease TTL.
         msg.hop();
 	   
-        MessageHandler handler = getHandler(msg);
-        if (handler != null) {
-            handler.handleMessage(msg, receivingConnection);
+        MessageHandler msgHandler = getMessageHandler(msg.getClass());
+        if (msgHandler != null) {
+            msgHandler.handleMessage(msg, null, receivingConnection);
+        } else if (msg instanceof VendorMessage) {
+            msgHandler = getMessageHandler(VendorMessage.class);
+            if (msgHandler != null) {
+                msgHandler.handleMessage(msg, null, receivingConnection);
+            }
         }
         
         //This may trigger propogation of query route tables.  We do this AFTER
@@ -451,168 +531,6 @@ public abstract class MessageRouter {
         notifyMessageListener(msg, receivingConnection);
     }
 
-    
-    
-    public static interface MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection);
-    }
-    
-    private class PingRequestHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
-            handlePingRequestPossibleDuplicate((PingRequest)msg, 
-                                               receivingConnection);
-        }
-    }
-    
-    private class PingReplyHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
-            handlePingReply((PingReply)msg, receivingConnection);
-        }
-    }
-    
-    private class QueryRequestHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
-            handleQueryRequestPossibleDuplicate(
-                (QueryRequest)msg, receivingConnection);
-        }
-    }
-    
-    private class QueryReplyHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
-            // if someone sent a TCP QueryReply with the MCAST header,
-            // that's bad, so ignore it.
-            QueryReply qmsg = (QueryReply)msg;
-            handleQueryReply(qmsg, receivingConnection);
-        }
-    }
-    
-    private class PushRequestHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
-            handlePushRequest((PushRequest)msg, receivingConnection);
-        }
-    }
-    
-    private class ResetTableMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handleResetTableMessage((ResetTableMessage)msg,
-                                    receivingConnection);
-        }
-    }
-    
-    private class PatchTableMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handlePatchTableMessage((PatchTableMessage)msg,
-                                    receivingConnection); 
-        }
-    }
-    
-    private class TCPConnectBackVendorMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
-            handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
-                                        receivingConnection);
-        }
-    }
-    
-    private class UDPConnectBackVendorMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
-            handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
-                                        receivingConnection);
-        }
-    }
-    
-    private class TCPConnectBackRedirectHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
-                    receivingConnection);
-        }
-    }
-    
-    private class UDPConnectBackRedirectHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
-                    receivingConnection);
-        }
-    }
-    
-    private class PushProxyRequestHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
-        }
-    }
-    
-    private class QueryStatusResponseHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
-        }
-    }
-    
-    private class GiveStatsVendorMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            // TODO: add the statistics recording code
-            handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
-        }
-    }
-    
-    private class StatisticVendorMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            // TODO: add the statistics recording code
-            handleStatisticsMessage(
-                            (StatisticVendorMessage)msg, receivingConnection);
-        }
-    }
-    
-    private class HeadPingHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            //TODO: add the statistics recording code
-            handleHeadPing((HeadPing)msg, receivingConnection);
-        }
-    }
-    
-    private class SimppRequestVMHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handleSimppRequest((SimppRequestVM)msg, receivingConnection);
-        }
-    }
-    
-    private class SimppVMHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handleSimppVM((SimppVM)msg);
-        }
-    }
-    
-    private class UpdateRequestHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handleUpdateRequest((UpdateRequest)msg, receivingConnection);
-        }
-    }
-    
-    private class UpdateResponseHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handleUpdateResponse((UpdateResponse)msg, receivingConnection);
-        }
-    }
-    
-    private class HeadPongHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            handleHeadPong((HeadPong)msg, receivingConnection); 
-        }
-    }
-    
-    private class VendorMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, ManagedConnection receivingConnection) {
-            receivingConnection.handleVendorMessage((VendorMessage)msg);
-        }
-    }
-    
     /**
      * Notifies any message listeners of this message's guid about the message.
      * This holds no locks.
@@ -636,85 +554,30 @@ public abstract class MessageRouter {
 	 *  port of the client node
      */	
 	public void handleUDPMessage(Message msg, InetSocketAddress addr) {
-        // Increment hops and decrement TTL.
+        
+	    // Increment hops and decrement TTL.
         msg.hop();
 
+        // Send UDPConnection messages on to the connection multiplexor
+        // for routing to the appropriate connection processor
+        if (msg instanceof UDPConnectionMessage) {
+            RouterService.getUDPMultiplexor().routeMessage(
+                    (UDPConnectionMessage) msg, addr);
+            return;
+        }
+
         // note: validity of addr/port are checked when message is constructed
-		InetAddress address = addr.getAddress();
-		int port = addr.getPort();
-
-		// Send UDPConnection messages on to the connection multiplexor
-		// for routing to the appropriate connection processor
-		if ( msg instanceof UDPConnectionMessage ) {
-		    RouterService.getUDPMultiplexor().routeMessage((UDPConnectionMessage)msg, addr);
-			return;
-		}
-
-		ReplyHandler handler = new UDPReplyHandler(address, port);
-		
-        if (msg instanceof QueryRequest) {
-            //TODO: compare QueryKey with old generation params.  if it matches
-            //send a new one generated with current params 
-            if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
-                sendAcknowledgement(addr, msg.getGUID());
-                // a TTL above zero may indicate a malicious client, as UDP
-                // messages queries should not be sent with TTL above 1.
-                //if(msg.getTTL() > 0) return;
-                if (!handleUDPQueryRequestPossibleDuplicate(
-                  (QueryRequest)msg, handler) ) {
-                    ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
-                }  
-            }
-            ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
-		} else if (msg instanceof QueryReply) {
-            QueryReply qr = (QueryReply) msg;
-			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
-            int numResps = qr.getResultCount();
-            // only account for OOB stuff if this was response to a 
-            // OOB query, multicast stuff is sent over UDP too....
-            if (!qr.isReplyToMulticastQuery())
-                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-			
-            handleQueryReply(qr, handler);
-            
-		} else if(msg instanceof PingRequest) {
-			ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
-			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
-												  handler, addr);
-		} else if(msg instanceof PingReply) {
-			ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
-            handleUDPPingReply((PingReply)msg, handler, address, port);
-		} else if(msg instanceof PushRequest) {
-			ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
-			handlePushRequest((PushRequest)msg, handler);
-		} else if(msg instanceof LimeACKVendorMessage) {
-			ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
-            handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
+        InetAddress address = addr.getAddress();
+        int port = addr.getPort();
+        
+        ReplyHandler replyHandler = new UDPReplyHandler(address, port);
+        
+        MessageHandler msgHandler = getUDPMessageHandler(msg.getClass());
+        if (msgHandler != null) {
+            msgHandler.handleMessage(msg, addr, replyHandler);
         }
-        else if(msg instanceof ReplyNumberVendorMessage) {
-            handleReplyNumberMessage((ReplyNumberVendorMessage) msg, addr);
-        }
-        else if(msg instanceof GiveStatsVendorMessage) {
-            handleGiveStats((GiveStatsVendorMessage) msg, handler);
-        }
-        else if(msg instanceof StatisticVendorMessage) {
-            handleStatisticsMessage((StatisticVendorMessage)msg, handler);
-        }
-        else if(msg instanceof UDPCrawlerPing) {
-        	//TODO: add the statistics recording code
-        	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
-        }
-        else if (msg instanceof HeadPing) {
-        	//TODO: add the statistics recording code
-        	handleHeadPing((HeadPing)msg, handler);
-        } 
-        else if(msg instanceof UpdateRequest) {
-            handleUpdateRequest((UpdateRequest)msg, handler);
-        }
-        else if(msg instanceof ContentResponse) {
-            handleContentResponse((ContentResponse)msg, handler);
-        }
-        notifyMessageListener(msg, handler);
+        
+        notifyMessageListener(msg, replyHandler);
     }
     
     /**
@@ -732,53 +595,40 @@ public abstract class MessageRouter {
         // network int appropriately.
         // If someone sends us messages we're not prepared to handle,
         // this could cause widespreaad AssertFailures
-        //Assert.that(msg.isMulticast(),
-        //   "non multicast message in handleMulticastMessage: " + msg);
-    
+        // Assert.that(msg.isMulticast(),
+        // "non multicast message in handleMulticastMessage: " + msg);
+
         // no multicast messages should ever have been
         // set with a TTL greater than 1.
-        if( msg.getTTL() > 1 )
+        if (msg.getTTL() > 1) {
             return;
+        }
 
         // Increment hops and decrement TTL.
         msg.hop();
 
-		InetAddress address = addr.getAddress();
-		int port = addr.getPort();
-		
-        if (NetworkUtils.isLocalAddress(address) &&
-          !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue())
+        InetAddress address = addr.getAddress();
+        int port = addr.getPort();
+
+        if (NetworkUtils.isLocalAddress(address)
+                && !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue()) {
             return;
-		
-		ReplyHandler handler = new UDPReplyHandler(address, port);
-		
-        if (msg instanceof QueryRequest) {
-            if(!handleUDPQueryRequestPossibleDuplicate(
-              (QueryRequest)msg, handler) ) {
-                ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
-            }
-            ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
-	//	} else if (msg instanceof QueryReply) {			
-	//		  ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
-    //        handleQueryReply((QueryReply)msg, handler);
-		} else if(msg instanceof PingRequest) {
-			ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
-			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
-												  handler, addr);
-	//	} else if(msg instanceof PingReply) {
-	//	      ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
-    //        handleUDPPingReply((PingReply)msg, handler, address, port);
-		} else if(msg instanceof PushRequest) {
-            ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
-			handlePushRequest((PushRequest)msg, handler);
-		}
-        notifyMessageListener(msg, handler);
+        }
+
+        ReplyHandler replyHandler = new UDPReplyHandler(address, port);
+
+        MessageHandler msgHandler = getMulticastMessageHandler(msg.getClass());
+        if (msgHandler != null) {
+            msgHandler.handleMessage(msg, addr, replyHandler);
+        }
+
+        notifyMessageListener(msg, replyHandler);
     }
 
 
     /**
-     * Returns true if the Query has a valid QueryKey.  false if it isn't
-     * present or valid.
+     * Returns true if the Query has a valid QueryKey. false if it isn't present
+     * or valid.
      */
     protected boolean hasValidQueryKey(InetAddress ip, int port, 
                                        QueryRequest qr) {
@@ -2953,6 +2803,324 @@ public abstract class MessageRouter {
                         c.send(hops);
                 }
             }
+        }
+    }
+    
+    public static interface MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler);
+    }
+    
+    private class PingRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
+            handlePingRequestPossibleDuplicate((PingRequest)msg, handler);
+        }
+    }
+    
+    private class PingReplyHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
+            handlePingReply((PingReply)msg, handler);
+        }
+    }
+    
+    private class QueryRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
+            handleQueryRequestPossibleDuplicate(
+                (QueryRequest)msg, (ManagedConnection)handler);
+        }
+    }
+    
+    private class QueryReplyHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
+            // if someone sent a TCP QueryReply with the MCAST header,
+            // that's bad, so ignore it.
+            QueryReply qmsg = (QueryReply)msg;
+            handleQueryReply(qmsg, handler);
+        }
+    }
+    
+    private class PushRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
+            handlePushRequest((PushRequest)msg, handler);
+        }
+    }
+    
+    private class ResetTableHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            handleResetTableMessage((ResetTableMessage)msg,
+                    (ManagedConnection)handler);
+        }
+    }
+    
+    private class PatchTableHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            handlePatchTableMessage((PatchTableMessage)msg,
+                    (ManagedConnection)handler); 
+        }
+    }
+    
+    private class TCPConnectBackHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
+            handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
+                    (ManagedConnection)handler);
+        }
+    }
+    
+    private class UDPConnectBackHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
+            handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
+                    (ManagedConnection)handler);
+        }
+    }
+    
+    private class TCPConnectBackRedirectHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
+                    (ManagedConnection)handler);
+        }
+    }
+    
+    private class UDPConnectBackRedirectHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
+                    (ManagedConnection)handler);
+        }
+    }
+    
+    private class PushProxyRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handlePushProxyRequest((PushProxyRequest) msg, (ManagedConnection)handler);
+        }
+    }
+    
+    private class QueryStatusResponseHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleQueryStatus((QueryStatusResponse) msg, (ManagedConnection)handler);
+        }
+    }
+    
+    private class GiveStatsHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            // TODO: add the statistics recording code
+            handleGiveStats((GiveStatsVendorMessage)msg, handler);
+        }
+    }
+    
+    private class StatisticsHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            // TODO: add the statistics recording code
+            handleStatisticsMessage((StatisticVendorMessage)msg, handler);
+        }
+    }
+    
+    private class HeadPingHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            //TODO: add the statistics recording code
+            handleHeadPing((HeadPing)msg, handler);
+        }
+    }
+    
+    private class SimppRequestVMHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleSimppRequest((SimppRequestVM)msg, handler);
+        }
+    }
+    
+    private class SimppVMHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleSimppVM((SimppVM)msg);
+        }
+    }
+    
+    private class UpdateRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleUpdateRequest((UpdateRequest)msg, handler);
+        }
+    }
+    
+    private class UpdateResponseHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleUpdateResponse((UpdateResponse)msg, handler);
+        }
+    }
+    
+    private class HeadPongHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleHeadPong((HeadPong)msg, handler); 
+        }
+    }
+    
+    public class VendorMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ((ManagedConnection)handler).handleVendorMessage((VendorMessage)msg);
+        }
+    }
+    
+    /*
+     * ===================================================
+     *                     UDP HANDLER
+     * ===================================================
+     */
+    private class UDPQueryRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            InetAddress address = addr.getAddress();
+            int port = addr.getPort();
+            
+            // TODO: compare QueryKey with old generation params.  if it matches
+            //send a new one generated with current params 
+            if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
+                sendAcknowledgement(addr, msg.getGUID());
+                // a TTL above zero may indicate a malicious client, as UDP
+                // messages queries should not be sent with TTL above 1.
+                //if(msg.getTTL() > 0) return;
+                if (!handleUDPQueryRequestPossibleDuplicate(
+                  (QueryRequest)msg, handler) ) {
+                    ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
+                }  
+            }
+            ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
+        }
+    }
+    
+    private class UDPQueryReplyHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            QueryReply qr = (QueryReply) msg;
+            ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+            int numResps = qr.getResultCount();
+            // only account for OOB stuff if this was response to a 
+            // OOB query, multicast stuff is sent over UDP too....
+            if (!qr.isReplyToMulticastQuery())
+                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+            
+            handleQueryReply(qr, handler);
+        }
+    }
+    
+    private class UDPPingRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
+            handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler, addr);
+        }
+    }
+    
+    private class UDPPingReplyHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
+            handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
+        }
+    }
+    
+    private class UDPPushRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
+            handlePushRequest((PushRequest)msg, handler);
+        }
+    }
+    
+    private class UDPLimeACKVendorMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
+            handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
+        }
+    }
+    
+    private class UDPReplyNumberMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleReplyNumberMessage((ReplyNumberVendorMessage) msg, addr);
+        }
+    }
+    
+    private class UDPGiveStatsHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleGiveStats((GiveStatsVendorMessage) msg, handler);
+        }
+    }
+    
+    private class UDPStatisticsMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleStatisticsMessage((StatisticVendorMessage)msg, handler);
+        }
+    }
+    
+    private class UDPUDPCrawlerPingHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            //TODO: add the statistics recording code
+            handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
+        }
+    }
+    
+    private class UDPHeadPingHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            //TODO: add the statistics recording code
+            handleHeadPing((HeadPing)msg, handler);
+        }
+    }
+    
+    private class UDPUpdateRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleUpdateRequest((UpdateRequest)msg, handler);
+        }
+    }
+    
+    private class UDPContentResponseHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleContentResponse((ContentResponse)msg, handler);
+        }
+    }
+    
+    /*
+     * ===================================================
+     *                  MULTICAST HANDLER
+     * ===================================================
+     */
+    public class MulticastQueryRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr,
+                ReplyHandler handler) {
+            if (!handleUDPQueryRequestPossibleDuplicate((QueryRequest) msg, handler)) {
+                ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES
+                        .addMessage(msg);
+            }
+            ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
+        }
+    }
+    
+    public class MulticastQueryReplyHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, 
+                ReplyHandler handler) {
+            ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+            handleQueryReply((QueryReply)msg, handler);
+        }
+    }
+    
+    public class MulticastPingRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, 
+                ReplyHandler handler) {
+            ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
+            handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler, addr);
+        }
+    }
+    
+    public class MulticastPingReplyHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, 
+                ReplyHandler handler) {
+            ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
+            handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
+        }
+    }
+    
+    public class MulticastPushRequestHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, 
+                ReplyHandler handler) {
+            ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
+            handlePushRequest((PushRequest)msg, handler);
         }
     }
 }
