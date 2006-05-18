@@ -24,6 +24,7 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.dht.LimeDHTManager;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -41,6 +42,7 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
@@ -134,7 +136,12 @@ public class RouterService {
 	 */
     private static ConnectionManager manager = new ConnectionManager();
 
-	/**
+    /**
+     * Initialize the class that manages the DHT.
+     */
+    private static LimeDHTManager dhtManager = new LimeDHTManager();
+    
+    /**
 	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
      * for tests.
 	 */
@@ -391,12 +398,12 @@ public class RouterService {
     		downloader.initialize(); 
     		LOG.trace("STOP DownloadManager");
     		
-    		LOG.trace("START SupernodeAssigner");
-    		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
+    		LOG.trace("START NodeAssigner");
+    		NodeAssigner sa = new NodeAssigner(uploadManager, 
     													 downloader, 
     													 manager);
     		sa.start();
-    		LOG.trace("STOP SupernodeAssigner");
+    		LOG.trace("STOP NodeAssigner");
 			
             // THIS MUST BE BEFORE THE CONNECT (below)
             // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
@@ -931,6 +938,8 @@ public class RouterService {
             LicenseFactory.persistCache();
             
             contentManager.shutdown();
+ 
+            dhtManager.shutdown();
             
             runShutdownItems();
             
@@ -1561,6 +1570,20 @@ public class RouterService {
     public static boolean isSupernode() {
         return manager.isSupernode();
     }
+    
+    /**
+     * Tells whether the node is connected to the DHT or not
+     * @return true if connected to the DHT, false otherwise
+     */
+    public static boolean isDHTNode() {
+        return dhtManager.isRunning();
+    }
+    /**
+	 * Tells wether this node is exclusively connected to the DHT
+	 */
+    public static boolean isExclusiveDHTNode() {
+        return (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && isDHTNode());
+    }
 
 	/**
 	 * Accessor for whether or not this node is a shielded leaf.
@@ -1677,7 +1700,8 @@ public class RouterService {
     public static boolean incomingStatusChanged() {
         if(callback != null)
             callback.addressStateChanged();
-            
+        //notify the dht
+        dhtManager.setFirewalled(acceptedIncomingConnection());
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1781,5 +1805,13 @@ public class RouterService {
     
     public static boolean canDoFWT() {
         return UDPSERVICE.canDoFWT();
+    }
+    
+    public static void initializeDHT() {
+        dhtManager.init();
+    }
+    
+    public static void shutdownDHT() {
+        dhtManager.shutdown();
     }
 }

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 CLASSPATH=\
-".;lib/commons-logging.jar;lib/log4j.jar;lib/core.jar;"
+".;../lib/jars/commons-logging.jar;../lib/jars/log4j.jar;"
 
 export CLASSPATH
 

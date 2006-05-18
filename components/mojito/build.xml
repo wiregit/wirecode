@@ -3,14 +3,16 @@
     <description>MojitoDHT</description>
 
 	<property name="basedir" value="."/>
-	<property name="jars" value="${basedir}/lib"/>
+	<property name="coredir" value="../core"/>
+	<property name="lib" value="../lib"/>
+	<property name="jars" value="${lib}/jars"/>
 		
 	<path id="default.classpath" >
 		<fileset dir="${jars}" includes="**/*.jar"/>
 	</path>
 	
     <target name="build">
-	    	<javac srcdir="${basedir}" 
+	    	<javac srcdir="${basedir}:${coredir}" 
 				destdir="${basedir}"
 		    		target="1.4"
 		    		source="1.4"

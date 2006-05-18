@@ -26,7 +26,7 @@ import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.QuestionsHandler;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -358,8 +358,8 @@ public class ConnectionManager {
     }
     
     /** Return true if we are not a private address, have been ultrapeer capable
-     *  in the past, and are not being shielded by anybody, AND we don't have UP
-     *  mode disabled.
+     *  in the past, and are not being shielded by anybody, we don't have UP
+     *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
         return !NetworkUtils.isPrivate() &&
@@ -367,7 +367,8 @@ public class ConnectionManager {
                !isShieldedLeaf() &&
                !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
                !isBehindProxy() &&
-               minConnectTimePassed();
+               minConnectTimePassed() &&
+               !RouterService.isExclusiveDHTNode();
     }
     
     /**
@@ -1774,7 +1775,7 @@ public class ConnectionManager {
 
         if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isActiveSupernode())
             return false;
-        else if(SupernodeAssigner.isTooGoodToPassUp() && _leafTries < _demotionLimit)
+        else if(NodeAssigner.isTooGoodUltrapeerToPassUp() && _leafTries < _demotionLimit)
 			return false;
         else
 		    return true;
