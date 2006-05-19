@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -26,13 +25,14 @@ public class MessageFactory {
     
     private static final Log LOG = LogFactory.getLog(MessageFactory.class);
     
+    /** Array of MessageParser(s) */
     private static final MessageParser[] PARSERS = new MessageParser[0xFF];
     
     /**
      * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
      * the TTL is set to SOFT_MAX-hops.
      */
-    public static final byte SOFT_MAX 
+    private static final byte SOFT_MAX 
         = ConnectionSettings.SOFT_MAX.getValue();
     
     static {
@@ -59,13 +59,17 @@ public class MessageFactory {
         }
         
         int index = functionId & 0xFF;
-        if (PARSERS[index] != null && LOG.isErrorEnabled()) {
-            Class clazz = PARSERS[index].getClass();
-            LOG.error("There is already a MessageParser of type " 
-                    + clazz + " registered for functionId " + functionId);
+        
+        Object o = null;
+        synchronized (PARSERS) {
+            o = PARSERS[index];
+            PARSERS[index] = parser;
         }
         
-        PARSERS[index] = parser;
+        if (o != null && LOG.isErrorEnabled()) {
+            LOG.error("There was already a MessageParser of type " 
+                    + o.getClass() + " registered for functionId " + functionId);
+        }
     }
     
     /**
@@ -73,7 +77,10 @@ public class MessageFactory {
      * if no such MessageParser is registered.
      */
     public static MessageParser getParser(byte functionId) {
-        return (MessageParser)PARSERS[functionId & 0xFF];
+        int index = functionId & 0xFF;
+        synchronized (PARSERS) {
+            return (MessageParser)PARSERS[index];
+        }
     }
     
     /**
@@ -275,6 +282,9 @@ public class MessageFactory {
         return parser.parse(guid, ttl, hops, payload, network);
     }
     
+    /**
+     * The interface for custom MessageParser(s)
+     */
     public static interface MessageParser {
         public Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException;

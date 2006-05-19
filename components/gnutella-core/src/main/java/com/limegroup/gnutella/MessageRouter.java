@@ -361,7 +361,11 @@ public abstract class MessageRouter {
         setMulticastMessageHandler(PushRequest.class, new MulticastPushRequestHandler());
     }
 
-    private static void setHandler(Map handlers, Class clazz, MessageHandler handler) {
+    /**
+     * Helper method to install a MessageHandler in the provided Map 
+     * for the provided Message Class
+     */
+    private static void setHandler(Map messageHandlers, Class clazz, MessageHandler handler) {
         if (clazz == null) {
             throw new NullPointerException("Class is null");
         }
@@ -370,39 +374,82 @@ public abstract class MessageRouter {
             throw new NullPointerException("MessageHandler is null");
         }
         
-        Object o = handlers.put(clazz, handler);
+        Object o = null;
+        synchronized (messageHandlers) {
+            o = messageHandlers.put(clazz, handler);
+        }
+        
         if (o != null && LOG.isErrorEnabled()) {
             LOG.error("There was already a MessageHandler of type " 
                 + o.getClass() + " registered for " + clazz);
         }
     }
     
-    private static Object getHandler(Map handlers, Class clazz) {
-        return handlers.get(clazz);
+    /**
+     * Helper method to get a MessageHandler from the provided Map
+     * for the provided Message Class
+     */
+    private static MessageHandler getHandler(Map messageHandlers, Class clazz) {
+        synchronized(messageHandlers) {
+            return (MessageHandler)messageHandlers.get(clazz);
+        }
     }
     
+    /**
+     * Installs a MessageHandler for "regular" Messages.
+     * 
+     * @link #handleMessage(Message, ManagedConnection)
+     * @param clazz The Class of the Message
+     * @param handler The Handler of the Message
+     */
     public void setMessageHandler(Class clazz, MessageHandler handler) {
         setHandler(messageHandlers, clazz, handler);
     }
     
+    /**
+     * Returns a MessageHandler for the specified Message Class
+     * or null if no such MessageHandler exists.
+     */
     public MessageHandler getMessageHandler(Class clazz) {
-        return (MessageHandler)getHandler(messageHandlers, clazz);
+        return getHandler(messageHandlers, clazz);
     }
     
+    /**
+     * Installs a MessageHandler for UDP Messages.
+     * 
+     * @link #handleUDPMessage(Message, InetSocketAddress)
+     * @param clazz The Class of the Message
+     * @param handler The Handler of the Message
+     */
     public void setUDPMessageHandler(Class clazz, MessageHandler handler) {
         setHandler(udpMessageHandlers, clazz, handler);
     }
     
+    /**
+     * Returns a MessageHandler for the specified Message Class
+     * or null if no such MessageHandler exists.
+     */
     public MessageHandler getUDPMessageHandler(Class clazz) {
-        return (MessageHandler)getHandler(udpMessageHandlers, clazz);
+        return getHandler(udpMessageHandlers, clazz);
     }
     
+    /**
+     * Installs a MessageHandler for Multicast Messages.
+     * 
+     * @link #handleMulticastMessage(Message, InetSocketAddress)
+     * @param clazz The Class of the Message
+     * @param handler The Handler of the Message
+     */
     public void setMulticastMessageHandler(Class clazz, MessageHandler handler) {
         setHandler(multicastMessageHandlers, clazz, handler);
     }
     
+    /**
+     * Returns a MessageHandler for the specified Message Class
+     * or null if no such MessageHandler exists.
+     */
     public MessageHandler getMulticastMessageHandler(Class clazz) {
-        return (MessageHandler)getHandler(multicastMessageHandlers, clazz);
+        return getHandler(multicastMessageHandlers, clazz);
     }
     
     /**
@@ -2806,10 +2853,18 @@ public abstract class MessageRouter {
         }
     }
     
+    /**
+     * The interface for custom MessageHandler(s)
+     */
     public static interface MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler);
     }
     
+    /*
+     * ===================================================
+     *                   "REGULAR" HANDLER
+     * ===================================================
+     */
     private class PingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);

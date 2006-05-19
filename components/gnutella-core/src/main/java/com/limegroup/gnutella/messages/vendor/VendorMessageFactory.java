@@ -71,13 +71,17 @@ public class VendorMessageFactory {
             throw new NullPointerException("VendorMessageParser is null");
         }
         
-        IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
-        if (selectors == null) {
-            selectors = new IntHashMap();
-            VENDORS.put(vendorId, selectors);
+        Object o = null;
+        synchronized (VENDORS) {
+            IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
+            if (selectors == null) {
+                selectors = new IntHashMap();
+                VENDORS.put(vendorId, selectors);
+            }
+            
+            o = selectors.put(selector, parser);
         }
         
-        Object o = selectors.put(selector, parser);
         if (o != null && LOG.isErrorEnabled()) {
             LOG.error("There was already a VendorMessageParser of type " 
                 + o.getClass() + " registered for selector " + selector);
@@ -85,11 +89,13 @@ public class VendorMessageFactory {
     }
     
     public static VendorMessageParser getParser(int selector, byte[] vendorId) {
-        IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
-        if (selectors == null) {
-            return null;
+        synchronized (VENDORS) {
+            IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
+            if (selectors == null) {
+                return null;
+            }
+            return (VendorMessageParser)selectors.get(selector);
         }
-        return (VendorMessageParser)selectors.get(selector);
     }
     
     public static VendorMessage deriveVendorMessage(byte[] guid, byte ttl,
@@ -130,6 +136,9 @@ public class VendorMessageFactory {
         return parser.parse(guid, ttl, hops, version, restOf, network);
     }
     
+    /**
+     * The interface for custom VendorMessageParser(s)
+     */
     public static interface VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, int network) throws BadPacketException;
