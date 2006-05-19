@@ -5,7 +5,6 @@ import java.io.OutputStream;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.Message;
 
 /**
  * An abstract class representing all variants of the new ROUTE_TABLE_UPDATE
