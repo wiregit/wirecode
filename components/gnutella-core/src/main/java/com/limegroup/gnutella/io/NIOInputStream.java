@@ -22,7 +22,7 @@ class NIOInputStream implements ChannelReadObserver, InterestReadChannel, ReadTi
     private final SoTimeout soTimeoutHandler;
     private InterestReadChannel channel;
     private BufferInputStream source;
-    private Object bufferLock;
+    private volatile Object bufferLock;
     private ByteBuffer buffer;
     private boolean shutdown;
     

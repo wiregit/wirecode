@@ -16,7 +16,7 @@ class NIOOutputStream implements WriteObserver {
     private final Shutdownable handler;
     private final InterestWriteChannel channel;
     private BufferOutputStream sink;
-    private Object bufferLock;
+    private volatile Object bufferLock;
     private ByteBuffer buffer;
     private boolean shutdown;
     

@@ -264,8 +264,10 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             throw new IOException("Socket closed.");
         
         if(reader instanceof NIOInputStream) {
+            // Ensure the stream is initialized before we interest it.
+            InputStream stream = ((NIOInputStream)reader).getInputStream();
             NIODispatcher.instance().interestRead(getChannel(), true);
-            return ((NIOInputStream)reader).getInputStream();
+            return stream;
         } else {
             Future future = new Future() {
                 private Object result;
