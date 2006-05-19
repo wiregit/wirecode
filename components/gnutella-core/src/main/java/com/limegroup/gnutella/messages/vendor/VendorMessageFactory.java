@@ -16,6 +16,10 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.util.IntHashMap;
 
+/**
+ * Factory to turn binary input as read from Network to VendorMessage
+ * Objects.
+ */
 public class VendorMessageFactory {
     
     private static final Log LOG = LogFactory.getLog(VendorMessageFactory.class);
@@ -57,6 +61,10 @@ public class VendorMessageFactory {
         setParser(VendorMessage.F_HEADER_UPDATE, VendorMessage.F_LIME_VENDOR_ID, new HeaderUpdateVendorMessageParser());
     }
     
+    /**
+     * Registers a VendorMessageParser under the provided selector (unsigned short) 
+     * and Vendor ID.
+     */
     public static void setParser(int selector, byte[] vendorId, VendorMessageParser parser) {
         if (selector < 0 || selector > 0xFFFF) {
             throw new IllegalArgumentException("Selector is out of range: " + selector);
@@ -111,6 +119,10 @@ public class VendorMessageFactory {
         return copy;
     }
     
+    /**
+     * Returns a VendorMessageParser for the provided selector 
+     * and vendor ID or null if no such parser is registered.
+     */
     public static VendorMessageParser getParser(int selector, byte[] vendorId) {
         IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
         if (selectors == null) {
