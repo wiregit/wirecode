@@ -94,6 +94,18 @@ public class FileUtils {
                 throw ioe;
         }
     }
+    
+    /**
+     * Determines if file parent is an ancestor of file child.
+     */
+    public static final boolean isAncestor(File parent, File child) {
+        while(child != null) {
+            if(child.equals(parent))
+                return true;
+            child = child.getParentFile();
+        }
+        return false;
+    }
 
     /** 
      * Detects attempts at directory traversal by testing if testDirectory 
