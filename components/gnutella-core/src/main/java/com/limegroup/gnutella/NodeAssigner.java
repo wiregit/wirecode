@@ -192,9 +192,6 @@ public class NodeAssigner {
                 UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) &&
         //AND I'm not a modem (in case estimate wrong)
         (ConnectionSettings.CONNECTION_SPEED.getValue() > SpeedConstants.MODEM_SPEED_INT) &&
-        //AND is my average uptime OR current uptime high enough?
-        (ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue() ||
-         _currentUptime >= UltrapeerSettings.MIN_INITIAL_UPTIME.getValue()) &&
         //AND am I not firewalled?
         ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
         //AND I have accepted incoming messages over UDP
