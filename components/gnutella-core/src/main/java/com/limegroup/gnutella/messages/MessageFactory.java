@@ -59,8 +59,12 @@ public class MessageFactory {
         }
         
         int index = functionId & 0xFF;
-        Object o = PARSERS[index];
-        PARSERS[index] = parser;
+        
+        Object o = null;
+        synchronized (PARSERS) {
+            o = PARSERS[index];
+            PARSERS[index] = parser;
+        }
         
         if (o != null && LOG.isErrorEnabled()) {
             LOG.error("There was already a MessageParser of type " 
