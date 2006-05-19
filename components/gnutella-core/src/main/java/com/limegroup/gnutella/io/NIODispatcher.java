@@ -82,12 +82,6 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * Maximum number of times an attachment can be hit in a row without considering
-     * it suspect & closing it.
-     */
-    private static final long MAXIMUM_ATTACHMENT_HITS = 10000;
-    
-    /**
      * Maximum number of times Selector can return quickly without having anything
      * selected.
      */
@@ -104,6 +98,9 @@ public class NIODispatcher implements Runnable {
     
     /** The current iteration of selection. */
     private long iteration = 0;
+    
+    /** Whether or not we've tried to wake up the selector. */
+    private volatile boolean wokeup = false;
 	
 	/** Queue lock. */
 	private final Object Q_LOCK = new Object();
@@ -205,6 +202,7 @@ public class NIODispatcher implements Runnable {
 	        synchronized(Q_LOCK) {
 				LATER.add(new RegisterOp(channel, handler, op, timeout));
 			}
+            wakeup();
         }
     }
     
@@ -241,16 +239,23 @@ public class NIODispatcher implements Runnable {
                 // so that multiple threads calling interest(..) will be atomic with
                 // respect to each other.  Otherwise, one thread can preempt another's
                 // interest setting, and one of the interested ops may be lost.
+                int oldOps;
 			    synchronized(sk.attachment()) {
                     if((op & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
                         ((Attachment)sk.attachment()).changeReadStatus(on);
                     }
-                        
+                    
+                    oldOps = sk.interestOps();
+                    
     				if(on)
-    					sk.interestOps(sk.interestOps() | op);
+    					sk.interestOps(oldOps | op);
     				else
-    					sk.interestOps(sk.interestOps() & ~op);
+    					sk.interestOps(oldOps & ~op);
                 }
+                
+                // if we're turning it on and it wasn't on before...
+                if(on && (oldOps & op) != op)
+                    wakeup();
 			}
         } catch(CancelledKeyException ignored) {
             // Because closing can happen in any thread, the key may be cancelled
@@ -321,6 +326,7 @@ public class NIODispatcher implements Runnable {
             synchronized(Q_LOCK) {
                 LATER.add(runner);
             }
+            wakeup();
         }
     }
    
@@ -342,6 +348,7 @@ public class NIODispatcher implements Runnable {
                synchronized(Q_LOCK) {
                    LATER.add(waiter);
                }
+               wakeup();
                waiter.wait();
            }
        }
@@ -524,6 +531,17 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
+     * Wakes up the primary selector if it wasn't already woken up,
+     * and the current thread is not the dispatch thread.
+     */
+    private void wakeup() {
+        if(!wokeup && Thread.currentThread() != dispatchThread) {
+            wokeup = true;
+            primarySelector.wakeup();
+        }
+    }
+    
+    /**
      * The actual NIO run loop
      */
     private void process() throws ProcessingException, SpinningException {
@@ -533,21 +551,6 @@ public class NIODispatcher implements Runnable {
         int ignores = 0;
         
         while(true) {
-            // This sleep is technically not necessary, however occasionally selector
-            // begins to wakeup with nothing selected.  This happens very frequently on Linux,
-            // and sometimes on Windows (bugs, etc..).  The sleep prevents busy-looping.
-            // It also allows pending registrations & network events to queue up so that
-            // selection can handle more things in one round.
-            // This is unrelated to the wakeup()-causing-busy-looping.  There's other bugs
-            // that cause this.
-            if (!checkTime || !CommonUtils.isWindows()) {
-                try {
-                   Thread.sleep(50);
-                } catch(InterruptedException ix) {
-                    LOG.warn("Selector interrupted", ix);
-               }
-            }
-            
             runPendingTasks();
             
             Collection polled = pollOtherSelectors();
@@ -571,7 +574,7 @@ public class NIODispatcher implements Runnable {
             }
             
             Collection keys = primarySelector.selectedKeys();
-            if(!immediate) {
+            if(!immediate && !wokeup) {
                 if(keys.isEmpty()) {
                     long now = System.currentTimeMillis();
                     if(startSelect == -1) {
@@ -603,7 +606,7 @@ public class NIODispatcher implements Runnable {
             }
             
             if(LOG.isTraceEnabled())
-                LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ", (" + this + ").");
+                LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ").");
             
             Collection allKeys;
             if(immediate) {
@@ -625,6 +628,7 @@ public class NIODispatcher implements Runnable {
             keys.clear();
             iteration++;
             TIMEOUTER.processTimeouts(now);
+            wokeup = false;
         }
     }
     
@@ -640,19 +644,13 @@ public class NIODispatcher implements Runnable {
         //       from throttles from being reprocessed.
         //       it is reset to 0 whenever the item is being processed for the first
         //       time in a given iteration.
-        
-        if(proxy.lastMod == iteration) {
-            proxy.hits++;
+
+        if(proxy.lastMod <= iteration)
             proxy.handled = 0;
-        // do not count ones that we've already processed (such as throttled items)
-        } else if(proxy.lastMod < iteration) {
-            proxy.hits = 0;
-            proxy.handled = 0;
-        }
             
         proxy.lastMod = iteration + 1;
         
-        if(sk.isValid() && proxy.hits < MAXIMUM_ATTACHMENT_HITS) {
+        if(sk.isValid()) {
             try {
                 try {
                     int notHandled = ~proxy.handled;
@@ -685,7 +683,7 @@ public class NIODispatcher implements Runnable {
             }
         } else {
             if(LOG.isErrorEnabled())
-                LOG.error("Too many hits in a row (or cancelled) for: " + attachment);
+                LOG.error("SelectionKey cancelled for: " + attachment);
             // we've had too many hits in a row.  kill this attachment.
             safeCancel(sk, attachment);
         }
@@ -780,7 +778,6 @@ public class NIODispatcher implements Runnable {
     class Attachment implements Timeoutable {        
         private final IOErrorObserver attachment;
         private long lastMod;
-        private long hits;
         private int handled;
         private SelectionKey key;
 
