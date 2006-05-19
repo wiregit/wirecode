@@ -41,7 +41,7 @@ public abstract class SingleLookupStatisticContainer extends StatisticContainer 
     
     public void setHops(int hops, boolean findValue) {
         if(findValue) {
-            globalLookupStats.GLOBAL_FIND_VALUE_LOOKUP_HOPS.incrementStat();
+            globalLookupStats.GLOBAL_FIND_VALUE_LOOKUP_HOPS.addData(hops);
             globalLookupStats.GLOBAL_FIND_VALUE_LOOKUP_HOPS.storeCurrentStat();
         }
         globalLookupStats.GLOBAL_LOOKUP_HOPS.addData(hops);
