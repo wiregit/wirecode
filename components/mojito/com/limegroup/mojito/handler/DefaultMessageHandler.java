@@ -146,7 +146,7 @@ public class DefaultMessageHandler extends MessageHandler
                             for (Iterator iterator = bag.values().iterator(); iterator.hasNext();) {
                                 KeyValue keyValue = (KeyValue) iterator.next();
                                 KUID originatorID = keyValue.getNodeID();
-                                if(originatorID != null && !originatorID.equals(node)) {
+                                if(originatorID != null && !originatorID.equals(node.getNodeID())) {
                                     keyValuesToForward.add(keyValue);
                                 }
                             }
