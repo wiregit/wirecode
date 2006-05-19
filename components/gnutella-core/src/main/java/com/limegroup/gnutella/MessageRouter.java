@@ -289,17 +289,17 @@ public abstract class MessageRouter {
     /**
      * Message Class -> (Regular) MessageHandler
      */
-    private Map messageHandlers = new IdentityHashMap();
+    private volatile Map messageHandlers = new IdentityHashMap();
     
     /**
      * Message Class -> (UDP) MessageHandler
      */
-    private Map udpMessageHandlers = new IdentityHashMap();
+    private volatile Map udpMessageHandlers = new IdentityHashMap();
     
     /**
      * Message Class -> (Multicast) MessageHandler
      */
-    private Map multicastMessageHandlers = new IdentityHashMap();
+    private volatile Map multicastMessageHandlers = new IdentityHashMap();
     
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -353,9 +353,12 @@ public abstract class MessageRouter {
 
     /**
      * Helper method to install a MessageHandler in the provided Map 
-     * for the provided Message Class
+     * for the provided Message Class.
+     * 
+     * See setMessageHandler(), setUDPMessageHandler() and 
+     * setMulticastMessageHandler() for implementation details.
      */
-    private static void setHandler(Map messageHandlers, Class clazz, MessageHandler handler) {
+    private static Map setHandler(Map handlerMap, Class clazz, MessageHandler handler) {
         if (clazz == null) {
             throw new NullPointerException("Class is null");
         }
@@ -364,15 +367,15 @@ public abstract class MessageRouter {
             throw new NullPointerException("MessageHandler is null");
         }
         
-        Object o = null;
-        synchronized (messageHandlers) {
-            o = messageHandlers.put(clazz, handler);
-        }
+        Map copy = new IdentityHashMap(handlerMap);
+        Object o = copy.put(clazz, handler);
         
         if (o != null && LOG.isErrorEnabled()) {
             LOG.error("There was already a MessageHandler of type " 
                 + o.getClass() + " registered for " + clazz);
         }
+        
+        return copy;
     }
     
     /**
@@ -380,9 +383,7 @@ public abstract class MessageRouter {
      * for the provided Message Class
      */
     private static MessageHandler getHandler(Map messageHandlers, Class clazz) {
-        synchronized(messageHandlers) {
-            return (MessageHandler)messageHandlers.get(clazz);
-        }
+        return (MessageHandler)messageHandlers.get(clazz);
     }
     
     /**
@@ -393,7 +394,9 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void setMessageHandler(Class clazz, MessageHandler handler) {
-        setHandler(messageHandlers, clazz, handler);
+        synchronized (messageHandlers) {
+            messageHandlers = setHandler(messageHandlers, clazz, handler);
+        }
     }
     
     /**
@@ -412,7 +415,9 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void setUDPMessageHandler(Class clazz, MessageHandler handler) {
-        setHandler(udpMessageHandlers, clazz, handler);
+        synchronized (udpMessageHandlers) {
+            udpMessageHandlers = setHandler(udpMessageHandlers, clazz, handler);
+        }
     }
     
     /**
@@ -431,7 +436,9 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void setMulticastMessageHandler(Class clazz, MessageHandler handler) {
-        setHandler(multicastMessageHandlers, clazz, handler);
+        synchronized (multicastMessageHandlers) {
+            multicastMessageHandlers = setHandler(multicastMessageHandlers, clazz, handler);
+        }
     }
     
     /**

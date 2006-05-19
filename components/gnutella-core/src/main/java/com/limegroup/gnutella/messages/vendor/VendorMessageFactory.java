@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -19,8 +20,10 @@ public class VendorMessageFactory {
     
     private static final Log LOG = LogFactory.getLog(VendorMessageFactory.class);
     
+    private static final Comparator COMPARATOR = new ByteArrayComparator();
+    
     /** Map (VendorID -> Map (selector -> Parser)) */
-    private static final Map VENDORS = new TreeMap(new ByteArrayComparator());
+    private static volatile Map VENDORS = new TreeMap(COMPARATOR);
     
     private static final BadPacketException UNRECOGNIZED_EXCEPTION =
         new BadPacketException("Unrecognized Vendor Message");
@@ -73,13 +76,16 @@ public class VendorMessageFactory {
         
         Object o = null;
         synchronized (VENDORS) {
-            IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
+            Map vendors = copyVendors();
+
+            IntHashMap selectors = (IntHashMap)vendors.get(vendorId);
             if (selectors == null) {
                 selectors = new IntHashMap();
-                VENDORS.put(vendorId, selectors);
+                vendors.put(vendorId, selectors);
             }
             
             o = selectors.put(selector, parser);
+            VENDORS = vendors;
         }
         
         if (o != null && LOG.isErrorEnabled()) {
@@ -88,14 +94,29 @@ public class VendorMessageFactory {
         }
     }
     
-    public static VendorMessageParser getParser(int selector, byte[] vendorId) {
-        synchronized (VENDORS) {
-            IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
-            if (selectors == null) {
-                return null;
-            }
-            return (VendorMessageParser)selectors.get(selector);
+    /**
+     * A helper method to create a deep copy of the VENDORS
+     * TreeMap.
+     */
+    private static Map copyVendors() {
+        Map copy = new TreeMap(COMPARATOR);
+        for(Iterator it = VENDORS.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            
+            byte[] vendor = (byte[])entry.getKey();
+            IntHashMap selectors = (IntHashMap)entry.getValue();
+            
+            copy.put(vendor, new IntHashMap(selectors));
         }
+        return copy;
+    }
+    
+    public static VendorMessageParser getParser(int selector, byte[] vendorId) {
+        IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
+        if (selectors == null) {
+            return null;
+        }
+        return (VendorMessageParser)selectors.get(selector);
     }
     
     public static VendorMessage deriveVendorMessage(byte[] guid, byte ttl,

@@ -59,12 +59,8 @@ public class MessageFactory {
         }
         
         int index = functionId & 0xFF;
-        
-        Object o = null;
-        synchronized (PARSERS) {
-            o = PARSERS[index];
-            PARSERS[index] = parser;
-        }
+        Object o = PARSERS[index];
+        PARSERS[index] = parser;
         
         if (o != null && LOG.isErrorEnabled()) {
             LOG.error("There was already a MessageParser of type " 
@@ -77,10 +73,7 @@ public class MessageFactory {
      * if no such MessageParser is registered.
      */
     public static MessageParser getParser(byte functionId) {
-        int index = functionId & 0xFF;
-        synchronized (PARSERS) {
-            return (MessageParser)PARSERS[index];
-        }
+        return (MessageParser)PARSERS[functionId & 0xFF];
     }
     
     /**

@@ -58,6 +58,7 @@
  */
 package com.limegroup.gnutella.util;
 
+
 /*
  * http://fisheye5.cenqua.com/viewrep/~raw,r=1.2/dwr/java/uk/ltd/getahead/dwr/lang/IntHashMap.java
  */
@@ -73,7 +74,7 @@ package com.limegroup.gnutella.util;
  * @author Alex Chaffee (alex@apache.org)
  * @author Stephen Colebourne
  * @since 2.0
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  * @see java.util.HashMap
  */
 public class IntHashMap {
@@ -175,6 +176,29 @@ public class IntHashMap {
         threshold = (int) (initialCapacity * loadFactor);
     }
 
+    /**
+     * Copy constructor
+     * 
+     * @param m The IntHashMap to copy
+     */
+    public IntHashMap(IntHashMap m) {
+        // Allow for a bit of growth
+        this((int) ((1 + m.size()) * 1.1));
+        putAll(m);
+    }
+    
+    /**
+     * Adds all elements from m to this.
+     */
+    public void putAll(IntHashMap m) {
+        Entry tab[] = m.table;
+        for (int i = tab.length; i-- > 0;) {
+            for (Entry e = tab[i]; e != null; e = e.next) {
+                put(e.key, e.value);
+            }
+        }
+    }
+    
     /**
      * <p>Returns the number of keys in this hashtable.</p>
      *
@@ -401,5 +425,4 @@ public class IntHashMap {
         }
         count = 0;
     }
-    
 }
