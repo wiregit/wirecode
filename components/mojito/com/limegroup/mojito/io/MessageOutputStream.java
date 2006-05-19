@@ -159,27 +159,13 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeStoreRequest(StoreRequest request) throws IOException {
-        
         writeQueryKey(request.getQueryKey());
-        writeShort(request.getRemaingCount());
-        
-        Collection values = request.getValues();
-        writeByte(values.size());
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
-            writeKeyValue((KeyValue)it.next());
-        }
+        writeKeyValue(request.getKeyValue());
     }
     
     private void writeStoreResponse(StoreResponse response) throws IOException {
-        writeShort(response.getRequestCount());
-        
-        Collection stats = response.getStoreStatus();
-        writeByte(stats.size());
-        for(Iterator it = stats.iterator(); it.hasNext(); ) {
-            StoreResponse.StoreStatus status = (StoreResponse.StoreStatus)it.next();
-            writeKUID(status.getKey());
-            writeByte(status.getStatus());
-        }
+        writeKUID(response.getValueID());
+        writeByte(response.getStatus());
     }
     
     private void writeStatsRequest(StatsRequest request) throws IOException {

@@ -20,15 +20,16 @@
 package com.limegroup.mojito.event;
 
 import java.util.Collection;
-import java.util.List;
+
+import com.limegroup.mojito.db.KeyValue;
 
 public interface StoreListener {
     
     /**
      * Called after a store request was processed
      * 
-     * @param keyValues List of KeyValues we have stored
+     * @param keyValue List of KeyValues we have stored
      * @param nodes Collection of ContactNodes where the keyValues were sored
      */
-    public void store(List keyValues, Collection nodes);
+    public void store(KeyValue keyValue, Collection nodes);
 }

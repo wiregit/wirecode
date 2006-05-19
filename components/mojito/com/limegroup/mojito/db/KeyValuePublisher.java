@@ -22,7 +22,6 @@ package com.limegroup.mojito.db;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,13 +114,10 @@ public class KeyValuePublisher implements Runnable {
         
         try {
             context.store(keyValue, new StoreListener() {
-                public void store(List keyValues, Collection nodes) {
-                    for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                        KeyValue keyValue = (KeyValue) it.next();
-                        keyValue.setLastPublishTime(System.currentTimeMillis());
-                        keyValue.setNumLocs(nodes.size());
-                        published++;
-                    }
+                public void store(KeyValue keyValue, Collection nodes) {
+                    keyValue.setLastPublishTime(System.currentTimeMillis());
+                    keyValue.setNumLocs(nodes.size());
+                    published++;
 
                     synchronized(publishLock) {
                         publishLock.notify();
@@ -130,11 +126,11 @@ public class KeyValuePublisher implements Runnable {
                     if (LOG.isTraceEnabled()) {
                         if (!nodes.isEmpty()) {
                             StringBuffer buffer = new StringBuffer("\nStoring ");
-                            buffer.append(keyValues).append(" at the following Nodes:\n");
+                            buffer.append(keyValue).append(" at the following Nodes:\n");
                             buffer.append(CollectionUtils.toString(nodes));
                             LOG.trace(buffer);
                         } else {
-                            LOG.trace("Failed to store " + keyValues);
+                            LOG.trace("Failed to store " + keyValue);
                         }
                     }
                 }

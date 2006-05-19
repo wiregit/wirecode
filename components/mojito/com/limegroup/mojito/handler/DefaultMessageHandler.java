@@ -36,6 +36,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.Database.KeyValueBag;
+import com.limegroup.mojito.handler.response.StoreResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -92,22 +93,24 @@ public class DefaultMessageHandler extends MessageHandler
         // never called
     }
     
-    private void addLiveContactInfo(ContactNode node, 
-            DHTMessage message) throws IOException {
+    private void addLiveContactInfo(ContactNode node, DHTMessage message) throws IOException {
         
-        if(node.isFirewalled()) return;
+        if (node.isFirewalled()) {
+            return;
+        }
         
         RoutingTable routeTable = getRouteTable();
         boolean newNode = false;
         //only do store forward if it is a new node in our routing table (we are (re)connecting to the network) 
         //or a node that is reconnecting
         ContactNode existingNode = routeTable.get(node.getNodeID());
-        if(existingNode == null || existingNode.getInstanceID() != node.getInstanceID()) {
+        if (existingNode == null || existingNode.getInstanceID() != node.getInstanceID()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Node "+node+" is new or has changed his instanceID, will check for store forward!");   
+                LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
             }
             newNode = true;
         }
+        
         //add node to the routing table -- update timestamp and info if needed
         routeTable.add(node, true);
 
@@ -162,31 +165,45 @@ public class DefaultMessageHandler extends MessageHandler
                 }
                 
                 if (!keyValuesToForward.isEmpty()) {
-                    ResponseHandler handler = new StoreForwardResponseHandler(context, keyValuesToForward);           
-                    RequestMessage request = context.getMessageFactory()
-                        .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
-                    
-                    context.getMessageDispatcher().send(node, request, handler);
+                    if (message instanceof FindNodeResponse) {
+                        store(message.getSource(), 
+                                ((FindNodeResponse)message).getQueryKey(), 
+                                keyValuesToForward);
+                    } else {
+                        ResponseHandler handler = new GetQueryKeyHandler(keyValuesToForward);
+                        RequestMessage request = context.getMessageFactory()
+                            .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
+                        
+                        context.getMessageDispatcher().send(node, request, handler);
+                    }
                 }
             }
         }
     }
     
-    /**
-     * Handles Store-Forward response. We're actually sending our
-     * Target Node a lookup for its own Node ID and it will tell us
-     * the QueryKey we need to store a KeyValue.
-     */
-    private static class StoreForwardResponseHandler extends AbstractResponseHandler {
-
+    private void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
+        for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
+            KeyValue keyValue = (KeyValue)it.next();
+            
+            ResponseHandler handler = new StoreResponseHandler(context);
+            RequestMessage request = context.getMessageFactory()
+                .createStoreRequest(node.getSocketAddress(), 
+                        queryKey, keyValue);
+            
+            context.getMessageDispatcher().send(node, request, handler);
+        }
+    }
+    
+    private class GetQueryKeyHandler extends AbstractResponseHandler {
+        
         private List keyValues;
         
-        public StoreForwardResponseHandler(Context context, List keyValues) {
-            super(context);
+        private GetQueryKeyHandler(List keyValues) {
+            super(DefaultMessageHandler.this.context);
             this.keyValues = keyValues;
         }
-        
-        public void response(ResponseMessage message, long time) throws IOException {
+
+        protected void response(ResponseMessage message, long time) throws IOException {
             
             FindNodeResponse response = (FindNodeResponse)message;
             
@@ -198,17 +215,17 @@ public class DefaultMessageHandler extends MessageHandler
                 context.getRouteTable().add(node, false);
             }
             
-            QueryKey queryKey = response.getQueryKey();
-            context.store(message.getSource(), queryKey, keyValues);
+            ContactNode node = message.getSource();
+            store(node, response.getQueryKey(), keyValues);
         }
 
-        protected void timeout(KUID nodeId, SocketAddress dst, 
-                RequestMessage message, long time) throws IOException {
+        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         }
-        
+
         public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+            
             if (LOG.isErrorEnabled()) {
-                LOG.error("Sending a store-forward request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+                LOG.error("Getting the QueryKey from " + ContactNode.toString(nodeId, dst) + " failed", e);
             }
             
             fireTimeout(nodeId, dst, message, -1L);

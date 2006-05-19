@@ -191,30 +191,18 @@ public class MessageInputStream extends DataInputStream {
             ContactNode node, KUID messageId) throws IOException {
         
         QueryKey queryKey = readQueryKey();
-        int remaining = readUnsignedShort();
+        KeyValue keyValue = readKeyValue();
         
-        int size = readUnsignedByte();
-        KeyValue[] values = new KeyValue[size];
-        for(int i = 0; i < values.length; i++) {
-            values[i] = readKeyValue();
-        }
-        return new StoreRequest(vendor, version, node, messageId, remaining, queryKey, Arrays.asList(values));
+        return new StoreRequest(vendor, version, node, messageId, queryKey, keyValue);
     }
     
     private StoreResponse readStoreResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         
-        int requesting = readUnsignedShort();
+        KUID valueId = readKUID();
+        int status = readUnsignedByte();
         
-        int size = readUnsignedByte();
-        StoreResponse.StoreStatus[] stats = new StoreResponse.StoreStatus[size];
-        for(int i = 0; i < stats.length; i++) {
-            KUID key = readKUID();
-            int status = readUnsignedByte();
-            stats[i] = new StoreResponse.StoreStatus(key, status);
-        }
-        
-        return new StoreResponse(vendor, version, node, messageId, requesting, Arrays.asList(stats));
+        return new StoreResponse(vendor, version, node, messageId, valueId, status);
     }
     
     private DHTMessage readStatsResponse(int vendor, int version, ContactNode node,

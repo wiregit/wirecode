@@ -516,21 +516,6 @@ public class Context {
         new StoreManager().store(keyValue, listener);
     }
     
-    public void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
-        
-        if (queryKey == null) {
-            throw new NullPointerException("Cannot store KeyValues without QueryKey");
-        }
-        
-        ResponseHandler handler = new StoreResponseHandler(Context.this, queryKey, keyValues);
-        
-        RequestMessage request 
-            = messageFactory.createStoreRequest(node.getSocketAddress(), keyValues.size(), 
-                    queryKey, Collections.EMPTY_LIST);
-        
-        messageDispatcher.send(node, request, handler);
-    }
-    
     public void stats(SocketAddress address, int request, StatsListener listener) throws IOException {
         RequestMessage msg = messageFactory.createStatsRequest(address, new byte[0], request);
         StatsResponseHandler handler = new StatsResponseHandler(this);
@@ -769,7 +754,7 @@ public class Context {
     
     private class StoreManager implements LookupListener {
         
-        private List keyValues;
+        private KeyValue keyValue;
         private StoreListener listener;
         
         private StoreManager() {
@@ -777,7 +762,7 @@ public class Context {
         }
         
         private void store(KeyValue keyValue, StoreListener listener) throws IOException {
-            this.keyValues = Arrays.asList(new KeyValue[]{keyValue});
+            this.keyValue = keyValue;
             this.listener = listener;
             
             KUID nodeId = ((KUID)keyValue.getKey()).toNodeID();
@@ -814,28 +799,30 @@ public class Context {
                 
                 if (queryKey == null) {
                     if (LOG.isErrorEnabled()) {
-                        LOG.error("Cannot store " + keyValues + " at " 
+                        LOG.error("Cannot store " + keyValue + " at " 
                                 + node + " because we have no QueryKey for it");
                     }
                     continue;
                 }
                 
                 try {
-                    Context.this.store(node, queryKey, keyValues);
+                    ResponseHandler handler = new StoreResponseHandler(Context.this);
+                    RequestMessage request 
+                        = messageFactory.createStoreRequest(node.getSocketAddress(), queryKey, keyValue);
+                    messageDispatcher.send(node, request, handler);
+                    
                     storeTargets.add(node);
                 } catch (IOException err) {
                     LOG.error("", err);
                 }
             }
             
-            for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                ((KeyValue)it.next()).setNumLocs(storeTargets.size());
-            }
+            keyValue.setNumLocs(storeTargets.size());
             
             if (listener != null) {
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.store(keyValues, storeTargets);
+                        listener.store(keyValue, storeTargets);
                     }
                 });
             }
