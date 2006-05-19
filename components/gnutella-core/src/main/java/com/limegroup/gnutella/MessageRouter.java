@@ -216,16 +216,6 @@ public abstract class MessageRouter {
     private static final ProcessingQueue TCP_CONNECT_BACKER =
         new ProcessingQueue("TCPConnectBack");
     
-    /**
-     * keeps track of which hosts have sent us head pongs.  We may choose
-     * to use these messages for udp tunnel keep-alive, so we don't want to
-     * set the minimum interval too high.  Right now it is half of what we
-     * believe to be the solicited grace period.
-     */
-    private static final Set _udpHeadRequests =
-    	Collections.synchronizedSet(new FixedSizeExpiringSet(200,
-    			ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue()/2));
-
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
 	 * upon very frequently.
@@ -297,17 +287,17 @@ public abstract class MessageRouter {
     private long _lastQueryKeyTime;
     
     /**
-     * Class -> MessageHandler
+     * Message Class -> (Regular) MessageHandler
      */
     private Map messageHandlers = new IdentityHashMap();
     
     /**
-     * Class -> (UDP) MessageHandler
+     * Message Class -> (UDP) MessageHandler
      */
     private Map udpMessageHandlers = new IdentityHashMap();
     
     /**
-     * Class -> (Multicast) MessageHandler
+     * Message Class -> (Multicast) MessageHandler
      */
     private Map multicastMessageHandlers = new IdentityHashMap();
     
@@ -603,7 +593,7 @@ public abstract class MessageRouter {
 	public void handleUDPMessage(Message msg, InetSocketAddress addr) {
         
 	    // Increment hops and decrement TTL.
-        msg.hop();
+	    msg.hop();
 
         // Send UDPConnection messages on to the connection multiplexor
         // for routing to the appropriate connection processor
