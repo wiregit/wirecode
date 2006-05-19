@@ -1486,10 +1486,9 @@ public class HTTPDownloader implements BandwidthTracker {
         _stateMachine.addState(new DownloadState());
     }
     
-        private class DownloadState extends ReadState {
+    private class DownloadState extends ReadState {
         private long currPos = _initialReadingPoint;
         private volatile boolean doingWrite;
-        
         
         void writeDone() {
             doingWrite = false;
@@ -1497,7 +1496,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
         protected boolean processRead(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
             if(doingWrite)
-                return false;
+                return true;
             
             boolean dataLeft = false;
             try {
@@ -1619,12 +1618,13 @@ public class HTTPDownloader implements BandwidthTracker {
                 // write to disk outside of lock.
                 //LOG.debug("WORKER: " + this + ", left: " + (left-totalRead) +",  writing fp: " + filePosition +", ds: " + dataStart + ", dL: " + dataLength);
                 if(!_incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array())) {
+                    LOG.debug("Scheduling callback for write.");
                     InterestReadChannel irc = (InterestReadChannel)rc;
                     irc.interest(false);
                     doingWrite = true;
                     _incompleteFile.writeBlockWithCallback(filePosition, dataStart, dataLength, buffer.array(),
                                                            new DownloadRestarter(irc, buffer, this));
-                    return false;
+                    return true;
                 }
                 
                 buffer.clear();
