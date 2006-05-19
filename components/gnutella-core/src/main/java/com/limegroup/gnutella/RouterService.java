@@ -305,6 +305,8 @@ public class RouterService {
   	public RouterService(ActivityCallback callback, MessageRouter router) {
 		RouterService.callback = callback;
         fileManager.registerFileManagerEventListener(callback);
+        manager.registerLifecycleListener(callback);
+        manager.registerLifecycleListener(dhtManager);
   		RouterService.router = router;
   	}
 
@@ -1655,7 +1657,7 @@ public class RouterService {
      */
     public static boolean addressChanged() {
         if(callback != null)
-            callback.addressStateChanged();        
+            callback.handleAddressStateChanged();        
         
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
@@ -1699,7 +1701,7 @@ public class RouterService {
      */
     public static boolean incomingStatusChanged() {
         if(callback != null)
-            callback.addressStateChanged();
+            callback.handleAddressStateChanged();
         //notify the dht
         dhtManager.setFirewalled(acceptedIncomingConnection());
         // Only continue if the current address/port is valid & not private.

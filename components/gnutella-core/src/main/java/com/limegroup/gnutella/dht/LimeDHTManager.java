@@ -3,6 +3,8 @@ package com.limegroup.gnutella.dht;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.LifecycleEvent;
+import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.mojito.MojitoDHT;
@@ -15,7 +17,7 @@ import com.limegroup.mojito.MojitoDHT;
  *
  * The current implementation is dependant on the MojitoDHT. TODO: create a more general DHT interface
  */
-public class LimeDHTManager {
+public class LimeDHTManager implements LifecycleListener{
     
     private static final Log LOG = LogFactory.getLog(LimeDHTManager.class);
     
@@ -76,6 +78,20 @@ public class LimeDHTManager {
     public void setFirewalled(boolean firewalled) {
         dht.setFirewalled(firewalled);
     }
+
+    public void handleLifecycleEvent(LifecycleEvent evt) {
+        if(evt.isConnectedEvent()) {
+            
+        } else if(evt.isConnectingEvent()){
+            
+        } else if(evt.isDisconnectedEvent() || evt.isConnectingEvent() || evt.isNoInternetEvent()) {
+            
+        } else {
+            return;
+        }
+    }
+    
+    
 
     /** we need a timer task to see: 
     1. We weren't able to bootstrap ==> check if we have new bootstrap nodes

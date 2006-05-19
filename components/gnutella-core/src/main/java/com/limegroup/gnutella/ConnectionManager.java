@@ -243,6 +243,13 @@ public class ConnectionManager {
      * The current measured downstream bandwidth.
      */
     private volatile float _measuredDownstreamBandwidth = 0.f;
+    
+    /**
+     * List of event listeners for LifeCycleEvents.
+     * LOCKING: listenerLock
+     */
+    private volatile List eventListeners = Collections.EMPTY_LIST;
+    private final Object listenerLock = new Object();
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using
@@ -1339,6 +1346,9 @@ public class ConnectionManager {
                                           c.getPort()), true, c.getLocalePref());
             }
         }
+        
+        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                LifecycleEvent.DISCONNECTED, null));
     }
 
     /**
@@ -1463,7 +1473,9 @@ public class ConnectionManager {
         RouterService.getMessageRouter().removeConnection(c);
 
         // 4) Notify the listener
-        RouterService.getCallback().connectionClosed(c);
+        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this, 
+                LifecycleEvent.CONNECTION_CLOSED,
+                c));
 
         // 5) Clean up Unicaster
         QueryUnicaster.instance().purgeQuery(c);
@@ -1593,6 +1605,11 @@ public class ConnectionManager {
                 need--;
             }
             _fetchers.addAll(fetchers);
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifecycleEvent.CONNECTING, null));
+        } else if (need == 0) {
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifecycleEvent.CONNECTED, null));
         }
 
         // Stop ConnectionFetchers as necessary, but it's possible there
@@ -1683,7 +1700,9 @@ public class ConnectionManager {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-        RouterService.getCallback().connectionInitializing(mc);
+        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                LifecycleEvent.CONNECTION_INITIALIZING,
+                mc));
      
         try {
             mc.initialize(fetcher);
@@ -1850,7 +1869,9 @@ public class ConnectionManager {
                 // down.
                 adjustConnectionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(c);
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifecycleEvent.CONNECTION_INITIALIZING,
+                    c));
         }
 
         try {
@@ -1900,7 +1921,9 @@ public class ConnectionManager {
                 // down.
                 adjustConnectionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(c);
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifecycleEvent.CONNECTION_INITIALIZING,
+                    c));
         }
 
         completeConnectionInitialization(c, false);
@@ -1924,7 +1947,9 @@ public class ConnectionManager {
             // announce its initialization
             boolean connectionOpen = connectionInitialized(mc);
             if(connectionOpen) {
-                RouterService.getCallback().connectionInitialized(mc);
+                dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                        LifecycleEvent.CONNECTION_INITIALIZED,
+                        mc));
                 setPreferredConnections();
             }
         }
@@ -2191,7 +2216,8 @@ public class ConnectionManager {
         
         // Notify the user that they have no internet connection and that
         // we will automatically retry
-        RouterService.getCallback().disconnected();
+        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                LifecycleEvent.NO_INTERNET));
 
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're
@@ -2252,6 +2278,40 @@ public class ConnectionManager {
             loc = /** assume english if locale is not given... */
                 ApplicationSettings.DEFAULT_LOCALE.getValue();
         return ApplicationSettings.LANGUAGE.getValue().equals(loc);
+    }
+    
+    /**
+     * registers a listener for LifeCycleEvents
+     */
+    public void registerLifecycleListener(LifecycleListener listener) {
+        if (eventListeners.contains(listener))
+            return;
+        synchronized (listenerLock) {
+            List copy = new ArrayList(eventListeners);
+            copy.add(listener);
+            eventListeners = Collections.unmodifiableList(copy);
+        }
+    }
+    
+    /**
+     * unregisters a listener for LifeCycleEvents
+     */
+    public void unregisterLifecycleListener(LifecycleListener listener) {
+        synchronized (listenerLock) {
+            List copy = new ArrayList(eventListeners);
+            copy.remove(listener);
+            eventListeners = Collections.unmodifiableList(copy);
+        }
+    }
+    
+    /**
+     * dispatches a LifecycleEvent to any registered listeners 
+     */
+    public void dispatchLifecycleEvent(LifecycleEvent evt) {
+        for (Iterator iter = eventListeners.iterator(); iter.hasNext();) {
+            LifecycleListener listener = (LifecycleListener) iter.next();
+            listener.handleLifecycleEvent(evt);
+        }
     }
 
 }
