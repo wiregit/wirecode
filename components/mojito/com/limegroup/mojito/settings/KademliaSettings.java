@@ -20,7 +20,7 @@
 package com.limegroup.mojito.settings;
 
 
-public class KademliaSettings extends MojitaProps {
+public class KademliaSettings extends MojitoProps {
     
     private KademliaSettings() {}
     

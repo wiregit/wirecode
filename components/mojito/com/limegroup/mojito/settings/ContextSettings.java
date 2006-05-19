@@ -26,7 +26,7 @@ import java.util.prefs.Preferences;
 import com.limegroup.mojito.KUID;
 
 
-public class ContextSettings extends MojitaProps {
+public class ContextSettings extends MojitoProps {
     
     private static final String LOCAL_NODE_ID_KEY = "LOCAL_NODE_ID";
     private static final String NODE_ID_TIMEOUT_KEY = "NODE_ID_TIMEOUT";

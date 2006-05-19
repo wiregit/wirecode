@@ -23,9 +23,9 @@ package com.limegroup.mojito.settings;
 /**
  * 
  */
-public class MojitaProps {
+public class MojitoProps {
     
-    private static final MojitaProps INSTANCE = new MojitaProps();
+    private static final MojitoProps INSTANCE = new MojitoProps();
     
     // The FACTORY is used for subclasses of LimeProps, so they know
     // which factory to add classes to.
@@ -34,16 +34,16 @@ public class MojitaProps {
     
     // This is protected so that subclasses can extend from it, but
     // subclasses should NEVER instantiate a copy themselves.
-    protected MojitaProps() {
-        /*super("mojita.props", "Mojita properties file");
-        Assert.that( getClass() == MojitaProps.class,
+    protected MojitoProps() {
+        /*super("mojito.props", "Mojita properties file");
+        Assert.that( getClass() == MojitoProps.class,
             "should not have a subclass instantiate");*/
     }
     
     /**
      * Returns the only instance of this class.
      */
-    public static MojitaProps instance() { return INSTANCE; }
+    public static MojitoProps instance() { return INSTANCE; }
     
     // STUBS STUBS STUBS STUBS STUBS STUBS STUBS STUBS STUBS STUBS STUBS
     

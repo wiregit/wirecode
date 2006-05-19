@@ -20,7 +20,7 @@
 package com.limegroup.mojito.settings;
 
 
-public final class NetworkSettings extends MojitaProps {
+public final class NetworkSettings extends MojitoProps {
     
     private NetworkSettings() {}
     
