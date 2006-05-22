@@ -19,11 +19,19 @@
  
 package com.limegroup.mojito.messages.request;
 
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.security.SignatureException;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.security.CryptoHelper;
 
-
+/**
+ * 
+ */
 public class StatsRequest extends RequestMessage {
     
     public static final int STATS = 0x00;
@@ -51,4 +59,17 @@ public class StatsRequest extends RequestMessage {
         return (request & RT) == RT;
     }
     
+    public boolean verify(KeyPair keyPair) 
+            throws InvalidKeyException, SignatureException {
+        return verify(keyPair.getPublic());
+    }
+    
+    public boolean verify(PublicKey pubKey) 
+            throws InvalidKeyException, SignatureException {
+        byte[] signature = getSignature();
+        if (pubKey != null && signature != null) {
+            return CryptoHelper.verify(pubKey, getMessageID().getBytes(), signature);
+        }
+        return false;
+    }
 }

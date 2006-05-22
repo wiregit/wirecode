@@ -43,7 +43,9 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.settings.ContextSettings;
 
-
+/**
+ * 
+ */
 public class DHT {
     
     private static final Log LOG = LogFactory.getLog(DHT.class);
@@ -242,11 +244,19 @@ public class DHT {
         context.ping(dst, listener);
     }
     
-    public void stats(SocketAddress dst, int request, StatsListener listener) throws IOException {
+    public void stats(SocketAddress dst, int request, 
+            StatsListener listener, PrivateKey privateKey) 
+                throws IOException, InvalidKeyException, SignatureException {
+        
         if (listener == null) {
             throw new NullPointerException("StatsListener is null");
         }
-        context.stats(dst, request, listener);
+        
+        if (privateKey == null) {
+            throw new NullPointerException("PrivateKey is null");
+        }
+        
+        context.stats(dst, request, listener, privateKey);
     }
     
     // TODO remove - for test purposes only
@@ -283,6 +293,10 @@ public class DHT {
                 keyValue.sign(context.getKeyPair());
             } else {
                 keyValue.sign(privateKey);
+                
+                if (!keyValue.verify(context.getKeyPair())) {
+                    throw new IllegalArgumentException();
+                }
             }
             
             Database database = context.getDatabase();

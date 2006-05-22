@@ -186,7 +186,7 @@ public final class CryptoHelper {
             throw new RuntimeException(err);
         }
     }
-    
+                       
     public static boolean verify(KeyPair keyPair, byte[] data, byte[] signature) 
             throws SignatureException, InvalidKeyException {
         return verify(keyPair.getPublic(), data, signature);

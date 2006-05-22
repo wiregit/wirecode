@@ -21,6 +21,8 @@ package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.security.InvalidKeyException;
+import java.security.SignatureException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,13 +48,28 @@ public class StatsRequestHandler extends AbstractRequestHandler {
 
     public void handleRequest(RequestMessage message) throws IOException {
         
+        StatsRequest req = (StatsRequest) message;
+        
+        try {
+            if (!req.verify(context.getMasterKey())) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(message.getSource() + " sent us an invalid Stats Request");
+                }
+                return;
+            }
+        } catch (InvalidKeyException e) {
+            LOG.error("InvalidKeyException", e);
+            return;
+        } catch (SignatureException e) {
+            LOG.error("SignatureException", e);
+            return;
+        }
+        
         if (LOG.isTraceEnabled()) {
             LOG.trace(message.getSource() + " sent us a Stats Request");
         }
         
         networkStats.STATS_REQUEST.incrementStat();
-        
-        StatsRequest req = (StatsRequest) message;
         StringWriter writer = new StringWriter();
         
         if(req.isDBRequest()) {

@@ -24,9 +24,11 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.net.SocketAddress;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -566,8 +568,14 @@ public class Context {
     }
     
     /** Retrieves Statistics from the given Node */
-    public void stats(SocketAddress address, int request, StatsListener listener) throws IOException {
-        RequestMessage msg = messageFactory.createStatsRequest(address, new byte[0], request);
+    public void stats(SocketAddress address, int request, 
+            StatsListener listener, PrivateKey privateKey) 
+                throws IOException, InvalidKeyException, SignatureException {
+        
+        KUID messageId = KUID.createRandomMessageID(address);
+        byte[] signature = CryptoHelper.sign(privateKey, messageId.getBytes());
+        
+        RequestMessage msg = messageFactory.createStatsRequest(address, messageId, signature, request);
         StatsResponseHandler handler = new StatsResponseHandler(this);
         if (listener != null) {
             handler.addStatsListener(listener);
