@@ -383,8 +383,7 @@ public final class NetworkUtils {
      * Returns an InetAddress representing the given IP address.
      */
     public static InetAddress getByAddress(byte[] addr) throws UnknownHostException {
-        String addrString = NetworkUtils.ip2string(addr);
-        return InetAddress.getByName(addrString);
+        return InetAddress.getByAddress(addr);
     }
     
     /**

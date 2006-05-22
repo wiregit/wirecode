@@ -22,5 +22,4 @@ public class IpPortSet extends TreeSet {
     public IpPortSet(Comparator c) {
         this(); // always use default comparator
     }
-
 }

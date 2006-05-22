@@ -279,9 +279,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * this <tt>UDPReplyHandler</tt>
 	 */
 	public String toString() {
-		return ("UDPReplyHandler:\r\n"+
-				IP.toString()+"\r\n"+
-				PORT+"\r\n");
+		return IP.toString() + ":" + PORT;
 	}
 	
 	/**

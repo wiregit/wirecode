@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.InetAddress;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -113,6 +114,11 @@ public class ExtendedEndpoint extends Endpoint {
      */
     public ExtendedEndpoint(String host, int port) { 
         super(host, port);
+        this.timeRecorded=now();
+    }
+    
+    public ExtendedEndpoint(InetAddress addr, int port) { 
+        super(addr, port);
         this.timeRecorded=now();
     }
     

@@ -37,14 +37,19 @@ public class IPPortCombo implements IpPort {
         if (networkData.length != 6)
             throw new BadPacketException("Weird Input");
 
-        String host = NetworkUtils.ip2string(networkData, 0);
         int port = ByteOrder.ushort2int(ByteOrder.leb2short(networkData, 4));
         if (!NetworkUtils.isValidPort(port))
             throw new BadPacketException("Bad Port: " + port);
         _port = port;
         try {
-            _addr = InetAddress.getByName(host);
+            byte[] a = new byte[4];
+            a[0] = networkData[0];
+            a[1] = networkData[1];
+            a[2] = networkData[2];
+            a[3] = networkData[3];
+            _addr = InetAddress.getByAddress(a);
         } catch(UnknownHostException uhe) {
+            uhe.printStackTrace();
             throw new BadPacketException("bad host.");
         }
         if (!NetworkUtils.isValidAddress(_addr))

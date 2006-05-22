@@ -421,28 +421,11 @@ public class UDPService implements ReadWriteObserver {
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
-	 */
-    public void send(Message msg, InetAddress ip, int port) 
-        throws IllegalArgumentException {
-        try {
-            send(msg, InetAddress.getByAddress(ip.getAddress()), port, ErrorService.getErrorCallback());
-        } catch(UnknownHostException ignored) {}
-    }
-
-	/**
-	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
-     * This method should not be called if the client is not GUESS enabled.
-     *
-	 * @param msg  the <tt>Message</tt> to send
-	 * @param ip   the <tt>InetAddress</tt> to send to
-	 * @param port the port to send to
      * @param err  an <tt>ErrorCallback<tt> if you want to be notified errors
      * @throws IllegalArgumentException if msg, ip, or err is null.
 	 */
-    public void send(Message msg, InetAddress ip, int port, ErrorCallback err) 
+    public void send(Message msg, InetAddress ip, int port) 
         throws IllegalArgumentException {
-        if (err == null)
-            throw new IllegalArgumentException("Null ErrorCallback");
         if (msg == null)
             throw new IllegalArgumentException("Null Message");
         if (ip == null)
@@ -464,9 +447,13 @@ public class UDPService implements ReadWriteObserver {
             return;
         }
 
-        ByteBuffer buffer = (ByteBuffer)baos.buffer().flip();
+        ByteBuffer buffer = (ByteBuffer)baos.buffer().flip();        
+        send(buffer, ip, port, false);
+    }
+    
+    public void send(ByteBuffer buffer, InetAddress ip, int port, boolean custom) { 
         synchronized(OUTGOING_MSGS) {
-            OUTGOING_MSGS.add(new SendBundle(buffer, ip, port, err));
+            OUTGOING_MSGS.add(new SendBundle(buffer, ip, port, custom));
             if(_channel != null)
                 NIODispatcher.instance().interestWrite(_channel, true);
         }
@@ -487,7 +474,10 @@ public class UDPService implements ReadWriteObserver {
     	                OUTGOING_MSGS.add(0, bundle);
                         releaseBuffer = false;
     	                return true; // no room left to send.
-                    } 
+                    } else if(bundle.custom) {
+                        bundle.buffer.rewind();
+                        releaseBuffer = false;
+                    }
                 } catch(BindException ignored) {
                 } catch(ConnectException ignored) {
                 } catch(NoRouteToHostException ignored) {
@@ -510,12 +500,12 @@ public class UDPService implements ReadWriteObserver {
 	private static class SendBundle {
 	    private final ByteBuffer buffer;
 	    private final SocketAddress addr;
-	    private final ErrorCallback callback;
+        private final boolean custom;
 	    
-	    SendBundle(ByteBuffer b, InetAddress addr, int port, ErrorCallback c) {
+	    SendBundle(ByteBuffer b, InetAddress addr, int port, boolean custom) {
 	        buffer = b;
 	        this.addr = new InetSocketAddress(addr, port);
-	        callback = c;
+            this.custom = custom;
 	    }
 	}
 

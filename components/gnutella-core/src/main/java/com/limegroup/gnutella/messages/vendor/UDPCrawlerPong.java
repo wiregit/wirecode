@@ -317,7 +317,7 @@ public class UDPCrawlerPong extends VendorMessage {
 						" dump of current byte block: "+current);
 			
 			//store the result in an ExtendedEndpoint
-			ExtendedEndpoint result = new ExtendedEndpoint(combo.getAddress(),combo.getPort()); 
+			ExtendedEndpoint result = new ExtendedEndpoint(combo.getInetAddress(),combo.getPort()); 
 			
 			//add connection lifetime
 			if(_connectionTime) {   
@@ -352,7 +352,7 @@ public class UDPCrawlerPong extends VendorMessage {
 						" dump of current byte block: "+current);
 			
 			//store the result in an ExtendedEndpoint
-			ExtendedEndpoint result = new ExtendedEndpoint(combo.getAddress(),combo.getPort()); 
+			ExtendedEndpoint result = new ExtendedEndpoint(combo.getInetAddress(),combo.getPort()); 
 			
 			//add connection lifetime
 			if(_connectionTime) {   

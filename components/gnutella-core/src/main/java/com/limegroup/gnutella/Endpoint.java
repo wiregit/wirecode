@@ -15,6 +15,7 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
 
     static final long serialVersionUID = 4686711693494625070L; 
     
+    private InetAddress addr = null;
     private String hostname = null;
     int port = 0;
     /** Number of files at the host, or -1 if unknown */
@@ -119,6 +120,17 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
         this(hostname, port, true);
     }
     
+    public Endpoint(InetAddress addr, int port) {
+        if(!NetworkUtils.isValidPort(port))
+            throw new IllegalArgumentException("invalid port: "+port);
+        if(!NetworkUtils.isValidAddress(addr))
+            throw new IllegalArgumentException("invalid address: " + addr);
+
+        this.addr = addr;
+        this.hostname = addr.getHostAddress();
+        this.port=port;
+    }
+    
     /**
      * Constructs a new endpoint using the specific hostname & port.
      * If strict is true, this does a DNS lookup against the name,
@@ -208,8 +220,12 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
      *  <tt>InetAddress</tt> cannot be created
      */
     public InetAddress getInetAddress() {
+        if(addr != null)
+            return addr;
+        
         try {
-            return InetAddress.getByName(hostname);
+            addr = InetAddress.getByName(hostname);
+            return addr;
         } catch (UnknownHostException e) {
             return null;
         }
@@ -218,6 +234,7 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
     public void setHostname(String hostname)
     {
         this.hostname = hostname;
+        this.addr = null;
     }
 
     public int getPort()
@@ -316,7 +333,11 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
      *This method  returns the IP of the end point as an array of bytes
      */
     public byte[] getHostBytes() throws UnknownHostException {
-        return InetAddress.getByName(hostname).getAddress();
+        InetAddress ad = getInetAddress();
+        if(ad == null)
+            throw new UnknownHostException(hostname);
+        else
+            return ad.getAddress();
     }
 
     /**
