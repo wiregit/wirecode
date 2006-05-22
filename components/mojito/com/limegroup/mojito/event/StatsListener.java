@@ -19,7 +19,9 @@
  
 package com.limegroup.mojito.event;
 
-
+/**
+ * 
+ */
 public interface StatsListener extends ResponseListener {
 
 }

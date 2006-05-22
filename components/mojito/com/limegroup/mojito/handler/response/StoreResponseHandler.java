@@ -33,7 +33,7 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.event.StoreResponseListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -66,16 +66,16 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         this.keyValues = keyValues;
     }
     
-    public void addStoreListener(StoreListener listener) {
+    public void addStoreListener(StoreResponseListener listener) {
         listeners.add(listener);
     }
     
-    public void removeStoreListener(StoreListener listener) {
+    public void removeStoreListener(StoreResponseListener listener) {
         listeners.remove(listener);
     }
 
-    public StoreListener[] getStoreListeners() {
-        return (StoreListener[])listeners.toArray(new StoreListener[0]);
+    public StoreResponseListener[] getStoreListeners() {
+        return (StoreResponseListener[])listeners.toArray(new StoreResponseListener[0]);
     }
     
     public QueryKey getQueryKey() {
@@ -170,7 +170,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             public void run() {
                 if (!isStopped()) {
                     for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                        StoreListener listener = (StoreListener)it.next();
+                        StoreResponseListener listener = (StoreResponseListener)it.next();
                         listener.storeSucceeded(node, keyValues);
                     }
                 }
@@ -183,7 +183,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             public void run() {
                 if (!isStopped()) {
                     for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                        StoreListener listener = (StoreListener)it.next();
+                        StoreResponseListener listener = (StoreResponseListener)it.next();
                         listener.storeFailed(nodeId, dst, keyValues);
                     }
                 }

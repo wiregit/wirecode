@@ -579,7 +579,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     /**
+     * A simple implementation of Map.Entry to store <ContactNode, QueryKey>
+     * tuples. The Key is the ContactNode and the QueryKey is the Value.
      * 
+     * This class is immutable!
      */
     public static class ContactNodeEntry implements Map.Entry {
         

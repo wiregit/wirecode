@@ -16,21 +16,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.event;
 
-import java.net.SocketAddress;
-import java.util.List;
+import java.util.Collection;
 
-import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
 
 /**
- * The interface for receiving Store events.
+ * 
  */
-public interface StoreListener extends ResponseListener {
-
-    public void storeSucceeded(ContactNode node, List keyValues);
+public interface StoreListener {
     
-    public void storeFailed(KUID nodeId, SocketAddress dst, List keyValues);
+    /**
+     * Called after a store request was processed
+     * 
+     * @param keyValue List of KeyValues we have stored
+     * @param nodes Collection of ContactNodes where the keyValues were sored
+     */
+    public void store(KeyValue keyValue, Collection nodes);
 }

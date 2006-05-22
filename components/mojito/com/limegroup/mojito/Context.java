@@ -51,7 +51,7 @@ import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StatsListener;
-import com.limegroup.mojito.event.StoreManagerListener;
+import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.handler.response.StatsResponseHandler;
@@ -127,10 +127,6 @@ public class Context {
     private ThreadFactory threadFactory = new DefaultThreadFactory();
     
     private String name;
-    
-    public Context() {
-        this("DHT");
-    }
     
     public Context(String name) {
         this.name = name;
@@ -565,7 +561,7 @@ public class Context {
     }
     
     /** Stores a given KeyValue */
-    public void store(KeyValue keyValue, StoreManagerListener listener) throws IOException {
+    public void store(KeyValue keyValue, StoreListener listener) throws IOException {
         new StoreManager().store(keyValue, listener);
     }
     
@@ -833,13 +829,13 @@ public class Context {
     private class StoreManager implements LookupListener {
         
         private KeyValue keyValue;
-        private StoreManagerListener listener;
+        private StoreListener listener;
         
         private StoreManager() {
         }
         
         private void store(KeyValue keyValue, 
-                StoreManagerListener listener) throws IOException {
+                StoreListener listener) throws IOException {
             this.keyValue = keyValue;
             this.listener = listener;
             
