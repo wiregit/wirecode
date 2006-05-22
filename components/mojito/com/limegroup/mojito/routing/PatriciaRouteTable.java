@@ -200,7 +200,8 @@ public class PatriciaRouteTable implements RoutingTable {
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Finished loading routing table. Now refreshing buckets");
-                };
+                }
+                
                 //refresh the buckets
                 refreshBuckets(true);
                 
@@ -212,7 +213,11 @@ public class PatriciaRouteTable implements RoutingTable {
             } catch (ClassNotFoundException e) {
                 LOG.error("PatriciaRouteTable Class not found exception: ", e);
             } finally {
-                try { if (in != null) { in.close(); } } catch (IOException ignore) {}
+                try { 
+                    if (in != null) { 
+                        in.close(); 
+                    } 
+                } catch (IOException ignore) {}
             }
         }
         return false;
@@ -242,7 +247,11 @@ public class PatriciaRouteTable implements RoutingTable {
         } catch (IOException e) {
             LOG.error("PatriciaRouteTable IO exception: ", e);
         } finally {
-            try { if (out != null) { out.close(); } } catch (IOException ignore) {}
+            try { 
+                if (out != null) { 
+                    out.close(); 
+                }
+            } catch (IOException ignore) {}
         }
         return false;
     }

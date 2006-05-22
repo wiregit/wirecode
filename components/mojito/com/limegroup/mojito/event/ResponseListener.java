@@ -25,7 +25,6 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 
-
 /**
  * The ResponseListener is called for every response this
  * Node has received
