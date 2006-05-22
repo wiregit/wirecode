@@ -41,7 +41,10 @@ import com.limegroup.mojito.messages.request.StoreRequest;
 import com.limegroup.mojito.messages.response.StoreResponse;
 
 /**
- * 
+ * The StoreResponseHandler handles storing of one or more 
+ * KeyValues at a given Node. It sends one KeyValue at once,
+ * waits for the response and sends the next KeyValue until
+ * all KeyValues were sent.
  */
 public class StoreResponseHandler extends AbstractResponseHandler {
     

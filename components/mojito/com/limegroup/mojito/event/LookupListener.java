@@ -23,17 +23,18 @@ import java.util.Collection;
 
 import com.limegroup.mojito.KUID;
 
-
+/**
+ * The interface for receiving Lookup events.
+ */
 public interface LookupListener extends ResponseListener {
     
     /**
-     * Called after a lookup has finished.
-     * 
-     * Collection <tt>c</tt> is either a collection of Map.Entries or
-     * a Collection instanceof KeyValueCollection.
-     * 
+     * Called for every found Value
      */
     public void found(KUID lookup, Collection c, long time);
     
+    /**
+     * Called after a lookup has finished.
+     */
     public void finish(KUID lookup, Collection c, long time);
 }

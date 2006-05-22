@@ -21,6 +21,9 @@ package com.limegroup.mojito.handler;
 
 import com.limegroup.mojito.Context;
 
+/**
+ * An abstract base class for RequestHandlers
+ */
 public abstract class AbstractRequestHandler extends MessageHandler 
         implements RequestHandler {
     

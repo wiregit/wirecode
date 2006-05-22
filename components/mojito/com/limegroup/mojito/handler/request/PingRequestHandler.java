@@ -31,9 +31,8 @@ import com.limegroup.mojito.messages.request.PingRequest;
 import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
-
 /**
- * 
+ * The PingRequestHandler handles incoming Ping requests.
  */
 public class PingRequestHandler extends AbstractRequestHandler {
 

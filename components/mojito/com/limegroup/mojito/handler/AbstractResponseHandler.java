@@ -32,7 +32,9 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.NetworkSettings;
 
-
+/**
+ * An abstract base class for ResponseHandlers
+ */
 public abstract class AbstractResponseHandler extends MessageHandler 
         implements ResponseHandler {
     

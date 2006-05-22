@@ -23,6 +23,9 @@ import java.util.Collection;
 
 import com.limegroup.mojito.db.KeyValue;
 
+/**
+ * 
+ */
 public interface StoreManagerListener {
     
     /**

@@ -44,7 +44,7 @@ public class ContextSettings extends LimeDHTProps {
         = FACTORY.createLongSetting("DISPATCH_EVENTS_EVERY", 25L);
     
     public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
-        = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", /*60L **/ 1000L);
+        = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", 60L * 1000L);
     
     public static final IntSetting MAX_LOCAL_HISTORY_SIZE
         = FACTORY.createIntSetting("MAX_LOCAL_HISTORY_SIZE", 20);
@@ -63,6 +63,18 @@ public class ContextSettings extends LimeDHTProps {
     
     public static final LongSetting SYNC_BOOTSTRAP_TIMEOUT
         = FACTORY.createLongSetting("SYNC_BOOTSTRAP_TIMEOUT", 3L * 60L * 1000L);
+    
+    public static final StringSetting VENDOR_ID
+        = FACTORY.createStringSetting("VENDOR_ID", "LIME");
+    
+    public static int getVendorID() {
+        String vendorId = VENDOR_ID.getValue();
+        int id = 0;
+        for(int i = 0; i < 4; i++) {
+            id = (id << 1) | (int)(vendorId.charAt(i) & 0xFF);
+        }
+        return id;
+    }
     
     public static void deleteNodeID(SocketAddress address) {
         String key = (address != null) ? address.toString() : "null";

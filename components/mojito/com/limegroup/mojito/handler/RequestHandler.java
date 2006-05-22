@@ -23,7 +23,9 @@ import java.io.IOException;
 
 import com.limegroup.mojito.messages.RequestMessage;
 
-
+/**
+ * Interface for incomong requests
+ */
 public interface RequestHandler {
     public void handleRequest(RequestMessage message) throws IOException;
 }

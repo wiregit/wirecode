@@ -26,8 +26,10 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 
-
-public class LookupAdapter implements LookupListener {
+/**
+ * An abstract class for receiving Lookup events.
+ */
+public abstract class LookupAdapter implements LookupListener {
 
     public void response(ResponseMessage response, long time) {
     }

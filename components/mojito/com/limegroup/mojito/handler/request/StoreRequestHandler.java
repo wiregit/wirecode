@@ -36,7 +36,12 @@ import com.limegroup.mojito.messages.response.StoreResponse;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
-
+/**
+ * The StoreRequestHandler handles incoming store requests as
+ * sent by other Nodes. It performs some probabilty tests to
+ * make sure the request makes sense (i.e. if the Key is close
+ * to us and so on).
+ */
 public class StoreRequestHandler extends AbstractRequestHandler {
     
     private static final Log LOG = LogFactory.getLog(StoreRequestHandler.class);
@@ -92,7 +97,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             nodesList = getRouteTable().select(valueId, k, true, false);
             if (!nodesList.contains(context.getLocalNode())) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("We are not close to " + keyValue.getKey() + ". KeyValue will expire faster!");
+                    LOG.trace("We are not close to " + keyValue.getKey() 
+                            + ". KeyValue will expire faster!");
                 }
                 
                 context.getDataBaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();

@@ -24,7 +24,9 @@ import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.routing.RoutingTable;
 
-
+/**
+ * An abstract MessageHandler
+ */
 public abstract class MessageHandler {
     
     protected final Context context;

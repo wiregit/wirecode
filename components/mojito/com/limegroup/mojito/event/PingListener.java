@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.event;
 
+/**
+ * The interface for receiving Ping events.
+ */
 public interface PingListener extends ResponseListener {
 
 }

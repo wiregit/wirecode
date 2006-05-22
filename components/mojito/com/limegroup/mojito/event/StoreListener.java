@@ -25,6 +25,9 @@ import java.util.List;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
+/**
+ * The interface for receiving Store events.
+ */
 public interface StoreListener extends ResponseListener {
 
     public void storeSucceeded(ContactNode node, List keyValues);

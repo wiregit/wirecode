@@ -53,7 +53,10 @@ import com.limegroup.mojito.util.KeyValueCollection;
 import com.limegroup.mojito.util.NetworkUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
 
-
+/**
+ * The LookupResponseHandler handles Node as well as Value
+ * lookups.
+ */
 public class LookupResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
@@ -488,9 +491,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         // Setting max errors to something else than 0 in lookups
         // is algorithmically incorrect!
         super.resend(nodeId, dst, message);
-    }*/
+    }
 
-    /*public void handleTimeout(KUID nodeId, 
+    public void handleTimeout(KUID nodeId, 
             SocketAddress dst, RequestMessage message, long time) throws IOException {
         super.handleTimeout(nodeId, dst, message, time);
     }*/
