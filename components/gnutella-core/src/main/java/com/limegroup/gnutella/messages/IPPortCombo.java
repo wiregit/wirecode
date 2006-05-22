@@ -49,7 +49,6 @@ public class IPPortCombo implements IpPort {
             a[3] = networkData[3];
             _addr = InetAddress.getByAddress(a);
         } catch(UnknownHostException uhe) {
-            uhe.printStackTrace();
             throw new BadPacketException("bad host.");
         }
         if (!NetworkUtils.isValidAddress(_addr))
