@@ -265,6 +265,16 @@ public final class CryptoHelper {
         }
     }
     
+    /*
+     * To create a KeyPair:
+     * keytool -genkey -keypass <password> -keystore <file> -storepass <password> -alias <alias>
+     * 
+     * To extract the PublicKey:
+     * java com.limegroup.mojito.security.CryptoHelper <file> <alias> <password>
+     * 
+     * To load the KeyPair:
+     * KeyPair keyPair = CryptoHelper.load(<file>, <alias>, <password>);
+     */
     public static void main(String[] args) throws Exception {
         
         KeyPair keyPair = load(new File(args[0]), args[1], args[2].toCharArray());
