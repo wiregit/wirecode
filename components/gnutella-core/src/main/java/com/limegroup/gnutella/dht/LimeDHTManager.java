@@ -29,14 +29,10 @@ public class LimeDHTManager implements LifecycleListener{
         dht = new MojitoDHT("LimeMojitoDHT");
     }
     
-    public synchronized void init() {
-        if(running) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot initialize DHT - DHT allready running!");
-            }
-            return;
-        } 
-        if(!DHTSettings.FORCE_DHT_CONNECT.getValue() && !DHTSettings.DHT_CAPABLE.getValue()) {
+    public synchronized void init(boolean passive) {
+        if(running) return;
+
+        if(!DHTSettings.DHT_CAPABLE.getValue() && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not DHT capable");
             }
@@ -54,9 +50,14 @@ public class LimeDHTManager implements LifecycleListener{
             }
             return;
         }
+        
         running = true;
         //set firewalled status
-        dht.setFirewalled(RouterService.acceptedIncomingConnection());
+        if(passive){
+            dht.setFirewalled(true);
+        } else {
+            dht.setFirewalled(RouterService.acceptedIncomingConnection());
+        }
         //TODO initialize the DHT here: bind, set Address, bootstrap etc.
         //dht.start();
     }
@@ -81,11 +82,15 @@ public class LimeDHTManager implements LifecycleListener{
 
     public void handleLifecycleEvent(LifecycleEvent evt) {
         if(evt.isConnectedEvent()) {
-            
-        } else if(evt.isConnectingEvent()){
-            
+            if(running) {
+                return;
+            } else {
+                init(false);
+            }
         } else if(evt.isDisconnectedEvent() || evt.isConnectingEvent() || evt.isNoInternetEvent()) {
-            
+            if(running) {
+                shutdown();
+            }
         } else {
             return;
         }

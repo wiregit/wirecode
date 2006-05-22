@@ -336,7 +336,7 @@ public class NodeAssigner {
             Runnable dhtInitializer = 
                 new Runnable() {
                     public void run() {
-                        RouterService.initializeDHT();
+                        RouterService.initializeDHT(false);
                     }
                 };
             ThreadFactory.startThread(dhtInitializer, "dhtInitializeThread");

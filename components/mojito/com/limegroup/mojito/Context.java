@@ -259,12 +259,14 @@ public class Context {
     }
     
     public boolean isFirewalled() {
-        return localNode.isFirewalled();
+        if(localNode != null) {
+            return localNode.isFirewalled();
+        } else {
+            return false;
+        }
     }
     
     public void setFirewalled(boolean firewalled) {
-        //TODO: if status has changed from firewalled to non-firewalled
-        //then re-bootstrap to the network
         if(localNode != null) {
             localNode.setFirewalled(firewalled);
         }
@@ -515,6 +517,16 @@ public class Context {
         new BootstrapManager().bootstrap(address, listener);
     }
     
+    public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
+        setBootstrapped(false);
+        new BootstrapManager().bootstrap(bootstrapHostsList, listener);
+    }
+    
+    public void bootstrap(BootstrapListener listener) throws IOException {
+        setBootstrapped(false);
+        new BootstrapManager().bootstrap(listener);
+    }
+    
     /** store */
     public void store(KeyValue keyValue, StoreListener listener) throws IOException {       
         new StoreManager().store(keyValue, listener);
@@ -670,6 +682,10 @@ public class Context {
         
         private List buckets = Collections.EMPTY_LIST;
         
+        private List bootstrapHostsList;
+        
+        private int failures;
+        
         private BootstrapManager() {  
         }
         
@@ -679,10 +695,22 @@ public class Context {
         
         public void bootstrap(SocketAddress address, 
                 BootstrapListener listener) throws IOException {
-            
             this.listener = listener;
             startTime = System.currentTimeMillis();
             ping(address, this);
+        }
+        
+        public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
+            this.bootstrapHostsList = bootstrapHostsList;
+            if(bootstrapHostsList != null && bootstrapHostsList.size() > 0) {
+                SocketAddress firstHost = (SocketAddress)bootstrapHostsList.get(0);
+                bootstrapHostsList.remove(0);
+                bootstrap(firstHost, listener);
+            } 
+        }
+        
+        public void bootstrap(BootstrapListener listener) throws IOException {
+            bootstrap(routeTable.getAllNodesMRS(), listener);
         }
         
         public void response(ResponseMessage response, long time) {
@@ -700,12 +728,44 @@ public class Context {
 
         public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
             if (request instanceof PingRequest) {
+                ++failures;
+                networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
                 if (LOG.isErrorEnabled()) {
-                    LOG.error("Initial bootstrap ping failed!");
+                    LOG.error("Initial bootstrap ping timeout, failure "+failures);
                 }
                 
-                firePhaseOneFinished();
-                firePhaseTwoFinished();
+                if(failures < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    if(bootstrapHostsList == null || bootstrapHostsList.size() == 0) {
+                        bootstrapHostsList = routeTable.getAllNodesMRS();
+                    }
+                    
+                    for (Iterator iter = bootstrapHostsList.iterator(); iter.hasNext();) {
+                        ContactNode node = (ContactNode) iter.next();
+                        //do not send to ourselve or the node which just timed out
+                        if(!node.getNodeID().equals(getLocalNodeID()) 
+                                && !node.getSocketAddress().equals(address)) {
+                            
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Retrying bootstrap ping with node: " + node);
+                            }
+                            
+                            try {
+                                iter.remove();
+                                ping(node,this);
+                            } catch (IOException err) {
+                                LOG.error(err);
+                                firePhaseOneFinished();
+                                firePhaseTwoFinished();
+                            }
+                        }
+                    }
+                }else {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("Initial bootstrap ping timeout, giving up bootstrap after "+failures+" tries");
+                    }
+                    firePhaseOneFinished();
+                    firePhaseTwoFinished();
+                }
             }
         }
         

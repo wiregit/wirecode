@@ -1809,8 +1809,8 @@ public class RouterService {
         return UDPSERVICE.canDoFWT();
     }
     
-    public static void initializeDHT() {
-        dhtManager.init();
+    public static void initializeDHT(boolean passiveMode) {
+        dhtManager.init(passiveMode);
     }
     
     public static void shutdownDHT() {
