@@ -34,6 +34,8 @@ public class UploadSlotManager {
 	 * active is sorted and contains only uploaders of the highest priority or 
 	 * non-killable uploads
 	 * queued is sorted and queued[0].priority <= active[last].priority
+	 * or if active[last].priority > queued[0].priority then 
+	 * active[last].preemptible = false.
 	 * 	
 	 */
 	private final List active, queued;
@@ -75,15 +77,18 @@ public class UploadSlotManager {
 		// kill all killable uploads with lower priority
 		for (int i = active.size() - 1; i >= 0; i--) {
 			UploadSlotRequest current = (UploadSlotRequest) active.get(i);
-			if (current.priority < priority && current.preempt) {
-				request.listener.releaseSlot();
-				active.remove(i);
+			if (current.priority < priority) {
+				if(current.preempt) {
+					current.listener.releaseSlot();
+					active.remove(i);
+				}
 			} else
 				break;
 		}
 		
 		if (hasFreeSlot(active.size())) {
 			addActiveRequest(request);
+			removeIfQueued(listener);
 			return 0;
 		}
 		else if (queue)
@@ -131,11 +136,13 @@ public class UploadSlotManager {
 		int i = 0;
 		for(; i < queued.size(); i++) {
 			UploadSlotRequest current = (UploadSlotRequest) queued.get(i);
+			if (current.listener == request.listener)
+				return ++i; // already queued, return current position
 			if (current.priority < request.priority) 
 				break;
 		}
 		queued.add(i,request);
-		return i++;
+		return ++i;
 	}
 	
 	/**
@@ -156,7 +163,13 @@ public class UploadSlotManager {
 	 */
 	public void cancelRequest(UploadSlotListener listener) {
 		requestDone(listener);
-		
+		removeIfQueued(listener);
+	}
+
+	/**
+	 * Removes an UploadSlotListener from the queue. 
+	 */
+	private void removeIfQueued(UploadSlotListener listener) {
 		for (Iterator iter = queued.iterator(); iter.hasNext();) {
 			UploadSlotRequest request = (UploadSlotRequest) iter.next();
 			if (request.listener == listener) {
@@ -181,34 +194,33 @@ public class UploadSlotManager {
 	}
 	
 	private void startQueuedIfPossible() {
-		UploadSlotRequest started = null;
-		if (hasFreeSlot(active.size()) && !queued.isEmpty()) {
-			UploadSlotRequest queuedRequest = (UploadSlotRequest) queued.get(0);
-			if (active.isEmpty()) {
-				queued.remove(0);
-				active.add(queuedRequest);
-				started = queuedRequest;
-			} else {
+		for(Iterator iter = queued.iterator();
+		iter.hasNext() && hasFreeSlot(active.size());) {
+			boolean started = false;
+			UploadSlotRequest queuedRequest = (UploadSlotRequest) iter.next();
+			
+			if (active.isEmpty()) 
+				started = true;
+			else {
 				
 				// if we already have active uploads, start a queued one only
 				// if the active ones are with the same or lesser priority.
+				// (possible if the last active is non-preemptible)
 				UploadSlotRequest activeRequest = 
 					(UploadSlotRequest) active.get(active.size() - 1);
-				
-				if (activeRequest.priority <= queuedRequest.priority) {
-					// could be less than if the last active is non-preemptible
-					queued.remove(0);
-					addActiveRequest(queuedRequest);
-					started = queuedRequest;
-				}
+
+				if (activeRequest.priority <= queuedRequest.priority) 
+					started = true;
+			}
+			
+			if (started && queuedRequest.listener.slotAvailable()) {
+				iter.remove();
+				addActiveRequest(queuedRequest);
 			}
 		}
-		
-		if (started != null)
-			started.listener.slotAvailable();
 	}
 	
-	private class UploadSlotRequest implements Comparable {
+	private class UploadSlotRequest {
 		final UploadSlotListener listener;
 		final boolean preempt;
 		final int priority;
@@ -218,13 +230,6 @@ public class UploadSlotManager {
 			this.listener = listener;
 			this.preempt = preempt;
 			this.priority = priority;
-		}
-		
-		public int compareTo(Object o) {
-			if (this == o)
-				return 0;
-			UploadSlotRequest other = (UploadSlotRequest)o;
-			return this.priority - other.priority;
 		}
 	}
 }

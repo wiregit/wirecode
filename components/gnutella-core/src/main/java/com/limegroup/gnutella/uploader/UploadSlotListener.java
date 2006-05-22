@@ -8,8 +8,9 @@ public interface UploadSlotListener {
 	/**
 	 * notification that an upload slot has become
 	 * available
+	 * @return if the upload will proceed immediately.
 	 */
-	public void slotAvailable();
+	public boolean slotAvailable();
 	
 	/**
 	 * request that this releases an upload slot if it
