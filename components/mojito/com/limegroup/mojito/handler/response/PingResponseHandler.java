@@ -34,7 +34,10 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.response.PingResponse;
 
-
+/**
+ * The PingResponseHandler handles ping responses from Nodes
+ * that we have pinged.
+ */
 public class PingResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);

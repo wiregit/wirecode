@@ -19,49 +19,36 @@
  
 package com.limegroup.mojito.messages.request;
 
-import java.util.Collection;
-
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.RequestMessage;
 
 
 public class StoreRequest extends RequestMessage {
 
-    private int remaining;
-    
     private QueryKey queryKey;
-    private Collection values;
+    private KeyValue keyValue;
     
     public StoreRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, int remaining, 
-            QueryKey queryKey, Collection values) {
+            ContactNode node, KUID messageId, 
+            QueryKey queryKey, KeyValue keyValue) {
         super(vendor, version, node, messageId);
         
-        if (remaining < 0 || remaining > 0xFFFF) {
-            throw new IllegalArgumentException("Remaining: " + remaining);
-        }
-        
-        this.remaining = remaining;
-        
         this.queryKey = queryKey;
-        this.values = values;
+        this.keyValue = keyValue;
     }
 
     public QueryKey getQueryKey() {
         return queryKey;
     }
     
-    public int getRemaingCount() {
-        return remaining;
-    }
-    
-    public Collection getValues() {
-        return values;
+    public KeyValue getKeyValue() {
+        return keyValue;
     }
     
     public String toString() {
-        return values.toString();
+        return keyValue.toString();
     }
 }

@@ -20,10 +20,6 @@
 package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -37,11 +33,15 @@ import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.request.StoreRequest;
 import com.limegroup.mojito.messages.response.StoreResponse;
-import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
-
+/**
+ * The StoreRequestHandler handles incoming store requests as
+ * sent by other Nodes. It performs some probabilty tests to
+ * make sure the request makes sense (i.e. if the Key is close
+ * to us and so on).
+ */
 public class StoreRequestHandler extends AbstractRequestHandler {
     
     private static final Log LOG = LogFactory.getLog(StoreRequestHandler.class);
@@ -69,6 +69,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         }
         
         QueryKey expected = QueryKey.getQueryKey(request.getSourceAddress());
+        
         if (!expected.equals(queryKey)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Expected " + expected + " from " 
@@ -79,58 +80,42 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        int remaining = request.getRemaingCount();
-        Collection values = request.getValues();
-        
+        KeyValue keyValue = request.getKeyValue();
+        KUID valueId = keyValue.getKey();
+
         if (LOG.isTraceEnabled()) {
-            if (!values.isEmpty()) {
-                LOG.trace(request.getSource() 
-                        + " requested us to store the KeyValues " + values);
-            } else {
-                LOG.trace(request.getSource() 
-                        + " requested us to store " + remaining + " KeyValues");
-            }
+            LOG.trace(request.getSource() 
+                    + " requested us to store the KeyValues " + keyValue);
         }
         
+        // under the assumption that the requester sent us a lookup before
+        // check if we are part of the closest alive nodes to this value
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        List nodesList = getRouteTable().select(valueId, k, false, false);
         
-        // Avoid to create an empty ArrayList
-        List stats = (values.isEmpty() ? Collections.EMPTY_LIST : new ArrayList(values.size()));
-        
-        // Add the KeyValues...
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
-            KeyValue keyValue = (KeyValue)it.next();
-            KUID key = (KUID)keyValue.getKey();
-            
-            // under the assumption that the requester sent us a lookup before
-            // check if we are part of the closest alive nodes to this value
-            List nodesList = getRouteTable().select(key, k, false, false);
+        if (!nodesList.contains(context.getLocalNode())) {
+            nodesList = getRouteTable().select(valueId, k, true, false);
             if (!nodesList.contains(context.getLocalNode())) {
-                nodesList = getRouteTable().select(key, k, true, false);
-                if (!nodesList.contains(context.getLocalNode())) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("We are not close to " + keyValue.getKey() + ". KeyValue will expire faster!");
-                    }
-                    
-                    context.getDataBaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
-                    keyValue.setClose(false);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("We are not close to " + keyValue.getKey() 
+                            + ". KeyValue will expire faster!");
                 }
-            }
-            
-            if (context.getDatabase().add(keyValue)) {
-                networkStats.STORE_REQUESTS_OK.incrementStat();
-                stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.SUCCEEDED));
-            } else {
-                networkStats.STORE_REQUESTS_FAILURE.incrementStat();
-                stats.add(new StoreResponse.StoreStatus((KUID)keyValue.getKey(), StoreResponse.FAILED));
+                
+                context.getDataBaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
+                keyValue.setClose(false);
             }
         }
         
-        int maxOnce = DatabaseSettings.MAX_STORE_FORWARD_ONCE.getValue();
-        int keyValues = Math.min(maxOnce, remaining);
+        int status = StoreResponse.FAILED;
+        if (context.getDatabase().add(keyValue)) {
+            networkStats.STORE_REQUESTS_OK.incrementStat();
+            status = StoreResponse.SUCCEEDED;
+        } else {
+            networkStats.STORE_REQUESTS_FAILURE.incrementStat();
+        }
         
         StoreResponse response 
-            = context.getMessageFactory().createStoreResponse(request, keyValues, stats);
+            = context.getMessageFactory().createStoreResponse(request, valueId, status);
         context.getMessageDispatcher().send(request.getSource(), response);
     }
 }

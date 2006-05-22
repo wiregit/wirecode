@@ -32,9 +32,10 @@ import java.util.Random;
 
 import com.limegroup.mojito.DHT;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupAdapter;
-import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.event.StoreManagerListener;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.PlanetLabTestsStatContainer;
 import com.limegroup.mojito.statistics.StatsManager;
@@ -326,8 +327,8 @@ public class PlanetLab {
                         /*if(publishDelay >= minRepublisher){*/
                         
                         lastPublishTime = System.currentTimeMillis();
-                        dht.put(toKUID(value), getBytes(value), new StoreListener() {
-                            public void store(List keyValues, Collection nodes) {
+                        dht.put(toKUID(value), getBytes(value), new StoreManagerListener() {
+                            public void store(KeyValue keyValue, Collection nodes) {
                                 planetlabStats.PUBLISH_LOCATIONS.addData(nodes.size());
                             }
                         });

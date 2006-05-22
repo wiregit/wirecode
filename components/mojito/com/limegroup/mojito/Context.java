@@ -51,8 +51,7 @@ import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StatsListener;
-import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.handler.ResponseHandler;
+import com.limegroup.mojito.event.StoreManagerListener;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.handler.response.StatsResponseHandler;
@@ -78,12 +77,15 @@ import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
-
+/**
+ * The Context is the heart of Mojito where everything comes 
+ * together. 
+ */
 public class Context {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
-    private static final int VENDOR = 0xDEADBEEF;
+    private static final int VENDOR = ContextSettings.getVendorID();
     private static final int VERSION = 0;
     
     private static Timer TIMER = new Timer(true);
@@ -170,6 +172,10 @@ public class Context {
         return name;
     }
     
+    /**
+     * Installs a custom MessageDispatcher implementation. The
+     * passed Class must be a subclass of MessageDispatcher.
+     */
     public synchronized void setMessageDispatcher(Class clazz) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
@@ -318,6 +324,10 @@ public class Context {
         return messageDispatcher.getSentMessagesSize();
     }
     
+    /**
+     * Sets the ThreadFactory. A null value will re-set the
+     * current ThreadFactory
+     */
     public void setThreadFactory(ThreadFactory threadFactory) {
         if (threadFactory == null) {
             threadFactory = new DefaultThreadFactory();
@@ -326,10 +336,19 @@ public class Context {
         this.threadFactory = threadFactory;
     }
     
+    /**
+     * Returns the current ThreadFactory
+     */
     public ThreadFactory getThreadFactory() {
         return threadFactory;
     }
     
+    /**
+     * Binds the DatagramChannel to a specific address & port.
+     * 
+     * @param address
+     * @throws IOException
+     */
     public void bind(SocketAddress address) throws IOException {
         if (isOpen()) {
             throw new IOException("DHT is already bound");
@@ -364,9 +383,12 @@ public class Context {
         messageDispatcher.bind(address);
     }
     
+    /**
+     * Starts the DHT
+     */
     public synchronized void start() {
         if (!isOpen()) {
-            throw new RuntimeException("DHT is not bound");
+            throw new IllegalStateException("DHT is not bound");
         }
         
         if (isRunning()) {
@@ -397,6 +419,9 @@ public class Context {
         messageDispatcherThread.start();
     }
     
+    /**
+     * Stops the DHT
+     */
     public synchronized void stop() {
         running = false;
         bootstrapped = false;
@@ -424,6 +449,13 @@ public class Context {
         }
     }
     
+    /**
+     * Schedules a Runnable
+     * 
+     * @param runnable
+     * @param delay
+     * @param period
+     */
     public void scheduleAtFixedRate(final Runnable runnable, long delay, long period) {
         TIMER.scheduleAtFixedRate(new TimerTask() {
             public void run() {
@@ -432,6 +464,9 @@ public class Context {
         }, delay, period);
     }
     
+    /**
+     * Fire's an Event
+     */
     public void fireEvent(Runnable event) {
         if (!isRunning()) {
             LOG.error("Discarding Event as DHT is not running");
@@ -446,26 +481,32 @@ public class Context {
         eventQueue.add(event);
     }
     
+    /** Adds a global PingListener */
     public void addPingListener(PingListener listener) {
         pingManager.addPingListener(listener);
     }
     
+    /** Removes a global PingListener */
     public void removePingListener(PingListener listener) {
         pingManager.removePingListener(listener);
     }
     
+    /** Returns all global PingListeners */
     public PingListener[] getPingListeners() {
         return pingManager.getPingListeners();
     }
     
+    /** Adds a global LookupListener */
     public void addLookupListener(LookupListener listener) {
         lookupManager.addLookupListener(listener);
     }
     
+    /** Removes a global LookupListener */
     public void removeLookupListener(LookupListener listener) {
         lookupManager.removeLookupListener(listener);
     }
     
+    /** Returns all global LookupListeners */
     public LookupListener[] getLookupListeners() {
         return lookupManager.getLookupListeners();
     }
@@ -482,55 +523,53 @@ public class Context {
         pingManager.ping(address);
     }
     
+    /** Pings the given Node */
     public void ping(SocketAddress address, PingListener listener) throws IOException {
         pingManager.ping(address, listener);
     }
     
+    /** Pings the given Node */
     public void ping(ContactNode node) throws IOException {
         pingManager.ping(node);
     }
     
+    /** Pings the given Node */
     public void ping(ContactNode node, PingListener listener) throws IOException {
         pingManager.ping(node, listener);
     }
     
+    /** Starts a value for the given KUID */
     public void get(KUID key, LookupListener listener) throws IOException {
         lookupManager.lookup(key, listener);
     }
     
+    /** Starts a lookup for the given KUID */
     public void lookup(KUID lookup) throws IOException {
         lookupManager.lookup(lookup);
     }
     
+    /** Starts a lookup for the given KUID */
     public void lookup(KUID lookup, LookupListener listener) throws IOException {
         lookupManager.lookup(lookup, listener);
     }
     
+    /** Bootstraps this Node from the given Node */
     public void bootstrap(SocketAddress address, BootstrapListener listener) throws IOException {
         setBootstrapped(false);
         new BootstrapManager().bootstrap(address, listener);
     }
     
-    /** store */
-    public void store(KeyValue keyValue, StoreListener listener) throws IOException {       
+    /** Stores a given KeyValue */
+    public void store(KeyValue keyValue) throws IOException {
+        new StoreManager().store(keyValue, null);
+    }
+    
+    /** Stores a given KeyValue */
+    public void store(KeyValue keyValue, StoreManagerListener listener) throws IOException {
         new StoreManager().store(keyValue, listener);
     }
     
-    public void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
-        
-        if (queryKey == null) {
-            throw new NullPointerException("Cannot store KeyValues without QueryKey");
-        }
-        
-        ResponseHandler handler = new StoreResponseHandler(Context.this, queryKey, keyValues);
-        
-        RequestMessage request 
-            = messageFactory.createStoreRequest(node.getSocketAddress(), keyValues.size(), 
-                    queryKey, Collections.EMPTY_LIST);
-        
-        messageDispatcher.send(node, request, handler);
-    }
-    
+    /** Retrieves Statistics from the given Node */
     public void stats(SocketAddress address, int request, StatsListener listener) throws IOException {
         RequestMessage msg = messageFactory.createStatsRequest(address, new byte[0], request);
         StatsResponseHandler handler = new StatsResponseHandler(this);
@@ -540,6 +579,9 @@ public class Context {
         messageDispatcher.send(address, msg, handler);
     }
     
+    /**
+     * Returns the approximate DHT size
+     */
     public int size() {
         if (!isRunning()) {
             return 0;
@@ -556,6 +598,11 @@ public class Context {
         return estimatedSize;
     }
     
+    /**
+     * Adds the approximate DHT size as returned by a remote Node.
+     * The average of the remote DHT sizes is incorporated into into
+     * our local computation.
+     */
     public void addEstimatedRemoteSize(int remoteSize) {
         if (remoteSize <= 0 || !ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
             return;
@@ -563,12 +610,16 @@ public class Context {
         
         synchronized (remoteSizeHistory) {
             remoteSizeHistory.add(new Integer(remoteSize));
-            if (remoteSizeHistory.size() >= ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
+            if (remoteSizeHistory.size() 
+                    >= ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
                 remoteSizeHistory.removeFirst();
             }
         }
     }
     
+    /**
+     * Computes and returns the approximate DHT size
+     */
     private int getEstimatedSize() {
         KUID localNodeId = getLocalNodeID();
         
@@ -579,6 +630,10 @@ public class Context {
         
         // TODO accoriding to Az code it works only with more than
         // two Nodes
+        if (nodes.size() <= 2) {
+            // There's always we!
+            return Math.max(1, nodes.size());
+        }
         
         // See Azureus DHTControlImpl.estimateDHTSize()
         // Di = localNodeID xor NodeIDi
@@ -655,6 +710,10 @@ public class Context {
         return dataBaseStats;
     }
     
+    /**
+     * The BootstrapManager performs a lookup for the local Node ID
+     * which is essentially the bootstrap process.
+     */
     public class BootstrapManager implements PingListener, LookupListener {
         
         private long startTime = 0L;
@@ -706,7 +765,6 @@ public class Context {
         }
         
         public void found(KUID lookup, Collection c, long time) {
-            
         }
         
         public void finish(KUID lookup, Collection c, long time) {
@@ -767,17 +825,22 @@ public class Context {
         }
     }
     
+    /**
+     * The StoreManager performs a lookup for the Value ID we're
+     * going to store and stores the KeyValue at the k closest 
+     * Nodes of the result set.
+     */
     private class StoreManager implements LookupListener {
         
-        private List keyValues;
-        private StoreListener listener;
+        private KeyValue keyValue;
+        private StoreManagerListener listener;
         
         private StoreManager() {
-            
         }
         
-        private void store(KeyValue keyValue, StoreListener listener) throws IOException {
-            this.keyValues = Arrays.asList(new KeyValue[]{keyValue});
+        private void store(KeyValue keyValue, 
+                StoreManagerListener listener) throws IOException {
+            this.keyValue = keyValue;
             this.listener = listener;
             
             KUID nodeId = ((KUID)keyValue.getKey()).toNodeID();
@@ -814,28 +877,26 @@ public class Context {
                 
                 if (queryKey == null) {
                     if (LOG.isErrorEnabled()) {
-                        LOG.error("Cannot store " + keyValues + " at " 
+                        LOG.error("Cannot store " + keyValue + " at " 
                                 + node + " because we have no QueryKey for it");
                     }
                     continue;
                 }
                 
                 try {
-                    Context.this.store(node, queryKey, keyValues);
+                    new StoreResponseHandler(Context.this, queryKey, keyValue).store(node);
                     storeTargets.add(node);
                 } catch (IOException err) {
-                    LOG.error("", err);
+                    LOG.error("Failed to store KeyValue", err);
                 }
             }
             
-            for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                ((KeyValue)it.next()).setNumLocs(storeTargets.size());
-            }
+            keyValue.setNumLocs(storeTargets.size());
             
             if (listener != null) {
                 fireEvent(new Runnable() {
                     public void run() {
-                        listener.store(keyValues, storeTargets);
+                        listener.store(keyValue, storeTargets);
                     }
                 });
             }
@@ -843,7 +904,7 @@ public class Context {
     }
     
     /**
-     * The PingContext takes care of concurrent Pings and makes sure
+     * The PingManager takes care of concurrent Pings and makes sure
      * a single Node cannot be pinged multiple times.
      */
     private class PingManager implements PingListener {
@@ -971,6 +1032,9 @@ public class Context {
         }
     }
     
+    /**
+     * The LookupManager takes care of multiple concurrent lookups
+     */
     private class LookupManager implements LookupListener {
         
         private Map handlerMap = new HashMap();
@@ -1110,6 +1174,9 @@ public class Context {
         }
     }
     
+    /**
+     * A default implementation of the ThreadFactory.
+     */
     private static class DefaultThreadFactory implements ThreadFactory {
         public Thread createThread(Runnable runnable, String name) {
             return new Thread(runnable, name);

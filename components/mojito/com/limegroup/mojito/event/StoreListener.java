@@ -19,16 +19,18 @@
  
 package com.limegroup.mojito.event;
 
-import java.util.Collection;
+import java.net.SocketAddress;
 import java.util.List;
 
-public interface StoreListener {
+import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.KUID;
+
+/**
+ * The interface for receiving Store events.
+ */
+public interface StoreListener extends ResponseListener {
+
+    public void storeSucceeded(ContactNode node, List keyValues);
     
-    /**
-     * Called after a store request was processed
-     * 
-     * @param keyValues List of KeyValues we have stored
-     * @param nodes Collection of ContactNodes where the keyValues were sored
-     */
-    public void store(List keyValues, Collection nodes);
+    public void storeFailed(KUID nodeId, SocketAddress dst, List keyValues);
 }

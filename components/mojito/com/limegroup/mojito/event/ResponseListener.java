@@ -27,7 +27,8 @@ import com.limegroup.mojito.messages.ResponseMessage;
 
 
 /**
- * 
+ * The ResponseListener is called for every response this
+ * Node has received
  */
 public interface ResponseListener {
     

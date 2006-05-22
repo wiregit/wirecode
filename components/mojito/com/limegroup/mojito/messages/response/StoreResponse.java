@@ -19,8 +19,6 @@
  
 package com.limegroup.mojito.messages.response;
 
-import java.util.Collection;
-
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -31,41 +29,22 @@ public class StoreResponse extends ResponseMessage {
     public static final int SUCCEEDED = 0x00;
     public static final int FAILED = 0x01;
     
-    private int requesting;
-    private Collection storeStatus;
+    private KUID valueId;
+    private int status;
 
     public StoreResponse(int vendor, int version, ContactNode node, 
-            KUID messageId, int requesting, Collection storeStatus) {
+            KUID messageId, KUID valueId, int status) {
         super(vendor, version, node, messageId);
         
-        this.requesting = requesting;
-        this.storeStatus = storeStatus;
+        this.valueId = valueId;
+        this.status = status;
     }
     
-    public int getRequestCount() {
-        return requesting;
+    public KUID getValueID() {
+        return valueId;
     }
     
-    public Collection getStoreStatus() {
-        return storeStatus;
-    }
-    
-    public static class StoreStatus {
-        
-        private KUID key;
-        private int status;
-        
-        public StoreStatus(KUID key, int status) {
-            this.key = key;
-            this.status = status;
-        }
-        
-        public KUID getKey() {
-            return key;
-        }
-        
-        public int getStatus() {
-            return status;
-        }
+    public int getStatus() {
+        return status;
     }
 }

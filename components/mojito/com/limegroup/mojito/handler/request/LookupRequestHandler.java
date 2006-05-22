@@ -40,10 +40,9 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.CollectionUtils;
 
 
-
-
 /**
- * Handles FIND_NODE as well as FIND_VALUE requests
+ * The LookupRequestHandler handles incoming FIND_NODE as well as 
+ * FIND_VALUE requests.
  */
 public class LookupRequestHandler extends AbstractRequestHandler {
     

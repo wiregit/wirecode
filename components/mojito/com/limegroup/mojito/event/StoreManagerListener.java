@@ -16,34 +16,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.handler;
 
-import com.limegroup.mojito.Context;
-import com.limegroup.mojito.io.MessageDispatcher;
-import com.limegroup.mojito.messages.MessageFactory;
-import com.limegroup.mojito.routing.RoutingTable;
+package com.limegroup.mojito.event;
+
+import java.util.Collection;
+
+import com.limegroup.mojito.db.KeyValue;
 
 /**
- * An abstract MessageHandler
+ * 
  */
-public abstract class MessageHandler {
+public interface StoreManagerListener {
     
-    protected final Context context;
-    
-    public MessageHandler(Context context) {
-        this.context = context;
-    }
-    
-    protected MessageDispatcher getMessageDispatcher() {
-        return context.getMessageDispatcher();
-    }
-    
-    protected RoutingTable getRouteTable() {
-        return context.getRouteTable();
-    }
-    
-    protected MessageFactory getMessageFactory() {
-        return context.getMessageFactory();
-    }
+    /**
+     * Called after a store request was processed
+     * 
+     * @param keyValue List of KeyValues we have stored
+     * @param nodes Collection of ContactNodes where the keyValues were sored
+     */
+    public void store(KeyValue keyValue, Collection nodes);
 }

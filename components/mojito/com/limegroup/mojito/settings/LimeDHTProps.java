@@ -75,8 +75,12 @@ public class LimeDHTProps /* extends AbstractSettings */ {
             return new LongSetting(value);
         }
         
-        public synchronized ByteSetting createByteSetting(String key, byte value) {
+        public ByteSetting createByteSetting(String key, byte value) {
             return new ByteSetting(value);
+        }
+        
+        public StringSetting createStringSetting(String key, String value) {
+            return new StringSetting(value);
         }
     }
     
@@ -106,5 +110,12 @@ public class LimeDHTProps /* extends AbstractSettings */ {
         public LongSetting(long value) { this.value = value; }
         public void setValue(long value) { this.value = value; }
         public long getValue() { return value; }
+    }
+    
+    public static class StringSetting {
+        private String value;
+        public StringSetting(String value) { this.value = value; }
+        public void setValue(String value) { this.value = value; }
+        public String getValue() { return value; }
     }
 }

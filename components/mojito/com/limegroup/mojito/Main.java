@@ -32,14 +32,13 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StatsListener;
-import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.event.StoreManagerListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.request.StatsRequest;
@@ -49,7 +48,6 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
-import com.limegroup.mojito.util.KeyValueCollection;
 
 
 public class Main {
@@ -380,10 +378,10 @@ public class Main {
         md.reset();
         
         System.out.println("Storing... " + key);
-        dht.put(key, value, new StoreListener() {
-            public void store(List keyValues, Collection nodes) {
+        dht.put(key, value, new StoreManagerListener() {
+            public void store(KeyValue keyValue, Collection nodes) {
                 StringBuffer buffer = new StringBuffer();
-                buffer.append("STORED KEY_VALUES: ").append(keyValues).append("\n");
+                buffer.append("STORED KEY_VALUES: ").append(keyValue).append("\n");
                 int i = 0;
                 for (Iterator iter = nodes.iterator(); iter.hasNext();) {
                     Node node = (Node) iter.next();
@@ -408,10 +406,10 @@ public class Main {
         md.reset();
         
         System.out.println("Removing... " + key);
-        dht.remove(key, new StoreListener() {
-            public void store(List keyValues, Collection nodes) {
+        dht.remove(key, new StoreManagerListener() {
+            public void store(KeyValue keyValue, Collection nodes) {
                 StringBuffer buffer = new StringBuffer();
-                buffer.append("REMOVED KEY_VALUES: ").append(keyValues).append("\n");
+                buffer.append("REMOVED KEY_VALUES: ").append(keyValue).append("\n");
                 int i = 0;
                 for (Iterator iter = nodes.iterator(); iter.hasNext();) {
                     Node node = (Node) iter.next();

@@ -30,7 +30,11 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.NetworkSettings;
 
-
+/**
+ * The NoOpResponseHandler does litteraly nothing. Its pupose
+ * is to have a non-null ResponseHandler because deling with
+ * nulls is a PITA.
+ */
 public final class NoOpResponseHandler implements ResponseHandler {
 
     private static final Log LOG = LogFactory.getLog(NoOpResponseHandler.class);

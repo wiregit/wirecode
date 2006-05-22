@@ -26,8 +26,9 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 
-
-
+/**
+ * Interface for responses
+ */
 public interface ResponseHandler {
     
     public void addTime(long time);

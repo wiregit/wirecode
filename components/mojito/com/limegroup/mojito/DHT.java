@@ -37,7 +37,7 @@ import com.limegroup.mojito.event.LookupAdapter;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StatsListener;
-import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.event.StoreManagerListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RoutingTable;
@@ -267,12 +267,12 @@ public class DHT {
         return put(key, value, null, null);
     }
     
-    public boolean put(KUID key, byte[] value, StoreListener listener) 
+    public boolean put(KUID key, byte[] value, StoreManagerListener listener) 
             throws IOException {
         return put(key, value, listener, null);
     }
     
-    public boolean put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) 
+    public boolean put(KUID key, byte[] value, StoreManagerListener listener, PrivateKey privateKey) 
             throws IOException {
         
         try {
@@ -355,11 +355,11 @@ public class DHT {
         return remove(key, null, null);
     }
     
-    public boolean remove(KUID key, StoreListener listener) throws IOException {
+    public boolean remove(KUID key, StoreManagerListener listener) throws IOException {
         return remove(key, listener, null);
     }
 
-    public boolean remove(KUID key, StoreListener listener, PrivateKey privateKey) throws IOException {
+    public boolean remove(KUID key, StoreManagerListener listener, PrivateKey privateKey) throws IOException {
         // To remove a KeyValue you just store an empty value!
         return put(key, new byte[0], listener, privateKey);
     }

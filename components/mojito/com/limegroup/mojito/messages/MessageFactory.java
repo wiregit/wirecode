@@ -27,6 +27,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.request.FindNodeRequest;
 import com.limegroup.mojito.messages.request.FindValueRequest;
 import com.limegroup.mojito.messages.request.PingRequest;
@@ -100,12 +101,12 @@ public class MessageFactory {
         return new FindValueResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), values);
     }
     
-    public StoreRequest createStoreRequest(SocketAddress dst, int remaining, QueryKey queryKey, Collection values) {
-        return new StoreRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), remaining, queryKey, values);
+    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, KeyValue keyValue) {
+        return new StoreRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), queryKey, keyValue);
     }
     
-    public StoreResponse createStoreResponse(RequestMessage request, int requesting, Collection status) {
-        return new StoreResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), requesting, status);
+    public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, int status) {
+        return new StoreResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), valueId, status);
     }
     
     public StatsRequest createStatsRequest(SocketAddress dst, byte[] signature, int request) {
