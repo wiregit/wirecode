@@ -51,8 +51,7 @@ import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StatsListener;
-import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.handler.ResponseHandler;
+import com.limegroup.mojito.event.StoreManagerListener;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.handler.response.StatsResponseHandler;
@@ -512,7 +511,7 @@ public class Context {
     }
     
     /** store */
-    public void store(KeyValue keyValue, StoreListener listener) throws IOException {       
+    public void store(KeyValue keyValue, StoreManagerListener listener) throws IOException {       
         new StoreManager().store(keyValue, listener);
     }
     
@@ -755,13 +754,12 @@ public class Context {
     private class StoreManager implements LookupListener {
         
         private KeyValue keyValue;
-        private StoreListener listener;
+        private StoreManagerListener listener;
         
         private StoreManager() {
-            
         }
         
-        private void store(KeyValue keyValue, StoreListener listener) throws IOException {
+        private void store(KeyValue keyValue, StoreManagerListener listener) throws IOException {
             this.keyValue = keyValue;
             this.listener = listener;
             
@@ -806,10 +804,7 @@ public class Context {
                 }
                 
                 try {
-                    ResponseHandler handler = new StoreResponseHandler(Context.this);
-                    RequestMessage request 
-                        = messageFactory.createStoreRequest(node.getSocketAddress(), queryKey, keyValue);
-                    messageDispatcher.send(node, request, handler);
+                    new StoreResponseHandler(Context.this, queryKey, keyValue).store(node);
                     
                     storeTargets.add(node);
                 } catch (IOException err) {

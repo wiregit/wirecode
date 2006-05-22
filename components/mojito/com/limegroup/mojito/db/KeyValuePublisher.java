@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.event.StoreManagerListener;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
 import com.limegroup.mojito.util.CollectionUtils;
@@ -113,7 +113,7 @@ public class KeyValuePublisher implements Runnable {
         databaseStats.REPUBLISHED_VALUES.incrementStat();
         
         try {
-            context.store(keyValue, new StoreListener() {
+            context.store(keyValue, new StoreManagerListener() {
                 public void store(KeyValue keyValue, Collection nodes) {
                     keyValue.setLastPublishTime(System.currentTimeMillis());
                     keyValue.setNumLocs(nodes.size());

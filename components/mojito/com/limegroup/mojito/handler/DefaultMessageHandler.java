@@ -182,16 +182,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
     
     private void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
-        for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-            KeyValue keyValue = (KeyValue)it.next();
-            
-            ResponseHandler handler = new StoreResponseHandler(context);
-            RequestMessage request = context.getMessageFactory()
-                .createStoreRequest(node.getSocketAddress(), 
-                        queryKey, keyValue);
-            
-            context.getMessageDispatcher().send(node, request, handler);
-        }
+        new StoreResponseHandler(context, queryKey, keyValues).store(node);
     }
     
     private class GetQueryKeyHandler extends AbstractResponseHandler {

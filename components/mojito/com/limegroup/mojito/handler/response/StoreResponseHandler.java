@@ -21,28 +21,77 @@ package com.limegroup.mojito.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.messages.request.StoreRequest;
 import com.limegroup.mojito.messages.response.StoreResponse;
 
 /**
- * Currently unused. Could be used to ACK/NACK store
- * requests
+ * 
  */
 public class StoreResponseHandler extends AbstractResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
+        
+    private QueryKey queryKey;
     
-    public StoreResponseHandler(Context context) {
+    private int index = 0;
+    private List keyValues;
+    
+    public StoreResponseHandler(Context context, QueryKey queryKey, KeyValue keyValue) {
+        this(context, queryKey, Arrays.asList(new KeyValue[]{keyValue}));
+    }
+    
+    public StoreResponseHandler(Context context, QueryKey queryKey, List keyValues) {
         super(context);
+        
+        this.queryKey = queryKey;
+        this.keyValues = keyValues;
+    }
+    
+    public void addStoreListener(StoreListener listener) {
+        listeners.add(listener);
+    }
+    
+    public void removeStoreListener(StoreListener listener) {
+        listeners.remove(listener);
+    }
+
+    public StoreListener[] getStoreListeners() {
+        return (StoreListener[])listeners.toArray(new StoreListener[0]);
+    }
+    
+    public QueryKey getQueryKey() {
+        return queryKey;
+    }
+    
+    public List getKeyValues() {
+        return keyValues;
+    }
+    
+    public void store(ContactNode node) throws IOException {
+        if (index < keyValues.size() && !isStopped()) {
+            KeyValue keyValue = (KeyValue)keyValues.get(index);
+            
+            StoreRequest request = context.getMessageFactory()
+                .createStoreRequest(node.getSocketAddress(), queryKey, keyValue);
+            
+            context.getMessageDispatcher().send(node, request, this);
+        }
     }
     
     public void response(ResponseMessage message, long time) throws IOException {
@@ -52,14 +101,46 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         KUID valueId = response.getValueID();
         int status = response.getStatus();
         
-        if (LOG.isTraceEnabled()) {
+        if (index < keyValues.size()) {
+            KeyValue current = (KeyValue)keyValues.get(index);
+            
+            if (!current.getKey().equals(valueId)) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(message.getSource() + " is ACK'ing a KeyValue " 
+                            + valueId + " we have not requested to store!");
+                }
+                
+                fireStoreFailed(message.getSource().getNodeID(), message.getSourceAddress());
+                return;
+            }
+            
             if (status == StoreResponse.SUCCEEDED) {
-                LOG.trace(message.getSource() + " sucessfully stored KeyValue " + valueId);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(message.getSource() + " sucessfully stored KeyValue " + valueId);
+                }
             } else if (status == StoreResponse.FAILED) {
-                LOG.trace(message.getSource() + " failed to store KeyValue " + valueId);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(message.getSource() + " failed to store KeyValue " + valueId);
+                }
             } else {
-                LOG.trace(message.getSource() + " returned unknown status code " 
-                        + status + " for KeyValue " + valueId);
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(message.getSource() + " returned unknown status code " 
+                            + status + " for KeyValue " + valueId);
+                }
+                
+                fireStoreFailed(message.getSource().getNodeID(), message.getSourceAddress());
+                return;
+            }
+            
+            // Reset the error counter
+            resetErrors();
+            
+            // Store next...
+            index++;
+            if (index < keyValues.size()) {
+                store(message.getSource());
+            } else {
+                fireStoreSucceeded(message.getSource());
             }
         }
     }
@@ -68,6 +149,8 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Max number of errors occured. Giving up!");
         }
+        
+        fireStoreFailed(nodeId, dst);
     }
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
@@ -76,5 +159,32 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         }
         
         fireTimeout(nodeId, dst, message, -1L);
+        fireStoreFailed(nodeId, dst);
+    }
+    
+    public void fireStoreSucceeded(final ContactNode node) {
+        context.fireEvent(new Runnable() {
+            public void run() {
+                if (!isStopped()) {
+                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                        StoreListener listener = (StoreListener)it.next();
+                        listener.storeSucceeded(node, keyValues);
+                    }
+                }
+            }
+        });
+    }
+    
+    public void fireStoreFailed(final KUID nodeId, final SocketAddress dst) {
+        context.fireEvent(new Runnable() {
+            public void run() {
+                if (!isStopped()) {
+                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
+                        StoreListener listener = (StoreListener)it.next();
+                        listener.storeFailed(nodeId, dst, keyValues);
+                    }
+                }
+            }
+        });
     }
 }
