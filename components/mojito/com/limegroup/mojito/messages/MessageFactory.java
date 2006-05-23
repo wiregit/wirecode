@@ -37,6 +37,7 @@ import com.limegroup.mojito.messages.response.FindValueResponse;
 import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.util.NetworkUtils;
 
 
 public class MessageFactory {
@@ -60,7 +61,10 @@ public class MessageFactory {
     }
     
     private KUID createMessageID(SocketAddress dst) {
-        return KUID.createRandomMessageID(dst);
+		if (NetworkUtils.isValidSocketAddress(dst)) {
+            return KUID.createRandomMessageID(dst);
+        }
+        return KUID.MIN_MESSAGE_ID;
     }
     
     private int getEstimatedSize() {
