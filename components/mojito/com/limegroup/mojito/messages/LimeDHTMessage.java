@@ -1,56 +1,86 @@
+/*
+ * Mojito Distributed Hash Tabe (DHT)
+ * Copyright (C) 2006 LimeWire LLC
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.limegroup.mojito.messages;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.SocketAddress;
 
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
-import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
-import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 import com.limegroup.mojito.io.InputOutputUtils;
 import com.limegroup.mojito.io.MessageFormatException;
 
-public class LimeDHTMessage extends VendorMessage {
+public class LimeDHTMessage extends Message {
 
-    public static final int F_LIME_DHT_MESSAGE = 30;
+    private static final long serialVersionUID = 3867749049179828044L;
+    
+    private static final byte F_DHT_MESSAGE = (byte)0x43;
     
     static {
-        VendorMessageFactory.setParser(F_LIME_DHT_MESSAGE, F_LIME_VENDOR_ID, new LimeDHTMessageParser());
+        MessageFactory.setParser(F_DHT_MESSAGE, new LimeDHTMessageParser());
     }
     
-    public LimeDHTMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID, int selector, int version, byte[] payload, int network) throws BadPacketException {
-        super(guid, ttl, hops, vendorID, selector, version, payload, network);
-    }
-
-    public LimeDHTMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID, int selector, int version, byte[] payload) throws BadPacketException {
-        super(guid, ttl, hops, vendorID, selector, version, payload);
-    }
-
-    public LimeDHTMessage(byte[] vendorIDBytes, int selector, int version, byte[] payload, int network) {
-        super(vendorIDBytes, selector, version, payload, network);
-    }
-
-    public LimeDHTMessage(byte[] vendorIDBytes, int selector, int version, byte[] payload) {
-        super(vendorIDBytes, selector, version, payload);
+    private byte[] payload;
+    
+    private LimeDHTMessage(byte[] payload) {
+        super(makeGuid(), F_DHT_MESSAGE, (byte)0x01, (byte)0x00, payload.length, N_UNKNOWN);
+        this.payload = payload;
     }
     
+    private LimeDHTMessage(byte[] guid, byte func, byte ttl, byte hops, byte[] payload, int network) {
+        super(guid, func, ttl, hops, payload.length, network);
+        this.payload = payload;
+    }
+
     public static LimeDHTMessage createMessage(DHTMessage msg) throws BadPacketException, IOException {
         byte[] payload = InputOutputUtils.serialize(msg);
         return createMessage(payload);
     }
-    
+
     public static LimeDHTMessage createMessage(byte[] payload) throws BadPacketException, IOException {
-        return new LimeDHTMessage(makeGuid(), (byte)1, (byte)0, F_LIME_VENDOR_ID, F_LIME_DHT_MESSAGE, 0, payload, N_UDP);
+        return new LimeDHTMessage(payload);
+    }
+    
+    protected void writePayload(OutputStream out) throws IOException {
+        out.write(payload);
+    }
+    
+    public void recordDrop() {
     }
 
-    public DHTMessage getDHTMessage(SocketAddress src) throws MessageFormatException {
-        return InputOutputUtils.deserialize(src, getPayload());
+    public Message stripExtendedPayload() {
+        return this;
     }
     
-    private static class LimeDHTMessageParser implements VendorMessageParser {
-        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
-            return new LimeDHTMessage(guid, ttl, hops, F_LIME_VENDOR_ID, F_LIME_DHT_MESSAGE, version, restOf);
+    public DHTMessage getDHTMessage(SocketAddress src) throws MessageFormatException {
+        return InputOutputUtils.deserialize(src, payload);
+    }
+    
+    private static class LimeDHTMessageParser implements MessageParser {
+        public Message parse(byte[] guid, byte ttl, byte hops, 
+                byte[] payload, int network) throws BadPacketException {
+            
+            return new LimeDHTMessage(guid, F_DHT_MESSAGE, ttl, hops, payload, network);
         }
     }
 }
