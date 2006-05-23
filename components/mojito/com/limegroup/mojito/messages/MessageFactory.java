@@ -64,7 +64,7 @@ public class MessageFactory {
     }
     
     private KUID createMessageID(SocketAddress dst) {
-        if (!NetworkUtils.isValidSocketAddress(dst)) {
+        if (NetworkUtils.isValidSocketAddress(dst)) {
             return KUID.createRandomMessageID(dst);
         }
         return KUID.MIN_MESSAGE_ID;
