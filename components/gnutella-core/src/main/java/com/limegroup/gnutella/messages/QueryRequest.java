@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -1291,9 +1292,9 @@ public class QueryRequest extends Message implements Serializable{
             ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
 			short sp = ByteOrder.leb2short(bais);
 			tempMinSpeed = ByteOrder.ushort2int(sp);
-            tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8");
+            tempQuery = new String(readNullTerminatedBytes(bais), "UTF-8");
             // handle extensions, which include rich query and URN stuff
-            byte[] extsBytes = super.readNullTerminatedBytes(bais);
+            byte[] extsBytes = readNullTerminatedBytes(bais);
             HUGEExtension huge = new HUGEExtension(extsBytes);
             GGEP ggep = huge.getGGEP();
 
@@ -1692,6 +1693,69 @@ public class QueryRequest extends Message implements Serializable{
         return originated;
     }
 
+    /**
+     * @effects Writes given extension string to given stream, adding
+     * delimiter if necessary, reporting whether next call should add
+     * delimiter. ext may be null or zero-length, in which case this is noop
+     */
+    protected boolean writeGemExtension(OutputStream os, 
+                                        boolean addPrefixDelimiter, 
+                                        byte[] extBytes) throws IOException {
+        if (extBytes == null || (extBytes.length == 0)) {
+            return addPrefixDelimiter;
+        }
+        if(addPrefixDelimiter) {
+            os.write(0x1c);
+        }
+        os.write(extBytes);
+        return true; // any subsequent extensions should have delimiter 
+    }
+    
+     /**
+     * @effects Writes given extension string to given stream, adding
+     * delimiter if necessary, reporting whether next call should add
+     * delimiter. ext may be null or zero-length, in which case this is noop
+     */
+    protected boolean writeGemExtension(OutputStream os, 
+                                        boolean addPrefixDelimiter, 
+                                        String ext) throws IOException {
+        if (ext != null)
+            return writeGemExtension(os, addPrefixDelimiter, ext.getBytes());
+        else
+            return writeGemExtension(os, addPrefixDelimiter, new byte[0]);
+    }
+    
+    /**
+     * @effects Writes each extension string in exts to given stream,
+     * adding delimiters as necessary. exts may be null or empty, in
+     *  which case this is noop
+     */
+    protected boolean writeGemExtensions(OutputStream os, 
+                                         boolean addPrefixDelimiter, 
+                                         Iterator iter) throws IOException {
+        if (iter == null) {
+            return addPrefixDelimiter;
+        }
+        while(iter.hasNext()) {
+            addPrefixDelimiter = writeGemExtension(os, addPrefixDelimiter, 
+                                                   iter.next().toString());
+        }
+        return addPrefixDelimiter; // will be true is anything at all was written 
+    }
+    
+    /**
+     * @effects utility function to read null-terminated byte[] from stream
+     */
+    protected byte[] readNullTerminatedBytes(InputStream is) 
+        throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int i;
+        while ((is.available()>0)&&(i=is.read())!=0) {
+            baos.write(i);
+        }
+        return baos.toByteArray();
+    }
+    
 	public int hashCode() {
 		if(_hashCode == 0) {
 			int result = 17;

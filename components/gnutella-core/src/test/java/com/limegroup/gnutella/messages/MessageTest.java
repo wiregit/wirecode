@@ -43,7 +43,7 @@ public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] b = new byte[40];
         Message m  = null;
         try {
-            m = Message.read(bais,b,(byte)4);
+            m = MessageFactory.read(bais,b,(byte)4);
             fail("bpe should have been thrown.");
         } catch(BadPacketException bpe) {
         }

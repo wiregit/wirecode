@@ -16,7 +16,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -434,7 +434,7 @@ public class FWTDetectionTest extends BaseTestCase {
         
         ByteArrayInputStream bais = new ByteArrayInputStream(read.getData());
         
-        PingReply replyWith = (PingReply)Message.read(bais);
+        PingReply replyWith = (PingReply)MessageFactory.read(bais);
         
         assertNotNull(replyWith.getMyInetAddress());
         assertEquals(InetAddress.getLocalHost(),replyWith.getMyInetAddress());
@@ -455,7 +455,7 @@ public class FWTDetectionTest extends BaseTestCase {
         sock.receive(read);
         bais = new ByteArrayInputStream(read.getData());
         
-        PingReply replyWithout = (PingReply)Message.read(bais);
+        PingReply replyWithout = (PingReply)MessageFactory.read(bais);
         
         assertNull(replyWithout.getMyInetAddress());
         assertEquals(0,replyWithout.getMyPort());
@@ -498,7 +498,7 @@ public class FWTDetectionTest extends BaseTestCase {
                 
                 ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
                     
-                return (PingRequest) Message.read(bais); 
+                return (PingRequest) MessageFactory.read(bais); 
         }
         
         /**

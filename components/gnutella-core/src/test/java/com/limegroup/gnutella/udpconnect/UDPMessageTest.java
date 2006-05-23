@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
@@ -149,7 +149,7 @@ public class UDPMessageTest extends BaseTestCase {
 
         // Read the message in
         sin = new ByteArrayInputStream(sout.toByteArray());
-        dmRead = (DataMessage) Message.read(sin);
+        dmRead = (DataMessage) MessageFactory.read(sin);
 
         // Extend the msgs sequenceNumber to 8 bytes based on past state
         dmRead.extendSequenceNumber(

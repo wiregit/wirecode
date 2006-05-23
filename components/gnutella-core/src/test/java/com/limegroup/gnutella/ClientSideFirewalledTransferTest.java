@@ -21,6 +21,7 @@ import junit.framework.Test;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -187,7 +188,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = Message.read(in);
+            Message syn = MessageFactory.read(in);
             if (syn instanceof SynMessage) break;
         }
 
@@ -317,7 +318,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = Message.read(in);
+            Message syn = MessageFactory.read(in);
             if (syn instanceof SynMessage) break;
         }
 
@@ -371,10 +372,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = Message.read(in);
+            Message syn = MessageFactory.read(in);
         }
     }
-
-
-
 }

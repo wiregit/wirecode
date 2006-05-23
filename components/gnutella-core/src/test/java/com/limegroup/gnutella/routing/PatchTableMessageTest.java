@@ -8,6 +8,7 @@ import java.util.Arrays;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
@@ -81,6 +82,6 @@ public class PatchTableMessageTest extends BaseTestCase {
 
     static PatchTableMessage read(byte[] bytes) throws Exception {
         InputStream in=new ByteArrayInputStream(bytes);
-        return (PatchTableMessage)Message.read(in);
+        return (PatchTableMessage)MessageFactory.read(in);
     }
 }

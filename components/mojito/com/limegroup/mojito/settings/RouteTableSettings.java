@@ -20,7 +20,7 @@
 package com.limegroup.mojito.settings;
 
 
-public final class RouteTableSettings extends LimeDHTProps {
+public final class RouteTableSettings extends MojitoProps {
 
     private RouteTableSettings() {}
     

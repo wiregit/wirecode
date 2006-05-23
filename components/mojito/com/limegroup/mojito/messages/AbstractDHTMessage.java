@@ -24,7 +24,9 @@ import java.net.SocketAddress;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
-
+/**
+ * An abstract implementation of DHTMessage
+ */
 public abstract class AbstractDHTMessage implements DHTMessage {
     
     private int vendor;

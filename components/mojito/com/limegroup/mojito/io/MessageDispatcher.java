@@ -163,7 +163,7 @@ public abstract class MessageDispatcher implements Runnable {
         return send(new Tag(node, request, responseHandler));
     }
     
-    private boolean send(Tag tag) throws IOException {
+    protected boolean send(Tag tag) throws IOException {
         if (!isOpen()) {
             throw new IOException("Channel is not open!");
         }
@@ -193,11 +193,14 @@ public abstract class MessageDispatcher implements Runnable {
             return false;
         }
         
+        return enqueueOutput(tag);
+    }
+    
+    protected boolean enqueueOutput(Tag tag) {
         synchronized(outputQueue) {
             outputQueue.add(tag);
             interestWrite(true);
         }
-        
         return true;
     }
     
@@ -215,79 +218,16 @@ public abstract class MessageDispatcher implements Runnable {
                 break;
             }
             
-            // Make sure we're not receiving messages from ourself.
-            KUID nodeId = message.getSourceNodeID();
-            SocketAddress src = message.getSourceAddress();
-            if (context.isLocalNodeID(nodeId)
-                    || context.isLocalAddress(src)) {
-                
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Received a message of type " + message.getClass().getName() 
-                            + " from ourself " + ContactNode.toString(nodeId, src));
-                }
-                return;
-            }
-            
-            if (!NetworkUtils.isValidSocketAddress(src)) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(ContactNode.toString(nodeId, src) + " has an invalid IP/Port");
-                }
-                return;
-            }
-            
-            if (message instanceof ResponseMessage) {
-                ResponseMessage response = (ResponseMessage)message;
-                
-                // Check the QueryKey in the message ID to figure
-                // out whether or not we have ever sent a Request
-                // to that Host!
-                if (!response.verifyQueryKey()) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(response.getSource() + " sent us an unrequested response!");
-                    }
-                    return;
-                }
-                 
-                Receipt receipt = null;
-                
-                synchronized(receiptMap) {
-                    receipt = (Receipt)receiptMap.get(message.getMessageID());
-                    
-                    if (receipt != null) {
-                        receipt.received();
-                
-                        // The QueryKey check should catch all malicious
-                        // and some buggy Nodes. Do some additional sanity
-                        // checks to make sure the NodeID, IP:Port and 
-                        // response type have the extpected values.
-                        if (!receipt.sanityCheck(response)) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("Response from " + response.getSource() 
-                                        + " did not pass the sanity check");
-                            }
-                            return;
-                        }
-                        
-                        // Set the Round Trip Time (RTT)
-                        message.getSource().setRoundTripTime(receipt.time());
-                        
-                        // OK, all checks passed. We can remove the receipt now!
-                        receiptMap.remove(message.getMessageID());
-                    }
-                }
-                
-                processResponse(receipt, response);
-                
-            } else if (message instanceof RequestMessage) {
-                processRequest((RequestMessage)message);
-                
-            } else if (LOG.isFatalEnabled()) {
-                LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
-            }
+            received(message);
         }
         
         // We're always interested in reading!
         interestRead(true);
+    }
+    
+    protected DHTMessage deserialize(SocketAddress src, byte[] data) 
+            throws MessageFormatException, IOException {
+        return InputOutputUtils.deserialize(src, data);
     }
     
     private DHTMessage readMessage() throws MessageFormatException, IOException {
@@ -299,12 +239,84 @@ public abstract class MessageDispatcher implements Runnable {
             buffer.flip();
             buffer.get(data, 0, length);
             
-            DHTMessage message = InputOutputUtils.deserialize(src, data);
+            DHTMessage message = deserialize(src, data);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
             networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
             return message;
         }
         return null;
+    }
+    
+    protected void received(DHTMessage message) throws IOException {
+        // Make sure we're not receiving messages from ourself.
+        KUID nodeId = message.getSourceNodeID();
+        SocketAddress src = message.getSourceAddress();
+        if (context.isLocalNodeID(nodeId)
+                || context.isLocalAddress(src)) {
+            
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Received a message of type " + message.getClass().getName() 
+                        + " from ourself " + ContactNode.toString(nodeId, src));
+            }
+            return;
+        }
+        
+        if (!NetworkUtils.isValidSocketAddress(src)) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(ContactNode.toString(nodeId, src) + " has an invalid IP/Port");
+            }
+            return;
+        }
+        
+        if (message instanceof ResponseMessage) {
+            ResponseMessage response = (ResponseMessage)message;
+            
+            // Check the QueryKey in the message ID to figure
+            // out whether or not we have ever sent a Request
+            // to that Host!
+            if (!response.verifyQueryKey()) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(response.getSource() + " sent us an unrequested response!");
+                }
+                return;
+            }
+             
+            Receipt receipt = null;
+            
+            synchronized(receiptMap) {
+                receipt = (Receipt)receiptMap.get(message.getMessageID());
+                
+                if (receipt != null) {
+                    receipt.received();
+            
+                    // The QueryKey check should catch all malicious
+                    // and some buggy Nodes. Do some additional sanity
+                    // checks to make sure the NodeID, IP:Port and 
+                    // response type have the extpected values.
+                    if (!receipt.sanityCheck(response)) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Response from " + response.getSource() 
+                                    + " did not pass the sanity check");
+                        }
+                        return;
+                    }
+                    
+                    // Set the Round Trip Time (RTT)
+                    message.getSource().setRoundTripTime(receipt.time());
+                    
+                    // OK, all checks passed. We can remove the receipt now!
+                    receiptMap.remove(message.getMessageID());
+                }
+            }
+            
+            processResponse(receipt, response);
+            
+        } else if (message instanceof RequestMessage) {
+            processRequest((RequestMessage)message);
+            
+        } else if (LOG.isFatalEnabled()) {
+            LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
+        }
     }
     
     private void processResponse(Receipt receipt, ResponseMessage response) {
@@ -323,15 +335,7 @@ public abstract class MessageDispatcher implements Runnable {
                 try {
                     if (tag.send(channel)) {
                         // Wohoo! Message was sent!
-                        networkStats.SENT_MESSAGES_COUNT.incrementStat();
-                        networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize()); // compressed size
-                        
-                        Receipt receipt = tag.getReceipt();
-                        if (receipt != null) {
-                            synchronized (receiptMap) {
-                                receiptMap.add(receipt);
-                            }
-                        }
+                        registerInput(tag);
                     } else {
                         // Dang! Re-Try next time!
                         outputQueue.addFirst(tag);
@@ -345,6 +349,18 @@ public abstract class MessageDispatcher implements Runnable {
             
             interestWrite(!outputQueue.isEmpty());
             return !outputQueue.isEmpty();
+        }
+    }
+    
+    protected void registerInput(Tag tag) {
+        networkStats.SENT_MESSAGES_COUNT.incrementStat();
+        networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize());
+        
+        Receipt receipt = tag.getReceipt();
+        if (receipt != null) {
+            synchronized (receiptMap) {
+                receiptMap.add(receipt);
+            }
         }
     }
     

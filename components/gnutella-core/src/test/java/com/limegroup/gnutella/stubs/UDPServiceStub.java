@@ -10,7 +10,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Timer;
@@ -24,8 +23,8 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
@@ -182,7 +181,7 @@ public final class UDPServiceStub extends UDPService {
 			try {
 				// we do things the old way temporarily
 				InputStream in = new ByteArrayInputStream(data);
-				Message message = Message.read(in, Message.N_UDP);
+				Message message = MessageFactory.read(in, Message.N_UDP);
 				if(message == null) return;                    
 				_router.handleUDPMessage(message, (InetSocketAddress)datagram.getSocketAddress());
 			} catch (IOException e) {

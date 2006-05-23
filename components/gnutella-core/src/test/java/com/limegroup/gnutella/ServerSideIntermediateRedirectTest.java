@@ -5,21 +5,18 @@ import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Iterator;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 
@@ -113,7 +110,7 @@ public final class ServerSideIntermediateRedirectTest
             UDP_ACCESS.setSoTimeout(TIMEOUT);
             UDP_ACCESS.receive(pack);
             ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-            PingRequest ping = (PingRequest) Message.read(bais);
+            PingRequest ping = (PingRequest) MessageFactory.read(bais);
             fail("Got a message");
         } catch (InterruptedIOException expected) {}
         catch (ClassCastException fine) {}

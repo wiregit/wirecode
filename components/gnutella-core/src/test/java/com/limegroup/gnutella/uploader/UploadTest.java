@@ -65,6 +65,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -1223,7 +1224,7 @@ public class UploadTest extends BaseTestCase {
                 DatagramPacket rcv = new DatagramPacket(recv,recv.length);
                 sock.receive(rcv);
                 ByteArrayInputStream bais = new ByteArrayInputStream(recv,0,rcv.getLength());
-                HeadPong pong = (HeadPong) Message.read(bais);
+                HeadPong pong = (HeadPong) MessageFactory.read(bais);
                 if (pong.getAltLocs().isEmpty())
                     break;
             } finally {
@@ -1249,7 +1250,7 @@ public class UploadTest extends BaseTestCase {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             handler.received.write(baos);
             ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            QueryReply reply = (QueryReply) Message.read(bais);
+            QueryReply reply = (QueryReply) MessageFactory.read(bais);
             Response resp = reply.getResultsArray()[0];
             if (resp.getLocations().isEmpty())
                 break;

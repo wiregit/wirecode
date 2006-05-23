@@ -17,11 +17,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -314,7 +314,7 @@ public class BrowseHostHandler {
         	try {
         		m = null;
         		LOG.debug("reading message");
-        		m = Message.read(in);
+        		m = MessageFactory.read(in);
         		LOG.debug("read message "+m);
         	}
         	catch (BadPacketException bpe) {LOG.debug(bpe);}

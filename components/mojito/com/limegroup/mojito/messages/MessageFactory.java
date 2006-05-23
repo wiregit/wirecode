@@ -39,7 +39,9 @@ import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.messages.response.StoreResponse;
 
-
+/**
+ * Factory class to construct DHTMessage(s)
+ */
 public class MessageFactory {
     
     protected final Context context;

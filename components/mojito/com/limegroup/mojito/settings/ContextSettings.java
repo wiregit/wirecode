@@ -26,7 +26,7 @@ import java.util.prefs.Preferences;
 import com.limegroup.mojito.KUID;
 
 
-public class ContextSettings extends LimeDHTProps {
+public class ContextSettings extends MojitoProps {
     
     private static final String LOCAL_NODE_ID_KEY = "LOCAL_NODE_ID";
     private static final String NODE_ID_TIMEOUT_KEY = "NODE_ID_TIMEOUT";
@@ -71,7 +71,7 @@ public class ContextSettings extends LimeDHTProps {
         String vendorId = VENDOR_ID.getValue();
         int id = 0;
         for(int i = 0; i < 4; i++) {
-            id = (id << 1) | (int)(vendorId.charAt(i) & 0xFF);
+            id = (id << 8) | (int)(vendorId.charAt(i) & 0xFF);
         }
         return id;
     }

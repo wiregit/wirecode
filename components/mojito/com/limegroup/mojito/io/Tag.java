@@ -118,6 +118,11 @@ class Tag {
         this.timeout = timeout;
     }
     
+    public boolean isRequest() {
+        return responseHandler != null 
+                && (message instanceof RequestMessage);
+    }
+    
     public int getSize() {
         return size;
     }
@@ -138,13 +143,22 @@ class Tag {
         return message;
     }
     
+    public ByteBuffer getData() {
+        return data;
+    }
+    
     public boolean send(DatagramChannel channel) throws IOException {
         if (channel.send(data, dst) != 0) {
-            sent = System.currentTimeMillis();
-            data = null;
+            sent();
             return true;
         }
         return false;
+    }
+    
+    public Receipt sent() {
+        sent = System.currentTimeMillis();
+        data = null;
+        return getReceipt();
     }
     
     public Receipt getReceipt() throws IllegalStateException {
@@ -152,8 +166,7 @@ class Tag {
             throw new IllegalStateException("Message has not been sent yet!");
         }
         
-        if (responseHandler != null 
-                && message instanceof RequestMessage) {
+        if (isRequest()) {
             return new Receipt();
         } else {
             return null;
@@ -188,6 +201,10 @@ class Tag {
         
         public RequestMessage getRequestMessage() {
             return (RequestMessage)Tag.this.getMessage();
+        }
+        
+        public int getSentMessageSize() {
+            return getSize();
         }
         
         public void received() {

@@ -1,12 +1,10 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -54,11 +52,8 @@ public abstract class VendorMessage extends Message {
     protected static final byte[] F_NULL_VENDOR_ID = {(byte) 0, (byte) 0,
                                                       (byte) 0, (byte) 0};
 
-    private static final int LENGTH_MINUS_PAYLOAD = 8;
-
-    private static final BadPacketException UNRECOGNIZED_EXCEPTION =
-        new BadPacketException("Unrecognized Vendor Message");
-
+    static final int LENGTH_MINUS_PAYLOAD = 8;
+    
     /**
      * Bytes 0-3 of the Vendor Message.  Something like "LIME".getBytes().
      */
@@ -231,145 +226,6 @@ public abstract class VendorMessage extends Message {
     //----------------------
     // Methods for all subclasses....
     //----------------------
-
-    /**
-     * Constructs a vendor message with the specified network data.
-     * The actual vendor message constructed is determined by the value
-     * of the selector within the message.
-     */
-    public static VendorMessage deriveVendorMessage(byte[] guid, byte ttl, 
-                                                    byte hops,
-                                                    byte[] fromNetwork,
-                                                    int network) 
-        throws BadPacketException {
-    	
-        // sanity check
-        if (fromNetwork.length < LENGTH_MINUS_PAYLOAD) {
-            ReceivedErrorStat.VENDOR_INVALID_PAYLOAD.incrementStat();
-            throw new BadPacketException("Not enough bytes for a VM!!");
-        }
-
-        // get very necessary parameters....
-        ByteArrayInputStream bais = new ByteArrayInputStream(fromNetwork);
-        byte[] vendorID = null, restOf = null;
-        int selector = -1, version = -1;
-        try {
-            // first 4 bytes are vendor ID
-            vendorID = new byte[4];
-            bais.read(vendorID, 0, vendorID.length);
-            // get the selector....
-            selector = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
-            // get the version....
-            version = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
-            // get the rest....
-            restOf = new byte[bais.available()];
-            bais.read(restOf, 0, restOf.length);
-        } catch (IOException ioe) {
-            ErrorService.error(ioe); // impossible.
-        }
-
-
-        // now switch on them to get the appropriate message....
-        if ((selector == F_HOPS_FLOW) && 
-            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
-            // HOPS FLOW MESSAGE
-            return new HopsFlowVendorMessage(guid, ttl, hops, version, 
-                                             restOf);
-        if ((selector == F_LIME_ACK) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            // LIME ACK MESSAGE
-            return new LimeACKVendorMessage(guid, ttl, hops, version, 
-                                            restOf);
-        if ((selector == F_REPLY_NUMBER) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            // REPLY NUMBER MESSAGE
-            return new ReplyNumberVendorMessage(guid, ttl, hops, version, 
-                                                restOf);
-        if ((selector == F_TCP_CONNECT_BACK) && 
-            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
-            // TCP CONNECT BACK
-            return new TCPConnectBackVendorMessage(guid, ttl, hops, version, 
-                                                   restOf);
-        if ((selector == F_MESSAGES_SUPPORTED) && 
-            (Arrays.equals(vendorID, F_NULL_VENDOR_ID)))
-            // Messages Supported Message
-            return new MessagesSupportedVendorMessage(guid, ttl, hops, version,
-                                                      restOf);            
-        if ((selector == F_UDP_CONNECT_BACK) && 
-            (Arrays.equals(vendorID, F_GTKG_VENDOR_ID)))
-            // UDP CONNECT BACK
-            return new UDPConnectBackVendorMessage(guid, ttl, hops, version, 
-                                                   restOf);
-        if ((selector == F_PUSH_PROXY_REQ) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            // Push Proxy Request
-            return new PushProxyRequest(guid, ttl, hops, version, restOf);
-        if ((selector == F_PUSH_PROXY_ACK) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            // Push Proxy Acknowledgement
-            return new PushProxyAcknowledgement(guid, ttl, hops, version, 
-                                                restOf);
-        if ((selector == F_LIME_ACK) && 
-            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
-            // Query Status Request
-            return new QueryStatusRequest(guid, ttl, hops, version, restOf);
-        if ((selector == F_REPLY_NUMBER) && 
-            (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
-            // Query Status Response
-            return new QueryStatusResponse(guid, ttl, hops, version, restOf);
-        if ((selector == F_TCP_CONNECT_BACK) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new TCPConnectBackRedirect(guid, ttl, hops, version, restOf);
-        if ((selector == F_UDP_CONNECT_BACK_REDIR) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);
-        if ((selector == F_CAPABILITIES) && 
-            (Arrays.equals(vendorID, F_NULL_VENDOR_ID)))
-            return new CapabilitiesVM(guid, ttl, hops, version, restOf);
-        if ((selector == F_GIVE_STATS) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf,
-                                              network);
-        if ((selector == F_STATISTICS) && 
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
-        if((selector == F_SIMPP_REQ) &&
-           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new SimppRequestVM(guid, ttl, hops, version, restOf);
-        if((selector == F_SIMPP) && 
-           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new SimppVM(guid, ttl, hops, version, restOf);
-        if ((selector == F_GIVE_ULTRAPEER) &&
-        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new UDPCrawlerPing(guid,ttl,hops,version,restOf);
-        if ((selector == F_ULTRAPEER_LIST) &&
-        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new UDPCrawlerPong(guid,ttl,hops,version,restOf);
-        if ((selector == F_UDP_HEAD_PING) &&
-        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new HeadPing(guid,ttl,hops,version,restOf);
-        if ((selector == F_UDP_HEAD_PONG) &&
-        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new HeadPong(guid,ttl,hops,version,restOf);
-        if((selector == F_UPDATE_REQ) &&
-           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new UpdateRequest(guid, ttl, hops, version, restOf);
-        if((selector == F_UPDATE_RESP) && 
-           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new UpdateResponse(guid, ttl, hops, version, restOf);
-        if((selector == F_CONTENT_REQ) &&
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new ContentRequest(guid, ttl, hops, version, restOf);
-        if((selector == F_CONTENT_RESP) &&
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new ContentResponse(guid, ttl, hops, version, restOf);
-        if((selector == F_HEADER_UPDATE) &&
-            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-            return new HeaderUpdateVendorMessage(guid, ttl, hops, version, restOf);
-        
-        ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
-        throw UNRECOGNIZED_EXCEPTION;
-    }
     
     /**
      * @return true if the two VMPs have identical signatures - no more, no 

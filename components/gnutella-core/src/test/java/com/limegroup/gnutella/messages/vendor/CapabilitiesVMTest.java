@@ -8,7 +8,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
@@ -39,7 +39,7 @@ public class CapabilitiesVMTest
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         CapabilitiesVM vmpRead = 
-            (CapabilitiesVM) Message.read(bais);
+            (CapabilitiesVM) MessageFactory.read(bais);
         assertEquals(vmp, vmpRead);
 
         assertGreaterThan(0, vmpRead.supportsFeatureQueries());
@@ -71,7 +71,7 @@ public class CapabilitiesVMTest
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         CapabilitiesVM vmp = 
-           (CapabilitiesVM) Message.read(bais);
+           (CapabilitiesVM) MessageFactory.read(bais);
         // make sure it supports everything we expect....
         assertEquals(10, vmp.supportsCapability("SUSH".getBytes()));
         assertEquals(5,  vmp.supportsCapability("NEIL".getBytes()));

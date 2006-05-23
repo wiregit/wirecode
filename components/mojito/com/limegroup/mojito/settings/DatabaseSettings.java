@@ -22,7 +22,7 @@ package com.limegroup.mojito.settings;
 /**
  * Settings for Database, KeyValues and for the republisher 
  */
-public final class DatabaseSettings extends LimeDHTProps {
+public final class DatabaseSettings extends MojitoProps {
     
     public static final String DATABASE_FILE = "Database.pat";
     

@@ -25,6 +25,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -443,7 +444,7 @@ public class HeadTest extends BaseTestCase {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		original.write(baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		return (HeadPong) HeadPong.read(bais);
+		return (HeadPong) MessageFactory.read(bais);
 	}
 	
 	private static void  createCollections() throws Exception{

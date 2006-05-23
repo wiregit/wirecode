@@ -8,8 +8,6 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -29,6 +27,7 @@ import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -36,11 +35,8 @@ import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.StringSetting;
-import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
-import com.limegroup.gnutella.statistics.HandshakingStat;
 import com.limegroup.gnutella.util.CompressingOutputStream;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
@@ -679,7 +675,7 @@ public class Connection implements IpPort {
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.
-        Message msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
+        Message msg = MessageFactory.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
         updateReadStatistics(msg);
         return msg;
     }

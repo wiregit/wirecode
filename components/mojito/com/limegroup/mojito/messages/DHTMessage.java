@@ -24,7 +24,9 @@ import java.net.SocketAddress;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
-
+/**
+ * Interface for DHT Messages
+ */
 public interface DHTMessage {
     
     public static final int MAX_MESSAGE_SIZE = 1492;
@@ -44,17 +46,24 @@ public interface DHTMessage {
     public static final int STATS_REQUEST = 0x0A;
     public static final int STATS_RESPONSE = 0x0B;
     
+    /** Returns the Vendor of the Message */
     public int getVendor();
     
+    /** Returns the Version of the Message */
     public int getVersion();
     
+    /** Returns the Message ID of the Message */
     public KUID getMessageID();
     
+    /** Returns the sender */
     public ContactNode getSource();
     
+    /** Returns the Node ID of the sender */
     public KUID getSourceNodeID();
     
+    /** Returns the SocketAddress of the sender */
     public SocketAddress getSourceAddress();
     
+    /** Returns the signature of the Message or null */ 
     public byte[] getSignature();
 }

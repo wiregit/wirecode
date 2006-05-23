@@ -22,6 +22,9 @@ package com.limegroup.mojito.messages;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
+/**
+ * An abstract base class for request Messages
+ */
 public abstract class RequestMessage extends AbstractDHTMessage {
 
     public RequestMessage(int vendor, int version, 

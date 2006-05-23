@@ -10,7 +10,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
@@ -20,11 +19,11 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -432,7 +431,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
             _udpPort = pack.getPort();
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            PingRequest ping = (PingRequest) Message.read(in);
+            PingRequest ping = (PingRequest) MessageFactory.read(in);
             
             // send the pong in response to the ping
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -709,7 +708,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
             in = new ByteArrayInputStream(pack.getData());
             Message m = null; 
             try {               
-                m = Message.read(in);
+                m = MessageFactory.read(in);
                 statsAck3 = (StatisticVendorMessage)m;
                 break; // no exception? we have the right message
             } catch (ClassCastException ccx) {
@@ -743,7 +742,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
             in = new ByteArrayInputStream(pack.getData());
             Message m = null; 
             try {               
-                m = Message.read(in);
+                m = MessageFactory.read(in);
                 statsAck4 = (StatisticVendorMessage)m;
                 break; // no exception? we have the right message
             } catch (ClassCastException ccx) {

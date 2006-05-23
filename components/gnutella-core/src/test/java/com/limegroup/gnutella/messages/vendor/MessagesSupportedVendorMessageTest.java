@@ -8,7 +8,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
@@ -52,7 +52,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         MessagesSupportedVendorMessage vmpRead = 
-            (MessagesSupportedVendorMessage) Message.read(bais);
+            (MessagesSupportedVendorMessage) MessageFactory.read(bais);
         assertEquals(vmp, vmpRead);
         assertGreaterThan(0, vmpRead.supportsTCPConnectBack());
         assertGreaterThan(0, vmpRead.supportsUDPConnectBack());
@@ -98,7 +98,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         MessagesSupportedVendorMessage vmp = 
-           (MessagesSupportedVendorMessage) Message.read(bais);
+           (MessagesSupportedVendorMessage) MessageFactory.read(bais);
         // make sure it supports everything we expect....
         assertEquals(10, vmp.supportsMessage("SUSH".getBytes(), 10));
         assertEquals(5, vmp.supportsMessage("NEIL".getBytes(), 5));

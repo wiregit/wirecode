@@ -13,6 +13,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -321,7 +322,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
             _udpSock.receive(dp);  // wait for the UDP ConnectBack...
             ByteArrayInputStream bais =
                 new ByteArrayInputStream(dp.getData());
-            pr = (PingRequest) Message.read(bais);
+            pr = (PingRequest) MessageFactory.read(bais);
             fail("Did recieve UDP ConnectBack!!");
         }
         catch (Exception good) {

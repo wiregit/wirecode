@@ -8,6 +8,7 @@ import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 
 /**
  * Reads messages from a channel.  This class is notified when more of a message
@@ -135,7 +136,7 @@ public class MessageReader implements ChannelReadObserver {
                 
             // Yay, we've got a full message.
             try {
-                Message m = Message.createMessage(header.array(), payload.array(), 
+                Message m = MessageFactory.createMessage(header.array(), payload.array(), 
                                                   receiver.getSoftMax(), receiver.getNetwork());
                 receiver.processReadMessage(m);
             } catch(BadPacketException ignored) {}

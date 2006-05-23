@@ -7,7 +7,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.BaseTestCase;
 
@@ -80,7 +80,7 @@ public class SpamReplyFilterTest extends BaseTestCase {
             _replyBytes[_indexOfVendor+i] = vendorBytes[i];
         
         QueryReply qr = 
-            (QueryReply) Message.read(new ByteArrayInputStream(_replyBytes));
+            (QueryReply) MessageFactory.read(new ByteArrayInputStream(_replyBytes));
         return _filter.allow(qr);
     }
 

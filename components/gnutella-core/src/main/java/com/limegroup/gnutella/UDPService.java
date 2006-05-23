@@ -3,38 +3,37 @@ package com.limegroup.gnutella;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.net.SocketAddress;
-import java.net.SocketException;
 import java.net.BindException;
 import java.net.ConnectException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.PortUnreachableException;
-import java.net.InetSocketAddress;
-import java.nio.channels.DatagramChannel;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-
-import java.util.List;
+import java.nio.channels.DatagramChannel;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.io.NIODispatcher;
+import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
-import com.limegroup.gnutella.io.ByteBufferCache;
-import com.limegroup.gnutella.io.ReadWriteObserver;
-import com.limegroup.gnutella.io.NIODispatcher;
 
 /**
  * This class handles UDP messaging services.  It both sends and
@@ -303,7 +302,7 @@ public class UDPService implements ReadWriteObserver {
             try {
                 // we do things the old way temporarily
                 InputStream in = new ByteArrayInputStream(data, 0, length);
-                Message message = Message.read(in, Message.N_UDP, IN_HEADER_BUF);
+                Message message = MessageFactory.read(in, Message.N_UDP, IN_HEADER_BUF);
                 if(message == null)
                     continue;
 

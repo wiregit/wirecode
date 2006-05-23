@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * A queue of messages organized by type.  Used by ManagedConnection to
