@@ -1,20 +1,13 @@
 package com.limegroup.gnutella.uploader;
 
 /**
- * A listener for availability of upload slots. 
- *
+ * Something that listens for the availability of UploadSlots 
  */
-public interface UploadSlotListener {
+public interface UploadSlotListener extends UploadSlotUser {
+	
 	/**
 	 * notification that an upload slot has become
 	 * available
-	 * @return if the upload will proceed immediately.
 	 */
-	public boolean slotAvailable();
-	
-	/**
-	 * request that this releases an upload slot if it
-	 * has one (effectively killing an upload)
-	 */
-	public void releaseSlot();
+	public void slotAvailable();
 }
