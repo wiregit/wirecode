@@ -96,13 +96,13 @@ public class FileUtils {
     }
     
     /**
-     * Determines if file parent is an ancestor of file child.
+     * Determines if file 'a' is an ancestor of file 'b'.
      */
-    public static final boolean isAncestor(File parent, File child) {
-        while(child != null) {
-            if(child.equals(parent))
+    public static final boolean isAncestor(File a, File b) {
+        while(b != null) {
+            if(b.equals(a))
                 return true;
-            child = child.getParentFile();
+            b = b.getParentFile();
         }
         return false;
     }
