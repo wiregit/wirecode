@@ -244,7 +244,7 @@ public final class CryptoHelper {
         }
     }
     
-    private static KeyPair load(File file, String alias, char[] password) 
+    public static KeyPair load(File file, String alias, char[] password) 
             throws IOException, KeyStoreException, CertificateException, 
                 NoSuchAlgorithmException, UnrecoverableKeyException {
         

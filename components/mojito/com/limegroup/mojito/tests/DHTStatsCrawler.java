@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.PrivateKey;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,9 +46,14 @@ import com.limegroup.mojito.messages.request.FindNodeRequest;
 import com.limegroup.mojito.messages.request.StatsRequest;
 import com.limegroup.mojito.messages.response.FindNodeResponse;
 import com.limegroup.mojito.messages.response.StatsResponse;
+import com.limegroup.mojito.security.CryptoHelper;
 
 
 public class DHTStatsCrawler implements Runnable, ResponseHandler {
+    
+    private static final File FILE = new File("mojito.keystore");
+    private static final String ALIAS = "mojito";
+    private static final char[] PASSWORD = "mojito".toCharArray();
     
     /** number of concurrent findNodes */
     private static final int alpha = 20;
@@ -86,7 +92,7 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
     //TODO remove:
     private int addedToQuery;
     
-
+    
     /**
      * Crawl the DHT: Contact everynode in the network asking for the closest node to their own nodeId
      * 
@@ -263,6 +269,15 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
         }
     }
     
+    private PrivateKey getPrivateKey() {
+        try {
+            return CryptoHelper.load(FILE, ALIAS, PASSWORD).getPrivate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
     private class StatsGatherer implements Runnable, StatsListener {
         
         /** number of concurrent stats requests */
@@ -300,18 +315,19 @@ public class DHTStatsCrawler implements Runnable, ResponseHandler {
                     for (Iterator iter = toQuery.iterator(); iter.hasNext();) { 
                         if(numReq > beta) { 
                             break; 
-                        } else {  
-                            ContactNode node = (ContactNode) iter.next(); 
-                            StatsRequest req = context.getMessageFactory().createStatsRequest(node.getSocketAddress(), 
-                                    new byte[0], StatsRequest.DB); 
+                        } else {
                             try { 
+                                ContactNode node = (ContactNode) iter.next(); 
+                                StatsRequest req = context.getMessageFactory().createStatsRequest(node.getSocketAddress(), StatsRequest.DB); 
+                                req.sign(getPrivateKey(), context.getSocketAddress(), node.getSocketAddress());
+                            
                                 iter.remove(); 
                                 queried.add(node);
                                 ++numReq; 
                                 StatsResponseHandler handler = new StatsResponseHandler(context);
                                 handler.addStatsListener(this);
-                                context.getMessageDispatcher().send(node.getSocketAddress(), req, handler); 
-                            } catch (IOException e) { 
+                                context.getMessageDispatcher().send(node, req, handler); 
+                            } catch (Exception e) { 
                                 e.printStackTrace(); 
                             }
                         }

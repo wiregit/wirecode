@@ -34,7 +34,9 @@ import com.limegroup.mojito.messages.request.StatsRequest;
 import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
-
+/**
+ * 
+ */
 public class StatsRequestHandler extends AbstractRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(StatsRequestHandler.class);
@@ -51,7 +53,9 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         StatsRequest req = (StatsRequest) message;
         
         try {
-            if (!req.verify(context.getMasterKey())) {
+            if (!req.verify(context.getMasterKey(), 
+                    message.getSourceAddress(), 
+                    context.getSocketAddress())) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(message.getSource() + " sent us an invalid Stats Request");
                 }

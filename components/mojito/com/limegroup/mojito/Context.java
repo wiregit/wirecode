@@ -65,6 +65,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.request.PingRequest;
+import com.limegroup.mojito.messages.request.StatsRequest;
 import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
@@ -572,10 +573,9 @@ public class Context {
             StatsListener listener, PrivateKey privateKey) 
                 throws IOException, InvalidKeyException, SignatureException {
         
-        KUID messageId = KUID.createRandomMessageID(address);
-        byte[] signature = CryptoHelper.sign(privateKey, messageId.getBytes());
+        StatsRequest msg = (StatsRequest)messageFactory.createStatsRequest(address, request);
+        msg.sign(privateKey, getSocketAddress(), address);
         
-        RequestMessage msg = messageFactory.createStatsRequest(address, messageId, signature, request);
         StatsResponseHandler handler = new StatsResponseHandler(this);
         if (listener != null) {
             handler.addStatsListener(listener);

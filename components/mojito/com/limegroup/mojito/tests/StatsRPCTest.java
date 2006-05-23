@@ -19,9 +19,11 @@
  
 package com.limegroup.mojito.tests;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.PrivateKey;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.DHT;
@@ -31,56 +33,62 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.request.StatsRequest;
 import com.limegroup.mojito.messages.response.StatsResponse;
+import com.limegroup.mojito.security.CryptoHelper;
 
 
 public class StatsRPCTest {
 
+    private static final File FILE = new File("mojito.keystore");
+    private static final String ALIAS = "mojito";
+    private static final char[] PASSWORD = "mojito".toCharArray();
     
+    private static PrivateKey getPrivateKey() {
+        try {
+            return CryptoHelper.load(FILE, ALIAS, PASSWORD).getPrivate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         int port = 4000;
-        try {
-            System.out.println("Starting stats server");
-            DHT dht = new DHT("DHT-StatsServer");
-            SocketAddress sac = new InetSocketAddress("localhost",port); 
-            dht.bind(sac);
-            dht.start();
-            System.out.println("Stats server is ready");
-            System.out.println("Starting Node");
-            SocketAddress sac2 = new InetSocketAddress("localhost",port+1);
-            KUID nodeID = KUID.createRandomNodeID(sac2);
-            final DHT dht2 = new DHT("DHT-2");
-            dht2.bind(sac2,nodeID);
-            dht2.start();
-            
-            dht2.bootstrap(sac);
-            
-            StatsListener listener = new StatsListener() {
-                public void response(ResponseMessage response, long time) {
-                    StringBuffer buffer = new StringBuffer();
-                    buffer.append("*** Stats to ").append(response.getSource())
-                        .append(" succeeded in ").append(time).append("ms\n");
-                    buffer.append(((StatsResponse)response).getStatistics());
-                    System.out.println(buffer.toString());
-                }
+        System.out.println("Starting stats server");
+        DHT dht = new DHT("DHT-StatsServer");
+        SocketAddress sac = new InetSocketAddress("localhost",port); 
+        dht.bind(sac);
+        dht.start();
+        System.out.println("Stats server is ready");
+        System.out.println("Starting Node");
+        SocketAddress sac2 = new InetSocketAddress("localhost",port+1);
+        KUID nodeID = KUID.createRandomNodeID(sac2);
+        final DHT dht2 = new DHT("DHT-2");
+        dht2.bind(sac2,nodeID);
+        dht2.start();
+        
+        dht2.bootstrap(sac);
+        
+        StatsListener listener = new StatsListener() {
+            public void response(ResponseMessage response, long time) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("*** Stats to ").append(response.getSource())
+                    .append(" succeeded in ").append(time).append("ms\n");
+                buffer.append(((StatsResponse)response).getStatistics());
+                System.out.println(buffer.toString());
+            }
 
-                public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-                    StringBuffer buffer = new StringBuffer();
-                    buffer.append("*** Stats to ").append(ContactNode.toString(nodeId, address))
-                        .append(" failed with timeout");
-                    System.out.println(buffer.toString());
-                }
-            };
-            
-            dht.stats(sac2, StatsRequest.STATS, listener);
-            
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("*** Stats to ").append(ContactNode.toString(nodeId, address))
+                    .append(" failed with timeout");
+                System.out.println(buffer.toString());
+            }
+        };
+        
+        dht.stats(sac2, StatsRequest.STATS, listener, getPrivateKey());
     }
-
 }
