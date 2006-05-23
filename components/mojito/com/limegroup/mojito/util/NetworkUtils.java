@@ -37,7 +37,8 @@ public final class NetworkUtils {
      * Returns true if the SocketAddress is any of our local machine addresses.
      */
     public static boolean isLocalHostAddress(SocketAddress addr) throws IOException {
-        return isLocalHostAddress(((InetSocketAddress)addr).getAddress());
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
+        return !iaddr.isUnresolved() && isLocalHostAddress(iaddr.getAddress());
     }
     
     /**
@@ -51,11 +52,11 @@ public final class NetworkUtils {
      * Returns whether or not the specified InetAddress and Port is valid.
      */
     public static boolean isValidSocketAddress(SocketAddress address) {
-        InetAddress addr = ((InetSocketAddress)address).getAddress();
-        int port = ((InetSocketAddress)address).getPort();
+        InetSocketAddress iaddr = (InetSocketAddress)address;
         
-        return com.limegroup.gnutella.util.NetworkUtils.isValidAddress(addr)
-            && com.limegroup.gnutella.util.NetworkUtils.isValidPort(port);
+        return !iaddr.isUnresolved()
+            && com.limegroup.gnutella.util.NetworkUtils.isValidAddress(iaddr.getAddress())
+            && com.limegroup.gnutella.util.NetworkUtils.isValidPort(iaddr.getPort());
     }
     
     /*public static boolean isLocalSocketAddress(SocketAddress address) {
