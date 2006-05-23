@@ -28,9 +28,7 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.security.KeyPair;
 import java.security.MessageDigest;
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -39,14 +37,10 @@ import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.routing.RoutingTable;
-import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -302,65 +296,7 @@ public class Main {
         });
     }
     
-    private static PrivateKey privateKey = null;
-    
-    private static void loadPrivateKey() throws Exception {
-        System.out.println("Loading private key...");
-        
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("File: ");
-        File file = new File(in.readLine());
-        if (!file.isFile()) {
-            throw new IOException(file + " is not a file");
-        }
-        
-        System.out.print("Alias: ");
-        String alias = in.readLine();
-        
-        System.out.print("Password: ");
-        char[] password = in.readLine().toCharArray();
-        
-        KeyPair keyPair = CryptoHelper.load(file, alias, password);
-        privateKey = keyPair.getPrivate();
-    }
-    
     private static void reqstats(DHT dht, String[] line) throws Exception {
-        if (privateKey == null) {
-            loadPrivateKey();
-        }
-        
-        String host = line[1];
-        int port = Integer.parseInt(line[2]);
-        String typeString = line[3];
-        
-        SocketAddress addr = new InetSocketAddress(host, port);
-        
-        int type = StatsRequest.STATS;
-        if(typeString.equals("rt")) {
-            type = StatsRequest.RT;
-        } else if(typeString.equals("db")) {
-            type = StatsRequest.DB;
-        }
-        
-        System.out.println("Requesting stat... " + addr);
-        StatsListener listener = new StatsListener() {
-            public void response(ResponseMessage response, long time) {
-                StringBuffer buffer = new StringBuffer();
-                buffer.append("*** Stats to ").append(response.getSource())
-                    .append(" succeeded in ").append(time).append("ms\n");
-                buffer.append(((StatsResponse)response).getStatistics());
-                System.out.println(buffer.toString());
-            }
-
-            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-                StringBuffer buffer = new StringBuffer();
-                buffer.append("*** Stats to ").append(ContactNode.toString(nodeId, address))
-                    .append(" failed with timeout");
-                System.out.println(buffer.toString());
-            }
-        };
-        
-        dht.stats(addr, type, listener, privateKey);
     }
     
     private static void bootstrap(DHT dht, String[] line) throws Throwable {

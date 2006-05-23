@@ -92,8 +92,4 @@ public abstract class AbstractDHTMessage implements DHTMessage {
     public byte[] getSignature() {
         return signature;
     }
-    
-    protected void setSignature(byte[] signature) {
-        this.signature = signature;
-    }
 }

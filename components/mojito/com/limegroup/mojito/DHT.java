@@ -36,7 +36,6 @@ import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupAdapter;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -242,21 +241,6 @@ public class DHT {
             throw new NullPointerException("PingListener is null");
         }
         context.ping(dst, listener);
-    }
-    
-    public void stats(SocketAddress dst, int request, 
-            StatsListener listener, PrivateKey privateKey) 
-                throws IOException, InvalidKeyException, SignatureException {
-        
-        if (listener == null) {
-            throw new NullPointerException("StatsListener is null");
-        }
-        
-        if (privateKey == null) {
-            throw new NullPointerException("PrivateKey is null");
-        }
-        
-        context.stats(dst, request, listener, privateKey);
     }
     
     // TODO remove - for test purposes only

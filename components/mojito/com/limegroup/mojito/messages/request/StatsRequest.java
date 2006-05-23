@@ -24,7 +24,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.InvalidKeyException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 
@@ -79,14 +78,7 @@ public class StatsRequest extends RequestMessage {
         }
         return false;
     }
-    
-    public void sign(PrivateKey privateKey, SocketAddress src, SocketAddress dst) 
-            throws IOException, InvalidKeyException, SignatureException {
-        
-        byte[] signature = CryptoHelper.sign(privateKey, getSignatureBlock(src, dst));
-        setSignature(signature);
-    }
-    
+
     private byte[] getSignatureBlock(SocketAddress src, SocketAddress dst) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(20 + 18 + 18 + 4);
         DataOutputStream out = new DataOutputStream(baos);

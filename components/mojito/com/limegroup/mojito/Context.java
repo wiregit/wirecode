@@ -24,11 +24,9 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.net.SocketAddress;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,11 +50,9 @@ import com.limegroup.mojito.db.KeyValuePublisher;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
-import com.limegroup.mojito.handler.response.StatsResponseHandler;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 import com.limegroup.mojito.handler.response.LookupResponseHandler.ContactNodeEntry;
 import com.limegroup.mojito.io.MessageDispatcher;
@@ -65,7 +61,6 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.request.StatsRequest;
 import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
@@ -566,21 +561,6 @@ public class Context {
     /** Stores a given KeyValue */
     public void store(KeyValue keyValue, StoreListener listener) throws IOException {
         new StoreManager().store(keyValue, listener);
-    }
-    
-    /** Retrieves Statistics from the given Node */
-    public void stats(SocketAddress address, int request, 
-            StatsListener listener, PrivateKey privateKey) 
-                throws IOException, InvalidKeyException, SignatureException {
-        
-        StatsRequest msg = (StatsRequest)messageFactory.createStatsRequest(address, request);
-        msg.sign(privateKey, getSocketAddress(), address);
-        
-        StatsResponseHandler handler = new StatsResponseHandler(this);
-        if (listener != null) {
-            handler.addStatsListener(listener);
-        }
-        messageDispatcher.send(address, msg, handler);
     }
     
     /**
