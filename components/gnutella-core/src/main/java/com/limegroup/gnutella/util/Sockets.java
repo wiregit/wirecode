@@ -72,6 +72,11 @@ public class Sockets {
         return connect(addr, timeout, observer);
     }
     
+    public static Socket connect(IpPort ipport, int timeout, ConnectObserver observer) throws IOException {  
+        InetSocketAddress addr = new InetSocketAddress(ipport.getInetAddress(), ipport.getPort());  
+        return connect(addr, timeout, observer);
+    }    
+    
     /**
      * Sets up a socket for connecting.
      * This method may either block or return immediately, depending on if

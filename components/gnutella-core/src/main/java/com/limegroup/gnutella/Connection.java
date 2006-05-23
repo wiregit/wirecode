@@ -364,9 +364,9 @@ public class Connection implements IpPort {
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
         if(isOutgoing()) {
             if(observer != null) {
-                _socket = Sockets.connect(_host, _port, timeout, createAsyncConnectObserver(requestHeaders, responder, observer));
+                _socket = connect(_host, _port, timeout, createAsyncConnectObserver(requestHeaders, responder, observer));
             } else {
-                _socket=Sockets.connect(_host, _port, timeout);
+                _socket = connect(_host, _port, timeout);
                 preHandshakeInitialize(requestHeaders, responder, observer);
             }
         } else {
@@ -374,6 +374,14 @@ public class Connection implements IpPort {
         }
     }
     
+    protected Socket connect(String addr, int port, int timeout) throws IOException {
+        return Sockets.connect(addr, port, timeout);
+    }
+
+    protected Socket connect(String addr, int port, int timeout, ConnectObserver observer) throws IOException {
+        return Sockets.connect(addr, port, timeout, observer);
+    }
+
     /**
      * Constructs the ConnectObserver that will be used to continue the connection process asynchronously.
      */
