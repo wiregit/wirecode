@@ -241,6 +241,13 @@ public class MojitoDHT {
         context.bootstrap(address, listener);
     }
     
+    /**
+     * Tries to bootstrap from a List of Hosts.
+     * 
+     * @param bootstrapHostsList a List of <tt>SocketAddress</tt>
+     * @param listener The listener for bootstrap events
+     * @throws IOException
+     */
     public void bootstrap(List bootstrapHostsList, BootstrapListener listener) 
             throws IOException {
         context.bootstrap(bootstrapHostsList, listener);

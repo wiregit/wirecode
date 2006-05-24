@@ -3,6 +3,10 @@ package com.limegroup.gnutella.dht;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,6 +18,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.ThreadFactory;
+import com.limegroup.mojito.event.BootstrapListener;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -30,6 +35,8 @@ public class LimeDHTManager implements LifecycleListener {
     private MojitoDHT dht;
 
     private volatile boolean running = false;
+    
+    private volatile LinkedList bootstrapHosts = new LinkedList();
     
     public LimeDHTManager() {
         dht = new MojitoDHT("LimeMojitoDHT");
@@ -100,6 +107,21 @@ public class LimeDHTManager implements LifecycleListener {
         running = false;
     }
     
+    public void addBootstrapHost(SocketAddress hostAddress) {
+        synchronized (bootstrapHosts) {
+            if(bootstrapHosts.size() > 10) {//TODO: as a param? Keep bootstrap list small because it should be updated often
+                bootstrapHosts.removeLast();
+            }
+            bootstrapHosts.addFirst(hostAddress);
+        }
+    }
+    
+    public void removeBootstrapHost(SocketAddress hostAddress) {
+        synchronized (bootstrapHosts) {
+            bootstrapHosts.remove(hostAddress);
+        }
+    }
+    
     public boolean isRunning() {
         return running;
     }
@@ -110,12 +132,16 @@ public class LimeDHTManager implements LifecycleListener {
 
     public void handleLifecycleEvent(LifecycleEvent evt) {
         if(evt.isConnectedEvent()) {
-            if(running) {
-                return;
-            } else {
+            if(!running) {
                 init(false);
+            } else {
+                //protect against change of state
+                if(RouterService.isSupernode()) {
+                    shutdown();
+                }
+                return;
             }
-        } else if(evt.isDisconnectedEvent() || evt.isConnectingEvent() || evt.isNoInternetEvent()) {
+        } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(running) {
                 shutdown();
             }

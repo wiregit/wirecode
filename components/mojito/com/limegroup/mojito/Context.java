@@ -158,6 +158,8 @@ public class Context {
         
         pingManager = new PingManager();
         lookupManager = new LookupManager();
+        
+        Thread.currentThread().setName(name+" - main");
     }
     
     public void setName(String name) {
@@ -581,6 +583,13 @@ public class Context {
         new BootstrapManager().bootstrap(address, listener);
     }
     
+    /**
+     * Tries to bootstrap from a List of Hosts.
+     * 
+     * @param bootstrapHostsList a List of <tt>SocketAddress</tt>
+     * @param listener The listener for bootstrap events
+     * @throws IOException
+     */
     public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
         setBootstrapped(false);
         new BootstrapManager().bootstrap(bootstrapHostsList, listener);
@@ -756,10 +765,22 @@ public class Context {
         public void bootstrap(SocketAddress address, 
                 BootstrapListener listener) throws IOException {
             this.listener = listener;
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Sending initial bootstrap ping to : " + address);
+            }
+            
             startTime = System.currentTimeMillis();
             ping(address, this);
         }
         
+        /**
+         * Tries to bootstrap from a List of Hosts.
+         * 
+         * @param bootstrapHostsList a List of <tt>SocketAddress</tt>
+         * @param listener The listener for bootstrap events
+         * @throws IOException
+         */
         public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
             this.bootstrapHostsList = bootstrapHostsList;
             if(bootstrapHostsList != null && bootstrapHostsList.size() > 0) {
