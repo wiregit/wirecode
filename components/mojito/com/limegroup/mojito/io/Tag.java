@@ -45,8 +45,10 @@ import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.messages.response.StoreResponse;
 
-
-class Tag {
+/**
+ * 
+ */
+public class Tag {
     
     private static final Log LOG = LogFactory.getLog(Tag.class);
     
@@ -64,7 +66,7 @@ class Tag {
     
     private long timeout = -1L;
     
-    public Tag(ContactNode node, ResponseMessage message) 
+    Tag(ContactNode node, ResponseMessage message) 
             throws IOException {
         
         data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
@@ -80,22 +82,22 @@ class Tag {
         this.message = message;
     }
     
-    public Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) 
+    Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) 
             throws IOException {
         this(null, dst, message, handler, -1L);
     }
     
-    public Tag(ContactNode node, RequestMessage message, ResponseHandler responseHandler) 
+    Tag(ContactNode node, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
         this(node.getNodeID(), node.getSocketAddress(), message, responseHandler, node.getAdaptativeTimeOut());
     }
     
-    public Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
+    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
         this(nodeId, dst, message, responseHandler, -1L);
     }
     
-    public Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler, long timeout) 
+    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler, long timeout) 
             throws IOException {
         
         data = ByteBuffer.wrap(InputOutputUtils.serialize(message));

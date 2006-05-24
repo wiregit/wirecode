@@ -52,7 +52,6 @@ import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.messages.LimeDHTMessage;
 
 /**
  * 
