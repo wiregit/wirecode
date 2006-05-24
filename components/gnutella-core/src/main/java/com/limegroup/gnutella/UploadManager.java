@@ -159,9 +159,14 @@ public class UploadManager implements BandwidthTracker {
     private int numMeasures = 0;
     
     /**
-     * The current average bandwidth
+     * The current average bandwidth.
+     * 
+     * This is only counted while uploads are active.
      */
     private float averageBandwidth = 0f;
+    
+    /** The last value that getMeasuredBandwidth created. */
+    private volatile float lastMeasuredBandwidth;
 
     /** The desired minimum quality of service to provide for uploads, in
      *  KB/s.  See testTotalUploadLimit. */
@@ -1623,6 +1628,7 @@ public class UploadManager implements BandwidthTracker {
 			up.measureBandwidth();
 			currentTotal += up.getAverageBandwidth();
 		}
+        
 		if ( c ) {
             synchronized(this) {
                 averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
@@ -1646,6 +1652,10 @@ public class UploadManager implements BandwidthTracker {
             
             sum += up.getMeasuredBandwidth();
 		}
+
+        
+        lastMeasuredBandwidth = sum;
+        
         return sum;
 	}
 	
@@ -1655,6 +1665,14 @@ public class UploadManager implements BandwidthTracker {
 	public synchronized float getAverageBandwidth() {
         return averageBandwidth;
 	}
+    
+    /**
+     * Returns the last value that getMeasuredBandwidth returned.
+     * @return
+     */
+    public float getLastMeasuredBandwidth() {
+        return lastMeasuredBandwidth;
+    }
 
     static void tBandwidthTracker(UploadManager upman) {
         upman.reportUploadSpeed(100000, 1000000);  //10 kB/s

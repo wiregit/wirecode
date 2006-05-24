@@ -175,14 +175,19 @@ public class DownloadManager implements BandwidthTracker {
     private int numMeasures = 0;
     
     /**
-     * The average bandwidth over all downloads
+     * The average bandwidth over all downloads.
+     * This is only counted while downloads are active.
      */
     private float averageBandwidth = 0;
+    
+    /** The last measured bandwidth, as counted from measureBandwidth. */
+    private volatile float lastMeasuredBandwidth;
     
     /**
      * The runnable that pumps inactive downloads to the correct state.
      */
     private Runnable _waitingPump;
+
 
     //////////////////////// Creation and Saving /////////////////////////
 
@@ -1515,6 +1520,7 @@ public class DownloadManager implements BandwidthTracker {
             bt.measureBandwidth();
             currentTotal += bt.getAverageBandwidth();
         }
+        
         if ( c ) {
             synchronized(this) {
                 averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
@@ -1544,6 +1550,8 @@ public class DownloadManager implements BandwidthTracker {
             }
             sum+=curr;
         }
+                
+        lastMeasuredBandwidth = sum;
         return sum;
     }
     
@@ -1552,6 +1560,14 @@ public class DownloadManager implements BandwidthTracker {
      */
     public synchronized float getAverageBandwidth() {
         return averageBandwidth;
+    }
+    
+    /**
+     * Returns the measured bandwidth as calculated from the last
+     * getMeasuredBandwidth() call.
+     */
+    public float getLastMeasuredBandwidth() {
+        return lastMeasuredBandwidth;
     }
 	
 	private String getFileName(RemoteFileDesc[] rfds, String fileName) {
