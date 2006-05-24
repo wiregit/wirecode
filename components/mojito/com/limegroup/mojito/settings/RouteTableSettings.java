@@ -19,6 +19,8 @@
  
 package com.limegroup.mojito.settings;
 
+import com.limegroup.mojito.settings.LimeDHTProps.BooleanSetting;
+
 
 public final class RouteTableSettings extends LimeDHTProps {
 
@@ -58,4 +60,7 @@ public final class RouteTableSettings extends LimeDHTProps {
         = FACTORY.createIntSetting("MAX_CONSECUTIVE_FAILURES", 100);
     
     public static final String ROUTETABLE_FILE = "RouteTable.pat";
+    
+    public static final BooleanSetting PERSIST_ROUTETABLE
+    = FACTORY.createBooleanSetting("PERSIST_ROUTETABLE", true);
 }

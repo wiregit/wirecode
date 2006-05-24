@@ -82,4 +82,7 @@ public final class DatabaseSettings extends LimeDHTProps {
     public static final LongSetting RUN_REPUBLISHER_EVERY
         = FACTORY.createSettableLongSetting("RUN_REPUBLISHER_EVERY", 5L*60L*1000L, 
                 "run_republisher_every", 5L*60L*1000L, 30L*60L*1000L);
+    
+    public static final BooleanSetting PERSIST_DATABASE
+        = FACTORY.createBooleanSetting("PERSIST_DATABASE", true);
 }

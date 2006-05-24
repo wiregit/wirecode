@@ -145,7 +145,10 @@ public class PlanetLab {
                     }
                     
                     dht.bootstrap(dst, new BootstrapListener() {
-                        
+                        public void noBootstrapHost() {
+                            System.out.println(index + ": no bootstrap host!");
+                        }
+
                         public void phaseOneComplete(long time) {
                             System.out.println(index + ": bootstrap phase ONE finished");
                         }
@@ -396,6 +399,12 @@ public class PlanetLab {
                             dht.start();
                             
                             dht.bootstrap(bootstrapServer, new BootstrapListener() {
+                                public void noBootstrapHost() {
+                                    synchronized(lock) {
+                                        lock.notify();
+                                    }
+                                }
+
                                 public void phaseOneComplete(long time) {}
 
                                 public void phaseTwoComplete(boolean foundNodes, long time) {

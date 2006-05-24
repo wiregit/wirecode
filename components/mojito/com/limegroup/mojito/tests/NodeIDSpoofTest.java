@@ -89,6 +89,9 @@ public class NodeIDSpoofTest {
         dht3.setName("DHT-2");
         dht3.start();
         dht3.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener() {
+            public void noBootstrapHost() {
+            }
+
             public void phaseOneComplete(long time) {
             }
 
@@ -120,6 +123,7 @@ public class NodeIDSpoofTest {
         dht2.setName("DHT-1");
         dht2.start();
         dht2.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener(){
+            public void noBootstrapHost() {};
             public void phaseOneComplete(long time) {}
             public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println("2");

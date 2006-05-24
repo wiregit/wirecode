@@ -351,6 +351,10 @@ public class Main {
             public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println("*** Bootstraping phase 2 " + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
             }
+
+            public void noBootstrapHost() {
+                System.out.println("*** Bootstrap failed: no bootstrap host available!");
+            }
         });
     }
     

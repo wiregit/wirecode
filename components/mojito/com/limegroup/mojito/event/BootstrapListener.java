@@ -23,4 +23,6 @@ public interface BootstrapListener {
     
     public void phaseOneComplete(long time);
     public void phaseTwoComplete(boolean foundNodes, long time);
+    
+    public void noBootstrapHost();
 }

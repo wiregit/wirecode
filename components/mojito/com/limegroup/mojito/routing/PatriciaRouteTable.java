@@ -197,12 +197,9 @@ public class PatriciaRouteTable implements RoutingTable {
                     this.bucketsTrie = bucketsTrie;
                     this.nodesTrie = nodeTrie;
                 }
-                
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Finished loading routing table. Now refreshing buckets");
+                    LOG.trace("Finished loading routing table.");
                 };
-                //refresh the buckets
-                refreshBuckets(true);
                 
                 return true;
             } catch (FileNotFoundException e) {

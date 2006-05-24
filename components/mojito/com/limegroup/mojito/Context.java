@@ -70,6 +70,7 @@ import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
@@ -152,6 +153,7 @@ public class Context {
 
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
+        
         messageDispatcher = new MessageDispatcherImpl(this);
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
@@ -358,6 +360,14 @@ public class Context {
         routeTable.add(localNode, false);
         ContextSettings.setLocalNodeInstanceID(nodeId, newID);
         messageDispatcher.bind(address);
+        if(DatabaseSettings.PERSIST_DATABASE.getValue()) {
+            database.load();
+        }
+
+        if(RouteTableSettings.PERSIST_ROUTETABLE.getValue()) {
+            routeTable.load();
+        }
+
     }
     
     //TODO testing purposes only - remove
@@ -427,6 +437,14 @@ public class Context {
         
         synchronized (remoteSizeHistory) {
             remoteSizeHistory.clear();
+        }
+        
+        if(RouteTableSettings.PERSIST_ROUTETABLE.getValue()) {
+            routeTable.store();
+        }
+        
+        if(DatabaseSettings.PERSIST_DATABASE.getValue()) {
+            database.store();
         }
     }
     
@@ -738,7 +756,6 @@ public class Context {
                     if(bootstrapHostsList == null || bootstrapHostsList.size() == 0) {
                         bootstrapHostsList = routeTable.getAllNodesMRS();
                     }
-                    
                     for (Iterator iter = bootstrapHostsList.iterator(); iter.hasNext();) {
                         ContactNode node = (ContactNode) iter.next();
                         //do not send to ourselve or the node which just timed out
@@ -752,25 +769,24 @@ public class Context {
                             try {
                                 iter.remove();
                                 ping(node,this);
+                                return;
                             } catch (IOException err) {
                                 LOG.error(err);
-                                firePhaseOneFinished();
-                                firePhaseTwoFinished();
+                                fireNoBootstrapHost();
                             }
                         }
                     }
+                    fireNoBootstrapHost();
                 }else {
                     if (LOG.isErrorEnabled()) {
                         LOG.error("Initial bootstrap ping timeout, giving up bootstrap after "+failures+" tries");
                     }
-                    firePhaseOneFinished();
-                    firePhaseTwoFinished();
+                    fireNoBootstrapHost();
                 }
             }
         }
         
         public void found(KUID lookup, Collection c, long time) {
-            
         }
         
         public void finish(KUID lookup, Collection c, long time) {
@@ -825,6 +841,16 @@ public class Context {
                 fireEvent(new Runnable() {
                     public void run() {
                         listener.phaseTwoComplete(foundNewNodes, time);
+                    }
+                });
+            }
+        }
+        
+        private void fireNoBootstrapHost() {
+            if (listener != null) {
+                fireEvent(new Runnable() {
+                    public void run() {
+                        listener.noBootstrapHost();
                     }
                 });
             }

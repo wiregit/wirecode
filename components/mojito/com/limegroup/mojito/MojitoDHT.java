@@ -76,6 +76,9 @@ public class MojitoDHT {
                     public void phaseOneComplete(long time) {}
 
                     public void phaseTwoComplete(boolean foundNodes, long time) {}
+
+                    public void noBootstrapHost() {
+                    }
                 });
             } catch (IOException err) {
                 if(LOG.isErrorEnabled()) {
@@ -206,6 +209,12 @@ public class MojitoDHT {
                             time.notify();
                         }
                     }
+
+                    public void noBootstrapHost() {
+                        synchronized (time) {
+                            time.notify();
+                        }
+                    }
             });
             try {
                 time.wait(timeout);
@@ -223,7 +232,7 @@ public class MojitoDHT {
      * @return The bootstrap time
      * @throws IOException
      */
-    private void bootstrap(BootstrapListener listener) 
+    public void bootstrap(BootstrapListener listener) 
             throws IOException {
         context.bootstrap(listener);
     }
