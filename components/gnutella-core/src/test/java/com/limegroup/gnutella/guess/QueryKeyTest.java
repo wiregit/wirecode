@@ -1,16 +1,13 @@
 package com.limegroup.gnutella.guess;
 
 import java.io.ByteArrayOutputStream;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryKeyTest(String name) {
@@ -69,8 +66,39 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(qk1,qk2);
     }
 
+    public void testQueryKeys() throws Exception {
+        InetAddress addr1 = InetAddress.getByName("www.limewire.com");
+        InetAddress addr2 = InetAddress.getByName("www.microsoft.com");
+        
+        int port1 = 1234;
+        int port2 = 4321;
+        
+        QueryKey key1 = QueryKey.getQueryKey(addr1, port1);
+        QueryKey key2 = QueryKey.getQueryKey(addr1, port2);
+        QueryKey key3 = QueryKey.getQueryKey(addr2, port1);
+        
+        assertTrue(key1.isFor(addr1, port1));
+        assertFalse(key1.equals(key2));
+        assertFalse(key1.equals(key3));
+        assertFalse(key1.isFor(addr1, port2));
+        assertFalse(key1.isFor(addr2, port1));
+        assertFalse(key1.isFor(addr2, port2));
+        
+        assertTrue(key2.isFor(addr1, port2));
+        assertFalse(key2.equals(key1));
+        assertFalse(key2.equals(key3));
+        assertFalse(key2.isFor(addr1, port1));
+        assertFalse(key2.isFor(addr2, port1));
+        assertFalse(key2.isFor(addr2, port2));
+        
+        assertTrue(key3.isFor(addr2, port1));
+        assertFalse(key3.equals(key1));
+        assertFalse(key3.equals(key2));
+        assertFalse(key3.isFor(addr1, port1));
+        assertFalse(key3.isFor(addr1, port2));
+        assertFalse(key3.isFor(addr2, port2));
+    }
     
-
     // Makes sure QueryKeys have no problem going in and out of GGEP blocks
     public void testQueryKeysAndGGEP() throws Exception {
         Random rand = new Random();
