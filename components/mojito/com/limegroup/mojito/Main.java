@@ -30,12 +30,26 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl2;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LifecycleEvent;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
@@ -72,25 +86,20 @@ public class Main {
             }
         }
         
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.PORT.setValue(port);
-        ConnectionSettings.FORCED_PORT.setValue(port);
-        
         InetAddress addr = host != null ? InetAddress.getByName(host) : null;
         
-        ArrayList dhts = new ArrayList();
+        //List dhts = standalone(addr, port, count);
+        List dhts = limewire(addr, port);
+        
+        run(addr, port, dhts);
+    }
+    
+    private static List standalone(InetAddress addr, int port, int count) {
+        List dhts = new ArrayList(count);
         
         for(int i = 0; i < count; i++) {
             try {
                 MojitoDHT dht = new MojitoDHT("DHT" + i);
-                
-                dht.setMessageDispatcher(LimeMessageDispatcherImpl2.class);
-                dht.setThreadFactory(new ThreadFactory() {
-                    public Thread createThread(Runnable runnable, String name) {
-                        return new ManagedThread(runnable, name);
-                    }
-                });
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
@@ -108,6 +117,31 @@ public class Main {
             }
         }
         
+        return dhts;
+    }
+    
+    private static List limewire(InetAddress addr, int port) throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        ConnectionSettings.PORT.setValue(port);
+        ConnectionSettings.FORCED_PORT.setValue(port);
+        
+        RouterService service = new RouterService(new DoNothing());
+        RouterService.preGuiInit();
+        service.start();
+        
+        MojitoDHT dht = RouterService.getLimeDHTManager().getMojitoDHT();
+        if (addr != null) {
+            dht.bind(new InetSocketAddress(addr, port));
+        } else {
+            dht.bind(new InetSocketAddress(port));
+        }
+        dht.start();
+        
+        return Arrays.asList(new Object[]{dht});
+    }
+    
+    private static void run(InetAddress addr, int port, List dhts) throws Exception {
         long time = 0L;
         for(int i = 1; i < dhts.size(); i++) {
             long t = ((MojitoDHT)dhts.get(i)).bootstrap(((MojitoDHT)dhts.get(i-1)).getSocketAddress());
@@ -481,6 +515,118 @@ public class Main {
         } else {
             Context context = dht.getContext();
             context.getDatabase().store();
+        }
+    }
+    
+    private static class DoNothing implements ActivityCallback {
+
+        public void acceptChat(Chatter ctr) {
+        }
+
+        public void acceptedIncomingChanged(boolean status) {
+        }
+
+        public void addressStateChanged() {
+        }
+
+        public void addUpload(Uploader u) {
+        }
+
+        public void browseHostFailed(GUID guid) {
+        }
+
+        public void chatErrorMessage(Chatter chatter, String str) {
+        }
+
+        public void chatUnavailable(Chatter chatter) {
+        }
+
+        public void componentLoading(String component) {
+        }
+
+        public void connectionClosed(Connection c) {
+        }
+
+        public void connectionInitialized(Connection c) {
+        }
+
+        public void connectionInitializing(Connection c) {
+        }
+
+        public void disconnected() {
+        }
+
+        public void fileManagerLoaded() {
+        }
+
+        public void fileManagerLoading() {
+        }
+
+        public void handleFileEvent(FileManagerEvent evt) {
+        }
+
+        public boolean handleMagnets(MagnetOptions[] magnets) {
+            return false;
+        }
+
+        public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set locs) {
+        }
+
+        public void handleQueryString(String query) {
+        }
+
+        public void handleSharedFileUpdate(File file) {
+        }
+
+        public boolean isQueryAlive(GUID guid) {
+            return false;
+        }
+
+        public void receiveMessage(Chatter chr) {
+        }
+
+        public void removeUpload(Uploader u) {
+        }
+
+        public void restoreApplication() {
+        }
+
+        public void setAnnotateEnabled(boolean enabled) {
+        }
+
+        public void updateAvailable(UpdateInformation info) {
+        }
+
+        public void uploadsComplete() {
+        }
+
+        public boolean warnAboutSharingSensitiveDirectory(File dir) {
+            return false;
+        }
+
+        public void addDownload(Downloader d) {
+        }
+
+        public void downloadsComplete() {
+        }
+
+        public String getHostValue(String key) {
+            return null;
+        }
+
+        public void promptAboutCorruptDownload(Downloader dloader) {
+        }
+
+        public void removeDownload(Downloader d) {
+        }
+
+        public void showDownloads() {
+        }
+
+        public void handleAddressStateChanged() {
+        }
+
+        public void handleLifecycleEvent(LifecycleEvent evt) {
         }
     }
 }

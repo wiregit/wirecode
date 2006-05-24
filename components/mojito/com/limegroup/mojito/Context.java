@@ -433,6 +433,10 @@ public class Context {
      * Stops the DHT
      */
     public synchronized void stop() {
+        if (!isRunning()) {
+            return;
+        }
+        
         running = false;
         bootstrapped = false;
         

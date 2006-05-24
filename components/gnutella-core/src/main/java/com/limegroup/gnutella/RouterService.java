@@ -137,11 +137,6 @@ public class RouterService {
     private static ConnectionManager manager = new ConnectionManager();
 
     /**
-     * Initialize the class that manages the DHT.
-     */
-    private static LimeDHTManager dhtManager = new LimeDHTManager();
-    
-    /**
 	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
      * for tests.
 	 */
@@ -223,6 +218,10 @@ public class RouterService {
      */
     private static UDPMultiplexor UDP_MULTIPLEXOR;
     
+    /**
+     * Initialize the class that manages the DHT.
+     */
+    private static LimeDHTManager dhtManager;
     
     static {
         // Link the multiplexor & NIODispatcher together.
@@ -305,9 +304,11 @@ public class RouterService {
   	public RouterService(ActivityCallback callback, MessageRouter router) {
 		RouterService.callback = callback;
         fileManager.registerFileManagerEventListener(callback);
+        RouterService.router = router;
+        dhtManager = new LimeDHTManager();
+
         manager.registerLifecycleListener(callback);
         manager.registerLifecycleListener(dhtManager);
-  		RouterService.router = router;
   	}
 
   	/**
@@ -541,6 +542,13 @@ public class RouterService {
         }
     }
 
+    /**
+     * Accessor for the <tt>LimeDHTManager</tt> instance.
+     */
+    public static LimeDHTManager getLimeDHTManager() {
+        return dhtManager;
+    }
+    
 	/**
 	 * Accessor for the <tt>MessageRouter</tt> instance.
 	 *

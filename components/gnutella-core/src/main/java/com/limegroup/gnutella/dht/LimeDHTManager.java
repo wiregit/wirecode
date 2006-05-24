@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -7,7 +11,9 @@ import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.ThreadFactory;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -17,7 +23,7 @@ import com.limegroup.mojito.MojitoDHT;
  *
  * The current implementation is dependant on the MojitoDHT. TODO: create a more general DHT interface
  */
-public class LimeDHTManager implements LifecycleListener{
+public class LimeDHTManager implements LifecycleListener {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTManager.class);
     
@@ -27,10 +33,19 @@ public class LimeDHTManager implements LifecycleListener{
     
     public LimeDHTManager() {
         dht = new MojitoDHT("LimeMojitoDHT");
+        
+        dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
+        dht.setThreadFactory(new ThreadFactory() {
+            public Thread createThread(Runnable runnable, String name) {
+                return new ManagedThread(runnable, name);
+            }
+        });
     }
     
     public synchronized void init(boolean passive) {
-        if(running) return;
+        if(running) {
+            return;
+        }
 
         if(!DHTSettings.DHT_CAPABLE.getValue() && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
             if(LOG.isDebugEnabled()) {
@@ -38,12 +53,14 @@ public class LimeDHTManager implements LifecycleListener{
             }
             return;
         }
+        
         if(RouterService.isConnecting()) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not connected to the Gnutella network");
             }
             return;
         }
+        
         if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && RouterService.isSupernode()) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - Node is allready an ultrapeer");
@@ -58,12 +75,23 @@ public class LimeDHTManager implements LifecycleListener{
         } else {
             dht.setFirewalled(RouterService.acceptedIncomingConnection());
         }
-        //TODO initialize the DHT here: bind, set Address, bootstrap etc.
-        //dht.start();
+        
+        try {
+            InetAddress addr = InetAddress.getByAddress(RouterService.getAddress());
+            int port = RouterService.getPort();
+            dht.bind(new InetSocketAddress(addr, port));
+            
+            //TODO initialize the DHT here: bind, set Address, bootstrap etc.
+            dht.start();
+        } catch (IOException err) {
+            LOG.error(err);
+        }
     }
     
     public synchronized void shutdown(){
-        if(!running) return;
+        if(!running) {
+            return;
+        }
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Shutting down DHT");
@@ -96,7 +124,9 @@ public class LimeDHTManager implements LifecycleListener{
         }
     }
     
-    
+    public MojitoDHT getMojitoDHT() {
+        return dht;
+    }
 
     /** we need a timer task to see: 
     1. We weren't able to bootstrap ==> check if we have new bootstrap nodes

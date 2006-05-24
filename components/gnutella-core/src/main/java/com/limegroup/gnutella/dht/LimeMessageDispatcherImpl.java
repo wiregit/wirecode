@@ -20,24 +20,30 @@
 package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.channels.DatagramChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.NIODispatcher;
-import com.limegroup.gnutella.io.ReadWriteObserver;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
+import com.limegroup.mojito.io.MessageFormatException;
+import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
 
 /**
  * 
  */
-public class LimeMessageDispatcherImpl extends MessageDispatcher implements ReadWriteObserver {
+public class LimeMessageDispatcherImpl extends MessageDispatcher 
+        implements MessageRouter.MessageHandler {
 
     private static final Log LOG = LogFactory.getLog(LimeMessageDispatcherImpl.class);
     
@@ -49,6 +55,11 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
         super(context);
         
         processingQueue = new ProcessingQueue(context.getName() + "-LimeMessageDispatcherPQ", true);
+        
+        LimeDHTMessage.registerMessage();
+        
+        RouterService.getMessageRouter()
+            .setUDPMessageHandler(LimeDHTMessage.class, this);
         
         context.scheduleAtFixedRate(new Runnable() {
             public void run() {
@@ -64,35 +75,50 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
     }
 
     public void bind(SocketAddress address) throws IOException {
-        if (isOpen()) {
-            throw new IOException("Already open");
-        }
-        
-        DatagramChannel channel = DatagramChannel.open();
-        channel.configureBlocking(false);
-        
-        DatagramSocket socket = channel.socket();
-        socket.setReuseAddress(false);
-        socket.setReceiveBufferSize(INPUT_BUFFER_SIZE);
-        socket.setSendBufferSize(OUTPUT_BUFFER_SIZE);
-        
-        socket.bind(address);
-        
-        setDatagramChannel(channel);
+        running = true;
     }
 
+    public boolean isOpen() {
+        return running;
+    }
+    
     public void stop() {
         running = false;
         processingQueue.clear();
-        setDatagramChannel(null);
     }
     
+    protected boolean enqueueOutput(Tag tag) {
+        try {
+            InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
+            LimeDHTMessage msg = LimeDHTMessage.createMessage(tag.getData().array());
+            UDPService.instance().send(msg, dst);
+            tag.sent();
+            registerInput(tag);
+            return true;
+        } catch (BadPacketException e) {
+            LOG.error("BadPacketException", e);
+        } catch (IOException e) {
+            LOG.error("IOException", e);
+        }
+        return false;
+    }
+
+    public void handleMessage(Message msg, InetSocketAddress addr, 
+            ReplyHandler handler) {
+        try {
+            DHTMessage message = ((LimeDHTMessage)msg).getDHTMessage(addr);
+            received(message);
+        } catch (MessageFormatException err) {
+            LOG.error("MessageFormatException", err);
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+        }
+    }
+
     protected void interestRead(boolean on) {
-        NIODispatcher.instance().interestRead(getDatagramChannel(), on);
     }
 
     protected void interestWrite(boolean on) {
-        NIODispatcher.instance().interestWrite(getDatagramChannel(), on);
     }
 
     public boolean isRunning() {
@@ -102,22 +128,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements Read
     protected void process(Runnable runnable) {
         processingQueue.add(runnable);
     }
-
-    public void shutdown() {
-        stop();
-    }
-
-    public void handleIOException(IOException iox) {
-        LOG.error(iox);
-    }
     
     public void run() {
         running = true;
-        
-        DatagramChannel channel = getDatagramChannel();
-        if (channel != null) {
-            processingQueue.clear();
-            NIODispatcher.instance().registerReadWrite(channel, this);
-        }
     }
 }

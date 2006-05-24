@@ -37,7 +37,7 @@ public class LimeDHTMessage extends Message {
     
     private static final byte F_DHT_MESSAGE = (byte)0x43;
     
-    static {
+    static void registerMessage() {
         MessageFactory.setParser(F_DHT_MESSAGE, new LimeDHTMessageParser());
     }
     

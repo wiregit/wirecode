@@ -2313,5 +2313,4 @@ public class ConnectionManager {
             listener.handleLifecycleEvent(evt);
         }
     }
-
 }
