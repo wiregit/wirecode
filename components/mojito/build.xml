@@ -3,17 +3,20 @@
     <description>MojitoDHT</description>
 
 	<property name="basedir" value="."/>
+	<property name="src" value="${basedir}/src/java"/>
+	
 	<property name="coredir" value="../core"/>
 	<property name="lib" value="../lib"/>
 	<property name="jars" value="${lib}/jars"/>
 		
 	<path id="default.classpath" >
 		<fileset dir="${jars}" includes="**/*.jar"/>
+		<pathelement location="${coredir}" />
 	</path>
 	
     <target name="build">
-	    	<javac srcdir="${basedir}:${coredir}" 
-				destdir="${basedir}"
+	    	<javac srcdir="${src}" 
+				destdir="${src}"
 		    		target="1.4"
 		    		source="1.4"
 	    			compiler="javac1.4"
@@ -25,8 +28,8 @@
 		
 	<target name="clean">
 		<delete>
-			<fileset dir="${basedir}" 
-				includes="com/**/*.class de/**/*.class"
+			<fileset dir="${src}" 
+				includes="**/*.class"
 			/>
 		</delete>
 	</target>
@@ -34,13 +37,13 @@
 	<target name="jar" depends="clean, build">
 		<delete file="mojito.jar"/>
 		<jar destfile="mojito.jar" 
-				basedir="${basedir}"
-				includes="com/**"
-				excludes="**/bin/** **/tests/** **/statistics/**"
+				basedir="${src}"
+				includes="**/*.class"
 				compress="false">
 		</jar>
 	</target>
-		
+	
+	<!--
 	<target name="planetLab" depends="clean, build">
 		<delete file="planetlab.jar"/>
 		<jar destfile="planetlab.jar" 
@@ -54,5 +57,6 @@
 			</manifest>
 		</jar>
 	</target>
+	-->
 </project>
 
