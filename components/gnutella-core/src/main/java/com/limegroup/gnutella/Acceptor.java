@@ -569,7 +569,7 @@ public class Acceptor {
             }
 
             // Dispatch asynchronously if possible.
-            if (client.getChannel() instanceof NIOMultiplexor) // supports non-blocking reads
+            if (client instanceof NIOMultiplexor) // supports non-blocking reads
                 ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(client, allowedProtocol));
             else
                 ThreadFactory.startThread(new BlockingConnectionDispatcher(client, allowedProtocol), "ConnectionDispatchRunner");

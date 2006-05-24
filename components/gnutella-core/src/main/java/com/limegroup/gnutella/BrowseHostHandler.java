@@ -22,6 +22,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -140,19 +141,23 @@ public class BrowseHostHandler {
             try {
                 // simply try connecting and getting results....
                 setState(DIRECTLY_CONNECTING);
+                LOG.trace("Attempting direct connection");
                 Socket socket = Sockets.connect(host, port,
                                                 DIRECT_CONNECT_TIME);
                 LOG.trace("direct connect successful");
                 browseExchange(socket);
             } catch (IOException ioe) {
+                LOG.debug("error while direct transfer", ioe);
                 // try pushing for fun.... (if we have the guid of the servent)
                 shouldTryPush = true;
             }
             if (!shouldTryPush) 
                 break;
         case 1: // true
+            LOG.debug("Attempting push connection");
             // if we're trying to push & we don't have a servent guid, it fails
             if ( _serventID == null ) {
+                LOG.debug("No serventID, failing");
                 failed();
             } else {
                 RemoteFileDesc fakeRFD = 
@@ -230,7 +235,7 @@ public class BrowseHostHandler {
     	try {
     		browseExchangeInternal(socket);
     	}finally {
-    		try{socket.close();}catch(IOException ignored){}
+            IOUtils.close(socket);
     		setState(FINISHED);
     	}
     }
@@ -269,14 +274,16 @@ public class BrowseHostHandler {
         
         // get the results...
         InputStream in = socket.getInputStream();
-        LOG.trace("BHH.browseExchange(): got input stream.");
+        LOG.trace("BHH.browseExchange(): got input stream: " + in);
 
         // first check the HTTP code, encoding, etc...
         ByteReader br = new ByteReader(in);
         LOG.trace("BHH.browseExchange(): trying to get HTTP code....");
         int code = parseHTTPCode(br.readLine());
-        if ((code < 200) || (code >= 300))
+        if ((code < 200) || (code >= 300)) {
+            LOG.debug("Bad code: " + code);
             throw new IOException();
+        }
         if(LOG.isDebugEnabled())
             LOG.debug("BHH.browseExchange(): HTTP Response is " + code);
 
@@ -304,9 +311,10 @@ public class BrowseHostHandler {
                 ; // do nothing special
             
         }
+        
         LOG.debug("BHH.browseExchange(): read HTTP seemingly OK.");
         
-	in = new BufferedInputStream(in);
+        in = new BufferedInputStream(in);
 
         // ok, everything checks out, proceed and read QRs...
         Message m = null;
@@ -315,13 +323,16 @@ public class BrowseHostHandler {
         		m = null;
         		LOG.debug("reading message");
         		m = MessageFactory.read(in);
-        		LOG.debug("read message "+m);
-        	}
-        	catch (BadPacketException bpe) {LOG.debug(bpe);}
-        	catch (IOException expected){} // either timeout, or the remote closed.
-        	if(m == null) 
+        	} catch (BadPacketException bpe) {
+                LOG.debug("BPE while reading", bpe);
+        	} catch (IOException expected){
+        	    LOG.debug("IOE while reading", expected);
+            } // either timeout, or the remote closed.
+            
+        	if(m == null)  {
+                LOG.debug("Unable to read a message");
         		return;
-        	 else {
+            } else {
         		if(m instanceof QueryReply) {
         			_currentLength += m.getTotalLength();
         			if(LOG.isTraceEnabled())
@@ -394,24 +405,24 @@ public class BrowseHostHandler {
      */
     private static int parseHTTPCode(String str) throws IOException {		
         if (str == null)
-            return -1; // hopefully this won't happen, but if so just error...
+            throw new IOException("couldn't read anything");
 		StringTokenizer tokenizer = new StringTokenizer(str, " ");		
 		String token;
 
 		// just a safety
 		if (! tokenizer.hasMoreTokens() )
-			throw new IOException();
+			throw new IOException("no tokens to read: " + str);
 
 		token = tokenizer.nextToken();
 		
 		// the first token should contain HTTP
 		if (token.toUpperCase().indexOf("HTTP") < 0 )
-			throw new IOException();
+			throw new IOException("didn't contain HTTP, had: " + token);
 		
 		// the next token should be a number
 		// just a safety
 		if (! tokenizer.hasMoreTokens() )
-			throw new IOException();
+			throw new IOException("no number token: " + str);
 
 		token = tokenizer.nextToken();
 		
@@ -421,7 +432,7 @@ public class BrowseHostHandler {
                 LOG.debug("BHH.parseHTTPCode(): returning " + num);
 			return java.lang.Integer.parseInt(num);
 		} catch (NumberFormatException e) {
-			throw new IOException();
+			throw new IOException("not a number: " + num);
 		}
 
     }
@@ -448,6 +459,7 @@ public class BrowseHostHandler {
                     try {
                         finalPRD.bhh.browseExchange(socket);
                     } catch (IOException ohWell) {
+                        LOG.debug("error while push transfer", ohWell);
                         finalPRD.bhh.failed();
                     }
                 }

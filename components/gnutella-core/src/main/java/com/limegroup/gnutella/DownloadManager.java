@@ -1163,21 +1163,21 @@ public class DownloadManager implements BandwidthTracker {
             //don't bother sending direct push if the node reported invalid
             //address and port.
             if (NetworkUtils.isValidAddress(address) &&
-                    NetworkUtils.isValidPort(file.getPort()))
+                    NetworkUtils.isValidPort(file.getPort())) {
                 udpService.send(pr, address, file.getPort());
-        } catch(UnknownHostException notCritical) {
-            //We can't send the push to a host we don't know
-            //but we can still send it to the proxies.
-        } finally {
-            IPFilter filter = IPFilter.instance();
-            //make sure we send it to the proxies, if any
-            Set proxies = file.getPushProxies();
-            for (Iterator iter = proxies.iterator();iter.hasNext();) {
-                IpPort ppi = (IpPort)iter.next();
-                if (filter.allow(ppi.getAddress()))
-                    udpService.send(pr,ppi.getInetAddress(),ppi.getPort());
+            }
+        } catch(UnknownHostException notCritical) {}
+    
+        IPFilter filter = IPFilter.instance();
+        //make sure we send it to the proxies, if any
+        Set proxies = file.getPushProxies();
+        for (Iterator iter = proxies.iterator();iter.hasNext();) {
+            IpPort ppi = (IpPort)iter.next();
+            if (filter.allow(ppi.getAddress())) {
+                udpService.send(pr,ppi.getInetAddress(),ppi.getPort());
             }
         }
+        
         return true;
     }
     
@@ -1425,7 +1425,10 @@ public class DownloadManager implements BandwidthTracker {
     
     private class GivParser extends AbstractChannelInterestRead {
         private final Socket socket;
-        private final StringBuffer sb = new StringBuffer();
+        private final StringBuffer givSB   = new StringBuffer();
+        private final StringBuffer blankSB = new StringBuffer();
+        private boolean readBlank;
+        private GIVLine giv;
         
         GivParser(Socket socket) {
             this.socket = socket;
@@ -1447,12 +1450,19 @@ public class DownloadManager implements BandwidthTracker {
                 }
                 
                 buffer.flip();
-                GIVLine giv = null;
-                if(BufferUtils.readLine(buffer, sb))
-                    giv = parseLine(sb.toString());
+                if(giv == null) {
+                    if(BufferUtils.readLine(buffer, givSB))
+                        giv = parseLine(givSB.toString());
+                }
+                
+                if(giv != null && !readBlank) {
+                    readBlank = BufferUtils.readLine(buffer, blankSB);
+                    if(blankSB.length() > 0)
+                        throw new IOException("didn't read blank line");
+                }
                 
                 buffer.compact();
-                if(giv != null) {
+                if(readBlank) {
                     handleGIV(socket, giv);
                     break;
                 }
