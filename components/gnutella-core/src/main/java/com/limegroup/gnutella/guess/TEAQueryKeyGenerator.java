@@ -88,7 +88,7 @@ import com.limegroup.gnutella.security.SecurityUtils;
         
         // Start out with 64 bits |0x00|0x00|port(2bytes)|ip(4bytes)|
         // and encrypt it with our secret key material.
-        long key64 = encrypt(((long)port) << 32) | (ipInt & 0xFFFFFFFFL);
+        long key64 = encrypt((((long)port) << 32) | (ipInt & 0xFFFFFFFFL));
         
         // 32-bit QK gives attackers the least amount of information
         // about our secret key while still not making it worth their
