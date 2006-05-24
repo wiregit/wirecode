@@ -20,36 +20,28 @@
 package com.limegroup.mojito.security;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import com.limegroup.mojito.db.KeyValue;
 
-
+/**
+ * 
+ */
 public final class CryptoHelper {
-    
-    private static final String KEY_STORE = "JKS";
     
     public static final String KEY_ALGORITHM = "DSA";
     public static final int KEY_SIZE = 512;
@@ -139,11 +131,6 @@ public final class CryptoHelper {
         }
     }
     
-    public static byte[] sign(KeyPair keyPair, byte[] data) 
-            throws SignatureException, InvalidKeyException {
-        return sign(keyPair.getPrivate(), data);
-    }
-    
     public static synchronized byte[] sign(PrivateKey privateKey, byte[] data) 
             throws SignatureException, InvalidKeyException {
         
@@ -158,11 +145,6 @@ public final class CryptoHelper {
         } catch (NoSuchAlgorithmException err) {
             throw new RuntimeException(err);
         }
-    }
-    
-    public static byte[] sign(KeyPair keyPair, KeyValue keyValue)
-            throws SignatureException, InvalidKeyException {
-        return sign(keyPair.getPrivate(), keyValue);
     }
     
     public static synchronized byte[] sign(PrivateKey privateKey, KeyValue keyValue)
@@ -186,11 +168,6 @@ public final class CryptoHelper {
             throw new RuntimeException(err);
         }
     }
-    
-    public static boolean verify(KeyPair keyPair, byte[] data, byte[] signature) 
-            throws SignatureException, InvalidKeyException {
-        return verify(keyPair.getPublic(), data, signature);
-    }
 
     public static synchronized boolean verify(PublicKey publicKey, byte[] data, byte[] signature) 
             throws SignatureException, InvalidKeyException {
@@ -210,11 +187,6 @@ public final class CryptoHelper {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-    }
-    
-    public static boolean verify(KeyPair keyPair, KeyValue keyValue)
-            throws SignatureException, InvalidKeyException {
-        return verify(keyPair.getPublic(), keyValue);
     }
 
     public static synchronized boolean verify(PublicKey publicKey, KeyValue keyValue) 
@@ -242,59 +214,5 @@ public final class CryptoHelper {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-    }
-    
-    private static KeyPair load(File file, String alias, char[] password) 
-            throws IOException, KeyStoreException, CertificateException, 
-                NoSuchAlgorithmException, UnrecoverableKeyException {
-        
-        FileInputStream in = null;
-        try {
-            in = new FileInputStream(file);
-            
-            KeyStore keyStore = KeyStore.getInstance(KEY_STORE);
-            keyStore.load(in, password);
-            
-            PrivateKey privKey = (PrivateKey)keyStore.getKey(alias, password);
-            Certificate cert = keyStore.getCertificate(alias);
-            PublicKey pubKey = cert.getPublicKey();
-            
-            return new KeyPair(pubKey, privKey);
-        } finally {
-            if (in != null) { in.close(); }
-        }
-    }
-    
-    /*
-     * To create a KeyPair:
-     * keytool -genkey -keypass <password> -keystore <file> -storepass <password> -alias <alias>
-     * 
-     * To extract the PublicKey:
-     * java com.limegroup.mojito.security.CryptoHelper <file> <alias> <password>
-     * 
-     * To load the KeyPair:
-     * KeyPair keyPair = CryptoHelper.load(<file>, <alias>, <password>);
-     */
-    public static void main(String[] args) throws Exception {
-        
-        KeyPair keyPair = load(new File(args[0]), args[1], args[2].toCharArray());
-        
-        PublicKey pubKey = keyPair.getPublic();
-        byte[] encodedKey = pubKey.getEncoded();
-        byte[] signature = sign(keyPair, encodedKey);
-        
-        FileOutputStream fos = new FileOutputStream(new File("public.key"));
-        GZIPOutputStream gz = new GZIPOutputStream(fos);
-        DataOutputStream out = new DataOutputStream(gz);
-        
-        out.writeInt(signature.length);
-        out.write(signature);
-        
-        out.writeInt(encodedKey.length);
-        out.write(encodedKey);
-        
-        out.close();
-        
-        System.out.println(pubKey.equals(loadMasterKey(new File("public.key"))));
     }
 }

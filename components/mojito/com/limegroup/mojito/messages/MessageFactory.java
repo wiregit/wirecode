@@ -115,8 +115,8 @@ public class MessageFactory {
         return new StoreResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), valueId, status);
     }
     
-    public StatsRequest createStatsRequest(SocketAddress dst, byte[] signature, int request) {
-        return new StatsRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), signature, request);
+    public StatsRequest createStatsRequest(SocketAddress dst, int request) {
+        return new StatsRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), request);
     }
 
     public StatsResponse createStatsResponse(RequestMessage request, String statistics) {

@@ -565,16 +565,6 @@ public class Context {
         new StoreManager().store(keyValue, listener);
     }
     
-    /** Retrieves Statistics from the given Node */
-    public void stats(SocketAddress address, int request, StatsListener listener) throws IOException {
-        RequestMessage msg = messageFactory.createStatsRequest(address, new byte[0], request);
-        StatsResponseHandler handler = new StatsResponseHandler(this);
-        if (listener != null) {
-            handler.addStatsListener(listener);
-        }
-        messageDispatcher.send(address, msg, handler);
-    }
-    
     /**
      * Returns the approximate DHT size
      */

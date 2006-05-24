@@ -36,14 +36,15 @@ import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupAdapter;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.settings.ContextSettings;
 
-
+/**
+ * 
+ */
 public class DHT {
     
     private static final Log LOG = LogFactory.getLog(DHT.class);
@@ -242,13 +243,6 @@ public class DHT {
         context.ping(dst, listener);
     }
     
-    public void stats(SocketAddress dst, int request, StatsListener listener) throws IOException {
-        if (listener == null) {
-            throw new NullPointerException("StatsListener is null");
-        }
-        context.stats(dst, request, listener);
-    }
-    
     // TODO remove - for test purposes only
     public Context getContext() {
         return context;
@@ -283,6 +277,10 @@ public class DHT {
                 keyValue.sign(context.getKeyPair());
             } else {
                 keyValue.sign(privateKey);
+                
+                if (!keyValue.verify(context.getKeyPair())) {
+                    throw new IllegalArgumentException();
+                }
             }
             
             Database database = context.getDatabase();

@@ -59,6 +59,17 @@ public final class NetworkUtils {
             && com.limegroup.gnutella.util.NetworkUtils.isValidPort(iaddr.getPort());
     }
     
+    public static byte[] getBytes(SocketAddress addr) throws IOException {
+        byte[] address = ((InetSocketAddress)addr).getAddress().getAddress();
+        int port = ((InetSocketAddress)addr).getPort();
+        
+        byte[] dst = new byte[address.length + 2];
+        System.arraycopy(address, 0, dst, 0, address.length);
+        dst[dst.length-2] = (byte)((port >> 8) & 0xFF);
+        dst[dst.length-1] = (byte)((port     ) & 0xFF);
+        return dst;
+    }
+    
     /*public static boolean isLocalSocketAddress(SocketAddress address) {
         InetAddress addr = ((InetSocketAddress)address).getAddress();
         return com.limegroup.gnutella.util.NetworkUtils.isLocalAddress(addr);
