@@ -58,10 +58,6 @@ public class MojitoDHT {
         context = new Context(name);
     }
     
-    public void setName(String name) {
-        context.setName(name);
-    }
-    
     public String getName() {
         return context.getName();
     }
@@ -98,8 +94,8 @@ public class MojitoDHT {
     }
     
     //  TODO testing purposes only - remove
-    public void bind(SocketAddress address,KUID localNodeID) throws IOException {
-        context.bind(address,localNodeID);
+    public void bind(SocketAddress address, KUID localNodeID) throws IOException {
+        context.bind(address, localNodeID);
     }
     
     public int size() {

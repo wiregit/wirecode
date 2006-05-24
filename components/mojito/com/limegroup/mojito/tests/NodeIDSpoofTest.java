@@ -19,127 +19,112 @@
  
 package com.limegroup.mojito.tests;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import java.util.Iterator;
+import java.util.List;
 
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
-import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.settings.NetworkSettings;
 
 
-public class NodeIDSpoofTest {
-
-    public NodeIDSpoofTest() {
-        super();
-        // TODO Auto-generated constructor stub
+public class NodeIDSpoofTest extends BaseTestCase {
+    
+    private static final int PORT = 3000;
+    
+    public NodeIDSpoofTest(String name) {
+        super(name);
     }
 
-    /**
-     * @param args
-     */
+    public static Test suite() {
+        return buildTestSuite(NodeIDSpoofTest.class);
+    }
+
     public static void main(String[] args) {
-        if (args.length == 0) {
-            System.err.println("Usage: NodeIDSpoofTest <testNum>. testNum: 0 for spoof, 1 for replace");
-            System.exit(-1);
-        }
-        int testNum = Integer.parseInt(args[0]);
-        int port = 4000;
-        try {
-            System.out.println("Starting bootstrap server");
-            MojitoDHT dht = new MojitoDHT();
-            SocketAddress sac = new InetSocketAddress(port); 
-            dht.bind(sac);
-            
-            dht.setName("DHT-bootstrap");
-            dht.start();
-            System.out.println("bootstrap server is ready");
-            
-            switch(testNum) {
-                case 0:
-                    testSpoof(port);
-                    break;
-                case 1:
-                    testReplace(port);
-                    break;
-                default:
-                    System.out.println("Unknown Test: " + testNum);
-                    break;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        junit.textui.TestRunner.run(suite());
     }
     
-    public static void testSpoof(int port) throws IOException{
-        //original DHT
-        System.out.println("here");
-        SocketAddress sac2 = new InetSocketAddress(port+1);
-        KUID nodeID = KUID.createRandomNodeID(sac2);
-        final MojitoDHT dht2 = new MojitoDHT();
-        dht2.bind(sac2,nodeID);
-        dht2.setName("DHT-1");
-        dht2.start();
-        dht2.bootstrap(new InetSocketAddress("localhost",port), null);
-        System.out.println("2");
+    public void testSpoof() throws Exception {
+        MojitoDHT bootstrap = new MojitoDHT("Bootstrap-DHT");
+        bootstrap.bind(new InetSocketAddress(PORT));
+        bootstrap.start();
         
-        //spoofer
-        final MojitoDHT dht3 = new MojitoDHT();
-        dht3.bind(new InetSocketAddress(port+2),nodeID);
-        dht3.setName("DHT-2");
-        dht3.start();
-        dht3.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener() {
-            public void noBootstrapHost() {
-            }
-
-            public void phaseOneComplete(long time) {
-            }
-
-            public void phaseTwoComplete(boolean foundNodes, long time) {
-                System.out.println();
-                System.out.println("1) Sent count: " + dht2.getSentMessagesCount());
-                System.out.println("1) Recv count: " + dht2.getReceivedMessagesCount());
-                System.out.println("1) Sent size: " + dht2.getSentMessagesSize());
-                System.out.println("1) Recv size: " + dht2.getReceivedMessagesSize());
-                
-                System.out.println(); 
-                System.out.println("2) Sent count: " + dht3.getSentMessagesCount());
-                System.out.println("2) Recv count: " + dht3.getReceivedMessagesCount());
-                System.out.println("2) Sent size: " + dht3.getSentMessagesSize());
-                System.out.println("2) Recv size: " + dht3.getReceivedMessagesSize());
-            }
-        });
-        System.out.println("3");
+        // The original Node
+        KUID nodeID = KUID.createRandomNodeID(new InetSocketAddress(PORT+1));
+        MojitoDHT original = new MojitoDHT("OriginalDHT");
+        original.bind(new InetSocketAddress(PORT+1), nodeID);
+        original.start();
+        original.bootstrap(new InetSocketAddress("localhost", PORT));
         
+        // The spoofer Node
+        MojitoDHT spoofer = new MojitoDHT("SpooferDHT");
+        spoofer.bind(new InetSocketAddress(PORT+2), nodeID);
+        spoofer.start();
+        spoofer.bootstrap(new InetSocketAddress("localhost", PORT));
         
+        Context context = MojitoHelper.getContext(bootstrap);
+        List nodes = context.getRouteTable().getAllNodes();
+        
+        System.out.println(nodes);
+        
+        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+            ContactNode node = (ContactNode)it.next();
+            
+            assertNotEquals(spoofer.getSocketAddress(), 
+                    node.getSocketAddress());
+        }
+        
+        bootstrap.stop();
+        original.stop();
+        spoofer.stop();
+        Thread.sleep(3000);
     }
     
-    public static void testReplace(final int port) throws IOException{
-        //original DHT
-        SocketAddress sac2 = new InetSocketAddress(port+1);
-        final KUID nodeID = KUID.createRandomNodeID(sac2);
-        final MojitoDHT dht2 = new MojitoDHT();
-        dht2.bind(sac2,nodeID);
-        dht2.setName("DHT-1");
-        dht2.start();
-        dht2.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener(){
-            public void noBootstrapHost() {};
-            public void phaseOneComplete(long time) {}
-            public void phaseTwoComplete(boolean foundNodes, long time) {
-                System.out.println("2");
-                //REPLACE!
-                try {
-                    dht2.stop();
-                    MojitoDHT dht3 = new MojitoDHT();
-                    dht3.bind(new InetSocketAddress(port+2),nodeID);
-                    dht3.setName("DHT-3");
-                    dht3.start();
-                    dht3.bootstrap(new InetSocketAddress("localhost",port),null);
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+    public void testReplace() throws Exception {
+        MojitoDHT bootstrap = new MojitoDHT("Bootstrap-DHT");
+        bootstrap.bind(new InetSocketAddress(PORT));
+        bootstrap.start();
+        
+        // The original Node
+        KUID nodeID = KUID.createRandomNodeID(new InetSocketAddress(PORT+1));
+        MojitoDHT original = new MojitoDHT("OriginalDHT");
+        original.bind(new InetSocketAddress(PORT+1), nodeID);
+        original.start();
+        original.bootstrap(new InetSocketAddress("localhost", PORT));
+        original.stop();
+        Thread.sleep(3000);
+        
+        // The spoofer Node
+        MojitoDHT replacement = new MojitoDHT("ReplacementDHT");
+        replacement.bind(new InetSocketAddress(PORT+2), nodeID);
+        replacement.start();
+        replacement.bootstrap(new InetSocketAddress("localhost", PORT));
+        Thread.sleep(2L * NetworkSettings.MAX_TIMEOUT.getValue());
+        
+        Context context = MojitoHelper.getContext(bootstrap);
+        List nodes = context.getRouteTable().getAllNodes();
+        System.out.println(nodes);
+        boolean contains = false;
+        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+            ContactNode node = (ContactNode)it.next();
+            
+            if (node.getSocketAddress()
+                    .equals(replacement.getSocketAddress())) {
+                contains = true;
+                break;
             }
-        });
+        }
+        
+        assertTrue("Bootstrap Node does not have the new Node in its RT!", contains);
+        
+        bootstrap.stop();
+        original.stop();
+        replacement.stop();
+        Thread.sleep(3000);
     }
 }

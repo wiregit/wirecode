@@ -161,11 +161,7 @@ public class Context {
         
         Thread.currentThread().setName(name+" - main");
     }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
+
     public String getName() {
         return name;
     }
@@ -367,12 +363,15 @@ public class Context {
         } else {
             nodeId = KUID.createNodeID(id);
         }
+        
         int instanceID = ContextSettings.getLocalNodeInstanceID(nodeId);
         int newID = (instanceID + 1) % 0xFF;
+        
         //add ourselve to the routing table
         localNode = new ContactNode(nodeId, address, 0, newID);
         localNode.setTimeStamp(Long.MAX_VALUE);
         routeTable.add(localNode, false);
+        
         ContextSettings.setLocalNodeInstanceID(nodeId, newID);
         messageDispatcher.bind(address);
         if(DatabaseSettings.PERSIST_DATABASE.getValue()) {
@@ -391,7 +390,10 @@ public class Context {
             throw new IOException("DHT is already bound");
         }
         
-        localNode = new ContactNode(localNodeID, address);
+        localNode = new ContactNode(localNodeID, address, 0, 1);
+        localNode.setTimeStamp(Long.MAX_VALUE);
+        routeTable.add(localNode, false);
+        
         messageDispatcher.bind(address);
     }
     

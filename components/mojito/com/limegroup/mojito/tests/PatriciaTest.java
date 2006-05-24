@@ -24,12 +24,27 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
 
 
-public class PatriciaTest {
+public class PatriciaTest extends BaseTestCase {
+    
+    public PatriciaTest(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(PatriciaTest.class);
+    }
+
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
 
     public void testNames() {
         String[] keys = { "Albert", "Xavier", "XyZ", "Anna",
@@ -44,19 +59,21 @@ public class PatriciaTest {
 
         int k = 6;
         List list = trie.select(toKUID("Albert"), k);
-        System.out.println(k == list.size()); // true
-        for (Iterator it = list.iterator(); it.hasNext(); ) {
-            String name = (String)it.next();
-            System.out.println(name);
-        }
+        assertEquals(k, list.size());
         
-        System.out.println();
-        list = trie.range(toKUID("Brasil"), 8);
-        System.out.println(2 == list.size()); // true
-        for (Iterator it = list.iterator(); it.hasNext(); ) {
+        /*for (Iterator it = list.iterator(); it.hasNext(); ) {
             String name = (String)it.next();
             System.out.println(name);
         }
+        System.out.println();*/
+        
+        list = trie.range(toKUID("Brasil"), 8);
+        assertEquals(2, list.size());
+        
+        /*for (Iterator it = list.iterator(); it.hasNext(); ) {
+            String name = (String)it.next();
+            System.out.println(name);
+        }*/
     }
     
     private static KUID toKUID(String key) {
@@ -76,10 +93,14 @@ public class PatriciaTest {
         }
         
         List list = trie.range(KUID.createRandomMessageID(), -1);
-        System.out.println(trie.size() == list.size()); // true
+        
+        assertFalse(trie.isEmpty());
+        assertFalse(list.isEmpty());
+        assertEquals(trie.size(), list.size());
     }
     
-    public void testMultipleSelect() {
+    // Not an unit test!
+    public void /*test*/MultipleSelect() {
         
         String localNode = "D6F8BAE43E4B1D6D31BC650D0A37EB30B2C7E3E8";
         String lookup = "E56242E5AC1F3E1819C2A791B68B9A68D8FF128F";
@@ -130,7 +151,8 @@ public class PatriciaTest {
         }
     }
     
-    public void testSelect() {
+    // Not an unit test!
+    private void /*test*/Select() {
         KUID lookup = KUID.createNodeID(ArrayUtils.parseHexString("C814CF8CF039760D1399720BDBBD10F5327DB5A9"));
         KUID inverted = lookup.invert();
         
@@ -181,7 +203,8 @@ public class PatriciaTest {
         System.out.println(trie.select(inverted, 1));
     }
     
-    public void testRandomRemove() {
+    // Not an unit test!
+    private void /*test*/RandomRemove() {
         PatriciaTrie trie = new PatriciaTrie();
         
         for(int i = 0; i < 100000; i++) {
@@ -228,13 +251,5 @@ public class PatriciaTest {
                 System.out.println(100f * i / 100000 + "%");
             }
         }
-    }
-    
-    public static void main(String[] args) {
-        /*new PatriciaTest().testNames();
-        new PatriciaTest().testRange();
-        new PatriciaTest().testSelect();
-        new PatriciaTest().testMultipleSelect();*/
-        new PatriciaTest().testRandomRemove();
     }
 }
