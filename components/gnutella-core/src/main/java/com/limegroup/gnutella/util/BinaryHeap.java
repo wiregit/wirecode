@@ -72,7 +72,8 @@ public class BinaryHeap
      */
     public void clear()
     {
-        currentSize = 0;
+        while(currentSize > 0) 
+        	array[currentSize--] = null;
     }
 
     /**

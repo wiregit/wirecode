@@ -32,15 +32,16 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.FreeloaderUploadingException;
+import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.LimitReachedUploadState;
 import com.limegroup.gnutella.uploader.PushProxyUploadState;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
+import com.limegroup.gnutella.uploader.UploadSlotUser;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.KeyValue;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
@@ -107,10 +108,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
     private final int ACCEPTED = 2;
     private final int BANNED = 3;
     //private final int NOT_VALIDATED = 4;
-    /** The min and max allowed times (in milliseconds) between requests by
-     *  queued hosts. */
-    public static final int MIN_POLL_TIME = 45000; //45 sec
-    public static final int MAX_POLL_TIME = 120000; //120 sec
 
 	/**
 	 * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>
@@ -121,7 +118,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
     /** The list of queued uploads.  Most recent uploads are added to the tail.
      *  Each pair contains the underlying socket and the time of the last
      *  request. */
-    private List /*of KeyValue (Socket,Long) */ _queuedUploads = 
+    private List /* <HTTPSession> */ _queuedUploads = 
         new ArrayList();
 
     
@@ -274,7 +271,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
                              Socket socket, boolean forceAllow) {
         
         LOG.trace("accepting upload");
-        HTTPUploader uploader = null;
+        HTTPSession session = new HTTPSession(socket, this);
         long startTime = -1;
 		try {
             int queued = -1;
@@ -285,6 +282,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             boolean startedNewFile = false;
             //do uploads
             while(true) {
+            	HTTPUploader uploader = session.getUploader();
                 if( uploader != null )
                     assertAsComplete( uploader.getState() );
                 
@@ -332,12 +330,12 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
                         cleanupFinishedUploader(uploader, startTime);
                     }
                     uploader = new HTTPUploader(currentMethod,
-                                                fileName, 
-						    			        socket,
+                                                line._fileName, 
+						    			        session,
 							    		        line._index,
 							    		        line.getParameters(),
-								    	        watchdog,
-                                                line.hadPassword());
+								    	        watchdog);
+                    session.setUploader(uploader);
                 }
                 // Otherwise (we're continuing an uploader),
                 // reinitialize the existing HTTPUploader.
@@ -370,7 +368,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
                 // If we have not accepted this file already, then
                 // find out whether or not we should.
                 if( queued != ACCEPTED ) {                	
-                    queued = processNewRequest(uploader, socket, forceAllow);
+                    queued = processNewRequest(session, forceAllow);
                     
                     // If we just accepted this request,
                     // set the start time appropriately.
@@ -428,7 +426,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
             if(LOG.isDebugEnabled())
-                LOG.debug(uploader + " IOE thrown, closing socket", ioe);
+                LOG.debug(session.getUploader() + " IOE thrown, closing socket", ioe);
         } finally {
             // The states SHOULD be INTERRUPTED or COMPLETED
             // here.  However, it is possible that an IOException
@@ -441,6 +439,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             // It is possible to prove that the state is either
             // interrupted or complete in the case of normal
             // program flow.
+        	HTTPUploader uploader = session.getUploader();
             if( uploader != null ) {
             	if( uploader.getState() != Uploader.COMPLETE )
                 	uploader.setState(Uploader.INTERRUPTED);
@@ -450,16 +449,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
                 // If this uploader is still in the queue, remove it.
                 // Also change its state from COMPLETE to INTERRUPTED
                 // because it didn't really complete.
-                boolean found = false;
-                for(Iterator iter=_queuedUploads.iterator();iter.hasNext();){
-                    KeyValue kv = (KeyValue)iter.next();
-                    if(kv.getKey()==socket) {
-                        iter.remove();
-                        found = true;
-                        break;
-                    }
-                }
-                if(found)
+                if(_queuedUploads.remove(session))
                     uploader.setState(Uploader.INTERRUPTED);
             }
             
@@ -710,17 +700,16 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
      *    If it is determined that the uploader is accepted, the uploader
      *    is added to the _activeUploadList.
      */
-    private int processNewRequest(HTTPUploader uploader, 
-                                  Socket socket,
+    private int processNewRequest(HTTPSession session,
                                   boolean forceAllow) throws IOException {
         if(LOG.isTraceEnabled())
-            LOG.trace(uploader + " processing new request.");
+            LOG.trace(session.getUploader() + " processing new request.");
         
         int queued = -1;
         
         // If this uploader should not bypass the queue, determine it's
         // slot.
-        if( !shouldBypassQueue(uploader) ) {
+        if( !shouldBypassQueue(session.getUploader()) ) {
             // If we are forcing this upload, intercept the queue check.
             if( forceAllow )
                 queued = ACCEPTED;
@@ -728,7 +717,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             // or reject the uploader.
             else
                 // note that checkAndQueue can throw an IOException
-                queued = checkAndQueue(uploader, socket);
+                queued = checkAndQueue(session);
         } else {
             queued = BYPASS_QUEUE;
         }
@@ -736,18 +725,17 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         // Act upon the queued state.
         switch(queued) {
             case REJECTED:
-                uploader.setState(Uploader.LIMIT_REACHED);
+                session.getUploader().setState(Uploader.LIMIT_REACHED);
                 break;
             case BANNED:
-            	uploader.setState(Uploader.BANNED_GREEDY);
+            	session.getUploader().setState(Uploader.BANNED_GREEDY);
             	break;
             case QUEUED:
-                uploader.setState(Uploader.QUEUED);
-                socket.setSoTimeout(MAX_POLL_TIME);
+            	session.handleQueued();
                 break;
             case ACCEPTED:
-                assertAsConnecting( uploader.getState() );
-                addAcceptedUploader(uploader);
+                assertAsConnecting( session.getUploader().getState() );
+                addAcceptedUploader(session.getUploader());
                 break;
             case BYPASS_QUEUE:
                 // ignore.
@@ -898,10 +886,9 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 	
 	public synchronized boolean isConnectedTo(InetAddress addr) {
 	    for(Iterator i = _queuedUploads.iterator(); i.hasNext(); ) {
-	        KeyValue next = (KeyValue)i.next();
-	        Socket socket = (Socket)next.getKey();
-	        if(socket != null && socket.getInetAddress().equals(addr))
-	            return true;
+	        HTTPSession next = (HTTPSession)i.next();
+	        if (next.isConnectedTo(addr))
+	        	return true;
 	    }
 	    for(Iterator i = _activeUploadList.iterator(); i.hasNext(); ) {
 	        HTTPUploader next = (HTTPUploader)i.next();
@@ -947,32 +934,31 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
      * @exception IOException the request came sooner than allowed by upload
      *  queueing rules.  (Throwing IOException forces the connection to be
      *  closed by the calling code.)  */
-	private synchronized int checkAndQueue(Uploader uploader,
-	                                       Socket socket) throws IOException {
-	    RequestCache rqc = (RequestCache)REQUESTS.get(uploader.getHost());
+	private synchronized int checkAndQueue(HTTPSession session) throws IOException {
+	    RequestCache rqc = (RequestCache)REQUESTS.get(session.getHost());
 	    if (rqc == null)
 	    	rqc = new RequestCache();
 	    // make sure we don't forget this RequestCache too soon!
-		REQUESTS.put(uploader.getHost(), rqc);
+		REQUESTS.put(session.getHost(), rqc);
 
         rqc.countRequest();
         if (rqc.isHammering()) {
             if(LOG.isWarnEnabled())
-                LOG.warn(uploader + " banned.");
+                LOG.warn(session.getUploader() + " banned.");
         	return BANNED;
         }
         
-        FileDesc fd = uploader.getFileDesc();
+        FileDesc fd = session.getUploader().getFileDesc();
         if(!fd.isVerified()) // spawn a validation
             RouterService.getFileManager().validate(fd);
 
         URN sha1 = fd.getSHA1Urn();
         boolean isGreedy = rqc.isGreedy(sha1);
+        boolean isDupe = rqc.isDupe(sha1);
         int size = _queuedUploads.size();
-        int posInQueue = positionInQueue(socket);//-1 if not in queue
+        int posInQueue = getPositionInQueue(session);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
-        boolean wontAccept = size >= maxQueueSize || 
-			rqc.isDupe(sha1);
+        boolean wontAccept = size >= maxQueueSize || isDupe;
         int ret = -1;
 
         // if this uploader is greedy and at least on other client is queued
@@ -980,11 +966,11 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         boolean limitReached = false;
         if (isGreedy && size >=1) {
             if(LOG.isWarnEnabled())
-                LOG.warn(uploader + " greedy -- limit reached."); 
+                LOG.warn(session.getUploader() + " greedy -- limit reached."); 
         	UploadStat.LIMIT_REACHED_GREEDY.incrementStat(); 
         	limitReached = true;
         } else if (posInQueue < 0) {
-            limitReached = hostLimitReached(uploader.getHost());
+            limitReached = hostLimitReached(session.getHost());
             // remember that we sent a LIMIT_REACHED only
             // if the limit was actually really reached and not 
             // if we just keep a greedy client from entering the
@@ -992,17 +978,13 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             if(limitReached)
                 rqc.limitReached(sha1);
         }
-        //Note: The current policy is to not put uploadrers in a queue, if they 
-        //do not send am X-Queue header. Further. uploaders are removed from 
-        //the queue if they do not send the header in the subsequent request.
-        //To change this policy, chnage the way queue is set.
-        boolean queue = uploader.supportsQueueing();
 
-        Assert.that(maxQueueSize>0,"queue size 0, cannot use");
+     /*   Assert.that(maxQueueSize>0,"queue size 0, cannot use");
         Assert.that(uploader.getState()==Uploader.CONNECTING,
                     "Bad state: "+uploader.getState());
-        Assert.that(uploader.getMethod()==HTTPRequestMethod.GET);
+        Assert.that(uploader.getMethod()==HTTPRequestMethod.GET); */
 
+        HTTPUploader uploader = session.getUploader();
         if(posInQueue == -1) {//this uploader is not in the queue already
             if(LOG.isDebugEnabled())
                 LOG.debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");
@@ -1012,16 +994,14 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
                       +wontAccept);
                 return REJECTED; //we rejected this uploader
             }
-            addToQueue(socket);
+            _queuedUploads.add(session);
             posInQueue = size;//the index of the uploader in the queue
             ret = QUEUED;//we have queued it now
             if(LOG.isDebugEnabled())
                 LOG.debug(uploader+" new uploader added to queue");
         }
         else {//we are alreacy in queue, update it
-            KeyValue kv = (KeyValue)_queuedUploads.get(posInQueue);
-            Long prev=(Long)kv.getValue();
-            if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis()) {
+            if(session.poll()) {
                 _queuedUploads.remove(posInQueue);
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader+" queued uploader flooding-throwing exception");
@@ -1032,7 +1012,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             if (rqc.isDupe(sha1))
             	return REJECTED;
             
-            kv.setValue(new Long(System.currentTimeMillis()));
             if(LOG.isDebugEnabled())
                 LOG.debug(uploader+" updated queued uploader");
             ret = QUEUED;//queued
@@ -1049,10 +1028,11 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             _queuedUploads.remove(posInQueue);
         }
         else {
-            //... no slot available for this uploader
-            //If uploader does not support queueing,
-            //it should be removed from the queue.
-            if(!queue) {//downloader does not support queueing
+            //Note: The current policy is to not put uploadrers in a queue, if they 
+            //do not send am X-Queue header. Further. uploaders are removed from 
+            //the queue if they do not send the header in the subsequent request.
+            //To change this policy, chnage the way queue is set.
+            if(!uploader.supportsQueueing()) {//downloader does not support queueing
                 _queuedUploads.remove(posInQueue);//remove it
                 ret = REJECTED;
             }
@@ -1063,26 +1043,10 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         	rqc.startedUpload(sha1);
         return ret;
     }
-
-    private synchronized void addToQueue(Socket socket) {
-        Long t = new Long(System.currentTimeMillis());
-        _queuedUploads.add(new KeyValue(socket,t));
-    }
-
-    /**
-     * @return the index of the uploader in the queue, -1 if not in queue
-     */
-    public synchronized int positionInQueue(Socket socket) {
-        int i = 0;
-        Iterator iter = _queuedUploads.iterator();
-        while(iter.hasNext()) {
-            Object curr = ((KeyValue)iter.next()).getKey();
-            if(curr==socket)
-                return i;
-            i++;
-        }
-        return -1;
-    }
+	
+	public int getPositionInQueue(HTTPSession session) {
+		return _queuedUploads.indexOf(session);
+	}
 
 	/**
 	 * Decrements the number of active uploads for the host specified in
@@ -1130,8 +1094,8 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         }
         iter = _queuedUploads.iterator();
         while(iter.hasNext()) { //also count uploads in queue to this host
-            Socket s = (Socket)((KeyValue)iter.next()).getKey();
-            if(s.getInetAddress().getHostAddress().equals(host))
+            HTTPSession session = (HTTPSession) iter.next();
+            if(session.getHost().equals(host))
                 i++;
         }
         return i>=max;
@@ -1347,7 +1311,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             String fileInfoPart = st.nextToken().trim();
 			String fileName = null;
 			Map parameters = null;
-            boolean hadPassword = false;
 			
             if(fileInfoPart.equals("/")) {
                 //special case for browse host request
@@ -1438,8 +1401,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             //check if the protocol is HTTP1.1.
             //Note that this is not a very strict check.
             boolean http11 = isHTTP11Request(requestLine);
-			return new HttpRequestLine(index, fileName, http11, parameters,
-                                       hadPassword);
+			return new HttpRequestLine(index, fileName, http11, parameters);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
@@ -1486,7 +1448,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 		}		
         UploadStat.URN_GET.incrementStat();
 		return new HttpRequestLine(desc.getIndex(), desc.getFileName(), 
-								   isHTTP11Request(requestLine), params, false);
+								   isHTTP11Request(requestLine), params);
 	}
 
 	/**
@@ -1555,11 +1517,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             ", is HTTP1.1? " + _http11 + ", Parameters = " + _params;
         }
         
-        /**
-         * Flag for whether or not the get request had the correct password.
-         */
-        final boolean _hadPass;
-
 		/**
 		 * Constructs a new <tt>RequestLine</tt> instance with no parameters.
 		 *
@@ -1568,7 +1525,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 */
 		HttpRequestLine(int index, String fileName, boolean http11) {
-		    this(index, fileName, http11, Collections.EMPTY_MAP, false);
+		    this(index, fileName, http11, Collections.EMPTY_MAP);
   		}
   		
 		/**
@@ -1579,8 +1536,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 * @param params a map of params in this request line
 		 */
-  		HttpRequestLine(int index, String fName, boolean http11, Map params,
-                        boolean hadPass) {
+  		HttpRequestLine(int index, String fName, boolean http11, Map params) {
   			_index = index;
   			_fileName = fName;
             _http11 = http11;
@@ -1588,7 +1544,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
                 _params = Collections.EMPTY_MAP;
             else
                 _params = params;
-            _hadPass = hadPass;
         }
         
 		/**
@@ -1608,12 +1563,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             return _params;
         }
 
-        /**
-         * @return true if the get request had a matching password
-         */
-        boolean hadPassword() {
-            return _hadPass;
-        }
   	}
 
     /** Calls measureBandwidth on each uploader. */

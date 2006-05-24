@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.settings.UploadSettings;
 
@@ -30,12 +29,6 @@ public class UploadSlotManager {
      */
     private static final float MINIMUM_UPLOAD_SPEED = 3.0f;
     
-    /**
-     * The BandwidthTracker we'll query when we want to know 
-     * the maximum upload speed.
-     */
-	private final BandwidthTracker tracker;
-	
 	/**
 	 * The list of active upload slot requests
 	 * INVARIANT: sorted by priority and contains only 
@@ -54,8 +47,7 @@ public class UploadSlotManager {
 	 */
 	private final List /* <BTSlotRequest> */ queuedResumable;
 	
-	public UploadSlotManager(BandwidthTracker tracker) {
-		this.tracker = tracker;
+	public UploadSlotManager() {
 		active = new ArrayList(UploadSettings.HARD_MAX_UPLOADS.getValue());
 		queued = new ArrayList(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
 		queuedResumable = new ArrayList(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
@@ -206,13 +198,18 @@ public class UploadSlotManager {
 		else if (current < UploadSettings.SOFT_MAX_UPLOADS.getValue()) 
 			return true;
 		else {
-			try {
-				return tracker.getMeasuredBandwidth() > MINIMUM_UPLOAD_SPEED;
-			} catch (InsufficientDataException ide) {
-				// this can happen when we haven't had many uploads,
-				// so we optimistically allow the upload.
-				return true;
+			float fastest = 0f;
+			for (Iterator iter = active.iterator(); iter.hasNext();) {
+				UploadSlotRequest request = (UploadSlotRequest) iter.next();
+				UploadSlotUser user = request.getUser();
+				float speed = 0;
+				try {
+					speed = user.getMeasuredBandwidth();
+				} catch (InsufficientDataException ide) {}
+				fastest = Math.max(fastest,speed);
 			}
+			
+			return fastest > MINIMUM_UPLOAD_SPEED;
 		}
 	}
 	
@@ -222,6 +219,8 @@ public class UploadSlotManager {
 	 */
 	private int queueRequest(UploadSlotRequest request) {
 		List queue = getQueue(request.user);
+		if (queue.size() == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
+			return -1;
 		queue.add(request);
 		return queue.size();
 	}
@@ -343,7 +342,7 @@ public class UploadSlotManager {
 		private final boolean queuable;
 		
 		HTTPSlotRequest (UploadSlotUser user, boolean queuable) {
-			super(user, true, HTTP);
+			super(user, false, HTTP);
 			this.queuable = queuable;
 		}
 		
