@@ -22,48 +22,61 @@ package com.limegroup.mojito.tests;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import com.limegroup.mojito.Context;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 
-
-public class DataBaseTest {
-
+public class DataBaseTest extends BaseTestCase {
+    
     private static InetSocketAddress addr = new InetSocketAddress("localhost",3000);
     
-    /**
-     * @param args
-     */
+    private MojitoDHT dht = null;
+    
+    public DataBaseTest(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(DataBaseTest.class);
+    }
+
     public static void main(String[] args) {
-        MojitoDHT dht = new MojitoDHT();
+        junit.textui.TestRunner.run(suite());
+    }
+
+    protected void setUp() throws Exception {
+        dht = new MojitoDHT();
         try {
             dht.bind(addr);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            fail(e);
         }
         dht.start();
-        testRemoveValueDB(dht.getContext());
-    }
-    
-    public static void testRemoveValueDB(Context context) {
-        Database db = context.getDatabase();
-        KUID key = KUID.createValueID(KUID.createUnknownID().getBytes());
-        byte[] value;
-        try {
-            value = "test".getBytes("UTF-8");
-            KUID nodeId = KUID.createRandomNodeID();
-            KeyValue keyValue = KeyValue.createRemoteKeyValue(key,value,nodeId,addr,null);
-            db.add(keyValue);
-            System.out.println(db.toString());
-            keyValue = KeyValue.createRemoteKeyValue(key,new byte[0],nodeId,addr,null);
-            db.add(keyValue);
-            System.out.println(db.toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
+    protected void tearDown() throws Exception {
+        dht.stop();
+        dht = null;
+        
+        Thread.sleep(3000);
+    }
+    
+    public void testRemoveValueDB() throws Exception {
+        Database db = dht.getContext().getDatabase();
+        KUID key = KUID.createValueID(KUID.createUnknownID().getBytes());
+        byte[] value = "test".getBytes("UTF-8");
+        
+        KUID nodeId = KUID.createRandomNodeID();
+        KeyValue keyValue = KeyValue.createRemoteKeyValue(key,value,nodeId,addr,null);
+        db.add(keyValue);
+        assertEquals(1, db.size());
+        
+        keyValue = KeyValue.createRemoteKeyValue(key,new byte[0],nodeId,addr,null);
+        db.add(keyValue);
+        assertEquals(0, db.size());
+    }
 }

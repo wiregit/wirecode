@@ -24,6 +24,9 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.handler.request.PingRequestHandler;
@@ -32,54 +35,71 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.response.PingResponse;
 
 
-public class ExternalAddressTest {
+public class ExternalAddressTest extends BaseTestCase {
+    
+    public ExternalAddressTest(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(ExternalAddressTest.class);
+    }
+
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
     
     public void testSettingExternalAddress() throws Exception {
-        MojitoDHT dht1 = new MojitoDHT();
+        MojitoDHT dht1 = new MojitoDHT("DHT-1");
         dht1.bind(new InetSocketAddress(2000));
         Context context1 = dht1.getContext();
-        
-        dht1.setName("DHT-1");
         dht1.start();
         
-        MojitoDHT dht2 = new MojitoDHT();
+        MojitoDHT dht2 = new MojitoDHT("DHT-2");
         dht2.bind(new InetSocketAddress(3000));
-        Context context3 = dht2.getContext();
-        
-        dht2.setName("DHT-3");
+        Context context2 = dht2.getContext();
         dht2.start();
         
         Thread.sleep(3000);
         
-        PingRequestHandlerStub pingHandlerStub = new PingRequestHandlerStub(context3);
+        PingRequestHandlerStub pingHandlerStub = new PingRequestHandlerStub(context2);
         Field pingHandler = MessageDispatcher.class.getDeclaredField("pingHandler");
         pingHandler.setAccessible(true);
-        pingHandler.set(context3.getMessageDispatcher(), pingHandlerStub);
-        
-        //NetworkSettings.ALLOW_MULTIPLE_NODES.setValue(true);
+        pingHandler.set(context2.getMessageDispatcher(), pingHandlerStub);
         
         // BEGIN
+        
+        /*
+         * First Ping: Accept any IP:Port
+         */
         pingHandlerStub.externalAddress = new InetSocketAddress("10.254.0.251", 3000);
         context1.ping(new InetSocketAddress("localhost", 3000), null);
         Thread.sleep(1000);
-        System.out.println(pingHandlerStub.externalAddress.equals(context1.getSocketAddress())); // false
+        assertEquals(pingHandlerStub.externalAddress, context1.getSocketAddress());
         
-        pingHandlerStub.externalAddress = new InetSocketAddress("127.0.0.1", 2000);
+        /*
+         * After 1st Ping: Two Nodes must say the same IP:Port
+         */
+        pingHandlerStub.externalAddress = new InetSocketAddress("www.google.com", 1234);
         context1.ping(new InetSocketAddress("localhost", 3000), null);
         Thread.sleep(1000);
-        System.out.println(pingHandlerStub.externalAddress.equals(context1.getSocketAddress())); // false
+        assertNotEquals(pingHandlerStub.externalAddress, context1.getSocketAddress());
         
-        pingHandlerStub.externalAddress = new InetSocketAddress("10.254.0.251", 2000);
+        pingHandlerStub.externalAddress = new InetSocketAddress("www.limewire.com", 80);
         context1.ping(new InetSocketAddress("localhost", 3000), null);
         Thread.sleep(1000);
-        System.out.println(pingHandlerStub.externalAddress.equals(context1.getSocketAddress())); // true
+        assertNotEquals(pingHandlerStub.externalAddress, context1.getSocketAddress());
+        
+        /*
+         * But Now!
+         */
+        pingHandlerStub.externalAddress = new InetSocketAddress("www.limewire.com", 80);
+        context1.ping(new InetSocketAddress("localhost", 3000), null);
+        Thread.sleep(1000);
+        assertEquals(pingHandlerStub.externalAddress, context1.getSocketAddress());
         
         dht1.stop();
         dht2.stop();
-    }
-    
-    public static void main(String[] args) throws Exception {
-        new ExternalAddressTest().testSettingExternalAddress();
     }
     
     private static class PingRequestHandlerStub extends PingRequestHandler {

@@ -24,6 +24,9 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.BucketNode;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
@@ -34,43 +37,50 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 
-public class RoutingTableTest {
-
-    private static InetSocketAddress addr = new InetSocketAddress("localhost",3000);
+public class RoutingTableTest extends BaseTestCase {
     
-    /**
-     * @param args
-     */
+    private static InetSocketAddress addr = new InetSocketAddress("localhost",3000);
+
+    private MojitoDHT dht = null;
+    private RoutingTable routingTable = null;
+    
+    public RoutingTableTest(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(RoutingTableTest.class);
+    }
+
     public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+    
+    protected void setUp() throws Exception {
         KademliaSettings.REPLICATION_PARAMETER.setValue(2);
         RouteTableSettings.MAX_LIVE_NODE_FAILURES.setValue(2);
-        
-        MojitoDHT dht = new MojitoDHT();
+       
+        dht = new MojitoDHT();
         try {
             dht.bind(addr);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            fail(e);
         }
+        
         dht.start();
-        RoutingTable routingTable = dht.getContext().getRouteTable();
-        
-//        testBuckets(routingTable);
-//        testReplaceNode(routingTable);
-//        testReplaceCachedNode(routingTable);
-//        testRemoveNode(routingTable);
-//        testLiveNodesOnly(routingTable);
-//        testreplaceBucketStaleNodes(routingTable);
-//        testreplaceBucketUnknownNodes(routingTable);
-//        testStoreLoadRoutingTable(dht, routingTable);
-        testMergeBuckets(routingTable);
-        
-        System.out.println("LOCAL NODE:"+dht.getLocalNode());
-        dht.stop();
-        System.exit(0);
+        routingTable = dht.getContext().getRouteTable();
     }
-    
-    public static void testLiveNodesOnly(RoutingTable routingTable) {
+
+    protected void tearDown() throws Exception {
+        dht.stop();
+        
+        dht = null;
+        routingTable = null;
+        
+        Thread.sleep(3000);
+    }
+
+    public void testLiveNodesOnly() {
         ContactNode node = new ContactNode(KUID.createRandomNodeID(addr),addr);
         routingTable.add(node,true);
         node = new ContactNode(KUID.createRandomNodeID(addr),addr);
@@ -81,15 +91,15 @@ public class RoutingTableTest {
         routingTable.handleFailure(node.getNodeID());
         routingTable.handleFailure(node.getNodeID());
         routingTable.handleFailure(node.getNodeID());
+        
         try {
             routingTable.refreshBuckets(false);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            fail(e);
         }
     }
     
-    public static void testBuckets(RoutingTable routingTable) {
+    public void testBuckets() {
         for (int i = 0; i < 22; i++) {
             ContactNode node = new ContactNode(KUID.createRandomNodeID(addr),addr);
             routingTable.add(node,true);
@@ -121,74 +131,77 @@ public class RoutingTableTest {
         System.out.println(buffer);
     }
     
-    public static void testReplaceCachedNode(RoutingTable routingTable) {
+    public void testReplaceCachedNode() {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         for (int i = 0; i < 2; i++) {
-            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",3000+i));
+            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 3000+i));
             routingTable.add(node,true);
         }
-        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30010));
-        routingTable.add(node1,true);
+        
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30010));
+        routingTable.add(node1, true);
+        
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        routingTable.add(node1,true);
+        
+        routingTable.add(node1, true);
     }
     
-    public static void testreplaceBucketStaleNodes(RoutingTable routingTable) {
+    public void testreplaceBucketStaleNodes() {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
-        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30010));
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30010));
         node1.failure();
         node1.failure();
         node1.failure();
-        routingTable.add(node1,false);
+        routingTable.add(node1, false);
+        
         for (int i = 0; i < 2; i++) {
-            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",3000+i));
-            routingTable.add(node,true);
+            ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 3000+i));
+            routingTable.add(node, true);
         }
     }
     
-    public static void testreplaceBucketUnknownNodes(RoutingTable routingTable) {
+    public void testreplaceBucketUnknownNodes() {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
-        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30010));
-        routingTable.add(node1,true);
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30010));
+        routingTable.add(node1, true);
         System.out.println(routingTable.toString());
-        ContactNode node2 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30011));
-        routingTable.add(node2,true);
+        ContactNode node2 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30011));
+        routingTable.add(node2, true);
         System.out.println(routingTable.toString());
-        ContactNode node3 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30012));
-        routingTable.add(node3,true);
+        ContactNode node3 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30012));
+        routingTable.add(node3, true);
         System.out.println(routingTable.toString());
     }
     
-    public static void testReplaceNode(RoutingTable routingTable) {
+    public void testReplaceNode() {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
-        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
+        ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), addr);
         routingTable.add(node1,true);
+        
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        routingTable.add(node1,true);
+        routingTable.add(node1, true);
     }
 
-    public static void testRemoveNode(RoutingTable routingTable) {
+    public void testRemoveNode() {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
-        routingTable.add(node1,true);
+        routingTable.add(node1, true);
         for (int i = 0; i < 20; i++) {
             ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
-            routingTable.add(node,true);
+            routingTable.add(node, true);
         }
         routingTable.handleFailure(node1.getNodeID());
         routingTable.handleFailure(node1.getNodeID());
@@ -196,68 +209,75 @@ public class RoutingTableTest {
     }
     
 
-    public static void testStoreLoadRoutingTable(MojitoDHT dht, RoutingTable routingTable){
+    public void testStoreLoadRoutingTable(){
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         ContactNode node3;
         ContactNode node4;
+        
         try {
-            ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30010));
-            routingTable.add(node1,true);
+            ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4), new InetSocketAddress("localhost", 30010));
+            routingTable.add(node1, true);
             Thread.sleep(50);
-            ContactNode node2 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30011));
-            routingTable.add(node2,true);
+            ContactNode node2 = new ContactNode(KUID.createPrefxNodeID(prefix,4), new InetSocketAddress("localhost", 30011));
+            routingTable.add(node2, true);
             Thread.sleep(50);
-            node3 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30012));
-            routingTable.add(node3,true);
+            node3 = new ContactNode(KUID.createPrefxNodeID(prefix,4), new InetSocketAddress("localhost", 30012));
+            routingTable.add(node3, true);
             Thread.sleep(50);
-            node4 = new ContactNode(KUID.createPrefxNodeID(prefix,4),new InetSocketAddress("localhost",30013));
-            routingTable.add(node4,true);
+            node4 = new ContactNode(KUID.createPrefxNodeID(prefix,4), new InetSocketAddress("localhost", 30013));
+            routingTable.add(node4, true);
             node4.failure();
             Thread.sleep(50);
             node1.failure();
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }
+        
         System.out.println(routingTable.toString());
         routingTable.store();
         routingTable.clear();
         System.out.println(routingTable.toString());
+        
         try {
             dht.stop();
             dht = new MojitoDHT();
             KUID newNodeId = KUID.createRandomNodeID(addr);
-            ContextSettings.setLocalNodeID(addr,newNodeId.getBytes());
+            ContextSettings.setLocalNodeID(addr, newNodeId.getBytes());
             dht.bind(addr);
             routingTable = dht.getContext().getRouteTable();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
         routingTable.load();
         System.out.println(routingTable.toString());
     }
     
-    public static void testMergeBuckets(RoutingTable routingTable) {
-//        byte[] prefix = new byte[1];
-//        prefix[0] = (byte)(0x01);
-        ContactNode node1 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+    // Bucket merging is not implemeneted!
+    /*public void testMergeBuckets() {
+        // byte[] prefix = new byte[1];
+        // prefix[0] = (byte)(0x01);
+        ContactNode node1 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost", 30010));
         routingTable.add(node1,true);
-        ContactNode node2 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        ContactNode node2 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost", 30010));
         routingTable.add(node2,true);
-        ContactNode node3 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        ContactNode node3 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost", 30010));
         routingTable.add(node3,true);
-        ContactNode node4 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        ContactNode node4 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost", 30010));
         routingTable.add(node4,true);
-        ContactNode node5 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        ContactNode node5 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost", 30010));
         routingTable.add(node5,true);
-        ContactNode node6 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost",30010));
+        ContactNode node6 = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress("localhost", 30010));
         routingTable.add(node6,true);
+        
         System.out.println(routingTable.toString());
+        
         routingTable.handleFailure(node4.getNodeID());
         routingTable.handleFailure(node4.getNodeID());
         routingTable.handleFailure(node5.getNodeID());
         routingTable.handleFailure(node5.getNodeID());
+        
         System.out.println(routingTable.toString());
-    }
-    
+    }*/
 }
