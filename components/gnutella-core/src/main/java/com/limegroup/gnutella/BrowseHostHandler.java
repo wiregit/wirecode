@@ -274,14 +274,15 @@ public class BrowseHostHandler {
         
         // get the results...
         InputStream in = socket.getInputStream();
-        LOG.trace("BHH.browseExchange(): got input stream: " + in);
+        LOG.trace("BHH.browseExchange(): got input stream");
 
         // first check the HTTP code, encoding, etc...
         ByteReader br = new ByteReader(in);
         LOG.trace("BHH.browseExchange(): trying to get HTTP code....");
         int code = parseHTTPCode(br.readLine());
         if ((code < 200) || (code >= 300)) {
-            LOG.debug("Bad code: " + code);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Bad code: " + code);
             throw new IOException();
         }
         if(LOG.isDebugEnabled())
