@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.settings;
 
-
 public final class RouteTableSettings extends MojitoProps {
 
     private RouteTableSettings() {}
@@ -58,4 +57,7 @@ public final class RouteTableSettings extends MojitoProps {
         = FACTORY.createIntSetting("MAX_CONSECUTIVE_FAILURES", 100);
     
     public static final String ROUTETABLE_FILE = "RouteTable.pat";
+    
+    public static final BooleanSetting PERSIST_ROUTETABLE
+    = FACTORY.createBooleanSetting("PERSIST_ROUTETABLE", true);
 }

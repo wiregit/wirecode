@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import com.limegroup.mojito.DHT;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapListener;
 
 
@@ -47,7 +47,7 @@ public class NodeIDSpoofTest {
         int port = 4000;
         try {
             System.out.println("Starting bootstrap server");
-            DHT dht = new DHT();
+            MojitoDHT dht = new MojitoDHT();
             SocketAddress sac = new InetSocketAddress(port); 
             dht.bind(sac);
             
@@ -76,7 +76,7 @@ public class NodeIDSpoofTest {
         System.out.println("here");
         SocketAddress sac2 = new InetSocketAddress(port+1);
         KUID nodeID = KUID.createRandomNodeID(sac2);
-        final DHT dht2 = new DHT();
+        final MojitoDHT dht2 = new MojitoDHT();
         dht2.bind(sac2,nodeID);
         dht2.setName("DHT-1");
         dht2.start();
@@ -84,11 +84,14 @@ public class NodeIDSpoofTest {
         System.out.println("2");
         
         //spoofer
-        final DHT dht3 = new DHT();
+        final MojitoDHT dht3 = new MojitoDHT();
         dht3.bind(new InetSocketAddress(port+2),nodeID);
         dht3.setName("DHT-2");
         dht3.start();
         dht3.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener() {
+            public void noBootstrapHost() {
+            }
+
             public void phaseOneComplete(long time) {
             }
 
@@ -115,18 +118,19 @@ public class NodeIDSpoofTest {
         //original DHT
         SocketAddress sac2 = new InetSocketAddress(port+1);
         final KUID nodeID = KUID.createRandomNodeID(sac2);
-        final DHT dht2 = new DHT();
+        final MojitoDHT dht2 = new MojitoDHT();
         dht2.bind(sac2,nodeID);
         dht2.setName("DHT-1");
         dht2.start();
         dht2.bootstrap(new InetSocketAddress("localhost",port), new BootstrapListener(){
+            public void noBootstrapHost() {};
             public void phaseOneComplete(long time) {}
             public void phaseTwoComplete(boolean foundNodes, long time) {
                 System.out.println("2");
                 //REPLACE!
                 try {
                     dht2.stop();
-                    DHT dht3 = new DHT();
+                    MojitoDHT dht3 = new MojitoDHT();
                     dht3.bind(new InetSocketAddress(port+2),nodeID);
                     dht3.setName("DHT-3");
                     dht3.start();

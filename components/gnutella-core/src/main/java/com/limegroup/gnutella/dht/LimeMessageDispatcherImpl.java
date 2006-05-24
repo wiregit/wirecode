@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.io;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -31,6 +31,7 @@ import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.DHTMessage;
 
 /**

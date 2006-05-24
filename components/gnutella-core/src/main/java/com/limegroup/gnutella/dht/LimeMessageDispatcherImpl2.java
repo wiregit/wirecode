@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.io;
+package com.limegroup.gnutella.dht;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
@@ -47,6 +48,9 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.io.MessageDispatcher;
+import com.limegroup.mojito.io.MessageFormatException;
+import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.LimeDHTMessage;
 
@@ -249,6 +253,12 @@ public class LimeMessageDispatcherImpl2 extends MessageDispatcher
         }
 
         public void showDownloads() {
+        }
+
+        public void handleAddressStateChanged() {
+        }
+
+        public void handleLifecycleEvent(LifecycleEvent evt) {
         }
     }
 }

@@ -26,8 +26,8 @@ import java.util.Iterator;
 
 import com.limegroup.mojito.BucketNode;
 import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.DHT;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -45,7 +45,7 @@ public class RoutingTableTest {
         KademliaSettings.REPLICATION_PARAMETER.setValue(2);
         RouteTableSettings.MAX_LIVE_NODE_FAILURES.setValue(2);
         
-        DHT dht = new DHT();
+        MojitoDHT dht = new MojitoDHT();
         try {
             dht.bind(addr);
         } catch (IOException e) {
@@ -66,12 +66,7 @@ public class RoutingTableTest {
         testMergeBuckets(routingTable);
         
         System.out.println("LOCAL NODE:"+dht.getLocalNode());
-        try {
-            dht.stop();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        dht.stop();
         System.exit(0);
     }
     
@@ -201,7 +196,7 @@ public class RoutingTableTest {
     }
     
 
-    public static void testStoreLoadRoutingTable(DHT dht, RoutingTable routingTable){
+    public static void testStoreLoadRoutingTable(MojitoDHT dht, RoutingTable routingTable){
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         ContactNode node3;
@@ -230,7 +225,7 @@ public class RoutingTableTest {
         System.out.println(routingTable.toString());
         try {
             dht.stop();
-            dht = new DHT();
+            dht = new MojitoDHT();
             KUID newNodeId = KUID.createRandomNodeID(addr);
             ContextSettings.setLocalNodeID(addr,newNodeId.getBytes());
             dht.bind(addr);

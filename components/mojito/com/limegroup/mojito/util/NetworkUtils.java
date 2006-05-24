@@ -62,7 +62,7 @@ public final class NetworkUtils {
     public static byte[] getBytes(SocketAddress addr) throws IOException {
         byte[] address = ((InetSocketAddress)addr).getAddress().getAddress();
         int port = ((InetSocketAddress)addr).getPort();
-        
+
         byte[] dst = new byte[address.length + 2];
         System.arraycopy(address, 0, dst, 0, address.length);
         dst[dst.length-2] = (byte)((port >> 8) & 0xFF);

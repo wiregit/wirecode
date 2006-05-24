@@ -50,11 +50,9 @@ import com.limegroup.mojito.db.KeyValuePublisher;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
-import com.limegroup.mojito.handler.response.StatsResponseHandler;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 import com.limegroup.mojito.handler.response.LookupResponseHandler.ContactNodeEntry;
 import com.limegroup.mojito.io.MessageDispatcher;
@@ -69,6 +67,7 @@ import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
@@ -150,6 +149,7 @@ public class Context {
 
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
+        
         messageDispatcher = new MessageDispatcherImpl(this);
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
@@ -261,11 +261,17 @@ public class Context {
     }
     
     public boolean isFirewalled() {
-        return localNode.isFirewalled();
+        if(localNode != null) {
+            return localNode.isFirewalled();
+        } else {
+            return false;
+        }
     }
     
     public void setFirewalled(boolean firewalled) {
-        localNode.setFirewalled(firewalled);
+        if(localNode != null) {
+            localNode.setFirewalled(firewalled);
+        }
     }
     
     public Database getDatabase() {
@@ -367,6 +373,14 @@ public class Context {
         routeTable.add(localNode, false);
         ContextSettings.setLocalNodeInstanceID(nodeId, newID);
         messageDispatcher.bind(address);
+        if(DatabaseSettings.PERSIST_DATABASE.getValue()) {
+            database.load();
+        }
+
+        if(RouteTableSettings.PERSIST_ROUTETABLE.getValue()) {
+            routeTable.load();
+        }
+
     }
     
     //TODO testing purposes only - remove
@@ -442,6 +456,14 @@ public class Context {
         
         synchronized (remoteSizeHistory) {
             remoteSizeHistory.clear();
+        }
+        
+        if(RouteTableSettings.PERSIST_ROUTETABLE.getValue()) {
+            routeTable.store();
+        }
+        
+        if(DatabaseSettings.PERSIST_DATABASE.getValue()) {
+            database.store();
         }
     }
     
@@ -555,9 +577,14 @@ public class Context {
         new BootstrapManager().bootstrap(address, listener);
     }
     
-    /** Stores a given KeyValue */
-    public void store(KeyValue keyValue) throws IOException {
-        new StoreManager().store(keyValue, null);
+    public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
+        setBootstrapped(false);
+        new BootstrapManager().bootstrap(bootstrapHostsList, listener);
+    }
+    
+    public void bootstrap(BootstrapListener listener) throws IOException {
+        setBootstrapped(false);
+        new BootstrapManager().bootstrap(listener);
     }
     
     /** Stores a given KeyValue */
@@ -711,6 +738,10 @@ public class Context {
         
         private List buckets = Collections.EMPTY_LIST;
         
+        private List bootstrapHostsList;
+        
+        private int failures;
+        
         private BootstrapManager() {  
         }
         
@@ -720,10 +751,22 @@ public class Context {
         
         public void bootstrap(SocketAddress address, 
                 BootstrapListener listener) throws IOException {
-            
             this.listener = listener;
             startTime = System.currentTimeMillis();
             ping(address, this);
+        }
+        
+        public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
+            this.bootstrapHostsList = bootstrapHostsList;
+            if(bootstrapHostsList != null && bootstrapHostsList.size() > 0) {
+                SocketAddress firstHost = (SocketAddress)bootstrapHostsList.get(0);
+                bootstrapHostsList.remove(0);
+                bootstrap(firstHost, listener);
+            } 
+        }
+        
+        public void bootstrap(BootstrapListener listener) throws IOException {
+            bootstrap(routeTable.getAllNodesMRS(), listener);
         }
         
         public void response(ResponseMessage response, long time) {
@@ -741,12 +784,43 @@ public class Context {
 
         public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
             if (request instanceof PingRequest) {
+                ++failures;
+                networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
                 if (LOG.isErrorEnabled()) {
-                    LOG.error("Initial bootstrap ping failed!");
+                    LOG.error("Initial bootstrap ping timeout, failure "+failures);
                 }
                 
-                firePhaseOneFinished();
-                firePhaseTwoFinished();
+                if(failures < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    if(bootstrapHostsList == null || bootstrapHostsList.size() == 0) {
+                        bootstrapHostsList = routeTable.getAllNodesMRS();
+                    }
+                    for (Iterator iter = bootstrapHostsList.iterator(); iter.hasNext();) {
+                        ContactNode node = (ContactNode) iter.next();
+                        //do not send to ourselve or the node which just timed out
+                        if(!node.getNodeID().equals(getLocalNodeID()) 
+                                && !node.getSocketAddress().equals(address)) {
+                            
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Retrying bootstrap ping with node: " + node);
+                            }
+                            
+                            try {
+                                iter.remove();
+                                ping(node,this);
+                                return;
+                            } catch (IOException err) {
+                                LOG.error(err);
+                                fireNoBootstrapHost();
+                            }
+                        }
+                    }
+                    fireNoBootstrapHost();
+                }else {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("Initial bootstrap ping timeout, giving up bootstrap after "+failures+" tries");
+                    }
+                    fireNoBootstrapHost();
+                }
             }
         }
         
@@ -805,6 +879,16 @@ public class Context {
                 fireEvent(new Runnable() {
                     public void run() {
                         listener.phaseTwoComplete(foundNewNodes, time);
+                    }
+                });
+            }
+        }
+        
+        private void fireNoBootstrapHost() {
+            if (listener != null) {
+                fireEvent(new Runnable() {
+                    public void run() {
+                        listener.noBootstrapHost();
                     }
                 });
             }

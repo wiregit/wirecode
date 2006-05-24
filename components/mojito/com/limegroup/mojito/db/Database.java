@@ -268,7 +268,7 @@ public class Database implements Serializable {
                 in = new ObjectInputStream(gzin);
 
                 KUID nodeId = (KUID) in.readObject();
-                if (!nodeId.equals(context.getLocalNodeID())) {
+                if (!context.isLocalNodeID(nodeId)) {
                     return false;
                 }
 

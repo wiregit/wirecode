@@ -26,6 +26,7 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,20 +43,18 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.settings.ContextSettings;
 
-/**
- * 
- */
-public class DHT {
+
+public class MojitoDHT {
     
-    private static final Log LOG = LogFactory.getLog(DHT.class);
+    private static final Log LOG = LogFactory.getLog(MojitoDHT.class);
     
     private Context context;
     
-    public DHT() {
+    public MojitoDHT() {
         context = new Context("DHT");
     }
     
-    public DHT(String name) {
+    public MojitoDHT(String name) {
         context = new Context(name);
     }
     
@@ -68,7 +67,26 @@ public class DHT {
     }
     
     public void setFirewalled(boolean firewalled) {
-        context.setFirewalled(firewalled);
+        //change from firewalled to non-firewalled? re-bootstrap
+        if(context.isFirewalled() && !firewalled) {
+            context.setFirewalled(firewalled);
+            try {
+                bootstrap(new BootstrapListener() {
+                    public void phaseOneComplete(long time) {}
+
+                    public void phaseTwoComplete(boolean foundNodes, long time) {}
+
+                    public void noBootstrapHost() {
+                    }
+                });
+            } catch (IOException err) {
+                if(LOG.isErrorEnabled()) {
+                    LOG.error("Firewalled to non-firewalled re-bootstrap error: "+err);
+                }
+            }
+        } else {
+        	context.setFirewalled(firewalled);
+        }
     }
     
     public boolean isFirewalled() {
@@ -128,7 +146,7 @@ public class DHT {
         context.start();
     }
     
-    public void stop() throws IOException {
+    public void stop() {
         context.stop();
     }
     
@@ -164,26 +182,39 @@ public class DHT {
         context.setMessageDispatcher(messageDispatcher);
     }
     
+    /**
+     * This method will try to bootstrap off the given address.
+     * This is a synchronous process.
+     * 
+     * @param address The address of the bootstrap host
+     * @return The bootstrap time
+     * @throws IOException
+     */
     public long bootstrap(SocketAddress address) throws IOException {
         return bootstrap(address, ContextSettings.SYNC_BOOTSTRAP_TIMEOUT.getValue());
     }
-
+    
     public long bootstrap(SocketAddress address, long timeout) throws IOException {
         final long[] time = new long[]{ -1L };
         
         synchronized (time) {
             context.bootstrap(address, new BootstrapListener() {
-                public void phaseOneComplete(long time) {
-                }
-
-                public void phaseTwoComplete(boolean foundNodes, long t) {
-                    time[0] = t;
-                    synchronized (time) {
-                        time.notify();
+                    public void phaseOneComplete(long time) {
                     }
-                }
+
+                    public void phaseTwoComplete(boolean foundNodes, long t) {
+                        time[0] = t;
+                        synchronized (time) {
+                            time.notify();
+                        }
+                    }
+
+                    public void noBootstrapHost() {
+                        synchronized (time) {
+                            time.notify();
+                        }
+                    }
             });
-            
             try {
                 time.wait(timeout);
             } catch (InterruptedException err) {
@@ -193,10 +224,26 @@ public class DHT {
         
         return time[0];
     }
+    
+    /**
+     * This method will try to bootstrap off known nodes from the routing table.
+     * 
+     * @return The bootstrap time
+     * @throws IOException
+     */
+    public void bootstrap(BootstrapListener listener) 
+            throws IOException {
+        context.bootstrap(listener);
+    }
 
     public void bootstrap(SocketAddress address, BootstrapListener listener) 
             throws IOException {
         context.bootstrap(address, listener);
+    }
+    
+    public void bootstrap(List bootstrapHostsList, BootstrapListener listener) 
+            throws IOException {
+        context.bootstrap(bootstrapHostsList, listener);
     }
     
     // TODO for debugging purposes only
@@ -277,10 +324,6 @@ public class DHT {
                 keyValue.sign(context.getKeyPair());
             } else {
                 keyValue.sign(privateKey);
-                
-                if (!keyValue.verify(context.getKeyPair())) {
-                    throw new IllegalArgumentException();
-                }
             }
             
             Database database = context.getDatabase();
@@ -304,14 +347,6 @@ public class DHT {
         return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
     }
     
-    /**
-     * Synchronous get method. Returns when the first value is found.
-     * 
-     * @param key The key to look for
-     * @param timeout The lookup timeout
-     * @return The first value found
-     * @throws IOException
-     */
     public Collection get(KUID key, long timeout) throws IOException {
         final Collection[] values = new Collection[] {
             Collections.EMPTY_LIST
@@ -319,7 +354,7 @@ public class DHT {
         
         synchronized (values) {
             context.get(key, new LookupAdapter() {
-                public void found(KUID lookup, Collection c, long time) {
+                public void finish(KUID lookup, Collection c, long time) {
                     values[0] = c;
                     synchronized (values) {
                         values.notify();

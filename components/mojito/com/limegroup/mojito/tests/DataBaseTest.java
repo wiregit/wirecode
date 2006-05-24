@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHT;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 
@@ -37,7 +37,7 @@ public class DataBaseTest {
      * @param args
      */
     public static void main(String[] args) {
-        DHT dht = new DHT();
+        MojitoDHT dht = new MojitoDHT();
         try {
             dht.bind(addr);
         } catch (IOException e) {

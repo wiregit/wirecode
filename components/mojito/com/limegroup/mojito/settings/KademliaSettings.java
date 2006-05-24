@@ -50,4 +50,7 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final BooleanSetting EXHAUSTIVE_VALUE_LOOKUP
         = FACTORY.createBooleanSetting("EXHAUSTIVE_VALUE_LOOKUP", false);
+    
+    public static final IntSetting MAX_BOOTSTRAP_FAILURES
+        = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES",10);
 }

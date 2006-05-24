@@ -197,13 +197,9 @@ public class PatriciaRouteTable implements RoutingTable {
                     this.bucketsTrie = bucketsTrie;
                     this.nodesTrie = nodeTrie;
                 }
-                
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Finished loading routing table. Now refreshing buckets");
-                }
-                
-                //refresh the buckets
-                refreshBuckets(true);
+                    LOG.trace("Finished loading routing table.");
+                };
                 
                 return true;
             } catch (FileNotFoundException e) {
@@ -213,11 +209,7 @@ public class PatriciaRouteTable implements RoutingTable {
             } catch (ClassNotFoundException e) {
                 LOG.error("PatriciaRouteTable Class not found exception: ", e);
             } finally {
-                try { 
-                    if (in != null) { 
-                        in.close(); 
-                    } 
-                } catch (IOException ignore) {}
+                try { if (in != null) { in.close(); } } catch (IOException ignore) {}
             }
         }
         return false;
