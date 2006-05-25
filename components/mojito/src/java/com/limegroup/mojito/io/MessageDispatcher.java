@@ -511,7 +511,7 @@ public abstract class MessageDispatcher implements Runnable {
         }
         
         private void processResponse() {
-            try {System.out.println("Response!");
+            try {
                 defaultHandler.handleResponse(response, receipt.time());
                 if (receipt.getResponseHandler() != defaultHandler) {
                     receipt.getResponseHandler().addTime(receipt.time());
