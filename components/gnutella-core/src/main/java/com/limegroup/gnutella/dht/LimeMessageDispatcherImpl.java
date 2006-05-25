@@ -40,7 +40,9 @@ import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
 
 /**
- * 
+ * LimeMessageDispatcher re-routes DHTMessage(s) through the
+ * LimeWire core so that all communcation can be done over
+ * a single network port.
  */
 public class LimeMessageDispatcherImpl extends MessageDispatcher 
         implements MessageRouter.MessageHandler {
@@ -56,11 +58,12 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         processingQueue = new ProcessingQueue(context.getName() + "-LimeMessageDispatcherPQ", true);
         
+        // Register the LimeDHTMessage type and the handler
         LimeDHTMessage.registerMessage();
-        
         RouterService.getMessageRouter()
             .setUDPMessageHandler(LimeDHTMessage.class, this);
         
+        // Install cleanup task
         context.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 if (isRunning()) {
@@ -85,8 +88,16 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void stop() {
         running = false;
         processingQueue.clear();
+        clear();
     }
     
+    /* 
+     * Overwritten:
+     * 
+     * Takes the payload of Tag, wraps it in a LimeDHTMessage, 
+     * sends it over UDPService and registers it in the input
+     * map if it's a RequestMessage.
+     */
     protected boolean enqueueOutput(Tag tag) {
         try {
             InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
@@ -103,11 +114,17 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         return false;
     }
 
+    /*
+     * Implements:
+     * 
+     * Takes the payload of LimeDHTMessage, deserializes it into
+     * a DHTMessage and handles the message.
+     */
     public void handleMessage(Message msg, InetSocketAddress addr, 
             ReplyHandler handler) {
         try {
             DHTMessage message = ((LimeDHTMessage)msg).getDHTMessage(addr);
-            received(message);
+            handleMessage(message);
         } catch (MessageFormatException err) {
             LOG.error("MessageFormatException", err);
         } catch (IOException err) {
@@ -116,9 +133,11 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     }
 
     protected void interestRead(boolean on) {
+        // DO NOTHING
     }
 
     protected void interestWrite(boolean on) {
+        // DO NOTHING
     }
 
     public boolean isRunning() {
@@ -129,6 +148,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         processingQueue.add(runnable);
     }
     
+    // This is not running as a Thread!
     public void run() {
         running = true;
     }

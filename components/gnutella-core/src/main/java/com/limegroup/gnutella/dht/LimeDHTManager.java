@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,7 +16,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.ThreadFactory;
-import com.limegroup.mojito.event.BootstrapListener;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -50,11 +47,13 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public synchronized void init(boolean passive) {
-        if(running) {
+        if (running) {
             return;
         }
 
-        if(!DHTSettings.DHT_CAPABLE.getValue() && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+        if (!DHTSettings.DHT_CAPABLE.getValue() 
+                && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+            
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not DHT capable");
             }
@@ -68,7 +67,9 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && RouterService.isSupernode()) {
+        if (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
+                && RouterService.isSupernode()) {
+            
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - Node is allready an ultrapeer");
             }
@@ -77,7 +78,7 @@ public class LimeDHTManager implements LifecycleListener {
         
         running = true;
         //set firewalled status
-        if(passive){
+        if (passive){
             dht.setFirewalled(true);
         } else {
             dht.setFirewalled(RouterService.acceptedIncomingConnection());
@@ -96,13 +97,14 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public synchronized void shutdown(){
-        if(!running) {
+        if (!running) {
             return;
         }
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Shutting down DHT");
         }
+        
         dht.stop();
         running = false;
     }

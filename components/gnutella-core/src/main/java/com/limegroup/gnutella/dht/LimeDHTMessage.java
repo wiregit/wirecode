@@ -31,6 +31,11 @@ import com.limegroup.mojito.io.InputOutputUtils;
 import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.messages.DHTMessage;
 
+/**
+ * LimeDHTMessage is a wrapper class for Mojito DHTMessage(s). This 
+ * allows us to route the Mojito DHTMessage(s) through the LimeWire core.
+ * The payload is a serialized DHTMessage.
+ */
 public class LimeDHTMessage extends Message {
 
     private static final long serialVersionUID = 3867749049179828044L;
@@ -48,8 +53,8 @@ public class LimeDHTMessage extends Message {
         this.payload = payload;
     }
     
-    private LimeDHTMessage(byte[] guid, byte func, byte ttl, byte hops, byte[] payload, int network) {
-        super(guid, func, ttl, hops, payload.length, network);
+    private LimeDHTMessage(byte[] guid, byte ttl, byte hops, byte[] payload, int network) {
+        super(guid, F_DHT_MESSAGE, ttl, hops, payload.length, network);
         this.payload = payload;
     }
 
@@ -77,11 +82,14 @@ public class LimeDHTMessage extends Message {
         return InputOutputUtils.deserialize(src, payload);
     }
     
+    /**
+     * An implementation of MessagePareser to parse LimeDHTMessage(s)
+     */
     private static class LimeDHTMessageParser implements MessageParser {
         public Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             
-            return new LimeDHTMessage(guid, F_DHT_MESSAGE, ttl, hops, payload, network);
+            return new LimeDHTMessage(guid, ttl, hops, payload, network);
         }
     }
 }

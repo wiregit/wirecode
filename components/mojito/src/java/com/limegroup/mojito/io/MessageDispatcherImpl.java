@@ -36,8 +36,10 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.messages.DHTMessage;
 
-
-public class MessageDispatcherImpl extends MessageDispatcher implements Runnable {
+/**
+ * This is a stand alone/reference implementation of MessageDispatcher
+ */
+public class MessageDispatcherImpl extends MessageDispatcher {
 
     private static final Log LOG = LogFactory.getLog(MessageDispatcherImpl.class);
     
@@ -87,6 +89,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         }
         
         processingQueue.clear();
+        clear();
     }
     
     public boolean isRunning() {

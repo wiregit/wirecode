@@ -59,7 +59,10 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 import com.limegroup.mojito.util.NetworkUtils;
 
-
+/**
+ * MessageDispatcher is an abstract class that takes care of
+ * all Mojito's communication needs.
+ */
 public abstract class MessageDispatcher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
@@ -67,10 +70,13 @@ public abstract class MessageDispatcher implements Runnable {
     protected static final int INPUT_BUFFER_SIZE = 64 * 1024;
     protected static final int OUTPUT_BUFFER_SIZE = 64 * 1024;
     
+    /** The recommended interval to call handleCleanup() */
     protected static final long CLEANUP = 100L;
     
+    /** Queue of things we have to send */
     private LinkedList outputQueue = new LinkedList();
     
+    /** Map of Messages (responses) we're awaiting */
     private ReceiptMap receiptMap = new ReceiptMap(512);
     
     private NetworkStatisticContainer networkStats;
@@ -196,6 +202,9 @@ public abstract class MessageDispatcher implements Runnable {
         return enqueueOutput(tag);
     }
     
+    /**
+     * Enqueues Tag to the Output queue
+     */
     protected boolean enqueueOutput(Tag tag) {
         synchronized(outputQueue) {
             outputQueue.add(tag);
@@ -204,6 +213,9 @@ public abstract class MessageDispatcher implements Runnable {
         return true;
     }
     
+    /**
+     * Reads all available Message from Network and processes them.
+     */
     public void handleRead() throws IOException {
         while(isRunning()) {
             DHTMessage message = null;
@@ -218,18 +230,25 @@ public abstract class MessageDispatcher implements Runnable {
                 break;
             }
             
-            received(message);
+            handleMessage(message);
         }
         
         // We're always interested in reading!
         interestRead(true);
     }
     
+    /**
+     * A helper method to deserialize Messages
+     */
     protected DHTMessage deserialize(SocketAddress src, byte[] data) 
             throws MessageFormatException, IOException {
         return InputOutputUtils.deserialize(src, data);
     }
     
+    /**
+     * Reads and returns a single DHTMessage from Network or null
+     * if no Messages were in the input queue.
+     */
     private DHTMessage readMessage() throws MessageFormatException, IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
@@ -247,7 +266,10 @@ public abstract class MessageDispatcher implements Runnable {
         return null;
     }
     
-    protected void received(DHTMessage message) throws IOException {
+    /**
+     * Handles a DHTMessage as read from Network
+     */
+    protected void handleMessage(DHTMessage message) throws IOException {
         // Make sure we're not receiving messages from ourself.
         KUID nodeId = message.getSourceNodeID();
         SocketAddress src = message.getSourceAddress();
@@ -319,14 +341,25 @@ public abstract class MessageDispatcher implements Runnable {
         }
     }
     
+    /**
+     * Starts a new ResponseProcessor
+     */
     private void processResponse(Receipt receipt, ResponseMessage response) {
         process(new ResponseProcessor(receipt, response));
     }
     
+    /**
+     * Starts a new RequestProcessor
+     */
     private void processRequest(RequestMessage request) {
         process(new RequestProcessor(request));
     }
     
+    /**
+     * Writes all Messages (if possible) from the output
+     * queue to the Network and returns whether or not some
+     * Messages were left in the output queue.
+     */
     public boolean handleWrite() throws IOException {
         synchronized (outputQueue) {
             while(!outputQueue.isEmpty() && isRunning()) {
@@ -352,6 +385,10 @@ public abstract class MessageDispatcher implements Runnable {
         }
     }
     
+    /**
+     * Called right after a Message has been sent to register
+     * its ResponseHandler (if it's a RequestMessage).
+     */
     protected void registerInput(Tag tag) {
         networkStats.SENT_MESSAGES_COUNT.incrementStat();
         networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize());
@@ -364,6 +401,9 @@ public abstract class MessageDispatcher implements Runnable {
         }
     }
     
+    /**
+     * Starts a cleanup process
+     */
     protected void handleClenup() {
         process(new Runnable() {
             public void run() {
@@ -374,14 +414,34 @@ public abstract class MessageDispatcher implements Runnable {
         });
     }
     
+    /** Called to indicate an interest in reading */
     protected abstract void interestRead(boolean on);
     
+    /** Called to indicate an interest in writing */
     protected abstract void interestWrite(boolean on);
     
+    /** Called to process a Task */
     protected abstract void process(Runnable runnable);
     
+    /** Called to check whether or not the Message should be processed */
     protected abstract boolean allow(DHTMessage message);
     
+    /**
+     * Clears the output queue and receipt map
+     */
+    protected void clear() {
+        synchronized (outputQueue) {
+            outputQueue.clear();
+        }
+        
+        synchronized (receiptMap) {
+            receiptMap.clear();
+        }
+    }
+    
+    /**
+     * A map of MessageID -> Receipts
+     */
     private class ReceiptMap extends FixedSizeHashMap {
         
         private static final long serialVersionUID = -3084244582682726933L;
@@ -429,6 +489,9 @@ public abstract class MessageDispatcher implements Runnable {
         }
     }
     
+    /**
+     * An implementation of Runnable to handle Response Messages.
+     */
     private class ResponseProcessor implements Runnable {
         
         private Receipt receipt;
@@ -448,7 +511,7 @@ public abstract class MessageDispatcher implements Runnable {
         }
         
         private void processResponse() {
-            try {
+            try {System.out.println("Response!");
                 defaultHandler.handleResponse(response, receipt.time());
                 if (receipt.getResponseHandler() != defaultHandler) {
                     receipt.getResponseHandler().addTime(receipt.time());
@@ -482,6 +545,9 @@ public abstract class MessageDispatcher implements Runnable {
         }
     }
     
+    /**
+     * An implementation of Runnable to handle Request Messages.
+     */
     private class RequestProcessor implements Runnable {
         
         private RequestMessage request;
@@ -524,6 +590,9 @@ public abstract class MessageDispatcher implements Runnable {
         }
     }
     
+    /**
+     * An implementation of Runnable to handle Timeouts.
+     */
     private class TimeoutProcessor implements Runnable {
         
         private Receipt receipt;
