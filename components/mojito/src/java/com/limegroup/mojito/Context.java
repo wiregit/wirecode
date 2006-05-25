@@ -774,6 +774,10 @@ public class Context {
             ping(address, this);
         }
         
+        public void bootstrap(BootstrapListener listener) throws IOException {
+            bootstrap(routeTable.getAllNodesMRS(), listener);
+        }
+        
         /**
          * Tries to bootstrap from a List of Hosts.
          * 
@@ -781,17 +785,19 @@ public class Context {
          * @param listener The listener for bootstrap events
          * @throws IOException
          */
-        public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
+        public void bootstrap(List bootstrapHostsList, 
+                BootstrapListener listener) throws IOException {
+            
+            this.listener = listener;
             this.bootstrapHostsList = bootstrapHostsList;
-            if(bootstrapHostsList != null && bootstrapHostsList.size() > 0) {
-                SocketAddress firstHost = (SocketAddress)bootstrapHostsList.get(0);
-                bootstrapHostsList.remove(0);
+            
+            if (!bootstrapHostsList.isEmpty()) {
+                SocketAddress firstHost = (SocketAddress)bootstrapHostsList.remove(0);
                 bootstrap(firstHost, listener);
-            } 
-        }
-        
-        public void bootstrap(BootstrapListener listener) throws IOException {
-            bootstrap(routeTable.getAllNodesMRS(), listener);
+            } else {
+                firePhaseOneFinished();
+                firePhaseTwoFinished();
+            }
         }
         
         public void response(ResponseMessage response, long time) {
@@ -809,17 +815,19 @@ public class Context {
 
         public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
             if (request instanceof PingRequest) {
-                ++failures;
+                
                 networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Initial bootstrap ping timeout, failure "+failures);
                 }
                 
-                if(failures < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-                    if(bootstrapHostsList == null || bootstrapHostsList.size() == 0) {
+                failures++;
+                if (failures < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    if (bootstrapHostsList == null || bootstrapHostsList.isEmpty()) {
                         bootstrapHostsList = routeTable.getAllNodesMRS();
                     }
-                    for (Iterator iter = bootstrapHostsList.iterator(); iter.hasNext();) {
+                    
+                    for (Iterator iter = bootstrapHostsList.iterator(); iter.hasNext(); ) {
                         ContactNode node = (ContactNode) iter.next();
                         //do not send to ourselve or the node which just timed out
                         if(!node.getNodeID().equals(getLocalNodeID()) 
@@ -831,7 +839,7 @@ public class Context {
                             
                             try {
                                 iter.remove();
-                                ping(node,this);
+                                ping(node, this);
                                 return;
                             } catch (IOException err) {
                                 LOG.error(err);
@@ -839,11 +847,14 @@ public class Context {
                             }
                         }
                     }
+                    
                     fireNoBootstrapHost();
-                }else {
+                    
+                } else {
                     if (LOG.isErrorEnabled()) {
-                        LOG.error("Initial bootstrap ping timeout, giving up bootstrap after "+failures+" tries");
+                        LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failures + " tries");
                     }
+                    
                     fireNoBootstrapHost();
                 }
             }

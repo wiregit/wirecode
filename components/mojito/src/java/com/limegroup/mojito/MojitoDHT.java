@@ -43,7 +43,9 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.settings.ContextSettings;
 
-
+/**
+ * 
+ */
 public class MojitoDHT {
     
     private static final Log LOG = LogFactory.getLog(MojitoDHT.class);
@@ -63,25 +65,20 @@ public class MojitoDHT {
     }
     
     public void setFirewalled(boolean firewalled) {
-        //change from firewalled to non-firewalled? re-bootstrap
-        if(context.isFirewalled() && !firewalled) {
-            context.setFirewalled(firewalled);
+        // change from firewalled to non-firewalled? re-bootstrap
+        if (context.isFirewalled() && !firewalled) {
+            context.setFirewalled(false);
             try {
                 bootstrap(new BootstrapListener() {
                     public void phaseOneComplete(long time) {}
-
                     public void phaseTwoComplete(boolean foundNodes, long time) {}
-
-                    public void noBootstrapHost() {
-                    }
+                    public void noBootstrapHost() {}
                 });
             } catch (IOException err) {
-                if(LOG.isErrorEnabled()) {
-                    LOG.error("Firewalled to non-firewalled re-bootstrap error: "+err);
-                }
+                LOG.error("Firewalled to non-firewalled re-bootstrap error: ", err);
             }
         } else {
-        	context.setFirewalled(firewalled);
+            context.setFirewalled(firewalled);
         }
     }
     

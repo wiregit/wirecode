@@ -321,18 +321,18 @@ public class KUID implements Serializable, Comparable {
      * @return true if this is closer to targetID, false otherwise
      */
     public boolean isCloser(KUID nodeID, KUID targetID) {
-        
-        for (int i=0;i<id.length;i++){
-
+        for (int i = 0; i < id.length; i++){
             int dSelf = (id[i] ^ targetID.id[i]) & 0xFF;
             int dOther = (nodeID.id[i] ^ targetID.id[i]) & 0xFF;
             int diff = dOther - dSelf;
-            if ( diff > 0 ){
+            
+            if (diff > 0) {
                 return true;
-            } else if (diff < 0 ) {
+            } else if (diff < 0) {
                 return false;
             } 
         }
+        
         return false;
     }
     
