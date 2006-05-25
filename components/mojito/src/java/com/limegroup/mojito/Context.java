@@ -158,8 +158,6 @@ public class Context {
         
         pingManager = new PingManager();
         lookupManager = new LookupManager();
-        
-        Thread.currentThread().setName(name+" - main");
     }
 
     public String getName() {
