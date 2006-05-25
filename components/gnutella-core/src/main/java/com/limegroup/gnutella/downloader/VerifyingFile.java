@@ -740,6 +740,8 @@ public class VerifyingFile {
             // we failed reading back from the file - assume block is corrupt
             // and it will have to be re-downloaded
             return false;
+        } catch(OutOfMemoryError oom) {
+            return false;
         }
         
         boolean corrupt = tree.isCorrupt(i, b, length);

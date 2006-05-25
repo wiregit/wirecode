@@ -113,7 +113,7 @@ public class Connection implements IpPort {
      */
     private final String _host;
     private int _port;
-    protected Socket _socket;
+    protected volatile Socket _socket;
     private InputStream _in;
     private OutputStream _out;
     private final boolean OUTGOING;
@@ -1490,6 +1490,11 @@ public class Connection implements IpPort {
 
         /** We got a connection. */
         public void handleConnect(Socket socket) {
+            // if we get the callback before the Sockets.connect call returned,
+            // then _socket will be null, but the rest of the code needs it.
+            // so we set it here just incase -- it's no big deal if it gets overwritten
+            // later.
+            _socket = socket;
             ThreadFactory.startThread(this, "Handshaking");
         }
         

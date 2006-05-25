@@ -1479,6 +1479,9 @@ public class ManagedConnection extends Connection
         }
         
         public void handleConnect(Socket socket) throws IOException {
+            // _socket may not really have been set yet, this ensures it
+            // is.
+            _socket = socket;
             preHandshakeInitialize(requestHeaders, responder, observer);
         }
 

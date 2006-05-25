@@ -329,6 +329,14 @@ public class NIODispatcher implements Runnable {
         }
     }
    
+   /** Same as invokeLater, except forces the Runnable to be done later on. */
+   public void invokeReallyLater(Runnable runner) {
+        synchronized(Q_LOCK) {
+            LATER.add(runner);
+        }
+        wakeup();
+    }
+   
    /** Invokes the method in the NIODispatcher thread & returns after it ran. */
    public void invokeAndWait(final Runnable future) throws InterruptedException {
        if(Thread.currentThread() == dispatchThread) {

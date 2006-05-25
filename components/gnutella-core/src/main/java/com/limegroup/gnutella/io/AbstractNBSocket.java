@@ -247,7 +247,11 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 return false;
             }
         } catch(IOException failed) {
-            shutdown();
+            NIODispatcher.instance().invokeReallyLater(new Runnable() {
+                public void run() {
+                    shutdown();
+                }
+            });
             return false;
         }
     }

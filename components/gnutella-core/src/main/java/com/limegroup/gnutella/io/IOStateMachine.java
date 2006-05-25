@@ -278,7 +278,14 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
             observer.shutdown();
         }
         
-        NIODispatcher.instance().getBufferCache().release(readBuffer);
+        // This must be done on the NIO thread, else the NIO thread could
+        // currently be processing this buffer, and things may continue to
+        // process it after we release it.
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                NIODispatcher.instance().getBufferCache().release(readBuffer);
+            }
+        });
     }
 
     public void interest(boolean status) {

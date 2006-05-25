@@ -55,7 +55,8 @@ public class IOUtils {
                     return true;
                 }
                 // If the file is locked, let them know.
-                if(StringUtils.contains(msg, "being used by another process")) {
+                if(StringUtils.contains(msg, "being used by another process") ||
+                   StringUtils.contains(msg, "with a user-mapped section open")) {
                     MessageService.showError("ERROR_LOCKED_BY_PROCESS_" + friendly);
                     return true;
                 }

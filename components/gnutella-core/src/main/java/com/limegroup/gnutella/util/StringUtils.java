@@ -521,8 +521,10 @@ public class StringUtils {
         Assert.that(retString.length() <= MAX_LEN, 
                     "Original filename: " + name +
                     ", converted: " + retString);
-        Assert.that(!retString.equals(""), 
-                    "Original filename: " + name);
+        
+        if(!intersection.isEmpty())
+            Assert.that(!retString.equals(""), "Original filename: " + name);
+            
         Assert.that(retString != null, 
                     "Original filename: " + name);
 
