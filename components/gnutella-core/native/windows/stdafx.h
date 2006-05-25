@@ -7,6 +7,9 @@
 
 // Include Java and Windows headers
 #include <jni.h>      // Java types for native code like jstring and JNIEnv
+
+#include <jawt_md.h>
+
 #include <windows.h>  // Win32 types, like DWORD
 #include <io.h>       // Unix-style file functions, like _chmod
 #include <sys/stat.h> // Options for Unix-style file functions, like _S_IWRITE
@@ -20,6 +23,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getWindowHandleNative(JNIEnv *e, jclass c, jobject o, jstring j);
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jint i, jstring j);
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c);
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallPresentNative(JNIEnv *e, jclass c);
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallEnabledNative(JNIEnv *e, jclass c);
@@ -33,8 +38,9 @@ JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewall
 #endif
 #endif
 
-// Make a type to match the function signature of the GetLastInputInfo() API located in user32.dll
+// Define types to match the signatures of functions we'll call in DLLs we load
 typedef BOOL (CALLBACK *GetLastInputInfoSignature)(PLASTINPUTINFO);
+typedef jboolean(JNICALL *JawtGetAwtSignature)(JNIEnv*, JAWT*);
 
 // Wraps a registry key, taking care of closing it
 class CRegistry {
@@ -117,6 +123,8 @@ CString GetString(JNIEnv *e, jstring j);
 jstring MakeJavaString(JNIEnv *e, LPCTSTR t);
 
 // Functions in WindowsShell.cpp
+HWND GetWindowHandle(JNIEnv *e, jclass c, jobject o, LPCTSTR bin);
+bool SetWindowIcon(HWND window, LPCTSTR icon);
 CString GetRunningPath();
 void Run(LPCTSTR path);
 bool Recycle(LPCTSTR path);
@@ -139,3 +147,19 @@ bool WindowsFirewallIsProgramListed(LPCTSTR path);
 bool WindowsFirewallIsProgramEnabled(LPCTSTR path);
 bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name);
 bool WindowsFirewallRemove(LPCTSTR path);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

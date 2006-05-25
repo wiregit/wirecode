@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import java.awt.Component;
+
 /**
  * A collection of core-related systems utilities,
  * most of which will require native code to do correctly.
@@ -22,7 +24,7 @@ public class SystemUtils {
                 if(CommonUtils.isWindows2000orXP()) {
                     System.loadLibrary("WindowsV5PlusUtils");
                 }
-                System.loadLibrary("WindowsFirewall");
+                System.loadLibrary("SystemUtilities");
             }
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
@@ -86,6 +88,31 @@ public class SystemUtils {
     private static final native long idleTime();
     private static final native int setFileWriteable(String filename);
     private static final native int setOpenFileLimit0(int max);
+
+    /**
+     * Gets the value of the Win32 HWND identifier of the native window that backs a given frame.
+     * 
+     * @param c The AWT Component, like a JFrame, that is backed by a native window
+     * @param s The path to the Java bin folder we're running on, like "C:\Program Files\Java\jre1.5.0_05\bin"
+     * @return  The Win32 HWND handle value
+     */
+    public static final int getWindowHandle(Component c, String s) {
+    	return getWindowHandleNative(c, s);
+    }
+
+    /**
+     * Changes the icon of a window.
+     * 
+     * Puts the given icon in the title bar, task bar, and Alt+Tab box.
+     * Replaces the Swing icon with a real Windows .ico that supports multiple sizes, full color, and partially transparent pixels.
+     * 
+     * @param handle The Win32 HWND handle value
+     * @param path   The path to a .ico file on the disk
+     * @return       False on error
+     */
+    public static final boolean setWindowIcon(int handle, String path) {
+    	return setWindowIconNative(handle, path);
+    }
 
 	/**
 	 * Get the path to the Windows launcher .exe file that is us running right now.
@@ -185,7 +212,8 @@ public class SystemUtils {
     	return false;
     }
 
-    // Native methods implemented in C++ code in WindowsFirewall.dll
+    private static final native int getWindowHandleNative(Component c, String s);
+    private static final native boolean setWindowIconNative(int handle, String path);
     private static final native String getRunningPathNative();
     private static final native boolean firewallPresentNative();
     private static final native boolean firewallEnabledNative();

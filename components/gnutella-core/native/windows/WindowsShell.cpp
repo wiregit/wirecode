@@ -2,6 +2,73 @@
 // Include the standard Windows DLL header which we've edited to include the Java headers and more headers
 #include "stdafx.h"
 
+// Takes the JNI environment and class
+// The jobject o is a AWT Component like a JFrame that is backed by a real Windows window
+// The LPCTSTR bin is the path to the folder that has the file "jawt.dll", like "C:\Program Files\Java\jre1.5.0_05\bin"
+// Gets the window handle that Java is using to make that frame
+// Returns the handle, or NULL on error
+JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getWindowHandleNative(JNIEnv *e, jclass c, jobject o, jstring j) { return (jint)GetWindowHandle(e, c, o, GetString(e, j)); }
+HWND GetWindowHandle(JNIEnv *e, jclass c, jobject o, LPCTSTR bin) {
+
+	// Make a JAWT structure that will tell Java we're using Java 1.4
+	JAWT awt;
+	awt.version = JAWT_VERSION_1_4;
+
+	// Load jawt.dll into our process space
+	CString path = CString(bin) + CString("\\jawt.dll"); // Compose the complete path to the DLL, like "C:\Program Files\Java\jre1.5.0_05\bin\jawt.dll"
+	HMODULE module = GetModuleHandle(path); // The DLL may already by in our process space
+	if (!module) module = LoadLibrary(path);
+	if (!module) return NULL;
+
+	// Get a function pointer to JAWT_GetAWT() in the DLL
+	JawtGetAwtSignature JawtGetAwt = (JawtGetAwtSignature)GetProcAddress(module, "_JAWT_GetAWT@8");
+
+	// Access Java's Active Widget Toolkit
+	jboolean result = JawtGetAwt(e, &awt);
+	if (result == JNI_FALSE) return NULL;
+
+	// Get the drawing surface
+	JAWT_DrawingSurface *surface = awt.GetDrawingSurface(e, o);
+	if (!surface) return NULL;
+
+	// Lock the drawing surface
+	jint lock = surface->Lock(surface);
+	if (lock & JAWT_LOCK_ERROR) { surface->Unlock(surface); return NULL; }
+
+	// Get the drawing surface information
+	JAWT_DrawingSurfaceInfo *info = surface->GetDrawingSurfaceInfo(surface);
+	if (!info) { surface->Unlock(surface); return NULL; }
+
+	// Get the Windows-specific drawing surface information
+	JAWT_Win32DrawingSurfaceInfo *win = (JAWT_Win32DrawingSurfaceInfo*)info->platformInfo;
+	if (!win) { surface->Unlock(surface); return NULL; }
+
+	// Get the window handle
+	HWND handle = win->hwnd;
+	if (!handle) { surface->Unlock(surface); return NULL; }
+
+	// Unlock the drawing surface and return the window handle
+	surface->Unlock(surface);
+	return handle;
+}
+
+// Takes a window handle, and a path to a .ico file on the disk
+// Puts the icon into the window
+// Returns false on error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jint i, jstring j) { return SetWindowIcon((HWND)i, GetString(e, j)); }
+bool SetWindowIcon(HWND window, LPCTSTR icon) {
+
+	// Open the .ico file, getting handles to the large and small icons inside it
+	HICON bigicon   = (HICON)LoadImage(NULL, "C:\\documents\\icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+	HICON smallicon = (HICON)LoadImage(NULL, "C:\\documents\\icon.ico", IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+	if (!bigicon || !smallicon) return false;
+
+	// Set both sizes of the window's icon
+	SendMessage(window, WM_SETICON, ICON_BIG,   (LPARAM)bigicon);
+	SendMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)smallicon);
+	return true;
+}
+
 // Returns the path of this running program, like "C:\Folder\Program.exe", or blank if error
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c) { return MakeJavaString(e, GetRunningPath()); }
 CString GetRunningPath() {
