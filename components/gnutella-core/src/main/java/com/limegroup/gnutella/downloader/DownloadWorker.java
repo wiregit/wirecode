@@ -666,7 +666,7 @@ public class DownloadWorker {
                 }
         }
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled())   
             LOG.debug("WORKER: attempting connect to " + _rfd.getHost() + ":" + _rfd.getPort());        
         
         DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
@@ -711,7 +711,8 @@ public class DownloadWorker {
      */
     private void connectDirectly(DirectConnector observer) {
         if (!_interrupted) {
-            LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
+            if(LOG.isTraceEnabled())
+                LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
             _connectObserver = observer;
             try {
                 Socket socket = Sockets.connect(_rfd.getHost(), _rfd.getPort(), NORMAL_CONNECT_TIME, observer);
@@ -730,19 +731,21 @@ public class DownloadWorker {
      * This method will return immediately and the given observer will
      * be notified of success or failure.
      */
-    private void connectWithPush(HTTPConnectObserver observer) {
+    private void connectWithPush(PushConnector observer) {
         if(!_interrupted) {
-            LOG.trace("WORKER: attempt push connection to: " + _rfd);
+            if(LOG.isTraceEnabled())
+                LOG.trace("WORKER: attempt push connection to: " + _rfd);
             _connectObserver = null;
             
             //When the push is complete and we have a socket ready to use
             //the acceptor thread is going to notify us using this object
-            final MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(_rfd.getFileName(), _rfd.getIndex(), _rfd.getClientGUID());       
-            _manager.registerPushObserver(observer, mrfd);
+            final PushDetails details = new PushDetails(_rfd.getClientGUID(), _rfd.getHost());
+            observer.setPushDetails(details);
+            _manager.registerPushObserver(observer, details);
             RouterService.getDownloadManager().sendPush(_rfd, observer);
             RouterService.schedule(new Runnable() {
                 public void run() {
-                    _manager.unregisterPushObserver(mrfd, true);
+                    _manager.unregisterPushObserver(details, true);
                 }
             }, _rfd.isFromAlternateLocation() ? UDP_PUSH_CONNECT_TIME : PUSH_CONNECT_TIME, 0);
         } else {
@@ -1443,6 +1446,7 @@ public class DownloadWorker {
     private class PushConnector extends HTTPConnectObserver {
         private boolean forgetOnFailure;
         private boolean directConnectOnFailure;
+        private PushDetails pushDetails;
         
         /**
          * Creates a new PushConnector.  If forgetOnFailure is true,
@@ -1485,12 +1489,17 @@ public class DownloadWorker {
             failed();
         }
         
+        /** Sets the details that will be used to unregister the push observer. */
+        void setPushDetails(PushDetails details) {
+            this.pushDetails = details;
+        }
+        
         /**
          * Possibly tells the manager to forget this RFD, cleans up various things,
          * and tells the manager to forget this worker.
          */
         private void failed() {            
-            _manager.unregisterPushObserver(new MiniRemoteFileDesc(_rfd), false);
+            _manager.unregisterPushObserver(pushDetails, false);
             
             if(!directConnectOnFailure) {
                 if(forgetOnFailure) {

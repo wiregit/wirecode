@@ -374,13 +374,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     protected VerifyingFile commonOutFile;
     
-    ////////////////datastructures used only for pushes//////////////
-    /**
-     * Push downloads insert their HTTPConnectObserver into this map so that when
-     * this downloader is notified of a push, it can send the event to the
-     * observer.        
-     */
-    private Map /* MiniRemoteFileDesc -> HTTPConnectObserver */ pushObservers;
+    /** A list of pushing hosts. */
+    private PushList pushes;
 
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
@@ -676,7 +671,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         stopped=false;
         paused = false;
         setState(QUEUED);
-        pushObservers = Collections.synchronizedMap(new HashMap());
+        pushes = new PushList();
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
         altLock = new Object();
@@ -1566,16 +1561,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (stopped)
             return false;
         
-        MiniRemoteFileDesc mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
-        HTTPConnectObserver observer =  
-            (HTTPConnectObserver) pushObservers.remove(mrfd);
-        
-        if(observer == null) //not in map. Not intended for me
-            return false;
-        
-        observer.handleConnect(socket);
-        
-        return true;
+        HTTPConnectObserver observer = pushes.getHostFor(clientGUID, socket.getInetAddress().getHostAddress());
+        if(observer != null)
+            observer.handleConnect(socket);
+        return observer != null;
     }
     
     /**
@@ -1583,8 +1572,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @param observer
      * @param mrfd
      */
-    void registerPushObserver(HTTPConnectObserver observer, MiniRemoteFileDesc mrfd) {
-        pushObservers.put(mrfd, observer);
+    void registerPushObserver(HTTPConnectObserver observer, PushDetails details) {
+        pushes.addPushHost(details, observer);
     }
     
     /**
@@ -1593,9 +1582,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @param mrfd
      * @param shutdown
      */
-    void unregisterPushObserver(MiniRemoteFileDesc mrfd, boolean shutdown) {
-        HTTPConnectObserver observer = 
-            (HTTPConnectObserver)pushObservers.remove(mrfd);
+    void unregisterPushObserver(PushDetails details, boolean shutdown) {
+        HTTPConnectObserver observer = pushes.getExactHostFor(details);
         if(observer != null && shutdown)
             observer.shutdown();
     }
@@ -1681,15 +1669,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             doomed.interrupt();
         }
         
-        Map pushers;
-        synchronized(pushObservers) {
-            pushers = new HashMap(pushObservers);
-            pushObservers.clear();
-        }
-        
-        // cannot iterate over pushObservers because shutdown may attempt
-        // to remove from it.
-        for(Iterator i = pushers.values().iterator(); i.hasNext(); ) {
+        List pushObservers = pushes.getAllAndClear();
+        for(Iterator i = pushObservers.iterator(); i.hasNext(); ) {
             HTTPConnectObserver next = (HTTPConnectObserver)i.next();
             next.shutdown();
         }
