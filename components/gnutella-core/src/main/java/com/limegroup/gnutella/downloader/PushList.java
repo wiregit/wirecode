@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /** Keeps track of who needs a push, and who should be notified of of success or failure. */
 public class PushList {
@@ -111,10 +112,18 @@ public class PushList {
             }
         }
         
-        LOG.debug("No exact match, using first.");
+        // Then try and find the first private address.
+        LOG.debug("No exact match, using first private address.");
+        for(Iterator i = hosts.iterator(); i.hasNext();) {
+            Push next = (Push)i.next();
+            if(NetworkUtils.isPrivateAddress(next.details.getAddress())) {
+                i.remove();
+                return next;
+            }   
+        }
         
-        // Then just return the first one.
-        return (Push)hosts.remove(0);
+        LOG.debug("No private address to use!");
+        return null;
     }
     
     /** Returns the exact Push in the list. */
