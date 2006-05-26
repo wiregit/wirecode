@@ -173,10 +173,8 @@ public class Main {
         String getall = "get exhaustive (key|kuid) (\\w|\\d)+";
         String listDB = "list db";
         String listRT = "list rt";
-        String storeRT = "store rt";
-        String storeDB = "store db";
-        String loadRT = "load rt";
-        String loadDB = "load db";
+        String store = "store .+";
+        String load = "load .+";
         String kill = "kill";
         String stats = "stats";
         String restart = "restart";
@@ -198,10 +196,8 @@ public class Main {
                 getr,
                 listDB,
                 listRT,
-                storeRT,
-                storeDB,
-                loadRT,
-                loadDB,
+                store,
+                load,
                 kill,
                 stats,
                 restart,
@@ -251,10 +247,17 @@ public class Main {
                     get(dht, line.split(" "));
                 } else if (line.matches(listDB) || line.matches(listRT)) {
                     list(dht, line.split(" "));
-                } else if (line.matches(storeRT) || line.matches(storeDB)) {
+                } else if (line.matches(store)) {
                     store(dht, line.split(" "));
-                } else if (line.matches(loadRT) || line.matches(loadDB)) {
-                    load(dht, line.split(" "));
+                } else if (line.matches(load)) {
+                    MojitoDHT nu = load(line.split(" "));
+                    SocketAddress bind = dht.getLocalSocketAddrss();
+                    dht.stop();
+                    
+                    nu.bind(bind);
+                    dhts.set(current, nu);
+                    nu.start();
+                    
                 } else if (line.matches(kill)) {
                     if (dht.isRunning()) {
                         dht.stop();
@@ -493,45 +496,22 @@ public class Main {
         System.out.println();
     }
     
-    private static void load(MojitoDHT dht, String[] line) throws Throwable {
-        /*if (line[1].equals("rt")) {
-            Context context = dht.getContext();
-            if (context.getRouteTable().load()) {
-                System.out.println("RouteTable was loaded successfully");
-            } else {
-                System.out.println("Loading RouteTable failed");
-            }
-        } else {
-            Context context = dht.getContext();
-            if (context.getDatabase().load()) {
-                System.out.println("Database was loaded successfully");
-            } else {
-                System.out.println("Loading Database failed");
-            }
-        }*/
+    private static MojitoDHT load(String[] line) throws Throwable {
+        File file = new File(line[1]);
+        System.out.println("Loading: " + file);
+        FileInputStream fis = new FileInputStream(file);
         
-        FileInputStream fis = new FileInputStream(new File("test.dat"));
-        MojitoDHT test = MojitoDHT.load(fis);
-        fis.close();
-        
-        info(dht);
-        list(dht, new String[]{"rt", "rt"});
-        
-        info(test);
-        list(test, new String[]{"rt", "rt"});
-        
+        try {
+            return MojitoDHT.load(fis);
+        } finally {
+            fis.close();
+        }
     }
     
     private static void store(MojitoDHT dht, String[] line) throws Exception {
-        /*if (line[1].equals("rt")) {
-            Context context = dht.getContext();
-            context.getRouteTable().store();
-        } else {
-            Context context = dht.getContext();
-            context.getDatabase().store();
-        }*/
-        
-        FileOutputStream fos = new FileOutputStream(new File("test.dat"));
+        File file = new File(line[1]);
+        System.out.println("Storing: " + file);
+        FileOutputStream fos = new FileOutputStream(file);
         dht.store(fos);
         fos.close();
     }
