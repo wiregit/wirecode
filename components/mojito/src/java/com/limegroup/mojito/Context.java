@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -92,6 +91,7 @@ public class Context {
     private PublicKey masterKey;
     
     private ContactNode localNode;
+    private SocketAddress localAddress;
     private SocketAddress tmpExternalAddress;
 
     private KeyPair keyPair;
@@ -242,7 +242,7 @@ public class Context {
     }
     
     public SocketAddress getLocalSocketAddress() {
-        return messageDispatcher.getLocalSocketAddress();
+        return localAddress;
     }
     
     public void setExternalSocketAddress(SocketAddress newExternalAddress)
@@ -351,17 +351,18 @@ public class Context {
      * @param address
      * @throws IOException
      */
-    public void bind(SocketAddress address) throws IOException {
+    public void bind(SocketAddress localAddress) throws IOException {
         if (isOpen()) {
             throw new IOException("DHT is already bound");
         }
         
-        localNode.setSocketAddress(address);
+        this.localAddress = localAddress;
         
+        localNode.setSocketAddress(localAddress);
         int instanceId = (localNode.getInstanceID() + 1) % 0xFF;
         localNode.setInstanceID(instanceId);
         
-        messageDispatcher.bind(address);
+        messageDispatcher.bind(localAddress);
     }
     
     /**
@@ -728,7 +729,7 @@ public class Context {
             this.listener = listener;
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Sending initial bootstrap ping to : " + address);
+                LOG.debug("Sending initial bootstrap ping to: " + address);
             }
             
             startTime = System.currentTimeMillis();
@@ -779,7 +780,7 @@ public class Context {
                 
                 networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
                 if (LOG.isErrorEnabled()) {
-                    LOG.error("Initial bootstrap ping timeout, failure "+failures);
+                    LOG.error("Initial bootstrap ping timeout, failure " + failures);
                 }
                 
                 failures++;

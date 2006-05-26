@@ -470,6 +470,9 @@ public class MojitoDHT {
         // SERIAL_VERSION_UID
         oos.writeLong(SERIAL_VERSION_UID);
         
+        // Time
+        oos.writeLong(System.currentTimeMillis());
+        
         // Name
         oos.writeObject(context.getName());
         
@@ -504,12 +507,11 @@ public class MojitoDHT {
         if (storeDatabase) {
             Collection keyValues = context.getDatabase().getValues();
             
-            KUID nodeId = local.getNodeID();
             for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
                 KeyValue keyValue = (KeyValue)it.next();
                 
                 if (!storeRouteTable 
-                        && !nodeId.equals(keyValue.getNodeID())) {
+                        && !keyValue.isLocalKeyValue()) {
                     continue;
                 }
                 
@@ -531,6 +533,9 @@ public class MojitoDHT {
         // SERIAL_VERSION_UID
         long serialVersionUID = ois.readLong();
         
+        // Time
+        long time = ois.readLong();
+        
         // Name
         String name = (String)ois.readObject();
         
@@ -539,6 +544,19 @@ public class MojitoDHT {
         // TODO: load SocketAddress?
         int instanceId = ois.readUnsignedByte();
         int flags = ois.readUnsignedByte();
+        
+        //boolean timeout = (System.currentTimeMillis()-time) 
+        //                    >= ContextSettings.NODE_ID_TIMEOUT.getValue();
+        
+        boolean timeout = false;
+        if (timeout) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(nodeId + " has timed out. Cannot restore the RouteTable and Database");
+            }
+            
+            nodeId = KUID.createRandomNodeID();
+            instanceId = 0;
+        }
         
         ContactNode local = new ContactNode(nodeId, 
                 new InetSocketAddress(0), instanceId, flags);
@@ -555,7 +573,9 @@ public class MojitoDHT {
             
             ContactNode node = null;
             while((node = (ContactNode)ois.readObject()) != null) {
-                routeTable.add(node, false);
+                if (!timeout) {
+                    routeTable.add(node, false);
+                }
             }
         }
         
@@ -566,7 +586,9 @@ public class MojitoDHT {
             
             KeyValue keyValue = null;
             while((keyValue = (KeyValue)ois.readObject()) != null) {
-                database.add(keyValue);
+                if (!timeout || keyValue.isLocalKeyValue()) {
+                    database.add(keyValue);
+                }
             }
         }
         
