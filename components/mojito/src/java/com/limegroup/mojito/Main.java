@@ -251,12 +251,12 @@ public class Main {
                     store(dht, line.split(" "));
                 } else if (line.matches(load)) {
                     MojitoDHT nu = load(line.split(" "));
-                    SocketAddress bind = dht.getLocalSocketAddrss();
                     dht.stop();
                     
-                    nu.bind(bind);
+                    nu.bind(dht.getLocalSocketAddrss());
                     dhts.set(current, nu);
                     nu.start();
+                    dht = nu;
                     
                 } else if (line.matches(kill)) {
                     if (dht.isRunning()) {
