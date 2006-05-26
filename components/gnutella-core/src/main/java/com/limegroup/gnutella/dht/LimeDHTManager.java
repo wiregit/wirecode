@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -13,6 +17,7 @@ import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.ThreadFactory;
@@ -29,6 +34,8 @@ public class LimeDHTManager implements LifecycleListener {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTManager.class);
     
+    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
+    
     private MojitoDHT dht;
 
     private volatile boolean running = false;
@@ -36,7 +43,24 @@ public class LimeDHTManager implements LifecycleListener {
     private volatile LinkedList bootstrapHosts = new LinkedList();
     
     public LimeDHTManager() {
-        dht = new MojitoDHT("LimeMojitoDHT");
+        
+        if (FILE.exists() && FILE.isFile()) {
+            try {
+                FileInputStream in = new FileInputStream(FILE);
+                dht = MojitoDHT.load(in);
+                in.close();
+            } catch (FileNotFoundException e) {
+                LOG.error("FileNotFoundException", e);
+            } catch (ClassNotFoundException e) {
+                LOG.error("ClassNotFoundException", e);
+            } catch (IOException e) {
+                LOG.error("IOException", e);
+            }
+        }
+        
+        if (dht == null) {
+            dht = new MojitoDHT("LimeMojitoDHT");
+        }
         
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
         dht.setThreadFactory(new ThreadFactory() {
@@ -107,6 +131,14 @@ public class LimeDHTManager implements LifecycleListener {
         
         dht.stop();
         running = false;
+        
+        try {
+            FileOutputStream out = new FileOutputStream(FILE);
+            dht.store(out);
+            out.close();
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+        }
     }
     
     public void addBootstrapHost(SocketAddress hostAddress) {
