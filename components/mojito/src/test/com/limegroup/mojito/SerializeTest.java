@@ -27,7 +27,7 @@ import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.util.zip.GZIPOutputStream;
 
-import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.util.PatriciaTrie;
 
 
@@ -100,7 +100,7 @@ public class SerializeTest {
         dht.start();
         
 //        Thread.sleep(3*1000);
-        RoutingTable rtable = dht.getContext().getRouteTable();
+        RouteTable rtable = dht.getContext().getRouteTable();
         for (int i = 0; i < 5000; i++) {
             ContactNode node = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress(i));
             rtable.add(node,false);

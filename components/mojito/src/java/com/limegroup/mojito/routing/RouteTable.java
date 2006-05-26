@@ -28,10 +28,10 @@ import com.limegroup.mojito.Context.BootstrapManager;
 
 
 /**
- * RoutingTable interface that all LimeDHT route table implementations
+ * RouteTable interface that all LimeDHT route table implementations
  * must implement.
  */
-public interface RoutingTable {
+public interface RouteTable {
     
     /**
      * Clears all elements from the RoutingTable

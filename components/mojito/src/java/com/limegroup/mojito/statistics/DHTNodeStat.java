@@ -28,7 +28,7 @@ import java.util.List;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.routing.RouteTable;
 
 
 public class DHTNodeStat implements DHTStats{
@@ -87,7 +87,7 @@ public class DHTNodeStat implements DHTStats{
     }
 
     public void dumpRouteTable(Writer writer) throws IOException{
-        RoutingTable routeTable = context.getRouteTable();
+        RouteTable routeTable = context.getRouteTable();
         if(nodeID == null) {
             nodeID = context.getLocalNodeID().toHexString();
         }

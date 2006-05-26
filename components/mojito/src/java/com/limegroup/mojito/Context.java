@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -64,7 +65,7 @@ import com.limegroup.mojito.messages.request.PingRequest;
 import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
-import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -96,7 +97,7 @@ public class Context {
     private KeyPair keyPair;
     
     private Database database;
-    private RoutingTable routeTable;
+    private RouteTable routeTable;
     private MessageDispatcher messageDispatcher;
     private MessageFactory messageFactory;
     private KeyValuePublisher keyValuePublisher;
@@ -149,9 +150,6 @@ public class Context {
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
         
-        localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode, false);
-        
         messageDispatcher = new MessageDispatcherImpl(this);
         messageFactory = new MessageFactory(this);
         keyValuePublisher = new KeyValuePublisher(this);
@@ -160,6 +158,10 @@ public class Context {
         
         pingManager = new PingManager();
         lookupManager = new LookupManager();
+        
+        // Add the local to the RouteTable
+        localNode.setTimeStamp(Long.MAX_VALUE);
+        routeTable.add(localNode, false);
     }
 
     public String getName() {
@@ -276,7 +278,7 @@ public class Context {
         return database;
     }
     
-    public RoutingTable getRouteTable() {
+    public RouteTable getRouteTable() {
         return routeTable;
     }
     

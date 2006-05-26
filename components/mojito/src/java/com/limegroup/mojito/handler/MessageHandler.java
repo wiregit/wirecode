@@ -22,7 +22,7 @@ package com.limegroup.mojito.handler;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
-import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.routing.RouteTable;
 
 /**
  * An abstract MessageHandler
@@ -39,7 +39,7 @@ public abstract class MessageHandler {
         return context.getMessageDispatcher();
     }
     
-    protected RoutingTable getRouteTable() {
+    protected RouteTable getRouteTable() {
         return context.getRouteTable();
     }
     

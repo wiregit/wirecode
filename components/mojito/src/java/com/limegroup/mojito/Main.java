@@ -58,7 +58,7 @@ import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -316,7 +316,7 @@ public class Main {
             buffer.append("-------------\n");
             buffer.append("TOTAL: " + values.size()).append("\n");
         } else {
-            RoutingTable routingTable = dht.getRoutingTable();
+            RouteTable routingTable = dht.getRoutingTable();
             buffer.append(routingTable.toString());
         }
         

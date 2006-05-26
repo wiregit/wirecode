@@ -30,7 +30,7 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
@@ -41,7 +41,7 @@ public class RoutingTableTest extends BaseTestCase {
     private static InetSocketAddress addr = new InetSocketAddress("localhost",3000);
 
     private MojitoDHT dht = null;
-    private RoutingTable routingTable = null;
+    private RouteTable routingTable = null;
     
     public RoutingTableTest(String name) {
         super(name);

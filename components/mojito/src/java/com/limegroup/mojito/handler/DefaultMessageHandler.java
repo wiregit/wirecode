@@ -41,7 +41,7 @@ import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
@@ -99,7 +99,7 @@ public class DefaultMessageHandler extends MessageHandler
             return;
         }
         
-        RoutingTable routeTable = getRouteTable();
+        RouteTable routeTable = getRouteTable();
         boolean newNode = false;
         //only do store forward if it is a new node in our routing table (we are (re)connecting to the network) 
         //or a node that is reconnecting

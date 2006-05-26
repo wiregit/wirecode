@@ -57,7 +57,7 @@ import com.limegroup.mojito.util.Trie.KeySelector;
  * parameter K and the the symbol size parameter B.
  *
  */
-public class PatriciaRouteTable implements RoutingTable {
+public class PatriciaRouteTable implements RouteTable {
     
     private static final Log LOG = LogFactory.getLog(PatriciaRouteTable.class);
     

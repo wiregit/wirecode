@@ -49,7 +49,7 @@ import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 
@@ -443,7 +443,7 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    RoutingTable getRoutingTable() {
+    RouteTable getRoutingTable() {
         return context.getRouteTable();
     }
     
@@ -551,7 +551,7 @@ public class MojitoDHT {
         // Load RouteTable
         boolean storeRouteTable = ois.readBoolean();
         if (storeRouteTable) {
-            RoutingTable routeTable = dht.context.getRouteTable();
+            RouteTable routeTable = dht.context.getRouteTable();
             
             ContactNode node = null;
             while((node = (ContactNode)ois.readObject()) != null) {
