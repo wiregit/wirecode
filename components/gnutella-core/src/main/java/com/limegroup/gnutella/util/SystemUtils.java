@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.util;
 
+import java.awt.Component;
+import java.io.File;
+
 /**
  * A collection of core-related systems utilities,
  * most of which will require native code to do correctly.
@@ -100,6 +103,23 @@ public class SystemUtils {
     }
 
     /**
+     * Changes the icon of a window.
+     * Puts the given icon in the title bar, task bar, and Alt+Tab box.
+     * Replaces the Swing icon with a real Windows .ico icon that supports multiple sizes, full color, and partially transparent pixels.
+     * 
+     * @param frame The AWT Component, like a JFrame, that is backed by a native window
+     * @param icon  The path to a .ico file on the disk
+     * @return      False on error
+     */
+    public static final boolean setWindowIcon(Component frame, File icon) {
+    	if (CommonUtils.isWindows() && isLoaded) {
+    		String result = setWindowIconNative(frame, System.getProperty("sun.boot.library.path"), icon.getPath());
+    		return result.equals(""); // Returns blank on success, or information about an error
+    	}
+    	return false;
+    }
+
+    /**
      * Determine if this Windows computer has Windows Firewall on it.
      * 
      * @return True if it does, false if it does not or there was an error
@@ -187,6 +207,7 @@ public class SystemUtils {
 
     // Native methods implemented in C++ code in WindowsFirewall.dll
     private static final native String getRunningPathNative();
+    private static final native String setWindowIconNative(Component frame, String bin, String icon);
     private static final native boolean firewallPresentNative();
     private static final native boolean firewallEnabledNative();
     private static final native boolean firewallExceptionsNotAllowedNative();

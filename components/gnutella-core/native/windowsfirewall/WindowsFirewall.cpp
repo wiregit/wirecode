@@ -9,44 +9,13 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 	return TRUE;
 }
 
-// Functions Java will call
-
-JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c) {
-	return MakeJavaString(e, GetRunningPath());
-}
-
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallPresentNative(JNIEnv *e, jclass c) {
-	return WindowsFirewallPresent();
-}
-
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallEnabledNative(JNIEnv *e, jclass c) {
-	return WindowsFirewallEnabled();
-}
-
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallExceptionsNotAllowedNative(JNIEnv *e, jclass c) {
-	return WindowsFirewallExceptionsNotAllowed();
-}
-
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring j) {
-	return WindowsFirewallIsProgramListed(GetString(e, j));
-}
-
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring j) {
-	return WindowsFirewallIsProgramEnabled(GetString(e, j));
-}
-
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring j1, jstring j2) {
-	return WindowsFirewallAdd(GetString(e, j1), GetString(e, j2));
-}
-
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring j) {
-	return WindowsFirewallRemove(GetString(e, j));
-}
-
 // Takes the JNI environment object, and a Java string
 // Safely gets the text from the Java string, copies it into a new CString, and frees the Java string
 // Returns the CString
 CString GetString(JNIEnv *e, jstring j) {
+
+	// If j is a null pointer, just return a blank string
+	if (j == NULL) return CString("");
 
 	// Get a character pointer into the text characters of the Java string
 	const char *c = e->GetStringUTFChars(j, FALSE);
@@ -70,8 +39,10 @@ jstring MakeJavaString(JNIEnv *e, LPCTSTR t) {
 	return e->NewStringUTF(t);
 }
 
-// Get the path of this running program, like "C:\Folder\Program.exe"
-// Returns blank if error
+// Returns the path of this running program, like "C:\Folder\Program.exe", or blank if error
+JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c) {
+	return MakeJavaString(e, GetRunningPath());
+}
 CString GetRunningPath() {
 
 	// Ask Windows for our path
@@ -80,8 +51,110 @@ CString GetRunningPath() {
 	return bay;
 }
 
+// Takes the JNI environment and class
+// The jobject frame is a AWT Component like a JFrame that is backed by a real Windows window
+// bin is the path to the folder that has the file "jawt.dll", like "C:\Program Files\Java\jre1.5.0_05\bin"
+// icon is the path to a Windows .ico file on the disk
+// Gets the window handle, and uses it to set the icon.
+// Returns blank on success, or a text message about what didn't work
+// Do not call this function repeatedly, it creates two icon resources for each call
+JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jobject frame, jstring bin, jstring icon) {
+	return MakeJavaString(e, SetWindowIcon(e, c, frame, GetString(e, bin), GetString(e, icon)));
+}
+CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR icon) {
+
+	// Make variables for the window handle we'll get, and the message we'll return
+	HWND handle = NULL;
+	CString message = "Start of method";
+
+	// Make sure neither of the paths are blank
+	if (bin == CString("") || icon == CString("")) return CString("Blank paths");
+
+	// Make a JAWT structure that will tell Java we're using Java 1.4
+	JAWT awt;
+	awt.version = JAWT_VERSION_1_4;
+
+	// Load jawt.dll into our process space
+	CString path = CString(bin) + CString("\\jawt.dll"); // Compose the complete path to the DLL, like "C:\Program Files\Java\jre1.5.0_05\bin\jawt.dll"
+	HMODULE module = GetModuleHandle(path); // The DLL may already by in our process space
+	if (!module) module = LoadLibrary(path);
+	if (module) {
+		message = "Got module";
+
+		// Get a function pointer to JAWT_GetAWT() in the DLL
+		JawtGetAwtSignature JawtGetAwt = (JawtGetAwtSignature)GetProcAddress(module, "_JAWT_GetAWT@8");
+		if (JawtGetAwt) {
+			message = "Got signature";
+
+			// Access Java's Active Widget Toolkit
+			jboolean result = JawtGetAwt(e, &awt);
+			if (result != JNI_FALSE) {
+				message = "Got AWT";
+
+				// Get the drawing surface
+				JAWT_DrawingSurface *surface = awt.GetDrawingSurface(e, frame);
+				if (surface) {
+					message = "Got surface";
+
+					// Lock the drawing surface
+					jint lock = surface->Lock(surface);
+					if ((lock & JAWT_LOCK_ERROR) == 0) { // If the error bit is not set, keep going
+						message = "Locked surface";
+
+						// Get the drawing surface information
+						JAWT_DrawingSurfaceInfo *info = surface->GetDrawingSurfaceInfo(surface);
+						if (info) {
+							message = "Got surface information";
+
+							// Get the Windows-specific drawing surface information
+							JAWT_Win32DrawingSurfaceInfo *win = (JAWT_Win32DrawingSurfaceInfo*)info->platformInfo;
+							if (win) {
+								message = "Got platform-specific surface information";
+
+								// Get the window handle
+								handle = win->hwnd;
+							}
+						}
+
+						// Unlock the drawing surface
+						surface->Unlock(surface);
+					}
+
+					// Free the drawing surface
+					awt.FreeDrawingSurface(surface);
+				}
+			}
+		}
+	}
+
+	// Make sure we were able to get the handle
+	if (!handle) return message;
+
+	// Open the .ico file, getting handles to the large and small icons inside it
+	HICON bigicon   = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+	HICON smallicon = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+	if (!bigicon || !smallicon) return CString("Unable to open icon file");
+
+	/*
+	 * It is important that you do not call this function repeatedly.
+	 * Each LoadImage call above creates a HICON that leads to an icon resource.
+	 * Windows graphics resources like icons take up a lot of memory.
+	 * A Windows program should free icons with a call to DestroyIcon(HICON).
+	 * We can't free them now, because they are on display in our window.
+	 * When the Windows process exits, Windows will free the two icons.
+	 */
+
+	// Set both sizes of the window's icon
+	SendMessage(handle, WM_SETICON, ICON_BIG,   (LPARAM)bigicon);
+	SendMessage(handle, WM_SETICON, ICON_SMALL, (LPARAM)smallicon);
+	return CString(""); // Return blank on success
+}
+
 // Determines if this copy of Windows has Windows Firewall
 // Returns true if it does, false if not or there was an error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallPresentNative(JNIEnv *e, jclass c) {
+	return WindowsFirewallPresent();
+}
 bool WindowsFirewallPresent() {
 
 	// Make a Windows Firewall object and have it access the COM interfaces of Windows Firewall
@@ -92,6 +165,9 @@ bool WindowsFirewallPresent() {
 
 // Determines if Windows Firewall is off or on
 // Returns true if the firewall is on, false if it's off or there was an error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallEnabledNative(JNIEnv *e, jclass c) {
+	return WindowsFirewallEnabled();
+}
 bool WindowsFirewallEnabled() {
 
 	// Make a Windows Firewall object and have it access the COM interfaces of Windows Firewall
@@ -106,6 +182,9 @@ bool WindowsFirewallEnabled() {
 
 // Determines if the Exceptions not allowed check box in Windows Firewall is checked
 // Returns true if the exceptions not allowed box is checked, false if it's not checked or there was an error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallExceptionsNotAllowedNative(JNIEnv *e, jclass c) {
+	return WindowsFirewallExceptionsNotAllowed();
+}
 bool WindowsFirewallExceptionsNotAllowed() {
 
 	// Make a Windows Firewall object and have it access the COM interfaces of Windows Firewall
@@ -121,6 +200,9 @@ bool WindowsFirewallExceptionsNotAllowed() {
 // Takes a program path and file name, like "C:\Folder\Program.exe"
 // Determines if it's listed in Windows Firewall
 // Returns true if is listed, false if it's not or there was an error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring j) {
+	return WindowsFirewallIsProgramListed(GetString(e, j));
+}
 bool WindowsFirewallIsProgramListed(LPCTSTR path) {
 
 	// Make a Windows Firewall object and have it access the COM interfaces of Windows Firewall
@@ -136,6 +218,9 @@ bool WindowsFirewallIsProgramListed(LPCTSTR path) {
 // Takes a program path and file name like "C:\Folder\Program.exe"
 // Determines if the listing for that program in Windows Firewall is checked or unchecked
 // Returns true if it is enabled, false if it's not or there was an error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring j) {
+	return WindowsFirewallIsProgramEnabled(GetString(e, j));
+}
 bool WindowsFirewallIsProgramEnabled(LPCTSTR path) {
 
 	// Make a Windows Firewall object and have it access the COM interfaces of Windows Firewall
@@ -151,6 +236,9 @@ bool WindowsFirewallIsProgramEnabled(LPCTSTR path) {
 // Takes a path like "C:\Folder\Program.exe" and a name like "My Program"
 // Adds the program's listing in Windows Firewall to make sure it is listed and checked
 // Returns false on error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring j1, jstring j2) {
+	return WindowsFirewallAdd(GetString(e, j1), GetString(e, j2));
+}
 bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name) {
 
 	// Make a Windows Firewall object and have it access the COM interfaces of Windows Firewall
@@ -165,6 +253,9 @@ bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name) {
 // Takes a path and file name like "C:\Folder\Program.exe"
 // Removes the program's listing from the Windows Firewall exceptions list
 // Returns false on error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring j) {
+	return WindowsFirewallRemove(GetString(e, j));
+}
 bool WindowsFirewallRemove(LPCTSTR path) {
 
 	// Make a Windows Firewall object and have it access the COM interfaces of Windows Firewall
