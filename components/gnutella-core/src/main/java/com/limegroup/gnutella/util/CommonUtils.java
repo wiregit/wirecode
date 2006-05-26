@@ -794,37 +794,56 @@ public final class CommonUtils {
 	 *  does not exist
      */
     public synchronized static File getUserSettingsDir() {
-        if ( SETTINGS_DIRECTORY != null ) return SETTINGS_DIRECTORY;
+        // LOGIC:
         
-        File settingsDir = new File(getUserHomeDir(), 
-                                    LIMEWIRE_PREFS_DIR_NAME);
+        // On all platforms other than Windows or OSX,
+        // this will return <user-home>/.limewire
+        
+        // On OSX, this will return <user-home>/Library/Preferences/LimeWire
+        
+        // On Windows, this first tries to find:
+        // a) <user-home>/$LIMEWIRE_PREFS_DIR/LimeWire
+        // b) <user-home>/$APPDATA/LimeWire
+        // c) <user-home/.limewire
+        // If the $LIMEWIRE_PREFS_DIR variable doesn't exist, it falls back
+        // to trying b).  If The $APPDATA variable can't be read or doesn't
+        // exist, it falls back to a).
+        // If using a) or b), and neither of those directories exist, but c)
+        // does, then c) is used.  Once a) or b) exist, they are used indefinitely.
+        // If neither a), b) nor c) exist, then the former is created in preference of
+        // of a), then b).
+        
+        if ( SETTINGS_DIRECTORY != null )
+            return SETTINGS_DIRECTORY;
+        
+        File settingsDir = new File(getUserHomeDir(), LIMEWIRE_PREFS_DIR_NAME);
         if (isWindows()) {
             String appdata = null;
             // In some Java 1.4 implementations, System.getenv() is 
             // depricated with prejudice (throws java.lang.Error).
             if (isJava15OrLater()) {
-                appdata = System.getProperty("LIMEWIRE_PREFS_DIR",
-                        System.getenv("APPDATA"));
+                appdata = System.getProperty("LIMEWIRE_PREFS_DIR", System.getenv("APPDATA"));
             } else {
                 // null string will fall back on default
                 appdata = System.getProperty("LIMEWIRE_PREFS_DIR",null);
             }
+            
             if ("%APPDATA%".equals(appdata)) {
                 appdata = null; // fall back on default
             }
+            
             if (appdata != null && appdata.length() > 0) {
                 File tempSettingsDir = new File(appdata, "LimeWire");
-                if (tempSettingsDir.isDirectory() || ! settingsDir.exists()) {
+                if (tempSettingsDir.isDirectory() || !settingsDir.exists()) {
                     try {
                         setUserSettingsDir(tempSettingsDir);
                         return tempSettingsDir;
-                    } catch (IOException e) {} // Ignore errors and fall back on default
-                    catch (SecurityException e) {} // Ignore errors and fall back on default
+                    } catch (IOException e) { // Ignore errors and fall back on default
+                    } catch (SecurityException e) {} // Ignore errors and fall back on default
                 }
             }
         } else if(isMacOSX()) {
-            settingsDir = new File(getUserHomeDir(), 
-                                     "Library/Preferences/LimeWire");
+            settingsDir = new File(getUserHomeDir(), "Library/Preferences/LimeWire");
         } 
       
         // Default behavior
