@@ -62,10 +62,6 @@ public class MojitoDHT {
     
     private Context context;
     
-    private boolean storeRouteTable = true;
-    
-    private boolean storeDatabase = true;
-    
     public MojitoDHT() {
         this(null, null, null);
     }
@@ -119,37 +115,6 @@ public class MojitoDHT {
     
     public boolean isFirewalled() {
         return context.isFirewalled();
-    }
-    
-    /**
-     * Sets whether or not the RouteTable should be serialized.
-     */
-    public void setStoreRouteTable(boolean storeRouteTable) {
-        this.storeRouteTable = storeRouteTable;
-    }
-    
-    /**
-     * Returns whether or not RouteTable serialization is enabled.
-     */
-    public boolean isStoreRouteTable() {
-        return storeRouteTable;
-    }
-    
-    /**
-     * Sets whether or not the Database should be serialized.
-     * 
-     * Note: If RouteTable serialization is turned off only local
-     * KeyValues will be serialized!
-     */
-    public void setStoreDatabase(boolean storeDatabase) {
-        this.storeDatabase = storeDatabase;
-    }
-    
-    /**
-     * Returns whether or not Database serialization is enabled.
-     */
-    public boolean isStoreDatabase() {
-        return storeDatabase;
     }
     
     public void bind(InetAddress addr, int port) throws IOException {
@@ -488,7 +453,18 @@ public class MojitoDHT {
     
     private static final long SERIAL_VERSION_UID = 0;
     
-    public synchronized void store(OutputStream out) throws IOException {
+    /**
+     * Writes the current state of Monjito DHT to the OutputStream.
+     */
+    public void store(OutputStream out) throws IOException {
+        store(out, true, true);
+    }
+    
+    /**
+     * Writes the current state of Monjito DHT to the OutputStream.
+     */
+    public synchronized void store(OutputStream out, 
+            boolean storeRouteTable, boolean storeDatabase) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(out);
         
         // SERIAL_VERSION_UID
@@ -544,6 +520,9 @@ public class MojitoDHT {
         }
     }
 
+    /**
+     * Loads a Mojito DHT instance from the InputStream.
+     */
     public static MojitoDHT load(InputStream in) 
             throws ClassNotFoundException, IOException {
         
@@ -570,8 +549,8 @@ public class MojitoDHT {
         MojitoDHT dht = new MojitoDHT(name, local, keyPair);
         
         // Load RouteTable
-        dht.storeRouteTable = ois.readBoolean();
-        if (dht.storeRouteTable) {
+        boolean storeRouteTable = ois.readBoolean();
+        if (storeRouteTable) {
             RoutingTable routeTable = dht.context.getRouteTable();
             
             ContactNode node = null;
@@ -581,8 +560,8 @@ public class MojitoDHT {
         }
         
         // Load Database
-        dht.storeDatabase = ois.readBoolean();
-        if (dht.storeDatabase) {
+        boolean storeDatabase = ois.readBoolean();
+        if (storeDatabase) {
             Database database = dht.context.getDatabase();
             
             KeyValue keyValue = null;

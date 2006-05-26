@@ -101,8 +101,6 @@ public class Main {
         for(int i = 0; i < count; i++) {
             try {
                 MojitoDHT dht = new MojitoDHT("DHT" + i);
-                dht.setStoreRouteTable(true);
-                dht.setStoreDatabase(true);
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
@@ -512,7 +510,7 @@ public class Main {
         File file = new File(line[1]);
         System.out.println("Storing: " + file);
         FileOutputStream fos = new FileOutputStream(file);
-        dht.store(fos);
+        dht.store(fos, true, true);
         fos.close();
     }
     

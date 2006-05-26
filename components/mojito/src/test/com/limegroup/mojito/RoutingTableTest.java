@@ -238,7 +238,7 @@ public class RoutingTableTest extends BaseTestCase {
         System.out.println(routingTable.toString());
         
         FileOutputStream out = new FileOutputStream(file);
-        dht.store(out);
+        dht.store(out, true, true);
         out.close();
         
         routingTable.clear();
