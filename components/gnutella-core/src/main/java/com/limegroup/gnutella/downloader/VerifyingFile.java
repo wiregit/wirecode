@@ -255,7 +255,7 @@ public class VerifyingFile {
      */
     public boolean writeBlock(long currPos, int start, int length, byte[] buf) {
         if(DELAYED.isEmpty())
-            return writeBlockImpl(currPos, start, length, buf);
+            return writeBlockImpl(currPos, start, length, buf, true);
         else // do not try to write if something else is waiting.
             return false;
     }
@@ -269,7 +269,7 @@ public class VerifyingFile {
      * @param buf the buffer of data
      * @return true if this scheduled a write or wasn't open, false if it couldn't.
      */
-    private boolean writeBlockImpl(long currPos, int start, int length, byte[] buf) {
+    private boolean writeBlockImpl(long currPos, int start, int length, byte[] buf, boolean runDelayed) {
         if (LOG.isTraceEnabled())
             LOG.trace("trying to write block at offset " + currPos + " with size " + length);
         
@@ -294,13 +294,13 @@ public class VerifyingFile {
         synchronized(this) {
     		/// some stuff to help debugging ///
     		if (!leasedBlocks.contains(intvl)) {
-                releaseChunk(temp);
+                releaseChunk(temp, runDelayed);
                 Assert.that(false, "trying to write an interval "+intvl+
                         " that wasn't leased.\n"+dumpState());
             }
     		
     		if (partialBlocks.contains(intvl) || savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
-                releaseChunk(temp);
+                releaseChunk(temp, runDelayed);
                 Assert.that(false,"trying to write an interval "+intvl+
                         " that was already written"+dumpState());
     		}
@@ -844,7 +844,7 @@ public class VerifyingFile {
                     storedException = diskIO;
                 }
             } finally {
-                releaseChunk(buf);
+                releaseChunk(buf, true);
                 
                 synchronized(VerifyingFile.this) {
                     if (!freedPending)
@@ -876,9 +876,10 @@ public class VerifyingFile {
         }
     }
     
-    private static void releaseChunk(byte[] buf) {
+    private static void releaseChunk(byte[] buf, boolean runDelayed) {
         CACHE.release(buf);
-        runDelayedWrites();
+        if(runDelayed)
+            runDelayedWrites();
     }
     
     /**  A simple Runnable that schedules a verification of the file. */
@@ -938,7 +939,7 @@ public class VerifyingFile {
         }
         
         private boolean write() {
-            if(vf.writeBlockImpl(currPos, start, length, buf)) {
+            if(vf.writeBlockImpl(currPos, start, length, buf, false)) {
                 callback.writeScheduled();
                 return true;
             } else {

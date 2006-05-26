@@ -1648,6 +1648,7 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         
         public void writeScheduled() {
+            LOG.debug("Delayed write scheduled");
             buffer.clear();
             downloader.writeDone();
             irc.interest(true);
