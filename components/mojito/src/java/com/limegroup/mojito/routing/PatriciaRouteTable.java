@@ -19,13 +19,7 @@
  
 package com.limegroup.mojito.routing;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
@@ -33,8 +27,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -158,94 +150,6 @@ public class PatriciaRouteTable implements RoutingTable {
         BucketNode root = new BucketNode(rootKUID,0);
         bucketsTrie.put(rootKUID,root);
         routingStats.BUCKET_COUNT.incrementStat();
-    }
-    
-    public synchronized boolean load() {
-        File file = new File(RouteTableSettings.ROUTETABLE_FILE);
-        if (file.exists() && file.isFile() && file.canRead()) {
-            
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Loading routing table from file "+file);
-            };
-            
-            ObjectInputStream in = null;
-            try {
-                FileInputStream fin = new FileInputStream(file);
-                GZIPInputStream gzin = new GZIPInputStream(fin);
-                in = new ObjectInputStream(gzin);
-                
-                KUID nodeId = (KUID)in.readObject();
-                PatriciaTrie bucketsTrie = (PatriciaTrie)in.readObject();
-                PatriciaTrie nodeTrie = (PatriciaTrie)in.readObject();
-                //local nodeID changed?
-                if (!nodeId.equals(context.getLocalNodeID())) {
-                    //rebuild routing table, inserting the most recently seen nodes first, 
-                    //then the least recently failed and finally the most recently failed
-                    
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Node ID changed, rebuilding routing table");
-                    };
-                    
-                    List nodesList = nodeTrie.values();
-                    nodesList = BucketUtils.sortLastDeadOrAlive(nodesList);
-                    for (Iterator iter = nodesList.iterator(); iter.hasNext();) {
-                        ContactNode node = (ContactNode) iter.next();
-                        if(node.getNodeID().equals(nodeId)) continue;
-                        put(node.getNodeID(),node,false);
-                    }
-                } else {
-                    this.bucketsTrie = bucketsTrie;
-                    this.nodesTrie = nodeTrie;
-                }
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Finished loading routing table.");
-                };
-                
-                return true;
-            } catch (FileNotFoundException e) {
-                LOG.error("PatriciaRouteTable file not found exception: ", e);
-            } catch (IOException e) {
-                LOG.error("PatriciaRouteTable IO exception: ", e);
-            } catch (ClassNotFoundException e) {
-                LOG.error("PatriciaRouteTable Class not found exception: ", e);
-            } finally {
-                try { if (in != null) { in.close(); } } catch (IOException ignore) {}
-            }
-        }
-        return false;
-    }
-    
-    public synchronized boolean store() {
-        File file = new File(RouteTableSettings.ROUTETABLE_FILE);
-        
-        ObjectOutputStream out = null;
-        
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            GZIPOutputStream gzout = new GZIPOutputStream(fos);
-            out = new ObjectOutputStream(gzout);
-            out.writeObject(context.getLocalNodeID());
-            out.writeObject(bucketsTrie);
-            out.writeObject(nodesTrie);
-            out.flush();
-            
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Finished storing routing table");
-            };
-            
-            return true;
-        } catch (FileNotFoundException e) {
-            LOG.error("PatriciaRouteTable file not found exception: ", e);
-        } catch (IOException e) {
-            LOG.error("PatriciaRouteTable IO exception: ", e);
-        } finally {
-            try { 
-                if (out != null) { 
-                    out.close(); 
-                }
-            } catch (IOException ignore) {}
-        }
-        return false;
     }
     
     public synchronized boolean add(ContactNode node, boolean knowToBeAlive) {

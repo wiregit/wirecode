@@ -44,4 +44,7 @@ public final class NetworkSettings extends MojitoProps {
     
     public static final BooleanSetting ALLOW_MULTIPLE_NODES
         = FACTORY.createBooleanSetting("ALLOW_MULTIPLE_NODES", false);
+    
+    public static final IntSetting MAX_MESSAGE_SIZE
+        = FACTORY.createSettableIntSetting("MAX_MESSAGE_SIZE", 1492, "max_message_size", 512, 64*1024);
 }

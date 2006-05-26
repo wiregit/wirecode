@@ -228,7 +228,7 @@ public class MessageInputStream extends DataInputStream {
         int instanceId = readUnsignedByte();
         int messageType = readUnsignedByte();
         
-        ContactNode node = new ContactNode(nodeId, src, flags, instanceId);
+        ContactNode node = new ContactNode(nodeId, src, instanceId, flags);
 
         switch(messageType) {
             case DHTMessage.PING_REQUEST:

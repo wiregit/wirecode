@@ -26,10 +26,6 @@ import java.util.List;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.Context;
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.settings.NetworkSettings;
 
 
@@ -55,7 +51,7 @@ public class NodeIDSpoofTest extends BaseTestCase {
         bootstrap.start();
         
         // The original Node
-        KUID nodeID = KUID.createRandomNodeID(new InetSocketAddress(PORT+1));
+        KUID nodeID = KUID.createRandomNodeID();
         MojitoDHT original = new MojitoDHT("OriginalDHT");
         original.bind(new InetSocketAddress(PORT+1), nodeID);
         original.start();
@@ -91,7 +87,7 @@ public class NodeIDSpoofTest extends BaseTestCase {
         bootstrap.start();
         
         // The original Node
-        KUID nodeID = KUID.createRandomNodeID(new InetSocketAddress(PORT+1));
+        KUID nodeID = KUID.createRandomNodeID();
         MojitoDHT original = new MojitoDHT("OriginalDHT");
         original.bind(new InetSocketAddress(PORT+1), nodeID);
         original.start();

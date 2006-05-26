@@ -27,9 +27,6 @@ import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.util.zip.GZIPOutputStream;
 
-import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.util.PatriciaTrie;
 

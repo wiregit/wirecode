@@ -115,11 +115,6 @@ public class KeyValue implements Serializable {
         return localKeyValue;
     }
     
-    public void sign(KeyPair keyPair)
-            throws InvalidKeyException, SignatureException {
-        sign(keyPair.getPrivate());
-    }
-
     public void sign(PrivateKey privateKey) 
             throws InvalidKeyException, SignatureException {
         signature = CryptoHelper.sign(privateKey, this);

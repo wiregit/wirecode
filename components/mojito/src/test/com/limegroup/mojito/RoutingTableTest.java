@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -27,10 +30,6 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.BucketNode;
-import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -81,9 +80,9 @@ public class RoutingTableTest extends BaseTestCase {
     }
 
     public void testLiveNodesOnly() {
-        ContactNode node = new ContactNode(KUID.createRandomNodeID(addr),addr);
+        ContactNode node = new ContactNode(KUID.createRandomNodeID(), addr);
         routingTable.add(node,true);
-        node = new ContactNode(KUID.createRandomNodeID(addr),addr);
+        node = new ContactNode(KUID.createRandomNodeID(), addr);
         routingTable.add(node,false);
         routingTable.handleFailure(node.getNodeID());
         routingTable.handleFailure(node.getNodeID());
@@ -101,7 +100,7 @@ public class RoutingTableTest extends BaseTestCase {
     
     public void testBuckets() {
         for (int i = 0; i < 22; i++) {
-            ContactNode node = new ContactNode(KUID.createRandomNodeID(addr),addr);
+            ContactNode node = new ContactNode(KUID.createRandomNodeID(), addr);
             routingTable.add(node,true);
             System.out.println(routingTable.toString());
         }
@@ -209,7 +208,7 @@ public class RoutingTableTest extends BaseTestCase {
     }
     
 
-    public void testStoreLoadRoutingTable(){
+    public void testStoreLoadRoutingTable() throws Exception {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         ContactNode node3;
@@ -234,15 +233,25 @@ public class RoutingTableTest extends BaseTestCase {
             e1.printStackTrace();
         }
         
+        File file = new File("mojito.state");
+        
         System.out.println(routingTable.toString());
-        routingTable.store();
+        
+        FileOutputStream out = new FileOutputStream(file);
+        dht.store(out);
+        out.close();
+        
         routingTable.clear();
         System.out.println(routingTable.toString());
         
         try {
             dht.stop();
-            dht = new MojitoDHT();
-            KUID newNodeId = KUID.createRandomNodeID(addr);
+            
+            FileInputStream in = new FileInputStream(file);
+            dht = MojitoDHT.load(in);
+            in.close();
+            
+            KUID newNodeId = KUID.createRandomNodeID();
             ContextSettings.setLocalNodeID(addr, newNodeId.getBytes());
             dht.bind(addr);
             routingTable = dht.getContext().getRouteTable();
@@ -250,7 +259,6 @@ public class RoutingTableTest extends BaseTestCase {
             e.printStackTrace();
         }
         
-        routingTable.load();
         System.out.println(routingTable.toString());
     }
     

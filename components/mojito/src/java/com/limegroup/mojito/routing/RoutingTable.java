@@ -137,14 +137,4 @@ public interface RoutingTable {
      * @throws IOException
      */
     public void refreshBuckets(boolean force, BootstrapManager manager) throws IOException;
-    
-    /**
-     * Loads a RoutingTable from a File
-     */
-    public boolean load();
-    
-    /**
-     * Stores current RoutingTable to a File
-     */
-    public boolean store();
 }

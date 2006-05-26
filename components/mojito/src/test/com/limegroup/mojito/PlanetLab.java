@@ -30,8 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupAdapter;

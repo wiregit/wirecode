@@ -25,8 +25,6 @@ import java.net.InetSocketAddress;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 

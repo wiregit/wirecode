@@ -20,13 +20,22 @@
 package com.limegroup.mojito;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +50,7 @@ import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RoutingTable;
+import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 
 /**
@@ -52,12 +62,37 @@ public class MojitoDHT {
     
     private Context context;
     
+    private boolean storeRouteTable = true;
+    
+    private boolean storeDatabase = true;
+    
     public MojitoDHT() {
-        context = new Context("DHT");
+        this(null, null, null);
     }
     
     public MojitoDHT(String name) {
-        context = new Context(name);
+        this(name, null, null);
+    }
+    
+    private MojitoDHT(String name, ContactNode local, KeyPair keyPair) {
+        if (name == null) {
+            name = "DHT";
+        }
+        
+        if (local == null) {
+            KUID nodeId = KUID.createRandomNodeID();
+            SocketAddress addr = new InetSocketAddress(0);
+            int flags = 0;
+            int instanceId = 0;
+            
+            local = new ContactNode(nodeId, addr, instanceId, flags);
+        }
+        
+        if (keyPair == null) {
+            keyPair = CryptoHelper.createKeyPair();
+        }
+        
+        context = new Context(name, local, keyPair);
     }
     
     public String getName() {
@@ -86,13 +121,43 @@ public class MojitoDHT {
         return context.isFirewalled();
     }
     
-    public void bind(SocketAddress address) throws IOException {
-        context.bind(address);
+    /**
+     * Sets whether or not the RouteTable should be serialized.
+     */
+    public void setStoreRouteTable(boolean storeRouteTable) {
+        this.storeRouteTable = storeRouteTable;
     }
     
-    //  TODO testing purposes only - remove
-    public void bind(SocketAddress address, KUID localNodeID) throws IOException {
-        context.bind(address, localNodeID);
+    /**
+     * Returns whether or not RouteTable serialization is enabled.
+     */
+    public boolean isStoreRouteTable() {
+        return storeRouteTable;
+    }
+    
+    /**
+     * Sets whether or not the Database should be serialized.
+     * 
+     * Note: If RouteTable serialization is turned off only local
+     * KeyValues will be serialized!
+     */
+    public void setStoreDatabase(boolean storeDatabase) {
+        this.storeDatabase = storeDatabase;
+    }
+    
+    /**
+     * Returns whether or not Database serialization is enabled.
+     */
+    public boolean isStoreDatabase() {
+        return storeDatabase;
+    }
+    
+    public void bind(InetAddress addr, int port) throws IOException {
+        bind(new InetSocketAddress(addr, port));
+    }
+    
+    public void bind(SocketAddress address) throws IOException {
+        context.bind(address);
     }
     
     public int size() {
@@ -211,7 +276,7 @@ public class MojitoDHT {
             try {
                 time.wait(timeout);
             } catch (InterruptedException err) {
-                LOG.error(err);
+                LOG.error("InterruptedException", err);
             }
         }
         
@@ -275,7 +340,7 @@ public class MojitoDHT {
             try {
                 time.wait(timeout);
             } catch (InterruptedException err) {
-                LOG.error(err);
+                LOG.error("InterruptedException", err);
             }
         }
         
@@ -295,12 +360,17 @@ public class MojitoDHT {
         return context;
     }
     
-    public Collection getKeys() {
+    public Set getKeys() {
         return context.getDatabase().getKeys();
     }
     
     public Collection getValues() {
         return context.getDatabase().getValues();
+    }
+    
+    // TODO for debugging purposes only
+    Collection getNodes() {
+        return context.getRouteTable().getAllNodes();
     }
     
     public boolean put(KUID key, byte[] value) 
@@ -321,7 +391,7 @@ public class MojitoDHT {
                 KeyValue.createLocalKeyValue(key, value, getLocalNode());
             
             if (privateKey == null) {
-                keyValue.sign(context.getKeyPair());
+                keyValue.sign(context.getPrivateKey());
             } else {
                 keyValue.sign(privateKey);
             }
@@ -335,9 +405,9 @@ public class MojitoDHT {
                 }
             }
         } catch (InvalidKeyException e) {
-            LOG.error(e);
+            LOG.error("InvalidKeyException", e);
         } catch (SignatureException e) {
-            LOG.error(e);
+            LOG.error("SignatureException", e);
         }
         
         return false;
@@ -365,7 +435,7 @@ public class MojitoDHT {
             try {
                 values.wait(timeout);
             } catch (InterruptedException err) {
-                LOG.error(err);
+                LOG.error("InterruptedException", err);
             }
         }
         
@@ -403,11 +473,6 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    Collection getNodes() {
-        return context.getRouteTable().getAllNodes();
-    }
-    
-    // TODO for debugging purposes only
     Database getDatabase() {
         return context.getDatabase();
     }
@@ -419,6 +484,114 @@ public class MojitoDHT {
     
     public String toString() {
         return getLocalNode().toString();
+    }
+    
+    private static final long SERIAL_VERSION_UID = 0;
+    
+    public synchronized void store(OutputStream out) throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        
+        // SERIAL_VERSION_UID
+        oos.writeLong(SERIAL_VERSION_UID);
+        
+        // Name
+        oos.writeObject(context.getName());
+        
+        // ContactNode
+        ContactNode local = context.getLocalNode();
+        oos.writeObject(local.getNodeID());
+        // TODO: store SocketAddress?
+        oos.writeByte(local.getInstanceID());
+        oos.writeByte(local.getFlags());
+        
+        // KeyPair
+        oos.writeObject(context.getKeyPair());
+        
+        // Store RouteTable
+        oos.writeBoolean(storeRouteTable);
+        if (storeRouteTable) {
+            List nodes = context.getRouteTable().getAllNodes();
+            
+            KUID nodeId = local.getNodeID();
+            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+                ContactNode node = (ContactNode)it.next();
+                
+                if (!node.getNodeID().equals(nodeId)) {
+                    oos.writeObject(node);
+                }
+            }
+            oos.writeObject(null); // Terminator
+        }
+
+        // Store Database
+        oos.writeBoolean(storeDatabase);
+        if (storeDatabase) {
+            Collection keyValues = context.getDatabase().getValues();
+            
+            KUID nodeId = local.getNodeID();
+            for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
+                KeyValue keyValue = (KeyValue)it.next();
+                
+                if (!storeRouteTable 
+                        && !nodeId.equals(keyValue.getNodeID())) {
+                    continue;
+                }
+                
+                oos.writeObject(keyValue);
+            }
+            
+            oos.writeObject(null); // Terminator
+        }
+    }
+
+    public static MojitoDHT load(InputStream in) 
+            throws ClassNotFoundException, IOException {
+        
+        ObjectInputStream ois = new ObjectInputStream(in);
+        
+        // SERIAL_VERSION_UID
+        long serialVersionUID = ois.readLong();
+        
+        // Name
+        String name = (String)ois.readObject();
+        
+        // ContactNode
+        KUID nodeId = (KUID)ois.readObject();
+        // TODO: load SocketAddress?
+        int instanceId = ois.readUnsignedByte();
+        int flags = ois.readUnsignedByte();
+        
+        ContactNode local = new ContactNode(nodeId, 
+                new InetSocketAddress(0), instanceId, flags);
+        
+        // KeyPair
+        KeyPair keyPair = (KeyPair)ois.readObject();
+        
+        MojitoDHT dht = new MojitoDHT(name, local, keyPair);
+        
+        // Load RouteTable
+        dht.storeRouteTable = ois.readBoolean();
+        if (dht.storeRouteTable) {
+            RoutingTable routeTable = dht.context.getRouteTable();
+            
+            ContactNode node = null;
+            while((node = (ContactNode)ois.readObject()) != null) {
+                routeTable.add(node, false);
+            }
+        }
+        
+        // Load Database
+        dht.storeDatabase = ois.readBoolean();
+        if (dht.storeDatabase) {
+            Database database = dht.context.getDatabase();
+            
+            KeyValue keyValue = null;
+            while((keyValue = (KeyValue)ois.readObject()) != null) {
+                database.add(keyValue);
+            }
+        }
+        
+        return dht;
     }
 }
 

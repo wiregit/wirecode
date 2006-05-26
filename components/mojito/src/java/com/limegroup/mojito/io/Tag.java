@@ -44,6 +44,7 @@ import com.limegroup.mojito.messages.response.FindValueResponse;
 import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.settings.NetworkSettings;
 
 /**
  * 
@@ -72,8 +73,9 @@ public class Tag {
         data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
         size = data.limit();
         
-        if (size >= DHTMessage.MAX_MESSAGE_SIZE) {
-            throw new IOException("Packet is too large: " + size + " >= " + DHTMessage.MAX_MESSAGE_SIZE);
+        int maxMessageSize = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
+        if (size >= maxMessageSize) {
+            throw new IOException("Message is too large: " + size + " >= " + maxMessageSize);
         }
         
         this.nodeId = node.getNodeID();
@@ -103,8 +105,9 @@ public class Tag {
         data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
         size = data.limit();
         
-        if (size >= DHTMessage.MAX_MESSAGE_SIZE) {
-            throw new IOException("Packet is too large: " + size + " >= " + DHTMessage.MAX_MESSAGE_SIZE);
+        int maxMessageSize = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
+        if (size >= maxMessageSize) {
+            throw new IOException("Message is too large: " + size + " >= " + maxMessageSize);
         }
         
         this.nodeId = nodeId;

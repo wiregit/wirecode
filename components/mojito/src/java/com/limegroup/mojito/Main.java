@@ -22,6 +22,7 @@ package com.limegroup.mojito;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -88,8 +89,8 @@ public class Main {
         
         InetAddress addr = host != null ? InetAddress.getByName(host) : null;
         
-        //List dhts = standalone(addr, port, count);
-        List dhts = limewire(addr, port);
+        List dhts = standalone(addr, port, count);
+        //List dhts = limewire(addr, port);
         
         run(addr, port, dhts);
     }
@@ -100,6 +101,8 @@ public class Main {
         for(int i = 0; i < count; i++) {
             try {
                 MojitoDHT dht = new MojitoDHT("DHT" + i);
+                dht.setStoreRouteTable(true);
+                dht.setStoreDatabase(true);
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
@@ -490,8 +493,8 @@ public class Main {
         System.out.println();
     }
     
-    private static void load(MojitoDHT dht, String[] line) {
-        if (line[1].equals("rt")) {
+    private static void load(MojitoDHT dht, String[] line) throws Throwable {
+        /*if (line[1].equals("rt")) {
             Context context = dht.getContext();
             if (context.getRouteTable().load()) {
                 System.out.println("RouteTable was loaded successfully");
@@ -505,17 +508,32 @@ public class Main {
             } else {
                 System.out.println("Loading Database failed");
             }
-        }
+        }*/
+        
+        FileInputStream fis = new FileInputStream(new File("test.dat"));
+        MojitoDHT test = MojitoDHT.load(fis);
+        fis.close();
+        
+        info(dht);
+        list(dht, new String[]{"rt", "rt"});
+        
+        info(test);
+        list(test, new String[]{"rt", "rt"});
+        
     }
     
-    private static void store(MojitoDHT dht, String[] line) {
-        if (line[1].equals("rt")) {
+    private static void store(MojitoDHT dht, String[] line) throws Exception {
+        /*if (line[1].equals("rt")) {
             Context context = dht.getContext();
             context.getRouteTable().store();
         } else {
             Context context = dht.getContext();
             context.getDatabase().store();
-        }
+        }*/
+        
+        FileOutputStream fos = new FileOutputStream(new File("test.dat"));
+        dht.store(fos);
+        fos.close();
     }
     
     private static class DoNothing implements ActivityCallback {

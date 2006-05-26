@@ -19,13 +19,6 @@
  
 package com.limegroup.mojito.db;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.SocketAddress;
 import java.security.InvalidKeyException;
@@ -34,10 +27,10 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Map.Entry;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,9 +44,7 @@ import com.limegroup.mojito.util.FixedSizeHashMap;
 import com.limegroup.mojito.util.PatriciaTrie;
 
 
-public class Database implements Serializable {
-
-    private static final long serialVersionUID = 3736527702913131617L;
+public class Database {
 
     private static final Log LOG = LogFactory.getLog(Database.class);
 
@@ -140,12 +131,12 @@ public class Database implements Serializable {
         return Collections.EMPTY_LIST;
     }
 
-    public synchronized Collection getKeys() {
-        ArrayList keys = new ArrayList(size());
+    public synchronized Set getKeys() {
+        HashSet keys = new HashSet(size());
         for(Iterator it = database.values().iterator(); it.hasNext(); ) {
             keys.add(((KeyValueBag)it.next()).getKey());
         }
-        return Collections.unmodifiableCollection(keys);
+        return Collections.unmodifiableSet(keys);
     }
     
     public synchronized Collection getValues() {
@@ -228,70 +219,7 @@ public class Database implements Serializable {
 
         return System.currentTimeMillis() >= time;
     }
-
-    public synchronized boolean store() {
-        File file = new File(DatabaseSettings.DATABASE_FILE);
-
-        ObjectOutputStream out = null;
-
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            GZIPOutputStream gzout = new GZIPOutputStream(fos);
-            out = new ObjectOutputStream(gzout);
-            out.writeObject(context.getLocalNodeID());
-            out.writeObject(database);
-            out.flush();
-            return true;
-        } catch (FileNotFoundException e) {
-            LOG.error("Database File not found error: ", e);
-        } catch (IOException e) {
-            LOG.error("Database IO error: ", e);
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException ignore) {
-            }
-        }
-        return false;
-    }
-
-    public synchronized boolean load() {
-        File file = new File(DatabaseSettings.DATABASE_FILE);
-        if (file.exists() && file.isFile() && file.canRead()) {
-
-            ObjectInputStream in = null;
-            try {
-                FileInputStream fin = new FileInputStream(file);
-                GZIPInputStream gzin = new GZIPInputStream(fin);
-                in = new ObjectInputStream(gzin);
-
-                KUID nodeId = (KUID) in.readObject();
-                if (!context.isLocalNodeID(nodeId)) {
-                    return false;
-                }
-
-                this.database = (DatabaseMap) in.readObject();
-                return true;
-            } catch (FileNotFoundException e) {
-                LOG.error("Database File not found error: ", e);
-            } catch (IOException e) {
-                LOG.error("Database IO error: ", e);
-            } catch (ClassNotFoundException e) {
-                LOG.error("Database Class not found error: ", e);
-            } finally {
-                try {
-                    if (in != null) {
-                        in.close();
-                    }
-                } catch (IOException ignore) {
-                }
-            }
-        }
-        return false;
-    }
-
+    
     public boolean isTrustworthy(KeyValue keyValue) 
             throws SignatureException, InvalidKeyException {
         PublicKey masterKey = context.getMasterKey();

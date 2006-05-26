@@ -67,7 +67,6 @@ import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RoutingTable;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
-import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
@@ -127,11 +126,13 @@ public class Context {
     
     private String name;
     
-    public Context(String name) {
+    public Context(String name, ContactNode localNode, KeyPair keyPair) {
         this.name = name;
+        this.localNode = localNode;
+        this.keyPair = keyPair;
         
         try {
-            File file = new File("public.key");
+            File file = new File(ContextSettings.MASTER_KEY.getValue());
             if (file.exists() && file.isFile()) {
                 masterKey = CryptoHelper.loadMasterKey(file);
             }
@@ -145,10 +146,11 @@ public class Context {
         globalLookupStats = new GlobalLookupStatisticContainer(this);
         dataBaseStats = new DataBaseStatisticContainer(this);
         
-        keyPair = CryptoHelper.createKeyPair();
-
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
+        
+        localNode.setTimeStamp(Long.MAX_VALUE);
+        routeTable.add(localNode, false);
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageFactory = new MessageFactory(this);
@@ -265,7 +267,7 @@ public class Context {
     }
     
     public void setFirewalled(boolean firewalled) {
-        if(localNode != null) {
+        if (localNode != null) {
             localNode.setFirewalled(firewalled);
         }
     }
@@ -352,45 +354,10 @@ public class Context {
             throw new IOException("DHT is already bound");
         }
         
-        KUID nodeId = null;
+        localNode.setSocketAddress(address);
         
-        byte[] id = ContextSettings.getLocalNodeID(address);
-        if (id == null) {
-            nodeId = KUID.createRandomNodeID(address);
-            ContextSettings.setLocalNodeID(address, nodeId.getBytes());
-        } else {
-            nodeId = KUID.createNodeID(id);
-        }
-        
-        int instanceID = ContextSettings.getLocalNodeInstanceID(nodeId);
-        int newID = (instanceID + 1) % 0xFF;
-        
-        //add ourselve to the routing table
-        localNode = new ContactNode(nodeId, address, 0, newID);
-        localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode, false);
-        
-        ContextSettings.setLocalNodeInstanceID(nodeId, newID);
-        messageDispatcher.bind(address);
-        if(DatabaseSettings.PERSIST_DATABASE.getValue()) {
-            database.load();
-        }
-
-        if(RouteTableSettings.PERSIST_ROUTETABLE.getValue()) {
-            routeTable.load();
-        }
-
-    }
-    
-    //TODO testing purposes only - remove
-    public void bind(SocketAddress address, KUID localNodeID) throws IOException {
-        if (isOpen()) {
-            throw new IOException("DHT is already bound");
-        }
-        
-        localNode = new ContactNode(localNodeID, address, 0, 1);
-        localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode, false);
+        int instanceId = (localNode.getInstanceID() + 1) % 0xFF;
+        localNode.setInstanceID(instanceId);
         
         messageDispatcher.bind(address);
     }
@@ -462,14 +429,6 @@ public class Context {
         
         synchronized (remoteSizeHistory) {
             remoteSizeHistory.clear();
-        }
-        
-        if(RouteTableSettings.PERSIST_ROUTETABLE.getValue()) {
-            routeTable.store();
-        }
-        
-        if(DatabaseSettings.PERSIST_DATABASE.getValue()) {
-            database.store();
         }
     }
     

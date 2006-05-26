@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.settings;
 
+import java.io.UnsupportedEncodingException;
 import java.net.SocketAddress;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -64,6 +65,9 @@ public class ContextSettings extends MojitoProps {
     public static final LongSetting SYNC_BOOTSTRAP_TIMEOUT
         = FACTORY.createLongSetting("SYNC_BOOTSTRAP_TIMEOUT", 3L * 60L * 1000L);
     
+    public static final StringSetting MASTER_KEY
+        = FACTORY.createStringSetting("MASTER_KEY", "public.key");
+    
     public static final StringSetting VENDOR_ID
         = FACTORY.createStringSetting("VENDOR_ID", "LIME");
     
@@ -74,6 +78,20 @@ public class ContextSettings extends MojitoProps {
             id = (id << 8) | (int)(vendorId.charAt(i) & 0xFF);
         }
         return id;
+    }
+    
+    public static String getVendorID(int vendorId) {
+        try {
+            byte[] name = new byte[]{
+                (byte)((vendorId >> 24) & 0xFF),
+                (byte)((vendorId >> 16) & 0xFF),
+                (byte)((vendorId >>  8) & 0xFF),
+                (byte)((vendorId      ) & 0xFF)
+            };
+            return new String(name, "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public static void deleteNodeID(SocketAddress address) {

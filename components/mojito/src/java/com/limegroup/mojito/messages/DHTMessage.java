@@ -29,8 +29,6 @@ import com.limegroup.mojito.KUID;
  */
 public interface DHTMessage {
     
-    public static final int MAX_MESSAGE_SIZE = 1492;
-
     public static final int PING_REQUEST = 0x01;
     public static final int PING_RESPONSE = 0x02;
     

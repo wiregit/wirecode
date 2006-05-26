@@ -20,16 +20,12 @@
 package com.limegroup.mojito;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Random;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -461,23 +457,25 @@ public class KUID implements Serializable, Comparable {
      * Creates and returns a random Node ID. The SocketAddress
      * can be null and it's used to just add some extra randomness.
      */
-    public static KUID createRandomNodeID(SocketAddress address) {
+    public static KUID createRandomNodeID() {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");
-            SecureRandom generator = SecureRandom.getInstance("SHA1PRNG");
+            //SecureRandom generator = SecureRandom.getInstance("SHA1PRNG");
             
-            Properties props = System.getProperties();
+            /*Properties props = System.getProperties();
             for(Enumeration e = props.keys(); e.hasMoreElements(); ) {
                 String key = (String)e.nextElement();
                 String value = (String)props.get(key);
                 
                 md.update(key.getBytes("UTF-8"));
                 md.update(value.getBytes("UTF-8"));
-            }
+            }*/
             
-            byte[] random = new byte[generator.nextInt(256)];
-            generator.nextBytes(random);
-            md.update(random);
+            byte[] random = new byte[Math.max(1, GENERATOR.nextInt(256))];
+            for(int i = Math.max(1, GENERATOR.nextInt(32)); i >= 0; i--) {
+                GENERATOR.nextBytes(random);
+                md.update(random);
+            }
             
             long time = System.currentTimeMillis();
             md.update((byte)((time >> 56L) & 0xFFL));
@@ -489,27 +487,14 @@ public class KUID implements Serializable, Comparable {
             md.update((byte)((time >>  8L) & 0xFFL));
             md.update((byte)((time       ) & 0xFFL));
             
-            if (address instanceof InetSocketAddress) {
-                InetSocketAddress addr = (InetSocketAddress)address;
-                md.update(addr.getAddress().getAddress());
-                
-                int port = addr.getPort();
-                md.update((byte)((port >>  8) & 0xFF));
-                md.update((byte)((port      ) & 0xFF));
-            }
+            md.update(RANDOM_PAD);
             
             return createNodeID(md.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
+        }/* catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
-        }
-    }
-    
-    public static KUID createRandomNodeID() {
-        byte[] id = new byte[LENGTH/8];
-        GENERATOR.nextBytes(id);
-        return createNodeID(id);
+        }*/
     }
     
     /**

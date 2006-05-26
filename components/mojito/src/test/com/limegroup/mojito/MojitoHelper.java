@@ -21,9 +21,6 @@ package com.limegroup.mojito;
 
 import java.lang.reflect.Field;
 
-import com.limegroup.mojito.Context;
-import com.limegroup.mojito.MojitoDHT;
-
 class MojitoHelper {
     
     private MojitoHelper() {}

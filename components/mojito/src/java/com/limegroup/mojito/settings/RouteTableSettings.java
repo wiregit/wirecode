@@ -55,9 +55,4 @@ public final class RouteTableSettings extends MojitoProps {
     
     public static final IntSetting MAX_CONSECUTIVE_FAILURES
         = FACTORY.createIntSetting("MAX_CONSECUTIVE_FAILURES", 100);
-    
-    public static final String ROUTETABLE_FILE = "RouteTable.pat";
-    
-    public static final BooleanSetting PERSIST_ROUTETABLE
-    = FACTORY.createBooleanSetting("PERSIST_ROUTETABLE", true);
 }

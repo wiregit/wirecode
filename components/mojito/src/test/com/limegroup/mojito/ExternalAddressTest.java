@@ -27,8 +27,6 @@ import java.net.SocketAddress;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Context;
-import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.handler.request.PingRequestHandler;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.RequestMessage;

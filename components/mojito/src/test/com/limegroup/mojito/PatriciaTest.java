@@ -27,7 +27,6 @@ import java.util.Set;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
 

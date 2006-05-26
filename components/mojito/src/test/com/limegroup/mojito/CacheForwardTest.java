@@ -25,8 +25,6 @@ import java.net.InetSocketAddress;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.MojitoDHT;
 
 
 public class CacheForwardTest extends BaseTestCase {

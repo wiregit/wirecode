@@ -103,7 +103,7 @@ public abstract class MessageDispatcher implements Runnable {
         storeHandler = new StoreRequestHandler(context);
         statsHandler = new StatsRequestHandler(context);
         
-        buffer = ByteBuffer.allocate(DHTMessage.MAX_MESSAGE_SIZE);
+        buffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
     }
     
     public abstract void bind(SocketAddress address) throws IOException;

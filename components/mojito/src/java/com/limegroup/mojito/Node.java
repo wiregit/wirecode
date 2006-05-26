@@ -21,6 +21,9 @@ package com.limegroup.mojito;
 
 import java.io.Serializable;
 
+/**
+ * 
+ */
 public abstract class Node implements Serializable {
     
     private KUID nodeId;
@@ -51,6 +54,9 @@ public abstract class Node implements Serializable {
         this.timeStamp = timestamp;
     }
     
+    /**
+     * Returns this Node's KUID
+     */
     public KUID getNodeID() {
         return nodeId;
     }

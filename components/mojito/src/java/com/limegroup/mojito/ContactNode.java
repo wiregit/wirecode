@@ -24,7 +24,9 @@ import java.net.SocketAddress;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
-
+/**
+ * 
+ */
 public class ContactNode extends Node {
     
     private static final long serialVersionUID = -5416538917308950549L;
@@ -46,16 +48,21 @@ public class ContactNode extends Node {
         this(nodeId, address, 0, 0);
     }
     
-    public ContactNode(KUID nodeId, SocketAddress address, int flags) {
-        this(nodeId, address, flags, 0);
-    }
+    /*public ContactNode(KUID nodeId, SocketAddress address, int flags) {
+        this(nodeId, address, 0, flags);
+    }*/
     
-    public ContactNode(KUID nodeId, SocketAddress address, int flags, int instanceId) {
+    public ContactNode(KUID nodeId, SocketAddress address, 
+            int instanceId, int flags) {
         super(nodeId);
         
+        if (address == null) {
+            throw new NullPointerException("SocketAddress is null");
+        }
+        
         this.address = address;
-        this.flags = flags;
         this.instanceId = instanceId;
+        this.flags = flags;
     }
     
     public long getAdaptativeTimeOut() {
