@@ -56,6 +56,7 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.io.LimeStandaloneMessageDispatcherImpl;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
@@ -101,6 +102,7 @@ public class Main {
         for(int i = 0; i < count; i++) {
             try {
                 MojitoDHT dht = new MojitoDHT("DHT" + i);
+                dht.setMessageDispatcher(LimeStandaloneMessageDispatcherImpl.class);
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));

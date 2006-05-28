@@ -22,6 +22,7 @@ package com.limegroup.gnutella.dht;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -59,8 +60,8 @@ public class LimeDHTMessage extends Message {
     }
 
     public static LimeDHTMessage createMessage(DHTMessage msg) throws BadPacketException, IOException {
-        byte[] payload = InputOutputUtils.serialize(msg);
-        return createMessage(payload);
+        ByteBuffer payload = InputOutputUtils.serialize(msg);
+        return createMessage(payload.array());
     }
 
     public static LimeDHTMessage createMessage(byte[] payload) throws BadPacketException, IOException {
@@ -79,7 +80,7 @@ public class LimeDHTMessage extends Message {
     }
     
     public DHTMessage getDHTMessage(SocketAddress src) throws MessageFormatException {
-        return InputOutputUtils.deserialize(src, payload);
+        return InputOutputUtils.deserialize(src, ByteBuffer.wrap(payload));
     }
     
     /**

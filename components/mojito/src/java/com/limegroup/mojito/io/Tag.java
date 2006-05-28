@@ -22,7 +22,6 @@ package com.limegroup.mojito.io;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +46,8 @@ import com.limegroup.mojito.messages.response.StoreResponse;
 import com.limegroup.mojito.settings.NetworkSettings;
 
 /**
- * 
+ * The Tag class is a wrapper for outgoing DHTMessages. For 
+ * sent Requests you may obtain a Receipt.
  */
 public class Tag {
     
@@ -67,10 +67,10 @@ public class Tag {
     
     private long timeout = -1L;
     
-    Tag(ContactNode node, ResponseMessage message) 
+    Tag(ContactNode node, ResponseMessage message, ByteBuffer data) 
             throws IOException {
         
-        data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
+        this.data = data;
         size = data.limit();
         
         int maxMessageSize = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
@@ -84,25 +84,25 @@ public class Tag {
         this.message = message;
     }
     
-    Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) 
+    Tag(SocketAddress dst, RequestMessage message, ByteBuffer data, ResponseHandler handler) 
             throws IOException {
-        this(null, dst, message, handler, -1L);
+        this(null, dst, message, data, handler, -1L);
     }
     
-    Tag(ContactNode node, RequestMessage message, ResponseHandler responseHandler) 
+    Tag(ContactNode node, RequestMessage message, ByteBuffer data, ResponseHandler responseHandler) 
             throws IOException {
-        this(node.getNodeID(), node.getSocketAddress(), message, responseHandler, node.getAdaptativeTimeOut());
+        this(node.getNodeID(), node.getSocketAddress(), message, data, responseHandler, node.getAdaptativeTimeOut());
     }
     
-    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
+    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ByteBuffer data, ResponseHandler responseHandler) 
             throws IOException {
-        this(nodeId, dst, message, responseHandler, -1L);
+        this(nodeId, dst, message, data, responseHandler, -1L);
     }
     
-    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler, long timeout) 
+    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ByteBuffer data, ResponseHandler responseHandler, long timeout) 
             throws IOException {
         
-        data = ByteBuffer.wrap(InputOutputUtils.serialize(message));
+        this.data = data;
         size = data.limit();
         
         int maxMessageSize = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
@@ -152,14 +152,6 @@ public class Tag {
         return data;
     }
     
-    public boolean send(DatagramChannel channel) throws IOException {
-        if (channel.send(data, dst) != 0) {
-            sent();
-            return true;
-        }
-        return false;
-    }
-    
     public Receipt sent() {
         sent = System.currentTimeMillis();
         data = null;
@@ -184,6 +176,10 @@ public class Tag {
         }
     }
     
+    /**
+     * The Receipt class keeps track of requests we've sent and 
+     * handles the response messages.
+     */
     public class Receipt {
         
         private long received = -1L;

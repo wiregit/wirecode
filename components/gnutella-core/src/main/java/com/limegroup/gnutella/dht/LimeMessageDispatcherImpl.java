@@ -90,7 +90,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         processingQueue.clear();
         clear();
     }
-    
+
     /* 
      * Overwritten:
      * 
@@ -103,7 +103,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
             InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
             LimeDHTMessage msg = LimeDHTMessage.createMessage(tag.getData().array());
             UDPService.instance().send(msg, dst);
-            tag.sent();
             registerInput(tag);
             return true;
         } catch (BadPacketException e) {

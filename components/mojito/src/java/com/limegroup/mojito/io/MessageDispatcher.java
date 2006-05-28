@@ -151,22 +151,24 @@ public abstract class MessageDispatcher implements Runnable {
     
     public boolean send(ContactNode node, ResponseMessage response) 
             throws IOException {
-        return send(new Tag(node, response)); 
+        return send(new Tag(node, response, serialize(response))); 
     }
     
     public boolean send(SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(dst, request, responseHandler));
+        return send(new Tag(dst, request, serialize(request), responseHandler));
     }
     
     public boolean send(KUID nodeId, SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(nodeId, dst, request, responseHandler));
+        return send(new Tag(nodeId, dst, request, 
+                serialize(request), responseHandler));
     }
     
     public boolean send(ContactNode node, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(node, request, responseHandler));
+        return send(new Tag(node, request, 
+                serialize(request), responseHandler));
     }
     
     protected boolean send(Tag tag) throws IOException {
@@ -238,9 +240,16 @@ public abstract class MessageDispatcher implements Runnable {
     }
     
     /**
-     * A helper method to deserialize Messages
+     * A helper method to serialize DHTMessage(s)
      */
-    protected DHTMessage deserialize(SocketAddress src, byte[] data) 
+    protected ByteBuffer serialize(DHTMessage message) throws IOException {
+        return InputOutputUtils.serialize(message);
+    }
+    
+    /**
+     * A helper method to deserialize DHTMessage(s)
+     */
+    protected DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
         return InputOutputUtils.deserialize(src, data);
     }
@@ -253,14 +262,16 @@ public abstract class MessageDispatcher implements Runnable {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
             
-            int length = buffer.position();
-            byte[] data = new byte[length];
+            //int length = buffer.position();
+            //byte[] data = new byte[length];
             buffer.flip();
-            buffer.get(data, 0, length);
+            //buffer.get(data, 0, length);
+            int length = buffer.remaining();
             
-            DHTMessage message = deserialize(src, data);
+            //DHTMessage message = deserialize(src, data);
+            DHTMessage message = deserialize(src, buffer);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
-            networkStats.RECEIVED_MESSAGES_SIZE.addData(data.length); // compressed size!
+            networkStats.RECEIVED_MESSAGES_SIZE.addData(length); // compressed size!
             return message;
         }
         return null;
@@ -366,7 +377,10 @@ public abstract class MessageDispatcher implements Runnable {
                 Tag tag = (Tag)outputQueue.removeFirst();
                 
                 try {
-                    if (tag.send(channel)) {
+                    SocketAddress dst = tag.getSocketAddres();
+                    ByteBuffer data = tag.getData();
+                    
+                    if (send(channel, dst, data)) {
                         // Wohoo! Message was sent!
                         registerInput(tag);
                     } else {
@@ -386,19 +400,30 @@ public abstract class MessageDispatcher implements Runnable {
     }
     
     /**
+     * The actual send method. Returns true if the data was
+     * sent or false if there was insufficient space in the
+     * output buffer (that means you'll have to re-try it later
+     * again).
+     */
+    protected boolean send(DatagramChannel channel, 
+            SocketAddress dst, ByteBuffer data) throws IOException {
+        return channel.send(data, dst) > 0;
+    }
+    
+    /**
      * Called right after a Message has been sent to register
      * its ResponseHandler (if it's a RequestMessage).
      */
     protected void registerInput(Tag tag) {
-        networkStats.SENT_MESSAGES_COUNT.incrementStat();
-        networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize());
-        
-        Receipt receipt = tag.getReceipt();
+        Receipt receipt = tag.sent();
         if (receipt != null) {
             synchronized (receiptMap) {
                 receiptMap.add(receipt);
             }
         }
+        
+        networkStats.SENT_MESSAGES_COUNT.incrementStat();
+        networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize());
     }
     
     /**
