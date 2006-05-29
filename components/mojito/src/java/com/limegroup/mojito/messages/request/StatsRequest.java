@@ -27,11 +27,11 @@ import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.security.CryptoHelper;
-import com.limegroup.mojito.util.NetworkUtils;
 
 /**
  * 

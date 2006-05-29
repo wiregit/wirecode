@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.BucketNode;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
@@ -44,7 +45,6 @@ import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.FixedSizeHashMap;
-import com.limegroup.mojito.util.NetworkUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.Trie.KeySelector;
 

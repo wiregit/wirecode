@@ -48,7 +48,7 @@ public class PingResponse extends ResponseMessage {
     }
     
     /** My external address */
-    public SocketAddress getExternalSocketAddress() {
+    public SocketAddress getExternalAddress() {
         return externalAddress;
     }
     

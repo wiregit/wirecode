@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -57,7 +58,6 @@ import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.messages.response.StoreResponse;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.FixedSizeHashMap;
-import com.limegroup.mojito.util.NetworkUtils;
 
 /**
  * MessageDispatcher is an abstract class that takes care of
@@ -261,14 +261,9 @@ public abstract class MessageDispatcher implements Runnable {
     private DHTMessage readMessage() throws MessageFormatException, IOException {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
-            
-            //int length = buffer.position();
-            //byte[] data = new byte[length];
             buffer.flip();
-            //buffer.get(data, 0, length);
-            int length = buffer.remaining();
+            int length = buffer.limit();
             
-            //DHTMessage message = deserialize(src, data);
             DHTMessage message = deserialize(src, buffer);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
             networkStats.RECEIVED_MESSAGES_SIZE.addData(length); // compressed size!

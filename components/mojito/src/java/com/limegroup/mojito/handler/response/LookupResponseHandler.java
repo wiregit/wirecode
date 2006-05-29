@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -50,7 +51,6 @@ import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
 import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
 import com.limegroup.mojito.statistics.SingleLookupStatisticContainer;
 import com.limegroup.mojito.util.KeyValueCollection;
-import com.limegroup.mojito.util.NetworkUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
 
 /**

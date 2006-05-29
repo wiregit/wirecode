@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -38,7 +39,6 @@ import com.limegroup.mojito.messages.response.FindValueResponse;
 import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.messages.response.StoreResponse;
-import com.limegroup.mojito.util.NetworkUtils;
 
 /**
  * Factory class to construct DHTMessage(s)

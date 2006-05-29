@@ -66,7 +66,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
         }
         
         PingResponse response = (PingResponse)message;
-        SocketAddress externalAddress = response.getExternalSocketAddress();
+        SocketAddress externalAddress = response.getExternalAddress();
         
         if (message.getSourceAddress().equals(externalAddress)) {
             if (LOG.isErrorEnabled()) {
