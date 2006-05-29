@@ -62,9 +62,9 @@ public class ByteBufferInputStream extends InputStream {
         return buffer.get() & 0xFF;
     }
 
-    public int read(byte[] b) throws IOException {
-        return super.read(b, 0, b.length);
-    }
+    /*public int read(byte[] b) throws IOException {
+        return read(b, 0, b.length);
+    }*/
     
     public int read(byte[] b, int off, int len) throws IOException {
         if (b == null) {

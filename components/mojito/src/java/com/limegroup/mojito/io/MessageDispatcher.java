@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -104,6 +105,7 @@ public abstract class MessageDispatcher implements Runnable {
         statsHandler = new StatsRequestHandler(context);
         
         buffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
+        buffer.order(ByteOrder.BIG_ENDIAN);
     }
     
     public abstract void bind(SocketAddress address) throws IOException;
@@ -264,9 +266,9 @@ public abstract class MessageDispatcher implements Runnable {
             buffer.flip();
             int length = buffer.limit();
             
-            DHTMessage message = deserialize(src, buffer);
+            DHTMessage message = deserialize(src, buffer/*.asReadOnlyBuffer()*/);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
-            networkStats.RECEIVED_MESSAGES_SIZE.addData(length); // compressed size!
+            networkStats.RECEIVED_MESSAGES_SIZE.addData(length);
             return message;
         }
         return null;
