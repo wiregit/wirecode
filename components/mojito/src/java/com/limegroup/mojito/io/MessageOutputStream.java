@@ -185,8 +185,8 @@ public class MessageOutputStream extends DataOutputStream {
         writeShort(msg.getVersion());
         writeByte(msg.getContactNode().getFlags());
         writeKUID(msg.getContactNode().getNodeID());
-        writeKUID(msg.getMessageID());
         writeByte(msg.getContactNode().getInstanceID());
+        writeKUID(msg.getMessageID());
         
         if (msg instanceof PingRequest) {
             writeByte(DHTMessage.PING_REQUEST);
