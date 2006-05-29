@@ -44,7 +44,10 @@ import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.messages.response.StoreResponse;
 
-
+/**
+ * The MessageOutputStream class writes a DHTMessage (serializes)
+ * to a given OutputStream.
+ */
 public class MessageOutputStream extends DataOutputStream {
     
     public MessageOutputStream(OutputStream out) {

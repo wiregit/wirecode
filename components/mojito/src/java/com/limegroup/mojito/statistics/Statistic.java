@@ -22,8 +22,7 @@ package com.limegroup.mojito.statistics;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.limegroup.mojito.util.IntBuffer;
-
+import com.limegroup.gnutella.util.IntBuffer;
 
 /**
  * Interface for generalized access to a <tt>Statistic</tt>.

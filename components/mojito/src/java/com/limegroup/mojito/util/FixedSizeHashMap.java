@@ -24,6 +24,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * A FixedSizeHashMap grows up to a fixed predefined size and 
+ * starts removing the eldest entry for each insertion. See 
+ * also access-order and insertion-order mode of LinkedHashMap!
+ */
 public class FixedSizeHashMap extends LinkedHashMap implements Serializable {
     
     private static final long serialVersionUID = 8502617259787609782L;
@@ -56,14 +61,23 @@ public class FixedSizeHashMap extends LinkedHashMap implements Serializable {
         this.maxSize = maxSize;
     }
 
+    /**
+     * Returns the max size of this Map
+     */
     public int getMaxSize() {
         return maxSize;
     }
     
+    /**
+     * Returns whether or not this Map is full
+     */
     public boolean isFull() {
         return size() >= maxSize;
     }
     
+    /*
+     * Remove the eldest entry if the Map is full
+     */
     protected boolean removeEldestEntry(Entry eldest) {
         return isFull();
     }

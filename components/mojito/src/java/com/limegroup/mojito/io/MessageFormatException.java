@@ -21,6 +21,10 @@ package com.limegroup.mojito.io;
 
 import java.io.IOException;
 
+/**
+ * MessageFormatException is thrown for either corrupt or
+ * non DHTMessages.
+ */
 public class MessageFormatException extends IOException {
 
     private static final long serialVersionUID = 4569597968567312626L;

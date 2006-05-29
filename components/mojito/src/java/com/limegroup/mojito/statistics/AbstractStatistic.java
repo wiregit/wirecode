@@ -28,8 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.limegroup.mojito.util.IntBuffer;
-
+import com.limegroup.gnutella.util.IntBuffer;
 
 /**
  * This class provides a default implementation of the <tt>Statistic</tt>

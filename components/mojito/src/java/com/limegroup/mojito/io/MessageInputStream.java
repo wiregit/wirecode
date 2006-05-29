@@ -45,7 +45,10 @@ import com.limegroup.mojito.messages.response.StatsResponse;
 import com.limegroup.mojito.messages.response.StoreResponse;
 import com.limegroup.mojito.security.CryptoHelper;
 
-
+/**
+ * The MessageInputStream reads (parses) a DHTMessage
+ * from a given InputStream
+ */
 public class MessageInputStream extends DataInputStream {
     
     public MessageInputStream(InputStream in) {

@@ -26,6 +26,9 @@ public final class CollectionUtils {
     
     private CollectionUtils() {}
     
+    /**
+     * Returns the given Collection as formatted String
+     */
     public static String toString(Collection c) {
         StringBuffer buffer = new StringBuffer();
         
@@ -34,6 +37,7 @@ public final class CollectionUtils {
             buffer.append(i).append(": ").append(it.next()).append("\n");
         }
         
+        // Delete the last \n
         if(buffer.length() > 1) {
             buffer.setLength(buffer.length()-1);
         }
