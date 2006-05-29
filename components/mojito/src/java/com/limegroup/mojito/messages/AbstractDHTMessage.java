@@ -19,8 +19,6 @@
  
 package com.limegroup.mojito.messages;
 
-import java.net.SocketAddress;
-
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
@@ -32,7 +30,7 @@ public abstract class AbstractDHTMessage implements DHTMessage {
     private int vendor;
     private int version;
 
-    private ContactNode source;
+    private ContactNode contactNode;
     private KUID messageId;
     
     private byte[] signature;
@@ -58,7 +56,7 @@ public abstract class AbstractDHTMessage implements DHTMessage {
         
         this.vendor = vendor;
         this.version = version;
-        this.source = source;
+        this.contactNode = source;
         this.messageId = messageId;
         this.signature = signature;
     }
@@ -75,20 +73,8 @@ public abstract class AbstractDHTMessage implements DHTMessage {
         return messageId;
     }
     
-    public void setSource(ContactNode source) {
-        this.source = source;
-    }
-    
-    public ContactNode getSource() {
-        return source;
-    }
-    
-    public KUID getSourceNodeID() {
-        return getSource().getNodeID();
-    }
-    
-    public SocketAddress getSourceAddress() {
-        return getSource().getSocketAddress();
+    public ContactNode getContactNode() {
+        return contactNode;
     }
     
     public byte[] getSignature() {

@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -48,17 +49,18 @@ public class PingRequestHandler extends AbstractRequestHandler {
     public void handleRequest(RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getSource() + " sent us a Ping");
+            LOG.trace(message.getContactNode() + " sent us a Ping");
         }
         
         networkStats.PING_REQUESTS.incrementStat();
         
         PingRequest request = (PingRequest)message;
         
+        ContactNode node = request.getContactNode();
         PingResponse response = context.getMessageFactory()
-                .createPingResponse(request, request.getSourceAddress());
+                .createPingResponse(request, node.getSocketAddress());
 
-        context.getMessageDispatcher().send(request.getSource(), response);
+        context.getMessageDispatcher().send(node, response);
         networkStats.PONGS_SENT.incrementStat();
     }
 }

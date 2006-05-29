@@ -237,14 +237,16 @@ public class Tag {
                 return (message instanceof PingRequest)
                     || (message instanceof StatsRequest);
             } else {
-                return nodeId.equals(response.getSourceNodeID());
+                ContactNode node = response.getContactNode();
+                return nodeId.equals(node.getNodeID());
             }
         }
         
         // This is actually not really necessary. The QueryKey in
         // MessageID should take care of it.
         private boolean compareSocketAddress(ResponseMessage response) {
-            return Tag.this.dst.equals(response.getSourceAddress());
+            ContactNode node = response.getContactNode();
+            return Tag.this.dst.equals(node.getSocketAddress());
         }
         
         private boolean compareResponseType(ResponseMessage response) {

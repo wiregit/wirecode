@@ -58,7 +58,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(request.getSource() + " is trying to lookup " + lookup);
+            LOG.trace(request.getContactNode() + " is trying to lookup " + lookup);
         }
         
         if (request instanceof FindNodeRequest) {
@@ -71,7 +71,8 @@ public class LookupRequestHandler extends AbstractRequestHandler {
     private void handleFindNodeRequest(LookupRequest request) throws IOException {
         
         KUID lookup = request.getLookupID();
-        QueryKey queryKey = QueryKey.getQueryKey(request.getSourceAddress());
+        QueryKey queryKey = QueryKey.getQueryKey(
+                request.getContactNode().getSocketAddress());
         
         List bucketList = Collections.EMPTY_LIST;
         if (context.isBootstrapped()) {
@@ -92,7 +93,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         FindNodeResponse response = context.getMessageFactory()
                     .createFindNodeResponse(request, queryKey, bucketList);
         
-        context.getMessageDispatcher().send(request.getSource(), response);
+        context.getMessageDispatcher().send(request.getContactNode(), response);
     }
     
     private void handleFindValueRequest(LookupRequest request) throws IOException {
@@ -107,7 +108,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             
             FindValueResponse response = context.getMessageFactory()
                         .createFindValueResponse(request, values);
-            context.getMessageDispatcher().send(request.getSource(), response);
+            context.getMessageDispatcher().send(request.getContactNode(), response);
         } else {
             // OK, send ContactNodes instead!
             handleFindNodeRequest(request);

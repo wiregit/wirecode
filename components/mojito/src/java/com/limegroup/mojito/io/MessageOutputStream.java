@@ -183,10 +183,10 @@ public class MessageOutputStream extends DataOutputStream {
     public void write(DHTMessage msg) throws IOException {
         writeInt(msg.getVendor());
         writeShort(msg.getVersion());
-        writeByte(msg.getSource().getFlags());
-        writeKUID(msg.getSource().getNodeID());
+        writeByte(msg.getContactNode().getFlags());
+        writeKUID(msg.getContactNode().getNodeID());
         writeKUID(msg.getMessageID());
-        writeByte(msg.getSource().getInstanceID());
+        writeByte(msg.getContactNode().getInstanceID());
         
         if (msg instanceof PingRequest) {
             writeByte(DHTMessage.PING_REQUEST);

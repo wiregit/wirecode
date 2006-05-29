@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.messages.DHTMessage;
 
@@ -97,7 +98,8 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     }
 
     protected boolean allow(DHTMessage message) {
-        return filter.allow(message.getSourceAddress());
+        ContactNode node = message.getContactNode();
+        return filter.allow(node.getSocketAddress());
     }
     
     protected void process(Runnable runnable) {

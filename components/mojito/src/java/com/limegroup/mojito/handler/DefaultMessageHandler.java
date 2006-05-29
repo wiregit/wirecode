@@ -77,7 +77,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleResponse(ResponseMessage message, long time) throws IOException {
-        addLiveContactInfo(message.getSource(), message);
+        addLiveContactInfo(message.getContactNode(), message);
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
@@ -86,7 +86,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleRequest(RequestMessage message) throws IOException {
-        addLiveContactInfo(message.getSource(), message);
+        addLiveContactInfo(message.getContactNode(), message);
     }
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
@@ -166,7 +166,7 @@ public class DefaultMessageHandler extends MessageHandler
                 
                 if (!keyValuesToForward.isEmpty()) {
                     if (message instanceof FindNodeResponse) {
-                        store(message.getSource(), 
+                        store(message.getContactNode(), 
                                 ((FindNodeResponse)message).getQueryKey(), 
                                 keyValuesToForward);
                     } else {
@@ -206,7 +206,7 @@ public class DefaultMessageHandler extends MessageHandler
                 context.getRouteTable().add(node, false);
             }
             
-            ContactNode node = message.getSource();
+            ContactNode node = message.getContactNode();
             store(node, response.getQueryKey(), keyValues);
         }
 

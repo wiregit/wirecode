@@ -334,7 +334,7 @@ public class Main {
         System.out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
             public void response(ResponseMessage response, long time) {
-                System.out.println("*** Ping to " + response.getSource() + " succeeded: " + time + "ms");
+                System.out.println("*** Ping to " + response.getContactNode() + " succeeded: " + time + "ms");
             }
 
             public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {

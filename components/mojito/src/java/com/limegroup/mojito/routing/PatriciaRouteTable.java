@@ -795,11 +795,13 @@ public class PatriciaRouteTable implements RouteTable {
         }
         
         public void response(ResponseMessage response, long time) {
-            loopLock.remove(response.getSourceNodeID());
-            touchBucket(response.getSourceNodeID());
+            ContactNode node = response.getContactNode();
+            loopLock.remove(node.getNodeID());
+            touchBucket(node.getNodeID());
+            
             if (LOG.isWarnEnabled()) {
                 LOG.warn("WARNING: " + newContact + " is trying to spoof its NodeID. " 
-                        + response.getSource()
+                        + response.getContactNode()
                         + " responded in " + time + " ms");
             }
             routingStats.SPOOF_COUNT.incrementStat();

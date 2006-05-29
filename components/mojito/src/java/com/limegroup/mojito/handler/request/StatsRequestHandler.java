@@ -54,10 +54,10 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         
         try {
             if (!req.verify(context.getMasterKey(), 
-                    message.getSourceAddress(), 
+                    message.getContactNode().getSocketAddress(), 
                     context.getSocketAddress())) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(message.getSource() + " sent us an invalid Stats Request");
+                    LOG.warn(message.getContactNode() + " sent us an invalid Stats Request");
                 }
                 return;
             }
@@ -70,7 +70,7 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         }
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getSource() + " sent us a Stats Request");
+            LOG.trace(message.getContactNode() + " sent us a Stats Request");
         }
         
         networkStats.STATS_REQUEST.incrementStat();
@@ -87,6 +87,6 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         StatsResponse response = context.getMessageFactory()
             .createStatsResponse(message, writer.toString());
         
-        context.getMessageDispatcher().send(message.getSource(), response);
+        context.getMessageDispatcher().send(message.getContactNode(), response);
     }
 }

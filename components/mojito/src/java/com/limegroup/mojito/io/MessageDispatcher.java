@@ -105,7 +105,6 @@ public abstract class MessageDispatcher implements Runnable {
         statsHandler = new StatsRequestHandler(context);
         
         buffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
-        buffer.order(ByteOrder.BIG_ENDIAN);
     }
     
     public abstract void bind(SocketAddress address) throws IOException;
@@ -266,6 +265,9 @@ public abstract class MessageDispatcher implements Runnable {
             buffer.flip();
             int length = buffer.limit();
             
+            // Restore Big-Endianess
+            buffer.order(ByteOrder.BIG_ENDIAN);
+            
             DHTMessage message = deserialize(src, buffer/*.asReadOnlyBuffer()*/);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
             networkStats.RECEIVED_MESSAGES_SIZE.addData(length);
@@ -279,8 +281,10 @@ public abstract class MessageDispatcher implements Runnable {
      */
     protected void handleMessage(DHTMessage message) throws IOException {
         // Make sure we're not receiving messages from ourself.
-        KUID nodeId = message.getSourceNodeID();
-        SocketAddress src = message.getSourceAddress();
+        ContactNode node = message.getContactNode();
+        KUID nodeId = node.getNodeID();
+        SocketAddress src = node.getSocketAddress();
+        
         if (context.isLocalNodeID(nodeId)
                 || context.isLocalAddress(src)) {
             
@@ -306,7 +310,7 @@ public abstract class MessageDispatcher implements Runnable {
             // to that Host!
             if (!response.verifyQueryKey()) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(response.getSource() + " sent us an unrequested response!");
+                    LOG.warn(response.getContactNode() + " sent us an unrequested response!");
                 }
                 return;
             }
@@ -325,14 +329,14 @@ public abstract class MessageDispatcher implements Runnable {
                     // response type have the extpected values.
                     if (!receipt.sanityCheck(response)) {
                         if (LOG.isWarnEnabled()) {
-                            LOG.warn("Response from " + response.getSource() 
+                            LOG.warn("Response from " + response.getContactNode() 
                                     + " did not pass the sanity check");
                         }
                         return;
                     }
                     
                     // Set the Round Trip Time (RTT)
-                    message.getSource().setRoundTripTime(receipt.time());
+                    message.getContactNode().setRoundTripTime(receipt.time());
                     
                     // OK, all checks passed. We can remove the receipt now!
                     receiptMap.remove(message.getMessageID());
@@ -546,7 +550,7 @@ public abstract class MessageDispatcher implements Runnable {
         
         private void processLateResponse() {
             
-            ContactNode node = response.getSource();
+            ContactNode node = response.getContactNode();
             
             if (LOG.isTraceEnabled()) {
                 if (response instanceof PingResponse) {
@@ -582,7 +586,7 @@ public abstract class MessageDispatcher implements Runnable {
             // Make sure a singe Node cannot monopolize our resources
             if (!allow(request)) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(request.getSource() + " refused");
+                    LOG.trace(request.getContactNode() + " refused");
                 }
                 networkStats.FILTERED_MESSAGES.incrementStat();
                 // return;

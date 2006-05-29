@@ -34,7 +34,7 @@ public final class KeyValueCollection implements Collection {
     private Collection keyValues;
     
     public KeyValueCollection(FindValueResponse response) {
-        this(response.getSource(), response.getValues());
+        this(response.getContactNode(), response.getValues());
     }
     
     public KeyValueCollection(ContactNode source, Collection keyValues) {

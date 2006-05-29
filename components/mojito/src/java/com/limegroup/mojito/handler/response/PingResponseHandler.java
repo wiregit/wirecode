@@ -61,16 +61,17 @@ public class PingResponseHandler extends AbstractResponseHandler {
     protected void response(ResponseMessage message, long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Received pong from " + message.getSource() 
+            LOG.trace("Received pong from " + message.getContactNode() 
                     + " after " + getErrors() + " errors and a total time of " + time() + "ms");
         }
         
         PingResponse response = (PingResponse)message;
         SocketAddress externalAddress = response.getExternalAddress();
         
-        if (message.getSourceAddress().equals(externalAddress)) {
+        ContactNode node = response.getContactNode();
+        if (node.getSocketAddress().equals(externalAddress)) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(message.getSource() + " is trying to set our external address to its address!");
+                LOG.error(node + " is trying to set our external address to its address!");
             }
             return;
         }

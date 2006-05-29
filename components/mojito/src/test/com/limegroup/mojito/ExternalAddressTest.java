@@ -110,15 +110,16 @@ public class ExternalAddressTest extends BaseTestCase {
 
         public void handleRequest(RequestMessage message) throws IOException {
             
-            SocketAddress addr = externalAddress != null ? externalAddress : message.getSourceAddress();
+            ContactNode node = message.getContactNode();
+            SocketAddress addr = externalAddress != null ? externalAddress : node.getSocketAddress();
 
-            System.out.println("Received Ping from " + message.getSourceAddress());
-            System.out.println("Going to tell " + message.getSourceAddress() + " that its external address is " + addr);
+            System.out.println("Received Ping from " + node.getSocketAddress());
+            System.out.println("Going to tell " + node.getSocketAddress() + " that its external address is " + addr);
             
             PingResponse pong = context.getMessageFactory()
                     .createPingResponse(message, addr);
     
-            context.getMessageDispatcher().send(message.getSource(), pong);
-        }        
+            context.getMessageDispatcher().send(node, pong);
+        }
     }
 }

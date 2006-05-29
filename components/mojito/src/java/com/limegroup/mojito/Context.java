@@ -1051,7 +1051,7 @@ public class Context {
             networkStats.PINGS_OK.incrementStat();
             
             synchronized (handlerMap) {
-                handlerMap.remove(response.getSourceAddress());
+                handlerMap.remove(response.getContactNode().getSocketAddress());
                 fireEvent(new Runnable() {
                     public void run() {
                         synchronized (listeners) {

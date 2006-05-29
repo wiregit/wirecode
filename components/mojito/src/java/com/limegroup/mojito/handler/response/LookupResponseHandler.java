@@ -211,7 +211,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             lookupStat.addReply();
             activeSearches--;
             
-            int hop = ((Integer)hopMap.get(message.getSourceNodeID())).intValue();
+            ContactNode node = message.getContactNode();
+            int hop = ((Integer)hopMap.get(node.getNodeID())).intValue();
+            
             if (message instanceof FindValueResponse) {
                 if (isValueLookup()) {
                     handleFindValueResponse((FindValueResponse)message, time, hop);
@@ -292,7 +294,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         
         if (c.isEmpty()) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(response.getSource()
+                LOG.warn(response.getContactNode()
                     + " returned an empty KeyValueCollection for " + lookup);
             }
             
@@ -300,7 +302,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             
         } else {
             if (LOG.isTraceEnabled()) {
-                LOG.trace(response.getSource()
+                LOG.trace(response.getContactNode()
                         + " returned KeyValues for "
                         + lookup + " after "
                         + queried.size() + " queried Nodes and a total time of "
@@ -343,7 +345,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                     node.setSocketAddress(response.getSocketAddress());
                 } else {*/
                     if (LOG.isErrorEnabled()) {
-                        LOG.error(response.getSource() 
+                        LOG.error(response.getContactNode() 
                                 + " sent us a ContactNode with an invalid IP/Port " + node);
                     }
                     continue;
@@ -594,7 +596,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         private ContactNodeEntry(FindNodeResponse response) {
-            this(response.getSource(), response.getQueryKey());
+            this(response.getContactNode(), response.getQueryKey());
         }
         
         private ContactNodeEntry(ContactNode node, QueryKey queryKey) {

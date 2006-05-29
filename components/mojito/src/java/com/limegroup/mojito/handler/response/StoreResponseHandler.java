@@ -109,29 +109,31 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             
             if (!current.getKey().equals(valueId)) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(message.getSource() + " is ACK'ing a KeyValue " 
+                    LOG.error(message.getContactNode() + " is ACK'ing a KeyValue " 
                             + valueId + " we have not requested to store!");
                 }
                 
-                fireStoreFailed(message.getSource().getNodeID(), message.getSourceAddress());
+                ContactNode node = message.getContactNode();
+                fireStoreFailed(node.getNodeID(), node.getSocketAddress());
                 return;
             }
             
             if (status == StoreResponse.SUCCEEDED) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(message.getSource() + " sucessfully stored KeyValue " + valueId);
+                    LOG.trace(message.getContactNode() + " sucessfully stored KeyValue " + valueId);
                 }
             } else if (status == StoreResponse.FAILED) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(message.getSource() + " failed to store KeyValue " + valueId);
+                    LOG.trace(message.getContactNode() + " failed to store KeyValue " + valueId);
                 }
             } else {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(message.getSource() + " returned unknown status code " 
+                    LOG.error(message.getContactNode() + " returned unknown status code " 
                             + status + " for KeyValue " + valueId);
                 }
                 
-                fireStoreFailed(message.getSource().getNodeID(), message.getSourceAddress());
+                ContactNode node = message.getContactNode();
+                fireStoreFailed(node.getNodeID(), node.getSocketAddress());
                 return;
             }
             
@@ -141,9 +143,9 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             // Store next...
             index++;
             if (index < keyValues.size()) {
-                store(message.getSource());
+                store(message.getContactNode());
             } else {
-                fireStoreSucceeded(message.getSource());
+                fireStoreSucceeded(message.getContactNode());
             }
         }
     }
