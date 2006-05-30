@@ -22,7 +22,6 @@ package com.limegroup.mojito.db;
 import java.io.Serializable;
 import java.net.SocketAddress;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -165,6 +164,10 @@ public class KeyValue implements Serializable {
         return value;
     }
     
+    public boolean isEmptyValue() {
+        return value == null || value.length == 0;
+    }
+    
     public KUID getNodeID() {
         return nodeId;
     }
@@ -241,6 +244,10 @@ public class KeyValue implements Serializable {
     }
     
     public String toString() {
-        return "KeyValue: " + key.toString() + " = " + new String(value) + " - originator: " + nodeId;
+        if (!isEmptyValue()) {
+            return key.toString() + " = " + new String(value) + " - originator: " + nodeId;
+        } else {
+            return key.toString() + " - originator: " + nodeId + " (REMOVE)";
+        }
     }
 }

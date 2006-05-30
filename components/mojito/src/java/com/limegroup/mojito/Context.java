@@ -94,7 +94,8 @@ public class Context {
     private SocketAddress localAddress;
     private SocketAddress tmpExternalAddress;
 
-    private KeyPair keyPair;
+    private final Object keyPairLock = new Object();
+    private volatile KeyPair keyPair;
     
     private Database database;
     private RouteTable routeTable;
@@ -203,6 +204,20 @@ public class Context {
     
     public PublicKey getMasterKey() {
         return masterKey;
+    }
+    
+    public void createNewKeyPair() {
+        setKeyPair(null);
+    }
+    
+    public void setKeyPair(KeyPair keyPair) {
+        synchronized (keyPairLock) {
+            if (keyPair == null) {
+                this.keyPair = CryptoHelper.createKeyPair();
+            } else {
+                this.keyPair = keyPair;
+            }
+        }
     }
     
     public KeyPair getKeyPair() {

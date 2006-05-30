@@ -63,11 +63,11 @@ public class MojitoDHT {
     private Context context;
     
     public MojitoDHT() {
-        this(null, null, null);
+        this(null, null, CryptoHelper.createKeyPair());
     }
     
     public MojitoDHT(String name) {
-        this(name, null, null);
+        this(name, null, CryptoHelper.createKeyPair());
     }
     
     private MojitoDHT(String name, ContactNode local, KeyPair keyPair) {
@@ -83,11 +83,7 @@ public class MojitoDHT {
             
             local = new ContactNode(nodeId, addr, instanceId, flags);
         }
-        
-        if (keyPair == null) {
-            keyPair = CryptoHelper.createKeyPair();
-        }
-        
+
         context = new Context(name, local, keyPair);
     }
     
@@ -367,6 +363,13 @@ public class MojitoDHT {
             synchronized(database) {
                 if (database.add(keyValue) 
                         || database.isTrustworthy(keyValue)) {
+                    
+                    // Create a new KeyPair every time we have removed
+                    // all local KeyValues.
+                    if (database.getLocalValueCount() == 0) {
+                        context.createNewKeyPair();
+                    }
+                    
                     context.store(keyValue, listener);
                     return true;
                 }
@@ -485,10 +488,7 @@ public class MojitoDHT {
         oos.writeByte(local.getInstanceID());
         oos.writeByte(local.getFlags());
         
-        // KeyPair
-        oos.writeObject(context.getKeyPair());
-        
-        // Store RouteTable
+        // Store the RouteTable
         oos.writeBoolean(storeRouteTable);
         if (storeRouteTable) {
             List nodes = context.getRouteTable().getAllNodes();
@@ -501,11 +501,15 @@ public class MojitoDHT {
                     oos.writeObject(node);
                 }
             }
-            oos.writeObject(null); // Terminator
+            
+            // Terminator
+            oos.writeObject(null); 
         }
 
-        // Store Database
+        // Store the Database
         oos.writeBoolean(storeDatabase);
+        boolean anyLocalKeyValue = false;
+        
         if (storeDatabase) {
             Collection keyValues = context.getDatabase().getValues();
             
@@ -517,10 +521,23 @@ public class MojitoDHT {
                     continue;
                 }
                 
+                if (!anyLocalKeyValue 
+                        && keyValue.isLocalKeyValue()) {
+                    anyLocalKeyValue = true;
+                }
+                
                 oos.writeObject(keyValue);
             }
             
-            oos.writeObject(null); // Terminator
+            // Terminator
+            oos.writeObject(null);
+        }
+        
+        // Store the KeyPair if there are any local KeyValues
+        if (storeDatabase && anyLocalKeyValue) {
+            oos.writeObject(context.getKeyPair());
+        } else {
+            oos.writeObject(null);
         }
     }
 
@@ -563,12 +580,10 @@ public class MojitoDHT {
         ContactNode local = new ContactNode(nodeId, 
                 new InetSocketAddress(0), instanceId, flags);
         
-        // KeyPair
-        KeyPair keyPair = (KeyPair)ois.readObject();
+        // Create an instance w/o a KeyPair for now (will set it later!)
+        MojitoDHT dht = new MojitoDHT(name, local, null);
         
-        MojitoDHT dht = new MojitoDHT(name, local, keyPair);
-        
-        // Load RouteTable
+        // Load the RouteTable
         boolean storeRouteTable = ois.readBoolean();
         if (storeRouteTable) {
             RouteTable routeTable = dht.context.getRouteTable();
@@ -581,7 +596,7 @@ public class MojitoDHT {
             }
         }
         
-        // Load Database
+        // Load the Database
         boolean storeDatabase = ois.readBoolean();
         if (storeDatabase) {
             Database database = dht.context.getDatabase();
@@ -594,6 +609,13 @@ public class MojitoDHT {
             }
         }
         
+        // Load the KeyPair. If null then create a new KeyPair!
+        KeyPair keyPair = (KeyPair)ois.readObject();
+        if (!storeDatabase || keyPair == null) {
+            keyPair = CryptoHelper.createKeyPair();
+        }
+        dht.context.setKeyPair(keyPair);
+
         return dht;
     }
 }

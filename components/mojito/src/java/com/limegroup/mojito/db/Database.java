@@ -50,6 +50,8 @@ public class Database {
 
     private DatabaseMap database;
 
+    private int localValueCount = 0;
+    
     private Context context;
 
     private DataBaseStatisticContainer databaseStats;
@@ -66,6 +68,10 @@ public class Database {
         return database.size();
     }
 
+    public synchronized int getLocalValueCount() {
+        return localValueCount;
+    }
+    
     public synchronized boolean isEmpty() {
         return database.isEmpty();
     }
@@ -75,7 +81,7 @@ public class Database {
     }
 
     public synchronized boolean add(KeyValue keyValue) {
-        if (keyValue.getValue().length > 0) {
+        if (!keyValue.isEmptyValue()) {
             KUID key = keyValue.getKey();
             KeyValueBag bag = (KeyValueBag) database.get(key);
             if (bag == null) {
@@ -84,7 +90,15 @@ public class Database {
             }
     
             databaseStats.STORED_VALUES.incrementStat();
-            return bag.add(keyValue);
+            
+            if (bag.add(keyValue)) {
+                if (keyValue.isLocalKeyValue()) {
+                    localValueCount++;
+                }
+                return true;
+            }
+            return false;
+            
         } else {
             return remove(keyValue);
         }
@@ -99,6 +113,9 @@ public class Database {
             }
             
             databaseStats.REMOVED_VALUES.incrementStat();
+            if (keyValue.isEmptyValue()) {
+                localValueCount--;
+            }
             return true;
         }
         return false;
@@ -301,14 +318,34 @@ public class Database {
          * rather age faster...
          */
         private boolean add(KeyValue keyValue) {
+            if (keyValue.isEmptyValue()) {
+                throw new IllegalArgumentException();
+            }
+            
+            return addOrRemove(keyValue);
+        }
+        
+        /**
+         * See add() for constraints!
+         */
+        private boolean remove(KeyValue keyValue) {
+            if (!keyValue.isEmptyValue()) {
+                throw new IllegalArgumentException();
+            }
+            
+            return addOrRemove(keyValue);
+        }
+        
+        /**
+         * Combined add/remove method. See add() for constraints!
+         */
+        private boolean addOrRemove(KeyValue keyValue) {
             try {
                 boolean isTrustworthy = isTrustworthy(keyValue);
-                KUID nodeId = keyValue.getNodeID();
                 
                 // No. 1
                 if (isTrustworthy) {
-                    values.put(nodeId, keyValue);
-                    return true;
+                    return update(keyValue);
                 }
                 
                 // If signed then make sure it's correct
@@ -323,7 +360,7 @@ public class Database {
                 }
                 
                 // If nothing to replace...
-                KeyValue current = (KeyValue)values.get(nodeId);
+                KeyValue current = (KeyValue)values.get(keyValue.getNodeID());
                 if (current == null) {
                     // ...add if not full or local
                     if (isFull() && !keyValue.isLocalKeyValue()) {
@@ -335,8 +372,7 @@ public class Database {
                     }
                     
                     // No. 2
-                    values.put(nodeId, keyValue);
-                    return true;
+                    return update(keyValue);
                 }
                 
                 // Cannot replace trustworthy KeyValues
@@ -353,8 +389,7 @@ public class Database {
                 
                 // No. 2
                 if (keyValue.isLocalKeyValue()) {
-                    values.put(nodeId, keyValue);
-                    return true;
+                    return update(keyValue);
                 }
                 
                 // Cannot replace local KeyValues
@@ -374,8 +409,7 @@ public class Database {
                     if (keyValue.isSigned()) {
                         if (keyValue.verify(current.getPublicKey())
                                 || current.verify(keyValue.getPublicKey())) {
-                            values.put(nodeId, keyValue);
-                            return true;
+                            return update(keyValue);
                         } else {
                             if (LOG.isTraceEnabled()) {
                                 LOG.trace("Cannot replace "
@@ -399,8 +433,7 @@ public class Database {
                 // A signed KeyValue will always replace  
                 // a non-signed KeyValue
                 } else if (keyValue.isSigned()) {
-                    values.put(nodeId, keyValue);
-                    return true;
+                    return update(keyValue);
                     
                 // OK, neither of them is signed so our only option
                 // is to check the IP:Port of the originator. If both
@@ -414,8 +447,7 @@ public class Database {
                         if (currentSrc.equals(
                                 keyValue.getSocketAddress())) {
                             
-                            values.put(nodeId, keyValue);
-                            return true;
+                            return update(keyValue);
                         } else {
                             if (LOG.isTraceEnabled()) {
                                 LOG.trace("Cannot replace "
@@ -428,9 +460,11 @@ public class Database {
                         }
                     } else {
                         
-                        // No. 5
-                        values.put(nodeId, keyValue);
-                        return true;
+                        // An anonymous source cannot remove an anonymous KeyValue!
+                        if (!keyValue.isEmptyValue()) {
+                            // No. 5
+                            return update(keyValue);
+                        }
                     }
                 }
             } catch (InvalidKeyException e) {
@@ -441,123 +475,18 @@ public class Database {
             return false;
         }
         
-        /*private boolean add(KeyValue keyValue) {
-            try {
-                boolean isTrustworthy = isTrustworthy(keyValue);
-                boolean isLocalKeyValue = keyValue.isLocalKeyValue();
-
-                if (!isTrustworthy 
-                        && !isLocalKeyValue 
-                        && keyValue.isSigned()) {
-                    
-                    if (!keyValue.verify()) {
-                        if (LOG.isErrorEnabled()) {
-                            LOG.error("Cannot add "
-                                    + keyValue +
-                                    " because it is signed but the signature does not match");
-                        }
-                        return false;
-                    }
-                }
-                
-                KUID nodeId = keyValue.getNodeID();
-                KeyValue current = (KeyValue) values.get(nodeId);
-
-                if (current == null) {
-                    if (values.isFull() && (!isTrustworthy || !isLocalKeyValue)) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("Cannot store " + keyValue
-                                    + " because KeyValueBag is full");
-                        }
-                        return false;
-                    }
-                } else if (!isLocalKeyValue) {
-
-                    if (!isTrustworthy) {
-
-                        if (isTrustworthy(current)) {
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("Cannot replace "
-                                                + current
-                                                + " with "
-                                                + keyValue
-                                                + " because new KeyValue is not trustworthy");
-                            }
-                            return false;
-                        }
-                        
-                        if (keyValue.isSigned()) {
-                            if (current.isSigned()) {
-                                if (!current.verify(keyValue.getPublicKey())) {
-                                    if (LOG.isTraceEnabled()) {
-                                        LOG.trace("Cannot replace "
-                                                    + current
-                                                    + " with "
-                                                    + keyValue
-                                                    + " because signatures do not match");
-                                    }
-                                    return false;
-                                }
-                            }
-                        } else if (current.isSigned()) {
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("Cannot replace "
-                                            + current
-                                            + " with "
-                                            + keyValue
-                                            + " because signatures do not match");
-                            }
-                            return false;
-                        }
-                        
-                        if (keyValue.isSigned() || current.isSigned()) {
-                            
-                            if (!keyValue.isSigned() 
-                                    && current.isSigned()) {
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace("Cannot replace "
-                                                    + current
-                                                    + " with "
-                                                    + keyValue
-                                                    + " because current is signed and the new KeyValue ");
-                                }
-                                return false;
-                            }
-                        } else {
-                            SocketAddress currentSrc = current.getSocketAddress();
-                            if (currentSrc != null
-                                    && !currentSrc.equals(keyValue
-                                            .getSocketAddress())) {
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace("Cannot replace "
-                                                    + current
-                                                    + " with "
-                                                    + keyValue
-                                                    + " because originator addresses do not match");
-                                }
-                                return false;
-                            }
-                        }
-                    }
-                }
-
-                if (LOG.isTraceEnabled()) {
-                    if (current != null) {
-                        LOG.trace("Replacing " + current + " with " + keyValue);
-                    } else {
-                        LOG.trace("Adding KeyValue " + keyValue);
-                    }
-                }
-
-                values.put(nodeId, keyValue);
+        /**
+         * Adds the KeyValue if it is not empty and removes it
+         * if it is empty.
+         */
+        private boolean update(KeyValue keyValue) {
+            if (keyValue.isEmptyValue()) {
+                return values.remove(keyValue.getNodeID()) != null;
+            } else {
+                values.put(keyValue.getNodeID(), keyValue);
                 return true;
-
-            } catch (InvalidKeyException e) {
-                throw new RuntimeException(e);
-            } catch (SignatureException e) {
-                throw new RuntimeException(e);
             }
-        }*/
+        }
 
         public KeyValue get(KUID nodeId) {
             return (KeyValue)values.get(nodeId);
@@ -571,38 +500,7 @@ public class Database {
             }
             return current.equals(keyValue);
         }
-
-        private boolean remove(KeyValue keyValue) {
-            try {
-                KUID nodeId = keyValue.getNodeID();
-                KeyValue current = (KeyValue) values.get(nodeId);
-                if (current == null) {
-                    return false;
-                }
-                SocketAddress currentSrc = current.getSocketAddress();
-                
-                boolean isTrustworthy = isTrustworthy(keyValue);
-                boolean isLocalKeyValue = keyValue.isLocalKeyValue();
-                
-                if (isTrustworthy 
-                        || (isLocalKeyValue && current.isLocalKeyValue())
-                        || (currentSrc != null && currentSrc.equals(keyValue.getSocketAddress()))) {
-                    
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Removed KeyValue " + current);
-                    }
-                    
-                    values.remove(nodeId);
-                    return true;
-                }
-                return false;
-            } catch (InvalidKeyException e) {
-                throw new RuntimeException(e);
-            } catch (SignatureException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
+        
         public boolean isEmpty() {
             return values.isEmpty();
         }
