@@ -69,11 +69,11 @@ public class DataBaseTest extends BaseTestCase {
         byte[] value = "test".getBytes("UTF-8");
         
         KUID nodeId = KUID.createRandomNodeID();
-        KeyValue keyValue = KeyValue.createRemoteKeyValue(key,value,nodeId,addr,null);
+        KeyValue keyValue = KeyValue.createRemoteKeyValue(key, value, nodeId, addr, null, null);
         db.add(keyValue);
         assertEquals(1, db.size());
         
-        keyValue = KeyValue.createRemoteKeyValue(key,new byte[0],nodeId,addr,null);
+        keyValue = KeyValue.createRemoteKeyValue(key, new byte[0], nodeId, addr, null, null);
         db.add(keyValue);
         assertEquals(0, db.size());
     }
