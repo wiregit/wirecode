@@ -277,11 +277,189 @@ public class Database {
             return key;
         }
 
+        /**
+         * 1) A trustworthy KeyValue will replace everything and 
+         *    they cannot be replaced by anything except 
+         *    trustworthy KeyValues.
+         *    
+         * 2) A local KeyValue will replace everything except
+         *    trustworthy KeyValues and they cannot be replaced by
+         *    anything except trustworthy or local KeyValues.
+         *    
+         * 3) A signed KeyValue will replace everything except
+         *    trustworthy, local or an another signed KeyValue
+         *    from a different originator (first comes, first serves).
+         * 
+         * 4) A non-anonymous KeyValue will replace every
+         *    anonymous KeyValue or non-anonymous KeyValue
+         *    if it is from the same source (IP:Port).
+         *    
+         * 5) An anonymous KeyValue will replace anonymous KeyValues.
+         * 
+         * TODO: We should talk about 4) and 5). It might be a good
+         * Idea to not allow No. 5 and let an anonymous KeyValue
+         * rather age faster...
+         */
         private boolean add(KeyValue keyValue) {
+            try {
+                boolean isTrustworthy = isTrustworthy(keyValue);
+                KUID nodeId = keyValue.getNodeID();
+                
+                // No. 1
+                if (isTrustworthy) {
+                    values.put(nodeId, keyValue);
+                    return true;
+                }
+                
+                // If signed then make sure it's correct
+                if (keyValue.isSigned()
+                        && !keyValue.verify()) {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("Cannot add "
+                            + keyValue 
+                            + " because it is signed but the signature is invalid");
+                    }
+                    return false;
+                }
+                
+                // If nothing to replace...
+                KeyValue current = (KeyValue)values.get(nodeId);
+                if (current == null) {
+                    // ...add if not full or local
+                    if (isFull() && !keyValue.isLocalKeyValue()) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Cannot store " + keyValue
+                                + " because KeyValueBag is full");
+                        }
+                        return false;
+                    }
+                    
+                    // No. 2
+                    values.put(nodeId, keyValue);
+                    return true;
+                }
+                
+                // Cannot replace trustworthy KeyValues
+                // No. 1
+                if (isTrustworthy(current)) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Cannot replace a trustworthy KeyValue "
+                                + current
+                                + " with a non-trustwothy KeyValue "
+                                + keyValue);
+                    }
+                    return false;
+                }
+                
+                // No. 2
+                if (keyValue.isLocalKeyValue()) {
+                    values.put(nodeId, keyValue);
+                    return true;
+                }
+                
+                // Cannot replace local KeyValues
+                // No. 2
+                if (current.isLocalKeyValue()) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Cannot replace a local KeyValue "
+                                + current
+                                + " with a non-local KeyValue "
+                                + keyValue);
+                    }
+                    return false;
+                }
+                
+                // No. 3
+                if (current.isSigned()) {
+                    if (keyValue.isSigned()) {
+                        if (keyValue.verify(current.getPublicKey())
+                                || current.verify(keyValue.getPublicKey())) {
+                            values.put(nodeId, keyValue);
+                            return true;
+                        } else {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Cannot replace "
+                                        + current
+                                        + " with "
+                                        + keyValue
+                                        + " because keys do not match");
+                            }
+                            return false;
+                        }
+                    } else {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Cannot replace signed KeyValue "
+                                    + current
+                                    + " with a non-signed KeyValue "
+                                    + keyValue);
+                        }
+                        return false;
+                    }
+                    
+                // A signed KeyValue will always replace  
+                // a non-signed KeyValue
+                } else if (keyValue.isSigned()) {
+                    values.put(nodeId, keyValue);
+                    return true;
+                    
+                // OK, neither of them is signed so our only option
+                // is to check the IP:Port of the originator. If both
+                // match we assume they're from the source which might
+                // be wrong!
+                } else {
+                    SocketAddress currentSrc = current.getSocketAddress();
+                    
+                    // No. 4
+                    if (currentSrc != null) {
+                        if (currentSrc.equals(
+                                keyValue.getSocketAddress())) {
+                            
+                            values.put(nodeId, keyValue);
+                            return true;
+                        } else {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Cannot replace "
+                                    + current
+                                    + " with "
+                                    + keyValue
+                                    + " because originator addresses do not match");
+                            }
+                            return false;
+                        }
+                    } else {
+                        
+                        // No. 5
+                        values.put(nodeId, keyValue);
+                        return true;
+                    }
+                }
+            } catch (InvalidKeyException e) {
+                LOG.error("InvalidKeyException", e);
+            } catch (SignatureException e) {
+                LOG.error("SignatureException", e);
+            }
+            return false;
+        }
+        
+        /*private boolean add(KeyValue keyValue) {
             try {
                 boolean isTrustworthy = isTrustworthy(keyValue);
                 boolean isLocalKeyValue = keyValue.isLocalKeyValue();
 
+                if (!isTrustworthy 
+                        && !isLocalKeyValue 
+                        && keyValue.isSigned()) {
+                    
+                    if (!keyValue.verify()) {
+                        if (LOG.isErrorEnabled()) {
+                            LOG.error("Cannot add "
+                                    + keyValue +
+                                    " because it is signed but the signature does not match");
+                        }
+                        return false;
+                    }
+                }
+                
                 KUID nodeId = keyValue.getNodeID();
                 KeyValue current = (KeyValue) values.get(nodeId);
 
@@ -289,7 +467,7 @@ public class Database {
                     if (values.isFull() && (!isTrustworthy || !isLocalKeyValue)) {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("Cannot store " + keyValue
-                                    + " because KeyValueCollection is full");
+                                    + " because KeyValueBag is full");
                         }
                         return false;
                     }
@@ -307,19 +485,58 @@ public class Database {
                             }
                             return false;
                         }
-
-                        SocketAddress currentSrc = current.getSocketAddress();
-                        if (currentSrc != null
-                                && !currentSrc.equals(keyValue
-                                        .getSocketAddress())) {
+                        
+                        if (keyValue.isSigned()) {
+                            if (current.isSigned()) {
+                                if (!current.verify(keyValue.getPublicKey())) {
+                                    if (LOG.isTraceEnabled()) {
+                                        LOG.trace("Cannot replace "
+                                                    + current
+                                                    + " with "
+                                                    + keyValue
+                                                    + " because signatures do not match");
+                                    }
+                                    return false;
+                                }
+                            }
+                        } else if (current.isSigned()) {
                             if (LOG.isTraceEnabled()) {
                                 LOG.trace("Cannot replace "
-                                                + current
-                                                + " with "
-                                                + keyValue
-                                                + " because originator addresses do not match");
+                                            + current
+                                            + " with "
+                                            + keyValue
+                                            + " because signatures do not match");
                             }
                             return false;
+                        }
+                        
+                        if (keyValue.isSigned() || current.isSigned()) {
+                            
+                            if (!keyValue.isSigned() 
+                                    && current.isSigned()) {
+                                if (LOG.isTraceEnabled()) {
+                                    LOG.trace("Cannot replace "
+                                                    + current
+                                                    + " with "
+                                                    + keyValue
+                                                    + " because current is signed and the new KeyValue ");
+                                }
+                                return false;
+                            }
+                        } else {
+                            SocketAddress currentSrc = current.getSocketAddress();
+                            if (currentSrc != null
+                                    && !currentSrc.equals(keyValue
+                                            .getSocketAddress())) {
+                                if (LOG.isTraceEnabled()) {
+                                    LOG.trace("Cannot replace "
+                                                    + current
+                                                    + " with "
+                                                    + keyValue
+                                                    + " because originator addresses do not match");
+                                }
+                                return false;
+                            }
                         }
                     }
                 }
@@ -340,7 +557,7 @@ public class Database {
             } catch (SignatureException e) {
                 throw new RuntimeException(e);
             }
-        }
+        }*/
 
         public KeyValue get(KUID nodeId) {
             return (KeyValue)values.get(nodeId);

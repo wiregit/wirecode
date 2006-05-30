@@ -48,10 +48,6 @@ public class ContactNode extends Node {
         this(nodeId, address, 0, 0);
     }
     
-    /*public ContactNode(KUID nodeId, SocketAddress address, int flags) {
-        this(nodeId, address, 0, flags);
-    }*/
-    
     public ContactNode(KUID nodeId, SocketAddress address, 
             int instanceId, int flags) {
         super(nodeId);
@@ -68,7 +64,7 @@ public class ContactNode extends Node {
     public long getAdaptativeTimeOut() {
         //for now, based on failures and previous round trip time
         long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
-        if(roundTripTime <= 0 || isDead()) {
+        if(roundTripTime <= 0L || isDead()) {
             return maxTimeout;
         } else {
             return Math.min(((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * roundTripTime) + 

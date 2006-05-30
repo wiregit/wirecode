@@ -60,12 +60,12 @@ public final class InputOutputUtils {
             MessageInputStream in = null;
             if (COMPRESS) {
                 GZIPInputStream gz = new GZIPInputStream(bbis);
-                in = new MessageInputStream(gz);
+                in = new MessageInputStream(src, gz);
             } else {
-                in = new MessageInputStream(bbis);
+                in = new MessageInputStream(src, bbis);
             }
             
-            DHTMessage message = in.readMessage(src);
+            DHTMessage message = in.readMessage();
             in.close();
             return message;
         } catch (IOException e) {

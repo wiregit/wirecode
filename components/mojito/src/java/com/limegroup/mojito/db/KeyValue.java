@@ -32,7 +32,10 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.security.CryptoHelper;
 
+/**
+ * 
 
+ */
 public class KeyValue implements Serializable {
     
     private static final long serialVersionUID = -666238398053901179L;
@@ -42,6 +45,7 @@ public class KeyValue implements Serializable {
     
     private KUID nodeId;
     private SocketAddress address;
+    private PublicKey pubKey;
     
     private boolean localKeyValue = false;
     
@@ -60,33 +64,35 @@ public class KeyValue implements Serializable {
     private int numLocs;
     
     public static KeyValue createLocalKeyValue(KUID key, byte[] value) {
-        return createKeyValue(key, value, null, null, null, true);
+        return createKeyValue(key, value, null, null, null, null, true);
     }
     
     public static KeyValue createLocalKeyValue(KUID key, byte[] value,
             KUID nodeId, SocketAddress address) {
-        return createKeyValue(key, value, nodeId, address, null, true);
+        return createKeyValue(key, value, nodeId, address, null, null, true);
     }
     
-    public static KeyValue createLocalKeyValue(KUID key, byte[] value, ContactNode node) {
+    public static KeyValue createLocalKeyValue(KUID key, byte[] value, 
+            ContactNode node) {
         return createKeyValue(key, value, 
-                node.getNodeID(), node.getSocketAddress(), null, true);
+                node.getNodeID(), node.getSocketAddress(), null, null, true);
     }
     
     public static KeyValue createRemoteKeyValue(KUID key, byte[] value, 
-            KUID nodeId, SocketAddress address, byte[] signature) {
-        return createKeyValue(key, value, nodeId, address, signature, false);
+            KUID nodeId, SocketAddress address, PublicKey pubKey, byte[] signature) {
+        return createKeyValue(key, value, nodeId, address, pubKey, signature, false);
     }
     
     private static KeyValue createKeyValue(KUID key, byte[] value, 
-            KUID nodeId, SocketAddress address, byte[] signature, 
+            KUID nodeId, SocketAddress address, PublicKey pubKey, byte[] signature, 
             boolean localKeyValue) {
         
-        return new KeyValue(key, value, nodeId, address, signature, localKeyValue);
+        return new KeyValue(key, value, nodeId, address, pubKey, signature, localKeyValue);
     }
     
     private KeyValue(KUID key, byte[] value, 
-            KUID nodeId, SocketAddress address, byte[] signature, 
+            KUID nodeId, SocketAddress address, 
+            PublicKey pubKey, byte[] signature, 
             boolean localKeyValue) {
         
         this.key = key;
@@ -100,6 +106,7 @@ public class KeyValue implements Serializable {
         
         this.address = address;
         
+        this.pubKey = pubKey;
         this.signature = signature;
         
         this.creationTime = System.currentTimeMillis();
@@ -120,9 +127,9 @@ public class KeyValue implements Serializable {
         signature = CryptoHelper.sign(privateKey, this);
     }
     
-    public boolean verify(KeyPair keyPair) 
+    public boolean verify()
             throws SignatureException, InvalidKeyException {
-        return verify(keyPair.getPublic());
+        return verify(getPublicKey());
     }
     
     public boolean verify(PublicKey pubKey) 
@@ -131,6 +138,15 @@ public class KeyValue implements Serializable {
             return CryptoHelper.verify(pubKey, this);
         }
         return false;
+    }
+    
+    public void setPublicKey(PublicKey pubKey) 
+            throws SignatureException, InvalidKeyException {
+        if (!verify(pubKey)) {
+            throw new IllegalStateException("Cannot set PublicKey");
+        }
+        
+        this.pubKey = pubKey;
     }
     
     public void setClose(boolean close) {
@@ -159,6 +175,10 @@ public class KeyValue implements Serializable {
     
     public boolean isSigned() {
         return signature != null;
+    }
+    
+    public PublicKey getPublicKey() {
+        return pubKey;
     }
     
     public byte[] getSignature() {
@@ -198,7 +218,7 @@ public class KeyValue implements Serializable {
     public void setNumLocs(int numLocs) {
         this.numLocs = numLocs;
     }
-
+    
     public boolean equals(Object o) {
         if (!(o instanceof KeyValue)) {
             return false;

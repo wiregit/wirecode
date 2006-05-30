@@ -51,8 +51,11 @@ import com.limegroup.mojito.security.CryptoHelper;
  */
 public class MessageInputStream extends DataInputStream {
     
-    public MessageInputStream(InputStream in) {
+    private SocketAddress src;
+    
+    public MessageInputStream(SocketAddress src, InputStream in) {
         super(in);
+        this.src = src;
     }
     
     private KUID readKUID() throws IOException {
@@ -73,6 +76,24 @@ public class MessageInputStream extends DataInputStream {
         }
     }
     
+    /*private byte[] readID() throws IOException {
+        byte[] id = new byte[KUID.LENGTH/8];
+        readFully(id);
+        return id;
+    }
+    
+    private KUID readNodeID() throws IOException {
+        return KUID.createNodeID(readID());
+    }
+    
+    private KUID readMessageID() throws IOException {
+        return KUID.createMessageID(readID());
+    }
+    
+    private KUID readValueID() throws IOException {
+        return KUID.createValueID(readID());
+    }*/
+    
     private KeyValue readKeyValue() throws IOException {
         
         KUID key = readKUID();
@@ -82,9 +103,10 @@ public class MessageInputStream extends DataInputStream {
         KUID nodeId = readKUID();
         SocketAddress address = readSocketAddress();
         
+        PublicKey pubKey = readPublicKey();
         byte[] signature = readSignature();
         
-        return KeyValue.createRemoteKeyValue(key, value, nodeId, address, signature);
+        return KeyValue.createRemoteKeyValue(key, value, nodeId, address, pubKey, signature);
     }
     
     private PublicKey readPublicKey() throws IOException {
@@ -221,7 +243,7 @@ public class MessageInputStream extends DataInputStream {
         return new StatsRequest(vendor, version, node, messageId, signature, request);
     }
     
-    public DHTMessage readMessage(SocketAddress src) throws IOException {
+    public DHTMessage readMessage() throws IOException {
 
         int vendor = readInt();
         int version = readUnsignedShort();

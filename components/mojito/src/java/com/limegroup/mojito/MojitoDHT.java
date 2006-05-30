@@ -357,8 +357,10 @@ public class MojitoDHT {
             
             if (privateKey == null) {
                 keyValue.sign(context.getPrivateKey());
+                keyValue.setPublicKey(context.getPublicKey());
             } else {
                 keyValue.sign(privateKey);
+                //keyValue.verify(context.getMasterKey());
             }
             
             Database database = context.getDatabase();
