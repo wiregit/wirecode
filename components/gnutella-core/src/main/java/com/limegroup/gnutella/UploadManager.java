@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +36,7 @@ import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.LimitReachedUploadState;
 import com.limegroup.gnutella.uploader.PushProxyUploadState;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
-import com.limegroup.gnutella.uploader.UploadSlotUser;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
@@ -114,14 +113,10 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 	 * instances (all of the uploads in progress).  
 	 */
 	private List /* of Uploaders */ _activeUploadList = new LinkedList();
+	
+	/** A manager for the available upload slots */
+	private final UploadSlotManager slotManager = new UploadSlotManager();
 
-    /** The list of queued uploads.  Most recent uploads are added to the tail.
-     *  Each pair contains the underlying socket and the time of the last
-     *  request. */
-    private List /* <HTTPSession> */ _queuedUploads = 
-        new ArrayList();
-
-    
 	/** set to true when an upload has been succesfully completed. */
 	private volatile boolean _hadSuccesfulUpload=false;
     
@@ -162,10 +157,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
      */
     private float averageBandwidth = 0f;
 
-    /** The desired minimum quality of service to provide for uploads, in
-     *  KB/s.  See testTotalUploadLimit. */
-    private static final float MINIMUM_UPLOAD_SPEED=3.0f;
-    
     /** 
      * The file index used in this structure to indicate a browse host
      * request
@@ -449,7 +440,9 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
                 // If this uploader is still in the queue, remove it.
                 // Also change its state from COMPLETE to INTERRUPTED
                 // because it didn't really complete.
-                if(_queuedUploads.remove(session))
+            	boolean stillInQueue = slotManager.positionInQueue(session) > -1;
+            	slotManager.requestDone(session);
+                if(stillInQueue)
                     uploader.setState(Uploader.INTERRUPTED);
             }
             
@@ -862,7 +855,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
      * uploads this will return true. 
      */
     public synchronized boolean isServiceable() {
-    	return hasFreeSlot(uploadsInProgress() + getNumQueuedUploads());
+    	return slotManager.isServiceable(uploadsInProgress() + getNumQueuedUploads());
     }
 
 	public synchronized int uploadsInProgress() {
@@ -870,7 +863,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 	}
 
 	public synchronized int getNumQueuedUploads() {
-        return _queuedUploads.size();
+        return slotManager.getNumQueued();
     }
 
 	/**
@@ -885,11 +878,9 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 	}
 	
 	public synchronized boolean isConnectedTo(InetAddress addr) {
-	    for(Iterator i = _queuedUploads.iterator(); i.hasNext(); ) {
-	        HTTPSession next = (HTTPSession)i.next();
-	        if (next.isConnectedTo(addr))
-	        	return true;
-	    }
+	    if (slotManager.getNumUsersForHost(addr.getHostAddress()) > 0)
+	    	return true;
+	    
 	    for(Iterator i = _activeUploadList.iterator(); i.hasNext(); ) {
 	        HTTPUploader next = (HTTPUploader)i.next();
 	        InetAddress host = next.getConnectedHost();
@@ -917,9 +908,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 	    
 	    return ret;
     }
-
-
-	/////////////////// Private Interface for Testing Limits /////////////////
 
     /** Checks whether the given upload may proceed based on number of slots,
      *  position in upload queue, etc.  Updates the upload queue as necessary.
@@ -953,99 +941,51 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             RouterService.getFileManager().validate(fd);
 
         URN sha1 = fd.getSHA1Urn();
-        boolean isGreedy = rqc.isGreedy(sha1);
-        boolean isDupe = rqc.isDupe(sha1);
-        int size = _queuedUploads.size();
-        int posInQueue = getPositionInQueue(session);//-1 if not in queue
-        int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
-        boolean wontAccept = size >= maxQueueSize || isDupe;
-        int ret = -1;
-
-        // if this uploader is greedy and at least on other client is queued
-        // send him another limit reached reply.
-        boolean limitReached = false;
-        if (isGreedy && size >=1) {
-            if(LOG.isWarnEnabled())
-                LOG.warn(session.getUploader() + " greedy -- limit reached."); 
-        	UploadStat.LIMIT_REACHED_GREEDY.incrementStat(); 
-        	limitReached = true;
-        } else if (posInQueue < 0) {
-            limitReached = hostLimitReached(session.getHost());
-            // remember that we sent a LIMIT_REACHED only
-            // if the limit was actually really reached and not 
-            // if we just keep a greedy client from entering the
-            // QUEUE
-            if(limitReached)
-                rqc.limitReached(sha1);
-        }
-
-     /*   Assert.that(maxQueueSize>0,"queue size 0, cannot use");
-        Assert.that(uploader.getState()==Uploader.CONNECTING,
-                    "Bad state: "+uploader.getState());
-        Assert.that(uploader.getMethod()==HTTPRequestMethod.GET); */
-
-        HTTPUploader uploader = session.getUploader();
-        if(posInQueue == -1) {//this uploader is not in the queue already
+        if (rqc.isDupe(sha1))
+        	return REJECTED;
+        
+        boolean greedy = rqc.isGreedy(sha1);
+        if (!greedy && hostLimitReached(session.getHost())) {
+        	greedy = true;
+        	rqc.limitReached(sha1);
+        } else if (greedy && slotManager.getNumQueued() > 0 &&
+        		slotManager.positionInQueue(session) == -1) {
             if(LOG.isDebugEnabled())
-                LOG.debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");
-            if(limitReached || wontAccept) { 
-                if(LOG.isDebugEnabled())
-                    LOG.debug(uploader+" limited? "+limitReached+" wontAccept? "
-                      +wontAccept);
-                return REJECTED; //we rejected this uploader
-            }
-            _queuedUploads.add(session);
-            posInQueue = size;//the index of the uploader in the queue
-            ret = QUEUED;//we have queued it now
-            if(LOG.isDebugEnabled())
-                LOG.debug(uploader+" new uploader added to queue");
+                LOG.debug(session.getUploader()+" limited");
+        	 return REJECTED;
         }
-        else {//we are alreacy in queue, update it
-            if(session.poll()) {
-                _queuedUploads.remove(posInQueue);
-                if(LOG.isDebugEnabled())
-                    LOG.debug(uploader+" queued uploader flooding-throwing exception");
-                throw new IOException();
-            }
-            
-            //check if this is a duplicate request
-            if (rqc.isDupe(sha1))
-            	return REJECTED;
-            
-            if(LOG.isDebugEnabled())
-                LOG.debug(uploader+" updated queued uploader");
-            ret = QUEUED;//queued
-        }
-        if(LOG.isDebugEnabled())
-            LOG.debug(uploader+" checking if given uploader is can be accomodated ");
-        // If we have atleast one slot available, see if the position
-        // in the queue is small enough to be accepted.
-        if(hasFreeSlot(posInQueue + uploadsInProgress())) {
-            ret = ACCEPTED;
-            if(LOG.isDebugEnabled())
-                LOG.debug(uploader+" accepting upload");
-            //remove this uploader from queue
-            _queuedUploads.remove(posInQueue);
-        }
-        else {
+        
+        int queued = slotManager.pollForSlot(session, 
+        		!greedy && session.getUploader().supportsQueueing());
+        
+        if (queued == -1) {
             //Note: The current policy is to not put uploadrers in a queue, if they 
             //do not send am X-Queue header. Further. uploaders are removed from 
             //the queue if they do not send the header in the subsequent request.
             //To change this policy, chnage the way queue is set.
-            if(!uploader.supportsQueueing()) {//downloader does not support queueing
-                _queuedUploads.remove(posInQueue);//remove it
-                ret = REJECTED;
-            }
+        	if (!session.getUploader().supportsQueueing())
+        		slotManager.cancelRequest(session);
+        	return REJECTED;
         }
         
-        //register the uploader in the dupe table
-        if (ret == ACCEPTED)
+        if (queued > 0 && session.poll()) {
+        	slotManager.cancelRequest(session);
+        	throw new IOException("came back too soon");
+        }
+        if (queued > 0)
+        	return QUEUED;
+        else {
         	rqc.startedUpload(sha1);
-        return ret;
-    }
+        	return ACCEPTED;
+        }
+	}
+	
+	/////////////////// Private Interface for Testing Limits /////////////////
+	
 	
 	public int getPositionInQueue(HTTPSession session) {
-		return _queuedUploads.indexOf(session);
+		//return _queuedUploads.indexOf(session);
+		return slotManager.positionInQueue(session);
 	}
 
 	/**
@@ -1078,65 +1018,15 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
   	}
 	
     /**
-     * @return true if the number of uploads from the host is strictly LESS than
+     * @return false if the number of uploads from the host is strictly LESS than
      * the MAX, although we want to allow exactly MAX uploads from the same
      * host. This is because this method is called BEFORE we add/allow the.
      * upload.
      */
 	private synchronized boolean hostLimitReached(String host) {
-        int max = UploadSettings.UPLOADS_PER_PERSON.getValue();
-        int i=0;
-        Iterator iter = _activeUploadList.iterator();
-        while(iter.hasNext()) { //count active uploads to this host
-            Uploader u = (Uploader)iter.next();
-            if(u.getHost().equals(host))
-                i++;
-        }
-        iter = _queuedUploads.iterator();
-        while(iter.hasNext()) { //also count uploads in queue to this host
-            HTTPSession session = (HTTPSession) iter.next();
-            if(session.getHost().equals(host))
-                i++;
-        }
-        return i>=max;
+        return slotManager.getNumUsersForHost(host) >= 
+        	UploadSettings.UPLOADS_PER_PERSON.getValue();
 	}
-	
-	/**
-	 * Returns true iff another upload is allowed assuming that the
-	 * amount of active uploaders is passed off to it.
-	 * REQUIRES: this' monitor is held
-	 */
-	public boolean hasFreeSlot(int current) {
-        //Allow another upload if (a) we currently have fewer than
-        //SOFT_MAX_UPLOADS uploads or (b) some upload has more than
-        //MINIMUM_UPLOAD_SPEED KB/s.  But never allow more than MAX_UPLOADS.
-        //
-        //In other words, we continue to allow uploads until everyone's
-        //bandwidth is diluted.  The assumption is that with MAX_UPLOADS
-        //uploads, the probability that all just happen to have low capacity
-        //(e.g., modems) is small.  This reduces "Try Again Later"'s at the
-        //expensive of quality, making swarmed downloads work better.
-        
-		if (current >= UploadSettings.HARD_MAX_UPLOADS.getValue()) {
-            return false;
-        } else if (current < UploadSettings.SOFT_MAX_UPLOADS.getValue()) {
-            return true;
-        } else {
-            float fastest=0.0f;
-            for (Iterator iter=_activeUploadList.iterator(); iter.hasNext(); ) {
-                BandwidthTracker upload=(BandwidthTracker)iter.next();
-                float speed = 0;
-                try {
-                    speed=upload.getMeasuredBandwidth();
-                } catch (InsufficientDataException ide) {
-                    speed = 0;
-                }
-                fastest=Math.max(fastest,speed);
-            }
-            return fastest>MINIMUM_UPLOAD_SPEED;
-        }
-    }
-
 
 	////////////////// Bandwith Allocation and Measurement///////////////
 

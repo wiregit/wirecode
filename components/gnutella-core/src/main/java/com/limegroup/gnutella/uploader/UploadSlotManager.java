@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.MultiIterator;
 
 
 /**
@@ -57,7 +58,7 @@ public class UploadSlotManager {
 	 * Polls for an available upload slot. (HTTP-style)
 	 * 
 	 * @param user the user that will use the upload slot
-	 * @queue if the user supports queueing
+	 * @queue if the user can enter the queue 
 	 * @return the position in the queue if queued, -1 if rejected,
 	 * 0 if it can proceed immediately
 	 */
@@ -91,13 +92,15 @@ public class UploadSlotManager {
 		
 		// if there is a higher priority upload or not enough free slots, queue.
 		if (existHigherPriority || 
-				!hasFreeSlot(active.size() + positionInQueue - freeableSlots)) {
+				!hasFreeSlot(active.size() + 
+						Math.max(0,positionInQueue) - 
+						freeableSlots)) {
 			
-			if (!request.isQueuable())
+			if (!request.isQueuable()) 
 				return -1;
 			
-			if (positionInQueue > 0)
-				return positionInQueue;
+			if (positionInQueue >= 0)
+				return ++positionInQueue;
 			else
 				return queueRequest(request);
 		}
@@ -107,7 +110,7 @@ public class UploadSlotManager {
 			killPreemptible(request.getPriority());
 
 		// remove from queue if it was there
-		if (positionInQueue > 0)
+		if (positionInQueue > -1)
 			removeIfQueued(request.getUser());
 		
 		addActiveRequest(request);
@@ -119,15 +122,19 @@ public class UploadSlotManager {
 	 *    0 if not in the queue
 	 */
 	private int positionInQueue(UploadSlotRequest request) {
-		if (request.isQueuable()) {
-			List queue = getQueue(request.getUser());
-			int i = queue.indexOf(request);
-			if (i > -1)
-				return ++i;
-		} 
-		return 0;
+		List queue = getQueue(request.getUser());
+		return queue.indexOf(request);
 	}
 	
+	public int positionInQueue(UploadSlotUser user) {
+		List queue = getQueue(user);
+		for(int i = 0; i < queue.size();i++) {
+			UploadSlotRequest request = (UploadSlotRequest) queue.get(i);
+			if (request.getUser() == user)
+				return i;
+		}
+		return -1;
+	}
 	/**
 	 * @return the queue where requests from the user would be found.
 	 */
@@ -179,6 +186,18 @@ public class UploadSlotManager {
 		}
 	}
 
+	/**
+	 * @return whether there would be a free slot for an HTTP uploader.
+	 */
+	public boolean isServiceable(int current) {
+		if (existActiveHigherPriority(HTTP))
+			return false;
+		
+		// This ignores currently active BT_SEED uploaders since they 
+		// can be preempted.
+		return hasFreeSlot(current);
+	}
+	
 	/**
 	 * @return whether there would be a free slot if current many were taken.
 	 */
@@ -241,9 +260,9 @@ public class UploadSlotManager {
 	/**
 	 * Cancels the request issued by this UploadSlotListener
 	 */
-	public void cancelRequest(UploadSlotUser listener) {
-		if (!removeIfQueued(listener))
-			requestDone(listener);
+	public void cancelRequest(UploadSlotUser user) {
+		if (!removeIfQueued(user))
+			requestDone(user);
 	}
 
 	/**
@@ -292,6 +311,25 @@ public class UploadSlotManager {
 			active.add(queuedRequest);
 			queuedRequest.getListener().slotAvailable();
 		}
+	}
+	
+	public int getNumQueued() {
+		// this is not that simple...
+		return queued.size() + queuedResumable.size();
+	}
+	
+	public int getNumUsersForHost(String host) {
+		MultiIterator iter = new MultiIterator(
+				new Iterator[] {active.iterator(), 
+						queued.iterator(), 
+						queuedResumable.iterator()});
+		int ret = 0;
+		while(iter.hasNext()) {
+			UploadSlotRequest request = (UploadSlotRequest)iter.next();
+			if (host.equals(request.getUser().getHost()))
+					ret++;
+		}
+		return ret;
 	}
 	
 	/**
