@@ -22,6 +22,7 @@ package com.limegroup.gnutella.dht;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +35,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.io.InputOutputUtils;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.io.Tag;
@@ -122,7 +124,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void handleMessage(Message msg, InetSocketAddress addr, 
             ReplyHandler handler) {
         try {
-            DHTMessage message = ((LimeDHTMessage)msg).getDHTMessage(addr);
+            ByteBuffer payload = ((LimeDHTMessage)msg).getPayload();
+            DHTMessage message = InputOutputUtils.deserialize(addr, payload);
             handleMessage(message);
         } catch (MessageFormatException err) {
             LOG.error("MessageFormatException", err);

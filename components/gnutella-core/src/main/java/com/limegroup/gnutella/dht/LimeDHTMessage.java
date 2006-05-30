@@ -21,16 +21,12 @@ package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
-import com.limegroup.mojito.io.InputOutputUtils;
-import com.limegroup.mojito.io.MessageFormatException;
-import com.limegroup.mojito.messages.DHTMessage;
 
 /**
  * LimeDHTMessage is a wrapper class for Mojito DHTMessage(s). This 
@@ -59,11 +55,6 @@ public class LimeDHTMessage extends Message {
         this.payload = payload;
     }
 
-    public static LimeDHTMessage createMessage(DHTMessage msg) throws BadPacketException, IOException {
-        ByteBuffer payload = InputOutputUtils.serialize(msg);
-        return createMessage(payload.array());
-    }
-
     public static LimeDHTMessage createMessage(byte[] payload) throws BadPacketException, IOException {
         return new LimeDHTMessage(payload);
     }
@@ -79,8 +70,8 @@ public class LimeDHTMessage extends Message {
         return this;
     }
     
-    public DHTMessage getDHTMessage(SocketAddress src) throws MessageFormatException {
-        return InputOutputUtils.deserialize(src, ByteBuffer.wrap(payload));
+    public ByteBuffer getPayload() {
+        return ByteBuffer.wrap(payload);
     }
     
     /**
