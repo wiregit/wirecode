@@ -32,8 +32,9 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.security.CryptoHelper;
 
 /**
- * 
-
+ * The KeyValue class is essentially a <Key, Value> Tuple with
+ * some additional fields like originator, PublicKey or the 
+ * signature of the KeyValue.
  */
 public class KeyValue implements Serializable {
     
@@ -44,14 +45,14 @@ public class KeyValue implements Serializable {
     
     private KUID nodeId;
     private SocketAddress address;
+    
     private PublicKey pubKey;
+    private byte[] signature;
     
     private boolean localKeyValue = false;
     
     private long creationTime;
     private long lastPublishTime;
-    
-    private byte[] signature;
     
     private int hashCode = -1;
     
@@ -62,26 +63,31 @@ public class KeyValue implements Serializable {
      */
     private int numLocs;
     
+    /** Constructs an anonymous local KeyValue */
     public static KeyValue createLocalKeyValue(KUID key, byte[] value) {
         return createKeyValue(key, value, null, null, null, null, true);
     }
     
-    public static KeyValue createLocalKeyValue(KUID key, byte[] value,
-            KUID nodeId, SocketAddress address) {
-        return createKeyValue(key, value, nodeId, address, null, null, true);
-    }
-    
+    /** Constrcuts a local KeyValue */
     public static KeyValue createLocalKeyValue(KUID key, byte[] value, 
             ContactNode node) {
         return createKeyValue(key, value, 
                 node.getNodeID(), node.getSocketAddress(), null, null, true);
     }
     
+    /** Constructs an local KeyValue */
+    public static KeyValue createLocalKeyValue(KUID key, byte[] value,
+            KUID nodeId, SocketAddress address) {
+        return createKeyValue(key, value, nodeId, address, null, null, true);
+    }
+    
+    /** Constructs a remote KeyValue we've received from the DHT */
     public static KeyValue createRemoteKeyValue(KUID key, byte[] value, 
             KUID nodeId, SocketAddress address, PublicKey pubKey, byte[] signature) {
         return createKeyValue(key, value, nodeId, address, pubKey, signature, false);
     }
     
+    /** Helper method to construct local as well as remote KeyValues */
     private static KeyValue createKeyValue(KUID key, byte[] value, 
             KUID nodeId, SocketAddress address, PublicKey pubKey, byte[] signature, 
             boolean localKeyValue) {
@@ -89,6 +95,7 @@ public class KeyValue implements Serializable {
         return new KeyValue(key, value, nodeId, address, pubKey, signature, localKeyValue);
     }
     
+    /** Private, use static constructors! */
     private KeyValue(KUID key, byte[] value, 
             KUID nodeId, SocketAddress address, 
             PublicKey pubKey, byte[] signature, 
@@ -112,25 +119,43 @@ public class KeyValue implements Serializable {
         this.localKeyValue = localKeyValue;
     }
     
+    /**
+     * A KeyValue is anonymous if the nodeId or the 
+     * address of the originator is unknown.
+     */
     public boolean isAnonymous() {
         return nodeId == null || address == null 
                     || nodeId.isUnknownID();
     }
     
+    /**
+     * Returns whether or not the KeyValue is a local KeyValue
+     */
     public boolean isLocalKeyValue() {
         return localKeyValue;
     }
     
+    /**
+     * Signs the KeyValue with the PrivateKey
+     */
     public void sign(PrivateKey privateKey) 
             throws InvalidKeyException, SignatureException {
         signature = CryptoHelper.sign(privateKey, this);
     }
     
+    /**
+     * Verifies the KeyValue/Signature with this KeyValues
+     * PublicKey
+     */
     public boolean verify()
             throws SignatureException, InvalidKeyException {
         return verify(getPublicKey());
     }
     
+    /**
+     * Verifies the KeyValue/Signature with the given
+     * PublicKey
+     */
     public boolean verify(PublicKey pubKey) 
             throws SignatureException, InvalidKeyException {
         if (pubKey != null && signature != null) {
@@ -139,69 +164,143 @@ public class KeyValue implements Serializable {
         return false;
     }
     
+    /**
+     * Sets the PublicKey of this KeyValue.
+     * 
+     * Note: The KeyValue must be signed and the signature
+     * must match with the given PublicKey or an IllegalArgumentException
+     * will be thrown!
+     */
     public void setPublicKey(PublicKey pubKey) 
             throws SignatureException, InvalidKeyException {
         if (!verify(pubKey)) {
-            throw new IllegalStateException("Cannot set PublicKey");
+            throw new IllegalArgumentException("Signature and PublicKey don't match");
         }
         
         this.pubKey = pubKey;
     }
     
+    /**
+     * Sets whether or not the KeyValue is considered
+     * as close to our local NodeID
+     */
     public void setClose(boolean close) {
         this.isClose = close;
     }
     
+    /**
+     * Returns whether or not the KeyValue is considered
+     * as close to our local NodeID
+     */
     public boolean isClose() {
         return isClose;
     }
     
+    /**
+     * Returns the Key of this KeyValue
+     */
     public KUID getKey() {
         return key;
     }
     
+    /**
+     * Returns the Value of this KeyValue.
+     */
     public byte[] getValue() {
         return value;
     }
     
+    /**
+     * Returns whether or not the value is "empty". Storing
+     * empty values on the DHT means removing them.
+     */
     public boolean isEmptyValue() {
         return value == null || value.length == 0;
     }
     
+    /**
+     * Returns the NodeID of the originator. In case of
+     * anonymous KeyValues it's type of an unknown ID
+     * rather than a true Node ID.
+     */
     public KUID getNodeID() {
         return nodeId;
     }
     
+    /**
+     * Returns the SocketAddress of the originator or
+     * null if the originator is unknown.
+     */
     public SocketAddress getSocketAddress() {
         return address;
     }
     
+    /**
+     * Returns whether or not the KeyValue is signed.
+     */
     public boolean isSigned() {
         return signature != null;
     }
     
+    /**
+     * Returns the PublicKey or null if no key is set
+     */
     public PublicKey getPublicKey() {
         return pubKey;
     }
     
+    /**
+     * Returns the signature or null if the KeyValue is not signed.
+     */
     public byte[] getSignature() {
         return signature;
     }
     
+    /**
+     * Returns the creation time of the KeyValue.
+     * 
+     * Note: Creation time is the time when this object
+     * was created.
+     */
     public long getCreationTime() {
         return creationTime;
     }
     
+    /**
+     * Sets the creation time of this KeyValue object
+     */
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
     }
     
+    /**
+     * Returns the time when this KeyValue was published last time
+     */
     public long getLastPublishTime() {
         return lastPublishTime;
     }
     
-    public void setLastPublishTime(long publishTime) {
+    /**
+     * Sets the publish time of this KeyValue object
+     */
+    void setLastPublishTime(long publishTime) {
         this.lastPublishTime = publishTime;
+    }
+    
+    /**
+     * Returns the number of locations where this 
+     * KeyValue has been stored
+     */
+    public int getNumLocs() {
+        return numLocs;
+    }
+
+    /**
+     * Sets the number of locations where this 
+     * KeyValue has been stored
+     */
+    public void setNumLocs(int numLocs) {
+        this.numLocs = numLocs;
     }
     
     public int hashCode() {
@@ -212,14 +311,6 @@ public class KeyValue implements Serializable {
             }
         }
         return hashCode;
-    }
-    
-    public int getNumLocs() {
-        return numLocs;
-    }
-
-    public void setNumLocs(int numLocs) {
-        this.numLocs = numLocs;
     }
     
     public boolean equals(Object o) {

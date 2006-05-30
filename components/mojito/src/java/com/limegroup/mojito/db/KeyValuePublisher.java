@@ -32,7 +32,9 @@ import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
 import com.limegroup.mojito.util.CollectionUtils;
 
-
+/**
+ * The KeyValuePublisher class republishes local KeyValue on the DHT
+ */
 public class KeyValuePublisher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(KeyValuePublisher.class);

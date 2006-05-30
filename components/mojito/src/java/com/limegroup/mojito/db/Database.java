@@ -43,7 +43,9 @@ import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 import com.limegroup.mojito.util.PatriciaTrie;
 
-
+/**
+ * 
+ */
 public class Database {
 
     private static final Log LOG = LogFactory.getLog(Database.class);
