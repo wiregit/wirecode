@@ -45,6 +45,7 @@ public class NIOSocket extends AbstractNBSocket {
         setInitialWriter();
         NIODispatcher.instance().register(channel, this);
         connectedTo = s.getInetAddress();
+        port = s.getPort();
     }
 
     /** Creates an unconnected NIOSocket. */
