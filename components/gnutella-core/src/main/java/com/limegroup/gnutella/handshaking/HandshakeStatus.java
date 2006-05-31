@@ -18,7 +18,7 @@ public class HandshakeStatus {
     public static final HandshakeStatus OK = new HandshakeStatus("OK", true);
     
     /* All bad statuses. */
-    public static final HandshakeStatus NO_X_ULTRAPEER = new HandshakeStatus("No X-Ultrapeer.");
+    public static final HandshakeStatus NO_X_ULTRAPEER = new HandshakeStatus("No X-Ultrapeer");
     public static final HandshakeStatus DISCONNECTED = new HandshakeStatus("I'm Disconnected");
     public static final HandshakeStatus WE_ARE_LEAVES = new HandshakeStatus("We're Leaves");
     public static final HandshakeStatus NOT_GOOD_UP = new HandshakeStatus("Not Good Ultrapeer");
