@@ -56,7 +56,6 @@ public class MessageOutputStream extends DataOutputStream {
 	
     private void writeKUID(KUID key) throws IOException {
         if (key != null) {
-            writeByte(key.getType());
             write(key.getBytes());
         } else {
             writeByte(0);

@@ -140,9 +140,9 @@ public class KUID implements Serializable, Comparable {
      * Returns the identity and throws a RuntimeException
      * if this isn't a Node ID.
      */
-    public KUID assertNodeID() throws RuntimeException {
+    public KUID assertNodeID() throws AssertionError {
         if (!isNodeID()) {
-            throw new RuntimeException(this + " is not a NODE_ID");
+            throw new AssertionError(this + " is not a NODE_ID");
         }
         return this;
     }
@@ -158,9 +158,9 @@ public class KUID implements Serializable, Comparable {
      * Returns the identity and throws a RuntimeException
      * if this isn't a Value ID.
      */
-    public KUID assertValueID() throws RuntimeException {
+    public KUID assertValueID() throws AssertionError {
         if (!isValueID()) {
-            throw new RuntimeException(this + " is not a VALUE_ID");
+            throw new AssertionError(this + " is not a VALUE_ID");
         }
         return this;
     }
@@ -176,9 +176,9 @@ public class KUID implements Serializable, Comparable {
      * Returns the identity and throws a RuntimeException
      * if this isn't a Message ID.
      */
-    public KUID assertMessageID() throws RuntimeException {
+    public KUID assertMessageID() throws AssertionError {
         if (!isMessageID()) {
-            throw new RuntimeException(this + " is not a MESSAGE_ID");
+            throw new AssertionError(this + " is not a MESSAGE_ID");
         }
         return this;
     }
@@ -585,17 +585,19 @@ public class KUID implements Serializable, Comparable {
      * @return a random KUID starting with the given prefix
      */
     private static KUID createPrefxNodeID(byte[] prefix, int depth, byte[] random) {
-        ++depth;
-        int length = (int)(depth)/8;
-        System.arraycopy(prefix,0,random,0,length);
-        if((depth % 8) != 0) {
-            int bitsToCopy = (depth) % 8;
+        depth++;
+        int length = (int)depth/8;
+        System.arraycopy(prefix, 0, random, 0, length);
+        
+        int bitsToCopy = depth % 8;
+        if (bitsToCopy != 0) {
             // Mask has the low-order (8-bits) bits set
             int mask = (1 << (8-bitsToCopy)) - 1;
             int prefixByte = prefix[length];
             int randByte   = random[length];
             random[length] = (byte) ((prefixByte & ~mask) | (randByte & mask));
         }
+        
         return KUID.createNodeID(random);
     }
     

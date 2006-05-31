@@ -58,49 +58,31 @@ public class MessageInputStream extends DataInputStream {
         this.src = src;
     }
     
-    private KUID readKUID() throws IOException {
-        int type = readUnsignedByte();
-        byte[] id = new byte[KUID.LENGTH/8];
-        readFully(id);
-        switch(type) {
-            case KUID.UNKNOWN_ID:
-                return KUID.createUnknownID(id);
-            case KUID.NODE_ID:
-                return KUID.createNodeID(id);
-            case KUID.MESSAGE_ID:
-                return KUID.createMessageID(id);
-            case KUID.VALUE_ID:
-                return KUID.createValueID(id);
-            default:
-                throw new IOException("Unknown KUID type=" + type);
-        }
-    }
-    
-    /*private byte[] readID() throws IOException {
+    private byte[] readKUIDBytes() throws IOException {
         byte[] id = new byte[KUID.LENGTH/8];
         readFully(id);
         return id;
     }
     
     private KUID readNodeID() throws IOException {
-        return KUID.createNodeID(readID());
+        return KUID.createNodeID(readKUIDBytes());
     }
     
     private KUID readMessageID() throws IOException {
-        return KUID.createMessageID(readID());
+        return KUID.createMessageID(readKUIDBytes());
     }
     
     private KUID readValueID() throws IOException {
-        return KUID.createValueID(readID());
-    }*/
+        return KUID.createValueID(readKUIDBytes());
+    }
     
     private KeyValue readKeyValue() throws IOException {
         
-        KUID key = readKUID();
+        KUID key = readValueID();
         byte[] value = new byte[readUnsignedShort()];
         readFully(value);
         
-        KUID nodeId = readKUID();
+        KUID nodeId = readNodeID();
         SocketAddress address = readSocketAddress();
         
         PublicKey pubKey = readPublicKey();
@@ -132,7 +114,7 @@ public class MessageInputStream extends DataInputStream {
     }
 	
     private ContactNode readContactNode() throws IOException {
-        KUID nodeId = readKUID();
+        KUID nodeId = readNodeID();
         SocketAddress addr = readSocketAddress();
         
         return new ContactNode(nodeId, addr);
@@ -179,7 +161,7 @@ public class MessageInputStream extends DataInputStream {
     
     private FindNodeRequest readFindNodeRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        KUID lookup = readKUID();
+        KUID lookup = readNodeID();
         return new FindNodeRequest(vendor, version, node, messageId, lookup);
     }
     
@@ -197,7 +179,7 @@ public class MessageInputStream extends DataInputStream {
     
     private FindValueRequest readFindValueRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        KUID lookup = readKUID();
+        KUID lookup = readValueID();
         return new FindValueRequest(vendor, version, node, messageId, lookup);
     }
     
@@ -224,7 +206,7 @@ public class MessageInputStream extends DataInputStream {
     private StoreResponse readStoreResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         
-        KUID valueId = readKUID();
+        KUID valueId = readValueID();
         int status = readUnsignedByte();
         
         return new StoreResponse(vendor, version, node, messageId, valueId, status);
@@ -248,9 +230,9 @@ public class MessageInputStream extends DataInputStream {
         int vendor = readInt();
         int version = readUnsignedShort();
         int flags = readUnsignedByte();
-        KUID nodeId = readKUID();
+        KUID nodeId = readNodeID();
         int instanceId = readUnsignedByte();
-        KUID messageId = readKUID();
+        KUID messageId = readMessageID();
         int messageType = readUnsignedByte();
         
         ContactNode node = new ContactNode(nodeId, src, instanceId, flags);
