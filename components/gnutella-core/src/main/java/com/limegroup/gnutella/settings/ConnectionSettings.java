@@ -359,6 +359,21 @@ public final class ConnectionSettings extends LimeProps {
                 "ConnectionSettings.QRTSizeInKibiEntries", 64, 256);
     
     /**
+     * The delay for the timer task checking the overall stability of our connection
+     * to the Gnutella network.
+     */
+    public static final LongSetting STABILITY_CHECK_TIMER_DELAY = 
+        FACTORY.createSettableLongSetting("STABILITY_CHECK_TIMER_DELAY", 30L*1000L, 
+                "ConnectionSettings.StabilityCheckTimerDelay", 10L*1000L, 5L * 60L * 1000L);
+    
+    public static final IntSetting STABLE_PERCONNECT_MESSAGES_THRESHOLD =
+        FACTORY.createIntSetting("STABLE_MESSAGES_THRESHOLD", 5);
+    
+    public static final IntSetting STABLE_TOTAL_MESSAGES_THRESHOLD =
+        FACTORY.createIntSetting("STABLE_TOTAL_MESSAGES_THRESHOLD", 45);
+    
+    
+    /**
      * Helper method left from Settings Manager
      *
 	 * Returns the maximum number of connections for the given connection

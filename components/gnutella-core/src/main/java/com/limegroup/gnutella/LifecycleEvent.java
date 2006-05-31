@@ -11,6 +11,8 @@ public class LifecycleEvent extends EventObject {
     public static final int CONNECTION_INITIALIZING = 6;
     public static final int CONNECTION_INITIALIZED = 7;
     public static final int CONNECTION_CLOSED = 8;
+    public static final int STABLE = 9;
+    public static final int UNSTABLE = 10;
    
     private final Connection connection;
     private final int type;
@@ -68,6 +70,14 @@ public class LifecycleEvent extends EventObject {
         return (type == CONNECTION_INITIALIZED);
     }
     
+    public boolean isStableEvent() {
+        return (type == STABLE);
+    }
+    
+    public boolean isUnstableEvent() {
+        return (type == UNSTABLE);
+    }
+    
     public String toString() {
         StringBuffer buffer = new StringBuffer("LifecycleEvent: [event=");
     
@@ -92,6 +102,12 @@ public class LifecycleEvent extends EventObject {
                 break;
             case CONNECTION_CLOSED:
                 buffer.append("CONNECTION_CLOSED");
+                break;
+            case STABLE:
+                buffer.append("STABLE");
+                break;
+            case UNSTABLE:
+                buffer.append("UNSTABLE");
                 break;
             default:
                 buffer.append("UNKNOWN");

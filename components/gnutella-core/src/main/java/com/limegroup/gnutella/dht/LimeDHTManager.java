@@ -27,11 +27,16 @@ import com.limegroup.mojito.event.BootstrapListener;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
- * A node should connect to the DHT only if it has been designated as capable by the <tt>NodeAssigner</tt> 
- * or if it is forced to. Once the node is a DHT node, if <tt>EXCLUDE_ULTRAPEERS</tt> is set to true, 
+ * A node should connect to the DHT only if it has previously been designated as capable 
+ * by the <tt>NodeAssigner</tt> or if it is forced to. 
+ * Once the node is a DHT node, if <tt>EXCLUDE_ULTRAPEERS</tt> is set to true, 
  * it should no try to connect as an ultrapeer (@see RouterService.isExclusiveDHTNode()). 
  *
- * The current implementation is dependant on the MojitoDHT. TODO: create a more general DHT interface
+ * There are two entry points to the init method: 
+ * 1) A stable connection event is fired: As soon as LW has a globally stable gnutella connection
+ * 2) The NodeAssigner declared the node as DHT capable
+ * 
+ * The current implementation is dependant on the MojitoDHT. 
  */
 public class LimeDHTManager implements LifecycleListener {
     
@@ -116,7 +121,7 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        if(!RouterService.isConnected()) {//TODO Replace with: RouterService.isStableState();
+        if(!RouterService.isStable()) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not connected to the Gnutella network");
             }
@@ -250,8 +255,7 @@ public class LimeDHTManager implements LifecycleListener {
      * or if we got disconnected from the network.
      */
     public void handleLifecycleEvent(LifecycleEvent evt) {
-        //TODO: replace isConnectedEvent with isStableEvent
-        if(evt.isConnectedEvent()) {
+        if(evt.isStableEvent()) {
             if(!running) {
                 init(false);
             } else {
