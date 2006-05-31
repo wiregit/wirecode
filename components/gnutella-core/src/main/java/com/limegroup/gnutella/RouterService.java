@@ -1667,6 +1667,7 @@ public class RouterService {
         if(callback != null)
             callback.handleAddressStateChanged();        
         
+        dhtManager.addressChanged();
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();

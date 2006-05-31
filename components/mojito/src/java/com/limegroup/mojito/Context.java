@@ -772,8 +772,7 @@ public class Context {
                 SocketAddress firstHost = (SocketAddress)bootstrapHostsList.remove(0);
                 bootstrap(firstHost, listener);
             } else {
-                firePhaseOneFinished();
-                firePhaseTwoFinished();
+                fireNoBootstrapHost();
             }
         }
         

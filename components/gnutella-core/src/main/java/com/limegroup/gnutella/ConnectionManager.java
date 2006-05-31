@@ -2284,9 +2284,10 @@ public class ConnectionManager {
      * registers a listener for LifeCycleEvents
      */
     public void registerLifecycleListener(LifecycleListener listener) {
-        if (eventListeners.contains(listener))
-            return;
         synchronized (listenerLock) {
+            if (eventListeners.contains(listener)) {
+                return;
+            }
             List copy = new ArrayList(eventListeners);
             copy.add(listener);
             eventListeners = Collections.unmodifiableList(copy);

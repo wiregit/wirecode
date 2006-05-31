@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +23,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.ThreadFactory;
+import com.limegroup.mojito.event.BootstrapListener;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -34,13 +37,31 @@ public class LimeDHTManager implements LifecycleListener {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTManager.class);
     
+    /**
+     * The file to persist this Mojito DHT
+     */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
     
     private MojitoDHT dht;
 
     private volatile boolean running = false;
     
+    /**
+     * A boolean to represent the state when we have failed last bootstrap
+     * and are waiting for new bootstrap hosts
+     */
+    private volatile boolean waiting = false;
+    
+    /**
+     * A list of DHT bootstrap hosts comming from the Gnutella network
+     */
     private volatile LinkedList bootstrapHosts = new LinkedList();
+    
+    /**
+     * A list of bootstrap hosts used in the last bootstrap attempt
+     */
+    private ArrayList previousBootstrapHosts;
+    
     
     public LimeDHTManager() {
         
@@ -70,7 +91,18 @@ public class LimeDHTManager implements LifecycleListener {
         });
     }
     
-    public synchronized void init(boolean passive) {
+    /**
+     * Initializes the Mojito DHT and connects it to the network in either passive mode
+     * or active mode if we are not firewalled.
+     * The initialization preconditions are the following:
+     * 1) We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
+     * 2) We have stable Gnutella connections
+     * 3) We are not an ultrapeer while excluding ultrapeers from the network
+     * 4) We are not already connected or trying to bootstrap
+     * 
+     * @param forcePassive true to connect to the DHT in passive mode
+     */
+    public synchronized void init(boolean forcePassive) {
         if (running) {
             return;
         }
@@ -84,7 +116,7 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        if(RouterService.isConnecting()) {
+        if(!RouterService.isConnected()) {//TODO Replace with: RouterService.isStableState();
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not connected to the Gnutella network");
             }
@@ -102,7 +134,7 @@ public class LimeDHTManager implements LifecycleListener {
         
         running = true;
         //set firewalled status
-        if (passive){
+        if (forcePassive){
             dht.setFirewalled(true);
         } else {
             dht.setFirewalled(RouterService.acceptedIncomingConnection());
@@ -112,14 +144,48 @@ public class LimeDHTManager implements LifecycleListener {
             InetAddress addr = InetAddress.getByAddress(RouterService.getAddress());
             int port = RouterService.getPort();
             dht.bind(new InetSocketAddress(addr, port));
-            
-            //TODO initialize the DHT here: bind, set Address, bootstrap etc.
             dht.start();
+            bootstrap();
         } catch (IOException err) {
             LOG.error(err);
         }
     }
     
+    /**
+     * Tries to bootstrap of a list of bootstrap hosts. 
+     * If bootstraping fails, the manager clears the list and 
+     * puts itself in a waiting state until new hosts are added. 
+     * 
+     */
+    private void bootstrap() {
+        synchronized (bootstrapHosts) {
+            previousBootstrapHosts = new ArrayList(bootstrapHosts);
+        }
+        try {
+            dht.bootstrap(previousBootstrapHosts, new BootstrapListener() {
+                public synchronized void noBootstrapHost() {
+                    synchronized (bootstrapHosts) {
+                        bootstrapHosts.removeAll(previousBootstrapHosts);
+                        waiting = true;
+                    }
+                }
+
+                public void phaseOneComplete(long time) {
+                    //notify listeners
+                }
+
+                public void phaseTwoComplete(boolean foundNodes, long time) {
+                    //notify listeners
+                }
+            });
+        } catch (IOException err) {
+            LOG.error(err);
+        }
+    }
+    
+    /**
+     * Shuts down the dht and persists it
+     */
     public synchronized void shutdown(){
         if (!running) {
             return;
@@ -131,7 +197,7 @@ public class LimeDHTManager implements LifecycleListener {
         
         dht.stop();
         running = false;
-        
+        waiting = false;
         try {
             FileOutputStream out = new FileOutputStream(FILE);
             dht.store(out);
@@ -141,12 +207,26 @@ public class LimeDHTManager implements LifecycleListener {
         }
     }
     
-    public void addBootstrapHost(SocketAddress hostAddress) {
+    /**
+     * Adds a host to the head of an ordered list of boostrap hosts.
+     * If the manager is waiting for hosts, this method tries to bootstrap 
+     * immediately after.
+     * 
+     * @param hostAddress The SocketAddress of the new bootstrap host.
+     */
+    public synchronized void addBootstrapHost(SocketAddress hostAddress) {
         synchronized (bootstrapHosts) {
-            if(bootstrapHosts.size() > 10) {//TODO: as a param? Keep bootstrap list small because it should be updated often
+            // TODO: as a param? Keep bootstrap list small because it should be updated often
+            if(bootstrapHosts.size() > 10) {
                 bootstrapHosts.removeLast();
             }
+            //always put/replace the host to the head of the list
+            bootstrapHosts.remove(hostAddress);
             bootstrapHosts.addFirst(hostAddress);
+        }
+        if(waiting) {
+            waiting = false;
+            bootstrap();
         }
     }
     
@@ -164,13 +244,20 @@ public class LimeDHTManager implements LifecycleListener {
         dht.setFirewalled(firewalled);
     }
 
+    /**
+     * Initializes the DHT when LW is stably connected to the Gnutella network. 
+     * Shuts the DHT down if we got promoted to ultrapeer and we want to exclude them
+     * or if we got disconnected from the network.
+     */
     public void handleLifecycleEvent(LifecycleEvent evt) {
+        //TODO: replace isConnectedEvent with isStableEvent
         if(evt.isConnectedEvent()) {
             if(!running) {
                 init(false);
             } else {
                 //protect against change of state
-                if(RouterService.isSupernode()) {
+                if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
+                        && RouterService.isSupernode()) {
                     shutdown();
                 }
                 return;
@@ -187,9 +274,10 @@ public class LimeDHTManager implements LifecycleListener {
     public MojitoDHT getMojitoDHT() {
         return dht;
     }
-
-    /** we need a timer task to see: 
-    1. We weren't able to bootstrap ==> check if we have new bootstrap nodes
-    2. We were firewalled ==> see if that changed (see acceptedIncomingChanged)
-        **/
+    
+    public void addressChanged() {
+        if(!running) return;
+        dht.stop();
+        init(false);
+   }
 }
