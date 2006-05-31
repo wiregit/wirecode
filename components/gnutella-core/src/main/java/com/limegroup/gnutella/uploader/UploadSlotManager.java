@@ -222,6 +222,7 @@ public class UploadSlotManager {
 				UploadSlotRequest request = (UploadSlotRequest) iter.next();
 				UploadSlotUser user = request.getUser();
 				float speed = 0;
+				user.measureBandwidth();
 				try {
 					speed = user.getMeasuredBandwidth();
 				} catch (InsufficientDataException ide) {}

@@ -55,6 +55,7 @@ import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.upelection.PromotionManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -150,10 +151,16 @@ public class RouterService {
 	 */
     private static DownloadManager downloader = new DownloadManager();
 
+    /**
+     * <tt>UploadSlotManager</tt> for controlling upload slots.
+     */
+    private static UploadSlotManager uploadSlotManager = new UploadSlotManager();
+    
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static UploadManager uploadManager = new UploadManager();
+    private static UploadManager uploadManager = 
+    	new UploadManager(uploadSlotManager);
     
     /**
      * <tt>PushManager</tt> for handling push requests.
@@ -593,6 +600,15 @@ public class RouterService {
      */
 	public static UploadManager getUploadManager() {
 		return uploadManager;
+	}
+
+    /** 
+     * Accessor for the <tt>UploadSlotManager</tt> instance.
+     *
+     * @return the <tt>UploadSlotManager</tt> in use
+     */
+	public static UploadSlotManager getUploadSlotManager() {
+		return uploadSlotManager;
 	}
 	
 	/**

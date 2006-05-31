@@ -121,11 +121,8 @@ public class ManagedTorrent {
 	private final List lifeCycleListeners = 
 		Collections.synchronizedList(new ArrayList(2));
 	
-	/**
-	 * Counters for how much this has uploaded and downloaded
-	 */
-	private final SimpleBandwidthTracker up, down;
-	
+	/** The total uploaded and downloaded data */
+	private long totalUp, totalDown;
 	
 
 	/**
@@ -149,8 +146,6 @@ public class ManagedTorrent {
 		_badPeers = Collections.EMPTY_SET;
 		trackerManager = new TrackerManager(this);
 		choker = new Choker(this, networkInvoker);
-		up = new SimpleBandwidthTracker();
-		down = new SimpleBandwidthTracker();
 	}
 
 	/**
@@ -854,8 +849,20 @@ public class ManagedTorrent {
 		return busy;
 	}
 
-	public SimpleBandwidthTracker getBandwidthTracker(boolean up) {
-		return up ? this.up : this.down;
+	public void countUploaded(int now) {
+		totalUp += now;
+	}
+	
+	public void countDownloaded(int now) {
+		totalDown += now;
+	}
+	
+	public long getTotalUploaded(){
+		return totalUp;
+	}
+	
+	public long getTotalDownloaded() {
+		return totalDown;
 	}
 
 
@@ -887,17 +894,28 @@ public class ManagedTorrent {
 		return _connections.size() == 0 && _peers.size() == 0;
 	}
 	
-	/**
-	 * @return whether the torrent is complete and has uploaded at
-	 * least as much as downloaded.
-	 */
-	boolean hasGoodRatio() {
-		return _folder.isComplete() && 
-		up.getTotalAmount() > down.getTotalAmount();
-	}
-	
 	public BTConnectionFetcher getFetcher() {
 		return _connectionFetcher;
+	}
+	
+	public void measureBandwidth() {
+		synchronized(_connections) {
+			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
+				BTConnection con = (BTConnection) iter.next();
+				con.measureBandwidth();
+			}
+		}
+	}
+	
+	public float getMeasuredBandwidth(boolean downstream) {
+		float ret = 0;
+		synchronized(_connections) {
+			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
+				BTConnection con = (BTConnection) iter.next();
+				ret += con.getMeasuredBandwidth(downstream);
+			}
+		}
+		return ret;
 	}
 	
 	private static class NIODispatcherThreadPool implements ThreadPool {

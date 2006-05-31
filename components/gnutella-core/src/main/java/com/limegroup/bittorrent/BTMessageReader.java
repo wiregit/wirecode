@@ -44,11 +44,6 @@ public class BTMessageReader implements ChannelReadObserver {
 	// whether this is the first message we're reading
 	private boolean first = true;
 
-	/*
-	 * my own private BandwidthTracker
-	 */
-	private SimpleBandwidthTracker _tracker;
-	
 	/** Whether this reader is shutdown */
 	private volatile boolean shutdown;
 	
@@ -64,7 +59,6 @@ public class BTMessageReader implements ChannelReadObserver {
 	public BTMessageReader(BTConnection connection) {
 		_in = ByteBuffer.allocate(BUFFER_SIZE);
 		_connection = connection;
-		_tracker = new SimpleBandwidthTracker();
 		LENGTH_STATE = new LengthState();
 		TYPE_STATE = new TypeState();
 		currentState = LENGTH_STATE;
@@ -105,23 +99,10 @@ public class BTMessageReader implements ChannelReadObserver {
 	}
 	
 	/**
-	 * We extend SimpleBandwidthTracker to calculate the bandwidth we use more
-	 * easily.
+	 * update stats.
 	 */
 	public void count(int read) {
 		BandwidthStat.BITTORRENT_MESSAGE_DOWNSTREAM_BANDWIDTH.addData(read);
-		_tracker.count(read);
-	}
-
-	/**
-	 * Accessor for the BandwidthTracker we hold, used by ManagedTorrent which
-	 * preferrably unchokes hosts that are sending us a lot of data
-	 * 
-	 * @return our BandwidthTracker
-	 */
-	public float getBandwidth() {
-		_tracker.measureBandwidth();
-		return _tracker.getMeasuredBandwidth();
 	}
 
 	/**

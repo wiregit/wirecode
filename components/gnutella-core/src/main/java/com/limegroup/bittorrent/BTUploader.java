@@ -3,6 +3,7 @@ package com.limegroup.bittorrent;
 import java.io.IOException;
 
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
@@ -14,15 +15,15 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
  * TODO find a proper solution.
  */
 public class BTUploader implements Uploader, TorrentLifecycleListener {
+	
 	private ManagedTorrent _torrent;
 	
 	private BTMetaInfo _info;
 
-	private SimpleBandwidthTracker _tracker;
+	private long startTime, stopTime;
 
 	public BTUploader(ManagedTorrent torrent, BTMetaInfo info) {
 		_torrent = torrent;
-		_tracker = new SimpleBandwidthTracker();
 		_info = info;
 	}
 
@@ -52,11 +53,11 @@ public class BTUploader implements Uploader, TorrentLifecycleListener {
 	}
 
 	public long amountUploaded() {
-		return _tracker.getTotalAmount();
+		return _torrent.getTotalUploaded();
 	}
 
 	public long getTotalAmountUploaded() {
-		return _tracker.getTotalAmount();
+		return _torrent.getTotalUploaded();
 	}
 
 	public String getHost() {
@@ -123,32 +124,34 @@ public class BTUploader implements Uploader, TorrentLifecycleListener {
 	}
 
 	public void measureBandwidth() {
-		_tracker.measureBandwidth();
+		_torrent.measureBandwidth();
 	}
 
-	public float getMeasuredBandwidth() {
+	public float getMeasuredBandwidth() throws InsufficientDataException {
 		if (!_torrent.isActive())
 			return 0.f;
-		measureBandwidth();
-		return _tracker.getMeasuredBandwidth();
+		return _torrent.getMeasuredBandwidth(false);
 	}
 
 	public float getAverageBandwidth() {
-		return _tracker.getAverageBandwidth();
-	}
-	
-	void wroteBytes(int written) {
-		_tracker.count(written);
+		long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
+		long runTime = (now - startTime) / 1000;
+		return getTotalAmountUploaded() / runTime;
 	}
 	
 	public void torrentStarted(ManagedTorrent t) {
-		if (t == _torrent)
+		if (t == _torrent) {
+			startTime = System.currentTimeMillis();
+			stopTime = 0;
 			RouterService.getCallback().addUpload(this);
+		}
 	}
 	
 	public void torrentStopped(ManagedTorrent t) {
-		if (t == _torrent)
+		if (t == _torrent) {
 			RouterService.getCallback().removeUpload(this);
+			stopTime = System.currentTimeMillis();
+		}
 	}
 	
 	public void torrentHitRatio(ManagedTorrent t) {

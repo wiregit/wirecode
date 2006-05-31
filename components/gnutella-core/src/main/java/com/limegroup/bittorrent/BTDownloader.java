@@ -15,6 +15,7 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
@@ -35,14 +36,13 @@ implements TorrentLifecycleListener {
 
 	private BTMetaInfo _info;
 
-	private SimpleBandwidthTracker _tracker;
-	
 	private DownloadManager manager;
+	
+	private long startTime, stopTime;
 	
 	public BTDownloader(ManagedTorrent torrent, BTMetaInfo info) {
 		_torrent = torrent;
 		_info = info;
-		_tracker = new SimpleBandwidthTracker();
 	}
 
 	/**
@@ -147,7 +147,7 @@ implements TorrentLifecycleListener {
 	}
 	
 	public long getTotalAmountDownloaded() {
-		return _tracker.getTotalAmount();
+		return _torrent.getTotalDownloaded();
 	}
 
 	/**
@@ -252,16 +252,17 @@ implements TorrentLifecycleListener {
 	}
 
 	public void measureBandwidth() {
-		_tracker.measureBandwidth();
+		_torrent.measureBandwidth();
 	}
 
-	public float getMeasuredBandwidth()  {
-		measureBandwidth();
-		return _tracker.getMeasuredBandwidth();
+	public float getMeasuredBandwidth() throws InsufficientDataException {
+		return _torrent.getMeasuredBandwidth(true);
 	}
 
 	public float getAverageBandwidth() {
-		return _tracker.getAverageBandwidth();
+		long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
+		long runTime = (now - startTime) / 1000;
+		return getTotalAmountDownloaded() / runTime;
 	}
 
 	public boolean isRelocatable() {
@@ -277,10 +278,6 @@ implements TorrentLifecycleListener {
 		return _info.getCompleteFile();
 	}
 	
-	void readBytes(int read) {
-		_tracker.count(read);
-	}
-
 	public URN getSHA1Urn() {
 		return _torrent.getMetaInfo().getURN();
 	}
@@ -295,20 +292,25 @@ implements TorrentLifecycleListener {
 	}
 
 	public void torrentComplete(ManagedTorrent t) {
-		if (_torrent == t)
+		if (_torrent == t) {
+			stopTime = System.currentTimeMillis(); // the download stops now.
 			manager.remove(this, true);
+		}
 	}
 
 	public void torrentStarted(ManagedTorrent t) {
-		// nothing
-		
+		startTime = System.currentTimeMillis();
+		stopTime = 0;
 	}
 
 	public void torrentHitRatio(ManagedTorrent t){} // we don't care
 	
 	public void torrentStopped(ManagedTorrent t) {
-		if (_torrent == t) 
+		if (_torrent == t) {
+			if (stopTime == 0) // do not update the stop time if was completed.
+				stopTime = System.currentTimeMillis();
 			manager.remove(this, t.isComplete());
+		}
 	}
 	
 	private void writeObject(ObjectOutputStream out) 

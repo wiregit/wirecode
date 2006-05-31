@@ -43,10 +43,10 @@ public class BTMessageWriter implements
 	/** Whether this writer is shutdown */
 	private volatile boolean shutdown;
 	
-	/*
-	 * my own private BandwidthTracker
+	/**
+	 * The current message being sent, if any.
 	 */
-	private SimpleBandwidthTracker _tracker;
+	private BTMessage currentMessage;
 
 	/**
 	 * Constructor
@@ -54,7 +54,6 @@ public class BTMessageWriter implements
 	public BTMessageWriter(BTConnection connection) {
 		_queue = new LinkedList();
 		_connection = connection;
-		_tracker = new SimpleBandwidthTracker();
 		_out[0] = ByteBuffer.allocate(5);
 	}
 
@@ -68,8 +67,10 @@ public class BTMessageWriter implements
 		if (LOG.isDebugEnabled())
 			LOG.debug("entering handleWrite call to "+_connection);
 		int written = 0;
-		do {
+		while(true) {
 			if (_out[1] == null || _out[1].remaining() == 0) {
+				currentMessage = null;
+				
 				if (!sendNextMessage()) {
 					if (LOG.isDebugEnabled())
 						LOG.debug("no more messages to send to "+_connection);
@@ -81,15 +82,22 @@ public class BTMessageWriter implements
 			// because somewhere in the chain we have a delayer its ok.
 			written = _channel.write(_out[0]);
 			written += _channel.write(_out[1]);
-			if (!_out[1].hasRemaining())
+			
+			if (!_out[1].hasRemaining()) {
 				_out[1] = null; // can be gc'd now
+				
+				if (currentMessage.getType() == BTMessage.PIECE) 
+					_connection.pieceSent();
+			}
 			
 			if (written > 0) {
 				count(written);
 				if (LOG.isDebugEnabled())
 					LOG.debug("wrote "+written+" bytes");
-			}
-		} while (written > 0);
+			} else 
+				break;
+			
+		} 
 		return true;
 	}
 
@@ -114,7 +122,7 @@ public class BTMessageWriter implements
 			_channel.interest(this, true);
 		return true;
 	}
-
+	
 	/**
 	 * Implement ChannelWriter interface
 	 */
@@ -134,7 +142,6 @@ public class BTMessageWriter implements
 			public void run() {
 				_queue.clear();
 				_channel.interest(BTMessageWriter.this, false);
-				
 			}
 		});
 	}
@@ -159,20 +166,7 @@ public class BTMessageWriter implements
 	 */
 	public void count(int written) {
 		BandwidthStat.BITTORRENT_MESSAGE_UPSTREAM_BANDWIDTH.addData(written);
-		_tracker.count(written);
 		_connection.wroteBytes(written);
-	}
-	
-	float getBandwidth() {
-		_tracker.measureBandwidth();
-		return _tracker.getMeasuredBandwidth();
-	}
-
-	/**
-	 * @return true if we don't currently have any messages to send in the queue
-	 */
-	public boolean isIdle() {
-		return _queue.isEmpty();
 	}
 	
 	/**
@@ -186,20 +180,18 @@ public class BTMessageWriter implements
 		if (_queue.isEmpty())
 			return false;
 		
-		BTMessage message = (BTMessage) _queue.removeFirst();
+		currentMessage = (BTMessage) _queue.removeFirst();
 		
 		if (LOG.isDebugEnabled())
-			LOG.debug("sending message "+message+" to "+_connection);
+			LOG.debug("sending message "+currentMessage+" to "+_connection);
 
-		_out[1] = message.getPayload();
+		_out[1] = currentMessage.getPayload();
 		_out[0].clear();
 		_out[0].order(ByteOrder.BIG_ENDIAN);
 		_out[0].putInt(_out[1].remaining() + 1); // message size
-		_out[0].put(message.getType());
+		_out[0].put(currentMessage.getType());
 		_out[0].flip();
-		countMessage(message, _out[1].remaining()+5);
-		if (_queue.isEmpty())
-			_connection.readyForWriting();
+		countMessage(currentMessage, _out[1].remaining()+5);
 		return true;
 	}
 	
@@ -245,5 +237,4 @@ public class BTMessageWriter implements
 			BTMessageStatBytes.OUTGOING_REQUEST.addData(length);
 		}
 	}
-
 }

@@ -115,7 +115,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 	private List /* of Uploaders */ _activeUploadList = new LinkedList();
 	
 	/** A manager for the available upload slots */
-	private final UploadSlotManager slotManager = new UploadSlotManager();
+	private final UploadSlotManager slotManager;
 
 	/** set to true when an upload has been succesfully completed. */
 	private volatile boolean _hadSuccesfulUpload=false;
@@ -229,7 +229,8 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
     private final Map /* of String to RequestCache */ REQUESTS =
         new FixedsizeForgetfulHashMap(250);
     
-    public UploadManager() {
+    public UploadManager(UploadSlotManager slotManager) {
+    	this.slotManager = slotManager;
     	RouterService.getConnectionDispatcher().addConnectionAcceptor(
     			this,
     			new String[]{"GET","HEAD"},

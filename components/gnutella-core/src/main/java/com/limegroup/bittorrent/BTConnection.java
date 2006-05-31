@@ -12,19 +12,24 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.messages.*;
+import com.limegroup.gnutella.uploader.UploadSlotListener;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.BitSet;
 
 /**
  * Class wrapping a Bittorrent connection.
  */
-public class BTConnection {
+public class BTConnection implements UploadSlotListener {
+	
 	private static final Log LOG = LogFactory.getLog(BTConnection.class);
 
 	/**
@@ -144,6 +149,12 @@ public class BTConnection {
 	 */
 	private int unchokeRound;
 	
+	/** Whether this connection is currently using an upload slot */
+	private boolean usingSlot;
+	
+	/** Bandwidth trackers for the outgoing and incoming bandwidth */
+	private SimpleBandwidthTracker up, down;
+	
 	/**
 	 * Constructs instance of this
 	 * 
@@ -186,6 +197,8 @@ public class BTConnection {
 		_isChoking = true;
 		_isInterested = false;
 		_isInteresting = false;
+		up = new SimpleBandwidthTracker();
+		down = new SimpleBandwidthTracker();
 
 		// if we have downloaded anything send a bitfield
 		if (_info.getVerifyingFolder().getVerifiedBlockSize() > 0)
@@ -270,6 +283,7 @@ public class BTConnection {
 			_socket.close();
 		} catch (IOException ioe) {}
 		
+		RouterService.getUploadSlotManager().cancelRequest(this);
 		_torrent.connectionClosed(this);
 	}
 
@@ -278,21 +292,29 @@ public class BTConnection {
 	 * downloadining or uploading
 	 */
 	public float getMeasuredBandwidth(boolean read) {
-		return read ? _reader.getBandwidth() : _writer.getBandwidth();
+		SimpleBandwidthTracker tracker = read ? down : up;
+		tracker.measureBandwidth();
+		try {
+			return tracker.getMeasuredBandwidth();
+		} catch (InsufficientDataException ide) {
+			return 0;
+		}
 	}
 
 	/**
 	 * notification that some bytes have been read on this connection
 	 */
 	private void readBytes(int read) {
-		_torrent.getBandwidthTracker(false).count(read);
+		down.count(read);
+		_torrent.countDownloaded(read);
 	}
 
 	/**
 	 * notification that some bytes have been written on this connection
 	 */
 	public void wroteBytes(int written) {
-		_torrent.getBandwidthTracker(true).count(written);
+		up.count(written);
+		_torrent.countUploaded(written);
 	}
 
 	/**
@@ -454,17 +476,34 @@ public class BTConnection {
 		clearRequests();
 	}
 
+	void pieceSent() {
+		Assert.that(usingSlot, "incosistent slot state");
+		usingSlot = false;
+		RouterService.getUploadSlotManager().requestDone(this);
+		readyForWriting();
+	}
 	/**
 	 * notifies this, that the connection is ready to write the next chunk of
 	 * the torrent
 	 */
 	void readyForWriting() {
-		if (_isChoked || _requested.isEmpty()) {
-			if (LOG.isDebugEnabled())
-				LOG.debug("cannot write while choked, requested size is "
-						+ _requested.size());
+		if (_isChoked || _requested.isEmpty()) 
 			return;
-		}
+		
+		int proceed = RouterService.getUploadSlotManager().requestSlot(
+					this,
+					!_torrent.isComplete());
+		
+		if (proceed == -1) // denied, choke the connection
+			sendChoke();
+		else if (proceed == 0) 
+			requestPieceRead();
+		// else queued, will receive callback.
+	}
+	
+	void requestPieceRead() {
+		if (_isChoked || _requested.isEmpty()) 
+			return;
 		
 		// pick a request at sort-of-random
 		Iterator iter = _requested.iterator();
@@ -474,6 +513,7 @@ public class BTConnection {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requesting disk read for "+in);
 		
+		usingSlot = true;
 		try {
 			_info.getVerifyingFolder().sendPiece(in, this);
 		} catch (IOException bad) {
@@ -674,7 +714,7 @@ public class BTConnection {
 		if (_info.getVerifyingFolder().hasBlock(in.getId())) 
 			_requested.add(in);
 		
-		if (!_requested.isEmpty() && _writer.isIdle())
+		if (!_requested.isEmpty() && !usingSlot)
 			readyForWriting();
 	}
 	
@@ -773,5 +813,37 @@ public class BTConnection {
 	public String toString() {
 		return _endpoint.toString();
 	}
+
+
+	public String getHost() {
+		return _socket.getInetAddress().getHostAddress();
+	}
 	
+	
+	public void releaseSlot() {
+		close();
+	}
+	
+	public void slotAvailable() {
+		NIODispatcher.instance().invokeLater(new Runnable() {
+			public void run() {
+				requestPieceRead();
+			}
+		});
+	}
+
+
+	public float getAverageBandwidth() {
+		return up.getAverageBandwidth();
+	}
+
+
+	public float getMeasuredBandwidth() throws InsufficientDataException {
+		return up.getMeasuredBandwidth();
+	}
+
+
+	public void measureBandwidth() {
+		up.measureBandwidth();
+	}
 }

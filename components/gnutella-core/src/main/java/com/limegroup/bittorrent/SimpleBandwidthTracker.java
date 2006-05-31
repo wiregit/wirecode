@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent;
 
 import com.limegroup.gnutella.BandwidthTracker;
+import com.limegroup.gnutella.InsufficientDataException;
 
 /**
  * A simple implementation of the BandwidthTracker interface
@@ -18,7 +19,7 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 
 	private volatile long _amount = 0;
 
-	private volatile float _measuredBandwidth = 0.f;
+	private volatile float _measuredBandwidth = -1f;
 
 	public SimpleBandwidthTracker() {
 		this(DEFAULT_INTERVAL);
@@ -39,9 +40,10 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 	public void measureBandwidth() {
 		long now = System.currentTimeMillis();
 		if (_firstTimeMeasured == 0) {
-			_lastTimeMeasured = _firstTimeMeasured = now;
-			return;
+			_firstTimeMeasured = now;
+			_lastTimeMeasured = _firstTimeMeasured;
 		}
+		
 		if (now - _lastTimeMeasured < _interval)
 			return;
 
@@ -51,7 +53,9 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 		_lastTimeMeasured = now;
 	}
 
-	public float getMeasuredBandwidth() {
+	public float getMeasuredBandwidth() throws InsufficientDataException {
+		if (_measuredBandwidth < 0)
+			throw new InsufficientDataException();
 		return _measuredBandwidth;
 	}
 
