@@ -2166,9 +2166,10 @@ public abstract class FileManager {
      * registers a listener for FileManagerEvents
      */
     public void registerFileManagerEventListener(FileEventListener listener) {
-        if (eventListeners.contains(listener))
-            return;
         synchronized (listenerLock) {
+            if (eventListeners.contains(listener)) {
+                return;
+            }
             List copy = new ArrayList(eventListeners);
             copy.add(listener);
             eventListeners = Collections.unmodifiableList(copy);
