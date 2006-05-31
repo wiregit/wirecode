@@ -862,6 +862,17 @@ public class Connection implements IpPort {
         return _port;
     }
     
+    /**
+     * Gets the port that this connection is listening on.
+     * If this is an outgoing connetion, it will return the port to which
+     * the socket connected.  Otherwise, if it is an incoming connection,
+     * it will return the port that the remote side had in the Listen-IP
+     * header.  If there was no port describe, it will return -1.
+     */
+    public int getListeningPort() {
+        return isOutgoing() ? _socket.getPort() : _headersRead.getListeningPort();
+    }
+    
     /** 
      * Sets the port where the conected node listens at, not the one
      * got from socket

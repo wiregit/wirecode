@@ -69,9 +69,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         HostCatcher hc = RouterService.getHostCatcher();
         hc.add(MessageTestUtils.createPongWithFreeLeafSlots());
         HandshakeResponse headers = HandshakeResponse.createResponse(props);
-        HandshakeResponse hr = 
-            HandshakeResponse.createLeafRejectIncomingResponse(headers);
-        
+        HandshakeResponse hr = HandshakeResponse.createLeafRejectIncomingResponse(headers, HandshakeStatus.NO_HEADERS);
         assertTrue(hr.hasXTryUltrapeers());
     }
     
@@ -545,8 +543,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         Properties headers = new Properties();
         headers.put(HeaderNames.X_ULTRAPEER, "false");
         HandshakeResponse client = HandshakeResponse.createResponse(headers);
-        HandshakeResponse hr = 
-            HandshakeResponse.createUltrapeerRejectIncomingResponse(client);
+        HandshakeResponse hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED);
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
@@ -559,7 +556,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         client = HandshakeResponse.createResponse(headers);
         
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
-        hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client);
+        hr = HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED);
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
@@ -582,7 +579,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         headers.put(HeaderNames.X_ULTRAPEER, "false");
         HandshakeResponse client = HandshakeResponse.createResponse(headers);
         HandshakeResponse hr = 
-            HandshakeResponse.createUltrapeerRejectIncomingResponse(client);
+            HandshakeResponse.createUltrapeerRejectIncomingResponse(client, HandshakeStatus.DISCONNECTED);
         runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(
@@ -591,7 +588,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         runLeafHeadersTest(hr);
 
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
-        hr = HandshakeResponse.createRejectOutgoingResponse();
+        hr = HandshakeResponse.createRejectOutgoingResponse(HandshakeStatus.DISCONNECTED);
         runRejectOutgoingLeafHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptOutgoingResponse(

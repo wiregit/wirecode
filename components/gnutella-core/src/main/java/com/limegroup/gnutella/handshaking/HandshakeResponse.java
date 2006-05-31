@@ -53,16 +53,10 @@ public class HandshakeResponse {
     /** The error code that a shielded leaf node should give to incoming
      *  connections.  */
     public static final int SHIELDED = 503;
-    /** The error message that a shielded leaf node should give to incoming
-     *  connections.  */
-    public static final String SHIELDED_MESSAGE = "I am a shielded leaf node";
 
     /** The error code that a node with no slots should give to incoming
      *  connections.  */
     public static final int SLOTS_FULL = 503;
-    /** The error message that a node with no slots should give to incoming
-     *  connections.  */
-    public static final String SLOTS_FULL_MESSAGE = "Service unavailable";
     
     /**
      * Default bad status code to be used while rejecting connections
@@ -203,6 +197,9 @@ public class HandshakeResponse {
      * Locale 
      */
     private final String LOCALE_PREF;
+    
+    /** The port the response says it's listening on. */
+    private final int LISTEN_PORT;
 
     /**
      * Constant for the number of hosts to return in X-Try-Ultrapeer headers.
@@ -284,6 +281,8 @@ public class HandshakeResponse {
         LOCALE_PREF = (loc.equals(""))?
             ApplicationSettings.DEFAULT_LOCALE.getValue():
             loc;
+           
+        LISTEN_PORT = extractIntHeaderValueAfter(headers, HeaderNames.LISTEN_IP, ":", -1);
     }
     
     /**
@@ -424,11 +423,9 @@ public class HandshakeResponse {
      * @return a <tt>HandshakeResponse</tt> with the appropriate response 
      *  headers
      */
-    static HandshakeResponse 
-        createUltrapeerRejectIncomingResponse(HandshakeResponse hr) {
-        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-            HandshakeResponse.SLOTS_FULL_MESSAGE,
-            addXTryHeader(hr, new Properties()));        
+    static HandshakeResponse createUltrapeerRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status) {
+        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL, status.getMessage(),
+                                     addXTryHeader(hr, new Properties()));        
     }
 
 
@@ -442,9 +439,9 @@ public class HandshakeResponse {
      * @param headers the <tt>Properties</tt> instance containing the headers
      *  to send to the node we're rejecting
      */
-    static HandshakeResponse createRejectOutgoingResponse() {
+    static HandshakeResponse createRejectOutgoingResponse(HandshakeStatus status) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     status.getMessage(),
                                      new Properties());        
     }
 
@@ -461,10 +458,9 @@ public class HandshakeResponse {
      *  connection and with the specified connection headers
      */
     static HandshakeResponse 
-        createLeafRejectIncomingResponse(HandshakeResponse hr) {
-        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-            HandshakeResponse.SHIELDED_MESSAGE,
-            addXTryHeader(hr, new Properties()));  
+        createLeafRejectIncomingResponse(HandshakeResponse hr, HandshakeStatus status) {
+        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL, status.getMessage(),
+                                     addXTryHeader(hr, new Properties()));  
     }
 
     /**
@@ -475,9 +471,9 @@ public class HandshakeResponse {
      * @return a new <tt>HandshakeResponse</tt> instance rejecting the 
      *  connection and with no extra headers
      */
-    static HandshakeResponse createLeafRejectOutgoingResponse() {
+    static HandshakeResponse createLeafRejectOutgoingResponse(HandshakeStatus status) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-                                     HandshakeResponse.SHIELDED_MESSAGE);        
+                                     status.getMessage());        
     }
 
     static HandshakeResponse createLeafRejectLocaleOutgoingResponse() {
@@ -920,6 +916,11 @@ public class HandshakeResponse {
     public String getLocalePref() {
         return LOCALE_PREF;
     }
+    
+    /** Accessor for the listening port. */
+    public int getListeningPort() {
+        return LISTEN_PORT;
+    }
 
     /**
      * Convenience method that returns whether or not the given header 
@@ -1057,6 +1058,38 @@ public class HandshakeResponse {
 			return defaultValue;
 		}
     }
+    
+    /**
+     * Helper method for returning an int header value in a header after a certain character.
+     * If the header name is not found, or if the header value cannot be parsed, the default
+     * value is returned.
+     *
+     * @param headers the connection headers to search through
+     * @param headerName the header name to look for
+     * @param token the token after which the int is looked for
+     * @param defaultValue the default value to return if the header value
+     *  could not be properly parsed
+     * @return the int value for the header
+     */
+    private static int extractIntHeaderValueAfter(Properties headers, 
+                                             String headerName,
+                                             String token,
+                                             int defaultValue) {
+        String value = headers.getProperty(headerName);
+
+        if(value == null)
+            return defaultValue;
+        
+        int idx = value.indexOf(token) + 1;
+        if(idx == 0 || idx == value.length())
+            return defaultValue;
+        
+        try {
+            return Integer.valueOf(value.substring(idx)).intValue();
+        } catch(NumberFormatException e) {
+            return defaultValue;
+        }
+    }    
 
     /**
      * Helper method for returning a byte header value.  If the header name

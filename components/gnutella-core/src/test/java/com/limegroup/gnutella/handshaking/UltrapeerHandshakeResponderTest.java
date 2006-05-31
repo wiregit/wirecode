@@ -86,6 +86,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
     public void testRespondToOutgoingUltrapeer() throws Exception {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
+        setPreferredConnections();
 
         // test the 3 Ultrapeer cases -- 
 
@@ -146,6 +147,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        setPreferredConnections();
 
         assertTrue(RouterService.isSupernode());
 
@@ -183,6 +185,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
+        setPreferredConnections();
 
         UltrapeerHandshakeResponder responder = 
             new UltrapeerHandshakeResponder("23.3.4.5");
@@ -221,11 +224,11 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
      */
     public void testRespondToIncomingLeaf() throws Exception {
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
-        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);      
-        
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        setPreferredConnections();
 
         assertTrue(RouterService.isSupernode());
         
@@ -260,5 +263,11 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         assertTrue("should have X-Try-Ultrapeer hosts", hr.hasXTryUltrapeers());
         UltrapeerSettings.MAX_LEAVES.revertToDefault();        
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(false);
+    }
+    
+    private void setPreferredConnections() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+                                    "_preferredConnections",
+                                    new Integer(ConnectionSettings.NUM_CONNECTIONS.getValue()));
     }
 }

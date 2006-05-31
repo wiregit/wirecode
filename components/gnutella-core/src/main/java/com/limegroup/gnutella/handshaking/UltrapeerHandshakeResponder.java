@@ -34,9 +34,10 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 		//Outgoing connection.
 		
 		//If our slots are full, reject it.
-		if (!_manager.allowConnection(response)) {
+        HandshakeStatus status = _manager.allowConnection(response);
+		if (!status.isAcceptable()) {
 		    HandshakingStat.UP_OUTGOING_REJECT_FULL.incrementStat();
-            return HandshakeResponse.createRejectOutgoingResponse();
+            return HandshakeResponse.createRejectOutgoingResponse(status);
         }
 
 		Properties ret = new Properties();
@@ -88,10 +89,11 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 		//Decide whether to allow or reject.  Somewhat complicated because
 		//of ultrapeer guidance.
 
-		if (reject(response, ret)) {
+        HandshakeStatus status = reject(response, ret);
+		if (!status.isAcceptable()) {
             // reject the connection, and let the other node know about 
             // any Ultrapeers we're connected to
-            return HandshakeResponse.createUltrapeerRejectIncomingResponse(response);
+            return HandshakeResponse.createUltrapeerRejectIncomingResponse(response, status);
 		}
 		
 		//We do this last, to prevent reject connections from being deflated,
@@ -107,11 +109,12 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 	}
     
     /** 
-     * Returns true if this incoming connections should be rejected with a 503. 
+     * Returns a HandshakeStatus to be used for rejecting. 
      */
-    private boolean reject(HandshakeResponse response, Properties ret) { 
+    private HandshakeStatus reject(HandshakeResponse response, Properties ret) { 
         // See if this connection can be allowed as a leaf.
-        boolean allowedAsLeaf = _manager.allowConnectionAsLeaf(response);
+        HandshakeStatus leafStatus = _manager.allowConnectionAsLeaf(response);
+        boolean allowedAsLeaf = leafStatus.isAcceptable();
         
         // If the user wasn't an ultrapeer, accept or reject
         // based on whether or not it was allowed.
@@ -122,7 +125,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
                 HandshakingStat.UP_INCOMING_REJECT_LEAF.incrementStat();
             else
                 HandshakingStat.UP_INCOMING_ACCEPT_LEAF.incrementStat();
-            return !allowedAsLeaf;
+            return leafStatus;
         }
             
         // Otherwise (if the user is an ultrapeer), there are a few things...
@@ -133,10 +136,11 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
         if (allowedAsLeaf && !supernodeNeeded) {
             HandshakingStat.UP_INCOMING_GUIDED.incrementStat();
             ret.put(HeaderNames.X_ULTRAPEER_NEEDED, Boolean.FALSE.toString());
-            return false;
+            return HandshakeStatus.OK;
         }
         
-        boolean allowedAsUltrapeer = _manager.allowConnection(response);
+        HandshakeStatus upStatus = _manager.allowConnection(response);
+        boolean allowedAsUltrapeer = upStatus.isAcceptable();
         
         // If supernode is needed or we can't accept them as a leaf,
         // see if we can accept them as a supernode.
@@ -144,7 +148,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
             HandshakingStat.UP_INCOMING_ACCEPT_UP.incrementStat();
             // not strictly necessary ...
             ret.put(HeaderNames.X_ULTRAPEER_NEEDED, Boolean.TRUE.toString());
-            return false;
+            return upStatus;
         }
         
         // In all other cases, we must reject the connection.
@@ -161,11 +165,12 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
         // This means that the last 10% of leaf slots will always be reserved
         // for connections that are unable to be ultrapeers.
         
-        if (!allowedAsLeaf)
+        if (!allowedAsLeaf) {
            HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_LEAF.incrementStat();
-        else
+           return leafStatus;
+        } else {
            HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_UP.incrementStat();
-        
-        return true;
+           return upStatus;
+        }
     }
 }

@@ -34,7 +34,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
         // only connect to ultrapeers.
         if (!response.isUltrapeer()) {
             HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
-            return HandshakeResponse.createLeafRejectOutgoingResponse();
+            return HandshakeResponse.createLeafRejectOutgoingResponse(HandshakeStatus.WE_ARE_LEAVES);
         }
 
         //check if this is a preferenced connection
@@ -47,9 +47,10 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
             }
         }
         
-        if (!_manager.allowConnection(response)) {
+        HandshakeStatus status = _manager.allowConnection(response);
+        if(!status.isAcceptable()) {
             HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
-            return HandshakeResponse.createLeafRejectOutgoingResponse();
+            return HandshakeResponse.createLeafRejectOutgoingResponse(status);
         }
         
         Properties ret = new Properties();
@@ -80,15 +81,16 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
         //if not an ultrapeer, reject.
         if (!hr.isUltrapeer()) {
             HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HandshakeResponse.createLeafRejectOutgoingResponse();
+            return HandshakeResponse.createLeafRejectOutgoingResponse(HandshakeStatus.WE_ARE_LEAVES);
         }		
         
         Properties ret = new LeafHeaders(getRemoteIP());
         
         //If we already have enough ultrapeers, reject.
-        if (!_manager.allowConnection(hr)) {
+        HandshakeStatus status = _manager.allowConnection(hr);
+        if (!status.isAcceptable()) {
             HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HandshakeResponse.createLeafRejectIncomingResponse(hr);
+            return HandshakeResponse.createLeafRejectIncomingResponse(hr, status);
         } 
 
 		//deflate if we can ...

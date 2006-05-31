@@ -4,9 +4,11 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
 /**
@@ -50,6 +52,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
     public void testRespondToOutgoingUltrapeer() throws Exception {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
+        setPreferredConnections();
 
         // test the 3 Ultrapeer cases -- 
 
@@ -84,7 +87,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
 
         // we shouldn't send any response header in this case -- it's
         // just assumed that we're becoming an Ultrapeer
-        assertTrue("should have been accepted", hr.isAccepted());
+        assertTrue("should have been accepted but was: " + hr, hr.isAccepted());
         assertEquals("should only have deflate header", 1, hr.props().size());
         assertTrue("should be deflated", hr.isDeflateEnabled());
 
@@ -107,6 +110,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
      * connection attempts should fail.
      */
     public void testRespondToOutgoingLeaf() throws Exception {
+        setPreferredConnections();
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         LeafHandshakeResponder responder = 
@@ -139,6 +143,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
      * Tests the method for responding to incoming connection attempts.
      */
     public void testRespondToIncomingUltrapeer() throws Exception {
+        setPreferredConnections();
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
@@ -163,6 +168,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
      * Test to make sure that incoming leaf connections are handled correctly.
      */
     public void testRespondToIncomingLeaf() throws Exception {
+        setPreferredConnections();
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);        
         // the ultrapeer we'll be testing against
@@ -177,6 +183,12 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         HandshakeResponse hr = responder.respond(leaf, false);
         
         assertFalse("should never accept leaves if we're a leaf.", hr.isAccepted());
+    }
+    
+    private void setPreferredConnections() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
+                                    "_preferredConnections",
+                                    new Integer(ConnectionSettings.NUM_CONNECTIONS.getValue()));
     }
 
 }

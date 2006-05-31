@@ -18,6 +18,7 @@ import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -26,7 +27,6 @@ import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.QuestionsHandler;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortSet;
@@ -686,8 +686,10 @@ public class ConnectionManager {
      * @return true, if we have incoming slot for the connection received,
      * false otherwise
      */
-    private boolean allowConnection(ManagedConnection c) {
-        if(!c.receivedHeaders()) return false;
+    private HandshakeStatus allowConnection(ManagedConnection c) {
+        if(!c.receivedHeaders())
+            return HandshakeStatus.NO_HEADERS;
+        
 		return allowConnection(c.headers(), false);
     }
 
@@ -700,7 +702,7 @@ public class ConnectionManager {
      * @return true, if we have incoming slot for the connection received,
      * false otherwise
      */
-    public boolean allowConnectionAsLeaf(HandshakeResponse hr) {
+    public HandshakeStatus allowConnectionAsLeaf(HandshakeResponse hr) {
 		return allowConnection(hr, true);
     }
 
@@ -713,7 +715,7 @@ public class ConnectionManager {
      * @return true, if we have incoming slot for the connection received,
      * false otherwise
      */
-     public boolean allowConnection(HandshakeResponse hr) {
+     public HandshakeStatus allowConnection(HandshakeResponse hr) {
          return allowConnection(hr, !hr.isUltrapeer());
      }
 
@@ -759,15 +761,16 @@ public class ConnectionManager {
      *  it was not written
      * @return true if a connection of the given type is allowed
      */
-    public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
+    public HandshakeStatus allowConnection(HandshakeResponse hr, boolean leaf) {
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
-		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
+		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue())
+            return HandshakeStatus.OK;
 		
 		// If it has not said whether or not it's an Ultrapeer or a Leaf
 		// (meaning it's an old-style connection), don't allow it.
 		if(!hr.isLeaf() && !hr.isUltrapeer())
-		    return false;
+		    return HandshakeStatus.NO_X_ULTRAPEER;
 
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
@@ -796,19 +799,21 @@ public class ConnectionManager {
 		
         // Don't allow anything if disconnected.
         if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() && _preferredConnections <= 0) {
-            return false;
+            return HandshakeStatus.DISCONNECTED;
             // If a leaf (shielded or not), check rules as such.
         } else if (isShieldedLeaf() || !isSupernode()) {
             
             // require ultrapeer.
 		    if(!hr.isUltrapeer()) {
-                return false;
+                return HandshakeStatus.WE_ARE_LEAVES;
             }
 		    
 		    // If it's not good, or it's the first few attempts & not a LimeWire, 
 		    // never allow it.
-		    if(!hr.isGoodUltrapeer() || (_connectionAttempts < limeAttempts && !hr.isLimeWire())) {
-		        return false;
+		    if(!hr.isGoodUltrapeer()) {
+                return HandshakeStatus.NOT_GOOD_UP;
+            } else if (_connectionAttempts < limeAttempts && !hr.isLimeWire()) {
+                return HandshakeStatus.STARTING_LIMEWIRE;
 		    // if we have slots, allow it.
 		    } else if (_shieldedConnections < _preferredConnections) {                
 		        // if it matched our preference, we don't need to preference
@@ -818,29 +823,34 @@ public class ConnectionManager {
 
                 // while idle, only allow LimeWire connections.
                 if (isIdle()) {
-                    return hr.isLimeWire();
+                    if(hr.isLimeWire())
+                        return HandshakeStatus.OK;
+                    else
+                        return HandshakeStatus.IDLE_LIMEWIRE;
                 }
 
-                return true;
+                return HandshakeStatus.OK;
             } else {
                 // if we were still trying to get a locale connection
                 // and this one matches, allow it, 'cause no one else matches.
                 // (we would have turned _needPref off if someone matched.)
                 if(_needPref && checkLocale(hr.getLocalePref())) {
-                    return true;
+                    _needPref = false;
+                    return HandshakeStatus.OK;
                 }
                 
                 // don't allow it.
-                return false;
+                System.out.println("shielded: " + _shieldedConnections + ", pref: " + _preferredConnections);
+                return HandshakeStatus.TOO_MANY_UPS;
             }
 		} else if (hr.isLeaf() || leaf) {
 		    // no leaf connections if we're a leaf.
 		    if(isShieldedLeaf() || !isSupernode()) {
-                return false;
+                return HandshakeStatus.WE_ARE_LEAVES;
             }
 
             if(!allowUltrapeer2LeafConnection(hr)) {
-                return false;
+                return HandshakeStatus.NOT_ALLOWED_LEAF;
             }
 
             int leaves = getNumInitializedClientConnections();
@@ -852,20 +862,24 @@ public class ConnectionManager {
             if(!hr.isLimeWire()) {
                 if( leaves < UltrapeerSettings.MAX_LEAVES.getValue() &&
                     nonLimeWireLeaves < RESERVED_NON_LIMEWIRE_LEAVES ) {
-                    return true;
+                    return HandshakeStatus.OK;
                 }
             }
             
             // Only allow good guys.
             if(!hr.isGoodLeaf()) {
-                return false;
+                return HandshakeStatus.NOT_GOOD_LEAF;
             }
                 
-            // if it's good, allow it.
-            return (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES -
-                    nonLimeWireLeaves)) <
-                      UltrapeerSettings.MAX_LEAVES.getValue();
-        } else if (hr.isGoodUltrapeer()) {
+            // if we have slots, allow it.
+            if((leaves +
+                Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES - nonLimeWireLeaves)
+               ) < UltrapeerSettings.MAX_LEAVES.getValue()) {
+                return HandshakeStatus.OK;
+            } else {
+                return HandshakeStatus.TOO_MANY_LEAF;
+            }
+        } else if (hr.isUltrapeer()) {
             // Note that this code is NEVER CALLED when we are a leaf.
             // As a leaf, we will allow however many ultrapeers we happen
             // to connect to.
@@ -877,7 +891,7 @@ public class ConnectionManager {
             int locale_num = 0;
             
             if(!allowUltrapeer2UltrapeerConnection(hr)) {
-                return false;
+                return HandshakeStatus.NOT_ALLOWED_UP;
             }
             
             if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
@@ -886,7 +900,7 @@ public class ConnectionManager {
                 if(checkLocale(hr.getLocalePref()) &&
                    _localeMatchingPeers
                    < ConnectionSettings.NUM_LOCALE_PREF.getValue()) {
-                    return true;
+                    return HandshakeStatus.OK;
                 }
 
                 //this number will be used at the end to figure out
@@ -894,27 +908,40 @@ public class ConnectionManager {
                 //(the reserved slots is to make sure we have at least
                 // NUM_LOCALE_PREF locale connections but we could have more so
                 // we get the max)
-                locale_num =
-                    getNumLimeWireLocalePrefSlots();
+                locale_num = getNumLimeWireLocalePrefSlots();
             }
 
-            // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
-            // for non-limewire peers to ensure that the network
-            // is well connected.
+            // If it's not a LimeWire, we'll allow it up to the ratio of
+            // MIN_NON_LIME_PEERS.  If we've exceeded that ratio, we'll allow it
+            // if it's good and is up to MAX_NON_LIME_PEERS.
+            // If it is a LimeWire, only allow it if we still have space left for
+            // non-limes and it's good.
             if(!hr.isLimeWire()) {
                 double nonLimeRatio = ((double)nonLimeWirePeers) / _preferredConnections;
                 if (nonLimeRatio < ConnectionSettings.MIN_NON_LIME_PEERS.getValue())
-                    return true;
-                return (nonLimeRatio < ConnectionSettings.MAX_NON_LIME_PEERS.getValue());  
+                    return HandshakeStatus.OK;
+                if(!hr.isGoodUltrapeer()) {
+                    return HandshakeStatus.NOT_GOOD_UP;
+                } else if(nonLimeRatio < ConnectionSettings.MAX_NON_LIME_PEERS.getValue()) {
+                    return HandshakeStatus.OK;
+                } else {
+                    return HandshakeStatus.NON_LIME_RATIO;
+                }
             } else {
-                int minNonLime = (int)
-                    (ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
-                return (peers + 
-                        Math.max(0,minNonLime - nonLimeWirePeers) + 
-                        locale_num) < _preferredConnections;
+                int minNonLime = (int)(ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections);
+                if(!hr.isGoodUltrapeer()) {
+                    return HandshakeStatus.NOT_GOOD_UP;
+                } else if((peers + 
+                           Math.max(0,minNonLime - nonLimeWirePeers) + 
+                           locale_num
+                          ) < _preferredConnections) {
+                    return HandshakeStatus.OK;
+                } else {
+                    return HandshakeStatus.NO_LIME_SLOTS;
+                }
             }
         }
-		return false;
+		return HandshakeStatus.UNKNOWN;
     }
 
     /**
@@ -1297,16 +1324,39 @@ public class ConnectionManager {
     }
 
     /**
-     * like allowConnection, except more strict - if this is a leaf,
-     * only allow connections whom we have told we're leafs.
+     * Like allowConnection, but more more strict.
+     * In addition to allowConnection, this checks to see if the connection
+     * is a leaf, and if so only allows it if we said we're it's supernode.
+     * It also makes sure that we don't have any duplicate connections to this
+     * particular host.  (Duplicate connections are checked by IP address and
+     * 'listen port', if a listen port was specified.)
+     * 
      * @return whether the connection should be allowed 
      */
-    private boolean allowInitializedConnection(Connection c) {
-    	if ((isShieldedLeaf() || !isSupernode()) &&
-    			!c.isClientSupernodeConnection())
+    private boolean allowInitializedConnection(ManagedConnection c) {
+    	if ((isShieldedLeaf() || !isSupernode()) && !c.isClientSupernodeConnection())
     		return false;
-    	
-    	return allowConnection(c.headers());
+        
+        List connections = getConnections();
+        int listenPort = c.getListeningPort();
+        String addr = c.getAddress();
+        
+        for(int i = 0; i < connections.size(); i++ ) {
+            ManagedConnection mc = (ManagedConnection)connections.get(i);
+            if(mc == c)
+                continue;
+            
+            if(addr.equals(mc.getAddress())) {
+                int mcLP = mc.getListeningPort();
+                // If either side didn't advertise a listening port,
+                // or both did and they're the same, then because the
+                // addresses are also equal, disallow it.
+                if(listenPort == -1 || mcLP == -1 || mcLP == listenPort)
+                    return false;
+            }
+        }
+        
+    	return allowConnection(c.headers()).isAcceptable();
     }
     
     /**
@@ -1898,13 +1948,15 @@ public class ConnectionManager {
      * 
      * @param c
      * @throws IOException
+     * 
+     * @return true if the connection should continue, false if it was closed
      */
-    private void completeInitializeExternallyGeneratedConnection(ManagedConnection c) throws IOException {
+    private boolean completeInitializeExternallyGeneratedConnection(ManagedConnection c) throws IOException {
         processConnectionHeaders(c);
         
         // If there's not space for the connection, destroy it.
         // It really should have been destroyed earlier, but this is just in case.
-        if (!c.isOutgoing() && !allowConnection(c)) {
+        if (!c.isOutgoing() && !allowConnection(c).isAcceptable()) {
             // No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
@@ -1921,7 +1973,7 @@ public class ConnectionManager {
             RouterService.getCallback().connectionInitializing(c);
         }
 
-        completeConnectionInitialization(c, false);
+        return completeConnectionInitialization(c, false);
     }
 
     /**
@@ -1931,8 +1983,10 @@ public class ConnectionManager {
      * @param fetched Specifies whether or not this connection is was fetched by a connection fetcher. If so, this
      *            removes that connection from the list of fetched connections being initialized, keeping the connection
      *            fetcher data in sync
+     *            
+     * @return true if the connection should continue, false if it was closed
      */
-    private void completeConnectionInitialization(ManagedConnection mc,
+    private boolean completeConnectionInitialization(ManagedConnection mc,
                                                   boolean fetched) {
         synchronized(this) {
             if(fetched) {
@@ -1945,6 +1999,7 @@ public class ConnectionManager {
                 RouterService.getCallback().connectionInitialized(mc);
                 setPreferredConnections();
             }
+            return connectionOpen;
         }
     }
 
@@ -2051,8 +2106,8 @@ public class ConnectionManager {
 
         public void handleConnect() {
             try {
-                completeInitializeExternallyGeneratedConnection(connection);
-                startConnection(connection);
+                if(completeInitializeExternallyGeneratedConnection(connection));
+                    startConnection(connection);
             } catch(IOException ignored) {
                 LOG.warn("Failed to complete initialization", ignored);
             }
@@ -2150,9 +2205,9 @@ public class ConnectionManager {
             initializeFetchedConnection(connection, this);
         }
         
-        /** Callback that Sockets.connect worked. */
+        /** Callback that handshaking has succeeded and we're all connected and ready. */
         public void handleConnect() {
-            completeConnectionInitialization(connection, true);
+            boolean stillOpen = completeConnectionInitialization(connection, true);
             processConnectionHeaders(connection);
             _lastSuccessfulConnect = System.currentTimeMillis();
             _catcher.doneWithConnect(endpoint, true);
@@ -2160,7 +2215,8 @@ public class ConnectionManager {
                 _needPref = false;
             
             try {
-                startConnection(connection);
+                if(stillOpen)
+                    startConnection(connection);
             } catch(IOException ignored) {}
         }
         
