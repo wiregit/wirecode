@@ -137,7 +137,7 @@ public class KUID implements Serializable, Comparable {
     }
     
     /**
-     * Returns the identity and throws a RuntimeException
+     * Returns the identity and throws an AssertionError
      * if this isn't a Node ID.
      */
     public KUID assertNodeID() throws AssertionError {
@@ -155,7 +155,7 @@ public class KUID implements Serializable, Comparable {
     }
     
     /**
-     * Returns the identity and throws a RuntimeException
+     * Returns the identity and throws an AssertionError
      * if this isn't a Value ID.
      */
     public KUID assertValueID() throws AssertionError {
@@ -173,7 +173,7 @@ public class KUID implements Serializable, Comparable {
     }
     
     /**
-     * Returns the identity and throws a RuntimeException
+     * Returns the identity and throws an AssertionError
      * if this isn't a Message ID.
      */
     public KUID assertMessageID() throws AssertionError {
