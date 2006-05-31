@@ -840,7 +840,6 @@ public class ConnectionManager {
                 }
                 
                 // don't allow it.
-                System.out.println("shielded: " + _shieldedConnections + ", pref: " + _preferredConnections);
                 return HandshakeStatus.TOO_MANY_UPS;
             }
 		} else if (hr.isLeaf() || leaf) {
@@ -1345,13 +1344,14 @@ public class ConnectionManager {
             ManagedConnection mc = (ManagedConnection)connections.get(i);
             if(mc == c)
                 continue;
-            
             if(addr.equals(mc.getAddress())) {
                 int mcLP = mc.getListeningPort();
                 // If either side didn't advertise a listening port,
                 // or both did and they're the same, then because the
                 // addresses are also equal, disallow it.
-                if(listenPort == -1 || mcLP == -1 || mcLP == listenPort)
+                // -1 == unknown, 0 == connecting w/o NIOSocket
+                if(listenPort == -1 || listenPort == 0 ||
+                   mcLP == -1 || mcLP == 0 || mcLP == listenPort)
                     return false;
             }
         }

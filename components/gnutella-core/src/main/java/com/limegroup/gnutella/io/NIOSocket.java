@@ -30,6 +30,9 @@ public class NIOSocket extends AbstractNBSocket {
      * disconnected)
      */
     private InetAddress connectedTo;
+    
+    /** The port we're connecting/connected to. */
+    private int port;
 
     /**
      * Constructs an NIOSocket using a pre-existing Socket. To be used by NIOServerSocket while accepting incoming
@@ -98,7 +101,9 @@ public class NIOSocket extends AbstractNBSocket {
 
     /** Stores the connecting address so we can retrieve it later. */
     public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) {
-        connectedTo = ((InetSocketAddress) addr).getAddress();
+        InetSocketAddress a = (InetSocketAddress)addr;
+        connectedTo = a.getAddress();
+        port = a.getPort();
         return super.connect(addr, timeout, observer);
     }
 
@@ -108,6 +113,13 @@ public class NIOSocket extends AbstractNBSocket {
      */
     public InetAddress getInetAddress() {
         return connectedTo;
+    }
+    
+    /**
+     * Returns the port this socket is connecting or connected to.
+     */
+    public int getPort() {
+        return port;
     }
 
     /** Constructs an InterestReadChannel adapter around the SocketChannel. */
@@ -174,10 +186,6 @@ public class NIOSocket extends AbstractNBSocket {
 
     public boolean getOOBInline() throws SocketException {
         return socket.getOOBInline();
-    }
-
-    public int getPort() {
-        return socket.getPort();
     }
 
     public int getReceiveBufferSize() throws SocketException {
