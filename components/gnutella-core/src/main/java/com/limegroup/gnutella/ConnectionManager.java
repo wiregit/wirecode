@@ -28,6 +28,7 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.QuestionsHandler;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -464,11 +465,8 @@ public class ConnectionManager {
      * @return true if this is probably connected to <tt>host</tt>
      */
     boolean isConnectedTo(String hostName) {
-        //A clone of the list of all connections, both initialized and
-        //uninitialized, leaves and unrouted.  If Java could be prevented from
-        //making certain code transformations, it would be safe to replace the
-        //call to "getConnections()" with "_connections", thus avoiding a clone.
-        //(Remember that _connections is never mutated.)
+        //A list of all connections, both initialized and
+        //uninitialized, leaves and unrouted. 
         List connections=getConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc = (ManagedConnection)iter.next();
@@ -477,6 +475,27 @@ public class ConnectionManager {
                 return true;
         }
         return false;
+    }
+    
+    /**
+     * Returns true if we're currently attempting to connect to a particular host.
+     * This checks both the Ip & Port.
+     */
+    boolean isConnectingTo(IpPort host) {
+        synchronized(this) {
+            for(int i = 0; i < _fetchers.size(); i++) {
+                ConnectionFetcher next = (ConnectionFetcher)_fetchers.get(i);
+                IpPort them = next.getIpPort();
+                if(them != null && host.getAddress().equals(them.getAddress()) && host.getPort() == them.getPort())
+                    return true;
+            }
+            for(int i = 0; i < _initializingFetchedConnections.size(); i++) {
+                ManagedConnection next = (ManagedConnection)_initializingFetchedConnections.get(i);
+                if(host.getAddress().equals(next.getAddress()) && host.getPort() == next.getPort())
+                    return true;
+            }
+            return false;
+        }
     }
 
     /**
@@ -1326,10 +1345,10 @@ public class ConnectionManager {
         _connectTime = Long.MAX_VALUE;
         _preferredConnections = 0;
         adjustConnectionFetchers(); // kill them all
+        
         //2. Remove all connections.
-        for (Iterator iter=getConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        for (Iterator iter = getConnections().iterator(); iter.hasNext(); ) {
+            ManagedConnection c = (ManagedConnection)iter.next();
             remove(c);
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
@@ -2077,6 +2096,15 @@ public class ConnectionManager {
         public ConnectionFetcher(boolean pref) {
             _pref = pref;
         }
+        
+        IpPort getIpPort() {
+            if(connection != null)
+                return connection;
+            else if(endpoint != null)
+                return endpoint;
+            else
+                return null;
+        }
 
         /** Starts the process of connecting to an arbitary endpoint. */
         public void connect() {
@@ -2107,7 +2135,9 @@ public class ConnectionManager {
             Assert.that(endpoint != null);
             
             // If this was an invalid endpoint, try again.
-            if (!IPFilter.instance().allow(endpoint.getAddress()) || isConnectedTo(endpoint.getAddress())) {
+            if (!IPFilter.instance().allow(endpoint.getAddress()) 
+                || isConnectedTo(endpoint.getAddress())
+                || isConnectingTo(endpoint)) {
                 _catcher.getAnEndpoint(this);
                 return;
             }

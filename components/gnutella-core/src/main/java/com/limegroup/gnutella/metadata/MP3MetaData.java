@@ -138,6 +138,8 @@ public class MP3MetaData extends AudioMetaData {
             return ;
         } catch (IOException iox) {
             return ;
+        } catch(ArrayIndexOutOfBoundsException ignored) {
+            return ;
         }
         
 

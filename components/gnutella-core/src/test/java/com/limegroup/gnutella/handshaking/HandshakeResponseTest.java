@@ -174,9 +174,6 @@ public final class HandshakeResponseTest extends BaseTestCase {
         List ultrapeers = new LinkedList();
         String leafAddress = "10.254.0.";
         String ultrapeerAddress = "20.23.0.";
-        Properties props = new Properties();
-        UltrapeerHandshakeResponder UHR = 
-            new UltrapeerHandshakeResponder("20.34.90.1");
         for(int i=0; i<10; i++) {
             Connection conn = new Connection(leafAddress+i, 6346);
             leaves.add(conn);
@@ -213,9 +210,6 @@ public final class HandshakeResponseTest extends BaseTestCase {
 		List ultrapeers = new LinkedList();
 		String leafAddress = "10.254.0.";
 		String ultrapeerAddress = "20.23.0.";
-		Properties props = new Properties();
-		UltrapeerHandshakeResponder UHR = 
-			new UltrapeerHandshakeResponder("20.34.90.1");
 		for(int i=0; i<30; i++) {
 			Connection conn = new Connection(leafAddress+i, 6346);
 			leaves.add(conn);

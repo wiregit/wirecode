@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -310,15 +311,14 @@ public class HostCatcher {
         Runnable probationRestorer = new Runnable() {
             public void run() {
                 LOG.trace("restoring hosts on probation");
+                List toAdd;
                 synchronized(HostCatcher.this) {
-                    Iterator iter = PROBATION_HOSTS.iterator();
-                    while(iter.hasNext()) {
-                        Endpoint host = (Endpoint)iter.next();
-                        add(host, false);
-                    }
-                    
+                    toAdd = new ArrayList(PROBATION_HOSTS);
                     PROBATION_HOSTS.clear();
                 }
+                
+                for(Iterator i = toAdd.iterator(); i.hasNext(); )
+                    add((Endpoint)i.next(), false);
             } 
         };
         // Recover hosts on probation every minute.

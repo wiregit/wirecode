@@ -458,8 +458,7 @@ public class UploadManager implements BandwidthTracker {
             
             if(LOG.isDebugEnabled())
                 LOG.debug(uploader + " closing socket");
-            //close the socket
-            close(socket);
+            IOUtils.close(socket);
         }
     }
     
@@ -833,25 +832,6 @@ public class UploadManager implements BandwidthTracker {
         // If the state wanted us to close the connection, throw an IOX.
         if(closeConnection)
             throw new IOException("close connection");
-    }
-
-    /**
-     * closes the passed socket and its corresponding I/O streams
-     */
-    public void close(Socket socket) {
-        //close the output streams, input streams and the socket
-        try {
-            if (socket != null)
-                socket.getOutputStream().close();
-        } catch (Exception e) {}
-        try {
-            if (socket != null)
-                socket.getInputStream().close();
-        } catch (Exception e) {}
-        try {
-            if (socket != null) 
-                socket.close();
-        } catch (Exception e) {}
     }
     
     /**
