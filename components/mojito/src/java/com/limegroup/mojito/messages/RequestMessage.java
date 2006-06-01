@@ -25,7 +25,7 @@ import com.limegroup.mojito.KUID;
 /**
  * An abstract base class for request Messages
  */
-public abstract class RequestMessage extends AbstractDHTMessage {
+public abstract class RequestMessage extends DHTMessage {
 
     public RequestMessage(int vendor, int version, 
             ContactNode node, KUID messageId) {

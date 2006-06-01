@@ -23,9 +23,9 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
 /**
- * Interface for DHT Messages
+ * This is an abstract base class for all DHT messages.
  */
-public interface DHTMessage {
+public abstract class DHTMessage {
     
     public static final int PING_REQUEST = 0x01;
     public static final int PING_RESPONSE = 0x02;
@@ -42,18 +42,58 @@ public interface DHTMessage {
     public static final int STATS_REQUEST = 0x0A;
     public static final int STATS_RESPONSE = 0x0B;
     
-    /** Returns the Vendor of the Message */
-    public int getVendor();
+    private int vendor;
+    private int version;
+
+    private ContactNode contactNode;
+    private KUID messageId;
     
-    /** Returns the Version of the Message */
-    public int getVersion();
+    private byte[] signature;
     
-    /** Returns the Message ID of the Message */
-    public KUID getMessageID();
+    public DHTMessage(int vendor, int version, 
+            ContactNode contactNode, KUID messageId) {
+        this(vendor, version, contactNode, messageId, null);
+    }
     
-    /** Returns the sender of this Message */
-    public ContactNode getContactNode();
+    public DHTMessage(int vendor, int version, 
+            ContactNode contactNode, KUID messageId, byte[] signature) {
+        
+        if (contactNode == null) {
+            throw new NullPointerException("ContactNode is null");
+        }
+        
+        if (messageId == null) {
+            throw new NullPointerException("MessageID is null");
+        }
+        
+        if (!messageId.isMessageID()) {
+            throw new IllegalArgumentException("MessageID is of wrong type: " + messageId);
+        }
+        
+        this.vendor = vendor;
+        this.version = version;
+        this.contactNode = contactNode;
+        this.messageId = messageId;
+        this.signature = signature;
+    }
     
-    /** Returns the signature of the Message or null */ 
-    public byte[] getSignature();
+    public int getVendor() {
+        return vendor;
+    }
+    
+    public int getVersion() {
+        return version;
+    }
+    
+    public KUID getMessageID() {
+        return messageId;
+    }
+    
+    public ContactNode getContactNode() {
+        return contactNode;
+    }
+    
+    public byte[] getSignature() {
+        return signature;
+    }
 }
