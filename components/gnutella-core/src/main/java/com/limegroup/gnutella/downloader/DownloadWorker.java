@@ -206,11 +206,6 @@ public class DownloadWorker {
     private volatile boolean _interrupted;
     
     /**
-     * Reference to the stealLock all workers for a download will synchronize on
-     */
-    private final Object _stealLock;
-    
-    /**
      * The downloader that will do the actual downloading
      * TODO: un-volatilize after fixing the assertion failures
      */
@@ -233,10 +228,15 @@ public class DownloadWorker {
     /** The current state of the non-blocking download. */
     private DownloadState _currentState;
     
-    DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd, VerifyingFile vf, Object lock) {
+    /**
+     *  Whether or not the worker is involved in a stealing operation
+     *  (as either a thief or victim).
+     */
+    private volatile boolean _stealing;
+    
+    DownloadWorker(ManagedDownloader manager, RemoteFileDesc rfd, VerifyingFile vf) {
         _manager = manager;
         _rfd = rfd;
-        _stealLock = lock;
         _commonOutFile = vf;
         _currentState = new DownloadState();
         
@@ -798,10 +798,8 @@ public class DownloadWorker {
         // it is still possible that a worker has died and released their ranges
         // just before we try to steal
         if (interval == null) {
-            synchronized(_stealLock) {
-                if(!assignGrey())
-                    return false;
-            }
+            if(!assignGrey())
+                return false;
         } else {
             assignWhite(interval);
         }
@@ -835,9 +833,19 @@ public class DownloadWorker {
      */
     private ConnectionStatus completeAssignAndRequestImpl(IOException x, Interval range, DownloadWorker victim) {
         try {
-            _downloader.parseHeaders();
-            if(x != null)
+            try {
+                _downloader.parseHeaders();
+            } catch(IOException iox) {
+                x = iox;
+            }
+            
+            if(x != null) {
+                if(victim != null) {
+                    victim.setStealing(false);
+                    setStealing(false);
+                }
                 throw x;
+            }
             
             if(victim == null)
                 completeAssignWhite(range);
@@ -1094,17 +1102,19 @@ public class DownloadWorker {
         
         //Note: we are not interested in being queued at this point this
         //line could throw a bunch of exceptions (not queuedException)
+        slowest.setStealing(true);
+        setStealing(true);
         _downloader.connectHTTP(slowestRange.low, slowestRange.high, false,_commonOutFile.getBlockSize(), new IOStateObserver() {
             public void handleStatesFinished() {
                 completeAssignAndRequest(null, slowestRange, slowest);
             }
 
             public void handleIOException(IOException iox) {
-                completeAssignAndRequest(iox, null, null);
+                completeAssignAndRequest(iox, null, slowest);
             }
 
             public void shutdown() {
-                completeAssignAndRequest(new IOException("shutdown"), null, null);
+                completeAssignAndRequest(new IOException("shutdown"), null, slowest);
             }
             
         });
@@ -1127,6 +1137,8 @@ public class DownloadWorker {
         synchronized(victim.getDownloader()) {
             // if the victim died or was stopped while the thief was connecting, we can't steal
             if (!victim.getDownloader().isActive()) {
+                victim.setStealing(false);
+                setStealing(false);
                 LOG.debug("victim is no longer active");
                 throw new NoSuchElementException();
             }
@@ -1139,6 +1151,8 @@ public class DownloadWorker {
                 if (LOG.isDebugEnabled())
                     LOG.debug("victim is now downloading something else "+
                             newSlowestRange+" vs. "+slowestRange);
+                victim.setStealing(false);
+                setStealing(false);
                 throw new NoSuchElementException();
             }
             
@@ -1160,6 +1174,8 @@ public class DownloadWorker {
                             ", high: " + slowestRange.high + ".  Was low: " + myLow +
                             ", high: " + myHigh);
                 }
+                victim.setStealing(false);
+                setStealing(false);
                 throw new IOException();
             }
             
@@ -1179,6 +1195,8 @@ public class DownloadWorker {
         // once we've told the victim where to stop, make our ranges release-able
         _downloader.startAt(newStart);
         _shouldRelease = true;
+        victim.setStealing(false);
+        setStealing(false);
     }
     
     Interval getDownloadInterval() {
@@ -1194,6 +1212,16 @@ public class DownloadWorker {
         }
     }
     
+    /** Sets this worker as being part of or not part of a stealing operation. */
+    private void setStealing(boolean stealing) {
+        this._stealing = stealing;
+    }
+    
+    /** Returns true if this worker is currently involved in a stealing operation. */
+    boolean isStealing() {
+        return _stealing;
+    }
+    
     /**
      * @return the httpdownloader that is going slowest.
      */
@@ -1204,8 +1232,10 @@ public class DownloadWorker {
         
         Set queuedWorkers = _manager.getQueuedWorkers().keySet();
         for (Iterator iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
-            
             DownloadWorker worker = (DownloadWorker) iter.next();
+            if(worker.isStealing())
+                continue;
+            
             if (queuedWorkers.contains(worker))
                 continue;
             
@@ -1251,6 +1281,10 @@ public class DownloadWorker {
         }
     }
     
+    /**
+     * Returns true if the victim is going below minimum speed.
+     * @return
+     */
     boolean isSlow() {
         float ourSpeed = getOurSpeed();
         return ourSpeed < MIN_ACCEPTABLE_SPEED && ourSpeed != UNKNOWN_SPEED;

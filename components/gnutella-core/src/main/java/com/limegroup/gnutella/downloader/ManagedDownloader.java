@@ -218,32 +218,14 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
      * files, _activeWorkers, busy and setState.  We should  not hold lock 
-     * while performing blocking IO operations, however we need to ensure 
-     * atomicity and thread safety for step 2 of the algorithm above. For 
-     * this reason we needed to add another lock - stealLock.
-     *
-     * We don't want to synchronize assignAndRequest on this since that freezes
-     * the GUI as it calls getAmountRead() frequently (which also hold this'
-     * monitor).  Now assignAndRequest is synchronized on stealLock, and within
-     * it we acquire this' monitor when we are modifying shared datastructures.
-     * This additional lock will prevent GUI freezes, since we hold this'
-     * monitor for a very short time while we are updating the shared
-     * datastructures, also atomicity is guaranteed since we are still
-     * synchronized.  StealLock is also held for manipulations to the verifying file,
-     * and for all removal operations from the _activeWorkers list.
+     * while performing blocking IO operations.
      * 
-     * stealLock->this is ok
-     * stealLock->verifyingFile is ok
-     * 
-     * Never acquire stealLock's monitor if you have this' monitor.
-     *
      * Never acquire incompleteFileManager's monitor if you have commonOutFile's
      * monitor.
      *
      * Never obtain manager's lock if you hold this.
      ***********************************************************************/
-    private Object stealLock;
-
+    
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
     /** The place to share completed downloads (and their metadata) */
@@ -667,7 +649,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         queuedWorkers = new HashMap();
 		chatList=new DownloadChatList();
         browseList=new DownloadBrowseHostList();
-        stealLock = new Object();
         stopped=false;
         paused = false;
         setState(QUEUED);
@@ -2327,7 +2308,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Starts a new Worker thread for the given RFD.
      */
     private void startWorker(final RemoteFileDesc rfd) {
-        DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile,stealLock);
+        DownloadWorker worker = new DownloadWorker(this,rfd,commonOutFile);
         synchronized(this) {
             _workers.add(worker);
             currentRFDs.add(rfd);
@@ -2574,7 +2555,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         // there needs to be at least one slow worker.
         for (Iterator iter = _workers.iterator(); iter.hasNext();) {
             DownloadWorker victim = (DownloadWorker) iter.next();
-            if (victim.isSlow())
+            if (!victim.isStealing() && victim.isSlow())
                 return true;
         }
         
