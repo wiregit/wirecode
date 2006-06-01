@@ -323,29 +323,6 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * Accessor for the array of URL representing the trackers, adds one URL to
-	 * it
-	 * 
-	 * @param url
-	 *            the <tt>URL</tt> to add
-	 */
-	public boolean addTracker(URL url) {
-		// list of trackers should not contain duplicates
-		for (int i = 0; i < _trackers.length; i++) {
-			if (_trackers[i].equals(url))
-				return false;
-		}
-
-		URL[] newTrackers = new URL[_trackers.length + 1];
-		System.arraycopy(_trackers, 0, newTrackers, 0, _trackers.length);
-		newTrackers[_trackers.length] = url;
-		_trackers = newTrackers;
-		if (_torrent != null)
-			_torrent.trackerAdded(new Tracker(url, this, _torrent));
-		return true;
-	}
-
-	/**
 	 * Returns which message digest was used to create _hashes.
 	 * 
 	 * @return new Instance of the message digest that was used

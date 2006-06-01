@@ -798,8 +798,8 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 			BTMetaInfo info = BTMetaInfo.readFromBytes(metaInfo);
 			for (Iterator iter = active.iterator(); iter.hasNext();) {
 				Downloader current = (Downloader) iter.next();
-				if (metaInfo.equals(current.getSHA1Urn()))
-					return current;
+				if (metaInfo.equals(current.getSHA1Urn())) 
+					return current; // eventually implement adding of trackers
 			}
 			AbstractDownloader ret = new BTDownloader(info);
 			initializeDownload(ret);

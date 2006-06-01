@@ -9,10 +9,7 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 
 /**
- * This class enables the GUI to treat a Torrent like any other upload. I'm
- * not actually happy with this solution but I don't want to spend time on the GUI
- * 
- * TODO find a proper solution.
+ * A facade for the GUI to treat a single BitTorrent download as a single upload.
  */
 public class BTUploader implements Uploader, TorrentLifecycleListener {
 	
@@ -154,11 +151,7 @@ public class BTUploader implements Uploader, TorrentLifecycleListener {
 		}
 	}
 	
-	public void torrentHitRatio(ManagedTorrent t) {
-		// TODO: check if this should yield to seeding torrents. 
-	}
-	
 	public void torrentComplete(ManagedTorrent t){
-		// TODO: check if this should yield to downloading torrents.
+		// nothing.
 	}
 }

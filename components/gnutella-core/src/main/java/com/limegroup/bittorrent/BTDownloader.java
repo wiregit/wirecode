@@ -32,6 +32,8 @@ implements TorrentLifecycleListener {
     
 	private static final String METAINFO = "metainfo";
 	
+	private static final TorrentManager torrentManager = new TorrentManager();
+	
 	private ManagedTorrent _torrent;
 
 	private BTMetaInfo _info;
@@ -301,7 +303,8 @@ implements TorrentLifecycleListener {
 
 	public void torrentComplete(ManagedTorrent t) {
 		if (_torrent == t) {
-			stopTime = System.currentTimeMillis(); // the download stops now.
+			// the download stops now. even though the torrent goes on
+			stopTime = System.currentTimeMillis(); 
 			manager.remove(this, true);
 		}
 	}
@@ -311,8 +314,6 @@ implements TorrentLifecycleListener {
 		stopTime = 0;
 	}
 
-	public void torrentHitRatio(ManagedTorrent t){} // we don't care
-	
 	public void torrentStopped(ManagedTorrent t) {
 		if (_torrent == t) {
 			if (stopTime == 0) // do not update the stop time if was completed.
@@ -347,6 +348,7 @@ implements TorrentLifecycleListener {
 		_torrent.addLifecycleListener(this);
 		BTUploader uploader = new BTUploader(_torrent,_info);
 		_torrent.addLifecycleListener(uploader);
+		_torrent.addLifecycleListener(torrentManager);
 	}
 	
 	public void startDownload() {
@@ -358,7 +360,7 @@ implements TorrentLifecycleListener {
 	}
 	
 	public boolean shouldBeRestarted() {
-		return getState() == QUEUED; 
+		return getState() == QUEUED && torrentManager.allowNewTorrent(); 
 	}
 	
 	public boolean isAlive() {

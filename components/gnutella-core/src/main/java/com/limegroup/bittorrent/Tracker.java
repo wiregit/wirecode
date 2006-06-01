@@ -129,7 +129,7 @@ public class Tracker {
 			addGetField(buf, "info_hash", infoHash);
 
 			String peerId = URLEncoder
-					.encode("LIME" +ApplicationSettings.CLIENT_ID.getValue(),
+					.encode("LIME" +new String(RouterService.getMyGUID()),
 							Constants.ASCII_ENCODING);
 			addGetField(buf, "peer_id", peerId);
 
@@ -207,7 +207,7 @@ public class Tracker {
 				return null;
 
 			byte[] response = get.getResponseBody();
-
+			
 			if (response == null)
 				return null;
 

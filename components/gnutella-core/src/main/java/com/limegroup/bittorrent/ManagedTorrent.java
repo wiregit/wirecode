@@ -122,7 +122,7 @@ public class ManagedTorrent {
 		Collections.synchronizedList(new ArrayList(2));
 	
 	/** The total uploaded and downloaded data */
-	private long totalUp, totalDown;
+	private volatile long totalUp, totalDown;
 	
 
 	/**
@@ -864,6 +864,12 @@ public class ManagedTorrent {
 	public long getTotalDownloaded() {
 		return totalDown;
 	}
+	
+	public float getRatio() {
+		if (getTotalDownloaded() == 0)
+			return 0;
+		return (1f * getTotalUploaded()) / getTotalDownloaded();
+	}
 
 
 	boolean hasNonBusyLocations() {
@@ -877,14 +883,6 @@ public class ManagedTorrent {
 			}
 		}
 		return false;
-	}
-	
-	/**
-	 * Notification that a new tracker has been added to the torrent.
-	 * @param t the new <tt>Tracker</tt>
-	 */
-	void trackerAdded(Tracker t) {
-		trackerManager.add(t);
 	}
 	
 	/**
