@@ -11,7 +11,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,6 +61,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPortSet;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -76,28 +76,28 @@ public class DownloadTest extends BaseTestCase {
     /**
      * Port for the first uploader.
      */
-    private static final int PORT_1 = 6320;
+    private static final int PORT_1 = 6321;
 
     /**
      * Port for the second uploader.
      */
-    private static final int PORT_2 = 6321;
+    private static final int PORT_2 = 6322;
 
     /**
      * Port for the third uploader.
      */
-    private static final int PORT_3 = 6322;
+    private static final int PORT_3 = 6323;
 
 
     /**
      * Port for the fourth uploader.
      */
-    private static final int PORT_4 = 6323;
+    private static final int PORT_4 = 6324;
 
     /**
      * Port for the fifth uploader.
      */
-    private static final int PORT_5 = 6324;
+    private static final int PORT_5 = 6325;
     
     
     /**
@@ -144,7 +144,7 @@ public class DownloadTest extends BaseTestCase {
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
 		RouterService rs = new RouterService(callback);
-        dm = rs.getDownloadManager();
+        dm = RouterService.getDownloadManager();
         dm.initialize();
 
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
@@ -172,7 +172,7 @@ public class DownloadTest extends BaseTestCase {
             }
         };
         RouterService.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
-            rs.start();
+        rs.start();
     } 
     
     public DownloadTest(String name) {
@@ -436,8 +436,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc [] rfds = {rfd};
         TestUploader uploader = new TestUploader("push uploader");
-        UDPAcceptor p = new UDPAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName(),uploader,guid);
+        new UDPAcceptor(PPORT_1,RouterService.getPort(), savedFile.getName(),uploader,guid);
         
         tGeneric(rfds);
     }
@@ -489,8 +488,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
-        UDPAcceptor pa = 
-            new UDPAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),uploader,guid);
+        new UDPAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),uploader,guid);
         
         tGeneric(rfds);
         
@@ -531,8 +529,7 @@ public class DownloadTest extends BaseTestCase {
         LOG.info("-Testing swarming from two sources (one broken)...");
         
         final int RATE=100;
-        final int STOP_AFTER = TestFile.length()/4;       
-        final int FUDGE_FACTOR=RATE*1024;  
+        final int STOP_AFTER = TestFile.length()/4;
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
@@ -615,12 +612,9 @@ public class DownloadTest extends BaseTestCase {
         TestUploader second = new TestUploader("second pusher");
         TestUploader third = new TestUploader("third pusher");
         
-        UDPAcceptor pa1 = 
-            new UDPAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),first,guid);
-        UDPAcceptor pa2 = 
-            new UDPAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),second,guid);
-        UDPAcceptor pa3 = 
-            new UDPAcceptor(PPORT_3,RouterService.getPort(),savedFile.getName(),third,guid);
+        new UDPAcceptor(PPORT_1,RouterService.getPort(),savedFile.getName(),first,guid);
+        new UDPAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),second,guid);
+        new UDPAcceptor(PPORT_3,RouterService.getPort(),savedFile.getName(),third,guid);
         
         
         uploader1.setRate(RATE);
@@ -691,7 +685,6 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1};
-        RemoteFileDesc[] rfds2 ={rfd2};
 
         ManagedDownloader downloader = (ManagedDownloader) 
             RouterService.download(rfds,Collections.EMPTY_LIST, null, false);
@@ -725,7 +718,6 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1};
-        RemoteFileDesc[] rfds2 ={rfd2};
 
         ManagedDownloader downloader = (ManagedDownloader) 
             RouterService.download(rfds,Collections.EMPTY_LIST, null, false);
@@ -1063,14 +1055,12 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setSendThexTreeHeader(getThex);
         uploader1.setSendThexTree(getThex);
         RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100, badSha1);
-        Downloader download = null;
         
         URN badURN = URN.createSHA1Urn(badSha1);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
         TigerTreeCache.instance().purgeTree(badURN);
         
-        download = RouterService.download(new RemoteFileDesc[] {rfd1}, false, 
-                                          null);
+        RouterService.download(new RemoteFileDesc[] {rfd1}, false, null);
         // even though the download completed, we ignore the tree 'cause the
         // URNs didn't match.
         assertNull(TigerTreeCache.instance().getHashTree(TestFile.hash()));
@@ -1164,7 +1154,6 @@ public class DownloadTest extends BaseTestCase {
     public void testUploaderPassesPushLoc() throws Exception {
         LOG.info("-Testing swarming from two sources one based on a push alt...");
         final int RATE=500;
-        final int FUDGE_FACTOR=RATE*1024;
         uploader1.setRate(RATE);
         uploader1.stopAfter(800000);
         
@@ -1183,8 +1172,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc []rfds = {rfd};
         
-        UDPAcceptor pa = new UDPAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName(),pusher,guid);
+        new UDPAcceptor(PPORT_1,RouterService.getPort(), savedFile.getName(),pusher,guid);
         
         tGeneric(rfds);
         
@@ -1212,23 +1200,20 @@ public class DownloadTest extends BaseTestCase {
         GUID guid2 = new GUID(GUID.makeGuid());
         
         AlternateLocation firstLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+                guid.toHexString()+";127.0.0.2:"+PPORT_1,TestFile.hash());
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid2.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+                guid2.toHexString()+";127.0.0.2:"+PPORT_2,TestFile.hash());
         
         AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
         alCol.add(pushLoc);
         
         first.setGoodAlternateLocations(alCol);
         
-        UDPAcceptor pa = new UDPAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName(),first,guid);
+        new UDPAcceptor(PPORT_1,RouterService.getPort(), savedFile.getName(),first,guid);
+        new UDPAcceptor(PPORT_2,RouterService.getPort(), savedFile.getName(),second,guid2);
         
-        UDPAcceptor pa2 = new UDPAcceptor(PPORT_2,RouterService.getPort(),
-                savedFile.getName(),second,guid2);
-        
-        RemoteFileDesc []rfd ={newRFDPush(PPORT_1,2)};
+        RemoteFileDesc []rfd ={newRFDPush(PPORT_1,1,2)};
         
         tGeneric(rfd);
         
@@ -1268,9 +1253,9 @@ public class DownloadTest extends BaseTestCase {
         
         
         AlternateLocation pushLoc = AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+                guid.toHexString()+";127.0.0.2:"+PPORT_1,TestFile.hash());
         
-        RemoteFileDesc pushRFD = newRFDPush(PPORT_1,2);
+        RemoteFileDesc pushRFD = newRFDPush(PPORT_1,1,2);
         
         assertFalse(pushRFD.supportsFWTransfer());
         assertTrue(pushRFD.needsPush());
@@ -1283,8 +1268,7 @@ public class DownloadTest extends BaseTestCase {
         later.add(openRFD1);
         later.add(openRFD2);
         
-        UDPAcceptor pa = new UDPAcceptor(PPORT_1,RouterService.getPort(),
-                savedFile.getName(),pusher,guid);
+        new UDPAcceptor(PPORT_1,RouterService.getPort(), savedFile.getName(),pusher,guid);
 
         
         ManagedDownloader download=
@@ -1345,19 +1329,18 @@ public class DownloadTest extends BaseTestCase {
         expectedProxies.addAll(pe.getProxies());
         
         PushAltLoc pushLocFWT = (PushAltLoc)AlternateLocation.create(
-                guid.toHexString()+";5:4.3.2.1;127.0.0.1:"+PPORT_2,TestFile.hash());
+                guid.toHexString()+";5:4.3.2.1;127.0.0.2:"+PPORT_2,TestFile.hash());
         pushLocFWT.updateProxies(true);
         
         assertEquals(1,pushLocFWT.getPushAddress().getProxies().size());
         
         RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
         
-        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2,3);
+        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2, 1, 2);
         assertFalse(pushRFD2.supportsFWTransfer());
         assertTrue(pushRFD2.needsPush());
         
-        UDPAcceptor pa2 = new UDPAcceptor(PPORT_2,RouterService.getPort(),
-                savedFile.getName(),pusher2,guid);
+        new UDPAcceptor(PPORT_2,RouterService.getPort(), savedFile.getName(),pusher2,guid);
         
         RemoteFileDesc [] now = {pushRFD2};
         
@@ -1565,7 +1548,6 @@ public class DownloadTest extends BaseTestCase {
         // check in HTTPDownloader to be updated.
         final int RATE=50;
         final int STOP_AFTER = (TestFile.length()/2)+1;
-        final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
         uploader1.setSendThexTreeHeader(true);
@@ -1627,7 +1609,6 @@ public class DownloadTest extends BaseTestCase {
         // check in HTTPDownloader to be updated.
         final int RATE=50;
         final int STOP_AFTER = TestFile.length()/2;
-        final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
@@ -1819,7 +1800,6 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1}; // see note below about why only rfd1
-        RemoteFileDesc[] later = {rfd2};
         
         // Interesting odd factoid about the test:
         // Whether or not RFD1 or RFD2 is tried first is a BIG DEAL.
@@ -2362,11 +2342,6 @@ public class DownloadTest extends BaseTestCase {
         }
     }
     
-    private static void tGenericCorrupt(RemoteFileDesc[] now)
-      throws Exception {
-        tGenericCorrupt(now, null);
-    }    
-    
     /**
      * Performs a generic download of the file specified in <tt>rfds</tt>.
      */
@@ -2400,9 +2375,7 @@ public class DownloadTest extends BaseTestCase {
      * Performs a generic resume download test.
      */
     private static void tResume(File incFile) throws Exception {
-        Downloader download = null;
-        
-        download = RouterService.download(incFile);
+         RouterService.download(incFile);
         
         waitForComplete();
         if (isComplete())
@@ -2414,17 +2387,6 @@ public class DownloadTest extends BaseTestCase {
         VerifyingFile vf = ifm.getEntry(incFile);
         assertNull("verifying file should be null", vf);
     }
-
-    private static URL genericURL(String url) {
-        URL    theURL = null;
-        try {
-            theURL = new URL(url);
-        } catch( Exception e ) {
-            fail("Generic URL creation failed", e);
-        }  
-        return theURL;
-    }
-
 
     private static RemoteFileDesc newRFD(int port, int speed) {
         return new RemoteFileDesc("127.0.0.1", port,
@@ -2459,14 +2421,18 @@ public class DownloadTest extends BaseTestCase {
     }
     
     private static RemoteFileDesc newRFDPush(int port,int suffix) throws Exception{
+        return newRFDPush(port, suffix, 1);
+    }
+    
+    private static RemoteFileDesc newRFDPush(int port, int rfdSuffix, int proxySuffix) throws Exception{    
         PushAltLoc al = (PushAltLoc)AlternateLocation.create(
-                guid.toHexString()+";127.0.0.1:"+port,TestFile.hash());
+                guid.toHexString()+";127.0.0." + proxySuffix +":"+port,TestFile.hash());
         al.updateProxies(true);
         
         Set urns = new HashSet();
         urns.add(TestFile.hash());
         
-        return new RemoteFileDesc("127.0.0."+suffix, 6346, 0, savedFile.getName(),
+        return new RemoteFileDesc("127.0.0."+rfdSuffix, 6346, 0, savedFile.getName(),
                 TestFile.length(),100,false,1,false, 
                 null,urns,false,
                 true,"ALT",0,0,al.getPushAddress());
@@ -2595,7 +2561,7 @@ public class DownloadTest extends BaseTestCase {
         }
     }
     
-    private static class UDPAcceptor extends Thread{
+    private static class UDPAcceptor extends ManagedThread {
         private int _portC;
         private DatagramSocket sock;
         private String _fileName;
@@ -2604,38 +2570,40 @@ public class DownloadTest extends BaseTestCase {
         public boolean sentGIV;
         private boolean noFile;
         public int pings;
-        
+        private String startedInTest;
+
         public UDPAcceptor(int port) {
+            startedInTest = "began in test: " + _currentTestName;
             noFile = true;
             try {
                 sock = new DatagramSocket(port);
-                //sock.connect(InetAddress.getLocalHost(),portC);
+                // sock.connect(InetAddress.getLocalHost(),portC);
                 sock.setSoTimeout(15000);
-            }catch(IOException bad) {
-                ErrorService.error(bad);
+            } catch (IOException bad) {
+                ErrorService.error(bad, startedInTest);
             }
             start();
         }
         
         public UDPAcceptor(int portL,int portC,String filename,TestUploader uploader,GUID g) {
-            super("push acceptor "+portL+"->"+portC);
-            
-            _portC=portC;
-            _fileName=filename;
-            _uploader=uploader;
-            _g=g;
+            super("push acceptor " + portL + "->" + portC);
+
+            _portC = portC;
+            _fileName = filename;
+            _uploader = uploader;
+            _g = g;
             try {
                 sock = new DatagramSocket(portL);
-                //sock.connect(InetAddress.getLocalHost(),portC);
+                // sock.connect(InetAddress.getLocalHost(),portC);
                 sock.setSoTimeout(15000);
-            }catch(IOException bad) {
-                ErrorService.error(bad);
+            } catch (IOException bad) {
+                ErrorService.error(bad, startedInTest);
             }
             setPriority(Thread.MAX_PRIORITY);
             start();
         }
-        
-        public void run() {
+
+        public void managedRun() {
             DatagramPacket p = new DatagramPacket(new byte[1024],1024);
             Message m = null;
             try {
@@ -2670,14 +2638,14 @@ public class DownloadTest extends BaseTestCase {
                 os.flush();
                 
                 LOG.debug("wrote GIV");
-                sentGIV=true;
+                sentGIV = true;
                 _uploader.setSocket(s);
-                
-            }catch(BadPacketException bad) {
-                ErrorService.error(bad);
-            }catch(IOException bad) {
-                ErrorService.error(bad);
-            }finally {
+
+            } catch (BadPacketException bad) {
+                ErrorService.error(bad, startedInTest);
+            } catch (IOException bad) {
+                ErrorService.error(bad, startedInTest);
+            } finally {
                 sock.close();
             }
         }
@@ -2693,8 +2661,8 @@ public class DownloadTest extends BaseTestCase {
                     new DatagramPacket(baos.toByteArray(),baos.toByteArray().length,from);
                 sock.send(pack);
                 pings++;
-            } catch (Exception e) {
-                fail(e);
+            } catch (IOException e) {
+                ErrorService.error(e, startedInTest);
             }
             
             LOG.debug("sent a NoFile headPong to "+from);

@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /** Keeps track of who needs a push, and who should be notified of of success or failure. */
@@ -113,10 +114,11 @@ public class PushList {
         }
         
         // Then try and find the first private address.
-        LOG.debug("No exact match, using first private address.");
+        LOG.debug("No exact match, using first private|bogus address.");
         for(Iterator i = hosts.iterator(); i.hasNext();) {
             Push next = (Push)i.next();
-            if(NetworkUtils.isPrivateAddress(next.details.getAddress())) {
+            if(NetworkUtils.isPrivateAddress(next.details.getAddress()) ||
+               next.details.getAddress().equals(RemoteFileDesc.BOGUS_IP)) {
                 i.remove();
                 return next;
             }   

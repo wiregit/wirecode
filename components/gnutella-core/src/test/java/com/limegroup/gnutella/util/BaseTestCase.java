@@ -57,6 +57,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     protected static File _xmlSchemasDir;
     protected static Class _testClass;
     private   static Timer _testKillerTimer = new Timer(true);
+    protected static String _currentTestName;
     protected Thread _testThread;
     protected TestResult _testResult;
     protected TimerTask _testKiller;
@@ -256,9 +257,9 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      *
 	 */
 	public void runBare() throws Throwable {
-        String testName = getName();
-        System.out.println("Running test: " + testName);
-        assertNotNull(testName);
+        _currentTestName = getName();
+        System.out.println("Running test: " + _currentTestName);
+        assertNotNull(_currentTestName);
         try {
             preSetUp();
             setUp();
