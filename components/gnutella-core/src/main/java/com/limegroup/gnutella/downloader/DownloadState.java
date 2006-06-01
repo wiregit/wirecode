@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.LinkedList;
+import java.util.List;
+
 class DownloadState {
     
     public static final int BEGIN = 0;
@@ -10,11 +13,15 @@ class DownloadState {
     public static final int QUEUED = 5;
     public static final int DOWNLOADING = 6;
     
-    private int state;
-    private boolean http11;
+    private volatile int state;
+    private volatile boolean http11;
+    
+    /** The last few states, for debugging. */
+    //private List _lastFewStates = new LinkedList();
     
     DownloadState() {
         this.state = BEGIN;
+    //    _lastFewStates.add(new Integer(BEGIN));
         this.http11 = true;
     }
     
@@ -24,6 +31,9 @@ class DownloadState {
     
     void setState(int state) {
         this.state = state;
+      //  _lastFewStates.add(new Integer(state));
+      //  if(_lastFewStates.size() > 5)
+      //      _lastFewStates.remove(0);
     }
     
     boolean isHttp11() {
@@ -35,7 +45,11 @@ class DownloadState {
     }
     
     public String toString() {
-        switch(state) {
+        return stateFor(state); // + ", prior: " + _lastFewStates;
+    }
+    
+    private String stateFor(int theState) {
+        switch(theState) {
         case BEGIN: return "Begin";
         case REQUESTING_THEX: return "Requesting Thex";
         case DOWNLOADING_THEX: return "Downloading Thex";
@@ -44,7 +58,7 @@ class DownloadState {
         case QUEUED: return "Queued";
         case DOWNLOADING: return "Downloading";
         default:
-            return "Unknown: " + state;
+            return "Unknown: " + theState;
         }
     }
 

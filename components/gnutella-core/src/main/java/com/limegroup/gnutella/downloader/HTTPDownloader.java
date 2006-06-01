@@ -1818,12 +1818,13 @@ public class HTTPDownloader implements BandwidthTracker {
         public void handleIOException(IOException iox) {
             IOStateObserver del;
             synchronized(this) {
+                error = true;
                 if(handled) {
                     LOG.warn("Ignoring iox", iox);
                     return;
                 }
+                
                 handled = true;
-                error = true;
                 del = delegate;
             }
             if(del != null)
@@ -1848,13 +1849,13 @@ public class HTTPDownloader implements BandwidthTracker {
         public void shutdown() {
             IOStateObserver del;
             synchronized(this) {
+                error = true;
                 if(handled) {
                     if(LOG.isWarnEnabled())
                         LOG.warn("Ignoring shutdown.");
                     return;
                 }
                 handled = true;
-                error = true;
                 del = delegate;
             }
             if(del != null)

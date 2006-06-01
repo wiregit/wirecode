@@ -2501,7 +2501,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 if(LOG.isDebugEnabled())
                     LOG.debug("MANAGER: kicking off workers, activeWorkers: " + 
                             _activeWorkers.size() + ", allWorkers: " + _workers.size() +
-                            ", queuedWorkers: " + queuedWorkers.size() + ", swarm cap: " + getSwarmCapacity());
+                            ", queuedWorkers: " + queuedWorkers.size() + ", swarm cap: " + getSwarmCapacity()
+                              );
+                //+ ", allActive: " + _activeWorkers.toString());
                 
                 
                 //OK. We are going to create a thread for each RFD. The policy for

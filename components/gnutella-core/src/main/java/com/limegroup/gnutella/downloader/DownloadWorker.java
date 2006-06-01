@@ -401,6 +401,10 @@ public class DownloadWorker {
             if(!status.isConnected())
                 releaseRanges();
             
+            // After A&R, we got a non queued response.
+            if(!status.isQueued())
+                _manager.removeQueuedWorker(this);
+            
             if(status.isPartialData()) {
                 _currentState.setState(DownloadState.BEGIN);
                 incrementState(null);
@@ -409,7 +413,6 @@ public class DownloadWorker {
                 boolean queued = _manager.killQueuedIfNecessary(this, !status.isQueued() ? -1 : status.getQueuePosition());
                 
                 if(status.isConnected()) {
-                    _manager.removeQueuedWorker(this);
                     _currentState.setState(DownloadState.DOWNLOADING);
                     beginDownload();
                 } else if (!queued) { // If we were told not to queue.
@@ -528,6 +531,7 @@ public class DownloadWorker {
             _rfd.setTHEXFailed();
             incrementState(status);
         } else {
+            _manager.removeQueuedWorker(this);
             _downloader.downloadThexBody(_manager.getSHA1Urn(), new State() {
                 protected void handleState(boolean success) {
                     synchronized(_commonOutFile) {
@@ -620,7 +624,6 @@ public class DownloadWorker {
                     }
                 }
                 
-                // downloader.stop() will already be called if it was interrupted.
                 NIODispatcher.instance().invokeLater(new Runnable() {
                     public void run() {
                         incrementState(null);
@@ -1383,7 +1386,7 @@ public class DownloadWorker {
     }
     
     public String toString() {
-        return _workerName + " -> "+_rfd;  
+        return _workerName + "[" + _currentState + "] -> "+_rfd;  
     }
     
     /**
