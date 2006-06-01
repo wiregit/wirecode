@@ -504,30 +504,6 @@ public class TorrentManager implements ConnectionAcceptor {
 		writeSnapshot();
 	}
 
-	/**
-	 * measures the bandwidth of all active torrents
-	 */
-	public synchronized void measureBandwidth() {
-		float currentTotalUp, currentTotalDown; 
-		currentTotalDown = currentTotalUp = 0.f;
-		boolean shouldCountAvg = false;
-		for (Iterator iter = _active.iterator(); iter.hasNext();) {
-			shouldCountAvg = true;
-			ManagedTorrent mt = (ManagedTorrent) iter.next();
-			mt.getBandwidthTracker(true).measureBandwidth();
-			mt.getBandwidthTracker(false).measureBandwidth();
-			currentTotalDown += mt.getBandwidthTracker(false).getMeasuredBandwidth();
-			currentTotalUp += mt.getBandwidthTracker(true).getMeasuredBandwidth();
-		}
-		if (shouldCountAvg) {
-			_averageDownload = (_averageDownload * _numMeasures + currentTotalDown) / (_numMeasures +1);
-			_averageUpload = (_averageUpload * _numMeasures + currentTotalUp) / (_numMeasures + 1);
-			_numMeasures ++;
-		}
-		_currentDownload = currentTotalDown;
-		_currentUpload = currentTotalUp;
-	}	
-
 	public float getCurrentDownload() {
 		return _currentDownload;
 	}

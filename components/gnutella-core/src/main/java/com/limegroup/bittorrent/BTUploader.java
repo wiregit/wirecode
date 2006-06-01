@@ -136,7 +136,7 @@ public class BTUploader implements Uploader, TorrentLifecycleListener {
 	public float getAverageBandwidth() {
 		long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
 		long runTime = (now - startTime) / 1000;
-		return getTotalAmountUploaded() / runTime;
+		return runTime > 0 ? getTotalAmountUploaded() / runTime : 0;
 	}
 	
 	public void torrentStarted(ManagedTorrent t) {

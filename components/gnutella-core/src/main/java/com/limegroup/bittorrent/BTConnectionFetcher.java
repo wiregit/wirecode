@@ -17,6 +17,7 @@ import com.limegroup.bittorrent.handshaking.BTHandshaker;
 import com.limegroup.bittorrent.handshaking.OutgoingBTHandshaker;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -84,10 +85,10 @@ public class BTConnectionFetcher  {
 		handshake.put(EXTENSION_BYTES);
 		handshake.put(_torrent.getInfoHash());
 		handshake.put("LIME".getBytes());
-		handshake.put(ApplicationSettings.CLIENT_ID.getValue().getBytes());
+		handshake.put(RouterService.getMyGUID());
 		handshake.flip();
 		
-		_handshake = handshake.asReadOnlyBuffer(); // this actually does nothing :(
+		_handshake = handshake.asReadOnlyBuffer(); 
 	}
 	
 	public synchronized void fetch() {

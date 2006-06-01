@@ -1536,6 +1536,14 @@ implements MeshHandler, AltLocListener {
     public boolean shouldBeRestarted() {
     	return hasNewSources() || getRemainingStateTime() <= 0;
     }
+    
+    public boolean shouldBeRemoved() {
+    	return isCancelled() || isCompleted();
+    }
+    
+    public boolean canBeInQueue() {
+    	return !isPaused();
+    }
 
     ///////////////////////////////////////////////////////////////////////////
 

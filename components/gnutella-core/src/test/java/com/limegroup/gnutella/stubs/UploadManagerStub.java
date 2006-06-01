@@ -2,11 +2,16 @@
 package com.limegroup.gnutella.stubs;
 
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 /**
  * stub for easier testing.  Feel free to override more methods/getters
  */
 public class UploadManagerStub extends UploadManager {
+	
+	public UploadManagerStub() {
+		super(new UploadSlotManager());
+	}
 	
 	int _numQueuedUploads;
 	boolean _isBusy;

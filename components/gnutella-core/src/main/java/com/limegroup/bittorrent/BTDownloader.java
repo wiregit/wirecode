@@ -40,8 +40,7 @@ implements TorrentLifecycleListener {
 	
 	private long startTime, stopTime;
 	
-	public BTDownloader(ManagedTorrent torrent, BTMetaInfo info) {
-		_torrent = torrent;
+	public BTDownloader(BTMetaInfo info) {
 		_info = info;
 	}
 
@@ -238,6 +237,15 @@ implements TorrentLifecycleListener {
 		}
 		return false;
 	}
+	
+	public boolean shouldBeRemoved() {
+		switch(_torrent.getState()) {
+		case ManagedTorrent.DISK_PROBLEM:
+		case ManagedTorrent.SEEDING:
+			return true;
+		}
+		return false;
+	}
 
 	public long getAmountVerified() {
 		return _info.getVerifyingFolder().getVerifiedBlockSize();
@@ -262,7 +270,7 @@ implements TorrentLifecycleListener {
 	public float getAverageBandwidth() {
 		long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
 		long runTime = (now - startTime) / 1000;
-		return getTotalAmountDownloaded() / runTime;
+		return runTime > 0 ? getTotalAmountDownloaded() / runTime : 0;
 	}
 
 	public boolean isRelocatable() {
@@ -350,17 +358,17 @@ implements TorrentLifecycleListener {
 	}
 	
 	public boolean shouldBeRestarted() {
-		return true; // we're always willing to be restarted
-	}
-	
-	public boolean isCancelled() {
-		return false; // can't be
+		return getState() == QUEUED; 
 	}
 	
 	public boolean isAlive() {
 		return false; // doesn't apply to torrents
 	}
 
+	public boolean canBeInQueue() {
+		return !isResumable();
+	}
+	
 	public boolean conflicts(URN urn, String fileName, int fileSize) {
 		String myName = _info.getCompleteFile().getName(); //TODO: look over this
 		return myName.equals(fileName) && 

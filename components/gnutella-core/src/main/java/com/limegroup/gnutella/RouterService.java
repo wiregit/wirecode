@@ -122,7 +122,7 @@ public class RouterService {
 	/**
 	 * <tt>TorrentManager</tt> instance for handling torrents
 	 */
-	private static final TorrentManager torrentManager = new TorrentManager();
+	private static final TorrentManager torrentManager = null;
     
     /**
      * ConnectionDispatcher instance that will dispatch incoming connections to
@@ -462,7 +462,7 @@ public class RouterService {
             LOG.trace("END loading StaticMessages");
             
 			LOG.trace("START TorrentManager");
-			torrentManager.initialize();
+			//torrentManager.initialize();
 			LOG.trace("STOP TorrentManager");
             
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
@@ -618,15 +618,6 @@ public class RouterService {
 	 */
 	public static PushManager getPushManager() {
 	    return pushManager;
-	}
-	
-	/**
-	 * Accessor for the <tt>TorrentManager</tt> instance.
-	 * 
-	 * @return the <tt>TorrentManager</tt> we are using
-	 */
-	public static TorrentManager getTorrentManager() {
-		return torrentManager;
 	}
 	
     /** 
@@ -926,7 +917,7 @@ public class RouterService {
             Statistics.instance().shutdown();
             
 			// start closing all active torrents
-			torrentManager.shutdown();
+			// torrentManager.shutdown();
 			
             //Update firewalled status
             ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
@@ -945,7 +936,7 @@ public class RouterService {
             
             downloader.writeSnapshot();
             
-            torrentManager.writeSnapshot();
+           // torrentManager.writeSnapshot();
             
             fileManager.stop(); // Saves UrnCache and CreationTimeCache
 
@@ -1555,7 +1546,7 @@ public class RouterService {
 	 */
 	public static Downloader downloadTorrent(File torrentFile)
 			throws IOException {
-		return torrentManager.download(torrentFile);
+		return downloader.downloadTorrent(torrentFile);
 	}
     
     /**
@@ -1568,7 +1559,7 @@ public class RouterService {
 	 */
 	public static Downloader downloadTorrent(URL url)
 			throws IOException {
-		return torrentManager.download(url);
+		return downloader.downloadTorrent(url);
 	}
 	
 	/**

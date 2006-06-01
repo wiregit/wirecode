@@ -11,8 +11,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,11 +25,16 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.bitzi.util.Base32;
+import com.limegroup.bittorrent.BTDownloader;
+import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -38,6 +45,7 @@ import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.Shutdownable;
@@ -329,7 +337,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
             AbstractDownloader md = (AbstractDownloader)i.next();
             if(md.isAlive()) {
                 continue;
-            } else if(md.isCancelled() || md.isCompleted()) {
+            } else if(md.shouldBeRemoved()) {
                 i.remove();
                 cleanupCompletedDownload(md, false);
             } else if(hasFreeSlot() && (md.shouldBeRestarted())) {
@@ -339,7 +347,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
                 active.add(md);
                 md.startDownload();
             } else {
-                if(!md.isPaused())
+                if(md.canBeInQueue())
                     md.setInactivePriority(index++);
                 md.handleInactivity();
             }
@@ -758,7 +766,50 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         initializeDownload(d);
         return d;
     }
-        
+    
+    public synchronized Downloader downloadTorrent(URL url) throws IOException {
+		if (LOG.isDebugEnabled())
+			LOG.debug("downloading torrent from " + url);
+		HttpMethod get = new GetMethod(url.toExternalForm());
+		get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+		get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+				"close");
+		get.setFollowRedirects(true);
+
+		HttpClient http = HttpClientManager.getNewClient(Constants.TIMEOUT,
+				Constants.TIMEOUT);
+		http.executeMethod(get);
+
+		if (get.getStatusCode() < 200 || get.getStatusCode() >= 300)
+			throw new IOException("bad status code, downloading .torrent file "
+					+ get.getStatusCode());
+
+		return downloadTorrent(get.getResponseBody());
+    }
+     
+    
+    public synchronized Downloader downloadTorrent(File torrentFile) throws IOException {
+    	return downloadTorrent(FileUtils.readFileFully(torrentFile));
+    }
+    
+    private Downloader downloadTorrent(byte [] metaInfo) throws IOException {
+    	// TODO figure out the SaveLocation exception stuff
+    	try {
+			BTMetaInfo info = BTMetaInfo.readFromBytes(metaInfo);
+			for (Iterator iter = active.iterator(); iter.hasNext();) {
+				Downloader current = (Downloader) iter.next();
+				if (metaInfo.equals(current.getSHA1Urn()))
+					return current;
+			}
+			AbstractDownloader ret = new BTDownloader(info);
+			initializeDownload(ret);
+			return ret;
+		} catch (IOException e) {
+			if (LOG.isDebugEnabled())
+				LOG.debug("bad torrent data", e);
+			throw e;
+		}
+    }
     
     /**
      * Performs common tasks for initializing the download.

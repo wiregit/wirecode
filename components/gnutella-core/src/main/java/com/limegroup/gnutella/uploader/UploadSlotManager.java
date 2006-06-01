@@ -227,10 +227,24 @@ public class UploadSlotManager {
 					speed = user.getMeasuredBandwidth();
 				} catch (InsufficientDataException ide) {}
 				fastest = Math.max(fastest,speed);
+				if (fastest > MINIMUM_UPLOAD_SPEED)
+					return true;
 			}
 			
-			return fastest > MINIMUM_UPLOAD_SPEED;
+			return false;
 		}
+	}
+	
+	public float getUploadBandwidth() {
+		float ret = 0;
+		for (Iterator iter = active.iterator(); iter.hasNext();) {
+			UploadSlotUser user = (UploadSlotUser) iter.next();
+			user.measureBandwidth();
+			try {
+				ret += user.getMeasuredBandwidth();
+			} catch (InsufficientDataException ide) {}
+		}
+		return ret;
 	}
 	
 	/**

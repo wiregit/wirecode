@@ -35,7 +35,7 @@ public class ManagedTorrent {
 	 * the upload throttle we are using
 	 */
 	private static final Throttle UPLOAD_THROTTLE = new NBThrottle(true,
-			UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.getValue());
+			UploadSettings.UPLOAD_SPEED.getValue() * 1000);
 	
 	/**
 	 * States of a torrent download.  Some of them are functionally equivalent

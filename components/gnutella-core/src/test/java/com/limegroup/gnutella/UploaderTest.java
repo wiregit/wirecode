@@ -31,6 +31,7 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -112,7 +113,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         fm = new FileManagerStub(urns,descs);
         rs = new RouterService(ac);
         RouterService.getContentManager().initialize();
-        upManager = new UploadManager();
+        upManager = new UploadManager(new UploadSlotManager());
 
         PrivilegedAccessor.setValue(rs,"fileManager",fm);
         PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
@@ -144,7 +145,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * - Bandwidth tracker works properly.
      */
     public void testLegacy() {
-        UploadManager.tBandwidthTracker(new UploadManager());
+        UploadManager.tBandwidthTracker(new UploadManager(null));
     }
     
     /** 

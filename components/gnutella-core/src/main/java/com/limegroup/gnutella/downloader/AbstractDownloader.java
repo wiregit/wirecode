@@ -101,15 +101,18 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	public abstract boolean shouldBeRestarted();
 	
 	/**
-	 * @return whether the download was cancelled.
+	 * @return whether the download should be removed from 
+	 * the waiting list.
 	 */
-	public abstract boolean isCancelled();
+	public abstract boolean shouldBeRemoved();
 	
 	/**
 	 * Handles state changes and other operations while
 	 * inactive.
 	 */
 	public abstract void handleInactivity();
+	
+	public abstract boolean canBeInQueue();
 	
     /**
      * Cleans up any resources before this downloader 
