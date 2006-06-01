@@ -759,14 +759,15 @@ public class DownloadWorker {
     String getInfo() {
         if (_downloader != null) {
             synchronized(_downloader) {
-                return this + "hashcode " + hashCode() + " will release? "
+                return this + "hashcode " + System.identityHashCode(_downloader) + " will release? "
                 + _shouldRelease + " interrupted? " + _interrupted
                 + " active? " + _downloader.isActive() 
                 + " victim? " + _downloader.isVictim()
                 + " initial reading " + _downloader.getInitialReadingPoint()
                 + " initial writing " + _downloader.getInitialWritingPoint()
                 + " amount to read " + _downloader.getAmountToRead()
-                + " amount read " + _downloader.getAmountRead()+"\n";
+                + " amount read " + _downloader.getAmountRead()
+                + " is in stealing " + isStealing()+"\n";
             }
         } else 
             return "worker not started";

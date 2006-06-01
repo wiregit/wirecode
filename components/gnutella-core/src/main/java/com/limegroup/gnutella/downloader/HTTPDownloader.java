@@ -18,10 +18,13 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import junit.framework.AssertionFailedError;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.Constants;
@@ -1614,19 +1617,37 @@ public class HTTPDownloader implements BandwidthTracker {
     			}                
                 
                 // TODO: Write to disk only when buffer is full.
-                
-                // write to disk outside of lock.
-                //LOG.debug("WORKER: " + this + ", left: " + (left-totalRead) +",  writing fp: " + filePosition +", ds: " + dataStart + ", dL: " + dataLength);
-                if(!_incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array())) {
-                    LOG.debug("Scheduling callback for write.");
-                    InterestReadChannel irc = (InterestReadChannel)rc;
-                    irc.interest(false);
-                    doingWrite = true;
-                    _incompleteFile.writeBlockWithCallback(filePosition, dataStart, dataLength, buffer.array(),
-                                                           new DownloadRestarter(irc, buffer, this));
-                    return true;
-                }
-                
+    			try {
+    				// write to disk outside of lock.
+    				//LOG.debug("WORKER: " + this + ", left: " + (left-totalRead) +",  writing fp: " + filePosition +", ds: " + dataStart + ", dL: " + dataLength);
+    				if(!_incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array())) {
+    					LOG.debug("Scheduling callback for write.");
+    					InterestReadChannel irc = (InterestReadChannel)rc;
+    					irc.interest(false);
+    					doingWrite = true;
+    					_incompleteFile.writeBlockWithCallback(filePosition, dataStart, dataLength, buffer.array(),
+    							new DownloadRestarter(irc, buffer, this));
+    					return true;
+    				}
+    			} catch (AssertFailure bad) {
+    				String currentWorker = "current worker "+System.identityHashCode(HTTPDownloader.this);
+    				String allWorkers = null;
+    				URN urn = _rfd.getSHA1Urn();
+    				if (urn != null) {
+    					ManagedDownloader myDownloader = RouterService.getDownloadManager().getDownloaderForURN(urn);
+    					if (myDownloader == null)
+    						allWorkers = "couldn't find my downloader???";
+    					else
+    						allWorkers = myDownloader.getWorkersInfo();
+    				}else
+    					allWorkers = " sha1 not available ";
+    				
+    				String errorReport = bad.getMessage() + "\n\n"+currentWorker+"\n\n"+allWorkers;
+    				AssertFailure failure = new AssertFailure(errorReport);
+    				failure.setStackTrace(bad.getStackTrace()); // so we see the VF dump only once.
+    				throw failure;
+    				
+    			}
                 buffer.clear();
             }
         }
