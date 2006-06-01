@@ -36,8 +36,8 @@ public interface DHTMessage {
     public static final int FIND_NODE_REQUEST = 0x05;
     public static final int FIND_NODE_RESPONSE = 0x06;
     
-    public static final int FIND_VALUE_REQUEST = 0x08;
-    public static final int FIND_VALUE_RESPONSE = 0x09;
+    public static final int FIND_VALUE_REQUEST = 0x07;
+    public static final int FIND_VALUE_RESPONSE = 0x08;
     
     public static final int STATS_REQUEST = 0x0A;
     public static final int STATS_RESPONSE = 0x0B;
