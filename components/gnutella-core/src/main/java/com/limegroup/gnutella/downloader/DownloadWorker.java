@@ -817,7 +817,12 @@ public class DownloadWorker {
      * @param victim The possibly null victim to steal from. 
      */
     private void completeAssignAndRequest(IOException x, Interval range, DownloadWorker victim) {
-        incrementState(completeAssignAndRequestImpl(x, range, victim));
+        ConnectionStatus status = completeAssignAndRequestImpl(x, range, victim);
+        if (victim != null) {
+            victim.setStealing(false);
+            setStealing(false);
+        }
+        incrementState(status);
     }
     
     /**
@@ -836,16 +841,11 @@ public class DownloadWorker {
         try {
             try {
                 _downloader.parseHeaders();
-            } catch(IOException iox) {
-                x = iox;
-            }
-            
-            if(x != null) {
-                if(victim != null) {
-                    victim.setStealing(false);
-                    setStealing(false);
-                }
-                throw x;
+            } finally {
+                // The IOX passed in here takes priority over
+                // any exception from parsing the headers.
+                if(x != null)
+                    throw x;
             }
             
             if(victim == null)
@@ -1138,8 +1138,6 @@ public class DownloadWorker {
         synchronized(victim.getDownloader()) {
             // if the victim died or was stopped while the thief was connecting, we can't steal
             if (!victim.getDownloader().isActive()) {
-                victim.setStealing(false);
-                setStealing(false);
                 LOG.debug("victim is no longer active");
                 throw new NoSuchElementException();
             }
@@ -1152,8 +1150,6 @@ public class DownloadWorker {
                 if (LOG.isDebugEnabled())
                     LOG.debug("victim is now downloading something else "+
                             newSlowestRange+" vs. "+slowestRange);
-                victim.setStealing(false);
-                setStealing(false);
                 throw new NoSuchElementException();
             }
             
@@ -1175,8 +1171,6 @@ public class DownloadWorker {
                             ", high: " + slowestRange.high + ".  Was low: " + myLow +
                             ", high: " + myHigh);
                 }
-                victim.setStealing(false);
-                setStealing(false);
                 throw new IOException();
             }
             
@@ -1196,8 +1190,6 @@ public class DownloadWorker {
         // once we've told the victim where to stop, make our ranges release-able
         _downloader.startAt(newStart);
         _shouldRelease = true;
-        victim.setStealing(false);
-        setStealing(false);
     }
     
     Interval getDownloadInterval() {
