@@ -165,7 +165,7 @@ public class KeyValuePublisher implements Runnable {
                     break;
                 }
             
-                if (context.isBootstrapped()) {
+                if (!context.isBootstrapping()) {
                     if (it == null) {
                         it = database.getValues().iterator();
                         

@@ -19,9 +19,15 @@ public class DHTSettings extends LimeProps{
     /**
      * Setting for wether or not the DHT should be active at all.
      */
-    public static final BooleanSetting DISABLE_DHT =
-        FACTORY.createSettableBooleanSetting("DISABLE_DHT", false, "DHTSettings.DisableDHT"); //TODO switch to true
+    public static final BooleanSetting DISABLE_DHT_USER =
+        FACTORY.createBooleanSetting("DISABLE_DHT_USER", false); //TODO switch to true
 
+    /**
+     * Setting for wether or not the DHT should be active at all.
+     */
+    public static final BooleanSetting DISABLE_DHT_NETWORK =
+        FACTORY.createSettableBooleanSetting("DISABLE_DHT_NETWORK", false, "DHTSettings.DisableDHT"); //TODO switch to true
+    
     /**
      * Setting for the minimum average uptime required to join the DHT.
      */

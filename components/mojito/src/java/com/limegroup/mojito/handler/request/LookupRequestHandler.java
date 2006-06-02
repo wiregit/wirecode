@@ -68,6 +68,17 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         }
     }
     
+    /**
+     * This method returns a list of nodes along with a QueryKey generated for this node. 
+     * The QueryKey will can then be used by the querying node to store data at this node.
+     * 
+     * If the local node is passive (e.g. firewalled), it returns a list of Most Recently Seen 
+     * nodes instead of returning the closest nodes to the lookup key. The reason for this is that 
+     * passive nodes do not have accurate routing tables.
+     * 
+     * @param request The LookupRequest for this lookup
+     * @throws IOException
+     */
     private void handleFindNodeRequest(LookupRequest request) throws IOException {
         
         KUID lookup = request.getLookupID();
@@ -75,9 +86,14 @@ public class LookupRequestHandler extends AbstractRequestHandler {
                 request.getContactNode().getSocketAddress());
         
         List bucketList = Collections.EMPTY_LIST;
-        if (context.isBootstrapped()) {
-            bucketList = context.getRouteTable().select(lookup, 
-                    KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);
+        if (!context.isBootstrapping()) {
+            if(context.isFirewalled()) {
+                bucketList = context.getRouteTable().getMRSNodes(
+                        KademliaSettings.REPLICATION_PARAMETER.getValue());
+            } else {
+                bucketList = context.getRouteTable().select(lookup, 
+                        KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);
+            }
         }
         
         if (LOG.isTraceEnabled()) {

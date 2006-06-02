@@ -678,6 +678,11 @@ public class PatriciaRouteTable implements RouteTable {
         List nodesList = nodesTrie.values();
         return BucketUtils.sort(nodesList);
     }
+    
+    public synchronized List getMRSNodes(int numNodes) {
+        List nodesList = getAllNodesMRS();
+        return nodesList.subList(0,Math.min(nodesList.size(),numNodes));
+    }
 
     public synchronized List getAllBuckets() {
         return bucketsTrie.values();

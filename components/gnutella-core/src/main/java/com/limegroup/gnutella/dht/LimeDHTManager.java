@@ -34,7 +34,13 @@ import com.limegroup.mojito.event.BootstrapListener;
  *
  * There are two entry points to the init method: 
  * 1) A stable connection event is fired: As soon as LW has a globally stable gnutella connection
- * 2) The NodeAssigner declared the node as DHT capable
+ * 2) The NodeAssigner declared the node as DHT capable and launched an initializer thread
+ * 
+ * This manager can be in one of the four following states:
+ * 1) not running.
+ * 2) running and bootstrapping: the dht is trying to bootstrap.
+ * 3) running and waiting: the dht has failed the bootstrap and is waiting for additional bootstrap hosts.
+ * 3) running and not waiting and not bootstrapping: the dht is bootstrapped.
  * 
  * The current implementation is dependant on the MojitoDHT. 
  */
@@ -111,6 +117,9 @@ public class LimeDHTManager implements LifecycleListener {
         if (running) {
             return;
         }
+        
+        if(DHTSettings.DISABLE_DHT_NETWORK.getValue() || DHTSettings.DISABLE_DHT_USER.getValue()) 
+            return;
 
         if (!DHTSettings.DHT_CAPABLE.getValue() 
                 && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
@@ -137,7 +146,6 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        running = true;
         //set firewalled status
         if (forcePassive){
             dht.setFirewalled(true);
@@ -150,6 +158,7 @@ public class LimeDHTManager implements LifecycleListener {
             int port = RouterService.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
+            running = true;
             bootstrap();
         } catch (IOException err) {
             LOG.error(err);
@@ -168,7 +177,7 @@ public class LimeDHTManager implements LifecycleListener {
         }
         try {
             dht.bootstrap(previousBootstrapHosts, new BootstrapListener() {
-                public synchronized void noBootstrapHost() {
+                public void noBootstrapHost() {
                     synchronized (bootstrapHosts) {
                         bootstrapHosts.removeAll(previousBootstrapHosts);
                         waiting = true;
@@ -283,5 +292,6 @@ public class LimeDHTManager implements LifecycleListener {
         if(!running) return;
         dht.stop();
         init(false);
-   }
+    }
+    
 }

@@ -107,7 +107,7 @@ public class Context {
     private PingManager pingManager;
     private LookupManager lookupManager;
     
-    private volatile boolean bootstrapped = false;
+    private volatile boolean bootstrapping = false;
     private boolean running = false;
     
     private DHTStats dhtStats = null;
@@ -317,12 +317,12 @@ public class Context {
         return messageDispatcher.isOpen();
     }
     
-    public void setBootstrapped(boolean bootstrapped) {
-        this.bootstrapped = bootstrapped;
+    public void setBootstrapping(boolean bootstrapped) {
+        this.bootstrapping = bootstrapped;
     }
     
-    public boolean isBootstrapped() {
-        return isRunning() && bootstrapped;
+    public boolean isBootstrapping() {
+        return (isRunning() && bootstrapping);
     }
     
     public int getReceivedMessagesCount() {
@@ -396,7 +396,6 @@ public class Context {
         pingManager.init();
         lookupManager.init();
         
-        bootstrapped = true;
         running = true;
 
         eventQueue = new ProcessingQueue(getName() + "-EventDispatcher", true);
@@ -425,7 +424,7 @@ public class Context {
         }
         
         running = false;
-        bootstrapped = false;
+        bootstrapping = false;
         
         keyValuePublisher.stop();
         
@@ -556,7 +555,8 @@ public class Context {
     
     /** Bootstraps this Node from the given Node */
     public void bootstrap(SocketAddress address, BootstrapListener listener) throws IOException {
-        setBootstrapped(false);
+        if(isBootstrapping()) return;
+        setBootstrapping(true);
         new BootstrapManager().bootstrap(address, listener);
     }
     
@@ -568,12 +568,14 @@ public class Context {
      * @throws IOException
      */
     public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
-        setBootstrapped(false);
+        if(isBootstrapping()) return;
+        setBootstrapping(true);
         new BootstrapManager().bootstrap(bootstrapHostsList, listener);
     }
     
     public void bootstrap(BootstrapListener listener) throws IOException {
-        setBootstrapped(false);
+        if(isBootstrapping()) return;
+        setBootstrapping(true);
         new BootstrapManager().bootstrap(listener);
     }
     
@@ -883,7 +885,7 @@ public class Context {
         }
         
         private void firePhaseTwoFinished() {
-            setBootstrapped(true);
+            setBootstrapping(false);
             
             if (listener != null) {
                 final long time = time();

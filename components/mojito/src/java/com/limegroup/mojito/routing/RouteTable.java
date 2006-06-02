@@ -118,6 +118,13 @@ public interface RouteTable {
     public List getAllNodesMRS();
     
     /**
+     * Returns ContactNodes ordered by most recently seen first as List
+     * 
+     * @param numNodes
+     */
+    public List getMRSNodes(int numNodes);
+    
+    /**
      * Returns all BucketNodes as List
      */
     public List getAllBuckets();
