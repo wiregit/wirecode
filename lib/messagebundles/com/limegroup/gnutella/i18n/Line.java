@@ -11,6 +11,8 @@ class Line {
     private final String value;
 
     private final int braces;
+    
+    private final boolean extraComment;
 
     /**
      * TODO: does not handle all comment lines properly! TODO: does not separate
@@ -25,6 +27,15 @@ class Line {
         if (data == null)
             throw new NullPointerException("null data");
         wholeLine = data;
+        data.trim();
+        
+        if(data.startsWith("#?")) {
+            data = data.substring(2).trim();
+            extraComment = true;
+        } else {
+            extraComment = false;
+        }
+        
         if (data.startsWith("#") || data.trim().equals("")) {
             key = null;
             value = null;
@@ -95,5 +106,12 @@ class Line {
      */
     int getBraceCount() {
         return braces;
+    }
+    
+    /**
+     * @return true if the line had an extra #? infront.
+     */
+    boolean hadExtraComment() {
+        return extraComment;
     }
 }

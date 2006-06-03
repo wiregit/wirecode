@@ -88,9 +88,6 @@ class LanguageUpdater {
     void updateAllLanguages() {
         for (Iterator i = langs.values().iterator(); i.hasNext();) {
             LanguageInfo next = (LanguageInfo) i.next();
-            // TODO: work with variants.
-            if (next.isVariant())
-                continue;
             updateLanguage(next);
         }
     }
@@ -106,8 +103,7 @@ class LanguageUpdater {
             return;
         }
 
-        print("Updating language: " + info.getName() + " (" + info.getCode()
-                + ")... ");
+        print("Updating language: " + info.getName() + " (" + info.getCode() + ")... ");
         String filename = info.getFileName();
         File f = new File(lib, filename);
         if (!f.isFile())
@@ -119,10 +115,8 @@ class LanguageUpdater {
         try {
             temp = File.createTempFile("TEMP", info.getCode(), lib);
             reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(f), info.isUTF8() ? "UTF-8"
-                            : "ISO-8859-1"));
-            printer = new PrintWriter(temp, info.isUTF8() ? "UTF-8"
-                    : "ISO-8859-1");
+                    new FileInputStream(f), info.isUTF8() ? "UTF-8" : "ISO-8859-1"));
+            printer = new PrintWriter(temp, info.isUTF8() ? "UTF-8" : "ISO-8859-1");
             if (info.isUTF8()) {
                 reader.mark(1);
                 if (reader.read() != '\uFEFF')
@@ -234,6 +228,13 @@ class LanguageUpdater {
      * Writes the body of the bundle.
      */
     private void printBody(PrintWriter printer, LanguageInfo info) {
+        Properties parent = null;
+        if(info.isVariant()) {
+            LanguageInfo pi = (LanguageInfo)langs.get(info.getBaseCode());
+            if(pi != null)
+                parent = pi.getProperties();
+        }
+        
         Properties props = info.getProperties();
         boolean reachedTranslations = false;
         for (Iterator i = englishList.iterator(); i.hasNext();) {
@@ -255,10 +256,24 @@ class LanguageUpdater {
                     printer.print("=");
                     printer.print(escape(line.getValue()));
                     printer.println();
+                    if(parent != null) {
+                        String pv = parent.getProperty(key);
+                        if(pv != null && !pv.equals("")) {
+                            printer.print("###$ ");
+                            printer.print(key);
+                            printer.print("=");
+                            printer.print(escape(pv));
+                            printer.println();
+                        }   
+                    }
+                } else if(value == null) {
+                    value = ""; // null before translations == ""
                 }
-
-                if (value != null
-                        && line.getBraceCount() == Line.parseBraceCount(value)) {
+                
+                if (!reachedTranslations || (
+                     value != null && !value.equals("") && 
+                     line.getBraceCount() == Line.parseBraceCount(value)
+                    )) {
                     printer.print(key);
                     printer.print("=");
                     printer.println(escape(value));
@@ -266,10 +281,6 @@ class LanguageUpdater {
                     printer.print("#? ");
                     printer.print(key);
                     printer.print("=");
-                    // only write the non-translated value if we didn't
-                    // above.
-                    if (!reachedTranslations)
-                        printer.print(escape(line.getValue()));
                     printer.println();
                 }
             }

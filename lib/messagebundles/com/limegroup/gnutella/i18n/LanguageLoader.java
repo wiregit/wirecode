@@ -65,9 +65,8 @@ class LanguageLoader {
             /* See if a .UTF-8.txt file exists; if so, use that as the link. */
             String linkFileName = files[i];
             int idxProperties = linkFileName.indexOf(PROPS_EXT);
-            File utf8 = new File(lib, linkFileName.substring(0, idxProperties)
-                    + UTF8_EXT);
-            boolean skipUTF8LeadingBOM;
+            File utf8 = new File(lib, linkFileName.substring(0, idxProperties) + UTF8_EXT);
+            boolean skipUTF8LeadingBOM = false;
             if (utf8.exists()) {
                 /*
                  * properties files are normally read as streams of ISO-8859-1
@@ -82,26 +81,24 @@ class LanguageLoader {
                  */
                 linkFileName = utf8.getName();
                 skipUTF8LeadingBOM = true;
-            } else
-                skipUTF8LeadingBOM = false;
+            }
 
             try {
-                InputStream in = new FileInputStream(
-                        new File(lib, linkFileName/* files[i] */));
+                File toRead = new File(lib, linkFileName);
+                InputStream in = new FileInputStream(toRead);
+                // skip the three-bytes leading BOM
                 if (skipUTF8LeadingBOM)
-                    try { /* skip the three-bytes leading BOM */
+                    try {
                         /*
                          * the leading BOM (U+FEFF), if present, is coded in
                          * UTF-8 as three bytes 0xEF, 0xBB, 0xBF; they are not
                          * part of a resource key.
                          */
                         in.mark(3);
-                        if (in.read() != 0xEF || in.read() != 0xBB
-                                || in.read() != 0xBF)
+                        if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
                             in.reset();
-                    } catch (java.io.IOException ioe) {
-                    }
-                loadFile(langs, in, linkFileName, files[i], skipUTF8LeadingBOM);
+                    } catch (java.io.IOException ioe) {}
+                loadFile(langs, in, linkFileName, files[i], skipUTF8LeadingBOM, toRead);
             } catch (FileNotFoundException fnfe) {
                 // oh well.
             }
@@ -128,6 +125,21 @@ class LanguageLoader {
 
         return lines;
     }
+    
+    private void scanForCommentedTranslations(File file, Properties props) throws IOException {
+        InputStream in = new FileInputStream(file);
+        in.mark(3);
+        if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
+            in.reset();
+        
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in, "ISO-8859-1"));
+        String read;
+        while((read = reader.readLine()) != null) {
+            Line line = new Line(read);
+            if(line.hadExtraComment())
+                props.put(line.getKey(), line.getValue());
+        }
+    }
 
     /**
      * Retrieves the default properties.
@@ -137,8 +149,7 @@ class LanguageLoader {
      */
     Properties getDefaultProperties() throws java.io.IOException {
         Properties p = new Properties();
-        InputStream in = new FileInputStream(new File(lib, BUNDLE_NAME
-                + PROPS_EXT));
+        InputStream in = new FileInputStream(new File(lib, BUNDLE_NAME + PROPS_EXT));
         p.load(in);
         in.close();
         return p;
@@ -157,8 +168,7 @@ class LanguageLoader {
 
         String read;
         while ((read = reader.readLine()) != null
-                && !read
-                        .startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"))
+                && !read.startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"))
             ;
 
         StringBuffer sb = new StringBuffer();
@@ -167,8 +177,7 @@ class LanguageLoader {
                 continue;
             sb.append(read).append("\n");
         }
-        InputStream in = new ByteArrayInputStream(sb.toString().getBytes(
-                "ISO-8859-1"));
+        InputStream in = new ByteArrayInputStream(sb.toString().getBytes("ISO-8859-1"));
         Properties p = new Properties();
         p.load(in);
 
@@ -224,11 +233,14 @@ class LanguageLoader {
      * Loads a single file into the languages map.
      */
     private LanguageInfo loadFile(Map newlangs, InputStream in,
-            String filename, String baseFileName, boolean isUTF8) {
+            String filename, String baseFileName, boolean isUTF8,
+            File toRead) {
         try {
             in = new BufferedInputStream(in);
             final Properties props = new Properties();
             props.load(in);
+            scanForCommentedTranslations(toRead, props);
+            
             /*
              * note that the file is read in ISO-8859-1 only, even if it is
              * encoded with another charset. However, the Properties has its
