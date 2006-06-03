@@ -100,7 +100,7 @@ class LanguageLoader {
                     } catch (java.io.IOException ioe) {}
                 loadFile(langs, in, linkFileName, files[i], skipUTF8LeadingBOM, toRead);
             } catch (FileNotFoundException fnfe) {
-                // oh well.
+                fnfe.printStackTrace();
             }
         }
         return langs;
@@ -127,7 +127,7 @@ class LanguageLoader {
     }
     
     private void scanForCommentedTranslations(File file, Properties props) throws IOException {
-        InputStream in = new FileInputStream(file);
+        InputStream in = new BufferedInputStream(new FileInputStream(file));
         in.mark(3);
         if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
             in.reset();
@@ -139,6 +139,7 @@ class LanguageLoader {
             if(line.hadExtraComment())
                 props.put(line.getKey(), line.getValue());
         }
+        reader.close();
     }
 
     /**
@@ -262,7 +263,7 @@ class LanguageLoader {
                     try {
                         bytes = value.getBytes("ISO-8859-1");
                     } catch (java.io.IOException ioe) {
-                        // should not occur
+                        ioe.printStackTrace();
                     }
                     try {
                         final String correctedValue = new String(bytes, "UTF-8");
@@ -270,7 +271,7 @@ class LanguageLoader {
                             props.put(key, correctedValue);
                     } catch (java.io.IOException ioe) {
                         // may occur if .UTF-8.txt file was incorrectly encoded.
-                        System.err.println(ioe);
+                        ioe.printStackTrace();
                     }
                 }
             }
@@ -292,7 +293,7 @@ class LanguageLoader {
             newlangs.put(li.getCode(), li);
             return li;
         } catch (IOException e) {
-            // ignore.
+            e.printStackTrace();
         } finally {
             if (in != null)
                 try {
