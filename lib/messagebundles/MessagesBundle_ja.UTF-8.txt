@@ -15,37 +15,33 @@ LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Hira
 LOCALE_SCRIPT_NAME=Far-East Asian
 LOCALE_ENGLISH_LANGUAGE_NAME=Japanese
-# Before adding a value below, verify the existence of the translation on the NSIS repository:
-# http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
 LOCALE_NSIS_NAME=Japanese
-# See also other translatable items for the LimeWire installer:
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/installbundles/
-
-################################################################################
-# Key/value pair for whether or not bold characters should be used for this
-# locale. Must be "true" or "false" (true only for complex scripts).
-################################################################################
 DISABLE_BOLD_CHARACTERS=true
-
-################################################################################
-# Key/value pair for whether or not the layout should be adapted for right-to-
-# left scripts. Must be "true" or "false" (true only for semitic scripts).
-################################################################################
 LAYOUT_RIGHT_TO_LEFT=false
-
-################################################################################
-# Key/value pair for whether or not the tips of the day should be displayed.
-# The default is false (set to true if TOTDs exist).
-################################################################################
-# See: http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/totd/
 HAS_TIPS_OF_THE_DAY=true
 
-# See also other translatable resources for the application:
-# * translations of meta-data search items:
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/xml/display/
-# * translations of "about.html"
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/resources/
-
+################################################################################
+# TO TRANSLATORS:  DO NOT EDIT ANY OF THE ABOVE LINES.
+# Everything above this point is used internally by the LimeWire program and
+# should not be edited.  See below for translating.
+################################################################################
+################################################################################
+# How to translate:
+# 1) Find a line that begins with #?
+# 2) Remove the #?
+# 3) Translate the line
+#
+# You can use the English line directly above it as a reference.
+# All English lines begin with '#### '.
+# You should not change those lines.
+#
+# If the language is a variant of another language
+# (like Brazilian/Standard Portuguese or Traditional/Simplified Chinese), there
+# will also be a line that begins with '###$ ' showing the translation in the
+# other language, if there was a translation in the other language.
+# You should not change those lines.
+#
+# You can also correct mispelled translations, if you see one that is wrong.
 ################################################################################
 ################################################################################
 # TRANSLATIONS START BELOW.
@@ -610,7 +606,7 @@ SEARCH_PUBLIC_BLOCK_STRING=ホストをブロック
 SEARCH_RESULT_TABLE_LABEL=結果
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=さらに検索
-#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered. 
+#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered.
 #? SEARCH_RESULT_SECURE_TIP=
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=選択したファイルの1つは実行できる
@@ -1470,7 +1466,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=そのファイルは解析できない
 #? SETUP_DIALOG_TITLE=
 #### SETUP_LANGUAGE_TITLE=Language Options
 SETUP_LANGUAGE_TITLE=言語オプション
-#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language: 
+#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language:
 #? SETUP_CHOOSE_LANGUAGE_LABEL=
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_LANGUAGE_LABEL=使用する言語を選択
@@ -1652,7 +1648,7 @@ XML_videos__video__stars__=星
 #### XML_videos__video__type__=Type
 XML_videos__video__type__=タイプ
 #### XML_videos__video__length__=Length
-XML_videos__video__length__=
+#? XML_videos__video__length__=
 #### XML_videos__video__year__=Year
 XML_videos__video__year__=年
 #### XML_videos__video__language__=Language
@@ -1891,7 +1887,7 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=of
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=
-#### INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Uploaded 
+#### INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Uploaded
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=
 #### INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=bytes of
 #? INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=
@@ -3756,26 +3752,6 @@ STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=その他LimeWiresに対し�
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=プッシュ
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes for Multicast pushes sent from all Gnutella clients versus other LimeWires.
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたマルチキャスト・プッシュのキロバイト総数
-
-# ultrapeer-specific sent stats
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=Sent
-STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=送信済み
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
-STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=質問ルート表を用いて、最後のホップについて他Ulトラッパーにルートされた全質問
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=Not Sent
-STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=未送信
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
-STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
-
-# leaf-specific sent stats
-#### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=Sent
-STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=送信済み
-#### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to leaves, using query routing tables.
-STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=質問ルート表を用いて、リーフにルートされた全質問
-#### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=Not Sent
-STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=未送信
-#### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
-STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- handshaking
