@@ -27,6 +27,7 @@ public class CoWList implements List {
     private final Object lock;
     
     public CoWList(List l, Object lock) {
+    	
         this.l = l;
         this.creator = new ReflectiveCreator(l.getClass());
         this.lock = lock == null ? this : lock;

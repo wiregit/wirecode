@@ -107,13 +107,11 @@ public class FileDesc implements FileDetails {
      * @param urns the URNs to associate with this FileDesc
      * @param index the index in the FileManager
      */
-    public FileDesc(File file, Set urns, int index) {	
-		if((file == null))
-			throw new NullPointerException("cannot create a FileDesc with a null File");
-		if(index < 0)
-			throw new IndexOutOfBoundsException("negative index (" + index + ") not permitted in FileDesc");
-		if(urns == null)
-			throw new NullPointerException("cannot create a FileDesc with a null URN Set");
+    public FileDesc(File file, Set urns, int index) {
+    	
+		if (file == null) throw new NullPointerException("cannot create a FileDesc with a null File");
+		if (index < 0)    throw new IndexOutOfBoundsException("negative index (" + index + ") not permitted in FileDesc");
+		if (urns == null) throw new NullPointerException("cannot create a FileDesc with a null URN Set");
 
 		FILE = file;
         _index = index;
@@ -123,8 +121,7 @@ public class FileDesc implements FileDetails {
         _modTime = FILE.lastModified();
         URNS = Collections.unmodifiableSet(urns);
 		SHA1_URN = extractSHA1();
-		if(SHA1_URN == null)
-			throw new IllegalArgumentException("no SHA1 URN");
+		if (SHA1_URN == null) throw new IllegalArgumentException("no SHA1 URN");
 
         _hits = 0; // Starts off with 0 hits
     }
@@ -180,10 +177,11 @@ public class FileDesc implements FileDetails {
 	 * Extracts the SHA1 URN from the set of urns.
 	 */
 	private URN extractSHA1() {
-	    for(Iterator iter = URNS.iterator(); iter.hasNext(); ) {
+		
+	    for (Iterator iter = URNS.iterator(); iter.hasNext(); ) {
+	    	
             URN urn = (URN)iter.next();
-            if(urn.isSHA1())
-                return urn;
+            if (urn.isSHA1()) return urn;
         }
 
 		// this should never happen!!
@@ -233,28 +231,25 @@ public class FileDesc implements FileDetails {
         _limeXMLDocs.add(doc);
         
 	    doc.setIdentifier(FILE);
-	    if(doc.isLicenseAvailable())
-	        _license = doc.getLicense();
+	    if (doc.isLicenseAvailable()) _license = doc.getLicense();
     }
     
     /**
      * Replaces one LimeXMLDocument with another.
      */
-    public boolean replaceLimeXMLDocument(LimeXMLDocument oldDoc, 
-                                          LimeXMLDocument newDoc) {
-        synchronized(_limeXMLDocs) {
+    public boolean replaceLimeXMLDocument(LimeXMLDocument oldDoc, LimeXMLDocument newDoc) {
+    	
+        synchronized (_limeXMLDocs) {
+        	
             int index = _limeXMLDocs.indexOf(oldDoc);
-            if( index == -1 )
-                return false;
+            if (index == -1) return false;
             
             _limeXMLDocs.set(index, newDoc);
         }
         
         newDoc.setIdentifier(FILE);
-        if(newDoc.isLicenseAvailable())
-            _license = newDoc.getLicense();
-        else if(_license != null && oldDoc.isLicenseAvailable())
-            _license = null;        
+        if (newDoc.isLicenseAvailable()) _license = newDoc.getLicense();
+        else if (_license != null && oldDoc.isLicenseAvailable()) _license = null;        
         return true;
     }
     
@@ -263,11 +258,9 @@ public class FileDesc implements FileDetails {
      */
     public boolean removeLimeXMLDocument(LimeXMLDocument toRemove) {
         
-        if (!_limeXMLDocs.remove(toRemove))
-            return false;
+        if (!_limeXMLDocs.remove(toRemove)) return false;
         
-        if(_license != null && toRemove.isLicenseAvailable())
-            _license = null;
+        if (_license != null && toRemove.isLicenseAvailable()) _license = null;
         
         return true;
     }   
@@ -280,9 +273,9 @@ public class FileDesc implements FileDetails {
     }
 	
 	public LimeXMLDocument getXMLDocument() {
+		
         List docs = getLimeXMLDocuments();
-		return docs.isEmpty() ? null 
-			: (LimeXMLDocument)docs.get(0);
+		return docs.isEmpty() ? null : (LimeXMLDocument)docs.get(0);
 	}
     
     /**
@@ -378,29 +371,33 @@ public class FileDesc implements FileDetails {
 
 	// overrides Object.toString to provide a more useful description
 	public String toString() {
-		return ("FileDesc:\r\n"+
-				"name:     "+_name+"\r\n"+
-				"index:    "+_index+"\r\n"+
-				"path:     "+_path+"\r\n"+
-				"size:     "+_size+"\r\n"+
-				"modTime:  "+_modTime+"\r\n"+
-				"File:     "+FILE+"\r\n"+
-				"urns:     "+URNS+"\r\n"+
-				"docs:     "+ _limeXMLDocs);
+		
+		return
+			"FileDesc:\r\n" +
+			"name:     " + _name    + "\r\n" +
+			"index:    " + _index   + "\r\n" +
+			"path:     " + _path    + "\r\n" +
+			"size:     " + _size    + "\r\n" +
+			"modTime:  " + _modTime + "\r\n" +
+			"File:     " + FILE     + "\r\n" +
+			"urns:     " + URNS     + "\r\n" +
+			"docs:     " + _limeXMLDocs;
 	}
 	
 	public InetSocketAddress getSocketAddress() {
+		
 		// TODO maybe cache this, even statically
 		try {
-			return new InetSocketAddress(InetAddress.getByAddress
-										 (RouterService.getAcceptor().getAddress(true)), 
-										 RouterService.getAcceptor().getPort(true));
-		} catch (UnknownHostException e) {
-		}
+
+			return new InetSocketAddress(InetAddress.getByAddress(RouterService.getAcceptor().getAddress(true)), RouterService.getAcceptor().getPort(true));
+
+		} catch (UnknownHostException e) {}
+		
 		return null;
 	}
 	
 	public boolean isFirewalled() {
+		
 		return !RouterService.acceptedIncomingConnection();
 	}
     
@@ -408,8 +405,7 @@ public class FileDesc implements FileDetails {
      * Determines if this FileDesc has been validated.
      */
     public boolean isVerified() {
+    	
         return RouterService.getContentManager().isVerified(SHA1_URN);
     }
 }
-
-

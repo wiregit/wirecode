@@ -78,8 +78,8 @@ public class UDPTrackerRequest extends TrackerRequester {
 	 */
 	private TrackerResponse _response = null;
 
-	public UDPTrackerRequest(URL url, BTMetaInfo info, ManagedTorrent torrent,
-			int event) throws IOException {
+	public UDPTrackerRequest(URL url, BTMetaInfo info, ManagedTorrent torrent, int event) throws IOException {
+
 		ADDRESS = InetAddress.getByName(url.getHost());
 		PORT = url.getPort();
 
@@ -90,12 +90,15 @@ public class UDPTrackerRequest extends TrackerRequester {
 	}
 
 	public TrackerResponse connectUDP() {
+
 		// we try UDP_TRACKER_RETRIES times or until we get a response, -
 		// this
 		// response may be bad but we won't retry for a while after
 		// receiving it
 		for (int i = 0; i < UDP_TRACKER_RETRIES && _response == null; i++) {
+
 			sendConnectRequest();
+
 			// we expect to be notified once _response has been set
 			try {
 				_messageLock.wait(UDP_TRACKER_TIMEOUT);
@@ -103,6 +106,7 @@ public class UDPTrackerRequest extends TrackerRequester {
 				// ignore
 			}
 		}
+
 		return _response;
 	}
 
@@ -277,20 +281,14 @@ public class UDPTrackerRequest extends TrackerRequester {
 	 * @return a new TrackerResponse
 	 * @throws BadTrackerResponseException
 	 */
-	private static TrackerResponse parseAnnounceResponse(byte[] message)
-			throws BadTrackerResponseException {
+	private static TrackerResponse parseAnnounceResponse(byte[] message) throws BadTrackerResponseException {
 
 		// parse the code, identifying the message
 		int code = ByteOrder.beb2int(message, 0, 4);
-		if (code == ACTION_ERROR)
-			throw new BadTrackerResponseException(parseErrorResponse(message));
-		if (code != ACTION_ANNOUNCE)
-			throw new BadTrackerResponseException("unknown tracker message "
-					+ code);
+		if (code == ACTION_ERROR) throw new BadTrackerResponseException(parseErrorResponse(message));
+		if (code != ACTION_ANNOUNCE) throw new BadTrackerResponseException("unknown tracker message " + code);
 
-		if (message.length < 20)
-			throw new BadTrackerResponseException(
-					"short announce tracker message");
+		if (message.length < 20) throw new BadTrackerResponseException("short announce tracker message");
 
 		int interval = ByteOrder.beb2int(message, 8);
 		int leechers = ByteOrder.beb2int(message, 12);
@@ -307,8 +305,8 @@ public class UDPTrackerRequest extends TrackerRequester {
 		} catch (ValueException ve) {
 			LOG.debug(ve);
 		}
-		return new TrackerResponse(peers, interval, leechers + seeders,
-				seeders, null);
+
+		return new TrackerResponse(peers, interval, leechers + seeders, seeders, null);
 	}
 
 	/**

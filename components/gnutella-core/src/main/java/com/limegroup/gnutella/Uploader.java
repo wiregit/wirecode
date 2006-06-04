@@ -143,6 +143,4 @@ public interface Uploader extends BandwidthTracker {
      * Returns whether or not the uploader is in an inactive state.
      */
     public boolean isInactive();
-
 }
-

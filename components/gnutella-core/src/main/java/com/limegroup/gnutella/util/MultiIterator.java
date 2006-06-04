@@ -1,16 +1,22 @@
 
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-
+/**
+ * A MultiIterator object keeps a list of iterators.
+ * Give the constructor an array of Iterator objects to make one.
+ * Call hasNext() and next() to move through all the iterators, one after the other.
+ */
 public class MultiIterator implements Iterator {
 
-	protected final Iterator [] iterators;
+	protected final Iterator[] iterators;
 	protected int current;
 	
-	public MultiIterator(Iterator [] iterators) {
+	public MultiIterator(Iterator[] iterators) {
 		this.iterators = iterators;
 	}
 	

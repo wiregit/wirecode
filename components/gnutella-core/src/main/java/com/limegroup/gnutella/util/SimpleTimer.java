@@ -44,12 +44,10 @@ public class SimpleTimer {
      * @exception IllegalArgumentException delay or period negative
      * @see java.util.Timer#schedule(java.util.TimerTask,long,long)
      */
-    public void schedule(final Runnable task, long delay, long period) 
-            throws IllegalStateException {
-        if (delay<0)
-            throw new IllegalArgumentException("Negative delay: "+delay);
-        if (period<0)
-            throw new IllegalArgumentException("Negative period: "+period);
+    public void schedule(final Runnable task, long delay, long period) throws IllegalStateException {
+    	
+        if (delay < 0) throw new IllegalArgumentException("Negative delay: " + delay);
+        if (period < 0) throw new IllegalArgumentException("Negative period: " + period);
             
         TimerTask tt = new TimerTask() {
             public void run() {
@@ -62,14 +60,13 @@ public class SimpleTimer {
         };
 
         try {
-            if(period == 0)
+            if (period == 0)
                 TIMER.schedule(tt, delay);
             else
                 TIMER.schedule(tt, delay, period);
-        } catch(IllegalStateException ise) {
+        } catch (IllegalStateException ise) {
             // swallow ISE's if the Timer cancelled itself.
-            if(cancelled)
-                throw ise;
+            if (cancelled) throw ise;
         }
     }      
 

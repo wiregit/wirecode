@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.util;
 
 import java.io.IOException;
@@ -15,6 +18,15 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.downloader.Interval;
 
 /**
+ * An IntervalSet object keeps a list of Interval objects.
+ * Each Interval clips out a range of data in a file.
+ * An IntervalSet clips out several ranges, describing which stripes we have and which we need.
+ * 
+ * An IntSet is a list of numbers like {1, 2, 50, 51, 52}.
+ * An Interval object has low and high to clip out a range within a file.
+ * So, IntervalSet is a list of Interval objects.
+ * 
+ * 
  * A "range" version of IntSet. This is a first cut of the class and does
  * not support all the operations IntSet does, just the ones we need for now.
  * <p>

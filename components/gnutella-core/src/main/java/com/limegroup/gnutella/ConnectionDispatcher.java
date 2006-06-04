@@ -85,7 +85,7 @@ public class ConnectionDispatcher {
         }
         
         // try to find someone who understands this protocol
-        Delegator delegator = (Delegator) protocols.get(word);
+        Delegator delegator = (Delegator)protocols.get(word);
        
         // no protocol available to handle this word 
         if (delegator == null) {
