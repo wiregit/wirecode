@@ -81,8 +81,7 @@ public class SystemUtils {
         if(isLoaded && (CommonUtils.isWindows() || CommonUtils.isMacOSX()))
             setFileWriteable(fileName);
     }
-            
-    
+
     private static final native long idleTime();
     private static final native int setFileWriteable(String filename);
     private static final native int setOpenFileLimit0(int max);

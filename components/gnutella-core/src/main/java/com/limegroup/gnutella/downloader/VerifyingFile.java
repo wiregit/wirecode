@@ -21,7 +21,6 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
-
 /**
  * A control point for all access to the file being downloaded to, also does 
  * on-the-fly verification.

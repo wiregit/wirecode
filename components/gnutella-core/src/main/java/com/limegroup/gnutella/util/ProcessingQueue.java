@@ -18,6 +18,14 @@ import java.util.LinkedList;
  * A ProcessingQueue object makes a separate thread to call run() on the objects.
  * When it runs out of objects, it lets the thread exit.
  * If the program calls p.add(r) again, it makes a new thread with the same name as the one before.
+ * 
+ * When you create a thread in Java, you can give it a name.
+ * These names are just helpful labels, they do not uniquely identify the thread.
+ * You can make a bunch of threads that all have no name, or you can make several threads that all have the same name.
+ * 
+ * The ProcessingQueue constructor takes a String, and uses it to name the ProcessingQueue's thread.
+ * If you make two ProcessingQueue objects with the same name, you've created two completely separate objects.
+ * They will each create their own thread, and operate seprately from one another.
  */
 public class ProcessingQueue {
 

@@ -64,18 +64,25 @@ public abstract class Message implements Serializable, Comparable {
 
     /** 0x00, ping. */
     public static final byte F_PING                  = (byte)0x0;
+
     /** 0x01, pong. */
     public static final byte F_PING_REPLY            = (byte)0x1;
+
     /** 0x40, push. */
     public static final byte F_PUSH                  = (byte)0x40;
+
     /** 0x80, query. */
     public static final byte F_QUERY                 = (byte)0x80;
+
     /** 0x81, query reply. */
     public static final byte F_QUERY_REPLY           = (byte)0x81;
+
     /** 0x30, route table update. */
     public static final byte F_ROUTE_TABLE_UPDATE    = (byte)0x30;
+
     /** 0x31, vendor message. */
     public static final byte F_VENDOR_MESSAGE        = (byte)0x31;
+
     /** 0x32, stable vendor message, not commonly used. */
     public static final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
 
@@ -96,10 +103,13 @@ public abstract class Message implements Serializable, Comparable {
 
     /** -1, network unknown, we don't know if it's TCP, UDP, or multicast UDP on the LAN. */
     public static final int N_UNKNOWN = -1;
+    
     /** 1, TCP. */
     public static final int N_TCP = 1;
+    
     /** 2, UDP. */
     public static final int N_UDP = 2;
+    
     /** 3, Multicast UDP on the LAN. (do) */
     public static final int N_MULTICAST = 3;
 
