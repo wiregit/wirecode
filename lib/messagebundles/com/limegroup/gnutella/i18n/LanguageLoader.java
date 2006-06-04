@@ -17,9 +17,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 
-/**
- * @author Admin
- */
 class LanguageLoader {
 
     /** @see LanguageInfo#getLink() */
@@ -126,6 +123,17 @@ class LanguageLoader {
         return lines;
     }
     
+    /**
+     * Scans the file for translations that mistakenly still have a 
+     * #? sign before them and adds them into the properties.
+     * This assumes the file is ISO-8859-1 encoded, just like Properties.load.
+     * If the file is UTF8 encoded, you will have to manually convert the
+     * resulting properties to UTF8.
+     * 
+     * @param file
+     * @param props
+     * @throws IOException
+     */
     private void scanForCommentedTranslations(File file, Properties props) throws IOException {
         InputStream in = new BufferedInputStream(new FileInputStream(file));
         in.mark(3);
@@ -229,6 +237,19 @@ class LanguageLoader {
             props.keySet().retainAll(keys);
         }
     }
+    
+    /**
+     * Iterates through the properties and removes all entries that
+     * have empty values.
+     * 
+     * @param props
+     */
+    private void removeEmptyProperties(Properties props) {
+        for(Iterator i = props.values().iterator(); i.hasNext(); ) {
+            if("".equals(i.next()))
+                i.remove();
+        }
+    }
 
     /**
      * Loads a single file into the languages map.
@@ -241,6 +262,7 @@ class LanguageLoader {
             final Properties props = new Properties();
             props.load(in);
             scanForCommentedTranslations(toRead, props);
+            removeEmptyProperties(props);
             
             /*
              * note that the file is read in ISO-8859-1 only, even if it is
