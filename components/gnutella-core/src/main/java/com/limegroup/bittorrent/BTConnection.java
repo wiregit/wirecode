@@ -72,7 +72,7 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * The pieces the remote host has
 	 */
-	private final BitSet _availableRanges;
+	private volatile BitSet _availableRanges;
 
 	/**
 	 * the Set of BTInterval containing requests that we did not yet send but
@@ -403,8 +403,10 @@ public class BTConnection implements UploadSlotListener {
 
 		// we should indicate that we are not interested anymore, so we are
 		// not unchoked when we do not want to request anything.
-		if (_info.getVerifyingFolder().getNumWeMiss(_availableRanges) == 0)
+		if (_info.getVerifyingFolder().containsAnyWeMiss(_availableRanges)) {
 			sendNotInterested();
+			return;
+		}
 
 		// whether we canceled some ranges that were requested or we were
 		// about to request
@@ -429,9 +431,7 @@ public class BTConnection implements UploadSlotListener {
 		}
 
 		// if we removed any ranges, choose some more rages to request...
-		// TODO: add some limiting of the number of downloads here
-		if (!_torrent.isComplete() && modified && _isInteresting
-				&& _toRequest.isEmpty())
+		if (!_torrent.isComplete() && modified)
 			_torrent.request(this);
 	}
 
@@ -546,24 +546,6 @@ public class BTConnection implements UploadSlotListener {
 	 */
 	BitSet getAvailableRanges() {
 		return _availableRanges;
-	}
-
-	/**
-	 * Adds a piece to the list of available pieces and marks the
-	 * connection interesting if we do not have this piece ourselves
-	 * 
-	 * @param pieceNum the piece number that is available
-	 */
-	private void addAvailablePiece(int pieceNum) {
-		VerifyingFolder v = _info.getVerifyingFolder();
-		_availableRanges.set(pieceNum);
-
-		
-		// tell the remote host we are interested if we don't have that range
-		if (v.hasBlock(pieceNum)) 
-			numMissing--;
-		else
-			sendInterested();
 	}
 
 	private void clearRequests() {
@@ -787,21 +769,48 @@ public class BTConnection implements UploadSlotListener {
 			handleIOException(new BadBTMessageException(
 					"bad bitfield received! " + _endpoint.toString()));
 
+		boolean willBeInteresting = false;
 		for (int i = 0; i < numBits; i++) {
 			byte mask = (byte) (0x80 >>> (i % 8));
 			if ((mask & field.get(i / 8)) == mask) {
-				addAvailablePiece(i);
+				if (!willBeInteresting && !_info.getVerifyingFolder().hasBlock(i))
+					willBeInteresting = true;
+				_availableRanges.set(i);
 			}
 		}
 		
-		numMissing = _info.getVerifyingFolder().getNumMissing(_availableRanges);
+		if (_availableRanges.cardinality() == numBits) {
+			_availableRanges = _info.getFullBitSet();
+			numMissing = 0;
+		} else
+			numMissing = _info.getVerifyingFolder().getNumMissing(_availableRanges);
+		
+		if (willBeInteresting)
+			sendInterested();
 	}
 
 	/**
 	 * handles a have message and adds the available range contained therein
 	 */
 	private void handleHave(BTHave message) {
-		addAvailablePiece(message.getPieceNum());
+		int pieceNum = message.getPieceNum();
+		if (_availableRanges.get(pieceNum))
+			return; // dublicate Have, ignore.
+		
+		VerifyingFolder v = _info.getVerifyingFolder();
+		_availableRanges.set(pieceNum);
+
+		
+		// tell the remote host we are interested if we don't have that range
+		if (v.hasBlock(pieceNum)) 
+			numMissing--;
+		else
+			sendInterested();
+		
+		if (_availableRanges.cardinality() == _info.getNumBlocks()) {
+			_availableRanges = _info.getFullBitSet();
+			numMissing = 0;
+		}
 	}
 
 	public boolean equals(Object o) {
@@ -848,5 +857,12 @@ public class BTConnection implements UploadSlotListener {
 
 	public void measureBandwidth() {
 		up.measureBandwidth();
+	}
+	
+	/**
+	 * @return if the remote host has the complete file, i.e. is a "seed".
+	 */
+	public boolean isSeed() {
+		return _availableRanges.cardinality() == _info.getNumBlocks();
 	}
 }

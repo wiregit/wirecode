@@ -134,7 +134,7 @@ public class VerifyingFolder {
 		pendingRanges = new BlockRangeMap();
 		
 		if (complete) 
-			verifiedBlocks = new FullBitSet();
+			verifiedBlocks = _info.getFullBitSet();
 		else {
 			verifiedBlocks = new BitSet(_info.getNumBlocks());
 			if (data != null)
@@ -271,7 +271,7 @@ public class VerifyingFolder {
 		verifiedBlocks.set(blockId);
 		bitFieldDirty = true;
 		if (isComplete()) 
-			verifiedBlocks = new FullBitSet();
+			verifiedBlocks = _info.getFullBitSet();
 	}
 	
 	/**
@@ -899,11 +899,20 @@ public class VerifyingFolder {
 	 * @return the # of pieces that we do not have that
 	 * the other host has
 	 */
-	synchronized int getNumWeMiss(BitSet other) {
+	synchronized boolean containsAnyWeMiss(BitSet other) {
+		// if we are complete we miss nothing
 		if (isComplete())
-			return 0;
-		other.andNot(verifiedBlocks);
-		return other.cardinality();
+			return false;
+		
+		// if they are complete we miss what we don't have
+		if (other == _info.getFullBitSet())
+			return verifiedBlocks.cardinality() < _info.getNumBlocks();
+		
+	    for(int i=other.nextSetBit(0); i>=0; i=other.nextSetBit(i+1)) {
+	    	if (!verifiedBlocks.get(i))
+	    		return true;
+	    }
+		return false;
 	}
 	
 	private static class BlockRangeMap extends HashMap {
@@ -940,20 +949,6 @@ public class VerifyingFolder {
 				ret += (long)set.getSize();
 			}
 			return ret;
-		}
-	}
-	
-	private class FullBitSet extends BitSet {
-		public void set(int i) {}
-		public void clear(int i){}
-		public boolean get(int i) {
-			return true;
-		}
-		public int cardinality() {
-			return _info.getNumBlocks();
-		}
-		public int length() {
-			return _info.getNumBlocks();
 		}
 	}
 }

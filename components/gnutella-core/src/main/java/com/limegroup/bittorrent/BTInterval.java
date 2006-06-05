@@ -12,6 +12,8 @@ public class BTInterval extends Interval {
 
 	public BTInterval(long low, long high, int id) {
 		super(low, high);
+		if (id < 0)
+			throw new IllegalArgumentException("negative id");
 		blockId = new Integer(id);
 	}
 	

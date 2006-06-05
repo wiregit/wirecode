@@ -444,7 +444,7 @@ public class ManagedTorrent {
 		BTInterval in = _folder.leaseRandom(btc.getAvailableRanges());
 		if (in != null)
 			btc.sendRequest(in);
-		else if (_folder.getNumWeMiss(btc.getAvailableRanges()) == 0) {
+		else {
 			if (LOG.isDebugEnabled())
 				LOG.debug("connection not interesting anymore");
 			btc.sendNotInterested();

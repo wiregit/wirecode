@@ -31,6 +31,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 
@@ -63,6 +64,8 @@ public class BTMetaInfo implements Serializable {
 			ErrorService.error(ioe);
 		}
 	}
+	
+	private BitSet fullSet = new FullBitSet();
 
 	/* a two dimensional array storing the hashes for this file */
 	private byte[][] _hashes;
@@ -707,6 +710,7 @@ public class BTMetaInfo implements Serializable {
 		_pieceLength = pieceLength.intValue();
 		_totalSize = totalSize.longValue();
 		initializeVerifyingFolder(folderData, false);
+		fullSet = new FullBitSet();
 	}
 
 	/**
@@ -829,6 +833,29 @@ public class BTMetaInfo implements Serializable {
 	public class FakeFileDesc extends FileDesc {
 		public FakeFileDesc(File file) {
 			super(file, FAKE_URN_SET, Integer.MAX_VALUE);
+		}
+	}
+	
+	public BitSet getFullBitSet() {
+		return fullSet;
+	}
+	
+	private class FullBitSet extends BitSet {
+		public void set(int i) {}
+		public void clear(int i){}
+		public boolean get(int i) {
+			return true;
+		}
+		public int cardinality() {
+			return getNumBlocks();
+		}
+		public int length() {
+			return getNumBlocks();
+		}
+		public int nextSetBit(int i) {
+			if (i >= cardinality())
+				return -1;
+			return i;
 		}
 	}
 

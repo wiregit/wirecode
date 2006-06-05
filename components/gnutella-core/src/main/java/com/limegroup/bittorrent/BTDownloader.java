@@ -39,13 +39,10 @@ implements TorrentLifecycleListener {
 
 	private DownloadManager manager;
 	
-	private TorrentManager torrentManager;
-	
 	private long startTime, stopTime;
 	
-	public BTDownloader(BTMetaInfo info, TorrentManager torrentManager) {
+	public BTDownloader(BTMetaInfo info) {
 		_info = info;
-		this.torrentManager = torrentManager;
 	}
 
 	/**
@@ -350,7 +347,7 @@ implements TorrentLifecycleListener {
 		_torrent.addLifecycleListener(this);
 		BTUploader uploader = new BTUploader(_torrent,_info);
 		_torrent.addLifecycleListener(uploader);
-		_torrent.addLifecycleListener(torrentManager);
+		_torrent.addLifecycleListener(RouterService.getTorrentManager());
 	}
 	
 	public void startDownload() {
@@ -362,7 +359,7 @@ implements TorrentLifecycleListener {
 	}
 	
 	public boolean shouldBeRestarted() {
-		return getState() == QUEUED && torrentManager.allowNewTorrent(); 
+		return getState() == QUEUED && RouterService.getTorrentManager().allowNewTorrent(); 
 	}
 	
 	public boolean isAlive() {
