@@ -79,7 +79,7 @@ public class UploadSlotManager {
 		return requestSlot(new BTSlotRequest(listener, highPriority));
 	}
 
-	private int requestSlot(UploadSlotRequest request) {
+	private synchronized int requestSlot(UploadSlotRequest request) {
 		
 		// see if there exists an uploader with higher priority
 		boolean existHigherPriority = existActiveHigherPriority(request.getPriority());
@@ -126,7 +126,7 @@ public class UploadSlotManager {
 		return queue.indexOf(request);
 	}
 	
-	public int positionInQueue(UploadSlotUser user) {
+	public synchronized int positionInQueue(UploadSlotUser user) {
 		List queue = getQueue(user);
 		for(int i = 0; i < queue.size();i++) {
 			UploadSlotRequest request = (UploadSlotRequest) queue.get(i);
@@ -189,7 +189,7 @@ public class UploadSlotManager {
 	/**
 	 * @return whether there would be a free slot for an HTTP uploader.
 	 */
-	public boolean isServiceable(int current) {
+	public synchronized boolean isServiceable(int current) {
 		if (existActiveHigherPriority(HTTP))
 			return false;
 		
@@ -235,10 +235,11 @@ public class UploadSlotManager {
 		}
 	}
 	
-	public float getUploadBandwidth() {
+	public synchronized float getUploadBandwidth() {
 		float ret = 0;
 		for (Iterator iter = active.iterator(); iter.hasNext();) {
-			UploadSlotUser user = (UploadSlotUser) iter.next();
+			UploadSlotRequest request = (UploadSlotRequest) iter.next();
+			UploadSlotUser user = (UploadSlotUser) request.getUser();
 			user.measureBandwidth();
 			try {
 				ret += user.getMeasuredBandwidth();
@@ -275,7 +276,7 @@ public class UploadSlotManager {
 	/**
 	 * Cancels the request issued by this UploadSlotListener
 	 */
-	public void cancelRequest(UploadSlotUser user) {
+	public synchronized void cancelRequest(UploadSlotUser user) {
 		if (!removeIfQueued(user))
 			requestDone(user);
 	}
@@ -299,7 +300,7 @@ public class UploadSlotManager {
 	/**
 	 * Notification that the UploadSlotUser is done with its request.
 	 */
-	public void requestDone(UploadSlotUser listener) {
+	public synchronized void requestDone(UploadSlotUser listener) {
 		for (Iterator iter = active.iterator(); iter.hasNext();) {
 			UploadSlotRequest request = (UploadSlotRequest) iter.next();
 			if (request.getUser() == listener) {
@@ -328,12 +329,11 @@ public class UploadSlotManager {
 		}
 	}
 	
-	public int getNumQueued() {
-		// this is not that simple...
+	public synchronized int getNumQueued() {
 		return queued.size() + queuedResumable.size();
 	}
 	
-	public int getNumUsersForHost(String host) {
+	public synchronized int getNumUsersForHost(String host) {
 		MultiIterator iter = new MultiIterator(
 				new Iterator[] {active.iterator(), 
 						queued.iterator(), 

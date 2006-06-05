@@ -17,6 +17,7 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
@@ -32,18 +33,19 @@ implements TorrentLifecycleListener {
     
 	private static final String METAINFO = "metainfo";
 	
-	private static final TorrentManager torrentManager = new TorrentManager();
-	
 	private ManagedTorrent _torrent;
 
 	private BTMetaInfo _info;
 
 	private DownloadManager manager;
 	
+	private TorrentManager torrentManager;
+	
 	private long startTime, stopTime;
 	
-	public BTDownloader(BTMetaInfo info) {
+	public BTDownloader(BTMetaInfo info, TorrentManager torrentManager) {
 		_info = info;
+		this.torrentManager = torrentManager;
 	}
 
 	/**

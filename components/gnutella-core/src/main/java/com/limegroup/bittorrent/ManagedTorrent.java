@@ -139,8 +139,6 @@ public class ManagedTorrent {
 		_info = info;
 		_info.setManagedTorrent(this);
 		_folder = info.getVerifyingFolder();
-		if (_folder.isVerifying())
-			_state.setInt(VERIFYING);
 		_connections = Collections.synchronizedList(new ArrayList());
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;

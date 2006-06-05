@@ -62,12 +62,12 @@ public class BTConnection implements UploadSlotListener {
 	/*
 	 * Reader for the messages
 	 */
-	private BTMessageReader _reader;
+	private final BTMessageReader _reader;
 
 	/*
 	 * Writer for the messages
 	 */
-	private BTMessageWriter _writer;
+	private final BTMessageWriter _writer;
 
 	/**
 	 * The pieces the remote host has
@@ -150,7 +150,7 @@ public class BTConnection implements UploadSlotListener {
 	private int unchokeRound;
 	
 	/** Whether this connection is currently using an upload slot */
-	private boolean usingSlot;
+	private volatile boolean usingSlot;
 	
 	/** Bandwidth trackers for the outgoing and incoming bandwidth */
 	private SimpleBandwidthTracker up, down;
@@ -283,7 +283,8 @@ public class BTConnection implements UploadSlotListener {
 			_socket.close();
 		} catch (IOException ioe) {}
 		
-		RouterService.getUploadSlotManager().cancelRequest(this);
+		if (usingSlot)
+			RouterService.getUploadSlotManager().cancelRequest(this);
 		_torrent.connectionClosed(this);
 	}
 
@@ -490,13 +491,15 @@ public class BTConnection implements UploadSlotListener {
 		if (_isChoked || _requested.isEmpty()) 
 			return;
 		
+		usingSlot = true;
 		int proceed = RouterService.getUploadSlotManager().requestSlot(
 					this,
 					!_torrent.isComplete());
 		
-		if (proceed == -1) // denied, choke the connection
+		if (proceed == -1) { // denied, choke the connection
+			usingSlot = false;
 			sendChoke();
-		else if (proceed == 0) 
+		} else if (proceed == 0) 
 			requestPieceRead();
 		// else queued, will receive callback.
 	}
@@ -513,7 +516,6 @@ public class BTConnection implements UploadSlotListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requesting disk read for "+in);
 		
-		usingSlot = true;
 		try {
 			_info.getVerifyingFolder().sendPiece(in, this);
 		} catch (IOException bad) {
@@ -821,6 +823,7 @@ public class BTConnection implements UploadSlotListener {
 	
 	
 	public void releaseSlot() {
+		usingSlot = false;
 		close();
 	}
 	

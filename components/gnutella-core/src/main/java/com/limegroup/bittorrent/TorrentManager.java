@@ -54,10 +54,10 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 	/**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
-	public TorrentManager() {
+	public void initialize() {
 		if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
-
+		
 		// register ourselves as an acceptor.
 		StringBuffer word = new StringBuffer();
 		word.append((char)19);
@@ -138,5 +138,9 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 	
 	public synchronized boolean allowNewTorrent() {
 		return _active.size() - _seeding.size() < getMaxActiveTorrents();
+	}
+	
+	public synchronized int getNumActiveTorrents() {
+		return _active.size();
 	}
 }

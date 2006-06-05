@@ -801,7 +801,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 				if (metaInfo.equals(current.getSHA1Urn())) 
 					return current; // eventually implement adding of trackers
 			}
-			AbstractDownloader ret = new BTDownloader(info);
+			AbstractDownloader ret = new BTDownloader(info, RouterService.getTorrentManager());
 			initializeDownload(ret);
 			return ret;
 		} catch (IOException e) {

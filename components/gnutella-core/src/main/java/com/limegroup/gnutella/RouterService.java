@@ -122,7 +122,7 @@ public class RouterService {
 	/**
 	 * <tt>TorrentManager</tt> instance for handling torrents
 	 */
-	private static final TorrentManager torrentManager = null;
+	private static TorrentManager torrentManager = new TorrentManager();
     
     /**
      * ConnectionDispatcher instance that will dispatch incoming connections to
@@ -150,7 +150,7 @@ public class RouterService {
 	 * <tt>DownloadManager</tt> for handling HTTP downloading.
 	 */
     private static DownloadManager downloader = new DownloadManager();
-
+    
     /**
      * <tt>UploadSlotManager</tt> for controlling upload slots.
      */
@@ -462,7 +462,7 @@ public class RouterService {
             LOG.trace("END loading StaticMessages");
             
 			LOG.trace("START TorrentManager");
-			//torrentManager.initialize();
+			torrentManager.initialize();
 			LOG.trace("STOP TorrentManager");
             
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
@@ -558,6 +558,10 @@ public class RouterService {
      */
     public static DownloadManager getDownloadManager() {
         return downloader;
+    }
+    
+    public static TorrentManager getTorrentManager() {
+    	return torrentManager;
     }
 
     public static AltLocManager getAltlocManager() {
@@ -831,7 +835,7 @@ public class RouterService {
      * Returns the number of uploads in progress.
      */
     public static int getNumUploads() {
-        return uploadManager.uploadsInProgress();
+        return uploadManager.uploadsInProgress() + torrentManager.getNumActiveTorrents();
     }
 
     /**
