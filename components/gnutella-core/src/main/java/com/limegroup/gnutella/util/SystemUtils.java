@@ -3,11 +3,18 @@ package com.limegroup.gnutella.util;
 import java.awt.Component;
 import java.io.File;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.DownloadManager;
+
 /**
  * A collection of core-related systems utilities,
  * most of which will require native code to do correctly.
  */
 public class SystemUtils {
+    
+    private static final Log LOG = LogFactory.getLog(SystemUtils.class);
     
     /**
      * Whether or not the native libraries could be loaded.
@@ -113,8 +120,12 @@ public class SystemUtils {
      */
     public static final boolean setWindowIcon(Component frame, File icon) {
     	if (CommonUtils.isWindows() && isLoaded) {
-    		String result = setWindowIconNative(frame, System.getProperty("sun.boot.library.path"), icon.getPath());
-    		return result.equals(""); // Returns blank on success, or information about an error
+    		try {
+    			String result = setWindowIconNative(frame, System.getProperty("sun.boot.library.path"), icon.getPath());
+    			return result.equals(""); // Returns blank on success, or information about an error
+    		} catch (UnsatisfiedLinkError e) { // Java loaded the library, but can't find the function call
+    			LOG.debug("UnsatisfiedLinkError calling setWindowIconNative()", e);
+    		} 
     	}
     	return false;
     }
