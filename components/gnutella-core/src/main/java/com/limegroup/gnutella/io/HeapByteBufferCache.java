@@ -73,7 +73,6 @@ public class HeapByteBufferCache {
     }
 
     public synchronized void put(ByteBuffer buf) {
-        
         // see if this buffer was sliced off of a bigger one
         ByteBuffer toReturn = (ByteBuffer) SLICED.remove(buf);
         if (toReturn == null)
@@ -93,5 +92,4 @@ public class HeapByteBufferCache {
         CACHE.clear();
         // keep the SCLICED mappings around to allow returning of sliced buffers.
     }
-
 }

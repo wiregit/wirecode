@@ -434,8 +434,16 @@ public class UDPService implements ReadWriteObserver {
         if(_channel == null || _channel.socket().isClosed())
             return; // ignore if not open.
 
-        BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(
-                NIODispatcher.instance().getBufferCache().getHeap(msg.getTotalLength()));
+        int length = msg.getTotalLength();
+        ByteBuffer buffer = NIODispatcher.instance().getBufferCache().getHeap(length);
+        if(buffer.remaining() != length)
+            throw new IllegalStateException("retrieved a buffer with wrong remaining! " +
+                                            "wanted: " + length +
+                                            ", had: " + buffer.remaining() +
+                                            ", position: " + buffer.position() +
+                                            ", limit: " + buffer.limit());
+
+        BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(buffer);
         try {
             msg.writeQuickly(baos);
         } catch(IOException e) {
@@ -445,8 +453,8 @@ public class UDPService implements ReadWriteObserver {
             // can't send the hit, so return
             return;
         }
-
-        ByteBuffer buffer = (ByteBuffer)baos.buffer().flip();        
+       
+        buffer.flip();
         send(buffer, ip, port, false);
     }
     

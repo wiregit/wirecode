@@ -176,7 +176,9 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
             } catch (IOException iox) {
                 if(LOG.isWarnEnabled())
                     LOG.warn("IOX while processing state: " + state, iox);
-                shutdown = true;
+                synchronized(this) {
+                    shutdown = true;
+                }
                 try {
                     close();
                 } catch(IOException ignored) {}

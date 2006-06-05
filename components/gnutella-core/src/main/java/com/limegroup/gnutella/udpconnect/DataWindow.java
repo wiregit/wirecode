@@ -154,11 +154,11 @@ public class DataWindow
             pkey = new Long(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.acks > 0 ) {
-                if(releaser != null) {
-                   releaser.releaseChunk(d.msg.getChunk());
-                }
                 window.remove(pkey);
                 count++;
+                
+                if(releaser != null)
+                    releaser.releaseChunk(d.msg.getChunk());
             } else {
                 break;
             }

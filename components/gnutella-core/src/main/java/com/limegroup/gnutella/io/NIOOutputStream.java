@@ -95,14 +95,18 @@ class NIOOutputStream implements WriteObserver {
     public synchronized void shutdown() {
         if(shutdown)
             return;
-        
-        if(buffer != null)
-            NIODispatcher.instance().getBufferCache().release(buffer);
+        shutdown = true;
 
         if(sink != null)
             sink.shutdown();
-            
-        shutdown = true;
+        
+        if(buffer != null) {
+            NIODispatcher.instance().invokeLater(new Runnable() {
+                public void run() {
+                    NIODispatcher.instance().getBufferCache().release(buffer);
+                }
+            });
+        }
     }
     
     /** Unused */

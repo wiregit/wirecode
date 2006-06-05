@@ -108,14 +108,18 @@ class NIOInputStream implements ChannelReadObserver, InterestReadChannel, ReadTi
     public synchronized void shutdown() {
         if(shutdown)
             return;
+        shutdown = true;
 
-        if (buffer != null)
-            NIODispatcher.instance().getBufferCache().release(buffer);
-        
         if(source != null)
             source.shutdown();
         
-        shutdown = true;
+        if(buffer != null) {
+            NIODispatcher.instance().invokeLater(new Runnable() {
+                public void run() {
+                    NIODispatcher.instance().getBufferCache().release(buffer);
+                }
+            });
+        }
     }
     
     /** Unused */
