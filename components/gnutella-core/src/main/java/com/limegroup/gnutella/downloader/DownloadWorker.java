@@ -1077,6 +1077,10 @@ public class DownloadWorker {
      * and completeAssignAndRequest will be called when the request completes.
      */
     private boolean assignGrey() {
+    	// if I'm currently being stolen from, do not try to steal.
+    	// can happen if my thief is exchanging headers.
+        if (isStealing())
+        	return false;
         
         //If this _downloader is a partial source, don't attempt to steal...
         //too confusing, too many problems, etc...
