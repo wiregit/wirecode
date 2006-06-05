@@ -6,8 +6,6 @@ import java.io.File;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.DownloadManager;
-
 /**
  * A collection of core-related systems utilities,
  * most of which will require native code to do correctly.
