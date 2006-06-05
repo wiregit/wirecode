@@ -12,6 +12,9 @@ import java.nio.channels.SocketChannel;
  */
 class SocketInterestReadAdapter implements InterestReadChannel {
     
+	/** Mask OOM as this exception */
+	private static final IOException OOM = new IOException();
+	
     /** the SocketChannel this is proxying. */
     private SocketChannel channel;
 
@@ -24,7 +27,14 @@ class SocketInterestReadAdapter implements InterestReadChannel {
     }
 
     public int read(ByteBuffer dst) throws IOException {
-        return channel.read(dst);
+    	try {
+    		return channel.read(dst);
+    	} catch (OutOfMemoryError oom) {
+    		// gc-ing will stall the NIODispatcher thread
+    		// but otherwise masking the oom is not very helpful
+    		System.gc();  
+    		throw OOM;
+    	}
     }
 
     public boolean isOpen() {
