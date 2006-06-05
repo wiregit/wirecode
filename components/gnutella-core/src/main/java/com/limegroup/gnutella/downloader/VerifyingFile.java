@@ -202,6 +202,8 @@ public class VerifyingFile {
         File parentFile = file.getParentFile();
         if( parentFile != null ) {
             parentFile.mkdirs();
+            if(!parentFile.exists())
+                throw new IOException("permission denied");
             FileUtils.setWriteable(parentFile);
         }
         FileUtils.setWriteable(file);
