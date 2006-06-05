@@ -1234,7 +1234,7 @@ public class DownloadWorker {
             
             HTTPDownloader h = worker.getDownloader();
             
-            if (h == null || h == _downloader)
+            if (h == null || h == _downloader || h.isVictim())
                 continue;
             
             // if we don't have speed yet, steal from the first slow guy
