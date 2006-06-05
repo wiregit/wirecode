@@ -256,7 +256,12 @@ public class VerifyingFile {
      * @return true if this scheduled a write or wasn't open, false if it couldn't.
      */
     public boolean writeBlock(long currPos, int start, int length, byte[] buf) {
-        if(DELAYED.isEmpty())
+        boolean canWrite;
+        synchronized(CACHE) {
+            canWrite = !DELAYED.isEmpty();
+        }
+        
+        if(canWrite)
             return writeBlockImpl(currPos, start, length, buf, true);
         else // do not try to write if something else is waiting.
             return false;
