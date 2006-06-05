@@ -74,8 +74,7 @@ public class LimeXMLSchema {
     public LimeXMLSchema(InputSource inputSource) throws IOException {
         //initialize schema
         Document document = getDocument(inputSource);
-        _canonicalizedFields =
-            (new LimeXMLSchemaFieldExtractor()).getFields(document);
+        _canonicalizedFields = Collections.unmodifiableList(new LimeXMLSchemaFieldExtractor().getFields(document));
         _schemaURI = retrieveSchemaURI(document);
         _rootXMLName = getRootXMLName(document);
         _description = getDisplayString(_schemaURI);
@@ -162,33 +161,6 @@ public class LimeXMLSchema {
     }
     
     /**
-     * Prints the node, as well as its children (by invoking the method
-     * recursively on the children)
-     * @param n The node which has to be printed (along with children)
-     */
-    private void printNode(Node n)
-    {
-        //get attributes
-        if(n.getNodeType() == Node.ELEMENT_NODE)
-        {
-            System.out.print("node = " + n.getNodeName() + " ");
-            NamedNodeMap  nnm = n.getAttributes();
-            Node name = nnm.getNamedItem("name");
-            if(name != null)
-                System.out.print(name + "" );
-            System.out.println("");
-            NodeList children = n.getChildNodes();
-            int numChildren = children.getLength();
-            for(int i=0;i<numChildren; i++)
-            {
-                Node child = children.item(i);
-                printNode(child);
-            }
-        }
-        
-    }
-
-    /**
      * Returns the unique identifier which identifies this particular schema
      * @return the unique identifier which identifies this particular schema
      */
@@ -232,7 +204,7 @@ public class LimeXMLSchema {
      */
     public List getCanonicalizedFields()
     {
-        return Collections.unmodifiableList(_canonicalizedFields);
+        return _canonicalizedFields;
     }
     
     
