@@ -404,6 +404,7 @@ public final class CreationTimeCache {
                 urnSet.add(urn);
             } catch(ClassCastException ignoredEx) {
                 iter.remove();
+                dirty = true;
             }
         }
     }
