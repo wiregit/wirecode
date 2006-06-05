@@ -50,6 +50,7 @@ import com.limegroup.gnutella.io.IOStateMachine;
 import com.limegroup.gnutella.io.IOStateObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.NBThrottle;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.ReadSkipState;
 import com.limegroup.gnutella.io.ReadState;
@@ -1689,7 +1690,12 @@ public class HTTPDownloader implements BandwidthTracker {
 	        _isActive = false;
 	    }
         
-        IOUtils.close(_socket);
+        // Close in the NIO thread, so everything stays there.
+        NIODispatcher.instance().invokeLater(new Runnable() {
+            public void run() {
+                IOUtils.close(_socket);
+            }
+        });
 	}
 
     /**
