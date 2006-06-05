@@ -11,7 +11,7 @@ public class DHTSettings extends LimeProps{
         FACTORY.createExpirableBooleanSetting("EVER_DHT_CAPABLE", false);
     
     /**
-     * Setting for whether or not we've ever been Ultrapeer capable.
+     * Setting to force DHT capability -- TODO for testing only - remove.
      */
     public static final BooleanSetting FORCE_DHT_CONNECT =
         FACTORY.createSettableBooleanSetting("FORCE_DHT_CONNECT", true, "DHTSettings.ForceDHTConnect"); //TODO switch to false

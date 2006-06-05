@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -150,7 +151,7 @@ public class LimeDHTManager implements LifecycleListener {
         if (forcePassive){
             dht.setFirewalled(true);
         } else {
-            dht.setFirewalled(RouterService.acceptedIncomingConnection());
+            dht.setFirewalled(!RouterService.acceptedIncomingConnection());
         }
         
         try {
@@ -181,15 +182,14 @@ public class LimeDHTManager implements LifecycleListener {
                     synchronized (bootstrapHosts) {
                         bootstrapHosts.removeAll(previousBootstrapHosts);
                         waiting = true;
+                        //here: perform a PING requesting for DHT hosts
                     }
                 }
-
-                public void phaseOneComplete(long time) {
-                    //notify listeners
-                }
-
+                public void phaseOneComplete(long time) {}
                 public void phaseTwoComplete(boolean foundNodes, long time) {
-                    //notify listeners
+                    //Notify our connections that we are now a DHT node 
+                    CapabilitiesVM.reconstructInstance();
+                    RouterService.getConnectionManager().sendUpdatedCapabilities();
                 }
             });
         } catch (IOException err) {
@@ -222,7 +222,7 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     /**
-     * Adds a host to the head of an ordered list of boostrap hosts.
+     * Adds a host to the head of a list of boostrap hosts ordered by Most Recently Seen.
      * If the manager is waiting for hosts, this method tries to bootstrap 
      * immediately after.
      * 
@@ -292,6 +292,10 @@ public class LimeDHTManager implements LifecycleListener {
         if(!running) return;
         dht.stop();
         init(false);
+    }
+    
+    public int getVersion() {
+        return dht.getVersion();
     }
     
 }

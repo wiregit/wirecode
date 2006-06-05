@@ -1565,7 +1565,9 @@ public class RouterService {
      * @return true if connected to the DHT, false otherwise
      */
     public static boolean isDHTNode() {
-        return dhtManager.isRunning();
+        if(dhtManager != null) {
+            return dhtManager.isRunning();
+        } else return false;
     }
     /**
 	 * Tells wether this node is exclusively connected to the DHT

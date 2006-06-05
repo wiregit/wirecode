@@ -321,6 +321,10 @@ public class MojitoDHT {
         return context;
     }
     
+    public int getVersion() {
+        return context.getVersion();
+    }
+    
     public Set getKeys() {
         return context.getDatabase().getKeys();
     }
