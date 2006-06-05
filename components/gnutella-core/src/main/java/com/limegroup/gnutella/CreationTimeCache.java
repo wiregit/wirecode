@@ -92,8 +92,6 @@ public final class CreationTimeCache {
 
     /**
      * Create and initialize urn cache.
-     * You should never really call this - use instance - not private for
-     * testing.
      */
     private CreationTimeCache() {
         URN_TO_TIME_MAP = createMap();
@@ -385,23 +383,28 @@ public final class CreationTimeCache {
         Iterator iter = entries.iterator();
         while (iter.hasNext()) {
             // for each entry, get the creation time and the urn....
-            Map.Entry currEntry = (Map.Entry) iter.next();
-            Long cTime = (Long) currEntry.getValue();
-            URN urn = (URN) currEntry.getKey();
+            // if the entry has invalid data then remove from map and 
+            // just continue iterating
+            try {
+                Map.Entry currEntry = (Map.Entry) iter.next();
+                Long cTime = (Long) currEntry.getValue();
+                URN urn = (URN) currEntry.getKey();    
+                
+                // don't ever add IFDs
+                if (RouterService.getFileManager().getFileDescForUrn(urn)
+                    instanceof IncompleteFileDesc) continue;
 
-            // don't ever add IFDs
-            if (RouterService.getFileManager().getFileDescForUrn(urn)
-                instanceof IncompleteFileDesc) continue;
-
-            // put the urn in a set of urns that have that creation time....
-            Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
-            if (urnSet == null) {
-                urnSet = new HashSet();
-                // populate the reverse mapping
-                TIME_TO_URNSET_MAP.put(cTime, urnSet);
+                // put the urn in a set of urns that have that creation time....
+                Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
+                if (urnSet == null) {
+                    urnSet = new HashSet();
+                    // populate the reverse mapping
+                    TIME_TO_URNSET_MAP.put(cTime, urnSet);
+                }
+                urnSet.add(urn);
+            } catch(ClassCastException ignoredEx) {
+                iter.remove();
             }
-            urnSet.add(urn);
-
         }
     }
 
