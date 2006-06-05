@@ -1628,23 +1628,7 @@ public class HTTPDownloader implements BandwidthTracker {
     					return true;
     				}
     			} catch (AssertFailure bad) {
-    				String currentWorker = "current worker "+System.identityHashCode(HTTPDownloader.this);
-    				String allWorkers = null;
-    				URN urn = _rfd.getSHA1Urn();
-    				if (urn != null) {
-    					ManagedDownloader myDownloader = RouterService.getDownloadManager().getDownloaderForURN(urn);
-    					if (myDownloader == null)
-    						allWorkers = "couldn't find my downloader???";
-    					else
-    						allWorkers = myDownloader.getWorkersInfo();
-    				}else
-    					allWorkers = " sha1 not available ";
-    				
-    				String errorReport = bad.getMessage() + "\n\n"+currentWorker+"\n\n"+allWorkers;
-    				AssertFailure failure = new AssertFailure(errorReport);
-    				failure.setStackTrace(bad.getStackTrace()); // so we see the VF dump only once.
-    				throw failure;
-    				
+    				createAssertionReport(bad);
     			}
                 buffer.clear();
             }
@@ -1654,6 +1638,26 @@ public class HTTPDownloader implements BandwidthTracker {
             return -1;
         }
 	}
+    
+    void createAssertionReport(AssertFailure bad) {
+		String currentWorker = "current worker "+System.identityHashCode(this);
+		String allWorkers = null;
+		URN urn = _rfd.getSHA1Urn();
+		if (urn != null) {
+			ManagedDownloader myDownloader = RouterService.getDownloadManager().getDownloaderForURN(urn);
+			if (myDownloader == null)
+				allWorkers = "couldn't find my downloader???";
+			else
+				allWorkers = myDownloader.getWorkersInfo();
+		}else
+			allWorkers = " sha1 not available ";
+		
+		String errorReport = bad.getMessage() + "\n\n"+currentWorker+"\n\n"+allWorkers;
+		AssertFailure failure = new AssertFailure(errorReport);
+		failure.setStackTrace(bad.getStackTrace()); // so we see the VF dump only once.
+		throw failure;
+
+    }
     
     private static class DownloadRestarter implements VerifyingFile.WriteCallback {
         private final DownloadState downloader;

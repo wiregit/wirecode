@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -580,8 +581,13 @@ public class DownloadWorker {
             
             if (LOG.isDebugEnabled())
                 LOG.debug("releasing ranges "+new Interval(low,high));
+
+            try {
+            	_commonOutFile.releaseBlock(new Interval(low,high));
+            } catch (AssertFailure bad) {
+            	downloader.createAssertionReport(bad);
+            }
             
-            _commonOutFile.releaseBlock(new Interval(low,high));
             downloader.forgetRanges();
         } else 
 			LOG.debug("nothing to release!");
