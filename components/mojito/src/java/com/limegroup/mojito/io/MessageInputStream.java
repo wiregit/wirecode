@@ -27,6 +27,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
@@ -84,7 +86,6 @@ public class MessageInputStream extends DataInputStream {
     }
     
     private KeyValue readKeyValue() throws IOException {
-        
         KUID key = readValueID();
         byte[] value = new byte[readUnsignedShort()];
         readFully(value);
@@ -96,6 +97,19 @@ public class MessageInputStream extends DataInputStream {
         byte[] signature = readSignature();
         
         return KeyValue.createRemoteKeyValue(key, value, nodeId, address, pubKey, signature);
+    }
+    
+    private List readKeyValues() throws IOException {
+        int size = readUnsignedByte();
+        if (size == 0) {
+            return Collections.EMPTY_LIST;
+        }
+        
+        KeyValue[] values = new KeyValue[size];
+        for(int i = 0; i < values.length; i++) {
+            values[i] = readKeyValue();
+        }
+        return Arrays.asList(values);
     }
     
     private PublicKey readPublicKey() throws IOException {
@@ -123,10 +137,22 @@ public class MessageInputStream extends DataInputStream {
     private ContactNode readContactNode() throws IOException {
         KUID nodeId = readNodeID();
         SocketAddress addr = readSocketAddress();
-        
         return new ContactNode(nodeId, addr);
     }
     
+    private List readContactNodes() throws IOException {
+        int size = readUnsignedByte();
+        if (size == 0) {
+            return Collections.EMPTY_LIST;
+        }
+        
+        ContactNode[] nodes = new ContactNode[size];
+        for(int i = 0; i < nodes.length; i++) {
+            nodes[i] = readContactNode();
+        }
+        return Arrays.asList(nodes);
+    }
+
     private InetSocketAddress readSocketAddress() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
@@ -151,15 +177,13 @@ public class MessageInputStream extends DataInputStream {
         return QueryKey.getQueryKey(queryKey, true);
     }
     
-    private PingRequest readPing(int vendor, int version, 
+    private PingRequest readPingRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        
         return new PingRequestImpl(vendor, version, node, messageId);
     }
     
-    private PingResponse readPong(int vendor, int version, 
+    private PingResponse readPingResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        
         SocketAddress externalAddress = readSocketAddress();
         int estimatedSize = readInt();
         return new PingResponseImpl(vendor, version, node, messageId, externalAddress, estimatedSize);
@@ -173,14 +197,9 @@ public class MessageInputStream extends DataInputStream {
     
     private FindNodeResponse readFindNodeResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        
         QueryKey queryKey = readQueryKey();
-        int size = readUnsignedByte();
-        ContactNode[] nodes = new ContactNode[size];
-        for(int i = 0; i < nodes.length; i++) {
-            nodes[i] = readContactNode();
-        }
-        return new FindNodeResponseImpl(vendor, version, node, messageId, queryKey, Arrays.asList(nodes));
+        List nodes = readContactNodes();
+        return new FindNodeResponseImpl(vendor, version, node, messageId, queryKey, nodes);
     }
     
     private FindValueRequest readFindValueRequest(int vendor, int version, 
@@ -191,30 +210,21 @@ public class MessageInputStream extends DataInputStream {
     
     private DHTMessage readFindValueResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        
-        int size = readUnsignedByte();
-        KeyValue[] values = new KeyValue[size];
-        for(int i = 0; i < values.length; i++) {
-            values[i] = readKeyValue();
-        }
-        return new FindValueResponseImpl(vendor, version, node, messageId, Arrays.asList(values));
+        List values = readKeyValues();
+        return new FindValueResponseImpl(vendor, version, node, messageId, values);
     }
     
     private StoreRequest readStoreRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        
         QueryKey queryKey = readQueryKey();
         KeyValue keyValue = readKeyValue();
-        
         return new StoreRequestImpl(vendor, version, node, messageId, queryKey, keyValue);
     }
     
     private StoreResponse readStoreResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        
         KUID valueId = readValueID();
         int status = readUnsignedByte();
-        
         return new StoreResponseImpl(vendor, version, node, messageId, valueId, status);
     }
     
@@ -245,9 +255,9 @@ public class MessageInputStream extends DataInputStream {
 
         switch(opcode) {
             case DHTMessage.PING_REQUEST:
-                return readPing(vendor, version, node, messageId);
+                return readPingRequest(vendor, version, node, messageId);
             case DHTMessage.PING_RESPONSE:
-                return readPong(vendor, version, node, messageId);
+                return readPingResponse(vendor, version, node, messageId);
             case DHTMessage.FIND_NODE_REQUEST:
                 return readFindNodeRequest(vendor, version, node, messageId);
             case DHTMessage.FIND_NODE_RESPONSE:

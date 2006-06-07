@@ -75,6 +75,13 @@ public class MessageOutputStream extends DataOutputStream {
         writeSignature(keyValue.getSignature());
     }
     
+    private void writeKeyValues(Collection values) throws IOException {
+        writeByte(values.size());
+        for(Iterator it = values.iterator(); it.hasNext(); ) {
+            writeKeyValue((KeyValue)it.next());
+        }
+    }
+    
     private void writePublicKey(PublicKey pubKey) throws IOException {
         if (pubKey != null) {
             byte[] encoded = pubKey.getEncoded();
@@ -98,6 +105,13 @@ public class MessageOutputStream extends DataOutputStream {
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getSocketAddress());
 	}
+    
+    private void writeContactNodes(Collection nodes) throws IOException {
+        writeByte(nodes.size());
+        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+            writeContactNode((ContactNode)it.next());
+        }
+    }
     
     private void writeSocketAddress(SocketAddress addr) throws IOException {
         if (addr instanceof InetSocketAddress) {
@@ -123,11 +137,11 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writePing(PingRequest ping) throws IOException {
+    private void writePingRequest(PingRequest ping) throws IOException {
         /* NOTHING TO WRITE */
     }
     
-    private void writePong(PingResponse pong) throws IOException {
+    private void writePingResponse(PingResponse pong) throws IOException {
         writeSocketAddress(pong.getExternalAddress());
         writeInt(pong.getEstimatedSize());
     }
@@ -138,12 +152,7 @@ public class MessageOutputStream extends DataOutputStream {
     
     private void writeFindNodeResponse(FindNodeResponse response) throws IOException {
         writeQueryKey(response.getQueryKey());
-        
-        Collection nodes = response.getNodes();
-        writeByte(nodes.size());
-        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-            writeContactNode((ContactNode)it.next());
-        }
+        writeContactNodes(response.getNodes());
     }
     
     private void writeFindValueRequest(FindValueRequest findValue) throws IOException {
@@ -151,12 +160,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeFindValueResponse(FindValueResponse response) throws IOException {
-        
-        Collection values = response.getValues();
-        writeByte(values.size());
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
-            writeKeyValue((KeyValue)it.next());
-        }
+        writeKeyValues(response.getValues());
     }
     
     private void writeStoreRequest(StoreRequest request) throws IOException {
@@ -177,8 +181,8 @@ public class MessageOutputStream extends DataOutputStream {
     private void writeStatsResponse(StatsResponse response) throws IOException {
         writeUTF(response.getStatistics());
     }
-    
-    public void write(DHTMessage msg) throws IOException {
+
+    private void writeHeader(DHTMessage msg) throws IOException {
         writeByte(msg.getOpCode());
         writeInt(msg.getVendor());
         writeShort(msg.getVersion());
@@ -186,30 +190,45 @@ public class MessageOutputStream extends DataOutputStream {
         writeKUID(msg.getContactNode().getNodeID());
         writeByte(msg.getContactNode().getInstanceID());
         writeKUID(msg.getMessageID());
+    }
+    
+    public void write(DHTMessage msg) throws IOException {
+        writeHeader(msg);
         
-        // TODO use opcode!
-        if (msg instanceof PingRequest) {
-            writePing((PingRequest)msg);
-        } else if (msg instanceof PingResponse) {
-            writePong((PingResponse)msg);
-        } else if (msg instanceof FindNodeRequest) {
-            writeFindNodeRequest((FindNodeRequest)msg);
-        } else if (msg instanceof FindNodeResponse) {
-            writeFindNodeResponse((FindNodeResponse)msg);
-        } else if (msg instanceof FindValueRequest) {
-            writeFindValueRequest((FindValueRequest)msg);
-        } else if (msg instanceof FindValueResponse) {
-            writeFindValueResponse((FindValueResponse)msg);
-        } else if (msg instanceof StoreRequest) {
-            writeStoreRequest((StoreRequest)msg);
-        } else if (msg instanceof StoreResponse) {
-            writeStoreResponse((StoreResponse)msg);
-        } else if (msg instanceof StatsRequest) {
-            writeStatsRequest((StatsRequest)msg);
-        } else if (msg instanceof StatsResponse) {
-            writeStatsResponse((StatsResponse)msg);
-        } else {
-            throw new IOException("Unknown Message: " + msg);
+        switch(msg.getOpCode()) {
+            case DHTMessage.PING_REQUEST:
+                writePingRequest((PingRequest)msg);
+                break;
+            case DHTMessage.PING_RESPONSE:
+                writePingResponse((PingResponse)msg);
+                break;
+            case DHTMessage.STORE_REQUEST:
+                writeStoreRequest((StoreRequest)msg);
+                break;
+            case DHTMessage.STORE_RESPONSE:
+                writeStoreResponse((StoreResponse)msg);
+                break;
+            case DHTMessage.FIND_NODE_REQUEST:
+                writeFindNodeRequest((FindNodeRequest)msg);
+                break;
+            case DHTMessage.FIND_NODE_RESPONSE:
+                writeFindNodeResponse((FindNodeResponse)msg);
+                break;
+            case DHTMessage.FIND_VALUE_REQUEST:
+                writeFindValueRequest((FindValueRequest)msg);
+                break;
+            case DHTMessage.FIND_VALUE_RESPONSE:
+                writeFindValueResponse((FindValueResponse)msg);
+                break;
+            case DHTMessage.STATS_REQUEST:
+                writeStatsRequest((StatsRequest)msg);
+                break;
+            case DHTMessage.STATS_RESPONSE:
+                writeStatsResponse((StatsResponse)msg);
+                break;
+            default:
+                throw new IOException("Unknown Message: " + msg);
+                
         }
     }
 }
