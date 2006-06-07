@@ -2330,6 +2330,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     synchronized void workerStarted(DownloadWorker worker) {
         if (LOG.isDebugEnabled())
             LOG.debug("worker "+worker + " started.");
+        if(!_workers.contains(worker))
+            throw new IllegalStateException("attempting to start invalid worker: " + worker);
+        
         setState(ManagedDownloader.DOWNLOADING);
         addActiveWorker(worker);
         chatList.addHost(worker.getDownloader());
@@ -2345,16 +2348,19 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     synchronized void removeWorker(DownloadWorker worker) {
-        removeActiveWorker(worker);
+        boolean rA = removeActiveWorker(worker);
         workerFailed(worker); // make sure its out of the chat list & browse list
-        _workers.remove(worker);
+        boolean rW = _workers.remove(worker);
+        if(rA && !rW)
+            throw new IllegalStateException("active removed but not in workers");
     }
     
-    synchronized void removeActiveWorker(DownloadWorker worker) {
+    synchronized boolean removeActiveWorker(DownloadWorker worker) {
         currentRFDs.remove(worker.getRFD());
         List l = new ArrayList(getActiveWorkers());
-        l.remove(worker);
+        boolean removed = l.remove(worker);
         _activeWorkers = Collections.unmodifiableList(l);
+        return removed;
     }
     
     synchronized void addActiveWorker(DownloadWorker worker) {
@@ -2895,6 +2901,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (LOG.isDebugEnabled())
             LOG.debug("adding queued worker " + queued +" at position "+position+
                     " current queued workers:\n"+_queuedWorkers);
+        
+        if(!_workers.contains(queued))
+            throw new IllegalStateException("attempting to queue invalid worker: " + queued);
         
         if ( position < queuePosition ) {
             queuePosition = position;

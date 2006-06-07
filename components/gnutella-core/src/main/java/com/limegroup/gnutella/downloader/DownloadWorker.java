@@ -651,9 +651,10 @@ public class DownloadWorker {
         if(LOG.isTraceEnabled())
             LOG.trace("establishConnection(" + _rfd + ")");
         
-        if (_manager.isCancelled() || _manager.isPaused()) {//this rfd may still be useful remember it
+        // this rfd may still be useful remember it
+        if (_manager.isCancelled() || _manager.isPaused() || _interrupted) {
             _manager.addRFD(_rfd);
-            _manager.workerFinished(this);
+            finishWorker();
             return;
         }
 
@@ -731,7 +732,7 @@ public class DownloadWorker {
                 observer.shutdown();
             }
         } else {
-            _manager.workerFinished(this);
+            finishWorker();
         }
     }
     
@@ -758,7 +759,7 @@ public class DownloadWorker {
                 }
             }, _rfd.isFromAlternateLocation() ? UDP_PUSH_CONNECT_TIME : PUSH_CONNECT_TIME, 0);
         } else {
-            _manager.workerFinished(this);
+            finishWorker();
         }
     }
     
@@ -1411,7 +1412,7 @@ public class DownloadWorker {
             if(observer != null) {
                 // Make sure it's not queued with Sockets.
                 if(Sockets.removeConnectObserver(_connectObserver))
-                    _manager.workerFinished(this);
+                    finishWorker();
                 // Make sure it immediately stops trying to connect.
                 else if(observer.getSocket() != null)
                     IOUtils.close(observer.getSocket());
@@ -1432,6 +1433,12 @@ public class DownloadWorker {
         return _workerName + "[" + _currentState + "] -> "+_rfd;  
     }
     
+    /** Ensures this worker is finished and doesn't start again. */
+    private void finishWorker() {
+        _interrupted = true;
+        _manager.workerFinished(this);
+    }
+    
     /**
      * Starts a new thread that will perform the download.
      * @param dl
@@ -1445,7 +1452,7 @@ public class DownloadWorker {
             initializeAlternateLocations();
             httpLoop();
         } else {
-            _manager.workerFinished(this);
+            finishWorker();
         }
     }
     
@@ -1457,7 +1464,7 @@ public class DownloadWorker {
         releaseRanges();
         _manager.removeQueuedWorker(this);
         _downloader.stop();
-        _manager.workerFinished(DownloadWorker.this);
+        finishWorker();
     }
     
     /**
@@ -1552,7 +1559,7 @@ public class DownloadWorker {
                     _manager.forgetRFD(_rfd);
                 }
                 finishConnect();
-                _manager.workerFinished(DownloadWorker.this);
+                finishWorker();
             } else {
                 connectDirectly(new DirectConnector(false));
             }
@@ -1613,7 +1620,7 @@ public class DownloadWorker {
                 connectWithPush(new PushConnector(false, false));
             } else {
                 finishConnect();
-                _manager.workerFinished(DownloadWorker.this);
+                finishWorker();
             }
         }
         
