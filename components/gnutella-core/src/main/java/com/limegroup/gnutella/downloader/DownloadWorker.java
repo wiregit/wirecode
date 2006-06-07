@@ -651,9 +651,10 @@ public class DownloadWorker {
         if(LOG.isTraceEnabled())
             LOG.trace("establishConnection(" + _rfd + ")");
         
-        if (_manager.isCancelled() || _manager.isPaused()) {//this rfd may still be useful remember it
+        // this rfd may still be useful remember it
+        if (_manager.isCancelled() || _manager.isPaused() || _interrupted) {
             _manager.addRFD(_rfd);
-            _manager.workerFinished(this);
+            finishWorker();
             return;
         }
 
@@ -731,7 +732,7 @@ public class DownloadWorker {
                 observer.shutdown();
             }
         } else {
-            _manager.workerFinished(this);
+            finishWorker();
         }
     }
     
@@ -758,7 +759,7 @@ public class DownloadWorker {
                 }
             }, _rfd.isFromAlternateLocation() ? UDP_PUSH_CONNECT_TIME : PUSH_CONNECT_TIME, 0);
         } else {
-            _manager.workerFinished(this);
+            finishWorker();
         }
     }
     
@@ -1360,13 +1361,15 @@ public class DownloadWorker {
     }
     
     private ConnectionStatus handleQueued(int position, int pollTime) {
-        if(_manager.getActiveWorkers().isEmpty()) {
-            if(_manager.isCancelled() || _manager.isPaused() ||  _interrupted)
-                return ConnectionStatus.getNoData(); // we were signalled to stop.
-            _manager.setState(ManagedDownloader.REMOTE_QUEUED);
+        synchronized(_manager) {
+            if(_manager.getActiveWorkers().isEmpty()) {
+                if(_manager.isCancelled() || _manager.isPaused() ||  _interrupted)
+                    return ConnectionStatus.getNoData(); // we were signalled to stop.
+                _manager.setState(ManagedDownloader.REMOTE_QUEUED);
+            }
+            _rfd.resetFailedCount();                
+            return ConnectionStatus.getQueued(position, pollTime);
         }
-        _rfd.resetFailedCount();                
-        return ConnectionStatus.getQueued(position, pollTime);
     }
     
     private ConnectionStatus handleProblemReadingHeader() {
@@ -1389,8 +1392,9 @@ public class DownloadWorker {
      * interrupts this downloader.
      */
     void interrupt() {
+        _interrupted = true;
+        
         synchronized(_currentState) {
-            _interrupted = true;
             if(_currentState.getCurrentState() == DownloadState.QUEUED)
                 finishHttpLoop();
         }
@@ -1398,18 +1402,21 @@ public class DownloadWorker {
         if(LOG.isDebugEnabled())
             LOG.debug("Stopping while state is: " + _currentState + ", this: " + toString());
         
-        if (_downloader != null)
+        // If a downloader is set up, we don't need to deal
+        // with the connector, since connecting has finished.
+        if (_downloader != null) {
             _downloader.stop();
-        
-        //Ensure that the ConnectObserver is cleaned up.
-        DirectConnector observer = _connectObserver;
-        if(observer != null) {
-            // Make sure it's not queued with Sockets.
-            if(Sockets.removeConnectObserver(_connectObserver))
-                _manager.workerFinished(this);
-            // Make sure it immediately stops trying to connect.
-            else if(observer.getSocket() != null)
-                IOUtils.close(observer.getSocket());
+        } else {
+            //Ensure that the ConnectObserver is cleaned up.
+            DirectConnector observer = _connectObserver;
+            if(observer != null) {
+                // Make sure it's not queued with Sockets.
+                if(Sockets.removeConnectObserver(_connectObserver))
+                    finishWorker();
+                // Make sure it immediately stops trying to connect.
+                else if(observer.getSocket() != null)
+                    IOUtils.close(observer.getSocket());
+            }
         }
     }
 
@@ -1426,6 +1433,12 @@ public class DownloadWorker {
         return _workerName + "[" + _currentState + "] -> "+_rfd;  
     }
     
+    /** Ensures this worker is finished and doesn't start again. */
+    private void finishWorker() {
+        _interrupted = true;
+        _manager.workerFinished(this);
+    }
+    
     /**
      * Starts a new thread that will perform the download.
      * @param dl
@@ -1439,7 +1452,7 @@ public class DownloadWorker {
             initializeAlternateLocations();
             httpLoop();
         } else {
-            _manager.workerFinished(this);
+            finishWorker();
         }
     }
     
@@ -1451,7 +1464,7 @@ public class DownloadWorker {
         releaseRanges();
         _manager.removeQueuedWorker(this);
         _downloader.stop();
-        _manager.workerFinished(DownloadWorker.this);
+        finishWorker();
     }
     
     /**
@@ -1546,7 +1559,7 @@ public class DownloadWorker {
                     _manager.forgetRFD(_rfd);
                 }
                 finishConnect();
-                _manager.workerFinished(DownloadWorker.this);
+                finishWorker();
             } else {
                 connectDirectly(new DirectConnector(false));
             }
@@ -1607,7 +1620,7 @@ public class DownloadWorker {
                 connectWithPush(new PushConnector(false, false));
             } else {
                 finishConnect();
-                _manager.workerFinished(DownloadWorker.this);
+                finishWorker();
             }
         }
         

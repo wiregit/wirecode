@@ -130,7 +130,8 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     /**
      * Notification that a write can happen.  The observer is informed of the event
      * in order to try filling our internal buffer.  If our last flush was too long
-     * ago, we force a flush to occur.
+     * ago, we force a flush to occur.  We also force a flush if the observer is no
+     * longer interested to make sure its last data is flushed from the buffer.
      */
     public boolean handleWrite() throws IOException {
         WriteObserver upper = observer;
@@ -140,7 +141,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         long now = System.currentTimeMillis();
         if (lastFlushTime == 0)
             lastFlushTime = now;
-        if (now - lastFlushTime > MAX_TIME)
+        if (now - lastFlushTime > MAX_TIME || upper == null)
             flush(now);
                  
         // If still no data after that, we've written everything we want -- exit.
@@ -154,7 +155,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
                     sink.interest(this,false);
             }
             return false;
-        }
+        } 
         
         return true;
     }
