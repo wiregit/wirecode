@@ -169,8 +169,8 @@ public class UploadManager implements BandwidthTracker {
     private volatile float lastMeasuredBandwidth;
 
     /** The desired minimum quality of service to provide for uploads, in
-     *  KB/s.  See testTotalUploadLimit. */
-    private static final float MINIMUM_UPLOAD_SPEED=3.0f;
+     *  B/s.  See testTotalUploadLimit. */
+    private static final float MINIMUM_UPLOAD_SPEED=3000f;
     
     /** 
      * The file index used in this structure to indicate a browse host
@@ -1120,7 +1120,7 @@ public class UploadManager implements BandwidthTracker {
 	private boolean hasFreeSlot(int current) {
         //Allow another upload if (a) we currently have fewer than
         //SOFT_MAX_UPLOADS uploads or (b) some upload has more than
-        //MINIMUM_UPLOAD_SPEED KB/s.  But never allow more than MAX_UPLOADS.
+        //MINIMUM_UPLOAD_SPEED B/s.  But never allow more than MAX_UPLOADS.
         //
         //In other words, we continue to allow uploads until everyone's
         //bandwidth is diluted.  The assumption is that with MAX_UPLOADS
