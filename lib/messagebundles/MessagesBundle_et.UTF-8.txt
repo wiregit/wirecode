@@ -12,37 +12,33 @@ LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Latn
 LOCALE_SCRIPT_NAME=Latin (Baltic Rim)
 LOCALE_ENGLISH_LANGUAGE_NAME=Estonian
-# Before adding a value below, verify the existence of the translation on the NSIS repository:
-# http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
 LOCALE_NSIS_NAME=Estonian
-# See also other translatable items for the LimeWire installer:
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/installbundles/
-
-################################################################################
-# Key/value pair for whether or not bold characters should be used for this
-# locale. Must be "true" or "false" (true only for complex scripts).
-################################################################################
 DISABLE_BOLD_CHARACTERS=false
-
-################################################################################
-# Key/value pair for whether or not the layout should be adapted for right-to-
-# left scripts. Must be "true" or "false" (true only for semitic scripts).
-################################################################################
 LAYOUT_RIGHT_TO_LEFT=false
-
-################################################################################
-# Key/value pair for whether or not the tips of the day should be displayed.
-# The default is false (set to true if TOTDs exist).
-################################################################################
-# See: http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/totd/
 HAS_TIPS_OF_THE_DAY=false
 
-# See also other translatable resources for the application:
-# * translations of meta-data search items:
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/xml/display/
-# * translations of "about.html"
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/resources/
-
+################################################################################
+# TO TRANSLATORS:  DO NOT EDIT ANY OF THE ABOVE LINES.
+# Everything above this point is used internally by the LimeWire program and
+# should not be edited.  See below for translating.
+################################################################################
+################################################################################
+# How to translate:
+# 1) Find a line that begins with #?
+# 2) Remove the #?
+# 3) Translate the line
+#
+# You can use the English line directly above it as a reference.
+# All English lines begin with '#### '.
+# You should not change those lines.
+#
+# If the language is a variant of another language
+# (like Brazilian/Standard Portuguese or Traditional/Simplified Chinese), there
+# will also be a line that begins with '###$ ' showing the translation in the
+# other language, if there was a translation in the other language.
+# You should not change those lines.
+#
+# You can also correct mispelled translations, if you see one that is wrong.
 ################################################################################
 ################################################################################
 # TRANSLATIONS START BELOW.
@@ -111,7 +107,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=Taasta vaikolekud
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Taasta kõik programmi algsätted.
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
-#? OPTIONS_LEARN_MORE_LABEL=Uuri rohkem selle valiku kohta...
+OPTIONS_LEARN_MORE_LABEL=Uuri rohkem selle valiku kohta...
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -607,7 +603,7 @@ SEARCH_PUBLIC_BLOCK_STRING=Blokeeri võõrustaja
 SEARCH_RESULT_TABLE_LABEL=Tulemused
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Otsi edasi
-#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered. 
+#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered.
 #? SEARCH_RESULT_SECURE_TIP=
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=Üks valitud failidest on isekäivituv
@@ -1467,7 +1463,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Faili koostisosi ei suudeta tuvastada.
 SETUP_DIALOG_TITLE=LimeWire’I paigaldamise dialoog
 #### SETUP_LANGUAGE_TITLE=Language Options
 SETUP_LANGUAGE_TITLE=Keele valikud
-#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language: 
+#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language:
 SETUP_CHOOSE_LANGUAGE_LABEL=Vali keel:
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_LANGUAGE_LABEL=Palun valige keel mida soovite, et LimeWire kasutaks.
@@ -1497,7 +1493,7 @@ SETUP_STARTUP_LABEL=Kas sa soovid käivitada LimeWire’it automaatselt kui sa k
 SETUP_STARTUP_CHECKBOX=Käivita automaatselt
 #### SETUP_FIREWALL_TITLE=Firewall Setup
 SETUP_FIREWALL_TITLE=Tulemüüri paigaldamine
-#### SETUP_FIREWALL_LABEL=LimeWire performs best with full access to the Internet. If firewall or security warnings appear, please unblock LimeWire and choose to remember the setting. Your firewall software may look different than the below picture. 
+#### SETUP_FIREWALL_LABEL=LimeWire performs best with full access to the Internet. If firewall or security warnings appear, please unblock LimeWire and choose to remember the setting. Your firewall software may look different than the below picture.
 SETUP_FIREWALL_LABEL=LimeWire töötab kõige paremini täieliku ligipääsuga Internetile. Kui tulemüür aktiveerub või ilmnevad turvahoiatused, ära blokeeri palun LimeWire’it ning vali sätete meelespidamine. Sinu tulemüüri tarkvara võib võib välja paista erinev alltoodud pildil olevast.
 #### SETUP_SCAN_TITLE=Scan for Files
 SETUP_SCAN_TITLE=Skanneeri faile
@@ -1520,7 +1516,7 @@ SETUP_CONFIRM_TITLE=Kinnita skanneerimine
 #### SETUP_CONFIRM_LABEL=We identified the folders below as ones that you might like to share. If you would like to share one of these folders, simply check its associated checkbox. Subfolders of shared folders will also be shared.
 SETUP_CONFIRM_LABEL=Me tuvastasime järgnevad kaustad, mida arvasime, et soovite jagada. Kui sa soovid jagada üht nendest kaustadest, lihtsalt kinnita seda määratud valikkastikeses. Jagatud kausta alamkaustad jagatakse samuti.
 #### SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=The selected folders below (and their subfolders) will be shared.
-#? SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=Allpool toodud kaustad (ja nende alamkaustad) jagatakse välja.
+SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=Allpool toodud kaustad (ja nende alamkaustad) jagatakse välja.
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWirel ei õnnestunud leida ühtegi faili mida võiksid jagada. Et jätkata LimeWire konfiguratsiooniga, kliki "Jätka".
 #### SETUP_FILTER_TITLE=Content Filtering
@@ -1888,7 +1884,7 @@ CC_PUBLISHER_CC_INTRO_URL_LABEL=Kuidas see töötab?
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=of
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=
-#### INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Uploaded 
+#### INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Uploaded
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=
 #### INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=bytes of
 #? INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=
@@ -3754,26 +3750,6 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes for Multicast pushes sent from all Gnutella clients versus other LimeWires.
 #? STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=
 
-# ultrapeer-specific sent stats
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=Sent
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=Not Sent
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
-
-# leaf-specific sent stats
-#### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=Sent
-#? STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=
-#### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to leaves, using query routing tables.
-#? STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=
-#### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=Not Sent
-#? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=
-#### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
-#? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
-
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- handshaking
 ################################################################################
@@ -4456,4 +4432,3 @@ ERROR_QUERY_EMPTY=Tühi päring
 #? STATS_OOB_THROUGHPUT_TITLE=
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 #? STATS_OOB_THROUGHPUT_LABEL=
-
