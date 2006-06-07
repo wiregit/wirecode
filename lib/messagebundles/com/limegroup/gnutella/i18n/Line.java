@@ -15,10 +15,12 @@ class Line {
     private final boolean extraComment;
 
     /**
-     * TODO: does not handle all comment lines properly! TODO: does not separate
-     * key=value pairs properly! TODO: does not decode continuation lines
-     * properly (continuation lines should be already joined in a upper layer
-     * before passing data line here.)
+     * TODO: does not handle all comment lines properly!
+     * TODO: does not separate key=value pairs properly!
+     * TODO: does not decode continuation lines properly
+     *       (continuation lines should be already joined in a upper layer
+     *        before passing data line here.)
+     * TODO: ignores lines that don't have an = or #.
      * 
      * @param data
      *            a data line to parse and store.
@@ -42,15 +44,19 @@ class Line {
             braces = 0;
         } else {
             int eq = data.indexOf("=");
-            if (eq == -1)
-                throw new IllegalArgumentException("can't decode line: " + data);
-            key = data.substring(0, eq);
-            if (eq == data.length() || eq == data.length() - 1)
-                value = "";
-            else
-                value = data.substring(eq + 1);
-
-            braces = parseBraceCount(value);
+            if (eq == -1) {
+                key = null;
+                value = null;
+                braces = 0;
+            } else {
+                key = data.substring(0, eq);
+                if (eq == data.length() || eq == data.length() - 1)
+                    value = "";
+                else
+                    value = data.substring(eq + 1);
+    
+                braces = parseBraceCount(value);
+            }
         }
     }
 
