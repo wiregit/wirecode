@@ -35,21 +35,23 @@ import com.limegroup.mojito.messages.impl.FindValueRequestImpl;
 import com.limegroup.mojito.messages.impl.FindValueResponseImpl;
 import com.limegroup.mojito.messages.impl.PingRequestImpl;
 import com.limegroup.mojito.messages.impl.PingResponseImpl;
+import com.limegroup.mojito.messages.impl.StatsRequestImpl;
 import com.limegroup.mojito.messages.impl.StatsResponseImpl;
 import com.limegroup.mojito.messages.impl.StoreRequestImpl;
 import com.limegroup.mojito.messages.impl.StoreResponseImpl;
 
 /**
- * Factory class to construct DHTMessage(s)
+ * 
  */
 public class MessageHelper {
 
     private Context context;
 
-    private MessageFactory factory = new DefaultMessageFactory();
+    private MessageFactory factory;
 
     public MessageHelper(Context context) {
         this.context = context;
+        setMessageFactory(null); // Default
     }
 
     public void setMessageFactory(MessageFactory factory) {
@@ -150,7 +152,7 @@ public class MessageHelper {
     }
 
     /**
-     * 
+     * The default implementation of the MessafeFactory
      */
     private static class DefaultMessageFactory implements MessageFactory {
 
@@ -186,8 +188,7 @@ public class MessageHelper {
 
         public StatsRequest createStatsRequest(int vendor, int version, 
                 ContactNode node, KUID messageId, int stats) {
-            //return new StatsRequestImpl(vendor, version, node, messageId, stats);
-            return null;
+            return new StatsRequestImpl(vendor, version, node, messageId, stats);
         }
 
         public StatsResponse createStatsResponse(int vendor, int version, 

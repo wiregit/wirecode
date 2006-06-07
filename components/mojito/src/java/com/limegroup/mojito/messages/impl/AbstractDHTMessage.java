@@ -70,6 +70,10 @@ public abstract class AbstractDHTMessage implements DHTMessage {
             throw new IllegalArgumentException("MessageID is of wrong type: " + messageId);
         }
 
+        if (version < 0 || version > 0xFFFF) {
+            throw new IllegalArgumentException("Version must be between 0x00 and 0xFFFF: " + version);
+        }
+        
         this.opcode = opcode;
         this.vendor = vendor;
         this.version = version;

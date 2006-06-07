@@ -47,6 +47,7 @@ import com.limegroup.mojito.event.LookupAdapter;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
@@ -171,6 +172,10 @@ public class MojitoDHT {
     
     public void setThreadFactory(ThreadFactory threadFactory) {
         context.setThreadFactory(threadFactory);
+    }
+    
+    public void setMessageFactory(MessageFactory messageFactory) {
+        context.setMessageFactory(messageFactory);
     }
     
     public void addPingListener(PingListener listener) {

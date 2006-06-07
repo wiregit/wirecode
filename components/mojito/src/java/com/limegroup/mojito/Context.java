@@ -310,6 +310,14 @@ public class Context {
         return messageHelper;
     }
     
+    public synchronized void setMessageFactory(MessageFactory factory) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageFactory while DHT is running");
+        }
+        
+        messageHelper.setMessageFactory(factory);
+    }
+    
     public MessageFactory getMessageFactory() {
         return messageHelper.getMessageFactory();
     }

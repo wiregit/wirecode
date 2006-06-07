@@ -21,8 +21,6 @@ package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

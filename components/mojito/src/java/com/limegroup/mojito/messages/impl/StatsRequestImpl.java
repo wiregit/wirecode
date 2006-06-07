@@ -32,21 +32,13 @@ public class StatsRequestImpl extends AbstractRequestMessage
     private int request;
 
     public StatsRequestImpl(int vendor, int version,
-            ContactNode node, KUID messageId, byte[] signature, int request) {
-        super(STATS_REQUEST, vendor, version, node, messageId, signature);
+            ContactNode node, KUID messageId, int request) {
+        super(STATS_REQUEST, vendor, version, node, messageId);
 
         this.request = request;
     }
 
     public int getRequest() {
         return request;
-    }
-
-    public boolean isDBRequest() {
-        return (request & DB) == DB;
-    }
-
-    public boolean isRTRequest() {
-        return (request & RT) == RT;
     }
 }

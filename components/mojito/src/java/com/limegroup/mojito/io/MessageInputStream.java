@@ -236,9 +236,8 @@ public class MessageInputStream extends DataInputStream {
     
     private DHTMessage readStatsRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        byte[] signature = readSignature();
         int request = readInt();
-        return new StatsRequestImpl(vendor, version, node, messageId, signature, request);
+        return new StatsRequestImpl(vendor, version, node, messageId, request);
     }
     
     public DHTMessage readMessage() throws IOException {
