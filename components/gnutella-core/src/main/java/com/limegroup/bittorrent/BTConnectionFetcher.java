@@ -153,7 +153,7 @@ public class BTConnectionFetcher  {
 	}
 	
 	public void handshakerDone(BTHandshaker shaker) {
-		if (fetchers.remove(shaker))
-			fetch();
+		fetchers.remove(shaker);
+		fetch();
 	}
 }

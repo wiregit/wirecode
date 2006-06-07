@@ -166,8 +166,8 @@ public class VerifyingFolder {
 		if (stored != null)
 			throw stored;
 		synchronized(this) {
-			requestedRanges.removeInterval(in);
 			pendingRanges.addInterval(in);
+			requestedRanges.removeInterval(in);
 		}
 		QUEUE.invokeLater(new WriteJob(in, data),_info.getURN());
 	}
@@ -189,20 +189,16 @@ public class VerifyingFolder {
 			if (storedException != null)
 				return;
 			
-			boolean freedPending = false;
 			try {
 				writeBlockImpl(in, data);
-				freedPending = true;
 			} catch (IOException iox) {
 				if (isOpen()) {
 					storedException = iox;
 					notifyDiskProblem();
 				}
 			} finally {
-				if (!freedPending) {
-					synchronized(VerifyingFolder.this) {
-						pendingRanges.removeInterval(in);
-					}
+				synchronized(VerifyingFolder.this) {
+					pendingRanges.removeInterval(in);
 				}
 			}
 		}
@@ -528,6 +524,7 @@ public class VerifyingFolder {
 				}
 			}
 			_fos = null;
+			pendingRanges.clear();
 		}
 		torrent = null;
 		// kill all jobs for this torrent
@@ -657,8 +654,14 @@ public class VerifyingFolder {
 			LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
 		
 		// see which pieces we don't have
-		BitSet clone = (BitSet)bs.clone();
-		clone.andNot(verifiedBlocks);
+		BitSet remote;
+		if (bs.cardinality() == _info.getNumBlocks()) {
+			remote = (BitSet) verifiedBlocks.clone();
+			remote.flip(0, _info.getNumBlocks());
+		} else {
+			remote = (BitSet) bs.clone();
+			remote.andNot(verifiedBlocks);
+		}
 		
 		// if possible, do not request any chunks which are currently
 		// being requested
@@ -669,14 +672,14 @@ public class VerifyingFolder {
 		});
 		while(iter.hasNext()) {
 			Integer element = (Integer) iter.next();
-			clone.clear(element.intValue());
+			remote.clear(element.intValue());
 		}
 		
-		if (clone.cardinality() > 0) {
+		if (remote.cardinality() > 0) {
 			// the remote has new chunks we can get
 			int selected = -1;
 			int current = 1;
-			for (int i = clone.nextSetBit(0); i >= 0; i = clone.nextSetBit(i+1)) {
+			for (int i = remote.nextSetBit(0); i >= 0; i = remote.nextSetBit(i+1)) {
 				if (Math.random() < 1f/current++)
 					selected = i;
 			}
@@ -690,13 +693,11 @@ public class VerifyingFolder {
 		} 
 		
 		// prepare a list of partial or requested blocks the remote host has
-		Set available = new LinkedHashSet(partialBlocks.size() + requestedRanges.size());
-		available.addAll(partialBlocks.keySet());
-		available.addAll(requestedRanges.keySet());
+		Set available = new LinkedHashSet(requestedRanges.keySet());
 		for (Iterator iterator = available.iterator(); iterator.hasNext();) {
 			Integer block = (Integer) iterator.next();
 			// if the other side doesn't have this block, its not an option
-			if (!bs.get(block.intValue())) 
+			if (!bs.get(block.intValue()) || verifiedBlocks.get(block.intValue())) 
 				iterator.remove();
 		}
 		

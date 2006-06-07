@@ -47,7 +47,7 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * the number of requests to send to any host without waiting for reply
 	 */
-	private static final int MAX_REQUESTS = 4;
+	private static final int MAX_REQUESTS = 10;
 
 	/**
 	 * connections that die after less than a minute won't be retried
@@ -337,9 +337,10 @@ public class BTConnection implements UploadSlotListener {
 		if (!_isChoked) {
 			_writer.enqueue(BTChoke.createMessage());
 			_isChoked = true;
-		}
+		} 
 	}
 
+	
 	/**
 	 * Unchokes the connection
 	 */
@@ -349,6 +350,13 @@ public class BTConnection implements UploadSlotListener {
 			setUnchokeRound(now);
 			_isChoked = false;
 		}
+	}
+	
+	/**
+	 * sends a keepalive
+	 */
+	void sendKeepAlive() {
+		_writer.sendKeepAlive();
 	}
 	
 	/**
@@ -368,7 +376,7 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * Informs the remote that we are interested in downloading. 
 	 */
-	void sendInterested() {
+	private void sendInterested() {
 		if (!_isInteresting) {
 			LOG.debug("sending interested message");
 			_writer.enqueue(BTInterested.createMessage());
@@ -403,7 +411,7 @@ public class BTConnection implements UploadSlotListener {
 
 		// we should indicate that we are not interested anymore, so we are
 		// not unchoked when we do not want to request anything.
-		if (_info.getVerifyingFolder().containsAnyWeMiss(_availableRanges)) {
+		if (!_info.getVerifyingFolder().containsAnyWeMiss(_availableRanges)) {
 			sendNotInterested();
 			return;
 		}
@@ -584,8 +592,7 @@ public class BTConnection implements UploadSlotListener {
 		for (Iterator iter = random.iterator(); _requesting.size() < MAX_REQUESTS
 		&& iter.hasNext() && !_isChoking;) {
 			BTInterval toReq = (BTInterval) iter.next();
-			if (!_writer.enqueue(new BTRequest(toReq)))
-				return;
+			_writer.enqueue(new BTRequest(toReq));
 			_toRequest.remove(toReq);
 			_requesting.add(toReq);
 		}
@@ -595,6 +602,8 @@ public class BTConnection implements UploadSlotListener {
 	 * @param message the incoming message to process.
 	 */
 	public void processMessage(BTMessage message) {
+		if (LOG.isDebugEnabled())
+			LOG.debug("handling message "+message);
 		switch (message.getType()) {
 		case BTMessage.CHOKE:
 			_isChoking = true;
@@ -716,7 +725,21 @@ public class BTConnection implements UploadSlotListener {
 						+ _requesting + " " + _toRequest);
 			return false;
 		}
+		if (LOG.isDebugEnabled())
+			LOG.debug(this + " starting to receive piece " + interval);
 		return true;
+	}
+	
+	void finishReceivingPiece() {
+		// get new ranges to request if necessary
+		if (!_torrent.isComplete()
+				&& _toRequest.size() + _requesting.size() < MAX_REQUESTS)
+			_torrent.request(this);
+		else if (LOG.isDebugEnabled())
+			LOG.debug("not requesting new ranges from "+this+ "\n because toRequest "+_toRequest+"\n and requesting "+_requesting);
+		
+		// send next request upon receiving piece.
+		enqueueRequests();
 	}
 
 	/**
@@ -744,14 +767,6 @@ public class BTConnection implements UploadSlotListener {
 			_torrent.diskExceptionHappened();
 			return;
 		}
-		
-		// get new ranges to request if necessary
-		if (!_torrent.isComplete()
-				&& _toRequest.size() + _requesting.size() < MAX_REQUESTS)
-			_torrent.request(this);
-		
-		// send next request upon receiving piece.
-		enqueueRequests();
 	}
 
 	/**

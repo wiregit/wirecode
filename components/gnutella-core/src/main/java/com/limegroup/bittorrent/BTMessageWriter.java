@@ -21,17 +21,18 @@ public class BTMessageWriter implements
 
 	private static final Log LOG = LogFactory.getLog(BTMessageWriter.class);
 
-	// maximum number of messages allowed in queue
-	// TODO: add a separate limit for Piece messages so we don't
-	// buffer too much data
-	private static final int MAX_QUEUE_SIZE = 10;
-
+	/** A keepalive with 4x0 bytes */
+	private static final ByteBuffer KEEP_ALIVE = ByteBuffer.allocate(4).asReadOnlyBuffer();
+	
+	/** keepAlive for this writer */
+	private final ByteBuffer myKeepAlive = KEEP_ALIVE.duplicate();
+	
 	// InterestWriteChannel to write to.
 	private InterestWriteChannel _channel;
 
 	// ByteBuffer storing the message currently being written
 	private final ByteBuffer[] _out = new ByteBuffer[2];
-
+	
 	/** 
 	 * the internal message queue
 	 */
@@ -47,7 +48,7 @@ public class BTMessageWriter implements
 	 * The current message being sent, if any.
 	 */
 	private BTMessage currentMessage;
-
+	
 	/**
 	 * Constructor
 	 */
@@ -68,6 +69,14 @@ public class BTMessageWriter implements
 			LOG.debug("entering handleWrite call to "+_connection);
 		int written = 0;
 		while(true) {
+			if (myKeepAlive.hasRemaining()) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("sending a keepalive to "+_connection);
+				written += _channel.write(myKeepAlive);
+				if (myKeepAlive.hasRemaining()) // need to finish keepalive first.
+					return true;
+			}
+			
 			if (_out[1] == null || _out[1].remaining() == 0) {
 				currentMessage = null;
 				
@@ -101,6 +110,13 @@ public class BTMessageWriter implements
 		return true;
 	}
 
+	public void sendKeepAlive() {
+		if (_queue.isEmpty()) {
+			myKeepAlive.clear();
+			_channel.interest(this, true);
+		}
+	}
+	
 	/**
 	 * Enqueues another message for the remote host
 	 * 
@@ -108,19 +124,21 @@ public class BTMessageWriter implements
 	 *            the BTMessage to enqueue
 	 * @return true if the message was enqueued, false if not.
 	 */
-	public boolean enqueue(BTMessage m) {
+	public void enqueue(BTMessage m) {
 		
-		if (_queue.size() > MAX_QUEUE_SIZE)
-			return false;
 		_queue.addLast(m);
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("enqueing message of type " + m.getType() + " to "
 					+ _connection.toString() + " : " + m.toString());
 		
+		// if there was a keepalive waiting to be sent and none of it 
+		// was written get rid of it
+		if (myKeepAlive.remaining() == 4)
+			myKeepAlive.limit(0);
+		
 		if (_channel != null)
 			_channel.interest(this, true);
-		return true;
 	}
 	
 	/**

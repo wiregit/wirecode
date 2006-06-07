@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIODispatcher;
@@ -36,6 +35,11 @@ public class ManagedTorrent {
 	 */
 	private static final Throttle UPLOAD_THROTTLE = new NBThrottle(true,
 			UploadSettings.UPLOAD_SPEED.getValue() * 1000);
+	
+	/**
+	 * How often to send keepalives.  2 minutes as suggested by spec.
+	 */
+	private static final int KEEP_ALIVE_INTERVAL = 2 * 60 * 1000; 
 	
 	/**
 	 * States of a torrent download.  Some of them are functionally equivalent
@@ -109,6 +113,11 @@ public class ManagedTorrent {
 	 * A runnable that takes care of scheduled periodic rechoking
 	 */
 	private Choker choker;
+	
+	/**
+	 * A runnable that sends periodic keepalives.
+	 */
+	private KeepAliveSender keepAliveSender;
 	
 	/** 
 	 * The current state of this torrent.
@@ -248,6 +257,8 @@ public class ManagedTorrent {
 		
 		// start the choking / unchoking of connections
 		choker.scheduleRechoke();
+		
+		keepAliveSender = new KeepAliveSender();
 	}
 
 	/**
@@ -293,6 +304,8 @@ public class ManagedTorrent {
 		
 		choker.stop();
 		trackerManager.announceStop();
+		if (keepAliveSender != null)
+			keepAliveSender.cancel();
 		
 		// close the files and write the snapshot
 		Runnable saver = new Runnable() {
@@ -537,6 +550,9 @@ public class ManagedTorrent {
 	 * @return true if we need any more connections
 	 */
 	boolean needsMoreConnections() {
+		// if we are complete, do not open any sockets - the active torrents will need them.
+		if (isComplete() && RouterService.getTorrentManager().hasNonSeeding())
+			return false;
 		if (RouterService.acceptedIncomingConnection())
 			return _connections.size() < BittorrentSettings.TORRENT_MAX_CONNECTIONS
 					.getValue() * 4 / 5;
@@ -912,6 +928,39 @@ public class ManagedTorrent {
 			}
 		}
 		return ret;
+	}
+	
+	private class KeepAliveSender implements Runnable {
+		/** Whether this sender is cancelled */
+		private volatile boolean cancelled;
+		
+		public KeepAliveSender() {
+			scheduleKeepAlive();
+		}
+		
+		private void scheduleKeepAlive() {
+			RouterService.schedule(this, KEEP_ALIVE_INTERVAL, 0 );
+		}
+		
+		void cancel() {
+			cancelled = true;
+		}
+		
+		public void run() {
+			if (cancelled)
+				return;
+			
+			networkInvoker.invokeLater(new Runnable() {
+				public void run() {
+					for (Iterator iter = _connections.iterator(); iter.hasNext();) {
+						BTConnection con = (BTConnection) iter.next();
+						con.sendKeepAlive();
+					}
+				}
+			});
+			
+			scheduleKeepAlive();
+		}
 	}
 	
 	private static class NIODispatcherThreadPool implements ThreadPool {

@@ -133,7 +133,6 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 	public synchronized void torrentStopped(ManagedTorrent t) {
 		_active.remove(t);
 		_seeding.remove(t);
-		
 	}
 	
 	public synchronized boolean allowNewTorrent() {
@@ -142,5 +141,9 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 	
 	public synchronized int getNumActiveTorrents() {
 		return _active.size();
+	}
+	
+	synchronized boolean hasNonSeeding() {
+		return _active.size() > _seeding.size();
 	}
 }
