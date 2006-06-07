@@ -1360,13 +1360,15 @@ public class DownloadWorker {
     }
     
     private ConnectionStatus handleQueued(int position, int pollTime) {
-        if(_manager.getActiveWorkers().isEmpty()) {
-            if(_manager.isCancelled() || _manager.isPaused() ||  _interrupted)
-                return ConnectionStatus.getNoData(); // we were signalled to stop.
-            _manager.setState(ManagedDownloader.REMOTE_QUEUED);
+        synchronized(_manager) {
+            if(_manager.getActiveWorkers().isEmpty()) {
+                if(_manager.isCancelled() || _manager.isPaused() ||  _interrupted)
+                    return ConnectionStatus.getNoData(); // we were signalled to stop.
+                _manager.setState(ManagedDownloader.REMOTE_QUEUED);
+            }
+            _rfd.resetFailedCount();                
+            return ConnectionStatus.getQueued(position, pollTime);
         }
-        _rfd.resetFailedCount();                
-        return ConnectionStatus.getQueued(position, pollTime);
     }
     
     private ConnectionStatus handleProblemReadingHeader() {
@@ -1389,8 +1391,9 @@ public class DownloadWorker {
      * interrupts this downloader.
      */
     void interrupt() {
+        _interrupted = true;
+        
         synchronized(_currentState) {
-            _interrupted = true;
             if(_currentState.getCurrentState() == DownloadState.QUEUED)
                 finishHttpLoop();
         }
@@ -1398,18 +1401,21 @@ public class DownloadWorker {
         if(LOG.isDebugEnabled())
             LOG.debug("Stopping while state is: " + _currentState + ", this: " + toString());
         
-        if (_downloader != null)
+        // If a downloader is set up, we don't need to deal
+        // with the connector, since connecting has finished.
+        if (_downloader != null) {
             _downloader.stop();
-        
-        //Ensure that the ConnectObserver is cleaned up.
-        DirectConnector observer = _connectObserver;
-        if(observer != null) {
-            // Make sure it's not queued with Sockets.
-            if(Sockets.removeConnectObserver(_connectObserver))
-                _manager.workerFinished(this);
-            // Make sure it immediately stops trying to connect.
-            else if(observer.getSocket() != null)
-                IOUtils.close(observer.getSocket());
+        } else {
+            //Ensure that the ConnectObserver is cleaned up.
+            DirectConnector observer = _connectObserver;
+            if(observer != null) {
+                // Make sure it's not queued with Sockets.
+                if(Sockets.removeConnectObserver(_connectObserver))
+                    _manager.workerFinished(this);
+                // Make sure it immediately stops trying to connect.
+                else if(observer.getSocket() != null)
+                    IOUtils.close(observer.getSocket());
+            }
         }
     }
 

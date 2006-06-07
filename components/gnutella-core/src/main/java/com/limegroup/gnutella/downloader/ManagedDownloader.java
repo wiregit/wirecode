@@ -320,7 +320,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Stores the queued threads and the corresponding queue position
      * LOCKING: copy on write on this
      */
-    private volatile Map /*DownloadWorker -> Integer*/ queuedWorkers;
+    private volatile Map /*DownloadWorker -> Integer*/ _queuedWorkers;
 
     /**
      * Set of RFDs where we store rfds we are currently connected to or
@@ -646,7 +646,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         currentRFDs = new HashSet();
         _activeWorkers=new LinkedList();
         _workers=new ArrayList();
-        queuedWorkers = new HashMap();
+        _queuedWorkers = new HashMap();
 		chatList=new DownloadChatList();
         browseList=new DownloadBrowseHostList();
         stopped=false;
@@ -939,7 +939,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         default:
             Assert.that(false, "invalid state: " + getState() +
                              ", workers: " + _workers.size() + 
-                             ", _activeWorkers: " + _activeWorkers.size());
+                             ", _activeWorkers: " + _activeWorkers.size() +
+                             ", _queuedWorkers: " + _queuedWorkers.size());
         }
     }   
     
@@ -2482,7 +2483,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 if(LOG.isDebugEnabled())
                     LOG.debug("MANAGER: kicking off workers, activeWorkers: " + 
                             _activeWorkers.size() + ", allWorkers: " + _workers.size() +
-                            ", queuedWorkers: " + queuedWorkers.size() + ", swarm cap: " + getSwarmCapacity()
+                            ", queuedWorkers: " + _queuedWorkers.size() + ", swarm cap: " + getSwarmCapacity()
                               );
                 //+ ", allActive: " + _activeWorkers.toString());
                 
@@ -2538,7 +2539,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     private boolean shouldStartWorker() {
         return (commonOutFile.hasFreeBlocksToAssign() > 0 || victimsExist()) &&
-               ((_workers.size() - queuedWorkers.size()) < getSwarmCapacity()) &&
+               ((_workers.size() - _queuedWorkers.size()) < getSwarmCapacity()) &&
                ranker.hasMore();
     }
     
@@ -2608,7 +2609,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
 
     public synchronized int getQueuedHostCount() {
-        return queuedWorkers.size();
+        return _queuedWorkers.size();
     }
 
     int getSwarmCapacity() {
@@ -2885,7 +2886,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             synchronized(this) {
                 Map m = new HashMap(getQueuedWorkers());
                 m.remove(unQueued);
-                queuedWorkers = Collections.unmodifiableMap(m);
+                _queuedWorkers = Collections.unmodifiableMap(m);
             }
         }
     }
@@ -2893,7 +2894,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private synchronized void addQueuedWorker(DownloadWorker queued, int position) {
         if (LOG.isDebugEnabled())
             LOG.debug("adding queued worker " + queued +" at position "+position+
-                    " current queued workers:\n"+queuedWorkers);
+                    " current queued workers:\n"+_queuedWorkers);
         
         if ( position < queuePosition ) {
             queuePosition = position;
@@ -2901,11 +2902,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
         Map m = new HashMap(getQueuedWorkers());
         m.put(queued,new Integer(position));
-        queuedWorkers = Collections.unmodifiableMap(m);
+        _queuedWorkers = Collections.unmodifiableMap(m);
     }
     
     Map getQueuedWorkers() {
-        return queuedWorkers;
+        return _queuedWorkers;
     }
     
     int getWorkerQueuePosition(DownloadWorker worker) {
@@ -2939,7 +2940,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         } 
 
         // Already Queued?...
-        if(queuedWorkers.containsKey(worker) && queuePos > -1) {
+        if(_queuedWorkers.containsKey(worker) && queuePos > -1) {
             // update position
             addQueuedWorker(worker,queuePos);
             return true;
@@ -2948,7 +2949,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (numDownloaders >= swarmCapacity) {
             // Search for the queued thread with a slot worse than ours.
             int highest = queuePos; // -1 if we aren't queued.            
-            for(Iterator i = queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
+            for(Iterator i = _queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
                 Map.Entry current = (Map.Entry)i.next();
                 int currQueue = ((Integer)current.getValue()).intValue();
                 if(currQueue > highest) {
