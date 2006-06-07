@@ -258,13 +258,14 @@ public class VerifyingFile {
     public boolean writeBlock(long currPos, int start, int length, byte[] buf) {
         boolean canWrite;
         synchronized(CACHE) {
-            canWrite = !DELAYED.isEmpty();
+            canWrite = DELAYED.isEmpty();
         }
         
-        if(canWrite)
+        if(canWrite) {
             return writeBlockImpl(currPos, start, length, buf, true);
-        else // do not try to write if something else is waiting.
+        } else { // do not try to write if something else is waiting.
             return false;
+        }
     }
 
     /**
@@ -867,14 +868,17 @@ public class VerifyingFile {
             DelayedWrite dw;
             
             synchronized(CACHE) {
-                if(DELAYED.isEmpty())
+                if(DELAYED.isEmpty()) {
+                    LOG.debug("Nothing delayed to run.");
                     return;
+                }
                 dw = (DelayedWrite)DELAYED.get(0);
             }
 
             // write & notify outside of lock
-            if(!dw.write())
+            if(!dw.write()) {
                 throw new IllegalStateException("couldn't write!");
+            }
             
             synchronized(CACHE) {
                 DELAYED.remove(0);
