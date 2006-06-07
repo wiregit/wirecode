@@ -31,7 +31,7 @@ import com.limegroup.mojito.messages.DHTMessage;
 
 public final class InputOutputUtils {
 
-    private static final boolean COMPRESS = true;
+    private static final boolean COMPRESS = false;
     
     private InputOutputUtils() {
     }

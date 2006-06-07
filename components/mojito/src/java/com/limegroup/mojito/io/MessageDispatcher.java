@@ -45,18 +45,18 @@ import com.limegroup.mojito.handler.request.StatsRequestHandler;
 import com.limegroup.mojito.handler.request.StoreRequestHandler;
 import com.limegroup.mojito.io.Tag.Receipt;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.FindNodeRequest;
+import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.FindValueRequest;
+import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.request.FindNodeRequest;
-import com.limegroup.mojito.messages.request.FindValueRequest;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
-import com.limegroup.mojito.messages.response.PingResponse;
-import com.limegroup.mojito.messages.response.StatsResponse;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.messages.StatsResponse;
+import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 
@@ -277,6 +277,16 @@ public abstract class MessageDispatcher implements Runnable {
     }
     
     /**
+     * Checks if we have ever sent a Request to the Node that
+     * sent us the Response.
+     */
+    private boolean verifyQueryKey(ResponseMessage response) {
+        KUID messageId = response.getMessageID();
+        ContactNode node = response.getContactNode();
+        return messageId.verifyQueryKey(node.getSocketAddress());
+    }
+    
+    /**
      * Handles a DHTMessage as read from Network
      */
     protected void handleMessage(DHTMessage message) throws IOException {
@@ -308,7 +318,7 @@ public abstract class MessageDispatcher implements Runnable {
             // Check the QueryKey in the message ID to figure
             // out whether or not we have ever sent a Request
             // to that Host!
-            if (!response.verifyQueryKey()) {
+            if (!verifyQueryKey(response)) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(response.getContactNode() + " sent us an unrequested response!");
                 }

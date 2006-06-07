@@ -31,18 +31,18 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.NoOpResponseHandler;
 import com.limegroup.mojito.handler.ResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.FindNodeRequest;
+import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.FindValueRequest;
+import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.request.FindNodeRequest;
-import com.limegroup.mojito.messages.request.FindValueRequest;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
-import com.limegroup.mojito.messages.response.PingResponse;
-import com.limegroup.mojito.messages.response.StatsResponse;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.messages.StatsResponse;
+import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.settings.NetworkSettings;
 
 /**

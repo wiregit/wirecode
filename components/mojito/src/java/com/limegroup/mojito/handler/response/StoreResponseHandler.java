@@ -37,8 +37,8 @@ import com.limegroup.mojito.event.StoreResponseListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.messages.StoreResponse;
 
 /**
  * The StoreResponseHandler handles storing of one or more 
@@ -90,7 +90,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         if (index < keyValues.size() && !isStopped()) {
             KeyValue keyValue = (KeyValue)keyValues.get(index);
             
-            StoreRequest request = context.getMessageFactory()
+            StoreRequest request = context.getMessageHelper()
                 .createStoreRequest(node.getSocketAddress(), queryKey, keyValue);
             
             context.getMessageDispatcher().send(node, request, this);

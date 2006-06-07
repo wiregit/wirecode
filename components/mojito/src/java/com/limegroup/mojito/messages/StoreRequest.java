@@ -6,29 +6,25 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.messages.response;
 
-import java.util.Collection;
+package com.limegroup.mojito.messages;
 
-import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.KUID;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.db.KeyValue;
 
+public interface StoreRequest extends RequestMessage {
 
-public class FindValueResponse extends LookupResponse {
-    
-    public FindValueResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, Collection values) {
-        super(vendor, version, node, messageId, values);
-    }
+    public QueryKey getQueryKey();
+
+    public KeyValue getKeyValue();
 }

@@ -31,11 +31,11 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
+import com.limegroup.mojito.messages.FindNodeRequest;
+import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.request.FindNodeRequest;
-import com.limegroup.mojito.messages.request.LookupRequest;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.CollectionUtils;
 
@@ -106,7 +106,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         
         context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
         
-        FindNodeResponse response = context.getMessageFactory()
+        FindNodeResponse response = context.getMessageHelper()
                     .createFindNodeResponse(request, queryKey, bucketList);
         
         context.getMessageDispatcher().send(request.getContactNode(), response);
@@ -122,7 +122,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
                 LOG.trace("Hit! " + lookup + " = {" + CollectionUtils.toString(values) + "}");
             }
             
-            FindValueResponse response = context.getMessageFactory()
+            FindValueResponse response = context.getMessageHelper()
                         .createFindValueResponse(request, values);
             context.getMessageDispatcher().send(request.getContactNode(), response);
         } else {

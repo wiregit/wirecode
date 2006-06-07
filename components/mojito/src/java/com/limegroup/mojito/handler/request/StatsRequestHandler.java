@@ -30,8 +30,8 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.response.StatsResponse;
+import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -50,10 +50,10 @@ public class StatsRequestHandler extends AbstractRequestHandler {
 
     public void handleRequest(RequestMessage message) throws IOException {
         
-        StatsRequest req = (StatsRequest) message;
+        StatsRequest request = (StatsRequest) message;
         
-        try {
-            if (!req.verify(context.getMasterKey(), 
+        /*try {
+            if (!request.verify(context.getMasterKey(), 
                     message.getContactNode().getSocketAddress(), 
                     context.getSocketAddress())) {
                 if (LOG.isWarnEnabled()) {
@@ -67,7 +67,7 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         } catch (SignatureException e) {
             LOG.error("SignatureException", e);
             return;
-        }
+        }*/
         
         if (LOG.isTraceEnabled()) {
             LOG.trace(message.getContactNode() + " sent us a Stats Request");
@@ -76,15 +76,25 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         networkStats.STATS_REQUEST.incrementStat();
         StringWriter writer = new StringWriter();
         
-        if(req.isDBRequest()) {
-            context.getDHTStats().dumpDataBase(writer);
-        } else if (req.isRTRequest()){
-            context.getDHTStats().dumpRouteTable(writer);
-        } else {
-            context.getDHTStats().dumpStats(writer, false);
+        switch(request.getRequest()) {
+            case StatsRequest.STATS:
+                context.getDHTStats().dumpStats(writer, false);
+                break;
+            case StatsRequest.DB:
+                context.getDHTStats().dumpDataBase(writer);
+                break;
+            case StatsRequest.RT:
+                context.getDHTStats().dumpRouteTable(writer);
+                break;
+            default:
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Unknown stats request: " + request.getRequest());
+                }
+                return;
+                
         }
         
-        StatsResponse response = context.getMessageFactory()
+        StatsResponse response = context.getMessageHelper()
             .createStatsResponse(message, writer.toString());
         
         context.getMessageDispatcher().send(message.getContactNode(), response);

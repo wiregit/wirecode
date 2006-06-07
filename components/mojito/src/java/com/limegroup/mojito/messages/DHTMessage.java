@@ -19,13 +19,15 @@
  
 package com.limegroup.mojito.messages;
 
+import java.net.SocketAddress;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
 /**
  * This is an abstract base class for all DHT messages.
  */
-public abstract class DHTMessage {
+public interface DHTMessage {
     
     public static final int PING_REQUEST = 0x01;
     public static final int PING_RESPONSE = 0x02;
@@ -39,61 +41,25 @@ public abstract class DHTMessage {
     public static final int FIND_VALUE_REQUEST = 0x07;
     public static final int FIND_VALUE_RESPONSE = 0x08;
     
-    public static final int STATS_REQUEST = 0x0A;
-    public static final int STATS_RESPONSE = 0x0B;
+    public static final int STATS_REQUEST = 0x09;
+    public static final int STATS_RESPONSE = 0x0A;
     
-    private int vendor;
-    private int version;
+    /** Returns the opcode (type) of the Message */
+    public int getOpCode();
+    
+    /** Returns the Vendor of the Message */
+    public int getVendor();
 
-    private ContactNode contactNode;
-    private KUID messageId;
+    /** Returns the Version of the Message */
+    public int getVersion();
+
+    /** Returns the Message ID of the Message */
+    public KUID getMessageID();
+
+    /** Returns the sender of this Message */
+    public ContactNode getContactNode();
     
-    private byte[] signature;
+    public KUID getSourceNodeID();
     
-    public DHTMessage(int vendor, int version, 
-            ContactNode contactNode, KUID messageId) {
-        this(vendor, version, contactNode, messageId, null);
-    }
-    
-    public DHTMessage(int vendor, int version, 
-            ContactNode contactNode, KUID messageId, byte[] signature) {
-        
-        if (contactNode == null) {
-            throw new NullPointerException("ContactNode is null");
-        }
-        
-        if (messageId == null) {
-            throw new NullPointerException("MessageID is null");
-        }
-        
-        if (!messageId.isMessageID()) {
-            throw new IllegalArgumentException("MessageID is of wrong type: " + messageId);
-        }
-        
-        this.vendor = vendor;
-        this.version = version;
-        this.contactNode = contactNode;
-        this.messageId = messageId;
-        this.signature = signature;
-    }
-    
-    public int getVendor() {
-        return vendor;
-    }
-    
-    public int getVersion() {
-        return version;
-    }
-    
-    public KUID getMessageID() {
-        return messageId;
-    }
-    
-    public ContactNode getContactNode() {
-        return contactNode;
-    }
-    
-    public byte[] getSignature() {
-        return signature;
-    }
+    public SocketAddress getSourceAddress();
 }

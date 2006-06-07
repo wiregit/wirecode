@@ -42,10 +42,10 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
 import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
@@ -336,7 +336,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             return;
         }
         
-        Collection nodes = response.getValues();
+        Collection nodes = response.getNodes();
         for(Iterator it = nodes.iterator(); it.hasNext(); ) {
             ContactNode node = (ContactNode)it.next();
             
@@ -509,9 +509,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     
     private RequestMessage createRequest(SocketAddress address) {
         if (isValueLookup()) {
-            return context.getMessageFactory().createFindValueRequest(address, lookup);
+            return context.getMessageHelper().createFindValueRequest(address, lookup);
         } else {
-            return context.getMessageFactory().createFindNodeRequest(address, lookup);
+            return context.getMessageHelper().createFindNodeRequest(address, lookup);
         }
     }
     

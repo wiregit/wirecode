@@ -38,9 +38,9 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.Database.KeyValueBag;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
@@ -171,7 +171,7 @@ public class DefaultMessageHandler extends MessageHandler
                                 keyValuesToForward);
                     } else {
                         ResponseHandler handler = new GetQueryKeyHandler(keyValuesToForward);
-                        RequestMessage request = context.getMessageFactory()
+                        RequestMessage request = context.getMessageHelper()
                             .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
                         
                         context.getMessageDispatcher().send(node, request, handler);
@@ -198,8 +198,8 @@ public class DefaultMessageHandler extends MessageHandler
             
             FindNodeResponse response = (FindNodeResponse)message;
             
-            Collection values = response.getValues();
-            for(Iterator it = values.iterator(); it.hasNext(); ) {
+            Collection nodes = response.getNodes();
+            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
                 // We did a FIND_NODE lookup use the info
                 // to fill our routing table
                 ContactNode node = (ContactNode)it.next();

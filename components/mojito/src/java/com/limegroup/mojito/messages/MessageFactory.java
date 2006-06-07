@@ -16,110 +16,49 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.messages;
 
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.List;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.messages.request.FindNodeRequest;
-import com.limegroup.mojito.messages.request.FindValueRequest;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
-import com.limegroup.mojito.messages.response.PingResponse;
-import com.limegroup.mojito.messages.response.StatsResponse;
-import com.limegroup.mojito.messages.response.StoreResponse;
 
 /**
  * Factory class to construct DHTMessage(s)
  */
-public class MessageFactory {
-    
-    protected final Context context;
-    
-    public MessageFactory(Context context) {
-        this.context = context;
-    }
-    
-    private int getVendor() {
-        return context.getVendor();
-    }
-    
-    private int getVersion() {
-        return context.getVersion();
-    }
-    
-    private ContactNode getLocalNode() {
-        return context.getLocalNode();
-    }
-    
-    private KUID createMessageID(SocketAddress dst) {
-        if (NetworkUtils.isValidSocketAddress(dst)) {
-            return KUID.createRandomMessageID(dst);
-        }
-        return KUID.MIN_MESSAGE_ID;
-    }
-    
-    private int getEstimatedSize() {
-        return context.size();
-    }
-    
-    public PingRequest createPingRequest(SocketAddress dst) {
-        return new PingRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst));
-    }
-    
-    public PingResponse createPingResponse(RequestMessage request, SocketAddress externalAddress) {
-        if (context.getSocketAddress().equals(externalAddress)) {
-            throw new IllegalArgumentException("Cannot tell other Node that its external address is the same as yours!");
-        }
-        return new PingResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), externalAddress, getEstimatedSize());
-    }
-    
-    public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookup) {
-        if (!lookup.isNodeID()) {
-            throw new IllegalArgumentException();
-        }
-        return new FindNodeRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), lookup);
-    }
-    
-    public FindNodeResponse createFindNodeResponse(RequestMessage request, QueryKey queryKey, List nodes) {
-        return new FindNodeResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), queryKey, nodes);
-    }
-    
-    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookup) {
-        if (!lookup.isValueID()) {
-            throw new IllegalArgumentException();
-        }
-        return new FindValueRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), lookup);
-    }
-    
-    public FindValueResponse createFindValueResponse(RequestMessage request, Collection values) {
-        return new FindValueResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), values);
-    }
-    
-    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, KeyValue keyValue) {
-        return new StoreRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), queryKey, keyValue);
-    }
-    
-    public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, int status) {
-        return new StoreResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), valueId, status);
-    }
-    
-    public StatsRequest createStatsRequest(SocketAddress dst, int request) {
-        return new StatsRequest(getVendor(), getVersion(), getLocalNode(), createMessageID(dst), request);
-    }
+public interface MessageFactory {
 
-    public StatsResponse createStatsResponse(RequestMessage request, String statistics) {
-        return new StatsResponse(getVendor(), getVersion(), getLocalNode(), request.getMessageID(), statistics);
-    }
+    public PingRequest createPingRequest(int vendor, int version, 
+            ContactNode node, KUID messageId);
+
+    public PingResponse createPingResponse(int vendor, int version, 
+            ContactNode node, KUID messageId, SocketAddress externalAddress, int dhtSize);
+
+    public FindNodeRequest createFindNodeRequest(int vendor, int version, 
+            ContactNode node, KUID messageId, KUID lookupId);
+
+    public FindNodeResponse createFindNodeResponse(int vendor, int version, 
+            ContactNode node, KUID messageId, QueryKey queryKey, Collection nodes);
+
+    public FindValueRequest createFindValueRequest(int vendor, int version, 
+            ContactNode node, KUID messageId, KUID lookupId);
+
+    public FindValueResponse createFindValueResponse(int vendor, int version, 
+            ContactNode node, KUID messageId, Collection values);
+
+    public StoreRequest createStoreRequest(int vendor, int version, 
+            ContactNode node, KUID messageId, QueryKey queryKey, KeyValue keyValue);
+
+    public StoreResponse createStoreResponse(int vendor, int version, 
+            ContactNode node, KUID messageId, KUID valueId, int response);
+
+    public StatsRequest createStatsRequest(int vendor, int version, 
+            ContactNode node, KUID messageId, int stats);
+
+    public StatsResponse createStatsResponse(int vendor, int version, 
+            ContactNode node, KUID messageId, String stats);
 }

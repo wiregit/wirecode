@@ -58,10 +58,11 @@ import com.limegroup.mojito.handler.response.LookupResponseHandler.ContactNodeEn
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.messages.MessageFactory;
+import com.limegroup.mojito.messages.MessageHelper;
+import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
@@ -100,7 +101,7 @@ public class Context {
     private Database database;
     private RouteTable routeTable;
     private MessageDispatcher messageDispatcher;
-    private MessageFactory messageFactory;
+    private MessageHelper messageHelper;
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
     
@@ -152,7 +153,7 @@ public class Context {
         routeTable = new PatriciaRouteTable(this);
         
         messageDispatcher = new MessageDispatcherImpl(this);
-        messageFactory = new MessageFactory(this);
+        messageHelper = new MessageHelper(this);
         keyValuePublisher = new KeyValuePublisher(this);
 
         bucketRefresher = new RandomBucketRefresher(this);
@@ -305,8 +306,12 @@ public class Context {
         return keyValuePublisher;
     }
     
+    public MessageHelper getMessageHelper() {
+        return messageHelper;
+    }
+    
     public MessageFactory getMessageFactory() {
-        return messageFactory;
+        return messageHelper.getMessageFactory();
     }
     
     public synchronized boolean isRunning() {
@@ -1051,7 +1056,7 @@ public class Context {
                         responseHandler.addPingListener(listener);
                     }
                     
-                    PingRequest request = messageFactory.createPingRequest(address);
+                    PingRequest request = getMessageHelper().createPingRequest(address);
                     messageDispatcher.send(nodeId, address, request, responseHandler);
 
                     handlerMap.put(address, responseHandler);

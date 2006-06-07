@@ -33,16 +33,16 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.messages.request.FindNodeRequest;
-import com.limegroup.mojito.messages.request.FindValueRequest;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
-import com.limegroup.mojito.messages.response.PingResponse;
-import com.limegroup.mojito.messages.response.StatsResponse;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.FindNodeRequest;
+import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.FindValueRequest;
+import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.messages.PingResponse;
+import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.messages.StatsResponse;
+import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.messages.StoreResponse;
 
 /**
  * The MessageOutputStream class writes a DHTMessage (serializes)
@@ -130,7 +130,6 @@ public class MessageOutputStream extends DataOutputStream {
     private void writePong(PingResponse pong) throws IOException {
         writeSocketAddress(pong.getExternalAddress());
         writeInt(pong.getEstimatedSize());
-        writeSignature(pong.getSignature());
     }
     
     private void writeFindNodeRequest(FindNodeRequest findNode) throws IOException {
@@ -140,9 +139,9 @@ public class MessageOutputStream extends DataOutputStream {
     private void writeFindNodeResponse(FindNodeResponse response) throws IOException {
         writeQueryKey(response.getQueryKey());
         
-        Collection values = response.getValues();
-        writeByte(values.size());
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
+        Collection nodes = response.getNodes();
+        writeByte(nodes.size());
+        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
             writeContactNode((ContactNode)it.next());
         }
     }
@@ -180,6 +179,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     public void write(DHTMessage msg) throws IOException {
+        writeByte(msg.getOpCode());
         writeInt(msg.getVendor());
         writeShort(msg.getVersion());
         writeByte(msg.getContactNode().getFlags());
@@ -187,35 +187,26 @@ public class MessageOutputStream extends DataOutputStream {
         writeByte(msg.getContactNode().getInstanceID());
         writeKUID(msg.getMessageID());
         
+        // TODO use opcode!
         if (msg instanceof PingRequest) {
-            writeByte(DHTMessage.PING_REQUEST);
             writePing((PingRequest)msg);
         } else if (msg instanceof PingResponse) {
-            writeByte(DHTMessage.PING_RESPONSE);
             writePong((PingResponse)msg);
         } else if (msg instanceof FindNodeRequest) {
-            writeByte(DHTMessage.FIND_NODE_REQUEST);
             writeFindNodeRequest((FindNodeRequest)msg);
         } else if (msg instanceof FindNodeResponse) {
-            writeByte(DHTMessage.FIND_NODE_RESPONSE);
             writeFindNodeResponse((FindNodeResponse)msg);
         } else if (msg instanceof FindValueRequest) {
-            writeByte(DHTMessage.FIND_VALUE_REQUEST);
             writeFindValueRequest((FindValueRequest)msg);
         } else if (msg instanceof FindValueResponse) {
-            writeByte(DHTMessage.FIND_VALUE_RESPONSE);
             writeFindValueResponse((FindValueResponse)msg);
         } else if (msg instanceof StoreRequest) {
-            writeByte(DHTMessage.STORE_REQUEST);
             writeStoreRequest((StoreRequest)msg);
         } else if (msg instanceof StoreResponse) {
-            writeByte(DHTMessage.STORE_RESPONSE);
             writeStoreResponse((StoreResponse)msg);
         } else if (msg instanceof StatsRequest) {
-            writeByte(DHTMessage.STATS_REQUEST);
             writeStatsRequest((StatsRequest)msg);
         } else if (msg instanceof StatsResponse) {
-            writeByte(DHTMessage.STATS_RESPONSE);
             writeStatsResponse((StatsResponse)msg);
         } else {
             throw new IOException("Unknown Message: " + msg);

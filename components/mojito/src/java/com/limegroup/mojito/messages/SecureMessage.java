@@ -16,33 +16,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.messages.response;
 
-import java.util.Collection;
-import java.util.Collections;
+package com.limegroup.mojito.messages;
 
-import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.messages.ResponseMessage;
+public interface SecureMessage {
+    
+    public static final int INSECURE = 0x00;
+    public static final int FAILED = 0x01;
+    public static final int SECURE = 0x02;
 
+    public void setSecureStatus(int secureStatus);
 
-public abstract class LookupResponse extends ResponseMessage {
+    public int getSecureStatus();
+
+    public boolean isSigned();
+
+    public byte[] getSignature();
+
+    public void setSignature(byte[] signature);
     
-    protected final Collection values;
-    
-    public LookupResponse(int vendor, int version, ContactNode node,
-            KUID messageId, Collection responseValues) {
-        super(vendor, version, node, messageId);
-        
-        this.values = Collections.unmodifiableCollection(responseValues);
-    }
-    
-    public Collection getValues() {
-        return values;
-    }
-    
-    public String toString() {
-        return values.toString();
-    }
+    public boolean isSecure();
 }

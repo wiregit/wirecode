@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.messages.response.FindValueResponse;
+import com.limegroup.mojito.messages.FindValueResponse;
 
 
 public final class KeyValueCollection implements Collection {

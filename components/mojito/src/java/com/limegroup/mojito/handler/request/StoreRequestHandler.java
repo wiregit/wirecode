@@ -31,8 +31,8 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
@@ -116,7 +116,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         }
         
         StoreResponse response 
-            = context.getMessageFactory().createStoreResponse(request, valueId, status);
+            = context.getMessageHelper().createStoreResponse(request, valueId, status);
         context.getMessageDispatcher().send(request.getContactNode(), response);
     }
 }
