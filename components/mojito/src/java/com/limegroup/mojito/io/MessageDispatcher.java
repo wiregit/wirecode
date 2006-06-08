@@ -251,7 +251,7 @@ public abstract class MessageDispatcher implements Runnable {
         ByteArrayOutputStream out = new ByteArrayOutputStream(640);
         message.write(out);
         out.close();
-        return ByteBuffer.wrap(out.toByteArray());
+        return ByteBuffer.wrap(out.toByteArray()).order(ByteOrder.BIG_ENDIAN);
     }
     
     /**

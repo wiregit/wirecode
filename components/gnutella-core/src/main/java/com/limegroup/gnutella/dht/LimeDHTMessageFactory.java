@@ -25,7 +25,6 @@ import com.limegroup.mojito.messages.StoreResponse;
 
 class LimeDHTMessageFactory implements MessageFactory {
 
-    
     public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
         throw new IOException("Cannot deserialize LimeDHTMessages with this method!");

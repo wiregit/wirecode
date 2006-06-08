@@ -28,7 +28,7 @@ import com.limegroup.mojito.messages.StoreResponse;
 
 abstract class LimeDHTMessage2 extends Message implements DHTMessage {
     
-    private static final byte F_DHT_MESSAGE = (byte)0x43;
+    static final byte F_DHT_MESSAGE = (byte)0x43;
     
     private int opcode;
     private int vendor;

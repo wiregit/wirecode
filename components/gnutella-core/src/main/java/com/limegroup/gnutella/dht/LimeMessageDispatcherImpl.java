@@ -33,11 +33,10 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.io.InputOutputUtils;
 import com.limegroup.mojito.io.MessageDispatcher;
-import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
 
@@ -60,10 +59,17 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         processingQueue = new ProcessingQueue(context.getName() + "-LimeMessageDispatcherPQ", true);
         
-        // Register the LimeDHTMessage type and the handler
-        LimeDHTMessage.registerMessage();
+        // Set the MessageFactory
+        LimeDHTMessageFactory factory = new LimeDHTMessageFactory();
+        context.setMessageFactory(factory);
+        
+        // Register the Message type
+        LimeDHTMessageParser parser = new LimeDHTMessageParser(factory);
+        MessageFactory.setParser(LimeDHTMessage2.F_DHT_MESSAGE, parser);
+        
+        // Install the handler for LimeDHTMessage
         RouterService.getMessageRouter()
-            .setUDPMessageHandler(LimeDHTMessage.class, this);
+            .setUDPMessageHandler(LimeDHTMessage2.class, this);
         
         // Install cleanup task
         context.scheduleAtFixedRate(new Runnable() {
@@ -101,18 +107,11 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
      * map if it's a RequestMessage.
      */
     protected boolean enqueueOutput(Tag tag) {
-        try {
-            InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
-            LimeDHTMessage msg = LimeDHTMessage.createMessage(tag.getData().array());
-            UDPService.instance().send(msg, dst);
-            registerInput(tag);
-            return true;
-        } catch (BadPacketException e) {
-            LOG.error("BadPacketException", e);
-        } catch (IOException e) {
-            LOG.error("IOException", e);
-        }
-        return false;
+        InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
+        ByteBuffer data = tag.getData();
+        UDPService.instance().send(data, dst.getAddress(), dst.getPort(), false);
+        registerInput(tag);
+        return true;
     }
 
     /*
@@ -123,12 +122,11 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
      */
     public void handleMessage(Message msg, InetSocketAddress addr, 
             ReplyHandler handler) {
+        LimeDHTMessage2 dhtMessage = (LimeDHTMessage2)msg;
+        dhtMessage.getContactNode().setSocketAddress(addr);
+        
         try {
-            ByteBuffer payload = ((LimeDHTMessage)msg).getPayload();
-            DHTMessage message = InputOutputUtils.deserialize(addr, payload);
-            handleMessage(message);
-        } catch (MessageFormatException err) {
-            LOG.error("MessageFormatException", err);
+            handleMessage(dhtMessage);
         } catch (IOException err) {
             LOG.error("IOException", err);
         }
