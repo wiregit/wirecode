@@ -19,8 +19,6 @@
  
 package com.limegroup.mojito.messages;
 
-import java.net.SocketAddress;
-
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
@@ -58,8 +56,4 @@ public interface DHTMessage {
 
     /** Returns the sender of this Message */
     public ContactNode getContactNode();
-    
-    public KUID getSourceNodeID();
-    
-    public SocketAddress getSourceAddress();
 }
