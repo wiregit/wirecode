@@ -1,13 +1,14 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * Kills an OutputStream after a certain amount of time has passed.<p>
@@ -45,39 +46,58 @@ public final class StalledUploadWatchdog implements Runnable {
      */
     public static long DELAY_TIME = 1000 * 60 * 2; //2 minutes    
     
-    private OutputStream ostream;
+    private Shutdownable shutdownable;
     private boolean isScheduled;
     private long nextCheckTime;
     private boolean closed;
+    
+    private final long delayTime;
+    
+    private OStreamWrap osWrap;
+    
+    public StalledUploadWatchdog() {
+    	this(DELAY_TIME);
+    }
+    
+    public StalledUploadWatchdog(long delayTime) {
+    	this.delayTime = delayTime;
+    }
     
     /**
      * Deactives the killing of the NormalUploadState
      */
     public synchronized boolean deactivate() {
         if(LOG.isDebugEnabled())
-            LOG.debug("Deactived on: " + ostream);
+            LOG.debug("Deactived on: " + shutdownable);
         nextCheckTime = -1; // don't reschedule.
-        ostream = null; //release the OutputStream
+        shutdownable = null; //release the resource
         return closed;
     }
     
     /**
      * Activates the checking.
      */
-    public synchronized void activate(OutputStream os) {
+    public synchronized void activate(Shutdownable shutdownable) {
         if(LOG.isDebugEnabled())
-            LOG.debug("Activated on: " + os);
+            LOG.debug("Activated on: " + shutdownable);
         // let run() know when we're expecting to run, so
         // it can reschedule older schedulings if needed.
-        nextCheckTime = System.currentTimeMillis() + DELAY_TIME;
+        nextCheckTime = System.currentTimeMillis() + delayTime;
 
         // if we're not already scheduled, schedule this task.
         if ( !isScheduled ) {
-            RouterService.schedule(this, DELAY_TIME, 0);
+            RouterService.schedule(this, delayTime, 0);
             isScheduled = true;
         }
         
-        this.ostream = os;
+        this.shutdownable = shutdownable;
+    }
+    
+    public synchronized void activate(OutputStream os) {
+    	if (osWrap == null)
+    		osWrap = new OStreamWrap();
+    	osWrap.setOstream(os);
+    	activate(osWrap);
     }
     
     /**
@@ -100,21 +120,29 @@ public final class StalledUploadWatchdog implements Runnable {
         }
         // otherwise, close the stream & remember we did it.
         else {
-            closed = true;
-            try {
-                // If it was null, it was already closed
-                // by an outside source.
-                if( ostream != null ) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("STALLED!  Killing: " + ostream);                    
-                    UploadStat.STALLED.incrementStat();
-                    ostream.close();
-                }
-            } catch(IOException ignored) {
-                //this can be ignored because we're going to close
-                //the connection anyway.
-            }
-            ostream = null;
+        	closed = true;
+        	// If it was null, it was already closed
+        	// by an outside source.
+        	if( shutdownable != null ) {
+        		if(LOG.isDebugEnabled())
+        			LOG.debug("STALLED!  Killing: " + shutdownable);                    
+        		UploadStat.STALLED.incrementStat();
+        		shutdownable.shutdown();
+        	}
+        	shutdownable = null;
         }
+    }
+    
+    private static class OStreamWrap implements Shutdownable {
+    	private OutputStream ostream;
+    	void setOstream(OutputStream ostream) {
+    		this.ostream = ostream;
+    	}
+    	public void shutdown() {
+    		IOUtils.close(ostream);
+    		ostream = null; 
+            //exceptions can be ignored because we're going to close
+            //the connection anyway.
+    	}
     }
 }
