@@ -852,7 +852,12 @@ public class VerifyingFile {
                     storedException = diskIO;
                 }
             } finally {
-                releaseChunk(buf, true);
+            	try {
+            		releaseChunk(buf, true);
+            	} catch (IllegalStateException bad) {
+            		// would like to know pending 
+            		throw new IllegalStateException(bad.getMessage()+"\n"+dumpState());
+            	}
                 
                 synchronized(VerifyingFile.this) {
                     if (!freedPending)
@@ -877,7 +882,14 @@ public class VerifyingFile {
 
             // write & notify outside of lock
             if(!dw.write()) {
-                throw new IllegalStateException("couldn't write!");
+            	synchronized(CACHE) {
+            		String report = " cannot write to this."+
+            			"\n delayed size "+DELAYED.size()+
+            			"\n queue size "+QUEUE.size()+
+            			"\n cache created "+CACHE.getCreated()+
+            			"\n cache available? "+CACHE.isBufferAvailable(); 
+            		throw new IllegalStateException(report);
+            	}
             }
             
             synchronized(CACHE) {
