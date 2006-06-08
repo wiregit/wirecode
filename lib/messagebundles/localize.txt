@@ -1,5 +1,5 @@
 Localization notes:
-Copyright (c)2002 the LimeWire project team. www.limewire.com
+Copyright (c)2002-2006 the LimeWire project team. www.limewire.com
 test cvs@lib.limewire.org
 This is the current list of supported locales.
 
