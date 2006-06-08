@@ -407,7 +407,7 @@ public class NIODispatcher implements Runnable {
      * Process a connected channel.
      */
     private void processConnect(long now, SelectionKey sk, ConnectObserver handler, Attachment proxy)
-            throws IOException {
+      throws IOException {
         if (LOG.isDebugEnabled())
             LOG.debug("Handling connect: " + handler);
 
@@ -682,6 +682,9 @@ public class NIODispatcher implements Runnable {
                     LOG.warn("Ignoring cancelled key", err);
                 } catch(IOException iox) {
                     LOG.warn("IOX processing", iox);
+                    try {
+                        sk.cancel(); // make sure its cancelled.
+                    } catch(Throwable ignored) {}
                     attachment.handleIOException(iox);
                 }
             } catch(Throwable t) {

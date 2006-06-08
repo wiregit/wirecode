@@ -485,11 +485,7 @@ public class UDPService implements ReadWriteObserver {
                         bundle.buffer.rewind();
                         releaseBuffer = false;
                     }
-                } catch(BindException ignored) {
-                } catch(ConnectException ignored) {
-                } catch(NoRouteToHostException ignored) {
-                } catch(PortUnreachableException ignored) {
-                } catch(SocketException ignored) {
+                } catch(IOException ignored) {
                     LOG.warn("Ignoring exception on socket", ignored);
                 } finally {
                     if (releaseBuffer)
