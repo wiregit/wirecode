@@ -19,9 +19,9 @@ LAYOUT_RIGHT_TO_LEFT=false
 HAS_TIPS_OF_THE_DAY=false
 
 ################################################################################
-# TO TRANSLATORS:  DO NOT EDIT ANY OF THE ABOVE LINES.
+# TO TRANSLATORS: DO NOT EDIT ANY OF THE ABOVE LINES.
 # Everything above this point is used internally by the LimeWire program and
-# should not be edited.  See below for translating.
+# should not be edited. See below for translating.
 ################################################################################
 ################################################################################
 # How to translate:
@@ -404,7 +404,6 @@ MENU_NAV_CONSOLE_MNEMONIC=O
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
 MENU_NAV_CONSOLE_ACCESSIBLE=顯示主控台視窗
 
-
 #### MENU_VIEW_TITLE=View
 ###$ MENU_VIEW_TITLE=查看 (V)
 MENU_VIEW_TITLE=檢視(V)
@@ -746,7 +745,7 @@ SEARCH_PUBLIC_BLOCK_STRING=封鎖主機
 SEARCH_RESULT_TABLE_LABEL=搜尋結果
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=搜尋更多
-#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered.
+#### SEARCH_RESULT_SECURE_TIP=This is a secure result. No information in this result has been tampered.
 #? SEARCH_RESULT_SECURE_TIP=
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 ###$ SEARCH_VIRUS_MSG_ONE=选中的 文件中 包含可执行程序
@@ -848,7 +847,6 @@ CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=選取所有項目
 CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=全部不選
 #### CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=Deselects all Items in the List
 CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=不選取所有項目
-
 
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
@@ -1375,7 +1373,7 @@ DOWNLOAD_STATUS_PAUSING=暫停...
 DOWNLOAD_STATUS_PAUSED=已暫停
 #### DOWNLOAD_STATUS_INVALID=Content Removed
 DOWNLOAD_STATUS_INVALID=檔案已移除
-#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network.  To learn more, double-click on the download (or click preview).
+#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network. To learn more, double-click on the download (or click preview).
 DOWNLOAD_INVALID_EXPLAIN=此檔案擁有者要求將此檔案從網路上移除。更多資訊請點兩下下載(或點選預覽)。
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
 DOWNLOAD_AWAITING_SOURCES=可能需要更明確的搜尋...
@@ -1842,7 +1840,7 @@ SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=以下選取的資料夾(以及子資料夾
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire 找不到任何共享檔案。要繼續設定 LimeWire，請點選「下一步」。
 #### SETUP_FILTER_TITLE=Content Filtering
 SETUP_FILTER_TITLE=過濾內容
-#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared.  By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content.  You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
+#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared. By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content. You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
 SETUP_FILTER_LABEL=LimeWire 可以過濾擁有者要求不要共享的檔案。啟動過濾表示您要求 LimeWire 透過移除內容清單確認所有您下載及分享的檔案。您可以由 過濾器 -> 設定內容過濾器 改變此選項。
 #### SETUP_FILTER_CHECKBOX=Enable Content Filtering
 SETUP_FILTER_CHECKBOX=啟用內容過濾
@@ -3344,9 +3342,8 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=密碼:
 
 #### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Buffer Size
 OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=緩衝大小
-#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media.  If iTunes or other media players experience frequent rebuffering, increase this value.  A higher setting may use more memory.
+#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media. If iTunes or other media players experience frequent rebuffering, increase this value. A higher setting may use more memory.
 OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=你可以設定串流媒體使用的緩衝大小。如果 iTunes 或其他播放器一直重新緩衝，請增加這個值。設定越高會使用越多記憶體。
-
 
 ################################################################################
 # Key/Value pairs for url handler options
@@ -3655,16 +3652,13 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=使用者名
 ###$ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=密码
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=密碼:
 
-
-
-
 ################################################################################
 # Key/value pairs for the content filter options window item
 # in the options window
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 OPTIONS_CONTENT_FILTER_TITLE=Bestanden Filteren
-#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared.  By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
+#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared. By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
 OPTIONS_CONTENT_FILTER_LABEL=LimeWire kan bestanden filteren, waarvan eigenaren van het copyright verzocht hebben deze niet te delen.  Door het filteren aan te zetten, laat u LimeWire alle bestanden die u download of deelt met een lijst van verwijderde bestanden controleren.
 #### OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Enable Content Filters
 OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Maak gebruik van Bestand Filter

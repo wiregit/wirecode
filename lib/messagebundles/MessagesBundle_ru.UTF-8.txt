@@ -18,9 +18,9 @@ LAYOUT_RIGHT_TO_LEFT=false
 HAS_TIPS_OF_THE_DAY=false
 
 ################################################################################
-# TO TRANSLATORS:  DO NOT EDIT ANY OF THE ABOVE LINES.
+# TO TRANSLATORS: DO NOT EDIT ANY OF THE ABOVE LINES.
 # Everything above this point is used internally by the LimeWire program and
-# should not be edited.  See below for translating.
+# should not be edited. See below for translating.
 ################################################################################
 ################################################################################
 # How to translate:
@@ -332,7 +332,6 @@ MENU_NAV_LIB_ACCESSIBLE=Перейти к экрану библиотеки
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
 #? MENU_NAV_CONSOLE_ACCESSIBLE=
 
-
 #### MENU_VIEW_TITLE=View
 MENU_VIEW_TITLE=Вид (V)
 #### MENU_VIEW_TITLE_MNEMONIC=V
@@ -603,7 +602,7 @@ SEARCH_PUBLIC_BLOCK_STRING=Блокировать хост
 SEARCH_RESULT_TABLE_LABEL=Результаты
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Искать ещё
-#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered.
+#### SEARCH_RESULT_SECURE_TIP=This is a secure result. No information in this result has been tampered.
 #? SEARCH_RESULT_SECURE_TIP=
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=Один из выбранных файлов является выполняемой
@@ -700,7 +699,6 @@ SEARCH_XML_FIELD_ACTION_NAME=Искать в {0}: {1}
 #? CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=
 #### CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=Deselects all Items in the List
 #? CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=
-
 
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
@@ -1143,7 +1141,7 @@ DOWNLOAD_STATUS_PAUSING=Приостановка...
 DOWNLOAD_STATUS_PAUSED=Приостановлен
 #### DOWNLOAD_STATUS_INVALID=Content Removed
 #? DOWNLOAD_STATUS_INVALID=
-#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network.  To learn more, double-click on the download (or click preview).
+#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network. To learn more, double-click on the download (or click preview).
 #? DOWNLOAD_INVALID_EXPLAIN=
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
 DOWNLOAD_AWAITING_SOURCES=Может потребоваться более точный поиск...
@@ -1521,7 +1519,7 @@ SETUP_CONFIRM_LABEL=Эти папки содержат мультимедийн�
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire не смог найти файлы к которым следовало бы открыть доступ.Чтобы продолжить, щёлкните "Вперёд".
 #### SETUP_FILTER_TITLE=Content Filtering
 #? SETUP_FILTER_TITLE=
-#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared.  By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content.  You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
+#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared. By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content. You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
 #? SETUP_FILTER_LABEL=
 #### SETUP_FILTER_CHECKBOX=Enable Content Filtering
 #? SETUP_FILTER_CHECKBOX=
@@ -2808,9 +2806,8 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Пароль:
 
 #### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Buffer Size
 #? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=
-#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media.  If iTunes or other media players experience frequent rebuffering, increase this value.  A higher setting may use more memory.
+#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media. If iTunes or other media players experience frequent rebuffering, increase this value. A higher setting may use more memory.
 #? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
-
 
 ################################################################################
 # Key/Value pairs for url handler options
@@ -3071,16 +3068,13 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Имя
 #### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password:
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Пароль
 
-
-
-
 ################################################################################
 # Key/value pairs for the content filter options window item
 # in the options window
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 #? OPTIONS_CONTENT_FILTER_TITLE=
-#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared.  By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
+#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared. By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
 #? OPTIONS_CONTENT_FILTER_LABEL=
 #### OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Enable Content Filters
 #? OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=
