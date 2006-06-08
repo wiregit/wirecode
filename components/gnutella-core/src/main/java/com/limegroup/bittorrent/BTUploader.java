@@ -127,12 +127,12 @@ public class BTUploader implements Uploader, TorrentLifecycleListener {
 	public float getMeasuredBandwidth() throws InsufficientDataException {
 		if (!_torrent.isActive())
 			return 0.f;
-		return _torrent.getMeasuredBandwidth(false);
+		return _torrent.getMeasuredBandwidth(false) / 1024;
 	}
 
 	public float getAverageBandwidth() {
 		long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
-		long runTime = (now - startTime) / 1000;
+		long runTime = (now - startTime);
 		return runTime > 0 ? getTotalAmountUploaded() / runTime : 0;
 	}
 	

@@ -265,12 +265,12 @@ implements TorrentLifecycleListener {
 	}
 
 	public float getMeasuredBandwidth() throws InsufficientDataException {
-		return _torrent.getMeasuredBandwidth(true);
+		return _torrent.getMeasuredBandwidth(true) / 1024;
 	}
 
 	public float getAverageBandwidth() {
 		long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
-		long runTime = (now - startTime) / 1000;
+		long runTime = now - startTime ;
 		return runTime > 0 ? getTotalAmountDownloaded() / runTime : 0;
 	}
 

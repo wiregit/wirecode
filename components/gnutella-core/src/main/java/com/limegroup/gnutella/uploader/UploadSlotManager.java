@@ -28,7 +28,7 @@ public class UploadSlotManager {
      * The desired minimum quality of service to provide for uploads, in
      *  KB/s
      */
-    private static final float MINIMUM_UPLOAD_SPEED = 3.0f;
+    private static final float MINIMUM_UPLOAD_SPEED = 3000.0f;
     
 	/**
 	 * The list of active upload slot requests
@@ -227,10 +227,10 @@ public class UploadSlotManager {
 					speed = user.getMeasuredBandwidth();
 				} catch (InsufficientDataException ide) {}
 				fastest = Math.max(fastest,speed);
-				if (fastest > MINIMUM_UPLOAD_SPEED)
+				if (fastest > MINIMUM_UPLOAD_SPEED) 
 					return true;
+				
 			}
-			
 			return false;
 		}
 	}
@@ -245,7 +245,7 @@ public class UploadSlotManager {
 				ret += user.getMeasuredBandwidth();
 			} catch (InsufficientDataException ide) {}
 		}
-		return ret;
+		return ret / 1024;
 	}
 	
 	/**

@@ -121,6 +121,7 @@ public class BTMessageReader implements ChannelReadObserver {
 				return;
 			shutdown = true;
 		}
+		_connection.close();
 	}
 
 	/**
@@ -352,7 +353,7 @@ public class BTMessageReader implements ChannelReadObserver {
 			
 			if (currentOffset == offset + _length - 8) {
 				// we're done receiving this piece
-				_connection.finishReceivingPiece();
+				_connection.requestIfPossible();
 				BTMessageStat.INCOMING_PIECE.incrementStat();
 				BTMessageStatBytes.INCOMING_PIECE.addData(5 + _length);
 				return LENGTH_STATE;

@@ -21,6 +21,7 @@ import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.messages.*;
+import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.BitSet;
@@ -53,6 +54,12 @@ public class BTConnection implements UploadSlotListener {
 	 * connections that die after less than a minute won't be retried
 	 */
 	private static final long MIN_RETRYABLE_LIFE_TIME = 60 * 1000;
+	
+	/**
+	 * Maximum time it should take to send a piece
+	 * (pieces are 32kb max)
+	 */
+	private static final long MAX_PIECE_SEND_TIME = 60 * 1000; 
 
 	/*
 	 * the NIOSocket
@@ -154,6 +161,12 @@ public class BTConnection implements UploadSlotListener {
 	
 	/** Bandwidth trackers for the outgoing and incoming bandwidth */
 	private SimpleBandwidthTracker up, down;
+	
+	/** Watchdog for this connection */
+	private StalledUploadWatchdog watchdog;
+	
+	/** Whether this connection is currently closing */
+	private volatile boolean closing;
 	
 	/**
 	 * Constructs instance of this
@@ -269,6 +282,11 @@ public class BTConnection implements UploadSlotListener {
 	 * Closes the connection.
 	 */
 	public void close() {
+		
+		if (closing)
+			return;
+		closing = true;
+		
 		try {
 			_socket.shutdownOutput();
 		} catch (IOException ioe1) {}
@@ -283,8 +301,10 @@ public class BTConnection implements UploadSlotListener {
 			_socket.close();
 		} catch (IOException ioe) {}
 		
-		if (usingSlot)
+		if (usingSlot) {
 			RouterService.getUploadSlotManager().cancelRequest(this);
+			watchdog.deactivate();
+		}
 		_torrent.connectionClosed(this);
 	}
 
@@ -488,9 +508,11 @@ public class BTConnection implements UploadSlotListener {
 	void pieceSent() {
 		Assert.that(usingSlot, "incosistent slot state");
 		usingSlot = false;
+		watchdog.deactivate();
 		RouterService.getUploadSlotManager().requestDone(this);
 		readyForWriting();
 	}
+	
 	/**
 	 * notifies this, that the connection is ready to write the next chunk of
 	 * the torrent
@@ -541,6 +563,9 @@ public class BTConnection implements UploadSlotListener {
 			public void run() {
 				if (LOG.isDebugEnabled())
 					LOG.debug("disk read done for "+in);
+				if (watchdog == null)
+					watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
+				watchdog.activate(_writer);
 				_writer.enqueue(new BTPiece(in, data));
 			}
 		};
@@ -607,17 +632,13 @@ public class BTConnection implements UploadSlotListener {
 		switch (message.getType()) {
 		case BTMessage.CHOKE:
 			_isChoking = true;
+			_requesting.clear();
 			break;
 
 		case BTMessage.UNCHOKE:
 			_isChoking = false;
-			if (_isInteresting) {
-				// try sending next request as soon as we are unchoked
-				enqueueRequests();
-				// get new ranges to request if necessary
-				if (!_torrent.isComplete() && _toRequest.isEmpty())
-					_torrent.request(this);
-			}
+			if (_isInteresting) 
+				requestIfPossible();
 			break;
 
 		case BTMessage.INTERESTED:
@@ -730,7 +751,7 @@ public class BTConnection implements UploadSlotListener {
 		return true;
 	}
 	
-	void finishReceivingPiece() {
+	void requestIfPossible() {
 		// get new ranges to request if necessary
 		if (!_torrent.isComplete()
 				&& _toRequest.size() + _requesting.size() < MAX_REQUESTS)
