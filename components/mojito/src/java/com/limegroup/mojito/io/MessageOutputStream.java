@@ -55,11 +55,11 @@ public class MessageOutputStream extends DataOutputStream {
     }
 	
     private void writeKUID(KUID key) throws IOException {
-        if (key != null) {
-            write(key.getBytes());
-        } else {
-            writeByte(0);
+        if (key == null) {
+            throw new NullPointerException("KUID cannot be null");
         }
+        
+        write(key.getBytes());
     }
     
     private void writeKeyValue(KeyValue keyValue) throws IOException {

@@ -289,12 +289,12 @@ abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class LimeFindValueRequestImpl extends LimeRequestMessage
+    static class FindValueRequestImpl extends LimeRequestMessage
             implements FindValueRequest {
         
         private KUID lookupId;
         
-        LimeFindValueRequestImpl(int vendor, int version,
+        FindValueRequestImpl(int vendor, int version,
                 ContactNode contactNode, KUID messageId,
                 KUID lookupId) {
             super(FIND_VALUE_REQUEST, vendor, version, contactNode, messageId);

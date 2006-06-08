@@ -19,19 +19,25 @@
 
 package com.limegroup.mojito.messages;
 
+import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.io.MessageFormatException;
 
 /**
  * Factory class to construct DHTMessage(s)
  */
 public interface MessageFactory {
 
+    public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
+            throws MessageFormatException, IOException;
+    
     public PingRequest createPingRequest(int vendor, int version, 
             ContactNode node, KUID messageId);
 

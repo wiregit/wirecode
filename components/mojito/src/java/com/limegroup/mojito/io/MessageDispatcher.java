@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.io;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -98,6 +99,7 @@ public abstract class MessageDispatcher implements Runnable {
         this.context = context;
         
         networkStats = context.getNetworkStats();
+        
         defaultHandler = new DefaultMessageHandler(context);
         pingHandler = new PingRequestHandler(context);
         lookupHandler = new LookupRequestHandler(context);
@@ -152,24 +154,26 @@ public abstract class MessageDispatcher implements Runnable {
     
     public boolean send(ContactNode node, ResponseMessage response) 
             throws IOException {
-        return send(new Tag(node, response, serialize(response))); 
+        ByteBuffer data = serialize(response);
+        return send(new Tag(node, response, data)); 
     }
     
     public boolean send(SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(dst, request, serialize(request), responseHandler));
+        ByteBuffer data = serialize(request);
+        return send(new Tag(dst, request, data, responseHandler));
     }
     
     public boolean send(KUID nodeId, SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(nodeId, dst, request, 
-                serialize(request), responseHandler));
+        ByteBuffer data = serialize(request);
+        return send(new Tag(nodeId, dst, request, data, responseHandler));
     }
     
     public boolean send(ContactNode node, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(node, request, 
-                serialize(request), responseHandler));
+        ByteBuffer data = serialize(request);
+        return send(new Tag(node, request, data, responseHandler));
     }
     
     protected boolean send(Tag tag) throws IOException {
@@ -244,7 +248,10 @@ public abstract class MessageDispatcher implements Runnable {
      * A helper method to serialize DHTMessage(s)
      */
     protected ByteBuffer serialize(DHTMessage message) throws IOException {
-        return InputOutputUtils.serialize(message);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(640);
+        message.write(out);
+        out.close();
+        return ByteBuffer.wrap(out.toByteArray());
     }
     
     /**
@@ -252,7 +259,7 @@ public abstract class MessageDispatcher implements Runnable {
      */
     protected DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
-        return InputOutputUtils.deserialize(context.getMessageFactory(), src, data);
+        return context.getMessageFactory().createMessage(src, data);
     }
     
     /**

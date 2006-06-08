@@ -19,10 +19,13 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.SocketAddress;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 
 /**
@@ -107,5 +110,9 @@ public abstract class AbstractDHTMessage implements DHTMessage {
     
     public SocketAddress getSourceAddress() {
         return contactNode.getSocketAddress();
+    }
+
+    public void write(OutputStream out) throws IOException {
+        new MessageOutputStream(out).write(this);
     }
 }

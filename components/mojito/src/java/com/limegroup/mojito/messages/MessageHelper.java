@@ -29,16 +29,7 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.messages.impl.FindNodeRequestImpl;
-import com.limegroup.mojito.messages.impl.FindNodeResponseImpl;
-import com.limegroup.mojito.messages.impl.FindValueRequestImpl;
-import com.limegroup.mojito.messages.impl.FindValueResponseImpl;
-import com.limegroup.mojito.messages.impl.PingRequestImpl;
-import com.limegroup.mojito.messages.impl.PingResponseImpl;
-import com.limegroup.mojito.messages.impl.StatsRequestImpl;
-import com.limegroup.mojito.messages.impl.StatsResponseImpl;
-import com.limegroup.mojito.messages.impl.StoreRequestImpl;
-import com.limegroup.mojito.messages.impl.StoreResponseImpl;
+import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 
 /**
  * 
@@ -103,13 +94,13 @@ public class MessageHelper {
                 getLocalNode(), request.getMessageID(), externalAddress, getEstimatedSize());
     }
 
-    public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookup) {
-        if (!lookup.isNodeID()) {
+    public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookupId) {
+        if (!lookupId.isNodeID()) {
             throw new IllegalArgumentException();
         }
         
         return factory.createFindNodeRequest(getVendor(), getVersion(), 
-                getLocalNode(), createMessageID(dst), lookup);
+                getLocalNode(), createMessageID(dst), lookupId);
     }
 
     public FindNodeResponse createFindNodeResponse(RequestMessage request, QueryKey queryKey, List nodes) {
@@ -117,13 +108,13 @@ public class MessageHelper {
                 getLocalNode(), request.getMessageID(), queryKey, nodes);
     }
 
-    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookup) {
-        if (!lookup.isValueID()) {
+    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId) {
+        if (!lookupId.isValueID()) {
             throw new IllegalArgumentException();
         }
         
         return factory.createFindValueRequest(getVendor(), getVersion(), 
-                getLocalNode(), createMessageID(dst), lookup);
+                getLocalNode(), createMessageID(dst), lookupId);
     }
 
     public FindValueResponse createFindValueResponse(RequestMessage request, Collection values) {
@@ -149,61 +140,5 @@ public class MessageHelper {
     public StatsResponse createStatsResponse(RequestMessage request, String statistics) {
         return factory.createStatsResponse(getVendor(), getVersion(), 
                 getLocalNode(), request.getMessageID(), statistics);
-    }
-
-    /**
-     * The default implementation of the MessafeFactory
-     */
-    private static class DefaultMessageFactory implements MessageFactory {
-
-        public FindNodeRequest createFindNodeRequest(int vendor, int version, 
-                ContactNode node, KUID messageId, KUID lookupId) {
-            return new FindNodeRequestImpl(vendor, version, node, messageId, lookupId);
-        }
-
-        public FindNodeResponse createFindNodeResponse(int vendor, int version, 
-                ContactNode node, KUID messageId, QueryKey queryKey, Collection nodes) {
-            return new FindNodeResponseImpl(vendor, version, node, messageId, queryKey, nodes);
-        }
-
-        public FindValueRequest createFindValueRequest(int vendor, int version, 
-                ContactNode node, KUID messageId, KUID lookupId) {
-            return new FindValueRequestImpl(vendor, version, node, messageId, lookupId);
-        }
-
-        public FindValueResponse createFindValueResponse(int vendor, int version, 
-                ContactNode node, KUID messageId, Collection values) {
-            return new FindValueResponseImpl(vendor, version, node, messageId, values);
-        }
-
-        public PingRequest createPingRequest(int vendor, int version, 
-                ContactNode node, KUID messageId) {
-            return new PingRequestImpl(vendor, version, node, messageId);
-        }
-
-        public PingResponse createPingResponse(int vendor, int version, 
-                ContactNode node, KUID messageId, SocketAddress externalAddress, int estimatedSize) {
-            return new PingResponseImpl(vendor, version, node, messageId, externalAddress, estimatedSize);
-        }
-
-        public StatsRequest createStatsRequest(int vendor, int version, 
-                ContactNode node, KUID messageId, int stats) {
-            return new StatsRequestImpl(vendor, version, node, messageId, stats);
-        }
-
-        public StatsResponse createStatsResponse(int vendor, int version, 
-                ContactNode node, KUID messageId, String stats) {
-            return new StatsResponseImpl(vendor, version, node, messageId, stats);
-        }
-
-        public StoreRequest createStoreRequest(int vendor, int version, 
-                ContactNode node, KUID messageId, QueryKey queryKey, KeyValue keyValue) {
-            return new StoreRequestImpl(vendor, version, node, messageId, queryKey, keyValue);
-        }
-
-        public StoreResponse createStoreResponse(int vendor, int version, 
-                ContactNode node, KUID messageId, KUID valueId, int response) {
-            return new StoreResponseImpl(vendor, version, node, messageId, valueId, response);
-        }
     }
 }

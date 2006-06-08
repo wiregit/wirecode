@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.messages;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
@@ -56,4 +59,7 @@ public interface DHTMessage {
 
     /** Returns the sender of this Message */
     public ContactNode getContactNode();
+    
+    /** Writes this Message to the OutputStream */
+    public void write(OutputStream out) throws IOException;
 }
