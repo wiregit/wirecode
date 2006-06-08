@@ -36,7 +36,7 @@ public interface MessageFactory {
             ContactNode node, KUID messageId);
 
     public PingResponse createPingResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, SocketAddress externalAddress, int dhtSize);
+            ContactNode node, KUID messageId, SocketAddress externalAddress, int estimatedSize);
 
     public FindNodeRequest createFindNodeRequest(int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId);

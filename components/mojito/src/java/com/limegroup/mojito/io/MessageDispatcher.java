@@ -252,7 +252,7 @@ public abstract class MessageDispatcher implements Runnable {
      */
     protected DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
-        return InputOutputUtils.deserialize(src, data);
+        return InputOutputUtils.deserialize(context.getMessageFactory(), src, data);
     }
     
     /**

@@ -23,47 +23,32 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.MessageFactory;
 
 
 public final class InputOutputUtils {
 
-    private static final boolean COMPRESS = false;
-    
     private InputOutputUtils() {
     }
 
     public static ByteBuffer serialize(DHTMessage message) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-        
-        MessageOutputStream out = null;
-        if (COMPRESS) {
-            GZIPOutputStream gz = new GZIPOutputStream(baos);
-            out = new MessageOutputStream(gz);
-        } else {
-            out = new MessageOutputStream(baos);
-        }
+        MessageOutputStream out = new MessageOutputStream(baos);
         
         out.write(message);
         out.close();
         return ByteBuffer.wrap(baos.toByteArray());
     }
 
-    public static DHTMessage deserialize(SocketAddress src, ByteBuffer data)
-            throws MessageFormatException {
+    public static DHTMessage deserialize(MessageFactory factory, 
+            SocketAddress src, ByteBuffer data)
+                throws MessageFormatException {
+        
         try {
             ByteBufferInputStream bbis = new ByteBufferInputStream(data);
-            
-            MessageInputStream in = null;
-            if (COMPRESS) {
-                GZIPInputStream gz = new GZIPInputStream(bbis);
-                in = new MessageInputStream(src, gz);
-            } else {
-                in = new MessageInputStream(src, bbis);
-            }
+            MessageInputStream in = new MessageInputStream(bbis, factory, src);
             
             DHTMessage message = in.readMessage();
             in.close();

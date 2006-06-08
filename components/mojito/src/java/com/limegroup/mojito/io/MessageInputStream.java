@@ -38,20 +38,14 @@ import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueRequest;
+import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
+import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
-import com.limegroup.mojito.messages.impl.FindNodeRequestImpl;
-import com.limegroup.mojito.messages.impl.FindNodeResponseImpl;
-import com.limegroup.mojito.messages.impl.FindValueRequestImpl;
-import com.limegroup.mojito.messages.impl.FindValueResponseImpl;
-import com.limegroup.mojito.messages.impl.PingRequestImpl;
-import com.limegroup.mojito.messages.impl.PingResponseImpl;
-import com.limegroup.mojito.messages.impl.StatsRequestImpl;
-import com.limegroup.mojito.messages.impl.StatsResponseImpl;
-import com.limegroup.mojito.messages.impl.StoreRequestImpl;
-import com.limegroup.mojito.messages.impl.StoreResponseImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 
 /**
@@ -60,10 +54,14 @@ import com.limegroup.mojito.security.CryptoHelper;
  */
 public class MessageInputStream extends DataInputStream {
     
+    private MessageFactory factory;
     private SocketAddress src;
     
-    public MessageInputStream(SocketAddress src, InputStream in) {
+    public MessageInputStream(InputStream in, 
+            MessageFactory factory, SocketAddress src) {
         super(in);
+        
+        this.factory = factory;
         this.src = src;
     }
     
@@ -179,65 +177,65 @@ public class MessageInputStream extends DataInputStream {
     
     private PingRequest readPingRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        return new PingRequestImpl(vendor, version, node, messageId);
+        return factory.createPingRequest(vendor, version, node, messageId);
     }
     
     private PingResponse readPingResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         SocketAddress externalAddress = readSocketAddress();
         int estimatedSize = readInt();
-        return new PingResponseImpl(vendor, version, node, messageId, externalAddress, estimatedSize);
+        return factory.createPingResponse(vendor, version, node, messageId, externalAddress, estimatedSize);
     }
     
     private FindNodeRequest readFindNodeRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         KUID lookup = readNodeID();
-        return new FindNodeRequestImpl(vendor, version, node, messageId, lookup);
+        return factory.createFindNodeRequest(vendor, version, node, messageId, lookup);
     }
     
     private FindNodeResponse readFindNodeResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         QueryKey queryKey = readQueryKey();
         List nodes = readContactNodes();
-        return new FindNodeResponseImpl(vendor, version, node, messageId, queryKey, nodes);
+        return factory.createFindNodeResponse(vendor, version, node, messageId, queryKey, nodes);
     }
     
     private FindValueRequest readFindValueRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
-        KUID lookup = readValueID();
-        return new FindValueRequestImpl(vendor, version, node, messageId, lookup);
+        KUID lookupId = readValueID();
+        return factory.createFindValueRequest(vendor, version, node, messageId, lookupId);
     }
     
-    private DHTMessage readFindValueResponse(int vendor, int version, 
+    private FindValueResponse readFindValueResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         List values = readKeyValues();
-        return new FindValueResponseImpl(vendor, version, node, messageId, values);
+        return factory.createFindValueResponse(vendor, version, node, messageId, values);
     }
     
     private StoreRequest readStoreRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         QueryKey queryKey = readQueryKey();
         KeyValue keyValue = readKeyValue();
-        return new StoreRequestImpl(vendor, version, node, messageId, queryKey, keyValue);
+        return factory.createStoreRequest(vendor, version, node, messageId, queryKey, keyValue);
     }
     
     private StoreResponse readStoreResponse(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         KUID valueId = readValueID();
         int status = readUnsignedByte();
-        return new StoreResponseImpl(vendor, version, node, messageId, valueId, status);
+        return factory.createStoreResponse(vendor, version, node, messageId, valueId, status);
     }
     
-    private DHTMessage readStatsResponse(int vendor, int version, ContactNode node,
-            KUID messageId) throws IOException{
-        String stats = readUTF();
-        return new StatsResponseImpl(vendor, version, node, messageId, stats);
-    }
-    
-    private DHTMessage readStatsRequest(int vendor, int version, 
+    private StatsRequest readStatsRequest(int vendor, int version, 
             ContactNode node, KUID messageId) throws IOException {
         int request = readInt();
-        return new StatsRequestImpl(vendor, version, node, messageId, request);
+        return factory.createStatsRequest(vendor, version, node, messageId, request);
+    }
+    
+    private StatsResponse readStatsResponse(int vendor, int version, ContactNode node,
+            KUID messageId) throws IOException{
+        String stats = readUTF();
+        return factory.createStatsResponse(vendor, version, node, messageId, stats);
     }
     
     public DHTMessage readMessage() throws IOException {

@@ -182,8 +182,8 @@ public class MessageHelper {
         }
 
         public PingResponse createPingResponse(int vendor, int version, 
-                ContactNode node, KUID messageId, SocketAddress externalAddress, int dhtSize) {
-            return new PingResponseImpl(vendor, version, node, messageId, externalAddress, dhtSize);
+                ContactNode node, KUID messageId, SocketAddress externalAddress, int estimatedSize) {
+            return new PingResponseImpl(vendor, version, node, messageId, externalAddress, estimatedSize);
         }
 
         public StatsRequest createStatsRequest(int vendor, int version, 
