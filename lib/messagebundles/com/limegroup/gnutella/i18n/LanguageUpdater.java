@@ -22,15 +22,10 @@ import java.util.Properties;
  * Rebuilds the language files, based on the English one.
  */
 class LanguageUpdater {
-
     private static final String MARKER = "# TRANSLATIONS START BELOW.";
-
     private final File lib;
-
     private final Map langs;
-
     private final List englishList;
-
     private boolean verbose = true;
 
     /**
@@ -87,7 +82,7 @@ class LanguageUpdater {
      */
     void updateAllLanguages() {
         for (Iterator i = langs.values().iterator(); i.hasNext();) {
-            LanguageInfo next = (LanguageInfo) i.next();
+            LanguageInfo next = (LanguageInfo)i.next();
             updateLanguage(next);
         }
     }
@@ -102,21 +97,22 @@ class LanguageUpdater {
             println("Unknown language.");
             return;
         }
-
-        print("Updating language: " + info.getName() + " (" + info.getCode() + ")... ");
+        print("Updating language: " + info.getName() + " (" + info.getCode()
+                + ")... ");
         String filename = info.getFileName();
         File f = new File(lib, filename);
         if (!f.isFile())
             throw new IllegalArgumentException("Invalid info: " + info);
-
         File temp;
         BufferedReader reader;
         PrintWriter printer;
         try {
             temp = File.createTempFile("TEMP", info.getCode(), lib);
             reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(f), info.isUTF8() ? "UTF-8" : "ISO-8859-1"));
-            printer = new PrintWriter(temp, info.isUTF8() ? "UTF-8" : "ISO-8859-1");
+                    new FileInputStream(f), info.isUTF8() ? "UTF-8"
+                            : "ISO-8859-1"));
+            printer = new PrintWriter(temp, info.isUTF8() ? "UTF-8"
+                    : "ISO-8859-1");
             if (info.isUTF8()) {
                 reader.mark(1);
                 if (reader.read() != '\uFEFF')
@@ -148,12 +144,9 @@ class LanguageUpdater {
     private void native2ascii(LanguageInfo info) {
         if (!info.isUTF8())
             throw new IllegalArgumentException("requires utf8 language.");
-
         InputStream in = null;
         OutputStream out = null;
-
         print("\tConverting to ASCII... ");
-
         try {
             in = new BufferedInputStream(
                     new FileInputStream(info.getFileName()));
@@ -162,12 +155,10 @@ class LanguageUpdater {
                 in.reset();
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                     in, "UTF8"));
-
             out = new BufferedOutputStream(new FileOutputStream(info
                     .getAlternateFileName()));
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
                     out, "ISO-8859-1"));
-
             String read;
             while ((read = reader.readLine()) != null) {
                 writer.write(ascii(read));
@@ -182,13 +173,11 @@ class LanguageUpdater {
             if (in != null)
                 try {
                     in.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
             if (out != null)
                 try {
                     out.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
         }
     }
 
@@ -206,18 +195,15 @@ class LanguageUpdater {
                 if (c == -1)
                     return false;
             }
-        } catch (IOException ignored) {
-        } finally {
+        } catch (IOException ignored) {} finally {
             if (ia != null)
                 try {
                     ia.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
             if (ib != null)
                 try {
                     ib.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
         }
         // if we didn't exit in the loop, a character was different
         // or one stream ended before another.
@@ -229,19 +215,18 @@ class LanguageUpdater {
      */
     private void printBody(PrintWriter printer, LanguageInfo info) {
         Properties parent = null;
-        if(info.isVariant()) {
+        final boolean isUTF8 = info.isUTF8();
+        if (info.isVariant()) {
             LanguageInfo pi = (LanguageInfo)langs.get(info.getBaseCode());
-            if(pi != null)
+            if (pi != null)
                 parent = pi.getProperties();
         }
-        
         Properties props = info.getProperties();
         boolean reachedTranslations = false;
         for (Iterator i = englishList.iterator(); i.hasNext();) {
-            Line line = (Line) i.next();
+            Line line = (Line)i.next();
             if (MARKER.equals(line.getLine()))
                 reachedTranslations = true;
-
             if (line.isComment()) {
                 printer.println(line.getLine());
             } else {
@@ -254,29 +239,27 @@ class LanguageUpdater {
                     printer.print("#### ");
                     printer.print(key);
                     printer.print("=");
-                    printer.print(escape(line.getValue()));
+                    printer.print(escape(line.getValue(), isUTF8));
                     printer.println();
-                    if(parent != null) {
+                    if (parent != null) {
                         String pv = parent.getProperty(key);
-                        if(pv != null && !pv.equals("")) {
+                        if (pv != null && !pv.equals("")) {
                             printer.print("###$ ");
                             printer.print(key);
                             printer.print("=");
-                            printer.print(escape(pv));
+                            printer.print(escape(pv, isUTF8));
                             printer.println();
-                        }   
+                        }
                     }
-                } else if(value == null) {
+                } else if (value == null) {
                     value = ""; // null before translations == ""
                 }
-                
-                if (!reachedTranslations || (
-                     value != null && !value.equals("") && 
-                     line.getBraceCount() == Line.parseBraceCount(value)
-                    )) {
+                if (!reachedTranslations
+                        || (value != null && !value.equals("") && line
+                                .getBraceCount() == Line.parseBraceCount(value))) {
                     printer.print(key);
                     printer.print("=");
-                    printer.println(escape(value));
+                    printer.println(escape(value, isUTF8));
                 } else {
                     printer.print("#? ");
                     printer.print(key);
@@ -304,8 +287,7 @@ class LanguageUpdater {
                     break;
                 printer.println(read);
             }
-        } finally {
-        }
+        } finally {}
     }
 
     /**
@@ -313,7 +295,7 @@ class LanguageUpdater {
      */
     private void removeInitialComments(List l) {
         for (Iterator i = l.iterator(); i.hasNext();) {
-            Line line = (Line) i.next();
+            Line line = (Line)i.next();
             if (line.isComment())
                 i.remove();
             else
@@ -325,7 +307,7 @@ class LanguageUpdater {
      * Returns a string suitable for insertion into a UTF-8 encoded Properties
      * file. Some characters will always be escaped.
      */
-    private String escape(String s) {
+    private String escape(final String s, final boolean isUTF8) {
         final int n = s.length();
         StringBuffer sb = new StringBuffer(n);
         for (int i = 0; i < n; i++) {
@@ -338,11 +320,13 @@ class LanguageUpdater {
             if (Character.isWhitespace(cp)
                     || Character.isSpaceChar(cp)
                     || Character.isISOControl(cp)
-                    ||
+                    // if the target file is not UTF8, we must escape all non
+                    // ISO-8859-1 characters.
+                    || (!isUTF8 && cp >= '\u0100')
                     // treat isolated surrogates like controls
-                    !Character.isSupplementaryCodePoint(cp)
-                    && (Character.isLowSurrogate((char) cp) || Character
-                            .isHighSurrogate((char) cp))) {
+                    || !Character.isSupplementaryCodePoint(cp)
+                    && (Character.isLowSurrogate((char)cp) || Character
+                            .isHighSurrogate((char)cp))) {
                 switch (cp) {
                 // only ASCII regular SPACE can be left unchanged;
                 case ' ':

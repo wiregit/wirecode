@@ -5,21 +5,16 @@ package com.limegroup.gnutella.i18n;
  */
 class Line {
     private final String wholeLine;
-
     private final String key;
-
     private final String value;
-
     private final int braces;
-    
     private final boolean extraComment;
 
     /**
-     * TODO: does not handle all comment lines properly!
-     * TODO: does not separate key=value pairs properly!
-     * TODO: does not decode continuation lines properly
-     *       (continuation lines should be already joined in a upper layer
-     *        before passing data line here.)
+     * TODO: does not handle all comment lines properly!<br />
+     * TODO: does not separate key=value pairs properly!<br />
+     * TODO: does not decode continuation lines properly (continuation lines
+     * should be already joined in a upper layer before passing data line here.)<br />
      * TODO: ignores lines that don't have an = or #.
      * 
      * @param data
@@ -28,49 +23,45 @@ class Line {
     Line(String data) {
         if (data == null)
             throw new NullPointerException("null data");
-        wholeLine = data;
+        this.wholeLine = data;
         data.trim();
-        
-        if(data.startsWith("#?")) {
+        if (data.startsWith("#?")) { //$NON-NLS-1$
             data = data.substring(2).trim();
-            extraComment = true;
+            this.extraComment = true;
         } else {
-            extraComment = false;
+            this.extraComment = false;
         }
-        
-        if (data.startsWith("#") || data.trim().equals("")) {
-            key = null;
-            value = null;
-            braces = 0;
+        if (data.startsWith("#") || data.equals("")) { //$NON-NLS-1$//$NON-NLS-2$
+            this.key = null;
+            this.value = null;
+            this.braces = 0;
         } else {
-            int eq = data.indexOf("=");
+            final int eq = data.indexOf('=');
             if (eq == -1) {
-                key = null;
-                value = null;
-                braces = 0;
+                this.key = null;
+                this.value = null;
+                this.braces = 0;
             } else {
-                key = data.substring(0, eq);
-                if (eq == data.length() || eq == data.length() - 1)
-                    value = "";
+                this.key = data.substring(0, eq);
+                if (eq >= data.length() - 1)
+                    this.value = ""; //$NON-NLS-1$
                 else
-                    value = data.substring(eq + 1);
-    
-                braces = parseBraceCount(value);
+                    this.value = data.substring(eq + 1);
+                this.braces = parseBraceCount(this.value);
             }
         }
     }
 
     static int parseBraceCount(String value) {
         int count = 0;
-        int startIdx = value.indexOf("{");
+        int startIdx = value.indexOf('{');
         while (startIdx != -1) {
-            int endIdx = value.indexOf("}", startIdx);
+            int endIdx = value.indexOf('}', startIdx);
             if (endIdx != -1) {
                 try {
                     Integer.parseInt(value.substring(startIdx + 1, endIdx));
                     count++;
-                } catch (NumberFormatException ignored) {
-                }
+                } catch (NumberFormatException nfe) {/* ignored */}
                 startIdx = endIdx + 1;
             } else {
                 break;
@@ -83,41 +74,41 @@ class Line {
      * @return true if this is a not a key=value line.
      */
     boolean isComment() {
-        return key == null;
+        return this.key == null;
     }
 
     /**
      * @return this whole text line (comment or key=value).
      */
     String getLine() {
-        return wholeLine;
+        return this.wholeLine;
     }
 
     /**
      * @return this line key, or null if isComment() is true.
      */
     String getKey() {
-        return key;
+        return this.key;
     }
 
     /**
      * @return this line value, or null if isComment() is true.
      */
     String getValue() {
-        return value;
+        return this.value;
     }
 
     /**
-     * Gets the number of braces this line had.
+     * @return the number of brace pairs this line had
      */
     int getBraceCount() {
-        return braces;
+        return this.braces;
     }
-    
+
     /**
-     * @return true if the line had an extra #? infront.
+     * @return true if the line had an extra "#? " in front.
      */
     boolean hadExtraComment() {
-        return extraComment;
+        return this.extraComment;
     }
 }

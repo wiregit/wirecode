@@ -18,26 +18,21 @@ import java.util.Set;
 import java.util.TreeMap;
 
 class LanguageLoader {
-
     /** @see LanguageInfo#getLink() */
-    static final String BUNDLE_NAME = "MessagesBundle";
-
+    static final String BUNDLE_NAME = "MessagesBundle"; //$NON-NLS-1$
     /** @see LanguageInfo#getLink() */
-    static final String PROPS_EXT = ".properties";
-
+    static final String PROPS_EXT = ".properties"; //$NON-NLS-1$
     /** @see LanguageInfo#getLink() */
-    static final String UTF8_EXT = ".UTF-8.txt";
-
-    private final Map/* <String code, LanguageInfo li> */langs;
-
+    static final String UTF8_EXT = ".UTF-8.txt"; //$NON-NLS-1$
+    private final Map/* <String, LanguageInfo> */langs;
     private final File lib;
 
     /**
      * @param directory
      */
     LanguageLoader(File directory) {
-        langs = new TreeMap();
-        lib = directory;
+        this.langs = new TreeMap();
+        this.lib = directory;
     }
 
     /**
@@ -49,20 +44,20 @@ class LanguageLoader {
      * @return the languages map (from complete locale codes to LocaleInfo)
      */
     Map loadLanguages() {
-        if (!lib.isDirectory())
-            throw new IllegalArgumentException("invalid lib: " + lib);
-
-        String[] files = lib.list();
+        if (!this.lib.isDirectory())
+            throw new IllegalArgumentException("invalid lib: " + this.lib);
+        final String[] files = this.lib.list();
         for (int i = 0; i < files.length; i++) {
-            if (!files[i].startsWith(BUNDLE_NAME + "_")
+            if (!files[i].startsWith(BUNDLE_NAME + '_')
                     || !files[i].endsWith(PROPS_EXT)
-                    || files[i].startsWith(BUNDLE_NAME + "_en"))
+                    || files[i].startsWith(BUNDLE_NAME + "_en")) //$NON-NLS-1$
                 continue;
-
             /* See if a .UTF-8.txt file exists; if so, use that as the link. */
             String linkFileName = files[i];
             int idxProperties = linkFileName.indexOf(PROPS_EXT);
-            File utf8 = new File(lib, linkFileName.substring(0, idxProperties) + UTF8_EXT);
+            final File utf8 = new File(this.lib, linkFileName.substring(0,
+                    idxProperties)
+                    + UTF8_EXT);
             boolean skipUTF8LeadingBOM = false;
             if (utf8.exists()) {
                 /*
@@ -79,10 +74,9 @@ class LanguageLoader {
                 linkFileName = utf8.getName();
                 skipUTF8LeadingBOM = true;
             }
-
             try {
-                File toRead = new File(lib, linkFileName);
-                InputStream in = new FileInputStream(toRead);
+                final File toRead = new File(this.lib, linkFileName);
+                final InputStream in = new FileInputStream(toRead);
                 // skip the three-bytes leading BOM
                 if (skipUTF8LeadingBOM)
                     try {
@@ -92,15 +86,17 @@ class LanguageLoader {
                          * part of a resource key.
                          */
                         in.mark(3);
-                        if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
+                        if (in.read() != 0xEF || in.read() != 0xBB
+                                || in.read() != 0xBF)
                             in.reset();
-                    } catch (java.io.IOException ioe) {}
-                loadFile(langs, in, linkFileName, files[i], skipUTF8LeadingBOM, toRead);
+                    } catch (java.io.IOException ioe) {/* ignored */}
+                loadFile(this.langs, in, linkFileName, files[i],
+                        skipUTF8LeadingBOM, toRead);
             } catch (FileNotFoundException fnfe) {
                 fnfe.printStackTrace();
             }
         }
-        return langs;
+        return this.langs;
     }
 
     /**
@@ -110,41 +106,40 @@ class LanguageLoader {
      * @throws IOException
      * @see Line
      */
-    List /* of Line */getEnglishLines() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                new FileInputStream(new File(lib, BUNDLE_NAME + PROPS_EXT)),
-                "ISO-8859-1"));
-
-        List lines = new LinkedList();
+    List/* <Line> */getEnglishLines() throws IOException {
+        final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(new File(this.lib,
+                        BUNDLE_NAME + PROPS_EXT)), "ISO-8859-1")); //$NON-NLS-1$
+        final List/* <Line> */lines = new LinkedList/* <Line> */();
         String read;
         while ((read = reader.readLine()) != null)
             lines.add(new Line(read));
-
         return lines;
     }
-    
+
     /**
-     * Scans the file for translations that mistakenly still have a 
-     * #? sign before them and adds them into the properties.
-     * This assumes the file is ISO-8859-1 encoded, just like Properties.load.
-     * If the file is UTF8 encoded, you will have to manually convert the
-     * resulting properties to UTF8.
+     * Scans the file for translations that mistakenly still have a #? sign
+     * before them and adds them into the properties. This assumes the file is
+     * ISO-8859-1 encoded, just like Properties.load. If the file is UTF8
+     * encoded, you will have to manually convert the resulting properties to
+     * UTF8.
      * 
      * @param file
      * @param props
      * @throws IOException
      */
-    private void scanForCommentedTranslations(File file, Properties props) throws IOException {
+    private void scanForCommentedTranslations(File file, Properties props)
+            throws IOException {
         InputStream in = new BufferedInputStream(new FileInputStream(file));
         in.mark(3);
         if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
             in.reset();
-        
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in, "ISO-8859-1"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in,
+                "ISO-8859-1")); //$NON-NLS-1$
         String read;
-        while((read = reader.readLine()) != null) {
+        while ((read = reader.readLine()) != null) {
             Line line = new Line(read);
-            if(line.hadExtraComment())
+            if (line.hadExtraComment())
                 props.put(line.getKey(), line.getValue());
         }
         reader.close();
@@ -158,7 +153,8 @@ class LanguageLoader {
      */
     Properties getDefaultProperties() throws java.io.IOException {
         Properties p = new Properties();
-        InputStream in = new FileInputStream(new File(lib, BUNDLE_NAME + PROPS_EXT));
+        InputStream in = new FileInputStream(new File(this.lib, BUNDLE_NAME
+                + PROPS_EXT));
         p.load(in);
         in.close();
         return p;
@@ -171,25 +167,24 @@ class LanguageLoader {
      * @throws IOException
      */
     Set getAdvancedKeys() throws java.io.IOException {
-        BufferedReader reader;
+        final BufferedReader reader;
         reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-                new File(lib, BUNDLE_NAME + PROPS_EXT)), "ISO-8859-1"));
-
+                new File(this.lib, BUNDLE_NAME + PROPS_EXT)), "ISO-8859-1")); //$NON-NLS-1$
         String read;
-        while ((read = reader.readLine()) != null
-                && !read.startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"))
-            ;
-
-        StringBuffer sb = new StringBuffer();
+        while ((read = reader.readLine()) != null)
+            if (read
+                    .startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL")) //$NON-NLS-1$
+                break;
+        final StringBuffer sb = new StringBuffer();
         while ((read = reader.readLine()) != null) {
             if (read.length() == 0 || read.charAt(0) == '#')
                 continue;
-            sb.append(read).append("\n");
+            sb.append(read).append("\n"); //$NON-NLS-1$
         }
-        InputStream in = new ByteArrayInputStream(sb.toString().getBytes("ISO-8859-1"));
+        InputStream in = new ByteArrayInputStream(sb.toString().getBytes(
+                "ISO-8859-1")); //$NON-NLS-1$
         Properties p = new Properties();
         p.load(in);
-
         in.close();
         reader.close();
         return p.keySet();
@@ -200,13 +195,14 @@ class LanguageLoader {
      */
     void extendVariantLanguages() {
         /* Extends missing resources with those from the base language */
-        for (Iterator i = langs.entrySet().iterator(); i.hasNext();) {
-            final Map.Entry entry = (Map.Entry) i.next();
+        for (final Iterator/* <Map.Entry<String, LanguageInfo>> */i = this.langs
+                .entrySet().iterator(); i.hasNext();) {
+            final Map.Entry entry = (Map.Entry)i.next();
             // final String code = (String)entry.getKey();
-            final LanguageInfo li = (LanguageInfo) entry.getValue();
+            final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
             if (li.isVariant()) {
-                final LanguageInfo liBase = (LanguageInfo) langs.get(li
+                final LanguageInfo liBase = (LanguageInfo)this.langs.get(li
                         .getBaseCode());
                 if (liBase != null) {
                     /* Get a copy of base properties */
@@ -229,41 +225,50 @@ class LanguageLoader {
      */
     void retainKeys(Set keys) {
         /* Extends missing resources with those from the base language */
-        for (Iterator i = langs.entrySet().iterator(); i.hasNext();) {
-            final Map.Entry entry = (Map.Entry) i.next();
+        for (final Iterator/* <Map.Entry<String, LanguageInfo>> */i = this.langs
+                .entrySet().iterator(); i.hasNext();) {
+            final Map.Entry/* <String, LanguageInfo> */entry = (Map.Entry)i
+                    .next();
             // final String code = (String)entry.getKey();
-            final LanguageInfo li = (LanguageInfo) entry.getValue();
+            final LanguageInfo li = (LanguageInfo)entry.getValue();
             final Properties props = li.getProperties();
             props.keySet().retainAll(keys);
         }
     }
-    
+
     /**
-     * Iterates through the properties and removes all entries that
-     * have empty values.
+     * Iterates through the properties and removes all entries that have empty
+     * values.
      * 
      * @param props
      */
     private void removeEmptyProperties(Properties props) {
-        for(Iterator i = props.values().iterator(); i.hasNext(); ) {
-            if("".equals(i.next()))
+        for (Iterator i = props.values().iterator(); i.hasNext();) {
+            if ("".equals(i.next())) //$NON-NLS-1$
                 i.remove();
         }
     }
 
     /**
      * Loads a single file into the languages map.
+     * 
+     * @param newlangs
+     * @param is
+     * @param filename
+     * @param baseFileName
+     * @param isUTF8
+     * @param toRead
+     * @return
      */
-    private LanguageInfo loadFile(Map newlangs, InputStream in,
-            String filename, String baseFileName, boolean isUTF8,
-            File toRead) {
+    private LanguageInfo loadFile(final Map newlangs, final InputStream is,
+            final String filename, final String baseFileName,
+            final boolean isUTF8, final File toRead) {
         try {
-            in = new BufferedInputStream(in);
+            final BufferedInputStream in = new BufferedInputStream(is);
             final Properties props = new Properties();
             props.load(in);
             scanForCommentedTranslations(toRead, props);
             removeEmptyProperties(props);
-            
             /*
              * note that the file is read in ISO-8859-1 only, even if it is
              * encoded with another charset. However, the Properties has its
@@ -272,23 +277,22 @@ class LanguageLoader {
              * the file is read and interpreted as a set of properties
              * (keys,values).
              */
-
             if (isUTF8) {
                 // actually the file was UTF-8-encoded: convert bytes read
                 // incorrectly as
                 // ISO-8859-1 characters, into actual Unicode UTF-16 code units.
                 for (Iterator i = props.entrySet().iterator(); i.hasNext();) {
-                    final Map.Entry entry = (Map.Entry) i.next();
-                    final String key = (String) entry.getKey();
-                    final String value = (String) entry.getValue();
+                    final Map.Entry entry = (Map.Entry)i.next();
+                    final String key = (String)entry.getKey();
+                    final String value = (String)entry.getValue();
                     byte[] bytes = null;
                     try {
-                        bytes = value.getBytes("ISO-8859-1");
+                        bytes = value.getBytes("ISO-8859-1"); //$NON-NLS-1$
                     } catch (java.io.IOException ioe) {
                         ioe.printStackTrace();
                     }
                     try {
-                        final String correctedValue = new String(bytes, "UTF-8");
+                        final String correctedValue = new String(bytes, "UTF-8"); //$NON-NLS-1$
                         if (!correctedValue.equals(value))
                             props.put(key, correctedValue);
                     } catch (java.io.IOException ioe) {
@@ -297,19 +301,19 @@ class LanguageLoader {
                     }
                 }
             }
-            String lc = props.getProperty("LOCALE_LANGUAGE_CODE", "");
-            String cc = props.getProperty("LOCALE_COUNTRY_CODE", "");
-            String vc = props.getProperty("LOCALE_VARIANT_CODE", "");
-            String sc = props.getProperty("LOCALE_SCRIPT_CODE", "");
-            String ln = props.getProperty("LOCALE_LANGUAGE_NAME", lc);
-            String cn = props.getProperty("LOCALE_COUNTRY_NAME", cc);
-            String vn = props.getProperty("LOCALE_VARIANT_NAME", vc);
-            String sn = props.getProperty("LOCALE_SCRIPT_NAME", sc);
-            String dn = props.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
-            String nsisName = props.getProperty("LOCALE_NSIS_NAME", "");
-            boolean rtl = props.getProperty("LAYOUT_RIGHT_TO_LEFT", "false")
-                    .equals("true");
-
+            String lc = props.getProperty("LOCALE_LANGUAGE_CODE", ""); //$NON-NLS-1$//$NON-NLS-2$
+            String cc = props.getProperty("LOCALE_COUNTRY_CODE", ""); //$NON-NLS-1$//$NON-NLS-2$
+            String vc = props.getProperty("LOCALE_VARIANT_CODE", ""); //$NON-NLS-1$//$NON-NLS-2$
+            String sc = props.getProperty("LOCALE_SCRIPT_CODE", ""); //$NON-NLS-1$//$NON-NLS-2$
+            String ln = props.getProperty("LOCALE_LANGUAGE_NAME", lc); //$NON-NLS-1$
+            String cn = props.getProperty("LOCALE_COUNTRY_NAME", cc); //$NON-NLS-1$
+            String vn = props.getProperty("LOCALE_VARIANT_NAME", vc); //$NON-NLS-1$
+            String sn = props.getProperty("LOCALE_SCRIPT_NAME", sc); //$NON-NLS-1$
+            String dn = props.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln); //$NON-NLS-1$
+            String nsisName = props.getProperty("LOCALE_NSIS_NAME", //$NON-NLS-1$
+                    ""); //$NON-NLS-1$
+            boolean rtl = props.getProperty("LAYOUT_RIGHT_TO_LEFT", //$NON-NLS-1$
+                    "false").equals("true"); //$NON-NLS-1$//$NON-NLS-2$
             LanguageInfo li = new LanguageInfo(lc, cc, vc, sc, ln, cn, vn, sn,
                     dn, nsisName, rtl, filename, props, baseFileName);
             newlangs.put(li.getCode(), li);
@@ -317,11 +321,10 @@ class LanguageLoader {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (in != null)
+            if (is != null)
                 try {
-                    in.close();
-                } catch (IOException ioe) {
-                }
+                    is.close();
+                } catch (IOException ioe) {}
         }
         return null;
     }

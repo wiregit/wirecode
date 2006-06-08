@@ -6,41 +6,23 @@ import java.util.Properties;
  * Struct-like container for language information.
  */
 class LanguageInfo implements Comparable {
-
     private final String languageCode;
-
     private final String countryCode;
-
     private final String variantCode;
-
     private final String scriptCode;
-
     private final String languageName;
-
     private final String countryName;
-
     private final String variantName;
-
     private final String scriptName;
-
     private boolean isRightToLeft;
-
     private final String displayName;
-
     private final String fileName;
-
     private final Properties properties;
-
     private double percentage;
-
     private final String alternateFileName;
-
     private final String nsisName;
-
     private static final String CHARSET_UTF8 = "UTF-8";
-
     private static final String CHARSET_8859_1 = "ISO-8859-1";
-
     private final String sourceCharset;
 
     /**
@@ -102,7 +84,7 @@ class LanguageInfo implements Comparable {
      * @see Comparable#compareTo(Object)
      */
     public int compareTo(Object other) {
-        final LanguageInfo o = (LanguageInfo) other;
+        final LanguageInfo o = (LanguageInfo)other;
         int comp = languageCode.compareTo(o.languageCode);
         if (comp != 0)
             return comp;
@@ -253,5 +235,4 @@ class LanguageInfo implements Comparable {
         return "<a href=\"" + HTMLOutput.PRE_LINK + fileName + "\" title=\""
                 + toString() + "\">" + displayName + "</a>";
     }
-
 }
