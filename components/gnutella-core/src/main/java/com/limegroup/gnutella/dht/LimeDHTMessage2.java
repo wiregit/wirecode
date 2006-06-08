@@ -26,7 +26,7 @@ import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 
-public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
+abstract class LimeDHTMessage2 extends Message implements DHTMessage {
     
     private static final byte F_DHT_MESSAGE = (byte)0x43;
     
@@ -54,7 +54,7 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         super(guid, F_DHT_MESSAGE, ttl, hops, length);
     }
 
-    public LimeDHTMessage2(int opcode, int vendor, int version, 
+    LimeDHTMessage2(int opcode, int vendor, int version, 
             ContactNode contactNode, KUID messageId) {
         super(makeGuid(), F_DHT_MESSAGE, (byte)0x01, (byte)0x00, 0, N_UNKNOWN);
         
@@ -65,7 +65,7 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         this.messageId = messageId;
     }
     
-    protected void serialize() throws IOException {
+    private void serialize() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(640);
         MessageOutputStream out = new MessageOutputStream(baos);
         out.write(this);
@@ -120,14 +120,14 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         return version;
     }
 
-    private static class LimeDHTRequestMessage extends LimeDHTMessage2
+    private static class LimeRequestMessage extends LimeDHTMessage2
             implements RequestMessage {
 
         private int secureStatus = INSECURE;
         
         private byte[] signature;
         
-        public LimeDHTRequestMessage(int opcode, int vendor, int version,
+        private LimeRequestMessage(int opcode, int vendor, int version,
                 ContactNode contactNode, KUID messageId) {
             super(opcode, vendor, version, contactNode, messageId);
         }
@@ -157,31 +157,31 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    private static class LimeDHTResponseMessage extends LimeDHTMessage2
+    private static class LimeResponseMessage extends LimeDHTMessage2
             implements ResponseMessage {
         
-        public LimeDHTResponseMessage(int opcode, int vendor, int version,
+        private LimeResponseMessage(int opcode, int vendor, int version,
                 ContactNode contactNode, KUID messageId) {
             super(opcode, vendor, version, contactNode, messageId);
         }
     }
     
-    static class PingRequestImpl extends LimeDHTRequestMessage 
+    static class PingRequestImpl extends LimeRequestMessage 
             implements PingRequest {
         
-        public PingRequestImpl(int vendor, int version, 
+        PingRequestImpl(int vendor, int version, 
                 ContactNode contactNode, KUID messageId) {
             super(PING_REQUEST, vendor, version, contactNode, messageId);
         }
     }
     
-    static class PingResponseImpl extends LimeDHTResponseMessage
+    static class PingResponseImpl extends LimeResponseMessage
             implements PingResponse {
         
         private SocketAddress externalAddress;
         private int estimatedSize;
         
-        PingResponseImpl(int opcode, int vendor, int version, 
+        PingResponseImpl(int vendor, int version, 
                 ContactNode contactNode, KUID messageId, 
                 SocketAddress externalAddress, int estiamtedSize) {
             super(PING_RESPONSE, vendor, version, contactNode, messageId);
@@ -199,13 +199,13 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class StoreRequestImpl extends LimeDHTRequestMessage
+    static class StoreRequestImpl extends LimeRequestMessage
             implements StoreRequest {
 
         private QueryKey queryKey;
         private KeyValue keyValue;
         
-        public StoreRequestImpl(int vendor, int version,
+        StoreRequestImpl(int vendor, int version,
                 ContactNode contactNode, KUID messageId,
                 QueryKey queryKey, KeyValue keyValue) {
             super(STORE_REQUEST, vendor, version, contactNode, messageId);
@@ -223,13 +223,13 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class StoreResponseImpl extends LimeDHTResponseMessage
+    static class StoreResponseImpl extends LimeResponseMessage
             implements StoreResponse {
         
         private KUID valueId;
         private int status;
         
-        public StoreResponseImpl(int vendor, int version, 
+        StoreResponseImpl(int vendor, int version, 
                 ContactNode contactNode, KUID messageId,
                 KUID valueId, int status) {
             super(STORE_RESPONSE, vendor, version, contactNode, messageId);
@@ -247,7 +247,7 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class FindNodeRequestImpl extends LimeDHTRequestMessage 
+    static class FindNodeRequestImpl extends LimeRequestMessage 
             implements FindNodeRequest {
         
         private KUID lookupId;
@@ -265,7 +265,7 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class FindNodeResponseImpl extends LimeDHTResponseMessage
+    static class FindNodeResponseImpl extends LimeResponseMessage
             implements FindNodeResponse {
 
         private Collection nodes;
@@ -289,12 +289,12 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class FindValueRequestImpl extends LimeDHTRequestMessage
+    static class LimeFindValueRequestImpl extends LimeRequestMessage
             implements FindValueRequest {
         
         private KUID lookupId;
         
-        FindValueRequestImpl(int vendor, int version,
+        LimeFindValueRequestImpl(int vendor, int version,
                 ContactNode contactNode, KUID messageId,
                 KUID lookupId) {
             super(FIND_VALUE_REQUEST, vendor, version, contactNode, messageId);
@@ -307,7 +307,7 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class FindValueResponseImpl extends LimeDHTResponseMessage 
+    static class FindValueResponseImpl extends LimeResponseMessage 
             implements FindValueResponse {
 
         private Collection values;
@@ -324,7 +324,7 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class StatsRequestImpl extends LimeDHTRequestMessage
+    static class StatsRequestImpl extends LimeRequestMessage
             implements StatsRequest {
 
         private int request;
@@ -341,12 +341,12 @@ public abstract class LimeDHTMessage2 extends Message implements DHTMessage {
         }
     }
     
-    static class StatsResponseImpl extends LimeDHTResponseMessage
+    static class StatsResponseImpl extends LimeResponseMessage
             implements StatsResponse {
 
         private String stats;
         
-        public StatsResponseImpl(int vendor, int version, 
+        StatsResponseImpl(int vendor, int version, 
                 ContactNode contactNode, KUID messageId, String stats) {
             super(STATS_RESPONSE, vendor, version, contactNode, messageId);
             
