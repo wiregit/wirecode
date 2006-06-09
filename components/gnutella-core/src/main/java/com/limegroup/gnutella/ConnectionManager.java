@@ -1393,6 +1393,14 @@ public class ConnectionManager {
      */
     public synchronized void disconnect() {
         _disconnectTime = System.currentTimeMillis();
+        
+        int sessionTime = (int)((_disconnectTime - _connectTime)/(1000L*60L)); //in minutes
+        int totalConnectTime = ApplicationSettings.TOTAL_CONNECTION_TIME.getValue() + sessionTime;
+        ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(totalConnectTime);
+        int totalConnections = ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1;
+        ApplicationSettings.TOTAL_CONNECTIONS.setValue(totalConnections);
+        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(totalConnectTime/totalConnections);
+        
         _connectTime = Long.MAX_VALUE;
         _preferredConnections = 0;
         adjustConnectionFetchers(); // kill them all

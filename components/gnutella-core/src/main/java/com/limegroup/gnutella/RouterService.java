@@ -905,6 +905,9 @@ public class RouterService {
             
             getAcceptor().shutdown();
             
+            //clean-up connections and record connection uptime for this session
+            manager.disconnect();
+            
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
             

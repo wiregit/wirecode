@@ -17,13 +17,32 @@ public class ApplicationSettings extends LimeProps {
      * The average time this user leaves the application running.
      */        
     public static final IntSetting AVERAGE_UPTIME =
-        FACTORY.createExpirableIntSetting("AVERAGE_UPTIME", 20*60);
+        FACTORY.createExpirableIntSetting("AVERAGE_UPTIME", 0);
    
     /**
 	 * The total time this user has used the application.
 	 */    
     public static final IntSetting TOTAL_UPTIME =
-        FACTORY.createIntSetting("TOTAL_UPTIME", 20*60);
+        FACTORY.createIntSetting("TOTAL_UPTIME", 0);
+    
+    /**
+     * The average time this user is connected to the network per session (in minutes).
+     */        
+    public static final IntSetting AVERAGE_CONNECTION_TIME =
+        FACTORY.createExpirableIntSetting("AVERAGE_CONNECTION_TIME", 0);
+    
+    /**
+     * The total time this user has been connected to the network (in minutes).
+     */    
+    public static final IntSetting TOTAL_CONNECTION_TIME =
+        FACTORY.createIntSetting("TOTAL_CONNECTION_TIME", 0);
+    
+    /**
+     * The total number of times this user has connected-disconnected from the network.
+     */    
+    public static final IntSetting TOTAL_CONNECTIONS =
+        FACTORY.createIntSetting("TOTAL_CONNECTIONS", 0);
+    
     
     /**
      * The total number of times the application  has been run --
