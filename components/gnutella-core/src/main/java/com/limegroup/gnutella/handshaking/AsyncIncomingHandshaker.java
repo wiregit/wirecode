@@ -55,7 +55,7 @@ public class AsyncIncomingHandshaker implements Handshaker, IOStateObserver {
     }
 
     public void shutdown() {
-        observer.handleBadHandshake();
+        observer.shutdown();
     }
 
 }
