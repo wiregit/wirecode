@@ -7,7 +7,7 @@ import com.limegroup.gnutella.InsufficientDataException;
  * A simple implementation of the BandwidthTracker interface
  */
 public class SimpleBandwidthTracker implements BandwidthTracker {
-	private static final int DEFAULT_INTERVAL = 3 * 1000;
+	private static final int DEFAULT_INTERVAL = 500;
 
 	private final int _interval;
 

@@ -8,7 +8,10 @@ import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -693,7 +696,9 @@ public class VerifyingFolder {
 		} 
 		
 		// prepare a list of partial or requested blocks the remote host has
-		Set available = new LinkedHashSet(requestedRanges.keySet());
+		Collection available = new HashSet(requestedRanges.size()+partialBlocks.size());
+		available.addAll(requestedRanges.keySet());
+		available.addAll(partialBlocks.keySet());
 		for (Iterator iterator = available.iterator(); iterator.hasNext();) {
 			Integer block = (Integer) iterator.next();
 			// if the other side doesn't have this block, its not an option
@@ -703,6 +708,9 @@ public class VerifyingFolder {
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("available partial blocks to attempt: "+available);
+		
+		available = new ArrayList(available);
+		Collections.shuffle((List)available);
 		
 		// go through and find a block that we can request something from.
 		for (Iterator iterator = available.iterator(); iterator.hasNext();) {

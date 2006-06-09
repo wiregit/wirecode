@@ -161,7 +161,6 @@ public class Choker {
 			int numFast = getNumUploads() - 1;
 			for(int i = fastest.size() - 1; i >= numFast; i--)
 				fastest.remove(i);
-			
 			// unchoke optimistically at least one interested connection
 			int optimistic = Math.max(1,
 					BittorrentSettings.TORRENT_MIN_UPLOADS.getValue() - fastest.size());
@@ -172,8 +171,9 @@ public class Choker {
 				if (fastest.remove(con)) 
 					con.sendUnchoke(periodic.round);
 				else if (optimistic > 0 && con.shouldBeInterested()) {
+					boolean wasChoked = con.isChoked();
 					con.sendUnchoke(periodic.round); // this is weird but that's how Bram does it
-					if (con.isInterested()) 
+					if (con.isInterested() && wasChoked) 
 						optimistic--;
 				} else 
 					con.sendChoke();

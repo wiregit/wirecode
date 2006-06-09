@@ -622,13 +622,22 @@ public class ManagedTorrent {
 		// cancel requests
 		Runnable r = new Runnable(){
 			public void run() {
+				List seeds = new ArrayList(_connections.size());
 				for (Iterator iter = _connections.iterator(); iter.hasNext();) {
 					BTConnection btc = (BTConnection) iter.next();
-					// cancel all requests, if there are any left. (This should not
-					// be the case at this point anymore)
-					btc.cancelAllRequests();
-					btc.sendNotInterested();
+					if (btc.isSeed())
+						seeds.add(btc);
+					else {
+						// cancel all requests, if there are any left. (This should not
+						// be the case at this point anymore)
+						btc.cancelAllRequests();
+						btc.sendNotInterested();
+					}
 				}
+				
+				// close all seed connections
+				for (Iterator iter = seeds.iterator();iter.hasNext();)
+					((BTConnection)iter.next()).close();
 			}
 		};
 		networkInvoker.invokeLater(r);

@@ -317,7 +317,7 @@ implements TorrentLifecycleListener {
 		if (_torrent == t) {
 			if (stopTime == 0) // do not update the stop time if was completed.
 				stopTime = System.currentTimeMillis();
-			manager.remove(this, t.isComplete());
+			manager.remove(this, isCompleted());
 		}
 	}
 	

@@ -110,7 +110,7 @@ public class BTMessageWriter implements
 	}
 
 	public void sendKeepAlive() {
-		if (_queue.isEmpty()) {
+		if (_queue.isEmpty() && _out[1] == null) {
 			myKeepAlive.clear();
 			_channel.interest(this, true);
 		}

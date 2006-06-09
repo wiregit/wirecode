@@ -106,31 +106,37 @@ public final class StalledUploadWatchdog implements Runnable {
      * Reschedules if needed.
      */
     public synchronized void run() {
-        isScheduled = false;
-        // we deactivated, don't do anything.
-        if(nextCheckTime == -1) {
-            return;
-        }
-        
-        long now = System.currentTimeMillis();
-        // if this was called before we should be checking,
-        // then reschedule it for the correct time.
-        if ( now < nextCheckTime ) {
-            RouterService.schedule(this, nextCheckTime - now, 0);
-        }
-        // otherwise, close the stream & remember we did it.
-        else {
-        	closed = true;
-        	// If it was null, it was already closed
-        	// by an outside source.
-        	if( shutdownable != null ) {
-        		if(LOG.isDebugEnabled())
-        			LOG.debug("STALLED!  Killing: " + shutdownable);                    
-        		UploadStat.STALLED.incrementStat();
-        		shutdownable.shutdown();
-        	}
-        	shutdownable = null;
-        }
+    	Shutdownable toShut = null;
+    	synchronized(this) {
+    		isScheduled = false;
+    		// we deactivated, don't do anything.
+    		if(nextCheckTime == -1) {
+    			return;
+    		}
+    		
+    		long now = System.currentTimeMillis();
+    		// if this was called before we should be checking,
+    		// then reschedule it for the correct time.
+    		if ( now < nextCheckTime ) {
+    			RouterService.schedule(this, nextCheckTime - now, 0);
+    		}
+    		// otherwise, close the stream & remember we did it.
+    		else {
+    			closed = true;
+    			// If it was null, it was already closed
+    			// by an outside source.
+    			if( shutdownable != null ) {
+    				if(LOG.isDebugEnabled())
+    					LOG.debug("STALLED!  Killing: " + shutdownable);                    
+    				UploadStat.STALLED.incrementStat();
+    				toShut = shutdownable;
+    			}
+    			shutdownable = null;
+    		}
+    	}
+    	
+    	if (toShut != null)
+    		toShut.shutdown();
     }
     
     private static class OStreamWrap implements Shutdownable {

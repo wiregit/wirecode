@@ -365,9 +365,9 @@ public class BTConnection implements UploadSlotListener {
 	 * Unchokes the connection
 	 */
 	void sendUnchoke(int now) {
+		setUnchokeRound(now);
 		if (_isChoked) {
 			_writer.enqueue(BTUnchoke.createMessage());
-			setUnchokeRound(now);
 			_isChoked = false;
 		}
 	}

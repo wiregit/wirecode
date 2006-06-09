@@ -80,7 +80,6 @@ public class UploadSlotManager {
 	}
 
 	private synchronized int requestSlot(UploadSlotRequest request) {
-		
 		// see if there exists an uploader with higher priority
 		boolean existHigherPriority = existActiveHigherPriority(request.getPriority());
 		
