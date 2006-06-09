@@ -50,11 +50,17 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     private Filter filter;
     
     private ProcessingQueue processingQueue;
+    private ProcessingQueue secureProcessingQueue;
     
     public MessageDispatcherImpl(Context context) {
         super(context);
         
-        processingQueue = new ProcessingQueue(context.getName() + "-MessageDispatcherPQ", true);
+        processingQueue = new ProcessingQueue(
+                context.getName() + "-MessageDispatcherPQ", true);
+        
+        secureProcessingQueue = new ProcessingQueue(
+                context.getName() + "-SecureMessageDispatcherPQ", true);
+        
         filter = new Filter();
     }
     
@@ -90,6 +96,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         }
         
         processingQueue.clear();
+        secureProcessingQueue.clear();
         clear();
     }
     
@@ -106,6 +113,10 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         processingQueue.add(runnable);
     }
     
+    protected void processSigned(Runnable runnable) {
+        secureProcessingQueue.add(runnable);
+    }
+
     private void interest(int ops, boolean on) {
         try {
             DatagramChannel channel = getDatagramChannel();

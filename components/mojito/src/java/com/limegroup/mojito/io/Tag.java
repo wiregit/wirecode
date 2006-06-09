@@ -43,7 +43,6 @@ import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
-import com.limegroup.mojito.settings.NetworkSettings;
 
 /**
  * The Tag class is a wrapper for outgoing DHTMessages. For 
@@ -67,16 +66,8 @@ public class Tag {
     
     private long timeout = -1L;
     
-    Tag(ContactNode node, ResponseMessage message, ByteBuffer data) 
+    Tag(ContactNode node, ResponseMessage message) 
             throws IOException {
-        
-        this.data = data;
-        size = data.limit();
-        
-        int maxMessageSize = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
-        if (size >= maxMessageSize) {
-            throw new IOException("Message is too large: " + size + " >= " + maxMessageSize);
-        }
         
         this.nodeId = node.getNodeID();
         this.dst = node.getSocketAddress();
@@ -84,31 +75,23 @@ public class Tag {
         this.message = message;
     }
     
-    Tag(SocketAddress dst, RequestMessage message, ByteBuffer data, ResponseHandler handler) 
+    Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) 
             throws IOException {
-        this(null, dst, message, data, handler, -1L);
+        this(null, dst, message, handler, -1L);
     }
     
-    Tag(ContactNode node, RequestMessage message, ByteBuffer data, ResponseHandler responseHandler) 
+    Tag(ContactNode node, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
-        this(node.getNodeID(), node.getSocketAddress(), message, data, responseHandler, node.getAdaptativeTimeOut());
+        this(node.getNodeID(), node.getSocketAddress(), message, responseHandler, node.getAdaptativeTimeOut());
     }
     
-    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ByteBuffer data, ResponseHandler responseHandler) 
+    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
-        this(nodeId, dst, message, data, responseHandler, -1L);
+        this(nodeId, dst, message, responseHandler, -1L);
     }
     
-    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ByteBuffer data, ResponseHandler responseHandler, long timeout) 
+    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler, long timeout) 
             throws IOException {
-        
-        this.data = data;
-        size = data.limit();
-        
-        int maxMessageSize = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
-        if (size >= maxMessageSize) {
-            throw new IOException("Message is too large: " + size + " >= " + maxMessageSize);
-        }
         
         this.nodeId = nodeId;
         this.dst = dst;
@@ -146,6 +129,11 @@ public class Tag {
     
     public DHTMessage getMessage() {
         return message;
+    }
+    
+    void setData(ByteBuffer data) {
+        this.size = data.remaining();
+        this.data = data;
     }
     
     public ByteBuffer getData() {

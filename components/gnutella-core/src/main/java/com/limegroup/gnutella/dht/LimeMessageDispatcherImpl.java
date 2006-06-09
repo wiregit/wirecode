@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +34,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
@@ -51,12 +53,18 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     private ProcessingQueue processingQueue;
     
+    private ProcessingQueue secureProcessingQueue;
+    
     private boolean running = false;
     
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
         
-        processingQueue = new ProcessingQueue(context.getName() + "-LimeMessageDispatcherPQ", true);
+        processingQueue = new ProcessingQueue(
+                context.getName() + "-LimeMessageDispatcherPQ", true);
+        
+        secureProcessingQueue = new ProcessingQueue(
+                context.getName() + "-SecureMessageDispatcherPQ", true);
         
         // Set the MessageFactory
         LimeDHTMessageFactory factory = new LimeDHTMessageFactory();
@@ -104,6 +112,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void stop() {
         running = false;
         processingQueue.clear();
+        secureProcessingQueue.clear();
         clear();
     }
 
@@ -131,6 +140,13 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void handleMessage(Message msg, InetSocketAddress addr, 
             ReplyHandler handler) {
         
+        if (!isRunning()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping message from " + addr + " because DHT is not running");
+            }
+            return;
+        }
+        
         LimeDHTMessage dhtMessage = (LimeDHTMessage)msg;
         dhtMessage.getContactNode().setSocketAddress(addr);
         
@@ -141,6 +157,19 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         }
     }
 
+    /*
+     * Overwritten:
+     * 
+     * Uses BufferByteArrayOutputStream instead of ByteArrayOutputStream
+     * to serialize Messages
+     */
+    protected ByteBuffer serialize(DHTMessage message) throws IOException {
+        BufferByteArrayOutputStream out = new BufferByteArrayOutputStream(640, true);
+        message.write(out);
+        out.close();
+        return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
+    }
+    
     protected void interestRead(boolean on) {
         // DO NOTHING
     }
@@ -157,6 +186,10 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         processingQueue.add(runnable);
     }
     
+    protected void processSigned(Runnable runnable) {
+        secureProcessingQueue.add(runnable);
+    }
+
     // This is not running as a Thread!
     public void run() {
         running = true;

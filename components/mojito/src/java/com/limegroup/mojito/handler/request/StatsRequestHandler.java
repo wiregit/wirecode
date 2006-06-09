@@ -50,22 +50,12 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         
         StatsRequest request = (StatsRequest) message;
         
-        /*try {
-            if (!request.verify(context.getMasterKey(), 
-                    message.getContactNode().getSocketAddress(), 
-                    context.getSocketAddress())) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(message.getContactNode() + " sent us an invalid Stats Request");
-                }
-                return;
+        if (!request.isSecure()) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(message.getContactNode() + " sent us an invalid Stats Request");
             }
-        } catch (InvalidKeyException e) {
-            LOG.error("InvalidKeyException", e);
             return;
-        } catch (SignatureException e) {
-            LOG.error("SignatureException", e);
-            return;
-        }*/
+        }
         
         if (LOG.isTraceEnabled()) {
             LOG.trace(message.getContactNode() + " sent us a Stats Request");

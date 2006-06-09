@@ -54,10 +54,12 @@ import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.messages.SecureMessage;
 import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 
@@ -71,6 +73,10 @@ public abstract class MessageDispatcher implements Runnable {
     
     protected static final int INPUT_BUFFER_SIZE = 64 * 1024;
     protected static final int OUTPUT_BUFFER_SIZE = 64 * 1024;
+    
+    /** The maximum size of a serialized Message we can send */
+    private static final int MAX_MESSAGE_SIZE
+        = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
     
     /** The recommended interval to call handleCleanup() */
     protected static final long CLEANUP = 100L;
@@ -154,26 +160,22 @@ public abstract class MessageDispatcher implements Runnable {
     
     public boolean send(ContactNode node, ResponseMessage response) 
             throws IOException {
-        ByteBuffer data = serialize(response);
-        return send(new Tag(node, response, data)); 
+        return send(new Tag(node, response)); 
     }
     
     public boolean send(SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        ByteBuffer data = serialize(request);
-        return send(new Tag(dst, request, data, responseHandler));
+        return send(new Tag(dst, request, responseHandler));
     }
     
     public boolean send(KUID nodeId, SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        ByteBuffer data = serialize(request);
-        return send(new Tag(nodeId, dst, request, data, responseHandler));
+        return send(new Tag(nodeId, dst, request, responseHandler));
     }
     
     public boolean send(ContactNode node, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        ByteBuffer data = serialize(request);
-        return send(new Tag(node, request, data, responseHandler));
+        return send(new Tag(node, request, responseHandler));
     }
     
     protected boolean send(Tag tag) throws IOException {
@@ -206,6 +208,16 @@ public abstract class MessageDispatcher implements Runnable {
             return false;
         }
         
+        // Serialize the Message
+        ByteBuffer data = serialize(tag.getMessage());
+        int size = data.remaining();
+        if (size >= MAX_MESSAGE_SIZE) {
+            //tag.handleError(new IOException("Message is too large: " + size + " >= " + MAX_MESSAGE_SIZE));
+            //return false;
+            throw new IOException("Message is too large: " + size + " >= " + MAX_MESSAGE_SIZE);
+        }
+        
+        tag.setData(data);
         return enqueueOutput(tag);
     }
     
@@ -270,7 +282,7 @@ public abstract class MessageDispatcher implements Runnable {
         SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
         if (src != null) {
             buffer.flip();
-            int length = buffer.limit();
+            int length = buffer.remaining();
             
             // Restore Big-Endianess
             buffer.order(ByteOrder.BIG_ENDIAN);
@@ -374,14 +386,34 @@ public abstract class MessageDispatcher implements Runnable {
      * Starts a new ResponseProcessor
      */
     private void processResponse(Receipt receipt, ResponseMessage response) {
-        process(new ResponseProcessor(receipt, response));
+        Runnable processor = new ResponseProcessor(receipt, response);
+        if (response instanceof SecureMessage) {
+            SecureMessage secure = (SecureMessage)response;
+            if (secure.isSigned()) {
+                processSigned(new SignatureProcessor(secure, processor));
+            } else {
+                process(processor);
+            }
+        } else {
+            process(processor);
+        }
     }
     
     /**
      * Starts a new RequestProcessor
      */
     private void processRequest(RequestMessage request) {
-        process(new RequestProcessor(request));
+        Runnable processor = new RequestProcessor(request);
+        if (request instanceof SecureMessage) {
+            SecureMessage secure = (SecureMessage)request;
+            if (secure.isSigned()) {
+                processSigned(new SignatureProcessor(secure, processor));
+            } else {
+                process(processor);
+            }
+        } else {
+            process(processor);
+        }
     }
     
     /**
@@ -397,6 +429,7 @@ public abstract class MessageDispatcher implements Runnable {
                 try {
                     SocketAddress dst = tag.getSocketAddres();
                     ByteBuffer data = tag.getData();
+                    assert data == null : " Somebody set Data to null";
                     
                     if (send(channel, dst, data)) {
                         // Wohoo! Message was sent!
@@ -462,6 +495,14 @@ public abstract class MessageDispatcher implements Runnable {
     
     /** Called to indicate an interest in writing */
     protected abstract void interestWrite(boolean on);
+    
+    /** 
+     * Called to process a time intensive Task. The default 
+     * implementation delegates to process().
+     */
+    protected void processSigned(Runnable runnable) {
+        process(runnable);
+    }
     
     /** Called to process a Task */
     protected abstract void process(Runnable runnable);
@@ -659,6 +700,26 @@ public abstract class MessageDispatcher implements Runnable {
             } catch (Exception e) {
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
             }
+        }
+    }
+    
+    /**
+     * An implementation of Runnable to handle SecureMessages
+     */
+    private class SignatureProcessor implements Runnable {
+        
+        private SecureMessage secure;
+        private Runnable delegate;
+        
+        private SignatureProcessor(SecureMessage secure, Runnable delegate) {
+            this.secure = secure;
+            this.delegate = delegate;
+        }
+        
+        public void run() {
+            // TODO validate signature!
+            
+            delegate.run();
         }
     }
 }

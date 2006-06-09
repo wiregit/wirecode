@@ -31,7 +31,7 @@ import com.limegroup.mojito.messages.DHTMessage;
 /**
  * An implementation of MessageDispatcher for debugging purposes. 
  * It allows us to read/write Messages in LimeDHTMessage format 
- * which means you can start instance of the LimeWire core and 
+ * which means you can start an instance of the LimeWire core and 
  * an arbitary number of DHT Nodes that are using this implementation.
  */
 public class LimeStandaloneMessageDispatcherImpl 
