@@ -26,6 +26,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
@@ -245,6 +246,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         }
         catch (InterruptedIOException expected) {}
 
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
         // now make a connection to the leaf to confirm that it will send a
         // correct download request
         Socket push = new Socket(InetAddress.getLocalHost(), PORT);
@@ -264,6 +266,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // awesome - everything checks out!
         push.close();
         ss.close();
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
 
 
