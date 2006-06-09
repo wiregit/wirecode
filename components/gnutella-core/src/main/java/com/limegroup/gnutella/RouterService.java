@@ -1800,6 +1800,10 @@ public class RouterService {
         return VerifyingFile.getSizeOfVerifyingCache();
     }
     
+    public static int getVerifyingFileQueueSize() {
+        return VerifyingFile.getNumPendingItems();
+    }
+    
     public static long getByteBufferCacheSize() {
         return NIODispatcher.instance().getBufferCache().getHeapCacheSize();
     }
