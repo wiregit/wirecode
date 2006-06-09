@@ -23,15 +23,17 @@ class LimeDHTMessageParser implements MessageParser {
     public Message parse(byte[] guid, byte ttl, byte hops, 
             byte[] payload, int network) throws BadPacketException {
         
+        // TODO See LimeDHTMessageFactory and the constructors of the
+        // various Messages! They generate a new GUID! That's not good!
         ByteArrayInputStream bais = new ByteArrayInputStream(payload);
         MessageInputStream in = new MessageInputStream(bais, factory, ADDRESS);
+        
         try {
-            return (LimeDHTMessage2)in.readMessage();
+            return (LimeDHTMessage)in.readMessage();
         } catch (IOException err) {
             throw new BadPacketException(err);
         } finally {
             try { in.close(); } catch (IOException ignore) {}
         }
-        //return new LimeDHTMessage(guid, ttl, hops, payload, network);
     }
 }

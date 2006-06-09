@@ -32,51 +32,51 @@ class LimeDHTMessageFactory implements MessageFactory {
 
     public FindNodeRequest createFindNodeRequest(int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId) {
-        return new LimeDHTMessage2.FindNodeRequestImpl(vendor, version, node, messageId, lookupId);
+        return new LimeDHTMessage.FindNodeRequestImpl(vendor, version, node, messageId, lookupId);
     }
 
     public FindNodeResponse createFindNodeResponse(int vendor, int version, 
             ContactNode node, KUID messageId, QueryKey queryKey, Collection nodes) {
-        return new LimeDHTMessage2.FindNodeResponseImpl(vendor, version, node, messageId, queryKey, nodes);
+        return new LimeDHTMessage.FindNodeResponseImpl(vendor, version, node, messageId, queryKey, nodes);
     }
 
     public FindValueRequest createFindValueRequest(int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId) {
-        return new LimeDHTMessage2.FindValueRequestImpl(vendor, version, node, messageId, lookupId);
+        return new LimeDHTMessage.FindValueRequestImpl(vendor, version, node, messageId, lookupId);
     }
 
     public FindValueResponse createFindValueResponse(int vendor, int version, 
             ContactNode node, KUID messageId, Collection values) {
-        return new LimeDHTMessage2.FindValueResponseImpl(vendor, version, node, messageId, values);
+        return new LimeDHTMessage.FindValueResponseImpl(vendor, version, node, messageId, values);
     }
 
     public PingRequest createPingRequest(int vendor, int version, 
             ContactNode node, KUID messageId) {
-        return new LimeDHTMessage2.PingRequestImpl(vendor, version, node, messageId);
+        return new LimeDHTMessage.PingRequestImpl(vendor, version, node, messageId);
     }
 
     public PingResponse createPingResponse(int vendor, int version, 
             ContactNode node, KUID messageId, SocketAddress externalAddress, int estimatedSize) {
-        return new LimeDHTMessage2.PingResponseImpl(vendor, version, node, messageId, externalAddress, estimatedSize);
+        return new LimeDHTMessage.PingResponseImpl(vendor, version, node, messageId, externalAddress, estimatedSize);
     }
 
     public StatsRequest createStatsRequest(int vendor, int version, 
             ContactNode node, KUID messageId, int stats) {
-        return new LimeDHTMessage2.StatsRequestImpl(vendor, version, node, messageId, stats);
+        return new LimeDHTMessage.StatsRequestImpl(vendor, version, node, messageId, stats);
     }
 
     public StatsResponse createStatsResponse(int vendor, int version, 
             ContactNode node, KUID messageId, String stats) {
-        return new LimeDHTMessage2.StatsResponseImpl(vendor, version, node, messageId, stats);
+        return new LimeDHTMessage.StatsResponseImpl(vendor, version, node, messageId, stats);
     }
 
     public StoreRequest createStoreRequest(int vendor, int version, 
             ContactNode node, KUID messageId, QueryKey queryKey, KeyValue keyValue) {
-        return new LimeDHTMessage2.StoreRequestImpl(vendor, version, node, messageId, queryKey, keyValue);
+        return new LimeDHTMessage.StoreRequestImpl(vendor, version, node, messageId, queryKey, keyValue);
     }
 
     public StoreResponse createStoreResponse(int vendor, int version, 
             ContactNode node, KUID messageId, KUID valueId, int response) {
-        return new LimeDHTMessage2.StoreResponseImpl(vendor, version, node, messageId, valueId, response);
+        return new LimeDHTMessage.StoreResponseImpl(vendor, version, node, messageId, valueId, response);
     }
 }

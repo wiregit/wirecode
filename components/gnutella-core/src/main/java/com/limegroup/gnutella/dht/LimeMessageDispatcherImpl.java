@@ -31,7 +31,6 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.ProcessingQueue;
@@ -65,11 +64,20 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         // Register the Message type
         LimeDHTMessageParser parser = new LimeDHTMessageParser(factory);
-        MessageFactory.setParser(LimeDHTMessage2.F_DHT_MESSAGE, parser);
+        MessageFactory.setParser(LimeDHTMessage.F_DHT_MESSAGE, parser);
         
-        // Install the handler for LimeDHTMessage
-        RouterService.getMessageRouter()
-            .setUDPMessageHandler(LimeDHTMessage2.class, this);
+        // Install the Message handlers
+        MessageRouter messageRouter = RouterService.getMessageRouter();
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.PingRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.PingResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.StoreRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.StoreResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.FindNodeRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.FindNodeResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.FindValueRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.FindValueResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.StatsRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(LimeDHTMessage.StatsResponseImpl.class, this);
         
         // Install cleanup task
         context.scheduleAtFixedRate(new Runnable() {
@@ -122,7 +130,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
      */
     public void handleMessage(Message msg, InetSocketAddress addr, 
             ReplyHandler handler) {
-        LimeDHTMessage2 dhtMessage = (LimeDHTMessage2)msg;
+        
+        LimeDHTMessage dhtMessage = (LimeDHTMessage)msg;
         dhtMessage.getContactNode().setSocketAddress(addr);
         
         try {
