@@ -74,7 +74,7 @@ public class ConnectionManager {
     /**
      * Timestamp for the last time the user selected to disconnect.
      */
-    private volatile long _disconnectTime = 0;
+    private volatile long _disconnectTime = -1;
     
     /**
      * Timestamp for the last time we started trying to connect
