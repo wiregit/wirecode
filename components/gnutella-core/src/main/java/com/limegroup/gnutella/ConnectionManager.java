@@ -74,7 +74,7 @@ public class ConnectionManager {
     /**
      * Timestamp for the last time the user selected to disconnect.
      */
-    private volatile long _disconnectTime = -1;
+    private volatile long _disconnectTime = 0;
     
     /**
      * Timestamp for the last time we started trying to connect
@@ -1392,15 +1392,22 @@ public class ConnectionManager {
      * the number of connections to zero.
      */
     public synchronized void disconnect() {
-        _disconnectTime = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
+        if(_disconnectTime == 0) { 
+            int sessionTime = (int)(Math.max(0,now - _connectTime)/(1000L)); //in seconds
+            if(sessionTime != 0) {
+                int totalConnectTime = Math.max(0, Math.min(Integer.MAX_VALUE,
+                        ApplicationSettings.TOTAL_CONNECTION_TIME.getValue() + sessionTime));
+                ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(totalConnectTime);
+                int totalConnections = ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1;
+                if(totalConnections < 1)
+                    totalConnections = 1;
+                ApplicationSettings.TOTAL_CONNECTIONS.setValue(totalConnections);
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(totalConnectTime/totalConnections);
+            }
+        }
         
-        int sessionTime = (int)((_disconnectTime - _connectTime)/(1000L*60L)); //in minutes
-        int totalConnectTime = ApplicationSettings.TOTAL_CONNECTION_TIME.getValue() + sessionTime;
-        ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(totalConnectTime);
-        int totalConnections = ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1;
-        ApplicationSettings.TOTAL_CONNECTIONS.setValue(totalConnections);
-        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(totalConnectTime/totalConnections);
-        
+        _disconnectTime = now;
         _connectTime = Long.MAX_VALUE;
         _preferredConnections = 0;
         adjustConnectionFetchers(); // kill them all

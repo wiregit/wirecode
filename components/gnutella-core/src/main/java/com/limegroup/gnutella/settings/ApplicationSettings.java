@@ -26,13 +26,13 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createIntSetting("TOTAL_UPTIME", 0);
     
     /**
-     * The average time this user is connected to the network per session (in minutes).
+     * The average time this user is connected to the network per session (in seconds).
      */        
     public static final IntSetting AVERAGE_CONNECTION_TIME =
         FACTORY.createExpirableIntSetting("AVERAGE_CONNECTION_TIME", 0);
     
     /**
-     * The total time this user has been connected to the network (in minutes).
+     * The total time this user has been connected to the network (in seconds).
      */    
     public static final IntSetting TOTAL_CONNECTION_TIME =
         FACTORY.createIntSetting("TOTAL_CONNECTION_TIME", 0);

@@ -9,6 +9,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -73,6 +74,8 @@ public class ConnectionManagerTest extends BaseTestCase {
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(true);
+        ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(0);
+        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(0);
     }
 
     public void tearDown() {
@@ -449,6 +452,45 @@ public class ConnectionManagerTest extends BaseTestCase {
         sleep();
         assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
         assertEquals("connect should have failed", 0, CATCHER.connectFailures);
+    }
+    
+    public void testRecordConnectionTime() throws Exception{
+        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(0);
+        ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(0);
+        ApplicationSettings.TOTAL_CONNECTIONS.setValue(0);
+        ConnectionManager mgr = RouterService.getConnectionManager();
+        assertFalse(mgr.isConnected());
+        CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
+        //try simple connect-disconnect
+        mgr.connect();
+        sleep(2000);
+        mgr.disconnect();
+        int totalConnect = ApplicationSettings.TOTAL_CONNECTION_TIME.getValue();
+        int averageTime = ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();
+        assertEquals(totalConnect,
+                averageTime);
+        mgr.connect();
+        sleep(6000);
+        mgr.disconnect();
+        assertEquals(totalConnect+6,
+                ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
+        assertGreaterThan(averageTime, ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        assertEquals((totalConnect+6)/2,
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        //try disconnecting twice in a row
+        mgr.disconnect();
+        assertEquals(totalConnect+6,
+                ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
+        assertGreaterThan(averageTime, ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        //test time changed during session
+        long now = System.currentTimeMillis();
+        PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
+                "_connectTime", new Long(now+(60L*60L*1000L)));
+        mgr.disconnect();
+        assertEquals(totalConnect+6,
+                ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
+        assertEquals((totalConnect+6)/2,
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
     }
 
     private void sleep() {
