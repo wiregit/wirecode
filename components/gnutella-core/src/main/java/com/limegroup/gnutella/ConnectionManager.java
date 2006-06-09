@@ -1344,7 +1344,8 @@ public class ConnectionManager {
             ManagedConnection mc = (ManagedConnection)connections.get(i);
             if(mc == c)
                 continue;
-            if(addr.equals(mc.getAddress())) {
+            if(!ConnectionSettings.ALLOW_DUPLICATE.getValue() &&
+            		addr.equals(mc.getAddress())) {
                 int mcLP = mc.getListeningPort();
                 // If either side didn't advertise a listening port,
                 // or both did and they're the same, then because the

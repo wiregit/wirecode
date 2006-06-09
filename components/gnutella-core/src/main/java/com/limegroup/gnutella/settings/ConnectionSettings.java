@@ -72,6 +72,12 @@ public final class ConnectionSettings extends LimeProps {
 	 */
 	public static final BooleanSetting LOCAL_IS_PRIVATE =
 		FACTORY.createBooleanSetting("LOCAL_IS_PRIVATE", true);
+	
+	/**
+	 * Whether to allow duplicate incoming connections.  Necessary for testing.
+	 */
+	public static final BooleanSetting ALLOW_DUPLICATE = 
+		FACTORY.createBooleanSetting("ALLOW_DUPLICATE", false);
 
 	/**
 	 * Setting for whether or not to connect using GWebCache.

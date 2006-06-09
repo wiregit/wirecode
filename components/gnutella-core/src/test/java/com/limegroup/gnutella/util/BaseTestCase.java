@@ -376,6 +376,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         SettingsHandler.setShouldSave(false);
         SettingsHandler.revertToDefault();
         ConnectionSettings.DISABLE_UPNP.setValue(true);
+        ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
