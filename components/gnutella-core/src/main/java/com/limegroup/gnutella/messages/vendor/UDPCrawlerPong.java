@@ -40,8 +40,10 @@ public class UDPCrawlerPong extends VendorMessage {
 	
 	private List _ultrapeers, _leaves;
 	
-	final boolean _connectionTime, _localeInfo, _newOnly, _userAgent;
-	
+    private int _nodeUptime;
+    
+    final boolean _connectionTime, _localeInfo, _newOnly, _userAgent, _hasNodeUptime;
+    
 	/**
 	 * the format of the response.
 	 */
@@ -59,6 +61,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		_connectionTime = request.hasConnectionTime();
 		_newOnly = request.hasNewOnly();
 		_userAgent = request.hasUserAgent();
+        _hasNodeUptime = request.hasNodeUptime();
 	}
 	
 	private static byte [] derivePayload(UDPCrawlerPing request) {
@@ -151,21 +154,32 @@ public class UDPCrawlerPong extends VendorMessage {
 			bytesPerResult+=2;
 		if (request.hasLocaleInfo())
 			bytesPerResult+=2;
-		byte [] result = new byte[(endpointsUP.size()+endpointsLeaf.size())*
-								  bytesPerResult+3];
+
+        int index;
+		if(request.hasNodeUptime()) {
+		    index = 7;
+		} else {
+		    index = 3;
+		}
+		
+        byte [] result = new byte[(endpointsUP.size()+endpointsLeaf.size())*
+								  bytesPerResult+index];
 		
 		//write out metainfo
 		result[0] = (byte)endpointsUP.size();
 		result[1] = (byte)endpointsLeaf.size();
 		result[2] = format;
 		
+        if(request.hasNodeUptime()) {
+            ByteOrder.int2leb(ApplicationSettings.AVERAGE_UPTIME.getValue(), result, 3);
+        }
+        
 		//cat the two lists
 		endpointsUP.addAll(endpointsLeaf);
 		
 		//cache the call to currentTimeMillis() cause its not always cheap
 		long now = System.currentTimeMillis();
-		
-		int index = 3;
+        
 		iter = endpointsUP.iterator();
 		while(iter.hasNext()) {
 			//pack each entry into a 6 byte array and add it to the result.
@@ -278,6 +292,8 @@ public class UDPCrawlerPong extends VendorMessage {
 		
 		_connectionTime = ((_format & UDPCrawlerPing.CONNECTION_TIME)
 			== (int)UDPCrawlerPing.CONNECTION_TIME);
+        _hasNodeUptime = ((_format & UDPCrawlerPing.NODE_UPTIME)
+                == (int)UDPCrawlerPing.NODE_UPTIME);
 		_localeInfo = (_format & UDPCrawlerPing.LOCALE_INFO)
 			== (int)UDPCrawlerPing.LOCALE_INFO;
 		_newOnly =(_format & UDPCrawlerPing.NEW_ONLY)
@@ -285,14 +301,23 @@ public class UDPCrawlerPong extends VendorMessage {
 		_userAgent =(_format & UDPCrawlerPing.USER_AGENT)
 			== (int)UDPCrawlerPing.USER_AGENT;
 		
-		int bytesPerResult = 6;
+		int offset;
+		if (_hasNodeUptime) {
+		    offset = 7;
+            _nodeUptime = ByteOrder.leb2int(payload,3);
+		} else {
+		    offset = 3;
+		}
+
+        int bytesPerResult = 6;
 		
 		if (_connectionTime)
 			bytesPerResult+=2;
 		if (_localeInfo)
 			bytesPerResult+=2;
+        
 		
-		int agentsOffset=(numberUP+numberLeaves)*bytesPerResult+3;
+		int agentsOffset=(numberUP+numberLeaves)*bytesPerResult+offset;
 		
 		//check if the payload is legal length
 		if (getVersion() == VERSION && 
@@ -301,7 +326,7 @@ public class UDPCrawlerPong extends VendorMessage {
 					" but should have been at least"+ agentsOffset);
 		
 		//parse the up ip addresses
-		for (int i = 3;i<numberUP*bytesPerResult;i+=bytesPerResult) {
+		for (int i = offset;i<numberUP*bytesPerResult;i+=bytesPerResult) {
 		
 			int index = i; //the index within the result block.
 			
@@ -336,7 +361,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		}
 		
 		//parse the leaf ip addresses
-		for (int i = numberUP*bytesPerResult+3;i<agentsOffset;i+=bytesPerResult) {
+		for (int i = numberUP*bytesPerResult+offset;i<agentsOffset;i+=bytesPerResult) {
 		
 			int index =i;
 		
@@ -415,6 +440,10 @@ public class UDPCrawlerPong extends VendorMessage {
 	public List getLeaves() {
 		return _leaves;
 	}
+    
+    public int getNodeUptime() {
+        return _nodeUptime;
+    }
 	/**
 	 * @return whether the set of results contains connection uptime
 	 */
@@ -427,6 +456,13 @@ public class UDPCrawlerPong extends VendorMessage {
 	public boolean hasLocaleInfo() {
 		return _localeInfo;
 	}
+    
+    /**
+     * @return whether the set of results contains connection uptime
+     */
+    public boolean hasNodeUptime() {
+        return _hasNodeUptime;
+    }
 	
 	/**
 	 * 

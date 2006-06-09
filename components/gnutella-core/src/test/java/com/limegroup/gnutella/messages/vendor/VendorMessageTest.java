@@ -15,6 +15,7 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -426,6 +427,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertEquals(2, req.getNumberLeaves());
     	assertFalse(req.hasConnectionTime());
     	assertFalse(req.hasLocaleInfo());
+        assertFalse(req.hasNodeUptime());
     	assertTrue(req.hasFeature(UDPCrawlerPing.PLAIN));
     	testWrite(req);
     	testRead(req);
@@ -435,6 +437,19 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertTrue(req.hasUserAgent());
     	assertTrue(req.hasFeature(UDPCrawlerPing.FEATURE_MASK));
     	assertEquals(0,req.getFormat() & ~UDPCrawlerPing.FEATURE_MASK);
+        
+        //test node uptime feature
+        req = new UDPCrawlerPing(guid, 1, 2, (byte)0x10);
+        assertTrue(req.hasNodeUptime());
+        assertFalse(req.hasConnectionTime());
+        assertFalse(req.hasLocaleInfo());
+        assertFalse(req.hasNewOnly());
+        assertFalse(req.hasUserAgent());
+        
+        //test mask
+        req = new UDPCrawlerPing(guid, 1, 2, (byte)0x11);
+        assertTrue(req.hasNodeUptime());
+        assertTrue(req.hasConnectionTime());
     }
     
     public void testUDPCrawlerPongMessage() throws Exception {
@@ -444,8 +459,21 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	
     	assertFalse(rep.hasConnectionTime());
     	assertFalse(rep.hasLocaleInfo());
+        assertFalse(rep.hasNodeUptime());
     	testWrite(rep);
     	testRead(rep);
+        
+        //test node uptime
+        ApplicationSettings.AVERAGE_UPTIME.setValue(5);
+        req = new UDPCrawlerPing(guid, 1,2,UDPCrawlerPing.NODE_UPTIME);
+        rep = new UDPCrawlerPong(req);
+        testWrite(rep);
+        testRead(rep);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        rep.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        rep = (UDPCrawlerPong)MessageFactory.read(bais);
+        assertEquals(5,rep.getNodeUptime());
     }
     
     public void testHeadPingMessage() throws Exception {

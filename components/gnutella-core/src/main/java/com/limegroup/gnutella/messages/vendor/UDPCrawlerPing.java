@@ -40,10 +40,11 @@ public class UDPCrawlerPing extends VendorMessage {
 	public static final byte LOCALE_INFO = 0x2;
 	public static final byte NEW_ONLY = 0x4;
 	public static final byte USER_AGENT = 0x8;
+    public static final byte NODE_UPTIME = 0x10;
     //public static final byte SAMPLE_FEATURE = 0x10; //its a bitmask, so the next feature would be 0x16, etc.
 	
 	//all features OR'd.
-	public static final byte FEATURE_MASK = 0xF; 
+	public static final byte FEATURE_MASK = 0x1F; 
 	
 	/**
 	 * constructs a new ultrapeer request message.
@@ -138,13 +139,21 @@ public class UDPCrawlerPing extends VendorMessage {
 		return _numberLeaves;
 	}
 	
-	/**
-	 * 
-	 * @return whether the ping is requesting connection uptimes.
-	 */
-	public boolean hasConnectionTime() {
-		return (byte)(CONNECTION_TIME & _format) == CONNECTION_TIME;
-	}
+    /**
+     * 
+     * @return whether the ping is requesting this node's connection uptime.
+     */
+    public boolean hasNodeUptime() {
+        return (byte)(NODE_UPTIME & _format) == NODE_UPTIME;
+    }
+    
+    /**
+     * 
+     * @return whether the ping is requesting connection uptimes.
+     */
+    public boolean hasConnectionTime() {
+        return (byte)(CONNECTION_TIME & _format) == CONNECTION_TIME;
+    }
 	
 	/**
 	 * 
