@@ -870,7 +870,15 @@ public class Connection implements IpPort {
      * header.  If there was no port describe, it will return -1.
      */
     public int getListeningPort() {
-        return isOutgoing() ? _socket.getPort() : _headersRead.getListeningPort();
+        if (isOutgoing()) {
+            if (_socket == null) {
+                return -1;
+            } else {
+                return _socket.getPort();
+            }
+        } else {
+            return _headersRead.getListeningPort();
+        }
     }
     
     /** 
