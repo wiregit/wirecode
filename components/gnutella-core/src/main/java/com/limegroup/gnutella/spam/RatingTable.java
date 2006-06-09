@@ -214,7 +214,7 @@ public class RatingTable {
                 return (Map)read;
             else 
                 return new HashMap();
-		} catch(Exception someKindOfError) {
+		} catch(Throwable someKindOfError) {
 			return new HashMap();
 		} finally {
             IOUtils.close(is);
