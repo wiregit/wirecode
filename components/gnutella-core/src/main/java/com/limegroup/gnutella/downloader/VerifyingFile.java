@@ -701,6 +701,11 @@ public class VerifyingFile {
         return CACHE.getCacheSize();
     }
     
+    /** Cleans the caches. */
+    public static void clearCaches() {
+        Runnable runner = new CacheCleaner();
+        runner.run();
+    }
 
     /**
      * Stub for calling verifyChunks(-1).

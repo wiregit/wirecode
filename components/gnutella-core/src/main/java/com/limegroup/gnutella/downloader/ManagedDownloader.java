@@ -830,6 +830,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                       "> completed download, state: " +
                       getState() + ", numQueries: " + numQueries +
                       ", lastQuerySent: " + lastQuerySent);
+        
+        VerifyingFile.clearCaches();
 
         // if this is all completed, nothing else to do.
         if(complete)

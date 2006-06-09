@@ -16,7 +16,7 @@ public class ByteBufferCacheTest extends BaseTestCase {
         return buildTestSuite(ByteBufferCacheTest.class);
     }
     
-    static ByteBufferCache CACHE;
+    private ByteBufferCache CACHE;
     
     public void setUp() {
         CACHE = new ByteBufferCache();
@@ -29,8 +29,10 @@ public class ByteBufferCacheTest extends BaseTestCase {
         ByteBuffer buf = CACHE.getHeap(100);
         int hashCode = System.identityHashCode(buf);
         CACHE.release(buf);
+        assertEquals(100, CACHE.getHeapCacheSize());
         buf = CACHE.getHeap(100);
         assertEquals(hashCode, System.identityHashCode(buf));
+        assertEquals(0, CACHE.getHeapCacheSize());
     }
     
     /**
@@ -42,6 +44,7 @@ public class ByteBufferCacheTest extends BaseTestCase {
         int hashCode = System.identityHashCode(buf);
         buf = CACHE.getHeap(100);
         assertNotEquals(hashCode, System.identityHashCode(buf));
+        assertEquals(0, CACHE.getHeapCacheSize());
     }
     
     
@@ -54,38 +57,36 @@ public class ByteBufferCacheTest extends BaseTestCase {
         buf = CACHE.getHeap(100);
         int hashCode = System.identityHashCode(buf);
         CACHE.release(buf);
+        assertEquals(100, CACHE.getHeapCacheSize());
         ByteBuffer larger = CACHE.getHeap(200);
+        assertEquals(100, CACHE.getHeapCacheSize());
         assertNotEquals(hashCode, System.identityHashCode(larger));
         
         // we haven't returned the larger buffer, and requesting a buffer
-        // of the smaller size will return the same object we had the first
+        // of the equal size will return the same object we had the first
         // time around.
         buf = CACHE.getHeap(100);
+        assertEquals(0, CACHE.getHeapCacheSize());
         assertEquals(hashCode, System.identityHashCode(buf));
     }
     
     /**
      * Tests that requesting a smaller buffer if a larger one is
-     * available will not create a new object.
+     * available will create a new object.
      */
-    public void testSlicingIfSmaller() throws Exception {
+    public void testNoSlicingIfSmaller() throws Exception {
         ByteBuffer buf = CACHE.getHeap(100);
         buf = CACHE.getHeap(100);
         int hashCode = System.identityHashCode(buf);
         CACHE.release(buf);
+        assertEquals(100, CACHE.getHeapCacheSize());
         ByteBuffer smaller = CACHE.getHeap(50);
+        assertEquals(100, CACHE.getHeapCacheSize());
         assertNotEquals(hashCode, System.identityHashCode(smaller));
         
-        // we haven't returned the smaller buffer, and requesting a buffer
-        // of the larger size will not return the same object we had the first
-        // time around.
+        // smaller did not use up the larger size.
         buf = CACHE.getHeap(100);
-        assertNotEquals(hashCode, System.identityHashCode(buf));
-        
-        // after returning the smaller buffer, the next request for a buffer
-        // the original size will return the same object.
-        CACHE.release(smaller);
-        buf = CACHE.getHeap(100);
+        assertEquals(0, CACHE.getHeapCacheSize());
         assertEquals(hashCode, System.identityHashCode(buf));
     }
     
@@ -97,28 +98,16 @@ public class ByteBufferCacheTest extends BaseTestCase {
         buf = CACHE.getHeap(100);
         int hashCode = System.identityHashCode(buf);
         CACHE.release(buf);
+        assertEquals(100, CACHE.getHeapCacheSize());
         buf = CACHE.getHeap(100);
+        assertEquals(0, CACHE.getHeapCacheSize());
         assertEquals(hashCode, System.identityHashCode(buf));
         CACHE.release(buf);
+        assertEquals(100, CACHE.getHeapCacheSize());
         
         CACHE.clearCache();
+        assertEquals(0, CACHE.getHeapCacheSize());
         buf = CACHE.getHeap(100);
         assertNotEquals(hashCode, System.identityHashCode(buf));
-        
-    }
-    
-    /**
-     * Tests that if the cache is cleared while a sliced buffer is
-     * checked out, upon return it will restore its full size.
-     */
-    public void testSlicedSurviveClearing() throws Exception {
-        ByteBuffer buf = CACHE.getHeap(100);
-        int hashCode = System.identityHashCode(buf);
-        CACHE.release(buf);
-        ByteBuffer smaller = CACHE.getHeap(50);
-        CACHE.clearCache(); // identical to testSlicingIfSmaller except this call.
-        CACHE.release(smaller);
-        buf = CACHE.getHeap(100);
-        assertEquals(hashCode, System.identityHashCode(buf));
     }
 }
