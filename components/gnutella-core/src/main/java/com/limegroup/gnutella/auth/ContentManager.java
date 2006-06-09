@@ -83,6 +83,11 @@ public class ContentManager {
         CACHE.writeToDisk();
     }
     
+    /** Gets the number of items in the cache. */
+    public int getCacheSize() {
+        return CACHE.getSize();
+    }
+    
     /** Sets the content authority. */
     public void setContentAuthority(ContentAuthority authority) {
         this.authority = authority;

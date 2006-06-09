@@ -13,6 +13,12 @@ public class HeapByteBufferCache {
     private final TreeMap /* Integer -> List<ByteBuffer> */ CACHE = new TreeMap();
     
     private final Map /* ByteBuffer -> ByteBuffer */ SLICED = new IdentityHashMap();
+    
+    /** The total size of bytes stored in sliced */
+    private long totalSlicedSize;
+    
+    /** The total size of bytes stored in cache. */
+    private long totalCacheSize;
 
     public ByteBuffer get() {
         return get(8192);
@@ -68,6 +74,7 @@ public class HeapByteBufferCache {
         // slice!
         larger.limit(size);
         ByteBuffer ret = larger.slice();
+        totalSlicedSize += larger.capacity();
         SLICED.put(ret, larger);
         return ret;
     }
@@ -75,8 +82,11 @@ public class HeapByteBufferCache {
     public synchronized void put(ByteBuffer buf) {
         // see if this buffer was sliced off of a bigger one
         ByteBuffer toReturn = (ByteBuffer) SLICED.remove(buf);
-        if (toReturn == null)
+        if (toReturn == null) {
             toReturn = buf;
+        } else {
+            totalSlicedSize -= toReturn.capacity();
+        }
         
         toReturn.clear();
         Integer size = new Integer(toReturn.capacity());
@@ -86,10 +96,16 @@ public class HeapByteBufferCache {
             CACHE.put(size, l);
         }
         l.add(toReturn);
+        totalCacheSize += toReturn.capacity();
     }
     
     public synchronized void clear() {
         CACHE.clear();
+        totalCacheSize = 0;
         // keep the SCLICED mappings around to allow returning of sliced buffers.
+    }
+    
+    public synchronized long getByteSize() {
+        return totalCacheSize + totalSlicedSize;
     }
 }

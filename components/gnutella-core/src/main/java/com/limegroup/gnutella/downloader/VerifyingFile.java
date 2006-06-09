@@ -691,6 +691,16 @@ public class VerifyingFile {
         return hashTree == null ? DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
     }
     
+    /** Returns the number of bytes cached in the verifying cache. */
+    public static int getSizeOfVerifyingCache() {
+        return CHUNK_CACHE.getCacheSize();
+    }
+    
+    /** Returns the number of bytes cached in the byte cache. */
+    public static int getSizeOfByteCache() {
+        return CACHE.getCacheSize();
+    }
+    
 
     /**
      * Stub for calling verifyChunks(-1).

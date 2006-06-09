@@ -41,6 +41,11 @@ class ContentCache {
     /** Whether or not data is dirty since the last time we wrote to disk. */
     private boolean dirty = false;
     
+    /** Returns the number of items in the map. */
+    synchronized int getSize() {
+        return responses.size();
+    }
+    
     /** Determines if there is a response for the given URN. */
     synchronized boolean hasResponseFor(URN urn) {
         return responses.containsKey(urn);

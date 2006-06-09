@@ -27,6 +27,7 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
@@ -1781,5 +1782,25 @@ public class RouterService {
     
     public static boolean canDoFWT() {
         return UDPSERVICE.canDoFWT();
+    }
+    
+    public static long getContentResponsesSize() {
+        return contentManager.getCacheSize();
+    }
+    
+    public static long getCreationCacheSize() {
+        return CreationTimeCache.instance().getSize();
+    }
+    
+    public static long getVerifyingFileByteCacheSize() {
+        return VerifyingFile.getSizeOfByteCache();
+    }
+    
+    public static long getVerifyingFileVerifyingCacheSize() {
+        return VerifyingFile.getSizeOfVerifyingCache();
+    }
+    
+    public static long getByteBufferCacheSize() {
+        return NIODispatcher.instance().getBufferCache().getHeapCacheSize();
     }
 }

@@ -100,6 +100,11 @@ public final class CreationTimeCache {
         constructURNMap();
 	}
     
+    /** Returns the number of URNS stored. */
+    public synchronized int getSize() {
+        return URN_TO_TIME_MAP.size();
+    }
+    
     /**
      * Get the Creation Time of the file.
 	 * @param urn <tt>URN<tt> to look up Creation Time for

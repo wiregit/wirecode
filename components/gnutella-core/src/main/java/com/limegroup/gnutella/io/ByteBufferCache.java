@@ -19,6 +19,10 @@ public class ByteBufferCache {
         return HEAP.get(size);
     }
     
+    public long getHeapCacheSize() {
+        return HEAP.getByteSize();
+    }
+    
     public void release(ByteBuffer buffer) {
         if(buffer.isDirect())
             DIRECT.put(buffer);

@@ -9,6 +9,7 @@ import java.util.Map;
 public class PowerOf2ByteArrayCache {
     
     private final Map CACHE = new HashMap(20);
+    private volatile int totalStored = 0;
     
     /**
      * @return a byte array of the specified size, using cached one
@@ -28,14 +29,21 @@ public class PowerOf2ByteArrayCache {
         byte[] ret = (byte[]) CACHE.get(i);
         if (ret == null) {
             ret = new byte[exp];
+            totalStored += exp;
             CACHE.put(i, ret);
         }
         return ret;
     }
     
+    public int getCacheSize() {
+        return totalStored;
+    }
+    
+    
     /** Erases all data in the cache. */
     public void clear() {
         CACHE.clear();
+        totalStored = 0;
     }
 
 }

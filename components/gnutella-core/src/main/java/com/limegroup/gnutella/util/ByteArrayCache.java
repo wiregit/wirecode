@@ -18,6 +18,9 @@ public class ByteArrayCache {
     /** Holds cached byte[]'s for future re-use. */
     private final Stack CACHE = new Stack();
     
+    /** The total size of the bytes stored in the cache. */
+    private int _totalSize;
+    
     /** The number of byte[]'s this cache has created that haven't been erased. */
     private int _numCreated;
 
@@ -39,6 +42,11 @@ public class ByteArrayCache {
         CACHE.ensureCapacity(maxSize);
     }
     
+    /** Returns the size of all cached bytes. */
+    public synchronized int getCacheSize() {
+        return _totalSize;
+    }
+    
     /**
      * Attempts to retrieve a new byte[].
      * If the cache is empty and getCreated() is >= getMaxSize(), this will block until
@@ -47,7 +55,9 @@ public class ByteArrayCache {
     public synchronized byte[] get() throws InterruptedException {
         while(true) {
             if (!CACHE.isEmpty()) {
-                return (byte[]) CACHE.pop();
+                byte[] b = (byte[])CACHE.pop();
+                _totalSize -= b.length;
+                return b;
             } else if (_numCreated < _maxSize) {
                 _numCreated++;
                 return new byte[_length];
@@ -63,7 +73,9 @@ public class ByteArrayCache {
      */
     public synchronized byte[] getQuick() {
         if (!CACHE.isEmpty()) {
-            return (byte[]) CACHE.pop();
+            byte[] b = (byte[])CACHE.pop();
+            _totalSize -= b.length;
+            return b;
         } else if (_numCreated < _maxSize) {
             _numCreated++;
             return new byte[_length];
@@ -77,6 +89,7 @@ public class ByteArrayCache {
      * The byte[] MUST HAVE BEEN A byte[] RETURNED FROM get().
      */
     public synchronized void release(byte[] data) {
+        _totalSize += data.length;
         CACHE.push(data);
         notifyAll();
     }
@@ -84,6 +97,7 @@ public class ByteArrayCache {
     /** Clears all items in the cache. */
     public synchronized void clear() {
         _numCreated -= CACHE.size();
+        _totalSize = 0;
         CACHE.clear();
         notifyAll();
     }
