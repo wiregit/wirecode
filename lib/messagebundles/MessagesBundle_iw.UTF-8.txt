@@ -176,7 +176,7 @@ ABOUT_BIZDEV_BLURB=מאחורי הקלעים, התכנון העסקי והעני
 ABOUT_WEBDEV_BLURB=<a href="http://www.limewire.com/"> אתר האינטרנט</a> של ליימווייר והעיצוב הגרפי של ליימווייר הם תוצאותיה של העבודה הקשה של צוות האינטרנט:
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
 ABOUT_SUPPORT_BLURB=שאלות על ליימווייר פרו נענות בחריצות ע"י צוות התמיכה הטכנית:
-#### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following developers have worked on the LimeWire team in the past but have since moved on to other projects:
+#### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:
 ABOUT_PREVIOUS_DEV_BLURB=בנוסף, המפתחים הבאים עבדו בעבר בצוות של ליימווייר אך מאז התקדמו לפרוייקטים אחרים:
 #### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
 #? ABOUT_CONTRIBUTORS_BLURB=

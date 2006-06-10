@@ -179,7 +179,7 @@ ABOUT_BIZDEV_BLURB=ビジネス戦略と日常的な出来事は、LimeWireの�
 ABOUT_WEBDEV_BLURB=また、LimeWireの<a href="http://www.limewire.com/">ウェブサイト</a>とLimeWireのグラフィック・デザインは、LimeWireのウェブ・チームの努力によるものです。
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
 ABOUT_SUPPORT_BLURB=尚、LimeWire PROに関する質問は、LimeWireの技術サポートがお答えします：
-#### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following developers have worked on the LimeWire team in the past but have since moved on to other projects:
+#### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:
 ABOUT_PREVIOUS_DEV_BLURB=過去にLimeWireチームで働いた開発者達は、その他プロジェクトに移動しています。
 #### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
 ABOUT_CONTRIBUTORS_BLURB=LimeWire オープンソースへ貢献した人は、同プロジェクトに重要なコード、多くのバグフィックス、考え方、研究、その他を残しました。以下はLimeWireの各見方に乗っ取り書き込まれたコード、コード上の重大なバクとして確認されたもの、あるいは双方に当ります。
