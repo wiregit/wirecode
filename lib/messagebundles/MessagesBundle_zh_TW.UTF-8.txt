@@ -1,5 +1,4 @@
-﻿#line3013
-################################################################################
+﻿################################################################################
 # Messages Bundle for LimeWire 4.8.3
 # Specialization for: Traditional Chinese - Taiwan, Hong Kong and Macao
 # Thanks to: Ciyuan Zou (last revision by "Ted")
