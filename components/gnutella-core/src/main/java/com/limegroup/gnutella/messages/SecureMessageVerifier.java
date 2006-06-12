@@ -19,15 +19,22 @@ public class SecureMessageVerifier {
     
     private static final Log LOG = LogFactory.getLog(SecureMessageVerifier.class);
 
-    private final ProcessingQueue QUEUE = new ProcessingQueue("SecureMessageVerifier");
+    private final ProcessingQueue QUEUE;
     
     /** The public key. */
     private PublicKey pubKey;
     
+    public SecureMessageVerifier() {
+        QUEUE = new ProcessingQueue("SecureMessageVerifier");
+    }
+    
+    public SecureMessageVerifier(String name) {
+        QUEUE = new ProcessingQueue(name + "-SecureMessageVerifier");
+    }
+    
     /** Queues this SecureMessage for verification. The callback will be notified of success or failure. */
     public void verify(SecureMessage sm, SecureMessageCallback smc) {
-        initializePublicKey();
-        verify(pubKey, "SHA1withDSA", sm, smc);
+        QUEUE.add(new Verifier(pubKey, "SHA1withDSA", sm, smc));
     }
     
     /** 
@@ -36,6 +43,14 @@ public class SecureMessageVerifier {
      */
     public void verify(PublicKey pubKey, String algorithm, 
             SecureMessage sm, SecureMessageCallback smc) {
+        
+        // To avoid ambiguous results interpret a null pubKey
+        // as an error. A null pubKey would otherwise result
+        // in loading core's secureMessage.key
+        if (pubKey == null) {
+            throw new IllegalArgumentException("PublicKey is null");
+        }
+        
         QUEUE.add(new Verifier(pubKey, algorithm, sm, smc));
     }
     
@@ -55,9 +70,9 @@ public class SecureMessageVerifier {
     protected File getKeyFile() {
         return new File(CommonUtils.getUserSettingsDir(), "secureMessage.key");
     }
-    
+
     /** Simple runnable to insert into the ProcessingQueue. */
-    private static class Verifier implements Runnable {
+    private class Verifier implements Runnable {
         
         private PublicKey pubKey;
         private String algorithm;
@@ -76,6 +91,13 @@ public class SecureMessageVerifier {
         
         /** Does the verification. */
         public void run() {
+            
+            // See verify(SecureMessage, SecureMessageCallback)
+            if(pubKey == null) {
+                initializePublicKey();
+                pubKey = SecureMessageVerifier.this.pubKey;
+            }
+            
             if(pubKey == null) {
                 LOG.warn("Cannot verify message without a public key.");
                 message.setSecureStatus(SecureMessage.INSECURE);
