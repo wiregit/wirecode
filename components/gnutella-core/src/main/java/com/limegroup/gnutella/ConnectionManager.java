@@ -1423,7 +1423,7 @@ public class ConnectionManager {
      * Returns this node's average connection time - in ms - including the current session.
      * 
      */
-    public long getCurrentAverageUptime() {
+    public synchronized long getCurrentAverageUptime() {
         long currentAverage = 0;
         long now = System.currentTimeMillis();
         long sessionTime = Math.max(0,now - _connectTime); //in ms
