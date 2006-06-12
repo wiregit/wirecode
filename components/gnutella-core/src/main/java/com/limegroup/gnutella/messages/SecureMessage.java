@@ -17,9 +17,5 @@ public interface SecureMessage {
 
     public byte[] getSecureSignature();
     
-    public boolean isSecure();
-    
-    public boolean isSigned();
-    
     public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException;
 }

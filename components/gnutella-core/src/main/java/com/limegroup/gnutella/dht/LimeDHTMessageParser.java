@@ -8,7 +8,7 @@ import java.net.SocketAddress;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
-import com.limegroup.mojito.io.MessageInputStream;
+import com.limegroup.mojito.io.DefaultMessageInputStream;
 
 class LimeDHTMessageParser implements MessageParser {
     
@@ -23,10 +23,8 @@ class LimeDHTMessageParser implements MessageParser {
     public Message parse(byte[] guid, byte ttl, byte hops, 
             byte[] payload, int network) throws BadPacketException {
         
-        // TODO See LimeDHTMessageFactory and the constructors of the
-        // various Messages! They generate a new GUID! That's not good!
         ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-        MessageInputStream in = new MessageInputStream(bais, factory, ADDRESS);
+        DefaultMessageInputStream in = new DefaultMessageInputStream(bais, factory, ADDRESS);
         
         try {
             return (LimeDHTMessage)in.readMessage();

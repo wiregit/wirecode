@@ -13,7 +13,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.io.MessageOutputStream;
+import com.limegroup.mojito.io.DefaultMessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -32,6 +32,9 @@ abstract class LimeDHTMessage extends Message implements DHTMessage {
     
     static final byte F_DHT_MESSAGE = (byte)0x43;
     
+    private static final byte TTL = (byte)0x01;
+    private static final byte HOPS = (byte)0x00;
+    
     private int opcode;
     private int vendor;
     private int version;
@@ -42,7 +45,7 @@ abstract class LimeDHTMessage extends Message implements DHTMessage {
     
     LimeDHTMessage(int opcode, int vendor, int version, 
             ContactNode contactNode, KUID messageId) {
-        super(makeGuid(), F_DHT_MESSAGE, (byte)0x01, (byte)0x00, 0, N_UNKNOWN);
+        super(makeGuid(), F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
         
         this.opcode = opcode;
         this.vendor = vendor;
@@ -53,7 +56,7 @@ abstract class LimeDHTMessage extends Message implements DHTMessage {
     
     private void serialize() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(640);
-        MessageOutputStream out = new MessageOutputStream(baos);
+        DefaultMessageOutputStream out = new DefaultMessageOutputStream(baos);
         out.write(this);
         out.close();
         

@@ -29,8 +29,8 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.io.ByteBufferInputStream;
+import com.limegroup.mojito.io.DefaultMessageInputStream;
 import com.limegroup.mojito.io.MessageFormatException;
-import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -53,10 +53,11 @@ public class DefaultMessageFactory implements MessageFactory {
             throws MessageFormatException, IOException {
         
         ByteBufferInputStream bbis = new ByteBufferInputStream(data);
-        MessageInputStream in = new MessageInputStream(bbis, this, src);
+        DefaultMessageInputStream in = new DefaultMessageInputStream(bbis, this, src);
         
         try {
-            return in.readMessage();
+            DHTMessage message = in.readMessage();
+            return message;
         } catch (IOException err) {
             throw new MessageFormatException(err);
         } finally {

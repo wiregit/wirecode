@@ -89,7 +89,7 @@ public class Context {
     
     private static Timer TIMER = new Timer(true);
     
-    private PublicKey masterKey;
+    private KeyPair masterKeyPair;
     
     private ContactNode localNode;
     private SocketAddress localAddress;
@@ -134,6 +134,7 @@ public class Context {
         this.localNode = localNode;
         this.keyPair = keyPair;
         
+        PublicKey masterKey = null;
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());
             if (file.exists() && file.isFile()) {
@@ -142,6 +143,7 @@ public class Context {
         } catch (Exception err) {
             LOG.fatal("Loading the MasterKey failed!", err);
         }
+        masterKeyPair = new KeyPair(masterKey, null);
         
         dhtStats = new DHTNodeStat(this);
         
@@ -204,7 +206,15 @@ public class Context {
     }
     
     public PublicKey getMasterKey() {
-        return masterKey;
+        return masterKeyPair.getPublic();
+    }
+    
+    public KeyPair getMasterKeyPair() {
+        return masterKeyPair;
+    }
+    
+    public void setMasterKeyPair(KeyPair masterKeyPair) {
+        this.masterKeyPair = masterKeyPair;
     }
     
     public void createNewKeyPair() {

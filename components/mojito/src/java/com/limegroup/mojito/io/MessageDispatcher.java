@@ -48,6 +48,7 @@ import com.limegroup.mojito.handler.request.StatsRequestHandler;
 import com.limegroup.mojito.handler.request.StoreRequestHandler;
 import com.limegroup.mojito.io.Tag.Receipt;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.DHTSecureMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueRequest;
@@ -388,8 +389,8 @@ public abstract class MessageDispatcher implements Runnable {
      */
     private void processResponse(Receipt receipt, ResponseMessage response) {
         Runnable processor = new ResponseProcessor(receipt, response);
-        if (response instanceof SecureMessage) {
-            SecureMessage secure = (SecureMessage)response;
+        if (response instanceof DHTSecureMessage) {
+            DHTSecureMessage secure = (DHTSecureMessage)response;
             if (secure.isSigned()) {
                 verify(secure, new SecureMessageCallbackImpl(processor));
             } else {
@@ -406,7 +407,7 @@ public abstract class MessageDispatcher implements Runnable {
     private void processRequest(RequestMessage request) {
         Runnable processor = new RequestProcessor(request);
         if (request instanceof SecureMessage) {
-            SecureMessage secure = (SecureMessage)request;
+            DHTSecureMessage secure = (DHTSecureMessage)request;
             if (secure.isSigned()) {
                 verify(secure, new SecureMessageCallbackImpl(processor));
             } else {
