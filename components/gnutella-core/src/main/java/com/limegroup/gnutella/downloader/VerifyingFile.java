@@ -898,21 +898,22 @@ public class VerifyingFile {
             }
 
             // write & notify outside of lock
-            if(!dw.write()) {
-            	synchronized(CACHE) {
-            		String report = " cannot write to this."+
-            			"\n delayed size "+DELAYED.size()+
-            			"\n queue size "+QUEUE.size()+
-            			"\n cache created "+CACHE.getCreated()+
-            			"\n cache available? "+CACHE.isBufferAvailable(); 
-            		throw new IllegalStateException(report);
-            	}
+            if(dw.write()) {
+                // if we wrote succesfully, remove the item from the cache.
+                synchronized(CACHE) {
+                    DELAYED.remove(0);
+                }
+            } else {
+                // otherwise, something went wrong, so reschedule another
+                // delayed write later on.
+                // NOTE: this should be impossible to happen, but it's happening,
+                //       and its no huge deal, so we're preparing for it.
+                QUEUE.invokeLater(new Runnable() {
+                    public void run() {
+                        runDelayedWrites();
+                    }
+                });
             }
-            
-            synchronized(CACHE) {
-                DELAYED.remove(0);
-            }
-            
         }
     }
     
