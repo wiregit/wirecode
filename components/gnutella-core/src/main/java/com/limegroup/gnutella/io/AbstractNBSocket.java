@@ -316,7 +316,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         if(writer instanceof NIOOutputStream)
             return ((NIOOutputStream)writer).getOutputStream();
         else
-            throw new IllegalStateException("writer not NIOOutputStream!");
+            throw new IllegalStateException("writer not NIOOutputStream, it's a: " + writer);
     }
     
     /** Gets the read timeout for this socket. */
