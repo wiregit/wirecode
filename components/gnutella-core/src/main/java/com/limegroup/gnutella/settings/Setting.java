@@ -72,7 +72,7 @@ public abstract class Setting {
         SIMPP_KEY = simppKey;
 		DEFAULT_VALUE = defaultValue;
 		if(DEFAULT_PROPS.containsKey(key)) 
-			throw new IllegalArgumentException("duplicate setting key");
+			throw new IllegalArgumentException("duplicate setting key: " + key);
 		DEFAULT_PROPS.put(KEY, defaultValue);
         loadValue(defaultValue);
 	}
