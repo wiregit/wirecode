@@ -1392,22 +1392,10 @@ public class ConnectionManager {
      * the number of connections to zero.
      */
     public synchronized void disconnect() {
-        long now = System.currentTimeMillis();
-        if(_disconnectTime == 0) { 
-            int sessionTime = (int)(Math.max(0,now - _connectTime)/(1000L)); //in seconds
-            if(sessionTime != 0) {
-                int totalConnectTime = Math.max(0, Math.min(Integer.MAX_VALUE,
-                        ApplicationSettings.TOTAL_CONNECTION_TIME.getValue() + sessionTime));
-                ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(totalConnectTime);
-                int totalConnections = ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1;
-                if(totalConnections < 1)
-                    totalConnections = 1;
-                ApplicationSettings.TOTAL_CONNECTIONS.setValue(totalConnections);
-                ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(totalConnectTime/totalConnections);
-            }
-        }
+        if(_disconnectTime == 0) 
+            getCurrentAverageUptime(true);
         
-        _disconnectTime = now;
+        _disconnectTime = System.currentTimeMillis();
         _connectTime = Long.MAX_VALUE;
         _preferredConnections = 0;
         adjustConnectionFetchers(); // kill them all
@@ -1422,6 +1410,34 @@ public class ConnectionManager {
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
                                           c.getPort()), true, c.getLocalePref());
             }
+        }
+    }
+    
+    /**
+     * Returns this node's average connection time including the current session.
+     * Note that this method will NOT update the settings if the current session was < 1 minute.
+     * 
+     * @param updateSettings true to save the time, false otherwise
+     */
+    public int getCurrentAverageUptime(boolean updateSettings) {
+        long now = System.currentTimeMillis();
+        int currentAverage = 0;
+        int sessionTime = (int)(Math.max(0,now - _connectTime)/(1000L)); //in seconds
+        if(sessionTime != 0) {
+            int totalConnectTime = Math.max(0, Math.min(Integer.MAX_VALUE,
+                    ApplicationSettings.TOTAL_CONNECTION_TIME.getValue() + sessionTime));
+            int totalConnections = ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1;
+            if(totalConnections < 1)
+                totalConnections = 1;
+            currentAverage = totalConnectTime/totalConnections;
+            if(updateSettings) {
+                ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(totalConnectTime);
+                ApplicationSettings.TOTAL_CONNECTIONS.setValue(totalConnections);
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(currentAverage);
+            }
+            return currentAverage;
+        } else {
+            return ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();
         }
     }
 

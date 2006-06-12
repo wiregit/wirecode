@@ -492,6 +492,20 @@ public class ConnectionManagerTest extends BaseTestCase {
         assertEquals((totalConnect+6)/2,
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
     }
+    
+    public void testGetCurrentAverageUptime() throws Exception{
+        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(30*60);
+        ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(60*60);
+        ApplicationSettings.TOTAL_CONNECTIONS.setValue(2);
+        ConnectionManager mgr = RouterService.getConnectionManager();
+        assertFalse(mgr.isConnected());
+        CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
+        //try simple connect-disconnect
+        mgr.connect();
+        sleep(5000);
+        assertEquals(3605/3, mgr.getCurrentAverageUptime(false));
+        assertEquals(2,ApplicationSettings.TOTAL_CONNECTIONS.getValue());
+    }
 
     private void sleep() {
         sleep(5000);
