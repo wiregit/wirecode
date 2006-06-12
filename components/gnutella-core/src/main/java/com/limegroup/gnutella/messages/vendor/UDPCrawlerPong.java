@@ -171,8 +171,10 @@ public class UDPCrawlerPong extends VendorMessage {
 		result[2] = format;
 		
         if(request.hasNodeUptime()) {
-            int currentAverage = RouterService.getConnectionManager().getCurrentAverageUptime(false);
-            ByteOrder.int2leb(currentAverage, result, 3);
+            long currentAverage = RouterService.getConnectionManager().getCurrentAverageUptime()/1000L;//in sec
+            if(currentAverage > Integer.MAX_VALUE)
+                currentAverage = Integer.MAX_VALUE;
+            ByteOrder.int2leb((int)currentAverage, result, 3);
 		}
         
 		//cat the two lists

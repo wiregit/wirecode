@@ -465,21 +465,27 @@ public class ConnectionManagerTest extends BaseTestCase {
         mgr.connect();
         sleep(2000);
         mgr.disconnect();
-        int totalConnect = ApplicationSettings.TOTAL_CONNECTION_TIME.getValue();
-        int averageTime = ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();
+        long totalConnect = ApplicationSettings.TOTAL_CONNECTION_TIME.getValue();
+        long averageTime = ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();
         assertEquals(totalConnect,
                 averageTime);
         mgr.connect();
         sleep(6000);
         mgr.disconnect();
-        assertEquals(totalConnect+6,
+        assertGreaterThan(totalConnect+5800,
+                ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
+        assertLessThan(totalConnect+6500,
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
         assertGreaterThan(averageTime, ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
-        assertEquals((totalConnect+6)/2,
+        assertGreaterThan((totalConnect+5800)/2,
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        assertLessThan((totalConnect+6500)/2,
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         //try disconnecting twice in a row
         mgr.disconnect();
-        assertEquals(totalConnect+6,
+        assertGreaterThan(totalConnect+5800,
+                ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
+        assertLessThan(totalConnect+6500,
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
         assertGreaterThan(averageTime, ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         //test time changed during session
@@ -487,15 +493,19 @@ public class ConnectionManagerTest extends BaseTestCase {
         PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
                 "_connectTime", new Long(now+(60L*60L*1000L)));
         mgr.disconnect();
-        assertEquals(totalConnect+6,
+        assertGreaterThan(totalConnect+5800,
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
-        assertEquals((totalConnect+6)/2,
+        assertLessThan(totalConnect+6500,
+                ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
+        assertGreaterThan((totalConnect+5800)/2,
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        assertLessThan((totalConnect+6500)/2,
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
     }
     
     public void testGetCurrentAverageUptime() throws Exception{
-        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(30*60);
-        ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(60*60);
+        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(30L*60L*1000L);
+        ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(60L*60L*1000L);
         ApplicationSettings.TOTAL_CONNECTIONS.setValue(2);
         ConnectionManager mgr = RouterService.getConnectionManager();
         assertFalse(mgr.isConnected());
@@ -503,7 +513,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         //try simple connect-disconnect
         mgr.connect();
         sleep(5000);
-        assertEquals(3605/3, mgr.getCurrentAverageUptime(false));
+        assertGreaterThan(((60L*60L*1000L)+5L*1000L)/3L, mgr.getCurrentAverageUptime());
         assertEquals(2,ApplicationSettings.TOTAL_CONNECTIONS.getValue());
     }
 

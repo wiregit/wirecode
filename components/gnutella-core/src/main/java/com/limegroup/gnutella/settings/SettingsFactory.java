@@ -643,6 +643,23 @@ public final class SettingsFactory {
     }
     
     /**
+     * Creates a new expiring <tt>LongSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized LongSetting createExpirableLongSetting(String key, 
+                                                             long defaultValue) {
+        LongSetting result = createLongSetting(key, defaultValue);
+        
+        if (expired)
+            result.revertToDefault();
+        
+        return result;
+    }
+    
+    /**
      * Creates a new <tt>FontNameSetting</tt> instance with the specified
      * key and default value.
      *

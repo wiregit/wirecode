@@ -1392,8 +1392,14 @@ public class ConnectionManager {
      * the number of connections to zero.
      */
     public synchronized void disconnect() {
-        if(_disconnectTime == 0) 
-            getCurrentAverageUptime(true);
+        if(_disconnectTime == 0) {
+            long averageUptime = getCurrentAverageUptime();
+            int totalConnections = Math.max(1, ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1);
+            long totalConnectTime = averageUptime * totalConnections; 
+            ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(totalConnectTime);
+            ApplicationSettings.TOTAL_CONNECTIONS.setValue(totalConnections);
+            ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(averageUptime);
+        }
         
         _disconnectTime = System.currentTimeMillis();
         _connectTime = Long.MAX_VALUE;
@@ -1414,31 +1420,24 @@ public class ConnectionManager {
     }
     
     /**
-     * Returns this node's average connection time including the current session.
-     * Note that this method will NOT update the settings if the current session was < 1 minute.
+     * Returns this node's average connection time - in ms - including the current session.
      * 
-     * @param updateSettings true to save the time, false otherwise
      */
-    public int getCurrentAverageUptime(boolean updateSettings) {
+    public long getCurrentAverageUptime() {
+        long currentAverage = 0;
         long now = System.currentTimeMillis();
-        int currentAverage = 0;
-        int sessionTime = (int)(Math.max(0,now - _connectTime)/(1000L)); //in seconds
-        if(sessionTime != 0) {
-            int totalConnectTime = Math.max(0, Math.min(Integer.MAX_VALUE,
-                    ApplicationSettings.TOTAL_CONNECTION_TIME.getValue() + sessionTime));
-            int totalConnections = ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1;
-            if(totalConnections < 1)
-                totalConnections = 1;
-            currentAverage = totalConnectTime/totalConnections;
-            if(updateSettings) {
-                ApplicationSettings.TOTAL_CONNECTION_TIME.setValue(totalConnectTime);
-                ApplicationSettings.TOTAL_CONNECTIONS.setValue(totalConnections);
-                ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(currentAverage);
-            }
-            return currentAverage;
-        } else {
-            return ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();
+        long sessionTime = Math.max(0,now - _connectTime); //in ms
+        int totalConnections = Math.max(0, ApplicationSettings.TOTAL_CONNECTIONS.getValue());
+
+        if(sessionTime != 0) { //else don't count current session
+            totalConnections+=1;
         }
+        
+        long totalConnectTime = Math.max(0, 
+                ApplicationSettings.TOTAL_CONNECTION_TIME.getValue() + sessionTime);
+        
+        currentAverage = totalConnectTime/totalConnections;
+        return currentAverage;
     }
 
     /**
