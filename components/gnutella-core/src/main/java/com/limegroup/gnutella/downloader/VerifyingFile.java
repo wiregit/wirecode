@@ -347,7 +347,9 @@ public class VerifyingFile {
      */
     public void setScanForExistingBlocks(boolean scan, long length) {
         if(scan && length != 0) {
-            existingFileSize = length;
+        	Assert.silent(length <= completedSize, 
+        			"length: "+length+" completed: "+completedSize);
+            existingFileSize = Math.min(length, completedSize);
         } else {
             existingFileSize = -1;
         }
