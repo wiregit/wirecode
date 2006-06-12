@@ -174,7 +174,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     private void writeStatsRequest(StatsRequest request) throws IOException {
-        writeSignature(request.getSignature());
+        writeSignature(request.getSecureSignature()); // TODO wrong!
         writeInt(request.getRequest());
     }
     

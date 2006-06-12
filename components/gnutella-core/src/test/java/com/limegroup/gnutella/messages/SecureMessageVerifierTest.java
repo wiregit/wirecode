@@ -180,6 +180,14 @@ public class SecureMessageVerifierTest extends BaseTestCase {
             this.secureStatus = secureStatus;
         }
 
+        public boolean isSecure() {
+            return secureStatus == SECURE;
+        }
+
+        public boolean isSigned() {
+            return getSecureSignature() != null;
+        }
+
         public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
         }
     }

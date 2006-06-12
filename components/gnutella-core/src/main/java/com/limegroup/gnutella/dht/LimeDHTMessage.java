@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -127,9 +129,14 @@ abstract class LimeDHTMessage extends Message implements DHTMessage {
         public int getSecureStatus() {
             return secureStatus;
         }
-
-        public byte[] getSignature() {
+        
+        public byte[] getSecureSignature() {
             return signature;
+        }
+
+        public void updateSignatureWithSecuredBytes(Signature signature) 
+                throws SignatureException {
+            // TODO Auto-generated method stub
         }
 
         public boolean isSecure() {

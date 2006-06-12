@@ -19,6 +19,7 @@
 
 package com.limegroup.mojito.messages;
 
+import com.limegroup.gnutella.messages.SecureMessage;
+
 public interface RequestMessage extends DHTMessage, SecureMessage {
-    
 }

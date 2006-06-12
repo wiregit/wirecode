@@ -24,15 +24,26 @@ public class SecureMessageVerifier {
     /** The public key. */
     private PublicKey pubKey;
     
-    /** Queues this SecureMessage for verification.  The callback will be notified of success or failure. */
+    /** Queues this SecureMessage for verification. The callback will be notified of success or failure. */
     public void verify(SecureMessage sm, SecureMessageCallback smc) {
-        QUEUE.add(new Verifier(sm, smc));
+        initializePublicKey();
+        verify(pubKey, "SHA1withDSA", sm, smc);
+    }
+    
+    /** 
+     * Queues this SecureMessage for verification. The callback will 
+     * be notified of success or failure.
+     */
+    public void verify(PublicKey pubKey, String algorithm, 
+            SecureMessage sm, SecureMessageCallback smc) {
+        QUEUE.add(new Verifier(pubKey, algorithm, sm, smc));
     }
     
     /** Initializes the public key if one isn't set. */
     private void initializePublicKey() {
-        if(pubKey == null)
+        if(pubKey == null) {
             pubKey = createPublicKey();
+        }
     }
     
     /** Creates the public key. */
@@ -45,61 +56,63 @@ public class SecureMessageVerifier {
         return new File(CommonUtils.getUserSettingsDir(), "secureMessage.key");
     }
     
-    /** Does the verification. */
-    private void verifyMessage(SecureMessage message, SecureMessageCallback callback) {
-        if(pubKey == null) {
-            LOG.warn("Cannot verify message without a public key.");
-            message.setSecureStatus(SecureMessage.INSECURE);
-            callback.handleSecureMessage(message, false);
-            return;
-        }
-        
-        byte[] signature = message.getSecureSignature();
-        if(signature == null) {
-            LOG.warn("Cannot verify message without a signature.");
-            message.setSecureStatus(SecureMessage.INSECURE);
-            callback.handleSecureMessage(message, false);
-            return;
-        }
-        
-        try {
-            Signature verifier = Signature.getInstance("SHA1withDSA");
-            verifier.initVerify(pubKey);
-            message.updateSignatureWithSecuredBytes(verifier);
-            if(verifier.verify(signature)) {
-                message.setSecureStatus(SecureMessage.SECURE);
-                callback.handleSecureMessage(message, true);
-                return;
-            }
-            // fallthrough on not secure & failures to set failed.
-        } catch (NoSuchAlgorithmException nsax) {
-            LOG.error("No alg.", nsax);
-        } catch (InvalidKeyException ikx) {
-            LOG.error("Invalid key", ikx);
-        } catch (SignatureException sx) {
-            LOG.error("Bad sig", sx);
-        } catch (ClassCastException ccx) {
-            LOG.error("bad cast", ccx);
-        }
-        
-        message.setSecureStatus(SecureMessage.FAILED);
-        callback.handleSecureMessage(message, false);
-    }
-    
     /** Simple runnable to insert into the ProcessingQueue. */
-    private class Verifier implements Runnable {
-        private final SecureMessage message;
-        private final SecureMessageCallback callback;
+    private static class Verifier implements Runnable {
         
-        Verifier(SecureMessage message, SecureMessageCallback callback) {
+        private PublicKey pubKey;
+        private String algorithm;
+        
+        private SecureMessage message;
+        private SecureMessageCallback callback;
+        
+        Verifier(PublicKey pubKey, String algorithm, 
+                SecureMessage message, SecureMessageCallback callback) {
+            
+            this.pubKey = pubKey;
+            this.algorithm = algorithm;
             this.message = message;
             this.callback = callback;
         }
         
+        /** Does the verification. */
         public void run() {
-            initializePublicKey();
-            verifyMessage(message, callback);
+            if(pubKey == null) {
+                LOG.warn("Cannot verify message without a public key.");
+                message.setSecureStatus(SecureMessage.INSECURE);
+                callback.handleSecureMessage(message, false);
+                return;
+            }
+            
+            byte[] signature = message.getSecureSignature();
+            if(signature == null) {
+                LOG.warn("Cannot verify message without a signature.");
+                message.setSecureStatus(SecureMessage.INSECURE);
+                callback.handleSecureMessage(message, false);
+                return;
+            }
+            
+            try {
+                Signature verifier = Signature.getInstance(algorithm);
+                verifier.initVerify(pubKey);
+                message.updateSignatureWithSecuredBytes(verifier);
+                if(verifier.verify(signature)) {
+                    message.setSecureStatus(SecureMessage.SECURE);
+                    callback.handleSecureMessage(message, true);
+                    return;
+                }
+                // fallthrough on not secure & failures to set failed.
+            } catch (NoSuchAlgorithmException nsax) {
+                LOG.error("No alg.", nsax);
+            } catch (InvalidKeyException ikx) {
+                LOG.error("Invalid key", ikx);
+            } catch (SignatureException sx) {
+                LOG.error("Bad sig", sx);
+            } catch (ClassCastException ccx) {
+                LOG.error("bad cast", ccx);
+            }
+            
+            message.setSecureStatus(SecureMessage.FAILED);
+            callback.handleSecureMessage(message, false);
         }
     }
-
 }

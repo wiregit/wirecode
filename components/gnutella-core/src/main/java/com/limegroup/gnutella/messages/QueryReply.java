@@ -704,6 +704,15 @@ public class QueryReply extends Message implements SecureMessage {
             signature.update(_payload, end, length);
         }
     }
+    
+    public synchronized boolean isSecure() {
+        return _secureStatus == SECURE;
+    }
+
+    public boolean isSigned() {
+        parseResults();
+        return _data.getSecureGGEP() != null;
+    }
 
 
     /** Determines if the message was verified. */

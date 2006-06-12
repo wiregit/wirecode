@@ -58,7 +58,7 @@ public class Tag {
     private DHTMessage message;
     
     private ByteBuffer data;
-    private int size;
+    private int size = -1;
     
     private ResponseHandler responseHandler;
     
@@ -112,6 +112,9 @@ public class Tag {
     }
     
     public int getSize() {
+        if (size < 0) {
+            throw new IllegalStateException("Data is not set and the size is unknown");
+        }
         return size;
     }
     
@@ -131,12 +134,15 @@ public class Tag {
         return message;
     }
     
-    void setData(ByteBuffer data) {
+    public void setData(ByteBuffer data) {
         this.size = data.remaining();
         this.data = data;
     }
     
     public ByteBuffer getData() {
+        if (data == null) {
+            throw new IllegalStateException("Data is null");
+        }
         return data;
     }
     

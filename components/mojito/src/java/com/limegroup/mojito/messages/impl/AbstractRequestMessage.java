@@ -19,6 +19,9 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.security.Signature;
+import java.security.SignatureException;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -57,16 +60,20 @@ public abstract class AbstractRequestMessage extends AbstractDHTMessage
         return signature != null;
     }
 
-    /** Returns the signature of the Message or null */
-    public byte[] getSignature() {
-        return signature;
-    }
-
     public void setSignature(byte[] signature) {
         this.signature = signature;
     }
     
     public boolean isSecure() {
-        return isSigned() && (secureStatus == SECURE);
+        return secureStatus == SECURE;
+    }
+
+    public byte[] getSecureSignature() {
+        return signature;
+    }
+
+    public void updateSignatureWithSecuredBytes(Signature signature) 
+            throws SignatureException {
+        // TODO Auto-generated method stub
     }
 }
