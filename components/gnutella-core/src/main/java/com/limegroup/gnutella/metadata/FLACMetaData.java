@@ -101,8 +101,12 @@ public class FLACMetaData extends AudioMetaData {
 		IOUtils.ensureSkip(dis, 16);
 
 		int sampleRate = ByteOrder.beb2int(info, 0, 3) >> 4;
+        if(sampleRate <= 0)
+            throw new IOException("unreasonable sample rate!");
 
 		int numChannels = ((ByteOrder.beb2int(info, 2, 1) >> 1) & 7) + 1;
+        if(numChannels <= 0)
+            throw new IOException("unreasonable number of channels!");
 
 		int bitsPerSample = ((ByteOrder.beb2int(info, 2, 2) >> 4) & 31) + 1;
 
