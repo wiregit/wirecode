@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.messages.SecureMessage;
+import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
@@ -390,7 +391,7 @@ public abstract class MessageDispatcher implements Runnable {
         if (response instanceof SecureMessage) {
             SecureMessage secure = (SecureMessage)response;
             if (secure.isSigned()) {
-                processSigned(new SignatureProcessor(secure, processor));
+                verify(secure, new SecureMessageCallbackImpl(processor));
             } else {
                 process(processor);
             }
@@ -407,7 +408,7 @@ public abstract class MessageDispatcher implements Runnable {
         if (request instanceof SecureMessage) {
             SecureMessage secure = (SecureMessage)request;
             if (secure.isSigned()) {
-                processSigned(new SignatureProcessor(secure, processor));
+                verify(secure, new SecureMessageCallbackImpl(processor));
             } else {
                 process(processor);
             }
@@ -496,16 +497,11 @@ public abstract class MessageDispatcher implements Runnable {
     /** Called to indicate an interest in writing */
     protected abstract void interestWrite(boolean on);
     
-    /** 
-     * Called to process a time intensive Task. The default 
-     * implementation delegates to process().
-     */
-    protected void processSigned(Runnable runnable) {
-        process(runnable);
-    }
-    
     /** Called to process a Task */
     protected abstract void process(Runnable runnable);
+    
+    /** Called to verify a SecureMessage */
+    protected abstract void verify(SecureMessage secureMessage, SecureMessageCallback smc);
     
     /** Called to check whether or not the Message should be processed */
     protected abstract boolean allow(DHTMessage message);
@@ -704,22 +700,18 @@ public abstract class MessageDispatcher implements Runnable {
     }
     
     /**
-     * An implementation of Runnable to handle SecureMessages
+     * An implementation of SecureMessageCallback to handle SecureMessages
      */
-    private class SignatureProcessor implements Runnable {
+    private class SecureMessageCallbackImpl implements SecureMessageCallback {
         
-        private SecureMessage secure;
-        private Runnable delegate;
+        private Runnable processor;
         
-        private SignatureProcessor(SecureMessage secure, Runnable delegate) {
-            this.secure = secure;
-            this.delegate = delegate;
+        private SecureMessageCallbackImpl(Runnable processor) {
+            this.processor = processor;
         }
         
-        public void run() {
-            // TODO validate signature!
-            
-            delegate.run();
+        public void handleSecureMessage(SecureMessage sm, boolean passed) {
+            process(processor);
         }
     }
 }

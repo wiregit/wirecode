@@ -34,12 +34,16 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.SecureMessage;
+import com.limegroup.gnutella.messages.SecureMessageCallback;
+import com.limegroup.gnutella.messages.SecureMessageVerifier;
 import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.security.CryptoHelper;
 
 /**
  * LimeMessageDispatcher re-routes DHTMessage(s) through the
@@ -53,18 +57,13 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     private ProcessingQueue processingQueue;
     
-    private ProcessingQueue secureProcessingQueue;
-    
     private boolean running = false;
     
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
         
         processingQueue = new ProcessingQueue(
-                context.getName() + "-LimeMessageDispatcherPQ", true);
-        
-        secureProcessingQueue = new ProcessingQueue(
-                context.getName() + "-SecureMessageDispatcherPQ", true);
+                context.getName() + "-LimeMessageDispatcherPQ");
         
         // Set the MessageFactory
         LimeDHTMessageFactory factory = new LimeDHTMessageFactory();
@@ -112,7 +111,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void stop() {
         running = false;
         processingQueue.clear();
-        secureProcessingQueue.clear();
         clear();
     }
 
@@ -183,11 +181,14 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     }
 
     protected void process(Runnable runnable) {
-        processingQueue.add(runnable);
+        if (isRunning()) {
+            processingQueue.add(runnable);
+        }
     }
     
-    protected void processSigned(Runnable runnable) {
-        secureProcessingQueue.add(runnable);
+    protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
+        SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
+        verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
 
     // This is not running as a Thread!
