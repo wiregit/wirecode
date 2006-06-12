@@ -117,7 +117,13 @@ public class HttpClientManager {
             if(LOG.isInfoEnabled())
                 LOG.info("Attempting connection (" + i + ") to " + 
                          methid.getURI().getEscapedURI());
-            client.executeMethod(methid);
+            try {
+                client.executeMethod(methid);
+            } catch(IllegalArgumentException iae) {
+                // HttpClient 2.1rc2 has errors w/ parsing cookies.
+                // See: https://www.limewire.org/jira/browse/CORE-33
+                throw (IOException)new IOException().initCause(iae);
+            }
             switch(methid.getStatusCode()) {
             case HttpStatus.SC_MOVED_TEMPORARILY:
             case HttpStatus.SC_MOVED_PERMANENTLY:
