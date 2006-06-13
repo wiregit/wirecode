@@ -41,8 +41,21 @@ import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
+import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.impl.AbstractMessage;
+import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
+import com.limegroup.mojito.messages.impl.FindNodeRequestImpl;
+import com.limegroup.mojito.messages.impl.FindNodeResponseImpl;
+import com.limegroup.mojito.messages.impl.FindValueRequestImpl;
+import com.limegroup.mojito.messages.impl.FindValueResponseImpl;
+import com.limegroup.mojito.messages.impl.PingRequestImpl;
+import com.limegroup.mojito.messages.impl.PingResponseImpl;
+import com.limegroup.mojito.messages.impl.StatsRequestImpl;
+import com.limegroup.mojito.messages.impl.StatsResponseImpl;
+import com.limegroup.mojito.messages.impl.StoreRequestImpl;
+import com.limegroup.mojito.messages.impl.StoreResponseImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 
 /**
@@ -71,20 +84,20 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         // Register the Message type
         LimeDHTMessageParser parser = new LimeDHTMessageParser(factory);
-        MessageFactory.setParser(LimeDHTMessage.F_DHT_MESSAGE, parser);
+        MessageFactory.setParser(AbstractMessage.F_DHT_MESSAGE, parser);
         
         // Install the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.PingRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.PingResponseImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.StoreRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.StoreResponseImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.FindNodeRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.FindNodeResponseImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.FindValueRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.FindValueResponseImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.StatsRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(LimeDHTMessage.StatsResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(PingRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(PingResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(StoreRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(StoreResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindNodeRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindNodeResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindValueRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindValueResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(StatsRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(StatsResponseImpl.class, this);
         
         // Install cleanup task
         context.scheduleAtFixedRate(new Runnable() {
@@ -145,7 +158,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
             return;
         }
         
-        LimeDHTMessage dhtMessage = (LimeDHTMessage)msg;
+        DHTMessage dhtMessage = (DHTMessage)msg;
         dhtMessage.getContactNode().setSocketAddress(addr);
         
         try {
@@ -194,5 +207,12 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     // This is not running as a Thread!
     public void run() {
         running = true;
+    }
+    
+    private static class LimeDHTMessageFactory extends DefaultMessageFactory {
+        public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
+                throws MessageFormatException, IOException {
+            throw new IOException("Cannot deserialize LimeDHTMessages with this method!");
+        }
     }
 }

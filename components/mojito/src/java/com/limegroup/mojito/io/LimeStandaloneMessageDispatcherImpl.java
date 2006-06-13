@@ -22,11 +22,10 @@ package com.limegroup.mojito.io;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Random;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 
 /**
  * An implementation of MessageDispatcher for debugging purposes. 
@@ -39,50 +38,20 @@ public class LimeStandaloneMessageDispatcherImpl
 
     private static final int MESSAGE_HEADER = 23;
     
-    private Random random = new Random();
-    
     public LimeStandaloneMessageDispatcherImpl(Context context) {
         super(context);
+        
+        context.setMessageFactory(new LimeStandaloneMessageFactory());
     }
 
-    protected ByteBuffer serialize(DHTMessage message) 
-            throws IOException {
-        ByteBuffer payload = super.serialize(message);
-        
-        ByteBuffer data = ByteBuffer.allocate(2048);
-        data.order(ByteOrder.LITTLE_ENDIAN);
-        
-        // GUID 16 bytes (4*4 byte)
-        for(int i = 0; i < 4; i++) {
-            data.putInt(random.nextInt());
-        }
-        
-        data.put((byte)0x43); // LimeDHTMessage
-        data.put((byte)0x01); // TTL
-        data.put((byte)0x00); // Hops
-        
-        data.putInt(payload.remaining()); // Length
-        
-        // Must be 23 byte total
-        assert data.position() == MESSAGE_HEADER;
-        
-        data.order(ByteOrder.BIG_ENDIAN);
-        data.put(payload);
-        
-        data.flip();
-        return data;
-    }
-
-    protected DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
-            throws MessageFormatException, IOException {
-        
-        try {
+    private static class LimeStandaloneMessageFactory extends DefaultMessageFactory {
+        public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
+                throws MessageFormatException, IOException {
+            
             // Skip the Gnutella Header
             data.position(MESSAGE_HEADER);
-        } catch (IllegalArgumentException err) {
-            throw new MessageFormatException(err);
-        }
-        
-        return super.deserialize(src, data);
+            
+            return super.createMessage(src, data);
+        }        
     }
 }

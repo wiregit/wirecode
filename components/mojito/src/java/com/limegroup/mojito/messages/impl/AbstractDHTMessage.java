@@ -31,8 +31,14 @@ import com.limegroup.mojito.messages.DHTMessage;
 /**
  * An abstract implementation of DHTMessage
  */
-public abstract class AbstractDHTMessage implements DHTMessage {
+public abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage {
 
+    /*
+     *  To remove the (Gnutella) Message dependence don't
+     *  extend from AbstractMessage and scroll down to the
+     *  bottom of this class.
+     */
+    
     private int opcode;
     
     private int vendor;
@@ -111,8 +117,14 @@ public abstract class AbstractDHTMessage implements DHTMessage {
     public SocketAddress getSourceAddress() {
         return contactNode.getSocketAddress();
     }
-
-    public void write(OutputStream out) throws IOException {
+    
+    /*
+     *  To remove the (Gnutella) Message dependence rename
+     *  writeMessage(OutputStream) to write(OutputStream) 
+     */
+    
+    // public void write(OutputStream out) throws IOException {
+    protected void writeMessage(OutputStream out) throws IOException {
         new DefaultMessageOutputStream(out).write(this);
     }
 }
