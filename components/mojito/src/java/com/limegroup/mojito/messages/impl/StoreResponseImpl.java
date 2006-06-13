@@ -19,8 +19,13 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StoreResponse;
 
 
@@ -38,11 +43,27 @@ public class StoreResponseImpl extends AbstractResponseMessage
         this.status = status;
     }
 
+    public StoreResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
+        super(STORE_RESPONSE, src, data);
+        
+        this.valueId = KUID.createValueID(data);
+        this.status = data.get() & 0xFF;
+    }
+    
     public KUID getValueID() {
         return valueId;
     }
 
+    protected void writeBody(MessageOutputStream out) throws IOException {
+        out.writeKUID(valueId);
+        out.writeByte(status);
+    }
+
     public int getStatus() {
         return status;
+    }
+    
+    public String toString() {
+        return "StoreResponse: valueId=" + valueId + ", status=" + status;
     }
 }

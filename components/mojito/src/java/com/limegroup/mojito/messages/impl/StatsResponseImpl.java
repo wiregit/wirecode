@@ -19,15 +19,21 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StatsResponse;
+import com.limegroup.mojito.util.ByteBufferUtils;
 
 
 public class StatsResponseImpl extends AbstractResponseMessage
         implements StatsResponse {
 
-    protected final String statistics;
+    private String statistics;
 
     public StatsResponseImpl(int vendor, int version, ContactNode node,
             KUID messageId, String statistics) {
@@ -36,8 +42,22 @@ public class StatsResponseImpl extends AbstractResponseMessage
         this.statistics = statistics;
     }
 
+    public StatsResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
+        super(STATS_RESPONSE, src, data);
+        
+        this.statistics = ByteBufferUtils.getUTFString(data);
+    }
+    
     public String getStatistics() {
         return statistics;
     }
 
+    protected void writeBody(MessageOutputStream out) throws IOException {
+        byte[] str = statistics.getBytes("UTF-8");
+        out.write(str, 0, str.length);
+    }
+    
+    public String toString() {
+        return "StatsResponse: " + statistics;
+    }
 }

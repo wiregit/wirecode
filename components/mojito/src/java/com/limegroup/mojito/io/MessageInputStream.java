@@ -46,10 +46,14 @@ public class MessageInputStream extends DataInputStream {
         super(in);
     }
     
+    public byte[] readBytes(int bytes) throws IOException {
+        byte[] buf = new byte[bytes];
+        readFully(buf);
+        return buf;
+    }
+    
     private byte[] readKUIDBytes() throws IOException {
-        byte[] id = new byte[KUID.LENGTH/8];
-        readFully(id);
-        return id;
+        return readBytes(KUID.LENGTH/8);
     }
     
     public KUID readNodeID() throws IOException {

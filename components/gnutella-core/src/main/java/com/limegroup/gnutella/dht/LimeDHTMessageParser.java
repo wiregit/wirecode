@@ -19,15 +19,14 @@
 
 package com.limegroup.gnutella.dht;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
-import com.limegroup.mojito.io.DefaultMessageInputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.impl.AbstractMessage;
@@ -45,16 +44,12 @@ class LimeDHTMessageParser implements MessageParser {
     public Message parse(byte[] guid, byte ttl, byte hops, 
             byte[] payload, int network) throws BadPacketException {
         
-        ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-        DefaultMessageInputStream in = new DefaultMessageInputStream(bais, factory, ADDRESS);
-        
         try {
-            DHTMessage message = in.readMessage();
+            DHTMessage message = factory.createMessage(ADDRESS, ByteBuffer.wrap(payload));
+            System.out.println(message);
             return (AbstractMessage)message;
         } catch (IOException err) {
             throw new BadPacketException(err);
-        } finally {
-            try { in.close(); } catch (IOException ignore) {}
         }
     }
 }

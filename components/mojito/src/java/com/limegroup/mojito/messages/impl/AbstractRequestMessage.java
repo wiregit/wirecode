@@ -19,8 +19,9 @@
 
 package com.limegroup.mojito.messages.impl;
 
-import java.security.Signature;
-import java.security.SignatureException;
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
@@ -32,48 +33,12 @@ import com.limegroup.mojito.messages.RequestMessage;
 public abstract class AbstractRequestMessage extends AbstractDHTMessage
         implements RequestMessage {
 
-    private int secureStatus = INSECURE;
-
-    private byte[] signature;
-
     public AbstractRequestMessage(int opcode, int vendor, int version,
             ContactNode node, KUID messageId) {
-        this(opcode, vendor, version, node, messageId, null);
-    }
-
-    public AbstractRequestMessage(int opcode, int vendor, int version,
-            ContactNode node, KUID messageId, byte[] signature) {
         super(opcode, vendor, version, node, messageId);
-
-        this.signature = signature;
     }
 
-    public void setSecureStatus(int secureStatus) {
-        this.secureStatus = secureStatus;
-    }
-
-    public int getSecureStatus() {
-        return secureStatus;
-    }
-
-    public boolean isSigned() {
-        return signature != null;
-    }
-
-    public void setSignature(byte[] signature) {
-        this.signature = signature;
-    }
-    
-    public boolean isSecure() {
-        return secureStatus == SECURE;
-    }
-
-    public byte[] getSecureSignature() {
-        return signature;
-    }
-
-    public void updateSignatureWithSecuredBytes(Signature signature) 
-            throws SignatureException {
-        // TODO Auto-generated method stub
+    public AbstractRequestMessage(int opcode, SocketAddress src, ByteBuffer data) throws IOException {
+        super(opcode, src, data);
     }
 }

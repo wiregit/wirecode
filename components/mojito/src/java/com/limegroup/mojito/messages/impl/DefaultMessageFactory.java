@@ -28,8 +28,6 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.io.ByteBufferInputStream;
-import com.limegroup.mojito.io.DefaultMessageInputStream;
 import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
@@ -52,16 +50,35 @@ public class DefaultMessageFactory implements MessageFactory {
     public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
         
-        ByteBufferInputStream bbis = new ByteBufferInputStream(data);
-        DefaultMessageInputStream in = new DefaultMessageInputStream(bbis, this, src);
+        int opcode = data.get() & 0xFF;
         
         try {
-            DHTMessage message = in.readMessage();
-            return message;
+            switch(opcode) {
+                case DHTMessage.PING_REQUEST:
+                    return new PingRequestImpl(src, data);
+                case DHTMessage.PING_RESPONSE:
+                    return new PingResponseImpl(src, data);
+                case DHTMessage.FIND_NODE_REQUEST:
+                    return new FindNodeRequestImpl(src, data);
+                case DHTMessage.FIND_NODE_RESPONSE:
+                    return new FindNodeResponseImpl(src, data);
+                case DHTMessage.FIND_VALUE_REQUEST:
+                    return new FindValueRequestImpl(src, data);
+                case DHTMessage.FIND_VALUE_RESPONSE:
+                    return new FindValueResponseImpl(src, data);
+                case DHTMessage.STORE_REQUEST:
+                    return new StoreRequestImpl(src, data);
+                case DHTMessage.STORE_RESPONSE:
+                    return new StoreResponseImpl(src, data);
+                case DHTMessage.STATS_REQUEST:
+                    return new StatsRequestImpl(src, data);
+                case DHTMessage.STATS_RESPONSE:
+                    return new StatsResponseImpl(src, data);
+                default:
+                    throw new IOException("Received unknown message type: " + opcode + " from " + src);
+            }
         } catch (IOException err) {
             throw new MessageFormatException(err);
-        } finally {
-            in.close();
         }
     }
     

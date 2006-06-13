@@ -19,11 +19,16 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.util.ByteBufferUtils;
 
 
 public class FindValueResponseImpl extends AbstractLookupResponse
@@ -38,7 +43,21 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         this.values = values;
     }
 
+    public FindValueResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
+        super(FIND_VALUE_RESPONSE, src, data);
+        
+        this.values = ByteBufferUtils.getKeyValues(data);
+    }
+    
     public Collection getValues() {
         return values;
+    }
+
+    protected void writeBody(MessageOutputStream out) throws IOException {
+        out.writeKeyValues(values);
+    }
+    
+    public String toString() {
+        return "FindValueResponse: " + values;
     }
 }

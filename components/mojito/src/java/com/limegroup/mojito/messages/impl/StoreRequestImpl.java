@@ -19,11 +19,17 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.util.ByteBufferUtils;
 
 
 public class StoreRequestImpl extends AbstractRequestMessage
@@ -40,7 +46,14 @@ public class StoreRequestImpl extends AbstractRequestMessage
         this.queryKey = queryKey;
         this.keyValue = keyValue;
     }
-
+    
+    public StoreRequestImpl(SocketAddress src, ByteBuffer data) throws IOException {
+        super(STORE_REQUEST, src, data);
+        
+        this.queryKey = ByteBufferUtils.getQueryKey(data);
+        this.keyValue = ByteBufferUtils.getKeyValue(data);
+    }
+    
     public QueryKey getQueryKey() {
         return queryKey;
     }
@@ -49,7 +62,12 @@ public class StoreRequestImpl extends AbstractRequestMessage
         return keyValue;
     }
 
+    protected void writeBody(MessageOutputStream out) throws IOException {
+        out.writeQueryKey(queryKey);
+        out.writeKeyValue(keyValue);
+    }
+
     public String toString() {
-        return keyValue.toString();
+        return "StoreRequest: " + keyValue.toString();
     }
 }

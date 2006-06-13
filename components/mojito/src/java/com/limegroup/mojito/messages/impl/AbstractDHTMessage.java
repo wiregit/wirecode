@@ -22,10 +22,11 @@ package com.limegroup.mojito.messages.impl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.io.DefaultMessageOutputStream;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 
 /**
@@ -90,6 +91,38 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         this.messageId = messageId;
     }
 
+    public AbstractDHTMessage(int opcode, SocketAddress src, ByteBuffer data) throws IOException {
+        
+        switch(opcode) {
+            case PING_REQUEST:
+            case PING_RESPONSE:
+            case STORE_REQUEST:
+            case STORE_RESPONSE:
+            case FIND_NODE_REQUEST:
+            case FIND_NODE_RESPONSE:
+            case FIND_VALUE_REQUEST:
+            case FIND_VALUE_RESPONSE:
+            case STATS_REQUEST:
+            case STATS_RESPONSE:
+                // OK
+                break;
+            default:
+                throw new IOException("Unknown opcode: " + opcode); 
+        }
+        
+        this.opcode = opcode;
+        
+        this.vendor = data.getInt();
+        this.version = data.getShort() & 0xFFFF;
+        
+        int flags = data.get() & 0xFF;
+        KUID nodeId = KUID.createNodeID(data);
+        int instanceId = data.get() & 0xFF;
+        this.contactNode = new ContactNode(nodeId, src, instanceId, flags);
+        
+        this.messageId = KUID.createMessageID(data);
+    }
+    
     public int getOpCode() {
         return opcode;
     }
@@ -110,14 +143,6 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         return contactNode;
     }
     
-    public KUID getSourceNodeID() {
-        return contactNode.getNodeID();
-    }
-    
-    public SocketAddress getSourceAddress() {
-        return contactNode.getSocketAddress();
-    }
-    
     /*
      *  To remove the (Gnutella) Message dependence rename
      *  writeMessage(OutputStream) to write(OutputStream) 
@@ -125,6 +150,20 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     // public void write(OutputStream out) throws IOException {
     protected void writeMessage(OutputStream out) throws IOException {
-        new DefaultMessageOutputStream(out).write(this);
+        MessageOutputStream msgOut = new MessageOutputStream(out);
+        writeHeader(msgOut);
+        writeBody(msgOut);
     }
+    
+    protected void writeHeader(MessageOutputStream out) throws IOException {
+        out.writeByte(getOpCode());
+        out.writeInt(getVendor());
+        out.writeShort(getVersion());
+        out.writeByte(getContactNode().getFlags());
+        out.writeKUID(getContactNode().getNodeID());
+        out.writeByte(getContactNode().getInstanceID());
+        out.writeKUID(getMessageID());
+    }
+    
+    protected abstract void writeBody(MessageOutputStream out) throws IOException;
 }

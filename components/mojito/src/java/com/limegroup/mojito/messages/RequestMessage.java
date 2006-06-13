@@ -19,5 +19,5 @@
 
 package com.limegroup.mojito.messages;
 
-public interface RequestMessage extends DHTMessage, DHTSecureMessage {
+public interface RequestMessage extends DHTMessage {
 }

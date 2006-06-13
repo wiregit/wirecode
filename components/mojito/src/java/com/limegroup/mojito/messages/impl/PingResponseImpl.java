@@ -19,11 +19,15 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.PingResponse;
+import com.limegroup.mojito.util.ByteBufferUtils;
 
 
 public class PingResponseImpl extends AbstractResponseMessage
@@ -41,6 +45,13 @@ public class PingResponseImpl extends AbstractResponseMessage
         this.estimatedSize = estimatedSize;
     }
 
+    public PingResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
+        super(PING_RESPONSE, src, data);
+        
+        this.externalAddress = ByteBufferUtils.getSocketAddress(data);
+        this.estimatedSize = data.getInt();
+    }
+    
     /** My external address */
     public SocketAddress getExternalAddress() {
         return externalAddress;
@@ -50,7 +61,12 @@ public class PingResponseImpl extends AbstractResponseMessage
         return estimatedSize;
     }
 
+    protected void writeBody(MessageOutputStream out) throws IOException {
+        out.writeSocketAddress(externalAddress);
+        out.writeInt(estimatedSize);
+    }
+
     public String toString() {
-        return "Pong: " + externalAddress;
+        return "PingResponse: externalAddress=" + externalAddress + ", estimatedSize=" + estimatedSize;
     }
 }

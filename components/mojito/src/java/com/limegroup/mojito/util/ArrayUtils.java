@@ -47,6 +47,19 @@ public final class ArrayUtils {
         return hash;
     }
     
+    public static boolean isNull(byte[] data) {
+        if (data == null 
+                || data.length == 0) {
+            return true;
+        }
+        
+        int sum = 0;
+        for(int i = data.length; i >= 0; --i) {
+            sum += (int)(data[i] & 0xFF);
+        }
+        return sum == 0;
+    }
+    
     public static String toHexString(byte[] data) {
         StringBuffer buffer = new StringBuffer(data.length * 2);
         for(int i = 0; i < data.length; i++) {

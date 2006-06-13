@@ -41,11 +41,9 @@ import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
-import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.impl.AbstractMessage;
-import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 import com.limegroup.mojito.messages.impl.FindNodeRequestImpl;
 import com.limegroup.mojito.messages.impl.FindNodeResponseImpl;
 import com.limegroup.mojito.messages.impl.FindValueRequestImpl;
@@ -77,13 +75,9 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         processingQueue = new ProcessingQueue(
                 context.getName() + "-LimeMessageDispatcherPQ");
-        
-        // Set the MessageFactory
-        LimeDHTMessageFactory factory = new LimeDHTMessageFactory();
-        context.setMessageFactory(factory);
-        
+
         // Register the Message type
-        LimeDHTMessageParser parser = new LimeDHTMessageParser(factory);
+        LimeDHTMessageParser parser = new LimeDHTMessageParser(context.getMessageFactory());
         MessageFactory.setParser(AbstractMessage.F_DHT_MESSAGE, parser);
         
         // Install the Message handlers
@@ -207,12 +201,5 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     // This is not running as a Thread!
     public void run() {
         running = true;
-    }
-    
-    private static class LimeDHTMessageFactory extends DefaultMessageFactory {
-        public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
-                throws MessageFormatException, IOException {
-            throw new IOException("Cannot deserialize LimeDHTMessages with this method!");
-        }
     }
 }

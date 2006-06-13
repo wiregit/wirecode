@@ -19,14 +19,19 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.LookupRequest;
 
 public abstract class AbstractLookupRequest extends AbstractRequestMessage
-	implements LookupRequest {
+        implements LookupRequest {
 
-    private KUID lookupId;
+    protected final KUID lookupId;
     
     public AbstractLookupRequest(int opcode, int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId) {
@@ -35,14 +40,26 @@ public abstract class AbstractLookupRequest extends AbstractRequestMessage
         	this.lookupId = lookupId;
     }
     
-    public AbstractLookupRequest(int opcode, int vendor, int version, 
-            ContactNode node, KUID messageId, KUID lookupId, byte[] signature) {
-        	super(opcode, vendor, version, node, messageId, signature);
-        	
-        	this.lookupId = lookupId;
+    public AbstractLookupRequest(int opcode, SocketAddress src, ByteBuffer data) throws IOException {
+        super(opcode, src, data);
+        
+        switch(opcode) {
+            case FIND_NODE_REQUEST:
+                lookupId = KUID.createNodeID(data);
+                break;
+            case FIND_VALUE_REQUEST:
+                lookupId = KUID.createValueID(data);
+                break;
+            default:
+                throw new IOException("Unknown opcode for lookup request: " + opcode);
+        }
     }
 
     public KUID getLookupID() {
         return lookupId;
+    }
+
+    protected void writeBody(MessageOutputStream out) throws IOException {
+        out.writeKUID(lookupId);
     }
 }

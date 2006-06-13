@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -504,11 +505,31 @@ public class KUID implements Serializable, Comparable {
         return new KUID(NODE_ID, id);
     }
     
+    private static byte[] getBytes(ByteBuffer data) {
+        byte[] id = new byte[LENGTH/8];
+        data.get(id);
+        return id;
+    }
+    
+    /**
+     * Creates and returns a Node ID from the ByteBuffer (relative get)
+     */
+    public static KUID createNodeID(ByteBuffer data) {
+        return new KUID(NODE_ID, getBytes(data));
+    }
+    
     /**
      * Creates and returns a Value ID from a byte array
      */
     public static KUID createValueID(byte[] id) {
         return new KUID(VALUE_ID, id);
+    }
+    
+    /**
+     * Creates and returns a Value ID from the ByteBuffer (relative get)
+     */
+    public static KUID createValueID(ByteBuffer data) {
+        return new KUID(VALUE_ID, getBytes(data));
     }
     
     /**
@@ -576,6 +597,13 @@ public class KUID implements Serializable, Comparable {
      */
     public static KUID createMessageID(byte[] id) {
         return new KUID(MESSAGE_ID, id);
+    }
+    
+    /**
+     * Creates and returns a Message ID from the ByteBuffer (relative get)
+     */
+    public static KUID createMessageID(ByteBuffer data) {
+        return new KUID(MESSAGE_ID, getBytes(data));
     }
     
     /**

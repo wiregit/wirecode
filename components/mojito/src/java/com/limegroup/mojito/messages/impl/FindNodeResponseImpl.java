@@ -19,12 +19,17 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.util.ByteBufferUtils;
 
 
 public class FindNodeResponseImpl extends AbstractLookupResponse
@@ -41,12 +46,28 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
         this.queryKey = queryKey;
         this.nodes = nodes;
     }
-
+    
+    public FindNodeResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
+        super(FIND_NODE_RESPONSE, src, data);
+        
+        this.queryKey = ByteBufferUtils.getQueryKey(data);
+        this.nodes = ByteBufferUtils.getContactNodes(data);
+    }
+    
     public QueryKey getQueryKey() {
         return queryKey;
     }
 
     public Collection getNodes() {
         return nodes;
+    }
+
+    protected void writeBody(MessageOutputStream out) throws IOException {
+        out.writeQueryKey(queryKey);
+        out.writeContactNodes(nodes);
+    }
+    
+    public String toString() {
+        return "FindNodeResponse: queryKey=" + queryKey + ", nodes=" + nodes;
     }
 }

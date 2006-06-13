@@ -19,6 +19,10 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -32,5 +36,9 @@ public abstract class AbstractResponseMessage extends AbstractDHTMessage
     public AbstractResponseMessage(int opcode, int vendor, int version,
             ContactNode node, KUID messageId) {
         super(opcode, vendor, version, node, messageId);
+    }
+    
+    public AbstractResponseMessage(int opcode, SocketAddress src, ByteBuffer data) throws IOException {
+        super(opcode, src, data);
     }
 }

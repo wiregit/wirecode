@@ -19,6 +19,10 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.FindNodeRequest;
@@ -29,5 +33,13 @@ public class FindNodeRequestImpl extends AbstractLookupRequest
     public FindNodeRequestImpl(int vendor, int version, ContactNode node,
             KUID messageId, KUID lookupId) {
         super(FIND_NODE_REQUEST, vendor, version, node, messageId, lookupId);
+    }
+    
+    public FindNodeRequestImpl(SocketAddress src, ByteBuffer data) throws IOException {
+        super(FIND_NODE_REQUEST, src, data);
+    }
+    
+    public String toString() {
+        return "FindNodeRequest: " + lookupId;
     }
 }

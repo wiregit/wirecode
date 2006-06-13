@@ -19,7 +19,7 @@
 
 package com.limegroup.mojito.messages;
 
-public interface StatsRequest extends RequestMessage {
+public interface StatsRequest extends RequestMessage, DHTSecureMessage {
 
     public static final int STATS = 0x00;
     public static final int DB = 0x01;

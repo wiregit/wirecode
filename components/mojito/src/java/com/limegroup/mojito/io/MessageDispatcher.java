@@ -285,7 +285,7 @@ public abstract class MessageDispatcher implements Runnable {
         if (src != null) {
             buffer.flip();
             int length = buffer.remaining();
-            
+
             // Restore Big-Endianess
             buffer.order(ByteOrder.BIG_ENDIAN);
             
