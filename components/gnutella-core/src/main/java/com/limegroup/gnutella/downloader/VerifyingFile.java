@@ -345,11 +345,12 @@ public class VerifyingFile {
      * @param scan
      * @param length
      */
-    public void setScanForExistingBlocks(boolean scan, long length) {
+    public void setScanForExistingBlocks(boolean scan, long length) 
+    throws IOException {
         if(scan && length != 0) {
-        	Assert.silent(length <= completedSize, 
-        			"length: "+length+" completed: "+completedSize);
-            existingFileSize = Math.min(length, completedSize);
+        	if (length > completedSize)
+        		throw new IOException("invalid completed size or length");
+            existingFileSize = length;
         } else {
             existingFileSize = -1;
         }

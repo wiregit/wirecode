@@ -375,47 +375,6 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         }
     }
 
-
-    /** Test that serialized versions of IncompleteFileManager v. 1.9 can be
-     *  deserialized.  (No hashes, didn't use VerifyingFile internally.) */
-    public void testDeserialize_19() throws Exception{
-        doDeserializeTest("IncompleteFileManager.1_9.dat");
-    }
-
-    /** Test that serialized versions of IncompleteFileManager v. 1.14 can be
-     *  deserialized.  (No hashes.) */
-    public void testOldDeserialize_114() throws Exception {
-        doDeserializeTest("IncompleteFileManager.1_14.dat");
-    }
-
-    private IncompleteFileManager doDeserializeTest(String filename) throws Exception {
-        IncompleteFileManager read=null;
-        ObjectInputStream in = new ConverterObjectInputStream(
-            new FileInputStream( CommonUtils.getResourceFile(
-                "com/limegroup/gnutella/downloader/"+filename
-            ) )
-        );
-        read=(IncompleteFileManager)in.readObject();
-        in.close();
-
-        VerifyingFile vf=(VerifyingFile)read.getEntry(
-                                               new File("another file.txt"));
-        assertTrue(vf!=null);
-        Iterator /* of Interval */ iter=vf.getBlocks();
-        assertTrue(iter.hasNext());
-        assertEquals(new Interval(3, 999), iter.next());
-        assertTrue(!iter.hasNext());
-
-        vf=(VerifyingFile)read.getEntry(new File("hello world.txt"));
-        assertTrue(vf!=null);
-        iter=vf.getBlocks();
-        assertTrue(iter.hasNext());
-        assertEquals(new Interval(1, 99), iter.next());
-        assertTrue(!iter.hasNext());
-
-        return ifm;
-    }
-    
 	private static String tempName(String s, int one, int two) throws Throwable {
 	    try {
             return (String)PrivilegedAccessor.invokeMethod(

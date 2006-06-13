@@ -457,7 +457,7 @@ public class IncompleteFileManager implements Serializable {
                 try {
                     vf = new VerifyingFile((int) getCompletedSize(f));
                 } catch (IllegalArgumentException iae) {
-                    vf = new VerifyingFile();
+                	continue;
                 }
                 List list = (List)o;
                 for(Iterator iter = list.iterator(); iter.hasNext(); ) {
@@ -469,8 +469,13 @@ public class IncompleteFileManager implements Serializable {
                     interval = new Interval(interval.low, interval.high - 1);
                     vf.addInterval(interval);
                 }
-                if(list.isEmpty())
-                	vf.setScanForExistingBlocks(true, f.length());
+                if(list.isEmpty()) {
+                	try {
+                		vf.setScanForExistingBlocks(true, f.length());
+                	} catch (IOException badSize) {
+                		continue; 
+                	}
+                }
                 retMap.put(f, vf);
             }
         }//end of for
