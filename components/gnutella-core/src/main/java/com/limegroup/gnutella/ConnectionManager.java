@@ -1427,7 +1427,7 @@ public class ConnectionManager {
         long currentAverage = 0;
         long now = System.currentTimeMillis();
         long sessionTime = Math.max(0,now - _connectTime); //in ms
-        int totalConnections = Math.max(0, ApplicationSettings.TOTAL_CONNECTIONS.getValue());
+        int totalConnections = ApplicationSettings.TOTAL_CONNECTIONS.getValue();
 
         if(sessionTime != 0) { //else don't count current session
             totalConnections+=1;
@@ -1436,7 +1436,7 @@ public class ConnectionManager {
         long totalConnectTime = Math.max(0, 
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue() + sessionTime);
         
-        currentAverage = totalConnectTime/totalConnections;
+        currentAverage = totalConnectTime/Math.max(1,totalConnections);
         return currentAverage;
     }
 
