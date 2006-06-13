@@ -315,8 +315,14 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             
         if(writer instanceof NIOOutputStream)
             return ((NIOOutputStream)writer).getOutputStream();
-        else
-            throw new IllegalStateException("writer not NIOOutputStream, it's a: " + writer);
+        else {
+            // Must check again, since it could have been closed & changed
+            // to a NoOpWriter after above check.
+            if(isClosed() || isShutdown())
+                throw new IOException("Socket closed.");
+            else
+                throw new IllegalStateException("writer not NIOOutputStream, it's a: " + writer);
+        }
     }
     
     /** Gets the read timeout for this socket. */
