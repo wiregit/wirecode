@@ -29,6 +29,7 @@ import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.IPPortCombo;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -62,16 +63,6 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
      * the different kinds of queries
      */
     private static final UDPCrawlerPing msgAll = new UDPCrawlerPing(new GUID(GUID.makeGuid()));
-    private static final UDPCrawlerPing msgSome = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 2, 1,(byte)0);
-    private static final UDPCrawlerPing msgLeafsOnly = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 0, 2,(byte)0);
-    private static final UDPCrawlerPing msgNone = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 0, 0,(byte)0);
-    private static final UDPCrawlerPing msgMore = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 20, 30,(byte)0);
-    private static final UDPCrawlerPing msgTimes = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)1);
-    private static final UDPCrawlerPing msgLocale = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)2);
-    private static final UDPCrawlerPing msgBadMask = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0xFF);
-    private static final UDPCrawlerPing msgNewOnly = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x4);
-    private static final UDPCrawlerPing msgAgents = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x8);
-    private static final UDPCrawlerPing msgNodeUptime = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x10);
     
     /**
 	 * The central Ultrapeer used in the test.
@@ -296,6 +287,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  	 * sends a message requesting 0 leafs and 0 ups.
  	 */
  	public void testMsgNone() throws Exception {
+ 	    UDPCrawlerPing msgNone = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 0, 0,(byte)0);
  		UDPCrawlerPong reply = new UDPCrawlerPong(msgNone);
         byte[] payload = reply.getPayload();
  		assertEquals(0,payload[0]);
@@ -306,6 +298,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  	 * sends a message requesting leafs only
  	 */
  	public void testMsgLeafs() throws Exception {
+       UDPCrawlerPing msgLeafsOnly = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 0, 2,(byte)0);
  		UDPCrawlerPong reply = new UDPCrawlerPong(msgLeafsOnly);
         byte[] payload = reply.getPayload();
  		assertEquals(2,payload[1]);
@@ -316,6 +309,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  	 * sends a message requesting 1 leafs and 2 ups.
  	 */
  	public void testMsgSome() throws Exception {
+ 	    UDPCrawlerPing msgSome = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 2, 1,(byte)0);
  		UDPCrawlerPong reply = new UDPCrawlerPong(msgSome);
         byte[] payload = reply.getPayload();
  		
@@ -328,6 +322,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  	 * sends a message requesting more UPs and Leafs that the host has.
  	 */
  	public void testMsgMore() throws Exception {
+ 	    UDPCrawlerPing msgMore = new UDPCrawlerPing(new GUID(GUID.makeGuid()), 20, 30,(byte)0);
  		UDPCrawlerPong reply = new UDPCrawlerPong(msgMore);
         byte[] payload = reply.getPayload();
  		
@@ -337,30 +332,43 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  		sleep();
  	}
  	
- 	/**
- 	 * tests whether requesting too often will give us a reply
- 	 */
- 	public void testHammering() throws Exception {
- 		
- 		//first message should go through
- 		tryMessage(msgAll);
- 		
- 		//second shouldn't
- 		try {
- 			tryMessage(msgAll);
- 			fail("ioex expected");
- 		}catch (IOException iox) {}
- 		sleep();
- 		
- 		//third should
- 		tryMessage(msgAll);
- 	}
+    
+    public void testUDPCrawlerPingMessage() throws Exception {
+        try {
+            tryMessage();
+        } catch (Exception ex) {
+            fail("message should not fail");
+            throw ex;
+        }
+        sleep();
+    }
+    
+    /**
+     * tests whether requesting too often will give us a reply
+     */
+    public void testHammering() throws Exception {
+        
+        //first message should go through
+        tryMessage();
+        
+        //second shouldn't
+        try {
+            tryMessage();
+            fail("ioex expected");
+        }catch (IOException iox) {}
+        sleep();
+        
+        //third should
+        tryMessage();
+        sleep();
+    }
  	
  	/**
  	 * tests a udp ping message requesting the connection lifetimes
  	 */
  	public void testConnectionTime() throws Exception{
  		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
+        UDPCrawlerPing msgTimes = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)1);
  		UDPCrawlerPong reply = new UDPCrawlerPong(msgTimes);
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
@@ -379,6 +387,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  	 */
  	public void testBadMask() throws Exception {
  		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
+        UDPCrawlerPing msgBadMask = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0xFF);
  		UDPCrawlerPong reply = new UDPCrawlerPong(msgBadMask);
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
@@ -397,6 +406,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  	 */
  	public void testLocale() throws Exception {
  		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
+        UDPCrawlerPing msgLocale = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)2);
         UDPCrawlerPong reply = new UDPCrawlerPong(msgLocale);
         byte[] payload = reply.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
@@ -442,7 +452,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  		
  		
  		//so now, only one UP should be in the result.
- 		
+        UDPCrawlerPing msgNewOnly = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x4);
  		UDPCrawlerPong pong = new UDPCrawlerPong(msgNewOnly);
  		
  		assertEquals(1, pong.getPayload()[0]);
@@ -463,7 +473,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  	
  	public void testMsgAgents() throws Exception {
  		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
- 		
+        UDPCrawlerPing msgAgents = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x8);
  		UDPCrawlerPong pong = new UDPCrawlerPong(msgAgents);
         byte[] payload = pong.getPayload();
         int agentsOffset=(payload[0]+payload[1])*6+3;
@@ -497,7 +507,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
     public void testMsgNodeConnectionUptime() throws Exception {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(5);
         PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
-        
+        UDPCrawlerPing msgNodeUptime = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x10);
         UDPCrawlerPong pong = new UDPCrawlerPong(msgNodeUptime);
         byte[] payload = pong.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
@@ -518,7 +528,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
         assertTrue(e.getPort() == UP1.getPort());
     }
     
- 	private void tryMessage(UDPCrawlerPing which) throws Exception {
+ 	private void tryMessage() throws Exception {
  		assertTrue(UDPService.instance().isListening());
  		UDP_ACCESS.setSoTimeout(5000);
  		
@@ -527,7 +537,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  		
  		//send a packet
  		ByteArrayOutputStream baos = new ByteArrayOutputStream();
- 		which.write(baos);
+ 		msgAll.write(baos);
  		DatagramPacket pack = new DatagramPacket(baos.toByteArray(),
  							baos.toByteArray().length,
 							_udpAddress, PORT);
@@ -548,11 +558,20 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  		
  		//parse the response
  		InputStream in = new ByteArrayInputStream(pack.getData());
- 		try {
- 			MessageFactory.read(in);
- 		}catch(BadPacketException bad) {
- 			fail("should never be thrown!",bad);
- 		} 
+        byte[] buf = new byte[23];
+        in.read(buf,0,23);
+        assertEquals((byte)0x31,buf[16]);
+        byte vendorId[] = new byte[4];
+        in.read(vendorId, 0, 4);
+        assertEquals(VendorMessage.F_LIME_VENDOR_ID, vendorId);
+        byte rest[] = new byte[in.available()];
+        in.read(rest, 0, rest.length);
+        //get the selector....
+        int selector = ByteOrder.ushort2int(ByteOrder.leb2short(rest, 0));
+        // get the version....
+        int version = ByteOrder.ushort2int(ByteOrder.leb2short(rest, 2));
+        assertEquals(VendorMessage.F_CRAWLER_PONG, selector);
+        assertEquals(UDPCrawlerPong.VERSION, version);
  	}
     
     private static class UDPCrawlerPongParserStub implements VendorMessageParser {
