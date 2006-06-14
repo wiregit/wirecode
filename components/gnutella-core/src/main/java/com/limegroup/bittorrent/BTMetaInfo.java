@@ -125,11 +125,6 @@ public class BTMetaInfo implements Serializable {
 	private URL[] _trackers;
 
 	/*
-	 * a set of locations
-	 */
-	private Set _locations = null;
-
-	/*
 	 * the total length of this torrent.
 	 */
 	private long _totalSize;
@@ -153,13 +148,6 @@ public class BTMetaInfo implements Serializable {
 		return _pieceLength;
 	}
 
-	/**
-	 * @return a Set of TorrentLocation
-	 */
-	public Set getLocations() {
-		return _locations;
-	}
-	
 	/**
 	 * Acessor for the files belonging to this torrent
 	 * 

@@ -74,12 +74,12 @@ public class ManagedTorrent {
 	 * The list of known good TorrentLocations that we are not connected 
 	 * or connecting to at the moment
 	 */
-	private Set _peers;
+	private Set<TorrentLocation> _peers;
 
 	/**
 	 * The list of known bad TorrentLocations
 	 */
-	private Set _badPeers;
+	private Set<TorrentLocation> _badPeers;
 
 	/**
 	 * the meta info for this torrent
@@ -107,7 +107,7 @@ public class ManagedTorrent {
 	 * only from the NIODispatcher thread, so no locking is required
 	 * when iterating on that thread.
 	 */
-	private final List _connections;
+	private final List<BTConnection> _connections;
 
 	/** 
 	 * A runnable that takes care of scheduled periodic rechoking
@@ -127,8 +127,8 @@ public class ManagedTorrent {
 	/**
 	 * A listener for the life of this torrent, if any.
 	 */
-	private final List lifeCycleListeners = 
-		Collections.synchronizedList(new ArrayList(2));
+	private final List<TorrentLifecycleListener> lifeCycleListeners = 
+		Collections.synchronizedList(new ArrayList<TorrentLifecycleListener>(2));
 	
 	/** The total uploaded and downloaded data */
 	private volatile long totalUp, totalDown;
@@ -148,7 +148,7 @@ public class ManagedTorrent {
 		_info = info;
 		_info.setManagedTorrent(this);
 		_folder = info.getVerifyingFolder();
-		_connections = Collections.synchronizedList(new ArrayList());
+		_connections = Collections.synchronizedList(new ArrayList<BTConnection>());
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
 		trackerManager = new TrackerManager(this);
@@ -296,8 +296,8 @@ public class ManagedTorrent {
 			throw new IllegalArgumentException("stopping in wrong state "+_state);
 		
 		synchronized(lifeCycleListeners) {
-			for (Iterator iter = lifeCycleListeners.iterator();iter.hasNext();)
-				((TorrentLifecycleListener)iter.next()).torrentStopped(this);
+			for (TorrentLifecycleListener listener : lifeCycleListeners)
+				listener.torrentStopped(this);
 		}
 		
 		
@@ -321,8 +321,7 @@ public class ManagedTorrent {
 			public void run() {
 				_connectionFetcher.shutdown();
 				while(!_connections.isEmpty()) {
-					BTConnection toClose = 
-						(BTConnection) _connections.get(_connections.size() - 1);
+					BTConnection toClose = _connections.get(_connections.size() - 1);
 					toClose.close(); // this removes itself from the list.
 				}
 			}
@@ -395,14 +394,12 @@ public class ManagedTorrent {
 
 	private void initializeTorrent() {
 		_badPeers = Collections.synchronizedSet(
-				new FixedSizeExpiringSet(500, 60 * 60 * 1000));
-		_peers = Collections.synchronizedSet(new HashSet());
-		if (_info.getLocations() != null)
-			_peers.addAll(_info.getLocations());
+				new FixedSizeExpiringSet<TorrentLocation>(500, 60 * 60 * 1000));
+		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
 
 		synchronized(lifeCycleListeners) {
-			for (Iterator iter = lifeCycleListeners.iterator();iter.hasNext();)
-				((TorrentLifecycleListener)iter.next()).torrentStarted(this);
+			for (TorrentLifecycleListener listener : lifeCycleListeners)
+				listener.torrentStarted(this);
 		}
 		
 		_connectionFetcher = new BTConnectionFetcher(this);
@@ -479,10 +476,8 @@ public class ManagedTorrent {
 		final BTHave have = new BTHave(in);
 		Runnable haveNotifier = new Runnable() {
 			public void run() {
-				for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-					BTConnection btc = (BTConnection) iter.next();
+				for (BTConnection btc : _connections) 
 					btc.sendHave(have);
-				}
 			}
 		};
 		networkInvoker.invokeLater(haveNotifier);
@@ -622,9 +617,8 @@ public class ManagedTorrent {
 		// cancel requests
 		Runnable r = new Runnable(){
 			public void run() {
-				List seeds = new ArrayList(_connections.size());
-				for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-					BTConnection btc = (BTConnection) iter.next();
+				List<BTConnection> seeds = new ArrayList<BTConnection>(_connections.size());
+				for (BTConnection btc : _connections) {
 					if (btc.isSeed())
 						seeds.add(btc);
 					else {
@@ -636,8 +630,8 @@ public class ManagedTorrent {
 				}
 				
 				// close all seed connections
-				for (Iterator iter = seeds.iterator();iter.hasNext();)
-					((BTConnection)iter.next()).close();
+				for (BTConnection seed : seeds)
+					seed.close();
 			}
 		};
 		networkInvoker.invokeLater(r);
@@ -652,8 +646,8 @@ public class ManagedTorrent {
 		trackerManager.announceComplete();
 		
 		synchronized(lifeCycleListeners) {
-			for (Iterator iter = lifeCycleListeners.iterator();iter.hasNext();)
-				((TorrentLifecycleListener)iter.next()).torrentComplete(this);
+			for(TorrentLifecycleListener listener : lifeCycleListeners)
+				listener.torrentComplete(this);
 		}
 	}
 
@@ -704,8 +698,7 @@ public class ManagedTorrent {
 	 */
 	private boolean isConnectedTo(TorrentLocation to) {
 		synchronized(_connections) {
-			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-				BTConnection btc = (BTConnection) iter.next();
+			for (BTConnection btc : _connections) {
 				// compare by address only. there's no way of comparing ports
 				// or peer ids
 				if (btc.getEndpoint().getAddress().equals(to.getAddress()))
@@ -722,9 +715,8 @@ public class ManagedTorrent {
 		long now = System.currentTimeMillis();
 
 		synchronized(_peers) {
-			for (Iterator iter = _peers.iterator(); iter.hasNext();) {
-				ret = Math.min(ret, ((TorrentLocation) iter.next())
-						.getWaitTime(now));
+			for (TorrentLocation loc : _peers) {
+				ret = Math.min(ret, loc.getWaitTime(now));
 				if (ret == 0)
 					return 0;
 			}
@@ -739,9 +731,9 @@ public class ManagedTorrent {
 	TorrentLocation getTorrentLocation() {
 		long now = System.currentTimeMillis();
 		synchronized(_peers) {
-			Iterator iter = _peers.iterator();
+			Iterator<TorrentLocation> iter = _peers.iterator();
 			while (iter.hasNext()) {
-				TorrentLocation temp = (TorrentLocation) iter.next();
+				TorrentLocation temp = iter.next();
 				if (temp.isBusy(now))
 					continue;
 				iter.remove();
@@ -863,8 +855,7 @@ public class ManagedTorrent {
 	public  int getNumBusyPeers() {
 		int busy = 0;
 		synchronized(_connections) {
-			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
+			for (BTConnection con : _connections) {
 				if (!con.isInteresting())
 					busy++;
 			}
@@ -898,9 +889,7 @@ public class ManagedTorrent {
 	boolean hasNonBusyLocations() {
 		long now = System.currentTimeMillis();
 		synchronized(_peers) {
-			Iterator iter = _peers.iterator();
-			while (iter.hasNext()) {
-				TorrentLocation to = (TorrentLocation) iter.next();
+			for (TorrentLocation to : _peers) {
 				if (!to.isBusy(now))
 					return true;
 			}
@@ -921,20 +910,16 @@ public class ManagedTorrent {
 	
 	public void measureBandwidth() {
 		synchronized(_connections) {
-			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
+			for (BTConnection con : _connections) 
 				con.measureBandwidth();
-			}
 		}
 	}
 	
 	public float getMeasuredBandwidth(boolean downstream) {
 		float ret = 0;
 		synchronized(_connections) {
-			for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
+			for (BTConnection con : _connections) 
 				ret += con.getMeasuredBandwidth(downstream);
-			}
 		}
 		return ret;
 	}
@@ -961,10 +946,8 @@ public class ManagedTorrent {
 			
 			networkInvoker.invokeLater(new Runnable() {
 				public void run() {
-					for (Iterator iter = _connections.iterator(); iter.hasNext();) {
-						BTConnection con = (BTConnection) iter.next();
+					for (BTConnection con : _connections) 
 						con.sendKeepAlive();
-					}
 				}
 			});
 			
