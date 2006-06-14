@@ -53,7 +53,7 @@ public class UDPCrawlerPing extends VendorMessage {
 	 * @param features the features we want to receive in the pong
 	 */
 	public UDPCrawlerPing(GUID guid, int numberUP, int numberLeaves, byte features) {
-	      super(F_LIME_VENDOR_ID, F_GIVE_ULTRAPEER, VERSION,
+	      super(F_LIME_VENDOR_ID, F_CRAWLER_PING, VERSION,
 	            derivePayload(numberUP,numberLeaves, features));
 	      setGUID(guid);
 	      _numberUP = numberUP;
@@ -106,7 +106,7 @@ public class UDPCrawlerPing extends VendorMessage {
 	protected UDPCrawlerPing(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload)
 			throws BadPacketException {
-		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_ULTRAPEER, version, payload);
+		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_CRAWLER_PING, version, payload);
 		
 		//see if the payload is valid
 		if (getVersion() == VERSION && (payload == null || payload.length != 3))

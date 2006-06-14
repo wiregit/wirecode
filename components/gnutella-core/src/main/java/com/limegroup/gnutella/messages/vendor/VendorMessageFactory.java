@@ -50,8 +50,7 @@ public class VendorMessageFactory {
         setParser(VendorMessage.F_STATISTICS, VendorMessage.F_LIME_VENDOR_ID, new StatisticVendorMessageParser());
         setParser(VendorMessage.F_SIMPP_REQ, VendorMessage.F_LIME_VENDOR_ID, new SimppRequestVMParser());
         setParser(VendorMessage.F_SIMPP, VendorMessage.F_LIME_VENDOR_ID, new SimppVMParser());
-        setParser(VendorMessage.F_GIVE_ULTRAPEER, VendorMessage.F_LIME_VENDOR_ID, new UDPCrawlerPingParser());
-        setParser(VendorMessage.F_ULTRAPEER_LIST, VendorMessage.F_LIME_VENDOR_ID, new UDPCrawlerPongParser());
+        setParser(VendorMessage.F_CRAWLER_PING, VendorMessage.F_LIME_VENDOR_ID, new UDPCrawlerPingParser());
         setParser(VendorMessage.F_UDP_HEAD_PING, VendorMessage.F_LIME_VENDOR_ID, new HeadPingParser());
         setParser(VendorMessage.F_UDP_HEAD_PONG, VendorMessage.F_LIME_VENDOR_ID, new HeadPongParser());
         setParser(VendorMessage.F_UPDATE_REQ, VendorMessage.F_LIME_VENDOR_ID, new UpdateRequestParser());
@@ -310,13 +309,6 @@ public class VendorMessageFactory {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, int network) throws BadPacketException {
             return new UDPCrawlerPing(guid, ttl, hops, version, restOf);
-        }
-    }
-    
-    private static class UDPCrawlerPongParser implements VendorMessageParser {
-        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
-                byte[] restOf, int network) throws BadPacketException {
-            return new UDPCrawlerPong(guid, ttl, hops, version, restOf);
         }
     }
     

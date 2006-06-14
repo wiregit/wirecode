@@ -122,7 +122,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         hashSet.add(smp);
         // UDP Crawl support
         smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
-        								F_ULTRAPEER_LIST,
+        								F_CRAWLER_PONG,
 										UDPCrawlerPong.VERSION);
         hashSet.add(smp);
         //Simpp Request message
@@ -239,10 +239,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     
     /**
      * @return -1 if the remote host does not support UDP crawling,
-     * else it returns the version.
+     * else it returns the version. TODO: Legacy reasons -- remove?
      */
     public int supportsUDPCrawling() {
-    	return supportsMessage(F_LIME_VENDOR_ID, F_ULTRAPEER_LIST);
+    	return supportsMessage(F_LIME_VENDOR_ID, F_CRAWLER_PONG);
     }
     
     public int supportsHeaderUpdate() {

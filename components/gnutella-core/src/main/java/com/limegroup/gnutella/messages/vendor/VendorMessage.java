@@ -17,39 +17,39 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 public abstract class VendorMessage extends Message {
 
     //Functional IDs defined by Gnutella VendorMessage protocol....
-    protected static final int F_MESSAGES_SUPPORTED = 0;
-    protected static final int F_HOPS_FLOW = 4;
-    protected static final int F_TCP_CONNECT_BACK = 7;
-    protected static final int F_UDP_CONNECT_BACK = 7;
-    protected static final int F_UDP_CONNECT_BACK_REDIR = 8;
-    protected static final int F_CAPABILITIES = 10;
-    protected static final int F_LIME_ACK = 11;
-    protected static final int F_REPLY_NUMBER = 12;
-    protected static final int F_PUSH_PROXY_REQ = 21;
-    protected static final int F_PUSH_PROXY_ACK = 22;
-    protected static final int F_GIVE_STATS = 14;
-    protected static final int F_STATISTICS = 15;
-    protected static final int F_GIVE_ULTRAPEER = 5;
-    protected static final int F_ULTRAPEER_LIST = 6;
-    protected static final int F_SIMPP_REQ = 16;
-    protected static final int F_SIMPP = 17;
-    protected static final int F_UDP_HEAD_PING = 23;
-    protected static final int F_UDP_HEAD_PONG = 24;
-    protected static final int F_HEADER_UPDATE = 25;
-    protected static final int F_UPDATE_REQ = 26;
-    protected static final int F_UPDATE_RESP = 27;
-    protected static final int F_CONTENT_REQ = 28;
-    protected static final int F_CONTENT_RESP = 29;
+    public static final int F_MESSAGES_SUPPORTED = 0;
+    public static final int F_HOPS_FLOW = 4;
+    public static final int F_TCP_CONNECT_BACK = 7;
+    public static final int F_UDP_CONNECT_BACK = 7;
+    public static final int F_UDP_CONNECT_BACK_REDIR = 8;
+    public static final int F_CAPABILITIES = 10;
+    public static final int F_LIME_ACK = 11;
+    public static final int F_REPLY_NUMBER = 12;
+    public static final int F_PUSH_PROXY_REQ = 21;
+    public static final int F_PUSH_PROXY_ACK = 22;
+    public static final int F_GIVE_STATS = 14;
+    public static final int F_STATISTICS = 15;
+    public static final int F_CRAWLER_PING = 5;
+    public static final int F_CRAWLER_PONG = 6;
+    public static final int F_SIMPP_REQ = 16;
+    public static final int F_SIMPP = 17;
+    public static final int F_UDP_HEAD_PING = 23;
+    public static final int F_UDP_HEAD_PONG = 24;
+    public static final int F_HEADER_UPDATE = 25;
+    public static final int F_UPDATE_REQ = 26;
+    public static final int F_UPDATE_RESP = 27;
+    public static final int F_CONTENT_REQ = 28;
+    public static final int F_CONTENT_RESP = 29;
 
 
     
-    protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
+    public static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};
-    protected static final byte[] F_BEAR_VENDOR_ID = {(byte) 66, (byte) 69,
+    public static final byte[] F_BEAR_VENDOR_ID = {(byte) 66, (byte) 69,
                                                       (byte) 65, (byte) 82};
-    protected static final byte[] F_GTKG_VENDOR_ID = {(byte) 71, (byte) 84,
+    public static final byte[] F_GTKG_VENDOR_ID = {(byte) 71, (byte) 84,
                                                       (byte) 75, (byte) 71};
-    protected static final byte[] F_NULL_VENDOR_ID = {(byte) 0, (byte) 0,
+    public static final byte[] F_NULL_VENDOR_ID = {(byte) 0, (byte) 0,
                                                       (byte) 0, (byte) 0};
 
     static final int LENGTH_MINUS_PAYLOAD = 8;
