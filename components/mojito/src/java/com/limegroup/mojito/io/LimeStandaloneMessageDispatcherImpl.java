@@ -50,6 +50,7 @@ public class LimeStandaloneMessageDispatcherImpl
             
             // Skip the Gnutella Header
             data.position(MESSAGE_HEADER);
+            data.mark();
             
             return super.createMessage(src, data);
         }        

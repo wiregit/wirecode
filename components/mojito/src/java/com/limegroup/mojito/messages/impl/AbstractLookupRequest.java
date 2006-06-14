@@ -35,12 +35,13 @@ public abstract class AbstractLookupRequest extends AbstractRequestMessage
     
     public AbstractLookupRequest(int opcode, int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId) {
-        	super(opcode, vendor, version, node, messageId);
-        	
-        	this.lookupId = lookupId;
+        super(opcode, vendor, version, node, messageId);
+        
+        this.lookupId = lookupId;
     }
     
-    public AbstractLookupRequest(int opcode, SocketAddress src, ByteBuffer data) throws IOException {
+    public AbstractLookupRequest(int opcode, SocketAddress src, ByteBuffer data) 
+            throws IOException {
         super(opcode, src, data);
         
         switch(opcode) {

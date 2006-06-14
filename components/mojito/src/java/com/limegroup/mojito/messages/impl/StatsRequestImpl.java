@@ -29,7 +29,6 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StatsRequest;
-import com.limegroup.mojito.util.ByteBufferUtils;
 
 /**
  *
@@ -40,7 +39,6 @@ public class StatsRequestImpl extends AbstractRequestMessage
     private int request;
     
     private ByteBuffer data;
-    private byte[] signature;
     
     private int secureStatus = INSECURE;
     
@@ -54,12 +52,12 @@ public class StatsRequestImpl extends AbstractRequestMessage
     public StatsRequestImpl(SocketAddress src, ByteBuffer data) throws IOException {
         super(STATS_REQUEST, src, data);
         
-        this.data = data;
-        
         this.request = data.get() & 0xFF;
         
-        if (data.remaining() >= 20) {
-            signature = ByteBufferUtils.getSignature(data, 20);
+        if (isSigned()) {
+            data.reset();
+            this.data = ByteBuffer.allocate(data.remaining());
+            this.data.put(data);
         }
     }
     
@@ -76,7 +74,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
     }
     
     public boolean isSigned() {
-        return getSecureSignature() != null;
+        return (getMessageFlags() & IS_SIGNED) == IS_SIGNED;
     }
     
     public boolean isSecure() {
@@ -84,12 +82,24 @@ public class StatsRequestImpl extends AbstractRequestMessage
     }
 
     public byte[] getSecureSignature() {
-        return signature;
+        return getChecksum();
     }
 
     public void updateSignatureWithSecuredBytes(Signature signature) 
             throws SignatureException {
+        data.rewind();
         
+        // 0-49
+        data.limit(CHECKSUM_START);
+        signature.update(data);
+        
+        // 50-69
+        signature.update(EMPTY_CHECKSUM_FIELD);
+        
+        // 70-n
+        data.limit(data.capacity());
+        data.position(CHECKSUM_START+EMPTY_CHECKSUM_FIELD.length);
+        signature.update(data);
     }
     
     protected void writeBody(MessageOutputStream out) throws IOException {
