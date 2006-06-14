@@ -1,5 +1,11 @@
 package com.limegroup.gnutella.io;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.util.BinaryHeap;
 
 /**
@@ -7,10 +13,17 @@ import com.limegroup.gnutella.util.BinaryHeap;
  */
 public class TimeoutController {
     
+    private static final Log LOG = LogFactory.getLog(TimeoutController.class);
+    
     private final BinaryHeap items = new BinaryHeap(20, true);
     
+    // used to store timed out items to notify outside of lock.
+    private final List timedout = new ArrayList(100);
+    
     /** Adds a timeoutable to be timed out at timeout + now. */
-    public void addTimeout(Timeoutable t, long now, long timeout) {
+    public synchronized void addTimeout(Timeoutable t, long now, long timeout) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Adding timeoutable: " + t + ", now: " + now + ", timeout: " + timeout);
         items.insert(new Timeout(t, now, timeout));
     }
 
@@ -18,18 +31,31 @@ public class TimeoutController {
      * Processes all the items that can be timed out.
      */
     public void processTimeouts(long now) {
-        while(!items.isEmpty()) {
-            Timeout t = (Timeout)items.getMax();
-            if(t != null && now >= t.expireTime)
-                t.timeoutable.notifyTimeout(now, t.expireTime, t.timeoutLength);
-            else
-                break;
-            items.extractMax(); // remove it -- we only peeked before.
+        synchronized(this) {
+            while(!items.isEmpty()) {
+                Timeout t = (Timeout)items.getMax();
+                if(t != null && now >= t.expireTime) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Timing out: " + t + ", expired: " + t.expireTime + ", now: " + now + ", length: " + t.timeoutLength);
+                    timedout.add(t);
+                } else {
+                    if(t != null && LOG.isDebugEnabled())
+                        LOG.debug("Breaking -- next timeout at: " + t.expireTime + ", now: " + now);
+                    break;
+                }
+                items.extractMax(); // remove it -- we only peeked before.
+            }
         }
+        
+        for(int i = 0; i < timedout.size(); i++) {
+            Timeout t = (Timeout)timedout.get(i);
+            t.timeoutable.notifyTimeout(now, t.expireTime, t.timeoutLength);
+        }
+        timedout.clear();
     }
     
     /** Gets the length of time till the next timeoutable expires. -1 for never. */
-    public long getNextExpireTime() {
+    public synchronized long getNextExpireTime() {
         if(items.isEmpty())
             return -1;
         else

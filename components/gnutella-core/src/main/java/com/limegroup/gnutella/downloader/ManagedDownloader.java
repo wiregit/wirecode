@@ -2489,9 +2489,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 }
                 
                 if(LOG.isDebugEnabled())
-                    LOG.debug("MANAGER: kicking off workers, activeWorkers: " + 
-                            _activeWorkers.size() + ", allWorkers: " + _workers.size() +
-                            ", queuedWorkers: " + _queuedWorkers.size() + ", swarm cap: " + getSwarmCapacity()
+                    LOG.debug("MANAGER: kicking off workers.  " + 
+                            "state: " + getState() + 
+                          ", allWorkers: " + _workers.size() + 
+                          ", activeWorkers: " + _activeWorkers.size() +
+                          ", queuedWorkers: " + _queuedWorkers.size() +
+                          ", swarm cap: " + getSwarmCapacity()
                               );
                 //+ ", allActive: " + _activeWorkers.toString());
                 

@@ -671,8 +671,7 @@ public class DownloadWorker {
                 state != ManagedDownloader.HASHING && state != ManagedDownloader.SAVING) {
                     if(_interrupted)
                         return; // we were signalled to stop.
-                    _manager.setState(ManagedDownloader.CONNECTING, 
-                            needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
+                    _manager.setState(ManagedDownloader.CONNECTING);
                 }
         }
 
