@@ -30,21 +30,26 @@ public class Tracker {
 	/*
 	 * possible EVENT codes for the tracker protocol
 	 */
-	/**
-	 * event: the client started the download
-	 */
-	public static final int EVENT_START = 1;
+	public enum Event {
+		START (100, "started"),
+		STOP (0, "stopped"), 
+		COMPLETE (20, "completed"), 
+		NONE (50, "");
+		
+		private final String numWant;
+		private final String description;
+		Event(int numWant, String description) {
+			this.numWant = numWant > 0 ? Integer.toString(numWant) : null;
+			this.description = description;
+		}
+		
+		public void addEventFields(StringBuffer buf) {
+			addGetField(buf,"event",description);
+			if (numWant != null)
+				addGetField(buf,"numwant",numWant);
+		}
+	}
 
-	/**
-	 * event: the client stops the download, inform the tracker so it can unlist
-	 * you
-	 */
-	public static final int EVENT_STOP = 2;
-
-	/**
-	 * event: the download has just been completed
-	 */
-	public static final int EVENT_COMPLETE = 3;
 
 	/**
 	 * no event: normal tracker update
@@ -102,7 +107,7 @@ public class Tracker {
 	 * @return TrackerResponse holding the data the tracker sent or null if the
 	 *         tracker did not send any data
 	 */
-	public TrackerResponse request(int event) {
+	public TrackerResponse request(Event event) {
 		if (url.getProtocol().startsWith("http")) {
 			String queryStr = createQueryString(event);
 			return connectHTTP(url, queryStr);
@@ -121,7 +126,7 @@ public class Tracker {
 	 *            the event code to send
 	 * @return string, the HTTP GET query string we send to the tracker
 	 */
-	private String createQueryString(int event) {
+	private String createQueryString(Event event) {
 		StringBuffer buf = new StringBuffer();
 		try {
 			String infoHash = URLEncoder.encode(new String(info.getInfoHash(),
@@ -159,22 +164,7 @@ public class Tracker {
 
 		addGetField(buf, "compact", "1");
 
-		switch (event) {
-		case EVENT_START:
-			addGetField(buf, "event", "started");
-			addGetField(buf, "numwant", "100");
-			break;
-		case EVENT_STOP:
-			addGetField(buf, "event", "stopped");
-			addGetField(buf, "numwant", "0");
-			break;
-		case EVENT_COMPLETE:
-			addGetField(buf, "event", "completed");
-			addGetField(buf, "numwant", "20");
-			break;
-		default:
-			addGetField(buf, "numwant", "50");
-		}
+		event.addEventFields(buf);
 
 		if (LOG.isDebugEnabled())
 			LOG.debug("tracker query " + buf.toString());

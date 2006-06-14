@@ -1,18 +1,20 @@
 package com.limegroup.bittorrent;
 
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.MessageService;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.CoWList;
-import com.limegroup.gnutella.util.ProcessingQueue;
 
 public class TrackerManager {
+	
+	private final ScheduledThreadPoolExecutor EXECUTOR = 
+		new ScheduledThreadPoolExecutor(0);
 	
 	private static final Log LOG = LogFactory.getLog(TrackerManager.class);
 	
@@ -32,9 +34,6 @@ public class TrackerManager {
 	 * the next time we'll contact the tracker.
 	 */
 	private volatile long _nextTrackerRequestTime;
-	
-	private final ProcessingQueue trackerQueue = 
-		new ProcessingQueue("Tracker Request Queue");
 	
 	private final ManagedTorrent torrent;
 	
@@ -57,52 +56,37 @@ public class TrackerManager {
 	 * @param event
 	 *            the event to send to the tracker, see TrackerRequester class
 	 */
-	private void announceBlocking(Tracker t, final int event) {
+	private void announceBlocking(Tracker t, final Tracker.Event event) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("connecting to tracker " + t.toString()+" for event "+event);
 		TrackerResponse response = t.request(event);
 		handleTrackerResponse(response, t);
 	}
 	
+	private void announceToAll(final Tracker.Event event) {
+		// announce ourselves to the trackers
+		for (final Tracker t : trackers) {
+			EXECUTOR.submit(new Runnable() {
+				public void run(){
+					announceBlocking(t,event);
+				}
+			});
+		}
+	}
+	
 	public void announceStart() {
 		_nextTrackerRequestTime = 0;
-		
-		
-		Runnable announcer = new Runnable() {
-			public void run() {
-				// announce ourselves to the trackers
-				for (Tracker t : trackers) {
-					announceBlocking(t,Tracker.EVENT_START);
-				}
-			}
-		};
-		
-		trackerQueue.invokeLater(announcer);
+		announceToAll(Tracker.Event.START);
 	}
 	
 	public void announceStop() {
-		Runnable announcer = new Runnable() {
-			public void run() {
-				// tell all trackers we're stopping.
-				for (Tracker t: trackers)
-					announceBlocking(t,Tracker.EVENT_STOP);
-			}
-		};
+		EXECUTOR.getQueue().clear();
 		
-		trackerQueue.invokeLater(announcer);
+		announceToAll(Tracker.Event.STOP);	
 	}
 	
 	public void announceComplete() {
-		//TODO: should we announce how much we've downloaded if we just resumed
-		// the torrent?  Its not mentioned in the spec...
-		Runnable announcer = new Runnable() {
-			public void run() {
-				for (Tracker t: trackers) {
-					announceBlocking(t,Tracker.EVENT_COMPLETE);
-				}
-			}
-		};
-		trackerQueue.invokeLater(announcer);
+		announceToAll(Tracker.Event.COMPLETE);
 	}
 	
 	/**
@@ -111,18 +95,10 @@ public class TrackerManager {
 	 * @param url the URL of the tracker
 	 */
 	public void announce(final Tracker t) {
-		
-		// offload tracker requests, - it simply takes too long even to execute
-		// it in our timer thread
-		Runnable trackerRequest = new Runnable() {
-			public void run() {
-				if (LOG.isDebugEnabled())
-					LOG.debug("announce thread for " + t.toString());
-				torrent.setScraping();
-				announceBlocking(t, Tracker.EVENT_NONE);
-			}
-		};
-		trackerQueue.invokeLater(trackerRequest);
+		if (LOG.isDebugEnabled())
+			LOG.debug("announce thread for " + t.toString());
+		torrent.setScraping();
+		announceBlocking(t, Tracker.Event.NONE);
 	}
 	
 	/**
@@ -157,7 +133,7 @@ public class TrackerManager {
 				announce(t);
 			}
 		};
-		RouterService.schedule(announcer, minDelay, 0);
+		EXECUTOR.schedule(announcer,minDelay, TimeUnit.MILLISECONDS);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 	
