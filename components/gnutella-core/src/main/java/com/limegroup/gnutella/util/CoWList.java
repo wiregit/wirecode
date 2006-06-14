@@ -9,45 +9,45 @@ import java.util.ListIterator;
 
 import com.limegroup.gnutella.ErrorService;
 
-interface ListCreator {
-    public List getList();
+interface ListCreator<T> {
+    public List<T> getList();
 }
 
-public class CoWList implements List {
+public class CoWList<T> implements List<T> {
     
     public static final ListCreator ARRAY_LIST = new ArrayCreator(); 
     
     public static final ListCreator LINKED_LIST = new LinkedCreator();
     
-    private volatile List l;
+    private volatile List<T> l;
     
-    private final ListCreator creator;
+    private final ListCreator<T> creator;
     
     /** Object to synchronize the atomic operations on */
     private final Object lock;
     
-    public CoWList(List l, Object lock) {
+    public CoWList(List<T> l, Object lock) {
         this.l = l;
-        this.creator = new ReflectiveCreator(l.getClass());
+        this.creator = new ReflectiveCreator<T>(l.getClass());
         this.lock = lock == null ? this : lock;
     }
     
     public CoWList(Class listType, Object lock) {
-        this(new ReflectiveCreator(listType),lock);
+        this(new ReflectiveCreator<T>(listType),lock);
     }
     
-    public CoWList(ListCreator creator) {
+    public CoWList(ListCreator<T> creator) {
         this(creator, null);
     }
     
-    public CoWList(ListCreator creator, Object lock) {
+    public CoWList(ListCreator<T> creator, Object lock) {
         this.creator = creator;
         l = creator.getList();
         this.lock = lock == null ? this : lock;
     }
     
-    private List getListCopy() {
-        List ret = creator.getList();
+    private List<T> getListCopy() {
+        List<T> ret = creator.getList();
         
         if (l != null)
             ret.addAll(l);
@@ -55,35 +55,35 @@ public class CoWList implements List {
         return ret;
     }
     
-    public void add(int arg0, Object arg1) {
+    public void add(int arg0, T arg1) {
         synchronized(lock) {
-            List newList = getListCopy();
+            List<T> newList = getListCopy();
             newList.add(arg0, arg1);
             l = newList;
         }
     }
 
-    public boolean add(Object arg0) {
+    public boolean add(T arg0) {
         synchronized(lock) {
-            List newList = getListCopy();
+            List<T> newList = getListCopy();
             boolean ret = newList.add(arg0);
             l = newList;
             return ret;
         }
     }
 
-    public boolean addAll(Collection arg0) {
+    public boolean addAll(Collection<? extends T> arg0) {
         synchronized(lock) {
-            List newList = getListCopy();
+            List<T> newList = getListCopy();
             boolean ret = newList.addAll(arg0);
             l = newList;
             return ret;
         }
     }
 
-    public boolean addAll(int arg0, Collection arg1) {
+    public boolean addAll(int arg0, Collection<? extends T> arg1) {
         synchronized(lock) {
-            List newList = getListCopy();
+            List<T> newList = getListCopy();
             boolean ret = newList.addAll(arg0,arg1);
             l = newList;
             return ret;
@@ -92,7 +92,7 @@ public class CoWList implements List {
 
     public void clear() {
         synchronized(lock) {
-            List newList = getListCopy();
+            List<T> newList = getListCopy();
             newList.clear();
             l = newList;
         }
@@ -106,7 +106,7 @@ public class CoWList implements List {
         return l.containsAll(arg0);
     }
 
-    public Object get(int index) {
+    public T get(int index) {
         return l.get(index);
     }
 
@@ -118,7 +118,7 @@ public class CoWList implements List {
         return l.isEmpty();
     }
 
-    public Iterator iterator() {
+    public Iterator<T> iterator() {
         return l.iterator();
     }
 
@@ -126,18 +126,18 @@ public class CoWList implements List {
         return l.lastIndexOf(o);
     }
 
-    public ListIterator listIterator() {
+    public ListIterator<T> listIterator() {
         return l.listIterator();
     }
 
-    public ListIterator listIterator(int index) {
+    public ListIterator<T> listIterator(int index) {
         return l.listIterator(index);
     }
 
-    public Object remove(int index) {
+    public T remove(int index) {
         synchronized(lock) {
-            Object ret = null;
-            List newList = getListCopy();
+            T ret = null;
+            List<T> newList = getListCopy();
             ret = newList.remove(index);
             l = newList;
             return ret;
@@ -146,7 +146,7 @@ public class CoWList implements List {
 
     public boolean remove(Object o) {
         synchronized(lock) {
-            List newList = getListCopy();
+            List<T> newList = getListCopy();
             boolean ret = newList.remove(o);
             l = newList;
             return ret;    
@@ -155,7 +155,7 @@ public class CoWList implements List {
 
     public boolean removeAll(Collection arg0) {
         synchronized(lock) {
-            List newList = getListCopy();
+            List<T> newList = getListCopy();
             boolean ret = newList.removeAll(arg0);
             l = newList;
             return ret;    
@@ -164,17 +164,17 @@ public class CoWList implements List {
 
     public boolean retainAll(Collection arg0) {
         synchronized(lock) {
-            List newList = getListCopy();
+            List<T> newList = getListCopy();
             boolean ret = newList.retainAll(arg0);
             l = newList;
             return ret;
         }
     }
 
-    public Object set(int arg0, Object arg1) {
+    public T set(int arg0, T arg1) {
         synchronized(lock) {
-            List newList = getListCopy();
-            Object ret = newList.set(arg0,arg1);
+            List<T> newList = getListCopy();
+            T ret = newList.set(arg0,arg1);
             l = newList;
             return ret;
         }
@@ -184,7 +184,7 @@ public class CoWList implements List {
         return l.size();
     }
 
-    public List subList(int fromIndex, int toIndex) {
+    public List<T> subList(int fromIndex, int toIndex) {
         return l.subList(fromIndex, toIndex);
     }
 
@@ -192,20 +192,20 @@ public class CoWList implements List {
         return l.toArray();
     }
 
-    public Object[] toArray(Object[] arg0) {
+    public <O>O[] toArray(O[] arg0) {
         return l.toArray(arg0);
     }
     
-    private static class ReflectiveCreator implements ListCreator {
+    private static class ReflectiveCreator<T> implements ListCreator<T> {
         private final Class listType;
         public ReflectiveCreator(Class c) {
             this.listType = c;
         }
         
-        public List getList() {            
-            List ret = null;
+        public List<T> getList() {            
+            List<T> ret = null;
             try {
-                ret = (List) listType.newInstance();
+                ret = (List<T>) listType.newInstance();
             } catch (IllegalAccessException bad) {
                 ErrorService.error(bad);
             } catch (InstantiationException bad) {
@@ -215,15 +215,15 @@ public class CoWList implements List {
         }
     }
     
-    private static class ArrayCreator implements ListCreator {
-        public List getList() {
-            return new ArrayList();
+    private static class ArrayCreator<T> implements ListCreator<T> {
+        public List<T> getList() {
+            return new ArrayList<T>();
         }
     }
 
-    private static class LinkedCreator implements ListCreator {
-        public List getList() {
-            return new LinkedList();
+    private static class LinkedCreator<T> implements ListCreator<T> {
+        public List<T> getList() {
+            return new LinkedList<T>();
         }
     }
 }

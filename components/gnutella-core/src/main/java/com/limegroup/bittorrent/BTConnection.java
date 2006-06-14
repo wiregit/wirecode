@@ -85,19 +85,19 @@ public class BTConnection implements UploadSlotListener {
 	 * the Set of BTInterval containing requests that we did not yet send but
 	 * which we intend to send soon. 
 	 */
-	private final Set _toRequest;
+	private final Set<BTInterval> _toRequest;
 
 	/**
 	 * the Set of BTIntervals we requested but which was not yet satisfied.
 	 */
-	private final Set _requesting;
+	private final Set<BTInterval> _requesting;
 
 	/**
 	 * the Set of BTInterval requested by the remote
 	 * host, we avoid queueing up all requested pieces in the writer to
 	 * save memory
 	 */
-	private final Set _requested;
+	private final Set<BTInterval> _requested;
 
 	/**
 	 * the metaInfo of this torrent
@@ -189,9 +189,9 @@ public class BTConnection implements UploadSlotListener {
 		_torrent = torrent;
 		_outgoing = isOutgoing;
 		_availableRanges = new BitSet(info.getNumBlocks());
-		_requesting = new HashSet();
-		_toRequest = new HashSet();
-		_requested = new HashSet();
+		_requesting = new HashSet<BTInterval>();
+		_toRequest = new HashSet<BTInterval>();
+		_requested = new HashSet<BTInterval>();
 		_startTime = System.currentTimeMillis();
 		_reader = new BTMessageReader(this);
 		_writer = new BTMessageWriter(this);
@@ -441,8 +441,8 @@ public class BTConnection implements UploadSlotListener {
 		boolean modified = false;
 
 		// remove all subranges that we may be requesting
-		for (Iterator iter = _requesting.iterator(); iter.hasNext();) {
-			BTInterval req = (BTInterval) iter.next();
+		for (Iterator<BTInterval> iter = _requesting.iterator(); iter.hasNext();) {
+			BTInterval req = iter.next();
 			if (req.getId() == pieceNum) {
 				iter.remove();
 				sendCancel(req);
@@ -450,8 +450,8 @@ public class BTConnection implements UploadSlotListener {
 			}
 		}
 		
-		for (Iterator iter = _toRequest.iterator(); iter.hasNext();) {
-			BTInterval req = (BTInterval) iter.next();
+		for (Iterator<BTInterval> iter = _toRequest.iterator(); iter.hasNext();) {
+			BTInterval req = iter.next();
 			if (req.getId() == pieceNum) {
 				iter.remove();
 				modified = true;
@@ -497,11 +497,8 @@ public class BTConnection implements UploadSlotListener {
 	 * Cancels all requests. Called when the download is complete
 	 */
 	void cancelAllRequests() {
-		Iterator iter = _requesting.iterator();
-		while (iter.hasNext()) {
-			BTInterval request = (BTInterval) iter.next();
+		for (BTInterval request : _requesting) 
 			sendCancel(request);
-		}
 		clearRequests();
 	}
 
@@ -539,8 +536,8 @@ public class BTConnection implements UploadSlotListener {
 			return;
 		
 		// pick a request at sort-of-random
-		Iterator iter = _requested.iterator();
-		BTInterval in = (BTInterval) iter.next();
+		Iterator<BTInterval> iter = _requested.iterator();
+		BTInterval in = iter.next();
 		iter.remove();
 		
 		if (LOG.isDebugEnabled())
@@ -582,11 +579,11 @@ public class BTConnection implements UploadSlotListener {
 	}
 
 	private void clearRequests() {
-		for (Iterator iter = _toRequest.iterator(); iter.hasNext();)
-			clearRequest((BTInterval) iter.next());
-
-		for (Iterator iter = _requesting.iterator(); iter.hasNext();)
-			clearRequest((BTInterval) iter.next());
+		for (BTInterval clear : _toRequest)
+			clearRequest(clear);
+		
+		for (BTInterval clear : _requesting)
+			clearRequest(clear);
 
 		_toRequest.clear();
 
@@ -611,12 +608,12 @@ public class BTConnection implements UploadSlotListener {
 		// the reason we randomize the list of requests to be sent is that we
 		// are receiving far too many ranges multiple times when the download
 		// is about to finish.
-		List random = new ArrayList();
+		List<BTInterval> random = new ArrayList<BTInterval>();
 		random.addAll(_toRequest);
 		Collections.shuffle(random);
-		for (Iterator iter = random.iterator(); _requesting.size() < MAX_REQUESTS
+		for (Iterator<BTInterval> iter = random.iterator(); _requesting.size() < MAX_REQUESTS
 		&& iter.hasNext() && !_isChoking;) {
-			BTInterval toReq = (BTInterval) iter.next();
+			BTInterval toReq = iter.next();
 			_writer.enqueue(new BTRequest(toReq));
 			_toRequest.remove(toReq);
 			_requesting.add(toReq);
@@ -686,8 +683,8 @@ public class BTConnection implements UploadSlotListener {
 		_requested.remove(in); 
 		
 		// remove any sub-ranges as well
-		for (Iterator iter = _requested.iterator(); iter.hasNext();) {
-			BTInterval current = (BTInterval) iter.next();
+		for (Iterator<BTInterval> iter = _requested.iterator(); iter.hasNext();) {
+			BTInterval current = iter.next();
 			if (in.getId() == current.getId() &&
 					(in.low <= current.high && current.low <= in.high))
 				iter.remove();

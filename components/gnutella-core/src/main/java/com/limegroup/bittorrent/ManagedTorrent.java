@@ -836,7 +836,7 @@ public class ManagedTorrent {
 		return false;
 	}
 
-	public List getConnections() {
+	public List<BTConnection> getConnections() {
 		return _connections;
 	}
 	

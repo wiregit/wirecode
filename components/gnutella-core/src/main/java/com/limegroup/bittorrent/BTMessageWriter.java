@@ -35,7 +35,7 @@ public class BTMessageWriter implements
 	/** 
 	 * the internal message queue
 	 */
-	private final LinkedList _queue;
+	private final LinkedList<BTMessage> _queue;
 
 	// the BTConnection this BTMessageWriter is associated with
 	private final BTConnection _connection;
@@ -52,7 +52,7 @@ public class BTMessageWriter implements
 	 * Constructor
 	 */
 	public BTMessageWriter(BTConnection connection) {
-		_queue = new LinkedList();
+		_queue = new LinkedList<BTMessage>();
 		_connection = connection;
 		_out[0] = ByteBuffer.allocate(5);
 	}
@@ -192,7 +192,7 @@ public class BTMessageWriter implements
 		if (_queue.isEmpty())
 			return false;
 		
-		currentMessage = (BTMessage) _queue.removeFirst();
+		currentMessage = _queue.removeFirst();
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("sending message "+currentMessage+" to "+_connection);

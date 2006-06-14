@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -19,8 +18,6 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Sockets;
 
 public class BTConnectionFetcher  {
@@ -58,8 +55,8 @@ public class BTConnectionFetcher  {
 	/*
 	 * the Set of concurrent connection fetchers
 	 */
-	final Set fetchers = 
-		Collections.synchronizedSet(new HashSet());
+	final Set<BTHandshaker> fetchers = 
+		Collections.synchronizedSet(new HashSet<BTHandshaker>());
 	
 	/**
 	 * the torrent this fetcher belongs to
@@ -136,11 +133,9 @@ public class BTConnectionFetcher  {
 		shutdown = true;
 		synchronized(fetchers) {
 			// copy because shutdown() removes
-			List conns = new ArrayList(fetchers);
-			for (Iterator iter = conns.iterator(); iter.hasNext();) {
-				Shutdownable connector = (Shutdownable) iter.next();
+			List<Shutdownable> conns = new ArrayList<Shutdownable>(fetchers);
+			for (Shutdownable connector : conns) 
 				connector.shutdown();
-			}
 		}
 	}
 

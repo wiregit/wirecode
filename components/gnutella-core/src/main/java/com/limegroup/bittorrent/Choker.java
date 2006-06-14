@@ -3,7 +3,6 @@ package com.limegroup.bittorrent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -23,15 +22,15 @@ public class Choker {
 	 * used to order BTConnections according to the average 
 	 * download or upload speed.
 	 */
-	private static final Comparator DOWNLOAD_SPEED_COMPARATOR = 
+	private static final Comparator<BTConnection> DOWNLOAD_SPEED_COMPARATOR = 
 		new SpeedComparator(true);
-	private static final Comparator UPLOAD_SPEED_COMPARATOR = 
+	private static final Comparator<BTConnection> UPLOAD_SPEED_COMPARATOR = 
 		new SpeedComparator(false);
 	
 	/*
 	 * orders BTConnections by the round they were unchoked.
 	 */
-	private static final Comparator UNCHOKE_COMPARATOR =
+	private static final Comparator<BTConnection> UNCHOKE_COMPARATOR =
 		new UnchokeComparator();
 
 	/*
@@ -82,11 +81,11 @@ public class Choker {
 			if (LOG.isDebugEnabled())
 				LOG.debug("scheduling rechoke");
 			
-			List l;
-			List connections = torrent.getConnections();
+			List<BTConnection> l;
+			List<BTConnection> connections = torrent.getConnections();
 			if (round++ % 3 == 0) {
 				synchronized(connections) {
-					l = new ArrayList(connections);
+					l = new ArrayList<BTConnection>(connections);
 				}
 				Collections.shuffle(l);
 			} else
@@ -113,11 +112,8 @@ public class Choker {
 			public void run() {
 				_globalChoke = choke;
 				if (choke) {
-					for (Iterator iter = torrent.getConnections().iterator(); 
-					iter.hasNext();) {
-						BTConnection btc = (BTConnection) iter.next();
+					for (BTConnection btc : torrent.getConnections()) 
 						btc.sendChoke();
-					}
 				} else
 					rechoke();
 			}
@@ -125,13 +121,13 @@ public class Choker {
 	}
 	
 	private class Rechoker implements Runnable {
-		private final List connections;
+		private final List<BTConnection> connections;
 		private final boolean forceUnchokes;
-		Rechoker(List connections) {
+		Rechoker(List<BTConnection> connections) {
 			this(connections, false);
 		}
 		
-		Rechoker(List connections, boolean forceUnchokes) {
+		Rechoker(List<BTConnection> connections, boolean forceUnchokes) {
 			this.connections = connections;
 			this.forceUnchokes = forceUnchokes;
 		}
@@ -149,9 +145,8 @@ public class Choker {
 		}
 		
 		private void leechRechoke() {
-			List fastest = new ArrayList(connections.size());
-			for (Iterator iter = connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
+			List<BTConnection> fastest = new ArrayList<BTConnection>(connections.size());
+			for (BTConnection con : connections) {
 				if (con.isInterested() && con.shouldBeInterested())
 					fastest.add(con);
 			}
@@ -166,8 +161,7 @@ public class Choker {
 					BittorrentSettings.TORRENT_MIN_UPLOADS.getValue() - fastest.size());
 			
 			
-			for (Iterator iter = connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
+			for (BTConnection con : connections) {
 				if (fastest.remove(con)) 
 					con.sendUnchoke(periodic.round);
 				else if (optimistic > 0 && con.shouldBeInterested()) {
@@ -188,10 +182,9 @@ public class Choker {
 				unchokesSinceLast;
 			}
 			
-			List preferred = new ArrayList();
+			List<BTConnection> preferred = new ArrayList<BTConnection>();
 			int newLimit = periodic.round - 3;
-			for (Iterator iter = connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
+			for (BTConnection con : connections) {
 				if (!con.isChoked() && con.isInterested() && 
 						con.shouldBeInterested()) {
 					if (con.getUnchokeRound() < newLimit)
@@ -213,8 +206,7 @@ public class Choker {
 			else
 				unchokesSinceLast += numNonPref;
 			
-			for (Iterator iter = connections.iterator(); iter.hasNext();) {
-				BTConnection con = (BTConnection) iter.next();
+			for (BTConnection con : connections) {
 				if (preferred.contains(con))
 					continue;
 				if (!con.isInterested())
@@ -261,7 +253,7 @@ public class Choker {
 	 * Compares two BTConnections by their average download 
 	 * or upload speeds.  Higher speeds get preference.
 	 */
-	public static class SpeedComparator implements Comparator {
+	public static class SpeedComparator implements Comparator<BTConnection> {
 		
 		private final boolean download;
 		public SpeedComparator(boolean download) {
@@ -269,12 +261,9 @@ public class Choker {
 		}
 		
 		// requires both objects to be of type BTConnection
-		public int compare(Object o1, Object o2) {
-			if (o1 == o2)
+		public int compare(BTConnection c1, BTConnection c2) {
+			if (c1 == c2)
 				return 0;
-			
-			BTConnection c1 = (BTConnection) o1;
-			BTConnection c2 = (BTConnection) o2;
 			
 			float bw1 = c1.getMeasuredBandwidth(download);
 			float bw2 = c2.getMeasuredBandwidth(download);
@@ -293,12 +282,10 @@ public class Choker {
 	 * unchoke round they were unchoked.  Connections with higher 
 	 * round get preference.
 	 */
-	private static class UnchokeComparator implements Comparator {
-		public int compare(Object a, Object b) {
-			if (a == b)
+	private static class UnchokeComparator implements Comparator<BTConnection> {
+		public int compare(BTConnection con1, BTConnection con2) {
+			if (con1 == con2)
 				return 0;
-			BTConnection con1 = (BTConnection) a;
-			BTConnection con2 = (BTConnection) b;
 			if (con1.getUnchokeRound() != con2.getUnchokeRound())
 				return -1 * (con1.getUnchokeRound() - con2.getUnchokeRound());
 			return UPLOAD_SPEED_COMPARATOR.compare(con1, con2);

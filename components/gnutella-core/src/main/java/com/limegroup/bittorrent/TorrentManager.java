@@ -3,7 +3,6 @@ package com.limegroup.bittorrent;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 
@@ -42,13 +41,13 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 	/**
 	 * The list of active torrents.
 	 */
-	private Set /* <ManagedTorrent> */_active = new HashSet();
+	private Set <ManagedTorrent>_active = new HashSet<ManagedTorrent>();
 	
 	/**
 	 * The list of active torrents that are seeding.
 	 * INVARIANT: subset of _active.
 	 */
-	private Set /* <ManagedTorrent> */_seeding = new HashSet();
+	private Set <ManagedTorrent>_seeding = new HashSet<ManagedTorrent>();
 
 
 	/**
@@ -89,8 +88,7 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 	 * @return active torrent for the given infoHash, null if no such.
 	 */
 	public synchronized ManagedTorrent getTorrentForHash(byte[] infoHash) {
-		for (Iterator iter = _active.iterator(); iter.hasNext();) {
-			ManagedTorrent torrent = (ManagedTorrent) iter.next();
+		for (ManagedTorrent torrent : _active) {
 			if (Arrays.equals(torrent.getInfoHash(), infoHash))
 				return torrent;
 		}
@@ -118,8 +116,7 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 		// than the limit.
 		while (_active.size() >= getMaxActiveTorrents()) {
 			ManagedTorrent best = null;
-			for (Iterator iter = _seeding.iterator(); iter.hasNext();) {
-				ManagedTorrent torrent = (ManagedTorrent) iter.next();
+			for (ManagedTorrent torrent : _seeding) {
 				if (best == null || torrent.getRatio() > best.getRatio())
 					best = torrent;
 			}

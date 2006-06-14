@@ -17,7 +17,6 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 /**
  * Class parsing the response from a tracker
@@ -28,7 +27,7 @@ public class TrackerResponse {
 	/**
 	 * List of peers contained in the tracker response
 	 */
-	public final List PEERS;
+	public final List<TorrentLocation> PEERS;
 
 	/**
 	 * The interval in seconds that we must wait before sending the next request
@@ -144,8 +143,8 @@ public class TrackerResponse {
 	 * 
 	 * @throws ValueException
 	 */
-	private static List parsePeers(List peers) throws ValueException {
-		List ret = new ArrayList();
+	private static List<TorrentLocation> parsePeers(List peers) throws ValueException {
+		List<TorrentLocation> ret = new ArrayList<TorrentLocation>();
 		for (Iterator iter = peers.iterator(); iter.hasNext();) {
 			Object t_peer = iter.next();
 			if (!(t_peer instanceof Map))
@@ -165,8 +164,8 @@ public class TrackerResponse {
 	 * @return non-null <tt>List</tt> of <tt>TorrentLocation</tt>
 	 * @throws ValueException
 	 */
-	static List parsePeers(byte[] bytes) throws ValueException {
-		ArrayList ret = new ArrayList();
+	static List<TorrentLocation> parsePeers(byte[] bytes) throws ValueException {
+		ArrayList<TorrentLocation> ret = new ArrayList<TorrentLocation>();
 		for (int i = 0; i < bytes.length - 5; i += 6) {
 			byte[] address = new byte[4];
 			System.arraycopy(bytes, i, address, 0, 4);

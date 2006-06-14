@@ -26,7 +26,7 @@ public class TrackerManager {
 	 * Note: It will be read much more often than updated. 
 	 * Note2: This is not proper multi-tracker support. 
 	 */
-	private final Collection trackers = new CoWList(CoWList.ARRAY_LIST);
+	private final Collection<Tracker> trackers = new CoWList<Tracker>(CoWList.ARRAY_LIST);
 	
 	/**
 	 * the next time we'll contact the tracker.
@@ -71,9 +71,8 @@ public class TrackerManager {
 		Runnable announcer = new Runnable() {
 			public void run() {
 				// announce ourselves to the trackers
-				for (Iterator iter = trackers.iterator(); iter.hasNext();) {
-					announceBlocking((Tracker)iter.next(),
-							Tracker.EVENT_START);
+				for (Tracker t : trackers) {
+					announceBlocking(t,Tracker.EVENT_START);
 				}
 			}
 		};
@@ -85,8 +84,8 @@ public class TrackerManager {
 		Runnable announcer = new Runnable() {
 			public void run() {
 				// tell all trackers we're stopping.
-				for (Iterator iter = trackers.iterator(); iter.hasNext();)
-					announceBlocking((Tracker)iter.next(),Tracker.EVENT_STOP);
+				for (Tracker t: trackers)
+					announceBlocking(t,Tracker.EVENT_STOP);
 			}
 		};
 		
@@ -98,9 +97,8 @@ public class TrackerManager {
 		// the torrent?  Its not mentioned in the spec...
 		Runnable announcer = new Runnable() {
 			public void run() {
-				for (Iterator iter = trackers.iterator(); iter.hasNext();) {
-					announceBlocking((Tracker)iter.next(),
-							Tracker.EVENT_COMPLETE);
+				for (Tracker t: trackers) {
+					announceBlocking(t,Tracker.EVENT_COMPLETE);
 				}
 			}
 		};
@@ -136,8 +134,7 @@ public class TrackerManager {
 			return true;
 		
 		int least = Integer.MAX_VALUE;
-		for(Iterator iter = trackers.iterator(); iter.hasNext();) {
-			Tracker t = (Tracker)iter.next();
+		for(Tracker t: trackers) {
 			
 			// shortcut
 			if (t.getFailures() == 0)
@@ -178,10 +175,8 @@ public class TrackerManager {
 				.getValue() * 1000;
 		
 		if (response != null) {
-				for (Iterator iter = response.PEERS.iterator(); iter.hasNext();) {
-					TorrentLocation next = (TorrentLocation) iter.next();
+				for (TorrentLocation next : response.PEERS) 
 					torrent.addEndpoint(next);
-				}
 				
 				minWaitTime = response.INTERVAL * 1000;
 				

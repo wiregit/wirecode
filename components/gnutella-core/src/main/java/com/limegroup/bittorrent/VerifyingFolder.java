@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,10 +14,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -149,7 +148,7 @@ public class VerifyingFolder {
 	 * populates various fields from data object that was 
 	 * deserialized.
 	 */
-	private void initialize(Map data) {
+	private void initialize(Map<String, Serializable> data) {
 		BlockRangeMap partial = (BlockRangeMap) data.get("partial");
 		if (partial != null)
 			partialBlocks = partial; 
@@ -330,7 +329,7 @@ public class VerifyingFolder {
 	}
 	
 	private void closeAnyCompletedFiles(int pieceNum) {
-		List possiblyCompleted = null;
+		List<Integer> possiblyCompleted = null;
 		for (int i = 0; i < _files.length; i++) {
 			if (_files[i].begin > pieceNum)
 				continue;
@@ -338,16 +337,15 @@ public class VerifyingFolder {
 				break;
 			
 			if (possiblyCompleted == null)
-				possiblyCompleted = new ArrayList();
+				possiblyCompleted = new ArrayList<Integer>();
 			
-			possiblyCompleted.add(new Integer(i));
+			possiblyCompleted.add(i);
 		}
 		
 		if (possiblyCompleted == null)
 			return;
 		
-		for (Iterator iter = possiblyCompleted.iterator(); iter.hasNext();) {
-			int index = ((Integer) iter.next()).intValue();
+		for (int index : possiblyCompleted) {
 			TorrentFile file = _files[index];
 			boolean done = true;
 			for(int i = file.begin; i <= file.end; i++) {
@@ -384,7 +382,7 @@ public class VerifyingFolder {
 			return true;
 		
 		partialBlocks.addInterval(in);
-		IntervalSet set = partialBlocks.getSet(in);
+		IntervalSet set = partialBlocks.get(in.getId());
 		if (set.getNumberOfIntervals() == 1) {
 			Interval one = set.getFirst();
 			if (isCompleteBlock(one,in.getId()))
@@ -423,7 +421,7 @@ public class VerifyingFolder {
 		// position of the first byte of a file in the torrent
 		long pos = 0;
 		
-		List filesToVerify = null;
+		List<TorrentFile> filesToVerify = null;
 		for (int i = 0; i < _files.length; i++) {
 			File file = new File(_files[i].PATH);
 
@@ -472,7 +470,7 @@ public class VerifyingFolder {
 				// if a file exists, try to verify it
 				if (isVerifying && file.length() > 0) {
 					if (filesToVerify == null)
-						filesToVerify = new ArrayList(_files.length);
+						filesToVerify = new ArrayList<TorrentFile>(_files.length);
 					filesToVerify.add(_files[i]);
 				}
 			}
@@ -668,15 +666,14 @@ public class VerifyingFolder {
 		
 		// if possible, do not request any chunks which are currently
 		// being requested
-		MultiIterator iter = new MultiIterator(new Iterator[]{
+		MultiIterator<Integer> iter = new MultiIterator<Integer>(new Iterator[]{
 				pendingRanges.keySet().iterator(),
 				requestedRanges.keySet().iterator(),
 				partialBlocks.keySet().iterator()
 		});
-		while(iter.hasNext()) {
-			Integer element = (Integer) iter.next();
-			remote.clear(element.intValue());
-		}
+		while(iter.hasNext()) 
+			remote.clear(iter.next());
+		
 		
 		if (remote.cardinality() > 0) {
 			// the remote has new chunks we can get
@@ -696,33 +693,33 @@ public class VerifyingFolder {
 		} 
 		
 		// prepare a list of partial or requested blocks the remote host has
-		Collection available = new HashSet(requestedRanges.size()+partialBlocks.size());
+		Collection<Integer> available = new HashSet<Integer>(requestedRanges.size()+partialBlocks.size());
 		available.addAll(requestedRanges.keySet());
 		available.addAll(partialBlocks.keySet());
-		for (Iterator iterator = available.iterator(); iterator.hasNext();) {
-			Integer block = (Integer) iterator.next();
+		for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext();) {
+			int i = iterator.next();
 			// if the other side doesn't have this block, its not an option
-			if (!bs.get(block.intValue()) || verifiedBlocks.get(block.intValue())) 
+			if (!bs.get(i) || verifiedBlocks.get(i)) 
 				iterator.remove();
 		}
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("available partial blocks to attempt: "+available);
 		
-		available = new ArrayList(available);
-		Collections.shuffle((List)available);
+		available = new ArrayList<Integer>(available);
+		Collections.shuffle((List<Integer>)available);
 		
 		// go through and find a block that we can request something from.
-		for (Iterator iterator = available.iterator(); iterator.hasNext();) {
-			Integer block = (Integer) iterator.next();
+		for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext();) {
+			int block = iterator.next();
 			
 			// figure out which parts of the chunks we need.
 			IntervalSet needed = new IntervalSet();
-			needed = needed.invert(getPieceSize(block.intValue()));
+			needed = needed.invert(getPieceSize(block));
 			
-			IntervalSet partial = partialBlocks.getSet(block);
-			IntervalSet pending = pendingRanges.getSet(block);
-			IntervalSet requested = requestedRanges.getSet(block);
+			IntervalSet partial = partialBlocks.get(block);
+			IntervalSet pending = pendingRanges.get(block);
+			IntervalSet requested = requestedRanges.get(block);
 			
 			// get the parts of the block we're missing
 			if (partial != null)
@@ -746,7 +743,7 @@ public class VerifyingFolder {
 			if (needed.isEmpty()) 
 				continue;
 			
-			BTInterval ret = new BTInterval(needed.getFirst(),block.intValue());
+			BTInterval ret = new BTInterval(needed.getFirst(),block);
 			if (LOG.isDebugEnabled())
 				LOG.debug("selected partial/requested interval "+ret);
 			return ret;
@@ -805,13 +802,12 @@ public class VerifyingFolder {
 	/**
 	 * verifies all the chunks that are associated with a list of files.
 	 */
-	private void verifyFiles(List l) {
+	private void verifyFiles(List<TorrentFile> l) {
 		int lastSet;
 		synchronized(this) {
 			lastSet = verifiedBlocks.length();
 		}
-		for (Iterator iter = l.iterator(); iter.hasNext();) {
-			TorrentFile f = (TorrentFile) iter.next();
+		for (TorrentFile f : l) {
 			for (int i = Math.max(lastSet,f.begin); i <= f.end; i++) 
 				VERIFY_QUEUE.invokeLater(new VerifyJob(i),_info.getURN());
 		}
@@ -881,9 +877,9 @@ public class VerifyingFolder {
 	}
 	
 	synchronized Map getSerializableObject() {
-		Map toWrite = new HashMap();
-		toWrite.put("verified",verifiedBlocks.clone());
-		toWrite.put("partial",partialBlocks.clone());
+		Map<String, Serializable> toWrite = new HashMap<String, Serializable>();
+		toWrite.put("verified",(Serializable)verifiedBlocks.clone());
+		toWrite.put("partial",(Serializable)partialBlocks.clone());
 		toWrite.put("wasVerifying", new Boolean(isVerifying));
 		return toWrite;
 	}
@@ -924,9 +920,9 @@ public class VerifyingFolder {
 		return false;
 	}
 	
-	private static class BlockRangeMap extends HashMap {
+	private static class BlockRangeMap extends HashMap<Integer, IntervalSet> {
 		public void addInterval(BTInterval in) {
-			IntervalSet s = (IntervalSet) get(in.blockId);
+			IntervalSet s = get(in.blockId);
 			if (s == null) {
 				s = new IntervalSet();
 				put(in.blockId,s);
@@ -935,7 +931,7 @@ public class VerifyingFolder {
 		}
 		
 		public void removeInterval(BTInterval in) {
-			IntervalSet s = (IntervalSet) get(in.blockId);
+			IntervalSet s = get(in.blockId);
 			if (s == null)
 				return;
 			s.delete(in);
@@ -943,20 +939,10 @@ public class VerifyingFolder {
 				remove(in.blockId);
 		}
 		
-		public IntervalSet getSet(BTInterval in) {
-			return (IntervalSet) get(in.blockId);
-		}
-		
-		public IntervalSet getSet(Integer id) {
-			return (IntervalSet) get(id);
-		}
-		
 		public long byteSize() {
 			long ret = 0;
-			for (Iterator iter = values().iterator(); iter.hasNext();) {
-				IntervalSet set = (IntervalSet) iter.next();
+			for (IntervalSet set : values()) 
 				ret += (long)set.getSize();
-			}
 			return ret;
 		}
 	}

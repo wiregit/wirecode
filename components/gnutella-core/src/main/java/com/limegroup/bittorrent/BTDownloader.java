@@ -6,8 +6,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.limegroup.gnutella.DownloadCallback;
@@ -219,9 +219,7 @@ implements TorrentLifecycleListener {
 
 	public int getQueuedHostCount() {
 		int qd = 0;
-		for (Iterator iter = _torrent.getConnections().iterator(); iter
-				.hasNext();) {
-			BTConnection c = (BTConnection) iter.next();
+		for (BTConnection c : _torrent.getConnections()) {
 			if (c.isChoking())
 				qd++;
 		}
@@ -323,15 +321,15 @@ implements TorrentLifecycleListener {
 	
 	private void writeObject(ObjectOutputStream out) 
 	throws IOException {
-		Map m = new HashMap();
-		m.put(ATTRIBUTES, attributes);
+		Map<String, Serializable> m = new HashMap<String, Serializable>();
+		m.put(ATTRIBUTES, (Serializable)attributes);
 		m.put(METAINFO, _info);
 		out.writeObject(m);
 	}
 	
 	private void readObject(ObjectInputStream in)
 	throws IOException, ClassNotFoundException {
-		Map m = (Map)in.readObject();
+		Map<String, Serializable> m = (Map<String, Serializable>)in.readObject();
 		attributes = (Map)m.get(ATTRIBUTES);
 		_info = (BTMetaInfo)m.get(METAINFO);
 		if (attributes == null || _info == null)
