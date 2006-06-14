@@ -91,7 +91,9 @@ public class StatsRequestImpl extends AbstractRequestMessage
         
         // 0-49
         data.limit(CHECKSUM_START);
-        signature.update(data);
+        while(data.hasRemaining()) {
+            signature.update(data.get());
+        }
         
         // 50-69
         signature.update(EMPTY_CHECKSUM_FIELD);
@@ -99,7 +101,9 @@ public class StatsRequestImpl extends AbstractRequestMessage
         // 70-n
         data.limit(data.capacity());
         data.position(CHECKSUM_START+EMPTY_CHECKSUM_FIELD.length);
-        signature.update(data);
+        while(data.hasRemaining()) {
+            signature.update(data.get());
+        }
     }
     
     protected void writeBody(MessageOutputStream out) throws IOException {
