@@ -11,5 +11,6 @@ interface SocketController {
     Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException;
     boolean removeConnectObserver(ConnectObserver observer);
     int getNumAllowedSockets();
+    int getNumWaitingSockets();
     
 }

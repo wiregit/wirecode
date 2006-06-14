@@ -105,7 +105,7 @@ public class Sockets {
         if(!NetworkUtils.isValidPort(addr.getPort()))  
             throw new IllegalArgumentException("port out of range: "+addr.getPort());
         
-        return CONTROLLER.connect(addr, timeout, observer);  
+        return CONTROLLER.connect(addr, timeout, observer);
 	}
     
     /**
@@ -123,4 +123,9 @@ public class Sockets {
 	public static int getNumAllowedSockets() {
         return CONTROLLER.getNumAllowedSockets();
 	}
+    
+    /** Returns the number of Sockets that are waiting for the controller to process them. */
+    public static int getNumWaitingSockets() {
+        return CONTROLLER.getNumWaitingSockets();
+    }
 }

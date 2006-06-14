@@ -753,6 +753,10 @@ public class NIODispatcher implements Runnable {
         }
     }
     
+    public int getNumTimeouts() {
+        return TIMEOUTER.getNumPendingTimeouts();
+    }
+    
     /**
      * The run loop
      */

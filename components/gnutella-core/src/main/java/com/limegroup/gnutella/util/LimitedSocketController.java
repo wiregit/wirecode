@@ -97,6 +97,11 @@ class LimitedSocketController extends SimpleSocketController {
         return MAX_CONNECTING_SOCKETS;
     }
     
+    /** Returns the number of sockets waiting. */
+    public synchronized int getNumWaitingSockets() {
+        return WAITING_REQUESTS.size();
+    }
+    
     /**
      * Runs through any waiting Requestors and initiates a connection to them.
      */

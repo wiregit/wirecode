@@ -60,6 +60,7 @@ import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
+import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
@@ -1809,5 +1810,13 @@ public class RouterService {
     
     public static long getByteBufferCacheSize() {
         return NIODispatcher.instance().getBufferCache().getHeapCacheSize();
+    }
+    
+    public static int getNumberOfWaitingSockets() {
+        return Sockets.getNumWaitingSockets();
+    }
+    
+    public static int getNumberOfPendingTimeouts() {
+        return NIODispatcher.instance().getNumTimeouts();
     }
 }

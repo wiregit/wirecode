@@ -35,6 +35,11 @@ class SimpleSocketController implements SocketController {
     public boolean removeConnectObserver(ConnectObserver observer) {
         return false;
     }
+    
+    /** Returns 0. */
+    public int getNumWaitingSockets() {
+        return 0;
+    }
 
     /** 
      * Establishes a connection to the given host.

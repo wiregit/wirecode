@@ -20,6 +20,10 @@ public class TimeoutController {
     // used to store timed out items to notify outside of lock.
     private final List timedout = new ArrayList(100);
     
+    synchronized int getNumPendingTimeouts() {
+        return items.size();
+    }
+    
     /** Adds a timeoutable to be timed out at timeout + now. */
     public synchronized void addTimeout(Timeoutable t, long now, long timeout) {
         if(LOG.isDebugEnabled())
