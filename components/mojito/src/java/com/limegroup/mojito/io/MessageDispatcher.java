@@ -388,11 +388,11 @@ public abstract class MessageDispatcher implements Runnable {
      * Starts a new ResponseProcessor
      */
     private void processResponse(Receipt receipt, ResponseMessage response) {
-        Runnable processor = new ResponseProcessor(receipt, response);
+        ResponseProcessor processor = new ResponseProcessor(receipt, response);
         if (response instanceof DHTSecureMessage) {
             DHTSecureMessage secure = (DHTSecureMessage)response;
             if (secure.isSigned()) {
-                verify(secure, new SecureMessageCallbackImpl(processor));
+                verify(secure, processor);
             } else {
                 process(processor);
             }
@@ -405,11 +405,11 @@ public abstract class MessageDispatcher implements Runnable {
      * Starts a new RequestProcessor
      */
     private void processRequest(RequestMessage request) {
-        Runnable processor = new RequestProcessor(request);
+        RequestProcessor processor = new RequestProcessor(request);
         if (request instanceof SecureMessage) {
             DHTSecureMessage secure = (DHTSecureMessage)request;
             if (secure.isSigned()) {
-                verify(secure, new SecureMessageCallbackImpl(processor));
+                verify(secure, processor);
             } else {
                 process(processor);
             }
@@ -573,7 +573,7 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * An implementation of Runnable to handle Response Messages.
      */
-    private class ResponseProcessor implements Runnable {
+    private class ResponseProcessor implements Runnable, SecureMessageCallback {
         
         private Receipt receipt;
         private ResponseMessage response;
@@ -581,6 +581,12 @@ public abstract class MessageDispatcher implements Runnable {
         private ResponseProcessor(Receipt receipt, ResponseMessage response) {
             this.receipt = receipt;
             this.response = response;
+        }
+        
+        public void handleSecureMessage(SecureMessage sm, boolean passed) {
+            if (passed) {
+                process(this);
+            }
         }
         
         public void run() {
@@ -629,12 +635,18 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * An implementation of Runnable to handle Request Messages.
      */
-    private class RequestProcessor implements Runnable {
+    private class RequestProcessor implements Runnable, SecureMessageCallback {
         
         private RequestMessage request;
         
         private RequestProcessor(RequestMessage request) {
             this.request = request;
+        }
+        
+        public void handleSecureMessage(SecureMessage sm, boolean passed) {
+            if (passed) {
+                process(this);
+            }
         }
         
         public void run() {
@@ -697,22 +709,6 @@ public abstract class MessageDispatcher implements Runnable {
             } catch (Exception e) {
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
             }
-        }
-    }
-    
-    /**
-     * An implementation of SecureMessageCallback to handle SecureMessages
-     */
-    private class SecureMessageCallbackImpl implements SecureMessageCallback {
-        
-        private Runnable processor;
-        
-        private SecureMessageCallbackImpl(Runnable processor) {
-            this.processor = processor;
-        }
-        
-        public void handleSecureMessage(SecureMessage sm, boolean passed) {
-            process(processor);
         }
     }
 }
