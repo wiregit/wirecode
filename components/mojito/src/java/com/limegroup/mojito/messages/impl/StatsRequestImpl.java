@@ -54,11 +54,11 @@ public class StatsRequestImpl extends AbstractRequestMessage
         
         this.request = data.get() & 0xFF;
         
-        if (isSigned()) {
+        /*if (isSigned()) {
             data.reset();
             this.data = ByteBuffer.allocate(data.remaining());
             this.data.put(data);
-        }
+        }*/
     }
     
     public int getRequest() {
@@ -74,7 +74,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
     }
     
     public boolean isSigned() {
-        return (getMessageFlags() & IS_SIGNED) == IS_SIGNED;
+        return false;
     }
     
     public boolean isSecure() {
@@ -82,18 +82,16 @@ public class StatsRequestImpl extends AbstractRequestMessage
     }
 
     public byte[] getSecureSignature() {
-        return getChecksum();
+        return null;
     }
 
     public void updateSignatureWithSecuredBytes(Signature signature) 
             throws SignatureException {
-        data.rewind();
+        /*data.rewind();
         
         // 0-49
         data.limit(CHECKSUM_START);
-        while(data.hasRemaining()) {
-            signature.update(data.get());
-        }
+        signature.update(data);
         
         // 50-69
         signature.update(EMPTY_CHECKSUM_FIELD);
@@ -101,9 +99,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
         // 70-n
         data.limit(data.capacity());
         data.position(CHECKSUM_START+EMPTY_CHECKSUM_FIELD.length);
-        while(data.hasRemaining()) {
-            signature.update(data.get());
-        }
+        signature.update(data);*/
     }
     
     protected void writeBody(MessageOutputStream out) throws IOException {

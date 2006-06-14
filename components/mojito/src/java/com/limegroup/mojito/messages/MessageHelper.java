@@ -36,20 +36,16 @@ import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
  */
 public class MessageHelper {
 
-    private Context context;
+    protected final Context context;
 
     private MessageFactory factory;
 
     public MessageHelper(Context context) {
         this.context = context;
-        setMessageFactory(null); // Default
+        factory = new DefaultMessageFactory();
     }
 
     public void setMessageFactory(MessageFactory factory) {
-        if (factory == null) {
-            factory = new DefaultMessageFactory();
-        }
-
         this.factory = factory;
     }
 
@@ -57,26 +53,26 @@ public class MessageHelper {
         return factory;
     }
 
-    private int getVendor() {
+    protected int getVendor() {
         return context.getVendor();
     }
 
-    private int getVersion() {
+    protected int getVersion() {
         return context.getVersion();
     }
 
-    private ContactNode getLocalNode() {
+    protected ContactNode getLocalNode() {
         return context.getLocalNode();
     }
 
-    private KUID createMessageID(SocketAddress dst) {
+    protected KUID createMessageID(SocketAddress dst) {
         if (NetworkUtils.isValidSocketAddress(dst)) {
             return KUID.createRandomMessageID(dst);
         }
         return KUID.MIN_MESSAGE_ID;
     }
 
-    private int getEstimatedSize() {
+    protected int getEstimatedSize() {
         return context.size();
     }
 

@@ -38,6 +38,9 @@ public interface MessageFactory {
     public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException;
     
+    public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 
+            throws IOException;
+    
     public PingRequest createPingRequest(int vendor, int version, 
             ContactNode node, KUID messageId);
 

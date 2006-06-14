@@ -54,15 +54,11 @@ public interface DHTMessage {
     /** Returns the Version of the Message */
     public int getVersion();
 
-    /** Returns the Message ID of the Message */
-    public KUID getMessageID();
-
-    public int getMessageFlags();
-    
     /** Returns the sender of this Message */
     public ContactNode getContactNode();
     
-    public byte[] getChecksum();
+    /** Returns the Message ID of the Message */
+    public KUID getMessageID();
     
     /** Writes this Message to the OutputStream */
     public void write(OutputStream out) throws IOException;

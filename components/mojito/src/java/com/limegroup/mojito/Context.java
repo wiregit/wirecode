@@ -316,16 +316,24 @@ public class Context {
         return keyValuePublisher;
     }
     
+    public synchronized void setMessageHelper(MessageHelper messageHelper) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageHelper while DHT is running");
+        }
+        
+        this.messageHelper = messageHelper;
+    }
+    
     public MessageHelper getMessageHelper() {
         return messageHelper;
     }
     
-    public synchronized void setMessageFactory(MessageFactory factory) {
+    public synchronized void setMessageFactory(MessageFactory messageFactory) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch MessageFactory while DHT is running");
         }
         
-        messageHelper.setMessageFactory(factory);
+        messageHelper.setMessageFactory(messageFactory);
     }
     
     public MessageFactory getMessageFactory() {

@@ -19,9 +19,11 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -82,6 +84,14 @@ public class DefaultMessageFactory implements MessageFactory {
         }
     }
     
+    public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 
+            throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream(640);
+        message.write(out);
+        out.close();
+        return ByteBuffer.wrap(out.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+    }
+
     public FindNodeRequest createFindNodeRequest(int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId) {
         return new FindNodeRequestImpl(vendor, version, node, messageId, lookupId);

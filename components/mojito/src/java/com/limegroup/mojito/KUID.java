@@ -134,7 +134,7 @@ public class KUID implements Serializable, Comparable {
         
         this.type = type;
         this.id = id;
-        this.hashCode = ArrayUtils.hashCode(id);
+        this.hashCode = Arrays.hashCode(id);
     }
     
     /**

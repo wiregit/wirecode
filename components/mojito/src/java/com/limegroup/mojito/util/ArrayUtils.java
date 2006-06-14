@@ -19,6 +19,8 @@
  
 package com.limegroup.mojito.util;
 
+import java.util.Arrays;
+
 public final class ArrayUtils {
     
     private static final char[] HEX = {
@@ -34,18 +36,6 @@ public final class ArrayUtils {
     };
     
     private ArrayUtils() {}
-    
-    public static int hashCode(byte[] data) {
-        int hash = 0;
-        for (int i = 0; i < data.length; i++) {
-            hash <<= 1;
-            if (hash < 0) {
-                hash |= 1;
-            }
-            hash ^= data[i];
-        }
-        return hash;
-    }
     
     public static boolean isNull(byte[] data) {
         if (data == null 

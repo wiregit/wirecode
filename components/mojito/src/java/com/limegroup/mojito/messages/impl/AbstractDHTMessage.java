@@ -28,7 +28,6 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.util.ByteBufferUtils;
 
 /**
  * An abstract implementation of DHTMessage
@@ -41,9 +40,9 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
      *  bottom of this class.
      */
     
-    static final byte[] EMPTY_CHECKSUM_FIELD = new byte[20];
+    /*static final byte[] EMPTY_CHECKSUM_FIELD = new byte[20];
     
-    static final int CHECKSUM_START = 50;
+    static final int CHECKSUM_START = 50;*/
     
     private int opcode;
     
@@ -53,9 +52,6 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     private ContactNode contactNode;
     
     private KUID messageId;
-    private int messageFlags;
-    
-    private byte[] checksum;
     
     public AbstractDHTMessage(int opcode, int vendor, int version,
             ContactNode contactNode, KUID messageId) {
@@ -130,9 +126,10 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         this.contactNode = new ContactNode(nodeId, src, instanceId, nodeFlags);
         
         this.messageId = KUID.createMessageID(data);
-        this.messageFlags = data.get() & 0xFF;
         
-        this.checksum = ByteBufferUtils.getBytes(data, EMPTY_CHECKSUM_FIELD.length);
+        //int messageFlags = data.get() & 0xFF;
+        //int checksum = data.getInt();
+        data.position(data.position()+5);
     }
     
     public int getOpCode() {
@@ -149,14 +146,6 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
 
     public KUID getMessageID() {
         return messageId;
-    }
-
-    public int getMessageFlags() {
-        return messageFlags;
-    }
-    
-    public byte[] getChecksum() {
-        return checksum;
     }
     
     public ContactNode getContactNode() {
@@ -183,8 +172,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         out.writeByte(getContactNode().getInstanceID()); // 27
         out.writeByte(getContactNode().getFlags()); // 28
         out.writeKUID(getMessageID()); // 29-48
-        out.writeByte(getMessageFlags()); // 49
-        out.write(EMPTY_CHECKSUM_FIELD); // 50-69
+        out.writeByte(0); // 49 (message flags) ???
+        out.writeInt(0); // 50-53 (checksum) ???
     }
     
     protected abstract void writeBody(MessageOutputStream out) throws IOException;

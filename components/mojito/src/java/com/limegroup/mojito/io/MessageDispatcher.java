@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.io;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -84,7 +83,7 @@ public abstract class MessageDispatcher implements Runnable {
     protected static final long CLEANUP = 100L;
     
     /** Queue of things we have to send */
-    private LinkedList outputQueue = new LinkedList();
+    private LinkedList<Tag> outputQueue = new LinkedList<Tag>();
     
     /** Map of Messages (responses) we're awaiting */
     private ReceiptMap receiptMap = new ReceiptMap(512);
@@ -211,7 +210,7 @@ public abstract class MessageDispatcher implements Runnable {
         }
         
         // Serialize the Message
-        ByteBuffer data = serialize(tag.getMessage());
+        ByteBuffer data = serialize(dst, message);
         int size = data.remaining();
         if (size >= MAX_MESSAGE_SIZE) {
             //tag.handleError(new IOException("Message is too large: " + size + " >= " + MAX_MESSAGE_SIZE));
@@ -261,17 +260,14 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * A helper method to serialize DHTMessage(s)
      */
-    protected ByteBuffer serialize(DHTMessage message) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(640);
-        message.write(out);
-        out.close();
-        return ByteBuffer.wrap(out.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+    protected final ByteBuffer serialize(SocketAddress dst, DHTMessage message) throws IOException {
+        return context.getMessageFactory().writeMessage(dst, message);
     }
     
     /**
      * A helper method to deserialize DHTMessage(s)
      */
-    protected DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
+    protected final DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
         return context.getMessageFactory().createMessage(src, data);
     }
@@ -286,7 +282,10 @@ public abstract class MessageDispatcher implements Runnable {
             buffer.flip();
             int length = buffer.remaining();
 
-            // Restore Big-Endianess
+            //ByteBuffer data = ByteBuffer.allocate(length);
+            //data.put(buffer);
+            
+            // Set to Big-Endianess
             buffer.order(ByteOrder.BIG_ENDIAN);
             
             DHTMessage message = deserialize(src, buffer/*.asReadOnlyBuffer()*/);
@@ -586,6 +585,9 @@ public abstract class MessageDispatcher implements Runnable {
         public void handleSecureMessage(SecureMessage sm, boolean passed) {
             if (passed) {
                 process(this);
+            } else if (LOG.isErrorEnabled()) {
+                LOG.error(response.getContactNode() 
+                        + " send us a signed Response but the signatures do not match!");
             }
         }
         
@@ -646,6 +648,9 @@ public abstract class MessageDispatcher implements Runnable {
         public void handleSecureMessage(SecureMessage sm, boolean passed) {
             if (passed) {
                 process(this);
+            } else if (LOG.isErrorEnabled()) {
+                LOG.error(request.getContactNode() 
+                        + " send us a signed Request but the signatures do not match!");
             }
         }
         
