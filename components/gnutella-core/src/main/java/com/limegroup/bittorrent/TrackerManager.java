@@ -1,6 +1,9 @@
 package com.limegroup.bittorrent;
 
 import java.util.Collection;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -10,11 +13,13 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.util.CoWList;
+import com.limegroup.gnutella.util.StoredFutureTask;
 
 public class TrackerManager {
 	
-	private final ScheduledThreadPoolExecutor EXECUTOR = 
-		new ScheduledThreadPoolExecutor(0);
+	// TODO: put this in some global place.
+	private static final ScheduledThreadPoolExecutor EXECUTOR = 
+		new ScheduledThreadPoolExecutor(1);
 	
 	private static final Log LOG = LogFactory.getLog(TrackerManager.class);
 	
@@ -29,6 +34,9 @@ public class TrackerManager {
 	 * Note2: This is not proper multi-tracker support. 
 	 */
 	private final Collection<Tracker> trackers = new CoWList<Tracker>(CoWList.ARRAY_LIST);
+	
+	/** Pending requests for this torrent */
+	private final Queue<FutureTask> myRequests = new ConcurrentLinkedQueue<FutureTask>();
 	
 	/**
 	 * the next time we'll contact the tracker.
@@ -66,11 +74,12 @@ public class TrackerManager {
 	private void announceToAll(final Tracker.Event event) {
 		// announce ourselves to the trackers
 		for (final Tracker t : trackers) {
-			EXECUTOR.submit(new Runnable() {
-				public void run(){
+			Runnable announcer = new Runnable(){
+				public void run() {
 					announceBlocking(t,event);
 				}
-			});
+			};
+			EXECUTOR.submit(createStoredTask(announcer));
 		}
 	}
 	
@@ -80,7 +89,10 @@ public class TrackerManager {
 	}
 	
 	public void announceStop() {
-		EXECUTOR.getQueue().clear();
+		// stop any current or future announcements
+		FutureTask task;
+		while((task = myRequests.poll()) != null)
+			task.cancel(true);
 		
 		announceToAll(Tracker.Event.STOP);	
 	}
@@ -94,18 +106,22 @@ public class TrackerManager {
 	 * 
 	 * @param url the URL of the tracker
 	 */
-	public void announce(final Tracker t) {
+	private void announce(final Tracker t) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("announce thread for " + t.toString());
 		torrent.setScraping();
 		announceBlocking(t, Tracker.Event.NONE);
 	}
 	
+	private FutureTask createStoredTask(Runnable r) {
+		return new StoredFutureTask<Object>(r, null, myRequests);
+	}
+	
 	/**
 	 * @return whether we've failed to connect to any tracker
 	 * too many times and should give up.
 	 */
-	public boolean isHopeless() {
+	private boolean isHopeless() {
 		if (trackers.isEmpty())
 			return true;
 		
@@ -122,7 +138,7 @@ public class TrackerManager {
 		return least >= MAX_TRACKER_FAILURES;
 	}
 	
-	public void scheduleTrackerRequest(long minDelay, final Tracker t) {
+	private void scheduleTrackerRequest(long minDelay, final Tracker t) {
 		Runnable announcer = new Runnable() {
 			public void run() {
 				if (!torrent.isActive())
@@ -133,7 +149,10 @@ public class TrackerManager {
 				announce(t);
 			}
 		};
-		EXECUTOR.schedule(announcer,minDelay, TimeUnit.MILLISECONDS);
+		LOG.debug("scheduling new tracker request");
+		EXECUTOR.schedule(createStoredTask(announcer),
+				minDelay, 
+				TimeUnit.MILLISECONDS);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 	
