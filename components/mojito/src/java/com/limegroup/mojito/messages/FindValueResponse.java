@@ -21,7 +21,10 @@ package com.limegroup.mojito.messages;
 
 import java.util.Collection;
 
-public interface FindValueResponse extends ResponseMessage {
+import com.limegroup.mojito.db.KeyValue;
 
-    public Collection getValues();
+
+public interface FindValueResponse extends LookupResponse {
+
+    public Collection<KeyValue> getValues();
 }

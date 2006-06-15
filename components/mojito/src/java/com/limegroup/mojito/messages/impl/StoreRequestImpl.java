@@ -28,9 +28,9 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StoreRequest;
-import com.limegroup.mojito.util.ByteBufferUtils;
 
 /**
  * An implementation of StoreRequest
@@ -55,8 +55,10 @@ public class StoreRequestImpl extends AbstractRequestMessage
             SocketAddress src, ByteBuffer data) throws IOException {
         super(context, STORE_REQUEST, src, data);
         
-        this.queryKey = ByteBufferUtils.getQueryKey(data);
-        this.keyValue = ByteBufferUtils.getKeyValue(data);
+        MessageInputStream in = getMessageInputStream();
+        
+        this.queryKey = in.readQueryKey();
+        this.keyValue = in.readKeyValue();
     }
     
     public QueryKey getQueryKey() {

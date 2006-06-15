@@ -19,7 +19,6 @@
 
 package com.limegroup.mojito.messages.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -27,6 +26,7 @@ import java.nio.ByteOrder;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -50,7 +50,7 @@ import com.limegroup.mojito.messages.StoreResponse;
  */
 public class DefaultMessageFactory implements MessageFactory {
 
-    private Context context;
+    protected final Context context;
     
     public DefaultMessageFactory(Context context) {
         this.context = context;
@@ -93,10 +93,10 @@ public class DefaultMessageFactory implements MessageFactory {
     
     public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 
             throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(640);
+        ByteBufferOutputStream out = new ByteBufferOutputStream(640, true);
         message.write(out);
         out.close();
-        return ByteBuffer.wrap(out.toByteArray()).order(ByteOrder.BIG_ENDIAN);
+        return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
     }
 
     public FindNodeRequest createFindNodeRequest(int vendor, int version, 
@@ -105,7 +105,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindNodeResponse createFindNodeResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, QueryKey queryKey, Collection nodes) {
+            ContactNode node, KUID messageId, QueryKey queryKey, Collection<ContactNode> nodes) {
         return new FindNodeResponseImpl(context, vendor, version, node, messageId, queryKey, nodes);
     }
 
@@ -115,7 +115,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueResponse createFindValueResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, Collection values) {
+            ContactNode node, KUID messageId, Collection<KeyValue> values) {
         return new FindValueResponseImpl(context, vendor, version, node, messageId, values);
     }
 
@@ -135,8 +135,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StatsResponse createStatsResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, String stats) {
-        return new StatsResponseImpl(context, vendor, version, node, messageId, stats);
+            ContactNode node, KUID messageId, byte[] statistics) {
+        return new StatsResponseImpl(context, vendor, version, node, messageId, statistics);
     }
 
     public StoreRequest createStoreRequest(int vendor, int version, 

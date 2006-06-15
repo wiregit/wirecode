@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StoreResponse;
 
@@ -51,8 +52,10 @@ public class StoreResponseImpl extends AbstractResponseMessage
             SocketAddress src, ByteBuffer data) throws IOException {
         super(context, STORE_RESPONSE, src, data);
         
-        this.valueId = KUID.createValueID(data);
-        this.status = data.get() & 0xFF;
+        MessageInputStream in = getMessageInputStream();
+        
+        this.valueId = in.readValueID();
+        this.status = in.readUnsignedByte();
     }
     
     public KUID getValueID() {

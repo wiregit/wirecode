@@ -273,22 +273,30 @@ public abstract class MessageDispatcher implements Runnable {
     }
     
     /**
+     * 
+     */
+    protected SocketAddress read(ByteBuffer b) throws IOException {
+        return channel.receive(b);
+    }
+    
+    /**
      * Reads and returns a single DHTMessage from Network or null
      * if no Messages were in the input queue.
      */
     private DHTMessage readMessage() throws MessageFormatException, IOException {
-        SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
+        SocketAddress src = read((ByteBuffer)buffer.clear());
         if (src != null) {
             buffer.flip();
             int length = buffer.remaining();
 
-            //ByteBuffer data = ByteBuffer.allocate(length);
-            //data.put(buffer);
+            ByteBuffer data = ByteBuffer.allocate(length);
+            data.put(buffer);
+            data.rewind();
             
             // Set to Big-Endianess
-            buffer.order(ByteOrder.BIG_ENDIAN);
+            data.order(ByteOrder.BIG_ENDIAN);
             
-            DHTMessage message = deserialize(src, buffer/*.asReadOnlyBuffer()*/);
+            DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
             networkStats.RECEIVED_MESSAGES_SIZE.addData(length);
             return message;
@@ -389,12 +397,7 @@ public abstract class MessageDispatcher implements Runnable {
     private void processResponse(Receipt receipt, ResponseMessage response) {
         ResponseProcessor processor = new ResponseProcessor(receipt, response);
         if (response instanceof DHTSecureMessage) {
-            DHTSecureMessage secure = (DHTSecureMessage)response;
-            if (secure.isSigned()) {
-                verify(secure, processor);
-            } else {
-                process(processor);
-            }
+            verify((DHTSecureMessage)response, processor);
         } else {
             process(processor);
         }
@@ -406,12 +409,7 @@ public abstract class MessageDispatcher implements Runnable {
     private void processRequest(RequestMessage request) {
         RequestProcessor processor = new RequestProcessor(request);
         if (request instanceof SecureMessage) {
-            DHTSecureMessage secure = (DHTSecureMessage)request;
-            if (secure.isSigned()) {
-                verify(secure, processor);
-            } else {
-                process(processor);
-            }
+            verify((DHTSecureMessage)request, processor);
         } else {
             process(processor);
         }
@@ -425,7 +423,7 @@ public abstract class MessageDispatcher implements Runnable {
     public boolean handleWrite() throws IOException {
         synchronized (outputQueue) {
             while(!outputQueue.isEmpty() && isRunning()) {
-                Tag tag = (Tag)outputQueue.removeFirst();
+                Tag tag = outputQueue.removeFirst();
                 
                 try {
                     SocketAddress dst = tag.getSocketAddres();
@@ -661,7 +659,7 @@ public abstract class MessageDispatcher implements Runnable {
                     LOG.trace(request.getContactNode() + " refused");
                 }
                 networkStats.FILTERED_MESSAGES.incrementStat();
-                // return;
+                return;
             }
             
             RequestHandler requestHandler = null;

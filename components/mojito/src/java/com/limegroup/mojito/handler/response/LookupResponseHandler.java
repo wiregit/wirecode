@@ -71,7 +71,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private long startTime;
     
     /** Set of queried KUIDs */
-    private Set queried = new HashSet();
+    private Set<KUID> queried = new HashSet<KUID>();
     
     /** Trie of ContactNodes we're going to query */
     private PatriciaTrie toQuery = new PatriciaTrie();
@@ -80,7 +80,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private PatriciaTrie responses = new PatriciaTrie();
     
     /** A Map we're using to count the number of hops */
-    private Map hopMap = new HashMap();
+    private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
     
     /** The expected result set size (aka K) */
     private int resultSetSize;
@@ -105,7 +105,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
      */
     private SingleLookupStatisticContainer lookupStat;
     
-    private Collection found = Collections.EMPTY_LIST;
+    private Collection<KeyValueCollection> foundKeyValues = Collections.EMPTY_LIST;
     
     public LookupResponseHandler(KUID lookup, Context context) {
         super(context);
@@ -315,10 +315,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             }
             foundValueLocs++;
             
-            if (found == Collections.EMPTY_LIST) {
-                found = new ArrayList();
+            if (foundKeyValues == Collections.EMPTY_LIST) {
+                foundKeyValues = new ArrayList<KeyValueCollection>();
             }
-            found.add(c);
+            foundKeyValues.add(c);
             
             fireFound(c, totalTime);
             
@@ -468,7 +468,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
 
         if (time >= 0L) {
             if (isValueLookup()) {
-                if (found.isEmpty()) {
+                if (foundKeyValues.isEmpty()) {
                     ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_FAILURE.incrementStat();
                 } else {
                     ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_OK.incrementStat();
@@ -479,11 +479,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 
                 // addResponse(ContactNode) limits the size of the
                 // Trie to K and we can thus use the size method of it!
-                found = responses.select(lookup, responses.size());
+                foundKeyValues = responses.select(lookup, responses.size());
             }
         }
         
-        fireFinish(found, time);
+        fireFinish(foundKeyValues, time);
     }
     
     /*protected void resend(KUID nodeId, 

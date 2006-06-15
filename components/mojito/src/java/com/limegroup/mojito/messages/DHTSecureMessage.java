@@ -24,6 +24,4 @@ import com.limegroup.gnutella.messages.SecureMessage;
 public interface DHTSecureMessage extends SecureMessage {
     
     public boolean isSecure();
-    
-    public boolean isSigned();
 }

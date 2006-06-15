@@ -22,10 +22,11 @@ package com.limegroup.mojito.messages;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.ContactNode;
 
-public interface FindNodeResponse extends ResponseMessage {
+public interface FindNodeResponse extends LookupResponse {
 
     public QueryKey getQueryKey();
 
-    public Collection getNodes();
+    public Collection<ContactNode> getNodes();
 }

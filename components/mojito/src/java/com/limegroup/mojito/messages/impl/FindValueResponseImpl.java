@@ -27,9 +27,10 @@ import java.util.Collection;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindValueResponse;
-import com.limegroup.mojito.util.ByteBufferUtils;
 
 /**
  * An implementation of FindValueResponse
@@ -37,11 +38,11 @@ import com.limegroup.mojito.util.ByteBufferUtils;
 public class FindValueResponseImpl extends AbstractLookupResponse
         implements FindValueResponse {
 
-    private Collection values;
+    private Collection<KeyValue> values;
 
     public FindValueResponseImpl(Context context, 
             int vendor, int version, ContactNode node, 
-            KUID messageId, Collection values) {
+            KUID messageId, Collection<KeyValue> values) {
         super(context, FIND_VALUE_RESPONSE, vendor, version, node, messageId);
 
         this.values = values;
@@ -51,10 +52,12 @@ public class FindValueResponseImpl extends AbstractLookupResponse
             SocketAddress src, ByteBuffer data) throws IOException {
         super(context, FIND_VALUE_RESPONSE, src, data);
         
-        this.values = ByteBufferUtils.getKeyValues(data);
+        MessageInputStream in = getMessageInputStream();
+        
+        this.values = in.readKeyValues();
     }
     
-    public Collection getValues() {
+    public Collection<KeyValue> getValues() {
         return values;
     }
 

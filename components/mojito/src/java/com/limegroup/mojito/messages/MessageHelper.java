@@ -21,7 +21,6 @@ package com.limegroup.mojito.messages;
 
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.List;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -99,7 +98,8 @@ public class MessageHelper {
                 getLocalNode(), createMessageID(dst), lookupId);
     }
 
-    public FindNodeResponse createFindNodeResponse(RequestMessage request, QueryKey queryKey, List nodes) {
+    public FindNodeResponse createFindNodeResponse(RequestMessage request, 
+            QueryKey queryKey, Collection<ContactNode> nodes) {
         return factory.createFindNodeResponse(getVendor(), getVersion(), 
                 getLocalNode(), request.getMessageID(), queryKey, nodes);
     }
@@ -113,7 +113,7 @@ public class MessageHelper {
                 getLocalNode(), createMessageID(dst), lookupId);
     }
 
-    public FindValueResponse createFindValueResponse(RequestMessage request, Collection values) {
+    public FindValueResponse createFindValueResponse(RequestMessage request, Collection<KeyValue> values) {
         return factory.createFindValueResponse(getVendor(), getVersion(), 
                 getLocalNode(), request.getMessageID(), values);
     }
@@ -133,7 +133,7 @@ public class MessageHelper {
                 getLocalNode(), createMessageID(dst), request);
     }
 
-    public StatsResponse createStatsResponse(RequestMessage request, String statistics) {
+    public StatsResponse createStatsResponse(RequestMessage request, byte[] statistics) {
         return factory.createStatsResponse(getVendor(), getVersion(), 
                 getLocalNode(), request.getMessageID(), statistics);
     }

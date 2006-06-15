@@ -21,5 +21,5 @@ package com.limegroup.mojito.messages;
 
 public interface StatsResponse extends ResponseMessage {
 
-    public String getStatistics();
+    public byte[] getStatistics();
 }

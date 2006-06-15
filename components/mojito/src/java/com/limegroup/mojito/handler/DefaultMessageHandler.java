@@ -198,11 +198,10 @@ public class DefaultMessageHandler extends MessageHandler
             
             FindNodeResponse response = (FindNodeResponse)message;
             
-            Collection nodes = response.getNodes();
-            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+            Collection<ContactNode> nodes = response.getNodes();
+            for(ContactNode node : nodes) {
                 // We did a FIND_NODE lookup use the info
                 // to fill our routing table
-                ContactNode node = (ContactNode)it.next();
                 context.getRouteTable().add(node, false);
             }
             

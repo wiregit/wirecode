@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.LookupRequest;
 
@@ -50,12 +51,14 @@ public abstract class AbstractLookupRequest extends AbstractRequestMessage
             throws IOException {
         super(context, opcode, src, data);
         
+        MessageInputStream in = getMessageInputStream();
+        
         switch(opcode) {
             case FIND_NODE_REQUEST:
-                lookupId = KUID.createNodeID(data);
+                lookupId = in.readNodeID();
                 break;
             case FIND_VALUE_REQUEST:
-                lookupId = KUID.createValueID(data);
+                lookupId = in.readValueID();
                 break;
             default:
                 throw new IOException("Unknown opcode for lookup request: " + opcode);

@@ -44,6 +44,10 @@ public class LimeStandaloneMessageDispatcherImpl
         context.setMessageFactory(new LimeStandaloneMessageFactory(context));
     }
 
+    protected boolean allow(DHTMessage message) {
+        return true;
+    }
+    
     private static class LimeStandaloneMessageFactory extends DefaultMessageFactory {
         
         public LimeStandaloneMessageFactory(Context context) {

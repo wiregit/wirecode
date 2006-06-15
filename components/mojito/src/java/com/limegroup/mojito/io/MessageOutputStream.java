@@ -126,4 +126,13 @@ public class MessageOutputStream extends DataOutputStream {
             writeByte(0);
         }
     }
+    
+    public void writeStatistics(byte[] statistics) throws IOException {
+        if (statistics != null) {
+            writeShort(statistics.length);
+            write(statistics);
+        } else {
+            writeShort(0);
+        }
+    }
 }

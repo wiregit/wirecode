@@ -26,9 +26,9 @@ import java.nio.ByteBuffer;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.PingResponse;
-import com.limegroup.mojito.util.ByteBufferUtils;
 
 /**
  * An implementation of PingResponse (Pong)
@@ -52,8 +52,10 @@ public class PingResponseImpl extends AbstractResponseMessage
             SocketAddress src, ByteBuffer data) throws IOException {
         super(context, PING_RESPONSE, src, data);
         
-        this.externalAddress = ByteBufferUtils.getSocketAddress(data);
-        this.estimatedSize = data.getInt();
+        MessageInputStream in = getMessageInputStream();
+        
+        this.externalAddress = in.readSocketAddress();
+        this.estimatedSize = in.readInt();
     }
     
     /** My external address */

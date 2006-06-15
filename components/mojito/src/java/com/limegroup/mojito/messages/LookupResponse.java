@@ -20,5 +20,5 @@
 package com.limegroup.mojito.messages;
 
 public interface LookupResponse extends ResponseMessage {
-
+    
 }

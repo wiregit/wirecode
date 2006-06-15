@@ -51,13 +51,13 @@ public interface MessageFactory {
             ContactNode node, KUID messageId, KUID lookupId);
 
     public FindNodeResponse createFindNodeResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, QueryKey queryKey, Collection nodes);
+            ContactNode node, KUID messageId, QueryKey queryKey, Collection<ContactNode> nodes);
 
     public FindValueRequest createFindValueRequest(int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId);
 
     public FindValueResponse createFindValueResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, Collection values);
+            ContactNode node, KUID messageId, Collection<KeyValue> values);
 
     public StoreRequest createStoreRequest(int vendor, int version, 
             ContactNode node, KUID messageId, QueryKey queryKey, KeyValue keyValue);
@@ -69,5 +69,5 @@ public interface MessageFactory {
             ContactNode node, KUID messageId, int stats);
 
     public StatsResponse createStatsResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, String stats);
+            ContactNode node, KUID messageId, byte[] statistics);
 }

@@ -200,7 +200,7 @@ public class LimeDHTManager implements LifecycleListener {
      * Shuts down the dht and persists it
      */
     public synchronized void shutdown(){
-        if (!running) {
+        /*if (!running) {
             return;
         }
         
@@ -217,7 +217,7 @@ public class LimeDHTManager implements LifecycleListener {
             out.close();
         } catch (IOException err) {
             LOG.error("IOException", err);
-        }
+        }*/
     }
     
     /**
@@ -296,5 +296,4 @@ public class LimeDHTManager implements LifecycleListener {
     public int getVersion() {
         return dht.getVersion();
     }
-    
 }

@@ -22,11 +22,17 @@ package com.limegroup.mojito.messages.impl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.security.Signature;
+import java.security.SignatureException;
 
+import com.limegroup.gnutella.util.ByteBufferInputStream;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 
@@ -41,11 +47,9 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
      *  bottom of this class.
      */
     
-    /*static final byte[] EMPTY_CHECKSUM_FIELD = new byte[20];
+    protected final Context context;
     
-    static final int CHECKSUM_START = 50;*/
-    
-    private Context context;
+    private ByteBuffer data;
     
     private int opcode;
     
@@ -56,25 +60,14 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     private KUID messageId;
     
+    private MessageInputStream in;
+    
     public AbstractDHTMessage(Context context, 
             int opcode, int vendor, int version,
             ContactNode contactNode, KUID messageId) {
 
-        switch(opcode) {
-            case PING_REQUEST:
-            case PING_RESPONSE:
-            case STORE_REQUEST:
-            case STORE_RESPONSE:
-            case FIND_NODE_REQUEST:
-            case FIND_NODE_RESPONSE:
-            case FIND_VALUE_REQUEST:
-            case FIND_VALUE_RESPONSE:
-            case STATS_REQUEST:
-            case STATS_RESPONSE:
-                // OK
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown opcode: " + opcode); 
+        if (!checkOpCode(opcode)) {
+            throw new IllegalArgumentException("Unknown opcode: " + opcode);
         }
         
         if (contactNode == null) {
@@ -104,6 +97,34 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     public AbstractDHTMessage(Context context, 
             int opcode, SocketAddress src, ByteBuffer data) throws IOException {
         
+        if (!checkOpCode(opcode)) {
+            throw new IOException("Unknown opcode: " + opcode);
+        }
+        
+        this.context = context;
+        this.opcode = opcode;
+        
+        in = new MessageInputStream(new ByteBufferInputStream(data));
+        
+        this.vendor = in.readInt();
+        this.version = in.readUnsignedShort();
+        
+        KUID nodeId = in.readNodeID();
+        int instanceId = in.readUnsignedByte();
+        int nodeFlags = in.readUnsignedByte();
+        this.contactNode = new ContactNode(nodeId, src, instanceId, nodeFlags);
+        
+        this.messageId = in.readMessageID();
+        
+        //int messageFlags = in.readUnsignedByte();
+        //int checksum = in.readInt();
+        //in.skipBytes(5); // see above
+        in.skip(5);
+        
+        this.data = data;
+    }
+    
+    private static boolean checkOpCode(int opcode) {
         switch(opcode) {
             case PING_REQUEST:
             case PING_RESPONSE:
@@ -115,32 +136,25 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
             case FIND_VALUE_RESPONSE:
             case STATS_REQUEST:
             case STATS_RESPONSE:
-                // OK
-                break;
+                return true;
             default:
-                throw new IOException("Unknown opcode: " + opcode); 
+                return false;
         }
-        
-        this.context = context;
-        this.opcode = opcode;
-        
-        this.vendor = data.getInt();
-        this.version = data.getShort() & 0xFFFF;
-        
-        KUID nodeId = KUID.createNodeID(data);
-        int instanceId = data.get() & 0xFF;
-        int nodeFlags = data.get() & 0xFF;
-        this.contactNode = new ContactNode(nodeId, src, instanceId, nodeFlags);
-        
-        this.messageId = KUID.createMessageID(data);
-        
-        //int messageFlags = data.get() & 0xFF;
-        //int checksum = data.getInt();
-        data.position(data.position()+5);
+    }
+    
+    protected MessageInputStream getMessageInputStream() throws IOException {
+        if (in == null) {
+            throw new IOException("Illegal State");
+        }
+        return in;
     }
     
     public Context getContext() {
         return context;
+    }
+    
+    public ByteBuffer getData() {
+        return data;
     }
     
     public int getOpCode() {
@@ -155,12 +169,12 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         return version;
     }
 
-    public KUID getMessageID() {
-        return messageId;
-    }
-    
     public ContactNode getContactNode() {
         return contactNode;
+    }
+    
+    public KUID getMessageID() {
+        return messageId;
     }
     
     /*
@@ -183,9 +197,24 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         out.writeByte(getContactNode().getInstanceID()); // 27
         out.writeByte(getContactNode().getFlags()); // 28
         out.writeKUID(getMessageID()); // 29-48
-        out.writeByte(0); // 49 (message flags) ???
-        out.writeInt(0); // 50-53 (checksum) ???
+        out.writeByte(0); // 49
+        out.writeInt(0); // 50-53
     }
     
     protected abstract void writeBody(MessageOutputStream out) throws IOException;
+    
+    protected void initSignature(Signature signature) 
+            throws SignatureException {
+        try {
+            // Destination
+            SocketAddress myExternalAddress = context.getSocketAddress();
+            signature.update(NetworkUtils.getBytes(myExternalAddress));
+
+            // Source
+            SocketAddress contactAddress = getContactNode().getSocketAddress();
+            signature.update(NetworkUtils.getBytes(contactAddress));
+        } catch (UnknownHostException err) {
+            throw new SignatureException(err);
+        }
+    }
 }

@@ -37,7 +37,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
@@ -162,19 +162,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         }
     }
 
-    /*
-     * Overwritten:
-     * 
-     * Uses BufferByteArrayOutputStream instead of ByteArrayOutputStream
-     * to serialize Messages
-     */
-    protected ByteBuffer serialize(DHTMessage message) throws IOException {
-        BufferByteArrayOutputStream out = new BufferByteArrayOutputStream(640, true);
-        message.write(out);
-        out.close();
-        return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
-    }
-    
     protected void interestRead(boolean on) {
         // DO NOTHING
     }

@@ -1,15 +1,15 @@
 package com.limegroup.gnutella.connection;
 
-import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
-import java.util.*;
-import java.util.zip.*;
-import java.net.*;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 
 /**
  * Tests that DeflaterWriter deflates data written to it correctly,
@@ -154,7 +154,7 @@ public final class DeflaterWriterTest extends BaseTestCase {
 	private byte[] inflate(ByteBuffer data) throws Exception {
 	    INFLATER.setInput(data.array(), 0, data.limit());
 	    byte[] buf = new byte[512];
-	    ByteArrayOutputStream out = new BufferByteArrayOutputStream();
+        ByteBufferOutputStream out = new ByteBufferOutputStream();
 	    int inflated = 0;
 	    while( (inflated = INFLATER.inflate(buf)) > 0)
 	        out.write(buf, 0, inflated);

@@ -34,7 +34,7 @@ public final class CollectionUtils {
         
         Iterator it = c.iterator();
         for(int i = 0; it.hasNext(); i++) {
-            buffer.append(i).append(": ").append(it.next()).append("\n");
+            buffer.append(i).append(": ").append(it.next()).append('\n');
         }
         
         // Delete the last \n

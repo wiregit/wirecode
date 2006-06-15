@@ -28,6 +28,7 @@ import java.security.SignatureException;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StatsRequest;
 
@@ -39,9 +40,9 @@ public class StatsRequestImpl extends AbstractRequestMessage
 
     private int request;
     
-    private ByteBuffer data;
-    
     private int secureStatus = INSECURE;
+    
+    private byte[] signature;
     
     public StatsRequestImpl(Context context, 
             int vendor, int version,
@@ -49,19 +50,17 @@ public class StatsRequestImpl extends AbstractRequestMessage
         super(context, STATS_REQUEST, vendor, version, node, messageId);
 
         this.request = request;
+        this.signature = null;
     }
 
     public StatsRequestImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
         super(context, STATS_REQUEST, src, data);
         
-        this.request = data.get() & 0xFF;
+        MessageInputStream in = getMessageInputStream();
         
-        /*if (isSigned()) {
-            data.reset();
-            this.data = ByteBuffer.allocate(data.remaining());
-            this.data.put(data);
-        }*/
+        this.request = in.readUnsignedByte();
+        this.signature = in.readSignature();
     }
     
     public int getRequest() {
@@ -76,37 +75,22 @@ public class StatsRequestImpl extends AbstractRequestMessage
         return secureStatus;
     }
     
-    public boolean isSigned() {
-        return false;
-    }
-    
     public boolean isSecure() {
         return secureStatus == SECURE;
     }
 
     public byte[] getSecureSignature() {
-        return null;
+        return signature;
     }
 
     public void updateSignatureWithSecuredBytes(Signature signature) 
             throws SignatureException {
-        /*data.rewind();
-        
-        // 0-49
-        data.limit(CHECKSUM_START);
-        signature.update(data);
-        
-        // 50-69
-        signature.update(EMPTY_CHECKSUM_FIELD);
-        
-        // 70-n
-        data.limit(data.capacity());
-        data.position(CHECKSUM_START+EMPTY_CHECKSUM_FIELD.length);
-        signature.update(data);*/
+        initSignature(signature);
     }
     
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeByte(request);
+        out.writeSignature(signature);
     }
     
     public String toString() {

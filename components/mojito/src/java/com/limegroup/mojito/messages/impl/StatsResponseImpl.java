@@ -26,19 +26,19 @@ import java.nio.ByteBuffer;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StatsResponse;
-import com.limegroup.mojito.util.ByteBufferUtils;
 
 
 public class StatsResponseImpl extends AbstractResponseMessage
         implements StatsResponse {
 
-    private String statistics;
+    private byte[] statistics;
 
     public StatsResponseImpl(Context context, 
             int vendor, int version, ContactNode node,
-            KUID messageId, String statistics) {
+            KUID messageId, byte[] statistics) {
         super(context, STATS_RESPONSE, vendor, version, node, messageId);
 
         this.statistics = statistics;
@@ -48,16 +48,17 @@ public class StatsResponseImpl extends AbstractResponseMessage
             SocketAddress src, ByteBuffer data) throws IOException {
         super(context, STATS_RESPONSE, src, data);
         
-        this.statistics = ByteBufferUtils.getUTFString(data);
+        MessageInputStream in = getMessageInputStream();
+        
+        this.statistics = in.readStatistics();
     }
     
-    public String getStatistics() {
+    public byte[] getStatistics() {
         return statistics;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
-        byte[] str = statistics.getBytes("UTF-8");
-        out.write(str, 0, str.length);
+        out.writeStatistics(statistics);
     }
     
     public String toString() {

@@ -19,8 +19,10 @@
  
 package com.limegroup.mojito.handler.request;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,8 +84,13 @@ public class StatsRequestHandler extends AbstractRequestHandler {
                 
         }
         
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GZIPOutputStream out = new GZIPOutputStream(baos);
+        out.write(writer.toString().getBytes());
+        out.close();
+        
         StatsResponse response = context.getMessageHelper()
-            .createStatsResponse(message, writer.toString());
+            .createStatsResponse(message, baos.toByteArray());
         
         context.getMessageDispatcher().send(message.getContactNode(), response);
     }

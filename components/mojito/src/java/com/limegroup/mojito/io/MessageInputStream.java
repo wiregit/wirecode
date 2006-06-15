@@ -82,7 +82,7 @@ public class MessageInputStream extends DataInputStream {
         return KeyValue.createRemoteKeyValue(key, value, nodeId, address, pubKey, signature);
     }
     
-    public List readKeyValues() throws IOException {
+    public List<KeyValue> readKeyValues() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.EMPTY_LIST;
@@ -123,7 +123,7 @@ public class MessageInputStream extends DataInputStream {
         return new ContactNode(nodeId, addr);
     }
     
-    public List readContactNodes() throws IOException {
+    public List<ContactNode> readContactNodes() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.EMPTY_LIST;
@@ -158,5 +158,16 @@ public class MessageInputStream extends DataInputStream {
         byte[] queryKey = new byte[length];
         readFully(queryKey, 0, queryKey.length);
         return QueryKey.getQueryKey(queryKey, true);
+    }
+    
+    public byte[] readStatistics() throws IOException {
+        int length = readUnsignedShort();
+        if (length == 0) {
+            return null;
+        }
+        
+        byte[] statistics = new byte[length];
+        readFully(statistics);
+        return statistics;
     }
 }
