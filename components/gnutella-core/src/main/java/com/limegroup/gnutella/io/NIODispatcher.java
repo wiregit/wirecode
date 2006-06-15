@@ -89,20 +89,14 @@ public class NIODispatcher implements Runnable {
     /** Ignore up to this many non-zero selects when suspecting selector is broken */
     private static final int MAX_IGNORES = 5;
     
+    /** The length of time between clearing intervals for the cache. */
+    private static final long CACHE_CLEAR_INTERVAL = 30000;
+    
     /** The thread this is being run on. */
     private final Thread dispatchThread;
     
-    /** The selector this uses. */
-    private Selector primarySelector = null;
-    
-    /** The current iteration of selection. */
-    private long iteration = 0;
-    
-    /** Whether or not we've tried to wake up the selector. */
-    private volatile boolean wokeup = false;
-	
-	/** Queue lock. */
-	private final Object Q_LOCK = new Object();
+    /** Queue lock. */
+    private final Object Q_LOCK = new Object();
     
     /**
      * A map of classes of SelectableChannels to the Selector that should
@@ -113,7 +107,7 @@ public class NIODispatcher implements Runnable {
     /** A list of other Selectors that should be polled. */
     private final List /* of Selector */ POLLERS = new ArrayList();
     
-	/** The invokeLater queue. */
+    /** The invokeLater queue. */
     private Collection /* of Runnable */ LATER = new LinkedList();
     
     /** The throttle queue. */
@@ -128,11 +122,17 @@ public class NIODispatcher implements Runnable {
      */
     private final ByteBufferCache BUFFER_CACHE = new ByteBufferCache();
     
+    /** The selector this uses. */
+    private Selector primarySelector = null;
+    
+    /** The current iteration of selection. */
+    private long iteration = 0;
+    
+    /** Whether or not we've tried to wake up the selector. */
+    private volatile boolean wokeup = false;
+    
     /** The last time the ByteBufferCache was cleared. */
     private long lastCacheClearTime;
-    
-    /** The length of time between clearing intervals for the cache. */
-    private static final long CACHE_CLEAR_INTERVAL = 30000;
     
     /** Returns true if the NIODispatcher is merrily chugging along. */
     public boolean isRunning() {
@@ -147,6 +147,11 @@ public class NIODispatcher implements Runnable {
     /** Gets the common ByteBufferCache */
     public ByteBufferCache getBufferCache() {
         return BUFFER_CACHE;
+    }
+    
+    /** Returns the number of timeouts that are pending. */
+    public int getNumPendingTimeouts() {
+        return TIMEOUTER.getNumPendingTimeouts();
     }
 	
 	/** Adds a Throttle into the throttle requesting loop. */
@@ -751,10 +756,6 @@ public class NIODispatcher implements Runnable {
         } catch(IOException ignored) {
             LOG.warn("error closing old selector", ignored);
         }
-    }
-    
-    public int getNumTimeouts() {
-        return TIMEOUTER.getNumPendingTimeouts();
     }
     
     /**

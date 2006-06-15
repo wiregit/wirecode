@@ -1817,6 +1817,6 @@ public class RouterService {
     }
     
     public static int getNumberOfPendingTimeouts() {
-        return NIODispatcher.instance().getNumTimeouts();
+        return NIODispatcher.instance().getNumPendingTimeouts();
     }
 }
