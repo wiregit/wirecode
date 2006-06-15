@@ -25,30 +25,35 @@ import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.util.ByteBufferUtils;
 
-
+/**
+ * An implementation of StoreRequest
+ */
 public class StoreRequestImpl extends AbstractRequestMessage
         implements StoreRequest {
 
     private QueryKey queryKey;
     private KeyValue keyValue;
 
-    public StoreRequestImpl(int vendor, int version,
+    public StoreRequestImpl(Context context, 
+            int vendor, int version,
             ContactNode node, KUID messageId,
             QueryKey queryKey, KeyValue keyValue) {
-        super(STORE_REQUEST, vendor, version, node, messageId);
+        super(context, STORE_REQUEST, vendor, version, node, messageId);
 
         this.queryKey = queryKey;
         this.keyValue = keyValue;
     }
     
-    public StoreRequestImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(STORE_REQUEST, src, data);
+    public StoreRequestImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, STORE_REQUEST, src, data);
         
         this.queryKey = ByteBufferUtils.getQueryKey(data);
         this.keyValue = ByteBufferUtils.getKeyValue(data);

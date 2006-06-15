@@ -24,25 +24,31 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.LookupRequest;
 
+/**
+ * An abstract class for LookupRequest implementations
+ */
 public abstract class AbstractLookupRequest extends AbstractRequestMessage
         implements LookupRequest {
 
     protected final KUID lookupId;
     
-    public AbstractLookupRequest(int opcode, int vendor, int version, 
+    public AbstractLookupRequest(Context context, 
+            int opcode, int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId) {
-        super(opcode, vendor, version, node, messageId);
+        super(context, opcode, vendor, version, node, messageId);
         
         this.lookupId = lookupId;
     }
     
-    public AbstractLookupRequest(int opcode, SocketAddress src, ByteBuffer data) 
+    public AbstractLookupRequest(Context context, 
+            int opcode, SocketAddress src, ByteBuffer data) 
             throws IOException {
-        super(opcode, src, data);
+        super(context, opcode, src, data);
         
         switch(opcode) {
             case FIND_NODE_REQUEST:

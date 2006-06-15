@@ -41,10 +41,15 @@ public class LimeStandaloneMessageDispatcherImpl
     public LimeStandaloneMessageDispatcherImpl(Context context) {
         super(context);
         
-        context.setMessageFactory(new LimeStandaloneMessageFactory());
+        context.setMessageFactory(new LimeStandaloneMessageFactory(context));
     }
 
     private static class LimeStandaloneMessageFactory extends DefaultMessageFactory {
+        
+        public LimeStandaloneMessageFactory(Context context) {
+            super(context);
+        }
+
         public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
                 throws MessageFormatException, IOException {
             

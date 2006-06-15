@@ -24,21 +24,25 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.PingRequest;
 
-
+/**
+ * An implementation of PingRequest
+ */
 public class PingRequestImpl extends AbstractRequestMessage
         implements PingRequest {
 
-    public PingRequestImpl(int vendor, int version,
+    public PingRequestImpl(Context context, int vendor, int version,
             ContactNode node, KUID messageId) {
-        super(PING_REQUEST, vendor, version, node, messageId);
+        super(context, PING_REQUEST, vendor, version, node, messageId);
     }
     
-    public PingRequestImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(PING_REQUEST, src, data);
+    public PingRequestImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, PING_REQUEST, src, data);
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {

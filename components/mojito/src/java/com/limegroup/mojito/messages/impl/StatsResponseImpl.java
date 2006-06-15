@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StatsResponse;
@@ -35,15 +36,17 @@ public class StatsResponseImpl extends AbstractResponseMessage
 
     private String statistics;
 
-    public StatsResponseImpl(int vendor, int version, ContactNode node,
+    public StatsResponseImpl(Context context, 
+            int vendor, int version, ContactNode node,
             KUID messageId, String statistics) {
-        super(STATS_RESPONSE, vendor, version, node, messageId);
+        super(context, STATS_RESPONSE, vendor, version, node, messageId);
 
         this.statistics = statistics;
     }
 
-    public StatsResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(STATS_RESPONSE, src, data);
+    public StatsResponseImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, STATS_RESPONSE, src, data);
         
         this.statistics = ByteBufferUtils.getUTFString(data);
     }

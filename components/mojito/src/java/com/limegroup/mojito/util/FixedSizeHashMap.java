@@ -29,7 +29,7 @@ import java.util.Map.Entry;
  * starts removing the eldest entry for each insertion. See 
  * also access-order and insertion-order mode of LinkedHashMap!
  */
-public class FixedSizeHashMap extends LinkedHashMap implements Serializable {
+public class FixedSizeHashMap<K, V> extends LinkedHashMap<K, V> implements Serializable {
     
     private static final long serialVersionUID = 8502617259787609782L;
     
@@ -56,7 +56,7 @@ public class FixedSizeHashMap extends LinkedHashMap implements Serializable {
         this.maxSize = maxSize;
     }
 
-    public FixedSizeHashMap(Map m, int maxSize) {
+    public FixedSizeHashMap(Map<K, V> m, int maxSize) {
         super(m);
         this.maxSize = maxSize;
     }

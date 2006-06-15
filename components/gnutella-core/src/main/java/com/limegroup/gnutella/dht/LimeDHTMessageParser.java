@@ -46,7 +46,7 @@ class LimeDHTMessageParser implements MessageParser {
         
         try {
             DHTMessage message = factory.createMessage(ADDRESS, ByteBuffer.wrap(payload));
-            System.out.println(message);
+            //System.out.println(message);
             return (AbstractMessage)message;
         } catch (IOException err) {
             throw new BadPacketException(err);

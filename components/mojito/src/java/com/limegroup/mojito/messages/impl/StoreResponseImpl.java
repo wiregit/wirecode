@@ -24,27 +24,32 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StoreResponse;
 
-
+/**
+ * An implementation of StoreResponse
+ */
 public class StoreResponseImpl extends AbstractResponseMessage
         implements StoreResponse {
 
     private KUID valueId;
     private int status;
 
-    public StoreResponseImpl(int vendor, int version, ContactNode node,
+    public StoreResponseImpl(Context context, 
+            int vendor, int version, ContactNode node,
             KUID messageId, KUID valueId, int status) {
-        super(STORE_RESPONSE, vendor, version, node, messageId);
+        super(context, STORE_RESPONSE, vendor, version, node, messageId);
 
         this.valueId = valueId;
         this.status = status;
     }
 
-    public StoreResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(STORE_RESPONSE, src, data);
+    public StoreResponseImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, STORE_RESPONSE, src, data);
         
         this.valueId = KUID.createValueID(data);
         this.status = data.get() & 0xFF;

@@ -24,19 +24,25 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.FindValueRequest;
 
+/**
+ * An implementation of FindValueRequest
+ */
 public class FindValueRequestImpl extends AbstractLookupRequest
         implements FindValueRequest {
 
-    public FindValueRequestImpl(int vendor, int version, ContactNode node,
+    public FindValueRequestImpl(Context context, 
+            int vendor, int version, ContactNode node,
             KUID messageId, KUID lookupId) {
-        super(FIND_VALUE_REQUEST, vendor, version, node, messageId, lookupId);
+        super(context, FIND_VALUE_REQUEST, vendor, version, node, messageId, lookupId);
     }
     
-    public FindValueRequestImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(FIND_VALUE_REQUEST, src, data);
+    public FindValueRequestImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, FIND_VALUE_REQUEST, src, data);
     }
     
     public String toString() {

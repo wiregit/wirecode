@@ -26,6 +26,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.StatsRequest;
@@ -42,15 +43,17 @@ public class StatsRequestImpl extends AbstractRequestMessage
     
     private int secureStatus = INSECURE;
     
-    public StatsRequestImpl(int vendor, int version,
+    public StatsRequestImpl(Context context, 
+            int vendor, int version,
             ContactNode node, KUID messageId, int request) {
-        super(STATS_REQUEST, vendor, version, node, messageId);
+        super(context, STATS_REQUEST, vendor, version, node, messageId);
 
         this.request = request;
     }
 
-    public StatsRequestImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(STATS_REQUEST, src, data);
+    public StatsRequestImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, STATS_REQUEST, src, data);
         
         this.request = data.get() & 0xFF;
         

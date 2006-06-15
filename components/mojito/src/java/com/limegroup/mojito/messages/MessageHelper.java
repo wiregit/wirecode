@@ -42,7 +42,7 @@ public class MessageHelper {
 
     public MessageHelper(Context context) {
         this.context = context;
-        factory = new DefaultMessageFactory();
+        factory = new DefaultMessageFactory(context);
     }
 
     public void setMessageFactory(MessageFactory factory) {

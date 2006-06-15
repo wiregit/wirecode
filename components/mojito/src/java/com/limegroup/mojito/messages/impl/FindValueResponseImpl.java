@@ -25,26 +25,31 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.util.ByteBufferUtils;
 
-
+/**
+ * An implementation of FindValueResponse
+ */
 public class FindValueResponseImpl extends AbstractLookupResponse
         implements FindValueResponse {
 
     private Collection values;
 
-    public FindValueResponseImpl(int vendor, int version,
-            ContactNode node, KUID messageId, Collection values) {
-        super(FIND_VALUE_RESPONSE, vendor, version, node, messageId);
+    public FindValueResponseImpl(Context context, 
+            int vendor, int version, ContactNode node, 
+            KUID messageId, Collection values) {
+        super(context, FIND_VALUE_RESPONSE, vendor, version, node, messageId);
 
         this.values = values;
     }
 
-    public FindValueResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(FIND_VALUE_RESPONSE, src, data);
+    public FindValueResponseImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, FIND_VALUE_RESPONSE, src, data);
         
         this.values = ByteBufferUtils.getKeyValues(data);
     }

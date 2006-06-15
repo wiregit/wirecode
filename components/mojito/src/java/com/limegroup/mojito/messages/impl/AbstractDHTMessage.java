@@ -25,6 +25,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
@@ -44,6 +45,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     static final int CHECKSUM_START = 50;*/
     
+    private Context context;
+    
     private int opcode;
     
     private int vendor;
@@ -53,7 +56,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     private KUID messageId;
     
-    public AbstractDHTMessage(int opcode, int vendor, int version,
+    public AbstractDHTMessage(Context context, 
+            int opcode, int vendor, int version,
             ContactNode contactNode, KUID messageId) {
 
         switch(opcode) {
@@ -89,6 +93,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
             throw new IllegalArgumentException("Version must be between 0x00 and 0xFFFF: " + version);
         }
         
+        this.context = context;
         this.opcode = opcode;
         this.vendor = vendor;
         this.version = version;
@@ -96,7 +101,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         this.messageId = messageId;
     }
 
-    public AbstractDHTMessage(int opcode, SocketAddress src, ByteBuffer data) throws IOException {
+    public AbstractDHTMessage(Context context, 
+            int opcode, SocketAddress src, ByteBuffer data) throws IOException {
         
         switch(opcode) {
             case PING_REQUEST:
@@ -115,6 +121,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
                 throw new IOException("Unknown opcode: " + opcode); 
         }
         
+        this.context = context;
         this.opcode = opcode;
         
         this.vendor = data.getInt();
@@ -130,6 +137,10 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         //int messageFlags = data.get() & 0xFF;
         //int checksum = data.getInt();
         data.position(data.position()+5);
+    }
+    
+    public Context getContext() {
+        return context;
     }
     
     public int getOpCode() {

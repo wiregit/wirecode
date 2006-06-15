@@ -24,19 +24,24 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.FindNodeRequest;
 
+/**
+ * An implementation of FindNodeRequest
+ */
 public class FindNodeRequestImpl extends AbstractLookupRequest
         implements FindNodeRequest {
 
-    public FindNodeRequestImpl(int vendor, int version, ContactNode node,
-            KUID messageId, KUID lookupId) {
-        super(FIND_NODE_REQUEST, vendor, version, node, messageId, lookupId);
+    public FindNodeRequestImpl(Context context, int vendor, int version, 
+            ContactNode node, KUID messageId, KUID lookupId) {
+        super(context, FIND_NODE_REQUEST, vendor, version, node, messageId, lookupId);
     }
     
-    public FindNodeRequestImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(FIND_NODE_REQUEST, src, data);
+    public FindNodeRequestImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, FIND_NODE_REQUEST, src, data);
     }
     
     public String toString() {

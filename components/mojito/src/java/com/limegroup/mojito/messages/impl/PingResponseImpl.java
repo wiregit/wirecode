@@ -24,29 +24,33 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.util.ByteBufferUtils;
 
-
+/**
+ * An implementation of PingResponse (Pong)
+ */
 public class PingResponseImpl extends AbstractResponseMessage
         implements PingResponse {
 
     private SocketAddress externalAddress;
     private int estimatedSize;
 
-    public PingResponseImpl(int vendor, int version, 
+    public PingResponseImpl(Context context, int vendor, int version, 
 	    ContactNode node, KUID messageId, 
 	    SocketAddress externalAddress, int estimatedSize) {
-        super(PING_RESPONSE, vendor, version, node, messageId);
+        super(context, PING_RESPONSE, vendor, version, node, messageId);
 
         this.externalAddress = externalAddress;
         this.estimatedSize = estimatedSize;
     }
 
-    public PingResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(PING_RESPONSE, src, data);
+    public PingResponseImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, PING_RESPONSE, src, data);
         
         this.externalAddress = ByteBufferUtils.getSocketAddress(data);
         this.estimatedSize = data.getInt();

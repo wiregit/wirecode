@@ -26,12 +26,15 @@ import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.util.ByteBufferUtils;
 
-
+/**
+ * An implementation of FindNodeResponse
+ */
 public class FindNodeResponseImpl extends AbstractLookupResponse
         implements FindNodeResponse {
 
@@ -39,16 +42,18 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
 
     private Collection nodes;
 
-    public FindNodeResponseImpl(int vendor, int version, ContactNode node,
+    public FindNodeResponseImpl(Context context, 
+            int vendor, int version, ContactNode node,
             KUID messageId, QueryKey queryKey, Collection nodes) {
-        super(FIND_NODE_RESPONSE, vendor, version, node, messageId);
+        super(context, FIND_NODE_RESPONSE, vendor, version, node, messageId);
 
         this.queryKey = queryKey;
         this.nodes = nodes;
     }
     
-    public FindNodeResponseImpl(SocketAddress src, ByteBuffer data) throws IOException {
-        super(FIND_NODE_RESPONSE, src, data);
+    public FindNodeResponseImpl(Context context, 
+            SocketAddress src, ByteBuffer data) throws IOException {
+        super(context, FIND_NODE_RESPONSE, src, data);
         
         this.queryKey = ByteBufferUtils.getQueryKey(data);
         this.nodes = ByteBufferUtils.getContactNodes(data);
