@@ -8,6 +8,7 @@ class Line {
     private final String key;
     private final String value;
     private final int braces;
+
     private final boolean extraComment;
 
     /**
@@ -15,7 +16,12 @@ class Line {
      * TODO: does not separate key=value pairs properly!<br />
      * TODO: does not decode continuation lines properly (continuation lines
      * should be already joined in a upper layer before passing data line here.)<br />
-     * TODO: ignores lines that don't have an = or #.
+     * TODO: ignores lines that don't have an = or #.<br />
+     * For these reasons, properties are read using the standard properties
+     * reader, and extra keys are added when needed from lines with
+     * extraComment=true. The Line class will be used mostly for keeping the
+     * information kept in comment lines, or in a few key=value pairs that were
+     * not uncommented by the contributing translator.
      * 
      * @param data
      *            a data line to parse and store.
@@ -25,30 +31,44 @@ class Line {
             throw new NullPointerException("null data");
         this.wholeLine = data;
         data.trim();
+        boolean ignored = false, extraComment = false;
         if (data.startsWith("#?")) { //$NON-NLS-1$
+            // attempt to look for a key=value pair after this special mark
             data = data.substring(2).trim();
-            this.extraComment = true;
-        } else {
-            this.extraComment = false;
+            extraComment = true;
+        } else if (data.startsWith("#") || data.equals("")) { //$NON-NLS-1$//$NON-NLS-2$
+            // an empty line or comment line is kept in this.wholeLine
+            ignored = true;
         }
-        if (data.startsWith("#") || data.equals("")) { //$NON-NLS-1$//$NON-NLS-2$
+        String key = null, value = null;
+        int braces = 0;
+        if (!ignored) {
+            final int eq;
+            if ((eq = data.indexOf('=')) != -1) {
+                key = data.substring(0, eq).trim();
+                value = data.substring(eq + 1).trim();
+                if (extraComment && (value.equals(""))) { //$NON-NLS-1$
+                    // Handle an extraComment line like "#? key=value" with an
+                    // empty key or empty value as a simple comment line stored
+                    // in this.wholeLine but not handled as a acceptable
+                    // supplementary key=value resource
+                    ignored = true;
+                } else
+                    braces = parseBraceCount(value);
+            }
+        }
+        if (ignored) {
+            // This is a comment or empty line, whose actual content is kept in
+            // this.wholeLine without any modification.
             this.key = null;
             this.value = null;
+            this.extraComment = false;
             this.braces = 0;
         } else {
-            final int eq = data.indexOf('=');
-            if (eq == -1) {
-                this.key = null;
-                this.value = null;
-                this.braces = 0;
-            } else {
-                this.key = data.substring(0, eq);
-                if (eq >= data.length() - 1)
-                    this.value = ""; //$NON-NLS-1$
-                else
-                    this.value = data.substring(eq + 1);
-                this.braces = parseBraceCount(this.value);
-            }
+            this.key = key;
+            this.value = value;
+            this.extraComment = extraComment;
+            this.braces = braces;
         }
     }
 
@@ -99,16 +119,21 @@ class Line {
     }
 
     /**
+     * @return true if the line had an extra "#? " in front. Such line contains
+     *         an additional key=value resource which should be added to the
+     *         loaded properties. This is useful only to handle the case where
+     *         translators forget to remove the "#? " leading mark in front of
+     *         their contributed translations, and avoids manual editing of
+     *         these incoming files by the LimeWire developers team.
+     */
+    boolean hadExtraComment() {
+        return this.extraComment;
+    }
+
+    /**
      * @return the number of brace pairs this line had
      */
     int getBraceCount() {
         return this.braces;
-    }
-
-    /**
-     * @return true if the line had an extra "#? " in front.
-     */
-    boolean hadExtraComment() {
-        return this.extraComment;
     }
 }

@@ -122,7 +122,7 @@ public class CountPercent {
             validKeys.addAll(this.basicKeys);
             validKeys.addAll(this.advancedKeys);
             loader.retainKeys(validKeys);
-            final List lines = loader.getEnglishLines();
+            final List/* <Line> */lines = loader.getEnglishLines();
             final LanguageUpdater updater = new LanguageUpdater(root,
                     this.langs, lines);
             if (action == ACTION_RELEASE || action == ACTION_NSIS)
@@ -151,7 +151,8 @@ public class CountPercent {
     private void checkBadKeys() {
         System.out.println("List of extra or badly named resource keys:"); //$NON-NLS-1$
         System.out.println("-------------------------------------------"); //$NON-NLS-1$
-        for (final Iterator i = this.langs.entrySet().iterator(); i.hasNext();) {
+        for (final Iterator/* <Map.Entry<String, LanguageInfo>> */i = this.langs
+                .entrySet().iterator(); i.hasNext();) {
             final Map.Entry entry = (Map.Entry)i.next();
             final String code = (String)entry.getKey();
             final LanguageInfo li = (LanguageInfo)entry.getValue();
@@ -176,7 +177,8 @@ public class CountPercent {
                 + this.basicTotal);
         System.out.println("---------------------------------"); //$NON-NLS-1$
         System.out.println();
-        for (final Iterator i = this.langs.entrySet().iterator(); i.hasNext();) {
+        for (final Iterator/* <Map.Entry<String, LanguageInfo>> */i = this.langs
+                .entrySet().iterator(); i.hasNext();) {
             final Map.Entry entry = (Map.Entry)i.next();
             final String code = (String)entry.getKey();
             final LanguageInfo li = (LanguageInfo)entry.getValue();

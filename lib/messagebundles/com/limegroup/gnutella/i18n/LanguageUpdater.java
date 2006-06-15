@@ -24,8 +24,8 @@ import java.util.Properties;
 class LanguageUpdater {
     private static final String MARKER = "# TRANSLATIONS START BELOW.";
     private final File lib;
-    private final Map langs;
-    private final List englishList;
+    private final Map/* <String, LanguageInfo> */langs;
+    private final List/* <String> */englishList;
     private boolean verbose = true;
 
     /**
@@ -35,7 +35,8 @@ class LanguageUpdater {
      * @param langs
      * @param englishLines
      */
-    LanguageUpdater(File dir, Map langs, List englishLines) {
+    LanguageUpdater(File dir, Map/* <String, LanguageInfo> */langs,
+            List/* <String> */englishLines) {
         this.lib = dir;
         this.langs = langs;
         this.englishList = englishLines;
@@ -48,7 +49,7 @@ class LanguageUpdater {
      * @param silent
      */
     void setSilent(boolean silent) {
-        verbose = !silent;
+        this.verbose = !silent;
     }
 
     /**
@@ -57,7 +58,7 @@ class LanguageUpdater {
      * @param msg
      */
     void print(String msg) {
-        if (verbose)
+        if (this.verbose)
             System.out.print(msg);
     }
 
@@ -65,7 +66,7 @@ class LanguageUpdater {
      * @param msg
      */
     void println(String msg) {
-        if (verbose)
+        if (this.verbose)
             System.out.println(msg);
     }
 
@@ -73,15 +74,17 @@ class LanguageUpdater {
      * 
      */
     void println() {
-        if (verbose)
-            System.out.println();
+        if (this.verbose)
+            ;
+        System.out.println();
     }
 
     /**
      * Updates all languages.
      */
     void updateAllLanguages() {
-        for (Iterator i = langs.values().iterator(); i.hasNext();) {
+        for (Iterator/* <LanguageInfo> */i = this.langs.values().iterator(); i
+                .hasNext();) {
             LanguageInfo next = (LanguageInfo)i.next();
             updateLanguage(next);
         }

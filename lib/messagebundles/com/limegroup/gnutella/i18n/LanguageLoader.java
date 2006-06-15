@@ -31,7 +31,7 @@ class LanguageLoader {
      * @param directory
      */
     LanguageLoader(File directory) {
-        this.langs = new TreeMap();
+        this.langs = new TreeMap/* <String, LanguageInfo> */();
         this.lib = directory;
     }
 
@@ -243,9 +243,16 @@ class LanguageLoader {
      * @param props
      */
     private void removeEmptyProperties(Properties props) {
-        for (Iterator i = props.values().iterator(); i.hasNext();) {
-            if ("".equals(i.next())) //$NON-NLS-1$
-                i.remove();
+        for (Iterator/* <Map.Entry<String, String>> */i = props.entrySet()
+                .iterator(); i.hasNext();) {
+            final Map.Entry entry = (Map.Entry)i.next();
+            if ("".equals(entry.getValue())) {//$NON-NLS-1$
+                final String key = (String)entry.getKey();
+                // exceptions for special keys to keep despite an empty value
+                if (!"LOCALE_COUNTRY_CODE".equals(key)
+                        && !"LOCALE_VARIANT_CODE".equals(key))
+                    i.remove();
+            }
         }
     }
 
@@ -268,6 +275,7 @@ class LanguageLoader {
             final Properties props = new Properties();
             props.load(in);
             scanForCommentedTranslations(toRead, props);
+            /* no more needed, as we already check "#? key=" lines without value */
             removeEmptyProperties(props);
             /*
              * note that the file is read in ISO-8859-1 only, even if it is
