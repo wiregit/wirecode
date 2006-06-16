@@ -75,8 +75,7 @@ class LanguageUpdater {
      */
     void println() {
         if (this.verbose)
-            ;
-        System.out.println();
+            System.out.println();
     }
 
     /**
