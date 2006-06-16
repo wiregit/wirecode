@@ -1,25 +1,18 @@
 package com.limegroup.bittorrent;
 
 import java.util.Collection;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.MessageService;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.CoWList;
-import com.limegroup.gnutella.util.StoredFutureTask;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 public class TrackerManager {
-	
-	// TODO: put this in some global place.
-	private static final ScheduledThreadPoolExecutor EXECUTOR = 
-		new ScheduledThreadPoolExecutor(1);
 	
 	private static final Log LOG = LogFactory.getLog(TrackerManager.class);
 	
@@ -35,8 +28,7 @@ public class TrackerManager {
 	 */
 	private final Collection<Tracker> trackers = new CoWList<Tracker>(CoWList.ARRAY_LIST);
 	
-	/** Pending requests for this torrent */
-	private final Queue<FutureTask> myRequests = new ConcurrentLinkedQueue<FutureTask>();
+	private final ProcessingQueue requestQueue = new ProcessingQueue("tracker requester");
 	
 	/**
 	 * the next time we'll contact the tracker.
@@ -44,6 +36,8 @@ public class TrackerManager {
 	private volatile long _nextTrackerRequestTime;
 	
 	private final ManagedTorrent torrent;
+	
+	private volatile TimerTask scheduledAnnounce;
 	
 	public TrackerManager(ManagedTorrent torrent) {
 		this.torrent = torrent;
@@ -79,7 +73,7 @@ public class TrackerManager {
 					announceBlocking(t,event);
 				}
 			};
-			EXECUTOR.submit(createStoredTask(announcer));
+			requestQueue.invokeLater(announcer);
 		}
 	}
 	
@@ -90,9 +84,9 @@ public class TrackerManager {
 	
 	public void announceStop() {
 		// stop any current or future announcements
-		FutureTask task;
-		while((task = myRequests.poll()) != null)
-			task.cancel(true);
+		TimerTask t = scheduledAnnounce;
+		if (t != null)
+			t.cancel();
 		
 		announceToAll(Tracker.Event.STOP);	
 	}
@@ -111,10 +105,6 @@ public class TrackerManager {
 			LOG.debug("announce thread for " + t.toString());
 		torrent.setScraping();
 		announceBlocking(t, Tracker.Event.NONE);
-	}
-	
-	private FutureTask createStoredTask(Runnable r) {
-		return new StoredFutureTask<Object>(r, null, myRequests);
 	}
 	
 	/**
@@ -139,7 +129,7 @@ public class TrackerManager {
 	}
 	
 	private void scheduleTrackerRequest(long minDelay, final Tracker t) {
-		Runnable announcer = new Runnable() {
+		final Runnable announcer = new Runnable() {
 			public void run() {
 				if (!torrent.isActive())
 					return;
@@ -149,10 +139,13 @@ public class TrackerManager {
 				announce(t);
 			}
 		};
+		Runnable scheduled = new Runnable() {
+			public void run() {
+				requestQueue.add(announcer);
+			}
+		};
 		LOG.debug("scheduling new tracker request");
-		EXECUTOR.schedule(createStoredTask(announcer),
-				minDelay, 
-				TimeUnit.MILLISECONDS);
+		scheduledAnnounce = RouterService.schedule(scheduled, minDelay, 0);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 	

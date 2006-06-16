@@ -17,7 +17,6 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -34,7 +33,7 @@ public class Tracker {
 		START (100, "started"),
 		STOP (0, "stopped"), 
 		COMPLETE (20, "completed"), 
-		NONE (50, "");
+		NONE (50, null);
 		
 		private final String numWant;
 		private final String description;
@@ -44,17 +43,13 @@ public class Tracker {
 		}
 		
 		public void addEventFields(StringBuffer buf) {
-			addGetField(buf,"event",description);
+			if (description != null)
+				addGetField(buf,"event",description);
 			if (numWant != null)
 				addGetField(buf,"numwant",numWant);
 		}
 	}
 
-
-	/**
-	 * no event: normal tracker update
-	 */
-	public static final int EVENT_NONE = 4;
 
 	private static final String QUESTION_MARK = "?";
 

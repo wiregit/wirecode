@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -696,8 +697,8 @@ public class RouterService {
      * @exception IllegalArgumentException delay or period negative
      * @see com.limegroup.gnutella.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
-    public static void schedule(Runnable task, long delay, long period) {
-        timer.schedule(task, delay, period);
+    public static TimerTask schedule(Runnable task, long delay, long period) {
+        return timer.schedule(task, delay, period);
     }
 
     /**
