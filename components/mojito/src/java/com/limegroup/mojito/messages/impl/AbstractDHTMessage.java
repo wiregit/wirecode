@@ -45,6 +45,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
      *  To remove the (Gnutella) Message dependence don't
      *  extend from AbstractMessage and scroll down to the
      *  bottom of this class.
+     *  
+     *  See also DefaultMessageFactory!
      */
     
     protected final Context context;
@@ -118,8 +120,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         
         //int messageFlags = in.readUnsignedByte();
         //int checksum = in.readInt();
-        //in.skipBytes(5); // see above
-        in.skip(5);
+        in.skip(5); // see above
         
         this.data = data;
     }

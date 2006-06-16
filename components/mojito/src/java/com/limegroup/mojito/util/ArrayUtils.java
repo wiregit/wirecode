@@ -19,8 +19,9 @@
  
 package com.limegroup.mojito.util;
 
-import java.util.Arrays;
-
+/**
+ * 
+ */
 public final class ArrayUtils {
     
     private static final char[] HEX = {

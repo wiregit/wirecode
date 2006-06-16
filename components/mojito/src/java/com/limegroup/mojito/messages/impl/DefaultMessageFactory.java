@@ -50,6 +50,12 @@ import com.limegroup.mojito.messages.StoreResponse;
  */
 public class DefaultMessageFactory implements MessageFactory {
 
+    /*
+     * The Gnutella Message Header we have to skip.
+     * See AbstractDHTMessage for more info!
+     */
+    private static final int GNUTELLA_MESSAGE_HEADER = 23;
+    
     protected final Context context;
     
     public DefaultMessageFactory(Context context) {
@@ -58,6 +64,9 @@ public class DefaultMessageFactory implements MessageFactory {
     
     public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
+        
+        data.position(GNUTELLA_MESSAGE_HEADER);
+        data.mark();
         
         int opcode = data.get() & 0xFF;
         

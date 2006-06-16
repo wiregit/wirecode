@@ -56,7 +56,6 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.io.LimeStandaloneMessageDispatcherImpl;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
@@ -96,7 +95,7 @@ public class Main {
         run(addr, port, dhts);
     }
     
-    private static final Class MESSAGE_DISPATCHER_CLASS = LimeStandaloneMessageDispatcherImpl.class;
+    //private static final Class MESSAGE_DISPATCHER_CLASS = LimeStandaloneMessageDispatcherImpl.class;
     
     private static List standalone(InetAddress addr, int port, int count) {
         List dhts = new ArrayList(count);
@@ -104,7 +103,7 @@ public class Main {
         for(int i = 0; i < count; i++) {
             try {
                 MojitoDHT dht = new MojitoDHT("DHT" + i);
-                dht.setMessageDispatcher(MESSAGE_DISPATCHER_CLASS);
+                //dht.setMessageDispatcher(MESSAGE_DISPATCHER_CLASS);
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
@@ -255,7 +254,7 @@ public class Main {
                     MojitoDHT nu = load(line.split(" "));
                     dht.stop();
                     
-                    nu.setMessageDispatcher(MESSAGE_DISPATCHER_CLASS);
+                    //nu.setMessageDispatcher(MESSAGE_DISPATCHER_CLASS);
                     nu.bind(dht.getLocalSocketAddrss());
                     dhts.set(current, nu);
                     
