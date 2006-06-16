@@ -20,7 +20,7 @@
 package com.limegroup.mojito.util;
 
 /**
- * 
+ * Miscellaneous utilities for Arrays
  */
 public final class ArrayUtils {
     

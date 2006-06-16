@@ -21,28 +21,31 @@ package com.limegroup.mojito.util;
 
 import java.util.List;
 
-public interface Trie {
+/**
+ * An interface for Tries
+ */
+public interface Trie<K, V> {
     
-    public Object put(Object key, Object value);
-    public Object get(Object key);
-    public Object remove(Object key);
-    public boolean containsKey(Object key);
-    //public boolean containsValue(Object value);
+    public V put(K key, V value);
+    public V get(K key);
+    public V remove(K key);
+    public boolean containsKey(K key);
+    //public boolean containsValue(V value);
     public int size();
     public boolean isEmpty();
     public void clear();
     
-    public List keys();
-    public List values();
+    public List<K> keys();
+    public List<V> values();
     
-    public List range(Object key, int length);
-    public List range(Object key, int length, KeySelector selector);
+    public List<V> range(K key, int length);
+    public List<V> range(K key, int length, KeySelector<K, V> selector);
     
-    public Object select(Object key);
-    public List select(Object key, int count);
-    public List select(Object key, int count, KeySelector selector);
+    public V select(K key);
+    public List<V> select(K key, int count);
+    public List<V> select(K key, int count, KeySelector<K, V> selector);
     
-    public static interface KeySelector {
-        public boolean allow(Object key, Object value);
+    public static interface KeySelector<K, V> {
+        public boolean allow(K key, V value);
     }
 }

@@ -25,9 +25,9 @@ import java.io.Writer;
 import com.limegroup.mojito.Context;
 
 
-public class DataBaseStatisticContainer extends StatisticContainer {
+public class DatabaseStatisticContainer extends StatisticContainer {
 
-    public DataBaseStatisticContainer(Context context) {
+    public DatabaseStatisticContainer(Context context) {
         super(context);
     }
 

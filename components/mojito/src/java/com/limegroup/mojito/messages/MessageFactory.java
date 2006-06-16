@@ -69,5 +69,5 @@ public interface MessageFactory {
             ContactNode node, KUID messageId, int stats);
 
     public StatsResponse createStatsResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, byte[] statistics);
+            ContactNode node, KUID messageId, String statistics);
 }

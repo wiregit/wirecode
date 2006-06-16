@@ -213,9 +213,11 @@ public abstract class MessageDispatcher implements Runnable {
         ByteBuffer data = serialize(dst, message);
         int size = data.remaining();
         if (size >= MAX_MESSAGE_SIZE) {
-            //tag.handleError(new IOException("Message is too large: " + size + " >= " + MAX_MESSAGE_SIZE));
+            IOException iox = new IOException("Message (" + message.getClass().getName()  + ") is too large: " 
+                    + size + " >= " + MAX_MESSAGE_SIZE);
+            //tag.handleError(iox);
             //return false;
-            throw new IOException("Message is too large: " + size + " >= " + MAX_MESSAGE_SIZE);
+            throw iox;
         }
         
         tag.setData(data);
@@ -397,7 +399,12 @@ public abstract class MessageDispatcher implements Runnable {
     private void processResponse(Receipt receipt, ResponseMessage response) {
         ResponseProcessor processor = new ResponseProcessor(receipt, response);
         if (response instanceof DHTSecureMessage) {
-            verify((DHTSecureMessage)response, processor);
+            if (context.getMasterKey() != null) {
+                verify((DHTSecureMessage)response, processor);
+            } else if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping secure response " 
+                        + response + " because PublicKey is not set");
+            }
         } else {
             process(processor);
         }
@@ -408,8 +415,13 @@ public abstract class MessageDispatcher implements Runnable {
      */
     private void processRequest(RequestMessage request) {
         RequestProcessor processor = new RequestProcessor(request);
-        if (request instanceof SecureMessage) {
-            verify((DHTSecureMessage)request, processor);
+        if (request instanceof DHTSecureMessage) {
+            if (context.getMasterKey() != null) {
+                verify((DHTSecureMessage)request, processor);
+            } else if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping secure request " 
+                        + request + " because PublicKey is not set");
+            }
         } else {
             process(processor);
         }

@@ -29,11 +29,11 @@ import java.util.Map;
 /**
  * An optimized PATRICIA Trie for Kademlia. 
  */
-public class PatriciaTrie implements Trie, Serializable {
+public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     
     private static final long serialVersionUID = 110232526181493307L;
 
-    private final Entry root = new Entry(null, null, -1);
+    private final Entry<K, V> root = new Entry<K, V>(null, null, -1);
     
     private int size = 0;
     private transient int modCount = 0;
@@ -110,12 +110,12 @@ public class PatriciaTrie implements Trie, Serializable {
      * exists it will be replaced. In the latter case it will return
      * the old value.
      */
-    public Object put(Object key, Object value) {
+    public V put(K key, V value) {
         if (key == null) {
             throw new NullPointerException("Key cannot be null");
         }
         
-        Entry found = getR(root.left, -1, key);
+        Entry<K, V> found = getR(root.left, -1, key);
         if (key.equals(found.key)) {
             if (/*found == root */ found.isEmpty()) {
                 incrementSize();
@@ -128,7 +128,7 @@ public class PatriciaTrie implements Trie, Serializable {
         int bitIndex = bitIndex(key, found.key);
         if (isValidBitIndex(bitIndex)) { // in 99.999...9% the case
             /* NEW KEY+VALUE TUPLE */
-            Entry t = new Entry(key, value, bitIndex);
+            Entry<K, V> t = new Entry<K, V>(key, value, bitIndex);
             root.left = putR(root.left, t, root);
             incrementSize();
             return null;
@@ -155,7 +155,7 @@ public class PatriciaTrie implements Trie, Serializable {
      * The actual put implementation. Entry t is the new Entry we're
      * gonna add.
      */
-    private Entry putR(Entry h, final Entry t, Entry p) {
+    private Entry<K, V> putR(Entry<K, V> h, final Entry<K, V> t, Entry<K, V> p) {
         if ((h.bitIndex >= t.bitIndex) || (h.bitIndex <= p.bitIndex)) {
             
             if (!isBitSet(t.key, t.bitIndex)) {
@@ -187,8 +187,8 @@ public class PatriciaTrie implements Trie, Serializable {
      * Returns the Value whose Key equals our lookup Key
      * or null if no such key exists.
      */
-    public Object get(Object key) {
-        Entry entry = getR(root.left, -1, key);
+    public V get(K key) {
+        Entry<K, V> entry = getR(root.left, -1, key);
         return (!entry.isEmpty() && key.equals(entry.key) ? entry.value : null);
     }
     
@@ -197,7 +197,7 @@ public class PatriciaTrie implements Trie, Serializable {
      * selectR but with the exception that it might return the
      * root Entry even if it's empty.
      */
-    private Entry getR(Entry h, int bitIndex, Object key) {
+    private Entry<K, V> getR(Entry<K, V> h, int bitIndex, K key) {
         if (h.bitIndex <= bitIndex) {
             return h;
         }
@@ -213,10 +213,11 @@ public class PatriciaTrie implements Trie, Serializable {
      * Returns the Value whose Key has the longest prefix
      * in common with our lookup key.
      */
-    public Object select(Object key) {
+    public V select(K key) {
         Entry[] entry = new Entry[1];
         if (!selectR(root.left, -1, key, entry)) {
-            return entry[0].value;
+            Entry<K, V> e = entry[0];
+            return e.value;
         }
         return null;
     }
@@ -226,7 +227,7 @@ public class PatriciaTrie implements Trie, Serializable {
      * its overhead because we're selecting only one best matching
      * Entry from the Trie.
      */
-    private boolean selectR(Entry h, int bitIndex, final Object key, final Entry[] entry) {
+    private boolean selectR(Entry<K, V> h, int bitIndex, final K key, final Entry[] entry) {
         if (h.bitIndex <= bitIndex) {
             // If we hit the root Node and it is empty
             // we have to look for an alternative best
@@ -256,25 +257,25 @@ public class PatriciaTrie implements Trie, Serializable {
      * sort method to sort the Nodes by last-recently 
      * and most-recently seen.
      */
-    public List select(Object key, int count) {
-        return select(key, count, new KeySelector() {
-            public boolean allow(Object key, Object value) {
+    public List<V> select(K key, int count) {
+        return select(key, count, new KeySelector<K, V>() {
+            public boolean allow(K key, V value) {
                 return true;
             }
         });
     }
     
-    public List select(Object key, int count, KeySelector keySelector) {
-        List list = new ArrayList(count);
+    public List<V> select(K key, int count, KeySelector<K, V> keySelector) {
+        List<V> list = new ArrayList<V>(count);
         selectR(root.left, -1, key, list, count, keySelector);
         return list;
     }
 
-    private boolean selectR(Entry h, int bitIndex, 
-            final Object key, 
-            final List list, 
+    private boolean selectR(Entry<K, V> h, int bitIndex, 
+            final K key, 
+            final List<V> list, 
             final int count, 
-            final KeySelector keySelector) {
+            final KeySelector<K, V> keySelector) {
         
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && keySelector.allow(h.key, h.value)) {
@@ -301,15 +302,15 @@ public class PatriciaTrie implements Trie, Serializable {
      * 
      * @param length (depth) in bits
      */
-    public List range(Object key, int length) {
-        return range(key, length, new KeySelector() {
-            public boolean allow(Object key, Object value) {
+    public List<V> range(K key, int length) {
+        return range(key, length, new KeySelector<K, V>() {
+            public boolean allow(K key, V value) {
                 return true;
             }
         });
     }
     
-    public List range(Object key, int length, KeySelector keySelector) {
+    public List<V> range(K key, int length, KeySelector<K, V> keySelector) {
         
         // If length is -1 then return everything!
         if (length == -1) {
@@ -320,7 +321,7 @@ public class PatriciaTrie implements Trie, Serializable {
             throw new IllegalArgumentException(length + " >= " + keyCreator.length());
         }
         
-        Entry entry = rangeR(root.left, -1, key, length, root);
+        Entry<K, V> entry = rangeR(root.left, -1, key, length, root);
         if (entry.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
@@ -339,11 +340,11 @@ public class PatriciaTrie implements Trie, Serializable {
         
         if (length < entry.bitIndex) {
             //System.out.println("Has Subtree");
-            return valuesInRangeR(entry, -1, keySelector, new ArrayList());
+            return valuesInRangeR(entry, -1, keySelector, new ArrayList<V>());
         } else {
             //System.out.println("Has No Subtree");
             if (keySelector.allow(entry.key, entry.value)) {
-                return Arrays.asList(new Object[]{entry.value});
+                return Arrays.asList(entry.value);
             } else {
                 return Collections.EMPTY_LIST;
             }
@@ -354,8 +355,8 @@ public class PatriciaTrie implements Trie, Serializable {
      * This is very similar to getR but with the difference that
      * we stop the lookup if h.bitIndex > keyLength.
      */
-    private Entry rangeR(Entry h, int bitIndex, 
-            final Object key, final int keyLength, Entry p) {
+    private Entry<K, V> rangeR(Entry<K, V> h, int bitIndex, 
+            final K key, final int keyLength, Entry<K, V> p) {
         
         if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
             return (h.isEmpty() ? p : h);
@@ -368,8 +369,8 @@ public class PatriciaTrie implements Trie, Serializable {
         }
     }
     
-    private List valuesInRangeR(Entry h, int bitIndex, 
-            final KeySelector keySelector, final List values) {
+    private List<V> valuesInRangeR(Entry<K, V> h, int bitIndex, 
+            final KeySelector<K, V> keySelector, final List<V> values) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() 
                     && keySelector.allow(h.key, h.value)) {
@@ -385,7 +386,7 @@ public class PatriciaTrie implements Trie, Serializable {
     /**
      * Returns true if this trie contains the specified Key
      */
-    public boolean containsKey(Object key) {
+    public boolean containsKey(K key) {
         Entry entry = getR(root.left, -1, key);
         return !entry.isEmpty() && key.equals(entry.key);
     }
@@ -396,7 +397,7 @@ public class PatriciaTrie implements Trie, Serializable {
      * @param key the Key to delete
      * @return Returns the deleted Value
      */
-    public Object remove(Object key) {
+    public V remove(K key) {
         return removeR(root.left, -1, key, root);
     }
     
@@ -405,7 +406,7 @@ public class PatriciaTrie implements Trie, Serializable {
      * 
      * Serach for the Key
      */
-    private Object removeR(Entry h, int bitIndex, Object key, Entry p) {
+    private V removeR(Entry<K, V> h, int bitIndex, K key, Entry<K, V> p) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && key.equals(h.key)) {
                 return removeEntry(h, p);
@@ -427,7 +428,7 @@ public class PatriciaTrie implements Trie, Serializable {
      * an internal (hard to remove) or external Entry (easy 
      * to remove)
      */
-    private Object removeEntry(Entry h, Entry p) {
+    private V removeEntry(Entry<K, V> h, Entry<K, V> p) {
         
         if (h != root) {
             if (h.isInternalNode()) {
@@ -447,15 +448,15 @@ public class PatriciaTrie implements Trie, Serializable {
      * If it's an external Entry then just remove it.
      * This is very easy and straight forward.
      */
-    private void removeExternalEntry(Entry h) {
+    private void removeExternalEntry(Entry<K, V> h) {
         if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isExternalNode()) {
             throw new IllegalArgumentException(h + " is not an external Entry!");
         } 
         
-        Entry parent = h.parent;
-        Entry child = (h.left == h) ? h.right : h.left;
+        Entry<K, V> parent = h.parent;
+        Entry<K, V> child = (h.left == h) ? h.right : h.left;
         
         if (parent.left == h) {
             h.parent.left = child;
@@ -475,7 +476,7 @@ public class PatriciaTrie implements Trie, Serializable {
      * this code. The Idea is essentially that Entry p takes Entry h's
      * place in the trie which requires some re-wireing.
      */
-    private void removeInternalEntry(Entry h, Entry p) {
+    private void removeInternalEntry(Entry<K, V> h, Entry<K, V> p) {
         if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isInternalNode()) {
@@ -487,8 +488,8 @@ public class PatriciaTrie implements Trie, Serializable {
         
         // Fix P's parent and child Nodes
         {
-            Entry parent = p.parent;
-            Entry child = (p.left == h) ? p.right : p.left;
+            Entry<K, V> parent = p.parent;
+            Entry<K, V> child = (p.left == h) ? p.right : p.left;
             
             if (parent.left == p) {
                 parent.left = child;
@@ -536,7 +537,7 @@ public class PatriciaTrie implements Trie, Serializable {
         return buffer.toString();
     }
     
-    private StringBuffer toStringR(Entry h, int bitIndex, 
+    private StringBuffer toStringR(Entry<K, V> h, int bitIndex, 
             final StringBuffer buffer) {
 
         if (h.bitIndex <= bitIndex) {
@@ -554,14 +555,14 @@ public class PatriciaTrie implements Trie, Serializable {
      * Returns all Keys as List. You can think of it as
      * a Set since there're no duplicate keys.
      */
-    public List keys() {
-        return keysR(root.left, -1, new ArrayList(size()));
+    public List<K> keys() {
+        return keysR(root.left, -1, new ArrayList<K>(size()));
     }
     
     /**
      * The actual keys() implementation. Just an inorder traverse
      */
-    private List keysR(Entry h, int bitIndex, final List keys) {
+    private List<K> keysR(Entry<K, V> h, int bitIndex, final List<K> keys) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty()) {
                 keys.add(h.key);
@@ -576,14 +577,14 @@ public class PatriciaTrie implements Trie, Serializable {
     /**
      * Returns all Values
      */
-    public List values() {
-        return valuesR(root.left, -1, new ArrayList(size()));
+    public List<V> values() {
+        return valuesR(root.left, -1, new ArrayList<V>(size()));
     }
     
     /**
      * The actual values() implementation. Just an inorder traverse
      */
-    private List valuesR(Entry h, int bitIndex, final List values) {
+    private List<V> valuesR(Entry<K, V> h, int bitIndex, final List<V> values) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty()) {
                 values.add(h.value);
@@ -610,34 +611,34 @@ public class PatriciaTrie implements Trie, Serializable {
         return bitIndex == KeyCreator.EQUAL_BIT_KEY;
     }
     
-    private boolean isBitSet(Object key, int bitIndex) {
+    private boolean isBitSet(K key, int bitIndex) {
         if (key == null) { // root's might be null!
             return false;
         }
         return keyCreator.isBitSet(key, bitIndex);
     }
     
-    private int bitIndex(Object key, Object foundKey) {
+    private int bitIndex(K key, K foundKey) {
         return keyCreator.bitIndex(key, foundKey);
     }
     
     /**
      * The actual Trie nodes.
      */
-    private final class Entry implements Map.Entry, Serializable {
+    private class Entry<L,W> implements Map.Entry<L,W>, Serializable {
         
         private static final long serialVersionUID = 4596023148184140013L;
         
-        private Object key;
-        private Object value;
+        private L key;
+        private W value;
         
         private int bitIndex;
         
-        private Entry parent;
-        private Entry left;
-        private Entry right;
+        private Entry<L,W> parent;
+        private Entry<L,W> left;
+        private Entry<L,W> right;
         
-        private Entry(Object key, Object value, int bitIndex) {
+        private Entry(L key, W value, int bitIndex) {
             this.key = key;
             this.value = value;
             
@@ -655,16 +656,16 @@ public class PatriciaTrie implements Trie, Serializable {
             return key == null;
         }
         
-        public Object getKey() {
+        public L getKey() {
             return key;
         }
         
-        public Object getValue() {
+        public W getValue() {
             return value;
         }
         
-        public Object setValue(Object value) {
-            Object o = this.value;
+        public W setValue(W value) {
+            W o = this.value;
             this.value = value;
             return o;
         }
@@ -673,7 +674,7 @@ public class PatriciaTrie implements Trie, Serializable {
          * Replaces the old key and value with the new ones.
          * Returns the old vlaue.
          */
-        private Object setKeyValue(Object key, Object value) {
+        private W setKeyValue(L key, W value) {
             this.key = key;
             return setValue(value);
         }

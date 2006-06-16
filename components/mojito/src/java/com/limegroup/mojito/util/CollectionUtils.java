@@ -22,6 +22,9 @@ package com.limegroup.mojito.util;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * Miscellaneous utilities for Collections
+ */
 public final class CollectionUtils {
     
     private CollectionUtils() {}
@@ -29,7 +32,7 @@ public final class CollectionUtils {
     /**
      * Returns the given Collection as formatted String
      */
-    public static String toString(Collection c) {
+    public static String toString(Collection<?> c) {
         StringBuffer buffer = new StringBuffer();
         
         Iterator it = c.iterator();

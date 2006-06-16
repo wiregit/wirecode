@@ -133,7 +133,7 @@ public class MessageHelper {
                 getLocalNode(), createMessageID(dst), request);
     }
 
-    public StatsResponse createStatsResponse(RequestMessage request, byte[] statistics) {
+    public StatsResponse createStatsResponse(RequestMessage request, String statistics) {
         return factory.createStatsResponse(getVendor(), getVersion(), 
                 getLocalNode(), request.getMessageID(), statistics);
     }

@@ -74,18 +74,18 @@ public class PatriciaRouteTable implements RouteTable {
     /**
      * The <tt>KeySelector</tt> that selects <tt>ContactNodes</tt> with one or more failures.
      */
-    private static final KeySelector SELECT_FAILED_CONTACTS = new KeySelector() {
-        public boolean allow(Object key, Object value) {
-            return ((ContactNode)value).hasFailed();
+    private static final KeySelector<KUID, ContactNode> SELECT_FAILED_CONTACTS = new KeySelector<KUID, ContactNode>() {
+        public boolean allow(KUID key, ContactNode value) {
+            return value.hasFailed();
         }
     };
     
     /**
      * The <tt>KeySelector</tt> that selects <tt>ContactNodes</tt> with no failures.
      */
-    private static final KeySelector SELECT_ALIVE_CONTACTS = new KeySelector() {
-        public boolean allow(Object key, Object value) {
-            return !((ContactNode)value).hasFailed();
+    private static final KeySelector<KUID, ContactNode> SELECT_ALIVE_CONTACTS = new KeySelector<KUID, ContactNode>() {
+        public boolean allow(KUID key, ContactNode value) {
+            return !value.hasFailed();
         }
     };
     
@@ -104,12 +104,12 @@ public class PatriciaRouteTable implements RouteTable {
     /**
      * The main contacts trie.
      */
-    private PatriciaTrie nodesTrie;
+    private PatriciaTrie<KUID, ContactNode> nodesTrie;
     
     /**
      * The Buckets trie.
      */
-    private PatriciaTrie bucketsTrie;
+    private PatriciaTrie<KUID, BucketNode> bucketsTrie;
 
     /**
      * The bucket of the current smallest subtree on the other side of the local node's bucket.
@@ -136,8 +136,8 @@ public class PatriciaRouteTable implements RouteTable {
         
         routingStats = new RoutingStatisticContainer(context);
         
-        nodesTrie = new PatriciaTrie();
-        bucketsTrie = new PatriciaTrie();
+        nodesTrie = new PatriciaTrie<KUID, ContactNode>();
+        bucketsTrie = new PatriciaTrie<KUID, BucketNode>();
         
         init();
     }
@@ -196,7 +196,7 @@ public class PatriciaRouteTable implements RouteTable {
         ContactNode existingNode = updateExistingNode(nodeId, node, knowToBeAlive);
         if (existingNode == null) {
             // get bucket closest to node
-            BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+            BucketNode bucket = bucketsTrie.select(nodeId);
             if(bucket.getNodeCount() < K) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Adding node: " + node + " to bucket: " + bucket);
@@ -221,7 +221,7 @@ public class PatriciaRouteTable implements RouteTable {
                     LOG.trace("Bucket "+bucket+" full");
                 }
                 
-                BucketNode localBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
+                BucketNode localBucket = bucketsTrie.select(context.getLocalNodeID());
                 //1
                 boolean containsLocal = localBucket.equals(bucket);
                 //2
@@ -235,15 +235,17 @@ public class PatriciaRouteTable implements RouteTable {
                         LOG.trace("splitting bucket: " + bucket);
                     }
                     
-                    List newBuckets = bucket.split();
+                    List<BucketNode> newBuckets = bucket.split();
                     routingStats.BUCKET_COUNT.incrementStat();
+                    
                     //update bucket node count
-                    BucketNode leftSplitBucket = (BucketNode) newBuckets.get(0);
-                    BucketNode rightSplitBucket = (BucketNode) newBuckets.get(1);
-                    bucketsTrie.put(leftSplitBucket.getNodeID(),leftSplitBucket);
-                    bucketsTrie.put(rightSplitBucket.getNodeID(),rightSplitBucket);
+                    BucketNode leftSplitBucket = newBuckets.get(0);
+                    BucketNode rightSplitBucket = newBuckets.get(1);
+                    bucketsTrie.put(leftSplitBucket.getNodeID(), leftSplitBucket);
+                    bucketsTrie.put(rightSplitBucket.getNodeID(), rightSplitBucket);
                     int countLeft = updateBucketNodeCount(leftSplitBucket);
                     int countRight = updateBucketNodeCount(rightSplitBucket);
+                    
                     //this should never happen
                     if(countLeft+countRight != bucket.getNodeCount()) {
                         if (LOG.isErrorEnabled()) {
@@ -253,12 +255,13 @@ public class PatriciaRouteTable implements RouteTable {
                     }
                     //update smallest subtree if split reason was that it contained the local bucket
                     if(containsLocal) {
-                        BucketNode newLocalBucket = (BucketNode)bucketsTrie.select(context.getLocalNodeID());
+                        BucketNode newLocalBucket = bucketsTrie.select(context.getLocalNodeID());
                         if(newLocalBucket.equals(leftSplitBucket)) {
                             smallestSubtreeBucket = rightSplitBucket;
-                        }
-                        else if(newLocalBucket.equals(rightSplitBucket)){
+                            
+                        } else if(newLocalBucket.equals(rightSplitBucket)){
                             smallestSubtreeBucket = leftSplitBucket;
+                            
                         } else {
                             if (LOG.isErrorEnabled()) {
                                 LOG.error("New buckets don't contain local node");
@@ -266,6 +269,7 @@ public class PatriciaRouteTable implements RouteTable {
                             return false;
                         }
                     }
+                    
                     //now trying recursive call!
                     //attempt the put the new contact again with the split buckets
                     put(nodeId,node,knowToBeAlive);
@@ -273,14 +277,16 @@ public class PatriciaRouteTable implements RouteTable {
                 } 
                 //not splitting --> replace bucket unknown entry or add to replacement cache. Also a good time to replace stale nodes
                 else {
-                    if(knowToBeAlive) {
-                        List bucketList = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
+                    if (knowToBeAlive) {
+                        List<ContactNode> bucketList = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
                         ContactNode leastRecentlySeen = 
                             BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
+                        
                         if(leastRecentlySeen.getTimeStamp() == 0L) {
                             
                             if (LOG.isTraceEnabled()) {
-                                LOG.trace("NOT splitting bucket "+ bucket+", replacing unknown node "+leastRecentlySeen+" with node "+node);
+                                LOG.trace("NOT splitting bucket "+ bucket+", replacing unknown node " 
+                                        + leastRecentlySeen+" with node "+node);
                             }
                             
                             node.alive();
@@ -290,10 +296,12 @@ public class PatriciaRouteTable implements RouteTable {
                             nodesTrie.put(nodeId,node);
                             return true;
                         }
-                    } 
+                    }
+                    
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("NOT splitting bucket "+ bucket+", adding node "+node+" to replacement cache");
                     }
+                    
                     addReplacementNode(bucket,node);
                     replaceBucketStaleNodes(bucket);
                 }
@@ -337,9 +345,9 @@ public class PatriciaRouteTable implements RouteTable {
             }
         }
         
-        ContactNode node = (ContactNode) nodesTrie.get(nodeId);
+        ContactNode node = nodesTrie.get(nodeId);
         //get closest bucket
-        BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+        BucketNode bucket = bucketsTrie.select(nodeId);
         if (node != null) {
             //TODO: we delete dead contacts immediately for now!...maybe relax?
             if (handleNodeFailure(node)) {
@@ -369,11 +377,10 @@ public class PatriciaRouteTable implements RouteTable {
     
     private void replaceBucketStaleNodes(BucketNode bucket) {
         int length = Math.max(0, bucket.getDepth()-1);
-        List failingNodes = nodesTrie.range(bucket.getNodeID(),length, SELECT_FAILED_CONTACTS);
+        List<ContactNode> failingNodes = nodesTrie.range(bucket.getNodeID(),length, SELECT_FAILED_CONTACTS);
         
-        for (Iterator iter = failingNodes.iterator(); iter.hasNext(); ) {
-            ContactNode failingNode = (ContactNode) iter.next();
-            if (!removeNodeAndReplace(failingNode.getNodeID(), bucket, false)) {
+        for (ContactNode node : failingNodes) {
+            if (!removeNodeAndReplace(node.getNodeID(), bucket, false)) {
                 return;
             }
         }
@@ -487,10 +494,10 @@ public class PatriciaRouteTable implements RouteTable {
         BucketNode bucket = null;
         
         // Check the RouteTable for existence
-        ContactNode existingNode = (ContactNode) nodesTrie.get(nodeId);
+        ContactNode existingNode = nodesTrie.get(nodeId);
         if (existingNode == null) {
             // check replacement cache in closest bucket
-            bucket = (BucketNode)bucketsTrie.select(nodeId);
+            bucket = bucketsTrie.select(nodeId);
             existingNode = bucket.getReplacementNode(nodeId);
             
             // If it was neither in the RouteTable nor in the
@@ -601,12 +608,10 @@ public class PatriciaRouteTable implements RouteTable {
     }
     
     public synchronized void refreshBuckets(boolean force, BootstrapManager manager) throws IOException{
-        List bucketsLookups = new ArrayList();
+        List<KUID> bucketsLookups = new ArrayList<KUID>();
         long now = System.currentTimeMillis();
         
-        for (Iterator iter = bucketsTrie.values().iterator(); iter.hasNext(); ) {
-            BucketNode bucket = (BucketNode) iter.next();
-            
+        for(BucketNode bucket : bucketsTrie.values()) {
             long lastTouch = bucket.getTimeStamp();
             //update bucket if freshness limit has passed
             //OR if it is not full (not complete)
@@ -614,10 +619,11 @@ public class PatriciaRouteTable implements RouteTable {
             //OR if forced 
             //TODO: maybe relax this a little bit?
             int length = Math.max(0, bucket.getDepth()-1);
-            List liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
+            List<ContactNode> liveNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_ALIVE_CONTACTS);
             
             //if we are bootstrapping, phase 1 allready took care of the local bucket
-            if(manager != null && liveNodes.contains(context.getLocalNode())) {
+            if (manager != null 
+                    && liveNodes.contains(context.getLocalNode())) {
                 continue;
             }
             
@@ -639,8 +645,8 @@ public class PatriciaRouteTable implements RouteTable {
             manager.setBuckets(bucketsLookups);
         }
         
-        for (Iterator iter = bucketsLookups.iterator(); iter.hasNext(); ) {
-            context.lookup((KUID) iter.next(), manager);
+        for(KUID nodeId : bucketsLookups) {
+            context.lookup(nodeId, manager);
             routingStats.BUCKET_REFRESH_COUNT.incrementStat();
         }
     }
@@ -658,10 +664,10 @@ public class PatriciaRouteTable implements RouteTable {
     }
 
     public synchronized ContactNode get(KUID nodeId, boolean checkAndUpdateCache) {
-        ContactNode node = (ContactNode)nodesTrie.get(nodeId);
+        ContactNode node = nodesTrie.get(nodeId);
         if (node == null && checkAndUpdateCache) {
-            BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
-            node = (ContactNode)bucket.getReplacementNode(nodeId);
+            BucketNode bucket = bucketsTrie.select(nodeId);
+            node = bucket.getReplacementNode(nodeId);
         }
         return node;
     }
@@ -670,21 +676,21 @@ public class PatriciaRouteTable implements RouteTable {
         return get(nodeId, false);
     }
 
-    public synchronized List getAllNodes() {
+    public synchronized List<ContactNode> getAllNodes() {
         return nodesTrie.values();
     }
     
-    public synchronized List getAllNodesMRS() {
-        List nodesList = nodesTrie.values();
+    public synchronized List<ContactNode> getAllNodesMRS() {
+        List<ContactNode> nodesList = nodesTrie.values();
         return BucketUtils.sort(nodesList);
     }
     
-    public synchronized List getMRSNodes(int numNodes) {
-        List nodesList = getAllNodesMRS();
-        return nodesList.subList(0,Math.min(nodesList.size(),numNodes));
+    public synchronized List<ContactNode> getMRSNodes(int numNodes) {
+        List<ContactNode> nodesList = getAllNodesMRS();
+        return nodesList.subList(0, Math.min(nodesList.size(), numNodes));
     }
 
-    public synchronized List getAllBuckets() {
+    public synchronized List<BucketNode> getAllBuckets() {
         return bucketsTrie.values();
     }
 
@@ -711,7 +717,8 @@ public class PatriciaRouteTable implements RouteTable {
      * sort method to sort the Nodes from least-recently 
      * to most-recently seen.
      */
-    public synchronized List select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact) {
+    public synchronized List<ContactNode> select(KUID lookup, int k, 
+            boolean onlyLiveNodes, boolean willContact) {
         //only touch bucket if we know we are going to contact it's nodes
         if(willContact) {
             touchBucket(lookup);
@@ -725,7 +732,7 @@ public class PatriciaRouteTable implements RouteTable {
     }
     
     public synchronized ContactNode select(KUID lookup) {
-        return (ContactNode)nodesTrie.select(lookup);
+        return nodesTrie.select(lookup);
     }
     
     public synchronized int size() {
@@ -738,7 +745,7 @@ public class PatriciaRouteTable implements RouteTable {
     
     private void touchBucket(KUID nodeId) {
         //get bucket closest to node
-        BucketNode bucket = (BucketNode)bucketsTrie.select(nodeId);
+        BucketNode bucket = bucketsTrie.select(nodeId);
         touchBucket(bucket);
     }
     
@@ -760,7 +767,7 @@ public class PatriciaRouteTable implements RouteTable {
             BucketNode bucket = (BucketNode)it.next();
             buffer.append(bucket).append("\n");
             totalNodesInBuckets += bucket.getNodeCount();
-            Collection bucketNodes = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1);
+            Collection bucketNodes = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
             buffer.append("\tNodes:"+"\n");
             for (Iterator iter = bucketNodes.iterator(); iter.hasNext();) {
                 ContactNode node = (ContactNode) iter.next();
@@ -768,7 +775,7 @@ public class PatriciaRouteTable implements RouteTable {
             }
         }
         buffer.append("-------------\n");
-        buffer.append("TOTAL BUCKETS: " + bucketsList.size()).append(" NUM. OF NODES: "+totalNodesInBuckets+"\n");
+        buffer.append("TOTAL BUCKETS: " + bucketsList.size()).append(" NUM. OF NODES: " + totalNodesInBuckets+"\n");
         buffer.append("-------------\n");
         
         Collection nodesList = getAllNodes();

@@ -19,9 +19,13 @@
 
 package com.limegroup.mojito.messages.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
@@ -34,11 +38,11 @@ import com.limegroup.mojito.messages.StatsResponse;
 public class StatsResponseImpl extends AbstractResponseMessage
         implements StatsResponse {
 
-    private byte[] statistics;
+    private String statistics;
 
     public StatsResponseImpl(Context context, 
             int vendor, int version, ContactNode node,
-            KUID messageId, byte[] statistics) {
+            KUID messageId, String statistics) {
         super(context, STATS_RESPONSE, vendor, version, node, messageId);
 
         this.statistics = statistics;
@@ -50,18 +54,45 @@ public class StatsResponseImpl extends AbstractResponseMessage
         
         MessageInputStream in = getMessageInputStream();
         
-        this.statistics = in.readStatistics();
+        byte[] s = in.readStatistics();
+        
+        ByteArrayInputStream bais = new ByteArrayInputStream(s);
+        GZIPInputStream gz = new GZIPInputStream(bais);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(s.length * 2);
+        
+        byte[] b = new byte[2048];
+        int len = -1;
+        while((len = gz.read(b)) != -1) {
+            baos.write(b, 0, len);
+        }
+        gz.close();
+        baos.close();
+        
+        this.statistics = new String(baos.toByteArray());
     }
     
-    public byte[] getStatistics() {
+    public String getStatistics() {
         return statistics;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeStatistics(statistics);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GZIPOutputStream gz = new GZIPOutputStream(baos);
+        gz.write(statistics.getBytes());
+        gz.close();
+        byte[] s = baos.toByteArray();
+        
+        out.writeStatistics(s);
     }
     
     public String toString() {
-        return "StatsResponse: " + statistics;
+        String s = statistics;
+        if (s != null) {
+            if (s.length() > 128) {
+                s = s.substring(0, 128);
+            }
+        }
+        
+        return "StatsResponse: " + s;
     }
 }

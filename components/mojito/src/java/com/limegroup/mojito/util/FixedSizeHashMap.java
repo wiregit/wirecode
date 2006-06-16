@@ -78,7 +78,7 @@ public class FixedSizeHashMap<K, V> extends LinkedHashMap<K, V> implements Seria
     /*
      * Remove the eldest entry if the Map is full
      */
-    protected boolean removeEldestEntry(Entry eldest) {
+    protected boolean removeEldestEntry(Entry<K, V> eldest) {
         return isFull();
     }
 }

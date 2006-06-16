@@ -27,7 +27,7 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.FindValueResponse;
 
 
-public final class KeyValueCollection implements Collection {
+public final class KeyValueCollection implements Collection<KeyValue> {
     
     private static final long serialVersionUID = 3740150886075929145L;
     
@@ -47,11 +47,11 @@ public final class KeyValueCollection implements Collection {
         return source;
     }
 
-    public boolean add(Object o) {
+    public boolean add(KeyValue o) {
         throw new UnsupportedOperationException("This class immutable");
     }
 
-    public boolean addAll(Collection c) {
+    public boolean addAll(Collection<? extends KeyValue> c) {
         throw new UnsupportedOperationException("This class immutable");
     }
 
@@ -63,7 +63,7 @@ public final class KeyValueCollection implements Collection {
         return keyValues.contains(o);
     }
 
-    public boolean containsAll(Collection c) {
+    public boolean containsAll(Collection<?> c) {
         return keyValues.containsAll(c);
     }
 
@@ -71,7 +71,7 @@ public final class KeyValueCollection implements Collection {
         return keyValues.isEmpty();
     }
 
-    public Iterator iterator() {
+    public Iterator<KeyValue> iterator() {
         return keyValues.iterator();
     }
 
@@ -79,11 +79,11 @@ public final class KeyValueCollection implements Collection {
         throw new UnsupportedOperationException("This class immutable");
     }
 
-    public boolean removeAll(Collection c) {
+    public boolean removeAll(Collection<?> c) {
         throw new UnsupportedOperationException("This class immutable");
     }
 
-    public boolean retainAll(Collection c) {
+    public boolean retainAll(Collection<?> c) {
         return keyValues.removeAll(c);
     }
 

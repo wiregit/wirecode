@@ -76,7 +76,7 @@ public class BucketNode extends Node {
     }
     
     public ContactNode getReplacementNode(KUID nodeId) {
-        return (ContactNode)getReplacementCache().get(nodeId);
+        return getReplacementCache().get(nodeId);
     }
     
     public int getReplacementCacheSize() {
@@ -90,7 +90,7 @@ public class BucketNode extends Node {
      * Use always the Iterator or the operators provided
      * by this class!
      */
-    public Map getReplacementCache() {
+    public Map<KUID, ContactNode> getReplacementCache() {
         if (replacementCache != null) {
             return replacementCache;
         }
@@ -99,20 +99,20 @@ public class BucketNode extends Node {
     
     public ContactNode getMostRecentlySeenCachedNode(boolean remove) {
         if(replacementCache != null) {
-            return (ContactNode)replacementCache.getMostRecentlySeen(remove);
+            return replacementCache.getMostRecentlySeen(remove);
         }
         return null;
     }
     
     public ContactNode removeReplacementNode(KUID nodeId) {
-        return (ContactNode)getReplacementCache().remove(nodeId);
+        return getReplacementCache().remove(nodeId);
     }
     
     public void touch() {
         super.alive();
     }
  
-    public List split() {
+    public List<BucketNode> split() {
         BucketNode leftBucket = new BucketNode(getNodeID(), depth+1);
         BucketNode rightBucket = new BucketNode(getNodeID().set(depth), depth+1);
         if (!getReplacementCache().isEmpty()) {
@@ -120,7 +120,7 @@ public class BucketNode extends Node {
                 LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
             }
         }
-        return Arrays.asList(new BucketNode[]{leftBucket, rightBucket});
+        return Arrays.asList(leftBucket, rightBucket);
     }
 
     public int getDepth() {
@@ -163,7 +163,7 @@ public class BucketNode extends Node {
     /**
      * LRU replacement cache
      */
-    private static class Cache extends FixedSizeHashMap {
+    private static class Cache extends FixedSizeHashMap<KUID, ContactNode> {
         
         private static final long serialVersionUID = 5255663117632404183L;
 
@@ -172,13 +172,13 @@ public class BucketNode extends Node {
         }
         
         // O(1)
-        public Object getLeastRecentlySeen(boolean remove) {
+        public ContactNode getLeastRecentlySeen(boolean remove) {
             if (isEmpty()) {
                 return null;
             }
             
-            Iterator it = values().iterator();
-            Object value = it.next();
+            Iterator<ContactNode> it = values().iterator();
+            ContactNode value = it.next();
             
             if (remove) {
                 it.remove();
@@ -187,13 +187,13 @@ public class BucketNode extends Node {
         }
         
         // O(n)
-        public Object getMostRecentlySeen(boolean remove) {
+        public ContactNode getMostRecentlySeen(boolean remove) {
             if (isEmpty()) {
                 return null;
             }
 
-            Object value = null;
-            Iterator it = values().iterator();
+            ContactNode value = null;
+            Iterator<ContactNode> it = values().iterator();
             while (it.hasNext()) {
                 value = it.next();
             }

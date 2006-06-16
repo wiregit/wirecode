@@ -102,7 +102,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                             + ". KeyValue will expire faster!");
                 }
                 
-                context.getDataBaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
+                context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
                 keyValue.setClose(false);
             }
         }

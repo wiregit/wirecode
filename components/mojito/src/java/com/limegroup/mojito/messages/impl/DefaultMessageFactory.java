@@ -144,7 +144,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StatsResponse createStatsResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, byte[] statistics) {
+            ContactNode node, KUID messageId, String statistics) {
         return new StatsResponseImpl(context, vendor, version, node, messageId, statistics);
     }
 

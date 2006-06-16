@@ -22,21 +22,24 @@ package com.limegroup.mojito.util;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Miscellaneous utilities for Tries
+ */
 public final class TrieUtils {
     
     private TrieUtils() {}
     
-    public static Trie synchronizedTrie(Trie trie) {
-        return new SynchronizedTrie(trie);
+    public static <K,V> Trie<K,V> synchronizedTrie(Trie<K,V> trie) {
+        return new SynchronizedTrie<K,V>(trie);
     }
     
-    private static class SynchronizedTrie implements Trie, Serializable {
+    private static class SynchronizedTrie<K,V> implements Trie<K,V>, Serializable {
 
         private static final long serialVersionUID = -8553889709551579766L;
 
-        private Trie trie;
+        private Trie<K,V> trie;
         
-        private SynchronizedTrie(Trie trie) {
+        private SynchronizedTrie(Trie<K,V> trie) {
             this.trie = trie;
         }
         
@@ -44,11 +47,11 @@ public final class TrieUtils {
             trie.clear();
         }
 
-        public synchronized boolean containsKey(Object key) {
+        public synchronized boolean containsKey(K key) {
             return trie.containsKey(key);
         }
 
-        public synchronized Object get(Object key) {
+        public synchronized V get(K key) {
             return trie.get(key);
         }
 
@@ -56,35 +59,35 @@ public final class TrieUtils {
             return trie.isEmpty();
         }
 
-        public synchronized List keys() {
+        public synchronized List<K> keys() {
             return trie.keys();
         }
 
-        public synchronized Object put(Object key, Object value) {
+        public synchronized V put(K key, V value) {
             return trie.put(key, value);
         }
 
-        public synchronized List range(Object key, int length, KeySelector selector) {
+        public synchronized List<V> range(K key, int length, KeySelector<K,V> selector) {
             return trie.range(key, length, selector);
         }
 
-        public synchronized List range(Object key, int length) {
+        public synchronized List<V> range(K key, int length) {
             return trie.range(key, length);
         }
 
-        public synchronized Object remove(Object key) {
+        public synchronized V remove(K key) {
             return trie.remove(key);
         }
 
-        public synchronized List select(Object key, int count, KeySelector selector) {
+        public synchronized List<V> select(K key, int count, KeySelector<K,V> selector) {
             return trie.select(key, count, selector);
         }
 
-        public synchronized List select(Object key, int count) {
+        public synchronized List<V> select(K key, int count) {
             return trie.select(key, count);
         }
 
-        public synchronized Object select(Object key) {
+        public synchronized V select(K key) {
             return trie.select(key);
         }
 
@@ -92,7 +95,7 @@ public final class TrieUtils {
             return trie.size();
         }
 
-        public synchronized List values() {
+        public synchronized List<V> values() {
             return trie.values();
         }
         

@@ -44,7 +44,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
-import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
+import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 
 
 /**
@@ -58,11 +58,11 @@ public class DefaultMessageHandler extends MessageHandler
     
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
     
-    private DataBaseStatisticContainer databaseStats;
+    private DatabaseStatisticContainer databaseStats;
     
     public DefaultMessageHandler(Context context) {
         super(context);
-        databaseStats = context.getDataBaseStats();
+        databaseStats = context.getDatabaseStats();
     }
     
     public void addTime(long time) {

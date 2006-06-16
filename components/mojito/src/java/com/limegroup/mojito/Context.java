@@ -72,7 +72,7 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
 import com.limegroup.mojito.statistics.DHTStats;
-import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
+import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
@@ -115,13 +115,13 @@ public class Context {
     
     private final NetworkStatisticContainer networkStats;
     private final GlobalLookupStatisticContainer globalLookupStats;
-    private final DataBaseStatisticContainer dataBaseStats;
+    private final DatabaseStatisticContainer databaseStats;
     
     private long lastEstimateTime = 0L;
     private int estimatedSize = 0;
     
-    private LinkedList localSizeHistory = new LinkedList();
-    private LinkedList remoteSizeHistory = new LinkedList();
+    private LinkedList<Integer> localSizeHistory = new LinkedList<Integer>();
+    private LinkedList<Integer> remoteSizeHistory = new LinkedList<Integer>();
     
     private ProcessingQueue eventQueue;
     
@@ -149,7 +149,7 @@ public class Context {
         
         networkStats = new NetworkStatisticContainer(this);
         globalLookupStats = new GlobalLookupStatisticContainer(this);
-        dataBaseStats = new DataBaseStatisticContainer(this);
+        databaseStats = new DatabaseStatisticContainer(this);
         
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
@@ -206,7 +206,10 @@ public class Context {
     }
     
     public PublicKey getMasterKey() {
-        return masterKeyPair.getPublic();
+        if (masterKeyPair != null) {
+            return masterKeyPair.getPublic();
+        }
+        return null;
     }
     
     public KeyPair getMasterKeyPair() {
@@ -703,8 +706,8 @@ public class Context {
             }
         
             int localSizeSum = 0;
-            for(Iterator it = localSizeHistory.iterator(); it.hasNext(); ) {
-                localSizeSum += ((Integer)it.next()).intValue();
+            for (Integer size : localSizeHistory) {
+                localSizeSum += size.intValue();
             }
             
             // If somebody is playing around with MAX_HISTORY_SIZE
@@ -742,8 +745,8 @@ public class Context {
         return globalLookupStats;
     }
     
-    public DataBaseStatisticContainer getDataBaseStats() {
-        return dataBaseStats;
+    public DatabaseStatisticContainer getDatabaseStats() {
+        return databaseStats;
     }
     
     /**
