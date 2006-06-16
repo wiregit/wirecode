@@ -645,8 +645,8 @@ public class PatriciaRouteTable implements RouteTable {
             manager.setBuckets(bucketsLookups);
         }
         
-        for(KUID nodeId : bucketsLookups) {
-            context.lookup(nodeId, manager);
+        for(KUID bucketId : bucketsLookups) {
+            context.lookup(bucketId, manager);
             routingStats.BUCKET_REFRESH_COUNT.incrementStat();
         }
     }
