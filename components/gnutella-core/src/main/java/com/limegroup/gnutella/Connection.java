@@ -1217,10 +1217,11 @@ public class Connection implements IpPort {
                 // Send this header as a line of ASCII text like "Header-Name: some, value\r\n"
                 writeLine(key + ": " + value + CRLF); // The method name writeLine sounds like it writes the ASCII text and then "\r\n", but it doesn't
 
+                // Add it to our record of the headers we've sent this remote computer
                 HEADERS_WRITTEN.put(key, value);
             }
         }
-        
+
         // End the group of headers with a blank line, just write "\r\n" to the remote computer
         writeLine(CRLF); // This just writes one "\r\n", not two
     }

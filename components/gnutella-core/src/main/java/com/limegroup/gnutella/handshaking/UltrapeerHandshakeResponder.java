@@ -19,15 +19,6 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 	 * Make an UltrapeerHandshakeResponder object that can read a group of headers and compose our response
 	 * 
 	 * @param host The IP address of the remote computer
-	 * 
-	 * 
-	 * 
-     * Creates a new instance of ClientHandshakeResponder
-     * @param manager Instance of connection manager, managing this
-     * connection
-     * @param router Instance of message router, to get correct local
-     * address at runtime.
-     * @param host The host with whom we are handshaking
      */
     public UltrapeerHandshakeResponder(String host) {
     	
@@ -45,7 +36,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
      * @return         The stage 3 headers we'll send to finish the handshake
      */
     protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
-    	
+
     	// Ask the connection manager if we have an open slot for this connection
 		if (!_manager.allowConnection(response)) {
 			
@@ -91,7 +82,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 			// Tell it we will be sending it compressed data
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE); // "Content-Encoding: deflate"
 		}
-		
+
 		// We're going to accept the connection, compose and return stage 3 headers
         return HandshakeResponse.createAcceptOutgoingResponse(ret); // Include "X-Ultrapeer: False" and "Content-Encoding: deflate" we may have added here
 	}

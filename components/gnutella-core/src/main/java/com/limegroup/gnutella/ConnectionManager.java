@@ -484,15 +484,15 @@ public class ConnectionManager {
      */
     public boolean isSupernode() {
 
+    	/*
         //zootella
         return true;
-        
-        /*
+        */
+
         // Return true if we're trying to become an ultrapeer, or are one
         return
             isActiveSupernode() || // We're on the network acting as an ultrapeer right now, or
             isSupernodeCapable();  // We have a fast enough computer and Internet connection to be one
-            */
     }
 
     /**
@@ -2073,8 +2073,8 @@ public class ConnectionManager {
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
 
-        // If the remote computer said "Pong-Caching: 0.1" or later, leave now (do) why?
-        if (connection.supportsPongCaching()) return;
+        // If the remote computer said "Pong-Caching: 0.1" or later, leave now
+        if (connection.supportsPongCaching()) return; // With pong caching, we don't need pings anymore
 
         /*
          * We need to compare how many connections we have to the keep alive to
