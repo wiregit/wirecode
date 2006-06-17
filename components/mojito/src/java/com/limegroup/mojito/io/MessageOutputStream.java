@@ -26,7 +26,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.util.Collection;
-import java.util.Iterator;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
@@ -52,7 +51,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     public void writeKeyValue(KeyValue keyValue) throws IOException {
-        writeKUID((KUID)keyValue.getKey());
+        writeKUID(keyValue.getKey());
         byte[] b = (byte[])keyValue.getValue();
         writeShort(b.length);
         write(b, 0, b.length);
@@ -64,10 +63,10 @@ public class MessageOutputStream extends DataOutputStream {
         writeSignature(keyValue.getSignature());
     }
     
-    public void writeKeyValues(Collection values) throws IOException {
+    public void writeKeyValues(Collection<KeyValue> values) throws IOException {
         writeByte(values.size());
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
-            writeKeyValue((KeyValue)it.next());
+        for(KeyValue kv : values) {
+            writeKeyValue(kv);
         }
     }
     
@@ -93,12 +92,12 @@ public class MessageOutputStream extends DataOutputStream {
     public void writeContactNode(ContactNode node) throws IOException {
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getSocketAddress());
-	}
+    }
     
-    public void writeContactNodes(Collection nodes) throws IOException {
+    public void writeContactNodes(Collection<ContactNode> nodes) throws IOException {
         writeByte(nodes.size());
-        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-            writeContactNode((ContactNode)it.next());
+        for(ContactNode node : nodes) {
+            writeContactNode(node);
         }
     }
     

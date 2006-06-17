@@ -342,6 +342,13 @@ public abstract class MessageDispatcher implements Runnable {
             return;
         }
         
+        if (!accept(message)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping message from " + ContactNode.toString(nodeId, src));
+            }
+            return;
+        }
+        
         if (message instanceof ResponseMessage) {
             ResponseMessage response = (ResponseMessage)message;
             
@@ -358,7 +365,7 @@ public abstract class MessageDispatcher implements Runnable {
             Receipt receipt = null;
             
             synchronized(receiptMap) {
-                receipt = (Receipt)receiptMap.get(message.getMessageID());
+                receipt = receiptMap.get(message.getMessageID());
                 
                 if (receipt != null) {
                     receipt.received();
@@ -514,7 +521,14 @@ public abstract class MessageDispatcher implements Runnable {
     protected abstract void verify(SecureMessage secureMessage, SecureMessageCallback smc);
     
     /** Called to check whether or not the Message should be processed */
-    protected abstract boolean allow(DHTMessage message);
+    protected boolean allow(DHTMessage message) {
+        return true;
+    }
+    
+    /** */
+    protected boolean accept(DHTMessage message) {
+        return true;
+    }
     
     /**
      * Clears the output queue and receipt map
@@ -532,7 +546,7 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * A map of MessageID -> Receipts
      */
-    private class ReceiptMap extends FixedSizeHashMap {
+    private class ReceiptMap extends FixedSizeHashMap<KUID, Receipt> {
         
         private static final long serialVersionUID = -3084244582682726933L;
 
@@ -545,9 +559,8 @@ public abstract class MessageDispatcher implements Runnable {
         }
         
         public void cleanup() {
-            for(Iterator it = entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)it.next();
-                Receipt receipt = (Receipt)entry.getValue();
+            for(Iterator<Receipt> it = values().iterator(); it.hasNext(); ) {
+                Receipt receipt = it.next();
                 
                 if (receipt.timeout()) {
                     receipt.received();
@@ -559,7 +572,7 @@ public abstract class MessageDispatcher implements Runnable {
             }
         }
         
-        protected boolean removeEldestEntry(Map.Entry eldest) {
+        protected boolean removeEldestEntry(Map.Entry<KUID, Receipt> eldest) {
             Receipt receipt = (Receipt)eldest.getValue();
             
             boolean timeout = receipt.timeout();

@@ -137,7 +137,7 @@ public class BucketNode extends Node {
         return buffer.toString();
     }
     
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         BucketNode bucket = new BucketNode(KUID.MIN_NODE_ID,0);
         System.out.println(bucket);
         for (int i = 0; i < 10; i++) {
@@ -149,7 +149,7 @@ public class BucketNode extends Node {
             System.out.println(KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth()).toHexString());
         }
 //        System.out.println(bucket2);
-    }
+    }*/
     
     public boolean equals(Object o) {
         if (!(o instanceof BucketNode)) {

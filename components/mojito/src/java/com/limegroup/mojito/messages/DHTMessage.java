@@ -35,8 +35,6 @@ public interface DHTMessage {
      */
     public static enum OpCode {
         
-        UNKNOWN(0x00),
-        
         PING_REQUEST(0x01),
         PING_RESPONSE(0x02),
         
@@ -66,13 +64,18 @@ public interface DHTMessage {
             return name() + "(" + getOpCode() + ")";
         }
         
-        public static OpCode valueOf(int opcode) {
+        /**
+         * Returns the OpCode enum for the integer. Throws an
+         * IllegalArgumentException if opcode is unknown!
+         */
+        public static OpCode valueOf(int opcode) throws IllegalArgumentException {
             for(OpCode o : values()) {
                 if (o.opcode == opcode) {
                     return o;
                 }
             }
-            return UNKNOWN;
+            
+            throw new IllegalArgumentException("Unknown opcode: " + opcode);
         }
     }
     

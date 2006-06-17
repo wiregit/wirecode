@@ -978,7 +978,7 @@ public class Context {
         
         public void finish(KUID lookup, Collection c, long time) {
             // List of ContactNodes where we stored the KeyValues.
-            final List storeTargets = new ArrayList(c.size());
+            final List<ContactNode> storeTargets = new ArrayList<ContactNode>(c.size());
             
             for(Iterator it = c.iterator(); it.hasNext(); ) {
                 ContactNodeEntry entry = (ContactNodeEntry)it.next();

@@ -330,16 +330,16 @@ public class MojitoDHT {
         return context.getVersion();
     }
     
-    public Set getKeys() {
+    public Set<KUID> getKeys() {
         return context.getDatabase().getKeys();
     }
     
-    public Collection getValues() {
+    public Collection<KeyValue> getValues() {
         return context.getDatabase().getValues();
     }
     
     // TODO for debugging purposes only
-    Collection getNodes() {
+    Collection<ContactNode> getNodes() {
         return context.getRouteTable().getAllNodes();
     }
     
@@ -392,11 +392,11 @@ public class MojitoDHT {
         return false;
     }
     
-    public Collection get(KUID key) throws IOException {
+    public Collection<KeyValue> get(KUID key) throws IOException {
         return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
     }
     
-    public Collection get(KUID key, long timeout) throws IOException {
+    public Collection<KeyValue> get(KUID key, long timeout) throws IOException {
         final Collection[] values = new Collection[] {
             Collections.EMPTY_LIST
         };

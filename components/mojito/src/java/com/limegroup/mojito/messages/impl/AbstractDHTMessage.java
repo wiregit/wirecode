@@ -68,8 +68,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
             OpCode opcode, int vendor, int version,
             ContactNode contactNode, KUID messageId) {
 
-        if (opcode == OpCode.UNKNOWN) {
-            throw new IllegalArgumentException("OpCode cannot be of type Unknown");
+        if (opcode == null) {
+            throw new NullPointerException("OpCode is null");
         }
         
         if (contactNode == null) {
@@ -99,8 +99,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     public AbstractDHTMessage(Context context, 
             OpCode opcode, SocketAddress src, ByteBuffer data) throws IOException {
         
-        if (opcode == OpCode.UNKNOWN) {
-            throw new IllegalArgumentException("OpCode cannot be of type Unknown");
+        if (opcode == null) {
+            throw new NullPointerException("OpCode is null");
         }
         
         this.context = context;

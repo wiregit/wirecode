@@ -119,22 +119,22 @@ public class DefaultMessageHandler extends MessageHandler
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
-            List closestNodes = routeTable.select(node.getNodeID(), k, false, false);
+            List<ContactNode> closestNodes = routeTable.select(node.getNodeID(), k, false, false);
             
             if (closestNodes.contains(context.getLocalNode())) {
-                List keyValuesToForward = new ArrayList();
+                List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
                 
                 Database database = context.getDatabase();
                 synchronized(database) {
-                    Collection bags = database.getKeyValueBags();
-                    for (Iterator iter = bags.iterator(); iter.hasNext(); ) {
-                        KeyValueBag bag = (KeyValueBag)iter.next();
+                    Collection<KeyValueBag> bags = database.getKeyValueBags();
+                    for(KeyValueBag bag : bags) {
                         
                         //To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
                         //or if it's ID is closer than any other ID (except the new closest one of course)
                         //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                        List closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
+                        List<ContactNode> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
                         ContactNode closest = (ContactNode)closestNodesToKey.get(0);
+                        
                         if (context.isLocalNode(closest)   
                                 || ((node.equals(closest)
                                         //maybe we haven't added him to the routing table
@@ -146,16 +146,16 @@ public class DefaultMessageHandler extends MessageHandler
                                 LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   
                             }
                             databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                            for (Iterator iterator = bag.values().iterator(); iterator.hasNext();) {
-                                KeyValue keyValue = (KeyValue) iterator.next();
+                            for(KeyValue keyValue : bag.values()) {
                                 KUID originatorID = keyValue.getNodeID();
                                 if(originatorID != null && !originatorID.equals(node.getNodeID())) {
                                     keyValuesToForward.add(keyValue);
                                 }
                             }
+                            
                         } else if (closestNodesToKey.size() == k) {
                             //if we are the furthest node: delete non-local value from local db
-                            ContactNode furthest = (ContactNode)closestNodesToKey.get(closestNodesToKey.size()-1);
+                            ContactNode furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
                             if(context.isLocalNode(furthest)) {
                                 int count = bag.removeAll(true);
                                 databaseStats.STORE_FORWARD_REMOVALS.addData(count);
@@ -181,15 +181,15 @@ public class DefaultMessageHandler extends MessageHandler
         }
     }
     
-    private void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
+    private void store(ContactNode node, QueryKey queryKey, List<KeyValue> keyValues) throws IOException {
         new StoreResponseHandler(context, queryKey, keyValues).store(node);
     }
     
     private class GetQueryKeyHandler extends AbstractResponseHandler {
         
-        private List keyValues;
+        private List<KeyValue> keyValues;
         
-        private GetQueryKeyHandler(List keyValues) {
+        private GetQueryKeyHandler(List<KeyValue> keyValues) {
             super(DefaultMessageHandler.this.context);
             this.keyValues = keyValues;
         }

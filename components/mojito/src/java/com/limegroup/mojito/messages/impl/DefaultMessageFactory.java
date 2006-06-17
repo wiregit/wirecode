@@ -83,11 +83,15 @@ public class DefaultMessageFactory implements MessageFactory {
         data.position(GNUTELLA_MESSAGE_HEADER);
         data.mark();
         
-        int opcode = data.get() & 0xFF;
+        OpCode opcode = null;
+        try {
+            opcode = OpCode.valueOf(data.get() & 0xFF);
+        } catch (IllegalArgumentException err) {
+            throw new MessageFormatException(err);
+        }
         
         try {
-            //switch(getOpCode(opcode)) {
-            switch(OpCode.valueOf(opcode)) {
+            switch(opcode) {
                 case PING_REQUEST:
                     return new PingRequestImpl(context, src, data);
                 case PING_RESPONSE:
@@ -109,7 +113,7 @@ public class DefaultMessageFactory implements MessageFactory {
                 case STATS_RESPONSE:
                     return new StatsResponseImpl(context, src, data);
                 default:
-                    throw new IOException("Received unknown message type: " + opcode + " from " + src);
+                    throw new IOException("Unhandled OpCode " + opcode);
             }
         } catch (IOException err) {
             throw new MessageFormatException(err);

@@ -28,8 +28,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -85,7 +87,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         QueryKey queryKey = QueryKey.getQueryKey(
                 request.getContactNode().getSocketAddress());
         
-        List bucketList = Collections.EMPTY_LIST;
+        List<ContactNode> bucketList = Collections.EMPTY_LIST;
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
                 bucketList = context.getRouteTable().getMRSNodes(
@@ -116,7 +118,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         
         KUID lookup = request.getLookupID();
         
-        Collection values = context.getDatabase().get(lookup);
+        Collection<KeyValue> values = context.getDatabase().get(lookup);
         if (values != null && !values.isEmpty()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Hit! " + lookup + " = {" + CollectionUtils.toString(values) + "}");

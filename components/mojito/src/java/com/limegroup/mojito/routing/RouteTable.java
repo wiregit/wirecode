@@ -95,7 +95,7 @@ public interface RouteTable {
      * @param willContact wheather or not we'll contact these ContactNodes
      * @return list of ContactNodes sorted by closeness
      */
-    public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact);
+    public List<ContactNode> select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact);
     
     /**
      * Returns true if the RoutingTable contains a ContactNode with this KUID.

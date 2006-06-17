@@ -26,7 +26,9 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.FindValueResponse;
 
-
+/**
+ * A collection of KeyValues
+ */
 public final class KeyValueCollection implements Collection<KeyValue> {
     
     private static final long serialVersionUID = 3740150886075929145L;

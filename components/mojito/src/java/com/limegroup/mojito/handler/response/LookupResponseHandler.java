@@ -74,10 +74,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private Set<KUID> queried = new HashSet<KUID>();
     
     /** Trie of ContactNodes we're going to query */
-    private PatriciaTrie toQuery = new PatriciaTrie();
+    private PatriciaTrie<KUID, ContactNode> toQuery = new PatriciaTrie<KUID, ContactNode>();
     
     /** Trie of ContactNodes that did respond */
-    private PatriciaTrie responses = new PatriciaTrie();
+    private PatriciaTrie<KUID, ContactNodeEntry> responses = new PatriciaTrie<KUID, ContactNodeEntry>();
     
     /** A Map we're using to count the number of hops */
     private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
@@ -105,7 +105,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
      */
     private SingleLookupStatisticContainer lookupStat;
     
-    private Collection<KeyValueCollection> foundKeyValues = Collections.EMPTY_LIST;
+    /**
+     * Either a collection of KeyValueCollections or ContactNodes
+     * depending on whether this is a Node or Value lookup.
+     */
+    private Collection found = Collections.EMPTY_LIST;
     
     public LookupResponseHandler(KUID lookup, Context context) {
         super(context);
@@ -315,10 +319,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             }
             foundValueLocs++;
             
-            if (foundKeyValues == Collections.EMPTY_LIST) {
-                foundKeyValues = new ArrayList<KeyValueCollection>();
+            if (found == Collections.EMPTY_LIST) {
+                found = new ArrayList();
             }
-            foundKeyValues.add(c);
+            found.add(c);
             
             fireFound(c, totalTime);
             
@@ -422,17 +426,17 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         if (responses.size() >= resultSetSize) {
-            KUID worst = ((ContactNodeEntry)responses.select(furthest)).getNodeID();
+            KUID worst = responses.select(furthest).getNodeID();
             
             KUID best = null;            
             if (!toQuery.isEmpty()) {
-                best = ((ContactNode)toQuery.select(lookup)).getNodeID();
+                best = toQuery.select(lookup).getNodeID();
             }
             
             if (best == null || worst.isCloser(best, lookup)) {
                 if (activeSearches == 0) {
                     if (LOG.isTraceEnabled()) {
-                        ContactNode bestResponse = ((ContactNodeEntry)responses.select(lookup)).getContactNode();
+                        ContactNode bestResponse = responses.select(lookup).getContactNode();
                         LOG.trace("Lookup for " + lookup + " terminates after "
                                 + hop + " hops, " + totalTime + "ms and " + queried.size() 
                                 + " queried Nodes with " + bestResponse + " as best match");
@@ -468,7 +472,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
 
         if (time >= 0L) {
             if (isValueLookup()) {
-                if (foundKeyValues.isEmpty()) {
+                if (found.isEmpty()) {
                     ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_FAILURE.incrementStat();
                 } else {
                     ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_OK.incrementStat();
@@ -479,11 +483,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 
                 // addResponse(ContactNode) limits the size of the
                 // Trie to K and we can thus use the size method of it!
-                foundKeyValues = responses.select(lookup, responses.size());
+                found = responses.select(lookup, responses.size());
             }
         }
         
-        fireFinish(foundKeyValues, time);
+        fireFinish(found, time);
     }
     
     /*protected void resend(KUID nodeId, 
@@ -547,7 +551,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         responses.put(entry.getNodeID(), entry);
         
         if (responses.size() > resultSetSize) {
-            ContactNode worst = ((ContactNodeEntry)responses.select(furthest)).getContactNode();
+            ContactNode worst = responses.select(furthest).getContactNode();
             responses.remove(worst.getNodeID());
             //hopMap.remove(node.getNodeID()); // TODO
         }

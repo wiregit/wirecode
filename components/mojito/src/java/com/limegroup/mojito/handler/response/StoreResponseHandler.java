@@ -53,13 +53,13 @@ public class StoreResponseHandler extends AbstractResponseHandler {
     private QueryKey queryKey;
     
     private int index = 0;
-    private List keyValues;
+    private List<KeyValue> keyValues;
     
     public StoreResponseHandler(Context context, QueryKey queryKey, KeyValue keyValue) {
         this(context, queryKey, Arrays.asList(new KeyValue[]{keyValue}));
     }
     
-    public StoreResponseHandler(Context context, QueryKey queryKey, List keyValues) {
+    public StoreResponseHandler(Context context, QueryKey queryKey, List<KeyValue> keyValues) {
         super(context);
         
         this.queryKey = queryKey;
@@ -82,13 +82,13 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         return queryKey;
     }
     
-    public List getKeyValues() {
+    public List<KeyValue> getKeyValues() {
         return keyValues;
     }
     
     public void store(ContactNode node) throws IOException {
         if (index < keyValues.size() && !isStopped()) {
-            KeyValue keyValue = (KeyValue)keyValues.get(index);
+            KeyValue keyValue = keyValues.get(index);
             
             StoreRequest request = context.getMessageHelper()
                 .createStoreRequest(node.getSocketAddress(), queryKey, keyValue);
@@ -105,7 +105,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         int status = response.getStatus();
         
         if (index < keyValues.size()) {
-            KeyValue current = (KeyValue)keyValues.get(index);
+            KeyValue current = keyValues.get(index);
             
             if (!current.getKey().equals(valueId)) {
                 if (LOG.isErrorEnabled()) {
