@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.Message;
 
 /**
@@ -37,13 +38,22 @@ public abstract class AbstractMessage extends Message {
     
     public static final byte F_DHT_MESSAGE = (byte)0x43;
     
+    /*
+     * The Gnutella Message Header we have to skip.
+     * See AbstractDHTMessage for more info!
+     */
+    public static final int GUID_END = 16;
+    public static final int PAYLOAD_START = 23;
+    
+    private static final byte[] GUID = new byte[16];
+    
     private static final byte TTL = (byte)0x01;
     private static final byte HOPS = (byte)0x00;
     
     private byte[] payload;
     
     AbstractMessage() {
-        super(makeGuid(), F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
+        super(GUID, F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
     }
 
     public void recordDrop() {
@@ -53,22 +63,42 @@ public abstract class AbstractMessage extends Message {
         return this;
     }
 
-    public void write(OutputStream out) throws IOException {
+    private void serialize() throws IOException {
         if (getLength() == 0) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(640);
-            writeMessage(baos);
+            writePayload(baos);
             baos.close();
             
             payload = baos.toByteArray();
             updateLength(payload.length);
         }
-        
-        super.write(out);
-    }
-
-    protected void writePayload(OutputStream out) throws IOException {
-        out.write(payload, 0, payload.length);
     }
     
-    protected abstract void writeMessage(OutputStream out) throws IOException;
+    @Override
+    public void writeQuickly(OutputStream out) throws IOException {
+        serialize();
+        
+        out.write(payload, 0, 16);
+        out.write(F_DHT_MESSAGE);
+        out.write(TTL);
+        out.write(HOPS);
+        ByteOrder.int2leb(payload.length-16, out);
+        out.write(payload, 16, payload.length-16);
+    }
+    
+    @Override
+    public void write(OutputStream out, byte[] buf) throws IOException {
+        serialize();
+        
+        System.arraycopy(payload, 0, buf, 0, 16);
+        buf[16] = F_DHT_MESSAGE;
+        buf[17] = TTL;
+        buf[18] = HOPS;
+        ByteOrder.int2leb(payload.length-16, buf, 19);
+        
+        out.write(buf);
+        out.write(payload, 16, payload.length-16);
+    }
+    
+    protected abstract void writePayload(OutputStream out) throws IOException;
 }

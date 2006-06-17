@@ -27,6 +27,7 @@ import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.ByteBufferOutputStream;
+import com.limegroup.gnutella.util.IntHashMap;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -51,41 +52,45 @@ import com.limegroup.mojito.messages.DHTMessage.OpCode;
  */
 public class DefaultMessageFactory implements MessageFactory {
 
-    /*
-     * The Gnutella Message Header we have to skip.
-     * See AbstractDHTMessage for more info!
-     */
-    private static final int GNUTELLA_MESSAGE_HEADER = 23;
-    
     protected final Context context;
     
-    //private IntHashMap opcodeMap = new IntHashMap();
+    // A IntHashMap of int-opcode to enum-opcode
+    private static IntHashMap<OpCode> opcodeMap = new IntHashMap<OpCode>();
+    
+    static {
+        for(OpCode opcode : OpCode.values()) {
+            opcodeMap.put(opcode.getOpCode(), opcode);
+        }
+    }
     
     public DefaultMessageFactory(Context context) {
         this.context = context;
-        
-        /*for(OpCode opcode : OpCode.values()) {
-            opcodeMap.put(opcode.getOpCode(), opcode);
-        }*/
     }
     
-    /*private OpCode getOpCode(int opcode) {
-        OpCode o = (OpCode)opcodeMap.get(opcode);
+    /**
+     * Returns the enum OpCode for the int version of the opcode. 
+     * This method is much faster than OpCode.valueOf(int) which
+     * runs in linear time.
+     */
+    private static OpCode opcode(int opcode) {
+        OpCode o = opcodeMap.get(opcode);
         if (o != null) {
             return o;
         }
-        return OpCode.UNKNOWN;
-    }*/
+        
+        throw new IllegalArgumentException("Unknown opcode: " + opcode);
+    }
     
     public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
         
-        data.position(GNUTELLA_MESSAGE_HEADER);
-        data.mark();
+        ByteBuffer guid = (ByteBuffer)data.slice().limit(AbstractMessage.GUID_END);
+        ByteBuffer payload = (ByteBuffer)data.position(AbstractMessage.PAYLOAD_START);
+        ByteBuffer[] msg = { guid, payload };
         
         OpCode opcode = null;
         try {
-            opcode = OpCode.valueOf(data.get() & 0xFF);
+            opcode = opcode(msg[0].get() & 0xFF);
         } catch (IllegalArgumentException err) {
             throw new MessageFormatException(err);
         }
@@ -93,25 +98,25 @@ public class DefaultMessageFactory implements MessageFactory {
         try {
             switch(opcode) {
                 case PING_REQUEST:
-                    return new PingRequestImpl(context, src, data);
+                    return new PingRequestImpl(context, src, msg);
                 case PING_RESPONSE:
-                    return new PingResponseImpl(context, src, data);
+                    return new PingResponseImpl(context, src, msg);
                 case FIND_NODE_REQUEST:
-                    return new FindNodeRequestImpl(context, src, data);
+                    return new FindNodeRequestImpl(context, src, msg);
                 case FIND_NODE_RESPONSE:
-                    return new FindNodeResponseImpl(context, src, data);
+                    return new FindNodeResponseImpl(context, src, msg);
                 case FIND_VALUE_REQUEST:
-                    return new FindValueRequestImpl(context, src, data);
+                    return new FindValueRequestImpl(context, src, msg);
                 case FIND_VALUE_RESPONSE:
-                    return new FindValueResponseImpl(context, src, data);
+                    return new FindValueResponseImpl(context, src, msg);
                 case STORE_REQUEST:
-                    return new StoreRequestImpl(context, src, data);
+                    return new StoreRequestImpl(context, src, msg);
                 case STORE_RESPONSE:
-                    return new StoreResponseImpl(context, src, data);
+                    return new StoreResponseImpl(context, src, msg);
                 case STATS_REQUEST:
-                    return new StatsRequestImpl(context, src, data);
+                    return new StatsRequestImpl(context, src, msg);
                 case STATS_RESPONSE:
-                    return new StatsResponseImpl(context, src, data);
+                    return new StatsResponseImpl(context, src, msg);
                 default:
                     throw new IOException("Unhandled OpCode " + opcode);
             }

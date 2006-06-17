@@ -49,7 +49,7 @@ public class StatsResponseImpl extends AbstractResponseMessage
     }
 
     public StatsResponseImpl(Context context, 
-            SocketAddress src, ByteBuffer data) throws IOException {
+            SocketAddress src, ByteBuffer[] data) throws IOException {
         super(context, OpCode.STATS_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();

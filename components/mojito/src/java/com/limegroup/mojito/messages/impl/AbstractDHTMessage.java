@@ -51,7 +51,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     protected final Context context;
     
-    private ByteBuffer data;
+    private ByteBuffer[] data;
     
     private OpCode opcode;
     
@@ -97,7 +97,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     }
 
     public AbstractDHTMessage(Context context, 
-            OpCode opcode, SocketAddress src, ByteBuffer data) throws IOException {
+            OpCode opcode, SocketAddress src, ByteBuffer[] data) throws IOException {
         
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
@@ -136,7 +136,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         return context;
     }
     
-    public ByteBuffer getData() {
+    public ByteBuffer[] getData() {
         return data;
     }
     
@@ -162,11 +162,11 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     /*
      *  To remove the (Gnutella) Message dependence rename
-     *  writeMessage(OutputStream) to write(OutputStream) 
+     *  writePayload(OutputStream) to write(OutputStream) 
      */
     
     // public void write(OutputStream out) throws IOException {
-    protected void writeMessage(OutputStream out) throws IOException {
+    protected void writePayload(OutputStream out) throws IOException {
         MessageOutputStream msgOut = new MessageOutputStream(out);
         writeHeader(msgOut);
         writeBody(msgOut);

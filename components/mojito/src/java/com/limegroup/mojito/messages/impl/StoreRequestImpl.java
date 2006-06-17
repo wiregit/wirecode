@@ -52,7 +52,7 @@ public class StoreRequestImpl extends AbstractRequestMessage
     }
     
     public StoreRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer data) throws IOException {
+            SocketAddress src, ByteBuffer[] data) throws IOException {
         super(context, OpCode.STORE_REQUEST, src, data);
         
         MessageInputStream in = getMessageInputStream();

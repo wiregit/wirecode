@@ -54,7 +54,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
     }
 
     public StatsRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer data) throws IOException {
+            SocketAddress src, ByteBuffer[] data) throws IOException {
         super(context, OpCode.STATS_REQUEST, src, data);
         
         MessageInputStream in = getMessageInputStream();

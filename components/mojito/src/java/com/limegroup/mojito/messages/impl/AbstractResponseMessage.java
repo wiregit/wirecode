@@ -41,7 +41,7 @@ public abstract class AbstractResponseMessage extends AbstractDHTMessage
     }
     
     public AbstractResponseMessage(Context context, 
-            OpCode opcode, SocketAddress src, ByteBuffer data) 
+            OpCode opcode, SocketAddress src, ByteBuffer[] data) 
             throws IOException {
         super(context, opcode, src, data);
     }
