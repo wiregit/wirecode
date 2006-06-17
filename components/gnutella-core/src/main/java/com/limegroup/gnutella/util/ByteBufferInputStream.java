@@ -123,20 +123,16 @@ public class ByteBufferInputStream extends InputStream {
         } else if (index == buffers.length-1 
                 && !buffers[index].hasRemaining()) {
             return -1;
+        } else if (len == 0 || b.length == 0) {
+            return (available() > 0 ? 0 : -1);
         }
         
         int r = 0;
-        boolean zero = true;
         while(index < buffers.length) {
             ByteBuffer buf = buffers[index];
             
             // The number of bytes we can read
             int l = Math.min(buf.remaining(), len-r);
-            
-            // Remember if any bytes were available
-            if (zero && buf.hasRemaining()) {
-                zero = false;
-            }
             
             // Do read
             buf.get(b, off+r, l);
@@ -152,7 +148,7 @@ public class ByteBufferInputStream extends InputStream {
         }
         
         // Return EOF if no bytes were available
-        return (zero ? -1 : r);
+        return (r > 0 ? r : -1);
     }
     
     public long skip(long n) throws IOException {
