@@ -36,11 +36,6 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      */
     protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
 
-        //zootella
-        System.out.println("initializeOutgoing() START");
-        System.out.println(response.toString());
-        System.out.println("initializeOutgoing() END");
-
     	// We're a leaf, so we can't connect to another leaf
     	// If the remote computer says it's not an ultrapeer, we need to reject the connection
         if (!response.isUltrapeer()) {
@@ -87,11 +82,6 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
 		
 		// Record that as a leaf, we accepted one more connection
         HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
-
-        //zootella
-        System.out.println("initializeOutgoing() START");
-        System.out.println(ret.toString());
-        System.out.println("initializeOutgoing() END");
 
         // Compose stage 3 headers, including the "Content-Encoding: deflate" one we might have just added above
         return HandshakeResponse.createAcceptOutgoingResponse(ret);

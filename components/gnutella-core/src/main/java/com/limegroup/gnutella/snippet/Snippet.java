@@ -55,7 +55,9 @@ public class Snippet {
     public static void snippet() {
 
     	String s;
-    	s = CommonUtils.getHttpServer();
+    	s = "hello";
+    	
+    	//s = CommonUtils.getHttpServer();
 
     	/*
     	boolean result = RouterService.canReceiveUnsolicited();
