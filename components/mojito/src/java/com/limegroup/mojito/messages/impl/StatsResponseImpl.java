@@ -43,14 +43,14 @@ public class StatsResponseImpl extends AbstractResponseMessage
     public StatsResponseImpl(Context context, 
             int vendor, int version, ContactNode node,
             KUID messageId, String statistics) {
-        super(context, STATS_RESPONSE, vendor, version, node, messageId);
+        super(context, OpCode.STATS_RESPONSE, vendor, version, node, messageId);
 
         this.statistics = statistics;
     }
 
     public StatsResponseImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, STATS_RESPONSE, src, data);
+        super(context, OpCode.STATS_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();
         

@@ -37,12 +37,12 @@ public class FindValueRequestImpl extends AbstractLookupRequest
     public FindValueRequestImpl(Context context, 
             int vendor, int version, ContactNode node,
             KUID messageId, KUID lookupId) {
-        super(context, FIND_VALUE_REQUEST, vendor, version, node, messageId, lookupId);
+        super(context, OpCode.FIND_VALUE_REQUEST, vendor, version, node, messageId, lookupId);
     }
     
     public FindValueRequestImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, FIND_VALUE_REQUEST, src, data);
+        super(context, OpCode.FIND_VALUE_REQUEST, src, data);
     }
     
     public String toString() {

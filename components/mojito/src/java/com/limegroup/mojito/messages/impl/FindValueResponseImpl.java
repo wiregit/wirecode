@@ -43,14 +43,14 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     public FindValueResponseImpl(Context context, 
             int vendor, int version, ContactNode node, 
             KUID messageId, Collection<KeyValue> values) {
-        super(context, FIND_VALUE_RESPONSE, vendor, version, node, messageId);
+        super(context, OpCode.FIND_VALUE_RESPONSE, vendor, version, node, messageId);
 
         this.values = values;
     }
 
     public FindValueResponseImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, FIND_VALUE_RESPONSE, src, data);
+        super(context, OpCode.FIND_VALUE_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();
         

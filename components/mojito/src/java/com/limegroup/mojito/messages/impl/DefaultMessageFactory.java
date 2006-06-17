@@ -44,6 +44,7 @@ import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.messages.DHTMessage.OpCode;
 
 /**
  * The default implementation of the MessageFactory
@@ -68,29 +69,29 @@ public class DefaultMessageFactory implements MessageFactory {
         data.position(GNUTELLA_MESSAGE_HEADER);
         data.mark();
         
-        int opcode = data.get() & 0xFF;
+        OpCode opcode = OpCode.valueOf(data.get() & 0xFF);
         
         try {
             switch(opcode) {
-                case DHTMessage.PING_REQUEST:
+                case PING_REQUEST:
                     return new PingRequestImpl(context, src, data);
-                case DHTMessage.PING_RESPONSE:
+                case PING_RESPONSE:
                     return new PingResponseImpl(context, src, data);
-                case DHTMessage.FIND_NODE_REQUEST:
+                case FIND_NODE_REQUEST:
                     return new FindNodeRequestImpl(context, src, data);
-                case DHTMessage.FIND_NODE_RESPONSE:
+                case FIND_NODE_RESPONSE:
                     return new FindNodeResponseImpl(context, src, data);
-                case DHTMessage.FIND_VALUE_REQUEST:
+                case FIND_VALUE_REQUEST:
                     return new FindValueRequestImpl(context, src, data);
-                case DHTMessage.FIND_VALUE_RESPONSE:
+                case FIND_VALUE_RESPONSE:
                     return new FindValueResponseImpl(context, src, data);
-                case DHTMessage.STORE_REQUEST:
+                case STORE_REQUEST:
                     return new StoreRequestImpl(context, src, data);
-                case DHTMessage.STORE_RESPONSE:
+                case STORE_RESPONSE:
                     return new StoreResponseImpl(context, src, data);
-                case DHTMessage.STATS_REQUEST:
+                case STATS_REQUEST:
                     return new StatsRequestImpl(context, src, data);
-                case DHTMessage.STATS_RESPONSE:
+                case STATS_RESPONSE:
                     return new StatsResponseImpl(context, src, data);
                 default:
                     throw new IOException("Received unknown message type: " + opcode + " from " + src);

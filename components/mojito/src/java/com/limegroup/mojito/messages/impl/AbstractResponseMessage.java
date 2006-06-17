@@ -35,13 +35,13 @@ public abstract class AbstractResponseMessage extends AbstractDHTMessage
         implements ResponseMessage {
 
     public AbstractResponseMessage(Context context, 
-            int opcode, int vendor, int version,
+            OpCode opcode, int vendor, int version,
             ContactNode node, KUID messageId) {
         super(context, opcode, vendor, version, node, messageId);
     }
     
     public AbstractResponseMessage(Context context, 
-            int opcode, SocketAddress src, ByteBuffer data) 
+            OpCode opcode, SocketAddress src, ByteBuffer data) 
             throws IOException {
         super(context, opcode, src, data);
     }

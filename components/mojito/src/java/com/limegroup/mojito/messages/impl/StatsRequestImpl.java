@@ -47,7 +47,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
     public StatsRequestImpl(Context context, 
             int vendor, int version,
             ContactNode node, KUID messageId, int request) {
-        super(context, STATS_REQUEST, vendor, version, node, messageId);
+        super(context, OpCode.STATS_REQUEST, vendor, version, node, messageId);
 
         this.request = request;
         this.signature = null;
@@ -55,7 +55,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
 
     public StatsRequestImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, STATS_REQUEST, src, data);
+        super(context, OpCode.STATS_REQUEST, src, data);
         
         MessageInputStream in = getMessageInputStream();
         

@@ -45,7 +45,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     public FindNodeResponseImpl(Context context, 
             int vendor, int version, ContactNode node,
             KUID messageId, QueryKey queryKey, Collection<ContactNode> nodes) {
-        super(context, FIND_NODE_RESPONSE, vendor, version, node, messageId);
+        super(context, OpCode.FIND_NODE_RESPONSE, vendor, version, node, messageId);
 
         this.queryKey = queryKey;
         this.nodes = nodes;
@@ -53,7 +53,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     
     public FindNodeResponseImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, FIND_NODE_RESPONSE, src, data);
+        super(context, OpCode.FIND_NODE_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();
         

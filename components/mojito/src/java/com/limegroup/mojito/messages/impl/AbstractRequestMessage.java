@@ -35,12 +35,12 @@ public abstract class AbstractRequestMessage extends AbstractDHTMessage
         implements RequestMessage {
 
     public AbstractRequestMessage(Context context, 
-            int opcode, int vendor, int version,
+            OpCode opcode, int vendor, int version,
             ContactNode node, KUID messageId) {
         super(context, opcode, vendor, version, node, messageId);
     }
 
-    public AbstractRequestMessage(Context context, int opcode, 
+    public AbstractRequestMessage(Context context, OpCode opcode, 
             SocketAddress src, ByteBuffer data) 
             throws IOException {
         super(context, opcode, src, data);

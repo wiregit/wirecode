@@ -133,7 +133,7 @@ public class Database {
     }
 
     public synchronized Collection<KeyValue> get(KUID key) {
-        KeyValueBag bag = (KeyValueBag) database.get(key);
+        KeyValueBag bag = database.get(key);
         if (bag != null) {
             databaseStats.RETRIEVED_VALUES.incrementStat();
             return Collections.unmodifiableCollection(bag.values());
@@ -250,11 +250,11 @@ public class Database {
 
         private static final long serialVersionUID = -4796278962768822384L;
 
-        private PatriciaTrie trie;
+        private PatriciaTrie<K, V> trie;
 
         public DatabaseMap(int maxSize) {
             super(1024, 0.75f, true, maxSize);
-            trie = new PatriciaTrie();
+            trie = new PatriciaTrie<K, V>();
         }
 
         public V put(K key, V value) {
@@ -263,15 +263,15 @@ public class Database {
         }
 
         public V remove(Object key) {
-            trie.remove(key);
+            trie.remove((K)key);
             return super.remove(key);
         }
 
         public V select(K key) {
-            return (V)trie.select(key);
+            return trie.select(key);
         }
 
-        protected boolean removeEldestEntry(Entry eldest) {
+        protected boolean removeEldestEntry(Entry<K, V> eldest) {
             if (super.removeEldestEntry(eldest)) {
                 remove(eldest.getKey());
             }

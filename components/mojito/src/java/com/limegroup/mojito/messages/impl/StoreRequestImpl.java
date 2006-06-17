@@ -45,7 +45,7 @@ public class StoreRequestImpl extends AbstractRequestMessage
             int vendor, int version,
             ContactNode node, KUID messageId,
             QueryKey queryKey, KeyValue keyValue) {
-        super(context, STORE_REQUEST, vendor, version, node, messageId);
+        super(context, OpCode.STORE_REQUEST, vendor, version, node, messageId);
 
         this.queryKey = queryKey;
         this.keyValue = keyValue;
@@ -53,7 +53,7 @@ public class StoreRequestImpl extends AbstractRequestMessage
     
     public StoreRequestImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, STORE_REQUEST, src, data);
+        super(context, OpCode.STORE_REQUEST, src, data);
         
         MessageInputStream in = getMessageInputStream();
         

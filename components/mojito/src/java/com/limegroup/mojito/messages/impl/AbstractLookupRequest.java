@@ -39,7 +39,7 @@ public abstract class AbstractLookupRequest extends AbstractRequestMessage
     protected final KUID lookupId;
     
     public AbstractLookupRequest(Context context, 
-            int opcode, int vendor, int version, 
+            OpCode opcode, int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId) {
         super(context, opcode, vendor, version, node, messageId);
         
@@ -47,7 +47,7 @@ public abstract class AbstractLookupRequest extends AbstractRequestMessage
     }
     
     public AbstractLookupRequest(Context context, 
-            int opcode, SocketAddress src, ByteBuffer data) 
+            OpCode opcode, SocketAddress src, ByteBuffer data) 
             throws IOException {
         super(context, opcode, src, data);
         

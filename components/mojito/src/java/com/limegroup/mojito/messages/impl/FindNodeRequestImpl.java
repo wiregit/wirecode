@@ -36,12 +36,12 @@ public class FindNodeRequestImpl extends AbstractLookupRequest
 
     public FindNodeRequestImpl(Context context, int vendor, int version, 
             ContactNode node, KUID messageId, KUID lookupId) {
-        super(context, FIND_NODE_REQUEST, vendor, version, node, messageId, lookupId);
+        super(context, OpCode.FIND_NODE_REQUEST, vendor, version, node, messageId, lookupId);
     }
     
     public FindNodeRequestImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, FIND_NODE_REQUEST, src, data);
+        super(context, OpCode.FIND_NODE_REQUEST, src, data);
     }
     
     public String toString() {

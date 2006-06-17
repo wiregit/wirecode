@@ -53,7 +53,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     private ByteBuffer data;
     
-    private int opcode;
+    private OpCode opcode;
     
     private int vendor;
     private int version;
@@ -65,11 +65,11 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     private MessageInputStream in;
     
     public AbstractDHTMessage(Context context, 
-            int opcode, int vendor, int version,
+            OpCode opcode, int vendor, int version,
             ContactNode contactNode, KUID messageId) {
 
-        if (!checkOpCode(opcode)) {
-            throw new IllegalArgumentException("Unknown opcode: " + opcode);
+        if (opcode == OpCode.UNKNOWN) {
+            throw new IllegalArgumentException("OpCode cannot be of type Unknown");
         }
         
         if (contactNode == null) {
@@ -97,10 +97,10 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     }
 
     public AbstractDHTMessage(Context context, 
-            int opcode, SocketAddress src, ByteBuffer data) throws IOException {
+            OpCode opcode, SocketAddress src, ByteBuffer data) throws IOException {
         
-        if (!checkOpCode(opcode)) {
-            throw new IOException("Unknown opcode: " + opcode);
+        if (opcode == OpCode.UNKNOWN) {
+            throw new IllegalArgumentException("OpCode cannot be of type Unknown");
         }
         
         this.context = context;
@@ -125,24 +125,6 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         this.data = data;
     }
     
-    private static boolean checkOpCode(int opcode) {
-        switch(opcode) {
-            case PING_REQUEST:
-            case PING_RESPONSE:
-            case STORE_REQUEST:
-            case STORE_RESPONSE:
-            case FIND_NODE_REQUEST:
-            case FIND_NODE_RESPONSE:
-            case FIND_VALUE_REQUEST:
-            case FIND_VALUE_RESPONSE:
-            case STATS_REQUEST:
-            case STATS_RESPONSE:
-                return true;
-            default:
-                return false;
-        }
-    }
-    
     protected MessageInputStream getMessageInputStream() throws IOException {
         if (in == null) {
             throw new IOException("Illegal State");
@@ -158,7 +140,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         return data;
     }
     
-    public int getOpCode() {
+    public OpCode getOpCode() {
         return opcode;
     }
     
@@ -191,7 +173,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     }
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
-        out.writeByte(getOpCode()); // 0
+        out.writeByte(getOpCode().getOpCode()); // 0
         out.writeInt(getVendor()); // 1-3
         out.writeShort(getVersion()); // 4-5
         out.writeKUID(getContactNode().getNodeID()); // 6-26

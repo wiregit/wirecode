@@ -42,7 +42,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
     public StoreResponseImpl(Context context, 
             int vendor, int version, ContactNode node,
             KUID messageId, KUID valueId, int status) {
-        super(context, STORE_RESPONSE, vendor, version, node, messageId);
+        super(context, OpCode.STORE_RESPONSE, vendor, version, node, messageId);
 
         this.valueId = valueId;
         this.status = status;
@@ -50,7 +50,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
 
     public StoreResponseImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, STORE_RESPONSE, src, data);
+        super(context, OpCode.STORE_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();
         

@@ -42,7 +42,7 @@ public class PingResponseImpl extends AbstractResponseMessage
     public PingResponseImpl(Context context, int vendor, int version, 
 	    ContactNode node, KUID messageId, 
 	    SocketAddress externalAddress, int estimatedSize) {
-        super(context, PING_RESPONSE, vendor, version, node, messageId);
+        super(context, OpCode.PING_RESPONSE, vendor, version, node, messageId);
 
         this.externalAddress = externalAddress;
         this.estimatedSize = estimatedSize;
@@ -50,7 +50,7 @@ public class PingResponseImpl extends AbstractResponseMessage
 
     public PingResponseImpl(Context context, 
             SocketAddress src, ByteBuffer data) throws IOException {
-        super(context, PING_RESPONSE, src, data);
+        super(context, OpCode.PING_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();
         
