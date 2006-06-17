@@ -59,6 +59,7 @@
 package com.limegroup.gnutella.util;
 
 
+
 /*
  * http://fisheye5.cenqua.com/viewrep/~raw,r=1.2/dwr/java/uk/ltd/getahead/dwr/lang/IntHashMap.java
  */
@@ -74,10 +75,10 @@ package com.limegroup.gnutella.util;
  * @author Alex Chaffee (alex@apache.org)
  * @author Stephen Colebourne
  * @since 2.0
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.6.1 $
  * @see java.util.HashMap
  */
-public class IntHashMap {
+public class IntHashMap<V> {
 
     /**
      * The hash table data.
@@ -108,11 +109,11 @@ public class IntHashMap {
      * <p>Innerclass that acts as a datastructure to create a new entry in the
      * table.</p>
      */
-    private static class Entry {
+    private static class Entry<V> {
         int hash;
         int key;
-        Object value;
-        Entry next;
+        V value;
+        Entry<V> next;
 
         /**
          * <p>Create a new entry with the given values.</p>
@@ -122,7 +123,7 @@ public class IntHashMap {
          * @param value The value for this key
          * @param next A reference to the next entry in the table
          */
-        protected Entry(int hash, int key, Object value, Entry next) {
+        protected Entry(int hash, int key, V value, Entry<V> next) {
             this.hash = hash;
             this.key = key;
             this.value = value;
@@ -181,7 +182,7 @@ public class IntHashMap {
      * 
      * @param m The IntHashMap to copy
      */
-    public IntHashMap(IntHashMap m) {
+    public IntHashMap(IntHashMap<V> m) {
         // Allow for a bit of growth
         this((int) ((1 + m.size()) * 1.1));
         putAll(m);
@@ -190,10 +191,10 @@ public class IntHashMap {
     /**
      * Adds all elements from m to this.
      */
-    public void putAll(IntHashMap m) {
-        Entry tab[] = m.table;
+    public void putAll(IntHashMap<? extends V> m) {
+        Entry<V> tab[] = m.table;
         for (int i = tab.length; i-- > 0;) {
-            for (Entry e = tab[i]; e != null; e = e.next) {
+            for (Entry<V> e = tab[i]; e != null; e = e.next) {
                 put(e.key, e.value);
             }
         }
@@ -236,14 +237,14 @@ public class IntHashMap {
      * @see        #containsValue(Object)
      * @see        java.util.Map
      */
-    public boolean contains(Object value) {
+    public boolean contains(V value) {
         if (value == null) {
             throw new NullPointerException();
         }
 
-        Entry tab[] = table;
+        Entry<V> tab[] = table;
         for (int i = tab.length; i-- > 0;) {
-            for (Entry e = tab[i]; e != null; e = e.next) {
+            for (Entry<V> e = tab[i]; e != null; e = e.next) {
                 if (e.value.equals(value)) {
                     return true;
                 }
@@ -264,7 +265,7 @@ public class IntHashMap {
      * @see    java.util.Map
      * @since JDK1.2
      */
-    public boolean containsValue(Object value) {
+    public boolean containsValue(V value) {
         return contains(value);
     }
 
@@ -278,10 +279,10 @@ public class IntHashMap {
      * @see #contains(Object)
      */
     public boolean containsKey(int key) {
-        Entry tab[] = table;
+        Entry<V> tab[] = table;
         int hash = key;
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry e = tab[index]; e != null; e = e.next) {
+        for (Entry<V> e = tab[index]; e != null; e = e.next) {
             if (e.hash == hash) {
                 return true;
             }
@@ -298,11 +299,11 @@ public class IntHashMap {
      *          this hashtable.
      * @see     #put(int, Object)
      */
-    public Object get(int key) {
-        Entry tab[] = table;
+    public V get(int key) {
+        Entry<V> tab[] = table;
         int hash = key;
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry e = tab[index]; e != null; e = e.next) {
+        for (Entry<V> e = tab[index]; e != null; e = e.next) {
             if (e.hash == hash) {
                 return e.value;
             }
@@ -321,7 +322,7 @@ public class IntHashMap {
      */
     protected void rehash() {
         int oldCapacity = table.length;
-        Entry oldMap[] = table;
+        Entry<V> oldMap[] = table;
 
         int newCapacity = oldCapacity * 2 + 1;
         Entry newMap[] = new Entry[newCapacity];
@@ -330,8 +331,8 @@ public class IntHashMap {
         table = newMap;
 
         for (int i = oldCapacity; i-- > 0;) {
-            for (Entry old = oldMap[i]; old != null;) {
-                Entry e = old;
+            for (Entry<V> old = oldMap[i]; old != null;) {
+                Entry<V> e = old;
                 old = old.next;
 
                 int index = (e.hash & 0x7FFFFFFF) % newCapacity;
@@ -356,12 +357,12 @@ public class IntHashMap {
      * @throws  NullPointerException  if the key is <code>null</code>.
      * @see     #get(int)
      */
-    public Object put(int key, Object value) {
+    public Object put(int key, V value) {
         // Makes sure the key is not already in the hashtable.
-        Entry tab[] = table;
+        Entry<V> tab[] = table;
         int hash = key;
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry e = tab[index]; e != null; e = e.next) {
+        for (Entry<V> e = tab[index]; e != null; e = e.next) {
             if (e.hash == hash) {
                 Object old = e.value;
                 e.value = value;
@@ -378,7 +379,7 @@ public class IntHashMap {
         }
 
         // Creates the new entry.
-        Entry e = new Entry(hash, key, value, tab[index]);
+        Entry<V> e = new Entry<V>(hash, key, value, tab[index]);
         tab[index] = e;
         count++;
         return null;
@@ -395,11 +396,11 @@ public class IntHashMap {
      * @return  the value to which the key had been mapped in this hashtable,
      *          or <code>null</code> if the key did not have a mapping.
      */
-    public Object remove(int key) {
-        Entry tab[] = table;
+    public V remove(int key) {
+        Entry<V> tab[] = table;
         int hash = key;
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry e = tab[index], prev = null; e != null; prev = e, e = e.next) {
+        for (Entry<V> e = tab[index], prev = null; e != null; prev = e, e = e.next) {
             if (e.hash == hash) {
                 if (prev != null) {
                     prev.next = e.next;
@@ -407,7 +408,7 @@ public class IntHashMap {
                     tab[index] = e.next;
                 }
                 count--;
-                Object oldValue = e.value;
+                V oldValue = e.value;
                 e.value = null;
                 return oldValue;
             }
@@ -419,7 +420,7 @@ public class IntHashMap {
      * <p>Clears this hashtable so that it contains no keys.</p>
      */
     public synchronized void clear() {
-        Entry tab[] = table;
+        Entry<V> tab[] = table;
         for (int index = tab.length; --index >= 0;) {
             tab[index] = null;
         }
