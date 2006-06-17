@@ -29,17 +29,36 @@ import java.nio.ByteBuffer;
  */
 public class ByteBufferInputStream extends InputStream {
 
-    private int index = 0;
-    private int mark = -1;
+    /** The index of the current ByteBuffer */
+    protected int index = 0;
     
-    private ByteBuffer[] buffers;
+    /** The index of the marked ByteBuffer */
+    protected int mark = -1;
     
+    /** The array of ByteBuffer(s) we're reading from */
+    protected ByteBuffer[] buffers;
+    
+    /**
+     * Creates a ByteBufferInputStream that is reading from
+     * a single ByteBuffer.
+     */
     public ByteBufferInputStream(ByteBuffer buffer) {
         this(new ByteBuffer[]{buffer});
     }
     
+    /**
+     * Creates a ByteBufferInputStream that is reading from
+     * multiple ByteBuffer(s).
+     */
     public ByteBufferInputStream(ByteBuffer[] buffers) {
         this.buffers = buffers;
+    }
+    
+    /**
+     * Returns the underlying array of ByteBuffer(s).
+     */
+    public ByteBuffer[] buffers() {
+        return buffers;
     }
     
     public int available() throws IOException {
