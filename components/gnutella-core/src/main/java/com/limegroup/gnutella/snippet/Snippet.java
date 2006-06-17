@@ -27,7 +27,6 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.messages.GGEPTest;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -48,7 +47,6 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.vendor.VendorMessageTest;
 
 public class Snippet {
 
