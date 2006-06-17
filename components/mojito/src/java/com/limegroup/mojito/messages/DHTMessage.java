@@ -30,21 +30,9 @@ import com.limegroup.mojito.KUID;
  */
 public interface DHTMessage {
     
-    /*private static final int PING_REQUEST = 0x01;
-    private static final int PING_RESPONSE = 0x02;
-    
-    private static final int STORE_REQUEST = 0x03;
-    private static final int STORE_RESPONSE = 0x04;
-    
-    private static final int FIND_NODE_REQUEST = 0x05;
-    private static final int FIND_NODE_RESPONSE = 0x06;
-    
-    private static final int FIND_VALUE_REQUEST = 0x07;
-    private static final int FIND_VALUE_RESPONSE = 0x08;
-    
-    private static final int STATS_REQUEST = 0x09;
-    private static final int STATS_RESPONSE = 0x0A;*/
-    
+    /**
+     * The opcodes of our Messages
+     */
     public static enum OpCode {
         
         UNKNOWN(0x00),
@@ -64,7 +52,7 @@ public interface DHTMessage {
         STATS_REQUEST(0x09),
         STATS_RESPONSE(0x0A);
         
-        private final int opcode;
+        private int opcode;
             
         private OpCode(int opcode) {
             this.opcode = opcode;
@@ -75,23 +63,16 @@ public interface DHTMessage {
         }
         
         public String toString() {
-            return "OpCode(" + opcode + ")";
+            return name() + "(" + getOpCode() + ")";
         }
         
         public static OpCode valueOf(int opcode) {
-            switch(opcode) {
-                case 0x01: return PING_REQUEST;
-                case 0x02: return PING_RESPONSE;
-                case 0x03: return STORE_REQUEST;
-                case 0x04: return STORE_RESPONSE;
-                case 0x05: return FIND_NODE_REQUEST;
-                case 0x06: return FIND_NODE_RESPONSE;
-                case 0x07: return FIND_VALUE_REQUEST;
-                case 0x08: return FIND_VALUE_RESPONSE;
-                case 0x09: return STATS_REQUEST;
-                case 0x0A: return STATS_RESPONSE;
-                default: return UNKNOWN;
+            for(OpCode o : values()) {
+                if (o.opcode == opcode) {
+                    return o;
+                }
             }
+            return UNKNOWN;
         }
     }
     

@@ -59,9 +59,23 @@ public class DefaultMessageFactory implements MessageFactory {
     
     protected final Context context;
     
+    //private IntHashMap opcodeMap = new IntHashMap();
+    
     public DefaultMessageFactory(Context context) {
         this.context = context;
+        
+        /*for(OpCode opcode : OpCode.values()) {
+            opcodeMap.put(opcode.getOpCode(), opcode);
+        }*/
     }
+    
+    /*private OpCode getOpCode(int opcode) {
+        OpCode o = (OpCode)opcodeMap.get(opcode);
+        if (o != null) {
+            return o;
+        }
+        return OpCode.UNKNOWN;
+    }*/
     
     public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
@@ -69,10 +83,11 @@ public class DefaultMessageFactory implements MessageFactory {
         data.position(GNUTELLA_MESSAGE_HEADER);
         data.mark();
         
-        OpCode opcode = OpCode.valueOf(data.get() & 0xFF);
+        int opcode = data.get() & 0xFF;
         
         try {
-            switch(opcode) {
+            //switch(getOpCode(opcode)) {
+            switch(OpCode.valueOf(opcode)) {
                 case PING_REQUEST:
                     return new PingRequestImpl(context, src, data);
                 case PING_RESPONSE:
