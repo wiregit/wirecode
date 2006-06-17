@@ -275,7 +275,7 @@ public abstract class MessageDispatcher implements Runnable {
     }
     
     /**
-     * 
+     * The raw read-method.
      */
     protected SocketAddress read(ByteBuffer b) throws IOException {
         return channel.receive(b);
@@ -294,9 +294,6 @@ public abstract class MessageDispatcher implements Runnable {
             ByteBuffer data = ByteBuffer.allocate(length);
             data.put(buffer);
             data.rewind();
-            
-            // Set to Big-Endianess
-            data.order(ByteOrder.BIG_ENDIAN);
             
             DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();

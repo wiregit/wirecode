@@ -83,14 +83,20 @@ public class DefaultMessageFactory implements MessageFactory {
     
     public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
-        
+     
         ByteBuffer guid = (ByteBuffer)data.slice().limit(AbstractMessage.GUID_END);
         ByteBuffer payload = (ByteBuffer)data.position(AbstractMessage.PAYLOAD_START);
         ByteBuffer[] msg = { guid, payload };
         
+        return createMessage(src, msg);
+    }
+    
+    public DHTMessage createMessage(SocketAddress src, ByteBuffer[] data) 
+            throws MessageFormatException, IOException {
+
         OpCode opcode = null;
         try {
-            opcode = opcode(msg[0].get() & 0xFF);
+            opcode = opcode(data[0].get() & 0xFF);
         } catch (IllegalArgumentException err) {
             throw new MessageFormatException(err);
         }
@@ -98,25 +104,25 @@ public class DefaultMessageFactory implements MessageFactory {
         try {
             switch(opcode) {
                 case PING_REQUEST:
-                    return new PingRequestImpl(context, src, msg);
+                    return new PingRequestImpl(context, src, data);
                 case PING_RESPONSE:
-                    return new PingResponseImpl(context, src, msg);
+                    return new PingResponseImpl(context, src, data);
                 case FIND_NODE_REQUEST:
-                    return new FindNodeRequestImpl(context, src, msg);
+                    return new FindNodeRequestImpl(context, src, data);
                 case FIND_NODE_RESPONSE:
-                    return new FindNodeResponseImpl(context, src, msg);
+                    return new FindNodeResponseImpl(context, src, data);
                 case FIND_VALUE_REQUEST:
-                    return new FindValueRequestImpl(context, src, msg);
+                    return new FindValueRequestImpl(context, src, data);
                 case FIND_VALUE_RESPONSE:
-                    return new FindValueResponseImpl(context, src, msg);
+                    return new FindValueResponseImpl(context, src, data);
                 case STORE_REQUEST:
-                    return new StoreRequestImpl(context, src, msg);
+                    return new StoreRequestImpl(context, src, data);
                 case STORE_RESPONSE:
-                    return new StoreResponseImpl(context, src, msg);
+                    return new StoreResponseImpl(context, src, data);
                 case STATS_REQUEST:
-                    return new StatsRequestImpl(context, src, msg);
+                    return new StatsRequestImpl(context, src, data);
                 case STATS_RESPONSE:
-                    return new StatsResponseImpl(context, src, msg);
+                    return new StatsResponseImpl(context, src, data);
                 default:
                     throw new IOException("Unhandled OpCode " + opcode);
             }

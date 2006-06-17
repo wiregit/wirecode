@@ -36,20 +36,28 @@ import com.limegroup.gnutella.messages.Message;
  */
 public abstract class AbstractMessage extends Message {
     
+    /** The function ID of our DHT Message */
     public static final byte F_DHT_MESSAGE = (byte)0x43;
     
-    /*
-     * The Gnutella Message Header we have to skip.
-     * See AbstractDHTMessage for more info!
-     */
+    /** GUID goes from 0 to 16th byte */
     public static final int GUID_END = 16;
+    
+    /** PAYLOAD starts at 23rd byte */
     public static final int PAYLOAD_START = 23;
     
+    /** 
+     * An empty GUID, it's never written to Network.
+     * See overwritten write-methods for more info!
+     */
     private static final byte[] GUID = new byte[16];
     
+    /** Default TTL */
     private static final byte TTL = (byte)0x01;
+    
+    /** Default HOPS */
     private static final byte HOPS = (byte)0x00;
     
+    /** The serialized  Message */
     private byte[] payload;
     
     AbstractMessage() {
@@ -63,6 +71,9 @@ public abstract class AbstractMessage extends Message {
         return this;
     }
 
+    /**
+     * Serialized this Message if it has not been serialized yet.
+     */
     private void serialize() throws IOException {
         if (getLength() == 0) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(640);

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +36,6 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
-import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
