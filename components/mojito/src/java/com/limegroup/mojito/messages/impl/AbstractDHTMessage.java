@@ -97,7 +97,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     }
 
     public AbstractDHTMessage(Context context, 
-            OpCode opcode, SocketAddress src, ByteBuffer[] data) throws IOException {
+            OpCode opcode, SocketAddress src, ByteBuffer... data) throws IOException {
         
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");

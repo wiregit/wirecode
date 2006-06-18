@@ -49,7 +49,7 @@ public class PingResponseImpl extends AbstractResponseMessage
     }
 
     public PingResponseImpl(Context context, 
-            SocketAddress src, ByteBuffer[] data) throws IOException {
+            SocketAddress src, ByteBuffer... data) throws IOException {
         super(context, OpCode.PING_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();

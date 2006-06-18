@@ -35,10 +35,7 @@ import com.limegroup.mojito.io.MessageFormatException;
  */
 public interface MessageFactory {
 
-    public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
-            throws MessageFormatException, IOException;
-    
-    public DHTMessage createMessage(SocketAddress src, ByteBuffer[] data) 
+    public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
         throws MessageFormatException, IOException;
     
     public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 

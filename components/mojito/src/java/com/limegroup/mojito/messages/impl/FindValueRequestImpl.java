@@ -41,7 +41,7 @@ public class FindValueRequestImpl extends AbstractLookupRequest
     }
     
     public FindValueRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer[] data) throws IOException {
+            SocketAddress src, ByteBuffer... data) throws IOException {
         super(context, OpCode.FIND_VALUE_REQUEST, src, data);
     }
     

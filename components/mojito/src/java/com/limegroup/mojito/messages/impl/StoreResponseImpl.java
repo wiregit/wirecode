@@ -49,7 +49,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
     }
 
     public StoreResponseImpl(Context context, 
-            SocketAddress src, ByteBuffer[] data) throws IOException {
+            SocketAddress src, ByteBuffer... data) throws IOException {
         super(context, OpCode.STORE_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();

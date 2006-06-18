@@ -81,19 +81,16 @@ public class DefaultMessageFactory implements MessageFactory {
         throw new IllegalArgumentException("Unknown opcode: " + opcode);
     }
     
-    public DHTMessage createMessage(SocketAddress src, ByteBuffer data) 
+    public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
             throws MessageFormatException, IOException {
-     
-        ByteBuffer guid = (ByteBuffer)data.slice().limit(AbstractMessage.GUID_END);
-        ByteBuffer payload = (ByteBuffer)data.position(AbstractMessage.PAYLOAD_START);
-        ByteBuffer[] msg = { guid, payload };
         
-        return createMessage(src, msg);
-    }
-    
-    public DHTMessage createMessage(SocketAddress src, ByteBuffer[] data) 
-            throws MessageFormatException, IOException {
-
+        if (data.length == 1) {
+            ByteBuffer guid = (ByteBuffer)data[0].slice().limit(AbstractMessage.GUID_END);
+            ByteBuffer payload = (ByteBuffer)data[0].position(AbstractMessage.PAYLOAD_START);
+            //data = new ByteBuffer[]{ guid, payload };
+            return createMessage(src, guid, payload);
+        }
+        
         OpCode opcode = null;
         try {
             opcode = opcode(data[0].get() & 0xFF);

@@ -49,7 +49,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     }
 
     public FindValueResponseImpl(Context context, 
-            SocketAddress src, ByteBuffer[] data) throws IOException {
+            SocketAddress src, ByteBuffer... data) throws IOException {
         super(context, OpCode.FIND_VALUE_RESPONSE, src, data);
         
         MessageInputStream in = getMessageInputStream();

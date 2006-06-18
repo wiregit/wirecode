@@ -40,7 +40,7 @@ public class FindNodeRequestImpl extends AbstractLookupRequest
     }
     
     public FindNodeRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer[] data) throws IOException {
+            SocketAddress src, ByteBuffer... data) throws IOException {
         super(context, OpCode.FIND_NODE_REQUEST, src, data);
     }
     

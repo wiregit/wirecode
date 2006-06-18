@@ -41,7 +41,7 @@ public class PingRequestImpl extends AbstractRequestMessage
     }
     
     public PingRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer[] data) throws IOException {
+            SocketAddress src, ByteBuffer... data) throws IOException {
         super(context, OpCode.PING_REQUEST, src, data);
     }
 
