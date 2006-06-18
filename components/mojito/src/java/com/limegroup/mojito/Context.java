@@ -84,9 +84,6 @@ public class Context {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
-    private static final int VENDOR = ContextSettings.getVendorID();
-    private static final int VERSION = 0;
-    
     private static Timer TIMER = new Timer(true);
     
     private KeyPair masterKeyPair;
@@ -198,11 +195,11 @@ public class Context {
     }
     
     public int getVendor() {
-        return VENDOR;
+        return ContextSettings.getVendorID();
     }
     
     public int getVersion() {
-        return VERSION;
+        return ContextSettings.VERSION.getValue();
     }
     
     public PublicKey getMasterKey() {

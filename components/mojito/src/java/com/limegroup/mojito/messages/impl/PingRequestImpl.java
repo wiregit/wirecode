@@ -35,9 +35,9 @@ import com.limegroup.mojito.messages.PingRequest;
 public class PingRequestImpl extends AbstractRequestMessage
         implements PingRequest {
 
-    public PingRequestImpl(Context context, int vendor, int version,
-            ContactNode node, KUID messageId) {
-        super(context, OpCode.PING_REQUEST, vendor, version, node, messageId);
+    public PingRequestImpl(Context context,
+            ContactNode contactNode, KUID messageId) {
+        super(context, OpCode.PING_REQUEST, contactNode, messageId);
     }
     
     public PingRequestImpl(Context context, 

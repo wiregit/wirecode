@@ -77,12 +77,15 @@ public class MojitoDHT {
         }
         
         if (local == null) {
+            int vendor = ContextSettings.getVendorID();
+            int version = ContextSettings.VERSION.getValue();
+            
             KUID nodeId = KUID.createRandomNodeID();
             SocketAddress addr = new InetSocketAddress(0);
             int flags = 0;
             int instanceId = 0;
             
-            local = new ContactNode(nodeId, addr, instanceId, flags);
+            local = new ContactNode(vendor, version, nodeId, addr, instanceId, flags);
         }
 
         context = new Context(name, local, keyPair);
@@ -492,6 +495,8 @@ public class MojitoDHT {
         
         // ContactNode
         ContactNode local = context.getLocalNode();
+        oos.writeInt(local.getVendor());
+        oos.writeShort(local.getVersion());
         oos.writeObject(local.getNodeID());
         // TODO: store SocketAddress?
         oos.writeByte(local.getInstanceID());
@@ -568,6 +573,8 @@ public class MojitoDHT {
         String name = (String)ois.readObject();
         
         // ContactNode
+        int vendor = ois.readInt();
+        int version = ois.readUnsignedShort();
         KUID nodeId = (KUID)ois.readObject();
         // TODO: load SocketAddress?
         int instanceId = ois.readUnsignedByte();
@@ -586,7 +593,7 @@ public class MojitoDHT {
             instanceId = 0;
         }
         
-        ContactNode local = new ContactNode(nodeId, 
+        ContactNode local = new ContactNode(vendor, version, nodeId, 
                 new InetSocketAddress(0), instanceId, flags);
         
         // Create an instance w/o a KeyPair for now (will set it later!)

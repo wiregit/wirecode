@@ -55,9 +55,6 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     private OpCode opcode;
     
-    private int vendor;
-    private int version;
-
     private ContactNode contactNode;
     
     private KUID messageId;
@@ -65,8 +62,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     private MessageInputStream in;
     
     public AbstractDHTMessage(Context context, 
-            OpCode opcode, int vendor, int version,
-            ContactNode contactNode, KUID messageId) {
+            OpCode opcode, ContactNode contactNode, KUID messageId) {
 
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
@@ -84,14 +80,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
             throw new IllegalArgumentException("MessageID is of wrong type: " + messageId);
         }
         
-        if ((version & 0xFFFF0000) != 0) {
-            throw new IllegalArgumentException("Version must be between 0x00 and 0xFFFF: " + version);
-        }
-        
         this.context = context;
         this.opcode = opcode;
-        this.vendor = vendor;
-        this.version = version;
         this.contactNode = contactNode;
         this.messageId = messageId;
     }
@@ -108,13 +98,12 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         
         in = new MessageInputStream(new ByteBufferInputStream(data));
         
-        this.vendor = in.readInt();
-        this.version = in.readUnsignedShort();
-        
+        int vendor = in.readInt();
+        int version = in.readUnsignedShort();
         KUID nodeId = in.readNodeID();
         int instanceId = in.readUnsignedByte();
-        int nodeFlags = in.readUnsignedByte();
-        this.contactNode = new ContactNode(nodeId, src, instanceId, nodeFlags);
+        int flags = in.readUnsignedByte();
+        this.contactNode = new ContactNode(vendor, version, nodeId, src, instanceId, flags);
         
         this.messageId = in.readMessageID();
         
@@ -143,14 +132,6 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     public OpCode getOpCode() {
         return opcode;
     }
-    
-    public int getVendor() {
-        return vendor;
-    }
-
-    public int getVersion() {
-        return version;
-    }
 
     public ContactNode getContactNode() {
         return contactNode;
@@ -173,9 +154,9 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     }
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
-        out.writeByte(getOpCode().getOpCode()); // 0
-        out.writeInt(getVendor()); // 1-3
-        out.writeShort(getVersion()); // 4-5
+        out.writeOpCode(getOpCode()); // 0
+        out.writeInt(getContactNode().getVendor()); // 1-3
+        out.writeShort(getContactNode().getVersion()); // 4-5
         out.writeKUID(getContactNode().getNodeID()); // 6-26
         out.writeByte(getContactNode().getInstanceID()); // 27
         out.writeByte(getContactNode().getFlags()); // 28

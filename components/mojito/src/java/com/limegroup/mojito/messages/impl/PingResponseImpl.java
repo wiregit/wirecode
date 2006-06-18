@@ -39,10 +39,10 @@ public class PingResponseImpl extends AbstractResponseMessage
     private SocketAddress externalAddress;
     private int estimatedSize;
 
-    public PingResponseImpl(Context context, int vendor, int version, 
-	    ContactNode node, KUID messageId, 
+    public PingResponseImpl(Context context, 
+	    ContactNode contactNode, KUID messageId, 
 	    SocketAddress externalAddress, int estimatedSize) {
-        super(context, OpCode.PING_RESPONSE, vendor, version, node, messageId);
+        super(context, OpCode.PING_RESPONSE, contactNode, messageId);
 
         this.externalAddress = externalAddress;
         this.estimatedSize = estimatedSize;

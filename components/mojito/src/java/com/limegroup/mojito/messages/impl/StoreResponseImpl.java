@@ -37,12 +37,12 @@ public class StoreResponseImpl extends AbstractResponseMessage
         implements StoreResponse {
 
     private KUID valueId;
-    private int status;
+    private StoreStatus status;
 
     public StoreResponseImpl(Context context, 
-            int vendor, int version, ContactNode node,
-            KUID messageId, KUID valueId, int status) {
-        super(context, OpCode.STORE_RESPONSE, vendor, version, node, messageId);
+            ContactNode contactNode, KUID messageId, 
+            KUID valueId, StoreStatus status) {
+        super(context, OpCode.STORE_RESPONSE, contactNode, messageId);
 
         this.valueId = valueId;
         this.status = status;
@@ -55,7 +55,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
         MessageInputStream in = getMessageInputStream();
         
         this.valueId = in.readValueID();
-        this.status = in.readUnsignedByte();
+        this.status = in.readStoreStatus();
     }
     
     public KUID getValueID() {
@@ -64,10 +64,10 @@ public class StoreResponseImpl extends AbstractResponseMessage
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeKUID(valueId);
-        out.writeByte(status);
+        out.writeStoreStatus(status);
     }
 
-    public int getStatus() {
+    public StoreStatus getStatus() {
         return status;
     }
     

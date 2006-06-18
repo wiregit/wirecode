@@ -41,9 +41,9 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     private Collection<KeyValue> values;
 
     public FindValueResponseImpl(Context context, 
-            int vendor, int version, ContactNode node, 
-            KUID messageId, Collection<KeyValue> values) {
-        super(context, OpCode.FIND_VALUE_RESPONSE, vendor, version, node, messageId);
+            ContactNode contactNode, KUID messageId, 
+            Collection<KeyValue> values) {
+        super(context, OpCode.FIND_VALUE_RESPONSE, contactNode, messageId);
 
         this.values = values;
     }

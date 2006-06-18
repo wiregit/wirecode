@@ -39,9 +39,9 @@ public abstract class AbstractLookupRequest extends AbstractRequestMessage
     protected final KUID lookupId;
     
     public AbstractLookupRequest(Context context, 
-            OpCode opcode, int vendor, int version, 
-            ContactNode node, KUID messageId, KUID lookupId) {
-        super(context, opcode, vendor, version, node, messageId);
+            OpCode opcode, ContactNode contactNode, 
+            KUID messageId, KUID lookupId) {
+        super(context, opcode, contactNode, messageId);
         
         this.lookupId = lookupId;
     }

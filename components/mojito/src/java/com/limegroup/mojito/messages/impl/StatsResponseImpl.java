@@ -41,9 +41,8 @@ public class StatsResponseImpl extends AbstractResponseMessage
     private String statistics;
 
     public StatsResponseImpl(Context context, 
-            int vendor, int version, ContactNode node,
-            KUID messageId, String statistics) {
-        super(context, OpCode.STATS_RESPONSE, vendor, version, node, messageId);
+            ContactNode contactNode, KUID messageId, String statistics) {
+        super(context, OpCode.STATS_RESPONSE, contactNode, messageId);
 
         this.statistics = statistics;
     }

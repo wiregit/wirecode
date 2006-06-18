@@ -33,6 +33,7 @@ import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
@@ -107,10 +108,10 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             }
         }
         
-        int status = StoreResponse.FAILED;
+        StoreStatus status = StoreStatus.FAILED;
         if (context.getDatabase().add(keyValue)) {
             networkStats.STORE_REQUESTS_OK.incrementStat();
-            status = StoreResponse.SUCCEEDED;
+            status = StoreStatus.SUCCEEDED;
         } else {
             networkStats.STORE_REQUESTS_FAILURE.incrementStat();
         }

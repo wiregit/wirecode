@@ -42,10 +42,9 @@ public class StoreRequestImpl extends AbstractRequestMessage
     private KeyValue keyValue;
 
     public StoreRequestImpl(Context context, 
-            int vendor, int version,
-            ContactNode node, KUID messageId,
+            ContactNode contactNode, KUID messageId,
             QueryKey queryKey, KeyValue keyValue) {
-        super(context, OpCode.STORE_REQUEST, vendor, version, node, messageId);
+        super(context, OpCode.STORE_REQUEST, contactNode, messageId);
 
         this.queryKey = queryKey;
         this.keyValue = keyValue;

@@ -31,6 +31,8 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.messages.DHTMessage.OpCode;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 
 /**
  * The MessageOutputStream class writes a DHTMessage (serializes)
@@ -90,6 +92,8 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     public void writeContactNode(ContactNode node) throws IOException {
+        writeInt(node.getVendor());
+        writeShort(node.getVersion());
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getSocketAddress());
     }
@@ -133,5 +137,13 @@ public class MessageOutputStream extends DataOutputStream {
         } else {
             writeShort(0);
         }
+    }
+    
+    public void writeOpCode(OpCode opcode) throws IOException {
+        writeByte(opcode.getOpCode());
+    }
+    
+    public void writeStoreStatus(StoreStatus status) throws IOException {
+        writeByte(status.getStatus());
     }
 }

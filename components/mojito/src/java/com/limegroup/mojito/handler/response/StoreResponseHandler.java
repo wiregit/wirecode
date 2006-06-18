@@ -39,6 +39,7 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 
 /**
  * The StoreResponseHandler handles storing of one or more 
@@ -102,7 +103,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         StoreResponse response = (StoreResponse)message;
         
         KUID valueId = response.getValueID();
-        int status = response.getStatus();
+        StoreStatus status = response.getStatus();
         
         if (index < keyValues.size()) {
             KeyValue current = keyValues.get(index);
@@ -118,11 +119,11 @@ public class StoreResponseHandler extends AbstractResponseHandler {
                 return;
             }
             
-            if (status == StoreResponse.SUCCEEDED) {
+            if (status == StoreStatus.SUCCEEDED) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace(message.getContactNode() + " sucessfully stored KeyValue " + valueId);
                 }
-            } else if (status == StoreResponse.FAILED) {
+            } else if (status == StoreStatus.FAILED) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace(message.getContactNode() + " failed to store KeyValue " + valueId);
                 }

@@ -43,9 +43,9 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     private Collection<ContactNode> nodes;
 
     public FindNodeResponseImpl(Context context, 
-            int vendor, int version, ContactNode node,
-            KUID messageId, QueryKey queryKey, Collection<ContactNode> nodes) {
-        super(context, OpCode.FIND_NODE_RESPONSE, vendor, version, node, messageId);
+            ContactNode contactNode, KUID messageId, 
+            QueryKey queryKey, Collection<ContactNode> nodes) {
+        super(context, OpCode.FIND_NODE_RESPONSE, contactNode, messageId);
 
         this.queryKey = queryKey;
         this.nodes = nodes;

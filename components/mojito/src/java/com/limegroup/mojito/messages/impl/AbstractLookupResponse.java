@@ -35,9 +35,8 @@ public abstract class AbstractLookupResponse extends AbstractResponseMessage
 	implements LookupResponse {
 
     public AbstractLookupResponse(Context context, 
-            OpCode opcode, int vendor, int version, 
-	    ContactNode node, KUID messageId) {
-        super(context, opcode, vendor, version, node, messageId);
+            OpCode opcode, ContactNode contactNode, KUID messageId) {
+        super(context, opcode, contactNode, messageId);
     }
     
     public AbstractLookupResponse(Context context, 

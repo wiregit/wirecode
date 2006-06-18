@@ -45,9 +45,8 @@ public class StatsRequestImpl extends AbstractRequestMessage
     private byte[] signature;
     
     public StatsRequestImpl(Context context, 
-            int vendor, int version,
-            ContactNode node, KUID messageId, int request) {
-        super(context, OpCode.STATS_REQUEST, vendor, version, node, messageId);
+            ContactNode contactNode, KUID messageId, int request) {
+        super(context, OpCode.STATS_REQUEST, contactNode, messageId);
 
         this.request = request;
         this.signature = null;

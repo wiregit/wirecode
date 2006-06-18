@@ -28,7 +28,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.io.MessageFormatException;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 
 /**
  * Factory class to construct DHTMessage(s)
@@ -41,33 +41,32 @@ public interface MessageFactory {
     public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 
             throws IOException;
     
-    public PingRequest createPingRequest(int vendor, int version, 
-            ContactNode node, KUID messageId);
+    public PingRequest createPingRequest(ContactNode contactNode, KUID messageId);
 
-    public PingResponse createPingResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, SocketAddress externalAddress, int estimatedSize);
+    public PingResponse createPingResponse(ContactNode contactNode, KUID messageId, 
+            SocketAddress externalAddress, int estimatedSize);
 
-    public FindNodeRequest createFindNodeRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, KUID lookupId);
+    public FindNodeRequest createFindNodeRequest(ContactNode contactNode, KUID messageId, 
+            KUID lookupId);
 
-    public FindNodeResponse createFindNodeResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, QueryKey queryKey, Collection<ContactNode> nodes);
+    public FindNodeResponse createFindNodeResponse(ContactNode contactNode, KUID messageId, 
+            QueryKey queryKey, Collection<ContactNode> nodes);
 
-    public FindValueRequest createFindValueRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, KUID lookupId);
+    public FindValueRequest createFindValueRequest(ContactNode contactNode, KUID messageId, 
+            KUID lookupId);
 
-    public FindValueResponse createFindValueResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, Collection<KeyValue> values);
+    public FindValueResponse createFindValueResponse(ContactNode contactNode, KUID messageId, 
+            Collection<KeyValue> values);
 
-    public StoreRequest createStoreRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, QueryKey queryKey, KeyValue keyValue);
+    public StoreRequest createStoreRequest(ContactNode contactNode, KUID messageId, 
+            QueryKey queryKey, KeyValue keyValue);
 
-    public StoreResponse createStoreResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, KUID valueId, int response);
+    public StoreResponse createStoreResponse(ContactNode contactNode, KUID messageId, 
+            KUID valueId, StoreStatus status);
 
-    public StatsRequest createStatsRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, int stats);
+    public StatsRequest createStatsRequest(ContactNode contactNode, KUID messageId, 
+            int stats);
 
-    public StatsResponse createStatsResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, String statistics);
+    public StatsResponse createStatsResponse(ContactNode contactNode, KUID messageId, 
+            String statistics);
 }

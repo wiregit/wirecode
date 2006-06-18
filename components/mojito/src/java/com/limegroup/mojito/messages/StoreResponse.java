@@ -26,7 +26,32 @@ public interface StoreResponse extends ResponseMessage {
     public static final int FAILED = 0x00;
     public static final int SUCCEEDED = 0x01;
 
+    public static enum StoreStatus {
+        FAILED(0x00),
+        SUCCEEDED(0x01);
+        
+        private int status;
+        
+        private StoreStatus(int status) {
+            this.status = status;
+        }
+        
+        public int getStatus() {
+            return status;
+        }
+        
+        public static StoreStatus valueOf(int status) throws MessageFormatException {
+            for(StoreStatus s : values()) {
+                if (s.status == status) {
+                    return s;
+                }
+            }
+            
+            throw new MessageFormatException("Unknown StoreStatus: " + status);
+        }
+    }
+    
     public KUID getValueID();
 
-    public int getStatus();
+    public StoreStatus getStatus();
 }

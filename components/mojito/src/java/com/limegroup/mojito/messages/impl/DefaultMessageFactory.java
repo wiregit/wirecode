@@ -32,13 +32,13 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.MessageFactory;
+import com.limegroup.mojito.messages.MessageFormatException;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.StatsRequest;
@@ -46,6 +46,7 @@ import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 
 /**
  * The default implementation of the MessageFactory
@@ -72,13 +73,13 @@ public class DefaultMessageFactory implements MessageFactory {
      * This method is much faster than OpCode.valueOf(int) which
      * runs in linear time.
      */
-    private static OpCode opcode(int opcode) {
+    private static OpCode opcode(int opcode) throws MessageFormatException {
         OpCode o = opcodeMap.get(opcode);
         if (o != null) {
             return o;
         }
         
-        throw new IllegalArgumentException("Unknown opcode: " + opcode);
+        throw new MessageFormatException("Unknown opcode: " + opcode);
     }
     
     public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
@@ -90,12 +91,11 @@ public class DefaultMessageFactory implements MessageFactory {
             return createMessage(src, guid, payload);
         }
         
-        OpCode opcode = null;
-        try {
-            opcode = opcode(data[0].get() & 0xFF);
-        } catch (IllegalArgumentException err) {
-            throw new MessageFormatException(err);
+        for(ByteBuffer b : data) {
+            b.order(ByteOrder.BIG_ENDIAN);
         }
+        
+        OpCode opcode = opcode(data[0].get() & 0xFF);
         
         try {
             switch(opcode) {
@@ -135,53 +135,52 @@ public class DefaultMessageFactory implements MessageFactory {
         return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
     }
 
-    public FindNodeRequest createFindNodeRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, KUID lookupId) {
-        return new FindNodeRequestImpl(context, vendor, version, node, messageId, lookupId);
+    public FindNodeRequest createFindNodeRequest(ContactNode contactNode, KUID messageId, 
+            KUID lookupId) {
+        return new FindNodeRequestImpl(context, contactNode, messageId, lookupId);
     }
 
-    public FindNodeResponse createFindNodeResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, QueryKey queryKey, Collection<ContactNode> nodes) {
-        return new FindNodeResponseImpl(context, vendor, version, node, messageId, queryKey, nodes);
+    public FindNodeResponse createFindNodeResponse(ContactNode contactNode, KUID messageId, 
+            QueryKey queryKey, Collection<ContactNode> nodes) {
+        return new FindNodeResponseImpl(context, contactNode, messageId, queryKey, nodes);
     }
 
-    public FindValueRequest createFindValueRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, KUID lookupId) {
-        return new FindValueRequestImpl(context, vendor, version, node, messageId, lookupId);
+    public FindValueRequest createFindValueRequest(ContactNode contactNode, KUID messageId, 
+            KUID lookupId) {
+        return new FindValueRequestImpl(context, contactNode, messageId, lookupId);
     }
 
-    public FindValueResponse createFindValueResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, Collection<KeyValue> values) {
-        return new FindValueResponseImpl(context, vendor, version, node, messageId, values);
+    public FindValueResponse createFindValueResponse(ContactNode contactNode, KUID messageId, 
+            Collection<KeyValue> values) {
+        return new FindValueResponseImpl(context, contactNode, messageId, values);
     }
 
-    public PingRequest createPingRequest(int vendor, int version, 
-            ContactNode node, KUID messageId) {
-        return new PingRequestImpl(context, vendor, version, node, messageId);
+    public PingRequest createPingRequest(ContactNode contactNode, KUID messageId) {
+        return new PingRequestImpl(context, contactNode, messageId);
     }
 
-    public PingResponse createPingResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, SocketAddress externalAddress, int estimatedSize) {
-        return new PingResponseImpl(context, vendor, version, node, messageId, externalAddress, estimatedSize);
+    public PingResponse createPingResponse(ContactNode contactNode, KUID messageId, 
+            SocketAddress externalAddress, int estimatedSize) {
+        return new PingResponseImpl(context, contactNode, messageId, externalAddress, estimatedSize);
     }
 
-    public StatsRequest createStatsRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, int stats) {
-        return new StatsRequestImpl(context, vendor, version, node, messageId, stats);
+    public StatsRequest createStatsRequest(ContactNode contactNode, KUID messageId, 
+            int stats) {
+        return new StatsRequestImpl(context, contactNode, messageId, stats);
     }
 
-    public StatsResponse createStatsResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, String statistics) {
-        return new StatsResponseImpl(context, vendor, version, node, messageId, statistics);
+    public StatsResponse createStatsResponse(ContactNode contactNode, KUID messageId, 
+            String statistics) {
+        return new StatsResponseImpl(context, contactNode, messageId, statistics);
     }
 
-    public StoreRequest createStoreRequest(int vendor, int version, 
-            ContactNode node, KUID messageId, QueryKey queryKey, KeyValue keyValue) {
-        return new StoreRequestImpl(context, vendor, version, node, messageId, queryKey, keyValue);
+    public StoreRequest createStoreRequest(ContactNode contactNode, KUID messageId, 
+            QueryKey queryKey, KeyValue keyValue) {
+        return new StoreRequestImpl(context, contactNode, messageId, queryKey, keyValue);
     }
 
-    public StoreResponse createStoreResponse(int vendor, int version, 
-            ContactNode node, KUID messageId, KUID valueId, int response) {
-        return new StoreResponseImpl(context, vendor, version, node, messageId, valueId, response);
+    public StoreResponse createStoreResponse(ContactNode contactNode, KUID messageId, 
+            KUID valueId, StoreStatus status) {
+        return new StoreResponseImpl(context, contactNode, messageId, valueId, status);
     }
 }

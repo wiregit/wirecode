@@ -28,6 +28,7 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 
 /**
@@ -51,15 +52,7 @@ public class MessageHelper {
     public MessageFactory getMessageFactory() {
         return factory;
     }
-
-    protected int getVendor() {
-        return context.getVendor();
-    }
-
-    protected int getVersion() {
-        return context.getVersion();
-    }
-
+    
     protected ContactNode getLocalNode() {
         return context.getLocalNode();
     }
@@ -76,8 +69,7 @@ public class MessageHelper {
     }
 
     public PingRequest createPingRequest(SocketAddress dst) {
-        return factory.createPingRequest(getVendor(), getVersion(), 
-                getLocalNode(), createMessageID(dst));
+        return factory.createPingRequest(getLocalNode(), createMessageID(dst));
     }
 
     public PingResponse createPingResponse(RequestMessage request, SocketAddress externalAddress) {
@@ -85,56 +77,48 @@ public class MessageHelper {
             throw new IllegalArgumentException("Cannot tell other Node that its external address is the same as yours!");
         }
         
-        return factory.createPingResponse(getVendor(), getVersion(), 
-                getLocalNode(), request.getMessageID(), externalAddress, getEstimatedSize());
+        return factory.createPingResponse(getLocalNode(), request.getMessageID(), 
+                externalAddress, getEstimatedSize());
     }
 
     public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookupId) {
-        if (!lookupId.isNodeID()) {
-            throw new IllegalArgumentException();
-        }
-        
-        return factory.createFindNodeRequest(getVendor(), getVersion(), 
-                getLocalNode(), createMessageID(dst), lookupId);
+        return factory.createFindNodeRequest(getLocalNode(), 
+                createMessageID(dst), lookupId.assertNodeID());
     }
 
     public FindNodeResponse createFindNodeResponse(RequestMessage request, 
             QueryKey queryKey, Collection<ContactNode> nodes) {
-        return factory.createFindNodeResponse(getVendor(), getVersion(), 
-                getLocalNode(), request.getMessageID(), queryKey, nodes);
+        return factory.createFindNodeResponse(getLocalNode(), request.getMessageID(), 
+                queryKey, nodes);
     }
 
     public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId) {
-        if (!lookupId.isValueID()) {
-            throw new IllegalArgumentException();
-        }
-        
-        return factory.createFindValueRequest(getVendor(), getVersion(), 
-                getLocalNode(), createMessageID(dst), lookupId);
+        return factory.createFindValueRequest(getLocalNode(), 
+                createMessageID(dst), lookupId.assertValueID());
     }
 
     public FindValueResponse createFindValueResponse(RequestMessage request, Collection<KeyValue> values) {
-        return factory.createFindValueResponse(getVendor(), getVersion(), 
-                getLocalNode(), request.getMessageID(), values);
+        return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), 
+                values);
     }
 
     public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, KeyValue keyValue) {
-        return factory.createStoreRequest(getVendor(), getVersion(), 
-                getLocalNode(), createMessageID(dst), queryKey, keyValue);
+        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), 
+                queryKey, keyValue);
     }
 
-    public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, int status) {
-        return factory.createStoreResponse(getVendor(), getVersion(), 
-                getLocalNode(), request.getMessageID(), valueId, status);
+    public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, StoreStatus status) {
+        return factory.createStoreResponse(getLocalNode(), request.getMessageID(), 
+                valueId, status);
     }
 
     public StatsRequest createStatsRequest(SocketAddress dst, int request) {
-        return factory.createStatsRequest(getVendor(), getVersion(), 
-                getLocalNode(), createMessageID(dst), request);
+        return factory.createStatsRequest(getLocalNode(), createMessageID(dst), 
+                request);
     }
 
     public StatsResponse createStatsResponse(RequestMessage request, String statistics) {
-        return factory.createStatsResponse(getVendor(), getVersion(), 
-                getLocalNode(), request.getMessageID(), statistics);
+        return factory.createStatsResponse(getLocalNode(), request.getMessageID(), 
+                statistics);
     }
 }

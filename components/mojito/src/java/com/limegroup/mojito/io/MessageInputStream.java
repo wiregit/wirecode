@@ -31,9 +31,12 @@ import java.util.Collections;
 import java.util.List;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.util.IntHashMap;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.messages.MessageFormatException;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.security.CryptoHelper;
 
 /**
@@ -41,6 +44,14 @@ import com.limegroup.mojito.security.CryptoHelper;
  * from a given InputStream
  */
 public class MessageInputStream extends DataInputStream {
+    
+    private static final IntHashMap<StoreStatus> storeStatusMap = new IntHashMap<StoreStatus>();
+    
+    static {
+        for(StoreStatus s : StoreStatus.values()) {
+            storeStatusMap.put(s.getStatus(), s);
+        }
+    }
     
     public MessageInputStream(InputStream in) {
         super(in);
@@ -118,9 +129,11 @@ public class MessageInputStream extends DataInputStream {
     }
 	
     public ContactNode readContactNode() throws IOException {
+        int vendor = readInt();
+        int version = readUnsignedShort();
         KUID nodeId = readNodeID();
         SocketAddress addr = readSocketAddress();
-        return new ContactNode(nodeId, addr);
+        return new ContactNode(vendor, version, nodeId, addr);
     }
     
     public List<ContactNode> readContactNodes() throws IOException {
@@ -169,5 +182,14 @@ public class MessageInputStream extends DataInputStream {
         byte[] statistics = new byte[length];
         readFully(statistics);
         return statistics;
+    }
+    
+    public StoreStatus readStoreStatus() throws IOException {
+        int status = readUnsignedByte();
+        StoreStatus s = storeStatusMap.get(status);
+        if (s != null) {
+            return s;
+        }
+        throw new MessageFormatException("Unknown StoreStatus: " + s);
     }
 }

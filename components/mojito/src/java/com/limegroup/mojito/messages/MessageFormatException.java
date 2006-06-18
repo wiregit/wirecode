@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.io;
+package com.limegroup.mojito.messages;
 
 import java.io.IOException;
 

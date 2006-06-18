@@ -82,12 +82,6 @@ public interface DHTMessage {
     /** Returns the opcode (type) of the Message */
     public OpCode getOpCode();
     
-    /** Returns the Vendor of the Message */
-    public int getVendor();
-
-    /** Returns the Version of the Message */
-    public int getVersion();
-
     /** Returns the sender of this Message */
     public ContactNode getContactNode();
     

@@ -35,9 +35,9 @@ public class FindValueRequestImpl extends AbstractLookupRequest
         implements FindValueRequest {
 
     public FindValueRequestImpl(Context context, 
-            int vendor, int version, ContactNode node,
-            KUID messageId, KUID lookupId) {
-        super(context, OpCode.FIND_VALUE_REQUEST, vendor, version, node, messageId, lookupId);
+            ContactNode contactNode, KUID messageId, KUID lookupId) {
+        super(context, OpCode.FIND_VALUE_REQUEST, 
+                contactNode, messageId, lookupId);
     }
     
     public FindValueRequestImpl(Context context, 
