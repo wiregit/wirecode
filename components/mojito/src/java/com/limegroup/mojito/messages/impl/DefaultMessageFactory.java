@@ -87,7 +87,6 @@ public class DefaultMessageFactory implements MessageFactory {
         if (data.length == 1) {
             ByteBuffer guid = (ByteBuffer)data[0].slice().limit(AbstractMessage.GUID_END);
             ByteBuffer payload = (ByteBuffer)data[0].position(AbstractMessage.PAYLOAD_START);
-            //data = new ByteBuffer[]{ guid, payload };
             return createMessage(src, guid, payload);
         }
         

@@ -40,17 +40,9 @@ public class ByteBufferInputStream extends InputStream {
     
     /**
      * Creates a ByteBufferInputStream that is reading from
-     * a single ByteBuffer.
+     * one or more ByteBuffer(s).
      */
-    public ByteBufferInputStream(ByteBuffer buffer) {
-        this(new ByteBuffer[]{buffer});
-    }
-    
-    /**
-     * Creates a ByteBufferInputStream that is reading from
-     * multiple ByteBuffer(s).
-     */
-    public ByteBufferInputStream(ByteBuffer[] buffers) {
+    public ByteBufferInputStream(ByteBuffer... buffers) {
         this.buffers = buffers;
     }
     
