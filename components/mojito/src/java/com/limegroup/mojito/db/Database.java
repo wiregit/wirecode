@@ -50,7 +50,7 @@ public class Database {
 
     private static final Log LOG = LogFactory.getLog(Database.class);
 
-    private DatabaseMap<KUID, KeyValueBag> database;
+    private DatabaseMap database;
 
     private int localValueCount = 0;
     
@@ -61,7 +61,7 @@ public class Database {
     public Database(Context context) {
         this.context = context;
         
-        database = new DatabaseMap<KUID, KeyValueBag>(DatabaseSettings.MAX_DATABASE_SIZE.getValue());
+        database = new DatabaseMap(DatabaseSettings.MAX_DATABASE_SIZE.getValue());
         
         databaseStats = context.getDatabaseStats();
     }
@@ -245,33 +245,33 @@ public class Database {
         return masterKey != null && keyValue.verify(masterKey);
     }
 
-    private static class DatabaseMap<K, V> extends FixedSizeHashMap<K, V> implements
-            Serializable {
+    private static class DatabaseMap extends FixedSizeHashMap<KUID, KeyValueBag> 
+            implements Serializable {
 
         private static final long serialVersionUID = -4796278962768822384L;
 
-        private PatriciaTrie<K, V> trie;
+        private PatriciaTrie<KUID, KeyValueBag> trie;
 
         public DatabaseMap(int maxSize) {
             super(1024, 0.75f, true, maxSize);
-            trie = new PatriciaTrie<K, V>();
+            trie = new PatriciaTrie<KUID, KeyValueBag>();
         }
 
-        public V put(K key, V value) {
+        public KeyValueBag put(KUID key, KeyValueBag value) {
             trie.put(key, value);
             return super.put(key, value);
         }
 
-        public V remove(Object key) {
-            trie.remove((K)key);
+        public KeyValueBag remove(Object key) {
+            trie.remove((KUID)key);
             return super.remove(key);
         }
 
-        public V select(K key) {
+        public KeyValueBag select(KUID key) {
             return trie.select(key);
         }
 
-        protected boolean removeEldestEntry(Entry<K, V> eldest) {
+        protected boolean removeEldestEntry(Entry<KUID, KeyValueBag> eldest) {
             if (super.removeEldestEntry(eldest)) {
                 remove(eldest.getKey());
             }

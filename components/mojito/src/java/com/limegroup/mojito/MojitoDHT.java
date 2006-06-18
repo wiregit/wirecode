@@ -47,6 +47,7 @@ import com.limegroup.mojito.event.LookupAdapter;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -55,7 +56,7 @@ import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 
 /**
- * 
+ * The Mojito DHT. All you need to know is here!
  */
 public class MojitoDHT {
     
@@ -205,7 +206,7 @@ public class MojitoDHT {
         return context.getLookupListeners();
     }
     
-    public void setMessageDispatcher(Class messageDispatcher) {
+    public void setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher) {
         context.setMessageDispatcher(messageDispatcher);
     }
     

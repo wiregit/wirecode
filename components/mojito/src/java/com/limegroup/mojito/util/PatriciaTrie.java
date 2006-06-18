@@ -38,7 +38,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     private int size = 0;
     private transient int modCount = 0;
     
-    private final KeyCreator keyCreator;
+    private final KeyCreator<K> keyCreator;
     
     public PatriciaTrie() {
         this(new KUIDKeyCreator());
@@ -743,7 +743,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * The interface used by PatriciaTrie to access the Keys
      * on bit level.
      */
-    public static interface KeyCreator extends Serializable {
+    public static interface KeyCreator<K> extends Serializable {
         
         /** Returned by bitIndex if key's bits are all 0 */
         public static final int NULL_BIT_KEY = -1;
@@ -759,9 +759,9 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         public int length();
         
         /** Returns whether or not a bit is set */
-        public boolean isBitSet(Object key, int bitIndex);
+        public boolean isBitSet(K key, int bitIndex);
         
         /** Returns the n-th different bit between key and found */
-        public int bitIndex(Object key, Object found);
+        public int bitIndex(K key, K found);
     }
 }

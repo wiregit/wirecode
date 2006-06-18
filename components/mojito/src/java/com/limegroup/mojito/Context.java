@@ -173,7 +173,7 @@ public class Context {
      * Installs a custom MessageDispatcher implementation. The
      * passed Class must be a subclass of MessageDispatcher.
      */
-    public synchronized void setMessageDispatcher(Class clazz) {
+    public synchronized void setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
         }

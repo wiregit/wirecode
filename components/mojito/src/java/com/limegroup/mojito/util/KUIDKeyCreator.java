@@ -21,28 +21,28 @@ package com.limegroup.mojito.util;
 
 import com.limegroup.mojito.KUID;
 
-public class KUIDKeyCreator implements PatriciaTrie.KeyCreator {
+public class KUIDKeyCreator implements PatriciaTrie.KeyCreator<KUID> {
     
     private static final long serialVersionUID = 6412279289438108492L;
 
-    public boolean isBitSet(Object key, int bitIndex) {
-        return ((KUID)key).isBitSet(bitIndex);
+    public boolean isBitSet(KUID key, int bitIndex) {
+        return key.isBitSet(bitIndex);
     }
 
     public int length() {
         return KUID.LENGTH;
     }
     
-    public int bitIndex(Object key, Object found) {
+    public int bitIndex(KUID key, KUID found) {
         if (found == null) {
-            switch(((KUID)key).getType()) {
-                case KUID.NODE_ID:
+            switch(key.getType()) {
+                case NODE_ID:
                     found = KUID.MIN_NODE_ID;
                     break;
-                case KUID.VALUE_ID:
+                case VALUE_ID:
                     found = KUID.MIN_VALUE_ID;
                     break;
-                case KUID.MESSAGE_ID:
+                case MESSAGE_ID:
                     found = KUID.MIN_MESSAGE_ID;
                     break;
                 default:
@@ -51,6 +51,6 @@ public class KUIDKeyCreator implements PatriciaTrie.KeyCreator {
             }
         }
         
-        return ((KUID)key).bitIndex((KUID)found);
+        return key.bitIndex(found);
     }
 }

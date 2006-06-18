@@ -25,7 +25,7 @@ import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 /**
- * 
+ * A ContactNode is an actual Node in DHT
  */
 public class ContactNode extends Node {
     
@@ -33,20 +33,27 @@ public class ContactNode extends Node {
 
     private static final int FIREWALLED = 0x01;
     
+    /** The Vendor ID of the Node */
     private int vendor;
     
+    /** The Version of the Node */
     private int version;
     
+    /** The IPP of the Node */
     private SocketAddress address;
     
+    /** The instance ID of the Node */
+    private int instanceId;
+
+    /** Various flags (like FIREWALLED) this Node has set */
     private int flags;
     
+    /** The number of failures (no response for requests) */
     private int failures = 0;
     
     private long lastDeadOrAliveTime = 0L;
     
-    private int instanceId;
-    
+    /** The RTT of the Node */
     private transient long roundTripTime = -1L;
     
     public ContactNode(int vendor, int version, 
@@ -80,6 +87,16 @@ public class ContactNode extends Node {
     
     public int getVersion() {
         return version;
+    }
+    
+    public SocketAddress getSocketAddress() {
+        return address;
+    }
+    
+    public SocketAddress setSocketAddress(SocketAddress address) {
+        SocketAddress o = this.address;
+        this.address = address;
+        return o;
     }
     
     public int getInstanceID() {
@@ -167,16 +184,6 @@ public class ContactNode extends Node {
         super.alive();
         failures = 0;
         lastDeadOrAliveTime = System.currentTimeMillis();
-    }
-    
-    public SocketAddress getSocketAddress() {
-        return address;
-    }
-    
-    public SocketAddress setSocketAddress(SocketAddress address) {
-        SocketAddress o = this.address;
-        this.address = address;
-        return o;
     }
     
     public boolean equals(Object o) {

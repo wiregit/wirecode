@@ -31,23 +31,28 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 
-
+/**
+ * A BucketNode is a virtual construct to simulate
+ * Buckets on the PatriciaTrie.
+ */
 public class BucketNode extends Node {
     
     private static final long serialVersionUID = 2903713682317244655L;
 
     private static final Log LOG = LogFactory.getLog(BucketNode.class);
     
+    /** The number of Contacts in this Bucket */
     private int nodeCount;
     
+    /** The depth of this Bucket in the Trie */
     private int depth;
     
     private Cache replacementCache;
     
-    public BucketNode(KUID nodeId,int depth) {
+    public BucketNode(KUID nodeId, int depth) {
         super(nodeId);
         this.depth = depth;
-        nodeCount = 0;
+        this.nodeCount = 0;
     }
     
     public void incrementNodeCount() {

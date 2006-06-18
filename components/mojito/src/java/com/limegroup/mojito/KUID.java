@@ -62,10 +62,13 @@ public class KUID implements Serializable, Comparable {
         0x1
     };
     
-    public static final int UNKNOWN_ID = 0x01;
-    public static final int NODE_ID = 0x02;
-    public static final int VALUE_ID = 0x03;
-    public static final int MESSAGE_ID = 0x04;
+    /** Types of KUIDs that exist */
+    public static enum Type {
+        UNKNOWN_ID,
+        NODE_ID,
+        VALUE_ID,
+        MESSAGE_ID;
+    }
     
     /** All bits 0 Unknown ID */
     public static final KUID MIN_UNKNOWN_ID;
@@ -103,27 +106,27 @@ public class KUID implements Serializable, Comparable {
         byte[] max = new byte[20];
         Arrays.fill(max, (byte)0xFF);
         
-        MIN_UNKNOWN_ID = new KUID(UNKNOWN_ID, min);
-        MAX_UNKNOWN_ID = new KUID(UNKNOWN_ID, max);
+        MIN_UNKNOWN_ID = new KUID(Type.UNKNOWN_ID, min);
+        MAX_UNKNOWN_ID = new KUID(Type.UNKNOWN_ID, max);
         
-        MIN_NODE_ID = new KUID(NODE_ID, min);
-        MAX_NODE_ID = new KUID(NODE_ID, max);
+        MIN_NODE_ID = new KUID(Type.NODE_ID, min);
+        MAX_NODE_ID = new KUID(Type.NODE_ID, max);
         
-        MIN_VALUE_ID = new KUID(VALUE_ID, min);
-        MAX_VALUE_ID = new KUID(VALUE_ID, max);
+        MIN_VALUE_ID = new KUID(Type.VALUE_ID, min);
+        MAX_VALUE_ID = new KUID(Type.VALUE_ID, max);
         
-        MIN_MESSAGE_ID = new KUID(MESSAGE_ID, min);
-        MAX_MESSAGE_ID = new KUID(MESSAGE_ID, max);
+        MIN_MESSAGE_ID = new KUID(Type.MESSAGE_ID, min);
+        MAX_MESSAGE_ID = new KUID(Type.MESSAGE_ID, max);
         
         GENERATOR.nextBytes(RANDOM_PAD);
     }
     
-    protected final int type;
+    private Type type;
     private byte[] id;
     
     private int hashCode;
     
-    protected KUID(int type, byte[] id) {
+    protected KUID(Type type, byte[] id) {
         if (id == null) {
             throw new NullPointerException("ID is null");
         }
@@ -152,7 +155,7 @@ public class KUID implements Serializable, Comparable {
      * Returns true if this is a Node ID
      */
     public boolean isNodeID() {
-        return type == NODE_ID;
+        return type == Type.NODE_ID;
     }
     
     /**
@@ -170,7 +173,7 @@ public class KUID implements Serializable, Comparable {
      * Returns true if this is a Value ID
      */
     public boolean isValueID() {
-        return type == VALUE_ID;
+        return type == Type.VALUE_ID;
     }
     
     /**
@@ -188,14 +191,14 @@ public class KUID implements Serializable, Comparable {
      * Returns true if this is a Message ID
      */
     public boolean isMessageID() {
-        return type == MESSAGE_ID;
+        return type == Type.MESSAGE_ID;
     }
     
     /**
      * Returns true if this is a Unknown ID
      */
     public boolean isUnknownID() {
-        return type == UNKNOWN_ID;
+        return type == Type.UNKNOWN_ID;
     }
     
     public boolean isBitSet(int bitIndex) {
@@ -295,7 +298,7 @@ public class KUID implements Serializable, Comparable {
             result[i] = (byte)(id[i] ^ nodeId.id[i]);
         }
         
-        int t = (type == nodeId.type) ? type : UNKNOWN_ID;
+        Type t = (type == nodeId.type) ? type : Type.UNKNOWN_ID;
         return new KUID(t, result);
     }
     
@@ -336,7 +339,7 @@ public class KUID implements Serializable, Comparable {
     /**
      * Returns the type of the current KUID
      */
-    public int getType() {
+    public Type getType() {
         return type;
     }
     
@@ -394,14 +397,14 @@ public class KUID implements Serializable, Comparable {
      * Converts the current KUID into a Node ID if it isn't already.
      */
     public KUID toNodeID() {
-        return (isNodeID() ? this : new KUID(NODE_ID, id));
+        return (isNodeID() ? this : new KUID(Type.NODE_ID, id));
     }
     
     /**
      * Converts the current KUID into a Value ID if it isn't already.
      */
     public KUID toValueID() {
-        return (isValueID() ? this : new KUID(VALUE_ID, id));
+        return (isValueID() ? this : new KUID(Type.VALUE_ID, id));
     }
     
     /**
@@ -435,23 +438,7 @@ public class KUID implements Serializable, Comparable {
     }
     
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        switch(type) {
-            case NODE_ID:
-                buffer.append("NODE_ID: ");
-                break;
-            case VALUE_ID:
-                buffer.append("VALUE_ID: ");
-                break;
-            case MESSAGE_ID:
-                buffer.append("MESSAGE_ID: ");
-                break;
-            default:
-                buffer.append("UNKNOWN_ID: ");
-                break;
-        }
-        buffer.append(toHexString());
-        return buffer.toString();
+        return type + ": " + toHexString();
     }
     
     /**
@@ -502,7 +489,7 @@ public class KUID implements Serializable, Comparable {
      * Creates and returns a Node ID from a byte array
      */
     public static KUID createNodeID(byte[] id) {
-        return new KUID(NODE_ID, id);
+        return new KUID(Type.NODE_ID, id);
     }
     
     private static byte[] getBytes(ByteBuffer data) {
@@ -515,21 +502,21 @@ public class KUID implements Serializable, Comparable {
      * Creates and returns a Node ID from the ByteBuffer (relative get)
      */
     public static KUID createNodeID(ByteBuffer data) {
-        return new KUID(NODE_ID, getBytes(data));
+        return new KUID(Type.NODE_ID, getBytes(data));
     }
     
     /**
      * Creates and returns a Value ID from a byte array
      */
     public static KUID createValueID(byte[] id) {
-        return new KUID(VALUE_ID, id);
+        return new KUID(Type.VALUE_ID, id);
     }
     
     /**
      * Creates and returns a Value ID from the ByteBuffer (relative get)
      */
     public static KUID createValueID(ByteBuffer data) {
-        return new KUID(VALUE_ID, getBytes(data));
+        return new KUID(Type.VALUE_ID, getBytes(data));
     }
     
     /**
@@ -596,14 +583,14 @@ public class KUID implements Serializable, Comparable {
      * Creates and returns a Message ID from the byte array
      */
     public static KUID createMessageID(byte[] id) {
-        return new KUID(MESSAGE_ID, id);
+        return new KUID(Type.MESSAGE_ID, id);
     }
     
     /**
      * Creates and returns a Message ID from the ByteBuffer (relative get)
      */
     public static KUID createMessageID(ByteBuffer data) {
-        return new KUID(MESSAGE_ID, getBytes(data));
+        return new KUID(Type.MESSAGE_ID, getBytes(data));
     }
     
     /**
@@ -654,6 +641,6 @@ public class KUID implements Serializable, Comparable {
      * Creates and returns an Unknown ID from the byte array
      */
     public static KUID createUnknownID(byte[] id) {
-        return new KUID(UNKNOWN_ID, id);
+        return new KUID(Type.UNKNOWN_ID, id);
     }
 }
