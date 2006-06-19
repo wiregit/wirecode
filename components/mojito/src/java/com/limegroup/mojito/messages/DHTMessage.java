@@ -64,18 +64,32 @@ public interface DHTMessage {
             return name() + "(" + getOpCode() + ")";
         }
         
+        private static OpCode[] OPCODES;
+        
+        static {
+            OpCode[] values = values();
+            OPCODES = new OpCode[values.length];
+            for (OpCode o : values) {
+                int index = o.opcode % OPCODES.length;
+                if (OPCODES[index] != null) {
+                    // Check the enums for duplicate opcodes!
+                    throw new IllegalStateException("OpCode collision: index=" + index 
+                            + ", OPCODES=" + OPCODES[index] + ", o=" + o);
+                }
+                OPCODES[index] = o;
+            }
+        }
+        
         /**
          * Returns the OpCode enum for the integer. Throws an
-         * IllegalArgumentException if opcode is unknown!
+         * MessageFormatException if opcode is unknown!
          */
-        public static OpCode valueOf(int opcode) throws IllegalArgumentException {
-            for(OpCode o : values()) {
-                if (o.opcode == opcode) {
-                    return o;
-                }
+        public static OpCode valueOf(int opcode) throws MessageFormatException {
+            OpCode o = OPCODES[opcode % OPCODES.length];
+            if (o != null && o.opcode == opcode) {
+                return o;
             }
-            
-            throw new IllegalArgumentException("Unknown opcode: " + opcode);
+            throw new MessageFormatException("Unknown opcode: " + opcode);
         }
     }
     

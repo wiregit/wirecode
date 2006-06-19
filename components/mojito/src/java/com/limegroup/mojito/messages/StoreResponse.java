@@ -23,9 +23,6 @@ import com.limegroup.mojito.KUID;
 
 public interface StoreResponse extends ResponseMessage {
 
-    public static final int FAILED = 0x00;
-    public static final int SUCCEEDED = 0x01;
-
     public static enum StoreStatus {
         FAILED(0x00),
         SUCCEEDED(0x01);
@@ -40,13 +37,27 @@ public interface StoreResponse extends ResponseMessage {
             return status;
         }
         
-        public static StoreStatus valueOf(int status) throws MessageFormatException {
-            for(StoreStatus s : values()) {
-                if (s.status == status) {
-                    return s;
+        private static StoreStatus[] STORESTATUS;
+        
+        static {
+            StoreStatus[] values = values();
+            STORESTATUS = new StoreStatus[values.length];
+            for (StoreStatus s : values) {
+                int index = s.status % STORESTATUS.length;
+                if (STORESTATUS[index] != null) {
+                    // Check the enums for duplicate states
+                    throw new IllegalStateException("StoreStatus collision: index=" + index 
+                            + ", STORESTATUS=" + STORESTATUS[index] + ", o=" + s);
                 }
+                STORESTATUS[index] = s;
             }
-            
+        }
+        
+        public static StoreStatus valueOf(int status) throws MessageFormatException {
+            StoreStatus s = STORESTATUS[status % STORESTATUS.length];
+            if (s != null && s.status == status) {
+                return s;
+            }
             throw new MessageFormatException("Unknown StoreStatus: " + status);
         }
     }

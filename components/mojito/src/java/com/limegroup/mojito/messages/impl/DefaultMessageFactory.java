@@ -27,7 +27,6 @@ import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.ByteBufferOutputStream;
-import com.limegroup.gnutella.util.IntHashMap;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -55,31 +54,8 @@ public class DefaultMessageFactory implements MessageFactory {
 
     protected final Context context;
     
-    // A IntHashMap of int-opcode to enum-opcode
-    private static IntHashMap<OpCode> opcodeMap = new IntHashMap<OpCode>();
-    
-    static {
-        for(OpCode opcode : OpCode.values()) {
-            opcodeMap.put(opcode.getOpCode(), opcode);
-        }
-    }
-    
     public DefaultMessageFactory(Context context) {
         this.context = context;
-    }
-    
-    /**
-     * Returns the enum OpCode for the int version of the opcode. 
-     * This method is much faster than OpCode.valueOf(int) which
-     * runs in linear time.
-     */
-    private static OpCode opcode(int opcode) throws MessageFormatException {
-        OpCode o = opcodeMap.get(opcode);
-        if (o != null) {
-            return o;
-        }
-        
-        throw new MessageFormatException("Unknown opcode: " + opcode);
     }
     
     public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
@@ -95,7 +71,7 @@ public class DefaultMessageFactory implements MessageFactory {
             b.order(ByteOrder.BIG_ENDIAN);
         }
         
-        OpCode opcode = opcode(data[0].get() & 0xFF);
+        OpCode opcode = OpCode.valueOf(data[0].get() & 0xFF);
         
         try {
             switch(opcode) {
