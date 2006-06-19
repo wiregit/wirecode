@@ -681,8 +681,7 @@ public class PatriciaRouteTable implements RouteTable {
     }
     
     public synchronized List<ContactNode> getAllNodesMRS() {
-        List<ContactNode> nodesList = nodesTrie.values();
-        return BucketUtils.sort(nodesList);
+        return BucketUtils.sort(nodesTrie.values());
     }
     
     public synchronized List<ContactNode> getMRSNodes(int numNodes) {
@@ -700,7 +699,7 @@ public class PatriciaRouteTable implements RouteTable {
      * true if it's the case.
      */
     private boolean handleNodeFailure(ContactNode node) {
-        if ((node != null) && node.failure()) {
+        if (node != null && node.failure()) {
             routingStats.DEAD_NODE_COUNT.incrementStat();
             return true;
         }

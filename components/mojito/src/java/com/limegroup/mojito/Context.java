@@ -607,30 +607,32 @@ public class Context {
         lookupManager.lookup(lookup, listener);
     }
     
-    /** Bootstraps this Node from the given Node */
-    public void bootstrap(SocketAddress address, BootstrapListener listener) throws IOException {
-        if(isBootstrapping()) return;
+    /**
+     * Tries to bootstrap from the local Route Table.
+     */
+    public void bootstrap(BootstrapListener listener) throws IOException {
+        if(isBootstrapping()) {
+            return;
+        }
+        
         setBootstrapping(true);
-        new BootstrapManager().bootstrap(address, listener);
+        new BootstrapManager().bootstrap(listener);
     }
     
     /**
-     * Tries to bootstrap from a List of Hosts.
-     * 
-     * @param bootstrapHostsList a List of <tt>SocketAddress</tt>
-     * @param listener The listener for bootstrap events
-     * @throws IOException
+     * Tries to bootstrap from a List of Hosts. Depending on the 
+     * size of the list it may fall back to bootstrapping from
+     * the local Route Table!
      */
-    public void bootstrap(List bootstrapHostsList, BootstrapListener listener) throws IOException {
-        if(isBootstrapping()) return;
+    public void bootstrap(List<? extends SocketAddress> hostList, 
+            BootstrapListener listener) throws IOException {
+        
+        if(isBootstrapping()) {
+            return;
+        }
+        
         setBootstrapping(true);
-        new BootstrapManager().bootstrap(bootstrapHostsList, listener);
-    }
-    
-    public void bootstrap(BootstrapListener listener) throws IOException {
-        if(isBootstrapping()) return;
-        setBootstrapping(true);
-        new BootstrapManager().bootstrap(listener);
+        new BootstrapManager().bootstrap(hostList, listener);
     }
     
     /** Stores a given KeyValue */
@@ -784,7 +786,11 @@ public class Context {
         
         private List buckets = Collections.EMPTY_LIST;
         
-        private List bootstrapHostsList;
+        /** 
+         * An Iterator of SocketAddresses or ContactNodes depending on
+         * the initialization.
+         */
+        private Iterator contacts;
         
         private int failures;
         
@@ -795,48 +801,51 @@ public class Context {
             return System.currentTimeMillis() - startTime;
         }
         
-        public void bootstrap(SocketAddress address, 
-                BootstrapListener listener) throws IOException {
-            this.listener = listener;
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Sending initial bootstrap ping to: " + address);
-            }
-            
-            startTime = System.currentTimeMillis();
-            ping(address, this);
-        }
-        
+        /**
+         * Tries to bootstrap from the local Route Table.
+         */
         public void bootstrap(BootstrapListener listener) throws IOException {
-            bootstrap(routeTable.getAllNodesMRS(), listener);
+            this.listener = listener;
+            this.contacts = routeTable.getAllNodesMRS().iterator();
+            
+            if (contacts.hasNext()) {
+                startTime = System.currentTimeMillis();
+                ping((ContactNode)contacts.next(), this);
+            } else {
+                fireNoBootstrapHost();
+            }
         }
         
         /**
          * Tries to bootstrap from a List of Hosts.
-         * 
-         * @param bootstrapHostsList a List of <tt>SocketAddress</tt>
-         * @param listener The listener for bootstrap events
-         * @throws IOException
          */
-        public void bootstrap(List bootstrapHostsList, 
+        public void bootstrap(List<? extends SocketAddress> hostList, 
                 BootstrapListener listener) throws IOException {
             
             this.listener = listener;
-            this.bootstrapHostsList = bootstrapHostsList;
+            this.contacts = hostList.iterator();
             
-            if (!bootstrapHostsList.isEmpty()) {
-                SocketAddress firstHost = (SocketAddress)bootstrapHostsList.remove(0);
-                bootstrap(firstHost, listener);
+            if (contacts.hasNext()) {
+                startTime = System.currentTimeMillis();
+                ping((SocketAddress)contacts.next(), this);
             } else {
                 fireNoBootstrapHost();
             }
         }
         
         public void response(ResponseMessage response, long time) {
+            if (response instanceof PingResponse) {
+                pingSucceeded((PingResponse)response);
+            }
+        }
+
+        /**
+         * Initialized the lookup process after a successfull
+         * ping request
+         */
+        private void pingSucceeded(PingResponse response) {
             try {
-                if (response instanceof PingResponse) {
-                    lookup(getLocalNodeID(), this);
-                }
+                lookup(getLocalNodeID(), this);
             } catch (IOException err) {
                 LOG.error("Bootstrap lookup failed: ", err);
                 
@@ -844,52 +853,80 @@ public class Context {
                 firePhaseTwoFinished();
             }
         }
-
-        public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+        
+        public void timeout(KUID nodeId, SocketAddress address, 
+                RequestMessage request, long time) {
             if (request instanceof PingRequest) {
-                
-                networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Initial bootstrap ping timeout, failure " + failures);
-                }
-                
-                failures++;
-                if (failures < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-                    if (bootstrapHostsList == null || bootstrapHostsList.isEmpty()) {
-                        bootstrapHostsList = routeTable.getAllNodesMRS();
+                try {
+                    if (!pingFailed(address)) {
+                        fireNoBootstrapHost();
                     }
-                    
-                    for (Iterator iter = bootstrapHostsList.iterator(); iter.hasNext(); ) {
-                        ContactNode node = (ContactNode) iter.next();
-                        //do not send to ourselve or the node which just timed out
-                        if(!node.getNodeID().equals(getLocalNodeID()) 
-                                && !node.getSocketAddress().equals(address)) {
-                            
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Retrying bootstrap ping with node: " + node);
-                            }
-                            
-                            try {
-                                iter.remove();
-                                ping(node, this);
-                                return;
-                            } catch (IOException err) {
-                                LOG.error(err);
-                                fireNoBootstrapHost();
-                            }
-                        }
-                    }
-                    
-                    fireNoBootstrapHost();
-                    
-                } else {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failures + " tries");
-                    }
-                    
+                } catch (IOException err) {
+                    LOG.error(err);
                     fireNoBootstrapHost();
                 }
             }
+        }
+        
+        /**
+         * Tries the next SocketAddress or ContactNode. Returns false
+         * if we should give up.
+         */
+        private boolean pingFailed(SocketAddress address) throws IOException {
+            networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Initial bootstrap ping timeout, failure " + failures);
+            }
+            
+            failures++;
+            if (failures >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failures + " tries");
+                }
+                
+                return false;
+            }
+            
+            // Possible switch from Iterator of SocketAddresses to an
+            // Iterator of ContactNodes (but not vice versa).
+            if (contacts == null || !contacts.hasNext()) {
+                contacts = routeTable.getAllNodesMRS().iterator();
+            }
+            
+            while(contacts.hasNext()) {
+                Object obj = contacts.next();
+                
+                if (obj instanceof SocketAddress) {
+                    SocketAddress addr = (SocketAddress)obj;
+                    ping(addr, this);
+                    return true;
+                    
+                } else if (obj instanceof ContactNode) {
+                    ContactNode node = (ContactNode)obj;
+                    //do not send to ourselve or the node which just timed out
+                    if (!node.getNodeID().equals(getLocalNodeID()) 
+                            && !node.getSocketAddress().equals(address)) {
+                        
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Retrying bootstrap ping with node: " + node);
+                        }
+                        
+                        ping(node, this);
+                        return true;
+                    }
+                } else {
+                    
+                    if (LOG.isFatalEnabled()) {
+                        if (obj != null) {
+                            LOG.fatal("Expected either a SocketAddress or ContactNode but got: " + obj + "/" + obj.getClass());
+                        } else {
+                            LOG.fatal("Expected either a SocketAddress or ContactNode but got: " + obj);
+                        }
+                    }
+                }
+            }
+            
+            return false;
         }
         
         public void found(KUID lookup, Collection c, long time) {
@@ -981,7 +1018,7 @@ public class Context {
             this.keyValue = keyValue;
             this.listener = listener;
             
-            KUID nodeId = ((KUID)keyValue.getKey()).toNodeID();
+            KUID nodeId = keyValue.getKey().toNodeID();
             lookup(nodeId, this);
         }
         
@@ -1047,8 +1084,10 @@ public class Context {
      */
     private class PingManager implements PingListener {
         
-        private Map handlerMap = new HashMap();
-        private List listeners = new ArrayList();
+        private Map<SocketAddress, PingResponseHandler> handlerMap 
+            = new HashMap<SocketAddress, PingResponseHandler>();
+        
+        private List<PingListener> listeners = new ArrayList<PingListener>();
         
         private PingManager() {
         }
@@ -1073,7 +1112,7 @@ public class Context {
 
         public PingListener[] getPingListeners() {
             synchronized (listeners) {
-                return (PingListener[])listeners.toArray(new PingListener[0]);
+                return listeners.toArray(new PingListener[0]);
             }
         }
         
@@ -1095,7 +1134,7 @@ public class Context {
 
         public void ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
             synchronized (handlerMap) {
-                PingResponseHandler responseHandler = (PingResponseHandler)handlerMap.get(address);
+                PingResponseHandler responseHandler = handlerMap.get(address);
                 if (responseHandler == null) {
                     
                     responseHandler = new PingResponseHandler(Context.this);
@@ -1125,8 +1164,7 @@ public class Context {
                 fireEvent(new Runnable() {
                     public void run() {
                         synchronized (listeners) {
-                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                                PingListener listener = (PingListener)it.next();
+                            for(PingListener listener : listeners) {
                                 listener.response(response, time);
                             }
                         }
@@ -1143,8 +1181,7 @@ public class Context {
                 fireEvent(new Runnable() {
                     public void run() {
                         synchronized (listeners) {
-                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                                PingListener listener = (PingListener)it.next();
+                            for(PingListener listener : listeners) {
                                 listener.timeout(nodeId, address, null, time);
                             }
                         }
@@ -1159,8 +1196,7 @@ public class Context {
         
         public boolean cancel(SocketAddress address) {
             synchronized (handlerMap) {
-                PingResponseHandler handler 
-                    = (PingResponseHandler)handlerMap.remove(address);
+                PingResponseHandler handler = handlerMap.remove(address);
                 if (handler != null) {
                     handler.stop();
                     return true;
@@ -1175,9 +1211,10 @@ public class Context {
      */
     private class LookupManager implements LookupListener {
         
-        private Map handlerMap = new HashMap();
+        private Map<KUID, LookupResponseHandler> handlerMap 
+            = new HashMap<KUID, LookupResponseHandler>();
         
-        private List listeners = new ArrayList();
+        private List<LookupListener> listeners = new ArrayList<LookupListener>();
         
         private LookupManager() {
             
@@ -1203,7 +1240,7 @@ public class Context {
 
         public LookupListener[] getLookupListeners() {
             synchronized (listeners) {
-                return (LookupListener[])listeners.toArray(new LookupListener[0]);
+                return listeners.toArray(new LookupListener[0]);
             }
         }
         
@@ -1217,7 +1254,7 @@ public class Context {
             }
             
             synchronized (handlerMap) {
-                LookupResponseHandler handler = (LookupResponseHandler)handlerMap.get(lookup);
+                LookupResponseHandler handler = handlerMap.get(lookup);
                 if (handler == null) {
                     handler = new LookupResponseHandler(lookup, Context.this);
                     handler.addLookupListener(this);
@@ -1237,7 +1274,7 @@ public class Context {
         
         public boolean cancel(KUID lookup) {
             synchronized (handlerMap) {
-                LookupResponseHandler handler = (LookupResponseHandler)handlerMap.remove(lookup);
+                LookupResponseHandler handler = handlerMap.remove(lookup);
                 if (handler != null) {
                     handler.stop();
                     return true;
@@ -1251,8 +1288,7 @@ public class Context {
                 fireEvent(new Runnable() {
                     public void run() {
                         synchronized (listeners) {
-                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                                LookupListener listener = (LookupListener)it.next();
+                            for(LookupListener listener : listeners) {
                                 listener.response(response, time);
                             }
                         }
@@ -1267,8 +1303,7 @@ public class Context {
                 fireEvent(new Runnable() {
                     public void run() {
                         synchronized (listeners) {
-                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                                LookupListener listener = (LookupListener)it.next();
+                            for(LookupListener listener : listeners) {
                                 listener.timeout(nodeId, address, request, time);
                             }
                         }
@@ -1284,8 +1319,7 @@ public class Context {
                 fireEvent(new Runnable() {
                     public void run() {
                         synchronized (listeners) {
-                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                                LookupListener listener = (LookupListener)it.next();
+                            for(LookupListener listener : listeners) {
                                 listener.found(lookup, c, time);
                             }
                         }
@@ -1301,8 +1335,7 @@ public class Context {
                 fireEvent(new Runnable() {
                     public void run() {
                         synchronized (listeners) {
-                            for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                                LookupListener listener = (LookupListener)it.next();
+                            for(LookupListener listener : listeners) {
                                 listener.finish(lookup, c, time);
                             }
                         }

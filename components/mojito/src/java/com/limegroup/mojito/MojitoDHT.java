@@ -31,6 +31,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -227,7 +228,7 @@ public class MojitoDHT {
         final long[] time = new long[]{ -1L };
         
         synchronized (time) {
-            context.bootstrap(address, new BootstrapListener() {
+            bootstrap(address, new BootstrapListener() {
                     public void phaseOneComplete(long time) {
                     }
 
@@ -244,6 +245,7 @@ public class MojitoDHT {
                         }
                     }
             });
+            
             try {
                 time.wait(timeout);
             } catch (InterruptedException err) {
@@ -267,19 +269,19 @@ public class MojitoDHT {
 
     public void bootstrap(SocketAddress address, BootstrapListener listener) 
             throws IOException {
-        context.bootstrap(address, listener);
+        bootstrap(Arrays.asList(address), listener);
     }
     
     /**
      * Tries to bootstrap from a List of Hosts.
      * 
-     * @param bootstrapHostsList a List of <tt>SocketAddress</tt>
+     * @param hostList a List of <tt>SocketAddress</tt>
      * @param listener The listener for bootstrap events
      * @throws IOException
      */
-    public void bootstrap(List bootstrapHostsList, BootstrapListener listener) 
+    public void bootstrap(List<? extends SocketAddress> hostList, BootstrapListener listener) 
             throws IOException {
-        context.bootstrap(bootstrapHostsList, listener);
+        context.bootstrap(hostList, listener);
     }
     
     /**
