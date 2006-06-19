@@ -3,14 +3,12 @@ package com.limegroup.gnutella.dht;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -201,7 +199,7 @@ public class LimeDHTManager implements LifecycleListener {
      * Shuts down the dht and persists it
      */
     public synchronized void shutdown(){
-        if (!running) {
+        /*if (!running) {
             return;
         }
         
@@ -218,7 +216,7 @@ public class LimeDHTManager implements LifecycleListener {
             out.close();
         } catch (IOException err) {
             LOG.error("IOException", err);
-        }
+        }*/
     }
     
     /**
@@ -297,5 +295,4 @@ public class LimeDHTManager implements LifecycleListener {
     public int getVersion() {
         return dht.getVersion();
     }
-    
 }

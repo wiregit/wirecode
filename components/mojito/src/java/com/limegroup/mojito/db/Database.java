@@ -39,7 +39,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
-import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
+import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 import com.limegroup.mojito.util.PatriciaTrie;
 
@@ -56,14 +56,14 @@ public class Database {
     
     private Context context;
 
-    private DataBaseStatisticContainer databaseStats;
+    private DatabaseStatisticContainer databaseStats;
     
     public Database(Context context) {
         this.context = context;
         
         database = new DatabaseMap(DatabaseSettings.MAX_DATABASE_SIZE.getValue());
         
-        databaseStats = context.getDataBaseStats();
+        databaseStats = context.getDatabaseStats();
     }
 
     public synchronized int size() {
@@ -85,7 +85,7 @@ public class Database {
     public synchronized boolean add(KeyValue keyValue) {
         if (!keyValue.isEmptyValue()) {
             KUID key = keyValue.getKey();
-            KeyValueBag bag = (KeyValueBag) database.get(key);
+            KeyValueBag bag = database.get(key);
             if (bag == null) {
                 bag = new KeyValueBag(key);
                 database.put(key, bag);
@@ -108,7 +108,7 @@ public class Database {
 
     public synchronized boolean remove(KeyValue keyValue) {
         KUID key = keyValue.getKey();
-        KeyValueBag bag = (KeyValueBag) database.get(key);
+        KeyValueBag bag = database.get(key);
         if (bag != null && bag.remove(keyValue)) {
             if (bag.isEmpty()) {
                 database.remove(key);
@@ -125,15 +125,15 @@ public class Database {
 
     public synchronized boolean contains(KeyValue keyValue) {
         KUID key = keyValue.getKey();
-        KeyValueBag bag = (KeyValueBag) database.get(key);
+        KeyValueBag bag = database.get(key);
         if (bag != null && bag.contains(keyValue)) {
             return true;
         }
         return false;
     }
 
-    public synchronized Collection get(KUID key) {
-        KeyValueBag bag = (KeyValueBag) database.get(key);
+    public synchronized Collection<KeyValue> get(KUID key) {
+        KeyValueBag bag = database.get(key);
         if (bag != null) {
             databaseStats.RETRIEVED_VALUES.incrementStat();
             return Collections.unmodifiableCollection(bag.values());
@@ -141,8 +141,8 @@ public class Database {
         return Collections.EMPTY_LIST;
     }
 
-    public synchronized Collection select(KUID key) {
-        KeyValueBag bag = (KeyValueBag) database.select(key);
+    public synchronized Collection<KeyValue> select(KUID key) {
+        KeyValueBag bag = database.select(key);
         if (bag != null) {
             databaseStats.RETRIEVED_VALUES.incrementStat();
             return Collections.unmodifiableCollection(bag.values());
@@ -150,26 +150,26 @@ public class Database {
         return Collections.EMPTY_LIST;
     }
 
-    public synchronized Set getKeys() {
-        HashSet keys = new HashSet(size());
-        for(Iterator it = database.values().iterator(); it.hasNext(); ) {
-            keys.add(((KeyValueBag)it.next()).getKey());
+    public synchronized Set<KUID> getKeys() {
+        HashSet<KUID> keys = new HashSet<KUID>(size());
+        for (KeyValueBag kvb : database.values()) {
+            keys.add(kvb.getKey());
         }
         return Collections.unmodifiableSet(keys);
     }
     
-    public synchronized Collection getValues() {
-        ArrayList keyValues = new ArrayList((int)(size() * 1.5f));
-        for(Iterator it = database.values().iterator(); it.hasNext(); ) {
-            keyValues.addAll(((KeyValueBag)it.next()).values());
+    public synchronized Collection<KeyValue> getValues() {
+        ArrayList<KeyValue> keyValues = new ArrayList<KeyValue>((int)(size() * 1.5f));
+        for (KeyValueBag kvb : database.values()) {
+            keyValues.addAll(kvb.values());
         }
         return Collections.unmodifiableCollection(keyValues);
     }
     
-    public synchronized Collection getKeyValueBags() {
-        ArrayList bags = new ArrayList(size());
-        for(Iterator it = database.values().iterator(); it.hasNext(); ) {
-            bags.add((KeyValueBag)it.next());
+    public synchronized Collection<KeyValueBag> getKeyValueBags() {
+        ArrayList<KeyValueBag> bags = new ArrayList<KeyValueBag>(size());
+        for(KeyValueBag kvb : database.values()) {
+            bags.add(kvb);
         }
         return Collections.unmodifiableCollection(bags);
     }
@@ -245,33 +245,33 @@ public class Database {
         return masterKey != null && keyValue.verify(masterKey);
     }
 
-    private static class DatabaseMap extends FixedSizeHashMap implements
-            Serializable {
+    private static class DatabaseMap extends FixedSizeHashMap<KUID, KeyValueBag> 
+            implements Serializable {
 
         private static final long serialVersionUID = -4796278962768822384L;
 
-        private PatriciaTrie trie;
+        private PatriciaTrie<KUID, KeyValueBag> trie;
 
         public DatabaseMap(int maxSize) {
             super(1024, 0.75f, true, maxSize);
-            trie = new PatriciaTrie();
+            trie = new PatriciaTrie<KUID, KeyValueBag>();
         }
 
-        public Object put(Object key, Object value) {
+        public KeyValueBag put(KUID key, KeyValueBag value) {
             trie.put(key, value);
             return super.put(key, value);
         }
 
-        public Object remove(Object key) {
-            trie.remove(key);
+        public KeyValueBag remove(Object key) {
+            trie.remove((KUID)key);
             return super.remove(key);
         }
 
-        public Object select(Object key) {
+        public KeyValueBag select(KUID key) {
             return trie.select(key);
         }
 
-        protected boolean removeEldestEntry(Entry eldest) {
+        protected boolean removeEldestEntry(Entry<KUID, KeyValueBag> eldest) {
             if (super.removeEldestEntry(eldest)) {
                 remove(eldest.getKey());
             }
@@ -285,11 +285,11 @@ public class Database {
 
         private KUID key;
 
-        private FixedSizeHashMap values;
+        private FixedSizeHashMap<KUID, KeyValue> values;
 
         private KeyValueBag(KUID key) {
             this.key = key;
-            values = new FixedSizeHashMap(DatabaseSettings.MAX_KEY_VALUES.getValue());
+            values = new FixedSizeHashMap<KUID, KeyValue>(DatabaseSettings.MAX_KEY_VALUES.getValue());
         }
 
         public KUID getKey() {
@@ -491,12 +491,12 @@ public class Database {
         }
 
         public KeyValue get(KUID nodeId) {
-            return (KeyValue)values.get(nodeId);
+            return values.get(nodeId);
         }
         
         public boolean contains(KeyValue keyValue) {
             KUID nodeId = keyValue.getNodeID();
-            KeyValue current = (KeyValue) values.get(nodeId);
+            KeyValue current = values.get(nodeId);
             if (current == null) {
                 return false;
             }
@@ -515,7 +515,7 @@ public class Database {
             values.clear();
         }
 
-        public Collection values() {
+        public Collection<KeyValue> values() {
             return Collections.unmodifiableCollection(values.values());
         }
 

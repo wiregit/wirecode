@@ -22,12 +22,14 @@ package com.limegroup.mojito;
 import java.io.Serializable;
 
 /**
- * 
+ * An abstract base class for Nodes
  */
 public abstract class Node implements Serializable {
     
+    /** The ID of this Node */
     private KUID nodeId;
     
+    /** The time when this Node was touched last time */
     private transient long timeStamp = 0L;
     
     public Node(KUID nodeId) {

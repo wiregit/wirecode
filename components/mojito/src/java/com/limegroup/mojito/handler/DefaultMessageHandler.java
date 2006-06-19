@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -38,13 +37,13 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.Database.KeyValueBag;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
-import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
+import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 
 
 /**
@@ -58,11 +57,11 @@ public class DefaultMessageHandler extends MessageHandler
     
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
     
-    private DataBaseStatisticContainer databaseStats;
+    private DatabaseStatisticContainer databaseStats;
     
     public DefaultMessageHandler(Context context) {
         super(context);
-        databaseStats = context.getDataBaseStats();
+        databaseStats = context.getDatabaseStats();
     }
     
     public void addTime(long time) {
@@ -119,22 +118,22 @@ public class DefaultMessageHandler extends MessageHandler
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
-            List closestNodes = routeTable.select(node.getNodeID(), k, false, false);
+            List<ContactNode> closestNodes = routeTable.select(node.getNodeID(), k, false, false);
             
             if (closestNodes.contains(context.getLocalNode())) {
-                List keyValuesToForward = new ArrayList();
+                List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
                 
                 Database database = context.getDatabase();
                 synchronized(database) {
-                    Collection bags = database.getKeyValueBags();
-                    for (Iterator iter = bags.iterator(); iter.hasNext(); ) {
-                        KeyValueBag bag = (KeyValueBag)iter.next();
+                    Collection<KeyValueBag> bags = database.getKeyValueBags();
+                    for(KeyValueBag bag : bags) {
                         
                         //To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
                         //or if it's ID is closer than any other ID (except the new closest one of course)
                         //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                        List closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
+                        List<ContactNode> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
                         ContactNode closest = (ContactNode)closestNodesToKey.get(0);
+                        
                         if (context.isLocalNode(closest)   
                                 || ((node.equals(closest)
                                         //maybe we haven't added him to the routing table
@@ -146,16 +145,16 @@ public class DefaultMessageHandler extends MessageHandler
                                 LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   
                             }
                             databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                            for (Iterator iterator = bag.values().iterator(); iterator.hasNext();) {
-                                KeyValue keyValue = (KeyValue) iterator.next();
+                            for(KeyValue keyValue : bag.values()) {
                                 KUID originatorID = keyValue.getNodeID();
                                 if(originatorID != null && !originatorID.equals(node.getNodeID())) {
                                     keyValuesToForward.add(keyValue);
                                 }
                             }
+                            
                         } else if (closestNodesToKey.size() == k) {
                             //if we are the furthest node: delete non-local value from local db
-                            ContactNode furthest = (ContactNode)closestNodesToKey.get(closestNodesToKey.size()-1);
+                            ContactNode furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
                             if(context.isLocalNode(furthest)) {
                                 int count = bag.removeAll(true);
                                 databaseStats.STORE_FORWARD_REMOVALS.addData(count);
@@ -171,7 +170,7 @@ public class DefaultMessageHandler extends MessageHandler
                                 keyValuesToForward);
                     } else {
                         ResponseHandler handler = new GetQueryKeyHandler(keyValuesToForward);
-                        RequestMessage request = context.getMessageFactory()
+                        RequestMessage request = context.getMessageHelper()
                             .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
                         
                         context.getMessageDispatcher().send(node, request, handler);
@@ -181,15 +180,15 @@ public class DefaultMessageHandler extends MessageHandler
         }
     }
     
-    private void store(ContactNode node, QueryKey queryKey, List keyValues) throws IOException {
+    private void store(ContactNode node, QueryKey queryKey, List<KeyValue> keyValues) throws IOException {
         new StoreResponseHandler(context, queryKey, keyValues).store(node);
     }
     
     private class GetQueryKeyHandler extends AbstractResponseHandler {
         
-        private List keyValues;
+        private List<KeyValue> keyValues;
         
-        private GetQueryKeyHandler(List keyValues) {
+        private GetQueryKeyHandler(List<KeyValue> keyValues) {
             super(DefaultMessageHandler.this.context);
             this.keyValues = keyValues;
         }
@@ -198,11 +197,10 @@ public class DefaultMessageHandler extends MessageHandler
             
             FindNodeResponse response = (FindNodeResponse)message;
             
-            Collection values = response.getValues();
-            for(Iterator it = values.iterator(); it.hasNext(); ) {
+            Collection<ContactNode> nodes = response.getNodes();
+            for(ContactNode node : nodes) {
                 // We did a FIND_NODE lookup use the info
                 // to fill our routing table
-                ContactNode node = (ContactNode)it.next();
                 context.getRouteTable().add(node, false);
             }
             

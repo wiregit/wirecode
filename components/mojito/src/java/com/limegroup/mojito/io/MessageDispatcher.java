@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,6 +31,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.messages.SecureMessage;
+import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
@@ -45,18 +46,21 @@ import com.limegroup.mojito.handler.request.StatsRequestHandler;
 import com.limegroup.mojito.handler.request.StoreRequestHandler;
 import com.limegroup.mojito.io.Tag.Receipt;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.DHTSecureMessage;
+import com.limegroup.mojito.messages.FindNodeRequest;
+import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.FindValueRequest;
+import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.MessageFormatException;
+import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.request.FindNodeRequest;
-import com.limegroup.mojito.messages.request.FindValueRequest;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
-import com.limegroup.mojito.messages.response.PingResponse;
-import com.limegroup.mojito.messages.response.StatsResponse;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.messages.StatsResponse;
+import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 
@@ -71,11 +75,15 @@ public abstract class MessageDispatcher implements Runnable {
     protected static final int INPUT_BUFFER_SIZE = 64 * 1024;
     protected static final int OUTPUT_BUFFER_SIZE = 64 * 1024;
     
+    /** The maximum size of a serialized Message we can send */
+    private static final int MAX_MESSAGE_SIZE
+        = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
+    
     /** The recommended interval to call handleCleanup() */
     protected static final long CLEANUP = 100L;
     
     /** Queue of things we have to send */
-    private LinkedList outputQueue = new LinkedList();
+    private LinkedList<Tag> outputQueue = new LinkedList<Tag>();
     
     /** Map of Messages (responses) we're awaiting */
     private ReceiptMap receiptMap = new ReceiptMap(512);
@@ -98,6 +106,7 @@ public abstract class MessageDispatcher implements Runnable {
         this.context = context;
         
         networkStats = context.getNetworkStats();
+        
         defaultHandler = new DefaultMessageHandler(context);
         pingHandler = new PingRequestHandler(context);
         lookupHandler = new LookupRequestHandler(context);
@@ -152,24 +161,22 @@ public abstract class MessageDispatcher implements Runnable {
     
     public boolean send(ContactNode node, ResponseMessage response) 
             throws IOException {
-        return send(new Tag(node, response, serialize(response))); 
+        return send(new Tag(node, response)); 
     }
     
     public boolean send(SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(dst, request, serialize(request), responseHandler));
+        return send(new Tag(dst, request, responseHandler));
     }
     
     public boolean send(KUID nodeId, SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(nodeId, dst, request, 
-                serialize(request), responseHandler));
+        return send(new Tag(nodeId, dst, request, responseHandler));
     }
     
     public boolean send(ContactNode node, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(node, request, 
-                serialize(request), responseHandler));
+        return send(new Tag(node, request, responseHandler));
     }
     
     protected boolean send(Tag tag) throws IOException {
@@ -202,6 +209,18 @@ public abstract class MessageDispatcher implements Runnable {
             return false;
         }
         
+        // Serialize the Message
+        ByteBuffer data = serialize(dst, message);
+        int size = data.remaining();
+        if (size >= MAX_MESSAGE_SIZE) {
+            IOException iox = new IOException("Message (" + message.getClass().getName()  + ") is too large: " 
+                    + size + " >= " + MAX_MESSAGE_SIZE);
+            //tag.handleError(iox);
+            //return false;
+            throw iox;
+        }
+        
+        tag.setData(data);
         return enqueueOutput(tag);
     }
     
@@ -243,16 +262,23 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * A helper method to serialize DHTMessage(s)
      */
-    protected ByteBuffer serialize(DHTMessage message) throws IOException {
-        return InputOutputUtils.serialize(message);
+    protected final ByteBuffer serialize(SocketAddress dst, DHTMessage message) throws IOException {
+        return context.getMessageFactory().writeMessage(dst, message);
     }
     
     /**
      * A helper method to deserialize DHTMessage(s)
      */
-    protected DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
+    protected final DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
-        return InputOutputUtils.deserialize(src, data);
+        return context.getMessageFactory().createMessage(src, data);
+    }
+    
+    /**
+     * The raw read-method.
+     */
+    protected SocketAddress read(ByteBuffer b) throws IOException {
+        return channel.receive(b);
     }
     
     /**
@@ -260,20 +286,31 @@ public abstract class MessageDispatcher implements Runnable {
      * if no Messages were in the input queue.
      */
     private DHTMessage readMessage() throws MessageFormatException, IOException {
-        SocketAddress src = channel.receive((ByteBuffer)buffer.clear());
+        SocketAddress src = read((ByteBuffer)buffer.clear());
         if (src != null) {
             buffer.flip();
-            int length = buffer.limit();
+            int length = buffer.remaining();
+
+            ByteBuffer data = ByteBuffer.allocate(length);
+            data.put(buffer);
+            data.rewind();
             
-            // Restore Big-Endianess
-            buffer.order(ByteOrder.BIG_ENDIAN);
-            
-            DHTMessage message = deserialize(src, buffer/*.asReadOnlyBuffer()*/);
+            DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
             networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
             networkStats.RECEIVED_MESSAGES_SIZE.addData(length);
             return message;
         }
         return null;
+    }
+    
+    /**
+     * Checks if we have ever sent a Request to the Node that
+     * sent us the Response.
+     */
+    private boolean verifyQueryKey(ResponseMessage response) {
+        KUID messageId = response.getMessageID();
+        ContactNode node = response.getContactNode();
+        return messageId.verifyQueryKey(node.getSocketAddress());
     }
     
     /**
@@ -302,13 +339,20 @@ public abstract class MessageDispatcher implements Runnable {
             return;
         }
         
+        if (!accept(message)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping message from " + ContactNode.toString(nodeId, src));
+            }
+            return;
+        }
+        
         if (message instanceof ResponseMessage) {
             ResponseMessage response = (ResponseMessage)message;
             
             // Check the QueryKey in the message ID to figure
             // out whether or not we have ever sent a Request
             // to that Host!
-            if (!response.verifyQueryKey()) {
+            if (!verifyQueryKey(response)) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(response.getContactNode() + " sent us an unrequested response!");
                 }
@@ -318,7 +362,7 @@ public abstract class MessageDispatcher implements Runnable {
             Receipt receipt = null;
             
             synchronized(receiptMap) {
-                receipt = (Receipt)receiptMap.get(message.getMessageID());
+                receipt = receiptMap.get(message.getMessageID());
                 
                 if (receipt != null) {
                     receipt.received();
@@ -357,14 +401,34 @@ public abstract class MessageDispatcher implements Runnable {
      * Starts a new ResponseProcessor
      */
     private void processResponse(Receipt receipt, ResponseMessage response) {
-        process(new ResponseProcessor(receipt, response));
+        ResponseProcessor processor = new ResponseProcessor(receipt, response);
+        if (response instanceof DHTSecureMessage) {
+            if (context.getMasterKey() != null) {
+                verify((DHTSecureMessage)response, processor);
+            } else if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping secure response " 
+                        + response + " because PublicKey is not set");
+            }
+        } else {
+            process(processor);
+        }
     }
     
     /**
      * Starts a new RequestProcessor
      */
     private void processRequest(RequestMessage request) {
-        process(new RequestProcessor(request));
+        RequestProcessor processor = new RequestProcessor(request);
+        if (request instanceof DHTSecureMessage) {
+            if (context.getMasterKey() != null) {
+                verify((DHTSecureMessage)request, processor);
+            } else if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping secure request " 
+                        + request + " because PublicKey is not set");
+            }
+        } else {
+            process(processor);
+        }
     }
     
     /**
@@ -375,11 +439,12 @@ public abstract class MessageDispatcher implements Runnable {
     public boolean handleWrite() throws IOException {
         synchronized (outputQueue) {
             while(!outputQueue.isEmpty() && isRunning()) {
-                Tag tag = (Tag)outputQueue.removeFirst();
+                Tag tag = outputQueue.removeFirst();
                 
                 try {
                     SocketAddress dst = tag.getSocketAddres();
                     ByteBuffer data = tag.getData();
+                    assert data == null : " Somebody set Data to null";
                     
                     if (send(channel, dst, data)) {
                         // Wohoo! Message was sent!
@@ -449,8 +514,18 @@ public abstract class MessageDispatcher implements Runnable {
     /** Called to process a Task */
     protected abstract void process(Runnable runnable);
     
+    /** Called to verify a SecureMessage */
+    protected abstract void verify(SecureMessage secureMessage, SecureMessageCallback smc);
+    
     /** Called to check whether or not the Message should be processed */
-    protected abstract boolean allow(DHTMessage message);
+    protected boolean allow(DHTMessage message) {
+        return true;
+    }
+    
+    /** */
+    protected boolean accept(DHTMessage message) {
+        return true;
+    }
     
     /**
      * Clears the output queue and receipt map
@@ -468,7 +543,7 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * A map of MessageID -> Receipts
      */
-    private class ReceiptMap extends FixedSizeHashMap {
+    private class ReceiptMap extends FixedSizeHashMap<KUID, Receipt> {
         
         private static final long serialVersionUID = -3084244582682726933L;
 
@@ -481,9 +556,8 @@ public abstract class MessageDispatcher implements Runnable {
         }
         
         public void cleanup() {
-            for(Iterator it = entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)it.next();
-                Receipt receipt = (Receipt)entry.getValue();
+            for(Iterator<Receipt> it = values().iterator(); it.hasNext(); ) {
+                Receipt receipt = it.next();
                 
                 if (receipt.timeout()) {
                     receipt.received();
@@ -495,7 +569,7 @@ public abstract class MessageDispatcher implements Runnable {
             }
         }
         
-        protected boolean removeEldestEntry(Map.Entry eldest) {
+        protected boolean removeEldestEntry(Map.Entry<KUID, Receipt> eldest) {
             Receipt receipt = (Receipt)eldest.getValue();
             
             boolean timeout = receipt.timeout();
@@ -518,7 +592,7 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * An implementation of Runnable to handle Response Messages.
      */
-    private class ResponseProcessor implements Runnable {
+    private class ResponseProcessor implements Runnable, SecureMessageCallback {
         
         private Receipt receipt;
         private ResponseMessage response;
@@ -526,6 +600,15 @@ public abstract class MessageDispatcher implements Runnable {
         private ResponseProcessor(Receipt receipt, ResponseMessage response) {
             this.receipt = receipt;
             this.response = response;
+        }
+        
+        public void handleSecureMessage(SecureMessage sm, boolean passed) {
+            if (passed) {
+                process(this);
+            } else if (LOG.isErrorEnabled()) {
+                LOG.error(response.getContactNode() 
+                        + " send us a signed Response but the signatures do not match!");
+            }
         }
         
         public void run() {
@@ -574,12 +657,21 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * An implementation of Runnable to handle Request Messages.
      */
-    private class RequestProcessor implements Runnable {
+    private class RequestProcessor implements Runnable, SecureMessageCallback {
         
         private RequestMessage request;
         
         private RequestProcessor(RequestMessage request) {
             this.request = request;
+        }
+        
+        public void handleSecureMessage(SecureMessage sm, boolean passed) {
+            if (passed) {
+                process(this);
+            } else if (LOG.isErrorEnabled()) {
+                LOG.error(request.getContactNode() 
+                        + " send us a signed Request but the signatures do not match!");
+            }
         }
         
         public void run() {
@@ -589,7 +681,7 @@ public abstract class MessageDispatcher implements Runnable {
                     LOG.trace(request.getContactNode() + " refused");
                 }
                 networkStats.FILTERED_MESSAGES.incrementStat();
-                // return;
+                return;
             }
             
             RequestHandler requestHandler = null;

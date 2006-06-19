@@ -19,81 +19,89 @@
  
 package com.limegroup.mojito.messages;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 
 /**
  * This is an abstract base class for all DHT messages.
  */
-public abstract class DHTMessage {
+public interface DHTMessage {
     
-    public static final int PING_REQUEST = 0x01;
-    public static final int PING_RESPONSE = 0x02;
-    
-    public static final int STORE_REQUEST = 0x03;
-    public static final int STORE_RESPONSE = 0x04;
-    
-    public static final int FIND_NODE_REQUEST = 0x05;
-    public static final int FIND_NODE_RESPONSE = 0x06;
-    
-    public static final int FIND_VALUE_REQUEST = 0x07;
-    public static final int FIND_VALUE_RESPONSE = 0x08;
-    
-    public static final int STATS_REQUEST = 0x0A;
-    public static final int STATS_RESPONSE = 0x0B;
-    
-    private int vendor;
-    private int version;
-
-    private ContactNode contactNode;
-    private KUID messageId;
-    
-    private byte[] signature;
-    
-    public DHTMessage(int vendor, int version, 
-            ContactNode contactNode, KUID messageId) {
-        this(vendor, version, contactNode, messageId, null);
-    }
-    
-    public DHTMessage(int vendor, int version, 
-            ContactNode contactNode, KUID messageId, byte[] signature) {
+    /**
+     * The opcodes of our Messages
+     */
+    public static enum OpCode {
         
-        if (contactNode == null) {
-            throw new NullPointerException("ContactNode is null");
+        PING_REQUEST(0x01),
+        PING_RESPONSE(0x02),
+        
+        STORE_REQUEST(0x03),
+        STORE_RESPONSE(0x04),
+        
+        FIND_NODE_REQUEST(0x05),
+        FIND_NODE_RESPONSE(0x06),
+        
+        FIND_VALUE_REQUEST(0x07),
+        FIND_VALUE_RESPONSE(0x08),
+        
+        STATS_REQUEST(0x09),
+        STATS_RESPONSE(0x0A);
+        
+        private int opcode;
+            
+        private OpCode(int opcode) {
+            this.opcode = opcode;
+        }
+    
+        public int getOpCode() {
+            return opcode;
         }
         
-        if (messageId == null) {
-            throw new NullPointerException("MessageID is null");
+        public String toString() {
+            return name() + "(" + getOpCode() + ")";
         }
         
-        if (!messageId.isMessageID()) {
-            throw new IllegalArgumentException("MessageID is of wrong type: " + messageId);
+        private static OpCode[] OPCODES;
+        
+        static {
+            OpCode[] values = values();
+            OPCODES = new OpCode[values.length];
+            for (OpCode o : values) {
+                int index = o.opcode % OPCODES.length;
+                if (OPCODES[index] != null) {
+                    // Check the enums for duplicate opcodes!
+                    throw new IllegalStateException("OpCode collision: index=" + index 
+                            + ", OPCODES=" + OPCODES[index] + ", o=" + o);
+                }
+                OPCODES[index] = o;
+            }
         }
         
-        this.vendor = vendor;
-        this.version = version;
-        this.contactNode = contactNode;
-        this.messageId = messageId;
-        this.signature = signature;
+        /**
+         * Returns the OpCode enum for the integer. Throws an
+         * MessageFormatException if opcode is unknown!
+         */
+        public static OpCode valueOf(int opcode) throws MessageFormatException {
+            OpCode o = OPCODES[opcode % OPCODES.length];
+            if (o != null && o.opcode == opcode) {
+                return o;
+            }
+            throw new MessageFormatException("Unknown opcode: " + opcode);
+        }
     }
     
-    public int getVendor() {
-        return vendor;
-    }
+    /** Returns the opcode (type) of the Message */
+    public OpCode getOpCode();
     
-    public int getVersion() {
-        return version;
-    }
+    /** Returns the sender of this Message */
+    public ContactNode getContactNode();
     
-    public KUID getMessageID() {
-        return messageId;
-    }
+    /** Returns the Message ID of the Message */
+    public KUID getMessageID();
     
-    public ContactNode getContactNode() {
-        return contactNode;
-    }
-    
-    public byte[] getSignature() {
-        return signature;
-    }
+    /** Writes this Message to the OutputStream */
+    public void write(OutputStream out) throws IOException;
 }

@@ -32,10 +32,14 @@ import java.nio.channels.Selector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.messages.SecureMessage;
+import com.limegroup.gnutella.messages.SecureMessageCallback;
+import com.limegroup.gnutella.messages.SecureMessageVerifier;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.security.CryptoHelper;
 
 /**
  * This is a stand alone/reference implementation of MessageDispatcher
@@ -50,11 +54,16 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     private Filter filter;
     
     private ProcessingQueue processingQueue;
+    private SecureMessageVerifier verifier;
     
     public MessageDispatcherImpl(Context context) {
         super(context);
         
-        processingQueue = new ProcessingQueue(context.getName() + "-MessageDispatcherPQ", true);
+        processingQueue = new ProcessingQueue(
+                context.getName() + "-MessageDispatcherPQ");
+        
+        verifier = new SecureMessageVerifier(context.getName());
+        
         filter = new Filter();
     }
     
@@ -103,9 +112,15 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     }
     
     protected void process(Runnable runnable) {
-        processingQueue.add(runnable);
+        if (isRunning()) {
+            processingQueue.add(runnable);
+        }
     }
     
+    protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
+        verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
+    }
+
     private void interest(int ops, boolean on) {
         try {
             DatagramChannel channel = getDatagramChannel();

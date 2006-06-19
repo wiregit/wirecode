@@ -21,8 +21,6 @@ package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,8 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.response.StatsResponse;
+import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -50,22 +48,12 @@ public class StatsRequestHandler extends AbstractRequestHandler {
 
     public void handleRequest(RequestMessage message) throws IOException {
         
-        StatsRequest req = (StatsRequest) message;
+        StatsRequest request = (StatsRequest) message;
         
-        try {
-            if (!req.verify(context.getMasterKey(), 
-                    message.getContactNode().getSocketAddress(), 
-                    context.getSocketAddress())) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(message.getContactNode() + " sent us an invalid Stats Request");
-                }
-                return;
+        if (!request.isSecure()) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(message.getContactNode() + " sent us an invalid Stats Request");
             }
-        } catch (InvalidKeyException e) {
-            LOG.error("InvalidKeyException", e);
-            return;
-        } catch (SignatureException e) {
-            LOG.error("SignatureException", e);
             return;
         }
         
@@ -76,15 +64,25 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         networkStats.STATS_REQUEST.incrementStat();
         StringWriter writer = new StringWriter();
         
-        if(req.isDBRequest()) {
-            context.getDHTStats().dumpDataBase(writer);
-        } else if (req.isRTRequest()){
-            context.getDHTStats().dumpRouteTable(writer);
-        } else {
-            context.getDHTStats().dumpStats(writer, false);
+        switch(request.getRequest()) {
+            case StatsRequest.STATS:
+                context.getDHTStats().dumpStats(writer, false);
+                break;
+            case StatsRequest.DB:
+                context.getDHTStats().dumpDataBase(writer);
+                break;
+            case StatsRequest.RT:
+                context.getDHTStats().dumpRouteTable(writer);
+                break;
+            default:
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Unknown stats request: " + request.getRequest());
+                }
+                return;
+                
         }
         
-        StatsResponse response = context.getMessageFactory()
+        StatsResponse response = context.getMessageHelper()
             .createStatsResponse(message, writer.toString());
         
         context.getMessageDispatcher().send(message.getContactNode(), response);

@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.settings.DatabaseSettings;
-import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
+import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.util.CollectionUtils;
 
 /**
@@ -42,7 +42,7 @@ public class KeyValuePublisher implements Runnable {
     private Context context;
     private Database database;
     
-    private final DataBaseStatisticContainer databaseStats;
+    private final DatabaseStatisticContainer databaseStats;
     
     private boolean running = false;
     
@@ -55,7 +55,7 @@ public class KeyValuePublisher implements Runnable {
         this.context = context;
         this.database = context.getDatabase();
         
-        databaseStats = context.getDataBaseStats();
+        databaseStats = context.getDatabaseStats();
     }
     
     public boolean isRunning() {

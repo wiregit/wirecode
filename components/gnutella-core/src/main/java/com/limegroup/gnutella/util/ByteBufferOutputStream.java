@@ -2,17 +2,16 @@ package com.limegroup.gnutella.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 /**
- * A ByteArrayOutputStream that uses ByteBuffers internally and can optionally
+ * A ByteBufferOutputStream that uses ByteBuffers internally and can optionally
  * grow or throw IOExceptions when the maximum size is reached and more is written.
  *
  * This exposes many methods to make using byte[]'s & ByteBuffers more efficient.
  */
-public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
+public class ByteBufferOutputStream extends OutputStream {
     
     /** The backing ByteBuffer.  If growth is enabled, the buffer may change. */
     protected ByteBuffer buffer;
@@ -23,28 +22,28 @@ public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
     /**
      * Creates an OutputStream initially sized at 32 that can grow.
      */
-    public BufferByteArrayOutputStream() {
+    public ByteBufferOutputStream() {
 	    this(32);
     }
 
     /**
      * Creates an OutputStream of the given size that can grow.
      */
-    public BufferByteArrayOutputStream(int size) {
+    public ByteBufferOutputStream(int size) {
 	    this(ByteBuffer.allocate(size), true);
     }
     
     /**
      * Creates an OutputStream of the given size that can grow as needed.
      */
-    public BufferByteArrayOutputStream(int size, boolean grow) {
+    public ByteBufferOutputStream(int size, boolean grow) {
         this(ByteBuffer.allocate(size), grow);
     }
     
     /**
      * Creates an OutputStream with the given backing array that cannot grow.
      */
-    public BufferByteArrayOutputStream(byte[] backing) {
+    public ByteBufferOutputStream(byte[] backing) {
         this(ByteBuffer.wrap(backing), false);
     }
     
@@ -52,14 +51,14 @@ public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
      * Creates an OutputStream using the given backing array, starting at position
      * 'pos' and allowing writes for the given length.  The stream cannot grow.
      */
-    public BufferByteArrayOutputStream(byte[] backing, int pos, int length) {
+    public ByteBufferOutputStream(byte[] backing, int pos, int length) {
         this(ByteBuffer.wrap(backing, pos, length), false);
     }
     
     /**
      * Creates an OutputStream backed by the given ByteBuffer.  The stream cannot grow.
      */
-    public BufferByteArrayOutputStream(ByteBuffer backing) {
+    public ByteBufferOutputStream(ByteBuffer backing) {
         this(backing, false);
     }
     
@@ -67,7 +66,7 @@ public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
      * Creates an OutputStream backed by the given ByteBuffer.  If 'grow' is true,
      * then the referenced ByteBuffer may change when the backing array is grown.
      */
-    public BufferByteArrayOutputStream(ByteBuffer backing, boolean grow) {
+    public ByteBufferOutputStream(ByteBuffer backing, boolean grow) {
         this.buffer = backing;
         this.grow = grow;
     }
@@ -89,7 +88,7 @@ public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
      * Returns a byte[] of the valid bytes written to this stream.
      *
      * This _may_ return a reference to the backing array itself (but it is not
-     * guaranteed to), so the BufferByteArrayOutputStream should not be used again
+     * guaranteed to), so the ByteBufferOutputStream should not be used again
      * after this is called if you want to preserve the contents of the array.
      */
     public byte[] toByteArray() {
@@ -165,7 +164,7 @@ public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
     private void grow(int len) {
         int size = buffer.capacity();
         int newSize = Math.max(size << 1, size + len);
-        ByteBuffer newBuffer = buffer.allocate(newSize);
+        ByteBuffer newBuffer = ByteBuffer.allocate(newSize);
         buffer.flip();
         newBuffer.put(buffer);
         buffer = newBuffer;

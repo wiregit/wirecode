@@ -31,7 +31,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -434,7 +434,7 @@ public class UDPService implements ReadWriteObserver {
         if(_channel == null || _channel.socket().isClosed())
             return; // ignore if not open.
 
-        BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(
+        ByteBufferOutputStream baos = new ByteBufferOutputStream(
                 NIODispatcher.instance().getBufferCache().getHeap(msg.getTotalLength()));
         try {
             msg.writeQuickly(baos);

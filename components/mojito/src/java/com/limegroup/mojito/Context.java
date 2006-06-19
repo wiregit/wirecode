@@ -58,10 +58,11 @@ import com.limegroup.mojito.handler.response.LookupResponseHandler.ContactNodeEn
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.messages.MessageFactory;
+import com.limegroup.mojito.messages.MessageHelper;
+import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
@@ -71,7 +72,7 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
 import com.limegroup.mojito.statistics.DHTStats;
-import com.limegroup.mojito.statistics.DataBaseStatisticContainer;
+import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
@@ -83,12 +84,9 @@ public class Context {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
-    private static final int VENDOR = ContextSettings.getVendorID();
-    private static final int VERSION = 0;
-    
     private static Timer TIMER = new Timer(true);
     
-    private PublicKey masterKey;
+    private KeyPair masterKeyPair;
     
     private ContactNode localNode;
     private SocketAddress localAddress;
@@ -100,7 +98,7 @@ public class Context {
     private Database database;
     private RouteTable routeTable;
     private MessageDispatcher messageDispatcher;
-    private MessageFactory messageFactory;
+    private MessageHelper messageHelper;
     private KeyValuePublisher keyValuePublisher;
     private RandomBucketRefresher bucketRefresher;
     
@@ -114,13 +112,13 @@ public class Context {
     
     private final NetworkStatisticContainer networkStats;
     private final GlobalLookupStatisticContainer globalLookupStats;
-    private final DataBaseStatisticContainer dataBaseStats;
+    private final DatabaseStatisticContainer databaseStats;
     
     private long lastEstimateTime = 0L;
     private int estimatedSize = 0;
     
-    private LinkedList localSizeHistory = new LinkedList();
-    private LinkedList remoteSizeHistory = new LinkedList();
+    private LinkedList<Integer> localSizeHistory = new LinkedList<Integer>();
+    private LinkedList<Integer> remoteSizeHistory = new LinkedList<Integer>();
     
     private ProcessingQueue eventQueue;
     
@@ -133,6 +131,7 @@ public class Context {
         this.localNode = localNode;
         this.keyPair = keyPair;
         
+        PublicKey masterKey = null;
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());
             if (file.exists() && file.isFile()) {
@@ -141,18 +140,19 @@ public class Context {
         } catch (Exception err) {
             LOG.fatal("Loading the MasterKey failed!", err);
         }
+        masterKeyPair = new KeyPair(masterKey, null);
         
         dhtStats = new DHTNodeStat(this);
         
         networkStats = new NetworkStatisticContainer(this);
         globalLookupStats = new GlobalLookupStatisticContainer(this);
-        dataBaseStats = new DataBaseStatisticContainer(this);
+        databaseStats = new DatabaseStatisticContainer(this);
         
         database = new Database(this);
         routeTable = new PatriciaRouteTable(this);
         
         messageDispatcher = new MessageDispatcherImpl(this);
-        messageFactory = new MessageFactory(this);
+        messageHelper = new MessageHelper(this);
         keyValuePublisher = new KeyValuePublisher(this);
 
         bucketRefresher = new RandomBucketRefresher(this);
@@ -173,7 +173,7 @@ public class Context {
      * Installs a custom MessageDispatcher implementation. The
      * passed Class must be a subclass of MessageDispatcher.
      */
-    public synchronized void setMessageDispatcher(Class clazz) {
+    public synchronized void setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
         }
@@ -195,15 +195,26 @@ public class Context {
     }
     
     public int getVendor() {
-        return VENDOR;
+        return ContextSettings.getVendorID();
     }
     
     public int getVersion() {
-        return VERSION;
+        return ContextSettings.VERSION.getValue();
     }
     
     public PublicKey getMasterKey() {
-        return masterKey;
+        if (masterKeyPair != null) {
+            return masterKeyPair.getPublic();
+        }
+        return null;
+    }
+    
+    public KeyPair getMasterKeyPair() {
+        return masterKeyPair;
+    }
+    
+    public void setMasterKeyPair(KeyPair masterKeyPair) {
+        this.masterKeyPair = masterKeyPair;
     }
     
     public void createNewKeyPair() {
@@ -305,8 +316,28 @@ public class Context {
         return keyValuePublisher;
     }
     
+    public synchronized void setMessageHelper(MessageHelper messageHelper) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageHelper while DHT is running");
+        }
+        
+        this.messageHelper = messageHelper;
+    }
+    
+    public MessageHelper getMessageHelper() {
+        return messageHelper;
+    }
+    
+    public synchronized void setMessageFactory(MessageFactory messageFactory) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageFactory while DHT is running");
+        }
+        
+        messageHelper.setMessageFactory(messageFactory);
+    }
+    
     public MessageFactory getMessageFactory() {
-        return messageFactory;
+        return messageHelper.getMessageFactory();
     }
     
     public synchronized boolean isRunning() {
@@ -672,8 +703,8 @@ public class Context {
             }
         
             int localSizeSum = 0;
-            for(Iterator it = localSizeHistory.iterator(); it.hasNext(); ) {
-                localSizeSum += ((Integer)it.next()).intValue();
+            for (Integer size : localSizeHistory) {
+                localSizeSum += size.intValue();
             }
             
             // If somebody is playing around with MAX_HISTORY_SIZE
@@ -711,8 +742,8 @@ public class Context {
         return globalLookupStats;
     }
     
-    public DataBaseStatisticContainer getDataBaseStats() {
-        return dataBaseStats;
+    public DatabaseStatisticContainer getDatabaseStats() {
+        return databaseStats;
     }
     
     /**
@@ -944,7 +975,7 @@ public class Context {
         
         public void finish(KUID lookup, Collection c, long time) {
             // List of ContactNodes where we stored the KeyValues.
-            final List storeTargets = new ArrayList(c.size());
+            final List<ContactNode> storeTargets = new ArrayList<ContactNode>(c.size());
             
             for(Iterator it = c.iterator(); it.hasNext(); ) {
                 ContactNodeEntry entry = (ContactNodeEntry)it.next();
@@ -1051,7 +1082,7 @@ public class Context {
                         responseHandler.addPingListener(listener);
                     }
                     
-                    PingRequest request = messageFactory.createPingRequest(address);
+                    PingRequest request = getMessageHelper().createPingRequest(address);
                     messageDispatcher.send(nodeId, address, request, responseHandler);
 
                     handlerMap.put(address, responseHandler);

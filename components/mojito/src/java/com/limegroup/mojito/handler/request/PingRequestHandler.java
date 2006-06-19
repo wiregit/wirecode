@@ -27,9 +27,9 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
+import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.response.PingResponse;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -57,7 +57,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
         PingRequest request = (PingRequest)message;
         
         ContactNode node = request.getContactNode();
-        PingResponse response = context.getMessageFactory()
+        PingResponse response = context.getMessageHelper()
                 .createPingResponse(request, node.getSocketAddress());
 
         context.getMessageDispatcher().send(node, response);

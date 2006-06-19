@@ -25,7 +25,7 @@ import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 /**
- * 
+ * A ContactNode is an actual Node in DHT
  */
 public class ContactNode extends Node {
     
@@ -33,22 +33,36 @@ public class ContactNode extends Node {
 
     private static final int FIREWALLED = 0x01;
     
+    /** The Vendor ID of the Node */
+    private int vendor;
+    
+    /** The Version of the Node */
+    private int version;
+    
+    /** The IPP of the Node */
     private SocketAddress address;
+    
+    /** The instance ID of the Node */
+    private int instanceId;
+
+    /** Various flags (like FIREWALLED) this Node has set */
     private int flags;
     
+    /** The number of failures (no response for requests) */
     private int failures = 0;
     
     private long lastDeadOrAliveTime = 0L;
     
-    private int instanceId;
-    
+    /** The RTT of the Node */
     private transient long roundTripTime = -1L;
     
-    public ContactNode(KUID nodeId, SocketAddress address) {
-        this(nodeId, address, 0, 0);
+    public ContactNode(int vendor, int version, 
+            KUID nodeId, SocketAddress address) {
+        this(vendor, version, nodeId, address, 0, 0);
     }
     
-    public ContactNode(KUID nodeId, SocketAddress address, 
+    public ContactNode(int vendor, int version, 
+            KUID nodeId, SocketAddress address, 
             int instanceId, int flags) {
         super(nodeId);
         
@@ -56,20 +70,33 @@ public class ContactNode extends Node {
             throw new NullPointerException("SocketAddress is null");
         }
         
+        if ((version & 0xFFFF0000) != 0) {
+            throw new IllegalArgumentException("Version must be between 0x00 and 0xFFFF: " + version);
+        }
+        
+        this.vendor = vendor;
+        this.version = version;
         this.address = address;
         this.instanceId = instanceId;
         this.flags = flags;
     }
     
-    public long getAdaptativeTimeOut() {
-        //for now, based on failures and previous round trip time
-        long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
-        if(roundTripTime <= 0L || isDead()) {
-            return maxTimeout;
-        } else {
-            return Math.min(((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * roundTripTime) + 
-                failures * roundTripTime), maxTimeout);
-        }
+    public int getVendor() {
+        return vendor;
+    }
+    
+    public int getVersion() {
+        return version;
+    }
+    
+    public SocketAddress getSocketAddress() {
+        return address;
+    }
+    
+    public SocketAddress setSocketAddress(SocketAddress address) {
+        SocketAddress o = this.address;
+        this.address = address;
+        return o;
     }
     
     public int getInstanceID() {
@@ -82,6 +109,17 @@ public class ContactNode extends Node {
 
     public int getFlags() {
         return flags;
+    }
+    
+    public long getAdaptativeTimeOut() {
+        //for now, based on failures and previous round trip time
+        long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
+        if(roundTripTime <= 0L || isDead()) {
+            return maxTimeout;
+        } else {
+            return Math.min(((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * roundTripTime) + 
+                failures * roundTripTime), maxTimeout);
+        }
     }
     
     public long getRoundTripTime() {
@@ -146,16 +184,6 @@ public class ContactNode extends Node {
         super.alive();
         failures = 0;
         lastDeadOrAliveTime = System.currentTimeMillis();
-    }
-    
-    public SocketAddress getSocketAddress() {
-        return address;
-    }
-    
-    public SocketAddress setSocketAddress(SocketAddress address) {
-        SocketAddress o = this.address;
-        this.address = address;
-        return o;
     }
     
     public boolean equals(Object o) {

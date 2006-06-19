@@ -31,8 +31,9 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
@@ -102,21 +103,21 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                             + ". KeyValue will expire faster!");
                 }
                 
-                context.getDataBaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
+                context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
                 keyValue.setClose(false);
             }
         }
         
-        int status = StoreResponse.FAILED;
+        StoreStatus status = StoreStatus.FAILED;
         if (context.getDatabase().add(keyValue)) {
             networkStats.STORE_REQUESTS_OK.incrementStat();
-            status = StoreResponse.SUCCEEDED;
+            status = StoreStatus.SUCCEEDED;
         } else {
             networkStats.STORE_REQUESTS_FAILURE.incrementStat();
         }
         
         StoreResponse response 
-            = context.getMessageFactory().createStoreResponse(request, valueId, status);
+            = context.getMessageHelper().createStoreResponse(request, valueId, status);
         context.getMessageDispatcher().send(request.getContactNode(), response);
     }
 }

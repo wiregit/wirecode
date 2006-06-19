@@ -466,10 +466,10 @@ public final class NetworkUtils {
      * 
      * This method is IPv6 compliant
      */
-    public static byte[] getBytes(SocketAddress addr) throws IOException {
+    public static byte[] getBytes(SocketAddress addr) throws UnknownHostException {
         InetSocketAddress iaddr = (InetSocketAddress)addr;
         if (iaddr.isUnresolved()) {
-            throw new UnknownHostException();
+            throw new UnknownHostException(iaddr.toString());
         }
         
         return getBytes(iaddr.getAddress(), iaddr.getPort());
@@ -480,7 +480,7 @@ public final class NetworkUtils {
      * 
      * This method is IPv6 compliant
      */
-    public static byte[] getBytes(InetAddress addr, int port) throws IOException {
+    public static byte[] getBytes(InetAddress addr, int port) {
         if (port < 0 || port > 0xFFFF) {
             throw new IllegalArgumentException("Port out of range: " + port);
         }

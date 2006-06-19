@@ -31,23 +31,28 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 
-
+/**
+ * A BucketNode is a virtual construct to simulate
+ * Buckets on the PatriciaTrie.
+ */
 public class BucketNode extends Node {
     
     private static final long serialVersionUID = 2903713682317244655L;
 
     private static final Log LOG = LogFactory.getLog(BucketNode.class);
     
+    /** The number of Contacts in this Bucket */
     private int nodeCount;
     
+    /** The depth of this Bucket in the Trie */
     private int depth;
     
     private Cache replacementCache;
     
-    public BucketNode(KUID nodeId,int depth) {
+    public BucketNode(KUID nodeId, int depth) {
         super(nodeId);
         this.depth = depth;
-        nodeCount = 0;
+        this.nodeCount = 0;
     }
     
     public void incrementNodeCount() {
@@ -76,7 +81,7 @@ public class BucketNode extends Node {
     }
     
     public ContactNode getReplacementNode(KUID nodeId) {
-        return (ContactNode)getReplacementCache().get(nodeId);
+        return getReplacementCache().get(nodeId);
     }
     
     public int getReplacementCacheSize() {
@@ -90,7 +95,7 @@ public class BucketNode extends Node {
      * Use always the Iterator or the operators provided
      * by this class!
      */
-    public Map getReplacementCache() {
+    public Map<KUID, ContactNode> getReplacementCache() {
         if (replacementCache != null) {
             return replacementCache;
         }
@@ -99,20 +104,20 @@ public class BucketNode extends Node {
     
     public ContactNode getMostRecentlySeenCachedNode(boolean remove) {
         if(replacementCache != null) {
-            return (ContactNode)replacementCache.getMostRecentlySeen(remove);
+            return replacementCache.getMostRecentlySeen(remove);
         }
         return null;
     }
     
     public ContactNode removeReplacementNode(KUID nodeId) {
-        return (ContactNode)getReplacementCache().remove(nodeId);
+        return getReplacementCache().remove(nodeId);
     }
     
     public void touch() {
         super.alive();
     }
  
-    public List split() {
+    public List<BucketNode> split() {
         BucketNode leftBucket = new BucketNode(getNodeID(), depth+1);
         BucketNode rightBucket = new BucketNode(getNodeID().set(depth), depth+1);
         if (!getReplacementCache().isEmpty()) {
@@ -120,7 +125,7 @@ public class BucketNode extends Node {
                 LOG.error("Bucket node inconsistent: trying to split node with replacement cache not empty!");
             }
         }
-        return Arrays.asList(new BucketNode[]{leftBucket, rightBucket});
+        return Arrays.asList(leftBucket, rightBucket);
     }
 
     public int getDepth() {
@@ -137,7 +142,7 @@ public class BucketNode extends Node {
         return buffer.toString();
     }
     
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         BucketNode bucket = new BucketNode(KUID.MIN_NODE_ID,0);
         System.out.println(bucket);
         for (int i = 0; i < 10; i++) {
@@ -149,7 +154,7 @@ public class BucketNode extends Node {
             System.out.println(KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth()).toHexString());
         }
 //        System.out.println(bucket2);
-    }
+    }*/
     
     public boolean equals(Object o) {
         if (!(o instanceof BucketNode)) {
@@ -163,7 +168,7 @@ public class BucketNode extends Node {
     /**
      * LRU replacement cache
      */
-    private static class Cache extends FixedSizeHashMap {
+    private static class Cache extends FixedSizeHashMap<KUID, ContactNode> {
         
         private static final long serialVersionUID = 5255663117632404183L;
 
@@ -172,13 +177,13 @@ public class BucketNode extends Node {
         }
         
         // O(1)
-        public Object getLeastRecentlySeen(boolean remove) {
+        public ContactNode getLeastRecentlySeen(boolean remove) {
             if (isEmpty()) {
                 return null;
             }
             
-            Iterator it = values().iterator();
-            Object value = it.next();
+            Iterator<ContactNode> it = values().iterator();
+            ContactNode value = it.next();
             
             if (remove) {
                 it.remove();
@@ -187,13 +192,13 @@ public class BucketNode extends Node {
         }
         
         // O(n)
-        public Object getMostRecentlySeen(boolean remove) {
+        public ContactNode getMostRecentlySeen(boolean remove) {
             if (isEmpty()) {
                 return null;
             }
 
-            Object value = null;
-            Iterator it = values().iterator();
+            ContactNode value = null;
+            Iterator<ContactNode> it = values().iterator();
             while (it.hasNext()) {
                 value = it.next();
             }

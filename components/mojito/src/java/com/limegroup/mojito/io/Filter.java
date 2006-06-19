@@ -26,14 +26,14 @@ import com.limegroup.mojito.util.FixedSizeHashMap;
 
 public class Filter {
     
-    private FixedSizeHashMap counterMap;
+    private FixedSizeHashMap<SocketAddress, DeltaCounter> counterMap;
     
     public Filter() {
-        counterMap = new FixedSizeHashMap(64, 0.75f, true, 64);
+        counterMap = new FixedSizeHashMap<SocketAddress, DeltaCounter>(64, 0.75f, true, 64);
     }
     
     public boolean allow(SocketAddress src) {
-        DeltaCounter counter = (DeltaCounter)counterMap.get(src);
+        DeltaCounter counter = counterMap.get(src);
         if (counter == null) {
             counter = new DeltaCounter();
             counterMap.put(src, counter);

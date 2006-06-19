@@ -16,24 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.messages;
 
-import com.limegroup.mojito.ContactNode;
-import com.limegroup.mojito.KUID;
-
-/**
- * An abstract base class for request Messages
- */
-public abstract class RequestMessage extends DHTMessage {
-
-    public RequestMessage(int vendor, int version, 
-            ContactNode node, KUID messageId) {
-        super(vendor, version, node, messageId);
-    }
-    
-    public RequestMessage(int vendor, int version, 
-            ContactNode node, KUID messageId, byte[] signature) {
-        super(vendor, version, node, messageId, signature);
-    }
+public interface RequestMessage extends DHTMessage {
 }

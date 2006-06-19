@@ -83,4 +83,7 @@ public class ContextSettings extends MojitoProps {
             throw new RuntimeException(e);
         }
     }
+    
+    public static IntSetting VERSION
+        = FACTORY.createIntSetting("VERSION", 0);
 }

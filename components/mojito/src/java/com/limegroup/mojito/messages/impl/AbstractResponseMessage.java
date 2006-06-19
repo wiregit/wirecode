@@ -6,26 +6,42 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.messages.request;
+
+package com.limegroup.mojito.messages.impl;
+
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.messages.ResponseMessage;
 
-public class FindNodeRequest extends LookupRequest {
+/**
+ * An abstract base class for response messages
+ */
+public abstract class AbstractResponseMessage extends AbstractDHTMessage
+        implements ResponseMessage {
 
-    public FindNodeRequest(int vendor, int version, ContactNode node, 
-            KUID messageId, KUID lookupId) {
-        super(vendor, version, node, messageId, lookupId);
+    public AbstractResponseMessage(Context context, 
+            OpCode opcode, ContactNode contactNode, KUID messageId) {
+        super(context, opcode, contactNode, messageId);
+    }
+    
+    public AbstractResponseMessage(Context context, 
+            OpCode opcode, SocketAddress src, ByteBuffer... data) 
+            throws IOException {
+        super(context, opcode, src, data);
     }
 }

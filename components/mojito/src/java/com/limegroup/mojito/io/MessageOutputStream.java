@@ -26,23 +26,13 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.util.Collection;
-import java.util.Iterator;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.messages.request.FindNodeRequest;
-import com.limegroup.mojito.messages.request.FindValueRequest;
-import com.limegroup.mojito.messages.request.PingRequest;
-import com.limegroup.mojito.messages.request.StatsRequest;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
-import com.limegroup.mojito.messages.response.PingResponse;
-import com.limegroup.mojito.messages.response.StatsResponse;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.DHTMessage.OpCode;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 
 /**
  * The MessageOutputStream class writes a DHTMessage (serializes)
@@ -54,17 +44,17 @@ public class MessageOutputStream extends DataOutputStream {
         super(out);
     }
 	
-    private void writeKUID(KUID key) throws IOException {
-        if (key != null) {
-            write(key.getBytes());
-        } else {
-            writeByte(0);
+    public void writeKUID(KUID key) throws IOException {
+        if (key == null) {
+            throw new NullPointerException("KUID cannot be null");
         }
+        
+        write(key.getBytes());
     }
     
-    private void writeKeyValue(KeyValue keyValue) throws IOException {
-        writeKUID((KUID)keyValue.getKey());
-        byte[] b = (byte[])keyValue.getValue();
+    public void writeKeyValue(KeyValue keyValue) throws IOException {
+        writeKUID(keyValue.getKey());
+        byte[] b = keyValue.getValue();
         writeShort(b.length);
         write(b, 0, b.length);
         
@@ -75,7 +65,14 @@ public class MessageOutputStream extends DataOutputStream {
         writeSignature(keyValue.getSignature());
     }
     
-    private void writePublicKey(PublicKey pubKey) throws IOException {
+    public void writeKeyValues(Collection<KeyValue> values) throws IOException {
+        writeByte(values.size());
+        for(KeyValue kv : values) {
+            writeKeyValue(kv);
+        }
+    }
+    
+    public void writePublicKey(PublicKey pubKey) throws IOException {
         if (pubKey != null) {
             byte[] encoded = pubKey.getEncoded();
             writeShort(encoded.length);
@@ -85,7 +82,7 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writeSignature(byte[] signature) throws IOException {
+    public void writeSignature(byte[] signature) throws IOException {
         if (signature != null && signature.length > 0) {
             writeByte(signature.length);
             write(signature, 0, signature.length);
@@ -94,13 +91,23 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writeContactNode(ContactNode node) throws IOException {
+    public void writeContactNode(ContactNode node) throws IOException {
+        writeInt(node.getVendor());
+        writeShort(node.getVersion());
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getSocketAddress());
-	}
+    }
     
-    private void writeSocketAddress(SocketAddress addr) throws IOException {
-        if (addr instanceof InetSocketAddress) {
+    public void writeContactNodes(Collection<ContactNode> nodes) throws IOException {
+        writeByte(nodes.size());
+        for(ContactNode node : nodes) {
+            writeContactNode(node);
+        }
+    }
+    
+    public void writeSocketAddress(SocketAddress addr) throws IOException {
+        if (addr instanceof InetSocketAddress
+                && !((InetSocketAddress)addr).isUnresolved()) {
             InetSocketAddress iaddr = (InetSocketAddress)addr;
             byte[] address = iaddr.getAddress().getAddress();
             int port = iaddr.getPort();
@@ -113,7 +120,7 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writeQueryKey(QueryKey queryKey) throws IOException {
+    public void writeQueryKey(QueryKey queryKey) throws IOException {
         if (queryKey != null) {
             byte[] qk = queryKey.getBytes();
             writeByte(qk.length);
@@ -123,102 +130,20 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writePing(PingRequest ping) throws IOException {
-        /* NOTHING TO WRITE */
-    }
-    
-    private void writePong(PingResponse pong) throws IOException {
-        writeSocketAddress(pong.getExternalAddress());
-        writeInt(pong.getEstimatedSize());
-        writeSignature(pong.getSignature());
-    }
-    
-    private void writeFindNodeRequest(FindNodeRequest findNode) throws IOException {
-        writeKUID(findNode.getLookupID());
-    }
-    
-    private void writeFindNodeResponse(FindNodeResponse response) throws IOException {
-        writeQueryKey(response.getQueryKey());
-        
-        Collection values = response.getValues();
-        writeByte(values.size());
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
-            writeContactNode((ContactNode)it.next());
-        }
-    }
-    
-    private void writeFindValueRequest(FindValueRequest findValue) throws IOException {
-        writeKUID(findValue.getLookupID());
-    }
-    
-    private void writeFindValueResponse(FindValueResponse response) throws IOException {
-        
-        Collection values = response.getValues();
-        writeByte(values.size());
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
-            writeKeyValue((KeyValue)it.next());
-        }
-    }
-    
-    private void writeStoreRequest(StoreRequest request) throws IOException {
-        writeQueryKey(request.getQueryKey());
-        writeKeyValue(request.getKeyValue());
-    }
-    
-    private void writeStoreResponse(StoreResponse response) throws IOException {
-        writeKUID(response.getValueID());
-        writeByte(response.getStatus());
-    }
-    
-    private void writeStatsRequest(StatsRequest request) throws IOException {
-        writeSignature(request.getSignature());
-        writeInt(request.getRequest());
-    }
-    
-    private void writeStatsResponse(StatsResponse response) throws IOException {
-        writeUTF(response.getStatistics());
-    }
-    
-    public void write(DHTMessage msg) throws IOException {
-        writeInt(msg.getVendor());
-        writeShort(msg.getVersion());
-        writeByte(msg.getContactNode().getFlags());
-        writeKUID(msg.getContactNode().getNodeID());
-        writeByte(msg.getContactNode().getInstanceID());
-        writeKUID(msg.getMessageID());
-        
-        if (msg instanceof PingRequest) {
-            writeByte(DHTMessage.PING_REQUEST);
-            writePing((PingRequest)msg);
-        } else if (msg instanceof PingResponse) {
-            writeByte(DHTMessage.PING_RESPONSE);
-            writePong((PingResponse)msg);
-        } else if (msg instanceof FindNodeRequest) {
-            writeByte(DHTMessage.FIND_NODE_REQUEST);
-            writeFindNodeRequest((FindNodeRequest)msg);
-        } else if (msg instanceof FindNodeResponse) {
-            writeByte(DHTMessage.FIND_NODE_RESPONSE);
-            writeFindNodeResponse((FindNodeResponse)msg);
-        } else if (msg instanceof FindValueRequest) {
-            writeByte(DHTMessage.FIND_VALUE_REQUEST);
-            writeFindValueRequest((FindValueRequest)msg);
-        } else if (msg instanceof FindValueResponse) {
-            writeByte(DHTMessage.FIND_VALUE_RESPONSE);
-            writeFindValueResponse((FindValueResponse)msg);
-        } else if (msg instanceof StoreRequest) {
-            writeByte(DHTMessage.STORE_REQUEST);
-            writeStoreRequest((StoreRequest)msg);
-        } else if (msg instanceof StoreResponse) {
-            writeByte(DHTMessage.STORE_RESPONSE);
-            writeStoreResponse((StoreResponse)msg);
-        } else if (msg instanceof StatsRequest) {
-            writeByte(DHTMessage.STATS_REQUEST);
-            writeStatsRequest((StatsRequest)msg);
-        } else if (msg instanceof StatsResponse) {
-            writeByte(DHTMessage.STATS_RESPONSE);
-            writeStatsResponse((StatsResponse)msg);
+    public void writeStatistics(byte[] statistics) throws IOException {
+        if (statistics != null) {
+            writeShort(statistics.length);
+            write(statistics);
         } else {
-            throw new IOException("Unknown Message: " + msg);
+            writeShort(0);
         }
+    }
+    
+    public void writeOpCode(OpCode opcode) throws IOException {
+        writeByte(opcode.getOpCode());
+    }
+    
+    public void writeStoreStatus(StoreStatus status) throws IOException {
+        writeByte(status.getStatus());
     }
 }

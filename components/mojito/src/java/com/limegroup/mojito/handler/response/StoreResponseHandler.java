@@ -37,8 +37,9 @@ import com.limegroup.mojito.event.StoreResponseListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.request.StoreRequest;
-import com.limegroup.mojito.messages.response.StoreResponse;
+import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 
 /**
  * The StoreResponseHandler handles storing of one or more 
@@ -53,13 +54,13 @@ public class StoreResponseHandler extends AbstractResponseHandler {
     private QueryKey queryKey;
     
     private int index = 0;
-    private List keyValues;
+    private List<KeyValue> keyValues;
     
     public StoreResponseHandler(Context context, QueryKey queryKey, KeyValue keyValue) {
         this(context, queryKey, Arrays.asList(new KeyValue[]{keyValue}));
     }
     
-    public StoreResponseHandler(Context context, QueryKey queryKey, List keyValues) {
+    public StoreResponseHandler(Context context, QueryKey queryKey, List<KeyValue> keyValues) {
         super(context);
         
         this.queryKey = queryKey;
@@ -82,15 +83,15 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         return queryKey;
     }
     
-    public List getKeyValues() {
+    public List<KeyValue> getKeyValues() {
         return keyValues;
     }
     
     public void store(ContactNode node) throws IOException {
         if (index < keyValues.size() && !isStopped()) {
-            KeyValue keyValue = (KeyValue)keyValues.get(index);
+            KeyValue keyValue = keyValues.get(index);
             
-            StoreRequest request = context.getMessageFactory()
+            StoreRequest request = context.getMessageHelper()
                 .createStoreRequest(node.getSocketAddress(), queryKey, keyValue);
             
             context.getMessageDispatcher().send(node, request, this);
@@ -102,10 +103,10 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         StoreResponse response = (StoreResponse)message;
         
         KUID valueId = response.getValueID();
-        int status = response.getStatus();
+        StoreStatus status = response.getStatus();
         
         if (index < keyValues.size()) {
-            KeyValue current = (KeyValue)keyValues.get(index);
+            KeyValue current = keyValues.get(index);
             
             if (!current.getKey().equals(valueId)) {
                 if (LOG.isErrorEnabled()) {
@@ -118,11 +119,11 @@ public class StoreResponseHandler extends AbstractResponseHandler {
                 return;
             }
             
-            if (status == StoreResponse.SUCCEEDED) {
+            if (status == StoreStatus.SUCCEEDED) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace(message.getContactNode() + " sucessfully stored KeyValue " + valueId);
                 }
-            } else if (status == StoreResponse.FAILED) {
+            } else if (status == StoreStatus.FAILED) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace(message.getContactNode() + " failed to store KeyValue " + valueId);
                 }

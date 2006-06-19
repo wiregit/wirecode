@@ -42,10 +42,10 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.messages.response.FindNodeResponse;
-import com.limegroup.mojito.messages.response.FindValueResponse;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
 import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
@@ -71,16 +71,16 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private long startTime;
     
     /** Set of queried KUIDs */
-    private Set queried = new HashSet();
+    private Set<KUID> queried = new HashSet<KUID>();
     
     /** Trie of ContactNodes we're going to query */
-    private PatriciaTrie toQuery = new PatriciaTrie();
+    private PatriciaTrie<KUID, ContactNode> toQuery = new PatriciaTrie<KUID, ContactNode>();
     
     /** Trie of ContactNodes that did respond */
-    private PatriciaTrie responses = new PatriciaTrie();
+    private PatriciaTrie<KUID, ContactNodeEntry> responses = new PatriciaTrie<KUID, ContactNodeEntry>();
     
     /** A Map we're using to count the number of hops */
-    private Map hopMap = new HashMap();
+    private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
     
     /** The expected result set size (aka K) */
     private int resultSetSize;
@@ -105,6 +105,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
      */
     private SingleLookupStatisticContainer lookupStat;
     
+    /**
+     * Either a collection of KeyValueCollections or ContactNodes
+     * depending on whether this is a Node or Value lookup.
+     */
     private Collection found = Collections.EMPTY_LIST;
     
     public LookupResponseHandler(KUID lookup, Context context) {
@@ -336,7 +340,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             return;
         }
         
-        Collection nodes = response.getValues();
+        Collection nodes = response.getNodes();
         for(Iterator it = nodes.iterator(); it.hasNext(); ) {
             ContactNode node = (ContactNode)it.next();
             
@@ -422,17 +426,17 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         if (responses.size() >= resultSetSize) {
-            KUID worst = ((ContactNodeEntry)responses.select(furthest)).getNodeID();
+            KUID worst = responses.select(furthest).getNodeID();
             
             KUID best = null;            
             if (!toQuery.isEmpty()) {
-                best = ((ContactNode)toQuery.select(lookup)).getNodeID();
+                best = toQuery.select(lookup).getNodeID();
             }
             
             if (best == null || worst.isCloser(best, lookup)) {
                 if (activeSearches == 0) {
                     if (LOG.isTraceEnabled()) {
-                        ContactNode bestResponse = ((ContactNodeEntry)responses.select(lookup)).getContactNode();
+                        ContactNode bestResponse = responses.select(lookup).getContactNode();
                         LOG.trace("Lookup for " + lookup + " terminates after "
                                 + hop + " hops, " + totalTime + "ms and " + queried.size() 
                                 + " queried Nodes with " + bestResponse + " as best match");
@@ -509,9 +513,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     
     private RequestMessage createRequest(SocketAddress address) {
         if (isValueLookup()) {
-            return context.getMessageFactory().createFindValueRequest(address, lookup);
+            return context.getMessageHelper().createFindValueRequest(address, lookup);
         } else {
-            return context.getMessageFactory().createFindNodeRequest(address, lookup);
+            return context.getMessageHelper().createFindNodeRequest(address, lookup);
         }
     }
     
@@ -547,7 +551,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         responses.put(entry.getNodeID(), entry);
         
         if (responses.size() > resultSetSize) {
-            ContactNode worst = ((ContactNodeEntry)responses.select(furthest)).getContactNode();
+            ContactNode worst = responses.select(furthest).getContactNode();
             responses.remove(worst.getNodeID());
             //hopMap.remove(node.getNodeID()); // TODO
         }

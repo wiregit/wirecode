@@ -22,6 +22,7 @@ package com.limegroup.mojito.routing;
 import java.io.IOException;
 import java.util.List;
 
+import com.limegroup.mojito.BucketNode;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.Context.BootstrapManager;
@@ -94,7 +95,7 @@ public interface RouteTable {
      * @param willContact wheather or not we'll contact these ContactNodes
      * @return list of ContactNodes sorted by closeness
      */
-    public List select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact);
+    public List<ContactNode> select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact);
     
     /**
      * Returns true if the RoutingTable contains a ContactNode with this KUID.
@@ -110,24 +111,24 @@ public interface RouteTable {
     /**
      * Returns all ContactNodes as List
      */
-    public List getAllNodes();
+    public List<ContactNode> getAllNodes();
     
     /**
      * Returns all ContactNodes ordered by most recently seen first as List
      */
-    public List getAllNodesMRS();
+    public List<ContactNode> getAllNodesMRS();
     
     /**
      * Returns ContactNodes ordered by most recently seen first as List
      * 
      * @param numNodes
      */
-    public List getMRSNodes(int numNodes);
+    public List<ContactNode> getMRSNodes(int numNodes);
     
     /**
      * Returns all BucketNodes as List
      */
-    public List getAllBuckets();
+    public List<BucketNode> getAllBuckets();
     
     /**
      * Kicks off a Bucket refresh.

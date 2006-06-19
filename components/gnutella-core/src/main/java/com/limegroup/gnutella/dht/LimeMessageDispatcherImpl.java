@@ -31,15 +31,28 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.SecureMessage;
+import com.limegroup.gnutella.messages.SecureMessageCallback;
+import com.limegroup.gnutella.messages.SecureMessageVerifier;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.io.InputOutputUtils;
 import com.limegroup.mojito.io.MessageDispatcher;
-import com.limegroup.mojito.io.MessageFormatException;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.impl.AbstractMessage;
+import com.limegroup.mojito.messages.impl.FindNodeRequestImpl;
+import com.limegroup.mojito.messages.impl.FindNodeResponseImpl;
+import com.limegroup.mojito.messages.impl.FindValueRequestImpl;
+import com.limegroup.mojito.messages.impl.FindValueResponseImpl;
+import com.limegroup.mojito.messages.impl.PingRequestImpl;
+import com.limegroup.mojito.messages.impl.PingResponseImpl;
+import com.limegroup.mojito.messages.impl.StatsRequestImpl;
+import com.limegroup.mojito.messages.impl.StatsResponseImpl;
+import com.limegroup.mojito.messages.impl.StoreRequestImpl;
+import com.limegroup.mojito.messages.impl.StoreResponseImpl;
+import com.limegroup.mojito.security.CryptoHelper;
 
 /**
  * LimeMessageDispatcher re-routes DHTMessage(s) through the
@@ -58,12 +71,25 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
         
-        processingQueue = new ProcessingQueue(context.getName() + "-LimeMessageDispatcherPQ", true);
+        processingQueue = new ProcessingQueue(
+                context.getName() + "-LimeMessageDispatcherPQ");
+
+        // Register the Message type
+        LimeDHTMessageParser parser = new LimeDHTMessageParser(context.getMessageFactory());
+        MessageFactory.setParser(AbstractMessage.F_DHT_MESSAGE, parser);
         
-        // Register the LimeDHTMessage type and the handler
-        LimeDHTMessage.registerMessage();
-        RouterService.getMessageRouter()
-            .setUDPMessageHandler(LimeDHTMessage.class, this);
+        // Install the Message handlers
+        MessageRouter messageRouter = RouterService.getMessageRouter();
+        messageRouter.setUDPMessageHandler(PingRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(PingResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(StoreRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(StoreResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindNodeRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindNodeResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindValueRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindValueResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(StatsRequestImpl.class, this);
+        messageRouter.setUDPMessageHandler(StatsResponseImpl.class, this);
         
         // Install cleanup task
         context.scheduleAtFixedRate(new Runnable() {
@@ -101,18 +127,11 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
      * map if it's a RequestMessage.
      */
     protected boolean enqueueOutput(Tag tag) {
-        try {
-            InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
-            LimeDHTMessage msg = LimeDHTMessage.createMessage(tag.getData().array());
-            UDPService.instance().send(msg, dst);
-            registerInput(tag);
-            return true;
-        } catch (BadPacketException e) {
-            LOG.error("BadPacketException", e);
-        } catch (IOException e) {
-            LOG.error("IOException", e);
-        }
-        return false;
+        InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
+        ByteBuffer data = tag.getData();
+        UDPService.instance().send(data, dst.getAddress(), dst.getPort(), false);
+        registerInput(tag);
+        return true;
     }
 
     /*
@@ -123,12 +142,19 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
      */
     public void handleMessage(Message msg, InetSocketAddress addr, 
             ReplyHandler handler) {
+        
+        if (!isRunning()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping message from " + addr + " because DHT is not running");
+            }
+            return;
+        }
+        
+        DHTMessage dhtMessage = (DHTMessage)msg;
+        dhtMessage.getContactNode().setSocketAddress(addr);
+        
         try {
-            ByteBuffer payload = ((LimeDHTMessage)msg).getPayload();
-            DHTMessage message = InputOutputUtils.deserialize(addr, payload);
-            handleMessage(message);
-        } catch (MessageFormatException err) {
-            LOG.error("MessageFormatException", err);
+            handleMessage(dhtMessage);
         } catch (IOException err) {
             LOG.error("IOException", err);
         }
@@ -147,9 +173,16 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     }
 
     protected void process(Runnable runnable) {
-        processingQueue.add(runnable);
+        if (isRunning()) {
+            processingQueue.add(runnable);
+        }
     }
     
+    protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
+        SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
+        verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
+    }
+
     // This is not running as a Thread!
     public void run() {
         running = true;

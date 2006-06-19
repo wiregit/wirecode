@@ -47,6 +47,8 @@ import com.limegroup.mojito.event.LookupAdapter;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.io.MessageDispatcher;
+import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
@@ -54,7 +56,7 @@ import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 
 /**
- * 
+ * The Mojito DHT. All you need to know is here!
  */
 public class MojitoDHT {
     
@@ -76,12 +78,15 @@ public class MojitoDHT {
         }
         
         if (local == null) {
+            int vendor = ContextSettings.getVendorID();
+            int version = ContextSettings.VERSION.getValue();
+            
             KUID nodeId = KUID.createRandomNodeID();
             SocketAddress addr = new InetSocketAddress(0);
             int flags = 0;
             int instanceId = 0;
             
-            local = new ContactNode(nodeId, addr, instanceId, flags);
+            local = new ContactNode(vendor, version, nodeId, addr, instanceId, flags);
         }
 
         context = new Context(name, local, keyPair);
@@ -173,6 +178,10 @@ public class MojitoDHT {
         context.setThreadFactory(threadFactory);
     }
     
+    public void setMessageFactory(MessageFactory messageFactory) {
+        context.setMessageFactory(messageFactory);
+    }
+    
     public void addPingListener(PingListener listener) {
         context.addPingListener(listener);
     }
@@ -197,7 +206,7 @@ public class MojitoDHT {
         return context.getLookupListeners();
     }
     
-    public void setMessageDispatcher(Class messageDispatcher) {
+    public void setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher) {
         context.setMessageDispatcher(messageDispatcher);
     }
     
@@ -325,16 +334,16 @@ public class MojitoDHT {
         return context.getVersion();
     }
     
-    public Set getKeys() {
+    public Set<KUID> getKeys() {
         return context.getDatabase().getKeys();
     }
     
-    public Collection getValues() {
+    public Collection<KeyValue> getValues() {
         return context.getDatabase().getValues();
     }
     
     // TODO for debugging purposes only
-    Collection getNodes() {
+    Collection<ContactNode> getNodes() {
         return context.getRouteTable().getAllNodes();
     }
     
@@ -387,11 +396,11 @@ public class MojitoDHT {
         return false;
     }
     
-    public Collection get(KUID key) throws IOException {
+    public Collection<KeyValue> get(KUID key) throws IOException {
         return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
     }
     
-    public Collection get(KUID key, long timeout) throws IOException {
+    public Collection<KeyValue> get(KUID key, long timeout) throws IOException {
         final Collection[] values = new Collection[] {
             Collections.EMPTY_LIST
         };
@@ -487,6 +496,8 @@ public class MojitoDHT {
         
         // ContactNode
         ContactNode local = context.getLocalNode();
+        oos.writeInt(local.getVendor());
+        oos.writeShort(local.getVersion());
         oos.writeObject(local.getNodeID());
         // TODO: store SocketAddress?
         oos.writeByte(local.getInstanceID());
@@ -563,6 +574,8 @@ public class MojitoDHT {
         String name = (String)ois.readObject();
         
         // ContactNode
+        int vendor = ois.readInt();
+        int version = ois.readUnsignedShort();
         KUID nodeId = (KUID)ois.readObject();
         // TODO: load SocketAddress?
         int instanceId = ois.readUnsignedByte();
@@ -581,7 +594,7 @@ public class MojitoDHT {
             instanceId = 0;
         }
         
-        ContactNode local = new ContactNode(nodeId, 
+        ContactNode local = new ContactNode(vendor, version, nodeId, 
                 new InetSocketAddress(0), instanceId, flags);
         
         // Create an instance w/o a KeyPair for now (will set it later!)

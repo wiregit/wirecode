@@ -29,8 +29,8 @@ import junit.framework.Test;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.handler.request.PingRequestHandler;
 import com.limegroup.mojito.io.MessageDispatcher;
+import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.response.PingResponse;
 
 
 public class ExternalAddressTest extends BaseTestCase {
@@ -116,7 +116,7 @@ public class ExternalAddressTest extends BaseTestCase {
             System.out.println("Received Ping from " + node.getSocketAddress());
             System.out.println("Going to tell " + node.getSocketAddress() + " that its external address is " + addr);
             
-            PingResponse pong = context.getMessageFactory()
+            PingResponse pong = context.getMessageHelper()
                     .createPingResponse(message, addr);
     
             context.getMessageDispatcher().send(node, pong);
