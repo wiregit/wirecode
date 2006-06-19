@@ -206,10 +206,6 @@ public class NodeAssigner {
         //AND I do not have a private address
         !NetworkUtils.isPrivate());
         
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Node is "+(isHardcore?"":"NOT")+" hardcore capable");
-        }
-        
         return isHardcore;
         
     }
@@ -240,6 +236,7 @@ public class NodeAssigner {
         boolean isUltrapeerCapable = 
             (isHardcoreCapable() &&
             //AND is my average uptime OR current uptime high enough?
+                    //TODO: GET Average connection uptime here! 
             (ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue() ||
              _currentUptime >= UltrapeerSettings.MIN_INITIAL_UPTIME.getValue()));
         
@@ -269,7 +266,7 @@ public class NodeAssigner {
                 switchFromDHTNode()) {
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Node will now try to become an ultrapeer");
+                LOG.debug("Node WILL become an ultrapeer");
             }
             
             _ultrapeerTries++;
@@ -315,7 +312,7 @@ public class NodeAssigner {
      * @return true if we switched, false otherwise
      */
     private static boolean switchFromDHTNode() {
-        if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && RouterService.isDHTNode()) {
+        if(RouterService.isDHTNode() && DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
             if(Math.random() < DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.getValue()){
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Randomly switching from DHT node to ultrapeer!");
@@ -349,16 +346,19 @@ public class NodeAssigner {
      */
     private static void setDHTCapable() {
         
+        Assert.that((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue() > 
+                     UltrapeerSettings.MIN_CONNECT_TIME.getValue()), "Wrong minimum initial uptime");
+        
         if (DHTSettings.DISABLE_DHT_USER.getValue() || DHTSettings.DISABLE_DHT_NETWORK.getValue()) {
             DHTSettings.DHT_CAPABLE.setValue(false);
             RouterService.shutdownDHT();
             return;
         }
-        
+
         boolean isDHTCapable = 
             (isHardcoreCapable() &&
-            //AND is my average uptime OR current uptime high enough?
-            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() ||
+            //AND is my average uptime AND current uptime high enough?
+            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() &&
              _currentUptime >= DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
         
         if(LOG.isDebugEnabled()) {
@@ -367,9 +367,9 @@ public class NodeAssigner {
 
         DHTSettings.DHT_CAPABLE.setValue(isDHTCapable);
         
-        //Node is DHT capable AND is not allready trying to connect as UP
-        if (isDHTCapable && 
-                !(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && _willTryToBeUltrapeer)) {
+        //Node is DHT capable AND is not an ultrapeer AND not allready trying to connect as UP
+        if (isDHTCapable && !(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && 
+                (RouterService.isSupernode() || _willTryToBeUltrapeer))) {
             Runnable dhtInitializer = 
                 new Runnable() {
                     public void run() {

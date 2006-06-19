@@ -129,7 +129,7 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        if(!RouterService.isStable()) {
+        if(DHTSettings.NEED_STABLE_GNUTELLA.getValue() && !RouterService.isStable()) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not connected to the Gnutella network");
             }
@@ -150,6 +150,10 @@ public class LimeDHTManager implements LifecycleListener {
             dht.setFirewalled(true);
         } else {
             dht.setFirewalled(!RouterService.acceptedIncomingConnection());
+        }
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Initializing the DHT");
         }
         
         try {

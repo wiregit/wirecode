@@ -281,13 +281,19 @@ public class MojitoDHT {
         context.bootstrap(bootstrapHostsList, listener);
     }
     
-    // TODO for debugging purposes only
-    long ping(SocketAddress dst) throws IOException {
+    /**
+     * Synchronous ping. 
+     * If the ping is successfull, the given host may be added to the routing table
+     * 
+     * @param dst
+     * @return
+     * @throws IOException
+     */
+    public long ping(SocketAddress dst) throws IOException {
         return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
     }
     
-    // TODO for debugging purposes only
-    long ping(SocketAddress dst, long timeout) throws IOException {
+    private long ping(SocketAddress dst, long timeout) throws IOException {
         final long[] time = new long[]{ -1L };
         
         synchronized (time) {
@@ -317,8 +323,15 @@ public class MojitoDHT {
         return time[0];
     }
     
-    // TODO for debugging purposes only
-    void ping(SocketAddress dst, PingListener listener) throws IOException {
+    /**
+     * Asynchronous ping.
+     * If the ping is successfull, the given host may be added to the routing table
+     * 
+     * @param dst
+     * @param listener
+     * @throws IOException
+     */
+    public void ping(SocketAddress dst, PingListener listener) throws IOException {
         if (listener == null) {
             throw new NullPointerException("PingListener is null");
         }

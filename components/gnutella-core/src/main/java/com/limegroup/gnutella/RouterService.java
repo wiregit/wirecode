@@ -223,6 +223,12 @@ public class RouterService {
      */
     private static LimeDHTManager dhtManager;
     
+    /**
+     * The Node assigner class
+     * 
+     */
+    private static NodeAssigner nodeAssigner;
+    
     static {
         // Link the multiplexor & NIODispatcher together.
         UDPSelectorProvider provider = UDPSelectorProvider.instance();
@@ -309,6 +315,10 @@ public class RouterService {
 
         manager.registerLifecycleListener(callback);
         manager.registerLifecycleListener(dhtManager);
+        
+        nodeAssigner = new NodeAssigner(uploadManager, 
+                                        downloader, 
+                                        manager);
   	}
 
   	/**
@@ -402,10 +412,7 @@ public class RouterService {
     		LOG.trace("STOP DownloadManager");
     		
     		LOG.trace("START NodeAssigner");
-    		NodeAssigner sa = new NodeAssigner(uploadManager, 
-    													 downloader, 
-    													 manager);
-    		sa.start();
+    		nodeAssigner.start();
     		LOG.trace("STOP NodeAssigner");
 			
             // THIS MUST BE BEFORE THE CONNECT (below)

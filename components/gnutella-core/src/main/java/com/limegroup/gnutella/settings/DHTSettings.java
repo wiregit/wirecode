@@ -29,13 +29,12 @@ public class DHTSettings extends LimeProps{
         FACTORY.createSettableBooleanSetting("DISABLE_DHT_NETWORK", false, "DHTSettings.DisableDHT"); //TODO switch to true
     
     /**
-     * Setting for the minimum average uptime required to join the DHT.
+     * Setting for the minimum average uptime (in seconds) required to join the DHT.
      */
     public static final IntSetting MIN_DHT_AVG_UPTIME =
-//        FACTORY.createSettableIntSetting("MIN_DHT_AVG_UPTIME",3600,"DHTSettings.MinDHTAvgUptime",3600,48*3600);
-        FACTORY.createSettableIntSetting("MIN_DHT_AVG_UPTIME",1,"DHTSettings.MinDHTAvgUptime",1,48*3600); //TODO rechange
+        FACTORY.createSettableIntSetting("MIN_DHT_AVG_UPTIME",120*60,"DHTSettings.MinDHTAvgUptime",120*60,48*3600);
     /**
-     * The minimum current uptime in seconds that a node must have to join the DHT.
+     * The minimum current uptime (in seconds) that a node must have to join the DHT.
      */
     public static final IntSetting MIN_DHT_INITIAL_UPTIME =
         FACTORY.createSettableIntSetting("MIN_DHT_INITIAL_UPTIME",120*60,"DHTSettings.MinDHTInitialUptime",120*60,48*3600);
@@ -51,4 +50,7 @@ public class DHTSettings extends LimeProps{
      */
     public static final FloatSetting DHT_TO_ULTRAPEER_PROBABILITY =
         FACTORY.createSettableFloatSetting("DHT_TO_ULTRAPEER_PROBABILITY", 0F, "DHTSettings.DHTToUltrapeerProbability",0F,1F);
+    
+    public static final BooleanSetting NEED_STABLE_GNUTELLA = 
+        FACTORY.createBooleanSetting("NEED_STABLE_GNUTELLA", true);
 }
