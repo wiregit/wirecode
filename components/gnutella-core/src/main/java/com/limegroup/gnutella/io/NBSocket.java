@@ -26,6 +26,13 @@ public abstract class NBSocket extends Socket {
      */
     public abstract boolean connect(SocketAddress addr, int timeout, ConnectObserver observer);
     
+    /**
+     * Sets an arbitrary Shutdownable as a shutdown observer.
+     * This observer is useful for being notified if the socket is shutdown prior to
+     * connect being called.
+     */
+    public abstract void setShutdownObserver(Shutdownable observer);
+    
     // a bunch of Constructors.
     
     public NBSocket() {

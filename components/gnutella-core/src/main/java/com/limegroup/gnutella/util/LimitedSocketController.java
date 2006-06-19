@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.NBSocket;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.io.SocketFactory;
 
 class LimitedSocketController extends SimpleSocketController {
@@ -108,16 +109,21 @@ class LimitedSocketController extends SimpleSocketController {
     private void runWaitingRequests() {
         // We must connect outside of the lock, so as not to expose being locked to external
         // entities.
-        List toBeProcessed = new ArrayList(Math.min(WAITING_REQUESTS.size(), Math.max(0, MAX_CONNECTING_SOCKETS - _socketsConnecting)));
+        List toBeProcessed = new ArrayList(Math.min(WAITING_REQUESTS.size(),
+                                           Math.max(0, MAX_CONNECTING_SOCKETS - _socketsConnecting)));
         synchronized(this) {
             while(_socketsConnecting < MAX_CONNECTING_SOCKETS && !WAITING_REQUESTS.isEmpty()) {
-                toBeProcessed.add(WAITING_REQUESTS.remove(0));
-                _socketsConnecting++;
+                Requestor next = (Requestor)WAITING_REQUESTS.remove(0);
+                if(!next.socket.isClosed()) {
+                    toBeProcessed.add(next);
+                    _socketsConnecting++;
+                }
             }
         }
         
         for(int i = 0; i < toBeProcessed.size(); i++) {
             Requestor next = (Requestor)toBeProcessed.get(i);
+            next.socket.setShutdownObserver(null);
             next.socket.connect(next.addr, next.timeout, new DelegateConnector(next.observer));
         }
     }
@@ -130,6 +136,7 @@ class LimitedSocketController extends SimpleSocketController {
             InetSocketAddress addr, int timeout, ConnectObserver observer) {
         if (_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
             WAITING_REQUESTS.add(new Requestor(socket, addr, timeout, observer));
+            socket.setShutdownObserver(new RemovalObserver(observer));
             return false;
         } else {
             _socketsConnecting++;
@@ -169,6 +176,23 @@ class LimitedSocketController extends SimpleSocketController {
         synchronized(this) {
             if(_socketsConnecting < MAX_CONNECTING_SOCKETS) {
                 notifyAll();
+            }
+        }
+    }
+    
+    /**
+     * An observer that is notified if the socket is shutdown while it is
+     * in the requesting list.
+     */
+    private class RemovalObserver implements Shutdownable {
+        private final ConnectObserver delegate;
+        RemovalObserver(ConnectObserver observer) {
+            this.delegate = observer;
+        }
+        
+        public void shutdown() {
+            if(removeConnectObserver(delegate)) {
+                delegate.shutdown();
             }
         }
     }

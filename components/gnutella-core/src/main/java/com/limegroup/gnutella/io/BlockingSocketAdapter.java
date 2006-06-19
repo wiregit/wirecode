@@ -16,6 +16,9 @@ import com.limegroup.gnutella.util.ThreadFactory;
  * compared to regular I/O code.
  */
 public class BlockingSocketAdapter extends NBSocket {
+    
+    /** Observer for when the socket is shutdown. */
+    private volatile Shutdownable shutdownObserver;
 
     public BlockingSocketAdapter() {
         super();
@@ -55,4 +58,20 @@ public class BlockingSocketAdapter extends NBSocket {
         }, "BlockingSocketEmulator");
         return false;
     }
+    
+    /**
+     * Sets an observer for being shutdown.
+     */
+    public void setShutdownObserver(Shutdownable observer) {
+        this.shutdownObserver = observer;
+    }
+    
+    /**
+     * Closes the socket and notifies the shutdown observer.
+     */
+    public void close() throws IOException {
+        shutdownObserver.shutdown();
+        super.close();
+    }
+    
 }

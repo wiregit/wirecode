@@ -286,6 +286,6 @@ public class NIOSocket extends AbstractNBSocket {
     }
 
     public String toString() {
-        return "NIOSocket::" + channel.toString();
+        return "NIOSocket::" + connectedTo + ", channel: " + channel.toString();
     }
 }

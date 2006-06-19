@@ -38,6 +38,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
 
     /** The connecter. */
     protected volatile ConnectObserver connecter;
+    
+    /** An observer for being shutdown. */
+    protected volatile Shutdownable shutdownObserver;
 
     /** Whether or not we've shutdown the socket. */
     private boolean shutdown = false;
@@ -75,6 +78,16 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }
     
     /**
+     * Sets the Shutdown observer.
+     * This observer is useful for when the Socket is created,
+     * but connect has not been called yet.  This observer will be
+     * notified when the socket is shutdown.
+     */
+    public final void setShutdownObserver(Shutdownable observer) {
+        shutdownObserver = observer;
+    }
+    
+    /**
      * Sets the new ReadObserver.
      *
      * The deepest ChannelReader in the chain first has its source
@@ -88,7 +101,17 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             public void run() {
                 ReadObserver oldReader = reader;
                 try {
-                    reader = newReader;
+                    synchronized(LOCK) {
+                        if(shutdown) {
+                            newReader.shutdown();
+                            return;
+                        }
+                        reader = newReader;
+                    }
+                    
+                    // At this point, if the socket gets shutdown, we know the
+                    // reader is going to be notified of the shutdown.
+                    
                     ChannelReader lastChannel = newReader;
                     // go down the chain of ChannelReaders and find the last one to set our source
                     while(lastChannel.getReadChannel() instanceof ChannelReader)
@@ -143,8 +166,15 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     }
 
                     InterestWriteChannel source = getBaseWriteChannel();
-                    writer = source;
-                    lastChannel.setWriteChannel(source);
+                    
+                    synchronized(LOCK) {
+                        lastChannel.setWriteChannel(source);
+                        if(shutdown) {
+                            source.shutdown();
+                            return;
+                        }
+                        writer = source;
+                    }
                 } catch(IOException iox) {
                     shutdown();
                     newWriter.shutdown(); // in case we hadn't set it yet.
@@ -232,7 +262,19 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * notified about the success even it it was immediate.
      */
     public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) {
-        this.connecter = observer;
+        synchronized(LOCK) {
+            if(shutdown) {
+                observer.shutdown();
+                return false;
+            }
+            
+            // Set the connectObserver within the lock so that the connecter
+            // will not be set away from null after shutdown is called.
+            this.connecter = observer;
+        }
+        
+        // At this point, we know that if shutdown is called, the observer
+        // will be notified of the shutdown.
         
         try {
             InetSocketAddress iaddr = (InetSocketAddress)addr;
@@ -369,12 +411,15 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         writer.shutdown();
         if(connecter != null)
             connecter.shutdown();
+        if(shutdownObserver != null)
+            shutdownObserver.shutdown();
         
         NIODispatcher.instance().invokeLater(new Runnable() {
             public void run() {
                 reader = new NoOpReader();
                 writer = new NoOpWriter();
                 connecter = null;
+                shutdownObserver = null;
             }
         });
     }

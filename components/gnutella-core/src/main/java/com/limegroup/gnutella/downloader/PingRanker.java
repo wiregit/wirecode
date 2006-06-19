@@ -367,13 +367,13 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
 
     public synchronized void registered(byte[] guid) {
         if (LOG.isDebugEnabled())
-            LOG.debug("ranker registered with guid "+(new GUID(guid)).toHexString(),new Exception());
+            LOG.debug("ranker registered with guid "+(new GUID(guid)).toHexString());
         running = true;
     }
 
     public synchronized void unregistered(byte[] guid) {
         if (LOG.isDebugEnabled())
-            LOG.debug("ranker unregistered with guid "+(new GUID(guid)).toHexString(),new Exception());
+            LOG.debug("ranker unregistered with guid "+(new GUID(guid)).toHexString());
 	
         running = false;
         newHosts.addAll(verifiedHosts);

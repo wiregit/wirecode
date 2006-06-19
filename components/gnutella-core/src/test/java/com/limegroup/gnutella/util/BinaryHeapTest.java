@@ -28,11 +28,11 @@ public class BinaryHeapTest extends BaseTestCase {
 	
 	public void testLegacy() throws Exception {
 	    BinaryHeap q=new BinaryHeap(4);
-        MyInteger one=new MyInteger(1);
-        MyInteger two=new MyInteger(2);
-        MyInteger three=new MyInteger(3);
-        MyInteger four=new MyInteger(4);
-        MyInteger five=new MyInteger(5);
+        Integer one=new Integer(1);
+        Integer two=new Integer(2);
+        Integer three=new Integer(3);
+        Integer four=new Integer(4);
+        Integer five=new Integer(5);
 
         assertTrue(q.isEmpty());
         assertEquals(4, q.capacity());
@@ -92,7 +92,7 @@ public class BinaryHeapTest extends BaseTestCase {
 //        System.out.println("(The spec does not say that the smallest"
 //                           +" element is removed on overflow.)");
         assertNotNull(q.insert(five));
-        assertEquals(new MyInteger(2), q.insert(five));
+        assertEquals(new Integer(2), q.insert(five));
         assertEquals(five, q.extractMax());
         assertEquals(five, q.extractMax());
         assertEquals(four, q.extractMax());
@@ -101,11 +101,11 @@ public class BinaryHeapTest extends BaseTestCase {
     }
     
     public void testResize() throws Exception {
-        MyInteger one=new MyInteger(1);
-        MyInteger two=new MyInteger(2);
-        MyInteger three=new MyInteger(3);
-        MyInteger four=new MyInteger(4);
-        MyInteger five=new MyInteger(5);
+        Integer one=new Integer(1);
+        Integer two=new Integer(2);
+        Integer three=new Integer(3);
+        Integer four=new Integer(4);
+        Integer five=new Integer(5);
         BinaryHeap q=new BinaryHeap(2, true);
 
         assertNull(q.insert(one));
@@ -150,6 +150,30 @@ public class BinaryHeapTest extends BaseTestCase {
         assertEquals(new Integer(1), FINALIZED.get(0));
     }
     
+    public void testSameValuesInserted() throws Exception {
+        BinaryHeap heap = new BinaryHeap(5, true);
+        Integer oneA = new Integer(1);
+        Integer oneB = new Integer(1);
+        Integer twoA = new Integer(2);
+        Integer twoB = new Integer(2);
+        Integer three = new Integer(3);
+        heap.insert(oneA);
+        heap.insert(twoA);
+        assertEquals(2, heap.size());
+        heap.insert(oneB);
+        assertEquals(3, heap.size());
+        heap.insert(twoB);
+        assertEquals(4, heap.size());
+        heap.insert(three);
+        assertEquals(5, heap.size());
+        assertSame(three, heap.extractMax());
+        assertSame(twoB, heap.extractMax());
+        assertSame(twoA, heap.extractMax());
+        assertSame(oneB, heap.extractMax());
+        assertSame(oneA, heap.extractMax());
+        
+    }
+    
     private static Comparable[] getArray(BinaryHeap q) throws Exception {
         return (Comparable[])PrivilegedAccessor.getValue(
             q, "array");
@@ -168,36 +192,6 @@ public class BinaryHeapTest extends BaseTestCase {
         protected void finalize() throws Throwable {
             super.finalize();
             FINALIZED.add(new Integer(id));
-        }
-    }
-
-    //For testing with Java 1.1.8
-    static class MyInteger implements Comparable
-    {
-        private int val;
-        public MyInteger(int val)
-        {
-            this.val=val;
-        }
-
-        public int compareTo(Object other)
-        {
-            int val2=((MyInteger)other).val;
-            if (val<val2)
-                return -1;
-            else if (val>val2)
-                return 1;
-            else
-                return 0;
-        }
-
-        public String toString()
-        {
-            return String.valueOf(val);
-        }
-        
-        public boolean equals(Object o) {
-            return ((MyInteger)o).val == val;
         }
     }
 }

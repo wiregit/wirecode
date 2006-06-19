@@ -804,6 +804,10 @@ public class NIODispatcher implements Runnable {
             this.attachment = attachment;
         }
         
+        public String toString() {
+            return "Attachment for: " + attachment;
+        }
+        
         synchronized void clearTimeout() {
             timeoutActive = false;
         }

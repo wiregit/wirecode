@@ -86,5 +86,9 @@ public class TimeoutController {
             Timeout b = (Timeout)o;
             return expireTime < b.expireTime ? 1 : expireTime > b.expireTime ? -1 : 0;
         }
+        
+        public String toString() {
+            return "TimeoutWrapper for: " + timeoutable;
+        }
     }
 }

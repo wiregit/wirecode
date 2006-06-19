@@ -1409,12 +1409,10 @@ public class DownloadWorker {
             //Ensure that the ConnectObserver is cleaned up.
             DirectConnector observer = _connectObserver;
             if(observer != null) {
-                // Make sure it's not queued with Sockets.
-                if(Sockets.removeConnectObserver(_connectObserver))
-                    finishWorker();
+                Socket socket = observer.getSocket();
                 // Make sure it immediately stops trying to connect.
-                else if(observer.getSocket() != null)
-                    IOUtils.close(observer.getSocket());
+                if(socket != null)
+                    IOUtils.close(socket);
             }
         }
     }
