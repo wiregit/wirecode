@@ -295,10 +295,10 @@ public final class ConnectionChecker implements Runnable {
         	InetAddress.getByName(host); // die fast if unresolvable
             Observer observer = new Observer();
             synchronized(observer) {
-                Socket s = Sockets.connect(host, 80, 20000, observer);
+                Socket s = Sockets.connect(host, 80, 6000, observer);
                 LOG.debug("Waiting for callback...");
                 try {
-                    observer.wait(40000);
+                    observer.wait(12000);
                 } catch(InterruptedException e) {}
                 if(!observer.hasResponse()) {
                     LOG.debug("No response!");
