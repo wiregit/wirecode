@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +25,7 @@ import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.ThreadPool;
 
 public class ManagedTorrent {
@@ -58,11 +60,11 @@ public class ManagedTorrent {
 	static final int TRACKER_FAILURE = 11;
 	static final int SCRAPING = 12; //scraping == requesting from tracker
 	
-	private static final ThreadPool INVOKER = 
+	private static final SchedulingThreadPool INVOKER = 
 		new NIODispatcherThreadPool();
 
 	/** the executor of our tasks. */
-	private ThreadPool networkInvoker = INVOKER;
+	private SchedulingThreadPool networkInvoker = INVOKER;
 	
 	/** 
 	 * Executor that changes the state of this torrent and does 
@@ -117,7 +119,7 @@ public class ManagedTorrent {
 	/**
 	 * A runnable that sends periodic keepalives.
 	 */
-	private KeepAliveSender keepAliveSender;
+	private Future keepAliveSender;
 	
 	/** 
 	 * The current state of this torrent.
@@ -258,7 +260,8 @@ public class ManagedTorrent {
 		// start the choking / unchoking of connections
 		choker.scheduleRechoke();
 		
-		keepAliveSender = new KeepAliveSender();
+		keepAliveSender = networkInvoker.invokeLater(
+				new KeepAliveSender(),KEEP_ALIVE_INTERVAL);
 	}
 
 	/**
@@ -305,7 +308,7 @@ public class ManagedTorrent {
 		choker.stop();
 		trackerManager.announceStop();
 		if (keepAliveSender != null)
-			keepAliveSender.cancel();
+			keepAliveSender.cancel(true);
 		
 		// close the files and write the snapshot
 		Runnable saver = new Runnable() {
@@ -610,10 +613,6 @@ public class ManagedTorrent {
 	 */
 	private void completeTorrentDownload() {
 		
-		// stop uploads 
-		LOG.debug("global choke");
-		choker.setGlobalChoke(true);
-		
 		// cancel requests
 		Runnable r = new Runnable(){
 			public void run() {
@@ -624,6 +623,7 @@ public class ManagedTorrent {
 					else {
 						// cancel all requests, if there are any left. (This should not
 						// be the case at this point anymore)
+						btc.sendChoke();
 						btc.cancelAllRequests();
 						btc.sendNotInterested();
 					}
@@ -640,7 +640,7 @@ public class ManagedTorrent {
 		saveFiles();
 		
 		// resume uploads
-		choker.setGlobalChoke(false);
+		choker.rechoke();
 		
 		// tell the tracker we are a seed now
 		trackerManager.announceComplete();
@@ -925,39 +925,27 @@ public class ManagedTorrent {
 	}
 	
 	private class KeepAliveSender implements Runnable {
-		/** Whether this sender is cancelled */
-		private volatile boolean cancelled;
-		
-		public KeepAliveSender() {
-			scheduleKeepAlive();
-		}
 		
 		private void scheduleKeepAlive() {
-			RouterService.schedule(this, KEEP_ALIVE_INTERVAL, 0 );
-		}
-		
-		void cancel() {
-			cancelled = true;
+			networkInvoker.invokeLater(this, KEEP_ALIVE_INTERVAL);
 		}
 		
 		public void run() {
-			if (cancelled)
-				return;
 			
-			networkInvoker.invokeLater(new Runnable() {
-				public void run() {
-					for (BTConnection con : _connections) 
-						con.sendKeepAlive();
-				}
-			});
+			for (BTConnection con : _connections) 
+				con.sendKeepAlive();
 			
 			scheduleKeepAlive();
 		}
 	}
 	
-	private static class NIODispatcherThreadPool implements ThreadPool {
+	private static class NIODispatcherThreadPool implements SchedulingThreadPool {
 		public void invokeLater(Runnable r) {
 			NIODispatcher.instance().invokeLater(r);
+		}
+		
+		public Future invokeLater(Runnable r, long delay) {
+			return NIODispatcher.instance().invokeLater(r, delay);
 		}
 	}
 }

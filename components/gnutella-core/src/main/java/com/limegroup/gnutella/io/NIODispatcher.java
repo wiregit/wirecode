@@ -15,6 +15,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -107,6 +112,8 @@ public class NIODispatcher implements Runnable {
     
 	/** The invokeLater queue. */
     private final Collection /* of Runnable */ LATER = new LinkedList();
+    
+    private final Queue<DelayedRunnable> DELAYED = new DelayQueue<DelayedRunnable>();
     
     /** The throttle queue. */
     private volatile List /* of NBThrottle */ THROTTLE = new ArrayList();
@@ -268,6 +275,14 @@ public class NIODispatcher implements Runnable {
         }
     }
    
+   public java.util.concurrent.Future invokeLater(Runnable later, long delay) {
+	   DelayedRunnable ret = new DelayedRunnable(later, delay);
+	   synchronized(Q_LOCK) {
+		   DELAYED.add(ret);
+	   }
+	   return ret;
+   }
+   
    /** Invokes the method in the NIODispatcher thread & returns after it ran. */
    public void invokeAndWait(final Runnable future) throws InterruptedException {
        if(Thread.currentThread() == dispatchThread) {
@@ -402,6 +417,11 @@ public class NIODispatcher implements Runnable {
 
             UNLOCKED.addAll(LATER);
             LATER.clear();
+            DelayedRunnable delayed = null;
+            while ((delayed = DELAYED.poll()) != null) {
+            	if (!delayed.isCancelled() && !delayed.isDone())
+            		UNLOCKED.add(delayed);
+            }
         }
         
         if(now > lastCacheClearTime + CACHE_CLEAR_INTERVAL) {
@@ -761,7 +781,7 @@ public class NIODispatcher implements Runnable {
             registerImpl(selector, channel, op, handler, timeout);
         }
     }
-
+    
     private static class SpinningException extends Exception {
         public SpinningException() { super(); }
     }
