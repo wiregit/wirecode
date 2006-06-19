@@ -58,19 +58,23 @@ public class ContextSettings extends MojitoProps {
     public static final LongSetting NODE_ID_TIMEOUT
         = FACTORY.createSettableLongSetting("NODE_ID_TIMEOUT", /*30L**/60L*1000L, "node_id_timeout", 0L, 24L*60L*60L*1000L);
     
-    public static final StringSetting VENDOR_ID
-        = FACTORY.createStringSetting("VENDOR_ID", "LIME");
+    public static final IntSetting VENDOR
+        = FACTORY.createIntSetting("VENDOR", parseVendorID("LIME"));
     
-    public static int getVendorID() {
-        String vendorId = VENDOR_ID.getValue();
+    public static int parseVendorID(String vendorId) {
+        char[] chars = vendorId.toCharArray();
+        if (chars.length != 4) {
+            throw new IllegalArgumentException("VendorID must be 4 characters");
+        }
+        
         int id = 0;
-        for(int i = 0; i < 4; i++) {
-            id = (id << 8) | (int)(vendorId.charAt(i) & 0xFF);
+        for(char c : chars) {
+            id = (id << 8) | (int)(c & 0xFF);
         }
         return id;
     }
     
-    public static String getVendorID(int vendorId) {
+    public static String toVendorString(int vendorId) {
         try {
             byte[] name = new byte[]{
                 (byte)((vendorId >> 24) & 0xFF),

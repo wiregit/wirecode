@@ -36,14 +36,18 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.KeyValuePublisher;
@@ -68,6 +72,7 @@ import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
@@ -84,10 +89,9 @@ public class Context {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
-    private static Timer TIMER = new Timer(true);
-    
     private KeyPair masterKeyPair;
     
+    private String name;
     private ContactNode localNode;
     private SocketAddress localAddress;
     private SocketAddress tmpExternalAddress;
@@ -99,7 +103,7 @@ public class Context {
     private RouteTable routeTable;
     private MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
-    private KeyValuePublisher keyValuePublisher;
+    private KeyValuePublisher publisher;
     private RandomBucketRefresher bucketRefresher;
     
     private PingManager pingManager;
@@ -120,11 +124,10 @@ public class Context {
     private LinkedList<Integer> localSizeHistory = new LinkedList<Integer>();
     private LinkedList<Integer> remoteSizeHistory = new LinkedList<Integer>();
     
-    private ProcessingQueue eventQueue;
-    
     private ThreadFactory threadFactory = new DefaultThreadFactory();
     
-    private String name;
+    private ThreadPoolExecutor eventExecutor;
+    private ScheduledThreadPoolExecutor scheduledExecutor;
     
     public Context(String name, ContactNode localNode, KeyPair keyPair) {
         this.name = name;
@@ -142,6 +145,9 @@ public class Context {
         }
         masterKeyPair = new KeyPair(masterKey, null);
         
+        createEventQueue();
+        createTimer();
+        
         dhtStats = new DHTNodeStat(this);
         
         networkStats = new NetworkStatisticContainer(this);
@@ -153,7 +159,7 @@ public class Context {
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
-        keyValuePublisher = new KeyValuePublisher(this);
+        publisher = new KeyValuePublisher(this);
 
         bucketRefresher = new RandomBucketRefresher(this);
         
@@ -165,6 +171,33 @@ public class Context {
         routeTable.add(localNode, false);
     }
 
+    private void createEventQueue() {
+        ThreadFactory factory = new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread thread = getThreadFactory().newThread(r);
+                thread.setName(getName() + "-EventDispatcher");
+                thread.setDaemon(true);
+                return thread;
+            }
+        };
+        
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
+        eventExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, queue, factory);
+    }
+    
+    private void createTimer() {
+        ThreadFactory factory = new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread thread = getThreadFactory().newThread(r);
+                thread.setName(getName() + "-ContextTimer");
+                thread.setDaemon(true);
+                return thread;
+            }
+        };
+        
+        scheduledExecutor = new ScheduledThreadPoolExecutor(1, factory);
+    }
+    
     public String getName() {
         return name;
     }
@@ -183,8 +216,8 @@ public class Context {
         }
         
         try {
-            Constructor c = clazz.getConstructor(new Class[]{Context.class});
-            messageDispatcher = (MessageDispatcher)c.newInstance(new Object[]{this});
+            Constructor c = clazz.getConstructor(Context.class);
+            messageDispatcher = (MessageDispatcher)c.newInstance(this);
         } catch (Exception err) {
             throw new RuntimeException(err);
         }
@@ -195,7 +228,7 @@ public class Context {
     }
     
     public int getVendor() {
-        return ContextSettings.getVendorID();
+        return ContextSettings.VENDOR.getValue();
     }
     
     public int getVersion() {
@@ -313,7 +346,7 @@ public class Context {
     }
     
     public KeyValuePublisher getPublisher() {
-        return keyValuePublisher;
+        return publisher;
     }
     
     public synchronized void setMessageHelper(MessageHelper messageHelper) {
@@ -428,22 +461,20 @@ public class Context {
         lookupManager.init();
         
         running = true;
-
-        eventQueue = new ProcessingQueue(getName() + "-EventDispatcher", true);
-        
-        Thread keyValuePublisherThread 
-            = getThreadFactory().createThread(keyValuePublisher, getName() + "-KeyValuePublisherThread");
-        keyValuePublisherThread.setDaemon(true);
         
         Thread messageDispatcherThread 
-            = getThreadFactory().createThread(messageDispatcher, getName() + "-MessageDispatcherThread");
-        messageDispatcherThread.setDaemon(true);
-    
-        long bucketRefreshTime = RouteTableSettings.BUCKET_REFRESH_TIME.getValue();
-        scheduleAtFixedRate(bucketRefresher, bucketRefreshTime , bucketRefreshTime);
-        
-        keyValuePublisherThread.start();
+            = getThreadFactory().newThread(messageDispatcher);
+        messageDispatcherThread.setName(getName() + "-MessageDispatcherThread");
+        //messageDispatcherThread.setDaemon(true);
         messageDispatcherThread.start();
+        
+        scheduleAtFixedRate(bucketRefresher, 
+                RouteTableSettings.BUCKET_REFRESH_TIME.getValue() , 
+                RouteTableSettings.BUCKET_REFRESH_TIME.getValue());
+        
+        scheduleAtFixedRate(publisher, 
+                DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue(), 
+                DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue());
     }
     
     /**
@@ -457,14 +488,10 @@ public class Context {
         running = false;
         bootstrapping = false;
         
-        keyValuePublisher.stop();
+        publisher.stop();
         
-        eventQueue.clear();
-        
-        if (bucketRefresher != null) {
-            bucketRefresher.cancel();
-            bucketRefresher = null;
-        }
+        eventExecutor.getQueue().clear();
+        scheduledExecutor.getQueue().clear();
         
         messageDispatcher.stop();
         
@@ -487,12 +514,8 @@ public class Context {
      * @param delay
      * @param period
      */
-    public void scheduleAtFixedRate(final Runnable runnable, long delay, long period) {
-        TIMER.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                runnable.run();
-            }
-        }, delay, period);
+    public ScheduledFuture<?> scheduleAtFixedRate(final Runnable runnable, long delay, long period) {
+        return scheduledExecutor.scheduleAtFixedRate(runnable, delay, period, TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -509,7 +532,7 @@ public class Context {
             return;
         }
 
-        eventQueue.add(event);
+        eventExecutor.execute(event);
     }
     
     /** Adds a global PingListener */
@@ -1292,9 +1315,9 @@ public class Context {
     /**
      * A default implementation of the ThreadFactory.
      */
-    private static class DefaultThreadFactory implements ThreadFactory {
-        public Thread createThread(Runnable runnable, String name) {
-            return new Thread(runnable, name);
+    private class DefaultThreadFactory implements ThreadFactory {
+        public Thread newThread(Runnable r) {
+            return new Thread(r, getName());
         }
     }
 }

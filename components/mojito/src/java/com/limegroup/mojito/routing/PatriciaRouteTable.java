@@ -631,7 +631,7 @@ public class PatriciaRouteTable implements RouteTable {
                     || (bucket.getNodeCount() < K) 
                     || (liveNodes.size() != bucket.getNodeCount())) {
                 //select a random ID with this prefix
-                KUID randomID = KUID.createPrefxNodeID(bucket.getNodeID().getBytes(),bucket.getDepth());
+                KUID randomID = KUID.createPrefxNodeID(bucket.getNodeID().getBytes(), bucket.getDepth());
                 
                 if(LOG.isTraceEnabled()) {
                     LOG.trace("Refreshing bucket:" + bucket + " with random ID: "+ randomID);

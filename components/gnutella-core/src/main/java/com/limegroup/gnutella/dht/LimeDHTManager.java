@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +22,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.MojitoDHT;
-import com.limegroup.mojito.ThreadFactory;
 import com.limegroup.mojito.event.BootstrapListener;
 
 /**
@@ -95,8 +95,8 @@ public class LimeDHTManager implements LifecycleListener {
         
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
         dht.setThreadFactory(new ThreadFactory() {
-            public Thread createThread(Runnable runnable, String name) {
-                return new ManagedThread(runnable, name);
+            public Thread newThread(Runnable runnable) {
+                return new ManagedThread(runnable);
             }
         });
     }

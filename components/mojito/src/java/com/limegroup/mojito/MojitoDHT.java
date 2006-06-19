@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +79,7 @@ public class MojitoDHT {
         }
         
         if (local == null) {
-            int vendor = ContextSettings.getVendorID();
+            int vendor = ContextSettings.VENDOR.getValue();
             int version = ContextSettings.VERSION.getValue();
             
             KUID nodeId = KUID.createRandomNodeID();

@@ -20,7 +20,6 @@
 package com.limegroup.mojito.routing;
 
 import java.io.IOException;
-import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 
 
-public class RandomBucketRefresher extends TimerTask implements Runnable {
+public class RandomBucketRefresher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(RandomBucketRefresher.class);
     
@@ -38,18 +37,16 @@ public class RandomBucketRefresher extends TimerTask implements Runnable {
         this.context = context;
     }
     
-    public synchronized boolean cancel() {
-        return super.cancel();
-    }
-    
-    public synchronized void run() {
+    public void run() {
         if(LOG.isTraceEnabled()) {
             LOG.trace("Random bucket refresh");
         }
         
         try {
-            if(!context.isBootstrapping()){
-                context.getRouteTable().refreshBuckets(false);
+            synchronized (context) {
+                if(!context.isBootstrapping()) {
+                    context.getRouteTable().refreshBuckets(false);
+                }
             }
         } catch (IOException ex) {
             LOG.error("RandomBucketRefresher IO exception: ", ex);

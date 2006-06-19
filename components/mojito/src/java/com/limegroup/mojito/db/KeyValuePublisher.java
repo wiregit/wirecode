@@ -21,14 +21,12 @@ package com.limegroup.mojito.db;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.util.CollectionUtils;
 
@@ -44,7 +42,7 @@ public class KeyValuePublisher implements Runnable {
     
     private final DatabaseStatisticContainer databaseStats;
     
-    private boolean running = false;
+    private volatile boolean running = false;
     
     private int published = 0;
     private int evicted = 0;
@@ -58,10 +56,6 @@ public class KeyValuePublisher implements Runnable {
         databaseStats = context.getDatabaseStats();
     }
     
-    public boolean isRunning() {
-        return running;
-    }
-    
     public void stop() {
         synchronized (publishLock) {
             running = false;
@@ -69,7 +63,7 @@ public class KeyValuePublisher implements Runnable {
         }
     }
     
-    private void publishKeyValue(KeyValue keyValue) {
+    private void publish(KeyValue keyValue) {
         
         // Check if KeyValue is still in DB because we're
         // working with a copy of the Collection.
@@ -108,10 +102,6 @@ public class KeyValuePublisher implements Runnable {
             }
         }
         
-        if (!isRunning()) {
-            return;
-        }
-        
         databaseStats.REPUBLISHED_VALUES.incrementStat();
         
         try {
@@ -141,54 +131,26 @@ public class KeyValuePublisher implements Runnable {
             try {
                 publishLock.wait();
             } catch (InterruptedException ignore) {}
-            
         } catch (IOException err) {
             LOG.error("KeyValuePublisher IO exception: ", err);
         }
     }
     
     public void run() {
-        synchronized (publishLock) {
-            if (running) {
-                LOG.error("Already running!");
-                return;
-            }
-            running = true;
-        }
+        running = true;
         
-        Iterator it = null;
-        Database database = context.getDatabase();
-        
-        while(true) {
-            synchronized (publishLock) {
-                if (!running) {
-                    break;
-                }
-            
-                if (!context.isBootstrapping()) {
-                    if (it == null) {
-                        it = database.getValues().iterator();
-                        
-                        evicted = 0;
-                        published = 0;
+        if (!context.isBootstrapping()) {
+            for(KeyValue keyValue : database.getValues()) {
+                synchronized (publishLock) {
+                    if (!running) {
+                        break;
                     }
-                }
-                
-                if (!running) {
-                    break;
-                }
-                
-                if (it != null && it.hasNext()) {
-                    KeyValue keyValue = (KeyValue)it.next();
-                    publishKeyValue(keyValue);
-                } else {
-                    it = null;
                     
-                    try {
-                        publishLock.wait(DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue());
-                    } catch (InterruptedException ignore) {}
+                    publish(keyValue);
                 }
             }
         }
+        
+        running = false;
     }
 }

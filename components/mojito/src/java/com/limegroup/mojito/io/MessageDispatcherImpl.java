@@ -28,6 +28,11 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
-import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.messages.DHTMessage;
@@ -53,17 +57,26 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     private Selector selector;
     private Filter filter;
     
-    private ProcessingQueue processingQueue;
     private SecureMessageVerifier verifier;
     
-    public MessageDispatcherImpl(Context context) {
+    private ThreadPoolExecutor executor;
+    
+    public MessageDispatcherImpl(final Context context) {
         super(context);
         
-        processingQueue = new ProcessingQueue(
-                context.getName() + "-MessageDispatcherPQ");
+        ThreadFactory factory = new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread thread = context.getThreadFactory().newThread(r);
+                thread.setName(context.getName() + "-MessageDispatcherExecutor");
+                thread.setDaemon(true);
+                return thread;
+            }
+        };
+        
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
+        executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, queue, factory);
         
         verifier = new SecureMessageVerifier(context.getName());
-        
         filter = new Filter();
     }
     
@@ -98,7 +111,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
             LOG.error("An error occured during stopping", err);
         }
         
-        processingQueue.clear();
+        executor.getQueue().clear();
         clear();
     }
     
@@ -113,7 +126,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     
     protected void process(Runnable runnable) {
         if (isRunning()) {
-            processingQueue.add(runnable);
+            executor.execute(runnable);
         }
     }
     
