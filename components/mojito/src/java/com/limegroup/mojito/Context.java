@@ -61,9 +61,7 @@ import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
-import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
-import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
@@ -89,8 +87,8 @@ public class Context {
     private volatile KeyPair keyPair;
     
     private Database database;
-    RouteTable routeTable;
-    MessageDispatcher messageDispatcher;
+    private RouteTable routeTable;
+    private MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
     private KeyValuePublisher publisher;
     private RandomBucketRefresher bucketRefresher;
@@ -103,9 +101,9 @@ public class Context {
     
     private DHTStats dhtStats = null;
     
-    final NetworkStatisticContainer networkStats;
-    private final GlobalLookupStatisticContainer globalLookupStats;
-    private final DatabaseStatisticContainer databaseStats;
+    private NetworkStatisticContainer networkStats;
+    private GlobalLookupStatisticContainer globalLookupStats;
+    private DatabaseStatisticContainer databaseStats;
     
     private long lastEstimateTime = 0L;
     private int estimatedSize = 0;
@@ -332,17 +330,11 @@ public class Context {
     }
     
     public boolean isFirewalled() {
-        if(localNode != null) {
-            return localNode.isFirewalled();
-        } else {
-            return false;
-        }
+        return localNode.isFirewalled();
     }
     
     public void setFirewalled(boolean firewalled) {
-        if (localNode != null) {
-            localNode.setFirewalled(firewalled);
-        }
+        localNode.setFirewalled(firewalled);
     }
     
     public Database getDatabase() {
@@ -442,7 +434,7 @@ public class Context {
      * @param address
      * @throws IOException
      */
-    public void bind(SocketAddress localAddress) throws IOException {
+    public synchronized void bind(SocketAddress localAddress) throws IOException {
         if (isOpen()) {
             throw new IOException("DHT is already bound");
         }
@@ -480,13 +472,8 @@ public class Context {
         //messageDispatcherThread.setDaemon(true);
         messageDispatcherThread.start();
         
-        scheduleAtFixedRate(bucketRefresher, 
-                RouteTableSettings.BUCKET_REFRESH_TIME.getValue() , 
-                RouteTableSettings.BUCKET_REFRESH_TIME.getValue());
-        
-        scheduleAtFixedRate(publisher, 
-                DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue(), 
-                DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue());
+        bucketRefresher.start();
+        publisher.start();
     }
     
     /**
@@ -500,6 +487,7 @@ public class Context {
         running = false;
         bootstrapping = false;
         
+        bucketRefresher.stop();
         publisher.stop();
         
         eventExecutor.getQueue().clear();
@@ -526,8 +514,8 @@ public class Context {
      * @param delay
      * @param period
      */
-    public ScheduledFuture<?> scheduleAtFixedRate(final Runnable runnable, long delay, long period) {
-        return scheduledExecutor.scheduleAtFixedRate(runnable, delay, period, TimeUnit.MILLISECONDS);
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable r, long delay, long period) {
+        return scheduledExecutor.scheduleAtFixedRate(r, delay, period, TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -699,7 +687,7 @@ public class Context {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // TODO only live nodes?
-        List nodes = routeTable.select(localNodeId, k, false, false);
+        List<ContactNode> nodes = routeTable.select(localNodeId, k, false, false);
         
         // TODO accoriding to Az code it works only with more than
         // two Nodes
@@ -717,7 +705,7 @@ public class Context {
         BigInteger sum2 = BigInteger.ZERO;
         
         for(int i = 1; i < nodes.size(); i++) {
-            ContactNode node = (ContactNode)nodes.get(i);
+            ContactNode node = nodes.get(i);
             
             BigInteger distance = localNodeId.xor(node.getNodeID()).toBigInteger();
             BigInteger j = BigInteger.valueOf(i);
@@ -754,7 +742,7 @@ public class Context {
         if (ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
             synchronized (remoteSizeHistory) {
                 if (remoteSizeHistory.size() >= 3) {
-                    Integer[] remote = (Integer[])remoteSizeHistory.toArray(new Integer[0]);
+                    Integer[] remote = remoteSizeHistory.toArray(new Integer[0]);
                     Arrays.sort(remote);
                     
                     // Skip the smallest and largest value

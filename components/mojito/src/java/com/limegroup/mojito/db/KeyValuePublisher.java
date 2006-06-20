@@ -16,23 +16,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.db;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.util.CollectionUtils;
 
-/**
- * The KeyValuePublisher class republishes local KeyValue on the DHT
- */
+// TODO rename to Publisher?
 public class KeyValuePublisher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(KeyValuePublisher.class);
@@ -40,14 +40,14 @@ public class KeyValuePublisher implements Runnable {
     private Context context;
     private Database database;
     
-    private final DatabaseStatisticContainer databaseStats;
+    private DatabaseStatisticContainer databaseStats;
     
-    private volatile boolean running = false;
+    private ScheduledFuture future;
     
     private int published = 0;
     private int evicted = 0;
     
-    private Object publishLock = new Object();
+    private Object lock = new Object();
     
     public KeyValuePublisher(Context context) {
         this.context = context;
@@ -56,14 +56,26 @@ public class KeyValuePublisher implements Runnable {
         databaseStats = context.getDatabaseStats();
     }
     
-    public void stop() {
-        synchronized (publishLock) {
-            running = false;
-            publishLock.notify();
+    public void start() {
+        synchronized (lock) {
+            if (future == null) {
+                future = context.scheduleAtFixedRate(this, 
+                        DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue(), 
+                        DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue());
+            }
         }
     }
     
-    private void publish(KeyValue keyValue) {
+    public void stop() {
+        synchronized (lock) {
+            if (future != null) {
+                future.cancel(true);
+                future = null;
+            }
+        }
+    }
+    
+    private void publish(KeyValue keyValue) throws IOException {
         
         // Check if KeyValue is still in DB because we're
         // working with a copy of the Collection.
@@ -104,15 +116,22 @@ public class KeyValuePublisher implements Runnable {
         
         databaseStats.REPUBLISHED_VALUES.incrementStat();
         
-        try {
+        synchronized (lock) {
+            if (future == null || future.isCancelled()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Publisher is cancelled");
+                }
+                return;
+            }
+            
             context.store(keyValue, new StoreListener() {
                 public void store(KeyValue keyValue, Collection nodes) {
                     keyValue.setLastPublishTime(System.currentTimeMillis());
                     keyValue.setNumLocs(nodes.size());
                     published++;
 
-                    synchronized(publishLock) {
-                        publishLock.notify();
+                    synchronized(lock) {
+                        lock.notify();
                     }
                     
                     if (LOG.isTraceEnabled()) {
@@ -129,28 +148,25 @@ public class KeyValuePublisher implements Runnable {
             });
             
             try {
-                publishLock.wait();
+                lock.wait();
             } catch (InterruptedException ignore) {}
-        } catch (IOException err) {
-            LOG.error("KeyValuePublisher IO exception: ", err);
         }
     }
-    
+
     public void run() {
-        running = true;
-        
-        if (!context.isBootstrapping()) {
-            for(KeyValue keyValue : database.getValues()) {
-                synchronized (publishLock) {
-                    if (!running) {
-                        break;
-                    }
-                    
-                    publish(keyValue);
+        for(KeyValue keyValue : database.getValues()) {
+            if (context.isBootstrapping()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " is bootstrapping, interrupting publisher");
                 }
+                break;
+            }
+            
+            try {
+                publish(keyValue);
+            } catch (IOException err) {
+                LOG.error("IOException", err);
             }
         }
-        
-        running = false;
     }
 }

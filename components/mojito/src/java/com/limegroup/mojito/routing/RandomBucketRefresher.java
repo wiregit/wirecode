@@ -20,21 +20,43 @@
 package com.limegroup.mojito.routing;
 
 import java.io.IOException;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.settings.RouteTableSettings;
 
-
+/**
+ * The RandomBucketRefresher class calls in periodical intervals
+ * RouteTable.refreshBuckets()
+ */
 public class RandomBucketRefresher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(RandomBucketRefresher.class);
     
     private Context context;
     
+    private volatile ScheduledFuture future;
+    
     public RandomBucketRefresher(Context context) {
         this.context = context;
+    }
+    
+    public synchronized void start() {
+        if (future == null) {
+            future = context.scheduleAtFixedRate(this, 
+                    RouteTableSettings.BUCKET_REFRESH_TIME.getValue(),
+                    RouteTableSettings.BUCKET_REFRESH_TIME.getValue());
+        }
+    }
+    
+    public synchronized void stop() {
+        if (future != null) {
+            future.cancel(true);
+            future = null;
+        }
     }
     
     public void run() {
@@ -44,12 +66,25 @@ public class RandomBucketRefresher implements Runnable {
         
         try {
             synchronized (context) {
-                if(!context.isBootstrapping()) {
-                    context.getRouteTable().refreshBuckets(false);
+                ScheduledFuture f = future;
+                if (f == null || f.isCancelled()) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("RandomBucketRefresher is canceled");
+                    }
+                    return;
                 }
+                
+                if (context.isBootstrapping()) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
+                    }
+                    return;
+                }
+                
+                context.getRouteTable().refreshBuckets(false);
             }
         } catch (IOException ex) {
-            LOG.error("RandomBucketRefresher IO exception: ", ex);
+            LOG.error("IOException", ex);
         }
     }
 }
