@@ -169,8 +169,9 @@ public class UploadManager implements BandwidthTracker {
     private volatile float lastMeasuredBandwidth;
 
     /** The desired minimum quality of service to provide for uploads, in
-     *  B/s.  See testTotalUploadLimit. */
-    private static final float MINIMUM_UPLOAD_SPEED=3000f;
+     *  KB/s.  
+     */
+    private static final float MINIMUM_UPLOAD_SPEED=3.0f;
     
     /** 
      * The file index used in this structure to indicate a browse host
