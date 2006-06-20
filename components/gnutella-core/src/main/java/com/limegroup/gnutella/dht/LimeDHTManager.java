@@ -76,11 +76,6 @@ public class LimeDHTManager implements LifecycleListener {
     private volatile LinkedList<SocketAddress> bootstrapHosts 
             = new LinkedList<SocketAddress>();
     
-    /**
-     * A list of bootstrap hosts used in the last bootstrap attempt
-     */
-    private List<SocketAddress> previousBootstrapHosts;
-    
     private boolean isActive = false;
     
     private final LimeDHTRoutingTable limeDHTRouteTable;
@@ -195,15 +190,19 @@ public class LimeDHTManager implements LifecycleListener {
      * 
      */
     private void bootstrap() {
+        
+        final List<SocketAddress> snapshot 
+            = new ArrayList<SocketAddress>(bootstrapHosts.size());
+        
         synchronized (bootstrapHosts) {
-            previousBootstrapHosts = new ArrayList<SocketAddress>(bootstrapHosts);
+            snapshot.addAll(bootstrapHosts);
         }
         
         try {
-            dht.bootstrap(previousBootstrapHosts, new BootstrapListener() {
+            dht.bootstrap(snapshot, new BootstrapListener() {
                 public void noBootstrapHost() {
                     synchronized (bootstrapHosts) {
-                        bootstrapHosts.removeAll(previousBootstrapHosts);
+                        bootstrapHosts.removeAll(snapshot);
                         waiting = true;
                         //here: perform a PING requesting for DHT hosts
                     }
@@ -216,7 +215,7 @@ public class LimeDHTManager implements LifecycleListener {
                 }
             });
         } catch (IOException err) {
-            LOG.error(err);
+            LOG.error("IOException", err);
         }
     }
     
@@ -280,7 +279,10 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public void addLeafDHTNode(String host, int port) {
-        if(!running) return;
+        if(!running) {
+            return;
+        }
+        
         ContactNode dhtNode = null;
         try {
             if(LOG.isDebugEnabled()) {
