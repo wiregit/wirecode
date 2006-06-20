@@ -26,6 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.messagehandlers.MessageHandler;
+import com.limegroup.gnutella.messagehandlers.OOBHandler;
+import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -51,7 +54,6 @@ import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
-import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 import com.limegroup.gnutella.messages.vendor.UpdateRequest;
 import com.limegroup.gnutella.messages.vendor.UpdateResponse;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
@@ -72,7 +74,6 @@ import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
-import com.limegroup.gnutella.upelection.PromotionManager;
 import com.limegroup.gnutella.util.FixedsizeHashMap;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -276,11 +277,6 @@ public abstract class MessageRouter {
     private final Object MESSAGE_LISTENER_LOCK = new Object();
 
     /**
-     * ref to the promotion manager.
-     */
-    private PromotionManager _promotionManager;
-
-    /**
      * The time we last received a request for a query key.
      */
     private long _lastQueryKeyTime;
@@ -312,48 +308,6 @@ public abstract class MessageRouter {
     protected MessageRouter() {
         _clientGUID=RouterService.getMyGUID();
         
-        setMessageHandler(PingRequest.class, new PingRequestHandler());
-        setMessageHandler(PingReply.class, new PingReplyHandler());
-        setMessageHandler(QueryRequest.class, new QueryRequestHandler());
-        setMessageHandler(QueryReply.class, new QueryReplyHandler());
-        setMessageHandler(PushRequest.class, new PushRequestHandler());
-        setMessageHandler(ResetTableMessage.class, new ResetTableHandler());
-        setMessageHandler(PatchTableMessage.class, new PatchTableHandler());
-        setMessageHandler(TCPConnectBackVendorMessage.class, new TCPConnectBackHandler());
-        setMessageHandler(UDPConnectBackVendorMessage.class, new UDPConnectBackHandler());
-        setMessageHandler(TCPConnectBackRedirect.class, new TCPConnectBackRedirectHandler());
-        setMessageHandler(UDPConnectBackRedirect.class, new UDPConnectBackRedirectHandler());
-        setMessageHandler(PushProxyRequest.class, new PushProxyRequestHandler());
-        setMessageHandler(QueryStatusResponse.class, new QueryStatusResponseHandler());
-        setMessageHandler(GiveStatsVendorMessage.class, new GiveStatsHandler());
-        setMessageHandler(StatisticVendorMessage.class, new StatisticsHandler());
-        setMessageHandler(HeadPing.class, new HeadPingHandler());
-        setMessageHandler(SimppRequestVM.class, new SimppRequestVMHandler());
-        setMessageHandler(SimppVM.class, new SimppVMHandler());
-        setMessageHandler(UpdateRequest.class, new UpdateRequestHandler());
-        setMessageHandler(UpdateResponse.class, new UpdateResponseHandler());
-        setMessageHandler(HeadPong.class, new HeadPongHandler());
-        setMessageHandler(VendorMessage.class, new VendorMessageHandler());
-        
-        setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
-        setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler());
-        setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
-        setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
-        setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
-        setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
-        setUDPMessageHandler(ReplyNumberVendorMessage.class, new UDPReplyNumberMessageHandler());
-        setUDPMessageHandler(GiveStatsVendorMessage.class, new UDPGiveStatsHandler());
-        setUDPMessageHandler(StatisticVendorMessage.class, new UDPStatisticsMessageHandler());
-        setUDPMessageHandler(UDPCrawlerPing.class, new UDPUDPCrawlerPingHandler());
-        setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
-        setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
-        setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
-        
-        setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
-        //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
-        setMulticastMessageHandler(PingRequest.class, new MulticastPingRequestHandler());
-        //setMulticastMessageHandler(PingReply.class, new MulticastPingReplyHandler());
-        setMulticastMessageHandler(PushRequest.class, new MulticastPushRequestHandler());
     }
 
     /**
@@ -461,7 +415,6 @@ public abstract class MessageRouter {
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
-		_promotionManager = RouterService.getPromotionManager();
 	    QRP_PROPAGATOR.start();
 
         // schedule a runner to clear unused out-of-band replies
@@ -472,6 +425,53 @@ public abstract class MessageRouter {
         // schedule a runner to send hops-flow messages
         RouterService.schedule(new HopsFlowManager(), HOPS_FLOW_INTERVAL*10, 
                                HOPS_FLOW_INTERVAL);
+        
+        // runner to clean up OOB sessions
+        OOBHandler oobHandler = new OOBHandler(this);
+        RouterService.schedule(oobHandler, CLEAR_TIME, CLEAR_TIME);
+        
+        setMessageHandler(PingRequest.class, new PingRequestHandler());
+        setMessageHandler(PingReply.class, new PingReplyHandler());
+        setMessageHandler(QueryRequest.class, new QueryRequestHandler());
+        setMessageHandler(QueryReply.class, new QueryReplyHandler());
+        setMessageHandler(PushRequest.class, new PushRequestHandler());
+        setMessageHandler(ResetTableMessage.class, new ResetTableHandler());
+        setMessageHandler(PatchTableMessage.class, new PatchTableHandler());
+        setMessageHandler(TCPConnectBackVendorMessage.class, new TCPConnectBackHandler());
+        setMessageHandler(UDPConnectBackVendorMessage.class, new UDPConnectBackHandler());
+        setMessageHandler(TCPConnectBackRedirect.class, new TCPConnectBackRedirectHandler());
+        setMessageHandler(UDPConnectBackRedirect.class, new UDPConnectBackRedirectHandler());
+        setMessageHandler(PushProxyRequest.class, new PushProxyRequestHandler());
+        setMessageHandler(QueryStatusResponse.class, new QueryStatusResponseHandler());
+        setMessageHandler(GiveStatsVendorMessage.class, new GiveStatsHandler());
+        setMessageHandler(StatisticVendorMessage.class, new StatisticsHandler());
+        setMessageHandler(HeadPing.class, new HeadPingHandler());
+        setMessageHandler(SimppRequestVM.class, new SimppRequestVMHandler());
+        setMessageHandler(SimppVM.class, new SimppVMHandler());
+        setMessageHandler(UpdateRequest.class, new UpdateRequestHandler());
+        setMessageHandler(UpdateResponse.class, new UpdateResponseHandler());
+        setMessageHandler(HeadPong.class, new HeadPongHandler());
+        setMessageHandler(VendorMessage.class, new VendorMessageHandler());
+        
+        setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
+        setUDPMessageHandler(QueryReply.class, oobHandler);
+        setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
+        setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
+        setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
+        setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
+        setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
+        setUDPMessageHandler(GiveStatsVendorMessage.class, new UDPGiveStatsHandler());
+        setUDPMessageHandler(StatisticVendorMessage.class, new UDPStatisticsMessageHandler());
+        setUDPMessageHandler(UDPCrawlerPing.class, new UDPCrawlerPingHandler());
+        setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
+        setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
+        setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
+        
+        setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
+        //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
+        setMulticastMessageHandler(PingRequest.class, new MulticastPingRequestHandler());
+        //setMulticastMessageHandler(PingReply.class, new MulticastPingReplyHandler());
+        setMulticastMessageHandler(PushRequest.class, new MulticastPushRequestHandler());
     }
 
     /**
@@ -1097,59 +1097,51 @@ public abstract class MessageRouter {
         // TODO: tally some stat stuff here
     }
 
-    /** This is called when a client on the network has results for us that we
-     *  may want.  We may contact them back directly or just cache them for
-     *  use.
-     */
-    protected void handleReplyNumberMessage(ReplyNumberVendorMessage reply,
-                                            InetSocketAddress addr) {
-        GUID qGUID = new GUID(reply.getGUID());
-        int numResults = 
-        RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
-        if (numResults < 0) // this may be a proxy query
-            numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
-
-        // see if we need more results for this query....
-        // if not, remember this location for a future, 'find more sources'
-        // targeted GUESS query, as long as the other end said they can receive
-        // unsolicited.
-        if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
-            OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
-
-            //if the reply cannot receive unsolicited udp, there is no point storing it.
-            if (!reply.canReceiveUnsolicited())
-            	return;
-            
-            DownloadManager dManager = RouterService.getDownloadManager();
-            // only store result if it is being shown to the user or if a
-            // file with the same guid is being downloaded
-            if (!_callback.isQueryAlive(qGUID) && 
-                !dManager.isGuidForQueryDownloading(qGUID))
-                return;
-
-            GUESSEndpoint ep = new GUESSEndpoint(addr.getAddress(),
-                                                 addr.getPort());
-            synchronized (_bypassedResults) {
-                // this is a quick critical section for _bypassedResults
-                // AND the set within it
-                Set eps = (Set) _bypassedResults.get(qGUID);
-                if (eps == null) {
-                    eps = new HashSet();
-                    _bypassedResults.put(qGUID, eps);
-                }
-                if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
-                    eps.add(ep);
-            }
-
-            return;
-        }
-        
-        LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(qGUID, reply.getNumResults());
-        UDPService.instance().send(ack, addr.getAddress(), addr.getPort());
-        OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
+    public int getNumOOBToRequest(ReplyNumberVendorMessage reply, ReplyHandler handler) {
+    	GUID qGUID = new GUID(reply.getGUID());
+    	int numResults = 
+    		RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
+    	if (numResults < 0) // this may be a proxy query
+    		numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
+    	
+    	// see if we need more results for this query....
+    	// if not, remember this location for a future, 'find more sources'
+    	// targeted GUESS query, as long as the other end said they can receive
+    	// unsolicited.
+    	if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
+    		OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+    		
+    		//if the reply cannot receive unsolicited udp, there is no point storing it.
+    		if (!reply.canReceiveUnsolicited())
+    			return -1;
+    		
+    		DownloadManager dManager = RouterService.getDownloadManager();
+    		// only store result if it is being shown to the user or if a
+    		// file with the same guid is being downloaded
+    		if (!_callback.isQueryAlive(qGUID) && 
+    				!dManager.isGuidForQueryDownloading(qGUID))
+    			return -1;
+    		
+    		GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(),
+    				handler.getPort());
+    		synchronized (_bypassedResults) {
+    			// this is a quick critical section for _bypassedResults
+    			// AND the set within it
+    			Set eps = (Set) _bypassedResults.get(qGUID);
+    			if (eps == null) {
+    				eps = new HashSet();
+    				_bypassedResults.put(qGUID, eps);
+    			}
+    			if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
+    				eps.add(ep);
+    		}
+    		
+    		return -1;
+    	}
+    	
+    	return reply.getNumResults();
+    	
     }
-
 
     /** Stores (for a limited time) the resps for later out-of-band delivery -
      *  interacts with handleLimeACKMessage
@@ -2681,23 +2673,6 @@ public abstract class MessageRouter {
 
 
     /**
-     * responds to a request for the list of ultrapeers or leaves.  It is sent right back to the
-     * requestor on the UDP receiver thread.
-     * @param msg the request message
-     * @param handler the UDPHandler to send it to.
-     */
-    private void handleUDPCrawlerPing(UDPCrawlerPing msg, ReplyHandler handler){
-    	
-    	//make sure the same person doesn't request too often
-    	//note: this should only happen on the UDP receiver thread, that's why
-    	//I'm not locking it.
-    	if (!_promotionManager.allowUDPPing(handler))
-    		return; 
-    	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
-    	handler.reply(newMsg);
-    }
-    
-    /**
      * Replies to a head ping sent from the given ReplyHandler.
      */
     private void handleHeadPing(HeadPing ping, ReplyHandler handler) {
@@ -2864,11 +2839,8 @@ public abstract class MessageRouter {
         }
     }
     
-    /**
-     * The interface for custom MessageHandler(s)
-     */
-    public static interface MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler);
+    public long getOOBExpireTime() {
+    	return CLEAR_TIME;
     }
     
     /*
@@ -3056,20 +3028,6 @@ public abstract class MessageRouter {
         }
     }
     
-    private class UDPQueryReplyHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            QueryReply qr = (QueryReply) msg;
-            ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
-            int numResps = qr.getResultCount();
-            // only account for OOB stuff if this was response to a 
-            // OOB query, multicast stuff is sent over UDP too....
-            if (!qr.isReplyToMulticastQuery())
-                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-            
-            handleQueryReply(qr, handler);
-        }
-    }
-    
     private class UDPPingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
@@ -3098,12 +3056,6 @@ public abstract class MessageRouter {
         }
     }
     
-    private class UDPReplyNumberMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            handleReplyNumberMessage((ReplyNumberVendorMessage) msg, addr);
-        }
-    }
-    
     private class UDPGiveStatsHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             handleGiveStats((GiveStatsVendorMessage) msg, handler);
@@ -3113,13 +3065,6 @@ public abstract class MessageRouter {
     private class UDPStatisticsMessageHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             handleStatisticsMessage((StatisticVendorMessage)msg, handler);
-        }
-    }
-    
-    private class UDPUDPCrawlerPingHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            //TODO: add the statistics recording code
-            handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
         }
     }
     

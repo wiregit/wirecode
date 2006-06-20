@@ -22,6 +22,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.search.QueryHandler;
+import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -135,6 +136,25 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         }
         assertEquals(queryGuid, new GUID(ack.getGUID()));
         assertEquals(10, ack.getNumResults());
+        
+        // now send back some results - they should be accepted.
+        Response[] res = new Response[10];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "susheel"+j);
+        Message m = 
+            new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        baos = new ByteArrayOutputStream();
+        m.write(baos);
+        byte [] packet = baos.toByteArray();
+        DatagramPacket reply = new DatagramPacket(packet, 
+        		packet.length,
+        		testUP[0].getInetAddress(), 
+                RouterService.getPort());
+        UDP_ACCESS.send(reply);
+        Thread.sleep(250);
+        assertEquals(10,RouterService.getSearchResultHandler().getNumResultsForQuery(queryGuid));
     }
 
 
@@ -427,6 +447,48 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
 
 
+    }
+    
+    public void testNoRNVMSent() throws Exception {
+    	drainAll();
+
+        // first of all, we should confirm that we are sending out a OOB query.
+        GUID queryGuid = new GUID(RouterService.newQueryGUID());
+        assertTrue(GUID.addressesMatch(queryGuid.bytes(), 
+                                       RouterService.getAddress(), 
+                                       RouterService.getPort()));
+        RouterService.query(queryGuid.bytes(), "susheel");
+        Thread.sleep(250);
+
+        // all connected UPs should get a OOB query
+        for (int i = 0; i < testUP.length; i++) {
+            QueryRequest qr = getFirstQueryRequest(testUP[i]);
+            assertNotNull(qr);
+            assertEquals(new GUID(qr.getGUID()), queryGuid);
+            assertTrue(qr.desiresOutOfBandReplies());
+        }
+
+        // now, do not send an RNVM and send a reply directly
+        Response[] res = new Response[10];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "susheel"+j);
+        Message m = 
+            new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        m.write(baos);
+        byte [] packet = baos.toByteArray();
+        DatagramPacket reply = new DatagramPacket(packet, 
+        		packet.length,
+        		testUP[0].getInetAddress(), 
+                RouterService.getPort());
+        UDP_ACCESS.send(reply);
+        
+        // nothing should be accepted.
+        Thread.sleep(250);
+        SearchResultHandler handler = RouterService.getSearchResultHandler();
+        assertEquals(0,handler.getNumResultsForQuery(queryGuid));
     }
     
     

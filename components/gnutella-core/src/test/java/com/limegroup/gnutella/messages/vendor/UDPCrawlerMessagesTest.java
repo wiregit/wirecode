@@ -140,7 +140,8 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
         
-        PrivilegedAccessor.setValue(RouterService.getPromotionManager(),
+        Object handler = RouterService.getMessageRouter().getUDPMessageHandler(UDPCrawlerPing.class);
+        PrivilegedAccessor.setValue(handler,
 				"_UDPListRequestors",
 				new FixedSizeExpiringSet(200,200));
         UDP_ACCESS.connect(InetAddress.getLocalHost(),PORT);

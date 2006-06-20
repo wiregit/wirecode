@@ -54,7 +54,6 @@ import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.udpconnect.UDPSelectorProvider;
 import com.limegroup.gnutella.updates.UpdateManager;
-import com.limegroup.gnutella.upelection.PromotionManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -157,12 +156,6 @@ public class RouterService {
      */
     private static PushManager pushManager = new PushManager();
     
-    /**
-     * <tt>PromotionManager</tt> for handling promotions to Ultrapeer.
-     */
-    private static PromotionManager promotionManager = new PromotionManager();
-
-	
     private static ResponseVerifier VERIFIER = new ResponseVerifier();
 
 	/**
@@ -651,14 +644,6 @@ public class RouterService {
 		return RESULT_HANDLER;
 	}
 	
-	/**
-	 * Accessor for the <tt>PromotionManager</tt> instance.
-	 * @return the <tt>PromotionManager</tt> in use.
-	 */
-	public static PromotionManager getPromotionManager() {
-		return promotionManager;
-	}
-    
     /** Gets the SecureMessageVerifier. */
     public static SecureMessageVerifier getSecureMessageVerifier() {
         return secureMessageVerifier;

@@ -16,7 +16,7 @@ import java.util.Set;
  * Note: do not use this class for time-sensitive operations.
  * if you do, wait at least 10-20ms before each operation. --zab
  */
-public class FixedSizeExpiringSet implements Set, Collection {
+public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
     /*
      * Default size for the FixedSizExpiringSet
      */
@@ -29,7 +29,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
 
     private final int _maxSize;
     private final long _expireTime;
-    private Map _map;
+    private Map<T,Long> _map;
 
     /**
      * Simple constructor for the FixedSizeExpiringSet. Takes no arguments.
@@ -56,7 +56,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     public FixedSizeExpiringSet(int size, long expireTime) {
         _maxSize = size;
         _expireTime = expireTime;
-        _map = new HashMap();
+        _map = new HashMap<T,Long>();
     }
 
     /*
@@ -84,7 +84,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
      * @see java.util.Collection#contains(java.lang.Object)
      */
     public boolean contains(Object arg0) {
-        Long time = (Long) _map.get(arg0);
+        Long time = _map.get(arg0);
         if (time == null)
             return false;
         else if (time.longValue() < System.currentTimeMillis()) {
@@ -99,7 +99,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
      * 
      * @see java.util.Collection#iterator()
      */
-    public Iterator iterator() {
+    public Iterator<T> iterator() {
         expire(false);
         return _map.keySet().iterator();
     }
@@ -119,7 +119,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
      * 
      * @see java.util.Collection#toArray(java.lang.Object[])
      */
-    public Object[] toArray(Object[] arg0) {
+    public <B>B[] toArray(B[] arg0) {
         expire(false);
         return _map.keySet().toArray(arg0);
     }
@@ -129,7 +129,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
      * 
      * @see java.util.Collection#add(java.lang.Object)
      */
-    public boolean add(Object arg0) {
+    public boolean add(T arg0) {
         if (arg0 == null)
             return false;
         expire(size() >= _maxSize);
@@ -137,7 +137,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
         if (_map.containsKey(arg0)) //contract requires it!
         	return false; 
         
-        _map.put(arg0, new Long(System.currentTimeMillis() + _expireTime));
+        _map.put(arg0, System.currentTimeMillis() + _expireTime);
         return true;
     }
 
@@ -169,11 +169,11 @@ public class FixedSizeExpiringSet implements Set, Collection {
      * 
      * @see java.util.Collection#addAll
      * (java.util.Collection) */
-    public boolean addAll(Collection coll) {
+    public boolean addAll(Collection<? extends T> coll) {
         if (coll.isEmpty())
             return false;
         int i = 0;            
-        for (Iterator iter=coll.iterator(); i < _maxSize && iter.hasNext(); i++)
+        for (Iterator<? extends T> iter=coll.iterator(); i < _maxSize && iter.hasNext(); i++)
             add(iter.next());
         return true;
     }
@@ -183,10 +183,10 @@ public class FixedSizeExpiringSet implements Set, Collection {
      * (java.util.Collection)
      */
     public boolean retainAll(Collection arg0) {
-        Map map = new HashMap();
+        Map<T,Long> map = new HashMap<T,Long>();
         boolean ret = false;
-        for (Iterator iter = _map.keySet().iterator(); iter.hasNext();) {
-            Object o = iter.next();
+        for (Iterator<T> iter = _map.keySet().iterator(); iter.hasNext();) {
+            T o = iter.next();
             if (arg0.contains(o))
                 map.put(o, _map.get(o));
             else
@@ -226,12 +226,10 @@ public class FixedSizeExpiringSet implements Set, Collection {
             return;
         long now = System.currentTimeMillis();
         long min = Long.MAX_VALUE;
-        Object oldest = null;
-        Collection expired = new HashSet();
-        for (Iterator iter = _map.keySet().iterator(); iter.hasNext();) {
-            Object key = iter.next();
-            Long l = ((Long) _map.get(key));
-            long time = l.longValue();
+        T oldest = null;
+        Collection<T> expired = new HashSet<T>();
+        for (T key : _map.keySet()) {
+            long time = _map.get(key);
             if (time < now) {
                 expired.add(key);
                 forceRemove = false;
