@@ -8,7 +8,6 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -258,16 +257,8 @@ public class ManagedConnection extends Connection
 
     /**
      * Holds the mappings of GUIDs that are being proxied.
-     * We want to construct this lazily....
-     * GUID.TimedGUID -> GUID
-     * OOB Proxy GUID - > Original GUID
      */
-    private Map _guidMap = null;
-
-    /**
-     * The max lifetime of the GUID (10 minutes).
-     */
-    private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
+    private GuidMap _guidMap = GuidMapFactory.getMap();
 
     /**
      * Whether or not this was a supernode <-> client connection when message
@@ -766,8 +757,7 @@ public class ManagedConnection extends Connection
         super.close();
         
         // release pointer to our _guidMap so it can be gc()'ed
-        if (_guidMap != null)
-            GuidMapExpirer.removeMap(_guidMap);
+        GuidMapFactory.removeMap(_guidMap);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -898,44 +888,21 @@ public class ManagedConnection extends Connection
                                RouterService.getPort());
 
         query = QueryRequest.createProxyQuery(query, oobGUID);
-
+        
         // 2) set up mappings between the guids
-        if (_guidMap == null) {
-            _guidMap = new Hashtable();
-            GuidMapExpirer.addMapToExpire(_guidMap);
-        }
-        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(oobGUID),
-                                                  TIMED_GUID_LIFETIME);
-        _guidMap.put(tGuid, new GUID(origGUID));
+        _guidMap.addMapping(origGUID, oobGUID);
 
         OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
         return query;
     }
 
     private QueryStatusResponse morphToStopQuery(QueryStatusResponse resp) {
-        // if the _guidMap is null, we aren't proxying anything....
-        if (_guidMap == null) return resp;
-
-        // if we are proxying this query, we should modify the GUID so as
-        // to shut off the correct query
-        final GUID origGUID = resp.getQueryGUID();
-        GUID oobGUID = null;
-        synchronized (_guidMap) {
-            Iterator entrySetIter = _guidMap.entrySet().iterator();
-            while (entrySetIter.hasNext()) {
-                Map.Entry entry = (Map.Entry) entrySetIter.next();
-                if (origGUID.equals(entry.getValue())) {
-                    oobGUID = ((GUID.TimedGUID)entry.getKey()).getGUID();
-                    break;
-                }
-            }
-        }
-
+        GUID oobGUID = _guidMap.getNewGUID(resp.getQueryGUID());
         // if we had a match, then just construct a new one....
         if (oobGUID != null)
             return new QueryStatusResponse(oobGUID, resp.getNumResults());
-
-        else return resp;
+        else
+            return resp;
     }
     
 
@@ -1017,18 +984,14 @@ public class ManagedConnection extends Connection
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler receivingConnection) {
         if (_guidMap != null) {
-        // ---------------------
-        // If we are proxying for a query, map back the guid of the reply
-        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()),
-                                                  TIMED_GUID_LIFETIME);
-        GUID origGUID = (GUID) _guidMap.get(tGuid);
-        if (origGUID != null) { 
-            byte prevHops = queryReply.getHops();
-            queryReply = new QueryReply(origGUID.bytes(), queryReply);
-            queryReply.setTTL((byte)2); // we ttl 1 more than necessary
-            queryReply.setHops(prevHops);
-        }
-        // ---------------------
+            byte[] origGUID = _guidMap.getOriginalGUID(queryReply.getGUID());
+            if (origGUID != null) { 
+                byte prevHops = queryReply.getHops();
+                queryReply = new QueryReply(origGUID, queryReply);
+                queryReply.setTTL((byte)2); // we ttl 1 more than necessary
+                queryReply.setHops(prevHops);
+            }
+            // ---------------------
         }
         
         send(queryReply);
@@ -1419,48 +1382,6 @@ public class ManagedConnection extends Connection
         }
     }
     
-
-    /** Class-wide expiration mechanism for all ManagedConnections.
-     *  Only expires on-demand.
-     */
-    private static class GuidMapExpirer implements Runnable {
-        
-        private static List toExpire = new LinkedList();
-        private static boolean scheduled = false;
-
-        public GuidMapExpirer() {};
-
-        public static synchronized void addMapToExpire(Map expiree) {
-            // schedule it on demand
-            if (!scheduled) {
-                RouterService.schedule(new GuidMapExpirer(), 0,
-                                       TIMED_GUID_LIFETIME);
-                scheduled = true;
-            }
-            toExpire.add(expiree);
-        }
-
-        public static synchronized void removeMap(Map expiree) {
-            toExpire.remove(expiree);
-        }
-
-        public void run() {
-            synchronized (GuidMapExpirer.class) {
-                // iterator through all the maps....
-                Iterator iter = toExpire.iterator();
-                while (iter.hasNext()) {
-                    Map currMap = (Map) iter.next();
-                    synchronized (currMap) {
-                        Iterator keyIter = currMap.keySet().iterator();
-                        // and expire as many entries as possible....
-                        while (keyIter.hasNext()) 
-                            if (((GUID.TimedGUID) keyIter.next()).shouldExpire())
-                                keyIter.remove();
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * A ConnectObserver that continues the handshaking process in the same thread,

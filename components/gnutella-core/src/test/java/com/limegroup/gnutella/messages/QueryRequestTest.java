@@ -172,7 +172,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		} catch(NullPointerException e) {}				
 
 		try {
-			qr = QueryRequest.createMulticastQuery(null);
+			qr = QueryRequest.createMulticastQuery(new byte[16], null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
@@ -505,7 +505,7 @@ public final class QueryRequestTest extends BaseTestCase {
 	 */
 	public void testMulticastQuery() {
 		QueryRequest testQuery = QueryRequest.createQuery("test");
-		QueryRequest qr = QueryRequest.createMulticastQuery(testQuery);		
+		QueryRequest qr = QueryRequest.createMulticastQuery(new byte[16], testQuery);		
 		runStandardChecksMulticast(qr, "test");
 	}
 
@@ -852,7 +852,7 @@ public final class QueryRequestTest extends BaseTestCase {
         assertTrue(!qr.isMulticast());
         assertEquals(Message.N_UNKNOWN, qr.getNetwork());
         
-        qr = QueryRequest.createMulticastQuery(qr);
+        qr = QueryRequest.createMulticastQuery(new byte[16], qr);
         assertTrue(qr.isMulticast());
         assertEquals(Message.N_MULTICAST, qr.getNetwork());
         

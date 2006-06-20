@@ -81,9 +81,9 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     public static void setSettings() throws Exception {
         // we want to test the expirer so make the expire period small
-        PrivilegedAccessor.setValue(ManagedConnection.class,
-                                    "TIMED_GUID_LIFETIME",
-                                    new Long(EXPIRE_TIME));
+        PrivilegedAccessor.setValue(GuidMapFactory.class, "EXPIRE_POLL_TIME", new Long(EXPIRE_TIME));
+        Class clazz = PrivilegedAccessor.getClass(GuidMapFactory.class, "GuidMapImpl");
+        PrivilegedAccessor.setValue(clazz, "TIMED_GUID_LIFETIME", new Long(EXPIRE_TIME));
         ConnectionSettings.MULTICAST_PORT.setValue(10100);
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(500);
@@ -471,20 +471,17 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     // tests that the expirer works
     public void testExpirer() throws Exception {
         // see if anything is going to be expired
-        Class guidMapExpirer = 
-            PrivilegedAccessor.getClass(ManagedConnection.class,
-                                        "GuidMapExpirer");
-        List expireList = (List) PrivilegedAccessor.getValue(guidMapExpirer, 
+        List expireList = (List) PrivilegedAccessor.getValue(GuidMapFactory.class, 
                                                              "toExpire");
         assertNotNull(expireList);
         Thread.sleep(EXPIRE_TIME*2);  // old guids should be expired...
-        synchronized (expireList) {
+        synchronized (GuidMapFactory.class) {
             assertEquals(1, expireList.size());
             // iterator through all the maps and confirm they are empty
-            Iterator iter = expireList.iterator();
-            while (iter.hasNext()) {
-                Map currMap = (Map) iter.next();
-                synchronized (currMap) {
+            for(Iterator i = expireList.iterator(); i.hasNext(); ) {
+                Object guidMapImpl = i.next();
+                synchronized(guidMapImpl) {
+                    Map currMap = (Map)PrivilegedAccessor.invokeMethod(guidMapImpl, "getMap", null);
                     assertTrue(currMap.isEmpty());
                 }
             }
@@ -511,12 +508,12 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         }
         Thread.sleep(EXPIRE_TIME*2);
         
-        synchronized (expireList) {
+        synchronized (GuidMapFactory.class) {
             // iterator through all the maps and confirm they are empty
-            Iterator iter = expireList.iterator();
-            while (iter.hasNext()) {
-                Map currMap = (Map) iter.next();
-                synchronized (currMap) {
+            for(Iterator i = expireList.iterator(); i.hasNext(); ) {
+                Object guidMapImpl = i.next();
+                synchronized(guidMapImpl) {
+                    Map currMap = (Map)PrivilegedAccessor.invokeMethod(guidMapImpl, "getMap", null);
                     assertTrue(currMap.isEmpty());
                 }
             }
@@ -524,9 +521,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         
         // close the leaf and make sure the MC purges it's guidmap
         LEAF[0].close();
-        ROUTER_SERVICE.query(GUID.makeGuid(), "stanford");
         Thread.sleep(2000);
-        assertTrue(expireList.isEmpty());       
+        assertTrue(expireList.toString(), expireList.isEmpty());       
     }
  
    

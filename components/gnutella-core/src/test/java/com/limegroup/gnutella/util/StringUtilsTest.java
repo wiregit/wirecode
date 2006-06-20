@@ -10,6 +10,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -289,23 +290,23 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("reallylongfilenamethatisgoingt", query);
         // verify that we can create local & network queries out of the query string
         qr = QueryRequest.createQuery(query);
-        QueryRequest.createMulticastQuery(qr);
+        QueryRequest.createMulticastQuery(GUID.makeGuid(), qr);
         
         //such query will fit any 2 out of 3 words in it.
         query = StringUtils.createQueryString("short one, reallylongotherfilename");
         assertEquals(2,query.split(" ").length);
         qr = QueryRequest.createQuery(query);
-        QueryRequest.createMulticastQuery(qr);
+        QueryRequest.createMulticastQuery(GUID.makeGuid(), qr);
         
         query = StringUtils.createQueryString("longfirstthingthatwontfitatall, but short others");
         containsAll("but short others", query);
         qr = QueryRequest.createQuery(query);
-        QueryRequest.createMulticastQuery(qr);
+        QueryRequest.createMulticastQuery(GUID.makeGuid(), qr);
         
         query = StringUtils.createQueryString("(5).jpg");
         assertEquals("5 jpg", query);
         qr = QueryRequest.createQuery(query);
-        QueryRequest.createMulticastQuery(qr);
+        QueryRequest.createMulticastQuery(GUID.makeGuid(), qr);
 		
 		// test with allow numbers switched on
 		assertEquals("500 jpg", StringUtils.createQueryString("500 jpg", true));
