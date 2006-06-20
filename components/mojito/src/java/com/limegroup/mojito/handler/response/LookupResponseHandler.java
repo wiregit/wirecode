@@ -169,12 +169,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         startTime = System.currentTimeMillis();
         
         // Get the first round of alpha nodes and send them requests
-        List alphaList = toQuery.select(lookup, KademliaSettings.LOOKUP_PARAMETER.getValue());
+        List<ContactNode> alphaList = toQuery.select(lookup, KademliaSettings.LOOKUP_PARAMETER.getValue());
         
         int sent = 0;
-        for(Iterator it = alphaList.iterator(); it.hasNext(); ) {
-            ContactNode node = (ContactNode)it.next();
-            
+        for(ContactNode node : alphaList) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Sending " + node + " a Find request for " + lookup);
             }
@@ -216,7 +214,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             activeSearches--;
             
             ContactNode node = message.getContactNode();
-            int hop = ((Integer)hopMap.get(node.getNodeID())).intValue();
+            int hop = hopMap.get(node.getNodeID()).intValue();
             
             if (message instanceof FindValueResponse) {
                 if (isValueLookup()) {
@@ -258,7 +256,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             }
         
             
-            int hop = ((Integer)hopMap.get(nodeId)).intValue();
+            int hop = hopMap.get(nodeId).intValue();
             lookupStep(hop);
             
             if (activeSearches == 0) {
@@ -340,9 +338,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             return;
         }
         
-        Collection nodes = response.getNodes();
-        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-            ContactNode node = (ContactNode)it.next();
+        Collection<ContactNode> nodes = response.getNodes();
+        for(ContactNode node : nodes) {
             
             if (!NetworkUtils.isValidSocketAddress(node.getSocketAddress())) {
                 /*if (response.getNodeID().equals(node.getNodeID())) {
@@ -450,10 +447,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         
         int numLookups = KademliaSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
         if (numLookups > 0) {
-            List toQueryList = toQuery.select(lookup, numLookups);
-            for(Iterator it = toQueryList.iterator(); it.hasNext(); ) {
-                ContactNode node = (ContactNode)it.next();
-                
+            List<ContactNode> toQueryList = toQuery.select(lookup, numLookups);
+            for (ContactNode node : toQueryList) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Sending " + node + " a find request for " + lookup);
                 }

@@ -20,6 +20,7 @@
 package com.limegroup.mojito;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -27,6 +28,8 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Random;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -442,47 +445,142 @@ public class KUID implements Serializable, Comparable {
     }
     
     /**
-     * Creates and returns a random Node ID. The SocketAddress
-     * can be null and it's used to just add some extra randomness.
+     * Creates and returns a random Node ID that is hopefully
+     * globally unique.
      */
     public static KUID createRandomNodeID() {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA1");
-            //SecureRandom generator = SecureRandom.getInstance("SHA1PRNG");
-            
-            /*Properties props = System.getProperties();
-            for(Enumeration e = props.keys(); e.hasMoreElements(); ) {
-                String key = (String)e.nextElement();
-                String value = (String)props.get(key);
-                
-                md.update(key.getBytes("UTF-8"));
-                md.update(value.getBytes("UTF-8"));
-            }*/
-            
-            byte[] random = new byte[Math.max(1, GENERATOR.nextInt(256))];
-            for(int i = Math.max(1, GENERATOR.nextInt(32)); i >= 0; i--) {
+        
+        /*
+         * Random Numbers.
+         */
+        MessageDigestInput randomNumbers = new MessageDigestInput() {
+            public void update(MessageDigest md) {
+                byte[] random = new byte[1024];
                 GENERATOR.nextBytes(random);
                 md.update(random);
             }
+        };
+        
+        /*
+         * System Properties. Many of them are not unique but
+         * properties like user.name, user.home or os.arch will
+         * add some randomness.
+         */
+        MessageDigestInput properties = new MessageDigestInput() {
+            public void update(MessageDigest md) {
+                try {
+                    Properties props = System.getProperties();
+                    for(Enumeration e = props.keys(); e.hasMoreElements(); ) {
+                        String key = (String)e.nextElement();
+                        String value = (String)props.get(key);
+                        
+                        md.update(key.getBytes("UTF-8"));
+                        md.update(value.getBytes("UTF-8"));
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+        
+        /*
+         * System time in millis (GMT). Many computer clocks
+         * are off. Should be a good source for randomness.
+         */
+        MessageDigestInput millis = new MessageDigestInput() {
+            public void update(MessageDigest md) {
+                long millis = System.currentTimeMillis();
+                md.update((byte)((millis >> 56L) & 0xFFL));
+                md.update((byte)((millis >> 48L) & 0xFFL));
+                md.update((byte)((millis >> 40L) & 0xFFL));
+                md.update((byte)((millis >> 32L) & 0xFFL));
+                md.update((byte)((millis >> 24L) & 0xFFL));
+                md.update((byte)((millis >> 16L) & 0xFFL));
+                md.update((byte)((millis >>  8L) & 0xFFL));
+                md.update((byte)((millis       ) & 0xFFL));
+            }
+        };
+        
+        /*
+         * Our obfuscation pad. 4 random bytes!
+         */
+        MessageDigestInput randomPad = new MessageDigestInput() {
+            public void update(MessageDigest md) {
+                md.update(RANDOM_PAD);
+            }
+        };
+        
+        /*
+         * VM/machine dependent pseudo time.
+         */
+        MessageDigestInput nanos = new MessageDigestInput() {
+            public void update(MessageDigest md) {
+                long nanos = System.nanoTime();
+                md.update((byte)((nanos >> 56L) & 0xFFL));
+                md.update((byte)((nanos >> 48L) & 0xFFL));
+                md.update((byte)((nanos >> 40L) & 0xFFL));
+                md.update((byte)((nanos >> 32L) & 0xFFL));
+                md.update((byte)((nanos >> 24L) & 0xFFL));
+                md.update((byte)((nanos >> 16L) & 0xFFL));
+                md.update((byte)((nanos >>  8L) & 0xFFL));
+                md.update((byte)((nanos       ) & 0xFFL));
+            }
+        };
+        
+        /*
+         * Sort the MessageDigestInput(s) by their random
+         * index (i.e. shuffle the array).
+         */
+        MessageDigestInput[] input = { 
+                properties, 
+                randomNumbers, 
+                millis, 
+                randomPad, 
+                nanos
+        };
+        
+        Arrays.sort(input);
+        
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
             
-            long time = System.currentTimeMillis();
-            md.update((byte)((time >> 56L) & 0xFFL));
-            md.update((byte)((time >> 48L) & 0xFFL));
-            md.update((byte)((time >> 40L) & 0xFFL));
-            md.update((byte)((time >> 32L) & 0xFFL));
-            md.update((byte)((time >> 24L) & 0xFFL));
-            md.update((byte)((time >> 16L) & 0xFFL));
-            md.update((byte)((time >>  8L) & 0xFFL));
-            md.update((byte)((time       ) & 0xFFL));
-            
-            md.update(RANDOM_PAD);
+            // Get the SHA1...
+            for(MessageDigestInput mdi : input) {
+                mdi.update(md);
+                
+                // Hash also the identity hash code
+                int hashCode = System.identityHashCode(mdi);
+                md.update((byte)((hashCode >> 24) & 0xFFL));
+                md.update((byte)((hashCode >> 16) & 0xFFL));
+                md.update((byte)((hashCode >>  8) & 0xFFL));
+                md.update((byte)((hashCode      ) & 0xFFL));
+                
+                // and the random index
+                md.update((byte)((mdi.rnd >> 24) & 0xFFL));
+                md.update((byte)((mdi.rnd >> 16) & 0xFFL));
+                md.update((byte)((mdi.rnd >>  8) & 0xFFL));
+                md.update((byte)((mdi.rnd      ) & 0xFFL));
+            }
             
             return createNodeID(md.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
-        }/* catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }*/
+        }
+    }
+    
+    /**
+     * See KUID.createRandomNodeID()
+     */
+    private abstract static class MessageDigestInput 
+            implements Comparable<MessageDigestInput> {
+        
+        private int rnd = GENERATOR.nextInt();
+        
+        public abstract void update(MessageDigest md);
+        
+        public int compareTo(MessageDigestInput o) {
+            return rnd - o.rnd;
+        }
     }
     
     /**

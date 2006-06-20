@@ -97,7 +97,7 @@ public final class KeyValueCollection implements Collection<KeyValue> {
         return keyValues.toArray();
     }
 
-    public Object[] toArray(Object[] a) {
+    public <T> T[] toArray(T[] a) {
         return keyValues.toArray(a);
     }
     
