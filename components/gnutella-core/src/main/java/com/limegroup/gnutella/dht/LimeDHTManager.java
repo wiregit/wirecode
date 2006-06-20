@@ -3,12 +3,14 @@ package com.limegroup.gnutella.dht;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
@@ -52,6 +54,7 @@ public class LimeDHTManager implements LifecycleListener {
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
     
+    /** The instance of the DHT */
     private MojitoDHT dht;
 
     private volatile boolean running = false;
@@ -65,12 +68,13 @@ public class LimeDHTManager implements LifecycleListener {
     /**
      * A list of DHT bootstrap hosts comming from the Gnutella network
      */
-    private volatile LinkedList bootstrapHosts = new LinkedList();
+    private volatile LinkedList<SocketAddress> bootstrapHosts 
+            = new LinkedList<SocketAddress>();
     
     /**
      * A list of bootstrap hosts used in the last bootstrap attempt
      */
-    private ArrayList previousBootstrapHosts;
+    private List<SocketAddress> previousBootstrapHosts;
     
     
     public LimeDHTManager() {
@@ -117,9 +121,11 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        if(DHTSettings.DISABLE_DHT_NETWORK.getValue() || DHTSettings.DISABLE_DHT_USER.getValue()) 
+        if(DHTSettings.DISABLE_DHT_NETWORK.getValue() 
+                || DHTSettings.DISABLE_DHT_USER.getValue()) {
             return;
-
+        }
+        
         if (!DHTSettings.DHT_CAPABLE.getValue() 
                 && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
             
@@ -129,7 +135,9 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        if(DHTSettings.NEED_STABLE_GNUTELLA.getValue() && !RouterService.isStable()) {
+        if (DHTSettings.NEED_STABLE_GNUTELLA.getValue() 
+                && !RouterService.isStable()) {
+            
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not connected to the Gnutella network");
             }
@@ -176,8 +184,9 @@ public class LimeDHTManager implements LifecycleListener {
      */
     private void bootstrap() {
         synchronized (bootstrapHosts) {
-            previousBootstrapHosts = new ArrayList(bootstrapHosts);
+            previousBootstrapHosts = new ArrayList<SocketAddress>(bootstrapHosts);
         }
+        
         try {
             dht.bootstrap(previousBootstrapHosts, new BootstrapListener() {
                 public void noBootstrapHost() {
@@ -203,7 +212,7 @@ public class LimeDHTManager implements LifecycleListener {
      * Shuts down the dht and persists it
      */
     public synchronized void shutdown(){
-        /*if (!running) {
+        if (!running) {
             return;
         }
         
@@ -220,7 +229,7 @@ public class LimeDHTManager implements LifecycleListener {
             out.close();
         } catch (IOException err) {
             LOG.error("IOException", err);
-        }*/
+        }
     }
     
     /**
@@ -236,10 +245,12 @@ public class LimeDHTManager implements LifecycleListener {
             if(bootstrapHosts.size() > 10) {
                 bootstrapHosts.removeLast();
             }
+            
             //always put/replace the host to the head of the list
             bootstrapHosts.remove(hostAddress);
             bootstrapHosts.addFirst(hostAddress);
         }
+        
         if(waiting) {
             waiting = false;
             bootstrap();
@@ -281,8 +292,6 @@ public class LimeDHTManager implements LifecycleListener {
             if(running) {
                 shutdown();
             }
-        } else {
-            return;
         }
     }
     
@@ -291,7 +300,10 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public void addressChanged() {
-        if(!running) return;
+        if(!running) {
+            return;
+        }
+        
         dht.stop();
         init(false);
     }

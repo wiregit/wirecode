@@ -436,7 +436,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             if (best == null || worst.isCloser(best, lookup)) {
                 if (activeSearches == 0) {
                     if (LOG.isTraceEnabled()) {
-                        ContactNode bestResponse = responses.select(lookup).getContactNode();
+                        ContactNode bestResponse = responses.select(lookup).getKey();
                         LOG.trace("Lookup for " + lookup + " terminates after "
                                 + hop + " hops, " + totalTime + "ms and " + queried.size() 
                                 + " queried Nodes with " + bestResponse + " as best match");
@@ -551,7 +551,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         responses.put(entry.getNodeID(), entry);
         
         if (responses.size() > resultSetSize) {
-            ContactNode worst = responses.select(furthest).getContactNode();
+            ContactNode worst = responses.select(furthest).getKey();
             responses.remove(worst.getNodeID());
             //hopMap.remove(node.getNodeID()); // TODO
         }
@@ -590,7 +590,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
      * 
      * This class is immutable!
      */
-    public static class ContactNodeEntry implements Map.Entry {
+    private static class ContactNodeEntry 
+            implements Map.Entry<ContactNode, QueryKey> {
         
         private ContactNode node;
         private QueryKey queryKey;
@@ -608,32 +609,28 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             this.node = node;
         }
         
-        public ContactNode getContactNode() {
+        public ContactNode getKey() {
             return node;
         }
         
-        public Object getKey() {
-            return getContactNode();
-        }
-        
         private KUID getNodeID() {
-            return getContactNode().getNodeID();
+            return node.getNodeID();
         }
         
         public QueryKey getQueryKey() {
             return queryKey;
         }
         
-        public Object getValue() {
-            return getQueryKey();
+        public QueryKey getValue() {
+            return queryKey;
         }
         
-        public Object setValue(Object o) {
+        public QueryKey setValue(QueryKey qk) {
             throw new UnsupportedOperationException("This is an immutable class");
         }
         
         public String toString() {
-            return node.toString() + ", queryKey: " + queryKey;
+            return node + ", queryKey: " + queryKey;
         }
     }
 }

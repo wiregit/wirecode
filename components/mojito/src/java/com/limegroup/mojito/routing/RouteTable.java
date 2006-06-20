@@ -25,7 +25,7 @@ import java.util.List;
 import com.limegroup.mojito.BucketNode;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Context.BootstrapManager;
+import com.limegroup.mojito.handler.BootstrapManager;
 
 
 /**

@@ -27,15 +27,9 @@ import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
@@ -47,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.KeyValuePublisher;
@@ -55,18 +48,14 @@ import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.handler.response.LookupResponseHandler;
-import com.limegroup.mojito.handler.response.PingResponseHandler;
-import com.limegroup.mojito.handler.response.StoreResponseHandler;
-import com.limegroup.mojito.handler.response.LookupResponseHandler.ContactNodeEntry;
+import com.limegroup.mojito.handler.BootstrapManager;
+import com.limegroup.mojito.handler.LookupManager;
+import com.limegroup.mojito.handler.PingManager;
+import com.limegroup.mojito.handler.StoreManager;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
-import com.limegroup.mojito.messages.PingRequest;
-import com.limegroup.mojito.messages.PingResponse;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
@@ -100,8 +89,8 @@ public class Context {
     private volatile KeyPair keyPair;
     
     private Database database;
-    private RouteTable routeTable;
-    private MessageDispatcher messageDispatcher;
+    RouteTable routeTable;
+    MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
     private KeyValuePublisher publisher;
     private RandomBucketRefresher bucketRefresher;
@@ -114,7 +103,7 @@ public class Context {
     
     private DHTStats dhtStats = null;
     
-    private final NetworkStatisticContainer networkStats;
+    final NetworkStatisticContainer networkStats;
     private final GlobalLookupStatisticContainer globalLookupStats;
     private final DatabaseStatisticContainer databaseStats;
     
@@ -163,8 +152,8 @@ public class Context {
 
         bucketRefresher = new RandomBucketRefresher(this);
         
-        pingManager = new PingManager();
-        lookupManager = new LookupManager();
+        pingManager = new PingManager(this);
+        lookupManager = new LookupManager(this);
         
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
@@ -616,7 +605,7 @@ public class Context {
         }
         
         setBootstrapping(true);
-        new BootstrapManager().bootstrap(listener);
+        new BootstrapManager(this).bootstrap(listener);
     }
     
     /**
@@ -632,12 +621,12 @@ public class Context {
         }
         
         setBootstrapping(true);
-        new BootstrapManager().bootstrap(hostList, listener);
+        new BootstrapManager(this).bootstrap(hostList, listener);
     }
     
     /** Stores a given KeyValue */
     public void store(KeyValue keyValue, StoreListener listener) throws IOException {
-        new StoreManager().store(keyValue, listener);
+        new StoreManager(this).store(keyValue, listener);
     }
     
     /**
@@ -772,585 +761,14 @@ public class Context {
     }
     
     /**
-     * The BootstrapManager performs a lookup for the local Node ID
-     * which is essentially the bootstrap process.
-     */
-    public class BootstrapManager implements PingListener, LookupListener {
-        
-        private long startTime = 0L;
-        
-        private boolean phaseTwo = false;
-        private boolean foundNewNodes = false;
-        
-        private BootstrapListener listener;
-        
-        private List buckets = Collections.EMPTY_LIST;
-        
-        /** 
-         * An Iterator of SocketAddresses or ContactNodes depending on
-         * the initialization.
-         */
-        private Iterator contacts;
-        
-        private int failures;
-        
-        private BootstrapManager() {  
-        }
-        
-        private long time() {
-            return System.currentTimeMillis() - startTime;
-        }
-        
-        /**
-         * Tries to bootstrap from the local Route Table.
-         */
-        public void bootstrap(BootstrapListener listener) throws IOException {
-            this.listener = listener;
-            this.contacts = routeTable.getAllNodesMRS().iterator();
-            
-            if (contacts.hasNext()) {
-                startTime = System.currentTimeMillis();
-                ping((ContactNode)contacts.next(), this);
-            } else {
-                fireNoBootstrapHost();
-            }
-        }
-        
-        /**
-         * Tries to bootstrap from a List of Hosts.
-         */
-        public void bootstrap(List<? extends SocketAddress> hostList, 
-                BootstrapListener listener) throws IOException {
-            
-            this.listener = listener;
-            this.contacts = hostList.iterator();
-            
-            if (contacts.hasNext()) {
-                startTime = System.currentTimeMillis();
-                ping((SocketAddress)contacts.next(), this);
-            } else {
-                fireNoBootstrapHost();
-            }
-        }
-        
-        public void response(ResponseMessage response, long time) {
-            if (response instanceof PingResponse) {
-                pingSucceeded((PingResponse)response);
-            }
-        }
-
-        /**
-         * Initialized the lookup process after a successfull
-         * ping request
-         */
-        private void pingSucceeded(PingResponse response) {
-            try {
-                lookup(getLocalNodeID(), this);
-            } catch (IOException err) {
-                LOG.error("Bootstrap lookup failed: ", err);
-                
-                firePhaseOneFinished();
-                firePhaseTwoFinished();
-            }
-        }
-        
-        public void timeout(KUID nodeId, SocketAddress address, 
-                RequestMessage request, long time) {
-            if (request instanceof PingRequest) {
-                try {
-                    if (!pingFailed(address)) {
-                        fireNoBootstrapHost();
-                    }
-                } catch (IOException err) {
-                    LOG.error(err);
-                    fireNoBootstrapHost();
-                }
-            }
-        }
-        
-        /**
-         * Tries the next SocketAddress or ContactNode. Returns false
-         * if we should give up.
-         */
-        private boolean pingFailed(SocketAddress address) throws IOException {
-            networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Initial bootstrap ping timeout, failure " + failures);
-            }
-            
-            failures++;
-            if (failures >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failures + " tries");
-                }
-                
-                return false;
-            }
-            
-            // Possible switch from Iterator of SocketAddresses to an
-            // Iterator of ContactNodes (but not vice versa).
-            if (contacts == null || !contacts.hasNext()) {
-                contacts = routeTable.getAllNodesMRS().iterator();
-            }
-            
-            while(contacts.hasNext()) {
-                Object obj = contacts.next();
-                
-                if (obj instanceof SocketAddress) {
-                    SocketAddress addr = (SocketAddress)obj;
-                    ping(addr, this);
-                    return true;
-                    
-                } else if (obj instanceof ContactNode) {
-                    ContactNode node = (ContactNode)obj;
-                    //do not send to ourselve or the node which just timed out
-                    if (!node.getNodeID().equals(getLocalNodeID()) 
-                            && !node.getSocketAddress().equals(address)) {
-                        
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Retrying bootstrap ping with node: " + node);
-                        }
-                        
-                        ping(node, this);
-                        return true;
-                    }
-                } else {
-                    
-                    if (LOG.isFatalEnabled()) {
-                        if (obj != null) {
-                            LOG.fatal("Expected either a SocketAddress or ContactNode but got: " + obj + "/" + obj.getClass());
-                        } else {
-                            LOG.fatal("Expected either a SocketAddress or ContactNode but got: " + obj);
-                        }
-                    }
-                }
-            }
-            
-            return false;
-        }
-        
-        public void found(KUID lookup, Collection c, long time) {
-        }
-        
-        public void finish(KUID lookup, Collection c, long time) {
-            if (!phaseTwo) {
-                phaseTwo = true;
-                firePhaseOneFinished();
-                
-                try {
-                    routeTable.refreshBuckets(true, this);
-                } catch (IOException err) {
-                    LOG.error("Beginning second phase failed: ", err);
-                    firePhaseTwoFinished();
-                }
-            } else {
-                if (!c.isEmpty()) {
-                    foundNewNodes = true;
-                }
-                
-                buckets.remove(lookup);
-                if (buckets.isEmpty()) {
-                    firePhaseTwoFinished();
-                }
-            }
-        }
-
-        public void setBuckets(List buckets) {
-            this.buckets = buckets;
-            
-            if (buckets.isEmpty()) {
-                firePhaseTwoFinished();
-            }
-        }
-        
-        private void firePhaseOneFinished() {
-            if (listener != null) {
-                final long time = time();
-                
-                fireEvent(new Runnable() {
-                    public void run() {
-                        listener.phaseOneComplete(time);
-                    }
-                });
-            }
-        }
-        
-        private void firePhaseTwoFinished() {
-            setBootstrapping(false);
-            
-            if (listener != null) {
-                final long time = time();
-                
-                fireEvent(new Runnable() {
-                    public void run() {
-                        listener.phaseTwoComplete(foundNewNodes, time);
-                    }
-                });
-            }
-        }
-        
-        private void fireNoBootstrapHost() {
-            if (listener != null) {
-                fireEvent(new Runnable() {
-                    public void run() {
-                        listener.noBootstrapHost();
-                    }
-                });
-            }
-        }
-    }
-    
-    /**
-     * The StoreManager performs a lookup for the Value ID we're
-     * going to store and stores the KeyValue at the k closest 
-     * Nodes of the result set.
-     */
-    private class StoreManager implements LookupListener {
-        
-        private KeyValue keyValue;
-        private StoreListener listener;
-        
-        private StoreManager() {
-        }
-        
-        private void store(KeyValue keyValue, 
-                StoreListener listener) throws IOException {
-            this.keyValue = keyValue;
-            this.listener = listener;
-            
-            KUID nodeId = keyValue.getKey().toNodeID();
-            lookup(nodeId, this);
-        }
-        
-        public void response(ResponseMessage response, long time) {
-        }
-
-        public void timeout(KUID nodeId, SocketAddress address, 
-                RequestMessage request, long time) {
-        }
-        
-        public void found(KUID lookup, Collection c, long time) {
-            
-        }
-        
-        public void finish(KUID lookup, Collection c, long time) {
-            // List of ContactNodes where we stored the KeyValues.
-            final List<ContactNode> storeTargets = new ArrayList<ContactNode>(c.size());
-            
-            for(Iterator it = c.iterator(); it.hasNext(); ) {
-                ContactNodeEntry entry = (ContactNodeEntry)it.next();
-                ContactNode node = entry.getContactNode();
-                QueryKey queryKey = entry.getQueryKey();
-                
-                if (isLocalNodeID(node.getNodeID())) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Skipping local Node as KeyValue is already stored at this Node");
-                    }
-                    storeTargets.add(node);
-                    continue;
-                }
-                
-                if (queryKey == null) {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error("Cannot store " + keyValue + " at " 
-                                + node + " because we have no QueryKey for it");
-                    }
-                    continue;
-                }
-                
-                try {
-                    new StoreResponseHandler(Context.this, queryKey, keyValue).store(node);
-                    storeTargets.add(node);
-                } catch (IOException err) {
-                    LOG.error("Failed to store KeyValue", err);
-                }
-            }
-            
-            keyValue.setNumLocs(storeTargets.size());
-            
-            if (listener != null) {
-                fireEvent(new Runnable() {
-                    public void run() {
-                        listener.store(keyValue, storeTargets);
-                    }
-                });
-            }
-        }
-    }
-    
-    /**
-     * The PingManager takes care of concurrent Pings and makes sure
-     * a single Node cannot be pinged multiple times.
-     */
-    private class PingManager implements PingListener {
-        
-        private Map<SocketAddress, PingResponseHandler> handlerMap 
-            = new HashMap<SocketAddress, PingResponseHandler>();
-        
-        private List<PingListener> listeners = new ArrayList<PingListener>();
-        
-        private PingManager() {
-        }
-        
-        public void init() {
-            synchronized (handlerMap) {
-                handlerMap.clear();
-            }
-        }
-        
-        public void addPingListener(PingListener listener) {
-            synchronized (listeners) {
-                listeners.add(listener);
-            }
-        }
-        
-        public void removePingListener(PingListener listener) {
-            synchronized (listeners) {
-                listeners.remove(listener);
-            }
-        }
-
-        public PingListener[] getPingListeners() {
-            synchronized (listeners) {
-                return listeners.toArray(new PingListener[0]);
-            }
-        }
-        
-        public void ping(SocketAddress address) throws IOException {
-            ping(null, address, null);
-        }
-
-        public void ping(SocketAddress address, PingListener listener) throws IOException {
-            ping(null, address, listener);
-        }
-
-        public void ping(ContactNode node) throws IOException {
-            ping(node.getNodeID(), node.getSocketAddress(), null);
-        }
-        
-        public void ping(ContactNode node, PingListener listener) throws IOException {
-            ping(node.getNodeID(), node.getSocketAddress(), listener);
-        }
-
-        public void ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
-            synchronized (handlerMap) {
-                PingResponseHandler responseHandler = handlerMap.get(address);
-                if (responseHandler == null) {
-                    
-                    responseHandler = new PingResponseHandler(Context.this);
-                    responseHandler.addPingListener(this);
-                    
-                    if (listener != null) {
-                        responseHandler.addPingListener(listener);
-                    }
-                    
-                    PingRequest request = getMessageHelper().createPingRequest(address);
-                    messageDispatcher.send(nodeId, address, request, responseHandler);
-
-                    handlerMap.put(address, responseHandler);
-                    networkStats.PINGS_SENT.incrementStat();
-                    
-                } else if (listener != null) {
-                    responseHandler.addPingListener(listener);
-                }
-            }
-        }
-        
-        public void response(final ResponseMessage response, final long time) {
-            networkStats.PINGS_OK.incrementStat();
-            
-            synchronized (handlerMap) {
-                handlerMap.remove(response.getContactNode().getSocketAddress());
-                fireEvent(new Runnable() {
-                    public void run() {
-                        synchronized (listeners) {
-                            for(PingListener listener : listeners) {
-                                listener.response(response, time);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        public void timeout(final KUID nodeId, final SocketAddress address, RequestMessage request, final long time) {            
-            networkStats.PINGS_FAILED.incrementStat();
-            
-            synchronized (handlerMap) {
-                handlerMap.remove(address);
-                fireEvent(new Runnable() {
-                    public void run() {
-                        synchronized (listeners) {
-                            for(PingListener listener : listeners) {
-                                listener.timeout(nodeId, address, null, time);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        public boolean cancel(ContactNode node) {
-            return cancel(node.getSocketAddress());
-        }
-        
-        public boolean cancel(SocketAddress address) {
-            synchronized (handlerMap) {
-                PingResponseHandler handler = handlerMap.remove(address);
-                if (handler != null) {
-                    handler.stop();
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-    
-    /**
-     * The LookupManager takes care of multiple concurrent lookups
-     */
-    private class LookupManager implements LookupListener {
-        
-        private Map<KUID, LookupResponseHandler> handlerMap 
-            = new HashMap<KUID, LookupResponseHandler>();
-        
-        private List<LookupListener> listeners = new ArrayList<LookupListener>();
-        
-        private LookupManager() {
-            
-        }
-        
-        public void init() {
-            synchronized (handlerMap) {
-                handlerMap.clear();
-            }
-        }
-        
-        public void addLookupListener(LookupListener listener) {
-            synchronized (listeners) {
-                listeners.add(listener);
-            }
-        }
-        
-        public void removeLookupListener(LookupListener listener) {
-            synchronized (listeners) {
-                listeners.remove(listener);
-            }
-        }
-
-        public LookupListener[] getLookupListeners() {
-            synchronized (listeners) {
-                return listeners.toArray(new LookupListener[0]);
-            }
-        }
-        
-        public void lookup(KUID lookup) throws IOException {
-            lookup(lookup, null);
-        }
-        
-        public void lookup(KUID lookup, LookupListener listener) throws IOException {
-            if (!lookup.isNodeID() && !lookup.isValueID()) {
-                throw new IllegalArgumentException("Lookup ID must be either a NodeID or ValueID");
-            }
-            
-            synchronized (handlerMap) {
-                LookupResponseHandler handler = handlerMap.get(lookup);
-                if (handler == null) {
-                    handler = new LookupResponseHandler(lookup, Context.this);
-                    handler.addLookupListener(this);
-                    
-                    if (listener != null) {
-                        handler.addLookupListener(listener);
-                    }
-                    
-                    handler.start();
-                    handlerMap.put(lookup, handler);
-                    
-                } else if (listener != null) {
-                    handler.addLookupListener(listener);
-                }
-            }
-        }
-        
-        public boolean cancel(KUID lookup) {
-            synchronized (handlerMap) {
-                LookupResponseHandler handler = handlerMap.remove(lookup);
-                if (handler != null) {
-                    handler.stop();
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void response(final ResponseMessage response, final long time) {
-            synchronized (handlerMap) {
-                fireEvent(new Runnable() {
-                    public void run() {
-                        synchronized (listeners) {
-                            for(LookupListener listener : listeners) {
-                                listener.response(response, time);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        public void timeout(final KUID nodeId, final SocketAddress address, 
-                final RequestMessage request, final long time) {
-            synchronized (handlerMap) {
-                fireEvent(new Runnable() {
-                    public void run() {
-                        synchronized (listeners) {
-                            for(LookupListener listener : listeners) {
-                                listener.timeout(nodeId, address, request, time);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-        
-        public void found(final KUID lookup, final Collection c, final long time) {
-            synchronized (handlerMap) {
-                handlerMap.remove(lookup);
-                
-                fireEvent(new Runnable() {
-                    public void run() {
-                        synchronized (listeners) {
-                            for(LookupListener listener : listeners) {
-                                listener.found(lookup, c, time);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-        
-        public void finish(final KUID lookup, final Collection c, final long time) {
-            synchronized (handlerMap) {
-                handlerMap.remove(lookup);
-                
-                fireEvent(new Runnable() {
-                    public void run() {
-                        synchronized (listeners) {
-                            for(LookupListener listener : listeners) {
-                                listener.finish(lookup, c, time);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-    }
-    
-    /**
      * A default implementation of the ThreadFactory.
      */
     private class DefaultThreadFactory implements ThreadFactory {
+        
+        private volatile int num = 0;
+        
         public Thread newThread(Runnable r) {
-            return new Thread(r, getName());
+            return new Thread(r, getName()+"-"+(num++));
         }
     }
 }
