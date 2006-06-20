@@ -130,17 +130,20 @@ public class StandardMessageRouter extends MessageRouter {
         
         byte[] data = request.getSupportsCachedPongData();
         Collection hosts = Collections.EMPTY_LIST;
-        if(data != null) {
+        int numHosts = ConnectionSettings.NUM_RETURN_PONGS.getValue();
+        //TODO: DHT IPP and regular IPP mutually exclusive? For now, DHTIPP gets preference
+        if (request.requestsDHTIPP() && RouterService.isDHTNode()) {
+            hosts = RouterService.getLimeDHTManager().getDHTNodes(numHosts);
+        } else if(data != null){
             boolean isUltrapeer =
                 data.length >= 1 && 
-		        (data[0] & PingRequest.SCP_ULTRAPEER_OR_LEAF_MASK) ==
-		            PingRequest.SCP_ULTRAPEER;
+                (data[0] & PingRequest.SCP_ULTRAPEER_OR_LEAF_MASK) ==
+                    PingRequest.SCP_ULTRAPEER;
             hosts = RouterService.getPreferencedHosts(
                         isUltrapeer, 
-			            request.getLocale(),
-			            ConnectionSettings.NUM_RETURN_PONGS.getValue());
-        }        
-        
+                        request.getLocale(),
+                        numHosts);
+        }
         
         PingReply reply;
     	if (ipport != null)

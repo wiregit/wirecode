@@ -9,6 +9,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
@@ -22,9 +25,13 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.routing.RouteTable;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -76,6 +83,10 @@ public class LimeDHTManager implements LifecycleListener {
      */
     private List<SocketAddress> previousBootstrapHosts;
     
+    private boolean isActive = false;
+    
+    private final LimeDHTRoutingTable limeDHTRouteTable;
+    
     
     public LimeDHTManager() {
         
@@ -96,7 +107,7 @@ public class LimeDHTManager implements LifecycleListener {
         if (dht == null) {
             dht = new MojitoDHT("LimeMojitoDHT");
         }
-        
+        limeDHTRouteTable = (LimeDHTRoutingTable) dht.setRoutingTable(LimeDHTRoutingTable.class);
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
         dht.setThreadFactory(new ThreadFactory() {
             public Thread newThread(Runnable runnable) {
@@ -117,12 +128,13 @@ public class LimeDHTManager implements LifecycleListener {
      * @param forcePassive true to connect to the DHT in passive mode
      */
     public synchronized void init(boolean forcePassive) {
+        isActive = !forcePassive;
         if (running) {
             return;
         }
         
         if(DHTSettings.DISABLE_DHT_NETWORK.getValue() 
-                || DHTSettings.DISABLE_DHT_USER.getValue()) {
+                || DHTSettings.DISABLE_DHT_USER.getValue()) { 
             return;
         }
         
@@ -135,13 +147,14 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        if (DHTSettings.NEED_STABLE_GNUTELLA.getValue() 
+        if(DHTSettings.NEED_STABLE_GNUTELLA.getValue() 
                 && !RouterService.isStable()) {
             
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not connected to the Gnutella network");
             }
             return;
+            
         }
         
         if (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
@@ -211,7 +224,9 @@ public class LimeDHTManager implements LifecycleListener {
     /**
      * Shuts down the dht and persists it
      */
-    public synchronized void shutdown(){
+    public synchronized void shutdown(boolean force){
+        if(!force && DHTSettings.FORCE_DHT_CONNECT.getValue()) return;
+        
         if (!running) {
             return;
         }
@@ -263,8 +278,27 @@ public class LimeDHTManager implements LifecycleListener {
         }
     }
     
+    public void addLeafDHTNode(String host, int port) {
+        if(!running) return;
+        ContactNode dhtNode = null;
+        try {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Pinging node: " + host);
+            }
+            dhtNode = dht.ping(new InetSocketAddress(host, port));
+            System.out.println("node: "+dhtNode);
+        } catch (IOException ignored) {
+            LOG.error(ignored);
+        }
+        if(dhtNode!= null) limeDHTRouteTable.addLeafDHTNode(dhtNode);
+    }
+    
     public boolean isRunning() {
         return running;
+    }
+    
+    public boolean isActiveNode() {
+        return running & isActive;
     }
     
     public void setFirewalled(boolean firewalled) {
@@ -284,13 +318,13 @@ public class LimeDHTManager implements LifecycleListener {
                 //protect against change of state
                 if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
                         && RouterService.isSupernode()) {
-                    shutdown();
+                    shutdown(false);
                 }
                 return;
             }
         } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(running) {
-                shutdown();
+                shutdown(false);
             }
         }
     }
@@ -310,5 +344,43 @@ public class LimeDHTManager implements LifecycleListener {
     
     public int getVersion() {
         return dht.getVersion();
+    }
+    
+    public Collection<IpPort> getDHTNodes(int numNodes){
+        if(!running) return Collections.emptyList();
+        LinkedList<IpPort> ipps = new LinkedList<IpPort>();
+        Collection<ContactNode> nodes = limeDHTRouteTable.getMRSNodes(numNodes);
+        KUID localNode = dht.getLocalNodeID();
+        for(ContactNode cn : nodes) {
+            if(!isActive && cn.getNodeID().equals(localNode)) 
+            	continue;
+            ipps.add(new IpPortContactNode(cn));
+        }
+        return ipps;
+    }
+    
+    private class IpPortContactNode implements IpPort {
+        
+        private final InetAddress nodeAddress;
+        
+        private final int port;
+        
+        public IpPortContactNode(ContactNode node) {
+            InetSocketAddress addr = (InetSocketAddress) node.getSocketAddress();
+            this.nodeAddress = addr.getAddress();
+            this.port = addr.getPort();
+        }
+        
+        public String getAddress() {
+            return nodeAddress.getHostAddress();
+        }
+
+        public InetAddress getInetAddress() {
+            return nodeAddress;
+        }
+
+        public int getPort() {
+            return port;
+        }
     }
 }

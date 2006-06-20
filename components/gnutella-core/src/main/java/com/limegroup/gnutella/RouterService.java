@@ -956,7 +956,7 @@ public class RouterService {
             
             contentManager.shutdown();
  
-            dhtManager.shutdown();
+            dhtManager.shutdown(true);
             
             runShutdownItems();
             
@@ -1568,7 +1568,7 @@ public class RouterService {
     }
     
     /**
-     * Tells whether the node is connected to the DHT or not
+     * Tells whether this node is (actively or passively) connected to the DHT or not
      * @return true if connected to the DHT, false otherwise
      */
     public static boolean isDHTNode() {
@@ -1576,11 +1576,24 @@ public class RouterService {
             return dhtManager.isRunning();
         } else return false;
     }
+    
     /**
-	 * Tells wether this node is exclusively connected to the DHT
+     * Tells whether this node is *actively* connected to the DHT
+     */
+    public static boolean isActiveDHTNode() {
+        if(dhtManager != null)
+            return dhtManager.isActiveNode();
+        else return false;
+    }
+    
+    /**
+	 * Tells whether this node is exclusively connected to the DHT
 	 */
     public static boolean isExclusiveDHTNode() {
-        return (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && isDHTNode());
+        if(dhtManager != null)
+            return (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
+                    && dhtManager.isActiveNode());
+        else return false;
     }
 
 	/**
@@ -1655,7 +1668,8 @@ public class RouterService {
         if(callback != null)
             callback.handleAddressStateChanged();        
         
-        dhtManager.addressChanged();
+        if(dhtManager != null)
+            dhtManager.addressChanged();
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1812,7 +1826,7 @@ public class RouterService {
     }
     
     public static void shutdownDHT() {
-        dhtManager.shutdown();
+        dhtManager.shutdown(false);
     }
     
     public static boolean isStable() {

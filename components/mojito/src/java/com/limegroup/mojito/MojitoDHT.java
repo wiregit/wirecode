@@ -212,6 +212,10 @@ public class MojitoDHT {
         context.setMessageDispatcher(messageDispatcher);
     }
     
+    public RouteTable setRoutingTable(Class <? extends RouteTable> routeTable) {
+        return context.setRoutingTable(routeTable);
+    }
+    
     /**
      * This method will try to bootstrap off the given address.
      * This is a synchronous process.
@@ -289,41 +293,40 @@ public class MojitoDHT {
      * If the ping is successfull, the given host may be added to the routing table
      * 
      * @param dst
-     * @return
+     * @return The responding <tt>ContactNode</tt> or null if there was a timeout
      * @throws IOException
      */
-    public long ping(SocketAddress dst) throws IOException {
+    public ContactNode ping(SocketAddress dst) throws IOException {
         return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
     }
     
-    private long ping(SocketAddress dst, long timeout) throws IOException {
-        final long[] time = new long[]{ -1L };
+    private ContactNode ping(SocketAddress dst, long timeout) throws IOException {
+        final ContactNode[] node = new ContactNode[] {null};
         
-        synchronized (time) {
+        synchronized (node) {
             context.ping(dst, new PingListener() {
                 public void response(ResponseMessage response, long t) {
-                    time[0] = t;
-                    synchronized (time) {
-                        time.notify();
+                    node[0] = response.getContactNode();
+                    synchronized (node) {
+                        node.notify();
                     }
                 }
 
                 public void timeout(KUID nodeId, SocketAddress address, 
                         RequestMessage request, long t) {
-                    synchronized (time) {
-                        time.notify();
+                    synchronized (node) {
+                        node.notify();
                     }
                 }
             });
             
             try {
-                time.wait(timeout);
+                node.wait(timeout);
             } catch (InterruptedException err) {
                 LOG.error("InterruptedException", err);
             }
         }
-        
-        return time[0];
+        return node[0];
     }
     
     /**

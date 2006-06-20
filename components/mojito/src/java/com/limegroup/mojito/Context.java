@@ -212,6 +212,29 @@ public class Context {
         }
     }
     
+    /**
+     * Installs a custom RouteTable implementation. The
+     * passed Class must be a subclass of <tt>RouteTable</tt>.
+     */
+    public synchronized RouteTable setRoutingTable(Class<? extends RouteTable> clazz) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch RouteTable while DHT is running");
+        }
+
+        if (clazz == null) {
+            clazz = PatriciaRouteTable.class;
+        }
+        
+        try {
+            Constructor c = clazz.getConstructor(new Class[]{Context.class});
+            routeTable = (RouteTable)c.newInstance(new Object[]{this});
+            routeTable.add(localNode, false);
+            return routeTable;
+        } catch (Exception err) {
+            throw new RuntimeException(err);
+        }
+    }
+    
     public DHTStats getDHTStats() {
         return dhtStats;
     }

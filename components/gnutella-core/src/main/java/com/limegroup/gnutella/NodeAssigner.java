@@ -312,7 +312,7 @@ public class NodeAssigner {
      * @return true if we switched, false otherwise
      */
     private static boolean switchFromDHTNode() {
-        if(RouterService.isDHTNode() && DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
+        if(RouterService.isActiveDHTNode() && DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
             if(Math.random() < DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.getValue()){
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Randomly switching from DHT node to ultrapeer!");

@@ -135,7 +135,7 @@ public final class CapabilitiesVM extends VendorMessage {
                                         UpdateHandler.instance().getLatestId());
         hashSet.add(smp);
         
-        if(RouterService.isDHTNode()) {
+        if(RouterService.isActiveDHTNode()) {
             smp = new SupportedMessageBlock(LIME_DHT_CAPABLE_BYTES,
                                             RouterService.getLimeDHTManager().getVersion());
             hashSet.add(smp);
