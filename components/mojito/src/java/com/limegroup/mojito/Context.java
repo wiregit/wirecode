@@ -224,8 +224,8 @@ public class Context {
         }
         
         try {
-            Constructor c = clazz.getConstructor(new Class[]{Context.class});
-            routeTable = (RouteTable)c.newInstance(new Object[]{this});
+            Constructor c = clazz.getConstructor(Context.class);
+            routeTable = (RouteTable)c.newInstance(this);
             routeTable.add(localNode, false);
             return routeTable;
         } catch (Exception err) {

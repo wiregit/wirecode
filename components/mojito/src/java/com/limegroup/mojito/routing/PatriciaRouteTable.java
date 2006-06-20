@@ -94,7 +94,7 @@ public class PatriciaRouteTable implements RouteTable {
      * Avoids loops in this process.
      */
     // TODO: Maybe no longer required!
-    private Map loopLock = new FixedSizeHashMap(16);
+    private Map<KUID, SpoofChecker> loopLock = new FixedSizeHashMap<KUID, SpoofChecker>(16);
     
     /**
      * The DHT's context.
@@ -455,7 +455,7 @@ public class PatriciaRouteTable implements RouteTable {
     
     private void pingBucketLastRecentlySeenNode(BucketNode bucket) {
         
-        List bucketList = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
+        List<ContactNode> bucketList = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
         
         ContactNode leastRecentlySeen = 
             BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));

@@ -1,8 +1,5 @@
 package com.limegroup.gnutella.dht;
 
-import java.util.List;
-
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
@@ -21,7 +18,7 @@ public class LimeDHTRoutingTable extends PatriciaRouteTable {
      */
     public void addLeafDHTNode(ContactNode node) {
         node.setTimeStamp(Long.MAX_VALUE);
-        super.add(node,true);
+        add(node,true);
     }
     
     public void removeLeafDHTNode() {

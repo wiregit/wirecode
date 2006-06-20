@@ -323,19 +323,19 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         
         Entry<K, V> entry = rangeR(root.left, -1, key, length, root);
         if (entry.isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         
         // Found key's length-th bit differs from our
         // key which means it cannot be the prefix...
         if (isBitSet(key, length) != isBitSet(entry.key, length)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         
         // ... or there are less than 'length' equal bits
         int bitIndex = keyCreator.bitIndex(key, entry.key);
         if (bitIndex >= 0 && bitIndex < length) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         
         if (length < entry.bitIndex) {
@@ -346,7 +346,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
             if (keySelector.allow(entry.key, entry.value)) {
                 return Arrays.asList(entry.value);
             } else {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
         }
     }

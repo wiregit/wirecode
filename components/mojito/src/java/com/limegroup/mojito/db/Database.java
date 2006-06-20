@@ -138,7 +138,7 @@ public class Database {
             databaseStats.RETRIEVED_VALUES.incrementStat();
             return Collections.unmodifiableCollection(bag.values());
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public synchronized Collection<KeyValue> select(KUID key) {
@@ -147,7 +147,7 @@ public class Database {
             databaseStats.RETRIEVED_VALUES.incrementStat();
             return Collections.unmodifiableCollection(bag.values());
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public synchronized Set<KUID> getKeys() {

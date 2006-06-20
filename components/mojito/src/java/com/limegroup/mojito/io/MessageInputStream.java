@@ -31,11 +31,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.util.IntHashMap;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.messages.MessageFormatException;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.security.CryptoHelper;
 
@@ -44,14 +42,6 @@ import com.limegroup.mojito.security.CryptoHelper;
  * from a given InputStream
  */
 public class MessageInputStream extends DataInputStream {
-    
-    private static final IntHashMap<StoreStatus> storeStatusMap = new IntHashMap<StoreStatus>();
-    
-    static {
-        for(StoreStatus s : StoreStatus.values()) {
-            storeStatusMap.put(s.getStatus(), s);
-        }
-    }
     
     public MessageInputStream(InputStream in) {
         super(in);
@@ -96,7 +86,7 @@ public class MessageInputStream extends DataInputStream {
     public List<KeyValue> readKeyValues() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         
         KeyValue[] values = new KeyValue[size];
@@ -139,7 +129,7 @@ public class MessageInputStream extends DataInputStream {
     public List<ContactNode> readContactNodes() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         
         ContactNode[] nodes = new ContactNode[size];
@@ -185,11 +175,6 @@ public class MessageInputStream extends DataInputStream {
     }
     
     public StoreStatus readStoreStatus() throws IOException {
-        int status = readUnsignedByte();
-        StoreStatus s = storeStatusMap.get(status);
-        if (s != null) {
-            return s;
-        }
-        throw new MessageFormatException("Unknown StoreStatus: " + s);
+        return StoreStatus.valueOf( readUnsignedByte() );
     }
 }

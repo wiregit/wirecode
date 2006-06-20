@@ -11,7 +11,6 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
@@ -31,7 +30,6 @@ import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.routing.RouteTable;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -107,6 +105,7 @@ public class LimeDHTManager implements LifecycleListener {
         if (dht == null) {
             dht = new MojitoDHT("LimeMojitoDHT");
         }
+        
         limeDHTRouteTable = (LimeDHTRoutingTable) dht.setRoutingTable(LimeDHTRoutingTable.class);
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
         dht.setThreadFactory(new ThreadFactory() {
@@ -225,7 +224,9 @@ public class LimeDHTManager implements LifecycleListener {
      * Shuts down the dht and persists it
      */
     public synchronized void shutdown(boolean force){
-        if(!force && DHTSettings.FORCE_DHT_CONNECT.getValue()) return;
+        if(!force && DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+            return;
+        }
         
         if (!running) {
             return;
@@ -290,7 +291,10 @@ public class LimeDHTManager implements LifecycleListener {
         } catch (IOException ignored) {
             LOG.error(ignored);
         }
-        if(dhtNode!= null) limeDHTRouteTable.addLeafDHTNode(dhtNode);
+        
+        if(dhtNode!= null) {
+            limeDHTRouteTable.addLeafDHTNode(dhtNode);
+        }
     }
     
     public boolean isRunning() {
@@ -347,13 +351,18 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public Collection<IpPort> getDHTNodes(int numNodes){
-        if(!running) return Collections.emptyList();
-        LinkedList<IpPort> ipps = new LinkedList<IpPort>();
+        if(!running) {
+            return Collections.emptyList();
+        }
+        
+        List<IpPort> ipps = new ArrayList<IpPort>();
         Collection<ContactNode> nodes = limeDHTRouteTable.getMRSNodes(numNodes);
         KUID localNode = dht.getLocalNodeID();
         for(ContactNode cn : nodes) {
-            if(!isActive && cn.getNodeID().equals(localNode)) 
-            	continue;
+            if(!isActive && cn.getNodeID().equals(localNode)) {
+                continue;
+            }
+            
             ipps.add(new IpPortContactNode(cn));
         }
         return ipps;

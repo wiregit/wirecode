@@ -212,7 +212,7 @@ public class MojitoDHT {
         context.setMessageDispatcher(messageDispatcher);
     }
     
-    public RouteTable setRoutingTable(Class <? extends RouteTable> routeTable) {
+    public RouteTable setRoutingTable(Class<? extends RouteTable> routeTable) {
         return context.setRoutingTable(routeTable);
     }
     

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +69,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     private boolean running = false;
     
+    private volatile ScheduledFuture future;
+    
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
         
@@ -90,15 +93,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         messageRouter.setUDPMessageHandler(FindValueResponseImpl.class, this);
         messageRouter.setUDPMessageHandler(StatsRequestImpl.class, this);
         messageRouter.setUDPMessageHandler(StatsResponseImpl.class, this);
-        
-        // Install cleanup task
-        context.scheduleAtFixedRate(new Runnable() {
-            public void run() {
-                if (isRunning()) {
-                    handleClenup();
-                }
-            }
-        }, CLEANUP, CLEANUP);
     }
 
     protected boolean allow(DHTMessage message) {
@@ -116,6 +110,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void stop() {
         running = false;
         processingQueue.clear();
+        stopCleanupTask();
+        
         clear();
     }
 
@@ -186,5 +182,26 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     // This is not running as a Thread!
     public void run() {
         running = true;
+        startCleanupTask();
+    }
+    
+    private synchronized void startCleanupTask() {
+        // Install cleanup task
+        if (future == null) {
+            future = context.scheduleAtFixedRate(new Runnable() {
+                public void run() {
+                    if (isRunning()) {
+                        handleClenup();
+                    }
+                }
+            }, CLEANUP, CLEANUP);
+        }
+    }
+    
+    private synchronized void stopCleanupTask() {
+        if (future != null) {
+            future.cancel(true);
+            future = null;
+        }
     }
 }

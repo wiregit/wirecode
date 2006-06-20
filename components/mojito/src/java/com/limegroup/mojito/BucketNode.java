@@ -99,7 +99,7 @@ public class BucketNode extends Node {
         if (replacementCache != null) {
             return replacementCache;
         }
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
     
     public ContactNode getMostRecentlySeenCachedNode(boolean remove) {
