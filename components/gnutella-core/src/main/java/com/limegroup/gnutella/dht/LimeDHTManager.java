@@ -279,24 +279,13 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public void addLeafDHTNode(String host, int port) {
-        if(!running) {
-            return;
-        }
-        
-        ContactNode dhtNode = null;
-        try {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Pinging node: " + host);
-            }
-            dhtNode = dht.ping(new InetSocketAddress(host, port));
-            System.out.println("node: "+dhtNode);
-        } catch (IOException ignored) {
-            LOG.error(ignored);
-        }
-        
-        if(dhtNode!= null) {
-            limeDHTRouteTable.addLeafDHTNode(dhtNode);
-        }
+        if(!running) return;
+        limeDHTRouteTable.addLeafDHTNode(host, port);
+    }
+    
+    public void removeLeafDHTNode(String host, int port) {
+        if(!running) return;
+        limeDHTRouteTable.removeLeafDHTNode(host, port);
     }
     
     public boolean isRunning() {

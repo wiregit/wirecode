@@ -1,10 +1,30 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.PingListener;
+import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
+import com.limegroup.mojito.settings.ContextSettings;
 
 public class LimeDHTRoutingTable extends PatriciaRouteTable {
+    
+    private static final Log LOG = LogFactory.getLog(LimeDHTRoutingTable.class);
+    
+    Map<IpPortImpl, KUID> leafDHTNodes = new HashMap<IpPortImpl, KUID>();
 
     public LimeDHTRoutingTable(Context context) {
         super(context);
@@ -16,12 +36,58 @@ public class LimeDHTRoutingTable extends PatriciaRouteTable {
      * 
      * @param node The DHT leaf node to be added
      */
-    public void addLeafDHTNode(ContactNode node) {
-        node.setTimeStamp(Long.MAX_VALUE);
-        add(node,true);
+    public void addLeafDHTNode(String host, int port) {
+        InetSocketAddress target = new InetSocketAddress(host, port);
+        IpPortImpl node = new IpPortImpl(target);
+        final ContactNode[] dhtNode = new ContactNode[] {null};
+
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Pinging node: " + host);
+        }
+        
+        synchronized (dhtNode) {
+                try {
+                    context.ping(target, new PingListener() {
+                        public void response(ResponseMessage response, long t) {
+                            dhtNode[0] = response.getContactNode();
+                            synchronized (dhtNode) {
+                                dhtNode.notify();
+                            }
+                        }
+
+                        public void timeout(KUID nodeId, SocketAddress address, 
+                                RequestMessage request, long t) {
+                            synchronized (dhtNode) {
+                                dhtNode.notify();
+                            }
+                        }
+                    });
+                } catch (IOException ignored) {}
+                
+            try {
+                dhtNode.wait(ContextSettings.SYNC_PING_TIMEOUT.getValue());
+            } catch (InterruptedException err) {
+                LOG.error("InterruptedException", err);
+            }
+        }
+        if(dhtNode[0] != null) {
+            leafDHTNodes.put(node, dhtNode[0].getNodeID());
+            dhtNode[0].setTimeStamp(Long.MAX_VALUE);
+            super.add(dhtNode[0],true);
+        }
     }
     
-    public void removeLeafDHTNode() {
-    	//TODO implement
+    /**
+     * Removes this DHT leaf from our routing table.
+     * 
+     */
+    public void removeLeafDHTNode(String host, int port) {
+        try {
+            IpPortImpl node = new IpPortImpl(host, port);
+            KUID nodeId = leafDHTNodes.remove(node);
+            if(nodeId != null) {
+                super.removeNodeAndReplace(nodeId, true);
+            }
+        } catch (UnknownHostException ignored) {}
     }
 }

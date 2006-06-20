@@ -289,47 +289,6 @@ public class MojitoDHT {
     }
     
     /**
-     * Synchronous ping. 
-     * If the ping is successfull, the given host may be added to the routing table
-     * 
-     * @param dst
-     * @return The responding <tt>ContactNode</tt> or null if there was a timeout
-     * @throws IOException
-     */
-    public ContactNode ping(SocketAddress dst) throws IOException {
-        return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
-    }
-    
-    private ContactNode ping(SocketAddress dst, long timeout) throws IOException {
-        final ContactNode[] node = new ContactNode[] {null};
-        
-        synchronized (node) {
-            context.ping(dst, new PingListener() {
-                public void response(ResponseMessage response, long t) {
-                    node[0] = response.getContactNode();
-                    synchronized (node) {
-                        node.notify();
-                    }
-                }
-
-                public void timeout(KUID nodeId, SocketAddress address, 
-                        RequestMessage request, long t) {
-                    synchronized (node) {
-                        node.notify();
-                    }
-                }
-            });
-            
-            try {
-                node.wait(timeout);
-            } catch (InterruptedException err) {
-                LOG.error("InterruptedException", err);
-            }
-        }
-        return node[0];
-    }
-    
-    /**
      * Asynchronous ping.
      * If the ping is successfull, the given host may be added to the routing table
      * 

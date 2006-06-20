@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.connection.GnetConnectObserver;
+import com.limegroup.gnutella.dht.LimeDHTManager;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
 import com.limegroup.gnutella.handshaking.BlockingIncomingHandshaker;
 import com.limegroup.gnutella.handshaking.BlockingOutgoingHandshaker;
@@ -1082,7 +1083,7 @@ public class Connection implements IpPort {
      * or -1 if it is not.
      * 
      */
-    public int remostHostIsDHTCapable() {
+    public int remostHostIsDHTNode() {
         if(_capabilities != null) 
             return _capabilities.supportsDHT();
         return -1;
@@ -1129,6 +1130,10 @@ public class Connection implements IpPort {
             try {				
                 _socket.close();
             } catch(IOException e) {}
+        }
+        //remove node from local DHT routing table if it was part of it
+        if(remostHostIsDHTNode() > -1) {
+            RouterService.getLimeDHTManager().removeLeafDHTNode(_host, _port);
         }
         
         // tell the inflater & deflater that we're done with them.

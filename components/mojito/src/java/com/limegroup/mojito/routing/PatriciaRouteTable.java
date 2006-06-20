@@ -99,7 +99,7 @@ public class PatriciaRouteTable implements RouteTable {
     /**
      * The DHT's context.
      */
-    private Context context;
+    protected Context context;
     
     /**
      * The main contacts trie.
@@ -386,6 +386,16 @@ public class PatriciaRouteTable implements RouteTable {
         }
     }
     
+    /**
+     * Removes the given node from the nodes trie and replaces it with the most recently seen
+     * node from the given bucket's replacement cache. If <b>force</b> is set to false, this method
+     * only removes the node if there is a replacement node available.
+     * 
+     * @param nodeId the node to remove
+     * @param bucket the bucket where the given node belongs
+     * @param force true to remove node in any case, false to remove only if a replacement is available
+     * @return true if the node was removed, false otherwise
+     */
     private boolean removeNodeAndReplace(KUID nodeId, BucketNode bucket,boolean force) {
         ContactNode replacement = bucket.getMostRecentlySeenCachedNode(true);
         if (replacement != null) {
@@ -408,6 +418,20 @@ public class PatriciaRouteTable implements RouteTable {
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Removes the given node from the nodes trie and replaces it with the most recently seen
+     * node from the corresponding bucket's replacement cache. If <b>force</b> is set to false, 
+     * this method only removes the node if there is a replacement node available.
+     * 
+     * @param nodeId the node to remove
+     * @param force true to remove node in any case, false to remove only if a replacement is available
+     * @return true if the node was removed, false otherwise
+     */
+    protected boolean removeNodeAndReplace(KUID nodeId, boolean force) {
+        BucketNode bucket = bucketsTrie.select(nodeId);
+        return removeNodeAndReplace(nodeId, bucket, force);
     }
     
     private int updateBucketNodeCount(BucketNode bucket) {
