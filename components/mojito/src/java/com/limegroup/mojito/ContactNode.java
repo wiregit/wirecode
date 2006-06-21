@@ -117,8 +117,8 @@ public class ContactNode extends Node {
         if(roundTripTime <= 0L || isDead()) {
             return maxTimeout;
         } else {
-            return Math.min(((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * roundTripTime) + 
-                failures * roundTripTime), maxTimeout);
+            return Math.min(maxTimeout, 
+                ((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * roundTripTime) + failures * roundTripTime));
         }
     }
     
@@ -196,7 +196,7 @@ public class ContactNode extends Node {
     }
     
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append(toString(getNodeID(), getSocketAddress()))
             .append(", failures: ").append(failures)
             .append(", instanceId: ").append(instanceId)

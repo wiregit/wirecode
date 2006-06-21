@@ -102,7 +102,7 @@ public final class KeyValueCollection implements Collection<KeyValue> {
     }
     
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Source: ").append(getSource()).append("\n");
         buffer.append(CollectionUtils.toString(keyValues));
         return buffer.toString();

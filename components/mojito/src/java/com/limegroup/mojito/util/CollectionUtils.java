@@ -33,7 +33,7 @@ public final class CollectionUtils {
      * Returns the given Collection as formatted String
      */
     public static String toString(Collection<?> c) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         
         Iterator it = c.iterator();
         for(int i = 0; it.hasNext(); i++) {

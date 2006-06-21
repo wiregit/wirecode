@@ -52,7 +52,7 @@ public final class ArrayUtils {
     }
     
     public static String toHexString(byte[] data) {
-        StringBuffer buffer = new StringBuffer(data.length * 2);
+        StringBuilder buffer = new StringBuilder(data.length * 2);
         for(int i = 0; i < data.length; i++) {
             buffer.append(HEX[(data[i] >> 4) & 0xF]).append(HEX[data[i] & 0xF]);
         }
@@ -60,7 +60,7 @@ public final class ArrayUtils {
     }
     
     public static String toBinString(byte[] data) {
-        StringBuffer buffer = new StringBuffer(data.length * 8);
+        StringBuilder buffer = new StringBuilder(data.length * 8);
         for(int i = 0; i < data.length; i++) {
             buffer.append(BIN[(data[i] >> 4) & 0xF]).append(BIN[data[i] & 0xF]).append(" ");
         }

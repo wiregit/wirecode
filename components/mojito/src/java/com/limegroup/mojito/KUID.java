@@ -39,14 +39,11 @@ import com.limegroup.mojito.util.PatriciaTrie.KeyCreator;
 
 /**
  * KUID stands for Kademlia Unique Identifier and represents 
- * an 160bit value. You're welcome to proposal a better name 
- * which is suitable for Keys, NodeIDs and MessageIDs!
+ * an 160bit value.
  * 
  * This class is immutable!
- * 
- * TODO: Maybe Key, NodeID and MessageID but 'Key' sucks!
  */
-public class KUID implements Serializable, Comparable {
+public class KUID implements Comparable<KUID>, Serializable {
     
     private static final long serialVersionUID = 633717248208386374L;
 
@@ -365,12 +362,10 @@ public class KUID implements Serializable, Comparable {
         return hashCode;
     }
     
-    public int compareTo(Object o) {
-        KUID other = (KUID)o;
-        
+    public int compareTo(KUID o) {
         int d = 0;
         for(int i = 0; i < id.length; i++) {
-            d = (id[i] & 0xFF) - (other.id[i] & 0xFF);
+            d = (id[i] & 0xFF) - (o.id[i] & 0xFF);
             if (d < 0) {
                 return -1;
             } else if (d > 0) {

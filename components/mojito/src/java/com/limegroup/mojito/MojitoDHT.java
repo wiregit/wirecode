@@ -233,21 +233,21 @@ public class MojitoDHT {
         
         synchronized (time) {
             bootstrap(address, new BootstrapListener() {
-                    public void phaseOneComplete(long time) {
-                    }
+                public void phaseOneComplete(long time) {
+                }
 
-                    public void phaseTwoComplete(boolean foundNodes, long t) {
-                        time[0] = t;
-                        synchronized (time) {
-                            time.notify();
-                        }
+                public void phaseTwoComplete(boolean foundNodes, long t) {
+                    time[0] = t;
+                    synchronized (time) {
+                        time.notify();
                     }
+                }
 
-                    public void noBootstrapHost() {
-                        synchronized (time) {
-                            time.notify();
-                        }
+                public void noBootstrapHost() {
+                    synchronized (time) {
+                        time.notify();
                     }
+                }
             });
             
             try {
@@ -286,6 +286,47 @@ public class MojitoDHT {
     public void bootstrap(List<? extends SocketAddress> hostList, BootstrapListener listener) 
             throws IOException {
         context.bootstrap(hostList, listener);
+    }
+    
+    /**
+     * Synchronous ping. 
+     * If the ping is successfull, the given host may be added to the routing table
+     * 
+     * @param dst
+     * @return The responding <tt>ContactNode</tt> or null if there was a timeout
+     * @throws IOException
+     */
+    public ContactNode ping(SocketAddress dst) throws IOException {
+        return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
+    }
+    
+    private ContactNode ping(SocketAddress dst, long timeout) throws IOException {
+        final ContactNode[] node = new ContactNode[] {null};
+        
+        synchronized (node) {
+            ping(dst, new PingListener() {
+                public void response(ResponseMessage response, long t) {
+                    node[0] = response.getContactNode();
+                    synchronized (node) {
+                        node.notify();
+                    }
+                }
+
+                public void timeout(KUID nodeId, SocketAddress address, 
+                        RequestMessage request, long t) {
+                    synchronized (node) {
+                        node.notify();
+                    }
+                }
+            });
+            
+            try {
+                node.wait(timeout);
+            } catch (InterruptedException err) {
+                LOG.error("InterruptedException", err);
+            }
+        }
+        return node[0];
     }
     
     /**
@@ -380,11 +421,11 @@ public class MojitoDHT {
     
     public Collection<KeyValue> get(KUID key, long timeout) throws IOException {
         final Collection[] values = new Collection[] {
-            Collections.EMPTY_LIST
+            Collections.emptyList()
         };
         
         synchronized (values) {
-            context.get(key, new LookupAdapter() {
+            get(key, new LookupAdapter() {
                 public void finish(KUID lookup, Collection c, long time) {
                     values[0] = c;
                     synchronized (values) {

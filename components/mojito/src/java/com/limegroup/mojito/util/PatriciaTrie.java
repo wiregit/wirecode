@@ -530,15 +530,15 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     }
     
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Trie[").append(size()).append("]={\n");
         toStringR(root.left, -1, buffer);
         buffer.append("}\n");
         return buffer.toString();
     }
     
-    private StringBuffer toStringR(Entry<K, V> h, int bitIndex, 
-            final StringBuffer buffer) {
+    private StringBuilder toStringR(Entry<K, V> h, int bitIndex, 
+            final StringBuilder buffer) {
 
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty()) {
