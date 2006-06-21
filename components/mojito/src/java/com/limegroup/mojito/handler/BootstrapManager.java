@@ -59,7 +59,10 @@ public class BootstrapManager implements PingListener, LookupListener {
     
     private BootstrapListener listener;
     
-    private List buckets = Collections.EMPTY_LIST;
+    /**
+     * List of Bucket IDs
+     */
+    private List<KUID> buckets = Collections.emptyList();
     
     /** 
      * An Iterator of SocketAddresses or ContactNodes depending on
@@ -234,7 +237,7 @@ public class BootstrapManager implements PingListener, LookupListener {
         }
     }
 
-    public void setBuckets(List buckets) {
+    public void setBuckets(List<KUID> buckets) {
         this.buckets = buckets;
         
         if (buckets.isEmpty()) {

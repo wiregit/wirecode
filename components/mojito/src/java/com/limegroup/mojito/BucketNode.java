@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 
@@ -69,6 +70,10 @@ public class BucketNode extends Node {
     
     public int getNodeCount() {
         return nodeCount;
+    }
+    
+    public boolean isFull() {
+        return nodeCount >= KademliaSettings.REPLICATION_PARAMETER.getValue();
     }
     
     public void addReplacementNode(ContactNode node) {

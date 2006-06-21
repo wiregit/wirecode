@@ -107,7 +107,7 @@ public class StoreManager implements LookupListener {
             }
             
             try {
-                new StoreResponseHandler(this.context, queryKey, keyValue).store(node);
+                new StoreResponseHandler(context, queryKey, keyValue).store(node);
                 storeTargets.add(node);
             } catch (IOException err) {
                 LOG.error("Failed to store KeyValue", err);
@@ -117,7 +117,7 @@ public class StoreManager implements LookupListener {
         keyValue.setNumLocs(storeTargets.size());
         
         if (listener != null) {
-            this.context.fireEvent(new Runnable() {
+            context.fireEvent(new Runnable() {
                 public void run() {
                     listener.store(keyValue, storeTargets);
                 }

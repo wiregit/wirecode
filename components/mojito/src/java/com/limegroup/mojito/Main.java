@@ -89,21 +89,18 @@ public class Main {
         
         InetAddress addr = host != null ? InetAddress.getByName(host) : null;
         
-        List dhts = standalone(addr, port, count);
-        //List dhts = limewire(addr, port);
+        List<MojitoDHT> dhts = standalone(addr, port, count);
+        //List<MojitoDHT> dhts = limewire(addr, port);
         
         run(addr, port, dhts);
     }
     
-    //private static final Class MESSAGE_DISPATCHER_CLASS = LimeStandaloneMessageDispatcherImpl.class;
-    
-    private static List standalone(InetAddress addr, int port, int count) {
-        List dhts = new ArrayList(count);
+    private static List<MojitoDHT> standalone(InetAddress addr, int port, int count) {
+        List<MojitoDHT> dhts = new ArrayList<MojitoDHT>(count);
         
         for(int i = 0; i < count; i++) {
             try {
                 MojitoDHT dht = new MojitoDHT("DHT" + i);
-                //dht.setMessageDispatcher(MESSAGE_DISPATCHER_CLASS);
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
@@ -124,7 +121,7 @@ public class Main {
         return dhts;
     }
     
-    private static List limewire(InetAddress addr, int port) throws Exception {
+    private static List<MojitoDHT> limewire(InetAddress addr, int port) throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         ConnectionSettings.PORT.setValue(port);
@@ -142,13 +139,13 @@ public class Main {
         }
         dht.start();
         
-        return Arrays.asList(new Object[]{dht});
+        return Arrays.asList(dht);
     }
     
-    private static void run(InetAddress addr, int port, List dhts) throws Exception {
+    private static void run(InetAddress addr, int port, List<MojitoDHT> dhts) throws Exception {
         long time = 0L;
         for(int i = 1; i < dhts.size(); i++) {
-            long t = ((MojitoDHT)dhts.get(i)).bootstrap(((MojitoDHT)dhts.get(i-1)).getSocketAddress());
+            long t = dhts.get(i).bootstrap(dhts.get(i-1).getSocketAddress());
             
             if (t >= 0L) {
                 time += t;
@@ -160,7 +157,7 @@ public class Main {
         System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
         int current = 0;
-        MojitoDHT dht = (MojitoDHT)dhts.get(current);
+        MojitoDHT dht = dhts.get(current);
         
         String help = "help";
         String info = "info";
@@ -221,7 +218,7 @@ public class Main {
                     info(dht);
                 } else if (line.matches(svitch)) {
                     int index = Integer.parseInt(line.split(" ")[1]);
-                    dht = (MojitoDHT)dhts.get(index);
+                    dht = dhts.get(index);
                     current = index;
                     info(dht);
                 } else if (line.matches(firewalled)) {
@@ -254,7 +251,6 @@ public class Main {
                     MojitoDHT nu = load(line.split(" "));
                     dht.stop();
                     
-                    //nu.setMessageDispatcher(MESSAGE_DISPATCHER_CLASS);
                     nu.bind(dht.getLocalAddress());
                     dhts.set(current, nu);
                     

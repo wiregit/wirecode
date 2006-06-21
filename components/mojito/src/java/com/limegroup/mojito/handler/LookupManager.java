@@ -48,7 +48,6 @@ public class LookupManager implements LookupListener {
     
     public LookupManager(Context context) {
         this.context = context;
-        
     }
     
     public void init() {

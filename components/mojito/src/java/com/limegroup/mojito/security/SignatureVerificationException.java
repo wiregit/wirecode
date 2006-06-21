@@ -23,6 +23,8 @@ import java.security.SignatureException;
 
 public class SignatureVerificationException extends SignatureException {
 
+    private static final long serialVersionUID = -200788227455219189L;
+
     public SignatureVerificationException() {
         super();
     }
