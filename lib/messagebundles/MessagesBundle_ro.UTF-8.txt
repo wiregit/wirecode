@@ -1,12 +1,12 @@
-################################################################################
+ï»¿################################################################################
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Romanian - Romania
 # Thanks to: Celestin Stahie.
 ################################################################################
 LOCALE_LANGUAGE_CODE=ro
-LOCALE_LANGUAGE_NAME=Românã
+LOCALE_LANGUAGE_NAME=Romï¿½nï¿½
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=România
+LOCALE_COUNTRY_NAME=Romï¿½nia
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Latn
@@ -108,7 +108,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restaureaza implicit
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Intoarcerea setarilor la implicit
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=Afla mai multe despre aceasta optiune...
- 
+
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
 ################################################################################
@@ -992,7 +992,7 @@ SHARE_FOLDER_POPUP_MENU_LABEL=Publica folderul
 #### UNSHARE_FOLDER_POPUP_MENU_LABEL=Stop Sharing Folder
 UNSHARE_FOLDER_POPUP_MENU_LABEL=Opreste publicarea folderului
 #### SHARE_FILE_ACTION_NAME=Share New File...
-#SHARE_FILE_ACTION_NAME=Publica un fisier nou...
+#? SHARE_FILE_ACTION_NAME=
 #### SHARE_FILE_ACTION_APPROVE_LABEL=Share
 SHARE_FILE_ACTION_APPROVE_LABEL=Publicare
 #### SHARE_FILE_ACTION_MNEMONIC=I
@@ -4426,4 +4426,3 @@ ALL_FILTERED_MESSAGES=Mesaje filtrului
 #? STATS_OOB_THROUGHPUT_TITLE=
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 #? STATS_OOB_THROUGHPUT_LABEL=
-
