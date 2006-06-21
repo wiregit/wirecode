@@ -305,7 +305,7 @@ public class PlanetLab {
             this.bootstrapServer = bootstrapServer;
             
             localNodeId = dht.getLocalNodeID();
-            address = dht.getLocalSocketAddrss();
+            address = dht.getLocalAddress();
             
             this.value = value;
             

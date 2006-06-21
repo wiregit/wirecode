@@ -269,6 +269,7 @@ public class BootstrapManager implements PingListener, LookupListener {
     }
     
     private void fireNoBootstrapHost() {
+        context.setBootstrapping(false);
         if (listener != null) {
             context.fireEvent(new Runnable() {
                 public void run() {

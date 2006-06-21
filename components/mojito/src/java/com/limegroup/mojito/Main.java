@@ -255,7 +255,7 @@ public class Main {
                     dht.stop();
                     
                     //nu.setMessageDispatcher(MESSAGE_DISPATCHER_CLASS);
-                    nu.bind(dht.getLocalSocketAddrss());
+                    nu.bind(dht.getLocalAddress());
                     dhts.set(current, nu);
                     
                     nu.start();

@@ -145,7 +145,7 @@ public class MojitoDHT {
         return context.getSocketAddress();
     }
     
-    public SocketAddress getLocalSocketAddrss() {
+    public SocketAddress getLocalAddress() {
         return context.getLocalSocketAddress();
     }
     
