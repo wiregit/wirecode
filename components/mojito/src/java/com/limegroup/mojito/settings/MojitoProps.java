@@ -25,7 +25,7 @@ import com.limegroup.gnutella.settings.SettingsFactory;
 
 
 /**
- * 
+ * Handler for all Mojito Settings.
  */
 public class MojitoProps extends AbstractSettings {
     

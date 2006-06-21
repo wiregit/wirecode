@@ -314,16 +314,18 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Computes the closest address to targetID between this KUID and nodeID
+     * Compares this KUID with with targetId and nodeId with targetId
+     * and returns true if this KUID is nearer to targetId than nodeId
+     * is.
      * 
-     * @param nodeID the KUID to compare to
-     * @param targetID the target ID
-     * @return true if this is closer to targetID, false otherwise
+     * @param nodeId the KUID to compare to
+     * @param targetId the target ID
+     * @return true if this KUID is nearer to targetID, false otherwise
      */
-    public boolean isCloser(KUID nodeID, KUID targetID) {
+    public boolean isNearer(KUID nodeId, KUID targetId) {
         for (int i = 0; i < id.length; i++){
-            int dSelf = (id[i] ^ targetID.id[i]) & 0xFF;
-            int dOther = (nodeID.id[i] ^ targetID.id[i]) & 0xFF;
+            int dSelf = (id[i] ^ targetId.id[i]) & 0xFF;
+            int dOther = (nodeId.id[i] ^ targetId.id[i]) & 0xFF;
             int diff = dOther - dSelf;
             
             if (diff > 0) {

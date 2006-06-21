@@ -430,7 +430,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 best = toQuery.select(lookup).getNodeID();
             }
             
-            if (best == null || worst.isCloser(best, lookup)) {
+            if (best == null || worst.isNearer(best, lookup)) {
                 if (activeSearches == 0) {
                     if (LOG.isTraceEnabled()) {
                         ContactNode bestResponse = responses.select(lookup).getKey();

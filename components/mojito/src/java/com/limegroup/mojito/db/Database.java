@@ -212,7 +212,7 @@ public class Database {
         try {
             if (keyValue.isAnonymous()
                     && !keyValue.verify(context.getMasterKey())
-                    || !keyValue.isClose()) {
+                    || !keyValue.isNearby()) {
                 expirationTime = keyValue.getCreationTime()
                         + DatabaseSettings.EXPIRATION_TIME_UNKNOWN.getValue();
             }

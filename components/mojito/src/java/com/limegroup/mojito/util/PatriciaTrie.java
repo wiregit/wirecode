@@ -690,7 +690,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         }
 
         public String toString() {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             
             if (root == this) {
                 buffer.append("RootEntry(");

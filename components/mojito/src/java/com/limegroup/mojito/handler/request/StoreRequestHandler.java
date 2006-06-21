@@ -104,7 +104,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                 }
                 
                 context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
-                keyValue.setClose(false);
+                keyValue.setNearby(false);
             }
         }
         

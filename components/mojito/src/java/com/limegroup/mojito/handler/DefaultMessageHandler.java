@@ -137,7 +137,7 @@ public class DefaultMessageHandler extends MessageHandler
                         if (context.isLocalNode(closest)   
                                 || ((node.equals(closest)
                                         //maybe we haven't added him to the routing table
-                                        || node.getNodeID().isCloser(closest.getNodeID(), bag.getKey())) 
+                                        || node.getNodeID().isNearer(closest.getNodeID(), bag.getKey())) 
                                         && (closestNodesToKey.size() > 1)
                                         && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                             

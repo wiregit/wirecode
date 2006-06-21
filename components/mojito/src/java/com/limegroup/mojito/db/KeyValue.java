@@ -57,7 +57,7 @@ public class KeyValue implements Map.Entry<KUID, byte[]>, Serializable {
     
     private int hashCode = -1;
     
-    private boolean isClose = true;
+    private boolean nearby = true;
     
     /**
      * The number of locations we have stored this value at
@@ -183,18 +183,18 @@ public class KeyValue implements Map.Entry<KUID, byte[]>, Serializable {
     
     /**
      * Sets whether or not the KeyValue is considered
-     * as close to our local NodeID
+     * as nearby to our local NodeID
      */
-    public void setClose(boolean close) {
-        this.isClose = close;
+    public void setNearby(boolean nearby) {
+        this.nearby = nearby;
     }
     
     /**
      * Returns whether or not the KeyValue is considered
-     * as close to our local NodeID
+     * as nearby to our local NodeID
      */
-    public boolean isClose() {
-        return isClose;
+    public boolean isNearby() {
+        return nearby;
     }
     
     /**
