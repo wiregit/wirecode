@@ -15,7 +15,7 @@ public class BandwidthStat extends BasicKilobytesStatistic {
 	/**
 	 * Specialized class for accumulating all upstream bandwidth data.
 	 */
-	private static class UpstreamBandwidthStat extends BandwidthStat {
+	public static class UpstreamBandwidthStat extends BandwidthStat {
 		public void addData(int data) {
 			super.addData(data);
 			UPSTREAM_BANDWIDTH.addData(data);
@@ -25,7 +25,7 @@ public class BandwidthStat extends BasicKilobytesStatistic {
 	/**
 	 * Specialized class for accumulating all downstream bandwidth data.
 	 */
-	private static class DownstreamBandwidthStat extends BandwidthStat {
+	public static class DownstreamBandwidthStat extends BandwidthStat {
 		public void addData(int data) {
 			super.addData(data);
 			DOWNSTREAM_BANDWIDTH.addData(data);

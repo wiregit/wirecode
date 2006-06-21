@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -21,7 +22,7 @@ import com.limegroup.gnutella.downloader.Interval;
  * classes in the util package should be stand alone, but we need to have 
  * Interval stay in downloads for reasons of backward compatibility.
  */
-public class IntervalSet {
+public class IntervalSet implements Serializable {
     
     /**
      * The sorted set of intervals this contains.

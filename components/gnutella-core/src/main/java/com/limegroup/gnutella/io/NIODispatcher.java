@@ -18,6 +18,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -102,16 +106,19 @@ public class NIODispatcher implements Runnable {
      * A map of classes of SelectableChannels to the Selector that should
      * be used to register that channel with.
      */
-    private final Map /* of Class -> Selector */ OTHER_SELECTORS = new HashMap();
+    private final Map <Class,Selector>  OTHER_SELECTORS = 
+    	new HashMap<Class,Selector>();
     
     /** A list of other Selectors that should be polled. */
-    private final List /* of Selector */ POLLERS = new ArrayList();
+    private final List <Selector> POLLERS = new ArrayList<Selector>();
     
     /** The invokeLater queue. */
-    private Collection /* of Runnable */ LATER = new LinkedList();
+    private Collection <Runnable> LATER = new LinkedList<Runnable>();
+    
+    private final Queue<DelayedRunnable> DELAYED = new DelayQueue<DelayedRunnable>();
     
     /** The throttle queue. */
-    private final List /* of NBThrottle */ THROTTLE = new ArrayList();
+    private final List <NBThrottle> THROTTLE = new ArrayList<NBThrottle>();
     
     /** The timeout manager. */
     private final TimeoutController TIMEOUTER = new TimeoutController();
@@ -270,7 +277,7 @@ public class NIODispatcher implements Runnable {
     
     /** Returns the Selector that should be used for the given channel. */
     private Selector getSelectorFor(SelectableChannel channel) {
-        Selector sel = (Selector)OTHER_SELECTORS.get(channel.getClass());
+        Selector sel = OTHER_SELECTORS.get(channel.getClass());
         if(sel == null)
             return primarySelector; // default selector
         else
@@ -341,6 +348,15 @@ public class NIODispatcher implements Runnable {
         }
         wakeup();
     }
+   
+
+   public java.util.concurrent.Future invokeLater(Runnable later, long delay) {
+	   DelayedRunnable ret = new DelayedRunnable(later, delay);
+	   synchronized(Q_LOCK) {
+		   DELAYED.add(ret);
+	   }
+	   return ret;
+   }
    
    /** Invokes the method in the NIODispatcher thread & returns after it ran. */
    public void invokeAndWait(final Runnable future) throws InterruptedException {
@@ -469,13 +485,19 @@ public class NIODispatcher implements Runnable {
      */
     private void runPendingTasks() {
         long now = System.currentTimeMillis();
-        for(int i = 0; i < THROTTLE.size(); i++)
-            ((NBThrottle)THROTTLE.get(i)).tick(now);
+        for(NBThrottle t: THROTTLE)
+            t.tick(now);
         
-        Collection localLater;
+        Collection<Runnable> localLater;
         synchronized(Q_LOCK) {
             localLater = LATER;
-            LATER = new LinkedList();
+            LATER = new LinkedList<Runnable>();
+
+            DelayedRunnable delayed = null;
+            while ((delayed = DELAYED.poll()) != null) {
+            	if (!delayed.isCancelled() && !delayed.isDone())
+            		localLater.add(delayed);
+            }
         }
         
         if(now > lastCacheClearTime + CACHE_CLEAR_INTERVAL) {
@@ -484,8 +506,7 @@ public class NIODispatcher implements Runnable {
         }
         
         if(!localLater.isEmpty()) {
-            for(Iterator i = localLater.iterator(); i.hasNext(); ) {
-                Runnable item = (Runnable) i.next();
+            for(Runnable item : localLater ) {
                 try {
                     item.run();
                 } catch(Throwable t) {
@@ -500,14 +521,13 @@ public class NIODispatcher implements Runnable {
      * Runs through all secondary Selectors and returns a 
      * Collection of SelectionKeys that they selected.
      */
-    private Collection /* of SelectionKey */ pollOtherSelectors() {
-        Collection ret = null;
+    private Collection <SelectionKey> pollOtherSelectors() {
+        Collection<SelectionKey> ret = null;
         boolean growable = false;
         
         // Optimized to not create collection objects unless absolutely
         // necessary.
-        for(int i = 0; i < POLLERS.size(); i++) {
-            Selector sel = (Selector)POLLERS.get(i);
+        for (Selector sel: POLLERS) {
             int n = 0;
             try {
                 n = sel.selectNow();
@@ -516,13 +536,13 @@ public class NIODispatcher implements Runnable {
             }
             
             if(n != 0) {
-                Collection selected = sel.selectedKeys();
+                Collection<SelectionKey> selected = sel.selectedKeys();
                 if(!selected.isEmpty()) {
                     if(ret == null) {
                         ret = selected;
                     } else if(!growable) {
                         growable = true;
-                        ret = new HashSet(ret);
+                        ret = new HashSet<SelectionKey>(ret);
                         ret.addAll(selected);
                     } else {
                         ret.addAll(selected);
@@ -537,9 +557,9 @@ public class NIODispatcher implements Runnable {
     /**
      * Loops through all Throttles and gives them the ready keys.
      */
-    private void readyThrottles(Collection keys) {
-        for (int i = 0; i < THROTTLE.size(); i++)
-            ((NBThrottle) THROTTLE.get(i)).selectableKeys(keys);
+    private void readyThrottles(Collection<SelectionKey> keys) {
+    	for (NBThrottle t : THROTTLE)
+            t.selectableKeys(keys);
     }
     
     /**
@@ -565,7 +585,7 @@ public class NIODispatcher implements Runnable {
         while(true) {
             runPendingTasks();
             
-            Collection polled = pollOtherSelectors();
+            Collection<SelectionKey> polled = pollOtherSelectors();
             boolean immediate = !polled.isEmpty();
             try {
                 if(!immediate && checkTime)
@@ -585,7 +605,7 @@ public class NIODispatcher implements Runnable {
                 throw new ProcessingException(iox);
             }
             
-            Collection keys = primarySelector.selectedKeys();
+            Collection<SelectionKey> keys = primarySelector.selectedKeys();
             if(!immediate && !wokeup) {
                 if(keys.isEmpty()) {
                     long now = System.currentTimeMillis();
@@ -620,9 +640,9 @@ public class NIODispatcher implements Runnable {
             if(LOG.isTraceEnabled())
                 LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ").");
             
-            Collection allKeys;
+            Collection<SelectionKey> allKeys;
             if(immediate) {
-                allKeys = new HashSet(keys.size() + polled.size());
+                allKeys = new HashSet<SelectionKey>(keys.size() + polled.size());
                 allKeys.addAll(keys);
                 allKeys.addAll(polled);
             } else {
@@ -632,10 +652,8 @@ public class NIODispatcher implements Runnable {
             readyThrottles(allKeys);
             
             long now = System.currentTimeMillis();
-            for(Iterator it = allKeys.iterator(); it.hasNext(); ) {
-                SelectionKey sk = (SelectionKey)it.next();
+            for(SelectionKey sk : allKeys ) 
 				process(now, sk, sk.attachment(), 0xFFFF);
-            }
             
             keys.clear();
             iteration++;
@@ -716,7 +734,7 @@ public class NIODispatcher implements Runnable {
      */
     private void swapSelector() {
         Selector oldSelector = primarySelector;
-        Collection oldKeys = Collections.EMPTY_SET;
+        Collection<SelectionKey> oldKeys = Collections.EMPTY_SET;
         try {
             if(oldSelector != null)
                 oldKeys = oldSelector.keys();
@@ -733,9 +751,8 @@ public class NIODispatcher implements Runnable {
         
         // We do not have to concern ourselves with secondary selectors,
         // because we only retrieves keys from the primary one.
-        for(Iterator i = oldKeys.iterator(); i.hasNext(); ) {
+        for(SelectionKey key : oldKeys ) {
             try {
-                SelectionKey key = (SelectionKey)i.next();
                 SelectableChannel channel = key.channel();
                 Attachment attachment = (Attachment)key.attachment();
                 int ops = key.interestOps();
@@ -901,7 +918,7 @@ public class NIODispatcher implements Runnable {
             registerImpl(getSelectorFor(channel), channel, op, handler, timeout);
         }
     }
-
+    
     private static class SpinningException extends Exception {
         public SpinningException() { super(); }
     }

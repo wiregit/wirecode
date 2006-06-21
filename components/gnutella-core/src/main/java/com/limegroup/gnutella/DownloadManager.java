@@ -10,8 +10,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,12 +24,18 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.bitzi.util.Base32;
+import com.limegroup.bittorrent.BTDownloader;
+import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -36,6 +44,7 @@ import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.BufferUtils;
@@ -48,11 +57,13 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
+import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
@@ -61,6 +72,9 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.IpPort;
+
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.MultiIterator;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -86,7 +100,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
-public class DownloadManager implements BandwidthTracker {
+public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
     
@@ -180,7 +194,6 @@ public class DownloadManager implements BandwidthTracker {
      */
     private Runnable _waitingPump;
 
-
     //////////////////////// Creation and Saving /////////////////////////
 
     /** 
@@ -208,6 +221,11 @@ public class DownloadManager implements BandwidthTracker {
         this.router = router;
         this.fileManager = fileManager;
         scheduleWaitingPump();
+        RouterService.getConnectionDispatcher().
+        addConnectionAcceptor(this,
+        		new String[]{"GIV"},
+        		false,
+        		true);
     }
 
     /**
@@ -321,20 +339,20 @@ public class DownloadManager implements BandwidthTracker {
     private synchronized void pumpDownloads() {
         int index = 1;
         for(Iterator i = waiting.iterator(); i.hasNext(); ) {
-            ManagedDownloader md = (ManagedDownloader)i.next();
+            AbstractDownloader md = (AbstractDownloader)i.next();
             if(md.isAlive()) {
                 continue;
-            } else if(md.isCancelled() ||md.isCompleted()) {
+            } else if(md.shouldBeRemoved()) {
                 i.remove();
                 cleanupCompletedDownload(md, false);
-            } else if(hasFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
+            } else if(hasFreeSlot() && (md.shouldBeRestarted())) {
                 i.remove();
                 if(md instanceof InNetworkDownloader)
                     innetworkCount++;
                 active.add(md);
                 md.startDownload();
             } else {
-                if(!md.isPaused())
+                if(md.canBeInQueue())
                     md.setInactivePriority(index++);
                 md.handleInactivity();
             }
@@ -366,7 +384,7 @@ public class DownloadManager implements BandwidthTracker {
     public IncompleteFileManager getIncompleteFileManager() {
         return incompleteFileManager;
     }    
-
+ 
     public synchronized int downloadsInProgress() {
         return active.size() + waiting.size();
     }
@@ -374,6 +392,9 @@ public class DownloadManager implements BandwidthTracker {
     public synchronized int getNumIndividualDownloaders() {
         int ret = 0;
         for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
+        	Object next = iter.next();
+        	if (! (next instanceof ManagedDownloader))
+        		continue; // TODO: count torrents separately
             ManagedDownloader md=(ManagedDownloader)iter.next();
             ret += md.getNumDownloaders();
        }
@@ -388,15 +409,15 @@ public class DownloadManager implements BandwidthTracker {
         return waiting.size();
     }
     
-    public ManagedDownloader getDownloaderForURN(URN sha1) {
+    public Downloader getDownloaderForURN(URN sha1) {
         synchronized(this) {
             for (Iterator iter = active.iterator(); iter.hasNext();) {
-                ManagedDownloader current = (ManagedDownloader) iter.next();
+                Downloader current = (Downloader) iter.next();
                 if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
                     return current;
             }
             for (Iterator iter = waiting.iterator(); iter.hasNext();) {
-                ManagedDownloader current = (ManagedDownloader) iter.next();
+                Downloader current = (Downloader) iter.next();
                 if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
                     return current;
             }
@@ -406,12 +427,12 @@ public class DownloadManager implements BandwidthTracker {
 
     public synchronized boolean isGuidForQueryDownloading(GUID guid) {
         for (Iterator iter=active.iterator(); iter.hasNext(); ) {
-            GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
+            GUID dGUID = ((AbstractDownloader) iter.next()).getQueryGUID();
             if ((dGUID != null) && (dGUID.equals(guid)))
                 return true;
         }
         for (Iterator iter=waiting.iterator(); iter.hasNext(); ) {
-            GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
+            GUID dGUID = ((AbstractDownloader) iter.next()).getQueryGUID();
             if ((dGUID != null) && (dGUID.equals(guid)))
                 return true;
         }
@@ -431,7 +452,7 @@ public class DownloadManager implements BandwidthTracker {
             waiting.clear();
         }
         for(Iterator i = buf.iterator(); i.hasNext(); ) {
-            ManagedDownloader md = (ManagedDownloader)i.next();
+            Downloader md = (Downloader)i.next();
             md.stop();
         }
     }   
@@ -518,8 +539,7 @@ public class DownloadManager implements BandwidthTracker {
         //thread must obtain the monitor to acquire a queue slot.)
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
-                ManagedDownloader downloader=(ManagedDownloader)iter.next();
-                DownloadCallback dc = callback;
+                AbstractDownloader downloader=(AbstractDownloader)iter.next();
                 
                 // ignore RequeryDownloaders -- they're legacy
                 if(downloader instanceof RequeryDownloader)
@@ -751,7 +771,50 @@ public class DownloadManager implements BandwidthTracker {
         initializeDownload(d);
         return d;
     }
-        
+    
+    public synchronized Downloader downloadTorrent(URL url) throws IOException {
+		if (LOG.isDebugEnabled())
+			LOG.debug("downloading torrent from " + url);
+		HttpMethod get = new GetMethod(url.toExternalForm());
+		get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+		get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+				"close");
+		get.setFollowRedirects(true);
+
+		HttpClient http = HttpClientManager.getNewClient(Constants.TIMEOUT,
+				Constants.TIMEOUT);
+		http.executeMethod(get);
+
+		if (get.getStatusCode() < 200 || get.getStatusCode() >= 300)
+			throw new IOException("bad status code, downloading .torrent file "
+					+ get.getStatusCode());
+
+		return downloadTorrent(get.getResponseBody());
+    }
+     
+    
+    public synchronized Downloader downloadTorrent(File torrentFile) throws IOException {
+    	return downloadTorrent(FileUtils.readFileFully(torrentFile));
+    }
+    
+    private Downloader downloadTorrent(byte [] metaInfo) throws IOException {
+    	// TODO figure out the SaveLocation exception stuff
+    	try {
+			BTMetaInfo info = BTMetaInfo.readFromBytes(metaInfo);
+			for (Iterator iter = active.iterator(); iter.hasNext();) {
+				Downloader current = (Downloader) iter.next();
+				if (metaInfo.equals(current.getSHA1Urn())) 
+					return current; // eventually implement adding of trackers
+			}
+			AbstractDownloader ret = new BTDownloader(info);
+			initializeDownload(ret);
+			return ret;
+		} catch (IOException e) {
+			if (LOG.isDebugEnabled())
+				LOG.debug("bad torrent data", e);
+			throw e;
+		}
+    }
     
     /**
      * Performs common tasks for initializing the download.
@@ -760,7 +823,7 @@ public class DownloadManager implements BandwidthTracker {
      * 3) Notifies the callback about the new downloader.
      * 4) Writes the new snapshot out to disk.
      */
-    private void initializeDownload(ManagedDownloader md) {
+    private void initializeDownload(AbstractDownloader md) {
         md.initialize(this, fileManager, callback(md));
 		waiting.add(md);
         callback(md).addDownload(md);
@@ -774,7 +837,7 @@ public class DownloadManager implements BandwidthTracker {
     /**
      * Returns the callback that should be used for the given md.
      */
-    private DownloadCallback callback(ManagedDownloader md) {
+    private DownloadCallback callback(Downloader md) {
         return (md instanceof InNetworkDownloader) ? innetworkCallback : callback;
     }
         
@@ -814,7 +877,7 @@ public class DownloadManager implements BandwidthTracker {
 	
 	private boolean conflicts(Iterator i, URN urn, String fileName, int fileSize) {
 		while(i.hasNext()) {
-			ManagedDownloader md = (ManagedDownloader)i.next();
+			AbstractDownloader md = (AbstractDownloader)i.next();
 			if (md.conflicts(urn, fileName, fileSize)) {
 				return true;
 			}
@@ -835,7 +898,7 @@ public class DownloadManager implements BandwidthTracker {
 	
 	private boolean isSaveLocationTaken(Iterator i, File candidateFile) {
 		while(i.hasNext()) {
-			ManagedDownloader md = (ManagedDownloader)i.next();
+			AbstractDownloader md = (AbstractDownloader)i.next();
 			if (candidateFile.equals(md.getSaveFile())) {
 				return true;
 			}
@@ -850,7 +913,7 @@ public class DownloadManager implements BandwidthTracker {
 	
 	private boolean conflictsWithIncompleteFile(Iterator i, File incompleteFile) {
 		while(i.hasNext()) {
-			ManagedDownloader md = (ManagedDownloader)i.next();
+			AbstractDownloader md = (AbstractDownloader)i.next();
 			if (md.conflictsWithIncompleteFile(incompleteFile)) {
 				return true;
 			}
@@ -913,7 +976,10 @@ public class DownloadManager implements BandwidthTracker {
             // Don't bother with making XML from the EQHD.
             RemoteFileDesc rfd = r.toRemoteFileDesc(data);
             for(Iterator j = downloaders.iterator(); j.hasNext(); ) {
-                ManagedDownloader currD = (ManagedDownloader)j.next();
+            	Downloader current = (Downloader)j.next();
+            	if ( !(current instanceof ManagedDownloader))
+            		continue; // can't add sources to torrents yet
+                ManagedDownloader currD = (ManagedDownloader) current;
                 // If we were able to add this specific rfd,
                 // add any alternates that this response might have
                 // also.
@@ -930,6 +996,11 @@ public class DownloadManager implements BandwidthTracker {
         }
     }
 
+    public void acceptConnection(String word, Socket sock) {
+    	HTTPStat.GIV_REQUESTS.incrementStat();
+    	acceptDownload(sock);
+    }
+    
     /**
      * Accepts the given socket for a push download to this host.
      * If the GIV is for a file that was never requested or has already
@@ -954,16 +1025,17 @@ public class DownloadManager implements BandwidthTracker {
         synchronized (this) {
             if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), socket))
                 return;
-            
-            for (Iterator iter = active.iterator(); iter.hasNext();) {
-                ManagedDownloader md = (ManagedDownloader) iter.next();
-                if (md.acceptDownload(file, socket, index, clientGUID))
-                    return;
-            }
-            for (Iterator iter = waiting.iterator(); iter.hasNext();) {
-                ManagedDownloader md = (ManagedDownloader) iter.next();
-                if (md.acceptDownload(file, socket, index, clientGUID))
-                    return;
+            Iterator iter = new MultiIterator(new Iterator[]{
+            		active.iterator(),
+            		waiting.iterator()
+            });
+            while(iter.hasNext()) {
+            	Downloader d = (Downloader) iter.next();
+            	if (! (d instanceof ManagedDownloader))
+            		continue; // pushes apply to gnutella downloads only
+            	ManagedDownloader md = (ManagedDownloader)d;
+            	if (md.acceptDownload(file, socket, index, clientGUID))
+            		return;
             }
         }
         
@@ -986,7 +1058,7 @@ public class DownloadManager implements BandwidthTracker {
      * puts the download back in the waiting list to be finished later.
      *     @modifies this, callback
      */
-    public synchronized void remove(ManagedDownloader downloader, 
+    public synchronized void remove(AbstractDownloader downloader, 
                                     boolean completed) {
         active.remove(downloader);
         if(downloader instanceof InNetworkDownloader)
@@ -1031,11 +1103,11 @@ public class DownloadManager implements BandwidthTracker {
     }
 
     /**
-     * Cleans up the given ManagedDownloader after completion.
+     * Cleans up the given Downloader after completion.
      *
      * If ser is true, also writes a snapshot to the disk.
      */
-    private void cleanupCompletedDownload(ManagedDownloader dl, boolean ser) {
+    private void cleanupCompletedDownload(AbstractDownloader dl, boolean ser) {
         querySentMDs.remove(dl);
         dl.finish();
         if (dl.getQueryGUID() != null)

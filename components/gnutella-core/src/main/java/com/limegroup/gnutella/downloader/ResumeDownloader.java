@@ -108,7 +108,7 @@ public class ResumeDownloader extends ManagedDownloader
      * Overrides ManagedDownloader to display a reasonable file size even
      * when no locations have been found.
      */
-    public synchronized int getContentLength() {
+    public synchronized long getContentLength() {
         return _size;
     }
 

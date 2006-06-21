@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.licenses.License;
@@ -81,7 +82,7 @@ public class FileDesc implements FileDetails {
 	/**
 	 * The LimeXMLDocs associated with this FileDesc.
 	 */
-	private final List /* of LimeXMLDocument */ _limeXMLDocs = new CoWList(CoWList.ARRAY_LIST);
+	private final List /* of LimeXMLDocument */ _limeXMLDocs = new CopyOnWriteArrayList();
 
 	/**
 	 * The number of hits this file has recieved.

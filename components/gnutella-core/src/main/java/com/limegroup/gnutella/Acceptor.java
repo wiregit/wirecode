@@ -12,6 +12,9 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +25,7 @@ import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
+
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -40,7 +44,7 @@ import com.limegroup.gnutella.util.ThreadFactory;
  * the only class that intializes it.  See setListeningPort() for more
  * info.
  */
-public class Acceptor {
+public class Acceptor implements ConnectionAcceptor {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
 
@@ -295,6 +299,11 @@ public class Acceptor {
         MulticastService.instance().start();
         UDPService.instance().start();
         RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
+        RouterService.getConnectionDispatcher().
+        addConnectionAcceptor(this,
+        		new String[]{"CONNECT","\n\n"},
+        		false,
+        		false);
         _started = true;
     }
 	
@@ -480,6 +489,12 @@ public class Acceptor {
 	    _acceptedIncoming = status;
 		RouterService.getCallback().acceptedIncomingChanged(status);
 	    return true;
+	}
+	
+	public void acceptConnection(String word, Socket s) {
+        if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
+            checkFirewall(s.getInetAddress());
+        IOUtils.close(s);
 	}
 	
 	/**

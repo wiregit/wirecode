@@ -10,7 +10,7 @@ import java.nio.channels.SocketChannel;
  * calls on to NIODispatcher.  All ReadableByteChannel
  * calls are delegated to the SocketChannel.
  */
-class SocketInterestReadAdapter implements InterestReadChannel {
+class SocketInterestReadAdapter implements InterestScatteringByteChannel {
     
 	/** Mask OOM as this exception */
 	private static final IOException OOM = new IOException();
@@ -48,5 +48,13 @@ class SocketInterestReadAdapter implements InterestReadChannel {
     ReadableByteChannel getChannel() {
         return channel;
     }
+
+	public long read(ByteBuffer[] arg0, int arg1, int arg2) throws IOException {
+		return channel.read(arg0, arg1, arg2);
+	}
+
+	public long read(ByteBuffer[] arg0) throws IOException {
+		return channel.read(arg0);
+	}
 
 }

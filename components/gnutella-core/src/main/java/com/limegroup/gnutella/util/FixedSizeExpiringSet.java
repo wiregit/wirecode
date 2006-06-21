@@ -57,6 +57,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
         _maxSize = size;
         _expireTime = expireTime;
         _map = new HashMap<T,Long>();
+
     }
 
     /*
@@ -158,7 +159,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
      * @see java.util.Collection#containsAll
      * (java.util.Collection)
      */
-    public boolean containsAll(Collection arg0) {
+    public boolean containsAll(Collection<?> arg0) {
         return _map.keySet().containsAll(arg0);
     }
 
@@ -185,8 +186,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
     public boolean retainAll(Collection arg0) {
         Map<T,Long> map = new HashMap<T,Long>();
         boolean ret = false;
-        for (Iterator<T> iter = _map.keySet().iterator(); iter.hasNext();) {
-            T o = iter.next();
+        for (T o : _map.keySet()) {
             if (arg0.contains(o))
                 map.put(o, _map.get(o));
             else
@@ -203,7 +203,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
      * @see java.util.Collection#removeAll
      * (java.util.Collection) 
      */
-    public boolean removeAll(Collection arg0) {
+    public boolean removeAll(Collection<?> arg0) {
         if (arg0.isEmpty())
             return false;
         boolean ret = false;

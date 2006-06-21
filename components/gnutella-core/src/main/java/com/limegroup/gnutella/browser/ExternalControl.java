@@ -10,12 +10,14 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.StringTokenizer;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageService;
@@ -23,11 +25,12 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 
-public class ExternalControl {
+public class ExternalControl implements ConnectionAcceptor {
     
     private static final Log LOG = LogFactory.getLog(ExternalControl.class);
 
@@ -45,6 +48,22 @@ public class ExternalControl {
 			arg.append(args[i]);
 		}
 		return arg.toString();
+	}
+	
+	private static final ExternalControl INSTANCE =
+		new ExternalControl();
+	
+	private ExternalControl() {
+		RouterService.getConnectionDispatcher().
+		addConnectionAcceptor(this,
+				new String[]{"MAGNET"},
+				true,
+				true);
+	}
+	
+	public void acceptConnection(String word, Socket sock) {
+		HTTPStat.MAGNET_REQUESTS.incrementStat(); 
+		fireMagnet(sock);
 	}
 
     /**

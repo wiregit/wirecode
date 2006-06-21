@@ -71,7 +71,8 @@ public final class HTTPUploader implements Uploader {
      */
 	private CountingOutputStream _ostream;
 	private InputStream _fis;
-	private Socket _socket;
+	private final HTTPSession session;
+	private final Socket _socket;
 	private int _totalAmountReadBefore;
 	private int _totalAmountRead;
 	private int _amountRead;
@@ -84,7 +85,6 @@ public final class HTTPUploader implements Uploader {
 	private String _userAgent;
 	private boolean _headersParsed;
 	private final String _fileName;
-	private final String _hostName;
 	private int _stateNum = CONNECTING;
 	private int _lastTransferStateNum;
 	private HTTPMessage _state;
@@ -94,7 +94,6 @@ public final class HTTPUploader implements Uploader {
 	private boolean _chatEnabled;
 	private boolean _browseEnabled;
     private boolean _supportsQueueing = false;
-    private final boolean _hadPassword;
     
     /**
      * True if this is a forcibly shared network file.
@@ -149,8 +148,6 @@ public final class HTTPUploader implements Uploader {
      * The parameters passed to the HTTP Request.
      */
     private Map _parameters = null;
-
-    private BandwidthTrackerImpl bandwidthTracker=null;
     
     /**
      * The alternate locations that have been written out (as good) locations.
@@ -183,7 +180,7 @@ public final class HTTPUploader implements Uploader {
 	 *
 	 * @param method the <tt>HTTPRequestMethod</tt> for the request
 	 * @param fileName the name of the file
-	 * @param socket the <tt>Socket</tt> instance to serve the upload over
+	 * @param session the <tt>HTTPSession</tt> associated with this upload
 	 * @param index the index of the file in the set of shared files
 	 * @param params the map of parameters in the http request.
      * @param dog the StalledUploadWatchdog to use for monitor stalls.
@@ -192,18 +189,18 @@ public final class HTTPUploader implements Uploader {
 	 */
 	public HTTPUploader(HTTPRequestMethod method,
 	                    String fileName, 
-                        Socket socket,
+                        HTTPSession session,
                         int index,
                         Map params,
-                        StalledUploadWatchdog dog,
-                        boolean hadPassword) {
+                        StalledUploadWatchdog dog) {
         STALLED_WATCHDOG = dog;
-		_socket = socket;
-		_hostName = _socket.getInetAddress().getHostAddress();
+        this.session = session;
+		_socket = session.getSocket();
 		_fileName = fileName;
 		_index = index;
 		_writtenLocs = null;
-        _hadPassword = hadPassword;
+        _totalAmountRead = 0;
+        _amountRead = 0;
 		reinitialize(method, params);
     }
     
@@ -227,19 +224,9 @@ public final class HTTPUploader implements Uploader {
         _clientAcceptsXGnutellaQueryreplies = false;
         _parameters = params;
         _totalAmountReadBefore = 0;
+        _totalAmountRead += _amountRead;
+        _amountRead = 0;
         
-        // If this is the first time we are initializing it,
-        // create a new bandwidth tracker and set a few more variables.
-        if( bandwidthTracker == null ) {
-            bandwidthTracker = new BandwidthTrackerImpl();
-            _totalAmountRead = 0;
-            _amountRead = 0;
-        }            
-        // Otherwise, update the amount read.
-        else {
-            _totalAmountRead += _amountRead;
-            _amountRead = 0;
-        }
 	}
 	
 	/**
@@ -355,7 +342,7 @@ public final class HTTPUploader implements Uploader {
 			_state = new NormalUploadState(this, STALLED_WATCHDOG);
 			break;
         case QUEUED:
-            int pos=RouterService.getUploadManager().positionInQueue(_socket);
+            int pos = session.positionInQueue();
             _state = new QueuedUploadState(pos,this);
             break;
         case NOT_VALIDATED:
@@ -461,7 +448,7 @@ public final class HTTPUploader implements Uploader {
         if( _lastTransferStateNum != QUEUED || _stateNum == INTERRUPTED)
             return -1;
         else
-            return RouterService.getUploadManager().positionInQueue(_socket);
+            return session.positionInQueue();
     }
 
 	/**
@@ -529,7 +516,7 @@ public final class HTTPUploader implements Uploader {
     }
 
 	// implements the Uploader interface
-	public int getFileSize() {
+	public long getFileSize() {
 	    if(_stateNum == THEX_REQUEST)
 	        return _fileDesc.getHashTree().getOutputLength();
 	    else
@@ -537,7 +524,7 @@ public final class HTTPUploader implements Uploader {
     }
 	
 	// implements the Uploader interface
-	public int getAmountRequested() {
+	public long getAmountRequested() {
 	    if(_stateNum == THEX_REQUEST)
 	        return _fileDesc.getHashTree().getOutputLength();
 	    else
@@ -557,7 +544,7 @@ public final class HTTPUploader implements Uploader {
 	public int getLastTransferState() { return _lastTransferStateNum; }
 
 	// implements the Uploader interface
-	public String getHost() {return _hostName;}
+	public String getHost() {return session.getHost();}
 
 	// implements the Uploader interface
 	public boolean isChatEnabled() {return _chatEnabled;}
@@ -688,7 +675,7 @@ public final class HTTPUploader implements Uploader {
      *
 	 * Implements the Uploader interface.
      */
-	public int amountUploaded() {
+	public long amountUploaded() {
 	    if(_stateNum == THEX_REQUEST) {
 	        if(_ostream == null)
 	            return 0;
@@ -704,7 +691,7 @@ public final class HTTPUploader implements Uploader {
 	 *
 	 * Implements the Uploader interface.
 	 */
-	public int getTotalAmountUploaded() {
+	public long getTotalAmountUploaded() {
 	    if(_stateNum == THEX_REQUEST) {
 	        if(_ostream == null)
 	            return 0;
@@ -1008,7 +995,6 @@ public final class HTTPUploader implements Uploader {
 				(str.indexOf("SmartDownload") != -1) ||
 				(str.indexOf("Teleport") != -1) ||
 				(str.indexOf("WebDownloader") != -1) ) {
-                if (!_hadPassword)
                     throw new FreeloaderUploadingException();
                 
                     
@@ -1265,13 +1251,13 @@ public final class HTTPUploader implements Uploader {
 	    int written = _totalAmountRead + _amountRead;
 	    if(_ostream != null)
 	        written += _ostream.getAmountWritten();
-        bandwidthTracker.measureBandwidth(written);
+        session.measureBandwidth(written);
     }
 
     public float getMeasuredBandwidth() {
         float retVal = 0;
         try {
-            retVal = bandwidthTracker.getMeasuredBandwidth();
+            retVal = session.getMeasuredBandwidth();
         } catch (InsufficientDataException ide) {
             retVal = 0;
         }
@@ -1279,7 +1265,7 @@ public final class HTTPUploader implements Uploader {
     }
     
     public float getAverageBandwidth() {
-        return bandwidthTracker.getAverageBandwidth();
+        return session.getAverageBandwidth();
     }
     
     public boolean wantsFAlts() {
@@ -1292,7 +1278,7 @@ public final class HTTPUploader implements Uploader {
 
 	// overrides Object.toString
 	public String toString() {
-        return "<"+_hostName+":"+ _index +">";
+        return "<"+getHost()+":"+ _index +">";
 //  		return "HTTPUploader:\r\n"+
 //  		       "File Name: "+_fileName+"\r\n"+
 //  		       "Host Name: "+_hostName+"\r\n"+

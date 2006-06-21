@@ -25,6 +25,7 @@ public class FakeThrottle implements Throttle {
     }
     
     void setAvailable(int av) { available = av; }
+    public void limit(int i){}
     int getAvailable() { return available; }
     int interests() { return interests; }
     public boolean didRequest() { return didRequest; }

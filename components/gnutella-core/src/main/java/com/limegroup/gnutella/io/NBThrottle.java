@@ -94,7 +94,7 @@ public class NBThrottle implements Throttle {
     private final int _processOp;
     
     /** The amount that is available every tick. */
-    private int _bytesPerTick;
+    private volatile int _bytesPerTick;
     
     /** The amount currently available in this tick. */
     private int _available;
@@ -268,6 +268,15 @@ public class NBThrottle implements Throttle {
             _available += amount;
         //LOG.trace("RETR: " + amount + ", REMAINING: " + _available + ", ALL: " + wroteAll + ", FROM: " + attachment);
     }
+    
+	/**
+	 * Set the number of bytes to write per second
+	 * 
+	 * @param bytesPerSecond
+	 */
+	public void limit(int bytesPerSecond) {
+		_bytesPerTick = (int)(bytesPerSecond * MILLIS_PER_TICK / 1000);
+	}
     
     /**
      * Notification from NIODispatcher that some time has passed.

@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.util.CoWList;
@@ -44,7 +45,7 @@ abstract class AbstractContribution implements Contribution {
     
     private int _id = NOT_CONNECTED;
     
-    private final List _uploadListeners = new CoWList(CoWList.ARRAY_LIST);
+    private final List _uploadListeners = new CopyOnWriteArrayList();
 	
     /* (non-Javadoc)
 	 * @see com.limegroup.gnutella.archive.Contribution#getVerificationUrl()
