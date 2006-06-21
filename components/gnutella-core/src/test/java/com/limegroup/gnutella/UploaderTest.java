@@ -415,9 +415,6 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("should have 2 active uploads",
             2, upManager.uploadsInProgress());
 
-            
-        Thread.sleep((HTTPSession.MIN_POLL_TIME+
-                      HTTPSession.MAX_POLL_TIME)/2);
         try {
             connectDloader(d5, false, rfd2, true);
             fail("should have been queued");

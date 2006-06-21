@@ -27,7 +27,7 @@ public class HTTPSession extends BandwidthTrackerImpl implements UploadSlotUser 
 	public static final int MAX_POLL_TIME = 120000; //120 sec
 	
 	/** The last time this session was polled if queued */
-	private long lastPollTime;
+	private volatile long lastPollTime;
 	
 	
 	public HTTPSession(Socket socket, UploadManager manager) {
@@ -64,6 +64,10 @@ public class HTTPSession extends BandwidthTrackerImpl implements UploadSlotUser 
 		uploader.setState(Uploader.QUEUED);
 		socket.setSoTimeout(MAX_POLL_TIME);
 		lastPollTime = System.currentTimeMillis();
+	}
+	
+	public void handleNotQueued() {
+		lastPollTime = 0;
 	}
 	
 	public boolean isConnectedTo(InetAddress addr) {

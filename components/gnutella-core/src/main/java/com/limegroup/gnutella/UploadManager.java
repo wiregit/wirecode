@@ -735,8 +735,8 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
             case ACCEPTED:
                 assertAsConnecting( session.getUploader().getState() );
                 addAcceptedUploader(session.getUploader());
-                break;
             case BYPASS_QUEUE:
+            	session.handleNotQueued();
                 // ignore.
                 break;
             default:

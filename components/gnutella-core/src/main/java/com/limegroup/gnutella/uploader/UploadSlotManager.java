@@ -26,9 +26,9 @@ public class UploadSlotManager {
 	
     /** 
      * The desired minimum quality of service to provide for uploads, in
-     *  KB/s
+     *  B/ms
      */
-    private static final float MINIMUM_UPLOAD_SPEED = 3000.0f;
+    private static final float MINIMUM_UPLOAD_SPEED = 3.0f;
     
 	/**
 	 * The list of active upload slot requests

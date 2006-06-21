@@ -20,7 +20,6 @@ import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.util.CoWList;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

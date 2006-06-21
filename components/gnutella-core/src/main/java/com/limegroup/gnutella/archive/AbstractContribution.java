@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.util.CoWList;
 
 
 abstract class AbstractContribution implements Contribution {
