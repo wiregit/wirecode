@@ -56,6 +56,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.DatabaseSettings;
 
 /**
  * The Mojito DHT. All you need to know is here!
@@ -384,11 +385,17 @@ public class MojitoDHT {
                 KeyValue.createLocalKeyValue(key, value, getLocalNode());
             
             if (privateKey == null) {
-                keyValue.sign(context.getPrivateKey());
-                keyValue.setPublicKey(context.getPublicKey());
+                if (DatabaseSettings.SIGN_KEY_VALUES.getValue()) {
+                    keyValue.sign(context.getPrivateKey());
+                    keyValue.setPublicKey(context.getPublicKey());
+                }
             } else {
                 keyValue.sign(privateKey);
-                //keyValue.verify(context.getMasterKey());
+                
+                if (!keyValue.verify(context.getMasterKey())) {
+                    throw new SignatureException("Cannot store " + keyValue 
+                            + " because signature does not match with the master key");
+                }
             }
             
             Database database = context.getDatabase();

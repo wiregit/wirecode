@@ -26,6 +26,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Arrays;
+import java.util.Map;
 
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
@@ -36,7 +37,7 @@ import com.limegroup.mojito.security.CryptoHelper;
  * some additional fields like originator, PublicKey or the 
  * signature of the KeyValue.
  */
-public class KeyValue implements Serializable {
+public class KeyValue implements Map.Entry<KUID, byte[]>, Serializable {
     
     private static final long serialVersionUID = -666238398053901179L;
     
@@ -140,7 +141,7 @@ public class KeyValue implements Serializable {
      */
     public void sign(PrivateKey privateKey) 
             throws InvalidKeyException, SignatureException {
-        signature = CryptoHelper.sign(privateKey, this);
+        signature = CryptoHelper.sign(privateKey, key.getBytes(), value);
     }
     
     /**
@@ -159,7 +160,7 @@ public class KeyValue implements Serializable {
     public boolean verify(PublicKey pubKey) 
             throws SignatureException, InvalidKeyException {
         if (pubKey != null && signature != null) {
-            return CryptoHelper.verify(pubKey, this);
+            return CryptoHelper.verify(pubKey, signature, key.getBytes(), value);
         }
         return false;
     }
@@ -173,10 +174,10 @@ public class KeyValue implements Serializable {
      */
     public void setPublicKey(PublicKey pubKey) 
             throws SignatureException, InvalidKeyException {
+        
         if (!verify(pubKey)) {
             throw new IllegalArgumentException("Signature and PublicKey don't match");
         }
-        
         this.pubKey = pubKey;
     }
     
@@ -211,6 +212,13 @@ public class KeyValue implements Serializable {
     }
     
     /**
+     * Not implemented, throws an UnsupportedOperationException!
+     */
+    public byte[] setValue(byte[] value) {
+        throw new UnsupportedOperationException("This class is immutable");
+    }
+    
+    /** 
      * Returns whether or not the value is "empty". Storing
      * empty values on the DHT means removing them.
      */
@@ -336,9 +344,10 @@ public class KeyValue implements Serializable {
     
     public String toString() {
         if (!isEmptyValue()) {
-            return key.toString() + " = " + new String(value) + " - originator: " + nodeId;
+            return key.toString() + " = " + new String(value) 
+                + ", originator=" + ContactNode.toString(nodeId, address);
         } else {
-            return key.toString() + " - originator: " + nodeId + " (REMOVE)";
+            return key.toString() + ", originator=" + ContactNode.toString(nodeId, address) + " (REMOVE)";
         }
     }
 }

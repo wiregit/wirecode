@@ -36,8 +36,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.zip.GZIPInputStream;
 
-import com.limegroup.mojito.db.KeyValue;
-
 /**
  * 
  */
@@ -70,7 +68,7 @@ public final class CryptoHelper {
             in.readFully(encodedKey);
             
             PublicKey pubKey = createPublicKey(encodedKey);
-            if (!verify(pubKey, encodedKey, signature)) {
+            if (!verify(pubKey, signature, encodedKey)) {
                 throw new SignatureVerificationException();
             }
             return pubKey;
@@ -101,28 +99,10 @@ public final class CryptoHelper {
         }
     }
     
-    public static Signature createSignature(KeyPair keyPair) {
-        return createSignature(keyPair.getPrivate(), keyPair.getPublic());
-    }
-    
-    public static Signature createSignature(PrivateKey privateKey) {
-        return createSignature(privateKey, null);
-    }
-    
-    public static Signature createSignature(PublicKey publicKey) {
-        return createSignature(null, publicKey);
-    }
-    
-    public static Signature createSignature(PrivateKey privateKey, PublicKey publicKey) {
+    public static Signature createSignSignature(PrivateKey privateKey) {
         try {
             Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
-            if (privateKey != null) {
-                signature.initSign(privateKey);
-            }
-            
-            if (publicKey != null) {
-                signature.initVerify(publicKey);
-            }
+            signature.initSign(privateKey);
             return signature;
         } catch (InvalidKeyException err) {
             throw new RuntimeException(err);
@@ -131,23 +111,19 @@ public final class CryptoHelper {
         }
     }
     
-    public static synchronized byte[] sign(PrivateKey privateKey, byte[] data) 
-            throws SignatureException, InvalidKeyException {
-        
+    public static Signature createVerifySignature(PublicKey publicKey) {
         try {
-            if (SIGNATURE == null) {
-                SIGNATURE = Signature.getInstance(SIGNATURE_ALGORITHM);
-            }
-            
-            SIGNATURE.initSign(privateKey);
-            SIGNATURE.update(data, 0, data.length);
-            return SIGNATURE.sign();
+            Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
+            signature.initVerify(publicKey);
+            return signature;
+        } catch (InvalidKeyException err) {
+            throw new RuntimeException(err);
         } catch (NoSuchAlgorithmException err) {
             throw new RuntimeException(err);
         }
     }
     
-    public static synchronized byte[] sign(PrivateKey privateKey, KeyValue keyValue)
+    public static synchronized byte[] sign(PrivateKey privateKey, byte[]... data)
             throws SignatureException, InvalidKeyException {
         
         try {
@@ -157,11 +133,9 @@ public final class CryptoHelper {
             
             SIGNATURE.initSign(privateKey);
             
-            byte[] key = keyValue.getKey().getBytes();
-            SIGNATURE.update(key, 0, key.length);
-            
-            byte[] value = keyValue.getValue();
-            SIGNATURE.update(value, 0, value.length);
+            for(byte[] d : data) {
+                SIGNATURE.update(d, 0, d.length);
+            }
             
             return SIGNATURE.sign();
         } catch (NoSuchAlgorithmException err) {
@@ -169,7 +143,7 @@ public final class CryptoHelper {
         }
     }
 
-    public static synchronized boolean verify(PublicKey publicKey, byte[] data, byte[] signature) 
+    public static synchronized boolean verify(PublicKey publicKey, byte[] signature, byte[]... data) 
             throws SignatureException, InvalidKeyException {
         
         if (signature == null) {
@@ -182,33 +156,10 @@ public final class CryptoHelper {
             }
             
             SIGNATURE.initVerify(publicKey);
-            SIGNATURE.update(data, 0, data.length);
-            return SIGNATURE.verify(signature);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static synchronized boolean verify(PublicKey publicKey, KeyValue keyValue) 
-            throws SignatureException, InvalidKeyException {
-
-        byte[] signature = keyValue.getSignature();
-        if (signature == null) {
-            return false;
-        }
-
-        try {
-            if (SIGNATURE == null) {
-                SIGNATURE = Signature.getInstance(SIGNATURE_ALGORITHM);
+            
+            for(byte[] d : data) {
+                SIGNATURE.update(d, 0, d.length);
             }
-
-            SIGNATURE.initVerify(publicKey);
-            
-            byte[] key = keyValue.getKey().getBytes();
-            SIGNATURE.update(key, 0, key.length);
-            
-            byte[] value = keyValue.getValue();
-            SIGNATURE.update(value, 0, value.length);
             
             return SIGNATURE.verify(signature);
         } catch (NoSuchAlgorithmException e) {

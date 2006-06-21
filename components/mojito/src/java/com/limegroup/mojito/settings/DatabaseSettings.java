@@ -80,4 +80,10 @@ public final class DatabaseSettings extends MojitoProps {
     public static final LongSetting RUN_REPUBLISHER_EVERY
         = FACTORY.createSettableLongSetting("RUN_REPUBLISHER_EVERY", 5L*60L*1000L, 
                 "run_republisher_every", 5L*60L*1000L, 30L*60L*1000L);
+    
+    /**
+     * 
+     */
+    public static final BooleanSetting SIGN_KEY_VALUES
+        = FACTORY.createBooleanSetting("SIGN_KEY_VALUES", false);
 }
