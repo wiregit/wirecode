@@ -473,8 +473,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                     ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_OK.incrementStat();
                 }
             } else {
-                lookupStat.setHops(hop, isValueLookup());
-                lookupStat.setTime((int)time, isValueLookup());
+                lookupStat.setHops(hop, false);
+                lookupStat.setTime((int)time, false);
                 
                 // addResponse(ContactNode) limits the size of the
                 // Trie to K and we can thus use the size method of it!

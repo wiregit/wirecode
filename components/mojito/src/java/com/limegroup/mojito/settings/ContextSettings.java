@@ -21,6 +21,11 @@ package com.limegroup.mojito.settings;
 
 import java.io.UnsupportedEncodingException;
 
+import com.limegroup.gnutella.settings.BooleanSetting;
+import com.limegroup.gnutella.settings.IntSetting;
+import com.limegroup.gnutella.settings.LongSetting;
+import com.limegroup.gnutella.settings.StringSetting;
+
 /**
  * 
  */

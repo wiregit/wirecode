@@ -87,7 +87,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         QueryKey queryKey = QueryKey.getQueryKey(
                 request.getContactNode().getSocketAddress());
         
-        List<ContactNode> bucketList = Collections.EMPTY_LIST;
+        List<ContactNode> bucketList = Collections.emptyList();
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
                 bucketList = context.getRouteTable().getMRSNodes(

@@ -19,103 +19,32 @@
  
 package com.limegroup.mojito.settings;
 
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.settings.AbstractSettings;
+import com.limegroup.gnutella.settings.SettingsFactory;
+
 
 /**
  * 
  */
-public class MojitoProps {
+public class MojitoProps extends AbstractSettings {
     
     private static final MojitoProps INSTANCE = new MojitoProps();
     
     // The FACTORY is used for subclasses of LimeProps, so they know
     // which factory to add classes to.
-    //protected static final SettingsFactory FACTORY = INSTANCE.getFactory();
-    protected static final SettingsFactory FACTORY = new SettingsFactory();
+    protected static final SettingsFactory FACTORY = INSTANCE.getFactory();
     
     // This is protected so that subclasses can extend from it, but
     // subclasses should NEVER instantiate a copy themselves.
     protected MojitoProps() {
-        /*super("mojito.props", "Mojita properties file");
+        super("mojito.props", "Mojito properties file");
         Assert.that( getClass() == MojitoProps.class,
-            "should not have a subclass instantiate");*/
+            "should not have a subclass instantiate");
     }
     
     /**
      * Returns the only instance of this class.
      */
     public static MojitoProps instance() { return INSTANCE; }
-    
-    // STUBS STUBS STUBS STUBS STUBS STUBS STUBS STUBS STUBS STUBS STUBS
-    
-    protected static class SettingsFactory {
-        
-        private SettingsFactory() {}
-        
-        public BooleanSetting createBooleanSetting(String key, boolean value) {
-            return new BooleanSetting(value);
-        }
-        
-        public BooleanSetting createSettableBooleanSetting(String key, boolean value, String simppKey) {
-            return new BooleanSetting(value);
-        }
-        
-        public IntSetting createIntSetting(String key, int value) {
-            return new IntSetting(value);
-        }
-        
-        public IntSetting createSettableIntSetting(String key, int value, String simppKey, int min, int max) {
-            return new IntSetting(value);
-        }
-        
-        public LongSetting createLongSetting(String key, long value) {
-            return new LongSetting(value);
-        }
-        
-        public LongSetting createSettableLongSetting(String key, long value, String simppKey, long min, long max) {
-            return new LongSetting(value);
-        }
-        
-        public ByteSetting createByteSetting(String key, byte value) {
-            return new ByteSetting(value);
-        }
-        
-        public StringSetting createStringSetting(String key, String value) {
-            return new StringSetting(value);
-        }
-    }
-    
-    public static class BooleanSetting {
-        private boolean value;
-        public BooleanSetting(boolean value) { this.value = value; }
-        public void setValue(boolean value) { this.value = value; }
-        public boolean getValue() { return value; }
-    }
-
-    public static class IntSetting {
-        private int value;
-        public IntSetting(int value) { this.value = value; }
-        public void setValue(int value) { this.value = value; }
-        public int getValue() { return value; }
-    }
-    
-    public static class ByteSetting {
-        private byte value;
-        public ByteSetting(byte value) { this.value = value; }
-        public void setValue(byte value) { this.value = value; }
-        public byte getValue() { return value; }
-    }
-    
-    public static class LongSetting {
-        private long value;
-        public LongSetting(long value) { this.value = value; }
-        public void setValue(long value) { this.value = value; }
-        public long getValue() { return value; }
-    }
-    
-    public static class StringSetting {
-        private String value;
-        public StringSetting(String value) { this.value = value; }
-        public void setValue(String value) { this.value = value; }
-        public String getValue() { return value; }
-    }
 }

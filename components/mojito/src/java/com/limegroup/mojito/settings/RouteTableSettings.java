@@ -19,6 +19,10 @@
  
 package com.limegroup.mojito.settings;
 
+import com.limegroup.gnutella.settings.BooleanSetting;
+import com.limegroup.gnutella.settings.IntSetting;
+import com.limegroup.gnutella.settings.LongSetting;
+
 public final class RouteTableSettings extends MojitoProps {
 
     private RouteTableSettings() {}

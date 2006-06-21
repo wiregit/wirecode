@@ -132,8 +132,8 @@ public class Context {
         }
         masterKeyPair = new KeyPair(masterKey, null);
         
-        createEventQueue();
-        createTimer();
+        initEventQueue();
+        initContextTimer();
         
         dhtStats = new DHTNodeStat(this);
         
@@ -158,7 +158,7 @@ public class Context {
         routeTable.add(localNode, false);
     }
 
-    private void createEventQueue() {
+    private void initEventQueue() {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 Thread thread = getThreadFactory().newThread(r);
@@ -172,7 +172,7 @@ public class Context {
         eventExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, queue, factory);
     }
     
-    private void createTimer() {
+    private void initContextTimer() {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 Thread thread = getThreadFactory().newThread(r);

@@ -19,6 +19,10 @@
  
 package com.limegroup.mojito.settings;
 
+import com.limegroup.gnutella.settings.BooleanSetting;
+import com.limegroup.gnutella.settings.IntSetting;
+import com.limegroup.gnutella.settings.LongSetting;
+
 
 public class KademliaSettings extends MojitoProps {
     
