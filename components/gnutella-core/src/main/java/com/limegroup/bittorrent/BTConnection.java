@@ -198,7 +198,7 @@ public class BTConnection implements UploadSlotListener {
 		
 		ThrottleWriter throttle = new ThrottleWriter(_torrent
 				.getUploadThrottle());
-		DelayedBufferWriter delayer = new DelayedBufferWriter(1400);
+		DelayedBufferWriter delayer = new DelayedBufferWriter(1400, 3000);
 		_writer.setWriteChannel(delayer);
 		delayer.setWriteChannel(throttle);
 		socket.setReadObserver(_reader);

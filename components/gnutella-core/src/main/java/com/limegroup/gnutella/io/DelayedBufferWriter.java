@@ -3,14 +3,12 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.io.WriteObserver;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
  * A Writer that stores data within a buffer and writes it out after some delay,
@@ -20,8 +18,8 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
 
     private static final Log LOG = LogFactory.getLog(DelayedBufferWriter.class);
 
-    /** The delay time to use before forcing a flush */
-    private final static int MAX_TIME = 200;
+    /** The default delay time to use before forcing a flush */
+    private final static int MAX_TIME = 4200;
    
     /** The channel to write to & interest on. */    
     private volatile InterestWriteChannel sink;
@@ -34,12 +32,32 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
      */
     private final ByteBuffer buf;
     
+    /** The delay time to use before forcing a flush */
+    private final long delay;
+    
+    /** Where to schedule the flush */
+    private final SchedulingThreadPool scheduler;
+    
     /** The last time we flushed, so we don't flush again too soon. */
     private long lastFlushTime;
+
+    /** Future flushing */
+    private Future interester;
     
     /** Constructs a new DelayedBufferWriter whose buffer is the given size. */
     public DelayedBufferWriter(int size) {
-        buf = ByteBuffer.allocate(size);
+    	this(size, MAX_TIME);
+    }
+    
+    /** Constructs a new DelayedBufferWriter whose buffer is the given size and delay. */
+    public DelayedBufferWriter(int size, long delay) {
+    	this(size, delay, new NIODispatcherScheduler());
+    }
+    
+    DelayedBufferWriter(int size, long delay, SchedulingThreadPool scheduler) {
+    	buf = ByteBuffer.allocate(size);
+    	this.delay = delay;
+    	this.scheduler = scheduler;
     }
 
     /**
@@ -52,8 +70,17 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
      * (if it was null).
      */
     public synchronized void interest(WriteObserver observer, boolean status) {
-        this.observer = status ? observer : null;
-        
+    	if (status) {
+    		this.observer = observer;
+    		// if we had any flushing scheduled, cancel it.
+    		if (interester != null) {
+    			interester.cancel(false);
+    			interester = null;
+    		}
+    	}
+    	else 
+    		this.observer = null;
+    	
         InterestWriteChannel source = sink;
         if(source != null)
             source.interest(this, true); 
@@ -141,20 +168,27 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         long now = System.currentTimeMillis();
         if (lastFlushTime == 0)
             lastFlushTime = now;
-        if (now - lastFlushTime > MAX_TIME || upper == null)
+        if (now - lastFlushTime > delay) 
             flush(now);
                  
-        // If still no data after that, we've written everything we want -- exit.
-        if (buf.position() == 0) {
-            // We have nothing left to write, however, it is possible
-            // that between the above check for interested.handleWrite & here,
-            // we got pre-empted and another thread turned on interest.
-            synchronized(this) {
-                upper = observer;
-                if (upper == null)
-                    sink.interest(this,false);
-            }
-            return false;
+        synchronized(this) {
+        	// It is possible that between the above check for 
+        	// interested.handleWrite & here, we got pre-empted 
+        	// and another thread turned on interest.
+        	upper = observer;
+        	if (upper == null) {
+        		sink.interest(this,false);
+        		
+        		// If still no data after that, we've written everything we want -- exit.
+        		if (buf.position() == 0) 
+        			return false;
+        		else {
+        			// otherwise schedule a flushing event.
+        			interester = scheduler.invokeLater(
+        					new Interester(), 
+        					lastFlushTime + delay - now);
+        		}
+        	}
         } 
         
         return true;
@@ -181,6 +215,35 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         } else  {
             buf.position(buf.limit()).limit(buf.capacity());
         }
+    }
+    
+    private class Interester implements Runnable {
+    	public void run() {
+    		DelayedBufferWriter me = DelayedBufferWriter.this;
+    		synchronized(me) {
+    			InterestWriteChannel below = me.sink;
+    			WriteObserver above = observer;
+    			if (below != null && 
+    					below.isOpen() && 
+    					above == null && 
+    					buf.position() > 0) {
+    				below.interest(me, true);
+    			}
+    		}
+    	}
+    }
+
+    // TODO: factor out this
+    private static class NIODispatcherScheduler implements SchedulingThreadPool {
+
+    	public Future invokeLater(Runnable r, long delay) {
+    		return NIODispatcher.instance().invokeLater(r, delay);
+    	}
+    	
+    	public void invokeLater(Runnable runner) {
+    		NIODispatcher.instance().invokeLater(runner);
+    	}
+    	
     }
 
 }
