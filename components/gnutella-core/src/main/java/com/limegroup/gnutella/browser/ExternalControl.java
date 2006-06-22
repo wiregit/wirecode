@@ -2,6 +2,7 @@ package com.limegroup.gnutella.browser;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,6 +28,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -38,7 +40,7 @@ public class ExternalControl implements ConnectionAcceptor {
 	private static final String LOCALHOST       = "127.0.0.1"; 
 	private static final String HTTP            = "http://";
 	private static boolean      initialized     = false;
-	private static String       enqueuedRequest = null;
+	private static volatile String       enqueuedRequest = null;
 
 	public static String preprocessArgs(String args[]) {
 	    LOG.trace("enter proprocessArgs");
@@ -56,14 +58,15 @@ public class ExternalControl implements ConnectionAcceptor {
 	private ExternalControl() {
 		RouterService.getConnectionDispatcher().
 		addConnectionAcceptor(this,
-				new String[]{"MAGNET"},
+				new String[]{"MAGNET","TORRENT"},
 				true,
 				true);
 	}
 	
 	public void acceptConnection(String word, Socket sock) {
-		HTTPStat.MAGNET_REQUESTS.incrementStat(); 
-		fireMagnet(sock);
+		if (word.equals("MAGNET"))
+			HTTPStat.MAGNET_REQUESTS.incrementStat(); 
+		fireControlThread(sock, word.equals("MAGNET"));
 	}
 
     /**
@@ -89,34 +92,42 @@ public class ExternalControl implements ConnectionAcceptor {
 	public static boolean  isInitialized() {
 		return initialized;
 	}
-	public static void enqueueMagnetRequest(String arg) {
-	    LOG.trace("enter enqueueMagnetRequest");
+	public static void enqueueControlRequest(String arg) {
+	    LOG.trace("enter enqueueControlRequest");
 		enqueuedRequest = arg;
 	}
 
-	public static void runQueuedMagnetRequest() {
+	public static void runQueuedControlRequest() {
 		initialized = true;
 	    if ( enqueuedRequest != null ) {
 			String request   = enqueuedRequest;
 			enqueuedRequest = null;
-            handleMagnetRequest(request);
+			if (isTorrentRequest(request))
+				handleTorrentRequest(request);
+			else
+				handleMagnetRequest(request);
 		}
 	}
 	
+	/**
+	 * @return true if this is a torrent request.  
+	 * TODO: make this work with magnet links pointing to torrent files.
+	 */
+	private static boolean isTorrentRequest(String arg) {
+		return arg != null && arg.trim().toLowerCase().endsWith(".torrent");
+	}
 	
 	//refactored the download logic into a separate method
 	public static void handleMagnetRequest(String arg) {
 	    LOG.trace("enter handleMagnetRequest");
 
-		ActivityCallback callback = RouterService.getCallback();
-
+	    ActivityCallback callback = restoreApplication();
         // No reason to make sure connections are active.  We don't even know
         // at this point if the magnet requires a search.
 //		if ( RouterService.getNumInitializedConnections() <= 0 ) 
 //		    RouterService.connect();
 
-		callback.restoreApplication();
-		callback.showDownloads();
+
 
 	    MagnetOptions options[] = MagnetOptions.parseMagnet(arg);
 
@@ -130,6 +141,20 @@ public class ExternalControl implements ConnectionAcceptor {
 		if (!callback.handleMagnets(options)) {
 		downloadMagnet(options);
 		}
+	}
+	
+	private static ActivityCallback restoreApplication() {
+		ActivityCallback callback = RouterService.getCallback();
+		callback.restoreApplication();
+		callback.showDownloads();
+		return callback;
+	}
+	
+	private static void handleTorrentRequest(String arg) {
+		LOG.trace("enter handleTorrentRequest");
+		ActivityCallback callback = restoreApplication();
+		File torrentFile = new File(arg.trim());
+		callback.handleTorrent(torrentFile);
 	}
 	
 	/**
@@ -198,15 +223,15 @@ public class ExternalControl implements ConnectionAcceptor {
 	 *  Deiconify the application, fire MAGNET request
 	 *  and return true as a sign that LimeWire is running.
 	 */
-	public static void fireMagnet(Socket socket) {
-	    LOG.trace("enter fireMagnet");
+	public static void fireControlThread(Socket socket, boolean magnet) {
+	    LOG.trace("enter fireControl");
 	    
-        Thread.currentThread().setName("IncomingMagnetThread");
+        Thread.currentThread().setName("IncomingControlThread");
 		try {
 			// Only allow control from localhost
 			if (!NetworkUtils.isLocalHost(socket)) {
                 if(LOG.isWarnEnabled())
-				    LOG.warn("Invalid magnet request from: " + socket.getInetAddress().getHostAddress());
+				    LOG.warn("Invalid control request from: " + socket.getInetAddress().getHostAddress());
 				return;
             }
 
@@ -223,11 +248,14 @@ public class ExternalControl implements ConnectionAcceptor {
 			byte[] bytes=s.getBytes();
 			out.write(bytes);
 			out.flush();
-            handleMagnetRequest(line);
+			if (magnet)
+				handleMagnetRequest(line);
+			else
+				handleTorrentRequest(line);
 		} catch (IOException e) {
-		    LOG.warn("Exception while responding to magnet request", e);
+		    LOG.warn("Exception while responding to control request", e);
 		} finally {
-		    try { socket.close(); } catch (IOException e) { }
+		    IOUtils.close(socket);
         }
 	}
 
@@ -246,6 +274,7 @@ public class ExternalControl implements ConnectionAcceptor {
 		// LimeWires to start if somehow the existing one
 		// set its port to 0, but that should not happen
 		// in normal program flow.
+		String type = isTorrentRequest(arg) ? "TORRENT" : "MAGNET";
 		if( !NetworkUtils.isValidPort(port) ) {
 		    ConnectionSettings.PORT.revertToDefault();
 		    port = ConnectionSettings.PORT.getValue();
@@ -258,7 +287,7 @@ public class ExternalControl implements ConnectionAcceptor {
 		    OutputStream os = socket.getOutputStream();
 		    OutputStreamWriter osw = new OutputStreamWriter(os);
 		    BufferedWriter out = new BufferedWriter(osw);
-		    out.write("MAGNET "+arg+" ");
+		    out.write(type+" "+arg+" ");
 		    out.write("\r\n");
 		    out.flush();
 		    String str = byteReader.readLine();

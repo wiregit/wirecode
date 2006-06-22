@@ -166,4 +166,7 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener
 	 * Indicates that the firewalled state of this has changed. 
 	 */
 	public void acceptedIncomingChanged(boolean status);
+	
+	/** Try to download the torrent file */
+	public void handleTorrent(File torrentFile);
 }

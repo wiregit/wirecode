@@ -275,6 +275,8 @@ public class Main implements ActivityCallback, ErrorCallback {
 	public boolean handleMagnets(final MagnetOptions[] magnets) {
 		return false;
 	}
+	
+	public void handleTorrent(File torrentFile){}
 
 	public void acceptedIncomingChanged(boolean status) { }
 
