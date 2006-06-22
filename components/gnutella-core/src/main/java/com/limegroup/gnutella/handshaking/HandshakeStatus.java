@@ -1,43 +1,57 @@
 package com.limegroup.gnutella.handshaking;
 
-public class HandshakeStatus {
+/**
+ * A description of status that handshaking can end with.
+ */
+public enum HandshakeStatus {
 
+    /* The only good status. */
+    OK("OK", true),
+    /* All bad statuses. */
+    NO_X_ULTRAPEER("No X-Ultrapeer"),
+    DISCONNECTED("I'm Disconnected"),
+    WE_ARE_LEAVES("We're Leaves"),
+    NOT_GOOD_UP("Not Good Ultrapeer"),
+    IDLE_LIMEWIRE("Idle, Need LimeWire"),
+    STARTING_LIMEWIRE("Starting, Need LimeWire"),
+    TOO_MANY_UPS("No Ultrapeer Slots"),
+    NOT_ALLOWED_LEAF("Leaf Connection Failed"),
+    NOT_GOOD_LEAF("Not Good Leaf"),
+    TOO_MANY_LEAF("No Leaf Slots"),
+    NOT_ALLOWED_UP("Ultrapeer Connection Failed"),
+    NON_LIME_RATIO("Non-LimeWire Slots Full"),
+    NO_LIME_SLOTS("No LimeWire Slots"),
+    NO_HEADERS("No Headers Received"),
+    UNKNOWN("Unknown Handshake Failure");
+    
+    /** The message the handshake should use. */
     private final String msg;
+    /** Whether or not the handshake can continue. */
     private final boolean ok;
     
+    /**
+     * Constructs a HandshakeStatus.
+     * If 'ok' is true, the handshake is acceptable.
+     * 
+     * @param msg
+     * @param ok
+     */
     private HandshakeStatus(String msg, boolean ok) {
         this.msg = msg;
         this.ok = ok;
     }
     
+    /** Constructs a HandshakeStatus that is not acceptable. */
     private HandshakeStatus(String msg) {
         this(msg, false);
     }
     
-    /** The only good status. */
-    public static final HandshakeStatus OK = new HandshakeStatus("OK", true);
-    
-    /* All bad statuses. */
-    public static final HandshakeStatus NO_X_ULTRAPEER = new HandshakeStatus("No X-Ultrapeer");
-    public static final HandshakeStatus DISCONNECTED = new HandshakeStatus("I'm Disconnected");
-    public static final HandshakeStatus WE_ARE_LEAVES = new HandshakeStatus("We're Leaves");
-    public static final HandshakeStatus NOT_GOOD_UP = new HandshakeStatus("Not Good Ultrapeer");
-    public static final HandshakeStatus IDLE_LIMEWIRE = new HandshakeStatus("Idle, Need LimeWire");
-    public static final HandshakeStatus STARTING_LIMEWIRE = new HandshakeStatus("Starting, Need LimeWire");
-    public static final HandshakeStatus TOO_MANY_UPS = new HandshakeStatus("No Ultrapeer Slots");
-    public static final HandshakeStatus NOT_ALLOWED_LEAF = new HandshakeStatus("Leaf Connection Failed");
-    public static final HandshakeStatus NOT_GOOD_LEAF = new HandshakeStatus("Not Good Leaf");
-    public static final HandshakeStatus TOO_MANY_LEAF = new HandshakeStatus("No Leaf Slots");
-    public static final HandshakeStatus NOT_ALLOWED_UP = new HandshakeStatus("Ultrapeer Connection Failed");
-    public static final HandshakeStatus NON_LIME_RATIO = new HandshakeStatus("Non-LimeWire Slots Full");
-    public static final HandshakeStatus NO_LIME_SLOTS = new HandshakeStatus("No LimeWire Slots");
-    public static final HandshakeStatus NO_HEADERS = new HandshakeStatus("No Headers Received");
-    public static final HandshakeStatus UNKNOWN = new HandshakeStatus("Unknown Handshake Failure");
-    
+    /** Describes the message the handshake should use. */
     public String getMessage() {
         return msg;
     }
     
+    /** Determines if the handshake can continue. */
     public boolean isAcceptable() {
         return ok;
     }
