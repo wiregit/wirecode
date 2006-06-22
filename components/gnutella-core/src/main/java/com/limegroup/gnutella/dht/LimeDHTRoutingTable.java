@@ -36,9 +36,8 @@ public class LimeDHTRoutingTable extends PatriciaRouteTable {
      * 
      * @param node The DHT leaf node to be added
      */
-    public void addLeafDHTNode(String host, int port) {
-        InetSocketAddress target = new InetSocketAddress(host, port);
-        IpPortImpl node = new IpPortImpl(target);
+    public void addLeafDHTNode(InetSocketAddress host) {
+        IpPortImpl node = new IpPortImpl(host);
         final ContactNode[] dhtNode = new ContactNode[] {null};
 
         if(LOG.isDebugEnabled()) {
@@ -47,7 +46,7 @@ public class LimeDHTRoutingTable extends PatriciaRouteTable {
         
         synchronized (dhtNode) {
                 try {
-                    context.ping(target, new PingListener() {
+                    context.ping(host, new PingListener() {
                         public void response(ResponseMessage response, long t) {
                             dhtNode[0] = response.getContactNode();
                             synchronized (dhtNode) {

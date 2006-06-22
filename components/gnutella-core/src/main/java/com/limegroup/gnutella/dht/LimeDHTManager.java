@@ -11,6 +11,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
@@ -20,9 +21,15 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
+import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -46,11 +53,11 @@ import com.limegroup.mojito.event.BootstrapListener;
  * 1) not running.
  * 2) running and bootstrapping: the dht is trying to bootstrap.
  * 3) running and waiting: the dht has failed the bootstrap and is waiting for additional bootstrap hosts.
- * 3) running and not waiting and not bootstrapping: the dht is bootstrapped.
+ * 3) running and bootstrapped.
  * 
  * The current implementation is dependant on the MojitoDHT. 
  */
-public class LimeDHTManager implements LifecycleListener {
+public class LimeDHTManager implements LifecycleListener, MessageListener {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTManager.class);
     
@@ -208,14 +215,16 @@ public class LimeDHTManager implements LifecycleListener {
                             bootstrap();
                         } else {
                             waiting = true;
-                            //here: perform a PING requesting for DHT hosts
+                            //send UDPPings -- non blocking
+                            sendRequestForDHTHosts();
                         }
                     }
                 }
-                public void phaseOneComplete(long time) {}
-                public void phaseTwoComplete(boolean foundNodes, long time) {
+                public void phaseOneComplete(long time) {
                     waiting = false;
-                    //Notify our connections that we are now a DHT node 
+                }
+                public void phaseTwoComplete(boolean foundNodes, long time) {
+                    //Notify our connections that we are now a full DHT node 
                     CapabilitiesVM.reconstructInstance();
                     RouterService.getConnectionManager().sendUpdatedCapabilities();
                 }
@@ -257,6 +266,11 @@ public class LimeDHTManager implements LifecycleListener {
         }
     }
     
+    private void sendRequestForDHTHosts() {
+        Message m = PingRequest.createUDPingWithDHTIPPRequest();
+        RouterService.getHostCatcher().sendMessage(m, this, new UDPPingCanceller());
+    }
+    
     /**
      * Adds a host to the head of a list of boostrap hosts ordered by Most Recently Seen.
      * If the manager is waiting for hosts, this method tries to bootstrap 
@@ -283,12 +297,17 @@ public class LimeDHTManager implements LifecycleListener {
         }
     }
     
-    public void addLeafDHTNode(String host, int port) {
+    public synchronized void addLeafDHTNode(String host, int port) {
         if(!running) return;
-        limeDHTRouteTable.addLeafDHTNode(host, port);
+        InetSocketAddress addr = new InetSocketAddress(host, port);
+        if(waiting) {
+            addBootstrapHost(addr);
+        } else {
+            limeDHTRouteTable.addLeafDHTNode(addr);
+        }
     }
     
-    public void removeLeafDHTNode(String host, int port) {
+    public synchronized void removeLeafDHTNode(String host, int port) {
         if(!running) return;
         limeDHTRouteTable.removeLeafDHTNode(host, port);
     }
@@ -302,7 +321,7 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public void setFirewalled(boolean firewalled) {
-        dht.setFirewalled(firewalled);
+        if(running && !waiting) dht.setFirewalled(firewalled);
     }
 
     /**
@@ -350,6 +369,20 @@ public class LimeDHTManager implements LifecycleListener {
         return waiting;
     }
     
+    public void processMessage(Message m, ReplyHandler handler) {
+        if(!(m instanceof PingReply)) return;
+        PingReply reply = (PingReply) m;
+        List<IpPort> l = reply.getPackedIPPorts();
+        
+        for (IpPort ipp : l) {
+            addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
+        }
+    }
+
+    public void registered(byte[] guid) {}
+
+    public void unregistered(byte[] guid) {}
+    
     public Collection<IpPort> getDHTNodes(int numNodes){
         if(!running) {
             return Collections.emptyList();
@@ -367,6 +400,8 @@ public class LimeDHTManager implements LifecycleListener {
         }
         return ipps;
     }
+    
+    
     
     private class IpPortContactNode implements IpPort {
         
@@ -392,4 +427,11 @@ public class LimeDHTManager implements LifecycleListener {
             return port;
         }
     }
+    
+    private class UDPPingCanceller implements Cancellable{
+        public boolean isCancelled() {
+            return !waiting;
+        }
+    }
+
 }
