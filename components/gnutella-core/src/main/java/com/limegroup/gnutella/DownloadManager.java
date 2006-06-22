@@ -72,6 +72,7 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.MultiIterable;
 
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.MultiIterator;
@@ -131,8 +132,8 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
      *  LOCKING: obtain this' monitor */
     private final List <AbstractDownloader> waiting=new LinkedList<AbstractDownloader>();
     
-    private final Iterable<AbstractDownloader> []activeAndWaiting = 
-    	new Iterable[]{active,waiting}; 
+    private final MultiIterable<AbstractDownloader> activeAndWaiting = 
+    	new MultiIterable<AbstractDownloader>(active,waiting); 
     
     /**
      * Whether or not the GUI has been init'd.
@@ -413,7 +414,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     }
     
     public synchronized Downloader getDownloaderForURN(URN sha1) {
-    	for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+    	for (AbstractDownloader md : activeAndWaiting) {
     		if (md.getSHA1Urn() != null && sha1.equals(md.getSHA1Urn()))
     			return md;
     	}
@@ -421,7 +422,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     }
 
     public synchronized boolean isGuidForQueryDownloading(GUID guid) {
-    	for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+    	for (AbstractDownloader md : activeAndWaiting) {
     		GUID dGUID = md.getQueryGUID();
     		if ((dGUID != null) && (dGUID.equals(guid)))
     			return true;
@@ -789,8 +790,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     	// TODO figure out the SaveLocation exception stuff
     	try {
 			BTMetaInfo info = BTMetaInfo.readFromBytes(metaInfo);
-			for (Downloader current : 
-				new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+			for (Downloader current : activeAndWaiting) {
 				if (info.getURN().equals(current.getSHA1Urn())) 
 					return current; // eventually implement adding of trackers
 			}
@@ -858,16 +858,12 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 		}
 		
 		synchronized (this) {
-			return conflicts(new MultiIterator(activeAndWaiting), urn, fileName, fileSize);
+			for (AbstractDownloader md : activeAndWaiting) {
+				if (md.conflicts(urn, fileName, fileSize)) 
+					return true;
+			}
+			return false;
 		}
-	}
-	
-	private boolean conflicts(Iterable<AbstractDownloader> i, URN urn, String fileName, int fileSize) {
-		for (AbstractDownloader md : i) {
-			if (md.conflicts(urn, fileName, fileSize)) 
-				return true;
-		}
-		return false;
 	}
 	
 	/**
@@ -877,7 +873,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 	 * @return
 	 */
 	public synchronized boolean isSaveLocationTaken(File candidateFile) {
-		for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+		for (AbstractDownloader md : activeAndWaiting) {
 			if (candidateFile.equals(md.getSaveFile())) 
 				return true;
 		}
@@ -885,7 +881,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 	}
 
 	private synchronized boolean conflictsWithIncompleteFile(File incompleteFile) {
-		for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+		for (AbstractDownloader md : activeAndWaiting) {
 			if (md.conflictsWithIncompleteFile(incompleteFile))
 				return true;
 		}
@@ -996,7 +992,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         synchronized (this) {
             if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), socket))
                 return;
-            for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+            for (AbstractDownloader md : activeAndWaiting) {
             	if (! (md instanceof ManagedDownloader))
             		continue; // pushes apply to gnutella downloads only
             	ManagedDownloader mmd = (ManagedDownloader)md;

@@ -26,6 +26,7 @@ import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.MultiIterator;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.RRProcessingQueue;
@@ -666,7 +667,7 @@ public class VerifyingFolder {
 		
 		// if possible, do not request any chunks which are currently
 		// being requested
-		MultiIterator<Integer> iter = new MultiIterator<Integer>(new Iterable[]{
+		MultiIterable<Integer> iter = new MultiIterable<Integer>(new Iterable[]{
 				pendingRanges.keySet(),
 				requestedRanges.keySet(),
 				partialBlocks.keySet()
