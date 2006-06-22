@@ -125,11 +125,14 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     /** The list of all ManagedDownloader's attempting to download.
      *  INVARIANT: active.size()<=slots() && active contains no duplicates 
      *  LOCKING: obtain this' monitor */
-    private List /* of ManagedDownloader */ active=new LinkedList();
+    private final List <AbstractDownloader> active=new LinkedList<AbstractDownloader>();
     /** The list of all queued ManagedDownloader. 
      *  INVARIANT: waiting contains no duplicates 
      *  LOCKING: obtain this' monitor */
-    private List /* of ManagedDownloader */ waiting=new LinkedList();
+    private final List <AbstractDownloader> waiting=new LinkedList<AbstractDownloader>();
+    
+    private final Iterable<AbstractDownloader> []activeAndWaiting = 
+    	new Iterable[]{active,waiting}; 
     
     /**
      * Whether or not the GUI has been init'd.
@@ -409,33 +412,20 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         return waiting.size();
     }
     
-    public Downloader getDownloaderForURN(URN sha1) {
-        synchronized(this) {
-            for (Iterator iter = active.iterator(); iter.hasNext();) {
-                Downloader current = (Downloader) iter.next();
-                if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
-                    return current;
-            }
-            for (Iterator iter = waiting.iterator(); iter.hasNext();) {
-                Downloader current = (Downloader) iter.next();
-                if (current.getSHA1Urn() != null && sha1.equals(current.getSHA1Urn()))
-                    return current;
-            }
-        }
-        return null;
+    public synchronized Downloader getDownloaderForURN(URN sha1) {
+    	for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+    		if (md.getSHA1Urn() != null && sha1.equals(md.getSHA1Urn()))
+    			return md;
+    	}
+    	return null;
     }
 
     public synchronized boolean isGuidForQueryDownloading(GUID guid) {
-        for (Iterator iter=active.iterator(); iter.hasNext(); ) {
-            GUID dGUID = ((AbstractDownloader) iter.next()).getQueryGUID();
-            if ((dGUID != null) && (dGUID.equals(guid)))
-                return true;
-        }
-        for (Iterator iter=waiting.iterator(); iter.hasNext(); ) {
-            GUID dGUID = ((AbstractDownloader) iter.next()).getQueryGUID();
-            if ((dGUID != null) && (dGUID.equals(guid)))
-                return true;
-        }
+    	for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+    		GUID dGUID = md.getQueryGUID();
+    		if ((dGUID != null) && (dGUID.equals(guid)))
+    			return true;
+    	}
         return false;
     }
     
@@ -443,18 +433,16 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
      * Clears all downloads.
      */
     public void clearAllDownloads() {
-        List buf;
+        List<Downloader> buf;
         synchronized(this) {
-            buf = new ArrayList(active.size() + waiting.size());
+            buf = new ArrayList<Downloader>(active.size() + waiting.size());
             buf.addAll(active);
             buf.addAll(waiting);
             active.clear();
             waiting.clear();
         }
-        for(Iterator i = buf.iterator(); i.hasNext(); ) {
-            Downloader md = (Downloader)i.next();
+        for(Downloader md : buf ) 
             md.stop();
-        }
     }   
 
     /** Writes a snapshot of all downloaders in this and all incomplete files to
@@ -801,8 +789,8 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     	// TODO figure out the SaveLocation exception stuff
     	try {
 			BTMetaInfo info = BTMetaInfo.readFromBytes(metaInfo);
-			for (Iterator iter = active.iterator(); iter.hasNext();) {
-				Downloader current = (Downloader) iter.next();
+			for (Downloader current : 
+				new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
 				if (info.getURN().equals(current.getSHA1Urn())) 
 					return current; // eventually implement adding of trackers
 			}
@@ -870,17 +858,14 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 		}
 		
 		synchronized (this) {
-			return conflicts(active.iterator(), urn, fileName, fileSize) 
-				|| conflicts(waiting.iterator(), urn, fileName, fileSize);
+			return conflicts(new MultiIterator(activeAndWaiting), urn, fileName, fileSize);
 		}
 	}
 	
-	private boolean conflicts(Iterator i, URN urn, String fileName, int fileSize) {
-		while(i.hasNext()) {
-			AbstractDownloader md = (AbstractDownloader)i.next();
-			if (md.conflicts(urn, fileName, fileSize)) {
+	private boolean conflicts(Iterable<AbstractDownloader> i, URN urn, String fileName, int fileSize) {
+		for (AbstractDownloader md : i) {
+			if (md.conflicts(urn, fileName, fileSize)) 
 				return true;
-			}
 		}
 		return false;
 	}
@@ -892,33 +877,19 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 	 * @return
 	 */
 	public synchronized boolean isSaveLocationTaken(File candidateFile) {
-		return isSaveLocationTaken(active.iterator(), candidateFile)
-			|| isSaveLocationTaken(waiting.iterator(), candidateFile);
-	}
-	
-	private boolean isSaveLocationTaken(Iterator i, File candidateFile) {
-		while(i.hasNext()) {
-			AbstractDownloader md = (AbstractDownloader)i.next();
-			if (candidateFile.equals(md.getSaveFile())) {
+		for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+			if (candidateFile.equals(md.getSaveFile())) 
 				return true;
-			}
 		}
 		return false;
 	}
 
 	private synchronized boolean conflictsWithIncompleteFile(File incompleteFile) {
-		return conflictsWithIncompleteFile(active.iterator(), incompleteFile)
-			|| conflictsWithIncompleteFile(waiting.iterator(), incompleteFile);
-	}
-	
-	private boolean conflictsWithIncompleteFile(Iterator i, File incompleteFile) {
-		while(i.hasNext()) {
-			AbstractDownloader md = (AbstractDownloader)i.next();
-			if (md.conflictsWithIncompleteFile(incompleteFile)) {
+		for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+			if (md.conflictsWithIncompleteFile(incompleteFile))
 				return true;
-			}
 		}
-		return false;	
+		return false;
 	}
 	
     /** 
@@ -1025,17 +996,13 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         synchronized (this) {
             if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), socket))
                 return;
-            Iterator iter = new MultiIterator(new Iterator[]{
-            		active.iterator(),
-            		waiting.iterator()
-            });
-            while(iter.hasNext()) {
-            	Downloader d = (Downloader) iter.next();
-            	if (! (d instanceof ManagedDownloader))
+            for (AbstractDownloader md : new MultiIterator<AbstractDownloader>(activeAndWaiting)) {
+            	if (! (md instanceof ManagedDownloader))
             		continue; // pushes apply to gnutella downloads only
-            	ManagedDownloader md = (ManagedDownloader)d;
-            	if (md.acceptDownload(file, socket, index, clientGUID))
+            	ManagedDownloader mmd = (ManagedDownloader)md;
+            	if (mmd.acceptDownload(file, socket, index, clientGUID))
             		return;
+            	
             }
         }
         
@@ -1075,8 +1042,9 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
      * Bumps the priority of an inactive download either up or down
      * by amt (if amt==0, bump to start/end of list).
      */
-    public synchronized void bumpPriority(Downloader downloader,
+    public synchronized void bumpPriority(Downloader downl,
                                           boolean up, int amt) {
+    	AbstractDownloader downloader = (AbstractDownloader)downl;
         int idx = waiting.indexOf(downloader);
         if(idx == -1)
             return;
