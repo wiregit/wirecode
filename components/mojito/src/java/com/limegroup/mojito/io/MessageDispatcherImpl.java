@@ -175,7 +175,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
                 
                 // CLEANUP
                 if (System.currentTimeMillis()-lastCleanup >= CLEANUP) {
-                    handleClenup();
+                    handleCleanup();
                     lastCleanup = System.currentTimeMillis();
                 }
             } catch (ClosedSelectorException err) {

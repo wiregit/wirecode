@@ -495,7 +495,7 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * Starts a cleanup process
      */
-    protected void handleClenup() {
+    protected void handleCleanup() {
         process(new Runnable() {
             public void run() {
                 synchronized (receiptMap) {

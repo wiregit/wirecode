@@ -39,7 +39,6 @@ class MessageDispatcher {
     
     
     private static class UDPDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
         private final Message m;
         private final InetSocketAddress addr;
         
@@ -48,7 +47,7 @@ class MessageDispatcher {
         }
         
         public void run() {
-            ROUTER.handleUDPMessage(m, addr);
+            RouterService.getMessageRouter().handleUDPMessage(m, addr);
         }
     }
     

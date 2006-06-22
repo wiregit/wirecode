@@ -83,7 +83,8 @@ public class LimeDHTManager implements LifecycleListener {
     
     public LimeDHTManager() {
         
-        if (FILE.exists() && FILE.isFile()) {
+        if (DHTSettings.PERSIST_DHT.getValue() && 
+                    FILE.exists() && FILE.isFile()) {
             try {
                 FileInputStream in = new FileInputStream(FILE);
                 dht = MojitoDHT.load(in);
@@ -116,7 +117,7 @@ public class LimeDHTManager implements LifecycleListener {
      * The initialization preconditions are the following:
      * 1) We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
      * 2) We have stable Gnutella connections
-     * 3) We are not an ultrapeer while excluding ultrapeers from the network
+     * 3) We are not an ultrapeer while excluding ultrapeers from the active network
      * 4) We are not already connected or trying to bootstrap
      * 
      * @param forcePassive true to connect to the DHT in passive mode
@@ -190,25 +191,30 @@ public class LimeDHTManager implements LifecycleListener {
      * 
      */
     private void bootstrap() {
-        
         final List<SocketAddress> snapshot 
             = new ArrayList<SocketAddress>(bootstrapHosts.size());
         
         synchronized (bootstrapHosts) {
             snapshot.addAll(bootstrapHosts);
         }
-        
+        System.out.println("snapshot:" + snapshot);
         try {
             dht.bootstrap(snapshot, new BootstrapListener() {
                 public void noBootstrapHost() {
                     synchronized (bootstrapHosts) {
                         bootstrapHosts.removeAll(snapshot);
-                        waiting = true;
-                        //here: perform a PING requesting for DHT hosts
+                        if(!bootstrapHosts.isEmpty()) {
+                            //hosts were added --> try again
+                            bootstrap();
+                        } else {
+                            waiting = true;
+                            //here: perform a PING requesting for DHT hosts
+                        }
                     }
                 }
                 public void phaseOneComplete(long time) {}
                 public void phaseTwoComplete(boolean foundNodes, long time) {
+                    waiting = false;
                     //Notify our connections that we are now a DHT node 
                     CapabilitiesVM.reconstructInstance();
                     RouterService.getConnectionManager().sendUpdatedCapabilities();
@@ -221,6 +227,8 @@ public class LimeDHTManager implements LifecycleListener {
     
     /**
      * Shuts down the dht and persists it
+     * 
+     * TODO: remove "force" arg
      */
     public synchronized void shutdown(boolean force){
         if(!force && DHTSettings.FORCE_DHT_CONNECT.getValue()) {
@@ -239,9 +247,11 @@ public class LimeDHTManager implements LifecycleListener {
         running = false;
         waiting = false;
         try {
-            FileOutputStream out = new FileOutputStream(FILE);
-            dht.store(out);
-            out.close();
+            if(DHTSettings.PERSIST_DHT.getValue()) {
+                FileOutputStream out = new FileOutputStream(FILE);
+                dht.store(out);
+                out.close();
+            }
         } catch (IOException err) {
             LOG.error("IOException", err);
         }
@@ -257,7 +267,7 @@ public class LimeDHTManager implements LifecycleListener {
     public synchronized void addBootstrapHost(SocketAddress hostAddress) {
         synchronized (bootstrapHosts) {
             // TODO: as a param? Keep bootstrap list small because it should be updated often
-            if(bootstrapHosts.size() > 10) {
+            if(bootstrapHosts.size() >= 10) {
                 bootstrapHosts.removeLast();
             }
             
@@ -265,16 +275,11 @@ public class LimeDHTManager implements LifecycleListener {
             bootstrapHosts.remove(hostAddress);
             bootstrapHosts.addFirst(hostAddress);
         }
-        
+        System.out.println("adding: "+hostAddress);
+        System.out.println("waiting: "+waiting);
         if(waiting) {
             waiting = false;
             bootstrap();
-        }
-    }
-    
-    public void removeBootstrapHost(SocketAddress hostAddress) {
-        synchronized (bootstrapHosts) {
-            bootstrapHosts.remove(hostAddress);
         }
     }
     
@@ -339,6 +344,10 @@ public class LimeDHTManager implements LifecycleListener {
     
     public int getVersion() {
         return dht.getVersion();
+    }
+    
+    public boolean isWaiting() {
+        return waiting;
     }
     
     public Collection<IpPort> getDHTNodes(int numNodes){

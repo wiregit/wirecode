@@ -62,7 +62,7 @@ import com.limegroup.mojito.security.CryptoHelper;
  */
 public class LimeMessageDispatcherImpl extends MessageDispatcher 
         implements MessageRouter.MessageHandler {
-
+    
     private static final Log LOG = LogFactory.getLog(LimeMessageDispatcherImpl.class);
     
     private ProcessingQueue processingQueue;
@@ -141,7 +141,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         if (!isRunning()) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Dropping message from " + addr + " because DHT is not running");
+                LOG.info(" Dropping message from " + addr + " because DHT is not running");
             }
             return;
         }
@@ -191,7 +191,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
             future = context.scheduleAtFixedRate(new Runnable() {
                 public void run() {
                     if (isRunning()) {
-                        handleClenup();
+                        handleCleanup();
                     }
                 }
             }, CLEANUP, CLEANUP);

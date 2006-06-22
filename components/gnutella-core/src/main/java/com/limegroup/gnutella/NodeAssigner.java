@@ -346,6 +346,7 @@ public class NodeAssigner {
      */
     private static void setDHTCapable() {
         
+        //make sure that the node has had the time to try to connect as an ultrapeer
         Assert.that((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue() > 
                      UltrapeerSettings.MIN_CONNECT_TIME.getValue()), "Wrong minimum initial uptime");
         

@@ -32,7 +32,7 @@ public final class NetworkSettings extends MojitoProps {
         = FACTORY.createIntSetting("PORT", 31337);
     
     public static final LongSetting MAX_TIMEOUT
-        = FACTORY.createSettableLongSetting("MAX_TIMEOUT", 10000L, "max_timeout", 5000L, 30000L);
+        = FACTORY.createSettableLongSetting("MAX_TIMEOUT", 10000L, "max_timeout", 10L, 30000L);
     
     public static final IntSetting MIN_TIMEOUT_RTT_FACTOR
         = FACTORY.createSettableIntSetting("MIN_TIMEOUT_RTT_FACTOR", 2, "min_timeout_rtt_factor", 1, 10);

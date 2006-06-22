@@ -14,7 +14,7 @@ public class DHTSettings extends LimeProps{
      * Setting to force DHT capability -- TODO for testing only - remove.
      */
     public static final BooleanSetting FORCE_DHT_CONNECT =
-        FACTORY.createSettableBooleanSetting("FORCE_DHT_CONNECT", true, "DHTSettings.ForceDHTConnect"); //TODO switch to false
+        FACTORY.createSettableBooleanSetting("FORCE_DHT_CONNECT", false, "DHTSettings.ForceDHTConnect"); //TODO switch to false
 
     /**
      * Setting for wether or not the DHT should be active at all.
@@ -51,6 +51,13 @@ public class DHTSettings extends LimeProps{
     public static final FloatSetting DHT_TO_ULTRAPEER_PROBABILITY =
         FACTORY.createSettableFloatSetting("DHT_TO_ULTRAPEER_PROBABILITY", 0F, "DHTSettings.DHTToUltrapeerProbability",0F,1F);
     
+    /**
+     * Setting for wether or not the node needs a stable connection to the Gnutella network
+     * before beeing able to connect to the DHT
+     */
     public static final BooleanSetting NEED_STABLE_GNUTELLA = 
         FACTORY.createBooleanSetting("NEED_STABLE_GNUTELLA", true);
+    
+    public static final BooleanSetting PERSIST_DHT = 
+        FACTORY.createBooleanSetting("PERSIST_DHT", true);
 }
