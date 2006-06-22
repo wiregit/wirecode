@@ -58,6 +58,10 @@ public class PingResponseHandler extends AbstractResponseHandler {
         return (PingListener[])listeners.toArray(new PingListener[0]);
     }
 
+    public boolean hasPingListener(PingListener listener) {
+        return listeners.contains(listener);
+    }
+    
     protected void response(ResponseMessage message, long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {

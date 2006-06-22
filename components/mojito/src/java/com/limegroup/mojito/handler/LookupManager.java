@@ -27,6 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.LookupListener;
@@ -38,6 +41,8 @@ import com.limegroup.mojito.messages.ResponseMessage;
  * The LookupManager takes care of multiple concurrent lookups
  */
 public class LookupManager implements LookupListener {
+    
+    private static final Log LOG = LogFactory.getLog(LookupManager.class);
     
     private Context context;
 
@@ -74,11 +79,11 @@ public class LookupManager implements LookupListener {
         }
     }
     
-    public void lookup(KUID lookup) throws IOException {
-        lookup(lookup, null);
+    public boolean lookup(KUID lookup) throws IOException {
+        return lookup(lookup, null);
     }
     
-    public void lookup(KUID lookup, LookupListener listener) throws IOException {
+    public boolean lookup(KUID lookup, LookupListener listener) throws IOException {
         if (!lookup.isNodeID() && !lookup.isValueID()) {
             throw new IllegalArgumentException("Lookup ID must be either a NodeID or ValueID");
         }
@@ -95,10 +100,13 @@ public class LookupManager implements LookupListener {
                 
                 handler.start();
                 handlerMap.put(lookup, handler);
+                return true;
                 
             } else if (listener != null) {
                 handler.addLookupListener(listener);
             }
+            
+            return false;
         }
     }
     
@@ -144,7 +152,13 @@ public class LookupManager implements LookupListener {
     
     public void found(final KUID lookup, final Collection c, final long time) {
         synchronized (handlerMap) {
-            handlerMap.remove(lookup);
+            LookupResponseHandler handler = handlerMap.remove(lookup);
+            
+            if (handler == null) {
+                if (LOG.isFatalEnabled()) {
+                    LOG.fatal("Reference Leak!? There was no LookupResponseHandler for " + lookup);
+                }
+            }
             
             context.fireEvent(new Runnable() {
                 public void run() {
@@ -160,7 +174,13 @@ public class LookupManager implements LookupListener {
     
     public void finish(final KUID lookup, final Collection c, final long time) {
         synchronized (handlerMap) {
-            handlerMap.remove(lookup);
+            LookupResponseHandler handler = handlerMap.remove(lookup);
+            
+            if (handler == null) {
+                if (LOG.isFatalEnabled()) {
+                    LOG.fatal("Reference Leak!? There was no LookupResponseHandler for " + lookup);
+                }
+            }
             
             context.fireEvent(new Runnable() {
                 public void run() {

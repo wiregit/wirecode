@@ -23,7 +23,9 @@ import com.limegroup.gnutella.settings.BooleanSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
-
+/**
+ * 
+ */
 public class KademliaSettings extends MojitoProps {
     
     private KademliaSettings() {}
@@ -33,21 +35,24 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final IntSetting REPLICATION_PARAMETER
         = FACTORY.createIntSetting("REPLICATION_PARAMETER", 20);
+    
     /**
      * The number of parallel lookups
      */
     public static final IntSetting LOOKUP_PARAMETER
         = FACTORY.createIntSetting("LOOKUP_PARAMETER", 5);
+    
     /**
      * The FIND_NODE lookup timeout
      */
     public static final LongSetting NODE_LOOKUP_TIMEOUT
-        = FACTORY.createLongSetting("NODE_LOOKUP_TIMEOUT",30L*1000L);
+        = FACTORY.createLongSetting("NODE_LOOKUP_TIMEOUT", 30L*1000L);
+    
     /**
      * The FIND_VALUE lookup timeout
      */
     public static final LongSetting VALUE_LOOKUP_TIMEOUT
-        = FACTORY.createLongSetting("VALUE_LOOKUP_TIMEOUT",45L*1000L);
+        = FACTORY.createLongSetting("VALUE_LOOKUP_TIMEOUT", 45L*1000L);
     
     /**
      * Whether or not a value lookup is exhaustive
@@ -55,6 +60,10 @@ public class KademliaSettings extends MojitoProps {
     public static final BooleanSetting EXHAUSTIVE_VALUE_LOOKUP
         = FACTORY.createBooleanSetting("EXHAUSTIVE_VALUE_LOOKUP", false);
     
+    /**
+     * The maximum number of bootstrap failures before bootstrapping 
+     * is given up.
+     */
     public static final IntSetting MAX_BOOTSTRAP_FAILURES
-        = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES",10);
+        = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 10);
 }

@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,10 +43,8 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.BucketUtils;
-import com.limegroup.mojito.util.FixedSizeHashMap;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.Trie.KeySelector;
-
 
 /**
  * This class is a Kademlia DHT routing table implementation 
@@ -88,13 +85,6 @@ public class PatriciaRouteTable implements RouteTable {
             return !value.hasFailed();
         }
     };
-    
-    /**
-     * A <tt>Map</tt> of hosts we contact during the spoof check. 
-     * Avoids loops in this process.
-     */
-    // TODO: Maybe no longer required!
-    private Map<KUID, SpoofChecker> loopLock = new FixedSizeHashMap<KUID, SpoofChecker>(16);
     
     /**
      * The DHT's context.
@@ -184,19 +174,23 @@ public class PatriciaRouteTable implements RouteTable {
      * if the Bucket was split and false otherwise.
      */
     private boolean splitBucket(BucketNode bucket) {
-        // Three conditions for splitting:
-        //1. Bucket contains nodeID.
-        //2. New node part of the smallest subtree to the local node
-        //2. current_depth mod symbol_size != 0
         if (LOG.isTraceEnabled()) {
             LOG.trace("Bucket " + bucket + " full");
         }
         
+        // Three conditions for splitting:
+        // 1. Bucket contains nodeID.
+        // 2. New node part of the smallest subtree to the local node
+        // 3. current_depth mod symbol_size != 0
+        
         BucketNode localBucket = bucketsTrie.select(context.getLocalNodeID());
+        
         //1
         boolean containsLocal = localBucket.equals(bucket);
+        
         //2
         boolean partOfSmallest = (smallestSubtreeBucket!= null) && smallestSubtreeBucket.equals(bucket);
+        
         //3
         boolean tooDeep = bucket.getDepth() % B == 0;
         
@@ -483,9 +477,9 @@ public class PatriciaRouteTable implements RouteTable {
                 >= RouteTableSettings.MAX_CACHE_SIZE.getValue()) {
             
             //replace older cache entries with this one
-            Map replacementCache = bucket.getReplacementCache();
-            for (Iterator iter = replacementCache.values().iterator(); iter.hasNext();) {
-                ContactNode oldNode = (ContactNode) iter.next();
+            Collection<ContactNode> nodes = bucket.getReplacementCache().values();
+            for (Iterator<ContactNode> iter = nodes.iterator(); iter.hasNext(); ) {
+                ContactNode oldNode = iter.next();
                 
                 if (oldNode.getTimeStamp() <= node.getTimeStamp()) {
                     iter.remove();
@@ -608,17 +602,6 @@ public class PatriciaRouteTable implements RouteTable {
                 }
             } catch (IOException ignore) {}
             
-            // If a Host has multiple IPs (see also above case) then
-            // we may create an infinite loop if boths ends think
-            // the other end is trying to spoof its Node ID! Make sure
-            // we're not creating a such loop.
-            if (loopLock.containsKey(nodeId)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Spoof check already in progress for " + existingNode);
-                }
-                return existingNode;
-            }
-            
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Spoof check for node: "+existingNode);
             }
@@ -626,18 +609,18 @@ public class PatriciaRouteTable implements RouteTable {
             // Kick off the spoof check. Ping the current contact and
             // if it responds then interpret it as an attempt to spoof
             // the node ID and if it doesn't then it is obviously dead.
-            SpoofChecker checker 
-                = new SpoofChecker(existingNode, node, replacement, bucket);
-            
             try {
-                context.ping(existingNode, checker);
-                loopLock.put(existingNode.getNodeID(), checker);
+                context.ping(existingNode,
+                    new SpoofChecker(existingNode, node, replacement, bucket));
             } catch (IOException err) {
                 LOG.error("Coud not start spoof check", err);
             }
-        } else if(existingNode.isDead()) { //replace anyway and put in unknown state
+        
+        // Replace the existing Node if it's dead!
+        } else if(existingNode.isDead()) { 
             return updateContactInfo(existingNode, node, false);
         }
+        
         return existingNode;
     }
     
@@ -708,7 +691,6 @@ public class PatriciaRouteTable implements RouteTable {
     public synchronized void clear() {
         nodesTrie.clear();
         bucketsTrie.clear();
-        loopLock.clear();
         
         init(); // init the Bucket Trie!
     }
@@ -811,30 +793,31 @@ public class PatriciaRouteTable implements RouteTable {
     }
     
     public synchronized String toString() {
-        Collection bucketsList = getAllBuckets();
-        StringBuffer buffer = new StringBuffer("\n");
+        Collection<BucketNode> bucketsList = getAllBuckets();
+        StringBuilder buffer = new StringBuilder("\n");
         buffer.append("-------------\nLocal node:"+context.getLocalNode()+"\n");
         buffer.append("-------------\nBuckets:\n");
+        
         int totalNodesInBuckets = 0;
-        for(Iterator it = bucketsList.iterator(); it.hasNext(); ) {
-            BucketNode bucket = (BucketNode)it.next();
+        for(BucketNode bucket : bucketsList) {
             buffer.append(bucket).append("\n");
             totalNodesInBuckets += bucket.getNodeCount();
-            Collection bucketNodes = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
+            Collection<ContactNode> bucketNodes = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
             buffer.append("\tNodes:"+"\n");
-            for (Iterator iter = bucketNodes.iterator(); iter.hasNext();) {
-                ContactNode node = (ContactNode) iter.next();
+            for(ContactNode node : bucketNodes) {
                 buffer.append("\t"+node+"\n");
             }
         }
+        
         buffer.append("-------------\n");
         buffer.append("TOTAL BUCKETS: " + bucketsList.size()).append(" NUM. OF NODES: " + totalNodesInBuckets+"\n");
         buffer.append("-------------\n");
         
-        Collection nodesList = getAllNodes();
+        Collection<ContactNode> nodesList = getAllNodes();
         buffer.append("-------------\n");
         buffer.append("TOTAL NODES: " + nodesList.size()).append("\n");
         buffer.append("-------------\n");
+        
         return buffer.toString();
     }
     
@@ -861,27 +844,28 @@ public class PatriciaRouteTable implements RouteTable {
         
         public void response(ResponseMessage response, long time) {
             ContactNode node = response.getContactNode();
-            loopLock.remove(node.getNodeID());
             touchBucket(node.getNodeID());
             
             if (LOG.isWarnEnabled()) {
                 LOG.warn("WARNING: " + newContact + " is trying to spoof its NodeID. " 
-                        + response.getContactNode()
-                        + " responded in " + time + " ms");
+                        + node + " responded in " + time + " ms");
             }
+            
             routingStats.SPOOF_COUNT.incrementStat();
+            
+            // ++++++++++++++++++++++++++++++++++++++++++++++++
             // Do nothing else! DefaultMessageHandler takes
             // care of everything else!
-            //TODO: add bad node to IP Filter
+            // ++++++++++++++++++++++++++++++++++++++++++++++++
         }
 
         public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-            loopLock.remove(nodeId);
             
             // The current contact is obviously not responding
             if (LOG.isInfoEnabled()) {
                 LOG.info(currentContact + " does not respond! Replacing it with " + newContact);
             }
+            
             updateContactInfo(currentContact, newContact, true);
             
             if(replacementNode && replacementBucket != null) {

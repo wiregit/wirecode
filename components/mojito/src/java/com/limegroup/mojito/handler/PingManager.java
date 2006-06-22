@@ -26,6 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -41,6 +44,8 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
  * a single Node cannot be pinged multiple times.
  */
 public class PingManager implements PingListener {
+    
+    private static final Log LOG = LogFactory.getLog(PingManager.class);
     
     private Context context;
 
@@ -80,23 +85,23 @@ public class PingManager implements PingListener {
         }
     }
     
-    public void ping(SocketAddress address) throws IOException {
-        ping(null, address, null);
+    public boolean ping(SocketAddress address) throws IOException {
+        return ping(null, address, null);
     }
 
-    public void ping(SocketAddress address, PingListener listener) throws IOException {
-        ping(null, address, listener);
+    public boolean ping(SocketAddress address, PingListener listener) throws IOException {
+        return ping(null, address, listener);
     }
 
-    public void ping(ContactNode node) throws IOException {
-        ping(node.getNodeID(), node.getSocketAddress(), null);
+    public boolean ping(ContactNode node) throws IOException {
+        return ping(node.getNodeID(), node.getSocketAddress(), null);
     }
     
-    public void ping(ContactNode node, PingListener listener) throws IOException {
-        ping(node.getNodeID(), node.getSocketAddress(), listener);
+    public boolean ping(ContactNode node, PingListener listener) throws IOException {
+        return ping(node.getNodeID(), node.getSocketAddress(), listener);
     }
 
-    public void ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
+    public boolean ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
         synchronized (handlerMap) {
             PingResponseHandler responseHandler = handlerMap.get(address);
             if (responseHandler == null) {
@@ -113,10 +118,12 @@ public class PingManager implements PingListener {
 
                 handlerMap.put(address, responseHandler);
                 networkStats.PINGS_SENT.incrementStat();
+                return true;
                 
             } else if (listener != null) {
                 responseHandler.addPingListener(listener);
             }
+            return false;
         }
     }
     
@@ -124,7 +131,19 @@ public class PingManager implements PingListener {
         networkStats.PINGS_OK.incrementStat();
         
         synchronized (handlerMap) {
-            handlerMap.remove(response.getContactNode().getSocketAddress());
+            
+            SocketAddress address 
+                = response.getContactNode().getSocketAddress();
+            
+            PingResponseHandler handler 
+                = handlerMap.remove(address);
+            
+            if (handler == null) {
+                if (LOG.isFatalEnabled()) {
+                    LOG.fatal("Reference Leak!? There was no PingResponseHandler for " + address);
+                }
+            }
+            
             context.fireEvent(new Runnable() {
                 public void run() {
                     synchronized (listeners) {
@@ -141,7 +160,15 @@ public class PingManager implements PingListener {
         networkStats.PINGS_FAILED.incrementStat();
         
         synchronized (handlerMap) {
-            handlerMap.remove(address);
+            PingResponseHandler handler 
+                = handlerMap.remove(address);
+            
+            if (handler == null) {
+                if (LOG.isFatalEnabled()) {
+                    LOG.fatal("Reference Leak!? There was no PingResponseHandler for " + address);
+                }
+            }
+            
             context.fireEvent(new Runnable() {
                 public void run() {
                     synchronized (listeners) {
