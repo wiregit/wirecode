@@ -166,13 +166,13 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         // delayer should have turned itself off
         assertFalse(sink.status);
         
-        // but there should be a scheduled cleaner
+        // but there should be a scheduled flusher
         assertFalse(scheduler.tasks.isEmpty());
-        StubFuture future = scheduler.tasks.get(0);
-        assertGreaterThan(190, future.delay);
+        Runnable r = scheduler.tasks.get(0);
         
         // that should turn interest on
-        future.r.run();
+        Thread.sleep(200);
+        r.run();
         assertTrue(sink.status);
     }
     
@@ -196,7 +196,11 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         // buf if in the meantime someone becomes interested in the
         // delayer again the cleaner should be cancelled.
         delayer.interest(source, true);
-        assertTrue(scheduler.tasks.get(0).cancelled);
+        
+        PrivilegedAccessor.setValue(sink,"status", Boolean.FALSE);
+        Thread.sleep(200);
+        scheduler.tasks.get(0).run();
+        assertFalse(sink.status);
         
     }
     
@@ -208,11 +212,10 @@ public class DelayedBufferWriterTest extends BaseTestCase {
     
     private class StubScheduler implements SchedulingThreadPool {
 
-    	List<StubFuture> tasks = new ArrayList<StubFuture>();
+    	List<Runnable> tasks = new ArrayList<Runnable>();
 		public Future invokeLater(Runnable r, long delay) {
-			StubFuture future = new StubFuture(delay, r);
-			tasks.add(future);
-			return future;
+			tasks.add(r);
+			return null;
 		}
 
 		public void invokeLater(Runnable runner) {

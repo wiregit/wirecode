@@ -63,6 +63,7 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.SimpleTimer;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -705,6 +706,13 @@ public class RouterService {
      */
     public static TimerTask schedule(Runnable task, long delay, long period) {
         return timer.schedule(task, delay, period);
+    }
+    
+    /**
+     * @return an object that can be used as a <tt>SchedulingThreadPool</tt>
+     */
+    public static SchedulingThreadPool getSchedulingThreadPool() {
+    	return timer;
     }
 
     /**

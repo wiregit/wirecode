@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -28,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
  * Dispatcher for NIO.
@@ -64,6 +66,9 @@ public class NIODispatcher implements Runnable {
     
     private static final NIODispatcher INSTANCE = new NIODispatcher();
     public static final NIODispatcher instance() { return INSTANCE; }
+    
+    private final SchedulingThreadPool SCHEDULER =
+    	new MyThreadPool();
     
     /**
      * Constructs the sole NIODispatcher, starting its thread.
@@ -926,6 +931,22 @@ public class NIODispatcher implements Runnable {
     private static class ProcessingException extends Exception {
         public ProcessingException() { super(); }
         public ProcessingException(Throwable t) { super(t); }
+    }
+    
+    public SchedulingThreadPool getSchedulingThreadPool() {
+    	return SCHEDULER;
+    }
+    
+    private static class MyThreadPool implements SchedulingThreadPool {
+
+		public Future invokeLater(Runnable r, long delay) {
+			return instance().invokeLater(r, delay);
+		}
+
+		public void invokeLater(Runnable runner) {
+			instance().invokeLater(runner);
+		}
+    	
     }
 }
 

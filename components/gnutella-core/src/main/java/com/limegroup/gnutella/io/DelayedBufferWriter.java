@@ -3,11 +3,11 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
-import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.Periodic;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
@@ -19,7 +19,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     private static final Log LOG = LogFactory.getLog(DelayedBufferWriter.class);
 
     /** The default delay time to use before forcing a flush */
-    private final static int MAX_TIME = 4200;
+    private final static int MAX_TIME = 200;
    
     /** The channel to write to & interest on. */    
     private volatile InterestWriteChannel sink;
@@ -35,15 +35,11 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     /** The delay time to use before forcing a flush */
     private final long delay;
     
-    /** Where to schedule the flush */
-    private final SchedulingThreadPool scheduler;
+    private final Periodic interester;
     
     /** The last time we flushed, so we don't flush again too soon. */
     private long lastFlushTime;
 
-    /** Future flushing */
-    private Future interester;
-    
     /** Constructs a new DelayedBufferWriter whose buffer is the given size. */
     public DelayedBufferWriter(int size) {
     	this(size, MAX_TIME);
@@ -51,13 +47,16 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     
     /** Constructs a new DelayedBufferWriter whose buffer is the given size and delay. */
     public DelayedBufferWriter(int size, long delay) {
-    	this(size, delay, new NIODispatcherScheduler());
+    	this(size, delay, NIODispatcher.instance().getSchedulingThreadPool());
     }
     
     DelayedBufferWriter(int size, long delay, SchedulingThreadPool scheduler) {
     	buf = ByteBuffer.allocate(size);
     	this.delay = delay;
-    	this.scheduler = scheduler;
+    	this.interester = new Periodic(
+    			new Interester(),
+    			delay,
+    			scheduler);
     }
 
     /**
@@ -72,11 +71,8 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     public synchronized void interest(WriteObserver observer, boolean status) {
     	if (status) {
     		this.observer = observer;
-    		// if we had any flushing scheduled, cancel it.
-    		if (interester != null) {
-    			interester.cancel(false);
-    			interester = null;
-    		}
+    		interester.unschedule();
+    		LOG.debug("cancelling scheduled flush");
     	}
     	else 
     		this.observer = null;
@@ -184,9 +180,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         			return false;
         		else {
         			// otherwise schedule a flushing event.
-        			interester = scheduler.invokeLater(
-        					new Interester(), 
-        					lastFlushTime + delay - now);
+        			interester.schedule(lastFlushTime + delay - now);
         		}
         	}
         } 
@@ -227,23 +221,10 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     					below.isOpen() && 
     					above == null && 
     					buf.position() > 0) {
+    				LOG.debug("forcing a flush");
     				below.interest(me, true);
     			}
     		}
     	}
     }
-
-    // TODO: factor out this
-    private static class NIODispatcherScheduler implements SchedulingThreadPool {
-
-    	public Future invokeLater(Runnable r, long delay) {
-    		return NIODispatcher.instance().invokeLater(r, delay);
-    	}
-    	
-    	public void invokeLater(Runnable runner) {
-    		NIODispatcher.instance().invokeLater(runner);
-    	}
-    	
-    }
-
 }

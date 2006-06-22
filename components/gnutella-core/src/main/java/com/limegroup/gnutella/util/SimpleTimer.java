@@ -2,6 +2,10 @@ package com.limegroup.gnutella.util;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.limegroup.gnutella.ErrorService;
 
@@ -12,7 +16,7 @@ import com.limegroup.gnutella.ErrorService;
  *
  * This does not expose the methods for scheduling at fixed rates.
  */
-public class SimpleTimer {
+public class SimpleTimer implements SchedulingThreadPool {
     
     /**
      * The underlying Timer of this SimpleTimer.
@@ -51,7 +55,7 @@ public class SimpleTimer {
         if (period<0)
             throw new IllegalArgumentException("Negative period: "+period);
             
-        TimerTask tt = new TimerTask() {
+        MyTimerTask tt = new MyTimerTask(new Runnable(){
             public void run() {
                 try {
                     task.run();
@@ -59,7 +63,7 @@ public class SimpleTimer {
                     ErrorService.error(t);
                 }
             }
-        };
+        });
 
         try {
             if(period == 0)
@@ -75,11 +79,66 @@ public class SimpleTimer {
         return tt;
     }      
 
+    public void invokeLater(Runnable r) {
+    	schedule(r, 0, 0);
+    }
+    
+    public Future invokeLater(Runnable r, long delay) {
+    	MyTimerTask tt = (MyTimerTask)schedule(r, delay, 0);
+    	return new TTFuture(tt);
+    }
     /**
      * Cancels this.  No more tasks can be scheduled or executed.
      */ 
     public void cancel() {
         cancelled = true;
         TIMER.cancel();
+    }
+    
+    private class MyTimerTask extends TimerTask {
+    	volatile boolean done, cancelled;
+    	final Runnable r; 
+    	MyTimerTask(Runnable r) {
+    		this.r = r;
+    	}
+    	
+    	public boolean cancel() {
+    		boolean ret = super.cancel();
+    		cancelled = true;
+    		return ret;
+    	}
+    	
+    	public void run (){
+    		if (cancelled)
+    			return;
+    		try {
+    			r.run();
+    		} finally  {
+    			done = true;
+    		}
+    	}
+    }
+    
+    private class TTFuture implements Future {
+    	final MyTimerTask task;
+    	volatile boolean cancelled;
+    	TTFuture(MyTimerTask task) {
+    		this.task = task;
+    	}
+		public boolean cancel(boolean mayInterruptIfRunning) {
+			return task.cancel();
+		}
+		public Object get() throws InterruptedException, ExecutionException {
+			return null;
+		}
+		public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+			return null;
+		}
+		public boolean isCancelled() {
+			return task.cancelled;
+		}
+		public boolean isDone() {
+			return task.done;
+		}
     }
 }
