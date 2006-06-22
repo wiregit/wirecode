@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.MultiIterator;
+import com.limegroup.gnutella.util.MultiIterable;
 
 
 /**
@@ -35,23 +35,26 @@ public class UploadSlotManager {
 	 * INVARIANT: sorted by priority and contains only 
 	 * requests of the highest priority or non-preemptible requests
 	 */
-	private final List /* <? extends UploadSlotRequest> */ active;
+	private final List  <UploadSlotRequest>  active;
 	
 	/**
 	 * The list of queued non-resumable requests
 	 */
-	private final List /* <HTTPSlotRequest> */ queued;
+	private final List  <HTTPSlotRequest>  queued;
 	
 	/**
 	 * The list of queued resumable requests
 	 * (currently only Seeding BT Uploaders)
 	 */
-	private final List /* <BTSlotRequest> */ queuedResumable;
+	private final List  <BTSlotRequest>  queuedResumable;
+	
+	private final MultiIterable<UploadSlotRequest> allRequests;
 	
 	public UploadSlotManager() {
-		active = new ArrayList(UploadSettings.HARD_MAX_UPLOADS.getValue());
-		queued = new ArrayList(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
-		queuedResumable = new ArrayList(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
+		active = new ArrayList<UploadSlotRequest>(UploadSettings.HARD_MAX_UPLOADS.getValue());
+		queued = new ArrayList<HTTPSlotRequest>(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
+		queuedResumable = new ArrayList<BTSlotRequest>(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
+		allRequests = new MultiIterable<UploadSlotRequest>(active, queued, queuedResumable);
 	}
 
 	/**
@@ -126,9 +129,9 @@ public class UploadSlotManager {
 	}
 	
 	public synchronized int positionInQueue(UploadSlotUser user) {
-		List queue = getQueue(user);
+		List<? extends UploadSlotRequest> queue = getQueue(user);
 		for(int i = 0; i < queue.size();i++) {
-			UploadSlotRequest request = (UploadSlotRequest) queue.get(i);
+			UploadSlotRequest request = queue.get(i);
 			if (request.getUser() == user)
 				return i;
 		}
@@ -137,7 +140,7 @@ public class UploadSlotManager {
 	/**
 	 * @return the queue where requests from the user would be found.
 	 */
-	private List getQueue(UploadSlotUser user) {
+	private List<? extends UploadSlotRequest> getQueue(UploadSlotUser user) {
 		return user instanceof UploadSlotListener ? queuedResumable : queued;
 	}
 	
@@ -149,7 +152,7 @@ public class UploadSlotManager {
 			return false;
 		
 		if (!active.isEmpty()) {
-			UploadSlotRequest max = (UploadSlotRequest) active.get(0);
+			UploadSlotRequest max = active.get(0);
 			if (max.getPriority() > priority)
 				return true;
 		}
@@ -167,7 +170,7 @@ public class UploadSlotManager {
 		// iterate backwards
 		int ret = 0;
 		for(int i = active.size() - 1; i >= 0; i--) {
-			UploadSlotRequest request = (UploadSlotRequest) active.get(i);
+			UploadSlotRequest request = active.get(i);
 			if (request.getPriority() < priority && request.isPreemptible())
 				ret++;
 		}
@@ -179,7 +182,7 @@ public class UploadSlotManager {
 	 */
 	private void killPreemptible(int priority) {
 		for(int i = active.size() - 1; i >= 0; i--) {
-			UploadSlotRequest request = (UploadSlotRequest) active.get(i);
+			UploadSlotRequest request = active.get(i);
 			if (request.getPriority() < priority && request.isPreemptible())
 				request.getUser().releaseSlot();
 		}
@@ -217,8 +220,7 @@ public class UploadSlotManager {
 			return true;
 		else {
 			float fastest = 0f;
-			for (Iterator iter = active.iterator(); iter.hasNext();) {
-				UploadSlotRequest request = (UploadSlotRequest) iter.next();
+			for (UploadSlotRequest request : active) {
 				UploadSlotUser user = request.getUser();
 				float speed = 0;
 				user.measureBandwidth();
@@ -236,8 +238,7 @@ public class UploadSlotManager {
 	
 	public synchronized float getUploadBandwidth() {
 		float ret = 0;
-		for (Iterator iter = active.iterator(); iter.hasNext();) {
-			UploadSlotRequest request = (UploadSlotRequest) iter.next();
+		for (UploadSlotRequest request : active) {
 			UploadSlotUser user = (UploadSlotUser) request.getUser();
 			user.measureBandwidth();
 			try {
@@ -251,11 +252,11 @@ public class UploadSlotManager {
 	 * adds a request to the appropriate queue if not already there
 	 * @return the position in the queue (>= 1)
 	 */
-	private int queueRequest(UploadSlotRequest request) {
-		List queue = getQueue(request.user);
+	private <T extends UploadSlotRequest>int queueRequest(UploadSlotRequest request) {
+		List<T> queue = (List<T>)getQueue(request.user);
 		if (queue.size() == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
 			return -1;
-		queue.add(request);
+		queue.add((T)request);
 		return queue.size();
 	}
 	
@@ -333,15 +334,10 @@ public class UploadSlotManager {
 	}
 	
 	public synchronized int getNumUsersForHost(String host) {
-		MultiIterator iter = new MultiIterator(
-				new Iterator[] {active.iterator(), 
-						queued.iterator(), 
-						queuedResumable.iterator()});
 		int ret = 0;
-		while(iter.hasNext()) {
-			UploadSlotRequest request = (UploadSlotRequest)iter.next();
+		for(UploadSlotRequest request : allRequests) {
 			if (host.equals(request.getUser().getHost()))
-					ret++;
+				ret++;
 		}
 		return ret;
 	}

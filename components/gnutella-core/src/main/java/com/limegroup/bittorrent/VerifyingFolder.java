@@ -667,11 +667,11 @@ public class VerifyingFolder {
 		
 		// if possible, do not request any chunks which are currently
 		// being requested
-		MultiIterable<Integer> iter = new MultiIterable<Integer>(new Iterable[]{
+		MultiIterable<Integer> iter = new MultiIterable<Integer>(
 				pendingRanges.keySet(),
 				requestedRanges.keySet(),
 				partialBlocks.keySet()
-		});
+		);
 		for (int chunk : iter)
 			remote.clear(chunk);
 		
