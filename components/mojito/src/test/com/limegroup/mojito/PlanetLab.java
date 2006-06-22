@@ -394,7 +394,7 @@ public class PlanetLab {
                     
                     synchronized (lock) {
                         try {
-                            dht.bind(address, localNodeId);
+                            dht.bind(localNodeId, address);
                             dht.start();
                             
                             dht.bootstrap(bootstrapServer, new BootstrapListener() {

@@ -37,6 +37,7 @@ import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.routing.RouteTable.SpoofChecker;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -49,10 +50,13 @@ public class PingManager implements PingListener {
     
     private Context context;
 
+    private Object pingLock = new Object();
+    
     private Map<SocketAddress, PingResponseHandler> handlerMap 
         = new HashMap<SocketAddress, PingResponseHandler>();
     
-    private List<PingListener> listeners = new ArrayList<PingListener>();
+    private List<PingListener> listeners 
+        = new ArrayList<PingListener>();
     
     private NetworkStatisticContainer networkStats;
     
@@ -85,6 +89,16 @@ public class PingManager implements PingListener {
         }
     }
     
+    public Object pingLock() {
+        return pingLock;
+    }
+    
+    public boolean isPinging(SocketAddress address) {
+        synchronized (pingLock()) {
+            return handlerMap.containsKey(address);
+        }
+    }
+    
     public boolean ping(SocketAddress address) throws IOException {
         return ping(null, address, null);
     }
@@ -102,7 +116,23 @@ public class PingManager implements PingListener {
     }
 
     public boolean ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
-        synchronized (handlerMap) {
+        return ping(nodeId, address, listener, true);
+    }
+    
+    /**
+     * A spoof check ping is not different from a regular ping.
+     * The only difference is that the SpoofChecker must overwrite 
+     * the equals() method properly so that there can be only one 
+     * SpoofChecker per address.
+     */
+    public boolean spoofCheckPing(ContactNode node, SpoofChecker checker) throws IOException {
+        return ping(node.getNodeID(), node.getSocketAddress(), checker, false);
+    }
+    
+    private boolean ping(KUID nodeId, SocketAddress address, 
+            PingListener listener, boolean duplicates) throws IOException {
+        
+        synchronized (pingLock()) {
             PingResponseHandler responseHandler = handlerMap.get(address);
             if (responseHandler == null) {
                 
@@ -121,7 +151,10 @@ public class PingManager implements PingListener {
                 return true;
                 
             } else if (listener != null) {
-                responseHandler.addPingListener(listener);
+                if (duplicates 
+                        || !responseHandler.hasResponseListener(listener)) {
+                    responseHandler.addPingListener(listener);
+                }
             }
             return false;
         }
@@ -130,7 +163,7 @@ public class PingManager implements PingListener {
     public void response(final ResponseMessage response, final long time) {
         networkStats.PINGS_OK.incrementStat();
         
-        synchronized (handlerMap) {
+        synchronized (pingLock()) {
             
             SocketAddress address 
                 = response.getContactNode().getSocketAddress();
@@ -159,7 +192,7 @@ public class PingManager implements PingListener {
     public void timeout(final KUID nodeId, final SocketAddress address, RequestMessage request, final long time) {            
         networkStats.PINGS_FAILED.incrementStat();
         
-        synchronized (handlerMap) {
+        synchronized (pingLock()) {
             PingResponseHandler handler 
                 = handlerMap.remove(address);
             
@@ -186,7 +219,7 @@ public class PingManager implements PingListener {
     }
     
     public boolean cancel(SocketAddress address) {
-        synchronized (handlerMap) {
+        synchronized (pingLock()) {
             PingResponseHandler handler = handlerMap.remove(address);
             if (handler != null) {
                 handler.stop();

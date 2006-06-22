@@ -45,7 +45,7 @@ public abstract class AbstractResponseHandler extends MessageHandler
     
     private int maxErrors;
     
-    protected final List listeners = new ArrayList();
+    protected final List<ResponseListener> listeners = new ArrayList<ResponseListener>();
     
     private volatile boolean stop = false;
     
@@ -81,6 +81,10 @@ public abstract class AbstractResponseHandler extends MessageHandler
         } else {
             this.maxErrors = maxErrors;
         }
+    }
+    
+    public boolean hasResponseListener(ResponseListener listener) {
+        return listeners.contains(listener);
     }
     
     public void stop() {
@@ -159,8 +163,7 @@ public abstract class AbstractResponseHandler extends MessageHandler
         context.fireEvent(new Runnable() {
             public void run() {
                 if (!isStopped()) {
-                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                        ResponseListener listener = (ResponseListener)it.next();
+                    for(ResponseListener listener : listeners) {
                         listener.response(response, time);
                     }
                 }
@@ -173,8 +176,7 @@ public abstract class AbstractResponseHandler extends MessageHandler
         context.fireEvent(new Runnable() {
             public void run() {
                 if (!isStopped()) {
-                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                        ResponseListener listener = (ResponseListener)it.next();
+                    for(ResponseListener listener : listeners) {
                         listener.timeout(nodeId, address, request, time);
                     }
                 }

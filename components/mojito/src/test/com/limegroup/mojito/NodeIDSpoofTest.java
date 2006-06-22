@@ -27,6 +27,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.settings.NetworkSettings;
+import com.limegroup.mojito.settings.RouteTableSettings;
 
 
 public class NodeIDSpoofTest extends BaseTestCase {
@@ -46,38 +47,48 @@ public class NodeIDSpoofTest extends BaseTestCase {
     }
     
     public void testSpoof() throws Exception {
-        MojitoDHT bootstrap = new MojitoDHT("Bootstrap-DHT");
-        bootstrap.bind(new InetSocketAddress(PORT));
+        RouteTableSettings.MIN_RECONNECTION_TIME.setValue(0);
+        
+        MojitoDHT bootstrap = new MojitoDHT("Bootstrap Node");
+        bootstrap.bind(new InetSocketAddress("localhost", PORT));
         bootstrap.start();
         
         // The original Node
-        KUID nodeID = KUID.createRandomNodeID();
+        KUID nodeId = KUID.createRandomNodeID();
+        
+        System.out.println("KUID: " + nodeId);
+        
         MojitoDHT original = new MojitoDHT("OriginalDHT");
-        original.bind(new InetSocketAddress(PORT+1), nodeID);
+        MojitoHelper.setNodeID(original, nodeId);
+        original.bind(new InetSocketAddress(PORT+1));
         original.start();
-        original.bootstrap(new InetSocketAddress("localhost", PORT));
+        original.bootstrap(bootstrap.getSocketAddress());
         
         // The spoofer Node
-        MojitoDHT spoofer = new MojitoDHT("SpooferDHT");
-        spoofer.bind(new InetSocketAddress(PORT+2), nodeID);
+        MojitoDHT spoofer = new MojitoDHT("Spoofer Node");
+        MojitoHelper.setNodeID(spoofer, nodeId);
+        spoofer.bind(new InetSocketAddress(PORT+2));
         spoofer.start();
-        spoofer.bootstrap(new InetSocketAddress("localhost", PORT));
+        spoofer.bootstrap(bootstrap.getSocketAddress());
         
-        Context context = MojitoHelper.getContext(bootstrap);
-        List nodes = context.getRouteTable().getAllNodes();
-        
-        System.out.println(nodes);
-        
-        for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-            ContactNode node = (ContactNode)it.next();
+        try {
+            Context context = MojitoHelper.getContext(bootstrap);
+            List nodes = context.getRouteTable().getAllNodes();
             
-            assertNotEquals(spoofer.getSocketAddress(), 
-                    node.getSocketAddress());
+            System.out.println(nodes);
+            
+            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
+                ContactNode node = (ContactNode)it.next();
+                
+                assertNotEquals(spoofer.getSocketAddress(), 
+                        node.getSocketAddress());
+            }
+        } finally {
+            bootstrap.stop();
+            original.stop();
+            spoofer.stop();
         }
         
-        bootstrap.stop();
-        original.stop();
-        spoofer.stop();
         Thread.sleep(3000);
     }
     
@@ -89,7 +100,8 @@ public class NodeIDSpoofTest extends BaseTestCase {
         // The original Node
         KUID nodeID = KUID.createRandomNodeID();
         MojitoDHT original = new MojitoDHT("OriginalDHT");
-        original.bind(new InetSocketAddress(PORT+1), nodeID);
+        MojitoHelper.setNodeID(original, nodeID);
+        original.bind(new InetSocketAddress(PORT+1));
         original.start();
         original.bootstrap(new InetSocketAddress("localhost", PORT));
         original.stop();
@@ -97,7 +109,8 @@ public class NodeIDSpoofTest extends BaseTestCase {
         
         // The spoofer Node
         MojitoDHT replacement = new MojitoDHT("ReplacementDHT");
-        replacement.bind(new InetSocketAddress(PORT+2), nodeID);
+        MojitoHelper.setNodeID(replacement, nodeID);
+        replacement.bind(new InetSocketAddress(PORT+2));
         replacement.start();
         replacement.bootstrap(new InetSocketAddress("localhost", PORT));
         Thread.sleep(2L * NetworkSettings.MAX_TIMEOUT.getValue());

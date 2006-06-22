@@ -59,6 +59,7 @@ import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.RouteTable.SpoofChecker;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -590,6 +591,11 @@ public class Context {
     /** Pings the given Node */
     public void ping(ContactNode node, PingListener listener) throws IOException {
         pingManager.ping(node, listener);
+    }
+    
+    /** Pings the given Node */
+    public void spoofCheckPing(ContactNode node, SpoofChecker checker) throws IOException {
+        pingManager.spoofCheckPing(node, checker);
     }
     
     /** Starts a value for the given KUID */

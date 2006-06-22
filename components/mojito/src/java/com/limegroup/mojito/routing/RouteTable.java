@@ -25,6 +25,7 @@ import java.util.List;
 import com.limegroup.mojito.BucketNode;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.handler.BootstrapManager;
 
 
@@ -145,4 +146,11 @@ public interface RouteTable {
      * @throws IOException
      */
     public void refreshBuckets(boolean force, BootstrapManager manager) throws IOException;
+    
+    /**
+     * 
+     */
+    public static interface SpoofChecker extends PingListener {
+        
+    }
 }

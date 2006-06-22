@@ -20,6 +20,9 @@
 package com.limegroup.mojito;
 
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+
+import com.limegroup.mojito.routing.RouteTable;
 
 class MojitoHelper {
     
@@ -32,6 +35,30 @@ class MojitoHelper {
             return (Context)context.get(dht);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+    
+    public static void setNodeID(MojitoDHT dht, KUID nodeId) {
+        setNodeID(getContext(dht), nodeId);
+    }
+    
+    public static void setNodeID(Context context, KUID nodeId) {
+        RouteTable routeTable = context.getRouteTable();
+        routeTable.clear();
+        
+        int vendor = context.getVendor();
+        int version = context.getVersion();
+        
+        ContactNode node = new ContactNode(vendor, version, nodeId, new InetSocketAddress(0));
+        node.setTimeStamp(Long.MAX_VALUE);
+        routeTable.add(node, false);
+        
+        try {
+            Field localNode = Context.class.getDeclaredField("localNode");
+            localNode.setAccessible(true);
+            localNode.set(context, node);
+        } catch (Exception err) {
+            throw new RuntimeException(err);
         }
     }
 }
