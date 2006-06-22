@@ -5,9 +5,6 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * An InputStream that attempts to read from a Buffer.
  *
@@ -16,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
  */
 class BufferInputStream extends InputStream implements Shutdownable {
     
-    private static final Log LOG = LogFactory.getLog(BufferInputStream.class);
+    //private static final Log LOG = LogFactory.getLog(BufferInputStream.class);
     
     
     /** the lock that reading waits on. */

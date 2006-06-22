@@ -1,19 +1,30 @@
 package com.limegroup.gnutella.licenses;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import java.io.File;
+import java.io.InterruptedIOException;
+import java.util.Iterator;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.metadata.*;
-import com.limegroup.gnutella.xml.*;    
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ClientSideTestCase;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.PatchTableMessage;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.routing.ResetTableMessage;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public final class LicenseSharingTest extends ClientSideTestCase {
 
@@ -43,7 +54,8 @@ public final class LicenseSharingTest extends ClientSideTestCase {
     }
 	
 	// used by ClientSideTestCase
-	private static void doSettings() {
+	@SuppressWarnings("unused")
+    private static void doSettings() {
 	    SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;ogg;wma");
         // get the resource file for com/limegroup/gnutella
         File cc1 = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.mp3");
@@ -73,7 +85,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, rs.getNumSharedFiles());
+        assertEquals(5, RouterService.getNumSharedFiles());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());

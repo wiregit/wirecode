@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
 /**
  * A reader that throttles data according to a throttle.
  *
@@ -15,7 +12,7 @@ import org.apache.commons.logging.Log;
  */
 public class ThrottleReader implements InterestReadChannel, ChannelReader, ThrottleListener {
     
-    private static final Log LOG = LogFactory.getLog(ThrottleReader.class);
+    //private static final Log LOG = LogFactory.getLog(ThrottleReader.class);
     
     /** The channel to write to & interest on. */    
     private volatile InterestReadChannel channel;

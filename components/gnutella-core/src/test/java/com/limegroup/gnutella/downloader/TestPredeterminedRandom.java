@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
-import java.util.Random;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 
 /** Returns pre-determined pseudorandom numbers. */
 public class TestPredeterminedRandom extends Random {

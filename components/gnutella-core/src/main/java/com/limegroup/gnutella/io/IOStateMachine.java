@@ -8,12 +8,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.io.InterestWriteChannel;
-
 /**
  * State machine for reading & writing.
  */

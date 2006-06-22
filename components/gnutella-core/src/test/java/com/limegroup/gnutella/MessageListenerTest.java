@@ -1,25 +1,12 @@
 package com.limegroup.gnutella;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -47,7 +34,7 @@ public class MessageListenerTest extends ClientSideTestCase {
 
         PingReply pong = PingReply.create(guid.bytes(), (byte) 2);
 
-        rs.getMessageRouter().registerMessageListener(guid.bytes(), ml);
+        RouterService.getMessageRouter().registerMessageListener(guid.bytes(), ml);
         Map map = getMap();
         assertEquals(1, map.size());
         assertEquals(0, ml.count);
@@ -58,7 +45,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         testUP[0].flush();
         Thread.sleep(2000);
         
-        rs.getMessageRouter().unregisterMessageListener(guid.bytes(), ml);
+        RouterService.getMessageRouter().unregisterMessageListener(guid.bytes(), ml);
         map = getMap();
         assertEquals(0, map.size());
         assertEquals(1, ml.count);
@@ -72,8 +59,8 @@ public class MessageListenerTest extends ClientSideTestCase {
         
         PingReply pong = PingReply.create(guid.bytes(), (byte) 2);
 
-        rs.getMessageRouter().registerMessageListener(guid.bytes(), ml1);
-        rs.getMessageRouter().registerMessageListener(guid.bytes(), ml2);
+        RouterService.getMessageRouter().registerMessageListener(guid.bytes(), ml1);
+        RouterService.getMessageRouter().registerMessageListener(guid.bytes(), ml2);
         Map map = getMap();
         assertEquals(1, map.size());
         assertEquals(0, ml1.count);
@@ -89,7 +76,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml1.count);
         assertEquals(1, ml2.count);
         
-        rs.getMessageRouter().unregisterMessageListener(guid.bytes(), ml1);
+        RouterService.getMessageRouter().unregisterMessageListener(guid.bytes(), ml1);
         assertTrue(ml1.unregistered);
         assertFalse(ml2.unregistered);
         map = getMap();
@@ -103,7 +90,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml1.count);
         assertEquals(2, ml2.count);
 
-        rs.getMessageRouter().unregisterMessageListener(guid.bytes(), ml2);
+        RouterService.getMessageRouter().unregisterMessageListener(guid.bytes(), ml2);
         assertTrue(ml2.unregistered);
         map = getMap();
         assertEquals(0, map.size());
@@ -118,8 +105,8 @@ public class MessageListenerTest extends ClientSideTestCase {
         PingReply pong1 = PingReply.create(guid1.bytes(), (byte) 2);
         PingReply pong2 = PingReply.create(guid2.bytes(), (byte) 2);
 
-        rs.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
-        rs.getMessageRouter().registerMessageListener(guid2.bytes(), ml2);
+        RouterService.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
+        RouterService.getMessageRouter().registerMessageListener(guid2.bytes(), ml2);
         Map map = getMap();
         assertEquals(2, map.size());
         assertEquals(0, ml1.count);
@@ -143,7 +130,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml1.count);
         assertEquals(1, ml2.count);        
         
-        rs.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
+        RouterService.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
         assertTrue(ml1.unregistered);
         assertFalse(ml2.unregistered);
         map = getMap();
@@ -157,7 +144,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml1.count);
         assertEquals(1, ml2.count);
 
-        rs.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml2);
+        RouterService.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml2);
         assertTrue(ml2.unregistered);
         map = getMap();
         assertEquals(0, map.size());
@@ -172,8 +159,8 @@ public class MessageListenerTest extends ClientSideTestCase {
         PingReply pong1 = PingReply.create(guid1.bytes(), (byte) 2);
         PingReply pong2 = PingReply.create(guid2.bytes(), (byte) 2);
 
-        rs.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
-        rs.getMessageRouter().registerMessageListener(guid2.bytes(), ml2);
+        RouterService.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
+        RouterService.getMessageRouter().registerMessageListener(guid2.bytes(), ml2);
         Map map = getMap();
         assertEquals(2, map.size());       
         assertTrue(ml1.registered);
@@ -188,7 +175,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(0, ml2.count);        
         
         // add ml1 again to ml1 -- should be notified twice per message now
-        rs.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
+        RouterService.getMessageRouter().registerMessageListener(guid1.bytes(), ml1);
         map = getMap();
         assertEquals(2, map.size());       
         assertTrue(ml1.registered);
@@ -203,7 +190,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(0, ml2.count);        
         
         // remove ml1 -- should be notified just once on the next send.
-        rs.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
+        RouterService.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
         map = getMap();
         assertEquals(2, map.size());       
         assertTrue(ml1.registered);
@@ -219,7 +206,7 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(0, ml2.count);
         
         // try removing ml1 from guid2's bytes, nothing should happen.
-        rs.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml1);
+        RouterService.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml1);
         map = getMap();
         assertEquals(2, map.size());       
         assertTrue(ml1.registered);
@@ -243,10 +230,10 @@ public class MessageListenerTest extends ClientSideTestCase {
         assertEquals(1, ml2.count);
         
         // and unregister the two of'm.
-        rs.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
+        RouterService.getMessageRouter().unregisterMessageListener(guid1.bytes(), ml1);
         map = getMap();
         assertEquals(1, map.size());
-        rs.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml2);
+        RouterService.getMessageRouter().unregisterMessageListener(guid2.bytes(), ml2);
         map = getMap();
         assertEquals(0, map.size());
         assertTrue(ml2.unregistered);
@@ -289,9 +276,5 @@ public class MessageListenerTest extends ClientSideTestCase {
 
     public static ActivityCallback getActivityCallback() {
         return new ActivityCallbackStub();
-    }
-
-    private static byte[] myIP() {
-        return new byte[] { (byte)192, (byte)168, 0, 1 };
     }
 }

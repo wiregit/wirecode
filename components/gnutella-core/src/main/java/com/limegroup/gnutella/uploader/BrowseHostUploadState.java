@@ -36,7 +36,6 @@ public final class BrowseHostUploadState extends UploadState {
             String str = "HTTP/1.1 406 Not Acceptable\r\n\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
-            debug("BHUS.doUpload(): client does not accept QRs.");
             return;
         }   
         //create a new indexing query
@@ -78,22 +77,9 @@ public final class BrowseHostUploadState extends UploadState {
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(BAOS.toByteArray());
         UPLOADER.setAmountUploaded(BAOS.size());
-        debug("BHUS.doUpload(): returning.");
 	}
 	
 	public boolean getCloseConnection() {
 	    return false;
-	}  	
-
-    private final static boolean debugOn = false;
-    private final void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final void debug(Exception out) {
-        if (debugOn)
-            out.printStackTrace();
-    }
-
-    
+	}
 }

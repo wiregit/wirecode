@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import java.io.IOException;
 import java.util.Properties;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;

@@ -2,16 +2,16 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Collections;
-import java.util.Collection;
 
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.IPPortCombo;
@@ -25,8 +25,8 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 

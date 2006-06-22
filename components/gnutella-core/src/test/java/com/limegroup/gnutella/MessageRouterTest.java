@@ -1,28 +1,26 @@
 package com.limegroup.gnutella;
 
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -656,7 +654,6 @@ public final class MessageRouterTest extends BaseTestCase {
     	assertNotNull(pingee._lastSent);
     	assertEquals(pingee._lastSent.getGUID(),ping.getGUID());
     	assertTrue(pingee._lastSent instanceof HeadPing);
-    	HeadPing ping2 = (HeadPing) pingee._lastSent;
     	
     	// we should have an entry in the routing table
     	RouteTable headRt =(RouteTable) PrivilegedAccessor.getValue(ROUTER,"_headPongRouteTable");

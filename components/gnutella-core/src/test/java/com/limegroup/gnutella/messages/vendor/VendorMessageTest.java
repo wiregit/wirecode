@@ -15,7 +15,6 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -36,31 +35,29 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
 
     public void testCreationConstructor() throws Exception {
-        VendorMessage vm = null;
-        byte[] payload = null;
         byte[] vendorID = null;
         try {
             //test messed up vendor ID
             vendorID = new byte[5];
-            vm = new VM(vendorID, 1, 1, new byte[0]);
+            new VM(vendorID, 1, 1, new byte[0]);
             fail("bpe should have been thrown.");
         } catch (IllegalArgumentException expected) {}
         
         try {
             // test bad selector
-            vm = new VM(new byte[4], 0x10000000, 1, new byte[0]);
+            new VM(new byte[4], 0x10000000, 1, new byte[0]);
             fail("bpe should have been thrown.");
         } catch (IllegalArgumentException expected) {}
         
         try {
             // test bad version
-            vm = new VM(vendorID, 1, 0x00020101, new byte[0]);
+            new VM(vendorID, 1, 0x00020101, new byte[0]);
             fail("bpe should have been thrown.");
         } catch (IllegalArgumentException expected) {}
         
         try {
             // test bad payload
-            vm = new VM(new byte[4], 1, 1, null);
+            new VM(new byte[4], 1, 1, null);
             fail("bpe should have been thrown.");
         } catch (NullPointerException expected) {}
     }
@@ -177,12 +174,12 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     public void testReplyNumber() throws Exception {
         try {
             GUID g = new GUID(GUID.makeGuid());
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(g, 0);
+            new ReplyNumberVendorMessage(g, 0);
             assertTrue(false);
         } catch(IllegalArgumentException expected) {}
         try {
             GUID g = new GUID(GUID.makeGuid());
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(g, 256);
+            new ReplyNumberVendorMessage(g, 256);
             assertTrue(false);
         } catch(IllegalArgumentException expected) {}
 
@@ -281,12 +278,12 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     public void testLimeACK() throws Exception {
         try {
             GUID g = new GUID(GUID.makeGuid());
-            LimeACKVendorMessage vm = new LimeACKVendorMessage(g, -1);
+            new LimeACKVendorMessage(g, -1);
             assertTrue(false);
         } catch(IllegalArgumentException expected) {}
         try {
             GUID g = new GUID(GUID.makeGuid());
-            LimeACKVendorMessage vm = new LimeACKVendorMessage(g, 256);
+            new LimeACKVendorMessage(g, 256);
             assertTrue(false);
         } catch(IllegalArgumentException expected) {}
 
@@ -567,12 +564,11 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         final int UDP_VERSION = UDPConnectBackRedirect.VERSION;
 
         byte[] guid = GUID.makeGuid();
-        UDPConnectBackRedirect udp = null;
         byte ttl = 1, hops = 0;
         
         try {
             // try a VERSION we don't support with a payload that is ok
-            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+            new UDPConnectBackRedirect(guid, ttl, hops,
                                                 UDP_VERSION+1, bytes(6));
         }
         catch (BadPacketException expected) {
@@ -581,7 +577,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         
         try {
             // try a VERSION we don't support, with the old 18-byte payload
-            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+            new UDPConnectBackRedirect(guid, ttl, hops,
                                                 UDP_VERSION+1, bytes(4));
             fail("should have thrown bpe");
         }
@@ -589,26 +585,26 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
 
         try {
             // in the next few tests, try bad sizes of the payload....
-            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+            new UDPConnectBackRedirect(guid, ttl, hops,
                                                 UDP_VERSION, bytes(0));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
-            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+            new UDPConnectBackRedirect(guid, ttl, hops,
                                                 UDP_VERSION, bytes(5));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
-            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+            new UDPConnectBackRedirect(guid, ttl, hops,
                                                 UDP_VERSION, bytes(7));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
         // Test version 1 constructor -- 18 bytes in payload
-        udp = new UDPConnectBackRedirect(guid, ttl, hops, 1, bytes(6));
+        new UDPConnectBackRedirect(guid, ttl, hops, 1, bytes(6));
         // no bpe ...
         
         // make sure we encode things just fine....
@@ -649,8 +645,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         byte ttl = 1, hops = 0;
         try {
             // try a VERSION we don't support but should be ok
-            TCPConnectBackRedirect TCP = 
-                new TCPConnectBackRedirect(guid, ttl, hops,
+            new TCPConnectBackRedirect(guid, ttl, hops,
                                                 TCP_VERSION+1, bytes(6));
         }
         catch (BadPacketException expected) {
@@ -658,30 +653,26 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         }
         try {
             // in the next few tests, try bad sizes of the payload....
-            TCPConnectBackRedirect TCP = 
-                new TCPConnectBackRedirect(guid, ttl, hops,
+            new TCPConnectBackRedirect(guid, ttl, hops,
                                                 TCP_VERSION, bytes(0));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
-            TCPConnectBackRedirect TCP = 
-                new TCPConnectBackRedirect(guid, ttl, hops,
+            new TCPConnectBackRedirect(guid, ttl, hops,
                                                 TCP_VERSION, bytes(5));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
-            TCPConnectBackRedirect TCP = 
-                new TCPConnectBackRedirect(guid, ttl, hops,
+            new TCPConnectBackRedirect(guid, ttl, hops,
                                                 TCP_VERSION, bytes(7));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
         // this is the correct size of the payload
-        TCPConnectBackRedirect TCP = 
-            new TCPConnectBackRedirect(guid, ttl, hops,
+        new TCPConnectBackRedirect(guid, ttl, hops,
                                             TCP_VERSION, bytes(6));
 
 
@@ -789,6 +780,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
 
         // see if Message.createMessage() can understand it
         Message m2 = MessageFactory.createMessage(header, payload, (byte)4, Message.N_TCP);
+        assertNotNull(m2);
     }
     
     private static class VM extends VendorMessage {

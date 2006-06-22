@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
@@ -15,20 +14,15 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.StubConnectionObserver;
 import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.ChannelReader;
-import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.StubConnectObserver;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.UDPServiceStub;
+import com.limegroup.gnutella.UDPServiceStub;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests that NIOSocket delegates events correctly.

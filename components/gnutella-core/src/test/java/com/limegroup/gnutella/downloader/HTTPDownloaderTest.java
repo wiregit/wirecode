@@ -29,7 +29,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
                                             length, new byte[16], 1,
                                             false, 2, false, null,
                                             null, false, false, "LIME",
-                                            0, null, -1);
+                                            null, -1);
         File f = new File("sam");
         VerifyingFile vf = new VerifyingFile(length);
         vf.open(f);
@@ -92,7 +92,6 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
         //readHeaders tests
 		String str;
 		HTTPDownloader down;
-		boolean ok = true;
 
 		str = "HTTP/1.1 200 OK\r\n";
 		down = newHTTPDownloader(str);
@@ -191,7 +190,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
         reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
         RemoteFileDesc rfd = new RemoteFileDesc("", 1, 1, "file", 1, new byte[16], 1, 
                                                 false, 1, false, null, Collections.EMPTY_SET,
-                                                false, false, "", 1, Collections.EMPTY_SET, 1);
+                                                false, false, "", Collections.EMPTY_SET, 1);
         HTTPDownloader d = new HTTPDownloader(rfd, null, false);
         PrivilegedAccessor.setValue(d, "_headerReader", reader);
         return d;

@@ -1,23 +1,22 @@
 package com.limegroup.gnutella.security;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.KeyFactory;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-import java.io.UnsupportedEncodingException;
-import java.io.File;
-
-import com.limegroup.gnutella.util.FileUtils;
-import com.bitzi.util.Base32;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.bitzi.util.Base32;
+import com.limegroup.gnutella.util.FileUtils;
 
 public class SignatureVerifier {
     

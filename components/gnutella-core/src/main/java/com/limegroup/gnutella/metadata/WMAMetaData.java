@@ -3,15 +3,12 @@ package com.limegroup.gnutella.metadata;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
 /**
  * Sets WMA metadata using the ASF parser.
  */
 public class WMAMetaData extends AudioMetaData {
     
-    private static final Log LOG = LogFactory.getLog(WMAMetaData.class);
+    //private static final Log LOG = LogFactory.getLog(WMAMetaData.class);
     
     
     /** Sets WMA data. */

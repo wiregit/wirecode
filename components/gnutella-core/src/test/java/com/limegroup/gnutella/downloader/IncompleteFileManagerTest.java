@@ -21,8 +21,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -57,7 +55,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
                "18.239.0.144", 6346, 13l,
                name, size,
                new byte[16], 56, false, 4, true, null,
-               urns, false, false,"",0,null, -1);
+               urns, false, false,"",null, -1);
        } catch (IOException e) {
            fail("Invalid URN", e);
            return null;
@@ -223,49 +221,49 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
 
     public void testCompletedName() throws Throwable {
         File tmp1=new File("T-1839-some file.txt");
-        assertEquals("some file.txt", ifm.getCompletedName(tmp1));
+        assertEquals("some file.txt", IncompleteFileManager.getCompletedName(tmp1));
     }
 
     public void testCompletedName_IllegalArgument() throws Throwable {
         try {
-            ifm.getCompletedName(new File("no dash.txt"));
+            IncompleteFileManager.getCompletedName(new File("no dash.txt"));
             fail("Accepted bad file");
         } catch (IllegalArgumentException pass) { }
 
         try {
-            ifm.getCompletedName(new File("T-one dash.txt"));
+            IncompleteFileManager.getCompletedName(new File("T-one dash.txt"));
             fail("Accepted bad file");
         } catch (IllegalArgumentException pass) { }
 
         try {
-            ifm.getCompletedName(new File("T-123-"));
+            IncompleteFileManager.getCompletedName(new File("T-123-"));
             fail("Accepted bad file");
         } catch (IllegalArgumentException pass) { }
     }
 
     public void testCompletedSize() throws Throwable {
         File tmp1=new File("T-1839-some file.txt");
-        assertEquals(1839, ifm.getCompletedSize(tmp1));
+        assertEquals(1839, IncompleteFileManager.getCompletedSize(tmp1));
     }
 
     public void testCompletedSize_IllegalArgument() throws Throwable {
         try {
-            ifm.getCompletedSize(new File("no dash.txt"));
+            IncompleteFileManager.getCompletedSize(new File("no dash.txt"));
             fail("Accepted bad file");
         } catch (IllegalArgumentException pass) { }
 
         try {
-            ifm.getCompletedSize(new File("T-one dash.txt"));
+            IncompleteFileManager.getCompletedSize(new File("T-one dash.txt"));
             fail("Accepted bad file");
         } catch (IllegalArgumentException pass) { }
 
         try {
-            ifm.getCompletedSize(new File("T--no number.txt"));
+            IncompleteFileManager.getCompletedSize(new File("T--no number.txt"));
             fail("Accepted bad file");
         } catch (IllegalArgumentException pass) { }
 
         try {
-            ifm.getCompletedSize(new File("T-x-bad number.txt"));
+            IncompleteFileManager.getCompletedSize(new File("T-x-bad number.txt"));
             fail("Accepted bad file");
         } catch (IllegalArgumentException pass) { }
     }

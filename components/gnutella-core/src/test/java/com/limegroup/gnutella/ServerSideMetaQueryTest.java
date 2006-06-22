@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.net.DatagramSocket;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -23,11 +22,6 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  */
 public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
-    /**
-     * Ultrapeer 1 UDP connection.
-     */
-    private static DatagramSocket[] UDP_ACCESS;
-
     public ServerSideMetaQueryTest(String name) {
         super(name);
     }
@@ -40,6 +34,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }      
     
+    @SuppressWarnings("unused")
     private static void doSettings() {
         TIMEOUT = 1250;
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3;wmv;png;bin");
@@ -74,10 +69,6 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
     public static Integer numUPs() {
         return new Integer(3);
-    }
-    
-    private static byte[] myIP() {
-        return new byte[] { (byte)127, (byte)0, 0, 1 };
     }
 
     public static ActivityCallback getActivityCallback() {

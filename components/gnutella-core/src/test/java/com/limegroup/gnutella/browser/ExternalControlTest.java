@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.browser;
 
-import java.net.URLEncoder;
-
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class ExternalControlTest extends BaseTestCase {

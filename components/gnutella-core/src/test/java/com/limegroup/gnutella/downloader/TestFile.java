@@ -57,7 +57,6 @@ public class TestFile {
                 URN hash = hash();
                 File tmpFile = File.createTempFile("tst2", "tmp");
                 writeFile(tmpFile);
-                InputStream is = new FileInputStream(tmpFile);
                 myTree = createHashTree(tmpFile, hash);
             } catch(IOException e) {
                 ErrorService.error(e);

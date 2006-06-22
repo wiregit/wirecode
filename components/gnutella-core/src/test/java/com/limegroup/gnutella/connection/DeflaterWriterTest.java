@@ -1,15 +1,16 @@
 package com.limegroup.gnutella.connection;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
-import java.util.*;
-import java.util.zip.*;
-import java.net.*;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 
 /**
  * Tests that DeflaterWriter deflates data written to it correctly,

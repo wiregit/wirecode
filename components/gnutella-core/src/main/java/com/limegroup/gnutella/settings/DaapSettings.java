@@ -1,8 +1,8 @@
 
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.MacOSXUtils;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.MacOSXUtils;
 
 /**
  * Settings for Digital Audio Access Protocol (DAAP)

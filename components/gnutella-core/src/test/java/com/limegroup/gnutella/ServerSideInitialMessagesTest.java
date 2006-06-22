@@ -64,7 +64,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         Message mPatch=getFirstMessageOfTypeFromQueue( PatchTableMessage.class );
         
         //  UP may support PONG CACHING so we don't send it an initial ping.
-        Message mPingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
+        getFirstMessageOfTypeFromQueue( PingRequest.class );
         
         assertNotNull( mCapVM );
         assertNotNull( mVendS );
@@ -87,7 +87,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         Message mVendS=getFirstMessageOfTypeFromQueue( MessagesSupportedVendorMessage.class );
         
         //  Leaf may support PONG CACHING so we don't send it an initial ping.
-        Message mqePingR=getFirstMessageOfTypeFromQueue( PingRequest.class );
+        getFirstMessageOfTypeFromQueue( PingRequest.class );
         
         assertNotNull( mCapvm );
         assertNotNull( mVendS );
@@ -97,12 +97,6 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         assertEquals( "Leaf messages queue not empty" + _queue, 0, _queue.size() );
     }
     // ======================================================
-    
-    //  Utility functions   
-    private final void sendF(Connection c, Message m) throws Exception {
-        c.send(m);
-        c.flush();
-    }
     
     private void parseWaitingMessages( Connection con ) throws Exception {
         try {

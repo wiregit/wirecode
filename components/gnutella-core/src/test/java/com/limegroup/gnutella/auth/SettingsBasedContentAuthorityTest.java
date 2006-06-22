@@ -2,13 +2,13 @@ package com.limegroup.gnutella.auth;
 
 import java.util.Random;
 
+import junit.framework.Test;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IpPort;
-
-import junit.framework.Test;
  
 public class SettingsBasedContentAuthorityTest extends BaseTestCase {
     

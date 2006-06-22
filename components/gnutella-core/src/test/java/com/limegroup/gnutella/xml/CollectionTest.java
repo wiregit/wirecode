@@ -1,15 +1,15 @@
 package com.limegroup.gnutella.xml;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.Collections;
-import java.io.ObjectOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
 
 import junit.framework.Test;
 
@@ -17,9 +17,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.Expand;
 import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.stubs.FileManagerStub;
 
 
 public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {

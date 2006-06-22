@@ -5,7 +5,6 @@ import java.io.IOException;
 class StubReadWriteObserver implements IOErrorObserver, ReadWriteObserver {
     
     private int amtToUse = Integer.MAX_VALUE;
-    private Throttle throttle;
     private int read = 0;
     private int wrote = 0;
     private boolean shutdown = false;

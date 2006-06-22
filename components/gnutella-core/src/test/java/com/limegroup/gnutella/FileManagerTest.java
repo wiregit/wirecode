@@ -14,7 +14,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.auth.StubContentAuthority;
 import com.limegroup.gnutella.auth.StubContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;

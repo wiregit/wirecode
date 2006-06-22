@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.metadata;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 import junit.framework.Test;
 

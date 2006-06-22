@@ -1,10 +1,9 @@
 package com.limegroup.gnutella.security;
 
-import java.security.SecureRandom;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
 
 /**
  *  A collection of utility methods related to 

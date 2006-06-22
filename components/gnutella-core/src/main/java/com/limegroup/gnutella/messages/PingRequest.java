@@ -3,12 +3,12 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;

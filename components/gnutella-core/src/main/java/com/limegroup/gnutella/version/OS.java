@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.version;
 
-import com.limegroup.gnutella.util.CommonUtils;
 import java.util.StringTokenizer;
+
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * An abstraction for representing an operating system.

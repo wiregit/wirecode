@@ -15,7 +15,6 @@ public class I18NConvertTest extends BaseTestCase {
     
     private final String CASE = "CASE";
     private final String ACCENTS = "ACCENTS";
-    private final String OTHER = "OTHER";
     private final String SPLIT = "KEYWORD_SPLIT";
     private AbstractI18NConverter _instanceICU;
     
@@ -44,7 +43,6 @@ public class I18NConvertTest extends BaseTestCase {
     }
     
     public void testConversions() throws Exception {
-        long l = System.currentTimeMillis();
         readLines(CASE);
         readLines(ACCENTS);
         _last = true;

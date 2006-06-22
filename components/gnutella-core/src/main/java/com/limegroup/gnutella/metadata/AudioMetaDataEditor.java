@@ -1,8 +1,5 @@
 package com.limegroup.gnutella.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -11,7 +8,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  */
 public abstract class AudioMetaDataEditor extends MetaDataEditor {
 	
-	private Log LOG = LogFactory.getLog(AudioMetaDataEditor.class);
+	//private Log LOG = LogFactory.getLog(AudioMetaDataEditor.class);
 	
 	protected String title_;
     protected String artist_;

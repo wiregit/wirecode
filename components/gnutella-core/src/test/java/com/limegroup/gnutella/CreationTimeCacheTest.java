@@ -3,29 +3,15 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.ObjectOutputStream;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
-import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -43,13 +29,7 @@ import com.limegroup.gnutella.xml.MetaFileManager;
 public class CreationTimeCacheTest 
     extends com.limegroup.gnutella.util.BaseTestCase {
     private static final int PORT=6669;
-    private static final int TIMEOUT=3000;
-    private static final byte[] ultrapeerIP=
-        new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
-    private static final byte[] oldIP=
-        new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    private static Connection[] testUPs = new Connection[4];
     private static RouterService rs;
 
     private static MyActivityCallback callback;
@@ -71,16 +51,10 @@ public class CreationTimeCacheTest
     }
 
     /**
-     * Ultrapeer 1 UDP connection.
-     */
-    private static DatagramSocket[] UDP_ACCESS;
-
-    /**
      * File where urns (currently SHA1 urns) get persisted to
      */
     private static final String CREATION_CACHE_FILE = "createtimes.cache";
     private static final String FILE_PATH = "com/limegroup/gnutella/util";
-    private static FileDesc[] descs;
 
 
 	/**
@@ -135,8 +109,8 @@ public class CreationTimeCacheTest
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
         rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
+        RouterService.clearHostCatcher();
+        RouterService.connect();
         Thread.sleep(1000);
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
@@ -146,81 +120,6 @@ public class CreationTimeCacheTest
     public void setUp() throws Exception  {
         doSettings();
     }
-     
-     private static Connection connect(RouterService rs, int port, 
-                                       boolean ultrapeer) 
-         throws Exception {
-         ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
-         Socket socket = ss.accept();
-         ss.close();
-         
-         socket.setSoTimeout(3000);
-         InputStream in=socket.getInputStream();
-         String word=readWord(in);
-         if (! word.equals("GNUTELLA"))
-             throw new IOException("Bad word: "+word);
-         
-         HandshakeResponder responder;
-         if (ultrapeer) {
-             responder = new UltrapeerResponder();
-         } else {
-             responder = new OldResponder();
-         }
-         Connection con = new Connection(socket);
-         con.initialize(null, responder);
-         replyToPing(con, ultrapeer);
-         return con;
-     }
-     
-     /**
-      * Acceptor.readWord
-      *
-      * @modifies sock
-      * @effects Returns the first word (i.e., no whitespace) of less
-      *  than 8 characters read from sock, or throws IOException if none
-      *  found.
-      */
-     private static String readWord(InputStream sock) throws IOException {
-         final int N=9;  //number of characters to look at
-         char[] buf=new char[N];
-         for (int i=0 ; i<N ; i++) {
-             int got=sock.read();
-             if (got==-1)  //EOF
-                 throw new IOException();
-             if ((char)got==' ') { //got word.  Exclude space.
-                 return new String(buf,0,i);
-             }
-             buf[i]=(char)got;
-         }
-         throw new IOException();
-     }
-
-     private static void replyToPing(Connection c, boolean ultrapeer) 
-             throws Exception {
-        // respond to a ping iff one is given.
-        Message m = null;
-        byte[] guid;
-        try {
-            while (!(m instanceof PingRequest)) {
-                m = c.receive(500);
-            }
-            guid = ((PingRequest)m).getGUID();            
-        } catch(InterruptedIOException iioe) {
-            //nothing's coming, send a fake pong anyway.
-            guid = new GUID().bytes();
-        }
-        
-        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
-        PingReply reply = 
-        PingReply.createExternal(guid, (byte)7,
-                                 socket.getLocalPort(), 
-                                 ultrapeer ? ultrapeerIP : oldIP,
-                                 ultrapeer);
-        reply.hop();
-        c.send(reply);
-        c.flush();
-     }
 
     ///////////////////////// Actual Tests ////////////////////////////
 
@@ -333,9 +232,8 @@ public class CreationTimeCacheTest
 
         {
             try {
-                Iterator iter = ctCache.getFiles(0).iterator();
-            }
-            catch (IllegalArgumentException expected) {}
+                ctCache.getFiles(0).iterator();
+            } catch (IllegalArgumentException expected) {}
         }
 
     }
@@ -532,43 +430,6 @@ public class CreationTimeCacheTest
 
 
     //////////////////////////////////////////////////////////////////
-
-    private void drainAll() throws Exception {
-        drainAll(testUPs);
-    }
-    
-    private static byte[] myIP() {
-        return new byte[] { (byte)127, (byte)0, 0, 1 };
-    }
-
-    private static final boolean DEBUG = false;
-    
-    static void debug(String message) {
-        if(DEBUG) 
-            System.out.println(message);
-    }
-
-    private static class UltrapeerResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) {
-            Properties props = new UltrapeerHeaders("127.0.0.1"); 
-            props.put(HeaderNames.X_DEGREE, "42");           
-            return HandshakeResponse.createResponse(props);
-        }
-        
-        public void setLocalePreferencing(boolean b) {}
-    }
-
-
-    private static class OldResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                boolean outgoing) {
-            Properties props=new Properties();
-            return HandshakeResponse.createResponse(props);
-        }
-        
-        public void setLocalePreferencing(boolean b) {}
-    }
 
     public static class MyActivityCallback extends ActivityCallbackStub {
     }

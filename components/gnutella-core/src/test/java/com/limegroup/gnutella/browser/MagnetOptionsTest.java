@@ -1,9 +1,8 @@
 package com.limegroup.gnutella.browser;
 
-import java.net.URLEncoder;
-
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.EncodingUtils;
 
 public class MagnetOptionsTest extends BaseTestCase {
 
@@ -15,14 +14,14 @@ public class MagnetOptionsTest extends BaseTestCase {
 		
 
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?dn="
-				+ URLEncoder.encode("compilc.:fileNm?7ßä") + "&kt="
-				+ URLEncoder.encode("keyword topic string")
+				+ EncodingUtils.encode("compilc.:fileNm?7ßä") + "&kt="
+				+ EncodingUtils.encode("keyword topic string")
 				+ "&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
 		assertEquals("Should have parsed one magnet", 1, opts.length);
 		opts = MagnetOptions.parseMagnet(opts[0].toString());
 		assertEquals("Should have parsed one magnet", 1, opts.length);
 		
-		opts = MagnetOptions.parseMagnet("magnet:?dn=" + URLEncoder.encode("compile me") 
+		opts = MagnetOptions.parseMagnet("magnet:?dn=" + EncodingUtils.encode("compile me") 
 		+ "&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO59&xs=http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO59");
 		assertEquals("Should have parsed one magnet", 1, opts.length);
 		opts = MagnetOptions.parseMagnet(opts[0].toString());

@@ -85,6 +85,7 @@ import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file
@@ -331,15 +332,14 @@ public class UploadTest extends BaseTestCase {
         c.send(push);
         c.flush();
         ss.setSoTimeout(2000);
-        Socket s = ss.accept();
         
         try {
-            s = ss.accept();
+            ss.accept();
             fail("node replied to duplicate push request");
         }catch(IOException expected){}
         
         try {
-            s = ss.accept();
+            ss.accept();
             fail("node replied to duplicate push request");
         }catch(IOException expected){}
         
@@ -430,8 +430,8 @@ public class UploadTest extends BaseTestCase {
 
 
     public void testHTTP10DownloadURLEncoding() throws Exception {
-        assertEquals("Unexpected: "+java.net.URLDecoder.decode(encodedFile), fileName,
-                     java.net.URLDecoder.decode(encodedFile));
+        assertEquals("Unexpected: "+ URLDecoder.decode(encodedFile), fileName,
+                     URLDecoder.decode(encodedFile));
         boolean passed = false;
         passed =download(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
         assertTrue("URL encoded",passed);
@@ -511,7 +511,7 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         
         assertEquals("URLDecoder broken",
-            fileName, java.net.URLDecoder.decode(encodedFile));
+            fileName, URLDecoder.decode(encodedFile));
 
         passed =download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz", false);
         assertTrue("URL encoded with HTTP1.1",passed);
@@ -1768,7 +1768,7 @@ public class UploadTest extends BaseTestCase {
         byte[] dl = getDownloadBytes("/uri-res/N2X?" + hash, null, null);
 //        assertEquals(FD.getHashTree().getOutputLength(), dl.length);
         DIMEParser parser = new DIMEParser(new ByteArrayInputStream(dl));
-        DIMERecord xml = parser.nextRecord();
+        parser.nextRecord(); // xml
         DIMERecord tree = parser.nextRecord();
         assertFalse(parser.hasNext());
         List allNodes = FD.getHashTree().getAllNodes();
@@ -2183,7 +2183,6 @@ public class UploadTest extends BaseTestCase {
         out.flush();
 
         //2. Read response code and headers, remember the content-length.
-        boolean foundHeader = false;
         Header expectedHeader = null;
         
         if( requiredHeader != null )

@@ -144,8 +144,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             smp2.encode(baos);
             smp3.encode(baos);
             smp1.encode(baos);
-            MessagesSupportedVendorMessage vmpOther = 
-                new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
+            new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                    baos.toByteArray());
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {
@@ -158,8 +157,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             smp3.encode(baos);
             smp1.encode(baos);
             baos.write("crap".getBytes());
-            MessagesSupportedVendorMessage vmpOther = 
-                new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
+            new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                    baos.toByteArray());
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {

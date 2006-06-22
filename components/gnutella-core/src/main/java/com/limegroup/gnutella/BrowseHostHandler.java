@@ -163,7 +163,7 @@ public class BrowseHostHandler {
                 RemoteFileDesc fakeRFD = 
                     new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
                                        _serventID.bytes(), 0, false, 0, false,
-                                       null, null,false,true,"",0l, proxies,
+                                       null, null,false,true,"", proxies,
                                        -1, canDoFWTransfer ? UDPConnection.VERSION : 0);
                 // register with the map so i get notified about a response to my
                 // Push.

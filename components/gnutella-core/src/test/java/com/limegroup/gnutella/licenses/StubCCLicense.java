@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.licenses;
 
-import com.limegroup.gnutella.ErrorService;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+
+import com.limegroup.gnutella.ErrorService;
 
 class StubCCLicense extends CCLicense {
 

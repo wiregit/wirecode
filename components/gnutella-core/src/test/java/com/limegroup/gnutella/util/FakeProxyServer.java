@@ -10,7 +10,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.ErrorService;
 

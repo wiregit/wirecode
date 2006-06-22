@@ -11,7 +11,6 @@ import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.io.AcceptObserver;
-import com.limegroup.gnutella.io.NIOServerSocket;
 import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;

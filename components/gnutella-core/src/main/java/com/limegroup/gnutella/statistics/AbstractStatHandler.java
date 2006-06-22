@@ -58,9 +58,12 @@ public abstract class AbstractStatHandler {
 	 * times).
 	 */
 	private static final Statistic BANDWIDTH_BYTE_STAT_STUB =
-		new AdvancedStatistic() {
-			public void addData() {}
-		};
+		new AdvancedStatistic() {          
+            @Override
+            public void addData(int data) {
+            }
+        
+    };
 
 	/**
 	 * No argument constructor simply creates new stats classes for all

@@ -17,11 +17,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.AbstractChannelInterestRead;
-import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;

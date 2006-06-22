@@ -540,7 +540,6 @@ class HashTreeHandler {
                 hashes.add(hash);
             }
 
-            String root32 = Base32.encode(getRoot());
             // iterator of all hashes we read
             Iterator hashIterator = hashes.iterator();
             // the current generation we are working on

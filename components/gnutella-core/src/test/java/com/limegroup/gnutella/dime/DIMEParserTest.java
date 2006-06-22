@@ -38,7 +38,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
 	    ByteArrayOutputStream out;
 	    Iterator parser;
 	    DIMERecord one, two;
-	    DIMERecord readOne, readTwo;
+	    DIMERecord readOne;
 	    
 	    // test an empty stream.
 	    in = new ByteArrayInputStream(new byte[0]);
@@ -135,7 +135,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
 	    ByteArrayOutputStream out;
 	    DIMEParser parser;
 	    DIMERecord one, two;
-	    DIMERecord readOne, readTwo;
+	    DIMERecord readOne;
 	    
 	    // test an empty stream.
 	    in = new ByteArrayInputStream(new byte[0]);
@@ -226,7 +226,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCa
 	    ByteArrayOutputStream out;
 	    DIMEParser parser;
 	    DIMERecord one, two;
-	    DIMERecord readOne, readTwo;
+	    DIMERecord readOne;
 	    List readList;
 	    
 	    // test an empty stream.

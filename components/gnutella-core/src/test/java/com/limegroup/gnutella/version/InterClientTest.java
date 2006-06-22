@@ -1,17 +1,26 @@
 package com.limegroup.gnutella.version;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ClientSideTestCase;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
+import com.limegroup.gnutella.messages.vendor.UpdateRequest;
+import com.limegroup.gnutella.messages.vendor.UpdateResponse;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.UpdateSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests to make sure updates are sent, requested, etc...

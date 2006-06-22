@@ -88,8 +88,6 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     
     // THIS TEST SHOULD BE RUN FIRST!!
     public void testPushProxySetup() throws Exception {
-        DatagramPacket pack = null;
-
         // send a MessagesSupportedMessage
         testUP[0].send(MessagesSupportedVendorMessage.instance());
         testUP[0].flush();
@@ -157,9 +155,9 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         IpPort ppi = (IpPort)iter.next();
         assertEquals(ppi.getPort(), 6355);
         
-        assertTrue(ppi.getInetAddress().equals( 
-                ((Connection)rs.getConnectionManager().getConnections().get(0)).getInetAddress() 
-                ));
+        assertEquals(ppi.getInetAddress(), 
+                ((Connection)RouterService.getConnectionManager().getConnections().get(0)).getInetAddress() 
+                );
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);
@@ -194,10 +192,9 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // but we should NOT get a incoming GIV
         try {
-            Socket givSock = ss.accept();
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {}
+            ss.accept();
+            fail("shouldn't have accepted");
+        } catch (InterruptedIOException expected) {}
         ss.close();
     }
 
@@ -372,7 +369,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = MessageFactory.read(in);
+            MessageFactory.read(in);
         }
     }
 }

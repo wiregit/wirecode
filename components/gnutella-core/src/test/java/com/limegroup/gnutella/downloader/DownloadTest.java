@@ -2393,7 +2393,7 @@ public class DownloadTest extends BaseTestCase {
                                   0, savedFile.getName(),
                                   TestFile.length(), new byte[16],
                                   speed, false, 4, false, null, null,
-                                  false,false,"",0,null, -1);
+                                  false,false,"",null, -1);
     }
 
 	private static RemoteFileDesc newRFDWithURN(int port, int speed) {
@@ -2417,7 +2417,7 @@ public class DownloadTest extends BaseTestCase {
                                   0, savedFile.getName(),
                                   TestFile.length(), new byte[16],
                                   speed, false, 4, false, null, set,
-                                  false, false,"",0,null, -1);
+                                  false, false,"",null, -1);
     }
     
     private static RemoteFileDesc newRFDPush(int port,int suffix) throws Exception{
@@ -2435,7 +2435,7 @@ public class DownloadTest extends BaseTestCase {
         return new RemoteFileDesc("127.0.0."+rfdSuffix, 6346, 0, savedFile.getName(),
                 TestFile.length(),100,false,1,false, 
                 null,urns,false,
-                true,"ALT",0,0,al.getPushAddress());
+                true,"ALT",0,al.getPushAddress());
     }
 
     /** Returns true if the complete file exists and is complete */

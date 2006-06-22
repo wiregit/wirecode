@@ -7,9 +7,11 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class BusyLeafQRTUpdateTest extends BaseTestCase {
     private ManagedConnectionCountQRT peer; 

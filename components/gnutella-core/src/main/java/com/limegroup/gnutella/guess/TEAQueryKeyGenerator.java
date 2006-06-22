@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.guess;
 
-import java.util.Arrays;
 import java.net.InetAddress;
 import java.security.SecureRandom;
+import java.util.Arrays;
+
 import com.limegroup.gnutella.security.SecurityUtils;
 
 /* package */ class TEAQueryKeyGenerator implements QueryKeyGenerator {

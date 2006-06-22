@@ -1,4 +1,5 @@
-package com.limegroup.gnutella.stubs;
+package com.limegroup.gnutella;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,14 +44,7 @@ public final class UDPServiceStub extends UDPService {
 	/**
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
-	private final static UDPService INSTANCE1 = new UDPServiceStub();
-    
-	/**
-	 * Constant for the size of UDP messages to accept -- dependent upon
-	 * IP-layer fragmentation.
-	 */
-	private final int BUFFER_SIZE = 1024 * 32;
-    
+	private final static UDPService INSTANCE1 = new UDPServiceStub();    
 
 	
 	/**
@@ -99,9 +93,6 @@ public final class UDPServiceStub extends UDPService {
 	 */
 	void setListeningSocket(DatagramSocket datagramSocket) {
 	}
-
-	/** Default wait time */
-	private final long LONG_TIME = 24 * 60 * 60 * 1000;
 
 	/** The active receivers of messages */
 	private final ArrayList RECEIVER_LIST = new ArrayList();
@@ -325,7 +316,7 @@ public final class UDPServiceStub extends UDPService {
 
         byte[] data = baos.toByteArray();
         DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
-        SEND_QUEUE.add(new Sender(dg, err));
+        SEND_QUEUE.add(new Sender(dg));
 	}
     
     // the runnable that actually sends the UDP packets.  didn't wany any
@@ -333,11 +324,9 @@ public final class UDPServiceStub extends UDPService {
     // received packets to be handled much more quickly
     private class Sender implements Runnable {
         private final DatagramPacket _dp;
-        private final ErrorCallback _err;
         
-        Sender(DatagramPacket dp, ErrorCallback err) {
+        Sender(DatagramPacket dp) {
             _dp = dp;
-            _err = err;
         }
         
         public void run() {
@@ -348,11 +337,6 @@ public final class UDPServiceStub extends UDPService {
 				internalSend(_dp);
 			} catch(NoRouteToHostException nrthe) {
 				// oh well, if we can't find that host, ignore it ...
-			} catch(IOException ioe) {
-				String errString = "ip/port: " + 
-								   _dp.getAddress() + ":" + 
-								   _dp.getPort();
-				_err.error(ioe, errString);
 			}
         }
     }

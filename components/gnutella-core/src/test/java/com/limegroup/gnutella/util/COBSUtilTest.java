@@ -157,7 +157,7 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         for (int i = 1; i < badBlock.length; i++)
             badBlock[i] = (byte)1;
         try {
-            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
+            COBSUtil.cobsDecode(badBlock);
             assertTrue(false);
         }
         catch (IOException expected) {}
@@ -166,14 +166,7 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         badBlock[0] = (byte) 10;
         for (int i = 1; i < badBlock.length; i++)
             badBlock[i] = (byte)1;
-        try {
-            // should pass this time
-            // badBlock is actually good ;)
-            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
-        }
-        catch (IOException unexpected) {
-            assertTrue(false);
-        }
+        COBSUtil.cobsDecode(badBlock);
 
         badBlock = new byte[4];
         badBlock[0] = (byte) 2;
@@ -181,7 +174,7 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         badBlock[2] = (byte) 1;
         badBlock[3] = (byte) 2;
         try {
-            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
+            COBSUtil.cobsDecode(badBlock);
             assertTrue(false);
         }
         catch (IOException expected) {

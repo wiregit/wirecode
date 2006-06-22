@@ -14,7 +14,6 @@ import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
@@ -34,19 +33,11 @@ public class VendorMessageSupportTest extends BaseTestCase {
     private String _remoteHost = "localhost";
     private int _remotePort = Backend.BACKEND_PORT;
     private static final int TIMEOUT = 2*500;
-    private boolean _localTest = true;
 
     public VendorMessageSupportTest(String name) {
         super(name);
     }
-
-    public VendorMessageSupportTest(String name, String host, int port) {
-        this(name);
-        _remoteHost = host;
-        _remotePort = port;
-        _localTest = false;
-    }
-
+    
     public static Test suite() {
         return buildTestSuite(VendorMessageSupportTest.class);
     }
@@ -62,11 +53,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
     private static boolean _testUDPCB = true;
 
     public void setUp() throws Exception {
-        debug("Expecting to test Gnutella host on " +
-              _remoteHost + ":" + _remotePort);
-              
-        if ( _localTest )
-            launchBackend();              
+        launchBackend();              
               
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);                    
 
@@ -317,42 +304,15 @@ public class VendorMessageSupportTest extends BaseTestCase {
         };
         sendThread.start();
 
-        PingRequest pr = null;
         try {
             _udpSock.receive(dp);  // wait for the UDP ConnectBack...
-            ByteArrayInputStream bais =
-                new ByteArrayInputStream(dp.getData());
-            pr = (PingRequest) MessageFactory.read(bais);
+            ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
+            MessageFactory.read(bais);
             fail("Did recieve UDP ConnectBack!!");
-        }
-        catch (Exception good) {
+        } catch (InterruptedIOException good) {
         }
 
         // we be golden dawg!!!
-    }    
-
-    private static final boolean debugOn = false;
-    private static final void debug(Exception e) {
-        if (debugOn)
-            e.printStackTrace();
-    }
-    private static final void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-
-
-    public static void main(String[] argv) throws Exception {
-        if (argv.length != 2)
-            junit.textui.TestRunner.run(suite());
-        else {
-            String name = VendorMessageSupportTest.class.getName();
-            String host = argv[0];
-            int port = Integer.parseInt(argv[1]);
-            junit.textui.TestRunner.run(new VendorMessageSupportTest(name,
-                                                                     host,
-                                                                     port));
-        }
     }
 }
     

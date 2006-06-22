@@ -78,7 +78,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         drainAll();
 
         // make sure leaf is sharing
-        assertEquals(2, ROUTER_SERVICE.getFileManager().getNumFiles());
+        assertEquals(2, RouterService.getFileManager().getNumFiles());
 
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
@@ -99,7 +99,6 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
     }
 
     public void testHTTPRequest() throws Exception {
-        Message m = null;
         String result = null;
 
         Socket s = new Socket("localhost", PORT);
@@ -133,7 +132,6 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
 
 
     public void testBadHTTPRequest1() throws Exception {
-        Message m = null;
         String result = null;
 
         Socket s = new Socket("localhost", PORT);

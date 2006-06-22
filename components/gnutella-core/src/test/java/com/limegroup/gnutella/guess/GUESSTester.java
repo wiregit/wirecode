@@ -79,7 +79,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
                 int length = datagram.getLength();
                 try {
                     // construct a message out of it...
-                    InputStream in = new ByteArrayInputStream(data);
+                    InputStream in = new ByteArrayInputStream(data, 0, length);
                     Message message = MessageFactory.read(in);		
                     if (message == null) continue;
                     if (message instanceof QueryReply) {

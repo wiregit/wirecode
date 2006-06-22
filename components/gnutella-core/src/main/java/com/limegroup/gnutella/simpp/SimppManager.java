@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.RouterService;
@@ -19,9 +21,6 @@ import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Used for managing signed messages published by LimeWire, and chaning settings

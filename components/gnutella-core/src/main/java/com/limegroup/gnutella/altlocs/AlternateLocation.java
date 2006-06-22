@@ -175,7 +175,6 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		URN urn = rfd.getSHA1Urn();
 		if(urn == null)
 		    throw new NullPointerException("cannot accept null URN");
-		int port = rfd.getPort();
 
 		if (!rfd.needsPush()) {
 			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()), urn);

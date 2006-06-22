@@ -7,13 +7,13 @@ import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.util.CommonUtils;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Provides static methods, which accept an InputStream and use the 
@@ -26,7 +26,6 @@ public class UpdateMessageVerifier {
     private byte[] data;
     private byte[] signature;
     private byte[] xmlMessage;
-    private boolean fromDisk;
     
     /**
      * @param fromDisk true if the byte are being read from disk, false is the
@@ -36,7 +35,6 @@ public class UpdateMessageVerifier {
         if(fromStream == null)
             throw new IllegalArgumentException();
         this.data = fromStream;
-        this.fromDisk = fromDisk;
     }
     
     
@@ -111,7 +109,6 @@ public class UpdateMessageVerifier {
      * this.data
      */
     private int findPipe(int startIndex) {
-        byte b = (byte)-1;
         boolean found = false;
         int i = startIndex;
         for( ; i < data.length; i++) {

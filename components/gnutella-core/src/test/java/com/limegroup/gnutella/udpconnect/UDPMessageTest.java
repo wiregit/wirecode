@@ -33,7 +33,6 @@ public class UDPMessageTest extends BaseTestCase {
 
         // Construct a data message
         byte        connectionID   = 1;
-        long        sequenceNumber = 0;
         byte[]      data           = new byte[512];
         int         datalength     = data.length;
 
@@ -49,8 +48,6 @@ public class UDPMessageTest extends BaseTestCase {
     public void testBoundaryConditions() throws Exception {
 
         // Construct a data message
-        byte        connectionID   = 1;
-        long        sequenceNumber = 0;
         byte[]      data           = new byte[512];
         int         datalength     = data.length;
 
@@ -73,8 +70,6 @@ public class UDPMessageTest extends BaseTestCase {
 	public void testDataSizes() throws Exception {
 
         // Construct a data message
-        byte        connectionID   = 1;
-        long        sequenceNumber = 0;
         byte[]      data;
         int         datalength;
 

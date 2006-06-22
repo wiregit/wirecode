@@ -1,28 +1,26 @@
 package com.limegroup.gnutella.version;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Iterator;
-import java.io.StringReader;
 import java.io.IOException;
-import java.net.URLEncoder;
+import java.io.StringReader;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EncodingUtils;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * An abstraction for the update XML.
@@ -385,6 +383,6 @@ class UpdateCollection {
      * Converts a string into url encoding.
      */
     private String encode(String unencoded) {
-        return URLEncoder.encode(unencoded);
+        return EncodingUtils.encode(unencoded);
     }
 }

@@ -79,9 +79,9 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         // first we need to set up GUESS capability
         // ----------------------------------------
         // set up solicited UDP support
-        PrivilegedAccessor.setValue( rs.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
         // set up unsolicited UDP support
-        PrivilegedAccessor.setValue( rs.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
         
         // you also have to set up TCP incoming....
         {
@@ -229,7 +229,6 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
     public void testBadQueryKey() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
-        Message m = null;
 
         QueryKey qkToUse = QueryKey.getQueryKey(localHost, 0);
         assertNotNull(qkToUse);
@@ -238,15 +237,13 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
             // we shouldn't get any response to our query...
             QueryRequest goodQuery = QueryRequest.createQueryKeyQuery("susheel", 
                                                                       qkToUse);
-            byte[] guid = goodQuery.getGUID();
             send(goodQuery, localHost, SERVER_PORT);
             
             try {
                 // now we should NOT get an ack            
-                m = receive();
+                receive();
                 assertTrue(false);
-            }
-            catch (InterruptedIOException expected) {}
+            } catch (InterruptedIOException expected) {}
         }
     }
     
@@ -275,10 +272,6 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 		DatagramPacket dg = new DatagramPacket(data, data.length, ip, port); 
         UDP_ACCESS.send(dg);
 	}
-
-    private static byte[] myIP() {
-        return new byte[] { (byte)127, (byte)0, 0, 1 };
-    }
 
     public static Integer numUPs() {
         return new Integer(3);

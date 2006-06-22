@@ -2,15 +2,12 @@ package com.limegroup.gnutella.spam;
 
 import java.util.Locale;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
 
 public class SpamManager {
-	private static final Log LOG = LogFactory.getLog(SpamManager.class);
+	//private static final Log LOG = LogFactory.getLog(SpamManager.class);
 
 	/**
 	 * If an RFDs spam rating is > MAX_THRESHOLD we will not remember the rating

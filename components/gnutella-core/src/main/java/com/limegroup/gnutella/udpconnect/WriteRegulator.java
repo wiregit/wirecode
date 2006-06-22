@@ -19,9 +19,6 @@ public class WriteRegulator {
     /** Cap the quick sending of blocks at this number */
     private static final int   MAX_SKIP_LIMIT       = 14;
 
-    /** The expected failure rate at optimal throughput */
-    private static final float TARGET_FAILURE_RATE  = 3f / 100f;
-
     /** The low failure rate at optimal throughput */
     private static final float LOW_FAILURE_RATE     = 3f / 100f;
 

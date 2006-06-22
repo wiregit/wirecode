@@ -1,27 +1,22 @@
 package com.limegroup.gnutella;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.zip.GZIPOutputStream;
 
 import junit.framework.Test;
 
-
+import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
+import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.bootstrap.UDPHostCache;
-import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 
 
 public class HostCatcherTest extends BaseTestCase {  

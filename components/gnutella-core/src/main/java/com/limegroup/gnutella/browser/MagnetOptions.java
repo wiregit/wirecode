@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +17,7 @@ import org.apache.commons.httpclient.URIException;
 
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
@@ -233,9 +233,9 @@ public class MagnetOptions implements Serializable {
 			ret.append("&xt=").append(xt);
 		}
 		if (getDisplayName() != null) 
-			ret.append("&dn=").append(URLEncoder.encode(getDisplayName()));
+			ret.append("&dn=").append(EncodingUtils.encode(getDisplayName()));
 		if (getKeywordTopic() != null) 
-			ret.append("&kt=").append(URLEncoder.encode(getKeywordTopic()));
+			ret.append("&kt=").append(EncodingUtils.encode(getKeywordTopic()));
 		for (Iterator iter = getXS().iterator(); iter.hasNext();) {
 			String xs = (String) iter.next();
 			ret.append("&xs=").append(xs);

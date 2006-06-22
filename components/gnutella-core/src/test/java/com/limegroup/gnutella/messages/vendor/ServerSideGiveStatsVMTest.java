@@ -68,23 +68,6 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 	 */
     private static final int TIMEOUT = 2000;
 
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 3;
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
-
     /**
      * Leaf connection to the Ultrapeer.
      */
@@ -159,8 +142,6 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     private static final GUID GUID3 = new GUID(query3.getGUID());
 
     private static final GUID l1GUID = new GUID(GUID.makeGuid());
-    private static final GUID l2GUID = new GUID(GUID.makeGuid());
-    private static final GUID l3GUID = new GUID(GUID.makeGuid());
     
 
 	/**
@@ -230,8 +211,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
+		RouterService.clearHostCatcher();
+        RouterService.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -244,7 +225,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 
 
 	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
 		sleep();
 		LEAF_1.close();
 		LEAF_2.close();
@@ -331,15 +312,6 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
  			drain(TCP_TEST_LEAF);
  		}
  	}
-
-    private void stopConnectionsCounting() {
-        LEAF_1.countEnabled = false;
-        LEAF_2.countEnabled = false;
-        LEAF_3.countEnabled = false;
-        LEAF_4.countEnabled = false;
-        ULTRAPEER_1.countEnabled = false;
-        ULTRAPEER_2.countEnabled = false;
-    }
 
 
 	/**

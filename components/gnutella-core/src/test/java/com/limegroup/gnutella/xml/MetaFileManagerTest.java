@@ -9,9 +9,9 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;

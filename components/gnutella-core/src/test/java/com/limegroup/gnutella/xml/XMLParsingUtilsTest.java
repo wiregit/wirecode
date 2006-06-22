@@ -5,10 +5,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
 import junit.framework.Test;
+
+import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -110,12 +109,11 @@ public class XMLParsingUtilsTest extends BaseTestCase {
     }
     
     public void testParseInvalid() throws Exception {
-        XMLParsingUtils.ParseResult result;
         String invalid =
             "<?xml asdf asdf>";
         
         try {
-            result = XMLParsingUtils.parse(invalid,1);
+            XMLParsingUtils.parse(invalid,1);
             fail("parsed invalid xml");
         }catch(SAXException expected){}
         
@@ -125,7 +123,7 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>";
         
         try {
-            result = XMLParsingUtils.parse(invalid,1);
+            XMLParsingUtils.parse(invalid,1);
             fail("parsed w/o closing audios tag");
         }catch(SAXException expected){}
         
@@ -134,7 +132,7 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"></audios>";
         
         try {
-            result = XMLParsingUtils.parse(invalid,1);
+            XMLParsingUtils.parse(invalid,1);
             fail("parsed with non-null not-closed audio element");
         }catch(SAXException expected){}
         
@@ -143,7 +141,7 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         "<audio genre=\"Rock\" identifier=\"def1.txt bitrate=\"190\"/></audios>";
         
         try {
-            result = XMLParsingUtils.parse(invalid,1);
+            XMLParsingUtils.parse(invalid,1);
             fail("parsed with malformed attribute");
         }catch(SAXException expected){}
     }

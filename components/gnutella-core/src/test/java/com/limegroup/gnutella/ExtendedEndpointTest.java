@@ -1,9 +1,9 @@
 package com.limegroup.gnutella;
 
 import java.io.StringWriter;
+import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.text.ParseException;
 
 import junit.framework.Test;
 

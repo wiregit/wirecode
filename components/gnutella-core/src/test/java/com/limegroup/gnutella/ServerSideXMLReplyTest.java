@@ -27,12 +27,6 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 
-	/**
-	 * The timeout value for sockets -- how much time we wait to accept 
-	 * individual messages before giving up.
-	 */
-    private static final int TIMEOUT = 2000;
-
     public ServerSideXMLReplyTest(String name) {
         super(name);
     }

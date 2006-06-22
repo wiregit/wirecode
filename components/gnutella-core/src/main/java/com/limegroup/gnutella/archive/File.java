@@ -1,17 +1,18 @@
 package com.limegroup.gnutella.archive;
 
 import java.util.HashMap;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
-
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileDetails;
 
 class File {
 

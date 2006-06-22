@@ -308,6 +308,7 @@ public final class NIOSocketTest extends BaseTestCase {
         }
     }
     
+    @SuppressWarnings("unused")
     private static class WriteTester implements ChannelWriter {
         private ByteBuffer buffer;
         private InterestWriteChannel channel;

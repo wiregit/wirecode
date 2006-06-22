@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Set;
 
 import com.limegroup.gnutella.settings.Settings;
 import com.limegroup.gnutella.settings.SettingsHandler;

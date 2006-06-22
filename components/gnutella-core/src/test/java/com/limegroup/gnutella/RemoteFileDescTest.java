@@ -2,19 +2,15 @@ package com.limegroup.gnutella;
 
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.
@@ -53,7 +49,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 									   10, "test",
 									   10, TEST_GUID, 10, false, 3,
 									   false, null, null, false, false,"",
-                                       0, null, -1);
+                                       null, -1);
 				fail("rfd1 should have received an exception for invalid port: "+
 					 rfd.getPort());
 			} catch(IllegalArgumentException e) {
@@ -71,12 +67,11 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		validPorts[1] = 6000;
 		for(int i=0; i<validPorts.length; i++) {
 			try {
-				RemoteFileDesc rfd = 
-					new RemoteFileDesc("www.limewire.org", validPorts[i], 
+				new RemoteFileDesc("www.limewire.org", validPorts[i], 
 									   10, "test",
 									   10, TEST_GUID, 10, false, 3,
 									   false, null, null, false, false,"",
-                                       0, null, -1);
+                                       null, -1);
 			} catch(IllegalArgumentException e) {
 				fail("rfd1 should not have received an exception for valid port: "+
 					 validPorts[i], e);
@@ -93,7 +88,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		RemoteFileDesc rfd =
 			new RemoteFileDesc("www.test.org", 3000, 10, "test", 10, TEST_GUID,
 							   10, true, 3, true, null, urns, 
-                               false, false,"",0, null, -1);
+                               false, false,"", null, -1);
 		URL rfdUrl = rfd.getUrl();
 		String urlString = rfdUrl.toString();
 		String host = rfd.getHost();
@@ -129,7 +124,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
                 HugeTestUtils.URNS[0].httpStringValue(), 10, 
                 pe.getClientGUID(), 10, true, 2, true, null, 
                 HugeTestUtils.URN_SETS[0],
-                false,true,"",0,proxies,-1);
+                false,true,"",proxies,-1);
 		 
 		 assertTrue(Arrays.equals(pe.getClientGUID(),fwalled.getClientGUID()));
 		 
@@ -138,7 +133,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 							   HugeTestUtils.URNS[1].httpStringValue(), 10, 
 							   GUID.makeGuid(), 10, true, 2, true, null, 
 							   HugeTestUtils.URN_SETS[1],
-                               false,false,"",0,null, -1);
+                               false,false,"",null, -1);
 		 
 		 RemoteFileDesc differentPE = new RemoteFileDesc(fwalled,pe2);
 		 assertTrue(Arrays.equals(pe2.getClientGUID(),differentPE.getClientGUID()));

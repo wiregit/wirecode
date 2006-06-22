@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.CommonUtils;
-
 import java.awt.Dimension;
 import java.awt.Toolkit;
 

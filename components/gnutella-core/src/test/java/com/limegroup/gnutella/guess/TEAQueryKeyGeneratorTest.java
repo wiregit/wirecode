@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.guess;
 
 
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Random;
-import java.math.BigInteger;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;

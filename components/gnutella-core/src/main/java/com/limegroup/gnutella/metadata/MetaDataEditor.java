@@ -1,8 +1,5 @@
 package com.limegroup.gnutella.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -15,7 +12,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public abstract class MetaDataEditor {
 
-	private Log LOG = LogFactory.getLog(MetaDataEditor.class);
+	//private Log LOG = LogFactory.getLog(MetaDataEditor.class);
 
     protected LimeXMLDocument correctDocument= null;
 

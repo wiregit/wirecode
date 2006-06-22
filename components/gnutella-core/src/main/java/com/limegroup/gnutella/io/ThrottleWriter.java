@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
 /**
  * A writer that throttles data according to a throttle.
  *
@@ -15,7 +12,7 @@ import org.apache.commons.logging.Log;
  */
 public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
     
-    private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
+    //private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
     
     /** The channel to write to & interest on. */    
     private volatile InterestWriteChannel channel;

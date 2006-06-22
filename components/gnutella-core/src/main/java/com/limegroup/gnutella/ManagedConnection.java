@@ -6,10 +6,8 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -781,6 +779,7 @@ public class ManagedConnection extends Connection
         supernodeClientAtLooping = isSupernodeClientConnection();
         
         if(!isAsynchronous()) {
+            LOG.debug("Starting blocking connection");
             Thread.currentThread().setName("MessageLoopingThread");
             while (true) {
                 Message m=null;
@@ -792,6 +791,7 @@ public class ManagedConnection extends Connection
                 } catch (BadPacketException ignored) {}
             }
         } else {
+            LOG.debug("Starting asynchronous connection");
             _socket.setSoTimeout(0); // no timeout for reading.
             
             MessageReader reader = new MessageReader(ManagedConnection.this);

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.licenses;
 
 import java.net.URL;
+
 import org.apache.commons.httpclient.URI;
 
 import com.limegroup.gnutella.URN;

@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.InetAddress;
 import java.util.Properties;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -20,10 +20,10 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -61,6 +61,7 @@ public abstract class ClientSideTestCase
         super(name);
     }
     
+    @SuppressWarnings("unused")
     private static void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
@@ -102,7 +103,7 @@ public abstract class ClientSideTestCase
                                                          "getActivityCallback",
                                                          null);
         rs=new RouterService(callback);
-        rs.preGuiInit();
+        RouterService.preGuiInit();
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         rs.start();

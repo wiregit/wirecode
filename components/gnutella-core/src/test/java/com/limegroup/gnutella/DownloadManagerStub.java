@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.stubs;
+package com.limegroup.gnutella;
 
 import java.io.File;
 import java.net.Socket;

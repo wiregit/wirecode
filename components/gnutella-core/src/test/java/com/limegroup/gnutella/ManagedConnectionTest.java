@@ -13,7 +13,6 @@ import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.StubHandshakeResponder;
-import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.NIOServerSocket;
@@ -98,7 +97,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
 
         // Record initial msgs.
         int initialNumSent = out.getNumMessagesSent();
-        long initialBytesSent = out.getUncompressedBytesSent();
+        //long initialBytesSent = out.getUncompressedBytesSent();
         long initialBytesRecv = in.getUncompressedBytesReceived();
         
         pr=new PingRequest((byte)3);

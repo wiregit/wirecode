@@ -6,31 +6,31 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
+import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 
 /**
@@ -427,8 +427,11 @@ public class Response {
             for(Iterator iter = col.iterator();
               iter.hasNext() && i < MAX_LOCATIONS;) {
             	Object o = iter.next();
-            	if (!(o instanceof DirectAltLoc))
+            	if (!(o instanceof DirectAltLoc)) {
+            	    if(LOG.isDebugEnabled())
+                        LOG.debug("Got non-direct-loc: " + o);
             		continue;
+                }
                 DirectAltLoc al = (DirectAltLoc)o;
                 if (al.canBeSent(AlternateLocation.MESH_RESPONSE)) {
                     IpPort host = al.getHost();
@@ -588,7 +591,6 @@ public class Response {
                  data.isReplyToMulticastQuery(),
                  data.isFirewalled(), 
                  data.getVendorCode(),
-                 System.currentTimeMillis(),
                  data.getPushProxies(),
                  getCreateTime(),
                  data.getFWTVersionSupported()

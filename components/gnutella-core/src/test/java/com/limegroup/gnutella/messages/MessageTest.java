@@ -41,12 +41,10 @@ public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[22] = (byte)0;
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         byte[] b = new byte[40];
-        Message m  = null;
         try {
-            m = MessageFactory.read(bais,b,(byte)4);
+            MessageFactory.read(bais,b,(byte)4);
             fail("bpe should have been thrown.");
         } catch(BadPacketException bpe) {
         }
-        PingReply pr = (PingReply)m;
     }
 }

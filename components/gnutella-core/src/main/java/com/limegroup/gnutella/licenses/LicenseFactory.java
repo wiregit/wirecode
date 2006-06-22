@@ -2,13 +2,12 @@ package com.limegroup.gnutella.licenses;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.metadata.WeedInfo;
 import com.limegroup.gnutella.metadata.WRMXML;
+import com.limegroup.gnutella.metadata.WeedInfo;
 
 /**
  * A factory for constructing Licenses based on licenses.

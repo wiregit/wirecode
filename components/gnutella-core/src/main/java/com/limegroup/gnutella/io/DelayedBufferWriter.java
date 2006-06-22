@@ -4,21 +4,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.io.WriteObserver;
-
 /**
  * A Writer that stores data within a buffer and writes it out after some delay,
  * or if the buffer fills up.
  */
 public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel {
 
-    private static final Log LOG = LogFactory.getLog(DelayedBufferWriter.class);
+    //private static final Log LOG = LogFactory.getLog(DelayedBufferWriter.class);
 
     /** The delay time to use before forcing a flush */
     private final static int MAX_TIME = 200;

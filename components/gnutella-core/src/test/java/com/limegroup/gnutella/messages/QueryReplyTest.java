@@ -14,7 +14,13 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.SignatureSpi;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -709,23 +715,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(numHeaders, testGGEP.getHeaders().size());
         Set retProxies = _ggepUtil.getPushProxies(testGGEP);
         assertEquals(4, retProxies.size());
-
-        IpPort[] array1 = 
-            (IpPort[])retProxies.toArray(new IpPort[0]);
-        IpPort[] array2 = 
-            (IpPort[])proxies.toArray(new IpPort[0]);
-
         assertEquals(retProxies, proxies);
-        //for(int i=0; i<array1.length; i++) {
-        //  assertEquals(array1[i], array2[i]);
-        //}
-        //Iterator iter1 = retProxies.iterator();
-        //Iterator iter2 = proxies.iterator();
-        //while(iter1.hasNext() && iter2.hasNext()) {
-        //  assertEquals((PushProxyInterface)iter1.next(), 
-        //               (PushProxyInterface)iter2.next());
-        //}
-        
     }
 
 
@@ -737,8 +727,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // trying to input
         try {
-            IpPort proxy = 
-                new IPPortCombo("0.0.0.0", 6346);
+            new IPPortCombo("0.0.0.0", 6346);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 
@@ -757,8 +746,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // trying to input is the only case
         try {
-            IpPort proxy = 
-                new IPPortCombo("0.0.0.0", 634600);
+            new IPPortCombo("0.0.0.0", 634600);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 
@@ -829,8 +817,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             int j = 0;
             while(iter.hasNext()) {
                 final int inIndex = 6*j;
-                IpPort ppi = (IpPort)iter.next();
-                InetAddress addr = ppi.getInetAddress();
+                iter.next(); //IpPort ppi = (IpPort)iter.next();
+               // InetAddress addr = ppi.getInetAddress();
                 byte[] tempAddr = new byte[4];
                 System.arraycopy(bytes, inIndex, tempAddr, 0, 4);
 
@@ -957,6 +945,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             assertEquals("wrong # of alts",
                 hits[0].getLocations(), hit.getLocations());
 		}        
+        
+        assertTrue("didn't check anything!", checked);
     }
     
     public void testQueryReplyHasCreationTimes() throws Exception {
@@ -1010,6 +1000,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             assertEquals("wrong creation time", expectTime,
                                                 hit.getCreateTime());
 		}
+        
+        assertTrue("didn't check anything!", checked);
     }
 
     /**
@@ -1030,7 +1022,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         
         try {
-            List results = qr.getResultsAsList();
+            qr.getResultsAsList();
             fail("should have thrown an exception for empty result");
         } catch(BadPacketException e) {
         }

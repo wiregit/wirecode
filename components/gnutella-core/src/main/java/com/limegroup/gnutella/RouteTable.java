@@ -420,7 +420,7 @@ public final class RouteTable {
         return buf.toString();
     }
 
-    private static boolean warned=false;
+//    private static boolean warned=false;
     /** Tests internal consistency.  VERY slow. */
     private final void repOk() {
         /*

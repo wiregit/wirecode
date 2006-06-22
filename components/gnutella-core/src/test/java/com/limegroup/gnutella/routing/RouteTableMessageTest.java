@@ -7,7 +7,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.BaseTestCase;
 
@@ -37,7 +36,7 @@ public class RouteTableMessageTest extends BaseTestCase {
         message[23+0]=(byte)0xFF;                            //bogus variant
         InputStream in=new ByteArrayInputStream(message);
         try {
-            Message m=(ResetTableMessage)MessageFactory.read(in);
+            MessageFactory.read(in);
             fail("exception should have been thrown");
         } catch (BadPacketException e) {
         }

@@ -1,15 +1,17 @@
 package com.limegroup.gnutella.licenses;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.bootstrap.*;
+import org.apache.commons.httpclient.URI;
 
-import org.apache.commons.httpclient.*;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 public final class CCLicenseTest extends BaseTestCase {
     

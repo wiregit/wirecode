@@ -163,11 +163,11 @@ public class RoundRobinQueueTest extends BaseTestCase {
 	
 	public void testEmpty() throws Exception {
 		try {
-			Object obj = queue.next();
+			queue.next();
 			fail("dequeued succesfully from an empty list?");
 		}catch (NoSuchElementException expected){}
 		try {
-			Object obj = setQueue.next();
+			setQueue.next();
 			fail("dequeued succesfully from an empty list?");
 		}catch (NoSuchElementException expected){}
 		

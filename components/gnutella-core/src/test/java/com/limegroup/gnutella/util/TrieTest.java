@@ -40,7 +40,6 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final Object aVal    = "value for a";
     private static final Object addVal  = "value for add";
     private static final Object anVal   = "value for an";
-    private static final Object anVal0  = "another value for an";
     private static final Object antVal  = "value for ant";
     private static final Object antVal0 = "another value for ant";
     
@@ -58,7 +57,6 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
     private void tTrie_Basic() throws Throwable {
         Trie t = new Trie(false);
         Iterator iter = null;
-        Object tmp1 = null, tmp2 = null, tmp3 = null, tmp4 = null;
 
 	    //Note int Trie.match(String, int, int String) is private, call it
         //using the helper function
@@ -112,8 +110,8 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEmpty(iter);
 
         // Yield many elements...
-        final Object aVals[] = {aVal, anVal, addVal, antVal};
-        assertIterator(iter = t.getPrefixedBy("a"));
+        iter = t.getPrefixedBy("a");
+        assertIterator(iter);
         expectNextSame(aVal, iter);
         expectNextSame(addVal, iter);
         expectNextSame(anVal, iter);
@@ -135,7 +133,6 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
     private void tTrie_EmptyString() {
         Trie t = new Trie(false);
         Iterator iter = null;
-        Object tmp1 = null, tmp2 = null;
 
         assertNull(t.get(""));
 

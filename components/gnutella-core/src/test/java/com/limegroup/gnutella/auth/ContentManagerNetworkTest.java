@@ -5,7 +5,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
@@ -21,7 +20,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
  
 public class ContentManagerNetworkTest extends BaseTestCase {
     

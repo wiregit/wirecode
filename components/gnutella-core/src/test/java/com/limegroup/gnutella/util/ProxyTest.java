@@ -19,12 +19,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class ProxyTest extends BaseTestCase {
 
-    private final static byte V4 = (byte) 4;
-
-    private final static byte V5 = (byte) 5;
-
-    private final static String HTTP_STR = "CONNECT";
-
     private static final int PROXY_PORT = 9990;
 
     static final int DEST_PORT = 9999;
@@ -52,7 +46,7 @@ public class ProxyTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
+        new RouterService(new ActivityCallbackStub());
         fps = new FakeProxyServer(9990, 9999);
     }
 

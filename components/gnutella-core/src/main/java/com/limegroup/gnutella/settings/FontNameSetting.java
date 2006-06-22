@@ -47,21 +47,4 @@ public final class FontNameSetting extends Setting {
     protected void loadValue(String sValue) {
         _fontName = sValue;
     }
-
-    
-    private boolean isRoman() {
-        String lang = ApplicationSettings.LANGUAGE.getValue();
-        
-        //for now just english to be on the safe side
-        if(lang.equals("en") ) {
-           /*
-             || lang.equals("fr")
-             || lang.equals("ca")
-           */
-            return true;
-        }
-        else
-            return false;
-    }
-    
 }

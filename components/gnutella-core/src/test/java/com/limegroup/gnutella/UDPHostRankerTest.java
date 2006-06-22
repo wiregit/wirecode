@@ -142,10 +142,6 @@ public class UDPHostRankerTest extends ClientSideTestCase {
         return new MyActivityCallback();
     }
 
-    private static byte[] myIP() {
-        return new byte[] { (byte)192, (byte)168, 0, 1 };
-    }
-
     public static class MyActivityCallback extends ActivityCallbackStub {
         private RemoteFileDesc rfd = null;
         public RemoteFileDesc getRFD() {

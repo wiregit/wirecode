@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.bootstrap;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.FileWriter;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -31,7 +29,7 @@ import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -450,7 +448,7 @@ public class BootstrapServerManager {
             String urlPart = null;
             if (_lastConnectable != null)
                 urlPart = "url=" +
-					URLEncoder.encode(_lastConnectable.getURLString());
+					EncodingUtils.encode(_lastConnectable.getURLString());
 
             //My ip address as a parameter.
             String ipPart = null;
@@ -543,7 +541,7 @@ public class BootstrapServerManager {
         String urlString = server.getURLString();
         String connectTo = urlString
                  +"?client="+CommonUtils.QHD_VENDOR_NAME
-                 +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
+                 +"&version="+EncodingUtils.encode(CommonUtils.getLimeWireVersion())
                  +"&"+request.parameters();
         // add the guid if it's our cache, so we can see if we're hammering
         // from a single client, or if it's a bunch of clients behind a NAT

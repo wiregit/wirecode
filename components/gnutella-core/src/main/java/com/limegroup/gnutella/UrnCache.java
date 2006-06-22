@@ -9,22 +9,22 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
@@ -130,10 +130,8 @@ public final class UrnCache {
         if(LOG.isDebugEnabled())
             LOG.debug("Clearing all pending hashes owned by: " + owner);
         
-        for(Iterator i = pendingHashing.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            File f = (File)next.getKey();
-            List callbacks = (List)next.getValue();
+        for(Iterator i = pendingHashing.values().iterator(); i.hasNext(); ) {
+            List callbacks = (List)i.next();
             for(int j = callbacks.size() - 1; j >= 0; j--) {
                 UrnCallback c = (UrnCallback)callbacks.get(j);
                 if(c.isOwner(owner))

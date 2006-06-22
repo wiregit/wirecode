@@ -8,15 +8,12 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.licenses.License;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.CoWList;

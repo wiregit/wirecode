@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.io;
 
-import java.net.Socket;
 import java.io.IOException;
+import java.net.Socket;
 
 /**
  * Allows accept events to be received.

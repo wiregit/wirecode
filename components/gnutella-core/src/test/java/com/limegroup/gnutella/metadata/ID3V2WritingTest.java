@@ -71,7 +71,7 @@ public class ID3V2WritingTest extends BaseTestCase {
         PrivilegedAccessor.setValue(editor, "artist_", "new Artist");
         PrivilegedAccessor.setValue(editor, "genre_", "Classic Rock");
         
-        int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
         //3. Test if the data was written correctly
         data = (AudioMetaData)MetaData.parse(TEST_FILE);

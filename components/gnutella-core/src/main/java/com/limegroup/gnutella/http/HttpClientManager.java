@@ -20,7 +20,6 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.Sockets;
 
 

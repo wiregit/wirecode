@@ -3,6 +3,8 @@ package com.limegroup.gnutella.simpp;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -12,9 +14,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 public class SimppParser {
     

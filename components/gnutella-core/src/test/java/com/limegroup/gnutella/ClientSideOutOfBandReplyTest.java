@@ -52,8 +52,9 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @SuppressWarnings("unused")
     private static void doSettings() {
-	ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
+        ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
     }
     
     ///////////////////////// Actual Tests ////////////////////////////
@@ -78,9 +79,9 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // ----------------------------------------
 
         // set up solicited UDP support
-        PrivilegedAccessor.setValue( rs.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
         // set up unsolicited UDP support
-        PrivilegedAccessor.setValue( rs.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
         
         // ----------------------------------------
 

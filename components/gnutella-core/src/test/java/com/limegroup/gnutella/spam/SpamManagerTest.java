@@ -6,7 +6,6 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -287,7 +286,7 @@ public class SpamManagerTest extends BaseTestCase {
                 false, 3, false,
                 doc, urns,
                 false,false,
-                "ALT",0l,
+                "ALT",
                 Collections.EMPTY_SET, 0l);
     }
     

@@ -5,8 +5,8 @@ import java.util.Enumeration;
 import com.apple.cocoa.foundation.NSMutableArray;
 import com.apple.cocoa.foundation.NSMutableDictionary;
 import com.apple.cocoa.foundation.NSObject;
-import com.apple.cocoa.foundation.NSUserDefaults;
 import com.apple.cocoa.foundation.NSSystem;
+import com.apple.cocoa.foundation.NSUserDefaults;
 
 /**
  * A collection of utility methods for OSX.
@@ -131,7 +131,7 @@ public class MacOSXUtils {
                 // We must remove with temp, not itemInfo, because itemInfo
                 // is a clone.
                 if(!allow)
-                    allApps.removeIdenticalObject(temp);
+                    allApps.removeObject(temp);
                 else
                     itemInfo.setObjectForKey(getAppDir(), PATH);
                 break;

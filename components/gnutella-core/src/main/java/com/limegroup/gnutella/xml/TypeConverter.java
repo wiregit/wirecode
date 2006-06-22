@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.HashMap;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Converts XML Schema types of Java types. Contains a hashMap of

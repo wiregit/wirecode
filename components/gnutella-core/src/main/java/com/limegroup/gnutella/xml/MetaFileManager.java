@@ -3,29 +3,29 @@ package com.limegroup.gnutella.xml;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Collection;
-import java.util.Collections;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.NameValue;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;        
 
 /**
  * This class handles querying shared files with XML data and returning XML data

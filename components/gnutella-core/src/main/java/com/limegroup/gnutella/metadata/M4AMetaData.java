@@ -75,6 +75,7 @@ public class M4AMetaData extends AudioMetaData {
         private static final int STBL_ATOM = 0x7374626c;
         private static final int STSD_ATOM = 0x73747364;
         private static final int MP4A_ATOM = 0x6d703461;
+        @SuppressWarnings("unused")
         private static final int DRMS_ATOM = 0x64726d73;
         private static final int UDTA_ATOM = 0x75647461;
         private static final int META_ATOM = 0x6d657461;
@@ -246,9 +247,7 @@ public class M4AMetaData extends AudioMetaData {
 	 * atom containing the metadata atoms
 	 */
 	private void positionMetaDataStream(InputStream rawIn) throws IOException{
-		DataInputStream in = new DataInputStream(rawIn);
-		byte []ILST = null;
-		     
+		DataInputStream in = new DataInputStream(rawIn);		     
 		skipAtom(FTYP_ATOM,in);
 		enterAtom(MOOV_ATOM,in);
 	

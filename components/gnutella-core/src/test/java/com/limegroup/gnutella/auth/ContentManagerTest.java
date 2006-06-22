@@ -7,7 +7,6 @@ import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
  
 public class ContentManagerTest extends BaseTestCase {
     

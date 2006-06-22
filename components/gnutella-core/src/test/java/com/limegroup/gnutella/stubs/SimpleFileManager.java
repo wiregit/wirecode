@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.File;
-import java.util.List;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;

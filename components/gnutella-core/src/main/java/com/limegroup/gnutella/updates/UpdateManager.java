@@ -18,7 +18,6 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.ThreadFactory;
 
 /**
@@ -33,15 +32,6 @@ public class UpdateManager {
      * Used when handshaking with other LimeWires. 
      */
     private String latestVersion;
-    /**
-     * The language specific string that contains the new features of the 
-     * version discovered in the network
-     */ 
-    private String message = "";
-    /**
-     * true if message is as per the user's language  preferences.
-     */
-    private boolean usesLocale;
     
     private static UpdateManager INSTANCE=null;
 
@@ -73,8 +63,6 @@ public class UpdateManager {
                     String xml = new String(verifier.getMessageBytes(),"UTF-8");
                     UpdateFileParser parser = new UpdateFileParser(xml);
                     latestVersion = parser.getVersion();
-                    message = parser.getMessage();
-                    usesLocale = parser.usesLocale();
                     isValid = true;
                 } catch(SAXException sax) {
                     LOG.error("invalid update xml", sax);

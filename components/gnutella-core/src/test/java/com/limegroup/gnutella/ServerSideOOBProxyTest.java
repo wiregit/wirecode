@@ -14,9 +14,6 @@ import java.util.Map;
 
 import junit.framework.Test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -48,7 +45,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;
 
-    private static final Log LOG = LogFactory.getLog(ServerSideOOBProxyTest.class);
+   // private static final Log LOG = LogFactory.getLog(ServerSideOOBProxyTest.class);
     
     /**
      * Ultrapeer 1 UDP connection.
@@ -158,8 +155,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming",Boolean.TRUE);
         PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedUnsolicitedIncoming",Boolean.TRUE);
         Thread.sleep(500);
-        assertTrue(ROUTER_SERVICE.isGUESSCapable());
-        assertTrue(ROUTER_SERVICE.isOOBCapable());
+        assertTrue(RouterService.isGUESSCapable());
+        assertTrue(RouterService.isOOBCapable());
         
         //no one has sent a MessagesSupportedVM yet so no queries should be
         //proxied
@@ -206,8 +203,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         byte[] proxiedGuid = new byte[queryRec.getGUID().length];
         System.arraycopy(queryRec.getGUID(), 0, proxiedGuid, 0, 
                          proxiedGuid.length);
-        GUID.addressEncodeGuid(proxiedGuid, ROUTER_SERVICE.getAddress(),
-                               ROUTER_SERVICE.getPort());
+        GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
+                RouterService.getPort());
         assertEquals(new GUID(proxiedGuid), new GUID(queryRec.getGUID()));
 
         // shut off query
@@ -318,8 +315,8 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         byte[] proxiedGuid = new byte[queryRec.getGUID().length];
         System.arraycopy(queryRec.getGUID(), 0, proxiedGuid, 0, 
                          proxiedGuid.length);
-        GUID.addressEncodeGuid(proxiedGuid, ROUTER_SERVICE.getAddress(),
-                               ROUTER_SERVICE.getPort());
+        GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
+                RouterService.getPort());
         assertEquals(new GUID(proxiedGuid), new GUID(queryRec.getGUID()));
         // 1) route some TCP results back and make sure they are mapped back to
         // the leaf

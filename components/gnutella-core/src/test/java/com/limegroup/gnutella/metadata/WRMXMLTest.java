@@ -1,12 +1,8 @@
 package com.limegroup.gnutella.metadata;
 
-import java.io.*;
-import java.util.*;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 public final class WRMXMLTest extends BaseTestCase {
     

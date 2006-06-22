@@ -171,6 +171,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * is provided, issues a HEAD request to get the file size.  If this fails,
      * returns null.  Package-access and static for easy testing.
      */
+    @SuppressWarnings("deprecation")
     private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
         String filename, URN urn) throws IOException{
         if (defaultURL==null) {
@@ -205,7 +206,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 null,           //no metadata
                 urns,
                 false,          //not a reply to a multicast query
-                false,"",0l, //not firewalled, no vendor, timestamp=0 (OK?)
+                false,"",       //not firewalled, no vendor,
                 url,            //url for GET request
                 null,           //no push proxies
                 0);         //assume no firewall transfer

@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -27,9 +26,10 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.version.UpdateInformation;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * A standalone program for testing UDPConnections across machines.

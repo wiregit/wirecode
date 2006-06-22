@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.altlocs;
 
-import java.util.Collection;
-
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;

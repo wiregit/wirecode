@@ -55,7 +55,7 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
                 bais = new ByteArrayInputStream(payload);
                 _port = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
                 byte[] guidBytes = new byte[16];
-                int bytesRead = bais.read(guidBytes, 0, guidBytes.length);
+                bais.read(guidBytes, 0, guidBytes.length);
                 _guid = new GUID(guidBytes);
                 break;
             case 2:

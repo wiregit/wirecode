@@ -1,16 +1,13 @@
 package com.limegroup.gnutella.connection;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
-import java.io.IOException;
 import java.util.zip.Deflater;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestWriteChannel;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.io.WriteObserver;
 
 /**
@@ -19,7 +16,7 @@ import com.limegroup.gnutella.io.WriteObserver;
  */
 public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     
-    private static final Log LOG = LogFactory.getLog(DeflaterWriter.class);
+    //private static final Log LOG = LogFactory.getLog(DeflaterWriter.class);
     
     /** The channel to write to & interest on. */    
     private volatile InterestWriteChannel channel;

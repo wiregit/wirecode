@@ -1,18 +1,14 @@
 package com.limegroup.gnutella.io;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Collection;
-import java.util.Iterator;
-
-import java.nio.channels.SelectionKey;
 import java.nio.channels.CancelledKeyException;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import java.nio.channels.SelectionKey;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A throttle that can be applied to non-blocking reads & writes.
@@ -74,7 +70,7 @@ import org.apache.commons.logging.Log;
  */
 public class NBThrottle implements Throttle {
     
-    private static final Log LOG = LogFactory.getLog(NBThrottle.class);
+    //private static final Log LOG = LogFactory.getLog(NBThrottle.class);
     
 
     private static final int DEFAULT_TICK_TIME = 100;

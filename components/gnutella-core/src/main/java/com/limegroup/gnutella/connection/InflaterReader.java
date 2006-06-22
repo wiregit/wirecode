@@ -2,9 +2,8 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.util.zip.Inflater;
 import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 import com.limegroup.gnutella.io.ChannelReader;
 import com.limegroup.gnutella.io.InterestReadChannel;

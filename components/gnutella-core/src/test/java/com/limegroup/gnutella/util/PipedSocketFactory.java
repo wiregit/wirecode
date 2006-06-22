@@ -1,27 +1,14 @@
 package com.limegroup.gnutella.util;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.nio.channels.SocketChannel;
 
-import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.NBSocket;
-import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.NIOServerSocket;
 import com.limegroup.gnutella.io.NIOSocket;
-import com.limegroup.gnutella.io.ReadWriteObserver;
 
 /** 
  * Returns two sockets A and B, so that the input of A is connected to 

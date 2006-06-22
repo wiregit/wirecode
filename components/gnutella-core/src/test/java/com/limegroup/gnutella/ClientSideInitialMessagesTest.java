@@ -8,8 +8,8 @@ import java.util.ListIterator;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -73,12 +73,6 @@ public class ClientSideInitialMessagesTest extends ClientSideTestCase {
         assertEquals( "UP messages queue not empty" + _queue, 0, _queue.size() );
     }
     // ======================================================
-    
-    //  Utility functions   
-    private final void sendF(Connection c, Message m) throws Exception {
-        c.send(m);
-        c.flush();
-    }
     
     private void parseWaitingMessages( Connection con ) throws Exception {
         try {

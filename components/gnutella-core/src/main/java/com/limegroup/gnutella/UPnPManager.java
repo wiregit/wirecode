@@ -20,7 +20,6 @@ import org.cybergarage.upnp.device.DeviceChangeListener;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
 

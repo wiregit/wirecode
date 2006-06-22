@@ -13,11 +13,11 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.util.Utilities;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 //Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
 

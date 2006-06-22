@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.settings;
 
 import java.io.File;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.Set;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Arrays;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * A setting which has a Set of files.

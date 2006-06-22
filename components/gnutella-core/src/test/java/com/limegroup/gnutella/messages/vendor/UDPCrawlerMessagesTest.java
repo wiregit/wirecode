@@ -29,8 +29,6 @@ import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.IPPortCombo;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -134,8 +132,8 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
         
         RouterService.setListeningPort(PORT);
 		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
+        RouterService.clearHostCatcher();
+        RouterService.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -154,7 +152,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
     }
 	
 	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
 		sleep();
 		LEAF_1.close();
 		LEAF_2.close();

@@ -39,8 +39,6 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 	 */
 	private final int BUFFER_SIZE = 8192;
 
-	private final int SOCKET_TIMEOUT = 2*1000; // 2 second wait for a message
-
     private final int NUM_UDP_LOOPS = 25;
     
     private final RouterService _rs = new RouterService(new
@@ -350,7 +348,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                 int length = datagram.getLength();
                 try {
                     // construct a message out of it...
-                    InputStream in = new ByteArrayInputStream(data);
+                    InputStream in = new ByteArrayInputStream(data, 0, length);
                     Message message = MessageFactory.read(in);		
                     if(message == null) continue;
                     if (message instanceof PingRequest) {

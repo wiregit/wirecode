@@ -6,26 +6,22 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.licenses.LicenseConstants;
 import com.limegroup.gnutella.licenses.LicenseFactory;
-import com.limegroup.gnutella.metadata.WeedInfo;
-import com.limegroup.gnutella.metadata.WRMXML;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import com.limegroup.gnutella.util.NameValue;
 
 
 /**

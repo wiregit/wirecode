@@ -2,13 +2,11 @@ package com.limegroup.gnutella.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Properties;
 import java.util.Random;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.ReadBufferChannel;
-import com.limegroup.gnutella.io.IOState;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class ReadSkipStateTest extends BaseTestCase {

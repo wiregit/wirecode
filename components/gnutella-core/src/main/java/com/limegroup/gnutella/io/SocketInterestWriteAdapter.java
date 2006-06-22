@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.io;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.io.IOException;
 
 /**
  * Adapter that forwards InterestWriteChannel.interest(..)

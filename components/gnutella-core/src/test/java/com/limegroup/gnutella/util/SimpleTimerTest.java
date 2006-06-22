@@ -92,7 +92,6 @@ public class SimpleTimerTest extends BaseTestCase {
             SimpleTimer t = new SimpleTimer(false);
             ErrorService.setErrorCallback(now);
             TimerTestTask a = new TimerTestTask("a3", true);
-            long start = System.currentTimeMillis();
             t.schedule(a, T, 2*T);
             sleep(T+T/2);
             t.cancel();
@@ -113,7 +112,6 @@ public class SimpleTimerTest extends BaseTestCase {
         private ArrayList _runs=new ArrayList();
         // Amount of allowed variation, in msecs.
         private static long FUDGE_FACTOR=40;
-        private String _name;
         private boolean _throwException;
     
         TimerTestTask(String name) {
@@ -121,7 +119,6 @@ public class SimpleTimerTest extends BaseTestCase {
         }
     
         TimerTestTask(String name, boolean throwException) {
-            this._name=name;
             this._throwException=throwException;
         }
     

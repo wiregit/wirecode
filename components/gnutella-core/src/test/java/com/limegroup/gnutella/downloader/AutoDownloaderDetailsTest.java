@@ -25,7 +25,7 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseT
 	public void testLegacy() throws Exception {
         AutoDownloadDetails add = 
         new AutoDownloadDetails("moxxiffey", null,
-                                GUID.makeGuid(), MediaType.getAudioMediaType());
+                                MediaType.getAudioMediaType());
         String[] files = {"moxxiffey - fuedehead.mp3"};
 
         RemoteFileDesc[] rfds = new RemoteFileDesc[files.length];
@@ -33,7 +33,7 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseT
             rfds[i] = new RemoteFileDesc("0.0.0.0", 6346, i, files[i],
                                          i, GUID.makeGuid(),
                                          3, false, 3, false,null, null,
-                                         false, false,"",0,null, -1);
+                                         false, false,"",null, -1);
 
         //Test serialization by writing to disk and rereading.  All the methods
         //should still work afterwards.

@@ -15,14 +15,6 @@ public class XMLKeywordToken extends AbstractToken {
 	/**
 	 * must be positive
 	 * 
-	 * This is a heuristic value to prevent an token from becoming bad after
-	 * only a small number of bad evaluations.
-	 */
-	private static final byte INITAL_GOOD = 20;
-
-	/**
-	 * must be positive
-	 * 
 	 * This value determines how dynamic the filter is. A low MAX value will
 	 * allow this Token to get a bad rating after occourring only a few times in
 	 * spam, a high value will make it very improbable that the filter will

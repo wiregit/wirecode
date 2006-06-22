@@ -1,10 +1,9 @@
 package com.limegroup.gnutella.version;
 
-import org.apache.commons.httpclient.URI;
-import com.limegroup.gnutella.URN;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.URN;
 
 /**
  * A single message for updating.

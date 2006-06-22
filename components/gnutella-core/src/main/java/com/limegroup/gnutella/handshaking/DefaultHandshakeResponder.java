@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.handshaking;
 
-import java.io.IOException;
-
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.RouterService;
 

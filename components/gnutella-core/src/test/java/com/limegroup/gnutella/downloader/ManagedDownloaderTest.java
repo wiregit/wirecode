@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ErrorService;
@@ -40,7 +41,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.DownloadManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
@@ -366,7 +366,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		}
 		if (noWritePermissionDir != null) {
 			try {
-				ManagedDownloader dl = new ManagedDownloader(rfds,
+				new ManagedDownloader(rfds,
 						new IncompleteFileManager(), new GUID(GUID.makeGuid()),
 						noWritePermissionDir, "does not matter", false);
 				fail("No exception thrown for dir " + noWritePermissionDir);
@@ -378,7 +378,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 			}
 			}
 		try {
-			ManagedDownloader dl = new ManagedDownloader(rfds,
+			new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
 					new File("/non existent directory"), null, false);
 			fail("No exception thrown");
@@ -389,7 +389,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						 sle.getErrorCode());
 		}
 		try {
-			ManagedDownloader dl = new ManagedDownloader(rfds,
+			new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
 					file.getParentFile(), file.getName(), false);
 			fail("No exception thrown");
@@ -411,7 +411,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		try {
 			File f = File.createTempFile("notadirectory", "file");
 			f.deleteOnExit();
-			ManagedDownloader dl = new ManagedDownloader(rfds,
+			new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
 					f, null, false);
 			fail("No exception thrown");
@@ -422,7 +422,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						 sle.getErrorCode());
 		}
 		try {
-			ManagedDownloader dl = new ManagedDownloader(rfds,
+			new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
 					null, "./", false);
 			fail("No exception thrown");
@@ -433,7 +433,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						 sle.getErrorCode());
 		}
 		try {
-			ManagedDownloader dl = new ManagedDownloader(rfds,
+			new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
 					null, "../myfile.txt", false);
 			fail("No exception thrown");
@@ -539,7 +539,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         return new RemoteFileDesc("127.0.0.1", PORT, 13l,
                                   name, 1024,
                                   new byte[16], 56, false, 4, true, null, urns,
-                                  false, false,"",0,null, -1);
+                                  false, false,"",null, -1);
     }
     
     private void requestStart(ManagedDownloader dl) throws Exception {

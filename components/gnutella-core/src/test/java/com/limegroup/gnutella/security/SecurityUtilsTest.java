@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.security;
 
 import junit.framework.Test;
+
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class SecurityUtilsTest extends BaseTestCase {

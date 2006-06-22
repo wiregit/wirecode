@@ -18,7 +18,6 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -56,12 +55,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 * individual messages before giving up.
 	 */
     private static final int TIMEOUT = 1800;
-
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
 
 	/**
 	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
@@ -149,8 +142,8 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
+        RouterService.clearHostCatcher();
+        RouterService.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -162,7 +155,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		LEAF.close();
 		ULTRAPEER_1.close();
 		ULTRAPEER_2.close();
-		ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
 		sleep();
 	}
 
@@ -305,7 +298,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		byte[] guid2 = GUID.makeGuid();
 		QueryReply reply2 = 
 			new QueryReply(qr.getGUID(), (byte)2, 6346, IP,
-						   56, new Response[] {response1}, guid2, false);
+						   56, new Response[] {response2}, guid2, false);
 		ULTRAPEER_1.send(reply2);
 		ULTRAPEER_1.flush();
 		

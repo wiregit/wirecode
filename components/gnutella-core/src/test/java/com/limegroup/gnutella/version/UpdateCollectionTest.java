@@ -1,14 +1,10 @@
 package com.limegroup.gnutella.version;
 
-import java.io.*;
-import java.util.*;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-
-import org.apache.commons.httpclient.*;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public final class UpdateCollectionTest extends BaseTestCase {
 

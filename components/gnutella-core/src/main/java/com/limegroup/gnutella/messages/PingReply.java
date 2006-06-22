@@ -6,11 +6,11 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.StringTokenizer;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Collections;
-import java.util.Collection;
+import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
@@ -609,10 +609,8 @@ public class PingReply extends Message implements Serializable, IpPort {
 
             if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
-                    byte[] clocale = 
-                        ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-                }
-                catch(BadGGEPPropertyException e) {
+                    ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                } catch(BadGGEPPropertyException e) {
                     ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
                     throw new BadPacketException("GGEP error : creating from"
                                                  + " network : client locale");

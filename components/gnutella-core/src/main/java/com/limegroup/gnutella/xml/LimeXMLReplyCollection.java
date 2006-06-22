@@ -30,9 +30,9 @@ import com.limegroup.gnutella.metadata.MetaDataEditor;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.util.Trie;
 
 /**
  * Maps LimeXMLDocuments for FileDescs in a specific schema.

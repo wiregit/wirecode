@@ -450,10 +450,7 @@ public final class MP3Info {
 	    
 	    return new File(_file).length();        
     }
-	private int getFrameSync() {
-		
-		return _header >> 21 & 2047;
-	}
+    
 	/**
 	 * The frequency is dependent on bitrate index and MPEG version
 	 * -> MPEG 2.5 - 32000, 16000,  8000
@@ -692,10 +689,12 @@ public final class MP3Info {
 	 *   10  | bands 12 to 31 |             off  |       on
 	 *   11  | bands 16 to 31 |              on  |       on
 	 */
+    @SuppressWarnings("unused")
 	 private int getModeExtIndex() {
 		
 		return _header >> 4 & 3;  
 	}
+     
 	private int getModeIndex() {
 		
 		return _header >> 6 & 3;  

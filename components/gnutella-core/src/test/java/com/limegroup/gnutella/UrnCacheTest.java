@@ -20,7 +20,6 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
      */
     private static final String URN_CACHE_FILE = "fileurns.cache";
     private static final String FILE_PATH = "com/limegroup/gnutella/util";
-    private static FileDesc[] descs;
 
     private static final Set EMPTY_SET = 
         Collections.unmodifiableSet(new HashSet());
@@ -80,11 +79,6 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
 			fileDescs[i] = new FileDesc(files[i], urns, i);
 		}				
 		return fileDescs;
-	}
-
-	private static void deleteCacheFile() {
-		File cacheFile = new File(_settingsDir, URN_CACHE_FILE);
-		cacheFile.delete();
 	}
 
 	/**

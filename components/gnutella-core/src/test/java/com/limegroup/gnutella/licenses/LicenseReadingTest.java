@@ -1,14 +1,19 @@
 package com.limegroup.gnutella.licenses;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.metadata.*;
-import com.limegroup.gnutella.xml.*;    
+import com.limegroup.gnutella.metadata.AudioMetaData;
+import com.limegroup.gnutella.metadata.MetaData;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public final class LicenseReadingTest extends BaseTestCase {
 

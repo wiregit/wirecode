@@ -1,25 +1,23 @@
 package com.limegroup.gnutella.licenses;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.io.ObjectInputStream;
-
-import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.util.CommonUtils;
-
-import org.apache.xerces.parsers.DOMParser;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.w3c.dom.Node;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.URI;
-
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
  * A base license class, implementing common functionality.

@@ -64,7 +64,6 @@ public class RIFFMetaData extends VideoMetaData {
 
 		// number of streams
 		dis.readFully(dword);
-		int numStreams = ByteOrder.leb2int(dword, 0, 4);
         
 		// boring data
 		IOUtils.ensureSkip(dis, 4);

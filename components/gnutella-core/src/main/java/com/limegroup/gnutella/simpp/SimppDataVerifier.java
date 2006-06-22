@@ -11,12 +11,12 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.util.CommonUtils;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 public class SimppDataVerifier {
     

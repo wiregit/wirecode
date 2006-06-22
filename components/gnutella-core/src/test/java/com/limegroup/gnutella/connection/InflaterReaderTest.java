@@ -1,18 +1,19 @@
 package com.limegroup.gnutella.connection;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.util.*;
-import java.util.zip.*;
-import java.net.*;
+import java.util.Random;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CompressingOutputStream;
 
 /**
  * Tests that InflaterReader inflates the source channel correctly.

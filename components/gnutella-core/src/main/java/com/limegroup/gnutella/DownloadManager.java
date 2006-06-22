@@ -519,7 +519,6 @@ public class DownloadManager implements BandwidthTracker {
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 ManagedDownloader downloader=(ManagedDownloader)iter.next();
-                DownloadCallback dc = callback;
                 
                 // ignore RequeryDownloaders -- they're legacy
                 if(downloader instanceof RequeryDownloader)

@@ -4,22 +4,19 @@ package com.limegroup.gnutella.xml;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
+import org.apache.xerces.parsers.SAXParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.apache.xerces.parsers.SAXParser;
 
 import com.limegroup.gnutella.ErrorService;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Provides just enough functionality for our simple schemas,
@@ -28,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class XMLParsingUtils {
     
-    private static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
+    //private static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
     
 
     static final private String XML_START = "<?xml";

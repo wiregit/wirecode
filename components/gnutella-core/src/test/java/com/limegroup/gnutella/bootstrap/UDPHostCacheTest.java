@@ -1,34 +1,33 @@
 package com.limegroup.gnutella.bootstrap;
 
-import java.io.StringWriter;
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Collections;
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
+import java.io.StringWriter;
 import java.net.DatagramSocket;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.StandardMessageRouter;
+import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UniqueHostPinger;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Unit tests for UDPHostCache.
@@ -45,8 +44,7 @@ public class UDPHostCacheTest extends BaseTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub(),
-                                             new StandardMessageRouter());
+        new RouterService(new ActivityCallbackStub(), new StandardMessageRouter());
         RouterService.getAcceptor().setAddress(InetAddress.getByName("1.1.1.1"));
         
         DatagramSocket ds = (DatagramSocket)PrivilegedAccessor.invokeMethod(

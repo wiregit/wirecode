@@ -1,11 +1,7 @@
 package com.limegroup.gnutella;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -14,9 +10,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class UDPStatusTest extends ClientSideTestCase {

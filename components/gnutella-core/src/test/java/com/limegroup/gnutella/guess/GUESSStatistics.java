@@ -26,7 +26,6 @@ public class GUESSStatistics {
                 long timeTook = tester.testAck(host, port);
                 if (timeTook > 0) {
                     numReceived++;
-                    long endTime = System.currentTimeMillis();
                     timeSum += timeTook;
                 }
             }
@@ -52,7 +51,6 @@ public class GUESSStatistics {
                 long timeTook = tester.testPing(host, port);
                 if (timeTook > 0) {
                     numReceived++;
-                    long endTime = System.currentTimeMillis();
                     timeSum += timeTook;
                 }
                 Thread.sleep(2*1000); // wait a couple of seconds for pings...

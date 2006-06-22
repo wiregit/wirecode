@@ -171,7 +171,7 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
             } catch(NoSuchMethodException tryAgain) {
                 // If nothing with the class parameter, try with none
                 try {
-                    add = clazz.getDeclaredMethod(methodName, null);
+                    add = clazz.getDeclaredMethod(methodName, (Class[])null);
                 } catch(NoSuchMethodException ignored) {}
             }
             
@@ -250,7 +250,7 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
 	 */
 	private static Test warning(final String message, final Throwable thrown) {
 		return new BaseTestCase("warning") {
-		    public void preSetup() {}
+		    public void preSetUp() {}
 		    public void postTearDown() {}
 			protected void runTest() {			    
 				fail(message, thrown);

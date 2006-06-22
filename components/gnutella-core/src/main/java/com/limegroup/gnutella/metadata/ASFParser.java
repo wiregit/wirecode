@@ -1,20 +1,20 @@
 package com.limegroup.gnutella.metadata;
 
 import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.DataInputStream;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.util.CountingInputStream;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.ByteOrder;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 
 /**
@@ -486,6 +486,7 @@ class ASFParser {
     /**
      * Parses a value from an extended tag, assuming the value is of the 'long' dataType.
      */
+    @SuppressWarnings("unused")
     private void parseExtendedLong(String field, int size, DataInputStream ds) throws IOException {
         if(size != 8) {
             if(LOG.isDebugEnabled())
@@ -562,6 +563,7 @@ class ASFParser {
             { (byte)0x14, (byte)0xE6, (byte)0x8A, (byte)0x29, (byte)0x22, (byte)0x26, (byte)0x17, (byte)0x4C,
               (byte)0xB9, (byte)0x35, (byte)0xDA, (byte)0xE0, (byte)0x7E, (byte)0xE9, (byte)0x28, (byte)0x9C };
             
+        @SuppressWarnings("unused")
         private static final byte CODEC_LIST_ID[] =
             { (byte)0x40, (byte)0x52, (byte)0xD1, (byte)0x86, (byte)0x1D, (byte)0x31, (byte)0xD0, (byte)0x11,
               (byte)0xA3, (byte)0xA4, (byte)0x00, (byte)0xA0, (byte)0xC9, (byte)0x03, (byte)0x48, (byte)0xF6 };
@@ -587,6 +589,7 @@ class ASFParser {
         private static final String WM_ALBUMTITLE = "WM/AlbumTitle";
         
         /** the zero-based track of the song */
+        @SuppressWarnings("unused")
         private static final String WM_TRACK = "WM/Track";
         
         /** the one-based track of the song */
@@ -602,33 +605,43 @@ class ASFParser {
         private static final String WM_DESCRIPTION = "WM/Description";
         
         /** the lyrics of the song */
+        @SuppressWarnings("unused")
         private static final String WM_LYRICS = "WM/Lyrics";
         
         /** whether or not this is encoded in VBR */
+        @SuppressWarnings("unused")
         private static final String VBR = "IsVBR";
         
         /** the unique file identifier of this song */
+        @SuppressWarnings("unused")
         private static final String WM_UNIQUE_FILE_IDENTIFIER = "WM/UniqueFileIdentifier";
         
         /** the artist of the album as a whole */
+        @SuppressWarnings("unused")
         private static final String WM_ALBUMARTIST = "WM/AlbumArtist";
         
         /** the encapsulated ID3 info */
+        @SuppressWarnings("unused")
         private static final String ID3 = "ID3";
         
         /** the provider of the song */
+        @SuppressWarnings("unused")
         private static final String WM_PROVIDER = "WM/Provider";
         
         /** the rating the provider gave this song */
+        @SuppressWarnings("unused")
         private static final String WM_PROVIDER_RATING = "WM/ProviderRating";
         
         /** the publisher */
+        @SuppressWarnings("unused")
         private static final String WM_PUBLISHER = "WM/Publisher";
         
         /** the composer */
+        @SuppressWarnings("unused")
         private static final String WM_COMPOSER = "WM/Composer";
         
         /** the time the song was encoded */
+        @SuppressWarnings("unused")
         private static final String WM_ENCODING_TIME = "WM/EncodingTime";
         
     }

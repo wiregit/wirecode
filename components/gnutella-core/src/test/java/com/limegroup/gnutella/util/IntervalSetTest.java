@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import junit.framework.Test;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.downloader.DownloadTest;
 import com.limegroup.gnutella.downloader.Interval;
 
 /**
@@ -709,10 +708,6 @@ public class IntervalSetTest extends BaseTestCase {
 
     private Interval getIntervalAt(int i) {
         return (Interval)iSet.getAllIntervalsAsList().get(i);
-    }
-    
-    private List getIntervals() throws Exception {
-        return (List)PrivilegedAccessor.getValue(iSet, "intervals");
     }
     
     

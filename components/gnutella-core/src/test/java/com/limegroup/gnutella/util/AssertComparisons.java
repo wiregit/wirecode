@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -490,6 +490,22 @@ public class AssertComparisons extends TestCase {
      * is thrown with the given messages.
      */
     static public void assertNotEquals(String msg, char[] expected, char[] actual) {
+        if(Arrays.equals(expected, actual))
+            fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.
+     */
+    static public void assertNotEquals(float[] expected, float[] actual) {
+        assertNotEquals(null, expected, actual);
+    }
+    
+    /**
+     * Assert that the two arrays are not equal.  If not, an AssertionFailedError
+     * is thrown with the given messages.
+     */
+    static public void assertNotEquals(String msg, float[] expected, float[] actual) {
         if(Arrays.equals(expected, actual))
             fail(formatComparison(NOT_EQUAL, msg, asList(expected), asList(actual)));
     }

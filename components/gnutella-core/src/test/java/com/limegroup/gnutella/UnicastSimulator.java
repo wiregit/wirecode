@@ -39,8 +39,6 @@ public class UnicastSimulator {
 	 */
 	private final int BUFFER_SIZE = 8192;
 
-	private final int SOCKET_TIMEOUT = 2*1000; // 2 second wait for a message
-
     private PingReply[] _pongs;
     private Thread[] _unicasters;
     private byte[] _localAddress;
@@ -112,14 +110,10 @@ public class UnicastSimulator {
         try {
             // create a ServerSocket to listen for Gnutellas....
             servSock = new ServerSocket(port);
-            debug("UnicastSimulator.tcpLoop(): listening on port " +
-                  port);
             System.out.println("LISTENING FOR GNUTELLA CONNECTIONS ON PORT " +
                                port);
         }
         catch (Exception noWork) {
-            debug("UnicastSimulator.tcpLoop(): couldn't listen on port " +
-                  port);
 			return;
         }
 
@@ -128,7 +122,6 @@ public class UnicastSimulator {
                 // listen for GNUTELLA connections, send back pings when
                 // established
                 Socket sock = servSock.accept();
-                debug("UnicastSimulator.tcpLoop(): got a incoming connection.");
                 sock.setSoTimeout(Constants.TIMEOUT);
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
@@ -138,7 +131,6 @@ public class UnicastSimulator {
                 if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
                     Connection conn = new Connection(sock);
                     conn.initialize(null, null);
-                    debug("UnicastSimulator.tcpLoop(): sending pings.");
                     for (int i = 0; i < _pongs.length; i++) {
                         conn.send(_pongs[i]);
                         Thread.sleep(10);
@@ -164,18 +156,12 @@ public class UnicastSimulator {
 		try {
 			socket = new DatagramSocket(port);
             socket.setSoTimeout(1000);
-            debug("UnicastSimulator.unicastLoop(): listening on port " +
-                  port);
 			//socket.setSoTimeout(SOCKET_TIMEOUT);
 		} 
         catch (SocketException e) {
-            debug("UnicastSimulator.unicastLoop(): couldn't listen on port " +
-                  port);
 			return;
 		}
         catch (RuntimeException e) {
-            debug("UnicastSimulator.unicastLoop(): couldn't listen on port " +
-                  port);
 			return;
 		}
 		
@@ -191,7 +177,7 @@ public class UnicastSimulator {
                 int length = datagram.getLength();
                 try {
                     // construct a message out of it...
-                    InputStream in = new ByteArrayInputStream(data);
+                    InputStream in = new ByteArrayInputStream(data, 0, length);
                     Message message = MessageFactory.read(in);		
                     if (message == null) continue;
                     if (message instanceof QueryRequest) {
@@ -259,8 +245,6 @@ public class UnicastSimulator {
                 continue;
             }
 		}
-        debug("UnicastSimulator.unicastLoop(): closing down port " +
-              port);
 		socket.close();
     }
 
@@ -287,24 +271,12 @@ public class UnicastSimulator {
 	}
     
 
-
-    private final static boolean debugOn = false;
-    private final static void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final static void debug(Exception out) {
-        if (debugOn)
-            out.printStackTrace();
-    }
-
     
     public static void main(String argv[]) throws Exception {
         if (argv.length > 0) {
-            UnicastSimulator simulator = new UnicastSimulator(argv[0]);
-        }
-        else {
-            UnicastSimulator simulator = new UnicastSimulator();
+            new UnicastSimulator(argv[0]);
+        } else {
+            new UnicastSimulator();
         }
         
     }

@@ -1,31 +1,17 @@
 package com.limegroup.gnutella.altlocs;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.Vector;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.FixedSizeSortedSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
@@ -34,7 +20,6 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  */
 public final class AlternateLocationCollectionTest extends BaseTestCase {
 
-	private Set _urnSet;
 	private Set _alternateLocations;
 
 	private AlternateLocationCollection _alCollection;

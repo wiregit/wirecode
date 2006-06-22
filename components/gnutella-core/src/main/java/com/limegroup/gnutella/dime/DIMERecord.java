@@ -76,6 +76,7 @@ public class DIMERecord {
      * and all subsequent records except for the very last one) in a DIME
      * message.
      */
+    @SuppressWarnings("unused")
     private static final byte CF_MASK = 0x01;
     
     /**

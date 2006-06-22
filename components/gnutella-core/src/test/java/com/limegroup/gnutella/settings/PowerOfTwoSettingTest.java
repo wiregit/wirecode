@@ -2,9 +2,10 @@ package com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
-import com.limegroup.gnutella.util.BaseTestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 
 
 public class PowerOfTwoSettingTest extends BaseTestCase {
@@ -57,24 +58,23 @@ public class PowerOfTwoSettingTest extends BaseTestCase {
     }
     
     public void testDefaultValueChecks() throws Exception {
-        PowerOfTwoSetting setting = null;
         try {
-            setting = new PowerOfTwoSetting(new Properties(), new Properties(), 
+            new PowerOfTwoSetting(new Properties(), new Properties(), 
                     "", 65, "", 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
         } catch (IllegalArgumentException expectedException) {;}
         try {
-            setting = new PowerOfTwoSetting(new Properties(), new Properties(), 
+            new PowerOfTwoSetting(new Properties(), new Properties(), 
                     "", 192, "", 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
         } catch (IllegalArgumentException expectedException) {;}
         try {
-            setting = new PowerOfTwoSetting(new Properties(), new Properties(), 
+            new PowerOfTwoSetting(new Properties(), new Properties(), 
                     "", 0, "", 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
         } catch (IllegalArgumentException expectedException) {;}
         try {
-            setting = new PowerOfTwoSetting(new Properties(), new Properties(), 
+            new PowerOfTwoSetting(new Properties(), new Properties(), 
                     "", -2, "", 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
         } catch (IllegalArgumentException expectedException) {;}

@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.connection;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
+
 import com.limegroup.gnutella.messages.Message;
 
 class StubMessageReceiver implements MessageReceiver {

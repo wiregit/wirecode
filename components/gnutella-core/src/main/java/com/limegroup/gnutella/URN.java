@@ -9,18 +9,18 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.security.MessageDigest;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Collections;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.SHA1;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.SystemUtils;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as

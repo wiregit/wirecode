@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;

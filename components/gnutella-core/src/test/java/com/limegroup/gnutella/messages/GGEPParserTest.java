@@ -2,9 +2,9 @@ package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-
 import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 
 public class GGEPParserTest extends BaseTestCase {
     

@@ -95,7 +95,6 @@ public class TestConnection {
         InputStream is = _socket.getInputStream();
         OutputStream os = _socket.getOutputStream();
         ByteReader reader = new ByteReader(is);
-        int b = 0;
         //write out the headers this code needs to change if the definition of
         //what's considered a good connection
         //Phase 1 of the handshake
@@ -139,7 +138,6 @@ public class TestConnection {
     private void loop() throws IOException {
         Socket incoming = null;
         incoming = _server.accept();
-        final Socket mySocket = incoming;
         try {
             handleRequest(incoming);
         } catch (IOException iox) {
@@ -154,7 +152,6 @@ public class TestConnection {
         InputStream is = socket.getInputStream();
         OutputStream os = socket.getOutputStream();
         ByteReader reader = new ByteReader(is);
-        int b = 0;
         String line = "dummy";
         while(line!=null && !line.equals("")) {
             line = reader.readLine();

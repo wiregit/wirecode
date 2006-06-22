@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.bootstrap;
 
-import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,6 +12,7 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -32,7 +32,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
     final static int SERVER_PORT=6700;
     final static String DIRECTORY="/path/to/script.php";
     final static String COMMON_PARAMS="client=LIME&version="
-        +URLEncoder.encode(CommonUtils.getLimeWireVersion());
+        +EncodingUtils.encode(CommonUtils.getLimeWireVersion());
 
     /** Our backend. */
     TestBootstrapServerManager bman;

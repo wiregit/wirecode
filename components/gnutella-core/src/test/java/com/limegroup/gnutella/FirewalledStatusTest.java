@@ -26,6 +26,7 @@ public class FirewalledStatusTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @SuppressWarnings("unused")
     private static void doSettings() {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
     }        
@@ -33,12 +34,12 @@ public class FirewalledStatusTest extends ClientSideTestCase {
     ///////////////////////// Actual Tests ////////////////////////////
     
     public void testStillFirewalledAfterLocalConnect() throws Exception {
-        assertFalse(rs.acceptedIncomingConnection());
+        assertFalse(RouterService.acceptedIncomingConnection());
 
         Socket incoming = new Socket("localhost", SERVER_PORT);
         incoming.close();
 
-        assertFalse(rs.acceptedIncomingConnection());
+        assertFalse(RouterService.acceptedIncomingConnection());
     }
 
 

@@ -8,6 +8,7 @@ public class Data implements Serializable {
 
     static final long serialVersionUID = 2238128677114591921L;
     
+    @SuppressWarnings("unused")
     private Data (byte[] b) {
         data = b;
     }

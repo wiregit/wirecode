@@ -3,7 +3,12 @@ package com.limegroup.gnutella.connection;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.util.BaseTestCase;

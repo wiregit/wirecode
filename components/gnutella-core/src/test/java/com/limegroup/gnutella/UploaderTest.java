@@ -13,7 +13,6 @@ import java.util.Vector;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.StubContentAuthority;
 import com.limegroup.gnutella.downloader.ConnectionStatus;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -24,7 +23,6 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.io.StubIOStateObserver;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
-import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -47,8 +45,6 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     private RemoteFileDesc rfd3;
     private RemoteFileDesc rfd4;
     private RemoteFileDesc rfd5;
-    private RemoteFileDesc defaultRfd;
-    private static FileDescStub defaultStub;
     private URN urn1,urn2,urn3,urn4,urn5;
 
 
@@ -61,48 +57,42 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         urn2 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFF");
         urn3 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
         urn4 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
-        urn5 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFC");
-
-        defaultStub = new FileDescStub();
-        defaultRfd = new RemoteFileDesc("1.1.1.1",1,10,"abc.txt",FileDescStub.DEFAULT_SIZE,
-                new byte[16], 56, false, 3,
-                false, null, FileDescStub.DEFAULT_SET, false, false,"",0, null, -1);
-        
+        urn5 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFC");        
         
         FileDescStub descStub = new FileDescStub("abc1.txt",urn1,0);
         urns.put(urn1,descStub);
         descs.add(descStub);
         rfd1 = new RemoteFileDesc("1.1.1.1",1,0,"abc1.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",0, null, -1);
+                                  false, null, descStub.getUrns(), false, false,"", null, -1);
         
         descStub = new FileDescStub("abc2.txt",urn2,1);
         urns.put(urn2,descStub);
         descs.add(descStub);
         rfd2 = new RemoteFileDesc("1.1.1.2",1,1,"abc2.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",0, null, -1);
+                                  false, null, descStub.getUrns(), false, false,"",null, -1);
         
         descStub = new FileDescStub("abc3.txt",urn3,2);
         urns.put(urn3,descStub);
         descs.add(descStub);
         rfd3 = new RemoteFileDesc("1.1.1.3",1,2,"abc3.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",0, null, -1);
+                                  false, null, descStub.getUrns(), false, false,"",null, -1);
         
         descStub = new FileDescStub("abc4.txt",urn4,3);
         urns.put(urn4,descStub);
         descs.add(descStub);
         rfd4 = new RemoteFileDesc("1.1.1.4",1,3,"abc4.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",0, null, -1);
+                                  false, null, descStub.getUrns(), false, false,"",null, -1);
         
         descStub = new FileDescStub("abc5.txt",urn5,4);
         urns.put(urn5,descStub);
         descs.add(descStub);
         rfd5 = new RemoteFileDesc("1.1.1.5",1,4,"abc5.txt",FileDescStub.DEFAULT_SIZE,
                                   new byte[16], 56, false, 3,
-                                  false, null, descStub.getUrns(), false, false,"",0, null, -1);
+                                  false, null, descStub.getUrns(), false, false,"",null, -1);
         
         // we don't want the tests confused by the stalled
         // watchdog killing stuff.

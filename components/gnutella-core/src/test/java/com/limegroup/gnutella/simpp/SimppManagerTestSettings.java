@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.simpp;
 
-import com.limegroup.gnutella.settings.LimeProps;
 import com.limegroup.gnutella.settings.IntSetting;
+import com.limegroup.gnutella.settings.LimeProps;
 
 class SimppManagerTestSettings extends LimeProps {
 

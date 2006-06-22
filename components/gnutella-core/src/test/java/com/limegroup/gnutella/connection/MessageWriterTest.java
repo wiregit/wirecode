@@ -1,17 +1,18 @@
 package com.limegroup.gnutella.connection;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
-import java.util.*;
-import java.net.*;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * Tests that MessageWriter deflates data written to it correctly,
@@ -127,7 +128,7 @@ public final class MessageWriterTest extends BaseTestCase {
 	    buffer.put(SINK.getBuffer()).flip();
 	    SINK.resize(10000);
 	    
-	    Message in1 = read(buffer);
+	    read(buffer);
 	    assertTrue(buffer.hasRemaining());
 	    assertEquals(20, buffer.remaining());
 	    buffer.compact();
@@ -232,37 +233,6 @@ public final class MessageWriterTest extends BaseTestCase {
         out.flush();
         return ByteBuffer.wrap(out.toByteArray());
     }
-    
-    private ByteBuffer buffer(Message m[]) throws Exception {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for(int i = 0; i < m.length; i++)
-            m[i].write(out);
-        out.flush();
-        return ByteBuffer.wrap(out.toByteArray());
-    }
-
-    private ByteBuffer buffer(List ms) throws Exception {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for(Iterator i = ms.iterator(); i.hasNext(); )
-            ((Message)i.next()).write(out);
-        out.flush();
-        return ByteBuffer.wrap(out.toByteArray());
-    }
-    
-    private ByteBuffer buffer(ByteBuffer[] bufs) throws Exception {
-        int length = 0;
-        for(int i = 0; i < bufs.length; i++)
-            length += bufs[i].limit();
-        ByteBuffer combined = ByteBuffer.allocate(length);
-        for(int i = 0; i < bufs.length; i++)
-            combined.put(bufs[i]);
-        combined.flip();
-        return combined;
-    }
-	
-	private ByteBuffer buffer(byte[] data) {
-	    return ByteBuffer.wrap(data);
-	}
     
     private QueryRequest q(String query) {
         return QueryRequest.createQuery(query, (byte)5);

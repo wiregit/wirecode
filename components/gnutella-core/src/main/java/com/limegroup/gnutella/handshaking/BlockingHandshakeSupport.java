@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import com.limegroup.gnutella.ByteReader;

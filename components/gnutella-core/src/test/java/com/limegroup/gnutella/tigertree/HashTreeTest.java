@@ -60,7 +60,7 @@ public class HashTreeTest extends BaseTestCase {
     public void testLargeFile()  throws Throwable {
     	URN urn = URN.createSHA1Urn(file);
     	try {
-    		HashTree tree = createHashTree(1780149344l,urn);
+    		createHashTree(1780149344l,urn);
     		fail("shouldn't have read whole file");
     	}catch(IOException expected){}
     }
@@ -192,7 +192,7 @@ public class HashTreeTest extends BaseTestCase {
         String data = new String(xmlRecord.getData());
         corruptedXML = createCorruptRecord(xmlRecord, data.substring(1));
         try {
-            HashTree tree = createTree(corruptedXML, treeRecord);
+            createTree(corruptedXML, treeRecord);
             fail("expected exception");
         } catch(IOException expected) {}
         

@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,7 +105,6 @@ public class HeadTest extends BaseTestCase {
 	    
 	    PrivilegedAccessor.setValue(RouterService.class,"router",mrStub);
 	    
-	    final InetAddress addr = InetAddress.getByName("1.2.3.4");
 	    ManagedConnectionStub mStub = new ManagedConnectionStub();
 	    final Set conns = new HashSet();
 	    conns.add(mStub);
@@ -396,7 +394,7 @@ public class HeadTest extends BaseTestCase {
 			new RemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 
 			        		10, GUID.makeGuid(), 10, true, 2, true, null, 
 							   HugeTestUtils.URN_SETS[1],
-                               false,false,"",0,null, -1);
+                               false,false,"",null, -1);
 		
 		Set received = pong1.getAllLocsRFD(dummy);
 		assertEquals(1,received.size());
@@ -430,7 +428,7 @@ public class HeadTest extends BaseTestCase {
 				false,1,false,
 				null,null,
 				false,false,
-				"",0,
+				"",
 				null,1);
 		
 		Set rfds = pong.getAllLocsRFD(rfd);

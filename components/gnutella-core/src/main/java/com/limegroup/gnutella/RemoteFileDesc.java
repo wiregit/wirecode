@@ -87,7 +87,6 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 
     private boolean _firewalled;
     private String _vendor;
-    private long _timestamp;
     
     /**
      * Whether or not the remote host supports HTTP/1.1
@@ -203,7 +202,6 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
               false,                        // reply to MCast
               false,                        // is firewalled
               AlternateLocation.ALT_VENDOR, // vendor
-              System.currentTimeMillis(),   // timestamp
               Collections.EMPTY_SET,        // push proxies
               rfd.getCreationTime(),       // creation time
               0,                            // firewalled transfer
@@ -231,7 +229,6 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
                 false,                        // reply to MCast
                 true,                        // is firewalled
                 AlternateLocation.ALT_VENDOR, // vendor
-                System.currentTimeMillis(),   // timestamp
                 null,
                 rfd.getCreationTime(),	// creation time
                 0,
@@ -272,11 +269,11 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns,
 						  boolean replyToMulticast, boolean firewalled, 
-                          String vendor, long timestamp,
+                          String vendor, 
                           Set proxies, long createTime) {
         this(host, port, index, filename, size, clientGUID, speed, chat,
              quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-             vendor, timestamp, proxies, createTime, 0, null);
+             vendor, proxies, createTime, 0, null);
     }
 
 	/** 
@@ -309,21 +306,21 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns,
 						  boolean replyToMulticast, boolean firewalled, 
-                          String vendor, long timestamp,
+                          String vendor, 
                           Set proxies, long createTime, 
                           int FWTVersion) {
 		this(host,port,index,filename,size, clientGUID,speed,chat,quality,browseHost,
-                xmlDoc, urns, replyToMulticast, firewalled,vendor,timestamp,proxies,
+                xmlDoc, urns, replyToMulticast, firewalled,vendor, proxies,
                 createTime, FWTVersion, null); // create pe if firewalled
 	}
 	
 	public RemoteFileDesc(String host, int port, long index, String filename,
 	        			int size,int speed,boolean chat, int quality, boolean browseHost,
 	        			LimeXMLDocument xmlDoc, Set urns, boolean replyToMulticast,
-	        			boolean firewalled, String vendor,long timestamp,long createTime,
+	        			boolean firewalled, String vendor,long createTime,
 	        			PushEndpoint pe) {
         this(host,port,index,filename,size,null,speed,chat,quality,browseHost,xmlDoc,urns,
-                replyToMulticast,firewalled,vendor,timestamp,null,createTime,0,pe); // use exising pe
+                replyToMulticast,firewalled,vendor,null,createTime,0,pe); // use exising pe
     }
     
     /**
@@ -333,7 +330,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     private RemoteFileDesc (String host, int port, long index, String filename,
             int size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set urns, boolean replyToMulticast,
-            boolean firewalled, String vendor,long timestamp,Set proxies, long createTime,
+            boolean firewalled, String vendor, Set proxies, long createTime,
             int FWTVersion, PushEndpoint pe) {
 	    
 	    if(!NetworkUtils.isValidPort(port)) {
@@ -389,7 +386,6 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 		_browseHostEnabled = browseHost;
 		_replyToMulticast = replyToMulticast;
         _vendor = vendor;
-        _timestamp = timestamp;
         _creationTime = createTime;
 		
 	if(xmlDoc!=null) //not strictly needed
@@ -934,10 +930,6 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
             }
         }
         return false;
-    }
-
-    private boolean byteArrayEquals(byte[] one, byte[] two) {
-        return one == null ? two == null : Arrays.equals(one, two);
     }
 
 	/**

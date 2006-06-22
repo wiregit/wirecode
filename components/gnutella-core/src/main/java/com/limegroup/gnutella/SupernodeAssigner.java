@@ -7,7 +7,6 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
 

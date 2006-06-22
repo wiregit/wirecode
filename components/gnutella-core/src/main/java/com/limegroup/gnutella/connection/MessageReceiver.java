@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.Message;
 import java.io.IOException;
+
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * Notifications & information about asynchronous message processing.

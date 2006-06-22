@@ -1,15 +1,14 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.List;
 import java.util.LinkedList;
-
-import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.IOUtils;
+import java.util.List;
+import java.util.Set;
 
 import junit.framework.Test;
+
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.NameValue;
 
 public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
     public GGEPTest(String name) {
@@ -481,16 +480,15 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[23] = (byte)'I';        
 
         bytes[8] = (byte)0xA5; // compressed, without valid data.
-        GGEP temp;
         try {
-            temp = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             fail("shoulda failed");
         } catch(BadGGEPBlockException bgbe) {}
 
 
         bytes[8] = (byte)0x80; // 0 len header
         try {
-            temp = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             assertTrue("Test 6 - 0 LEN HEADER!", false);
         } 
         catch (BadGGEPBlockException hopefullySo) {
@@ -502,7 +500,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[18] = (byte)0xBF;
         bytes[19] = (byte)0xBF;
         try {
-            temp = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             assertTrue("Test 6 - >3 DATA LEN!", false);
         } 
         catch (BadGGEPBlockException hopefullySo) {
@@ -551,7 +549,6 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testMalformedGGEP() throws Exception {
-        GGEP one = null;
         byte[] bytes = new byte[24];
         bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
         bytes[1] = (byte)0x05;
@@ -581,7 +578,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test first case where no magic number....
         bytes[0] = (byte) 'I';
         try {
-            one = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             fail("need to fail.");
         }
         catch (BadGGEPBlockException hopefullySo) {
@@ -596,7 +593,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[4] = (byte)'O';
         bytes[5] = (byte)'S';
         try {
-            one = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             fail("need to fail.");
         }
         catch (BadGGEPBlockException hopefullySo) {
@@ -629,7 +626,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[22] = (byte)'N';
         bytes[23] = (byte)'I';                
         try {
-            one = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             fail("need to fail");
         }
         catch (BadGGEPBlockException hopefullySo) {
@@ -648,7 +645,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[7] = (byte)0xbf;
         bytes[8] = (byte)0xbf;
         try {
-            one = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             fail("need to fail");
         }
         catch (BadGGEPBlockException hopefullySo) {
@@ -658,7 +655,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         // not enough bytes!
         bytes = new byte[0];
         try {
-            one = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             fail("need to fail");            
         }
         catch (BadGGEPBlockException hopefullySo) {
@@ -689,7 +686,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[20] = (byte)'W';
         bytes[21] = (byte)'A';
         try {
-            one = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             fail("need to fail");
         }
         catch (BadGGEPBlockException hopefullySo) {
@@ -723,7 +720,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[21] = (byte)'N';
         bytes[21] = (byte)'I';
         try {
-            one = new GGEP(bytes,0,null);
+            new GGEP(bytes,0,null);
             fail("need to fail");            
         }
         catch (BadGGEPBlockException hopefullySo) {

@@ -112,38 +112,33 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
         byte ttl = 1, hops = 0;
         try {
             // try a VERSION we don't support
-            TCPConnectBackVendorMessage TCP = 
-                new TCPConnectBackVendorMessage(guid, ttl, hops,
+            new TCPConnectBackVendorMessage(guid, ttl, hops,
                                                 TCP_VERSION+1, bytes(2));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             // in the next few tests, try bad sizes of the payload....
-            TCPConnectBackVendorMessage TCP = 
-                new TCPConnectBackVendorMessage(guid, ttl, hops,
+            new TCPConnectBackVendorMessage(guid, ttl, hops,
                                                 TCP_VERSION, bytes(0));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
-            TCPConnectBackVendorMessage TCP = 
-                new TCPConnectBackVendorMessage(guid, ttl, hops,
+            new TCPConnectBackVendorMessage(guid, ttl, hops,
                                                 TCP_VERSION, bytes(1));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
-            TCPConnectBackVendorMessage TCP = 
-                new TCPConnectBackVendorMessage(guid, ttl, hops,
+            new TCPConnectBackVendorMessage(guid, ttl, hops,
                                                 TCP_VERSION, bytes(3));
             fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
         // this is the correct size of the payload
-        TCPConnectBackVendorMessage TCP = 
-            new TCPConnectBackVendorMessage(guid, ttl, hops,
+        new TCPConnectBackVendorMessage(guid, ttl, hops,
                                             TCP_VERSION, bytes(2));
 
 

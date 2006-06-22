@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
@@ -165,7 +165,7 @@ public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
     private void grow(int len) {
         int size = buffer.capacity();
         int newSize = Math.max(size << 1, size + len);
-        ByteBuffer newBuffer = buffer.allocate(newSize);
+        ByteBuffer newBuffer = ByteBuffer.allocate(newSize);
         buffer.flip();
         newBuffer.put(buffer);
         buffer = newBuffer;

@@ -1,19 +1,19 @@
 package com.limegroup.gnutella.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
-import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.MessageService;
 
 /**
  * Provides utility I/O methods, used by multiple classes

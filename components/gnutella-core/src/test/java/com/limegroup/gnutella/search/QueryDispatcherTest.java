@@ -2,7 +2,6 @@ package com.limegroup.gnutella.search;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import junit.framework.Test;
 

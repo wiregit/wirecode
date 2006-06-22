@@ -56,7 +56,6 @@ public final class RouteTableTest extends BaseTestCase {
         assertSame(c4, rt.getReplyHandler(g4));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
         rt.routeReply(g2, c3);                     //{g1, g4}, {g2}
-        debug(rt.toString());
         assertSame(c1, rt.getReplyHandler(g1));
         assertSame(c3, rt.getReplyHandler(g2));
         assertNull(rt.getReplyHandler(g3));
@@ -176,7 +175,6 @@ public final class RouteTableTest extends BaseTestCase {
         ReplyHandler c1=new ReplyHandlerStub();
         ReplyHandler c2=new ReplyHandlerStub();
         ReplyHandler c3=new ReplyHandlerStub();
-        ReplyHandler c4=new ReplyHandlerStub();
 
         // test setTTL and getAndSetTTL
         rt.setTTL(rt.tryToRouteReply(g2, c2), (byte)2);
@@ -231,17 +229,6 @@ public final class RouteTableTest extends BaseTestCase {
         throws IllegalAccessException, NoSuchFieldException {
         return (Map) PrivilegedAccessor.getValue(rt, mapName);
     }
-
-    private static final boolean debugOn = false;
-    private static final void debug(Exception e) {
-        if (debugOn)
-            e.printStackTrace();
-    }
-    private static final void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-
 
     private static class ResultCounterImpl 
         implements com.limegroup.gnutella.search.ResultCounter {

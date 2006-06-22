@@ -1,8 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.net.Socket;
-
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 
 

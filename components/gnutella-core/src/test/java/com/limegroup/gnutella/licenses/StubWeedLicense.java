@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.licenses;
 
 import com.limegroup.gnutella.ErrorService;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 
 class StubWeedLicense extends WeedLicense {
     

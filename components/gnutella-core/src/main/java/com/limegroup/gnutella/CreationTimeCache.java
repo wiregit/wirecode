@@ -18,13 +18,13 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * This class contains a systemwide File creation time cache that persists these

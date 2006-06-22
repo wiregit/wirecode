@@ -12,34 +12,33 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testLegacy() throws Exception {
-        Endpoint e;
         try {
-            e=new Endpoint(":6347");
+            new Endpoint(":6347");
             fail("endpoint should not have been created");
         } catch (IllegalArgumentException exc) {}
         
         try {
-            e=new Endpoint("abc:cas");
+            new Endpoint("abc:cas");
             fail("endpoint should not have been created");
         } catch (IllegalArgumentException exc) {}
 
         try {
-            e=new Endpoint("abc");
+            new Endpoint("abc");
             fail("endpoint should not have been created");
         } catch(IllegalArgumentException exc) {}
 
         try {
-            e=new Endpoint("abc:");
+            new Endpoint("abc:");
             fail("endpoint should not have been created");
         } catch(IllegalArgumentException exc) {}
 
         try {
-            e=new Endpoint("abc:7");
+            new Endpoint("abc:7");
             fail("endpoint should not have been created");
         } catch(IllegalArgumentException exc) {}
         
         try {
-            e=new Endpoint("0.0.0.0");
+            new Endpoint("0.0.0.0");
             fail("endpoint should not have been created");
         } catch(IllegalArgumentException exc) {}
 
@@ -83,7 +82,7 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
                               boolean requireNumeric, 
                               boolean allowed) {
         try {
-            Endpoint e=new Endpoint(hostAndPort, requireNumeric);
+            new Endpoint(hostAndPort, requireNumeric);
             assertTrue("Allowed: \""+hostAndPort+"\"", allowed);
         } catch (IllegalArgumentException e) {
             assertTrue("Disallowed: \""+hostAndPort+"\"", !allowed);

@@ -37,8 +37,6 @@ public class AutoDownloadDetails implements Serializable {
     private transient boolean xmlCreated = false;
     // the 'filter' associated with this search
     private transient MediaType type = null;
-    // the GUID associated with this search
-    private byte[] guid = null;
     // the list of downloads made so far - should not exceed size
     // MAX_DOWNLOADS
     private List /* of RemoteFileDesc */ dlList = null;
@@ -98,7 +96,7 @@ public class AutoDownloadDetails implements Serializable {
      * @param inType the mediatype associated with this string.....
      */
     public AutoDownloadDetails(String inQuery, String inRichQuery, 
-                               byte[] inGuid, MediaType inType) {
+                               MediaType inType) {
         query = inQuery;
         richQuery = inRichQuery;
         type = inType;
@@ -106,7 +104,6 @@ public class AutoDownloadDetails implements Serializable {
             mediaDesc = type.getMimeType();
         else
             mediaDesc = null;
-        guid = inGuid;
         dlList = new Vector();
         wordSet = new HashSet();
     }
@@ -143,8 +140,6 @@ public class AutoDownloadDetails implements Serializable {
      * @return Whether or not the add was successful. 
      */
     public synchronized boolean addDownload(RemoteFileDesc toAdd) {
-        debug("ADD.addDownload(): *-----------");
-        debug("ADD.addDownload(): entered.");
         // this is used not only as a return value but to control processing.
         // if it every turns false we just stop processing....
         boolean retVal = true;
@@ -156,8 +151,6 @@ public class AutoDownloadDetails implements Serializable {
             // make sure the file ext is legit....
             if ((type != null) && !(type.matches(inputFileName))) {
                 retVal = false;
-                debug("ADD.addDownload(): file " +
-                      inputFileName + " isn't the right type.");
             }
 
             // create our xml doc if we need to...
@@ -176,8 +169,6 @@ public class AutoDownloadDetails implements Serializable {
             int score = ResponseVerifier.score(query, xmlDoc, toAdd);
             if (score < LOW_SCORE) {
                 retVal = false;
-                debug("ADD.addDownload(): file " +
-                      inputFileName + " has low score of " + score);
             }
 
             // check to see there is a high incidence of words here in stuff we
@@ -190,8 +181,6 @@ public class AutoDownloadDetails implements Serializable {
                 final int numTokens = st.countTokens();
                 while (st.hasMoreTokens()) {
                     String currToken = st.nextToken().toLowerCase();
-                    debug("ADD.addDownload(): currToken = " +
-                          currToken);
                     if (!wordSet.contains(currToken)) 
                         additions++;
                 }
@@ -201,10 +190,6 @@ public class AutoDownloadDetails implements Serializable {
                 if ((additions == 0) || 
                     (matchRate > WORD_INCIDENCE_RATE)) {
                     retVal = false;
-                    debug("ADD.addDownload(): file " +
-                          inputFileName + " has many elements similar to" +
-                          " other files. matchRate = " + matchRate + 
-                          ", additions = " + additions);
                 }
             }
 
@@ -228,8 +213,6 @@ public class AutoDownloadDetails implements Serializable {
                                            currProcessedFileName.length());
                     if (((float)diffs)/((float)smaller) < MATCH_PRECISION_DL) {
                         retVal = false;
-                        debug("ADD.addDownload(): conflict for file " +
-                              inputFileName + " and " + currFileName);
                     }
 
                     // oops, we have already accepted that file for DL, don't
@@ -249,14 +232,10 @@ public class AutoDownloadDetails implements Serializable {
                                     FileManager.DELIMITERS);
                 while (st.hasMoreTokens())
                     wordSet.add(st.nextToken().toLowerCase());
-                debug("ADD.addDownload(): wordSet = " + wordSet);
             }
         }
         else 
             retVal = false;
-
-        debug("ADD.addDownload(): returning " + retVal);        
-        debug("ADD.addDownload(): -----------*");
         return retVal;
     }
 
@@ -306,16 +285,6 @@ public class AutoDownloadDetails implements Serializable {
         else
             retString = fileName.substring(0, extStart);
         return retString;
-    }
-
-    private static final boolean debugOn = false;
-    private static void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private static void debug(Exception e) {
-        if (debugOn)
-            e.printStackTrace();
     }
     
 }

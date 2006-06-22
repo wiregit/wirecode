@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
-import java.util.Set;
 import java.io.File;
+import java.util.Set;
 
 public interface UrnCallback {
  

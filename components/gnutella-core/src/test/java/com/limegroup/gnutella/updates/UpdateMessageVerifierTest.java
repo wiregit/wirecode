@@ -65,16 +65,6 @@ public class UpdateMessageVerifierTest extends BaseTestCase {
 	public void testOldVerFile() throws Exception {
 		specificTest("old_verFile.xml",true);
 	}
-	
-	
-		
-    
-    private static File getUpdateVer() throws Exception {
-                  // tests/TestData    /tests          / ..
-        File f = getTestDirectory().getParentFile().getParentFile();
-        return new File(f, "gui/update.ver");
-    }
-    
     
     protected void setUp() throws Exception {
     	File pub = CommonUtils.getResourceFile(testXMLPath+"public.key");

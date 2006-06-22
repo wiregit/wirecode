@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.util.IntervalSet;
-import java.util.NoSuchElementException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import com.limegroup.gnutella.util.IntervalSet;
 
 /** 
  * Selection strategy that selects the next available block.  

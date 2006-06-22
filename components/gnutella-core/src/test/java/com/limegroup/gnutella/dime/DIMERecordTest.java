@@ -612,7 +612,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
     	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
 	        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 	        try {
-    	        DIMERecord record = DIMERecord.createFromStream(in);
+    	        DIMERecord.createFromStream(in);
 	            fail("expected exception");
             } catch(IOException expected) {
                 assertEquals("invalid type: " + i, expected.getMessage());
@@ -620,8 +620,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
             
             // try also creating not from network.
             try {
-                DIMERecord record = new DIMERecord((byte)type, null,
-                                                      null, null, null);
+                new DIMERecord((byte)type, null, null, null, null);
                 fail("expected exception");
             } catch(IllegalArgumentException expected) {
                 assertEquals("invalid type: " + i, expected.getMessage());
@@ -644,7 +643,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
     	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
 	        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 	        try {
-    	        DIMERecord record = DIMERecord.createFromStream(in);
+    	        DIMERecord.createFromStream(in);
 	            fail("expected exception");
             } catch(IOException expected) {
                 assertEquals("invalid version: " + i, expected.getMessage());
@@ -666,7 +665,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
     	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
 	        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 	        try {
-    	        DIMERecord record = DIMERecord.createFromStream(in);
+    	        DIMERecord.createFromStream(in);
 	            fail("expected exception");
             } catch(IOException expected) {
                 assertEquals("invalid reserved: " + i, expected.getMessage());
@@ -677,7 +676,6 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
     public void testDataTooLarge() throws Exception {
         ByteArrayOutputStream out;
         ByteArrayInputStream in;
-        DIMERecord record;
         
 	    out = new ByteArrayOutputStream();
 	    out.write( 0x08 ); // mb, me & cf clear.
@@ -689,7 +687,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	                            (byte)0xFF, (byte)0xFF } ); // data length: LARGE
         in = new ByteArrayInputStream(out.toByteArray());   
         try {
-            record = DIMERecord.createFromStream(in);
+            DIMERecord.createFromStream(in);
             fail("expected exception");
         } catch(IOException expected) {
             assertEquals("data too big.", expected.getMessage());
@@ -707,7 +705,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCa
 	                            (byte)0x00, (byte)0x00 } );
         in = new ByteArrayInputStream(out.toByteArray());   
         try {
-            record = DIMERecord.createFromStream(in);
+            DIMERecord.createFromStream(in);
             fail("expected exception");
         } catch(IOException expected) {
             assertEquals("data too big.", expected.getMessage());

@@ -51,8 +51,8 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         DownloadSettings.MAX_SIM_DOWNLOAD.setValue(0);
         TestActivityCallback callback=new TestActivityCallback();
-        RouterService rs = new RouterService(callback);
-        DownloadManager dm = rs.getDownloadManager();
+        new RouterService(callback);
+        DownloadManager dm = RouterService.getDownloadManager();
         dm.initialize();
         assertTrue("unable to read snapshot!",
             dm.readSnapshot(CommonUtils.getResourceFile(filePath + file)));

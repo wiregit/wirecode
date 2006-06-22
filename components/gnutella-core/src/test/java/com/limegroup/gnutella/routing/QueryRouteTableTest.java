@@ -12,8 +12,8 @@ import junit.framework.Test;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -68,24 +68,6 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         byte[] retBytes = new byte[0];
             retBytes = 
             (byte[]) PrivilegedAccessor.invokeMethod(source, "uncompress", chunk);
-        return retBytes;
-    }
-
-
-    private byte[] invokeHalve(byte[] chunk) throws Exception {
-        byte[] retBytes = new byte[0];
-            retBytes = 
-            (byte[]) PrivilegedAccessor.invokeMethod(QueryRouteTable.class, 
-                                                     "halve", chunk);
-        return retBytes;
-    }
-
-
-    private byte[] invokeUnhalve(byte[] chunk) throws Exception {
-        byte[] retBytes = new byte[0];
-            retBytes = 
-            (byte[]) PrivilegedAccessor.invokeMethod(QueryRouteTable.class, 
-                                                     "unhalve", chunk);
         return retBytes;
     }
     

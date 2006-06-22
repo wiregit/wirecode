@@ -112,8 +112,7 @@ public class CapabilitiesVMTest
             smp2.encode(baos);
             smp3.encode(baos);
             smp1.encode(baos);
-            CapabilitiesVM vmpOther = 
-                new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray());
+            new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray());
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {
         }
@@ -125,8 +124,7 @@ public class CapabilitiesVMTest
             smp3.encode(baos);
             smp1.encode(baos);
             baos.write("crap".getBytes());
-            CapabilitiesVM vmpOther = 
-                new CapabilitiesVM(guid, ttl, hops, 0, 
+            new CapabilitiesVM(guid, ttl, hops, 0, 
                                                    baos.toByteArray());
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {

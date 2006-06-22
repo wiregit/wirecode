@@ -1,10 +1,8 @@
 package com.limegroup.gnutella.browser;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -13,28 +11,21 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public class HTTPHandler {
 
-	/** The relative document root. */
-	private static final String ROOT = "root/";
-
     private Socket       _socket; 
 	private OutputStream _ostream;
-	private boolean      _inErrorState;
-	private String       _line;
 
 	/**
      *  Create and execute the handler without a new thread.
      */
 	public static HTTPHandler createPage( Socket socket, String content ) {
 
-    	HTTPHandler handler = new HTTPHandler(socket, null);
+    	HTTPHandler handler = new HTTPHandler(socket);
 		handler.handlePage(content);
 		return(handler);
 	}
 
-    public HTTPHandler( Socket socket, String line ) {
+    public HTTPHandler( Socket socket) {
         _socket      = socket;
-		_line        = line;
-		_inErrorState = false;
     }
 
     /**
@@ -52,46 +43,8 @@ public class HTTPHandler {
 		try {
 			_ostream  = _socket.getOutputStream();
 		} catch (IOException e) {
-			_inErrorState = true;
 		}
 	}
-
-    /**
-     *  Parse out the path component.
-     */
-    private String getRelativePath( String line ) {
-        StringTokenizer st   = new StringTokenizer( line );
-        String          path = null;
-
-        if ( st.hasMoreTokens() )
-            path = st.nextToken();
-        else
-            _inErrorState = true;
-
-        return path;
-    }
-
-    /**
-     *  Return the file if a file request.  Error out as appropriate.
-     */
-	private void processRequest( File apath, String rpath ) {
-
-		// Check to see if this is a control request
-		String rbase = rpath;
-		int    rloc  = rbase.indexOf("?");
-		if ( rloc > 0 )
-		    rbase = rbase.substring(0, rloc);
-
-        if ( !apath.exists() )
-			_inErrorState =true;
-
-        if ( !apath.canRead() )
-			_inErrorState =true;
-
-		if ( _inErrorState ) 
-			writeError();
-	}
-
     /**
      *  Echo back a page.
      */
@@ -105,7 +58,6 @@ public class HTTPHandler {
             _ostream.write(content);
 
         } catch( IOException e ) {
-			_inErrorState =true;
 		}
 
 		try {

@@ -1,33 +1,33 @@
 package com.limegroup.gnutella.bootstrap;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.UDPPinger;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-
-import java.io.Writer;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Collections;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import com.limegroup.gnutella.util.IpPortSet;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A collection of UDP Host Caches.
@@ -288,6 +288,7 @@ public class UDPHostCache {
     /**
      * Creates and adds a host/port as a UDP host cache.
      */
+    @SuppressWarnings("unused")
     private void createAndAdd(String host, int port) {
         try {
             ExtendedEndpoint ep = 

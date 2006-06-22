@@ -32,9 +32,6 @@ public class TestConnection {
 
     private volatile boolean _expectSimppRequest;
 
-    //The simpp message number this connection is expected to send
-    private int _simppMessageNumber;
-
     private int _capabilitySimppNo;
 
     private boolean _causeError;
@@ -57,8 +54,7 @@ public class TestConnection {
     
     public TestConnection(int simppNumber, boolean expectSimppReq, 
                boolean sendSimppData, int capabilitySimpp) throws IOException {
-        _simppData = readCorrectFile(simppNumber);        
-        _simppMessageNumber = simppNumber;
+        _simppData = readCorrectFile(simppNumber);
         _expectSimppRequest = expectSimppReq;
         _sendSimppData = sendSimppData;
         _capabilitySimppNo = capabilitySimpp;
@@ -93,7 +89,6 @@ public class TestConnection {
         InputStream is = _socket.getInputStream();
         OutputStream os = _socket.getOutputStream();
         ByteReader reader = new ByteReader(is);
-        int b = 0;
         //write out the headers this code needs to change if the definition of
         //what's considered a good connection
         //Phase 1 of the handshake
@@ -184,11 +179,10 @@ public class TestConnection {
     }
     
     public void setSimppMessageNumber(int number) {
-        _simppMessageNumber = number;
         try {
             _simppData = readCorrectFile(number);        
         } catch(IOException iox) {
-            Assert.that(false, "unable to read correct simpp test data");
+            throw new RuntimeException("unable to read correct simpp test data", iox);
         }
     }
 

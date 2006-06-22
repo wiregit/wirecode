@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import java.util.LinkedList;
-import java.util.List;
 
 class DownloadState {
     

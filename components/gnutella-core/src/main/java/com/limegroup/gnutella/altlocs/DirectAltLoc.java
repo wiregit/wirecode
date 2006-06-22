@@ -6,14 +6,14 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortForSelf;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -88,7 +88,7 @@ public class DirectAltLoc extends AlternateLocation {
 								  true, quality, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
                                   ALT_VENDOR,//Never displayed, and we don't know
-                                  System.currentTimeMillis(), null, -1);
+                                  null, -1);
 		
 		return ret;
 	}

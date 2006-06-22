@@ -5,10 +5,10 @@ import java.io.File;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class OGGWritingTest extends BaseTestCase {
 

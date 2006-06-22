@@ -120,10 +120,10 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE = new RouterService(callback);
-		ROUTER_SERVICE.preGuiInit();
+        RouterService.preGuiInit();
 		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();
+        RouterService.clearHostCatcher();
+        RouterService.connect();
         
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -163,7 +163,7 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 
 
 	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
 		sleep();
         for (int i = 0; i < LEAF.length; i++)
             LEAF[i].close();

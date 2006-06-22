@@ -64,7 +64,7 @@ public class PushAltLoc extends AlternateLocation {
 		        	_pushAddress.getAddress(),_pushAddress.getPort(),0,
 		        	HTTPConstants.URI_RES_N2R+SHA1_URN,size,
 					1000, true, quality, false, null,
-					urnSet,false, true,ALT_VENDOR,System.currentTimeMillis(),
+					urnSet,false, true,ALT_VENDOR,
 					-1,_pushAddress);
 
 		

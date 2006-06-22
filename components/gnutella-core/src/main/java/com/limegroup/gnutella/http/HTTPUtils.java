@@ -3,6 +3,7 @@ package com.limegroup.gnutella.http;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,7 +11,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
-import java.net.URLEncoder;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;

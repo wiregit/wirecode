@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.io;
 
-import java.nio.channels.*;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 
 public class FakeSelectionKey extends SelectionKey {
     private int ops;

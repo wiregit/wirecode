@@ -60,6 +60,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @SuppressWarnings("unused")
     private static void doSettings() {
         TIMEOUT = 4000;
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
@@ -692,7 +693,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             assertEquals(UDP_ACCESS.length, endpoints.size());
         }
         
-        long currTime = System.currentTimeMillis();
         Downloader downloader = 
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
@@ -1435,7 +1435,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                                   "whatever", 10, GUID.makeGuid(),
                                   1, false, 3, false, null, 
                                   urns, false, false, 
-                                  "LIME", 0, new HashSet(), -1);
+                                  "LIME", new HashSet(), -1);
     }
     
     private RemoteFileDesc makeRFD(String sha1) throws Exception {

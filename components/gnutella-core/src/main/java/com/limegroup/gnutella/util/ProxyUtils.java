@@ -1,19 +1,19 @@
 package com.limegroup.gnutella.util;
 
-import java.io.IOException;
 import java.io.BufferedReader;
-import java.io.OutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.io.ConnectObserver;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.io.ConnectObserver;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 
 /**

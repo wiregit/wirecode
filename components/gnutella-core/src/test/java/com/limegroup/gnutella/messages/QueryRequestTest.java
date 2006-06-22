@@ -4,10 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
@@ -75,7 +73,6 @@ public final class QueryRequestTest extends BaseTestCase {
                 GGEP ggepBlock = new GGEP(false); // do COBS
                 ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
                               qkBytes.toByteArray());
-                ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(baos[i]);
                 baos[i].write(0x1c);
 				baos[i].write(0);
@@ -94,7 +91,6 @@ public final class QueryRequestTest extends BaseTestCase {
 				Set queryUrns = qr.getQueryUrns();
                 assertEquals("should not have any URNs", 0, queryUrns.size());
 
-                Set curUrnTypeSet = qr.getRequestedUrnTypes();
                 assertEquals("query keys should be equal",
                              qk, qr.getQueryKey());
 			}		   
@@ -108,71 +104,70 @@ public final class QueryRequestTest extends BaseTestCase {
 	 * URNs are not accepted.
 	 */
 	public void testEmptyQueryNotAccepted() {
-		QueryRequest qr = null;
 		try {
-			qr = QueryRequest.createQuery("");
+			QueryRequest.createQuery("");
 			fail("exception should have been thrown");
 		} catch(IllegalArgumentException e) {}		
 
 		try {
-			qr = QueryRequest.createRequery("");
+			QueryRequest.createRequery("");
 			fail("exception should have been thrown");
 		} catch(IllegalArgumentException e) {}		
 		try {
-			qr = QueryRequest.createQuery((String)null);
+			QueryRequest.createQuery((String)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
-			qr = QueryRequest.createQuery((URN)null);
+			QueryRequest.createQuery((URN)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
-			qr = QueryRequest.createRequery((String)null);
+			QueryRequest.createRequery((String)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 
 		try {
-			qr = QueryRequest.createRequery((URN)null);
+			QueryRequest.createRequery((URN)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
-			qr = QueryRequest.createRequery(null, (byte)3);
+			QueryRequest.createRequery(null, (byte)3);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 
 		try {
-			qr = QueryRequest.createQuery(null, "", "");
+			QueryRequest.createQuery(null, "", "");
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 		try {
-			qr = QueryRequest.createQuery(new byte[16], null, "");
+			QueryRequest.createQuery(new byte[16], null, "");
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 		try {
-			qr = QueryRequest.createQuery(new byte[16], "", null);
+			QueryRequest.createQuery(new byte[16], "", null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 		try {
-			qr = QueryRequest.createQuery(new byte[16], "", "");
+			QueryRequest.createQuery(new byte[16], "", "");
 			fail("exception should have been thrown");
 		} catch(IllegalArgumentException e) {}	
 			
 		try {
-			qr = QueryRequest.createQuery(new byte[15], "test", "");
+			QueryRequest.createQuery(new byte[15], "test", "");
 			fail("exception should have been thrown");
 		} catch(IllegalArgumentException e) {}				
 
 		try {
-			qr = QueryRequest.createQuery("test", null);
+			QueryRequest.createQuery("test", null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
 		try {
-			qr = QueryRequest.createMulticastQuery(new byte[16], null);
+			QueryRequest.createMulticastQuery(new byte[16], null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
@@ -180,7 +175,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		try {
 			//String is double null-terminated.
 			byte[] payload = new byte[2+3];
-			qr = QueryRequest.createNetworkQuery(
+			QueryRequest.createNetworkQuery(
 			    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN );
 			fail("exception should have been thrown");
 		} catch(BadPacketException e) {
@@ -192,29 +187,28 @@ public final class QueryRequestTest extends BaseTestCase {
 	 * and that valid ones are.
 	 */
 	public void testTTLParameters() {
-		QueryRequest qr = null;
 		try {
-			qr = QueryRequest.createQuery("test", (byte)-1);
+			QueryRequest.createQuery("test", (byte)-1);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 		try {
-			qr = QueryRequest.createQuery("test", (byte)8);
-			fail("should have rejected query");
-		} catch(IllegalArgumentException e) {}
-
-		try {
-			qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)-1);
-			fail("should have rejected query");
-		} catch(IllegalArgumentException e) {}
-		try {
-			qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)8);
+			QueryRequest.createQuery("test", (byte)8);
 			fail("should have rejected query");
 		} catch(IllegalArgumentException e) {}
 
-		qr = QueryRequest.createQuery("test", (byte)1);
-		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)1);
-		qr = QueryRequest.createQuery("test", (byte)3);
-		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)3);
+		try {
+			QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)-1);
+			fail("should have rejected query");
+		} catch(IllegalArgumentException e) {}
+		try {
+			QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)8);
+			fail("should have rejected query");
+		} catch(IllegalArgumentException e) {}
+
+	    QueryRequest.createQuery("test", (byte)1);
+		QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)1);
+		QueryRequest.createQuery("test", (byte)3);
+		QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)3);
 
 	}
 
@@ -224,12 +218,10 @@ public final class QueryRequestTest extends BaseTestCase {
 	 * XML vs. no XML, URN vs. no URN, etc.
 	 */
 	public void testStillAcceptedIfOnlyPartsAreEmpty() throws Exception {
-		QueryRequest qr = null;
-
 		//String is double null-terminated.
 		byte[] payload = new byte[2+3];
 		payload[2] = (byte)65;
-		qr = QueryRequest.createNetworkQuery(
+		QueryRequest.createNetworkQuery(
 		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 
 		
@@ -243,7 +235,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		baos.write(HugeTestUtils.URNS[0].toString().getBytes()); 		
 		baos.write(0); // last null
 
-		qr = QueryRequest.createNetworkQuery(
+		QueryRequest.createNetworkQuery(
 		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 	}
 
@@ -320,8 +312,7 @@ public final class QueryRequestTest extends BaseTestCase {
 
         for(int i=0; i<HugeTestUtils.URNS.length; i++) {
             try {
-                QueryRequest qr = 
-                    QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
+                QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     URN_BYTES[i].toByteArray(), 
                                                     Message.N_UNKNOWN);
             } catch(BadPacketException e) {
@@ -338,6 +329,7 @@ public final class QueryRequestTest extends BaseTestCase {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         QueryRequest qrRead = (QueryRequest) MessageFactory.read(bais);
+        assertNotNull(qrRead);
     }
 
 
@@ -369,7 +361,7 @@ public final class QueryRequestTest extends BaseTestCase {
 
             // we don't currently verify this -- should we accept queries
             // that don't ask for URNs??
-			Set queryUrnTypes = qr.getRequestedUrnTypes();
+		//	Set queryUrnTypes = qr.getRequestedUrnTypes();
         }
 	}
 
@@ -400,8 +392,7 @@ public final class QueryRequestTest extends BaseTestCase {
 			baos[i].write(0);
 			baos[i].write(0);
             try {
-                QueryRequest qr = 
-                    QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
+                QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     baos[i].toByteArray(), 
                                                     Message.N_UNKNOWN);
                 
@@ -917,7 +908,6 @@ public final class QueryRequestTest extends BaseTestCase {
 
     public void testMetaFlagConstructor() throws Exception {
         try {
-        QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
                              null, null, true, Message.N_TCP, false, 0, false, 
                              1);
@@ -958,7 +948,6 @@ public final class QueryRequestTest extends BaseTestCase {
         }
 
         try {
-        QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
                              null, null, true, Message.N_TCP, false, 0, false,
                              0 | flags[0] | flags[1] | flags[2] |  flags[3] | 
@@ -1086,14 +1075,4 @@ public final class QueryRequestTest extends BaseTestCase {
                                                            query.getGUID());
         assertTrue(proxy.desiresOutOfBandReplies());
     }
-    
-	private static String print(Collection col) {
-		Iterator iter = col.iterator();
-		StringBuffer sb = new StringBuffer();
-		while(iter.hasNext()) {
-			sb.append(iter.next()); 
-			sb.append("\r\n");
-		}
-		return sb.toString();
-	}
 }

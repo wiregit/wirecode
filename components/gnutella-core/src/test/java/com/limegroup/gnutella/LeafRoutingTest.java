@@ -97,7 +97,7 @@ public class LeafRoutingTest extends BaseTestCase {
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         rs.start();
-        rs.connect();
+        RouterService.connect();
         RouterService.clearHostCatcher();
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());

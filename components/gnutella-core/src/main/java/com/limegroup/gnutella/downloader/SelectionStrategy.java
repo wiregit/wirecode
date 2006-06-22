@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.NoSuchElementException;
+
 import com.limegroup.gnutella.util.IntervalSet;
 
 public interface SelectionStrategy {

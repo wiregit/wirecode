@@ -13,7 +13,6 @@ import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;

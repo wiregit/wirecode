@@ -1,9 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.util.Properties;
 
-import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 

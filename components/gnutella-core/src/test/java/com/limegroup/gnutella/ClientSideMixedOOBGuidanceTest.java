@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -58,7 +57,6 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
     // MUST RUN THIS TEST FIRST
     public void testMixedProtocol() throws Exception {
-        DatagramPacket pack = null;
         UDP_ACCESS = new DatagramSocket();
 
         for (int i = 0; i < testUP.length; i++) {
@@ -78,10 +76,10 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         UDP_ACCESS.setSoTimeout(TIMEOUT*2);
         // ----------------------------------------
         // set up solicited UDP support
-        PrivilegedAccessor.setValue( rs.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedSolicitedIncoming", Boolean.TRUE );
 
         // set up unsolicited UDP support
-        PrivilegedAccessor.setValue( rs.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
+        PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", Boolean.TRUE );
  
         // you also have to set up TCP incoming....
         {

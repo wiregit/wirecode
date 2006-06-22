@@ -104,7 +104,7 @@ public class UDPPushTest extends BaseTestCase {
 				false,1,false,
 				doc,urns,
 				false,true,
-				"LIME",now,
+				"LIME",
 				proxies,now);
 		
 		rfd2 = new RemoteFileDesc(
@@ -113,7 +113,7 @@ public class UDPPushTest extends BaseTestCase {
 				false,1,false,
 				doc,urns,
 				false,true,
-				"LIME",now,
+				"LIME",
 				proxies,now);
 		
 		rfdAlt = new RemoteFileDesc(
@@ -122,7 +122,7 @@ public class UDPPushTest extends BaseTestCase {
 				false,1,false,
 				doc,urns,
 				false,true,
-				"ALT",now,
+				"ALT",
 				proxies,now);
 		
 		Acceptor acc = RouterService.getAcceptor();

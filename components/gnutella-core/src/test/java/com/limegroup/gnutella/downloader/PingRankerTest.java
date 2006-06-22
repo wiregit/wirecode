@@ -475,19 +475,6 @@ public class PingRankerTest extends BaseTestCase {
         assertTrue(s.contains(rfd1));
         assertTrue(s.contains(rfd2));
     }
-    
-    
-    private static RemoteFileDesc newRFD(String host, int speed){
-        return new RemoteFileDesc(host, 1,
-                                  0, "asdf",
-                                  TestFile.length(), new byte[16],
-                                  speed, false, 4, false, null, null,
-                                  false,false,"",0,null, -1);
-    }
-
-    private static RemoteFileDesc newRFDWithURN() {
-        return newRFDWithURN();
-    }
 
     private static RemoteFileDesc newRFDWithURN(String host, int speed) {
         Set set = new HashSet();
@@ -502,7 +489,7 @@ public class PingRankerTest extends BaseTestCase {
                                   0, "asdf",
                                   TestFile.length(), new byte[16],
                                   speed, false, 4, false, null, set,
-                                  false, false,"",0,null, -1);
+                                  false, false,"",null, -1);
     }
     
     /**

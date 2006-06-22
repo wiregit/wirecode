@@ -14,13 +14,13 @@ import java.util.Set;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.DownloadManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
@@ -82,7 +82,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         return new RemoteFileDesc("1.2.3.4", 6346, 13l,
                                   name, size,
                                   new byte[16], 56, false, 4, true, null, urns,
-                                  false, false,"",0,null, -1);
+                                  false, false,"",null, -1);
     }
 
     ////////////////////////////////////////////////////////////////////////////

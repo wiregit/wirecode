@@ -5,31 +5,25 @@
  */
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.IOUtils;
 
 public class UDPCrawlerPong extends VendorMessage {
 	

@@ -2,10 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import junit.framework.Test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
@@ -13,7 +11,6 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.DownloadManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -26,7 +23,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  */
 public class MagnetDownloaderTest extends BaseTestCase {
 
-	private static final Log LOG = LogFactory.getLog(MagnetDownloaderTest.class);
+	//private static final Log LOG = LogFactory.getLog(MagnetDownloaderTest.class);
     
     final static int PORT=6666;
     private DownloadManagerStub manager;

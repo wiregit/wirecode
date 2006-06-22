@@ -5,7 +5,6 @@ import com.limegroup.gnutella.Assert;
 public class PublishedCCLicense{
 
     private static final String DATE_TAG = "dc:date";
-    private static final String IDENTIFIER_TAG = "dc:identifier"; //magnet link
     private static final String RIGHTS_TAG = "dc:rights";
     private static final String TITLE_TAG = "dc:title";
     private static final String DESCRIPTION_TAG = "dc:description";

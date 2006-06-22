@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
 
 import junit.framework.Test;
 
@@ -29,7 +29,7 @@ public class ByteReaderTest extends BaseTestCase {
 		ByteReader bin;
 		String s;       
 	
-		in=new StringBufferInputStream("abc\r\na\rbc\n");
+		in=new ByteArrayInputStream("abc\r\na\rbc\n".getBytes());
 		bin=new ByteReader(in);
 	
 		s=bin.readLine(); assertEquals("abc", s);
@@ -37,7 +37,7 @@ public class ByteReaderTest extends BaseTestCase {
 		s=bin.readLine(); assertNull(s);
 		s=bin.readLine(); assertNull(s);
 	
-		in=new StringBufferInputStream("a\ne");
+		in=new ByteArrayInputStream("a\ne".getBytes());
 		bin=new ByteReader(in);
 	
 		s=bin.readLine(); assertEquals("a", s);

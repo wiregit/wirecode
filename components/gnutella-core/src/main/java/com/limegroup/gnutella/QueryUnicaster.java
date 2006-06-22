@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.messages.PingReply;
@@ -24,9 +27,6 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master
@@ -532,6 +532,7 @@ public final class QueryUnicaster {
     
     /** removes all Unicast Endpoints, reset associated members
      */
+    @SuppressWarnings("unused") // used by tests
     private void resetUnicastEndpointsAndQueries() {
         LOG.debug("Resetting unicast endpoints.");        
         synchronized (_queries) {

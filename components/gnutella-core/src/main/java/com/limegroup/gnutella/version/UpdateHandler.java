@@ -3,38 +3,38 @@ package com.limegroup.gnutella.version;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.List;
-import java.util.Iterator;
-import java.util.HashSet;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.security.SignatureVerifier;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.security.SignatureVerifier;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.UpdateSettings;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Manager for version updates.
@@ -462,7 +462,6 @@ public class UpdateHandler {
                                   false,                        // reply to MCast
                                   false,                        // is firewalled
                                   "LIME",                        // vendor
-                                  System.currentTimeMillis(),   // timestamp
                                   Collections.EMPTY_SET,        // push proxies
                                   0,                            // creation time
                                   0);                           // firewalled transfer

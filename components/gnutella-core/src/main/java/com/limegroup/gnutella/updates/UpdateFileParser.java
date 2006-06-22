@@ -39,7 +39,7 @@ public class UpdateFileParser {
         timestamp = -1l;
         InputSource inputSource = new InputSource(new StringReader(xml));
         Document d = null;
-        synchronized(this.parser) {
+        synchronized(parser) {
             parser.parse(inputSource);
             d = parser.getDocument();
         }

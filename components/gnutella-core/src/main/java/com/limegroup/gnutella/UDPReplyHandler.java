@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -14,6 +13,7 @@ import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**

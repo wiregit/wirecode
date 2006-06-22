@@ -13,7 +13,6 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.ThreadFactory;
 
 /**

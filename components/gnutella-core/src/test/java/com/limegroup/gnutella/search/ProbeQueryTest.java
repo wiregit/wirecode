@@ -55,8 +55,8 @@ public final class ProbeQueryTest extends BaseTestCase {
      * with the proper TTL.
      */
     public void testSendProbe() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", rs.getMessageRouter());
+        new RouterService(new ActivityCallbackStub());
+        assertNotNull("should have a message router", RouterService.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(ProbeQuery.class, 
                                          "sendProbe",
@@ -167,9 +167,6 @@ public final class ProbeQueryTest extends BaseTestCase {
         Integer two   = new Integer(2);
         Integer three = new Integer(3);
         Integer four  = new Integer(4);
-        Integer five  = new Integer(5);
-        Integer six   = new Integer(6);
-        Integer seven = new Integer(7);
 
         List testList = new LinkedList();
         testList.add(one);

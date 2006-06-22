@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.handshaking;
 
-import java.io.IOException;
 
 /**
  * Provides a servent ways to set connection handshake responses in response to 

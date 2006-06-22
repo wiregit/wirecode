@@ -1,8 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import java.util.List;
 import java.util.LinkedList;
-import java.util.Collections;
+import java.util.List;
 
 /**
  * A pool of Runnables that are processed asynchronously.

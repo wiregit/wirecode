@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * a HashSet which allows us to use custom hashCode and equals methods for

@@ -13,7 +13,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
 /**
  * This class tests the Response class.

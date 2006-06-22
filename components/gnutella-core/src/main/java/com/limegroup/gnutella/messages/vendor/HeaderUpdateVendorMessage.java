@@ -45,7 +45,9 @@ public class HeaderUpdateVendorMessage extends VendorMessage {
     
     private static byte [] derivePayload(Properties props) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        props.save(baos,null);
+        try {
+            props.store(baos,null);
+        } catch(IOException ignored) {}
         return baos.toByteArray();
     }
     

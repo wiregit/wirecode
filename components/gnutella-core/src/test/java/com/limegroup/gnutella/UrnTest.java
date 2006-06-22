@@ -183,7 +183,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	 */
 	public void testValidUrns() throws Exception {
 		for(int i=0; i<VALID_URNS.length; i++) {
-            URN urn = URN.createSHA1Urn(VALID_URNS[i]);
+            URN.createSHA1Urn(VALID_URNS[i]);
 		}
 	}
 
@@ -193,10 +193,9 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	 * string inputs fail properly.
 	 */
 	public void testInvalidUrns() {
-		boolean encounteredFailure = false;
 		for(int i=0; i<INVALID_URNS.length; i++) {
 			try {
-				URN urn = URN.createSHA1Urn(INVALID_URNS[i]);
+				URN.createSHA1Urn(INVALID_URNS[i]);
 				fail("should have thrown an exception on: " + INVALID_URNS[i]);
 			} catch(IOException e) {
 			}
@@ -217,7 +216,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 			}
 			URN urn = URN.createSHA1Urn(curFile);
 			assertTrue("should be a valid SHA1", urn.isSHA1());
-			assertTrue("should be considered a urn", urn.isUrn(urn.toString()));
+			assertTrue("should be considered a urn", URN.isUrn(urn.toString()));
 			assertEquals("should be == UrnTypes", urn.getUrnType(), UrnType.SHA1);
             URN newURN = URN.createSHA1Urn(urn.toString());
             assertEquals("urns should be equal", urn, newURN);

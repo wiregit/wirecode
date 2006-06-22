@@ -3,10 +3,6 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * An OutputStream that attempts to write from a Buffer.
@@ -16,7 +12,7 @@ import org.apache.commons.logging.Log;
  */
  class BufferOutputStream extends OutputStream implements Shutdownable {
     
-    private static final Log LOG = LogFactory.getLog(BufferOutputStream.class);
+    //private static final Log LOG = LogFactory.getLog(BufferOutputStream.class);
     
     
     /** the lock that reading waits on. */

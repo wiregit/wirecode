@@ -77,7 +77,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     public void testTCPExpireRequestsNotSent() throws Exception {
         drainAll();
         for (int i = 0; i < 2; i++) {
-            assertFalse(rs.acceptedIncomingConnection());
+            assertFalse(RouterService.acceptedIncomingConnection());
 
             try {
                 testUP[0].receive(TIMEOUT);
@@ -85,7 +85,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             catch (InterruptedIOException expected) {}
             
             Thread.sleep(MY_EXPIRE_TIME+MY_VALIDATE_TIME);
-            assertFalse(rs.acceptedIncomingConnection());
+            assertFalse(RouterService.acceptedIncomingConnection());
             Thread.sleep(100);
             // now we should get the connect backs cuz it has been a while
             Message m = null;
@@ -103,13 +103,13 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             Socket s = new Socket("localhost", PORT);
             s.close();
             Thread.sleep(100);
-            assertTrue(rs.acceptedIncomingConnection());
+            assertTrue(RouterService.acceptedIncomingConnection());
             
             // wait until the expire time is realized
             Thread.sleep(MY_EXPIRE_TIME + MY_VALIDATE_TIME + 1000);
             
             // query the Acceptor - it should send off more requests
-            assertFalse(rs.acceptedIncomingConnection());
+            assertFalse(RouterService.acceptedIncomingConnection());
             Thread.sleep(100);
             Message m = null;
             do {
@@ -128,7 +128,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 Socket s = new Socket("localhost", PORT);
                 s.close();
                 Thread.sleep(100);
-                assertTrue(rs.acceptedIncomingConnection());
+                assertTrue(RouterService.acceptedIncomingConnection());
             }
             
             // wait until the expire time is realized
@@ -140,7 +140,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
                 Socket s = new Socket("localhost", PORT);
                 s.close();
                 Thread.sleep(100);
-                assertTrue(rs.acceptedIncomingConnection());
+                assertTrue(RouterService.acceptedIncomingConnection());
                 try {
                     testUP[0].receive(TIMEOUT);
                 }
@@ -148,7 +148,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             }
             else {
                 // query the Acceptor - it should send off more requests
-                assertFalse(rs.acceptedIncomingConnection());
+                assertFalse(RouterService.acceptedIncomingConnection());
                 Thread.sleep(100);
                 Message m = null;
                 do {
@@ -172,10 +172,10 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         readNumConnectBacks(1,testUP[1], TIMEOUT);
         
         // leave only one connection open
-        assertGreaterThan(1,rs.getConnectionManager().getNumInitializedConnections());
+        assertGreaterThan(1,RouterService.getConnectionManager().getNumInitializedConnections());
         testUP[1].close();
         Thread.sleep(500);
-        assertEquals(1,rs.getConnectionManager().getNumInitializedConnections());
+        assertEquals(1,RouterService.getConnectionManager().getNumInitializedConnections());
         
         drainAll();
         // sleep
@@ -367,10 +367,6 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
 
     public static ActivityCallback getActivityCallback() {
         return new MyActivityCallback();
-    }
-
-    private static byte[] myIP() {
-        return new byte[] { (byte)192, (byte)168, 0, 1 };
     }
 
     public static class MyActivityCallback extends ActivityCallbackStub {

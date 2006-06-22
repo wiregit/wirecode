@@ -3,14 +3,14 @@ package com.limegroup.gnutella;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.limegroup.gnutella.messages.PingRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ProcessingQueue;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Sends Gnutella messages via UDP to a set of hosts and calls back to a 

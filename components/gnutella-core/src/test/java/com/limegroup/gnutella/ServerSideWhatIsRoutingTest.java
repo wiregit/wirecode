@@ -44,29 +44,6 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
 	 */
     private static final int PORT = 6667;
 
-	/**
-	 * The timeout value for sockets -- how much time we wait to accept 
-	 * individual messages before giving up.
-	 */
-    private static final int TIMEOUT = 2000;
-
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 3;
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
-
     /**
      * Leaf connection to the Ultrapeer.
      */
@@ -155,8 +132,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
+		RouterService.clearHostCatcher();
+        RouterService.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
@@ -169,7 +146,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
 
 
 	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
 		sleep();
         if ((LEAF != null) && LEAF.isOpen())
             LEAF.close();

@@ -1,8 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
 import java.io.InterruptedIOException;
-import java.util.Iterator;
 
 import junit.framework.Test;
 
@@ -13,7 +11,6 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**

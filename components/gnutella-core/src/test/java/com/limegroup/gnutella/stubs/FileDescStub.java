@@ -9,7 +9,6 @@ import java.util.Set;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 
 public class FileDescStub extends FileDesc {
     public static final String DEFAULT_URN =

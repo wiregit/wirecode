@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Set;
 
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.util.CommonUtils;

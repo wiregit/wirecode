@@ -3,7 +3,6 @@ package com.limegroup.gnutella.stubs;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Set;
 
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.Message;

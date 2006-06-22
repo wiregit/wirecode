@@ -11,8 +11,8 @@ import java.util.TreeMap;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.util.COBSUtil;
-import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.NameValue;
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
@@ -367,11 +367,6 @@ public class GGEP {
         throws IOException {
 
         // 1. WRITE THE HEADER FLAGS
-        // in the future, when we actually encode and compress, this code should
-        // still work.  well, the code that deals with the header flags, that
-        // is, you'll still need to encode/compress
-        boolean shouldCompress = false;
-
         int flags = 0x00;
         if (isLast)
             flags |= 0x80;

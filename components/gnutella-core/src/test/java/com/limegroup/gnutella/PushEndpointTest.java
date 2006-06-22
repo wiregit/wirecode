@@ -10,7 +10,6 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
@@ -141,7 +140,7 @@ public class PushEndpointTest extends BaseTestCase {
     	PushEndpoint ext = new PushEndpoint(guid2.bytes(),set6,
     			0,2, new IpPortImpl("1.2.3.4",5));
     	network = ext.toBytes();
-    	assertEquals(ext.getSizeBytes(set6)+6,network.length);
+    	assertEquals(PushEndpoint.getSizeBytes(set6)+6,network.length);
     	
     	m.clear();
     	PushEndpoint ext2 = PushEndpoint.fromBytes(
@@ -158,7 +157,7 @@ public class PushEndpointTest extends BaseTestCase {
     	PushEndpoint noFWT = new PushEndpoint(guid2.bytes(),set6,
     	        0,0, new IpPortImpl("1.2.3.4",5));
     	network = noFWT.toBytes();
-    	assertEquals(noFWT.getSizeBytes(set6),network.length);
+    	assertEquals(PushEndpoint.getSizeBytes(set6),network.length);
     	
     	m.clear();
     	PushEndpoint noFWT2 = PushEndpoint.fromBytes(
