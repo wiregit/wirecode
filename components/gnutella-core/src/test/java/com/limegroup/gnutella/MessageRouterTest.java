@@ -667,7 +667,6 @@ public final class MessageRouterTest extends BaseTestCase {
         RouterService rs = new RouterService(new ActivityCallbackStub());
         RouterService.preGuiInit();
         rs.start();
-        DHTSettings.NEED_STABLE_GNUTELLA.setValue(false);
         RouterService.initializeDHT(true);
         RouterService.getLimeDHTManager().addLeafDHTNode("localhost", 3000);
         Thread.sleep(300);

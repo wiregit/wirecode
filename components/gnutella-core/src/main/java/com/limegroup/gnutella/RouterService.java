@@ -925,6 +925,8 @@ public class RouterService {
                 return;
                 
             _state = 3;
+
+            dhtManager.shutdown(true);
             
             getAcceptor().shutdown();
             
@@ -956,7 +958,6 @@ public class RouterService {
             
             contentManager.shutdown();
  
-            dhtManager.shutdown(true);
             
             runShutdownItems();
             
@@ -1579,6 +1580,7 @@ public class RouterService {
     
     /**
      * Tells whether this node is *actively* connected to the DHT
+     * @see <tt>isPassiveDHTNode</tt>
      */
     public static boolean isActiveDHTNode() {
         if(dhtManager != null)
@@ -1587,15 +1589,21 @@ public class RouterService {
     }
     
     /**
-	 * Tells whether this node is exclusively connected to the DHT
-	 */
-    public static boolean isExclusiveDHTNode() {
+     * Tells whether this node is *passively* connected to the DHT, i.e. can perform queries
+     * and store requests but is not part of the DHT routing table 
+     * (does not store data or respond to queries)
+     */
+    public static boolean isPassiveDHTNode() {
         if(dhtManager != null)
-            return (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                    && dhtManager.isActiveNode());
+            return dhtManager.isPassiveNode();
         else return false;
     }
-
+    
+    public static void setPassiveDHTNode(boolean passive) {
+        if(dhtManager != null)
+            dhtManager.setPassive(passive);
+    }
+    
 	/**
 	 * Accessor for whether or not this node is a shielded leaf.
 	 *
@@ -1713,8 +1721,6 @@ public class RouterService {
     public static boolean incomingStatusChanged() {
         if(callback != null)
             callback.handleAddressStateChanged();
-        //notify the dht
-        dhtManager.setFirewalled(acceptedIncomingConnection());
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1829,7 +1835,4 @@ public class RouterService {
         dhtManager.shutdown(false);
     }
     
-    public static boolean isStable() {
-        return manager.isStable();
-    }
 }

@@ -1,21 +1,25 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.List;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.PingPongSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.mojito.Context;
 import com.limegroup.mojito.MojitoDHT;
-import com.limegroup.mojito.routing.PatriciaRouteTable;
-import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.NetworkSettings;
 
 public class LimeDHTManagerTest extends BaseTestCase {
@@ -25,6 +29,8 @@ public class LimeDHTManagerTest extends BaseTestCase {
     private static LimeDHTManager DHT_MANAGER;
     
     private static MojitoDHT BOOTSTRAP_DHT;
+    
+    private static int PORT = 6346;
 
     public LimeDHTManagerTest(String name) {
         super(name);
@@ -51,17 +57,17 @@ public class LimeDHTManagerTest extends BaseTestCase {
     }
     
     protected void setUp() throws Exception {
+        setSettings();
         ROUTER_SERVICE =
             new RouterService(new ActivityCallbackStub());
         ROUTER_SERVICE.start();
         
         DHT_MANAGER = RouterService.getLimeDHTManager();
 
-        setSettings();
     }
 
     private static void setSettings() throws Exception {
-        ConnectionSettings.PORT.setValue(6346);
+        ConnectionSettings.PORT.setValue(PORT);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.USE_GWEBCACHE.setValue(false);
@@ -69,10 +75,13 @@ public class LimeDHTManagerTest extends BaseTestCase {
         DHTSettings.DHT_CAPABLE.setValue(true);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
         DHTSettings.DISABLE_DHT_USER.setValue(false);
-        DHTSettings.EXCLUDE_ULTRAPEERS.setValue(true);
+        DHTSettings.EXCLUDE_ULTRAPEERS.setValue(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        DHTSettings.NEED_STABLE_GNUTELLA.setValue(false);
         DHTSettings.PERSIST_DHT.setValue(false);
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+                new String[] {"*.*.*.*"});
+            FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+                new String[] {"127.*.*.*", "18.239.0.*"});
     }
     
     public void testBootstrap() throws Exception {
@@ -111,6 +120,26 @@ public class LimeDHTManagerTest extends BaseTestCase {
         //by now, should have failed previous unsuccessfull bootstrap and bootstrapped correctly
         bootstrapHosts = (List) PrivilegedAccessor.getValue(DHT_MANAGER, "bootstrapHosts");
         assertFalse(DHT_MANAGER.isWaiting());
+    }
+    
+    public void testLeafDHTNode() throws Exception{
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+
+        RouterService.initializeDHT(false);
+        //get ready to accept connections
+        RouterService.clearHostCatcher();
+        RouterService.connect();  
+        //create a leaf and connect
+        Connection leaf = new Connection("localhost", PORT);
+        leaf.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        CapabilitiesVM.reconstructInstance();
+        leaf.send(CapabilitiesVM.instance());
+        //we should have received this leaf and bootstrapped off of it
+        sleep(3000);
+        //TODO: incomplete
+        leaf.close();
     }
     
     public void tearDown() {

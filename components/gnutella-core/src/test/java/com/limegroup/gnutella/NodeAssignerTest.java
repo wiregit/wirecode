@@ -115,7 +115,6 @@ public class NodeAssignerTest extends BaseTestCase {
         ApplicationSettings.AVERAGE_UPTIME.setValue(DHTSettings.MIN_DHT_AVG_UPTIME.getValue());
         PrivilegedAccessor.setValue(ASSIGNER,"_currentUptime",
                                     new Long(DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
-        DHTSettings.NEED_STABLE_GNUTELLA.setValue(false);
     }
     
     private void setHardcoreCapabilities() throws Exception{
@@ -151,7 +150,13 @@ public class NodeAssignerTest extends BaseTestCase {
         ULTRAPEER.setAcceptsUltrapeers(true);
         connect();
         assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
+        assertTrue("should be passively connected to the DHT", RouterService.isPassiveDHTNode());
+        
+        //make sure you can't be an active DHT node at the same time
+        setDHTCapabilities();
+        sleep(200);
         assertFalse("should not be a DHT node", RouterService.isActiveDHTNode());
+        
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{

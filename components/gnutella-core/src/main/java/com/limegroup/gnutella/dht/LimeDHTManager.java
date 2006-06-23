@@ -45,9 +45,8 @@ import com.limegroup.mojito.event.BootstrapListener;
  * Once the node is a DHT node, if <tt>EXCLUDE_ULTRAPEERS</tt> is set to true, 
  * it should no try to connect as an ultrapeer (@see RouterService.isExclusiveDHTNode()). 
  *
- * There are two entry points to the init method: 
- * 1) A stable connection event is fired: As soon as LW has a globally stable gnutella connection
- * 2) The NodeAssigner declared the node as DHT capable and launched an initializer thread
+ * The NodeAssigner should be the only class to have the authority to 
+ * initialize the DHT and connect to the network.
  * 
  * This manager can be in one of the four following states:
  * 1) not running.
@@ -57,7 +56,7 @@ import com.limegroup.mojito.event.BootstrapListener;
  * 
  * The current implementation is dependant on the MojitoDHT. 
  */
-public class LimeDHTManager implements LifecycleListener, MessageListener {
+public class LimeDHTManager implements LifecycleListener {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTManager.class);
     
@@ -122,50 +121,35 @@ public class LimeDHTManager implements LifecycleListener, MessageListener {
      * Initializes the Mojito DHT and connects it to the network in either passive mode
      * or active mode if we are not firewalled.
      * The initialization preconditions are the following:
-     * 1) We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
-     * 2) We have stable Gnutella connections
-     * 3) We are not an ultrapeer while excluding ultrapeers from the active network
-     * 4) We are not already connected or trying to bootstrap
+     * 1) if we want to actively connect: We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
+     * 2) We are not an ultrapeer while excluding ultrapeers from the active network
+     * 3) We are not already connected or trying to bootstrap
      * 
      * @param forcePassive true to connect to the DHT in passive mode
      */
     public synchronized void init(boolean forcePassive) {
-        isActive = !forcePassive;
         if (running) {
             return;
         }
+        isActive = !forcePassive;
         
         if(DHTSettings.DISABLE_DHT_NETWORK.getValue() 
                 || DHTSettings.DISABLE_DHT_USER.getValue()) { 
             return;
         }
         
-        if (!DHTSettings.DHT_CAPABLE.getValue() 
-                && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+        //if we want to connect actively, we either shouldn't be an ultrapeer
+        //or should be DHT capable
+        if (!forcePassive && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+            if(!DHTSettings.DHT_CAPABLE.getValue() ||
+               (RouterService.isSupernode() &&
+               DHTSettings.EXCLUDE_ULTRAPEERS.getValue())) {
             
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot initialize DHT - node is not DHT capable");
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Cannot initialize DHT - node is not DHT capable or is an ultrapeer");
+                }
+                return;
             }
-            return;
-        }
-        
-        if(DHTSettings.NEED_STABLE_GNUTELLA.getValue() 
-                && !RouterService.isStable()) {
-            
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot initialize DHT - node is not connected to the Gnutella network");
-            }
-            return;
-            
-        }
-        
-        if (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                && RouterService.isSupernode()) {
-            
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot initialize DHT - Node is allready an ultrapeer");
-            }
-            return;
         }
         
         //set firewalled status
@@ -255,6 +239,11 @@ public class LimeDHTManager implements LifecycleListener, MessageListener {
         dht.stop();
         running = false;
         waiting = false;
+        
+        //Notify our connections that we disconnected
+        CapabilitiesVM.reconstructInstance();
+        RouterService.getConnectionManager().sendUpdatedCapabilities();
+        
         try {
             if(DHTSettings.PERSIST_DHT.getValue()) {
                 FileOutputStream out = new FileOutputStream(FILE);
@@ -268,7 +257,7 @@ public class LimeDHTManager implements LifecycleListener, MessageListener {
     
     private void sendRequestForDHTHosts() {
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
-        RouterService.getHostCatcher().sendMessage(m, this, new UDPPingCanceller());
+        RouterService.getHostCatcher().sendMessage(m, new DHTNodesRequestListener(), new UDPPingCanceller());
     }
     
     /**
@@ -320,27 +309,26 @@ public class LimeDHTManager implements LifecycleListener, MessageListener {
         return running & isActive;
     }
     
-    public void setFirewalled(boolean firewalled) {
-        if(running && !waiting) dht.setFirewalled(firewalled);
+    public boolean isPassiveNode() {
+        return running & !isActive;
+    }
+    
+    public void setPassive(boolean firewalled) {
+        //TODO here: see Jira: MOJITO-53
+        if(running && !waiting) dht.setFirewalled(true);
     }
 
     /**
-     * Initializes the DHT when LW is stably connected to the Gnutella network. 
-     * Shuts the DHT down if we got promoted to ultrapeer and we want to exclude them
-     * or if we got disconnected from the network.
+     * Shuts the DHT down if we got disconnected from the network.
      */
     public void handleLifecycleEvent(LifecycleEvent evt) {
-        if(evt.isStableEvent()) {
-            if(!running) {
-                init(false);
-            } else {
-                //protect against change of state
-                if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                        && RouterService.isSupernode()) {
-                    shutdown(false);
-                }
-                return;
+        if(evt.isConnectedEvent()) {
+            //protect against change of state
+            if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
+                    && RouterService.isSupernode()) {
+                shutdown(false);
             }
+            return;
         } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(running) {
                 shutdown(false);
@@ -368,20 +356,6 @@ public class LimeDHTManager implements LifecycleListener, MessageListener {
     public boolean isWaiting() {
         return waiting;
     }
-    
-    public void processMessage(Message m, ReplyHandler handler) {
-        if(!(m instanceof PingReply)) return;
-        PingReply reply = (PingReply) m;
-        List<IpPort> l = reply.getPackedIPPorts();
-        
-        for (IpPort ipp : l) {
-            addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
-        }
-    }
-
-    public void registered(byte[] guid) {}
-
-    public void unregistered(byte[] guid) {}
     
     public Collection<IpPort> getDHTNodes(int numNodes){
         if(!running) {
@@ -432,6 +406,22 @@ public class LimeDHTManager implements LifecycleListener, MessageListener {
         public boolean isCancelled() {
             return !waiting;
         }
+    }
+    
+    private class DHTNodesRequestListener implements MessageListener{
+        public void processMessage(Message m, ReplyHandler handler) {
+            if(!(m instanceof PingReply)) return;
+            PingReply reply = (PingReply) m;
+            List<IpPort> l = reply.getPackedIPPorts();
+            
+            for (IpPort ipp : l) {
+                addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
+            }
+        }
+
+        public void registered(byte[] guid) {}
+
+        public void unregistered(byte[] guid) {}
     }
 
 }

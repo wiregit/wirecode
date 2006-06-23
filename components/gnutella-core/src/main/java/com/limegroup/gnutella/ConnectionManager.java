@@ -274,10 +274,6 @@ public class ConnectionManager {
                 }
             }, 1000, 1000);
         }
-        // schedule the runnable that periodically checks the overall 
-        // stability of our Gnutella connection
-        long timerDelay = ConnectionSettings.STABILITY_CHECK_TIMER_DELAY.getValue();
-        RouterService.schedule(new StabilityChecker(), timerDelay , timerDelay);
     }
 
 
@@ -378,8 +374,7 @@ public class ConnectionManager {
                !isShieldedLeaf() &&
                !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
                !isBehindProxy() &&
-               minConnectTimePassed() &&
-               !RouterService.isExclusiveDHTNode();
+               minConnectTimePassed();
     }
     
     /**
@@ -2338,14 +2333,6 @@ public class ConnectionManager {
         return count;
     }
     
-    public boolean isStable() {
-        return (countConnectionsWithNMessages(
-                ConnectionSettings.STABLE_PERCONNECT_MESSAGES_THRESHOLD.getValue()) 
-                >= getPreferredConnectionCount() &&
-                getActiveConnectionMessages() >= 
-                    ConnectionSettings.STABLE_TOTAL_MESSAGES_THRESHOLD.getValue());
-    }
-    
     /**
      * Count up all the messages on active connections
      */
@@ -2362,25 +2349,4 @@ public class ConnectionManager {
         return count;
     }
     
-    /**
-     * Runnable to check the stability of our connection to the Gnutella network.
-     * Fires events only in case there is a stability change.
-     */
-    private class StabilityChecker implements Runnable {
-        
-        private boolean isStable = false;
-
-        public void run() {
-            boolean stable = isStable();
-            if(isStable && !stable) { 
-                isStable = false;
-                dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                        LifecycleEvent.UNSTABLE, null));
-            } else if(!isStable && stable) { 
-                isStable = true;
-                dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                        LifecycleEvent.STABLE, null));
-            }
-        }
-    }
 }

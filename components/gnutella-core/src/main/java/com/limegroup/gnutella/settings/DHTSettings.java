@@ -51,13 +51,6 @@ public class DHTSettings extends LimeProps{
     public static final FloatSetting DHT_TO_ULTRAPEER_PROBABILITY =
         FACTORY.createSettableFloatSetting("DHT_TO_ULTRAPEER_PROBABILITY", 0F, "DHTSettings.DHTToUltrapeerProbability",0F,1F);
     
-    /**
-     * Setting for wether or not the node needs a stable connection to the Gnutella network
-     * before beeing able to connect to the DHT
-     */
-    public static final BooleanSetting NEED_STABLE_GNUTELLA = 
-        FACTORY.createBooleanSetting("NEED_STABLE_GNUTELLA", true);
-    
     public static final BooleanSetting PERSIST_DHT = 
         FACTORY.createBooleanSetting("PERSIST_DHT", true);
 }
