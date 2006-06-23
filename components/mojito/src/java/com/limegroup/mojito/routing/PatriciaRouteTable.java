@@ -169,14 +169,11 @@ public class PatriciaRouteTable implements RouteTable {
         consecutiveFailures = 0;
         
         // Update an existing node
-        ContactNode existingNode = updateExistingNode(node, knowToBeAlive);
+        ContactNode existingNode = updateIfExistingNode(node, knowToBeAlive);
         
-        if (existingNode != null) {
-            System.out.println(existingNode);
-        }
-        
+        // IF null then it's a new ContactNode!
         if (existingNode == null) {
-            // get bucket closest to node
+            // Get the Bucket closest to node
             BucketNode bucket = bucketsTrie.select(node.getNodeID());
             
             // The Bucket is NOT full? Just add it!
@@ -196,6 +193,123 @@ public class PatriciaRouteTable implements RouteTable {
         }
 
         return false;
+    }
+    
+    /**
+     * Checks the local table and replacement nodes and updates timestamp.
+     * 
+     * @param nodeId The contact nodeId
+     * @param node The contact node 
+     * @param isAlive If the contact is alive
+     * 
+     * @return true if the contact exists and has been updated, false otherwise
+     */
+    private ContactNode updateIfExistingNode(ContactNode node, boolean isAlive) {
+        boolean fromReplacementCache = false;
+        BucketNode bucket = null;
+        
+        KUID nodeId = node.getNodeID();
+        
+        // Check the RouteTable for existence
+        ContactNode existingNode = nodesTrie.get(nodeId);
+        if (existingNode == null) {
+            // check replacement cache in closest bucket
+            bucket = bucketsTrie.select(nodeId);
+            existingNode = bucket.getReplacementNode(nodeId);
+            
+            // If it was neither in the RouteTable nor in the
+            // replacement cache then it's new and unknown! We 
+            // have to add it first!
+            if (existingNode == null) {
+                return null;
+            }
+            
+            // ContactNode is from replacement cache!
+            fromReplacementCache = true;
+        }
+
+        // if we are here -> the node is already in the routing table
+        if (isAlive) {
+            
+            // IF the existing node is marked as dead replace it!
+            if (existingNode.isDead()) {
+                return updateContactInfo(existingNode, node, true);
+            }
+            
+            // ELSE IF same Address? Update timestamp!
+            InetSocketAddress newAddress = (InetSocketAddress) node.getSocketAddress();
+            InetSocketAddress oldAddress = (InetSocketAddress) existingNode.getSocketAddress();
+            if (oldAddress.equals(newAddress)) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Updating timestamp for node: "+existingNode);
+                }
+                return updateContactInfo(existingNode, node, true);
+            }
+            
+            // ELSE IF we have heard of the existing node recently do nothing!
+            long now = System.currentTimeMillis();
+            long delay = now - existingNode.getTimeStamp();
+            if(delay < RouteTableSettings.MIN_RECONNECTION_TIME.getValue()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Not doing spoof check as contact alive recently for node: " + existingNode);
+                }
+                return existingNode;
+            }
+            
+            // ELSE 
+            try {
+                // Huh? The addresses are not equal but both belong
+                // obviously to this local machine!? There isn't much
+                // we can do. Set it to the new address and hope it 
+                // doesn't use a different NIF everytime...
+                if (NetworkUtils.isLocalHostAddress(newAddress)
+                        && NetworkUtils.isLocalHostAddress(oldAddress)
+                        && newAddress.getPort() == oldAddress.getPort()) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Local machine is using different NIFs" + existingNode);
+                    }
+                    return updateContactInfo(existingNode, node, true);
+                }
+            } catch (IOException ignore) {}
+            
+            // ELSE start spoof check!
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Spoof check for node: " + existingNode);
+            }
+    
+            // Kick off the spoof check. Ping the current contact and
+            // if it responds then interpret it as an attempt to spoof
+            // the node ID and if it doesn't then it is obviously dead.
+            try {
+                context.spoofCheckPing(existingNode, 
+                        new SpoofCheckerImpl(existingNode, node, fromReplacementCache, bucket));
+            } catch (IOException err) {
+                LOG.error("Could not start spoof check", err);
+            }
+        
+        // Replace the existing Node if it's dead!
+        } else if(existingNode.isDead()) { 
+            return updateContactInfo(existingNode, node, false);
+        }
+        
+        return existingNode;
+    }
+    
+    private ContactNode updateContactInfo(ContactNode existingNode, ContactNode newNode, boolean alive) {
+        if(alive) {
+            existingNode.setSocketAddress(newNode.getSocketAddress());
+            if(newNode.getRoundTripTime() > 0L) {
+                existingNode.setRoundTripTime(newNode.getRoundTripTime());
+            }
+            existingNode.setInstanceID(newNode.getInstanceID());
+            existingNode.alive();
+            touchBucket(existingNode.getNodeID());
+        } else {
+            existingNode.setSocketAddress(newNode.getSocketAddress());
+            existingNode.unknownState();
+        }
+        return existingNode;
     }
     
     /**
@@ -264,8 +378,8 @@ public class PatriciaRouteTable implements RouteTable {
             BucketNode rightSplitBucket = newBuckets.get(1);
             bucketsTrie.put(leftSplitBucket.getNodeID(), leftSplitBucket);
             bucketsTrie.put(rightSplitBucket.getNodeID(), rightSplitBucket);
-            int countLeft = updateBucketNodeCount(leftSplitBucket);
-            int countRight = updateBucketNodeCount(rightSplitBucket);
+            int countLeft = updateNodeCountOfBucket(leftSplitBucket);
+            int countRight = updateNodeCountOfBucket(rightSplitBucket);
             
             //this should never happen
             if(countLeft + countRight != bucket.getNodeCount()) {
@@ -297,6 +411,12 @@ public class PatriciaRouteTable implements RouteTable {
         }
         
         return false;
+    }
+    
+    private int updateNodeCountOfBucket(BucketNode bucket) {
+        int newCount = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1).size();
+        bucket.setNodeCount(newCount);
+        return newCount;
     }
     
     /**
@@ -332,8 +452,81 @@ public class PatriciaRouteTable implements RouteTable {
         }
         
         addReplacementNode(bucket, node);
-        replaceBucketStaleNodes(bucket);
+        replaceStaleNodesInBucket(bucket);
         return false;
+    }
+    
+    /**
+     * Adds a node to the replacement cache of the corresponding bucket
+     * and ping the last recently node
+     * 
+     * @param bucket
+     * @param node
+     */
+    private void addReplacementNode(BucketNode bucket, ContactNode node) {
+        boolean add = false;
+        
+        //first add to the replacement cache
+        if(bucket.getReplacementCacheSize() 
+                >= RouteTableSettings.MAX_CACHE_SIZE.getValue()) {
+            
+            //replace older cache entries with this one
+            Collection<ContactNode> nodes = bucket.getReplacementCache().values();
+            for (Iterator<ContactNode> iter = nodes.iterator(); iter.hasNext(); ) {
+                ContactNode oldNode = iter.next();
+                
+                if (oldNode.getTimeStamp() <= node.getTimeStamp()) {
+                    iter.remove();
+                    add = true;
+                    break;
+                }
+            }
+        } else {
+            add = true;
+        }
+        
+        //a good time to ping least recently seen node
+        if (add) {
+            bucket.addReplacementNode(node);
+            routingStats.REPLACEMENT_COUNT.incrementStat();
+            pingLeastRecentlySeenNodeInBucket(bucket);
+        } 
+    }
+    
+    private void pingLeastRecentlySeenNodeInBucket(BucketNode bucket) {
+        
+        List<ContactNode> bucketList = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
+        
+        ContactNode leastRecentlySeen = 
+            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
+        
+        //don't ping ourselves or an allready pinged node
+        if (leastRecentlySeen.equals(context.getLocalNode())) {
+            return;
+        }
+
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Pinging the least recently seen Node " 
+                    + leastRecentlySeen);
+        }
+        
+        try {
+            //will get handled by DefaultMessageHandler
+            context.ping(leastRecentlySeen);
+        } catch (IOException e) {
+            LOG.error("Pinging the least recently seen Node failed", e);
+        }
+    }
+
+    private void replaceStaleNodesInBucket(BucketNode bucket) {
+        int length = Math.max(0, bucket.getDepth()-1);
+        List<ContactNode> failingNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_FAILED_CONTACTS);
+        
+        for (ContactNode node : failingNodes) {
+            if (!removeNodeAndReplace(node.getNodeID(), bucket, false)) {
+                return;
+            }
+        }
     }
     
     /**
@@ -400,15 +593,17 @@ public class PatriciaRouteTable implements RouteTable {
         }
     }
     
-    private void replaceBucketStaleNodes(BucketNode bucket) {
-        int length = Math.max(0, bucket.getDepth()-1);
-        List<ContactNode> failingNodes = nodesTrie.range(bucket.getNodeID(), length, SELECT_FAILED_CONTACTS);
-        
-        for (ContactNode node : failingNodes) {
-            if (!removeNodeAndReplace(node.getNodeID(), bucket, false)) {
-                return;
-            }
+    /**
+     * Increments ContactNode's failure counter, marks it as stale
+     * if a certain error level is exceeded and returns 
+     * true if it's the case.
+     */
+    private boolean handleNodeFailure(ContactNode node) {
+        if (node != null && node.failure()) {
+            routingStats.DEAD_NODE_COUNT.incrementStat();
+            return true;
         }
+        return false;
     }
     
     /**
@@ -421,7 +616,7 @@ public class PatriciaRouteTable implements RouteTable {
      * @param force true to remove node in any case, false to remove only if a replacement is available
      * @return true if the node was removed, false otherwise
      */
-    private boolean removeNodeAndReplace(KUID nodeId, BucketNode bucket,boolean force) {
+    private boolean removeNodeAndReplace(KUID nodeId, BucketNode bucket, boolean force) {
         ContactNode replacement = bucket.getMostRecentlySeenCachedNode(true);
         if (replacement != null) {
             nodesTrie.remove(nodeId);
@@ -429,7 +624,8 @@ public class PatriciaRouteTable implements RouteTable {
             add(replacement, false);
             
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Replaced nodeId: "+nodeId+" with node "+ replacement +" from bucket: "+bucket);
+                LOG.trace("Replaced nodeId: " + nodeId + " with node " 
+                        + replacement + " from bucket: "+bucket);
             }
             touchBucket(bucket);
             return true;
@@ -437,7 +633,8 @@ public class PatriciaRouteTable implements RouteTable {
             nodesTrie.remove(nodeId);
             bucket.decrementNodeCount();
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Removed nodeId: "+nodeId+" from bucket: "+bucket);
+                LOG.trace("Removed nodeId: " + nodeId 
+                        + " from bucket: " + bucket);
             }
             
             return true;
@@ -460,196 +657,8 @@ public class PatriciaRouteTable implements RouteTable {
         return removeNodeAndReplace(nodeId, bucket, force);
     }
     
-    private int updateBucketNodeCount(BucketNode bucket) {
-        int newCount = nodesTrie.range(bucket.getNodeID(),bucket.getDepth()-1).size();
-        bucket.setNodeCount(newCount);
-        return newCount;
-    }
-    
-    /**
-     * Adds a node to the replacement cache of the corresponding bucket
-     * and ping the last recently node
-     * 
-     * @param bucket
-     * @param node
-     */
-    private void addReplacementNode(BucketNode bucket, ContactNode node) {
-        boolean add = false;
-        
-        //first add to the replacement cache
-        if(bucket.getReplacementCacheSize() 
-                >= RouteTableSettings.MAX_CACHE_SIZE.getValue()) {
-            
-            //replace older cache entries with this one
-            Collection<ContactNode> nodes = bucket.getReplacementCache().values();
-            for (Iterator<ContactNode> iter = nodes.iterator(); iter.hasNext(); ) {
-                ContactNode oldNode = iter.next();
-                
-                if (oldNode.getTimeStamp() <= node.getTimeStamp()) {
-                    iter.remove();
-                    add = true;
-                    break;
-                }
-            }
-        } else {
-            add = true;
-        }
-        
-        //a good time to ping least recently seen node
-        if (add) {
-            bucket.addReplacementNode(node);
-            routingStats.REPLACEMENT_COUNT.incrementStat();
-            pingBucketLastRecentlySeenNode(bucket);
-        } 
-    }
-    
-    private void pingBucketLastRecentlySeenNode(BucketNode bucket) {
-        
-        List<ContactNode> bucketList = nodesTrie.range(bucket.getNodeID(), bucket.getDepth()-1);
-        
-        ContactNode leastRecentlySeen = 
-            BucketUtils.getLeastRecentlySeen(BucketUtils.sort(bucketList));
-        
-        //don't ping ourselves or an allready pinged node
-        if(leastRecentlySeen.equals(context.getLocalNode())) {
-            return;
-        }
-
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Pinging the least recently seen Node " 
-                    + leastRecentlySeen);
-        }
-        
-        try {
-            //will get handled by DefaultMessageHandler
-            context.ping(leastRecentlySeen);
-        } catch (IOException e) {
-            LOG.error("Pinging the least recently seen Node failed", e);
-        }
-    }
-    
-    
-    /**
-     * Checks the local table and replacement nodes and updates timestamp.
-     * 
-     * 
-     * @param nodeId The contact nodeId
-     * @param node The contact node 
-     * @param alive If the contact is alive
-     * 
-     * @return true if the contact exists and has been updated, false otherwise
-     */
-    private ContactNode updateExistingNode(ContactNode node, boolean alive) {
-        boolean replacement = false;
-        BucketNode bucket = null;
-        
-        KUID nodeId = node.getNodeID();
-        
-        // Check the RouteTable for existence
-        ContactNode existingNode = nodesTrie.get(nodeId);
-        if (existingNode == null) {
-            // check replacement cache in closest bucket
-            bucket = bucketsTrie.select(nodeId);
-            existingNode = bucket.getReplacementNode(nodeId);
-            
-            // If it was neither in the RouteTable nor in the
-            // replacement cache then it's new and unknown! We 
-            // have to add it first!
-            if (existingNode == null) {
-                return null;
-            }
-            
-            // ContactNode is from replacement cache!
-            replacement = true;
-        }
-
-        // if we are here -> the node is already in the routing table
-        if (alive) {
-            //if the existing node is marked as dead, replace anyway
-            if (existingNode.isDead()) {
-                return updateContactInfo(existingNode, node, true);
-            }
-            
-            // Same Address? OK, update timestamp
-            InetSocketAddress newAddress = (InetSocketAddress) node.getSocketAddress();
-            InetSocketAddress oldAddress = (InetSocketAddress) existingNode.getSocketAddress();
-            if (oldAddress.equals(newAddress)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Updating timestamp for node: "+existingNode);
-                }
-                return updateContactInfo(existingNode, node, true);
-            }
-            
-            //check if we have heard of the existing node recently
-            long now = System.currentTimeMillis();
-            long delay = now - existingNode.getTimeStamp();
-            if(delay < RouteTableSettings.MIN_RECONNECTION_TIME.getValue()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Not doing spoof check as contact alive recently for node: "+existingNode);
-                }
-                return existingNode;
-            }
-            
-            //START: SPOOF CHECK
-            try {
-                // Huh? The addresses are not equal but both belong
-                // obviously to this local machine!? There isn't much
-                // we can do. Set it to the new address and hope it 
-                // doesn't use a different NIF everytime...
-                if (NetworkUtils.isLocalHostAddress(newAddress)
-                        && NetworkUtils.isLocalHostAddress(oldAddress)
-                        && newAddress.getPort() == oldAddress.getPort()) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Local maching loop detection for node: "+existingNode);
-                    }
-                    return updateContactInfo(existingNode, node, true);
-                }
-            } catch (IOException ignore) {}
-            
-            
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Spoof check for node: " + existingNode);
-            }
-    
-            // Kick off the spoof check. Ping the current contact and
-            // if it responds then interpret it as an attempt to spoof
-            // the node ID and if it doesn't then it is obviously dead.
-            try {
-                context.spoofCheckPing(existingNode, 
-                        new SpoofCheckerImpl(existingNode, node, replacement, bucket));
-            } catch (IOException err) {
-                LOG.error("Could not start spoof check", err);
-            }
-        
-        // Replace the existing Node if it's dead!
-        } else if(existingNode.isDead()) { 
-            return updateContactInfo(existingNode, node, false);
-        }
-        
-        return existingNode;
-    }
-    
-    private ContactNode updateContactInfo(ContactNode existingNode, ContactNode newNode, boolean alive) {
-        if(alive) {
-            existingNode.setSocketAddress(newNode.getSocketAddress());
-            if(newNode.getRoundTripTime() > 0L) {
-                existingNode.setRoundTripTime(newNode.getRoundTripTime());
-            }
-            existingNode.setInstanceID(newNode.getInstanceID());
-            existingNode.alive();
-            touchBucket(existingNode.getNodeID());
-        } else {
-            existingNode.setSocketAddress(newNode.getSocketAddress());
-            existingNode.unknownState();
-        }
-        return existingNode;
-    }
-        
-    public synchronized void refreshBuckets(boolean force) throws IOException{
-        refreshBuckets(force, null);
-    }
-    
     public synchronized void refreshBuckets(boolean force, BootstrapManager manager) throws IOException{
+        
         List<KUID> bucketsLookups = new ArrayList<KUID>();
         long now = System.currentTimeMillis();
         
@@ -692,17 +701,6 @@ public class PatriciaRouteTable implements RouteTable {
             routingStats.BUCKET_REFRESH_COUNT.incrementStat();
         }
     }
-    
-    public synchronized void clear() {
-        nodesTrie.clear();
-        bucketsTrie.clear();
-        
-        init(); // init the Bucket Trie!
-    }
-
-    public synchronized boolean containsNode(KUID nodeId) {
-        return nodesTrie.containsKey(nodeId);
-    }
 
     public synchronized ContactNode get(KUID nodeId, boolean checkAndUpdateCache) {
         ContactNode node = nodesTrie.get(nodeId);
@@ -734,23 +732,14 @@ public class PatriciaRouteTable implements RouteTable {
         return bucketsTrie.values();
     }
 
-    /**
-     * Increments ContactNode's failure counter, marks it as stale
-     * if a certain error level is exceeded and returns 
-     * true if it's the case.
-     */
-    private boolean handleNodeFailure(ContactNode node) {
-        if (node != null && node.failure()) {
-            routingStats.DEAD_NODE_COUNT.incrementStat();
-            return true;
-        }
-        return false;
+    public synchronized boolean containsNode(KUID nodeId) {
+        return nodesTrie.containsKey(nodeId);
     }
 
-    public synchronized boolean isEmpty() {
-        return nodesTrie.isEmpty();
+    public synchronized ContactNode select(KUID lookup) {
+        return nodesTrie.select(lookup);
     }
-
+    
     /** 
      * Returns a List of ContactNodes sorted by their 
      * closeness to the provided Key. Use BucketList's
@@ -771,16 +760,23 @@ public class PatriciaRouteTable implements RouteTable {
         }
     }
     
-    public synchronized ContactNode select(KUID lookup) {
-        return nodesTrie.select(lookup);
-    }
-    
     public synchronized int size() {
         return nodesTrie.size();
+    }
+    
+    public synchronized boolean isEmpty() {
+        return nodesTrie.isEmpty();
     }
 
     public synchronized int getBucketCount() {
         return bucketsTrie.size();
+    }
+    
+    public synchronized void clear() {
+        nodesTrie.clear();
+        bucketsTrie.clear();
+        
+        init(); // init the Bucket Trie!
     }
     
     private void touchBucket(KUID nodeId) {
@@ -873,10 +869,10 @@ public class PatriciaRouteTable implements RouteTable {
             
             updateContactInfo(currentContact, newContact, true);
             
-            if(replacementNode && replacementBucket != null) {
+            if (replacementNode && replacementBucket != null) {
                 // we have found a live contact in the bucket's replacement cache!
                 // It's a good time to replace this bucket's dead entry with this node
-                pingBucketLastRecentlySeenNode(replacementBucket);
+                pingLeastRecentlySeenNodeInBucket(replacementBucket);
             }
         }
         

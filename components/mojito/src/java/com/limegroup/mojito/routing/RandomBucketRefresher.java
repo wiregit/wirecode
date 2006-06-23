@@ -81,7 +81,7 @@ public class RandomBucketRefresher implements Runnable {
                     return;
                 }
                 
-                context.getRouteTable().refreshBuckets(false);
+                context.getRouteTable().refreshBuckets(false, null);
             }
         } catch (IOException ex) {
             LOG.error("IOException", ex);

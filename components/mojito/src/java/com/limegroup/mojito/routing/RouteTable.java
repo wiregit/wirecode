@@ -132,13 +132,6 @@ public interface RouteTable {
     public List<BucketNode> getAllBuckets();
     
     /**
-     * Kicks off a Bucket refresh.
-     * 
-     * @param force wheather or not to force are Bucket refresh
-     */
-    public void refreshBuckets(boolean force) throws IOException;
-    
-    /**
      * Refreshes the routing table's buckets
      * 
      * @param force true to refresh all buckets, false otherwise
