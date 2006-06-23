@@ -151,7 +151,7 @@ public class MessageFactory {
      * Reads a message using the specified buffer & network and the default soft
      * max.
      */
-    public static Message read(InputStream in, int network, byte[] buf)
+    public static Message read(InputStream in, byte[] buf, int network)
             throws BadPacketException, IOException {
         return MessageFactory.read(in, buf, network, SOFT_MAX);
     }

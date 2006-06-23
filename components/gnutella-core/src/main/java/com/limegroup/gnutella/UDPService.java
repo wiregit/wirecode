@@ -12,7 +12,6 @@ import java.net.NoRouteToHostException;
 import java.net.PortUnreachableException;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.LinkedList;
@@ -302,7 +301,7 @@ public class UDPService implements ReadWriteObserver {
             try {
                 // we do things the old way temporarily
                 InputStream in = new ByteArrayInputStream(data, 0, length);
-                Message message = MessageFactory.read(in, Message.N_UDP, IN_HEADER_BUF);
+                Message message = MessageFactory.read(in, IN_HEADER_BUF, Message.N_UDP);
                 if(message == null)
                     continue;
 
