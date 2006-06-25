@@ -42,11 +42,11 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     /**
      * Keeps track of what hosts have sent us PushRequests lately.
      */
-    private final Map /* String -> IntWrapper */ PUSH_REQUESTS = 
-        Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
+    private final Map<String, IntWrapper> PUSH_REQUESTS = 
+        Collections.synchronizedMap(new FixedsizeForgetfulHashMap<String, IntWrapper>(200));
 
-    private final Map /* GUID -> GUID */ GUID_REQUESTS = 
-        Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
+    private final Map<GUID, GUID> GUID_REQUESTS = 
+        Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, GUID>(200));
 
 	/**
 	 * Instance following singleton.
@@ -226,12 +226,12 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         String h = NetworkUtils.ip2string(ip);
 
         // check whether we serviced this push request already
-	GUID guid = new GUID(pushRequest.getGUID());
-	if (GUID_REQUESTS.put(guid,guid) != null)
-		return;
+    	GUID guid = new GUID(pushRequest.getGUID());
+    	if (GUID_REQUESTS.put(guid,guid) != null)
+    		return;
 
        // make sure the guy isn't hammering us
-        IntWrapper i = (IntWrapper)PUSH_REQUESTS.get(h);
+        IntWrapper i = PUSH_REQUESTS.get(h);
         if(i == null) {
             i = new IntWrapper(1);
             PUSH_REQUESTS.put(h, i);

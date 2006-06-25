@@ -29,7 +29,6 @@ public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.Base
     }    
     
     public void setUp() {
-        FixedsizePriorityQueue.DEBUG=true;
         q=new FixedsizePriorityQueue(Comparators.integerComparator(), 4);
         assertNull(q.insert(three));
         assertNull(q.insert(four));

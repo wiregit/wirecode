@@ -11,13 +11,13 @@ import java.util.NoSuchElementException;
  * a few additional methods not found in BinaryHeap.  <b>This class is not
  * synchronized.</b>
  */
-public class BucketQueue implements Cloneable {
+public class BucketQueue<E> implements Cloneable {
     /** 
      * Within each bucket, elements at the FRONT are newer then the back.  It is
      * assumed that buckets is very small; otherwise additional state could
      * speed up some of the operations.  
      */
-    private Buffer[] buckets;
+    private Buffer<E>[] buckets;
     /**
      * The size, stored for efficiency reasons.
      * INVARIANT: size=buckets[0].size()+...+buckets[buckets.length-1].size()
@@ -32,6 +32,7 @@ public class BucketQueue implements Cloneable {
      * @exception IllegalArgumentException priorities or capacityPerPriority
      *  is non-positive.
      */
+    @SuppressWarnings("unchecked")
     public BucketQueue(int priorities, int capacityPerPriority) 
             throws IllegalArgumentException {
         if (priorities<=0)
@@ -41,9 +42,9 @@ public class BucketQueue implements Cloneable {
             throw new IllegalArgumentException(
                 "Bad capacity: "+capacityPerPriority);
 
-        this.buckets=new Buffer[priorities];
+        this.buckets=(Buffer<E>[])new Buffer[priorities];
         for (int i=0; i<buckets.length; i++) {
-            buckets[i]=new Buffer(capacityPerPriority);
+            buckets[i] = new Buffer<E>(capacityPerPriority);
         }
     }
 
@@ -54,25 +55,27 @@ public class BucketQueue implements Cloneable {
      * @exception IllegalArgumentException capacities.length<=0 or 
      *  capacities[i]<=0 for any i
      */
+    @SuppressWarnings("unchecked")
     public BucketQueue(int[] capacities) throws IllegalArgumentException {
         if (capacities.length<=0)
             throw new IllegalArgumentException();
-        this.buckets=new Buffer[capacities.length];
+        this.buckets=(Buffer<E>[])new Buffer[capacities.length];
 
         for (int i=0; i<buckets.length; i++) {
             if (capacities[i]<=0)
                 throw new IllegalArgumentException(
                     "Non-positive capacity: "+capacities[i]);
-            buckets[i]=new Buffer(capacities[i]);
+            buckets[i]=new Buffer<E>(capacities[i]);
         }
     }
 
     /** "Copy constructor": constructs a a new shallow copy of other. */
-    public BucketQueue(BucketQueue other) {
+    @SuppressWarnings("unchecked")
+    public BucketQueue(BucketQueue<? extends E> other) {
         //Note that we can't just shallowly clone other.buckets
-        this.buckets=new Buffer[other.buckets.length];
+        this.buckets=(Buffer<E>[])new Buffer[other.buckets.length];
         for (int i=0; i<this.buckets.length; i++) {
-            this.buckets[i]=new Buffer(other.buckets[i]); //clone
+            this.buckets[i]=new Buffer<E>(other.buckets[i]); //clone
         }
         this.size=other.size;
     }
@@ -95,13 +98,13 @@ public class BucketQueue implements Cloneable {
      * @exception IllegalArgumentException priority is not a legal priority, 
      *  as determined by this' constructor
      */
-    public Object insert(Object o, int priority) {
+    public E insert(E o, int priority) {
         repOk();
         if(priority < 0 || priority >= buckets.length) {
             throw new IllegalArgumentException("Bad priority: "+priority);
         }
 
-        Object ret = buckets[priority].addFirst(o);
+        E ret = buckets[priority].addFirst(o);
         if (ret == null)
             size++;     //Maintain invariant
 
@@ -134,7 +137,7 @@ public class BucketQueue implements Cloneable {
         return ret;
     }
 
-    public Object extractMax() throws NoSuchElementException {
+    public E extractMax() throws NoSuchElementException {
         repOk();
         try {
             for (int i=buckets.length-1; i>=0 ;i--) {
@@ -149,7 +152,7 @@ public class BucketQueue implements Cloneable {
         }
     }
 
-    public Object getMax() throws NoSuchElementException {
+    public E getMax() throws NoSuchElementException {
         //TODO: we can optimize this by storing the position of the first
         //non-empty bucket.
         for (int i=buckets.length-1; i>=0 ;i--) {
@@ -187,7 +190,7 @@ public class BucketQueue implements Cloneable {
      *  to lowest priority.  Within each priority level, newer elements are
      *  yielded before older ones.  
      */
-    public Iterator iterator() {
+    public Iterator<E> iterator() {
         return new BucketQueueIterator(buckets.length-1, this.size());
     }
 
@@ -200,7 +203,7 @@ public class BucketQueue implements Cloneable {
      * @exception IllegalArgumentException startPriority is not a legal priority
      *  as determined by this' constructor
      */
-    public Iterator iterator(int startPriority, int n) 
+    public Iterator<E> iterator(int startPriority, int n) 
             throws IllegalArgumentException {
         if (startPriority<0 || startPriority>=buckets.length)
             throw new IllegalArgumentException("Bad priority: "+startPriority);
@@ -208,8 +211,8 @@ public class BucketQueue implements Cloneable {
         return new BucketQueueIterator(startPriority, n);
     }
 
-    private class BucketQueueIterator extends UnmodifiableIterator {
-        private Iterator currentIterator;
+    private class BucketQueueIterator extends UnmodifiableIterator<E> {
+        private Iterator<E> currentIterator;
         private int currentBucket;
         private int left;
 
@@ -242,7 +245,7 @@ public class BucketQueue implements Cloneable {
             return false;
         }
 
-        public synchronized Object next() {
+        public synchronized E next() {
             //This relies on the benevolent side effects of hasNext.
             if (! hasNext())
                 throw new NoSuchElementException();
@@ -253,8 +256,8 @@ public class BucketQueue implements Cloneable {
     }
 
     /** Returns a shallow copy of this, of type BucketQueue */
-    public Object clone() {
-        return new BucketQueue(this);        
+    public BucketQueue<E> clone() {
+        return new BucketQueue<E>(this);        
     }
 
     private void repOk() {

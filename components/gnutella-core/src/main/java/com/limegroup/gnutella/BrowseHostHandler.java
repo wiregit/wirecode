@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -54,7 +53,7 @@ public class BrowseHostHandler {
 
     /** Map from serventID to BrowseHostHandler instance.
      */
-    private static Map _pushedHosts = new HashMap();
+    private static Map<GUID, PushRequestDetails> _pushedHosts = new HashMap<GUID, PushRequestDetails>();
 
     /** The ActivityCallBack instance.  Used for talking to GUI.
      */
@@ -451,7 +450,7 @@ public class BrowseHostHandler {
 
         PushRequestDetails prd = null;
         synchronized (_pushedHosts) {
-            prd = (PushRequestDetails) _pushedHosts.remove(serventID);
+            prd = _pushedHosts.remove(serventID);
         }
         if (prd != null) {
             final PushRequestDetails finalPRD = prd;
@@ -479,24 +478,18 @@ public class BrowseHostHandler {
     private static class Expirer implements Runnable {
         public void run() {
             try {
-                Iterator keys = null;
-                Set toRemove = new HashSet();
+                Set<GUID> toRemove = new HashSet<GUID>();
                 synchronized (_pushedHosts) {
-                    keys = _pushedHosts.keySet().iterator();
-                    while (keys.hasNext()) {
-                        Object currKey = keys.next();
-                        PushRequestDetails currPRD = null;
-                        currPRD = (PushRequestDetails) _pushedHosts.get(currKey);
+                    for(GUID key : _pushedHosts.keySet()) {
+                        PushRequestDetails currPRD = _pushedHosts.get(key);
                         if ((currPRD != null) && (currPRD.isExpired())) {
                             LOG.debug("Expirer.run(): expiring a badboy.");
-                            toRemove.add(currKey);
+                            toRemove.add(key);
                             currPRD.bhh.failed();
                         }
                     }
-                    // done iterating through _pushedHosts, remove the keys now...
-                    keys = toRemove.iterator();
-                    while (keys.hasNext())
-                        _pushedHosts.remove(keys.next());
+                    for(GUID key : toRemove)
+                        _pushedHosts.remove(key);
                 }
             } catch(Throwable t) {
                 ErrorService.error(t);

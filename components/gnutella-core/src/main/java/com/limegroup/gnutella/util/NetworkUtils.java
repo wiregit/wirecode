@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -331,11 +330,10 @@ public final class NetworkUtils {
     /**
      * Packs a Collection of IpPorts into a byte array.
      */
-    public static byte[] packIpPorts(Collection ipPorts) {
+    public static byte[] packIpPorts(Collection<? extends IpPort> ipPorts) {
         byte[] data = new byte[ipPorts.size() * 6];
         int offset = 0;
-        for(Iterator i = ipPorts.iterator(); i.hasNext(); ) {
-            IpPort next = (IpPort)i.next();
+        for(IpPort next : ipPorts) {
             byte[] addr = next.getInetAddress().getAddress();
             int port = next.getPort();
             System.arraycopy(addr, 0, data, offset, 4);
@@ -353,12 +351,12 @@ public final class NetworkUtils {
      * @throws BadPacketException if an invalid Ip is found or the size 
      * is not divisble by six
      */
-    public static List unpackIps(byte [] data) throws BadPacketException {
+    public static List<IpPort> unpackIps(byte [] data) throws BadPacketException {
     	if (data.length % 6 != 0)
     		throw new BadPacketException("invalid size");
     	
     	int size = data.length/6;
-    	List ret = new ArrayList(size);
+    	List<IpPort> ret = new ArrayList<IpPort>(size);
     	byte [] current = new byte[6];
     	
     	
@@ -370,8 +368,8 @@ public final class NetworkUtils {
     	return Collections.unmodifiableList(ret);
     }
 
-    public static List unpackPushEPs(InputStream is) throws BadPacketException,IOException {
-        List ret = new LinkedList();
+    public static List<PushEndpoint> unpackPushEPs(InputStream is) throws BadPacketException,IOException {
+        List<PushEndpoint> ret = new LinkedList<PushEndpoint>();
         DataInputStream dais = new DataInputStream(is);
         while (dais.available() > 0) 
             ret.add(PushEndpoint.fromBytes(dais));

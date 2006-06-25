@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -39,6 +40,9 @@ import com.limegroup.gnutella.util.SystemUtils;
 public final class URN implements HTTPHeaderValue, Serializable {
 
 	private static final long serialVersionUID = -6053855548211564799L;
+    
+    /** An empty set casted to URNs. */
+    public static final Set<URN> NO_URN_SET = Collections.emptySet();
 	
 	/**
 	 * A constant invalid URN that classes can use to represent an invalid URN.

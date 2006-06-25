@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -177,7 +176,7 @@ public class MediaType implements Serializable {
     /**
      * The list of extensions within this MediaType.
      */
-    private final Set exts;
+    private final Set<String> exts;
     
     /**
      * Whether or not this is one of the default media types.
@@ -193,7 +192,7 @@ public class MediaType implements Serializable {
     	}
         this.schema = schema;
         this.descriptionKey = null;
-        this.exts = Collections.EMPTY_SET;
+        this.exts = Collections.emptySet();
         this.isDefault = false;
     }
     
@@ -215,10 +214,10 @@ public class MediaType implements Serializable {
         this.descriptionKey = descriptionKey;
         this.isDefault = true;
         if(extensions == null) {
-            this.exts = Collections.EMPTY_SET;
+            this.exts = Collections.emptySet();
         } else {
-            Set set =
-                new TreeSet(Comparators.caseInsensitiveStringComparator());
+            Set<String> set =
+                new TreeSet<String>(Comparators.caseInsensitiveStringComparator());
             set.addAll(Arrays.asList(extensions));
             this.exts = set;
         }
@@ -276,7 +275,7 @@ public class MediaType implements Serializable {
     /**
      * Returns the extensions for this media type.
      */
-    public Set getExtensions() {
+    public Set<String> getExtensions() {
         return exts;
     }
     
@@ -388,9 +387,8 @@ public class MediaType implements Serializable {
      *  where synchronization is necessary.  If that changes, add synch.
      */
     public static class Aggregator {
-        /** A list of MediaType objects.
-         */
-        private List _filters = new LinkedList();
+        /** A list of MediaType objects. */
+        private List<MediaType> _filters = new LinkedList<MediaType>();
 
         private Aggregator() {}
         /** I don't check for duplicates. */
@@ -402,10 +400,8 @@ public class MediaType implements Serializable {
          *  this aggregates.
          */
         public boolean allow(final String fName) {
-            Iterator iter = _filters.iterator();
-            while (iter.hasNext()) {
-                MediaType currType = (MediaType)iter.next();
-                if (currType.matches(fName))
+            for(MediaType mt : _filters) {
+                if(mt.matches(fName))
                     return true;
             }
             return false;
@@ -415,9 +411,9 @@ public class MediaType implements Serializable {
     /**
      * Utility that makes an array out of two sets.
      */
-    private static String[] makeArray(Set one, Set two) {
-        Set all = new HashSet(one);
+    private static String[] makeArray(Set<String> one, Set<String> two) {
+        Set<String> all = new HashSet<String>(one);
         all.addAll(two);
-        return (String[])all.toArray(new String[all.size()]);
+        return all.toArray(new String[all.size()]);
     }
 }

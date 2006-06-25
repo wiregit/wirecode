@@ -75,9 +75,9 @@ public class ExtendedEndpoint extends Endpoint {
      *  Bounded in size, so only the most recent HISTORY_SIZE times are
      *  recorded.  Also, only one entry is recorded for any two connection
      *  successes within a WINDOW_TIME millisecond window. */
-    private Buffer /* of Long */ connectSuccesses=new Buffer(HISTORY_SIZE);
+    private Buffer<Long> connectSuccesses=new Buffer<Long>(HISTORY_SIZE);
     /** Same as connectSuccesses, but for failed connections. */
-    private Buffer /* of Long */ connectFailures=new Buffer(HISTORY_SIZE);
+    private Buffer<Long> connectFailures=new Buffer<Long>(HISTORY_SIZE);
 
     /** the locale of the client that this endpoint represents */
     private String _clientLocale = 
@@ -190,14 +190,14 @@ public class ExtendedEndpoint extends Endpoint {
     /** Returns the last few times we successfully connected to this.
      *  @return an Iterator of system times in milliseconds, each as
      *   a Long, in descending order. */
-    public Iterator /* Long */ getConnectionSuccesses() {
+    public Iterator<Long> getConnectionSuccesses() {
         return connectSuccesses.iterator();
     }
 
     /** Returns the last few times we successfully connected to this.
      *  @return an Iterator of system times in milliseconds, each as
      *   a Long, in descending order. */
-    public Iterator /* Long */ getConnectionFailures() {
+    public Iterator<Long> getConnectionFailures() {
         return connectFailures.iterator();
     }
 
@@ -268,11 +268,11 @@ public class ExtendedEndpoint extends Endpoint {
         return this;
     }
 
-    private void recordConnectionAttempt(Buffer buf, long now) {
+    private void recordConnectionAttempt(Buffer<Long> buf, long now) {
         if (buf.isEmpty()) {
             //a) No attempts; just add it.
             buf.addFirst(new Long(now));
-        } else if (now - ((Long)buf.first()).longValue() >= WINDOW_TIME) {
+        } else if (now - buf.first().longValue() >= WINDOW_TIME) {
             //b) Attempt more than WINDOW_TIME milliseconds ago.  Add.
             buf.addFirst(new Long(now));
         } else {
@@ -467,20 +467,17 @@ public class ExtendedEndpoint extends Endpoint {
      * <li>Average daily uptime (higher is better)
      * </ul>
      */
-    public static Comparator priorityComparator() {
+    public static Comparator<ExtendedEndpoint> priorityComparator() {
         return PRIORITY_COMPARATOR;
     }
     
     /**
      * The sole priority comparator.
      */
-    private static final Comparator PRIORITY_COMPARATOR = new PriorityComparator();
+    private static final Comparator<ExtendedEndpoint> PRIORITY_COMPARATOR = new PriorityComparator();
 
-    static class PriorityComparator implements Comparator {
-        public int compare(Object extEndpoint1, Object extEndpoint2) {
-            ExtendedEndpoint a=(ExtendedEndpoint)extEndpoint1;
-            ExtendedEndpoint b=(ExtendedEndpoint)extEndpoint2;
-
+    static class PriorityComparator implements Comparator<ExtendedEndpoint> {
+        public int compare(ExtendedEndpoint a, ExtendedEndpoint b) {
             int ret=a.connectScore()-b.connectScore();
             if(ret != 0) 
                 return ret;
@@ -516,8 +513,8 @@ public class ExtendedEndpoint extends Endpoint {
         else if (connectFailures.isEmpty())
             return 1;   //only successes
         else {            
-            long success=((Long)connectSuccesses.last()).longValue();
-            long failure=((Long)connectFailures.last()).longValue();
+            long success = connectSuccesses.last().longValue();
+            long failure = connectFailures.last().longValue();
             //Can't use success-failure because of overflow/underflow.
             if (success>failure)
                 return 1;

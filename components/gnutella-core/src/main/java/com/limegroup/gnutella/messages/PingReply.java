@@ -38,12 +38,12 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * The list of extra ip/ports contained in this reply.
      */
-    private final List PACKED_IP_PORTS;
+    private final List<IpPort> PACKED_IP_PORTS;
     
     /**
      * The list of extra ip/ports contained in this reply.
      */
-    private final List PACKED_UDP_HOST_CACHES;
+    private final List<IpPort> PACKED_UDP_HOST_CACHES;
 
     /**
      * The IP address to connect to if this is a UDP host cache.
@@ -169,21 +169,21 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param ttl the time to live for this message
      */
     public static PingReply create(byte[] guid, byte ttl) {
-        return create(guid, ttl, Collections.EMPTY_LIST);
+        return create(guid, ttl, IpPort.EMPTY_LIST);
     }
     
     /**
      * Creates a new <tt>PingReply</tt> for this host with the specified
      * GUID, TTL & packed hosts.
      */
-    public static PingReply create(byte[] guid, byte ttl, Collection hosts) {
+    public static PingReply create(byte[] guid, byte ttl, Collection<? extends IpPort> hosts) {
         return create(
             guid,
             ttl,
             RouterService.getPort(),
             RouterService.getAddress(),
-            (long)RouterService.getNumSharedFiles(),
-            (long)RouterService.getSharedFileSize()/1024,
+            RouterService.getNumSharedFiles(),
+            RouterService.getSharedFileSize()/1024,
             RouterService.isSupernode(),
             Statistics.instance().calculateDailyUptime(),
             UDPService.instance().isGUESSCapable(),
@@ -200,7 +200,7 @@ public class PingReply extends Message implements Serializable, IpPort {
      * GUID, TTL & return address.
      */   
     public static PingReply create(byte[] guid, byte ttl, IpPort addr) {
-        return create(guid, ttl, addr, Collections.EMPTY_LIST);
+        return create(guid, ttl, addr, IpPort.EMPTY_LIST);
     }
     
     
@@ -209,7 +209,7 @@ public class PingReply extends Message implements Serializable, IpPort {
      * GUID, TTL, return address & packed hosts.
      */
     public static PingReply create(byte[] guid, byte ttl,
-                                   IpPort returnAddr, Collection hosts) {
+                                   IpPort returnAddr, Collection<? extends IpPort> hosts) {
         GGEP ggep = newGGEP(Statistics.instance().calculateDailyUptime(),
                             RouterService.isSupernode(),
                             UDPService.instance().isGUESSCapable());
@@ -226,8 +226,8 @@ public class PingReply extends Message implements Serializable, IpPort {
                       ttl,
                       RouterService.getPort(),
                       RouterService.getAddress(),
-                      (long)RouterService.getNumSharedFiles(),
-                      (long)RouterService.getSharedFileSize()/1024,
+                      RouterService.getNumSharedFiles(),
+                      RouterService.getSharedFileSize()/1024,
                       RouterService.isSupernode(),
                       ggep);
     }
@@ -426,7 +426,7 @@ public class PingReply extends Message implements Serializable, IpPort {
       boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
       String locale, int slots) {    
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-                      dailyUptime, isGuessCapable, locale, slots, Collections.EMPTY_LIST);
+                      dailyUptime, isGuessCapable, locale, slots, IpPort.EMPTY_LIST);
     }
     
     /**
@@ -456,7 +456,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         create(byte[] guid, byte ttl,
                int port, byte[] ip, long files, long kbytes,
                boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
-               String locale, int slots, Collection hosts) {
+               String locale, int slots, Collection<? extends IpPort> hosts) {
         GGEP ggep = newGGEP(dailyUptime, isUltrapeer, isGuessCapable);
         addLocale(ggep, locale, slots);
         addPackedHosts(ggep, hosts);
@@ -699,8 +699,8 @@ public class PingReply extends Message implements Serializable, IpPort {
         int slots = -1; //-1 didn't get it.
         InetAddress myIP=null;
         int myPort=0;
-        List packedIPs = Collections.EMPTY_LIST;
-        List packedCaches = Collections.EMPTY_LIST;
+        List<IpPort> packedIPs = Collections.emptyList();
+        List<IpPort> packedCaches = Collections.emptyList();
         String cacheAddress = null;
         
         // TODO: the exceptions thrown here are messy
@@ -906,7 +906,7 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Adds the packed hosts into this GGEP.
      */
-    private static GGEP addPackedHosts(GGEP ggep, Collection hosts) {
+    private static GGEP addPackedHosts(GGEP ggep, Collection<? extends IpPort> hosts) {
         if(hosts == null || hosts.isEmpty())
             return ggep;
             
@@ -1126,14 +1126,14 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Gets the list of packed IP/Ports.
      */
-    public List /* of IpPort */ getPackedIPPorts() {
+    public List<IpPort> getPackedIPPorts() {
         return PACKED_IP_PORTS;
     }
     
     /**
      * Gets a list of packed IP/Ports of UDP Host Caches.
      */
-    public List /* of IpPort */ getPackedUDPHostCaches() {
+    public List<IpPort> getPackedUDPHostCaches() {
         return PACKED_UDP_HOST_CACHES;
     }
 
@@ -1183,8 +1183,8 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Unzips data about UDP host caches & returns a list of'm.
      */
-    private List listCaches(String allCaches) {
-        List theCaches = new LinkedList();
+    private List<IpPort> listCaches(String allCaches) {
+        List<IpPort> theCaches = new LinkedList<IpPort>();
         StringTokenizer st = new StringTokenizer(allCaches, "\n");
         while(st.hasMoreTokens()) {
             String next = st.nextToken();

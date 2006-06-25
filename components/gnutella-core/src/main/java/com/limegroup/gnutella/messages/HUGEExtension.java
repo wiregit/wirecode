@@ -18,9 +18,9 @@ public class HUGEExtension {
     // (lazily constructed)
     // -----------------------------------------
     private GGEP _ggep = null;
-    private Set _urns = null;
-    private Set _urnTypes = null;
-    private Set _miscBlocks = null;
+    private Set<URN> _urns = null;
+    private Set<UrnType> _urnTypes = null;
+    private Set<String> _miscBlocks = null;
     // -----------------------------------------
 
     /** @return the set of GGEP Objects in this HUGE extension.
@@ -30,25 +30,25 @@ public class HUGEExtension {
     }
     /** @return the set of URN Objects in this HUGE extension.
      */
-    public Set getURNS() {
+    public Set<URN> getURNS() {
         if (_urns == null)
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         else
             return _urns;
     }
     /** @return the set of URN Type Objects in this HUGE extension.
      */
-    public Set getURNTypes() {
+    public Set<UrnType> getURNTypes() {
         if (_urnTypes == null)
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         else
             return _urnTypes;
     }
     /** @return the set of miscellaneous blocks (Strings) in this extension.
      */
-    public Set getMiscBlocks() {
+    public Set<String> getMiscBlocks() {
         if (_miscBlocks == null)
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         else 
             return _miscBlocks;
     }
@@ -86,20 +86,20 @@ public class HUGEExtension {
                             // it's an URN to match, of form "urn:namespace:etc"
                             URN urn = URN.createSHA1Urn(curExtStr);
                             if(_urns == null) 
-                                _urns = new HashSet(1);
+                                _urns = new HashSet<URN>(1);
                             _urns.add(urn);
                         } else if (UrnType.isSupportedUrnType(curExtStr)) {
                             // it's an URN type to return, of form "urn" or 
                             // "urn:namespace"
                             if(UrnType.isSupportedUrnType(curExtStr)) {
                                 if(_urnTypes == null) 
-                                    _urnTypes = new HashSet(1);
+                                    _urnTypes = new HashSet<UrnType>(1);
                                 _urnTypes.add(UrnType.createUrnType(curExtStr));
                             }
                         } else {
                             // miscellaneous, but in the case of queries, xml
                             if (_miscBlocks == null)
-                                _miscBlocks = new HashSet(1);
+                                _miscBlocks = new HashSet<String>(1);
                             _miscBlocks.add(curExtStr);
                         }
                     } catch (IOException bad) {}

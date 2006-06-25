@@ -21,29 +21,29 @@ public class LibraryData implements Settings {
     /**
 	 * The directories not to share.
 	 */
-    public final Set DIRECTORIES_NOT_TO_SHARE = DATA.getSet("DIRECTORIES_NOT_TO_SHARE");
+    public final Set<File> DIRECTORIES_NOT_TO_SHARE = DATA.getSet("DIRECTORIES_NOT_TO_SHARE");
     
     /**
      * Sensitive directories that are explicitly allowed to be shared.
      */
-    public final Set SENSITIVE_DIRECTORIES_VALIDATED = DATA.getSet("SENSITIVE_DIRECTORIES_VALIDATED");
+    public final Set<File> SENSITIVE_DIRECTORIES_VALIDATED = DATA.getSet("SENSITIVE_DIRECTORIES_VALIDATED");
     
     /**
      * Sensitive directories that are explicitly not allowed to be shared.
      */
-    public final Set SENSITIVE_DIRECTORIES_NOT_TO_SHARE = DATA.getSet("SENSITIVE_DIRECTORIES_NOT_TO_SHARE");
+    public final Set<File> SENSITIVE_DIRECTORIES_NOT_TO_SHARE = DATA.getSet("SENSITIVE_DIRECTORIES_NOT_TO_SHARE");
     
     /**
      * Individual files that should be shared despite being located outside
      * of any shared directory, and despite any extension limitations.
      */
-    public final Set SPECIAL_FILES_TO_SHARE = DATA.getSet("SPECIAL_FILES_TO_SHARE");
+    public final Set<File> SPECIAL_FILES_TO_SHARE = DATA.getSet("SPECIAL_FILES_TO_SHARE");
     
     /**
      * Files that should be not shared despite being located inside
      * a shared directory.
      */
-    public final Set FILES_NOT_TO_SHARE = DATA.getSet("FILES_NOT_TO_SHARE");    
+    public final Set<File> FILES_NOT_TO_SHARE = DATA.getSet("FILES_NOT_TO_SHARE");    
     
     /**
      * Whether or not a 'save' operation is actually going to save to disk.

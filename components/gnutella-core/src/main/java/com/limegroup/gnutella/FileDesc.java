@@ -9,14 +9,13 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.util.CoWList;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -58,7 +57,7 @@ public class FileDesc implements FileDetails {
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
 	 * is immutable.
 	 */
-    private final Set /* of URNS */ URNS; 
+    private final Set<URN> URNS; 
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -78,7 +77,7 @@ public class FileDesc implements FileDetails {
 	/**
 	 * The LimeXMLDocs associated with this FileDesc.
 	 */
-	private final List /* of LimeXMLDocument */ _limeXMLDocs = new CoWList(CoWList.ARRAY_LIST);
+	private final List<LimeXMLDocument> _limeXMLDocs = new CopyOnWriteArrayList<LimeXMLDocument>();
 
 	/**
 	 * The number of hits this file has recieved.
@@ -104,7 +103,7 @@ public class FileDesc implements FileDetails {
      * @param urns the URNs to associate with this FileDesc
      * @param index the index in the FileManager
      */
-    public FileDesc(File file, Set urns, int index) {	
+    public FileDesc(File file, Set<? extends URN> urns, int index) {	
 		if((file == null))
 			throw new NullPointerException("cannot create a FileDesc with a null File");
 		if(index < 0)
@@ -177,8 +176,7 @@ public class FileDesc implements FileDetails {
 	 * Extracts the SHA1 URN from the set of urns.
 	 */
 	private URN extractSHA1() {
-	    for(Iterator iter = URNS.iterator(); iter.hasNext(); ) {
-            URN urn = (URN)iter.next();
+        for(URN urn : URNS) {
             if(urn.isSHA1())
                 return urn;
         }
@@ -208,7 +206,7 @@ public class FileDesc implements FileDetails {
 	 * @return a new <tt>Set</tt> of <tt>URN</tt>s for this 
 	 *  <tt>FileDesc</tt>
 	 */
-	public Set getUrns() {
+	public Set<URN> getUrns() {
 		return URNS;
 	}   
 
@@ -272,7 +270,7 @@ public class FileDesc implements FileDetails {
     /**
      * Returns the LimeXMLDocuments for this FileDesc.
      */
-    public List getLimeXMLDocuments() {
+    public List<LimeXMLDocument> getLimeXMLDocuments() {
         return _limeXMLDocs;
     }
     
@@ -281,9 +279,8 @@ public class FileDesc implements FileDetails {
      * document List is empty.
      */
     public LimeXMLDocument getXMLDocument() {
-        List docs = getLimeXMLDocuments();
-                return docs.isEmpty() ? null 
-                        : (LimeXMLDocument)docs.get(0);
+        List<LimeXMLDocument> docs = getLimeXMLDocuments();
+        return docs.isEmpty() ? null : docs.get(0);
     }
     
     /**
@@ -292,11 +289,9 @@ public class FileDesc implements FileDetails {
      * exists.
      */
     public LimeXMLDocument getXMLDocument(String schemaURI) {
-        for(Iterator it = getLimeXMLDocuments().iterator(); it.hasNext(); ) {
-            LimeXMLDocument doc = (LimeXMLDocument)it.next();
-            if (doc.getSchemaURI().equalsIgnoreCase(schemaURI)) {
+        for(LimeXMLDocument doc : getLimeXMLDocuments()) {
+            if (doc.getSchemaURI().equalsIgnoreCase(schemaURI))
                 return doc;
-            }
         }
         return null;
     }

@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -98,9 +97,8 @@ public final class ConnectionWatchdog {
      */
     private void findDuds() {
         //Take a snapshot of all connections, including leaves.
-        Map /* ManagedConnection -> ConnectionState */ snapshot = new HashMap();
-        for (Iterator iter = allConnections(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        Map<ManagedConnection, ConnectionState> snapshot = new HashMap<ManagedConnection, ConnectionState>();
+        for(ManagedConnection c : allConnections()) {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
@@ -127,9 +125,8 @@ public final class ConnectionWatchdog {
         //The horizon statistics for the connection are temporarily disabled
         //during this process.  In the rare chance that legitimate pongs 
         //(other than in response to my ping), they will be ignored.
-        HashMap /* Connection -> ConnectionState */ snapshot = new HashMap();
-        for (Iterator iter = connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        Map<ManagedConnection, ConnectionState> snapshot = new HashMap<ManagedConnection, ConnectionState>();
+        for(ManagedConnection c : allConnections()) {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
@@ -139,16 +136,16 @@ public final class ConnectionWatchdog {
         RouterService.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, 0);
     }
 
-    /** Returns an iterator of all initialized connections in this, including
+    /** Returns an iterable of all initialized connections in this, including
      *  leaf connecions. */
-    private Iterator allConnections() {
-        List normal = RouterService.getConnectionManager().getInitializedConnections();
-        List leaves =  RouterService.getConnectionManager().getInitializedClientConnections();
+    private Iterable<ManagedConnection> allConnections() {
+        List<ManagedConnection> normal = RouterService.getConnectionManager().getInitializedConnections();
+        List<ManagedConnection> leaves =  RouterService.getConnectionManager().getInitializedClientConnections();
 
-        List buf = new ArrayList(normal.size() + leaves.size());
+        List<ManagedConnection> buf = new ArrayList<ManagedConnection>(normal.size() + leaves.size());
         buf.addAll(normal);
         buf.addAll(leaves);
-        return buf.iterator();
+        return buf;
     }
     
 
@@ -160,7 +157,7 @@ public final class ConnectionWatchdog {
      * If no duds exist (or they were killed), findDuds() is started again.
      */
     private class DudChecker implements Runnable {
-        private Map snapshots;
+        private Map<ManagedConnection, ConnectionState> snapshots;
         private boolean kill;
         
         /**
@@ -168,7 +165,7 @@ public final class ConnectionWatchdog {
          * The checker may be used to kill the connections (if they haven't progressed)
          * or to re-evaluate them later.
          */
-        DudChecker(Map snapshots, boolean kill) {
+        DudChecker(Map<ManagedConnection, ConnectionState> snapshots, boolean kill) {
             this.snapshots = snapshots;
             this.kill = kill;
         }
@@ -176,17 +173,19 @@ public final class ConnectionWatchdog {
         public void run() {
             //Loop through all connections, trying to find ones that
             //have not made sufficient progress. 
-            List potentials = kill ? Collections.EMPTY_LIST : new ArrayList();
-            for (Iterator iter=allConnections(); iter.hasNext(); ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
+            List<ManagedConnection> potentials;
+            if(kill)
+                potentials = Collections.emptyList();
+            else
+                potentials = new ArrayList<ManagedConnection>();
+            for(ManagedConnection c : allConnections()) {
                 if (!c.isKillable())
     				continue;
-                Object state = snapshots.get(c);
-                if (state == null)
+                ConnectionState oldState = snapshots.get(c);
+                if (oldState == null)
                     continue;  //this is a new connection
     
                 ConnectionState currentState=new ConnectionState(c);
-                ConnectionState oldState=(ConnectionState)state;
                 if (currentState.notProgressedSince(oldState)) {
                     if(kill) {
                         if(ConnectionSettings.WATCHDOG_ACTIVE.getValue()) {

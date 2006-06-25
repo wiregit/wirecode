@@ -5,7 +5,6 @@ import java.io.NotActiveException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Iterator;
 
 import com.limegroup.gnutella.util.Buffer;
 
@@ -22,7 +21,7 @@ public class BandwidthTrackerImpl implements Serializable {
     /** Keep 10 clicks worth of data, which we can then average to get a more
      *  accurate moving time average.
      *  INVARIANT: snapShots[0]==measuredBandwidth.floatValue() */
-    transient Buffer /* of Float */ snapShots = new Buffer(HISTORY_SIZE);
+    transient Buffer<Float> snapShots = new Buffer<Float>(HISTORY_SIZE);
     
     /**
      * Number of times we've been bandwidth measured.
@@ -86,11 +85,9 @@ public class BandwidthTrackerImpl implements Serializable {
         int size = snapShots.getSize();
         if (size  < 3 )
             throw new InsufficientDataException();
-        Iterator iter = snapShots.iterator();
         float total = 0;
-        while(iter.hasNext()) {
-            total+= ((Float)iter.next()).floatValue();
-        }
+        for(Float f : snapShots)
+            total += f.floatValue();
         cachedBandwidth = total/size;
         return cachedBandwidth;
     }
@@ -105,7 +102,7 @@ public class BandwidthTrackerImpl implements Serializable {
           
 
     private void readObject(ObjectInputStream in) throws IOException {
-        snapShots=new Buffer(HISTORY_SIZE);
+        snapShots=new Buffer<Float>(HISTORY_SIZE);
         numMeasures = 0;
         averageBandwidth = 0;
         try {

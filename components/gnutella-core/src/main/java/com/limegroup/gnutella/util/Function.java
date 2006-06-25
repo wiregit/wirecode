@@ -3,7 +3,7 @@ package com.limegroup.gnutella.util;
 /**
  * A one argument function. 
  */
-public interface Function {
+public interface Function<K, V> {
     /** 
      * Applies this function to argument, returning the result.
      *     @modifies argument (if there there is a side effect)
@@ -11,6 +11,6 @@ public interface Function {
      *     @exception IllegalArgumentException the argument is of right type
      *      but violates some other precondition.
      */
-    public Object apply(Object argument) 
+    public V apply(K argument) 
         throws ClassCastException, IllegalArgumentException;
 }

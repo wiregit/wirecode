@@ -178,7 +178,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 		int n=s.length();
 		if (n==0)
 			return new String[0];
-		Vector buf=new Vector();
+		Vector<String> buf=new Vector<String>();
 
 		//s[i] is the start of the word to add to buf
 		//s[j] is just past the end of the word
@@ -197,7 +197,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 		}
 		String[] ret=new String[buf.size()];
 		for (int i=0; i<ret.length; i++)
-			ret[i]=(String)buf.get(i);
+			ret[i]= buf.get(i);
 		return ret;
     }
 

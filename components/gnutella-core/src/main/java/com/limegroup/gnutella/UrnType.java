@@ -5,6 +5,7 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,12 +53,15 @@ public class UrnType implements Serializable {
 	/**
 	 * Constant for specifying SHA1 URNs in replies.
 	 */
-	public static transient final Set SHA1_SET = new HashSet();		
+	public static transient final Set<UrnType> SHA1_SET = new HashSet<UrnType>();		
 
 	/**
 	 * Constant for specifying any type of URN for replies.
 	 */
-	public static transient final Set ANY_TYPE_SET = new HashSet();	
+	public static transient final Set<UrnType> ANY_TYPE_SET = new HashSet<UrnType>();
+    
+    /** Set for no URN Types requested. */
+    public static transient final Set<UrnType> NO_TYPE_SET = Collections.emptySet();
 
 	/**
 	 * Statically add the SHA1 type to the set. 

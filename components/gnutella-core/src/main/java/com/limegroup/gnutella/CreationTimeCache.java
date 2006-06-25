@@ -25,6 +25,8 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.GenericsUtils;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * This class contains a systemwide File creation time cache that persists these
@@ -68,18 +70,18 @@ public final class CreationTimeCache {
      * CreationTimeCache container.  LOCKING: obtain this.
      * URN -> Creation Time (Long)
      */
-    private final Map URN_TO_TIME_MAP;
+    private final Map<URN, Long> URN_TO_TIME_MAP;
 
     /**
      * Alternate container.  LOCKING: obtain this.
      * Creation Time (Long) -> Set of URNs
      */
-    private final SortedMap TIME_TO_URNSET_MAP;
+    private final SortedMap<Long, Set<URN>> TIME_TO_URNSET_MAP;
     
     /**
      * Whether or not data is dirty since the last time we saved.
      */
-    private boolean dirty = false;
+    private boolean dirty;
 
     /**
 	 * Returns the <tt>CreationTimeCache</tt> instance.
@@ -94,9 +96,10 @@ public final class CreationTimeCache {
      * Create and initialize urn cache.
      */
     private CreationTimeCache() {
+        dirty = false;
         URN_TO_TIME_MAP = createMap();
         // use a custom comparator to sort the map in descending order....
-        TIME_TO_URNSET_MAP = new TreeMap(Comparators.inverseLongComparator());
+        TIME_TO_URNSET_MAP = new TreeMap<Long, Set<URN>>(Comparators.inverseLongComparator());
         constructURNMap();
 	}
     
@@ -112,7 +115,7 @@ public final class CreationTimeCache {
      * there is no association.
      */
     public synchronized Long getCreationTime(URN urn) {
-		return (Long) URN_TO_TIME_MAP.get(urn);
+		return URN_TO_TIME_MAP.get(urn);
     }
     
     /**
@@ -133,7 +136,7 @@ public final class CreationTimeCache {
      * Removes the CreationTime that is associated with the specified URN.
      */
     public synchronized void removeTime(URN urn) {
-        Long time = (Long) URN_TO_TIME_MAP.remove(urn);
+        Long time = URN_TO_TIME_MAP.remove(urn);
         removeURNFromURNSet(urn, time);
         if(time != null)
             dirty = true;
@@ -150,17 +153,11 @@ public final class CreationTimeCache {
         // about it though :)
         synchronized (RouterService.getFileManager()) {
             synchronized (this) {
-                Iterator iter = URN_TO_TIME_MAP.entrySet().iterator();
+                Iterator<Map.Entry<URN, Long>> iter = URN_TO_TIME_MAP.entrySet().iterator();
                 while (iter.hasNext()) {
-                    Map.Entry currEntry = (Map.Entry) iter.next();
-                    if(!(currEntry.getKey() instanceof URN) ||
-                       !(currEntry.getValue() instanceof Long)) {
-                        iter.remove();
-                        dirty = true;
-                        continue;
-                    }
-                    URN currURN = (URN) currEntry.getKey();
-                    Long cTime = (Long) currEntry.getValue();
+                    Map.Entry<URN, Long> currEntry = iter.next();
+                    URN currURN = currEntry.getKey();
+                    Long cTime = currEntry.getValue();
                     
                     // check to see if file still exists
                     // NOTE: technically a URN can map to multiple FDs, but I only want
@@ -204,7 +201,7 @@ public final class CreationTimeCache {
         Long cTime = new Long(time);
 
         // populate urn to time
-        Long existing = (Long)URN_TO_TIME_MAP.get(urn);
+        Long existing = URN_TO_TIME_MAP.get(urn);
         if(existing == null || !existing.equals(cTime)) {
             dirty = true;
             URN_TO_TIME_MAP.put(urn, cTime);
@@ -224,14 +221,14 @@ public final class CreationTimeCache {
     public synchronized void commitTime(URN urn) 
         throws IllegalArgumentException {
         if (urn == null) throw new IllegalArgumentException("Null URN.");
-        Long cTime = (Long) URN_TO_TIME_MAP.get(urn);
+        Long cTime = URN_TO_TIME_MAP.get(urn);
         if  (cTime == null) 
             throw new IllegalArgumentException("Never added URN via addTime()");
 
         // populate time to set of urns
-        Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
+        Set<URN> urnSet = TIME_TO_URNSET_MAP.get(cTime);
         if (urnSet == null) {
-            urnSet = new HashSet();
+            urnSet = new HashSet<URN>();
             TIME_TO_URNSET_MAP.put(cTime, urnSet);
         }
         urnSet.add(urn);
@@ -257,57 +254,56 @@ public final class CreationTimeCache {
      * me. null is fine though.
      * @return a List ordered by younger URNs.
      */
-    public List getFiles(final QueryRequest request, final int max)
+    public List<URN> getFiles(final QueryRequest request, final int max)
         throws IllegalArgumentException {
         // if i'm using FM, always grab that lock first and then me.  be quick
         // about it though :)
         synchronized (RouterService.getFileManager()) {
-        synchronized (this) {
-        if (max < 1) throw new IllegalArgumentException("bad max = " + max);
-        List urnList = new ArrayList();
-        Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
-        final MediaType.Aggregator filter = 
-            (request == null ? null : MediaType.getAggregator(request));
+            synchronized (this) {
+                if (max < 1)
+                    throw new IllegalArgumentException("bad max = " + max);
+                MediaType.Aggregator filter = request == null ?
+                                null : MediaType.getAggregator(request);
 
-        // may be non-null at loop end
-        List toRemove = null;
+                // may be non-null at loop end
+                List<URN> toRemove = null;
+                List<URN> urnList = new ArrayList<URN>();
+                
+                // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the
+                // entries in descending order....
+                for(Set<URN> urns : TIME_TO_URNSET_MAP.values()) {
+                    if(urnList.size() >= max)
+                        break;
+                    
+                    for(URN currURN : urns) {
+                        if(urnList.size() >= max)
+                            break;
+                        
+                        FileDesc fd = RouterService.getFileManager().getFileDescForUrn(currURN);
+                        // unfortunately fds can turn into ifds so ignore
+                        if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
+                            if (toRemove == null)
+                                toRemove = new ArrayList<URN>();
+                            toRemove.add(currURN);
+                            continue;
+                        }
 
-        // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the 
-        // entries in descending order....
-        while (iter.hasNext() && (urnList.size() < max)) {
-            Map.Entry currEntry = (Map.Entry) iter.next();
-            Set urns = (Set) currEntry.getValue();
-
-            // only put as many as desired, and possibly filter results based
-            // on what the query desires
-            Iterator innerIter = urns.iterator();
-            while ((urnList.size() < max) && innerIter.hasNext()) {
-                URN currURN = (URN) innerIter.next();
-                FileDesc fd =
-                    RouterService.getFileManager().getFileDescForUrn(currURN);
-                // unfortunately fds can turn into ifds so ignore
-                if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
-                    if (toRemove == null) toRemove = new ArrayList();
-                    toRemove.add(currURN);
-                    continue;
+                        if (filter == null)
+                            urnList.add(currURN);
+                        else if (filter.allow(fd.getFileName()))
+                            urnList.add(currURN);
+                    }
                 }
 
-                if (filter == null) urnList.add(currURN);
-                else if (filter.allow(fd.getFileName())) urnList.add(currURN);
-            }
-        }
+                // clear any ifd's or unshared files that may have snuck into structures
+                if (toRemove != null) {
+                    for (URN currURN : toRemove) {
+                        removeTime(currURN);
+                    }
+                }
 
-        // clear any ifd's or unshared files that may have snuck into structures
-        if (toRemove != null) {
-            Iterator removees = toRemove.iterator();
-            while (removees.hasNext()) {
-                URN currURN = (URN) removees.next();
-                removeTime(currURN);
+                return urnList;
             }
-        }
-
-        return urnList;
-        }
         }
     }
 
@@ -336,11 +332,7 @@ public final class CreationTimeCache {
         } catch (IOException e) {
             ErrorService.error(e);
         } finally {
-            try {
-                if (oos != null)
-                    oos.close();
-            }
-            catch (IOException ignored) {}
+            IOUtils.close(oos);
         }
         
         dirty = false;
@@ -352,21 +344,20 @@ public final class CreationTimeCache {
      */
     private synchronized void removeURNFromURNSet(URN urn, Long refTime) {
         if (refTime != null) {
-            Set urnSet = (Set) TIME_TO_URNSET_MAP.get(refTime);
-            if ((urnSet != null) && (urnSet.remove(urn)))
-                if (urnSet.size() < 1) TIME_TO_URNSET_MAP.remove(refTime);
-        }
-        else { // search everything
-            Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
+            Set<URN> urnSet = TIME_TO_URNSET_MAP.get(refTime);
+            if (urnSet != null && urnSet.remove(urn))
+                if (urnSet.size() < 1)
+                    TIME_TO_URNSET_MAP.remove(refTime);
+        } else { // search everything
             // find the urn in the map:
             // 1) get rid of it
             // 2) get rid of the empty set if it exists
-            while (iter.hasNext()) {
-                Map.Entry currEntry = (Map.Entry) iter.next();
-                Set urnSet = (Set) currEntry.getValue();
+            for(Iterator<Set<URN>> i = TIME_TO_URNSET_MAP.values().iterator(); i.hasNext(); ) {
+                Set<URN> urnSet = i.next();
                 if (urnSet.contains(urn)) {
                     urnSet.remove(urn); // 1)
-                    if (urnSet.size() < 1) iter.remove(); // 2)
+                    if (urnSet.size() < 1)
+                        i.remove(); // 2)
                     break;
                 }
             }
@@ -384,33 +375,24 @@ public final class CreationTimeCache {
      * synchronization may be needed.
      */
     private void constructURNMap() {
-        Set entries = URN_TO_TIME_MAP.entrySet();
-        Iterator iter = entries.iterator();
-        while (iter.hasNext()) {
+        for(Map.Entry<URN, Long> currEntry : URN_TO_TIME_MAP.entrySet()) {
             // for each entry, get the creation time and the urn....
-            // if the entry has invalid data then remove from map and 
-            // just continue iterating
-            try {
-                Map.Entry currEntry = (Map.Entry) iter.next();
-                Long cTime = (Long) currEntry.getValue();
-                URN urn = (URN) currEntry.getKey();    
-                
-                // don't ever add IFDs
-                if (RouterService.getFileManager().getFileDescForUrn(urn)
-                    instanceof IncompleteFileDesc) continue;
+            Long cTime = currEntry.getValue();
+            URN urn = currEntry.getKey();    
+            
+            // don't ever add IFDs
+            if (RouterService.getFileManager().getFileDescForUrn(urn)
+                instanceof IncompleteFileDesc) continue;
 
-                // put the urn in a set of urns that have that creation time....
-                Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
-                if (urnSet == null) {
-                    urnSet = new HashSet();
-                    // populate the reverse mapping
-                    TIME_TO_URNSET_MAP.put(cTime, urnSet);
-                }
-                urnSet.add(urn);
-            } catch(ClassCastException ignoredEx) {
-                iter.remove();
-                dirty = true;
+            // put the urn in a set of urns that have that creation time....
+            Set<URN> urnSet = TIME_TO_URNSET_MAP.get(cTime);
+            if (urnSet == null) {
+                urnSet = new HashSet<URN>();
+                // populate the reverse mapping
+                TIME_TO_URNSET_MAP.put(cTime, urnSet);
             }
+            
+            urnSet.add(urn);
         }
     }
 
@@ -418,23 +400,18 @@ public final class CreationTimeCache {
     /**
      * Loads values from cache file, if available
      */
-    private Map createMap() {
+    private Map<URN, Long> createMap() {
         ObjectInputStream ois = null;
 		try {
             ois = new ConverterObjectInputStream(new BufferedInputStream(
                             new FileInputStream(CTIME_CACHE_FILE)));
-			return (Map)ois.readObject();
+            return GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class, true);
 	    } catch(Throwable t) {
+            dirty = true;
 	        LOG.error("Unable to read creation time file", t);
-	        return new HashMap();
+	        return new HashMap<URN, Long>();
 	    } finally {
-            if(ois != null) {
-                try {
-                    ois.close();
-                } catch(IOException e) {
-                    // all we can do is try to close it
-                }
-            }
+            IOUtils.close(ois);
         }
 	}
 }

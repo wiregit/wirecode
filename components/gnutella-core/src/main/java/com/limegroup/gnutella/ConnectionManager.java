@@ -146,13 +146,13 @@ public class ConnectionManager {
 
     /** Threads trying to maintain the NUM_CONNECTIONS.
      *  LOCKING: obtain this. */
-    private final List /* of ConnectionFetcher */ _fetchers =
-        new ArrayList();
+    private final List<ConnectionFetcher> _fetchers =
+        new ArrayList<ConnectionFetcher>();
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
-    private final List /* of ManagedConnection */ _initializingFetchedConnections =
-        new ArrayList();
+    private final List<ManagedConnection> _initializingFetchedConnections =
+        new ArrayList<ManagedConnection>();
 
     /**
      * dedicated ConnectionFetcher used by leafs to fetch a
@@ -208,12 +208,12 @@ public class ConnectionManager {
      *   much slower.
      */
     //TODO:: why not use sets here??
-    private volatile List /* of ManagedConnection */
-        _connections = Collections.EMPTY_LIST;
-    private volatile List /* of ManagedConnection */
-        _initializedConnections = Collections.EMPTY_LIST;
-    private volatile List /* of ManagedConnection */
-        _initializedClientConnections = Collections.EMPTY_LIST;
+    private volatile List<ManagedConnection>
+        _connections = Collections.emptyList();
+    private volatile List<ManagedConnection>
+        _initializedConnections = Collections.emptyList();
+    private volatile List<ManagedConnection>
+        _initializedClientConnections = Collections.emptyList();
 
     private volatile int _shieldedConnections = 0;
     private volatile int _nonLimeWireLeaves = 0;
@@ -467,10 +467,7 @@ public class ConnectionManager {
     boolean isConnectedTo(String hostName) {
         //A list of all connections, both initialized and
         //uninitialized, leaves and unrouted. 
-        List connections=getConnections();
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
-
+        for(ManagedConnection mc : getConnections()) {
             if (mc.getAddress().equals(hostName))
                 return true;
         }
@@ -483,14 +480,12 @@ public class ConnectionManager {
      */
     boolean isConnectingTo(IpPort host) {
         synchronized(this) {
-            for(int i = 0; i < _fetchers.size(); i++) {
-                ConnectionFetcher next = (ConnectionFetcher)_fetchers.get(i);
+            for(ConnectionFetcher next : _fetchers) {
                 IpPort them = next.getIpPort();
                 if(them != null && host.getAddress().equals(them.getAddress()) && host.getPort() == them.getPort())
                     return true;
             }
-            for(int i = 0; i < _initializingFetchedConnections.size(); i++) {
-                ManagedConnection next = (ManagedConnection)_initializingFetchedConnections.get(i);
+            for(ManagedConnection next : _initializingFetchedConnections) {
                 if(host.getAddress().equals(next.getAddress()) && host.getPort() == next.getPort())
                     return true;
             }
@@ -648,9 +643,7 @@ public class ConnectionManager {
     public void measureBandwidth() {
         float upstream=0.f;
         float downstream=0.f;
-        List connections = getInitializedConnections();
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
+        for(ManagedConnection mc : getInitializedConnections()) {
             mc.measureBandwidth();
             upstream+=mc.getMeasuredUpstreamBandwidth();
             downstream+=mc.getMeasuredDownstreamBandwidth();
@@ -1002,8 +995,7 @@ public class ConnectionManager {
     private int ultrapeerToUltrapeerConnections() {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
+        for(ManagedConnection mc : _initializedConnections) {
             if (mc.isSupernodeSupernodeConnection())
                 ret++;
         }
@@ -1015,8 +1007,7 @@ public class ConnectionManager {
     private int oldConnections() {
 		// technically, we can allow old connections.
 		int ret = 0;
-        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            ManagedConnection mc=(ManagedConnection)iter.next();
+        for(ManagedConnection mc : _initializedConnections) {
             if (!mc.isSupernodeConnection())
                 ret++;
         }
@@ -1048,7 +1039,7 @@ public class ConnectionManager {
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    public List getInitializedConnections() {
+    public List<ManagedConnection> getInitializedConnections() {
         return _initializedConnections;
     }
 
@@ -1057,11 +1048,9 @@ public class ConnectionManager {
      * String loc.
      * create a new linkedlist to return.
      */
-    public List getInitializedConnectionsMatchLocale(String loc) {
-        List matches = new LinkedList();
-        for(Iterator itr= _initializedConnections.iterator();
-            itr.hasNext();) {
-            Connection conn = (Connection)itr.next();
+    public List<Connection> getInitializedConnectionsMatchLocale(String loc) {
+        List<Connection> matches = new LinkedList<Connection>();
+        for(Connection conn : _initializedConnections) {
             if(loc.equals(conn.getLocalePref()))
                 matches.add(conn);
         }
@@ -1075,7 +1064,7 @@ public class ConnectionManager {
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    public List getInitializedClientConnections() {
+    public List<ManagedConnection> getInitializedClientConnections() {
         return _initializedClientConnections;
     }
 
@@ -1084,11 +1073,9 @@ public class ConnectionManager {
      * String loc.
      * create a new linkedlist to return.
      */
-    public List getInitializedClientConnectionsMatchLocale(String loc) {
-    	List matches = new LinkedList();
-        for(Iterator itr= _initializedClientConnections.iterator();
-            itr.hasNext();) {
-            Connection conn = (Connection)itr.next();
+    public List<Connection> getInitializedClientConnectionsMatchLocale(String loc) {
+    	List<Connection>  matches = new LinkedList<Connection>();
+        for(Connection conn : _initializedClientConnections) {
             if(loc.equals(conn.getLocalePref()))
                 matches.add(conn);
         }
@@ -1098,7 +1085,7 @@ public class ConnectionManager {
     /**
      * @return all of this' connections.
      */
-    public List getConnections() {
+    public List<ManagedConnection> getConnections() {
         return _connections;
     }
 
@@ -1112,22 +1099,22 @@ public class ConnectionManager {
      *  TODO: should the set of pushproxy UPs be cached and updated as
      *  connections are killed and created?
      */
-    public Set getPushProxies() {
+    public Set<IpPort> getPushProxies() {
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean
             // value
-            Iterator ultrapeers = getInitializedConnections().iterator();
-            Set proxies = new IpPortSet();
-            while (ultrapeers.hasNext() && (proxies.size() < 4)) {
-                ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
+            Set<IpPort> proxies = new IpPortSet();
+            for(ManagedConnection currMC : getInitializedConnections()) {
+                if(proxies.size() >= 4)
+                    break;
                 if (currMC.isPushProxy())
                     proxies.add(currMC);
             }
             return proxies;
         }
 
-        return Collections.EMPTY_SET;
+        return Collections.emptySet();
     }
 
     /**
@@ -1137,25 +1124,27 @@ public class ConnectionManager {
     public boolean sendTCPConnectBackRequests() {
         int sent = 0;
         
-        List peers = new ArrayList(getInitializedConnections());
+        List<ManagedConnection> peers = new ArrayList<ManagedConnection>(getInitializedConnections());
         Collections.shuffle(peers);
-        for (Iterator iter = peers.iterator(); iter.hasNext();) {
-            ManagedConnection currMC = (ManagedConnection) iter.next();
+        for (Iterator<ManagedConnection> iter = peers.iterator(); iter.hasNext();) {
+            ManagedConnection currMC = iter.next();
             if (currMC.remoteHostSupportsTCPRedirect() < 0)
                 iter.remove();
         }
         
         if (peers.size() == 1) {
-            ManagedConnection myConn = (ManagedConnection) peers.get(0);
+            ManagedConnection myConn = peers.get(0);
             for (int i = 0; i < CONNECT_BACK_REDUNDANT_REQUESTS; i++) {
+                // This is inside to generate a different GUID for each request.
                 Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
                 myConn.send(cb);
                 sent++;
             }
         } else {
             final Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
-            for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
-                ManagedConnection currMC = (ManagedConnection)i.next();
+            for(ManagedConnection currMC : peers) {
+                if(sent >= 5)
+                    break;
                 currMC.send(cb);
                 sent++;
             }
@@ -1170,12 +1159,12 @@ public class ConnectionManager {
      */
     public boolean sendUDPConnectBackRequests(GUID cbGuid) {
         int sent =  0;
-        final Message cb =
-            new UDPConnectBackVendorMessage(RouterService.getPort(), cbGuid);
-        List peers = new ArrayList(getInitializedConnections());
+        final Message cb = new UDPConnectBackVendorMessage(RouterService.getPort(), cbGuid);
+        List<ManagedConnection> peers = new ArrayList<ManagedConnection>(getInitializedConnections());
         Collections.shuffle(peers);
-        for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
-            ManagedConnection currMC = (ManagedConnection)i.next();
+        for(ManagedConnection currMC : peers) {
+            if(sent >= 5)
+                break;
             if (currMC.remoteHostSupportsUDPConnectBack() >= 0) {
                 currMC.send(cb);
                 sent++;
@@ -1194,9 +1183,7 @@ public class ConnectionManager {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for query status response is a cached
             // value
-            Iterator ultrapeers = getInitializedConnections().iterator();
-            while (ultrapeers.hasNext()) {
-                ManagedConnection currMC = (ManagedConnection)ultrapeers.next();
+            for(ManagedConnection currMC : getInitializedConnections()) {
                 if (currMC.remoteHostSupportsLeafGuidance() >= 0)
                     currMC.send(stat);
             }
@@ -1211,8 +1198,7 @@ public class ConnectionManager {
 	 *  there is one, otherwise returns <tt>null</tt>
 	 */
 	public Endpoint getConnectedGUESSUltrapeer() {
-		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
-			ManagedConnection connection = (ManagedConnection)iter.next();
+        for(ManagedConnection connection : _initializedConnections) {
 			if(connection.isSupernodeConnection() &&
 			   connection.isGUESSUltrapeer()) {
 				return new Endpoint(connection.getInetAddress().getAddress(),
@@ -1229,10 +1215,9 @@ public class ConnectionManager {
      * @return A non-null List of GUESS enabled, TCP connected Ultrapeers.  The
      * are represented as ManagedConnections.
      */
-	public List getConnectedGUESSUltrapeers() {
-        List retList = new ArrayList();
-		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
-			ManagedConnection connection = (ManagedConnection)iter.next();
+	public List<ManagedConnection> getConnectedGUESSUltrapeers() {
+        List<ManagedConnection> retList = new ArrayList<ManagedConnection>();
+        for(ManagedConnection connection : _initializedConnections) {
 			if(connection.isSupernodeConnection() &&
                connection.isGUESSUltrapeer())
 				retList.add(connection);
@@ -1248,9 +1233,9 @@ public class ConnectionManager {
      * and initializeFetchedConnection, both times from within a
      * synchronized(this) block.
      */
-    private void connectionInitializing(Connection c) {
+    private void connectionInitializing(ManagedConnection c) {
         //REPLACE _connections with the list _connections+[c]
-        List newConnections=new ArrayList(_connections);
+        List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_connections);
         newConnections.add(c);
         _connections = Collections.unmodifiableList(newConnections);
     }
@@ -1288,7 +1273,7 @@ public class ConnectionManager {
             if(!c.isSupernodeClientConnection()){
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections+[c]
-                List newConnections=new ArrayList(_initializedConnections);
+                List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_initializedConnections);
                 newConnections.add(c);
                 _initializedConnections =
                     Collections.unmodifiableList(newConnections);
@@ -1304,8 +1289,8 @@ public class ConnectionManager {
             } else {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
-                List newConnections
-                    =new ArrayList(_initializedClientConnections);
+                List<ManagedConnection> newConnections
+                    =new ArrayList<ManagedConnection>(_initializedClientConnections);
                 newConnections.add(c);
                 _initializedClientConnections =
                     Collections.unmodifiableList(newConnections);
@@ -1336,12 +1321,12 @@ public class ConnectionManager {
     	if ((isShieldedLeaf() || !isSupernode()) && !c.isClientSupernodeConnection())
     		return false;
         
-        List connections = getConnections();
+        List<ManagedConnection> connections = getConnections();
         int listenPort = c.getListeningPort();
         String addr = c.getAddress();
         
         for(int i = 0; i < connections.size(); i++ ) {
-            ManagedConnection mc = (ManagedConnection)connections.get(i);
+            ManagedConnection mc = connections.get(i);
             if(mc == c)
                 continue;
             if(!ConnectionSettings.ALLOW_DUPLICATE.getValue() &&
@@ -1364,9 +1349,8 @@ public class ConnectionManager {
      * removes any supernode->supernode connections
      */
     private void killPeerConnections() {
-    	List conns = _initializedConnections;
-    	for (Iterator iter = conns.iterator(); iter.hasNext();) {
-			ManagedConnection con = (ManagedConnection) iter.next();
+    	List<ManagedConnection> conns = _initializedConnections;
+        for(ManagedConnection con : conns) {
 			if (con.isSupernodeSupernodeConnection()) 
 				removeInternal(con);
 		}
@@ -1377,14 +1361,10 @@ public class ConnectionManager {
      * down every one of them.
      */
     public void sendUpdatedCapabilities() {        
-        for(Iterator iter = getInitializedConnections().iterator(); iter.hasNext(); ) {
-            Connection c = (Connection)iter.next();
+        for(Connection c : getInitializedConnections())
             c.sendUpdatedCapabilities();
-        }
-        for(Iterator iter = getInitializedClientConnections().iterator(); iter.hasNext(); ) {
-            Connection c = (Connection)iter.next();
+        for(Connection c : getInitializedClientConnections())
             c.sendUpdatedCapabilities();
-        }        
     }
 
     /**
@@ -1407,8 +1387,7 @@ public class ConnectionManager {
         adjustConnectionFetchers(); // kill them all
         
         //2. Remove all connections.
-        for (Iterator iter = getConnections().iterator(); iter.hasNext(); ) {
-            ManagedConnection c = (ManagedConnection)iter.next();
+        for(ManagedConnection c : getConnections()) {
             remove(c);
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
@@ -1514,7 +1493,7 @@ public class ConnectionManager {
             if (i != -1) {
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections-[c]
-                List newConnections=new ArrayList();
+                List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>();
                 newConnections.addAll(_initializedConnections);
                 newConnections.remove(c);
                 _initializedConnections =
@@ -1533,7 +1512,7 @@ public class ConnectionManager {
             if (i != -1) {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections-[c]
-                List newConnections=new ArrayList();
+                List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>();
                 newConnections.addAll(_initializedClientConnections);
                 newConnections.remove(c);
                 _initializedClientConnections =
@@ -1548,7 +1527,7 @@ public class ConnectionManager {
         int i=_connections.indexOf(c);
         if (i != -1) {
             //REPLACE _connections with the list _connections-[c]
-            List newConnections=new ArrayList(_connections);
+            List<ManagedConnection> newConnections=new ArrayList<ManagedConnection>(_connections);
             newConnections.remove(c);
             _connections = Collections.unmodifiableList(newConnections);
         }
@@ -1577,9 +1556,7 @@ public class ConnectionManager {
     private synchronized void stabilizeConnections() {
         while(getNumInitializedConnections() > _preferredConnections) {
             ManagedConnection newest = null;
-            for(Iterator i = _initializedConnections.iterator(); i.hasNext();){
-                ManagedConnection c = (ManagedConnection)i.next();
-                
+            for(ManagedConnection c : _initializedConnections) {
                 // first see if this is a non-limewire connection and cut it off
                 // unless it is our only connection left
                 
@@ -1682,9 +1659,9 @@ public class ConnectionManager {
         // Build up lists of what we need to connect to & remove from connecting.
         
         // Start connection fetchers as necessary
-        List fetchers = Collections.EMPTY_LIST;
+        List<ConnectionFetcher> fetchers = Collections.emptyList();
         if (need > 0) {
-            fetchers = new ArrayList(need);
+            fetchers = new ArrayList<ConnectionFetcher>(need);
             while (need > 0) {
                 // This kicks off the thread for the fetcher
                 ConnectionFetcher fetcher = new ConnectionFetcher();
@@ -1698,23 +1675,23 @@ public class ConnectionManager {
         // aren't enough fetchers to stop.  In this case, close some of the
         // connections started by ConnectionFetchers.
         int lastFetcherIndex = _fetchers.size();
-        List extras = new ArrayList();
+        List<Object> extras = new ArrayList<Object>();
         while((need < 0) && (lastFetcherIndex > 0)) {
-            ConnectionFetcher fetcher = (ConnectionFetcher)_fetchers.remove(--lastFetcherIndex);
+            ConnectionFetcher fetcher = _fetchers.remove(--lastFetcherIndex);
             need++;
             extras.add(fetcher);
         }
         int lastInitializingConnectionIndex = _initializingFetchedConnections.size();
         while((need < 0) && (lastInitializingConnectionIndex > 0)) {
             ManagedConnection connection = 
-                (ManagedConnection)_initializingFetchedConnections.remove(--lastInitializingConnectionIndex);
+                _initializingFetchedConnections.remove(--lastInitializingConnectionIndex);
             need++;
             extras.add(connection);
         }
         
         // Now connect'm.
         for(int i = fetchers.size() - 1; i >= 0; i--) {
-            ConnectionFetcher fetcher = (ConnectionFetcher)fetchers.remove(i);
+            ConnectionFetcher fetcher = fetchers.remove(i);
             fetcher.connect();
         }
         
@@ -1914,12 +1891,11 @@ public class ConnectionManager {
         StringTokenizer st = new StringTokenizer(hostAddresses,
             Constants.ENTRY_SEPARATOR);
 
-        List hosts = new ArrayList(st.countTokens());
+        List<Endpoint> hosts = new ArrayList<Endpoint>(st.countTokens());
         while(st.hasMoreTokens()){
             String address = st.nextToken().trim();
             try {
-                Endpoint e = new Endpoint(address);
-                hosts.add(e);
+                hosts.add(new Endpoint(address));
             } catch(IllegalArgumentException iae){
                 continue;
             }

@@ -43,7 +43,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     /**
      * Constructor for the IncompleteFileDesc object.
      */
-    public IncompleteFileDesc(File file, Set urns, int index, 
+    public IncompleteFileDesc(File file, Set<? extends URN> urns, int index, 
                               String completedName, int completedSize,
                               VerifyingFile vf) {
         super(file, urns, index);

@@ -207,7 +207,7 @@ public class PingRankerTest extends BaseTestCase {
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3","2.2.2.3:5"));
         assertEquals(1,pinger.hosts.size());
-        assertIpPortEquals(new IpPortImpl("1.2.2.2",3),pinger.hosts.get(0));
+        assertIpPortEquals(new IpPortImpl("1.2.2.2",3),(IpPort)pinger.hosts.get(0));
         HeadPing ping = (HeadPing)pinger.messages.get(0);
         assertEquals(g,ping.getClientGuid());
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
@@ -624,7 +624,7 @@ public class PingRankerTest extends BaseTestCase {
         
     }
 
-    private static void assertIpPortEquals(IpPort a, Object b) {
+    private static void assertIpPortEquals(IpPort a, IpPort b) {
         assertTrue(IpPort.COMPARATOR.compare(a,b) == 0);
     }
     

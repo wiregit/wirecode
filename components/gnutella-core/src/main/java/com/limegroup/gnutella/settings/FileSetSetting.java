@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
  
 public class FileSetSetting extends Setting {
     
-    private Set value;
+    private Set<File> value;
 
 	/**
 	 * Creates a new <tt>FileSetSetting</tt> instance with the specified
@@ -29,7 +29,7 @@ public class FileSetSetting extends Setting {
         
 	FileSetSetting(Properties defaultProps, Properties props, String key, 
                      File[] defaultValue, String simppKey) {
-		super(defaultProps, props, key, decode(new HashSet(Arrays.asList(defaultValue))), simppKey);
+		super(defaultProps, props, key, decode(new HashSet<File>(Arrays.asList(defaultValue))), simppKey);
 		setPrivate(true);
     }
 
@@ -39,7 +39,7 @@ public class FileSetSetting extends Setting {
 	 * 
 	 * @return the value of this setting
 	 */
-	public Set getValue() {
+	public Set<File> getValue() {
         return value;
 	}
 	
@@ -47,7 +47,7 @@ public class FileSetSetting extends Setting {
 	 * Gets the value as an array.
 	 */
 	public synchronized File[] getValueAsArray() {
-	    return (File[])value.toArray(new File[value.size()]);
+	    return value.toArray(new File[value.size()]);
     }
 
 	/**
@@ -55,7 +55,7 @@ public class FileSetSetting extends Setting {
 	 *
 	 * @param value the value to store
 	 */
-	public void setValue(Set value) {
+	public void setValue(Set<? extends File> value) {
 		super.setValue(decode(value));
 	}
 
@@ -110,13 +110,13 @@ public class FileSetSetting extends Setting {
     /**
      * Splits the string into a Set
      */
-    private static final Set encode(String src) {
+    private static final Set<File> encode(String src) {
         if (src == null || src.length()==0)
-            return new HashSet();
+            return new HashSet<File>();
         
         StringTokenizer tokenizer = new StringTokenizer(src, ";");
         int size = tokenizer.countTokens();
-        Set set = new HashSet();
+        Set<File> set = new HashSet<File>();
         for(int i = 0; i < size; i++)
             set.add(new File(tokenizer.nextToken()));
         return set;

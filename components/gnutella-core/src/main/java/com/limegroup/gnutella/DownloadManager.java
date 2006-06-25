@@ -131,8 +131,8 @@ public class DownloadManager implements BandwidthTracker {
      * number of files that we have sent a udp push for and are waiting a connection.
      * LOCKING: obtain UDP_FAILOVER if manipulating the contained sets as well!
      */
-    private final Map /* of byte[] guids -> IntWrapper */ 
-        UDP_FAILOVER = new TreeMap(new GUID.GUIDByteComparator());
+    private final Map<byte[], IntWrapper>  
+        UDP_FAILOVER = new TreeMap<byte[], IntWrapper>(new GUID.GUIDByteComparator());
     
     /**
      * A sequentially processed list of PushFailoverRequestors, used to process
@@ -273,15 +273,13 @@ public class DownloadManager implements BandwidthTracker {
      * Kills all in-network downloaders that are not present in the list of URNs
      * @param urns a current set of urns that we are downloading in-network.
      */
-    public synchronized void killDownloadersNotListed(Collection updates) {
+    public synchronized void killDownloadersNotListed(Collection<? extends UpdateInformation> updates) {
         if (updates == null)
             return;
         
-        Set urns = new HashSet(updates.size());
-        for (Iterator iter = updates.iterator(); iter.hasNext();) {
-            UpdateInformation ui = (UpdateInformation) iter.next();
+        Set<String> urns = new HashSet<String>(updates.size());
+        for(UpdateInformation ui : updates)
             urns.add(ui.getUpdateURN().httpStringValue());
-        }
         
         for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());
         iter.hasNext();) {
@@ -291,7 +289,7 @@ public class DownloadManager implements BandwidthTracker {
                 d.stop();
         }
         
-        Set hopeless = UpdateSettings.FAILED_UPDATES.getValue();
+        Set<String> hopeless = UpdateSettings.FAILED_UPDATES.getValue();
         hopeless.retainAll(urns);
         UpdateSettings.FAILED_UPDATES.setValue(hopeless);
     }
@@ -1379,7 +1377,7 @@ public class DownloadManager implements BandwidthTracker {
     private void addUDPFailover(RemoteFileDesc file) {
         synchronized (UDP_FAILOVER) {
             byte[] key = file.getClientGUID();
-            IntWrapper requests = (IntWrapper)UDP_FAILOVER.get(key);
+            IntWrapper requests = UDP_FAILOVER.get(key);
             if (requests == null) {
                 requests = new IntWrapper(0);
                 UDP_FAILOVER.put(key, requests);
@@ -1396,7 +1394,7 @@ public class DownloadManager implements BandwidthTracker {
     private void cancelUDPFailover(byte[] clientGUID) {
         synchronized (UDP_FAILOVER) {
             byte[] key = clientGUID;
-            IntWrapper requests = (IntWrapper)UDP_FAILOVER.get(key);
+            IntWrapper requests = UDP_FAILOVER.get(key);
             if (requests != null) {
             	requests.addInt(-1);
                 if (requests.getInt() <= 0)
@@ -1611,7 +1609,7 @@ public class DownloadManager implements BandwidthTracker {
            byte[] key =_file.getClientGUID();
            
            synchronized(UDP_FAILOVER) {
-               IntWrapper requests = (IntWrapper)UDP_FAILOVER.get(key);
+               IntWrapper requests = UDP_FAILOVER.get(key);
                if (requests!=null && requests.getInt() > 0) {
             	   requests.addInt(-1);
                    if (requests.getInt() == 0)

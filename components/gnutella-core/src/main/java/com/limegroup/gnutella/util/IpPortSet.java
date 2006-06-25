@@ -8,18 +8,18 @@ import java.util.TreeSet;
  * a utility class for easier and cleaner creation of sets that store
  * IpPort objects 
  */
-public class IpPortSet extends TreeSet {
+public class IpPortSet extends TreeSet<IpPort> {
 
     public IpPortSet() {
         super(IpPort.COMPARATOR);
     }
 
-    public IpPortSet(Collection c) {
+    public IpPortSet(Collection<? extends IpPort> c) {
         this();
         addAll(c);
     }
     
-    public IpPortSet(Comparator c) {
+    public IpPortSet(Comparator<? super IpPort> c) {
         this(); // always use default comparator
     }
 }

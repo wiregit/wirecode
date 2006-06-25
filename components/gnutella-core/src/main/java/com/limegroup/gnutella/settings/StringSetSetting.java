@@ -8,7 +8,7 @@ import java.util.StringTokenizer;
 
 public class StringSetSetting extends Setting {
 
-    private Set value;
+    private Set<String> value;
     
     public StringSetSetting(Properties defaultProps, Properties props,
             String key, String defaultValue) {
@@ -20,7 +20,7 @@ public class StringSetSetting extends Setting {
      * 
      * @return the value of this setting
      */
-    public synchronized Set getValue() {
+    public synchronized Set<String> getValue() {
         return value;
     }
     
@@ -28,7 +28,7 @@ public class StringSetSetting extends Setting {
      * Gets the value as an array.
      */
     public synchronized String[] getValueAsArray() {
-        return (String[])value.toArray(new String[value.size()]);
+        return value.toArray(new String[value.size()]);
     }
 
     /** Load value from property string value
@@ -42,13 +42,13 @@ public class StringSetSetting extends Setting {
     /**
      * Splits the string into a Set
      */
-    private static final Set encode(String src) {
+    private static final Set<String> encode(String src) {
         if (src == null || src.length()==0)
-            return new HashSet();
+            return new HashSet<String>();
         
         StringTokenizer tokenizer = new StringTokenizer(src, ";");
         int size = tokenizer.countTokens();
-        Set set = new HashSet();
+        Set<String> set = new HashSet<String>();
         for(int i = 0; i < size; i++)
             set.add(tokenizer.nextToken());
         return set;
@@ -75,7 +75,7 @@ public class StringSetSetting extends Setting {
      *
      * @param value the value to store
      */
-    public synchronized void setValue(Set value) {
+    public synchronized void setValue(Set<String> value) {
         super.setValue(decode(value));
     }
     

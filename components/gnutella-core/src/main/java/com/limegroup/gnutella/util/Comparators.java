@@ -21,12 +21,12 @@ public final class Comparators {
     /**
      * <tt>Comparator</tt> for comparing two <tt>Long</tt>s.
      */
-    private static final Comparator LONG_COMPARATOR = new LongComparator();
+    private static final Comparator<Long> LONG_COMPARATOR = new LongComparator();
 
     /**
      * Inverse <tt>Comparator</tt> for comparing two <tt>Long</tt>s.
      */
-    private static final Comparator INVERSE_LONG_COMPARATOR = 
+    private static final Comparator<Long> INVERSE_LONG_COMPARATOR = 
         new InverseLongComparator();
     
     /**
@@ -43,7 +43,7 @@ public final class Comparators {
      * <tt>Comparator</tt> for comparing two <tt>String</tt>s regardless of
      * case.
      */
-    private static final Comparator CASE_INSENSITIVE_STRING_COMPARATOR =
+    private static final Comparator<String> CASE_INSENSITIVE_STRING_COMPARATOR =
         new CaseInsensitiveStringComparator();
     
     /**
@@ -73,7 +73,7 @@ public final class Comparators {
      * 
      * @return the <tt>LongComparator</tt> instance
      */
-    public static Comparator longComparator() {
+    public static Comparator<Long> longComparator() {
         return LONG_COMPARATOR;
     }
 
@@ -86,7 +86,7 @@ public final class Comparators {
      * 
      * @return the <tt>LongComparator</tt> instance
      */
-    public static Comparator inverseLongComparator() {
+    public static Comparator<Long> inverseLongComparator() {
         return INVERSE_LONG_COMPARATOR;
     }
 
@@ -124,7 +124,7 @@ public final class Comparators {
      *
      * @return the <tt>CaseInsensitiveStringComparator</tt> instance
      */
-    public static Comparator caseInsensitiveStringComparator() {
+    public static Comparator<String> caseInsensitiveStringComparator() {
         return CASE_INSENSITIVE_STRING_COMPARATOR;
     }
     
@@ -147,11 +147,11 @@ public final class Comparators {
      * <tt>Comparable</tt> interface, unlike <tt>Long</tt>s in 1.2+. 
      */
     private static final class LongComparator implements 
-        Comparator, Serializable {
+        Comparator<Long>, Serializable {
         private static final long serialVersionUID = 226428887996180051L;
      
-        public int compare(Object o1, Object o2) {
-            return longCompareTo((Long)o1, (Long)o2);
+        public int compare(Long o1, Long o2) {
+            return longCompareTo(o1, o2);
         }
     }
 
@@ -162,12 +162,12 @@ public final class Comparators {
      * <tt>Comparable</tt> interface, unlike <tt>Long</tt>s in 1.2+. 
      */    
     private static final class InverseLongComparator implements 
-        Comparator, Serializable {
+        Comparator<Long>, Serializable {
         private static final long serialVersionUID = 316426787496198051L;
                                                              
      
-        public int compare(Object o1, Object o2) {
-            return -longCompareTo((Long)o1, (Long)o2);
+        public int compare(Long o1, Long o2) {
+            return -longCompareTo(o1, o2);
         }
     }
     
@@ -176,11 +176,11 @@ public final class Comparators {
      * without regard to case.
      */
     public static final class CaseInsensitiveStringComparator implements
-        Comparator, Serializable {
+        Comparator<String>, Serializable {
         private static final long serialVersionUID = 263123571237995212L;
         
-        public int compare(Object o1, Object o2) {
-            return StringUtils.compareIgnoreCase((String)o1, (String)o2);
+        public int compare(String o1, String o2) {
+            return StringUtils.compareIgnoreCase(o1, o2);
         }
     }
     

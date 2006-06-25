@@ -21,8 +21,7 @@ import java.util.NoSuchElementException;
 * @author Anurag Singla initial revision
 * @author Christopher Rohrs bug fix, specification cleanup, and unit tests
 */
-public class DoublyLinkedList
-{    
+public class DoublyLinkedList<E> implements Iterable<DoublyLinkedList.ListElement<E>> {    
     /*
      * This linked list can be visualized as
      * null<--start<-->e1<-->e2<-->...<-->en<-->last-->null,
@@ -33,13 +32,13 @@ public class DoublyLinkedList
      * points to the first element in the list (thru its next element) 
      * INVARIANT: prev, & value fields are always null for this
      */
-    private ListElement start;
+    private ListElement<E> start;
 
     /**
      * points to the last element in the list (thru its prev element)
      * INVARIANT: next, & value fields are always null for this
      */
-    private ListElement last;
+    private ListElement<E> last;
     
     /** Creates new empty DoublyLinkedList */
     public DoublyLinkedList()
@@ -47,8 +46,8 @@ public class DoublyLinkedList
         //allocate space for both start & last pointers
         //The prev & next fields will be pointing to null at this point
         //in both the references
-        start = new ListElement(null);
-        last = new ListElement(null);
+        start = new ListElement<E>(null);
+        last = new ListElement<E>(null);
     
         //since no elements right now, make start & last point to each other
         start.next = last;
@@ -63,9 +62,9 @@ public class DoublyLinkedList
      * @param value the value of the new element.
      * @return the element holding value.
      */
-    public ListElement addLast(Object value)
+    public ListElement<E> addLast(E value)
     {
-        ListElement element=new ListElement(value);
+        ListElement<E> element=new ListElement<E>(value);
 
         //else insert at the end
         element.prev = last.prev;
@@ -80,14 +79,14 @@ public class DoublyLinkedList
      * Removes and returns the first element from the list
      * @return The element removed, or null if none present
      */
-    public ListElement removeFirst()
+    public ListElement<E> removeFirst()
     {
         //if no element in the list, return null
         if(start.next == last)
             return null;
 
         //else store the element to be removed/returned
-        ListElement removed = start.next;
+        ListElement<E> removed = start.next;
     
         //adjust the pointers
         start.next = start.next.next;
@@ -102,7 +101,7 @@ public class DoublyLinkedList
      * @param element The element to be removed.  This must be an element
      *  of this.
      */
-    public void remove(ListElement element)
+    public void remove(ListElement<E> element)
     {
         //if null element or invalid state, return false
         //No element in the list is gonna have any of the pointers null
@@ -135,34 +134,33 @@ public class DoublyLinkedList
      * each element to get the values in this.
      *     @requires this not modified while iterator in use.
      */
-    public Iterator iterator() {
+    public Iterator<ListElement<E>> iterator() {
         return new DoublyLinkedListIterator();
     }
 
     /**
      * Returns true if this contains the given ListElement.
      */
-    public boolean contains(ListElement e) {
-        for (Iterator iter=iterator(); iter.hasNext(); ) {
-            ListElement e2=(ListElement)iter.next();
+    public boolean contains(ListElement<E> e) {
+        for(ListElement<E> e2 : this) {
             if (e.equals(e2))
                 return true;
         }
         return false;
     }
     
-    private class DoublyLinkedListIterator extends UnmodifiableIterator {
+    private class DoublyLinkedListIterator extends UnmodifiableIterator<ListElement<E>> {
         /** The next element to yield, or last if done. */
-        private ListElement next=start.next;
+        private ListElement<E> next = start.next;
 
         public boolean hasNext() {
             return next!=last;
         }
 
-        public Object next() {
+        public ListElement<E> next() {
             if (! hasNext())
                 throw new NoSuchElementException();
-            ListElement ret=next;
+            ListElement<E> ret=next;
             next=next.next;
             return ret;
         }
@@ -171,29 +169,27 @@ public class DoublyLinkedList
     /**
      * An element of the linked list.  Immutable.
      */
-    public static class ListElement
-    {
+    public static class ListElement<E> {
         /**
          * The key/object it stores
          */
-        Object key;
+        E key;
     
         /**
          * Refernce to the previous element in the list
          */
-        ListElement prev;
+        ListElement<E> prev;
     
         /**
          * Refernce to the next element in the list
          */
-        ListElement next;
+        ListElement<E> next;
     
         /**
          * creates a new instance, with the specified key
          * @param key The key/value to be stored in this list element
          */
-        ListElement(Object key)
-        {
+        ListElement(E key) {
             //store the object
             this.key = key;
             //make both the forward & backward pointers null
@@ -205,11 +201,10 @@ public class DoublyLinkedList
          * returns the key stored in this element
          * @return the key stored in this element
          */
-        public Object getKey()
-        {
+        public E getKey() {
             return key;
         }
 
-    }//end of class ListElement
+    }
 }
 

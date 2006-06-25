@@ -31,18 +31,18 @@ import com.limegroup.gnutella.Assert;
  * 
  * @see BinaryHeap 
  */
-public class FixedsizePriorityQueue {
+public class FixedsizePriorityQueue<E> implements Iterable<E> {
     /** 
      * The underlying data structure.
      * INVARIANT: tree.size()<=capacity 
      * INVARIANT: all elements of tree instanceof Node
      */
-    private SortedSet /* of Node */ tree;
+    private SortedSet<Node> tree;
     /** The maximum number of elements to hold. */
     private int capacity;
     /** Used to sort data.  Note that tree is actually sorted by Node'
      *  natural ordering. */
-    private Comparator comparator;
+    private Comparator<? super E> comparator;
 
     /** Used to allocate Node.myID. */
     private static int nextID=0;
@@ -52,23 +52,22 @@ public class FixedsizePriorityQueue {
      * is necessary to allow multiple nodes with same priority.  See
      * http://developer.java.sun.com/developer/bugParade/bugs/4229181.html
      */
-    private final class Node implements Comparable {
+    private final class Node implements Comparable<Node> {
         /** The underlying data. */
-        private final Object data;     
+        private final E data;     
         /** Used to guarantee two nodes are never equal. */
         private final int myID;
 
-        Node(Object data) {
+        Node(E data) {
             this.data=data;
             this.myID=nextID++;  //allocate unique ID
         }
         
-        public Object getData() {
+        public E getData() {
             return data;
         }
 
-        public int compareTo(Object o) {
-            Node other=(Node)o;
+        public int compareTo(Node other) {
             //Compare by priority (primary key).
             int c=comparator.compare(this.getData(), other.getData());
             if (c!=0)
@@ -79,9 +78,9 @@ public class FixedsizePriorityQueue {
         }
         
         public boolean equals(Object o) {
-            if (! (o instanceof Node))
+            if (! (o instanceof FixedsizePriorityQueue.Node))
                 return false;
-            return compareTo(o)==0;
+            return compareTo((Node)o)==0;
         }
 
         public String toString() {
@@ -97,12 +96,12 @@ public class FixedsizePriorityQueue {
      * @param capacity the maximum number of elements
      * @exception IllegalArgumentException capacity negative
      */
-    public FixedsizePriorityQueue(Comparator comparator, int capacity) 
+    public FixedsizePriorityQueue(Comparator<? super E> comparator, int capacity) 
             throws IllegalArgumentException {
         this.comparator=comparator;
         if (capacity<=0)
             throw new IllegalArgumentException();
-        tree=new TreeSet();
+        tree=new TreeSet<Node>();
         this.capacity=capacity;
     }
 
@@ -116,29 +115,25 @@ public class FixedsizePriorityQueue {
      *  to higher priority
      * @return the element ejected, possibly x, or null if none 
      */
-    public Object insert(Object x) {
-        repOk();
+    public E insert(E x) {
         Node node=new Node(x);       
         if (size()<capacity()) {
             //a) Size less than capacity.  Just add x.
             boolean added=tree.add(node);
             Assert.that(added);
-            repOk();
             return null;
         } else {
             //Ensure size does not exceeed capacity.    
             //Micro-optimizations are possible.
-            Node smallest=(Node)tree.first();
+            Node smallest = tree.first();
             if (node.compareTo(smallest)>0) {
                 //b) x larger than smallest of this: remove smallest and add x
                 tree.remove(smallest);
                 boolean added=tree.add(node);
                 Assert.that(added);
-                repOk();
                 return smallest.getData();
             } else {
                 //c) Otherwise do nothing.
-                repOk();
                 return x;
             }
         }
@@ -148,16 +143,16 @@ public class FixedsizePriorityQueue {
      * Returns the highest priority element of this.
      * @exception NoSuchElementException this.size()==0
      */
-    public Object getMax() throws NoSuchElementException {
-        return ((Node)tree.last()).getData();
+    public E getMax() throws NoSuchElementException {
+        return tree.last().getData();
     }
 
    /**
      * Returns the lowest priority element of this.
      * @exception NoSuchElementException this.size()==0
      */
-    public Object getMin() throws NoSuchElementException {
-        return ((Node)tree.first()).getData();
+    public E getMin() throws NoSuchElementException {
+        return tree.first().getData();
     }
 
     /** 
@@ -170,8 +165,8 @@ public class FixedsizePriorityQueue {
     public boolean contains(Object o) {
         //You can't just look up o in tree, as tree is sorted by priority, which
         //isn't necessarily consistent with equals.
-        for (Iterator iter=tree.iterator(); iter.hasNext(); ) {
-            if (o.equals(((Node)iter.next()).getData()))
+        for(Node node : tree) {
+            if(o.equals(node.getData()))
                 return true;
         }
         return false;
@@ -187,8 +182,8 @@ public class FixedsizePriorityQueue {
     public boolean remove(Object o) {
         //You can't just look up o in tree, as tree is sorted by priority, which
         //isn't necessarily consistent with equals.
-        for (Iterator iter=tree.iterator(); iter.hasNext(); ) {
-            if (o.equals(((Node)iter.next()).getData())) {
+        for (Iterator<Node> iter=tree.iterator(); iter.hasNext(); ) {
+            if (o.equals(iter.next().getData())) {
                 iter.remove();
                 return true;
             }
@@ -199,20 +194,20 @@ public class FixedsizePriorityQueue {
     /** 
      * Returns an iterator of the elements in this, from <b>worst to best</b>.
      */
-    public Iterator iterator() {
+    public Iterator<E> iterator() {
         return new DataIterator();            
     }
 
     /** Applies getData() to elements of tree.iterator(). */
-    private class DataIterator implements Iterator {
-        Iterator delegate=tree.iterator();
+    private class DataIterator implements Iterator<E> {
+        Iterator<Node> delegate=tree.iterator();
 
         public boolean hasNext() {
             return delegate.hasNext();
         }
 
-        public Object next() {
-            return ((Node)delegate.next()).getData();
+        public E next() {
+            return delegate.next().getData();
         }
 
         public void remove() {
@@ -233,18 +228,6 @@ public class FixedsizePriorityQueue {
      */
     public int capacity() {
         return capacity;
-    }
-
-    static boolean DEBUG=false;
-    protected void repOk() {
-        if (!DEBUG)
-            return;
-
-        Assert.that(size()<=capacity());
-
-        for (Iterator iter=tree.iterator(); iter.hasNext(); ) {
-            Assert.that(iter.next() instanceof Node);
-        }
     }
 
     public String toString() {

@@ -37,7 +37,7 @@ import com.limegroup.gnutella.Assert;
 * @author Anurag Singla -- initial version
 * @author Christopher Rohrs -- cleaned up and added unit tests 
 */
-public class FixedsizeForgetfulHashMap implements Map
+public class FixedsizeForgetfulHashMap<K, V> implements Map<K, V>
 {
     /* Implementation note:
      *
@@ -77,15 +77,15 @@ public class FixedsizeForgetfulHashMap implements Map
      */
 
     /** The underlying map from keys to [value, list element] pairs */
-    private Map /* Objects -> ValueElement */ map;
+    private Map<K, ValueElement<K, V>> map;
 
     /**
      * A linked list of the keys in the hashMap. It is used to remove the 
      * elements from the underlying hashMap datastructure in FIFO order
      * Newer elements are stored in the tail.
      */
-    private DoublyLinkedList /* of ListElement */ removeList = 
-        new DoublyLinkedList();
+    private DoublyLinkedList<K> removeList = 
+        new DoublyLinkedList<K>();
 
     /**
      * Maximum number of elements to be stored in the underlying hashMap
@@ -105,12 +105,12 @@ public class FixedsizeForgetfulHashMap implements Map
      * This information is required so that when we overwrite the mapping (same key,
      * but different value), we should update the removeList entries accordingly.
      */
-    private static class ValueElement
+    private static class ValueElement<K, E>
     {
         /** The element in the remove list that corresponds to this mapping */
-        DoublyLinkedList.ListElement listElement;    
+        DoublyLinkedList.ListElement<K> listElement;    
         /** The actual value (that user wanted to store in the hash map) */
-        Object value;
+        E value;
     
         /**
          * Creates a new instance with specified values
@@ -118,8 +118,8 @@ public class FixedsizeForgetfulHashMap implements Map
          * @param listElement The element in the remove list that corresponds 
          * to this mapping
          */
-        public ValueElement(Object value,
-                            DoublyLinkedList.ListElement listElement) {
+        public ValueElement(E value,
+                            DoublyLinkedList.ListElement<K> listElement) {
             //update the member fields
             this.value = value;
             this.listElement = listElement;
@@ -127,12 +127,12 @@ public class FixedsizeForgetfulHashMap implements Map
     
         /** Returns the element in the remove list that corresponds to this
          *  mapping thats stored in this instance */
-        public DoublyLinkedList.ListElement getListElement() {
+        public DoublyLinkedList.ListElement<K> getListElement() {
             return listElement;
         }
     
         /** Returns the value stored */
-        public Object getValue() {
+        public E getValue() {
             return value;
         }
         
@@ -165,7 +165,7 @@ public class FixedsizeForgetfulHashMap implements Map
     public FixedsizeForgetfulHashMap(int size)
     {
         //allocate space in underlying hashMap
-        map=new HashMap((size * 4)/3 + 10, 0.75f);
+        map=new HashMap<K, ValueElement<K, V>>((size * 4)/3 + 10, 0.75f);
     
         //if size is < 1
         if (size < 1)
@@ -182,9 +182,9 @@ public class FixedsizeForgetfulHashMap implements Map
      *  @return the value associated with this key, or null if no association 
      *   (possibly because the key was expired)
      */
-    public Object get(Object key)
+    public V get(Object key)
     {
-        ValueElement pair=(ValueElement)map.get(key);
+        ValueElement<K, V> pair = map.get(key);
         return (pair==null) ? null : pair.getValue();
     }
 
@@ -200,7 +200,7 @@ public class FixedsizeForgetfulHashMap implements Map
      * @return previous value associated with specified key, or <tt>null</tt>
      *	       if there was no mapping for key..
      */
-    public Object put(Object key, Object value)
+    public V put(K key, V value)
     {
         //add the new mapping to the underlying hashmap data structure
         //add only if not null.  This isn't strictly needed our specification
@@ -211,7 +211,7 @@ public class FixedsizeForgetfulHashMap implements Map
         //add the mapping
         //the method takes care of adding the information to the remove list
         //and other details (like updating current count)
-        Object oldValue = addMapping(key,value);   
+        V oldValue = addMapping(key,value);   
 
         //return the old value
         return oldValue;
@@ -232,33 +232,28 @@ public class FixedsizeForgetfulHashMap implements Map
      *	       <tt>null</tt> with the specified key.
      * @modifies currentCount, 'this', removeList
      */
-    private Object addMapping(Object key, Object value)
+    private V addMapping(K key, V value)
     {
         //add the newly inserted element to the removeList
-        DoublyLinkedList.ListElement listElement = removeList.addLast(key);
+        DoublyLinkedList.ListElement<K> listElement = removeList.addLast(key);
             
         //insert the mapping in the hashmap (after wrapping the value properly)
         //save the element removed
-        ValueElement ret = (ValueElement)map.put(
-            key, new ValueElement(value, listElement));
+        ValueElement<K, V> ret = map.put(key, new ValueElement<K, V>(value, listElement));
         
         //if a mapping already existed, remove the entry corresponding to 
         //the old value from the removeList
-        if(ret != null)
-        {
+        if(ret != null) {
             removeList.remove(ret.getListElement());
-        }
-        else
-        {
+        } else {
             //else increment the count of entries
             currentSize++;
         }
     
         //if the count is more than max, means we need to remove an entry
-        if(currentSize > maxSize)
-        {
+        if(currentSize > maxSize) {
             //get an element from the remove list to remove
-            DoublyLinkedList.ListElement toRemove = removeList.removeFirst();
+            DoublyLinkedList.ListElement<K> toRemove = removeList.removeFirst();
 
             //remove it from the hashMap
             map.remove(toRemove.getKey());
@@ -298,17 +293,17 @@ public class FixedsizeForgetfulHashMap implements Map
      * @return Value corresponding to the key-value removed from the map
      * @modifies this
      */
-    public Object removeLRUEntry()
+    public V removeLRUEntry()
     {
         //if there are no elements, return null.
         if(isEmpty())
             return null;
         
         //get an element from the remove list to remove
-        DoublyLinkedList.ListElement toRemove = removeList.removeFirst();
+        DoublyLinkedList.ListElement<K> toRemove = removeList.removeFirst();
 
         //remove it from the hashMap
-        ValueElement removed = (ValueElement)map.remove(toRemove.getKey());
+        ValueElement<K, V> removed = map.remove(toRemove.getKey());
         
         //decrement the count
         currentSize--;
@@ -327,13 +322,9 @@ public class FixedsizeForgetfulHashMap implements Map
      *
      * @param t Mappings to be stored in this map.
      */
-    public void putAll(Map t)
-    {
-        Iterator iter=t.keySet().iterator();
-        while (iter.hasNext())
-        {
-            Object key=iter.next();
-            put(key,t.get(key));
+    public void putAll(Map<? extends K, ? extends V> t) {
+        for(Map.Entry<? extends K, ? extends V> entry : t.entrySet()) {
+            put(entry.getKey(), entry.getValue());
         }
     }
     
@@ -343,26 +334,14 @@ public class FixedsizeForgetfulHashMap implements Map
      *
      * @return a shallow copy of this map.
      */
-    public Object clone()
-    {
+    public Object clone() {
         //create a clone map of required size
-        Map clone = new HashMap((map.size() * 4)/3 + 10, 0.75f);
-        
-        //get the entrySet corresponding to this map
-        Set entrySet = map.entrySet();
-        
-        //iterate over the elements
-        Iterator iterator = entrySet.iterator();
-        while(iterator.hasNext())
-        {
-            //get the next element
-            Map.Entry entry = (Map.Entry)iterator.next();
-            
+        Map<K, V> clone = new HashMap<K, V>((map.size() * 4)/3 + 10, 0.75f);
+        for(Map.Entry<K, ValueElement<K, V>> entry : map.entrySet()) {
             //add it to the clone map
             //add only the value (and not the ValueElement wrapper instance
             //that is stored internally
-            clone.put(entry.getKey(), 
-                                ((ValueElement)entry.getValue()).getValue());
+            clone.put(entry.getKey(), entry.getValue().getValue());
         }
         
         //return the clone
@@ -377,14 +356,12 @@ public class FixedsizeForgetfulHashMap implements Map
      * @return previous value associated with specified key, or <tt>null</tt>
      *	       if there was no mapping for key.
      */
-    public Object remove(Object key) 
-    {
+    public V remove(Object key) {
         //save the element removed
-        ValueElement ret = (ValueElement)map.remove(key);
+        ValueElement<K, V> ret = map.remove(key);
     
         //if the mapping existed
-        if(ret != null)
-        {
+        if(ret != null) {
             //decrement the current size
             currentSize--;
         
@@ -392,9 +369,7 @@ public class FixedsizeForgetfulHashMap implements Map
             removeList.remove(ret.getListElement());
         
             return ret.getValue();
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
@@ -445,29 +420,32 @@ public class FixedsizeForgetfulHashMap implements Map
 
     /** <b>Partially implemented.</b>  
      *  Only keySet().iterator() is well defined. */
-    public Set keySet() {
+    public Set<K> keySet() {
         return new KeySet(map.keySet());
     }    
-    class KeySet extends AbstractSet {
-        Set real;
-        KeySet(Set real) {
+    
+    class KeySet extends AbstractSet<K> {
+        Set<K> real;
+        
+        KeySet(Set<K> real) {
             this.real=real;
         }
-        public Iterator iterator() {
+        public Iterator<K> iterator() {
             return new KeyIterator(real.iterator());
-        }        
+        }
+        
         public int size() {
             return FixedsizeForgetfulHashMap.this.size();
         }
     }
-    class KeyIterator implements Iterator {
-        Iterator real;
+    class KeyIterator implements Iterator<K> {
+        Iterator<K> real;
         Object lastYielded=null;
-        KeyIterator(Iterator real) {
+        KeyIterator(Iterator<K> real) {
             this.real=real;
         }
-        public Object next() {
-            Object ret=real.next();
+        public K next() {
+            K ret=real.next();
             lastYielded=ret;
             return ret;
         }
@@ -482,9 +460,8 @@ public class FixedsizeForgetfulHashMap implements Map
             //Cleanup entry in removeList.  Note that we cannot simply call
             //FixedsizeForgetfulHashMap.this.remove(lastYielded) since that may
             //affect the underlying map--while iterating through it.
-            ValueElement ve = (ValueElement)map.get(lastYielded);
-            if (ve != null)  //not strictly needed by specification of remove.
-            {
+            ValueElement<K, V> ve = map.get(lastYielded);
+            if (ve != null) { //not strictly needed by specification of remove.
                 currentSize--;
                 removeList.remove(ve.getListElement());      
             }
@@ -495,7 +472,7 @@ public class FixedsizeForgetfulHashMap implements Map
     }
 
     /** <b>Not implemented; behavior undefined</b> */
-    public Collection values() {
+    public Collection<V> values() {
         throw new UnsupportedOperationException();
     }
 
@@ -505,7 +482,7 @@ public class FixedsizeForgetfulHashMap implements Map
     }
 
     /** <b>Not implemented; behavior undefined</b> */
-    public Set entrySet() {
+    public Set<Map.Entry<K, V>> entrySet() {
         throw new UnsupportedOperationException();
     }
  
@@ -513,10 +490,9 @@ public class FixedsizeForgetfulHashMap implements Map
 
     /** Tests the invariants described above. */
     public void repOk() {
-        for (Iterator iter=map.keySet().iterator(); iter.hasNext(); ) {
-            Object k=iter.next();
+        for(K k : map.keySet()) {
             Assert.that(k!=null, "Null key (1)");
-            ValueElement ve=(ValueElement)map.get(k);
+            ValueElement<K, V> ve = map.get(k);
             Assert.that(ve!=null, "Null value element (1)");
             Assert.that(ve.getValue()!=null, "Null real value (1)");
             Assert.that(removeList.contains(ve.getListElement()), 
@@ -525,12 +501,10 @@ public class FixedsizeForgetfulHashMap implements Map
                         "Invariant 1b failed");
         }
 
-        for (Iterator iter=removeList.iterator(); iter.hasNext(); ) {
-            DoublyLinkedList.ListElement l=
-                (DoublyLinkedList.ListElement)iter.next();
-            Object k=l.getKey();
+        for(DoublyLinkedList.ListElement<K> l : removeList) {
+            K k = l.getKey();
             Assert.that(k!=null, "Null key (2)");
-            ValueElement ve=(ValueElement)map.get(k);
+            ValueElement<K, V> ve = map.get(k);
             Assert.that(ve!=null, "Null value element (2)");
             Assert.that(ve.getListElement().equals(l), "Invariant 2b failed");
         }

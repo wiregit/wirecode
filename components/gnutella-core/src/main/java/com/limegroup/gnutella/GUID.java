@@ -328,16 +328,16 @@ public class GUID implements Comparable {
     public static final Comparator GUID_BYTE_COMPARATOR = new GUIDByteComparator();
 
     /** Compares GUID's lexically. */
-    public static class GUIDComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            return GUID.compare(((GUID)a).bytes, ((GUID)b).bytes);
+    public static class GUIDComparator implements Comparator<GUID> {
+        public int compare(GUID a, GUID b) {
+            return GUID.compare(a.bytes, b.bytes);
         }
     }
 
     /** Compares 16-byte arrays (raw GUIDs) lexically. */
-    public static class GUIDByteComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            return GUID.compare((byte[])a, (byte[])b);
+    public static class GUIDByteComparator implements Comparator<byte[]> {
+        public int compare(byte[] a, byte[] b) {
+            return GUID.compare(a, b);
         }
     }
 

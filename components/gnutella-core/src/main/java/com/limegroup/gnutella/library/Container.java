@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IOUtils;
 
 /**
@@ -38,7 +39,7 @@ class Container {
     
     private static final Log LOG = LogFactory.getLog(Container.class);
     
-    private final Map STORED = new HashMap();
+    private final Map<String, Collection<File>> STORED = new HashMap<String, Collection<File>>();
     private final String filename;
     
     /**
@@ -52,13 +53,11 @@ class Container {
     }
     
     /**
-     * Loads data from disk.  This requires the data either be
-     * a Map or a Collection if it already existed (in order
-     * to refresh data, instead of replace it).
+     * Loads data from disk.
      */
     void load() {
         // Read without grabbing the lock.
-        Map read = readFromDisk();
+        Map<String, Collection<File>> read = readFromDisk();
         
         synchronized(this) {
             // Simple case -- no stored data yet.
@@ -66,29 +65,17 @@ class Container {
                 STORED.putAll(read);
             } else {
                 // If data was stored, we can't replace, we have to refresh.
-                for(Iterator i = read.entrySet().iterator(); i.hasNext(); ) {
-                    Map.Entry next = (Map.Entry)i.next();
-                    Object k = next.getKey();
-                    Object v = next.getValue();
-                    Object storedV = STORED.get(k);
+                for(Map.Entry<String, Collection<File>> entry : read.entrySet()) {
+                    String k = entry.getKey();
+                    Collection<File> v = entry.getValue();
+                    Collection<File> storedV = STORED.get(k);
                     if(storedV == null) {
                         // Another simple case -- key wasn't stored yet.
                         STORED.put(k, v);
                     } else {
                         synchronized(storedV) {
-                            // We can only refresh if both values are either
-                            // Collections or Maps.
-                            if(v instanceof Collection && storedV instanceof Collection) {
-                                Collection cv = (Collection)storedV;
-                                cv.clear();
-                                cv.addAll((Collection)v);
-                            } else if(v instanceof Map && storedV instanceof Map) {
-                                Map mv = (Map)storedV;
-                                mv.clear();
-                                mv.putAll((Map)v);
-                            } else if(LOG.isWarnEnabled()) {
-                                LOG.warn("Unable to reload data, key: " + k);
-                            }
+                            storedV.clear();
+                            storedV.addAll(v);
                         }
                     }
                 }
@@ -103,33 +90,23 @@ class Container {
      * The returned sets are synchronized, but the serialized sets are NOT SYNCHRONIZED.
      * This means that the future can change what they synchronize on easily.
      */
-    synchronized Set getSet(String name) {
-        Object data = STORED.get(name);
+    synchronized Set<File> getSet(String name) {
+        Collection<File> data = STORED.get(name);
         if (data != null) {
-        	return (Set)data;
-        }
-        else { 
-            Set set = Collections.synchronizedSet(new HashSet());
+            return (Set<File>)data;
+        } else { 
+            Set<File> set = Collections.synchronizedSet(new HashSet<File>());
             STORED.put(name, set);
             return set;
         }
     }
     
     /**
-     * Clears all entries.  This assumes all entries are either Collections or Maps.
+     * Clears all entries.
      */
     synchronized void clear() {
-        for(Iterator i = STORED.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            Object v = next.getValue();
-            synchronized(v) {
-                if(v instanceof Collection)
-                    ((Collection)v).clear();
-                else if(v instanceof Map)
-                    ((Map)v).clear();
-                else if(LOG.isDebugEnabled())
-                    LOG.debug("Unable to clear data, key: " + next.getKey());
-            }
+        for(Collection<File> data : STORED.values()) {
+            data.clear();
         }
     }
         
@@ -138,31 +115,24 @@ class Container {
      * Saves the data to disk.
      */
     void save() {
-        Map toSave;
+        Map<String, Collection<File>> toSave;
         
         synchronized(this) {
-            toSave = new HashMap(STORED.size());
-            // This assumes that all objects are basic Collections objects. 
-            // If any aren't, we ignore them.
-            // Ideally we would use Cloneable, but the method is protected.
-            for(Iterator i = STORED.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry next = (Map.Entry)i.next();
-                Object k = next.getKey();
-                Object v = next.getValue();
+            toSave = new HashMap<String, Collection<File>>(STORED.size());
+            for(Map.Entry<String, Collection<File>> entry : STORED.entrySet()) {
+                String k = entry.getKey();
+                Collection<File> v = entry.getValue();
                 synchronized(v) {
                 	if(v instanceof SortedSet)
-            			toSave.put(k, new TreeSet((SortedSet)v));
+            			toSave.put(k, new TreeSet<File>((SortedSet<File>)v));
             		else if(v instanceof Set)
-            			toSave.put(k, new HashSet((Set)v));
-            		else if(v instanceof Map)
-            			toSave.put(k, new HashMap((Map)v));
+            			toSave.put(k, new HashSet<File>(v));
             		else if(v instanceof List) {
             			if (v instanceof RandomAccess)
-            				toSave.put(k, new ArrayList((List)v));
+            				toSave.put(k, new ArrayList<File>(v));
             			else 
-            				toSave.put(k, new LinkedList((List)v));
-            		}
-                    else {
+            				toSave.put(k, new LinkedList<File>(v));
+            		} else {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Update to clone! key: " + k);
                         toSave.put(k, v);
@@ -194,7 +164,7 @@ class Container {
     /**
      * Reads a Map from disk.
      */
-    private Map readFromDisk() {
+    private Map<String, Collection<File>> readFromDisk() {
         File f = new File(CommonUtils.getUserSettingsDir(), filename);
         ObjectInputStream ois = null;
         Map map = null;
@@ -212,22 +182,27 @@ class Container {
         }
         
         if (map != null) {
-        	
-        	HashMap toReturn = new HashMap(map.size());
-        	
+        	HashMap<String, Collection<File>> toReturn = new HashMap<String, Collection<File>>(map.size());
         	for (Iterator i = map.entrySet().iterator(); i.hasNext();) {
         		Map.Entry entry = (Map.Entry)i.next();
-        		Object k = entry.getKey();
-        		Object v = entry.getValue();
-        	
+                if(!(entry.getKey() instanceof String)) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Ignoring key: " + entry.getKey());
+                    continue;
+                }
+                String k = (String)entry.getKey();
+                if(!(entry.getValue() instanceof Collection)) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Ignoring value: " + entry.getValue());
+                    continue;
+                }
+                Collection<File> v = GenericsUtils.scanForCollection(entry.getValue(), File.class, true);
         		if(v instanceof SortedSet)
-        			toReturn.put(k, Collections.synchronizedSortedSet((SortedSet)v));
+        			toReturn.put(k, Collections.synchronizedSortedSet((SortedSet<File>)v));
         		else if(v instanceof Set)
-        			toReturn.put(k, Collections.synchronizedSet((Set)v));
-        		else if(v instanceof Map)
-        			toReturn.put(k, Collections.synchronizedMap((Map)v));
+        			toReturn.put(k, Collections.synchronizedSet((Set<File>)v));
         		else if(v instanceof List)
-        			toReturn.put(k, Collections.synchronizedList((List)v));
+        			toReturn.put(k, Collections.synchronizedList((List<File>)v));
         		else {
         			if(LOG.isWarnEnabled())
         				LOG.warn("Update to clone! key: " + k);
@@ -237,7 +212,7 @@ class Container {
         	return toReturn;
         }
         else {
-        	return new HashMap();
+        	return new HashMap<String, Collection<File>>();
         }
     }
 }

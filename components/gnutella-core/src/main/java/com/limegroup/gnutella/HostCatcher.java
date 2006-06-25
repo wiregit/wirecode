@@ -129,24 +129,24 @@ public class HostCatcher {
      * INVARIANT: queue contains no duplicates and contains exactly the
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
-    private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = 
-        new BucketQueue(new int[] {NORMAL_SIZE,GOOD_SIZE, CACHE_SIZE});
-    private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
+    private final BucketQueue<ExtendedEndpoint> ENDPOINT_QUEUE = 
+        new BucketQueue<ExtendedEndpoint>(new int[] {NORMAL_SIZE,GOOD_SIZE, CACHE_SIZE});
+    private final Set<ExtendedEndpoint> ENDPOINT_SET = new HashSet<ExtendedEndpoint>();
     
     /**
      * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
      */
-    private final Set FREE_ULTRAPEER_SLOTS_SET = new HashSet();
+    private final Set<ExtendedEndpoint> FREE_ULTRAPEER_SLOTS_SET = new HashSet<ExtendedEndpoint>();
     
     /**
      * <tt>Set</tt> of hosts advertising free leaf connection slots.
      */
-    private final Set FREE_LEAF_SLOTS_SET = new HashSet();
+    private final Set<ExtendedEndpoint> FREE_LEAF_SLOTS_SET = new HashSet<ExtendedEndpoint>();
     
     /**
      * map of locale (string) to sets (of endpoints).
      */
-    private final Map LOCALE_SET_MAP =  new HashMap();
+    private final Map<String, Set<ExtendedEndpoint>> LOCALE_SET_MAP =  new HashMap<String, Set<ExtendedEndpoint>>();
     
     /**
      * number of endpoints to keep in the locale set
@@ -164,10 +164,10 @@ public class HostCatcher {
      * INVARIANT: permanentHosts contains no duplicates and contains exactly
      *  the same elements and permanentHostsSet
      * LOCKING: obtain this' monitor before modifying either */
-    private FixedsizePriorityQueue /* of ExtendedEndpoint */ permanentHosts=
-        new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(),
+    private FixedsizePriorityQueue<ExtendedEndpoint> permanentHosts=
+        new FixedsizePriorityQueue<ExtendedEndpoint>(ExtendedEndpoint.priorityComparator(),
                                    PERMANENT_SIZE);
-    private Set /* of ExtendedEndpoint */ permanentHostsSet=new HashSet();
+    private Set<ExtendedEndpoint> permanentHostsSet=new HashSet<ExtendedEndpoint>();
 
     
     /** The GWebCache bootstrap system. */
@@ -195,7 +195,7 @@ public class HostCatcher {
      * 
      * LOCKING: obtain this' monitor before modifying/iterating
      */
-    private final Set EXPIRED_HOSTS = new HashSet();
+    private final Set<Endpoint> EXPIRED_HOSTS = new HashSet<Endpoint>();
     
     /**
      * <tt>Set</tt> of hosts we were able to create TCP connections with but 
@@ -204,7 +204,7 @@ public class HostCatcher {
      * 
      * LOCKING: obtain this' monitor before modifying/iterating
      */    
-    private final Set PROBATION_HOSTS = new HashSet();
+    private final Set<Endpoint> PROBATION_HOSTS = new HashSet<Endpoint>();
     
     /**
      * Constant for the number of milliseconds to wait before periodically
@@ -239,7 +239,7 @@ public class HostCatcher {
     /**
      * All EndpointObservers waiting on getting an Endpoint.
      */
-    private List _catchersWaiting = new LinkedList();
+    private List<EndpointObserver> _catchersWaiting = new LinkedList<EndpointObserver>();
     
     /**
      * The last allowed time that we can continue ranking pongs.
@@ -310,14 +310,14 @@ public class HostCatcher {
         Runnable probationRestorer = new Runnable() {
             public void run() {
                 LOG.trace("restoring hosts on probation");
-                List toAdd;
+                List<Endpoint> toAdd;
                 synchronized(HostCatcher.this) {
-                    toAdd = new ArrayList(PROBATION_HOSTS);
+                    toAdd = new ArrayList<Endpoint>(PROBATION_HOSTS);
                     PROBATION_HOSTS.clear();
                 }
                 
-                for(Iterator i = toAdd.iterator(); i.hasNext(); )
-                    add((Endpoint)i.next(), false);
+                for(Endpoint e : toAdd)
+                    add(e, false);
             } 
         };
         // Recover hosts on probation every minute.
@@ -337,14 +337,14 @@ public class HostCatcher {
     public void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
         synchronized(this) {
-            rank(new HashSet(ENDPOINT_SET));
+            rank(new HashSet<Endpoint>(ENDPOINT_SET));
         }
     }
     
     /**
      * Rank the collection of hosts.
      */
-    private void rank(Collection hosts) {
+    private void rank(Collection<? extends IpPort> hosts) {
         if(needsPongRanking()) {
             pinger.rank(
                 hosts,
@@ -513,8 +513,7 @@ public class HostCatcher {
         // if the pong carried packed IP/Ports, add those as their own
         // endpoints.
         rank(pr.getPackedIPPorts());
-        for(Iterator i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
-            IpPort ipp = (IpPort)i.next();
+        for(IpPort ipp : pr.getPackedIPPorts()) {
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
             if(isValidHost(ep))
                 add(ep, GOOD_PRIORITY);
@@ -522,8 +521,7 @@ public class HostCatcher {
         
         // if the pong carried packed UDP host caches, add those as their
         // own endpoints.
-        for(Iterator i = pr.getPackedUDPHostCaches().iterator(); i.hasNext(); ) {
-            IpPort ipp = (IpPort)i.next();
+        for(IpPort ipp : pr.getPackedUDPHostCaches()) {
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
             ep.setUDPHostCache(true);
             addUDPHostCache(ep);
@@ -579,7 +577,7 @@ public class HostCatcher {
      * @param host the host to add
      * @param hosts the <tt>Set</tt> to add it to
      */
-    private void addToFixedSizeSet(ExtendedEndpoint host, Set hosts) {
+    private void addToFixedSizeSet(ExtendedEndpoint host, Set<? super ExtendedEndpoint> hosts) {
         
         synchronized(this) {
             // Don't allow the free slots host to expand infinitely.
@@ -601,12 +599,12 @@ public class HostCatcher {
     private synchronized void addToLocaleMap(ExtendedEndpoint endpoint) {
         String loc = endpoint.getClientLocale();
         if(LOCALE_SET_MAP.containsKey(loc)) { //if set exists for ths locale
-            Set s = (Set)LOCALE_SET_MAP.get(loc);
+            Set<ExtendedEndpoint> s = LOCALE_SET_MAP.get(loc);
             if(s.add(endpoint) && s.size() > LOCALE_SET_SIZE)
                 s.remove(s.iterator().next());
         }
         else { //otherwise create new set and add it to the map
-            Set s = new HashSet();
+            Set<ExtendedEndpoint> s = new HashSet<ExtendedEndpoint>();
             s.add(endpoint);
             LOCALE_SET_MAP.put(loc, s);
         }
@@ -615,10 +613,10 @@ public class HostCatcher {
     /**
      * Adds a collection of addresses to this.
      */
-    public void add(Collection endpoints) {
+    public void add(Collection<? extends Endpoint> endpoints) {
         rank(endpoints);
-        for(Iterator i = endpoints.iterator(); i.hasNext(); )
-            add((Endpoint)i.next(), true);
+        for(Endpoint e: endpoints)
+            add(e, true);
             
     }
 
@@ -717,7 +715,7 @@ public class HostCatcher {
                 //queue, so we have to cleanup the set to maintain
                 //rep. invariant.
                 ENDPOINT_SET.add(e);
-                Object ejected=ENDPOINT_QUEUE.insert(e, priority);
+                ExtendedEndpoint ejected = ENDPOINT_QUEUE.insert(e, priority);
                 if (ejected!=null) {
                     ENDPOINT_SET.remove(ejected);
                 }         
@@ -749,7 +747,7 @@ public class HostCatcher {
 
         addToLocaleMap(e); //add e to locale mapping 
         
-        Object removed=permanentHosts.insert(e);
+        ExtendedEndpoint removed=permanentHosts.insert(e);
         if (removed!=e) {
             //Was actually added...
             permanentHostsSet.add(e);
@@ -850,7 +848,7 @@ public class HostCatcher {
             if (p == null)
                 return; // no more endpoints to give.
             
-            observer = (EndpointObserver) _catchersWaiting.remove(0);
+            observer = _catchersWaiting.remove(0);
         }
         
         // It is important that this is outside the lock.  Otherwise HostCatcher's lock
@@ -971,14 +969,14 @@ public class HostCatcher {
         // Otherwise, might as well use the leaf slots hosts up as well
         // since we added them to the size and they can give us other info
         else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
-            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
-            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+            Iterator<ExtendedEndpoint> iter = FREE_LEAF_SLOTS_SET.iterator();
+            ExtendedEndpoint ee = iter.next();
             iter.remove();
             return ee;
         } 
         if (! ENDPOINT_QUEUE.isEmpty()) {
             //pop e from queue and remove from set.
-            ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
+            ExtendedEndpoint e= ENDPOINT_QUEUE.extractMax();
             boolean ok=ENDPOINT_SET.remove(e);
             
             //check that e actually was in set.
@@ -994,27 +992,27 @@ public class HostCatcher {
      * tries to return an endpoint that matches the locale of this client
      * from the passed in set.
      */
-    private ExtendedEndpoint preferenceWithLocale(Set base) {
+    private ExtendedEndpoint preferenceWithLocale(Set<ExtendedEndpoint> base) {
 
         String loc = ApplicationSettings.LANGUAGE.getValue();
 
         // preference a locale host if we haven't matched any locales yet
         if(!RouterService.getConnectionManager().isLocaleMatched()) {
             if(LOCALE_SET_MAP.containsKey(loc)) {
-                Set locales = (Set)LOCALE_SET_MAP.get(loc);
-                for(Iterator i = base.iterator(); i.hasNext(); ) {
-                    Object next = i.next();
+                Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
+                for(Iterator<ExtendedEndpoint> i = base.iterator(); i.hasNext(); ) {
+                    ExtendedEndpoint next = i.next();
                     if(locales.contains(next)) {
                         i.remove();
                         locales.remove(next);
-                        return (ExtendedEndpoint)next;
+                        return next;
                     }
                 }
             }
         }
         
-        Iterator iter = base.iterator();
-        ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+        Iterator<ExtendedEndpoint> iter = base.iterator();
+        ExtendedEndpoint ee = iter.next();
         iter.remove();
         return ee;
     }
@@ -1043,7 +1041,7 @@ public class HostCatcher {
      * This method exists primarily for testing.  THIS MUST NOT BE MODIFIED
      * WHILE ITERATOR IS IN USE.
      */
-    Iterator getPermanentHosts() {
+    Iterator<ExtendedEndpoint> getPermanentHosts() {
         return permanentHosts.iterator();
     }
 
@@ -1056,12 +1054,12 @@ public class HostCatcher {
      * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
      *  have advertised they have free ultrapeer slots
      */
-    public synchronized Collection getUltrapeersWithFreeUltrapeerSlots(int num) {
+    public synchronized Collection<IpPort> getUltrapeersWithFreeUltrapeerSlots(int num) {
         return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
                                         ApplicationSettings.LANGUAGE.getValue(),num);
     }
 
-    public synchronized Collection 
+    public synchronized Collection<IpPort>
         getUltrapeersWithFreeUltrapeerSlots(String locale,int num) {
         return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
                                         locale,num);
@@ -1076,12 +1074,12 @@ public class HostCatcher {
      * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
      *  have advertised they have free leaf slots
      */
-    public synchronized Collection getUltrapeersWithFreeLeafSlots(int num) {
+    public synchronized Collection<IpPort> getUltrapeersWithFreeLeafSlots(int num) {
         return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
                                         ApplicationSettings.LANGUAGE.getValue(),num);
     }
     
-    public synchronized Collection
+    public synchronized Collection<IpPort>
         getUltrapeersWithFreeLeafSlots(String locale,int num) {
         return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
                                         locale,num);
@@ -1091,24 +1089,26 @@ public class HostCatcher {
      * preference the set so we try to return those endpoints that match
      * passed in locale "loc"
      */
-    private Collection getPreferencedCollection(Set base, String loc, int num) {
+    private Collection<IpPort> getPreferencedCollection(Set<? extends IpPort> base, String loc, int num) {
         if(loc == null || loc.equals(""))
             loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
 
-        Set hosts = new HashSet(num);
-        Iterator i;
-
-        Set locales = (Set)LOCALE_SET_MAP.get(loc);
+        Set<IpPort> hosts = new HashSet<IpPort>(num);
+        
+        Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
         if(locales != null) {
-            for(i = locales.iterator(); i.hasNext() && hosts.size() < num; ) {
-                Object next = i.next();
-                if(base.contains(next))
-                    hosts.add(next);
+            for(ExtendedEndpoint e : locales) {
+                if(hosts.size() >= num)
+                    break;
+                if(base.contains(e))
+                    hosts.add(e);
             }
         }
         
-        for(i = base.iterator(); i.hasNext() && hosts.size() < num;) {
-            hosts.add(i.next());
+        for(IpPort ipp : base) {
+            if(hosts.size() >= num)
+                break;
+            hosts.add(ipp);
         }
         
         return hosts;
