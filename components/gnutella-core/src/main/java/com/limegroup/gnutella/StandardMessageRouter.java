@@ -47,8 +47,8 @@ public class StandardMessageRouter extends MessageRouter {
         //If this wasn't a handshake or crawler ping, check if we can accept
         //incoming connection for old-style unrouted connections, ultrapeers, or
         //leaves.  TODO: does this mean leaves always respond to pings?
-        int hops = (int)ping.getHops();
-        int ttl = (int)ping.getTTL();
+        int hops = ping.getHops();
+        int ttl = ping.getTTL();
         if (   (hops+ttl > 2) 
             && !_manager.allowAnyConnection())
             return;
@@ -129,7 +129,7 @@ public class StandardMessageRouter extends MessageRouter {
         }
         
         byte[] data = request.getSupportsCachedPongData();
-        Collection hosts = Collections.EMPTY_LIST;
+        Collection<IpPort> hosts = Collections.emptyList();
         if(data != null) {
             boolean isUltrapeer =
                 data.length >= 1 && 
@@ -164,15 +164,10 @@ public class StandardMessageRouter extends MessageRouter {
         //words, why no ultrapong marking, proper address calculation, etc?
         
         //send the pongs for leaves
-        List /*<ManagedConnection>*/ leafConnections 
-            = _manager.getInitializedClientConnections();
+        List<ManagedConnection> leafConnections = _manager.getInitializedClientConnections();
         
-        for(Iterator iterator = leafConnections.iterator(); 
-            iterator.hasNext();) {
-            //get the next connection
-            ManagedConnection connection = (ManagedConnection)iterator.next();
+        for(ManagedConnection connection : leafConnections) {
             //create the pong for this connection
-
             PingReply pr = 
                 PingReply.createExternal(m.getGUID(), (byte)2, 
                                          connection.getPort(),
@@ -285,16 +280,13 @@ public class StandardMessageRouter extends MessageRouter {
         // -----------------------------
 
         //convert responses to QueryReplies
-        Iterator /*<QueryReply>*/iterator=responsesToQueryReplies(responses,
+        Iterable<QueryReply> iterable = responsesToQueryReplies(responses,
                                                                   query);
         //send the query replies
         try {
-            while(iterator.hasNext()) {
-                QueryReply queryReply = (QueryReply)iterator.next();
+            for(QueryReply queryReply : iterable)
                 sendQueryReply(queryReply);
-            }
-        } 
-        catch (IOException e) {
+        }  catch (IOException e) {
             // if there is an error, do nothing..
         }
         // -----------------------------
@@ -317,7 +309,7 @@ public class StandardMessageRouter extends MessageRouter {
      *
      * @return a new <tt>List</tt> of <tt>QueryReply</tt> instances
      */
-    protected List createQueryReply(byte[] guid, byte ttl,
+    protected List<QueryReply> createQueryReply(byte[] guid, byte ttl,
                                     long speed, Response[] res,
                                     byte[] clientGUID, 
                                     boolean busy, boolean uploaded, 
@@ -325,7 +317,7 @@ public class StandardMessageRouter extends MessageRouter {
                                     boolean isFromMcast,
                                     boolean isFWTransfer) {
         
-        List queryReplies = new ArrayList();
+        List<QueryReply> queryReplies = new ArrayList<QueryReply>();
         QueryReply queryReply = null;
 
         // pick the right address & port depending on multicast & fwtrans
@@ -359,7 +351,7 @@ public class StandardMessageRouter extends MessageRouter {
                 port = RouterService.getPort();
                 if(!NetworkUtils.isValidAddress(ip) ||
                         !NetworkUtils.isValidPort(port))
-                    return Collections.EMPTY_LIST;
+                    return Collections.emptyList();
             }
         }
         
@@ -388,21 +380,18 @@ public class StandardMessageRouter extends MessageRouter {
         // get the *latest* push proxies if we have not accepted an incoming
         // connection in this session
         boolean notIncoming = !RouterService.acceptedIncomingConnection();
-        Set proxies = 
-            (notIncoming ? 
-             _manager.getPushProxies() : null);
+        Set<IpPort> proxies = notIncoming ? _manager.getPushProxies() : null;
         
         // it may be too big....
         if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {
             // ok, need to partition responses up once again and send out
             // multiple query replies.....
-            List splitResps = new LinkedList();
+            List<Response[]> splitResps = new LinkedList<Response[]>();
             splitAndAddResponses(splitResps, res);
 
             while (!splitResps.isEmpty()) {
-                Response[] currResps = (Response[]) splitResps.remove(0);
-                String currXML = 
-                LimeXMLDocumentHelper.getAggregateString(currResps);
+                Response[] currResps = splitResps.remove(0);
+                String currXML = LimeXMLDocumentHelper.getAggregateString(currResps);
                 byte[] currXMLBytes = null;
                 try {
                     currXMLBytes = currXML.getBytes("UTF-8");
@@ -482,7 +471,7 @@ public class StandardMessageRouter extends MessageRouter {
         return retResps;
     }
 
-    private void splitAndAddResponses(List addTo, Response[] toSplit) {
+    private void splitAndAddResponses(List<Response[]> addTo, Response[] toSplit) {
         Response[][] splits = splitResponses(toSplit);
         addTo.add(splits[0]);
         addTo.add(splits[1]);

@@ -3,7 +3,6 @@ package com.limegroup.gnutella.uploader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Iterator;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.Response;
@@ -47,15 +46,13 @@ public final class BrowseHostUploadState extends UploadState {
             responses = new Response[0];
         
         //convert to QueryReplies
-        Iterator /*<QueryReply>*/ iterator 
+        Iterable<QueryReply> iterable 
             = RouterService.getMessageRouter().responsesToQueryReplies(responses, 
 																	   indexingQuery);
         
         try {
-            while(iterator.hasNext()) {
-                QueryReply queryReply = (QueryReply)iterator.next();
+            for(QueryReply queryReply : iterable)
                 queryReply.write(BAOS);
-            }
         } catch (IOException e) {
             // if there is an error, do nothing..
         }

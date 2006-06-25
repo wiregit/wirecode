@@ -405,7 +405,7 @@ public final class CreationTimeCache {
 		try {
             ois = new ConverterObjectInputStream(new BufferedInputStream(
                             new FileInputStream(CTIME_CACHE_FILE)));
-            return GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class, true);
+            return GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class, GenericsUtils.ScanMode.REMOVE);
 	    } catch(Throwable t) {
             dirty = true;
 	        LOG.error("Unable to read creation time file", t);

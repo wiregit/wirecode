@@ -33,7 +33,7 @@ public class RemoteHostData {
     public RemoteHostData(String host, int port, byte[] guid) {
         _host = host;
         _port = port;
-        _clientGUID = (byte[]) guid.clone();
+        _clientGUID = guid.clone();
     }
     
     

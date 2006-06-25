@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.Set;
 
 import com.limegroup.gnutella.udpconnect.UDPConnection;
@@ -25,7 +24,7 @@ public class PushEndpointForSelf extends PushEndpoint {
      */
     private PushEndpointForSelf() {
         super(RouterService.getMyGUID(),
-                Collections.EMPTY_SET,
+                IpPort.EMPTY_SET,
                 0,
                 UDPConnection.VERSION);
     
@@ -41,7 +40,7 @@ public class PushEndpointForSelf extends PushEndpoint {
     /**
      * delegate the call to connection manager
      */
-    public Set getProxies() {
+    public Set<IpPort> getProxies() {
         return RouterService.getConnectionManager().getPushProxies();
     }
     

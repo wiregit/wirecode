@@ -55,6 +55,7 @@ import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.udpconnect.UDPSelectorProvider;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -226,8 +227,8 @@ public class RouterService {
     /**
      * A list of items that require running prior to shutting down LW.
      */
-    private static final List SHUTDOWN_ITEMS = 
-        Collections.synchronizedList(new LinkedList());
+    private static final List<Thread> SHUTDOWN_ITEMS = 
+        Collections.synchronizedList(new LinkedList<Thread>());
 
     /**
      * Variable for whether or not that backend threads have been started.
@@ -849,14 +850,11 @@ public class RouterService {
             return;
         
         // Start each shutdown item.
-        for(Iterator i = SHUTDOWN_ITEMS.iterator(); i.hasNext(); ) {
-            Thread t = (Thread)i.next();
+        for(Thread t : SHUTDOWN_ITEMS)
             t.start();
-        }
         
         // Now that we started them all, iterate back and wait for each one to finish.
-        for(Iterator i = SHUTDOWN_ITEMS.iterator(); i.hasNext(); ) {
-            Thread t = (Thread)i.next();
+        for(Thread t : SHUTDOWN_ITEMS) {
             try {
                 t.join();
             } catch(InterruptedException ie) {}
@@ -1238,9 +1236,9 @@ public class RouterService {
      * 
      * @param num How many endpoints to try to get
      */
-    public static Collection getPreferencedHosts(boolean isUltrapeer, String locale, int num) {
+    public static Collection<IpPort> getPreferencedHosts(boolean isUltrapeer, String locale, int num) {
         
-        Set hosts = new IpPortSet();
+        Set<IpPort> hosts = new IpPortSet();
         
         if(isUltrapeer)
             hosts.addAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale,num));
@@ -1251,17 +1249,20 @@ public class RouterService {
         
         if(hosts.size() < num) {
             //we first try to get the connections that match the locale.
-            List conns = manager.getInitializedConnectionsMatchLocale(locale);
-            for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < num;)
-                hosts.add(i.next());
+            for(IpPort ipp : manager.getInitializedConnectionsMatchLocale(locale)) {
+                if(hosts.size() >= num)
+                    break;
+                hosts.add(ipp);
+            }
             
             //if we still don't have enough hosts, get them from the list
             //of all initialized connection
             if(hosts.size() < num) {
-                //list returned is unmmodifiable
-                conns = manager.getInitializedConnections();
-                for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < num;)
-                    hosts.add(i.next());
+                for(IpPort ipp : manager.getInitializedConnections()) {
+                    if(hosts.size() >= num)
+                        break;
+                    hosts.add(ipp);
+                }
             }
         }
         

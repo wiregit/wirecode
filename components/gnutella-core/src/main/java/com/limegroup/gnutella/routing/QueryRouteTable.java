@@ -545,9 +545,9 @@ public class QueryRouteTable {
      * Assert.that(prev.equals(m)); 
      * </pre> 
      */
-    public List /* of RouteTableMessage */ encode(
+    public List<RouteTableMessage> encode(
       QueryRouteTable prev, boolean allowCompression) {
-        List /* of RouteTableMessage */ buf=new LinkedList();
+        List<RouteTableMessage> buf=new LinkedList<RouteTableMessage>();
         if (prev==null)
             buf.add(new ResetTableMessage(bitTableLength, infinity));
         else

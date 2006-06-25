@@ -196,7 +196,8 @@ class Container {
                         LOG.warn("Ignoring value: " + entry.getValue());
                     continue;
                 }
-                Collection<File> v = GenericsUtils.scanForCollection(entry.getValue(), File.class, true);
+                Collection<File> v = GenericsUtils.scanForCollection(entry.getValue(), File.class,
+                                                                     GenericsUtils.ScanMode.REMOVE);
         		if(v instanceof SortedSet)
         			toReturn.put(k, Collections.synchronizedSortedSet((SortedSet<File>)v));
         		else if(v instanceof Set)

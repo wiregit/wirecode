@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Utility interface that allows class containing host information to be 
@@ -39,6 +40,8 @@ public interface IpPort {
     
     /** An empty list, casted to an IpPort. */
     public static final List<IpPort> EMPTY_LIST = Collections.emptyList();
+    /** An empty set, casted to an IpPort. */
+    public static final Set<IpPort> EMPTY_SET = Collections.emptySet();
     
     /**
      * A comparator to compare IpPort objects.

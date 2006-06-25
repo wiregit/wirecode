@@ -22,6 +22,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -118,7 +119,7 @@ public class BrowseHostHandler {
      * @param canDoFWTransfer Whether or not this guy can do a firewall
      * transfer.
      */
-    public void browseHost(String host, int port, Set proxies,
+    public void browseHost(String host, int port, Set<? extends IpPort> proxies,
                            boolean canDoFWTransfer) {
         if(!NetworkUtils.isValidPort(port) || 
                                          !NetworkUtils.isValidAddress(host)) {

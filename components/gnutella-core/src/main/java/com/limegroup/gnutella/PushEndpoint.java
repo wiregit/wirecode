@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -111,8 +112,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
      * reference the true key object.  A WeakReference is used to allow
      * GC'ing to still work and the map to ultimately remove unused keys.
      */
-	private static final Map GUID_PROXY_MAP = 
-	    Collections.synchronizedMap(new WeakHashMap());
+	private static final Map<GUID, GuidSetWrapper> GUID_PROXY_MAP = 
+	    Collections.synchronizedMap(new WeakHashMap<GUID, GuidSetWrapper>());
     
     static {
         RouterService.schedule(new WeakCleaner(),30*1000,30*1000);
@@ -148,7 +149,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * cleared after registering in the map.  This is used only to 
 	 * hold the parsed proxies until they are put in the map.
 	 */
-	private Set _proxies;
+	private Set<IpPort> _proxies;
 	
 	/**
 	 * the external address of this PE.  Needed for firewall-to-firewall
@@ -160,28 +161,28 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @param guid the client guid	
 	 * @param proxies the push proxies for that host
 	 */
-	public PushEndpoint(byte [] guid, Set proxies,int features,int version) {
+	public PushEndpoint(byte [] guid, Collection<? extends IpPort> proxies,int features,int version) {
 		this(guid,proxies,features,version,null);
 	}
 	
-	public PushEndpoint(byte [] guid, Set proxies,int features,int version,IpPort addr) {
+	public PushEndpoint(byte [] guid, Collection<? extends IpPort> proxies,int features,int version,IpPort addr) {
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
 		_clientGUID=guid;
 		_guid = new GUID(_clientGUID);
 		if (proxies != null) {
             if (proxies instanceof IpPortSet)
-                _proxies = Collections.unmodifiableSet(proxies);
+                _proxies = Collections.unmodifiableSet((IpPortSet)proxies);
             else
                 _proxies = Collections.unmodifiableSet(new IpPortSet(proxies));
         } else
-            _proxies = Collections.EMPTY_SET;
+            _proxies = Collections.emptySet();
 		_externalAddr = addr;
 	}
 	
 	
 	
-	public PushEndpoint(byte [] guid, Set proxies) {
+	public PushEndpoint(byte [] guid, Collection<? extends IpPort> proxies) {
 		this(guid,proxies,PLAIN,0);
 	}
 	
@@ -190,7 +191,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * not very useful but can happen.
 	 */
 	public PushEndpoint(byte [] guid) {
-		this(guid, Collections.EMPTY_SET);
+		this(guid, IpPort.EMPTY_LIST);
 	}
 	
 	/**
@@ -214,7 +215,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
-		Set proxies = new IpPortSet();
+		Set<IpPort> proxies = new IpPortSet();
 		
 		int fwtVersion =0;
 		
@@ -260,7 +261,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @return a byte-packed representation of this
 	 */
 	public byte [] toBytes() {
-	    Set proxies = getProxies();
+	    Set<IpPort> proxies = getProxies();
 	    int payloadSize = getSizeBytes(proxies);
 	    IpPort addr = getValidExternalAddress();
         int FWTVersion = supportsFWTVersion();
@@ -280,7 +281,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		toBytes(where, offset, getProxies(), getValidExternalAddress(),supportsFWTVersion());
 	}
 	
-	private void toBytes(byte []where, int offset, Set proxies, IpPort address, int FWTVersion) {
+	private void toBytes(byte []where, int offset, Set<? extends IpPort> proxies,
+                         IpPort address, int FWTVersion) {
 	    
 	    int neededSpace = getSizeBytes(proxies);
 	    if (address != null) { 
@@ -315,9 +317,10 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		
 		//store the push proxies
 		int i=0;
-		for (Iterator iter = proxies.iterator();iter.hasNext() && i < 4;) {
-			IpPort ppi = (IpPort) iter.next();
-			
+        for(IpPort ppi : proxies) {
+            if(i >= 4)
+                break;
+            
 			byte [] addr = ppi.getInetAddress().getAddress();
 			short port = (short)ppi.getPort();
 			
@@ -349,7 +352,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     public static PushEndpoint fromBytes(DataInputStream dais) 
     throws BadPacketException, IOException {
         byte [] guid =new byte[16];
-        Set proxies = new IpPortSet(); 
+        Set<IpPort> proxies = new IpPortSet(); 
         IpPort addr = null;
         
         int header = dais.read() & 0xFF;
@@ -391,17 +394,17 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * 
 	 * @return a view of the current set of proxies.
 	 */
-	public Set getProxies() {
+	public Set<IpPort> getProxies() {
 
 	    synchronized(this) {
 	    	if (_proxies!=null)
 	        	return _proxies;
 	    }
 
-	    GuidSetWrapper current = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
+	    GuidSetWrapper current = GUID_PROXY_MAP.get(_guid);
 
 	    if (current == null)
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         
 	    return current.getProxies();
 	}
@@ -420,8 +423,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * unless it has never been put in the map.
 	 */
 	public int supportsFWTVersion() {
-		GuidSetWrapper current = (GuidSetWrapper)
-			GUID_PROXY_MAP.get(_guid);
+		GuidSetWrapper current = GUID_PROXY_MAP.get(_guid);
 		int currentVersion = current == null ? 
 				_fwtVersion : current.getFWTVersion();
 		return currentVersion;
@@ -433,8 +435,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 */
 	public static void setFWTVersionSupported(byte[] guid,int version){
 		GUID g = new GUID(guid);
-		GuidSetWrapper current = (GuidSetWrapper)
-			GUID_PROXY_MAP.get(g);
+		GuidSetWrapper current = GUID_PROXY_MAP.get(g);
 		if (current!=null)
 			current.setFWTVersion(version);
 	}
@@ -499,9 +500,9 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		}
 		
 		int proxiesWritten=0;
-		for (Iterator iter = getProxies().iterator();
-			iter.hasNext() && proxiesWritten <4;) {
-            IpPort cur = (IpPort)iter.next();
+        for(IpPort cur : getProxies()) {
+            if(proxiesWritten >= 4)
+                break;
 			
 			httpString.append(NetworkUtils.ip2string(
 				        cur.getInetAddress().getAddress()));
@@ -522,8 +523,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * if they have never been updated.
 	 */
 	public int getFeatures() {
-		GuidSetWrapper current = (GuidSetWrapper)
-			GUID_PROXY_MAP.get(_guid);
+		GuidSetWrapper current = GUID_PROXY_MAP.get(_guid);
 		int currentFeatures = current==null ? _features : current.getFeatures();
 		return currentFeatures & FEATURES_MASK;
 	}
@@ -533,8 +533,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 */
 	public static void setFeatures(byte [] guid,int features) {
 		GUID g = new GUID(guid);
-		GuidSetWrapper current = (GuidSetWrapper)
-			GUID_PROXY_MAP.get(g);
+		GuidSetWrapper current = GUID_PROXY_MAP.get(g);
 		if (current!=null)
 			current.setFeatures(features);
 	}
@@ -544,15 +543,13 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
      */
     public static void setAddr(byte [] guid, IpPort addr) {
         GUID g = new GUID(guid);
-        GuidSetWrapper current = (GuidSetWrapper)
-            GUID_PROXY_MAP.get(g);
+        GuidSetWrapper current = GUID_PROXY_MAP.get(g);
         if (current!=null)
             current.setIpPort(addr);
     }
     
     private IpPort getIpPort() {
-        GuidSetWrapper current = (GuidSetWrapper)
-            GUID_PROXY_MAP.get(_guid);
+        GuidSetWrapper current = GUID_PROXY_MAP.get(_guid);
         return current == null || current.getIpPort() == null ? 
                 _externalAddr : current.getIpPort();
     }
@@ -596,7 +593,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    GUID guidRef = null;
 
 	    synchronized(GUID_PROXY_MAP) {
-	        existing = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
+	        existing = GUID_PROXY_MAP.get(_guid);
 
 	        // try to get a hard ref so that the mapping won't expire
 	        if (existing!=null)
@@ -611,7 +608,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	            if (good)
 	                existing.updateProxies(_proxies,true);
 	            else
-	                existing.updateProxies(Collections.EMPTY_SET,true);
+	                existing.updateProxies(IpPort.EMPTY_SET,true);
 	            
 	            GUID_PROXY_MAP.put(_guid,existing);
 	            
@@ -648,7 +645,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 */
 	public static void overwriteProxies(byte [] guid, String httpString) 
 		throws IOException {
-	    Set newSet = new HashSet();
+	    Set<IpPort> newSet = new HashSet<IpPort>();
 	    StringTokenizer tok = new StringTokenizer(httpString,",");
 	    while(tok.hasMoreTokens()) {
 	        String proxy = tok.nextToken().trim();
@@ -660,11 +657,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         overwriteProxies(guid, newSet);
     }
     
-    public static void overwriteProxies(byte[] guid, Set newSet) {
+    public static void overwriteProxies(byte[] guid, Set<? extends IpPort> newSet) {
 	    GUID g = new GUID(guid);
 	    GuidSetWrapper wrapper;
 	    synchronized(GUID_PROXY_MAP) {
-	        wrapper = (GuidSetWrapper)GUID_PROXY_MAP.get(g);
+	        wrapper = GUID_PROXY_MAP.get(g);
 	        if (wrapper==null) {
 	            wrapper = new GuidSetWrapper(g);
 	            GUID_PROXY_MAP.put(g, wrapper);
@@ -743,8 +740,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	}
 	
 	private static class GuidSetWrapper {
-	    private final WeakReference _guidRef;
-	    private Set _proxies;
+	    private final WeakReference<GUID> _guidRef;
+	    private Set<IpPort> _proxies;
 	    private int _features,_fwtVersion;
         private IpPort _externalAddr;
 	    
@@ -753,13 +750,13 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    }
 	    
 	    GuidSetWrapper(GUID guid,int features, int version) {
-	        _guidRef = new WeakReference(guid);
+	        _guidRef = new WeakReference<GUID>(guid);
 	        _features=features;
 	        _fwtVersion=version;
 	    }
 	    
-	    synchronized void updateProxies(Set s, boolean add){
-	        Set existing = new IpPortSet();
+	    synchronized void updateProxies(Set<? extends IpPort> s, boolean add){
+	        Set<IpPort> existing = new IpPortSet();
             
 	        if (s == null)
                 s = _proxies;
@@ -775,12 +772,12 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	        overwriteProxies(existing);
 	    }
 	    
-	    synchronized void overwriteProxies(Set s) {
+	    synchronized void overwriteProxies(Set<? extends IpPort> s) {
 	        _proxies = Collections.unmodifiableSet(s);
 	    }
 	    
-	    synchronized Set getProxies() {
-	        return _proxies != null ? _proxies : Collections.EMPTY_SET;
+	    synchronized Set<IpPort> getProxies() {
+	        return _proxies != null ? _proxies : IpPort.EMPTY_SET;
 	    }
 	    
 	    synchronized int getFeatures() {
@@ -808,7 +805,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         }
 	    
 	    GUID getGuid() {
-	        return (GUID) _guidRef.get();
+	        return _guidRef.get();
 	    }
 	}
     

@@ -9,12 +9,12 @@ import java.util.Map;
  * An attempt to add new entry throws an NoMoreStorageException
  * @see NoMoreStorageException
  */
-public class FixedsizeHashMap {
+public class FixedsizeHashMap<K, V> {
     
     /**
      * The underlying storage
      */
-    private final Map hashMap;
+    private final Map<K, V> hashMap;
     
     /**
      * The max number of elements that can be stored
@@ -29,7 +29,7 @@ public class FixedsizeHashMap {
      */
     public FixedsizeHashMap(int size)
     {
-        hashMap = new HashMap(size * 4/3);
+        hashMap = new HashMap<K, V>(size * 4/3);
         this.maxSize = size;
     }
     
@@ -43,9 +43,9 @@ public class FixedsizeHashMap {
      * already full or not
      * @see isfull()
      */
-    public synchronized Object put(Object key, Object value) throws NoMoreStorageException
+    public synchronized V put(K key, V value) throws NoMoreStorageException
     {
-        Object retValue = null;
+        V retValue = null;
         
         //check if the count is less than size, in that case no problem
         //inserting this new entry
@@ -70,7 +70,7 @@ public class FixedsizeHashMap {
      * @param key The given key
      * @return the value given key maps to
      */
-    public synchronized Object get(Object key) {
+    public synchronized V get(K key) {
         return hashMap.get(key);
     }
     

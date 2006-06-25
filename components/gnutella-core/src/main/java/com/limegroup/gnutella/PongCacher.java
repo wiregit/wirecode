@@ -48,7 +48,8 @@ public final class PongCacher {
      * <tt>BucketQueue</tt> holding pongs separated by hops.
      * The map is of String (locale) to BucketQueue (Pongs per Hop)
      */
-    private static final Map /* String -> BucketQueue */ PONGS = new HashMap();
+    private static final Map<String, BucketQueue<PingReply>> PONGS =
+        new HashMap<String, BucketQueue<PingReply>>();
 
     /**
      * Returns the single <tt>PongCacher</tt> instance.
@@ -70,13 +71,13 @@ public final class PongCacher {
      *
      * @return the <tt>List</tt> of cached pongs -- continually updated
      */
-    public List getBestPongs(String loc) {
+    public List<PingReply> getBestPongs(String loc) {
         synchronized(PONGS) { 
-            List pongs = new LinkedList(); //list to return
+            List<PingReply> pongs = new LinkedList<PingReply>(); //list to return
             long curTime = System.currentTimeMillis();
             //first we try to populate "pongs" with those pongs
             //that match the locale 
-            List removeList = 
+            List<PingReply> removeList = 
                 addBestPongs(loc, pongs, curTime, 0);
             //remove all stale pongs that were reported for the
             //locale
@@ -108,7 +109,7 @@ public final class PongCacher {
      * adds good pongs to the passed in list "pongs" and
      * return a list of pongs that should be removed.
      */
-    private List addBestPongs(String loc, List pongs, 
+    private List<PingReply> addBestPongs(String loc, List<PingReply> pongs, 
                               long curTime, int i) {
         //set the expire time to be used.
         //if the locale that is passed in is "en" then just use the
@@ -121,14 +122,14 @@ public final class PongCacher {
         
         //check if there are any pongs of the specific locale stored
         //in PONGS.
-        List remove = null;
+        List<PingReply> remove = null;
         if(PONGS.containsKey(loc)) { 
             //get all the pongs that are of the specific locale and
             //make sure that they are not stale
-            BucketQueue bq = (BucketQueue)PONGS.get(loc);
-            Iterator iter = bq.iterator();
+            BucketQueue<PingReply> bq = PONGS.get(loc);
+            Iterator<PingReply> iter = bq.iterator();
             for(;iter.hasNext() && i < NUM_HOPS; i++) {
-                PingReply pr = (PingReply)iter.next();
+                PingReply pr = iter.next();
                 
                 //if the pongs are stale put into the remove list
                 //to be returned.  Didn't pass in the remove list
@@ -137,7 +138,7 @@ public final class PongCacher {
                 //this may be a premature and unnecessary opt.
                 if(curTime - pr.getCreationTime() > exp_time) {
                     if(remove == null) 
-                        remove = new LinkedList();
+                        remove = new LinkedList<PingReply>();
                     remove.add(pr);
                 }
                 else {
@@ -154,12 +155,10 @@ public final class PongCacher {
      * removes the pongs with the specified locale and those
      * that are in the passed in list l
      */
-    private void removePongs(String loc, List l) {
+    private void removePongs(String loc, List<PingReply> l) {
         if(l != null) {
-            BucketQueue bq = (BucketQueue)PONGS.get(loc);
-            Iterator iter = l.iterator();
-            while(iter.hasNext()) {
-                PingReply pr = (PingReply)iter.next();
+            BucketQueue<PingReply> bq = PONGS.get(loc);
+            for(PingReply pr : l) {
                 bq.removeAll(pr);
             }
         }
@@ -183,11 +182,11 @@ public final class PongCacher {
         synchronized(PONGS) {
             //check the map for the locale and create or retrieve the set
             if(PONGS.containsKey(pr.getClientLocale())) {
-                BucketQueue bq = (BucketQueue)PONGS.get(pr.getClientLocale());
+                BucketQueue<PingReply> bq = PONGS.get(pr.getClientLocale());
                 bq.insert(pr, pr.getHops());
             }
             else {
-                BucketQueue bq = new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
+                BucketQueue<PingReply> bq = new BucketQueue<PingReply>(NUM_HOPS, NUM_PONGS_PER_HOP);
                 bq.insert(pr, pr.getHops());
                 PONGS.put(pr.getClientLocale(), bq);
             }

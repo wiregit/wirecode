@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -174,21 +173,22 @@ public abstract class MessageRouter {
      * if the sink wants them).  Cleared every CLEAR_TIME seconds.
      * TimedGUID->QueryResponseBundle.
      */
-    private final Map _outOfBandReplies = new Hashtable();
+    private final Map<GUID.TimedGUID, QueryResponseBundle> _outOfBandReplies =
+        new Hashtable<GUID.TimedGUID, QueryResponseBundle>();
 
     /**
      * Keeps track of potential sources of content.  Comprised of Sets of GUESS
      * Endpoints.  Kept tidy when searches/downloads are killed.
      */
-    private final Map _bypassedResults = new HashMap();
+    private final Map<GUID, Set<GUESSEndpoint>> _bypassedResults = new HashMap<GUID, Set<GUESSEndpoint>>();
 
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
      * UDP.  The size is limited and once the size is reached, no more connect
      * back attempts will be honored.
      */
-    private static final FixedsizeHashMap _udpConnectBacks = 
-        new FixedsizeHashMap(200);
+    private static final FixedsizeHashMap<String, String> _udpConnectBacks = 
+        new FixedsizeHashMap<String, String>(200);
         
     /**
      * The maximum numbers of ultrapeers to forward a UDPConnectBackRedirect
@@ -201,8 +201,8 @@ public abstract class MessageRouter {
      * TCP.  The size is limited and once the size is reached, no more connect
      * back attempts will be honored.
      */
-    private static final FixedsizeHashMap _tcpConnectBacks = 
-        new FixedsizeHashMap(200);
+    private static final FixedsizeHashMap<String, String> _tcpConnectBacks = 
+        new FixedsizeHashMap<String, String>(200);
         
     /**
      * The maximum numbers of ultrapeers to forward a TCPConnectBackRedirect
@@ -264,11 +264,9 @@ public abstract class MessageRouter {
      */
     private static final long TIMED_GUID_LIFETIME = 25 * 1000; 
 
-    /**
-     * Keeps track of Listeners of GUIDs.
-     * GUID -> List of MessageListener
-     */
-    private volatile Map _messageListeners = Collections.EMPTY_MAP;
+    /** Keeps track of Listeners of GUIDs. */
+    private volatile Map<byte[], List<MessageListener>> _messageListeners =
+        Collections.emptyMap();
     
     /**
      * Lock that registering & unregistering listeners can hold
@@ -281,20 +279,17 @@ public abstract class MessageRouter {
      */
     private long _lastQueryKeyTime;
     
-    /**
-     * Message Class -> (Regular) MessageHandler
-     */
-    private volatile Map messageHandlers = new IdentityHashMap();
+    /** Handlers for TCP messages. */
+    private volatile Map<Class<? extends Message>, MessageHandler> messageHandlers =
+        new IdentityHashMap<Class<? extends Message>, MessageHandler>();
     
-    /**
-     * Message Class -> (UDP) MessageHandler
-     */
-    private volatile Map udpMessageHandlers = new IdentityHashMap();
+    /** Handler for UDP messages. */
+    private volatile Map<Class<? extends Message>, MessageHandler> udpMessageHandlers =
+        new IdentityHashMap<Class<? extends Message>, MessageHandler>();
     
-    /**
-     * Message Class -> (Multicast) MessageHandler
-     */
-    private volatile Map multicastMessageHandlers = new IdentityHashMap();
+    /** Handler for TCP messages. */
+    private volatile Map<Class<? extends Message>, MessageHandler> multicastMessageHandlers =
+        new IdentityHashMap<Class<? extends Message>, MessageHandler>();
     
     /** Map for Multicast morphed GUIDs. */
     private GuidMap _multicastGuidMap = GuidMapFactory.getMap();
@@ -317,7 +312,9 @@ public abstract class MessageRouter {
      * See setMessageHandler(), setUDPMessageHandler() and 
      * setMulticastMessageHandler() for implementation details.
      */
-    private static Map setHandler(Map handlerMap, Class clazz, MessageHandler handler) {
+    private static Map<Class<? extends Message>, MessageHandler> setHandler(
+      Map<Class<? extends Message>, ? extends MessageHandler> handlerMap,
+      Class<? extends Message> clazz, MessageHandler handler) {
         if (clazz == null) {
             throw new NullPointerException("Class is null");
         }
@@ -326,7 +323,8 @@ public abstract class MessageRouter {
             throw new NullPointerException("MessageHandler is null");
         }
         
-        Map copy = new IdentityHashMap(handlerMap);
+        Map<Class<? extends Message>, MessageHandler> copy =
+            new IdentityHashMap<Class<? extends Message>, MessageHandler>(handlerMap);
         Object o = copy.put(clazz, handler);
         
         if (o != null && LOG.isErrorEnabled()) {
@@ -341,8 +339,8 @@ public abstract class MessageRouter {
      * Helper method to get a MessageHandler from the provided Map
      * for the provided Message Class
      */
-    private static MessageHandler getHandler(Map messageHandlers, Class clazz) {
-        return (MessageHandler)messageHandlers.get(clazz);
+    private static MessageHandler getHandler(Map<Class<? extends Message>, ? extends MessageHandler> messageHandlers, Class<? extends Message> clazz) {
+        return messageHandlers.get(clazz);
     }
     
     /**
@@ -352,7 +350,7 @@ public abstract class MessageRouter {
      * @param clazz The Class of the Message
      * @param handler The Handler of the Message
      */
-    public void setMessageHandler(Class clazz, MessageHandler handler) {
+    public void setMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
         synchronized (messageHandlers) {
             messageHandlers = setHandler(messageHandlers, clazz, handler);
         }
@@ -362,7 +360,7 @@ public abstract class MessageRouter {
      * Returns a MessageHandler for the specified Message Class
      * or null if no such MessageHandler exists.
      */
-    public MessageHandler getMessageHandler(Class clazz) {
+    public MessageHandler getMessageHandler(Class<? extends Message> clazz) {
         return getHandler(messageHandlers, clazz);
     }
     
@@ -373,7 +371,7 @@ public abstract class MessageRouter {
      * @param clazz The Class of the Message
      * @param handler The Handler of the Message
      */
-    public void setUDPMessageHandler(Class clazz, MessageHandler handler) {
+    public void setUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
         synchronized (udpMessageHandlers) {
             udpMessageHandlers = setHandler(udpMessageHandlers, clazz, handler);
         }
@@ -383,7 +381,7 @@ public abstract class MessageRouter {
      * Returns a MessageHandler for the specified Message Class
      * or null if no such MessageHandler exists.
      */
-    public MessageHandler getUDPMessageHandler(Class clazz) {
+    public MessageHandler getUDPMessageHandler(Class<? extends Message> clazz) {
         return getHandler(udpMessageHandlers, clazz);
     }
     
@@ -394,7 +392,7 @@ public abstract class MessageRouter {
      * @param clazz The Class of the Message
      * @param handler The Handler of the Message
      */
-    public void setMulticastMessageHandler(Class clazz, MessageHandler handler) {
+    public void setMulticastMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
         synchronized (multicastMessageHandlers) {
             multicastMessageHandlers = setHandler(multicastMessageHandlers, clazz, handler);
         }
@@ -404,7 +402,7 @@ public abstract class MessageRouter {
      * Returns a MessageHandler for the specified Message Class
      * or null if no such MessageHandler exists.
      */
-    public MessageHandler getMulticastMessageHandler(Class clazz) {
+    public MessageHandler getMulticastMessageHandler(Class<? extends Message> clazz) {
         return getHandler(multicastMessageHandlers, clazz);
     }
     
@@ -516,10 +514,10 @@ public abstract class MessageRouter {
      *  original query guid.  may be empty.
      *  @param guid the guid of the query you want endpoints for.
      */
-    public Set getGuessLocs(GUID guid) {
-        Set clone = new HashSet();
+    public Set<GUESSEndpoint> getGuessLocs(GUID guid) {
+        Set<GUESSEndpoint> clone = new HashSet<GUESSEndpoint>();
         synchronized (_bypassedResults) {
-            Set eps = (Set) _bypassedResults.get(guid);
+            Set<GUESSEndpoint> eps = _bypassedResults.get(guid);
             if (eps != null)
                 clone.addAll(eps);
         }
@@ -585,10 +583,9 @@ public abstract class MessageRouter {
      * This holds no locks.
      */
     private final void notifyMessageListener(Message msg, ReplyHandler handler) {
-        List all = (List)_messageListeners.get(msg.getGUID());
+        List<MessageListener> all = _messageListeners.get(msg.getGUID());
         if(all != null) {
-            for(Iterator i = all.iterator(); i.hasNext(); ) {
-                MessageListener next = (MessageListener)i.next();
+            for(MessageListener next : all) {
                 next.processMessage(msg, handler);
             }
         }
@@ -1068,8 +1065,7 @@ public abstract class MessageRouter {
 
         GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
                                                     TIMED_GUID_LIFETIME);
-        QueryResponseBundle bundle = 
-            (QueryResponseBundle) _outOfBandReplies.remove(refGUID);
+        QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
 
         if ((bundle != null) && (ack.getNumResults() > 0)) {
             InetAddress iaddr = addr.getAddress();
@@ -1077,21 +1073,20 @@ public abstract class MessageRouter {
 
             //convert responses to QueryReplies, but only send as many as the
             //node wants
-            Iterator iterator = null;
+            Iterable<QueryReply> iterable;
             if (ack.getNumResults() < bundle._responses.length) {
                 Response[] desired = new Response[ack.getNumResults()];
                 for (int i = 0; i < desired.length; i++)
                     desired[i] = bundle._responses[i];
-                iterator = responsesToQueryReplies(desired, bundle._query, 1);
+                iterable = responsesToQueryReplies(desired, bundle._query, 1);
+            } else { 
+                iterable = responsesToQueryReplies(bundle._responses, 
+                                                   bundle._query, 1);
             }
-            else 
-                iterator = responsesToQueryReplies(bundle._responses, 
-                                                   bundle._query, 1); 
+            
             //send the query replies
-            while(iterator.hasNext()) {
-                QueryReply queryReply = (QueryReply)iterator.next();
+            for(QueryReply queryReply : iterable)
                 UDPService.instance().send(queryReply, iaddr, port);
-            }
         }
         // else some sort of routing error or attack?
         // TODO: tally some stat stuff here
@@ -1122,14 +1117,13 @@ public abstract class MessageRouter {
     				!dManager.isGuidForQueryDownloading(qGUID))
     			return -1;
     		
-    		GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(),
-    				handler.getPort());
+    		GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
     		synchronized (_bypassedResults) {
     			// this is a quick critical section for _bypassedResults
     			// AND the set within it
-    			Set eps = (Set) _bypassedResults.get(qGUID);
+    			Set<GUESSEndpoint> eps = _bypassedResults.get(qGUID);
     			if (eps == null) {
-    				eps = new HashSet();
+    				eps = new HashSet<GUESSEndpoint>();
     				_bypassedResults.put(qGUID, eps);
     			}
     			if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
@@ -1178,10 +1172,13 @@ public abstract class MessageRouter {
                                                  portToContact);
 
         int sentTo = 0;
-        List peers = new ArrayList(_manager.getInitializedConnections());
+        List<ManagedConnection> peers =
+            new ArrayList<ManagedConnection>(_manager.getInitializedConnections());
         Collections.shuffle(peers);
-        for(Iterator i = peers.iterator(); i.hasNext() && sentTo < MAX_UDP_CONNECTBACK_FORWARDS;) {
-            ManagedConnection currMC = (ManagedConnection)i.next();
+        for(ManagedConnection currMC : peers) {
+            if(sentTo >= MAX_UDP_CONNECTBACK_FORWARDS)
+                break;
+            
             if(currMC == source)
                 continue;
 
@@ -1230,12 +1227,12 @@ public abstract class MessageRouter {
      * @return whether we should service the redirect request
      * @modifies the map
      */
-    private boolean shouldServiceRedirect(FixedsizeHashMap map, Object key) {
+    private boolean shouldServiceRedirect(FixedsizeHashMap<String, String> map, String key) {
         synchronized(map) {
-            Object placeHolder = map.get(key);
+            String placeHolder = map.get(key);
             if (placeHolder == null) {
                 try {
-                    map.put(key, map);
+                    map.put(key, key);
                     return true;
                 } catch (NoMoreStorageException nomo) {
                     return false;  // we've done too many connect backs, stop....
@@ -1258,10 +1255,13 @@ public abstract class MessageRouter {
         Message msg = new TCPConnectBackRedirect(sourceAddr, portToContact);
 
         int sentTo = 0;
-        List peers = new ArrayList(_manager.getInitializedConnections());
+        List<ManagedConnection> peers =
+            new ArrayList<ManagedConnection>(_manager.getInitializedConnections());
         Collections.shuffle(peers);
-        for(Iterator i = peers.iterator(); i.hasNext() && sentTo < MAX_TCP_CONNECTBACK_FORWARDS;) {
-            ManagedConnection currMC = (ManagedConnection)i.next();
+        for(ManagedConnection currMC : peers) {
+            if(sentTo >= MAX_TCP_CONNECTBACK_FORWARDS)
+                break;
+            
             if(currMC == source)
                 continue;
 
@@ -1489,14 +1489,14 @@ public abstract class MessageRouter {
         //Broadcast the ping to other connected nodes (supernodes or older
         //nodes), but DON'T forward any ping not originating from me 
         //along leaf to ultrapeer connections.
-        List list = manager.getInitializedConnections();
+        List<ManagedConnection> list = manager.getInitializedConnections();
         int size = list.size();
 
         boolean randomlyForward = false;
         if(size > 3) randomlyForward = true;
         double percentToIgnore;
         for(int i=0; i<size; i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
+            ManagedConnection mc = list.get(i);
             if(!mc.isStable()) continue;
             if (receivingConnection == FOR_ME_REPLY_HANDLER || 
                 (mc != receivingConnection && 
@@ -1532,10 +1532,10 @@ public abstract class MessageRouter {
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
-        List list = _manager.getInitializedClientConnections();
-        List hitConnections = new ArrayList();
+        List<ManagedConnection> list = _manager.getInitializedClientConnections();
+        List<ManagedConnection> hitConnections = new ArrayList<ManagedConnection>();
         for(int i=0; i<list.size(); i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
+            ManagedConnection mc = list.get(i);
             if(mc == handler) continue;
             if(mc.shouldForwardQuery(query)) {
                 hitConnections.add(mc);
@@ -1555,7 +1555,7 @@ public abstract class MessageRouter {
         RoutedQueryStat.LEAF_DROP.addData(notSent);
         
         for(int i=0; i<hitConnections.size(); i++) {
-            ManagedConnection mc = (ManagedConnection)hitConnections.get(i);
+            ManagedConnection mc = hitConnections.get(i);
             
             // sendRoutedQueryToHost is not called because 
             // we have already ensured it hits the routing table
@@ -1632,11 +1632,11 @@ public abstract class MessageRouter {
 		//nodes), but DON'T forward any queries not originating from me 
 		//along leaf to ultrapeer connections.
 	 
-		List list = _manager.getInitializedConnections();
+		List<ManagedConnection> list = _manager.getInitializedConnections();
         int limit = list.size();
 
 		for(int i=0; i<limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);      
+			ManagedConnection mc = list.get(i);      
             forwardQueryToUltrapeer(query, handler, mc);  
         }
     }
@@ -1657,7 +1657,7 @@ public abstract class MessageRouter {
 		//nodes), but DON'T forward any queries not originating from me 
 		//along leaf to ultrapeer connections.
 	 
-		List list = _manager.getInitializedConnections();
+		List<ManagedConnection> list = _manager.getInitializedConnections();
         int limit = list.size();
 
         int connectionsNeededForOld = OLD_CONNECTIONS_TO_USE;
@@ -1667,7 +1667,7 @@ public abstract class MessageRouter {
             // an old-style query, break out
             if(connectionsNeededForOld == 0) break;
 
-			ManagedConnection mc = (ManagedConnection)list.get(i);
+			ManagedConnection mc = list.get(i);
             
             // if the query is comiing from an old connection, try to
             // send it's traffic to old connections.  Only send it to
@@ -1735,7 +1735,7 @@ public abstract class MessageRouter {
      * @param qr the <tt>QueryRequest</tt> to send
      */
     private void originateLeafQuery(QueryRequest qr) {
-		List list = _manager.getInitializedConnections();
+		List<ManagedConnection> list = _manager.getInitializedConnections();
 
         // only send to at most 4 Ultrapeers, as we could have more
         // as a result of race conditions - also, don't send what is new
@@ -1746,7 +1746,7 @@ public abstract class MessageRouter {
         int limit = Math.min(max, list.size());
         final boolean wantsOOB = qr.desiresOutOfBandReplies();
         for(int i=start; i<start+limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);
+			ManagedConnection mc = list.get(i);
             QueryRequest qrToSend = qr;
             if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
                 qrToSend = QueryRequest.unmarkOOBQuery(qr);
@@ -1856,9 +1856,9 @@ public abstract class MessageRouter {
         //prevalent, this may consume too much bandwidth.
 		//Also forward any GUESS pongs to all leaves.
         if (newAddress && (reply.isUltrapeer() || supportsUnicast)) {
-            List list=_manager.getInitializedClientConnections();
+            List<ManagedConnection> list=_manager.getInitializedClientConnections();
             for (int i=0; i<list.size(); i++) {
-                ManagedConnection c = (ManagedConnection)list.get(i);
+                ManagedConnection c = list.get(i);
                 Assert.that(c != null, "null c.");
                 if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
                     c.handlePingReply(reply, handler);
@@ -2220,9 +2220,9 @@ public abstract class MessageRouter {
      * @param responses The responses to be converted
      * @param queryRequest The query request corresponding to which we are
      * generating query replies.
-     * @return Iterator (on QueryReply) over the Query Replies
+     * @return Iterable of QueryReply
      */
-    public Iterator responsesToQueryReplies(Response[] responses,
+    public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                             QueryRequest queryRequest) {
         return responsesToQueryReplies(responses, queryRequest, 10);
     }
@@ -2239,13 +2239,13 @@ public abstract class MessageRouter {
      * @param queryRequest The query request corresponding to which we are
      * generating query replies.
      * @param REPLY_LIMIT the maximum number of responses to have in each reply.
-     * @return Iterator (on QueryReply) over the Query Replies
+     * @return Iterable of QueryReply
      */
-    private Iterator responsesToQueryReplies(Response[] responses,
+    private Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
                                              final int REPLY_LIMIT) {
         //List to store Query Replies
-        List /*<QueryReply>*/ queryReplies = new LinkedList();
+        List<QueryReply> queryReplies = new LinkedList<QueryReply>();
         
         // get the appropriate queryReply information
         byte[] guid = queryRequest.getGUID();
@@ -2335,7 +2335,7 @@ public abstract class MessageRouter {
                 ttl = 1; // not strictly necessary, but nice.
             }
             
-            List replies =
+            List<QueryReply> replies =
                 createQueryReply(guid, ttl, speed, res, 
                                  _clientGUID, busy, uploaded, 
                                  measuredSpeed, mcast,
@@ -2346,7 +2346,7 @@ public abstract class MessageRouter {
 
         }//end of while
         
-        return queryReplies.iterator();
+        return queryReplies;
     }
 
     /**
@@ -2355,7 +2355,7 @@ public abstract class MessageRouter {
      *
      * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
      */
-    protected abstract List createQueryReply(byte[] guid, byte ttl,
+    protected abstract List<QueryReply> createQueryReply(byte[] guid, byte ttl,
                                             long speed, 
                                              Response[] res, byte[] clientGUID, 
                                              boolean busy, 
@@ -2486,13 +2486,13 @@ public abstract class MessageRouter {
 		long time = System.currentTimeMillis();
 
 		//For all connections to new hosts c needing an update...
-		List list=_manager.getInitializedConnections();
+		List<ManagedConnection> list=_manager.getInitializedConnections();
 		QueryRouteTable table = null;
-		List /* of RouteTableMessage */ patches = null;
+		List<RouteTableMessage> patches = null;
 		QueryRouteTable lastSent = null;
 		
 		for(int i=0; i<list.size(); i++) {                        
-			ManagedConnection c=(ManagedConnection)list.get(i);
+			ManagedConnection c = list.get(i);
 			
 
 			// continue if I'm an Ultrapeer and the node on the
@@ -2553,9 +2553,8 @@ public abstract class MessageRouter {
                 return;
             }
             
-		    for(Iterator iter = patches.iterator(); iter.hasNext();) {
-		        c.send((RouteTableMessage)iter.next());
-    	    }
+            for(RouteTableMessage next : patches)
+		        c.send(next);
     	    
             c.setQueryRouteTableSent(table);
 		}
@@ -2599,10 +2598,10 @@ public abstract class MessageRouter {
 	 * @param qrt the <tt>QueryRouteTable</tt> to add to
 	 */
 	private static void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
-		List leaves = _manager.getInitializedClientConnections();
+		List<ManagedConnection> leaves = _manager.getInitializedClientConnections();
 		
 		for(int i=0; i<leaves.size(); i++) {
-			ManagedConnection mc = (ManagedConnection)leaves.get(i);
+			ManagedConnection mc = leaves.get(i);
         	synchronized (mc.getQRPLock()) {
         	    //	Don't include busy leaves
         	    if( !mc.isBusyLeaf() ){
@@ -2626,14 +2625,15 @@ public abstract class MessageRouter {
     public void registerMessageListener(byte[] guid, MessageListener ml) {
         ml.registered(guid);
         synchronized(MESSAGE_LISTENER_LOCK) {
-            Map listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
+            Map<byte[], List<MessageListener>> listeners =
+                new TreeMap<byte[], List<MessageListener>>(GUID.GUID_BYTE_COMPARATOR);
             listeners.putAll(_messageListeners);
-            List all = (List)listeners.get(guid);
+            List<MessageListener> all = listeners.get(guid);
             if(all == null) {
-                all = new ArrayList(1);
+                all = new ArrayList<MessageListener>(1);
                 all.add(ml);
             } else {
-                List temp = new ArrayList(all.size() + 1);
+                List<MessageListener> temp = new ArrayList<MessageListener>(all.size() + 1);
                 temp.addAll(all);
                 all = temp;
                 all.add(ml);
@@ -2652,12 +2652,13 @@ public abstract class MessageRouter {
     public void unregisterMessageListener(byte[] guid, MessageListener ml) {
         boolean removed = false;
         synchronized(MESSAGE_LISTENER_LOCK) {
-            List all = (List)_messageListeners.get(guid);
+            List<MessageListener> all = _messageListeners.get(guid);
             if(all != null) {
-                all = new ArrayList(all);
+                all = new ArrayList<MessageListener>(all);
                 if(all.remove(ml)) {
                     removed = true;
-                    Map listeners = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
+                    Map<byte[], List<MessageListener>> listeners =
+                        new TreeMap<byte[], List<MessageListener>>(GUID.GUID_BYTE_COMPARATOR);
                     listeners.putAll(_messageListeners);
                     if(all.isEmpty())
                         listeners.remove(guid);
@@ -2752,19 +2753,16 @@ public abstract class MessageRouter {
     private class Expirer implements Runnable {
         public void run() {
             try {
-                Set toRemove = new HashSet();
+                Set<GUID.TimedGUID> toRemove = new HashSet<GUID.TimedGUID>();
                 synchronized (_outOfBandReplies) {
-                    Iterator keys = _outOfBandReplies.keySet().iterator();
-                    while (keys.hasNext()) {
-                        GUID.TimedGUID currQB = (GUID.TimedGUID) keys.next();
+                    for(GUID.TimedGUID currQB : _outOfBandReplies.keySet()) {
                         if ((currQB != null) && (currQB.shouldExpire()))
                             toRemove.add(currQB);
                     }
                     // done iterating through _outOfBandReplies, remove the 
                     // keys now...
-                    keys = toRemove.iterator();
-                    while (keys.hasNext())
-                        _outOfBandReplies.remove(keys.next());
+                    for(GUID.TimedGUID next : toRemove)
+                        _outOfBandReplies.remove(next);
                 }
             } 
             catch(Throwable t) {
@@ -2810,14 +2808,13 @@ public abstract class MessageRouter {
             
             // state changed? don't bother the ultrapeer with information
             // that it already knows. we need to inform new ultrapeers, though.
-            final List connections = _manager.getInitializedConnections();
+            final List<ManagedConnection> connections = _manager.getInitializedConnections();
             final HopsFlowVendorMessage hops = 
                 new HopsFlowVendorMessage(isBusy ? BUSY_HOPS_FLOW :
                                           FREE_HOPS_FLOW);
             if (isBusy == _oldBusyState) {
                 for (int i = 0; i < connections.size(); i++) {
-                    ManagedConnection c =
-                        (ManagedConnection)connections.get(i);
+                    ManagedConnection c = connections.get(i);
                     // Yes, we may tell a new ultrapeer twice, but
                     // without a buffer of some kind, we might forget
                     // some ultrapeers. The clean solution would be
@@ -2831,7 +2828,7 @@ public abstract class MessageRouter {
             } else { 
                 _oldBusyState = isBusy;
                 for (int i = 0; i < connections.size(); i++) {
-                    ManagedConnection c = (ManagedConnection)connections.get(i);
+                    ManagedConnection c = connections.get(i);
                     if (c != null && c.isClientSupernodeConnection())
                         c.send(hops);
                 }

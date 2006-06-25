@@ -71,34 +71,33 @@ public final class QueryUnicaster {
      * maintained:
      * GUID -> QueryBundle where GUID == QueryBundle._qr.getGUID()
      */
-    private Map _queries;
+    private Map<GUID, QueryBundle> _queries;
 
     /**
      * Maps leaf connections to the queries they've spawned.
      * The map is from ReplyHandler to a Set (of GUIDs).
      */
-    private Map _querySets;
+    private Map<ReplyHandler, Set<GUID>> _querySets;
 
     /** 
      * The unicast enabled hosts I should contact for queries.  Add to the
      * front, remove from the end.  Therefore, the OLDEST entries are at the
      * end.
      */
-    private LinkedList _queryHosts;
+    private LinkedList<GUESSEndpoint> _queryHosts;
 
     /**
      * The Set of QueryKeys to be used for Queries.
-     * GUESSEndpoint -> QueryKey
      */
-    private Map _queryKeys;
+    private Map<GUESSEndpoint, QueryKeyBundle> _queryKeys;
 
     /** The fixed size list of endpoints i've pinged.
      */
-    private Buffer _pingList;
+    private Buffer<GUESSEndpoint> _pingList;
 
     /** A List of query GUIDS to purge.
      */
-    private List _qGuidsToRemove;
+    private List<GUID> _qGuidsToRemove;
 
     /** The last time I sent a broadcast ping.
      */
@@ -142,8 +141,8 @@ public final class QueryUnicaster {
      * Returns a List of unicast Endpoints.  These Endpoints are the NEWEST 
      * we've seen.
      */
-    public List getUnicastEndpoints() {
-        List retList = new ArrayList();
+    public List<GUESSEndpoint> getUnicastEndpoints() {
+        List<GUESSEndpoint> retList = new ArrayList<GUESSEndpoint>();
         synchronized (_queryHosts) {
             LOG.debug("QueryUnicaster.getUnicastEndpoints(): obtained lock.");
             int size = _queryHosts.size();
@@ -167,8 +166,10 @@ public final class QueryUnicaster {
 	 */
 	public GUESSEndpoint getUnicastEndpoint() {
 		synchronized(_queryHosts) {
-			if(_queryHosts.isEmpty()) return null;
-			return (GUESSEndpoint)_queryHosts.getFirst();
+			if(_queryHosts.isEmpty())
+                return null;
+            else
+                return _queryHosts.getFirst();
 		}
 	}
 
@@ -178,12 +179,12 @@ public final class QueryUnicaster {
  	 */
     private QueryUnicaster() {
         // construct DSes...
-        _queries = new Hashtable();
-        _queryHosts = new LinkedList();
-        _queryKeys = new Hashtable();
-        _pingList = new Buffer(25);
-        _querySets = new Hashtable();
-        _qGuidsToRemove = new Vector();
+        _queries = new Hashtable<GUID, QueryBundle>();
+        _queryHosts = new LinkedList<GUESSEndpoint>();
+        _queryKeys = new Hashtable<GUESSEndpoint, QueryKeyBundle>();
+        _pingList = new Buffer<GUESSEndpoint>(25);
+        _querySets = new Hashtable<ReplyHandler, Set<GUID>>();
+        _qGuidsToRemove = new Vector<GUID>();
 
         // start service...
         _querier = new ManagedThread() {
@@ -233,15 +234,12 @@ public final class QueryUnicaster {
                     // QueryKey Reply!!
                     continue; // try another up above....
                 }
-                QueryKey queryKey = 
-                    ((QueryKeyBundle) _queryKeys.get(toQuery))._queryKey;
+                QueryKey queryKey = _queryKeys.get(toQuery)._queryKey;
 
                 purgeGuidsInternal(); // in case any were added while asleep
 				boolean currentHostUsed = false;
                 synchronized (_queries) {
-                    Iterator iter = _queries.values().iterator();
-                    while (iter.hasNext()) {
-                        QueryBundle currQB = (QueryBundle)iter.next();
+                    for(QueryBundle currQB : _queries.values()) {
                         if (currQB._hostsQueried.size() > QueryBundle.MAX_QUERIES)
                             // query is now stale....
                             _qGuidsToRemove.add(new GUID(currQB._qr.getGUID()));
@@ -287,11 +285,8 @@ public final class QueryUnicaster {
      */
     private void purgeGuidsInternal() {
         synchronized (_qGuidsToRemove) {
-            Iterator removee = _qGuidsToRemove.iterator();
-            while (removee.hasNext()) {
-                GUID currGuid = (GUID) removee.next();
+            for(GUID currGuid : _qGuidsToRemove)
                 _queries.remove(currGuid);
-            }
         }
     }
 
@@ -337,9 +332,9 @@ public final class QueryUnicaster {
 
         // then record the guid in the set of leaf's queries...
         synchronized (_querySets) {
-            Set guids = (Set) _querySets.get(reference);
+            Set<GUID> guids = _querySets.get(reference);
             if (guids == null) {
-                guids = new HashSet();
+                guids = new HashSet<GUID>();
                 _querySets.put(reference, guids);
             }
             guids.add(guid);
@@ -415,12 +410,11 @@ public final class QueryUnicaster {
         if (reference == null)
             return;
         synchronized (_querySets) {
-            Set guids = (Set) _querySets.remove(reference);
+            Set<GUID> guids = _querySets.remove(reference);
             if (guids == null)
                 return;
-            Iterator iter = guids.iterator();
-            while (iter.hasNext())
-                purgeQuery((GUID) iter.next());
+            for(GUID guid : guids)
+                purgeQuery(guid);
         }
         LOG.debug("QueryUnicaster.purgeQuery(RH): returning.");
     }
@@ -470,7 +464,7 @@ public final class QueryUnicaster {
      */
     private void addResults(GUID queryGUID, int numResultsToAdd) {
         synchronized (_queries) {
-            QueryBundle qb = (QueryBundle) _queries.get(queryGUID);
+            QueryBundle qb = _queries.get(queryGUID);
             if (qb != null) {// add results if possible...
                 qb._numResults += numResultsToAdd;
                 
@@ -513,8 +507,7 @@ public final class QueryUnicaster {
 
         if (_queryHosts.size() < MIN_ENDPOINTS) {
             // send a ping to the guy you are popping if cache too small
-            GUESSEndpoint toReturn = 
-                (GUESSEndpoint) _queryHosts.removeLast();
+            GUESSEndpoint toReturn = _queryHosts.removeLast();
             // if i haven't pinged him 'recently', then ping him...
             synchronized (_pingList) {
                 if (!_pingList.contains(toReturn)) {
@@ -527,7 +520,7 @@ public final class QueryUnicaster {
             }
             return toReturn;
         }
-        return (GUESSEndpoint) _queryHosts.removeLast();
+        return _queryHosts.removeLast();
     }
     
     /** removes all Unicast Endpoints, reset associated members
@@ -569,7 +562,7 @@ public final class QueryUnicaster {
         int _numResults = 0;
         /** The Set of Endpoints queried for this Query.
          */
-        final Set _hostsQueried = new HashSet();
+        final Set<GUESSEndpoint> _hostsQueried = new HashSet<GUESSEndpoint>();
 
         public QueryBundle(QueryRequest qr) {
             _qr = qr;
@@ -617,12 +610,10 @@ public final class QueryUnicaster {
     private class QueryKeyExpirer implements Runnable {
         public void run() {
             synchronized (_queryKeys) {
-                Set entries = _queryKeys.entrySet();
-                Iterator iter = entries.iterator();
-                while (iter.hasNext()) {
-                    QueryKeyBundle currQKB = (QueryKeyBundle) iter.next();
-                    if (currQKB.shouldExpire())
-                        entries.remove(currQKB);
+                for(Iterator<QueryKeyBundle> iter = _queryKeys.values().iterator();
+                    iter.hasNext(); ) {
+                    if(iter.next().shouldExpire())
+                        iter.remove();
                 }
             }
         }

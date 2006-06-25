@@ -578,7 +578,6 @@ public class HostCatcher {
      * @param hosts the <tt>Set</tt> to add it to
      */
     private void addToFixedSizeSet(ExtendedEndpoint host, Set<? super ExtendedEndpoint> hosts) {
-        
         synchronized(this) {
             // Don't allow the free slots host to expand infinitely.
             if(hosts.add(host) && hosts.size() > 200) {

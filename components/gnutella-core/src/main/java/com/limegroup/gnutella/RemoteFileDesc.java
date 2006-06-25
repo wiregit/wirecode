@@ -20,11 +20,13 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
@@ -77,7 +79,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	 *  INVARIANT: _xmlDocs != null -> _xmlDocs.length != 0
 	 */
     private LimeXMLDocument[] _xmlDocs;
-	private Set /* of URN*/  _urns;
+	private Set<URN>  _urns;
 
     /**
      * Boolean indicating whether or not the remote host has browse host 
@@ -177,7 +179,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * this object only during de/serialization, but we keep it cached if we
      * ever create one
      */
-    private Map propertiesMap; 
+    private Map<String, Serializable> propertiesMap; 
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -202,7 +204,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
               false,                        // reply to MCast
               false,                        // is firewalled
               AlternateLocation.ALT_VENDOR, // vendor
-              Collections.EMPTY_SET,        // push proxies
+              IpPort.EMPTY_SET,            // push proxies
               rfd.getCreationTime(),       // creation time
               0,                            // firewalled transfer
               null);                       // no PE cause not firewalled
@@ -267,10 +269,10 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
-						  LimeXMLDocument xmlDoc, Set urns,
+						  LimeXMLDocument xmlDoc, Set<? extends URN> urns,
 						  boolean replyToMulticast, boolean firewalled, 
                           String vendor, 
-                          Set proxies, long createTime) {
+                          Set<? extends IpPort> proxies, long createTime) {
         this(host, port, index, filename, size, clientGUID, speed, chat,
              quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
              vendor, proxies, createTime, 0, null);
@@ -304,10 +306,10 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
-						  LimeXMLDocument xmlDoc, Set urns,
+						  LimeXMLDocument xmlDoc, Set<? extends URN> urns,
 						  boolean replyToMulticast, boolean firewalled, 
                           String vendor, 
-                          Set proxies, long createTime, 
+                          Set<? extends IpPort> proxies, long createTime, 
                           int FWTVersion) {
 		this(host,port,index,filename,size, clientGUID,speed,chat,quality,browseHost,
                 xmlDoc, urns, replyToMulticast, firewalled,vendor, proxies,
@@ -316,7 +318,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	
 	public RemoteFileDesc(String host, int port, long index, String filename,
 	        			int size,int speed,boolean chat, int quality, boolean browseHost,
-	        			LimeXMLDocument xmlDoc, Set urns, boolean replyToMulticast,
+	        			LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
 	        			boolean firewalled, String vendor,long createTime,
 	        			PushEndpoint pe) {
         this(host,port,index,filename,size,null,speed,chat,quality,browseHost,xmlDoc,urns,
@@ -329,8 +331,8 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      */
     private RemoteFileDesc (String host, int port, long index, String filename,
             int size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set urns, boolean replyToMulticast,
-            boolean firewalled, String vendor, Set proxies, long createTime,
+            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
+            boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
             int FWTVersion, PushEndpoint pe) {
 	    
 	    if(!NetworkUtils.isValidPort(port)) {
@@ -393,9 +395,8 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
         else
             _xmlDocs = null;
 		if(urns == null) {
-			_urns = Collections.EMPTY_SET;
-		}
-		else {
+			_urns = Collections.emptySet();
+		} else {
 			_urns = Collections.unmodifiableSet(urns);
 		}
         _http11 = ( !_urns.isEmpty() );
@@ -408,26 +409,14 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
         //(the default Java value).  Hence we also initialize
         //_browseHostEnabled.  See class overview for more details.
         if(_urns == null) {
-            _urns = Collections.EMPTY_SET;
+            _urns = Collections.emptySet();
             _browseHostEnabled= false;
         } else {
-            // It seems that the Urn Set has some java.io.Files
-            // inserted into it. See:
-            // http://bugs.limewire.com:8080/bugs/searching.jsp?disp1=l&disp2=c&disp3=o&disp4=j&l=141&c=188&m=694_223
+            // According to some bug reports, it seems that the
+            // Urn Set has some java.io.Files inserted into it.
             // Here we check for this case and remove the offending object.
-            HashSet newUrns = null;
-            Iterator iter = _urns.iterator();
-            while(iter.hasNext()) {
-                Object next = iter.next();
-                if(!(next instanceof URN)) {
-                    if(newUrns == null) {
-                        newUrns = new HashSet();
-                        newUrns.addAll(_urns);
-                    }
-                    newUrns.remove(next);
-                }
-            }
-            if(newUrns != null) {
+            Set<URN> newUrns = GenericsUtils.scanForSet(_urns, URN.class, GenericsUtils.ScanMode.NEW_COPY_REMOVED, HashSet.class);
+            if(_urns != newUrns) {
                 _urns = Collections.unmodifiableSet(newUrns);
             }
         }
@@ -466,7 +455,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     private void writeObject(ObjectOutputStream stream) throws IOException {
         if (_serializeProxies && _pushAddr != null) {
             if (propertiesMap == null)
-                propertiesMap = new HashMap();
+                propertiesMap = new HashMap<String, Serializable>();
             
             // this will also update the PE in case it changed since last serialization
             propertiesMap.put("_pushAddr",_pushAddr.httpStringValue());
@@ -713,7 +702,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	 *
 	 * @return the <tt>Set</tt> of URNs for this <tt>RemoteFileDesc</tt>
 	 */
-	public final Set getUrns() {
+	public final Set<URN> getUrns() {
 		return _urns;
 	}
 
@@ -792,11 +781,11 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * @return the <tt>Set</tt> of proxy hosts that will accept push requests
      *  for this host -- can be empty
      */
-    public final Set getPushProxies() {
+    public final Set<IpPort> getPushProxies() {
     	if (_pushAddr!=null)
     		return _pushAddr.getProxies();
     	else
-    		return Collections.EMPTY_SET;
+    		return Collections.emptySet();
     }
 
     /**
