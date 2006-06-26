@@ -154,12 +154,6 @@ public class LookupManager implements LookupListener {
         synchronized (handlerMap) {
             LookupResponseHandler handler = handlerMap.remove(lookup);
             
-            if (handler == null) {
-                if (LOG.isFatalEnabled()) {
-                    LOG.fatal("Reference Leak!? There was no LookupResponseHandler for " + lookup);
-                }
-            }
-            
             context.fireEvent(new Runnable() {
                 public void run() {
                     synchronized (listeners) {
@@ -175,12 +169,6 @@ public class LookupManager implements LookupListener {
     public void finish(final KUID lookup, final Collection c, final long time) {
         synchronized (handlerMap) {
             LookupResponseHandler handler = handlerMap.remove(lookup);
-            
-            if (handler == null) {
-                if (LOG.isFatalEnabled()) {
-                    LOG.fatal("Reference Leak!? There was no LookupResponseHandler for " + lookup);
-                }
-            }
             
             context.fireEvent(new Runnable() {
                 public void run() {

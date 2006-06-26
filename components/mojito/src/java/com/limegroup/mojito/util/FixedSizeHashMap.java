@@ -72,7 +72,7 @@ public class FixedSizeHashMap<K, V> extends LinkedHashMap<K, V> implements Seria
      * Returns whether or not this Map is full
      */
     public boolean isFull() {
-        return size() >= maxSize;
+        return size() > maxSize;
     }
     
     /*

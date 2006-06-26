@@ -20,6 +20,7 @@
 package com.limegroup.mojito.util;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * An interface for Tries
@@ -39,13 +40,14 @@ public interface Trie<K, V> {
     public List<V> values();
     
     public List<V> range(K key, int length);
-    public List<V> range(K key, int length, KeySelector<K, V> selector);
+    public List<V> range(K key, int length, Cursor<K, V> cursor);
     
     public V select(K key);
-    public List<V> select(K key, int count);
-    public List<V> select(K key, int count, KeySelector<K, V> selector);
+    public Map.Entry<K,V> select(K key, Cursor<K, V> cursor);
     
-    public static interface KeySelector<K, V> {
-        public boolean allow(K key, V value);
+    public Map.Entry<K,V> traverse(Cursor<K, V> cursor);
+    
+    public static interface Cursor<K, V> {
+        public boolean select(Map.Entry<K, V> entry);
     }
 }

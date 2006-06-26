@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,7 +44,8 @@ import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
-import com.limegroup.mojito.util.Trie.KeySelector;
+import com.limegroup.mojito.util.TrieUtils;
+import com.limegroup.mojito.util.Trie.Cursor;
 
 /**
  * This class is a Kademlia DHT routing table implementation 
@@ -70,18 +72,18 @@ public class PatriciaRouteTable implements RouteTable {
     /**
      * The <tt>KeySelector</tt> that selects <tt>ContactNodes</tt> with one or more failures.
      */
-    private static final KeySelector<KUID, ContactNode> SELECT_FAILED_CONTACTS = new KeySelector<KUID, ContactNode>() {
-        public boolean allow(KUID key, ContactNode value) {
-            return value.hasFailed();
+    private static final Cursor<KUID, ContactNode> SELECT_FAILED_CONTACTS = new Cursor<KUID, ContactNode>() {
+        public boolean select(Entry<KUID, ContactNode> entry) {
+            return entry.getValue().hasFailed();
         }
     };
     
     /**
      * The <tt>KeySelector</tt> that selects <tt>ContactNodes</tt> with no failures.
      */
-    private static final KeySelector<KUID, ContactNode> SELECT_ALIVE_CONTACTS = new KeySelector<KUID, ContactNode>() {
-        public boolean allow(KUID key, ContactNode value) {
-            return !value.hasFailed();
+    private static final Cursor<KUID, ContactNode> SELECT_ALIVE_CONTACTS = new Cursor<KUID, ContactNode>() {
+        public boolean select(Entry<KUID, ContactNode> entry) {
+            return !entry.getValue().hasFailed();
         }
     };
     
@@ -139,6 +141,9 @@ public class PatriciaRouteTable implements RouteTable {
         BucketNode root = new BucketNode(rootKUID, 0);
         bucketsTrie.put(rootKUID, root);
         routingStats.BUCKET_COUNT.incrementStat();
+        
+        consecutiveFailures = 0;
+        smallestSubtreeBucket = null;
     }
     
     /**
@@ -753,10 +758,10 @@ public class PatriciaRouteTable implements RouteTable {
             touchBucket(lookup);
         }
         
-        if(onlyLiveNodes) {
-            return nodesTrie.select(lookup, k, SELECT_ALIVE_CONTACTS);
+        if (onlyLiveNodes) {
+            return TrieUtils.select(nodesTrie, lookup, k, SELECT_ALIVE_CONTACTS);
         } else {
-            return nodesTrie.select(lookup, k);
+            return TrieUtils.select(nodesTrie, lookup, k);
         }
     }
     

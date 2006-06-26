@@ -52,6 +52,7 @@ import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
 import com.limegroup.mojito.statistics.SingleLookupStatisticContainer;
 import com.limegroup.mojito.util.KeyValueCollection;
 import com.limegroup.mojito.util.PatriciaTrie;
+import com.limegroup.mojito.util.TrieUtils;
 
 /**
  * The LookupResponseHandler handles Node as well as Value
@@ -169,7 +170,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         startTime = System.currentTimeMillis();
         
         // Get the first round of alpha nodes and send them requests
-        List<ContactNode> alphaList = toQuery.select(lookup, KademliaSettings.LOOKUP_PARAMETER.getValue());
+        List<ContactNode> alphaList = TrieUtils.select(toQuery, lookup, KademliaSettings.LOOKUP_PARAMETER.getValue());
         
         int sent = 0;
         for(ContactNode node : alphaList) {
@@ -447,7 +448,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         
         int numLookups = KademliaSettings.LOOKUP_PARAMETER.getValue() - activeSearches;
         if (numLookups > 0) {
-            List<ContactNode> toQueryList = toQuery.select(lookup, numLookups);
+            List<ContactNode> toQueryList = TrieUtils.select(toQuery, lookup, numLookups);
             for (ContactNode node : toQueryList) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Sending " + node + " a find request for " + lookup);
@@ -478,7 +479,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 
                 // addResponse(ContactNode) limits the size of the
                 // Trie to K and we can thus use the size method of it!
-                found = responses.select(lookup, responses.size());
+                found = TrieUtils.select(responses, lookup, responses.size());
             }
         }
         

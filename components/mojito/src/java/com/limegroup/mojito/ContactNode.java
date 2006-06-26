@@ -111,7 +111,7 @@ public class ContactNode extends Node {
         return flags;
     }
     
-    public long getAdaptativeTimeOut() {
+    public long getAdaptativeTimeout() {
         //for now, based on failures and previous round trip time
         long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
         if(roundTripTime <= 0L || isDead()) {

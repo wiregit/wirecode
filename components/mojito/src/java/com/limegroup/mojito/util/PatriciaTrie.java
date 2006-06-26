@@ -44,6 +44,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         this(new KUIDKeyCreator());
     }
     
+    @SuppressWarnings("unchecked")
     public PatriciaTrie(KeyCreator keyCreator) {
         this.keyCreator = keyCreator;
     }
@@ -213,6 +214,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * Returns the Value whose Key has the longest prefix
      * in common with our lookup key.
      */
+    @SuppressWarnings("unchecked")
     public V select(K key) {
         Entry[] entry = new Entry[1];
         if (!selectR(root.left, -1, key, entry)) {
@@ -251,48 +253,36 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         return false;
     }
     
-    /** 
-     * Returns a List of buckts sorted by their 
-     * closeness to the provided Key. Use BucketList's
-     * sort method to sort the Nodes by last-recently 
-     * and most-recently seen.
-     */
-    public List<V> select(K key, int count) {
-        return select(key, count, new KeySelector<K, V>() {
-            public boolean allow(K key, V value) {
-                return true;
-            }
-        });
-    }
-    
-    public List<V> select(K key, int count, KeySelector<K, V> keySelector) {
-        List<V> list = new ArrayList<V>(count);
-        selectR(root.left, -1, key, list, count, keySelector);
-        return list;
+    @SuppressWarnings("unchecked")
+    public Map.Entry<K,V> select(K key, Cursor<K, V> cursor) {
+        Entry[] entry = new Entry[]{ null };
+        selectR(root.left, -1, key, cursor, entry);
+        return entry[0];
     }
 
     private boolean selectR(Entry<K, V> h, int bitIndex, 
             final K key, 
-            final List<V> list, 
-            final int count, 
-            final KeySelector<K, V> keySelector) {
+            final Cursor<K, V> cursor,
+            final Entry[] entry) {
         
         if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty() && keySelector.allow(h.key, h.value)) {
-                list.add(h.value);
+            if (!h.isEmpty() && cursor.select(h)) {
+                entry[0] = h;
+                return false; // exit
             }
-            return list.size() < count;
+            return true; // continue
         }
 
         if (!isBitSet(key, h.bitIndex)) {
-            if (selectR(h.left, h.bitIndex, key, list, count, keySelector)) {
-                return selectR(h.right, h.bitIndex, key, list, count, keySelector);
+            if (selectR(h.left, h.bitIndex, key, cursor, entry)) {
+                return selectR(h.right, h.bitIndex, key, cursor, entry);
             }
         } else {
-            if (selectR(h.right, h.bitIndex, key, list, count, keySelector)) {
-                return selectR(h.left, h.bitIndex, key, list, count, keySelector);
+            if (selectR(h.right, h.bitIndex, key, cursor, entry)) {
+                return selectR(h.left, h.bitIndex, key, cursor, entry);
             }
         }
+        
         return false;
     }
     
@@ -303,14 +293,15 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * @param length (depth) in bits
      */
     public List<V> range(K key, int length) {
-        return range(key, length, new KeySelector<K, V>() {
-            public boolean allow(K key, V value) {
+        return range(key, length, new Cursor<K, V>() {
+            public boolean select(Map.Entry<K, V> entry) {
                 return true;
             }
         });
     }
     
-    public List<V> range(K key, int length, KeySelector<K, V> keySelector) {
+    @SuppressWarnings("unchecked")
+    public List<V> range(K key, int length, Cursor<K, V> keySelector) {
         
         // If length is -1 then return everything!
         if (length == -1) {
@@ -343,7 +334,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
             return valuesInRangeR(entry, -1, keySelector, new ArrayList<V>());
         } else {
             //System.out.println("Has No Subtree");
-            if (keySelector.allow(entry.key, entry.value)) {
+            if (keySelector.select(entry)) {
                 return Arrays.asList(entry.value);
             } else {
                 return Collections.emptyList();
@@ -370,10 +361,10 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     }
     
     private List<V> valuesInRangeR(Entry<K, V> h, int bitIndex, 
-            final KeySelector<K, V> keySelector, final List<V> values) {
+            final Cursor<K, V> keySelector, final List<V> values) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() 
-                    && keySelector.allow(h.key, h.value)) {
+                    && keySelector.select(h)) {
                 values.add(h.value);
             }
             return values;
@@ -596,6 +587,30 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         return valuesR(h.right, h.bitIndex, values);
     }
     
+    @SuppressWarnings("unchecked")
+    public Map.Entry<K, V> traverse(Cursor<K, V> cursor) {
+        Entry[] entry = new Entry[1];
+        travserseR(root.left, -1, cursor, entry);
+        return entry[0];
+    }
+    
+    private boolean travserseR(Entry<K, V> h, int bitIndex, 
+            final Cursor<K, V> cursor, final Entry[] entry) {
+        
+        if (h.bitIndex <= bitIndex) {
+            if (!h.isEmpty() && cursor.select(h)) {
+                entry[0] = h;
+                return false; // exit
+            }
+            return true; // continue
+        }
+        
+        if (travserseR(h.left, h.bitIndex, cursor, entry)) {
+            return travserseR(h.right, h.bitIndex, cursor, entry);
+        }
+        return false;
+    }
+    
     /** Helper method. Returns true if bitIndex is a valid index */
     private static boolean isValidBitIndex(int bitIndex) {
         return 0 <= bitIndex && bitIndex <= Integer.MAX_VALUE;
@@ -625,20 +640,21 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     /**
      * The actual Trie nodes.
      */
-    private class Entry<L,W> implements Map.Entry<L,W>, Serializable {
+    @SuppressWarnings("hiding") // it wouldn't complain if this class was static!
+    private class Entry<K,V> implements Map.Entry<K,V>, Serializable {
         
         private static final long serialVersionUID = 4596023148184140013L;
         
-        private L key;
-        private W value;
+        private K key;
+        private V value;
         
         private int bitIndex;
         
-        private Entry<L,W> parent;
-        private Entry<L,W> left;
-        private Entry<L,W> right;
+        private Entry<K,V> parent;
+        private Entry<K,V> left;
+        private Entry<K,V> right;
         
-        private Entry(L key, W value, int bitIndex) {
+        private Entry(K key, V value, int bitIndex) {
             this.key = key;
             this.value = value;
             
@@ -656,16 +672,16 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
             return key == null;
         }
         
-        public L getKey() {
+        public K getKey() {
             return key;
         }
         
-        public W getValue() {
+        public V getValue() {
             return value;
         }
         
-        public W setValue(W value) {
-            W o = this.value;
+        public V setValue(V value) {
+            V o = this.value;
             this.value = value;
             return o;
         }
@@ -674,7 +690,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
          * Replaces the old key and value with the new ones.
          * Returns the old vlaue.
          */
-        private W setKeyValue(L key, W value) {
+        private V setKeyValue(K key, V value) {
             this.key = key;
             return setValue(value);
         }
