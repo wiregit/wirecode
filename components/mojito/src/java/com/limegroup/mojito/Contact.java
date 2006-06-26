@@ -26,68 +26,139 @@ import java.net.SocketAddress;
  */
 public interface Contact {
     
+    /**
+     * 
+     */
     public static enum State {
         ALIVE,
         DEAD,
         UNKNOWN;
     }
     
+    /**
+     * 
+     */
+    public State getState();
+
+    /**
+     * 
+     */
+    public void setState(State state);
+    
+    /**
+     * 
+     */
     public int getVendor();
     
+    /**
+     * 
+     */
     public int getVersion();
     
+    /**
+     * 
+     */
     public KUID getNodeID();
     
-    public SocketAddress getSocketAddress();
-    
-    @Deprecated
+    /**
+     * 
+     */
     public void setSocketAddress(SocketAddress address);
     
+    /**
+     * 
+     */
+    public SocketAddress getSocketAddress();
+    
+    /**
+     * 
+     */
     public int getInstanceID();
     
-    @Deprecated
-    public void setInstanceID(int instanceId);
-    
+    /**
+     * 
+     */
     // TODO ???
     @Deprecated
     public int getFlags();
     
-    public long getTimeStamp();
-    
-    @Deprecated
+    /**
+     * 
+     */
     public void setTimeStamp(long timeStamp);
     
-    public long getAdaptativeTimeout();
+    /**
+     * 
+     */
+    public long getTimeStamp();
     
-    public long getRoundTripTime();
-    
+    /**
+     * 
+     */
     public void setRoundTripTime(long rtt);
     
+    /**
+     * 
+     */
+    public long getRoundTripTime();
+    
+    /**
+     * 
+     */
+    public long getAdaptativeTimeout();
+    
+    /**
+     * 
+     */
     public long getLastDeadOrAliveTime();
     
+    /**
+     * 
+     */
     public boolean hasBeenRecentlyAlive();
     
+    /**
+     * 
+     */
     public void setFirewalled(boolean firewalled);
     
+    /**
+     * 
+     */
     public boolean isFirewalled();
     
+    /**
+     * 
+     */
     public boolean isAlive();
     
-    public void alive();
-    
+    /**
+     * 
+     */
     public boolean isDead();
     
+    /**
+     * Has the this Contact ever failed since the last contact
+     */
     public boolean hasFailed();
     
+    /**
+     * 
+     */
     public void handleFailure();
     
+    /**
+     * 
+     */
     public boolean isUnknown();
     
+    /**
+     * 
+     */
     public void unknown();
     
+    /**
+     * 
+     */
     public void set(Contact contact);
-    
-    public State getState();
-    
-    public void setState(State state);
 }

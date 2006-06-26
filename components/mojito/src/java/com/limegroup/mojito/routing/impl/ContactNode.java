@@ -115,8 +115,7 @@ public class ContactNode implements Contact, Serializable {
     }
     
     public int getFlags() {
-        // TODO Auto-generated method stub
-        return 0;
+        return flags;
     }
 
     public int getVendor() {
@@ -141,8 +140,9 @@ public class ContactNode implements Contact, Serializable {
     
     public void setSocketAddress(SocketAddress address) {
         this.address = address;
+        
+        this.instanceId = (instanceId + 1) % 0xFF;
     }
-    
     
     public void setInstanceID(int instanceId) {
         this.instanceId = instanceId;

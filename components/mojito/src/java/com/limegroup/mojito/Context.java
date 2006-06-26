@@ -440,10 +440,7 @@ public class Context {
         }
         
         this.localAddress = localAddress;
-        
         localNode.setSocketAddress(localAddress);
-        int instanceId = (localNode.getInstanceID() + 1) % 0xFF;
-        localNode.setInstanceID(instanceId);
         
         messageDispatcher.bind(localAddress);
     }

@@ -32,17 +32,15 @@ import com.limegroup.mojito.KUID;
 public interface RouteTable {
     
     /**
-     * Adds a new ContactNode or if it's already known updates its
-     * contact information.
+     * Adds a new Contact or if it's already in the RouteTable updates 
+     * its contact information.
      * 
-     * @param node the ContactNode we would like to add
-     * @param knownToBeAlive wheather or not this ContactNode is known to be alive
-     * @return true if ContactNode was added
+     * @param node the Contact we would like to add
      */
     public void add(Contact node);
     
     /**
-     * Returns a Contact from the local RoutingTable if such Node exists 
+     * Returns a Contact from the local RoutingTable if such Contact exists 
      * and null if it doesn't.
      */
     public Contact get(KUID nodeId);
@@ -61,16 +59,16 @@ public interface RouteTable {
      * to sort the list from least-recently-seen to most-recently-seen ContactNode.
      * 
      * @param nodeId the lookup KUID
-     * @param count the number of Contact (maybe less if RoutingTable has less than k entries!)
-     * @param liveContacts wheather or not only live nodes should be in the result set
-     * @param willContact wheather or not we'll contact these ContactNodes
-     * @return list of ContactNodes sorted by closeness
+     * @param count the number of Contact (maybe less if RoutingTable has less than 'count' entries!)
+     * @param liveContacts wheather or not only live Contacts should be in the result set
+     * @param willContact wheather or not we'll contact these Contacts
+     * @return list of Contacts sorted by closeness
      */
     public List<Contact> select(KUID nodeId, int count, boolean liveContacts, boolean willContact);
     
     /**
      * Notifies the RoutingTable that the Contact with the provided
-     * KUID has failed to a request
+     * KUID has failed to answert to a request.
      */
     public void handleFailure(KUID nodeId);
     
@@ -90,7 +88,10 @@ public interface RouteTable {
     public List<Contact> getCachedContacts();
     
     /**
+     * Returns a List of KUIDs that need to be looked up in order
+     * to refresh the RouteTable.
      * 
+     * @param force whether or not the refresh is forced 
      */
     public List<KUID> getRefreshIDs(boolean force);
     

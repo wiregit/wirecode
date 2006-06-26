@@ -71,16 +71,16 @@ public class RouteTableImpl implements RouteTable {
         KUID bucketId = KUID.MIN_NODE_ID;
         bucketTrie.put(bucketId, new BucketNode(context, bucketId, 0));
         
-        add(context.getLocalNode());
-        
         consecutiveFailures = 0;
         smallestSubtreeBucket = null;
+        
+        add(context.getLocalNode());
     }
     
     public synchronized void add(Contact node) {
         
         if (node.isFirewalled()) {
-            if (LOG.isInfoEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 LOG.trace(node + " is firewalled");
             }
             return;
@@ -129,7 +129,8 @@ public class RouteTableImpl implements RouteTable {
                     LOG.warn(node + " is trying to spoof " + response.getContact());
                 }
                 
-                // DO NOTHING!
+                // DO NOTHING! The DefaultMessageHandler 
+                // takes care of everything else!
             }
 
             public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
@@ -143,7 +144,7 @@ public class RouteTableImpl implements RouteTable {
                     Contact existing = bucket.get(nodeId);
                     if (existing != null) {
                         existing.set(node);
-                        if (bucket.containsCache(nodeId)) {
+                        if (bucket.containsCachedContact(nodeId)) {
                             // We have found a live contact in the bucket's replacement cache!
                             // It's a good time to replace this bucket's dead entry with this node
                             ping (bucket.getLeastRecentlySeenLiveContact());
@@ -159,7 +160,7 @@ public class RouteTableImpl implements RouteTable {
     }
     
     protected void add(Bucket bucket, Contact node) {
-        bucket.addLive(node);
+        bucket.addLiveContact(node);
         
         if (node.isAlive()) {
             routingStats.LIVE_NODE_COUNT.incrementStat();
@@ -228,10 +229,10 @@ public class RouteTableImpl implements RouteTable {
                     LOG.info("Replacing " + leastRecentlySeen + " with " + node);
                 }
                 
-                boolean  removed = bucket.removeLive(leastRecentlySeen.getNodeID());
+                boolean  removed = bucket.removeLiveContact(leastRecentlySeen.getNodeID());
                 assert (removed == true);
                 
-                bucket.addLive(node);
+                bucket.addLiveContact(node);
                 touchBucket(bucket);
                 routingStats.LIVE_NODE_COUNT.incrementStat();
                 return;
@@ -244,7 +245,7 @@ public class RouteTableImpl implements RouteTable {
         
         // If the cache is full the least recently seen
         // node will be evicted!
-        bucket.addCache(node);
+        bucket.addCachedContact(node);
         routingStats.REPLACEMENT_COUNT.incrementStat();
         
         ping(bucket.getLeastRecentlySeenLiveContact());
@@ -286,21 +287,21 @@ public class RouteTableImpl implements RouteTable {
         if (node.isDead()) {
             routingStats.DEAD_NODE_COUNT.incrementStat();
             
-            if (bucket.containsLive(nodeId)) {
+            if (bucket.containsLiveContact(nodeId)) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Removing " + node + " and replacing it with the MRS Node from Cache");
                 }
                 
-                bucket.removeLive(nodeId);
+                bucket.removeLiveContact(nodeId);
                 assert (bucket.isLiveFull() == false);
                 
                 Contact mrs = bucket.getMostRecentlySeenCachedContact();
                 if (mrs != null) {
-                    boolean removed = bucket.removeCache(mrs.getNodeID());
+                    boolean removed = bucket.removeCachedContact(mrs.getNodeID());
                     assert (removed == true);
                     
                     mrs.unknown();
-                    bucket.addLive(mrs);
+                    bucket.addLiveContact(mrs);
                     touchBucket(bucket);
                 }
             } else {
@@ -309,7 +310,7 @@ public class RouteTableImpl implements RouteTable {
                     LOG.trace("Removing " + node + " from Cache");
                 }
                 
-                boolean removed = bucket.removeCache(nodeId);
+                boolean removed = bucket.removeCachedContact(nodeId);
                 assert (removed == true);
             }
         }
@@ -403,7 +404,7 @@ public class RouteTableImpl implements RouteTable {
                 // List but Cursors have on small sets an
                 // overhead that does not pay off.
                 //TrieUtils.values(bucket.trie(), nodes);
-                nodes.addAll(bucket.live());
+                nodes.addAll(bucket.getLiveContacts());
                 return false;
             }
         });
@@ -415,7 +416,7 @@ public class RouteTableImpl implements RouteTable {
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
             public boolean select(Entry<KUID, Bucket> entry) {
                 Bucket bucket = entry.getValue();
-                nodes.addAll(bucket.cache());
+                nodes.addAll(bucket.getCachedContacts());
                 return false;
             }
         });
