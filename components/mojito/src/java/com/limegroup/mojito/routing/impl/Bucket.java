@@ -1,3 +1,22 @@
+/*
+ * Mojito Distributed Hash Tabe (DHT)
+ * Copyright (C) 2006 LimeWire LLC
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.limegroup.mojito.routing.impl;
 
 import java.util.Collection;
@@ -6,6 +25,9 @@ import java.util.List;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 
+/**
+ * 
+ */
 interface Bucket {
 
     public KUID getBucketID();
@@ -28,7 +50,7 @@ interface Bucket {
 
     public Contact select(KUID nodeId);
 
-    public List<? extends Contact> select(KUID nodeId, int count);
+    public List<Contact> select(KUID nodeId, int count);
 
     public boolean remove(KUID nodeId);
 
@@ -48,29 +70,27 @@ interface Bucket {
 
     public boolean isTooDeep();
 
-    public Collection<? extends Contact> live();
+    public Collection<Contact> live();
 
-    public Collection<? extends Contact> cache();
+    public Collection<Contact> cache();
 
-    public Contact getLeastRecentlySeenLiveNode();
+    public Contact getLeastRecentlySeenLiveContact();
 
-    public Contact getMostRecentlySeenLiveNode();
+    public Contact getMostRecentlySeenLiveContact();
 
-    // O(1)
-    public Contact getLeastRecentlySeenCachedNode();
+    public Contact getLeastRecentlySeenCachedContact();
 
-    // O(n)
-    public Contact getMostRecentlySeenCachedNode();
+    public Contact getMostRecentlySeenCachedContact();
 
-    public List<? extends Bucket> split();
+    public List<Bucket> split();
 
     public int size();
 
     public int getLiveSize();
-
-    public int getLiveWithZeroFailures();
     
     public int getCacheSize();
 
     public void clear();
+    
+    public boolean isRefreshRequired();
 }

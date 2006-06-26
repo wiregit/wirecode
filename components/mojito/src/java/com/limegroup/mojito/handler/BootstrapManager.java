@@ -90,7 +90,7 @@ public class BootstrapManager implements PingListener, LookupListener {
     public void bootstrap(BootstrapListener listener) throws IOException {
         this.listener = listener;
         
-        List<? extends Contact> nodes = context.getRouteTable().getNodes();
+        List<Contact> nodes = context.getRouteTable().getContacts();
         nodes = BucketUtils.sort(nodes);
         this.contacts = nodes.iterator();
         
@@ -176,7 +176,7 @@ public class BootstrapManager implements PingListener, LookupListener {
         // Possible switch from Iterator of SocketAddresses to an
         // Iterator of ContactNodes (but not vice versa).
         if (contacts == null || !contacts.hasNext()) {
-            List<? extends Contact> nodes = context.getRouteTable().getNodes();
+            List<? extends Contact> nodes = context.getRouteTable().getContacts();
             nodes = BucketUtils.sort(nodes);
             contacts = nodes.iterator();
         }

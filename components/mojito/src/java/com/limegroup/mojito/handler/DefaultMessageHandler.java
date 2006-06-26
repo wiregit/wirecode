@@ -119,7 +119,7 @@ public class DefaultMessageHandler extends MessageHandler
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
-            List<? extends Contact> closestNodes = routeTable.select(node.getNodeID(), k, false, false);
+            List<Contact> closestNodes = routeTable.select(node.getNodeID(), k, false, false);
             
             if (closestNodes.contains(context.getLocalNode())) {
                 List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
@@ -132,7 +132,7 @@ public class DefaultMessageHandler extends MessageHandler
                         //To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
                         //or if it's ID is closer than any other ID (except the new closest one of course)
                         //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                        List<? extends Contact> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
+                        List<Contact> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
                         Contact closest = closestNodesToKey.get(0);
                         
                         if (context.isLocalNode(closest)   

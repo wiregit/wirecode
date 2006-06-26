@@ -55,10 +55,6 @@ public class ContactNode implements Contact, Serializable {
     
     private transient State state = State.UNKNOWN;
     
-    public ContactNode(int vendor, int version, KUID nodeId, SocketAddress address) {
-        this(vendor, version, nodeId, address, 0, 0, State.UNKNOWN);
-    }
-    
     public ContactNode(int vendor, int version, KUID nodeId, 
             SocketAddress address, State state) {
         this(vendor, version, nodeId, address, 0, 0, state);

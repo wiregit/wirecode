@@ -300,7 +300,7 @@ public class Main {
         System.out.println("Local ContactNode: " + dht.getLocalNode());
         System.out.println("Is running: " + dht.isRunning());
         System.out.println("Database Size: " + dht.getDatabase().size());
-        System.out.println("RouteTable Size: " + dht.getRoutingTable().getNodes().size());
+        System.out.println("RouteTable Size: " + dht.getRoutingTable().getContacts().size());
         System.out.println("Size: " + dht.size());
     }
     

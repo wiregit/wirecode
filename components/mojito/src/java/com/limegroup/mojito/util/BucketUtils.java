@@ -52,7 +52,7 @@ public final class BucketUtils {
      * Sorts the contacts from most recently seen to
      * least recently seen
      */
-    public static List<? extends Contact> sort(List<? extends Contact> nodes) {
+    public static <T extends Contact> List<T> sort(List<T> nodes) {
         Collections.sort(nodes, new Comparator<Contact>() {
             public int compare(Contact a, Contact b) {
                 long t1 = a.getTimeStamp();
@@ -75,7 +75,7 @@ public final class BucketUtils {
      * 
      * Used when loading the routing table
      */
-    public static List<? extends Contact> sortLastDeadOrAlive(List<? extends Contact> nodes) {
+    public static <T extends Contact> List<T> sortLastDeadOrAlive(List<T> nodes) {
         Collections.sort(nodes, new Comparator<Contact>() {
             public int compare(Contact a, Contact b) {
                 long t1 = a.getLastDeadOrAliveTime();

@@ -58,7 +58,6 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.RouteTable.SpoofChecker;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
@@ -593,11 +592,6 @@ public class Context {
         pingManager.ping(node, listener);
     }
     
-    /** Pings the given Node */
-    public void spoofCheckPing(Contact node, SpoofChecker checker) throws IOException {
-        pingManager.spoofCheckPing(node, checker);
-    }
-    
     /** Starts a value for the given KUID */
     public void get(KUID key, LookupListener listener) throws IOException {
         lookupManager.lookup(key, listener);
@@ -693,7 +687,7 @@ public class Context {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // TODO only live nodes?
-        List<? extends Contact> nodes = routeTable.select(localNodeId, k, false, false);
+        List<Contact> nodes = routeTable.select(localNodeId, k, false, false);
         
         // TODO accoriding to Az code it works only with more than
         // two Nodes

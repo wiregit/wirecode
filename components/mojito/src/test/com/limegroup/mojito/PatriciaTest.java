@@ -24,9 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
 

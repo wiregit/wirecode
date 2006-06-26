@@ -19,12 +19,21 @@
 
 package com.limegroup.mojito.util;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 
 public final class ContactUtils {
 
+    private static final Log LOG = LogFactory.getLog(ContactUtils.class);
+    
     private ContactUtils() {}
     
     public static String toString(KUID nodeId, SocketAddress address) {
@@ -39,5 +48,32 @@ public final class ContactUtils {
         } else {
             return "null";
         }
+    }
+    
+    public static boolean isLocalContact(Contact node) {
+        try {
+            return NetworkUtils.isLocalHostAddress(node.getSocketAddress());
+        } catch (IOException e) {
+            LOG.error("IOException", e);
+        }
+        return false;
+    }
+    
+    public static boolean areLocalContacts(Contact existing, Contact node) {
+        try {
+            // Huh? The addresses are not equal but both belong
+            // obviously to this local machine!?
+            InetSocketAddress newAddress = (InetSocketAddress) node.getSocketAddress();
+            InetSocketAddress oldAddress = (InetSocketAddress) existing.getSocketAddress();
+            if (NetworkUtils.isLocalHostAddress(newAddress)
+                    && NetworkUtils.isLocalHostAddress(oldAddress)
+                    && newAddress.getPort() == oldAddress.getPort()) {
+                return true;
+            }
+        } catch (IOException e) {
+            LOG.error("IOException", e);
+        }
+        
+        return false;
     }
 }

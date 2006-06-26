@@ -88,10 +88,10 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         QueryKey queryKey = QueryKey.getQueryKey(
                 request.getContact().getSocketAddress());
         
-        List<? extends Contact> nodes = (List<? extends Contact>)Collections.EMPTY_LIST;
+        List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
-                nodes = context.getRouteTable().getNodes();
+                nodes = context.getRouteTable().getContacts();
                 nodes = BucketUtils.sort(nodes);
                 nodes = nodes.subList(0, Math.min(nodes.size(), KademliaSettings.REPLICATION_PARAMETER.getValue()));
             } else {

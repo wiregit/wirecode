@@ -33,6 +33,7 @@ import java.util.List;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.routing.impl.ContactNode;
@@ -124,7 +125,7 @@ public class MessageInputStream extends DataInputStream {
         int version = readUnsignedShort();
         KUID nodeId = readNodeID();
         SocketAddress addr = readSocketAddress();
-        return new ContactNode(vendor, version, nodeId, addr);
+        return new ContactNode(vendor, version, nodeId, addr, State.UNKNOWN);
     }
     
     public List<Contact> readContacts() throws IOException {

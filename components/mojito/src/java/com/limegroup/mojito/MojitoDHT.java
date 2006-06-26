@@ -365,8 +365,8 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    Collection<? extends Contact> getNodes() {
-        return context.getRouteTable().getNodes();
+    Collection<Contact> getNodes() {
+        return context.getRouteTable().getContacts();
     }
     
     public boolean put(KUID key, byte[] value) 
@@ -534,7 +534,7 @@ public class MojitoDHT {
         // Store the RouteTable
         oos.writeBoolean(storeRouteTable);
         if (storeRouteTable) {
-            List<? extends Contact> nodes = context.getRouteTable().getNodes();
+            List<? extends Contact> nodes = context.getRouteTable().getContacts();
             
             KUID nodeId = local.getNodeID();
             for(Contact node : nodes) {

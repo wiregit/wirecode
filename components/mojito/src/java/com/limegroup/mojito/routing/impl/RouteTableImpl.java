@@ -20,6 +20,7 @@
 package com.limegroup.mojito.routing.impl;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -30,9 +31,13 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.PingListener;
+import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
+import com.limegroup.mojito.statistics.RoutingStatisticContainer;
+import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.Trie.Cursor;
 
@@ -41,6 +46,11 @@ public class RouteTableImpl implements RouteTable {
     private static final Log LOG = LogFactory.getLog(RouteTableImpl.class);
     
     private Context context;
+    
+    /**
+     * The <tt>StatisticsContainer</tt> for the routing table stats.
+     */
+    private RoutingStatisticContainer routingStats;
     
     private PatriciaTrie<KUID, Bucket> bucketTrie;
     
@@ -51,13 +61,15 @@ public class RouteTableImpl implements RouteTable {
     public RouteTableImpl(Context context) {
         this.context = context;
         
+        routingStats = new RoutingStatisticContainer(context);
+        
         bucketTrie = new PatriciaTrie<KUID, Bucket>();
         init();
     }
     
     private void init() {
         KUID bucketId = KUID.MIN_NODE_ID;
-        bucketTrie.put(bucketId, new BucketNode(bucketId, 0));
+        bucketTrie.put(bucketId, new BucketNode(context, bucketId, 0));
         
         add(context.getLocalNode());
         
@@ -65,7 +77,7 @@ public class RouteTableImpl implements RouteTable {
         smallestSubtreeBucket = null;
     }
     
-    public void add(Contact node) {
+    public synchronized void add(Contact node) {
         
         if (node.isFirewalled()) {
             if (LOG.isInfoEnabled()) {
@@ -95,12 +107,14 @@ public class RouteTableImpl implements RouteTable {
         assert (existing != null);
         
         if (!existing.isAlive() 
-                || existing.equals(node)) {
+                || existing.equals(node)
+                || ContactUtils.areLocalContacts(existing, node)) {
             
             existing.set(node);
             if (node.isAlive()) {
                 touchBucket(bucket);
             }
+            
         } else if (node.isAlive() 
                 && !existing.hasBeenRecentlyAlive()) {
             
@@ -108,12 +122,50 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    protected void doSpoofCheck(Bucket bucket, Contact existing, Contact node) {
+    protected void doSpoofCheck(Bucket bucket, Contact existing, final Contact node) {
+        PingListener listener = new PingListener() {
+            public void response(ResponseMessage response, long time) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(node + " is trying to spoof " + response.getContact());
+                }
+                
+                // DO NOTHING!
+            }
+
+            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(ContactUtils.toString(nodeId, address) 
+                            + " did not respond! Replacing it with " + node);
+                }
+                
+                synchronized (RouteTableImpl.this) {
+                    Bucket bucket = bucketTrie.select(nodeId);
+                    Contact existing = bucket.get(nodeId);
+                    if (existing != null) {
+                        existing.set(node);
+                        if (bucket.containsCache(nodeId)) {
+                            // We have found a live contact in the bucket's replacement cache!
+                            // It's a good time to replace this bucket's dead entry with this node
+                            ping (bucket.getLeastRecentlySeenLiveContact());
+                        }
+                    } else {
+                        add(node);
+                    }
+                }
+            }
+        };
         
+        ping(existing, listener);
     }
     
     protected void add(Bucket bucket, Contact node) {
         bucket.addLive(node);
+        
+        if (node.isAlive()) {
+            routingStats.LIVE_NODE_COUNT.incrementStat();
+        } else {
+            routingStats.UNKNOWN_NODE_COUNT.incrementStat();
+        }
     }
     
     protected boolean split(Bucket bucket) {
@@ -133,7 +185,7 @@ public class RouteTableImpl implements RouteTable {
                 LOG.trace("Splitting bucket: " + bucket);
             }
             
-            List<? extends Bucket> buckets = bucket.split();
+            List<Bucket> buckets = bucket.split();
             assert (buckets.size() == 2);
             
             Bucket left = buckets.get(0);
@@ -157,6 +209,9 @@ public class RouteTableImpl implements RouteTable {
             Bucket oldRight = bucketTrie.put(right.getBucketID(), right);
             assert (oldRight == null);
             
+            // Increment by one 'cause see above.
+            routingStats.BUCKET_COUNT.incrementStat();
+            
             // WHOHOOO! WE SPLIT THE BUCKET!!!
             return true;
         }
@@ -167,7 +222,7 @@ public class RouteTableImpl implements RouteTable {
     protected void replace(Bucket bucket, Contact node) {
         
         if (node.isAlive()) {
-            Contact leastRecentlySeen = bucket.getLeastRecentlySeenLiveNode();
+            Contact leastRecentlySeen = bucket.getLeastRecentlySeenLiveContact();
             if (leastRecentlySeen.isUnknown()) {
                 if (LOG.isTraceEnabled()) {
                     LOG.info("Replacing " + leastRecentlySeen + " with " + node);
@@ -178,6 +233,7 @@ public class RouteTableImpl implements RouteTable {
                 
                 bucket.addLive(node);
                 touchBucket(bucket);
+                routingStats.LIVE_NODE_COUNT.incrementStat();
                 return;
             }
         }
@@ -189,10 +245,12 @@ public class RouteTableImpl implements RouteTable {
         // If the cache is full the least recently seen
         // node will be evicted!
         bucket.addCache(node);
-        ping(bucket.getLeastRecentlySeenLiveNode());
+        routingStats.REPLACEMENT_COUNT.incrementStat();
+        
+        ping(bucket.getLeastRecentlySeenLiveContact());
     }
     
-    public void handleFailure(KUID nodeId) {
+    public synchronized void handleFailure(KUID nodeId) {
         
         // NodeID might be null if we sent a ping to
         // an unknown Node (i.e. we knew only the
@@ -226,6 +284,8 @@ public class RouteTableImpl implements RouteTable {
         
         node.handleFailure();
         if (node.isDead()) {
+            routingStats.DEAD_NODE_COUNT.incrementStat();
+            
             if (bucket.containsLive(nodeId)) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Removing " + node + " and replacing it with the MRS Node from Cache");
@@ -234,7 +294,7 @@ public class RouteTableImpl implements RouteTable {
                 bucket.removeLive(nodeId);
                 assert (bucket.isLiveFull() == false);
                 
-                Contact mrs = bucket.getMostRecentlySeenCachedNode();
+                Contact mrs = bucket.getMostRecentlySeenCachedContact();
                 if (mrs != null) {
                     boolean removed = bucket.removeCache(mrs.getNodeID());
                     assert (removed == true);
@@ -263,15 +323,15 @@ public class RouteTableImpl implements RouteTable {
         return bucketTrie.select(nodeId).remove(nodeId);
     }
     
-    public Contact select(KUID nodeId) {
+    public synchronized Contact select(KUID nodeId) {
         return bucketTrie.select(nodeId).select(nodeId);
     }
     
-    public Contact get(KUID nodeId) {
+    public synchronized Contact get(KUID nodeId) {
         return bucketTrie.select(nodeId).get(nodeId);
     }
     
-    public List<? extends Contact> select(final KUID nodeId, final int count) {
+    public synchronized List<Contact> select(final KUID nodeId, final int count) {
         final List<Contact> nodes = new ArrayList<Contact>(count);
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
             public boolean select(Entry<KUID, Bucket> entry) {
@@ -284,12 +344,12 @@ public class RouteTableImpl implements RouteTable {
     }
     
     
-    public List<? extends Contact> select(final KUID nodeId, final int count, 
-            final boolean liveNodes, final boolean willContact) {
+    public synchronized List<Contact> select(final KUID nodeId, final int count, 
+            final boolean liveContacts, final boolean willContact) {
         
         final List<Contact> nodes = new ArrayList<Contact>(count);
         
-        if (liveNodes) {
+        if (liveContacts) {
             bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
                 public boolean select(Entry<KUID, Bucket> entry) {
                     Bucket bucket = entry.getValue();
@@ -322,10 +382,10 @@ public class RouteTableImpl implements RouteTable {
         }
         return nodes;
     }
-
-    public List<? extends Contact> getNodes() {
-        List<? extends Contact> live = getLiveNodes();
-        List<? extends Contact> cached = getCachedNodes();
+    
+    public synchronized List<Contact> getContacts() {
+        List<Contact> live = getLiveContacts();
+        List<Contact> cached = getCachedContacts();
         
         List<Contact> nodes = new ArrayList<Contact>(live.size() + cached.size());
         nodes.addAll(live);
@@ -333,7 +393,7 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
-    public List<? extends Contact> getLiveNodes() {
+    public synchronized List<Contact> getLiveContacts() {
         final List<Contact> nodes = new ArrayList<Contact>();
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
             public boolean select(Entry<KUID, Bucket> entry) {
@@ -350,7 +410,7 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
-    public List<? extends Contact> getCachedNodes() {
+    public synchronized List<Contact> getCachedContacts() {
         final List<Contact> nodes = new ArrayList<Contact>();
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
             public boolean select(Entry<KUID, Bucket> entry) {
@@ -362,18 +422,14 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
-    public List<KUID> getRefreshIDs(final boolean force) {
-        final List<KUID> ids = new ArrayList<KUID>();
+    public synchronized List<KUID> getRefreshIDs(final boolean force) {
+        final List<KUID> randomIds = new ArrayList<KUID>();
         
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
             public boolean select(Entry<KUID, Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 if (!bucket.contains(context.getLocalNodeID())) {
-                    long d = System.currentTimeMillis() - bucket.getTimeStamp();
-                    if (d >= RouteTableSettings.BUCKET_REFRESH_TIME.getValue()
-                            || bucket.getLiveSize() < KademliaSettings.REPLICATION_PARAMETER.getValue()
-                            || bucket.getLiveSize() != bucket.getLiveWithZeroFailures()
-                            || force) {
+                    if (force || bucket.isRefreshRequired()) {
                         
                         // Select a random ID with this prefix
                         KUID randomId = KUID.createPrefxNodeID(bucket.getBucketID(), bucket.getDepth());
@@ -382,17 +438,18 @@ public class RouteTableImpl implements RouteTable {
                             LOG.trace("Refreshing bucket:" + bucket + " with random ID: " + randomId);
                         }
                         
-                        ids.add(randomId);
+                        randomIds.add(randomId);
                     }
                 }
                 return false;
             }
         });
         
-        return ids;
+        routingStats.BUCKET_REFRESH_COUNT.addData(randomIds.size());
+        return randomIds;
     }
     
-    public List<? extends Bucket> getBuckets() {
+    public synchronized List<Bucket> getBuckets() {
         return bucketTrie.values();
     }
     
@@ -412,17 +469,30 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    public void clear() {
+    private void ping(Contact node, PingListener listener) {
+        try {
+            context.ping(node, listener);
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+        }
+    }
+    
+    public synchronized void clear() {
         bucketTrie.clear();
         init();
     }
     
-    public String toString() {
+    public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("Buckets: ").append(bucketTrie.size()).append("\n");
+        buffer.append("Local: ").append(context.getLocalNode()).append("\n");
+        
         for(Bucket bucket : getBuckets()) {
             buffer.append(bucket).append("\n");
         }
+        
+        buffer.append("Total Buckets: ").append(bucketTrie.size()).append("\n");
+        buffer.append("Total Live Contacts: ").append(getLiveContacts().size()).append("\n");
+        buffer.append("Total Cached Contacts: ").append(getCachedContacts().size()).append("\n");
         return buffer.toString();
     }
 }

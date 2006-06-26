@@ -65,7 +65,7 @@ public class MessageOutputStream extends DataOutputStream {
         writeSignature(keyValue.getSignature());
     }
     
-    public void writeKeyValues(Collection<KeyValue> values) throws IOException {
+    public void writeKeyValues(Collection<? extends KeyValue> values) throws IOException {
         writeByte(values.size());
         for(KeyValue kv : values) {
             writeKeyValue(kv);

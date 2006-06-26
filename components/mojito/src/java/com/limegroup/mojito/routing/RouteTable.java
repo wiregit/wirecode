@@ -23,7 +23,6 @@ import java.util.List;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.PingListener;
 
 
 /**
@@ -63,11 +62,11 @@ public interface RouteTable {
      * 
      * @param nodeId the lookup KUID
      * @param count the number of Contact (maybe less if RoutingTable has less than k entries!)
-     * @param liveNodes wheather or not only live nodes should be in the result set
+     * @param liveContacts wheather or not only live nodes should be in the result set
      * @param willContact wheather or not we'll contact these ContactNodes
      * @return list of ContactNodes sorted by closeness
      */
-    public List<? extends Contact> select(KUID nodeId, int count, boolean liveNodes, boolean willContact);
+    public List<Contact> select(KUID nodeId, int count, boolean liveContacts, boolean willContact);
     
     /**
      * Notifies the RoutingTable that the Contact with the provided
@@ -78,17 +77,17 @@ public interface RouteTable {
     /**
      * Returns all Contacts as List
      */
-    public List<? extends Contact> getNodes();
+    public List<Contact> getContacts();
     
     /**
      * Returns Contacts that are actively used for routing
      */
-    public List<? extends Contact> getLiveNodes();
+    public List<Contact> getLiveContacts();
     
     /**
      * Returns cached Contacts that are in the replacement cache
      */
-    public List<? extends Contact> getCachedNodes();
+    public List<Contact> getCachedContacts();
     
     /**
      * 
@@ -99,11 +98,4 @@ public interface RouteTable {
      * Clears all elements from the RoutingTable
      */
     public void clear();
-    
-    /**
-     * 
-     */
-    public static interface SpoofChecker extends PingListener {
-        
-    }
 }

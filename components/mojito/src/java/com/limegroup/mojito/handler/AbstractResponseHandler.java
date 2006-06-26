@@ -22,7 +22,6 @@ package com.limegroup.mojito.handler;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.limegroup.mojito.Context;

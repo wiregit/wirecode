@@ -37,7 +37,6 @@ import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.routing.RouteTable.SpoofChecker;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -115,22 +114,8 @@ public class PingManager implements PingListener {
         return ping(node.getNodeID(), node.getSocketAddress(), listener);
     }
 
-    public boolean ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
-        return ping(nodeId, address, listener, true);
-    }
-    
-    /**
-     * A spoof check ping is not different from a regular ping.
-     * The only difference is that the SpoofChecker must overwrite 
-     * the equals() method properly so that there can be only one 
-     * SpoofChecker per address.
-     */
-    public boolean spoofCheckPing(Contact node, SpoofChecker checker) throws IOException {
-        return ping(node.getNodeID(), node.getSocketAddress(), checker, false);
-    }
-    
-    private boolean ping(KUID nodeId, SocketAddress address, 
-            PingListener listener, boolean duplicates) throws IOException {
+    public boolean ping(KUID nodeId, SocketAddress address, 
+            PingListener listener) throws IOException {
         
         synchronized (pingLock()) {
             PingResponseHandler responseHandler = handlerMap.get(address);
@@ -151,10 +136,7 @@ public class PingManager implements PingListener {
                 return true;
                 
             } else if (listener != null) {
-                if (duplicates 
-                        || !responseHandler.hasResponseListener(listener)) {
-                    responseHandler.addPingListener(listener);
-                }
+                responseHandler.addPingListener(listener);
             }
             return false;
         }

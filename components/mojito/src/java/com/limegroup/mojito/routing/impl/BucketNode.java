@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
@@ -41,12 +42,8 @@ import com.limegroup.mojito.util.Trie.Cursor;
  * 
  */
 class BucketNode implements Bucket {
-
-    public static enum Foo {
-        LIVE,
-        CACHE,
-        BOTH;
-    }
+    
+    private Context context;
     
     private KUID bucketId;
     
@@ -58,7 +55,8 @@ class BucketNode implements Bucket {
     
     private long timeStamp = 0L;
     
-    public BucketNode(KUID bucketId, int depth) {
+    public BucketNode(Context context, KUID bucketId, int depth) {
+        this.context = context;
         this.bucketId = bucketId;
         this.depth = depth;
         
@@ -175,15 +173,15 @@ class BucketNode implements Bucket {
         return depth % RouteTableSettings.DEPTH_LIMIT.getValue() == 0;
     }
     
-    public Collection<? extends Contact> live() {
+    public Collection<Contact> live() {
         return nodeTrie.values();
     }
     
-    public Collection<? extends Contact> cache() {
+    public Collection<Contact> cache() {
         return cache.values();
     }
     
-    public Contact getLeastRecentlySeenLiveNode() {
+    public Contact getLeastRecentlySeenLiveContact() {
         final Contact[] leastRecentlySeen = new Contact[]{ null };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
             public boolean select(Map.Entry<KUID, Contact> entry) {
@@ -198,7 +196,7 @@ class BucketNode implements Bucket {
         return leastRecentlySeen[0];
     }
     
-    public Contact getMostRecentlySeenLiveNode() {
+    public Contact getMostRecentlySeenLiveContact() {
         final Contact[] mostRecentlySeen = new Contact[]{ null };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
             public boolean select(Map.Entry<KUID, Contact> entry) {
@@ -214,7 +212,7 @@ class BucketNode implements Bucket {
     }
 
     // O(1)
-    public Contact getLeastRecentlySeenCachedNode() {
+    public Contact getLeastRecentlySeenCachedContact() {
         if (cache().isEmpty()) {
             return null;
         }
@@ -223,7 +221,7 @@ class BucketNode implements Bucket {
     }
     
     // O(n)
-    public Contact getMostRecentlySeenCachedNode() {
+    public Contact getMostRecentlySeenCachedContact() {
         Contact node = null;
         for(Contact n : cache()) {
             node = n;
@@ -231,12 +229,12 @@ class BucketNode implements Bucket {
         return node;
     }
     
-    public List<? extends Bucket> split() {
+    public List<Bucket> split() {
 
         assert (cache().isEmpty() == true);
         
-        BucketNode left = new BucketNode(bucketId, depth+1);
-        BucketNode right = new BucketNode(bucketId.set(depth), depth+1);
+        Bucket left = new BucketNode(context, bucketId, depth+1);
+        Bucket right = new BucketNode(context, bucketId.set(depth), depth+1);
         
         for (Contact node : live()) {
             KUID nodeId = node.getNodeID();
@@ -286,6 +284,23 @@ class BucketNode implements Bucket {
         return cache.size();
     }
     
+    public boolean isRefreshRequired() {
+        if ((System.currentTimeMillis() - getTimeStamp()) 
+                >= RouteTableSettings.BUCKET_REFRESH_TIME.getValue()) {
+            return true;
+        }
+        
+        if (getLiveSize() < KademliaSettings.REPLICATION_PARAMETER.getValue()) {
+            return true;
+        }
+        
+        if (getLiveSize() != getLiveWithZeroFailures()) {
+            return true;
+        }
+        
+        return false;
+    }
+    
     public void clear() {
         nodeTrie.clear();
         cache = Collections.emptyMap();
@@ -311,7 +326,7 @@ class BucketNode implements Bucket {
             .append(", live=").append(getLiveSize())
             .append(", cache=").append(getCacheSize()).append(")\n");
         
-        Iterator<? extends Contact> it = live().iterator();
+        Iterator<Contact> it = live().iterator();
         for(int i = 0; it.hasNext(); i++) {
             buffer.append(" ").append(i).append(": ").append(it.next()).append("\n");
         }

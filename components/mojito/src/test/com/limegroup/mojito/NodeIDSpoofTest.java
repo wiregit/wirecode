@@ -22,9 +22,6 @@ package com.limegroup.mojito;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.old.ContactNode;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
