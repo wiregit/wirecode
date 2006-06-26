@@ -13,10 +13,10 @@ import java.util.Map;
  * be any object. 
  * @author  asingla
  */
-public class NameValue implements Map.Entry {
+public class NameValue<V> implements Map.Entry<String, V> {
 
     private final String _name;
-    private Object _value;
+    private V _value;
     
     /**
      * Creates a new NameValue with a null value.
@@ -26,7 +26,7 @@ public class NameValue implements Map.Entry {
     }
     
     /** Creates new NameValue */
-    public NameValue(String name, Object value) {
+    public NameValue(String name, V value) {
         this._name = name;
         this._value = value;
     }
@@ -35,16 +35,16 @@ public class NameValue implements Map.Entry {
         return _name;
     }
     
-    public Object getKey() {
+    public String getKey() {
         return _name;
     }
     
-    public Object getValue() {
+    public V getValue() {
         return _value;
     }
 	
-	public Object setValue(Object value) {
-	    Object old = _value;
+	public V setValue(V value) {
+	    V old = _value;
 		this._value = value;
 		return old;
 	}
@@ -53,18 +53,17 @@ public class NameValue implements Map.Entry {
         return "name = " + _name + " value = " + _value;
     }
     
-    public static class ComparableByName extends NameValue implements Comparable {
+    public static class ComparableByName<V> extends NameValue<V> implements Comparable<ComparableByName> {
         public ComparableByName(String name) {
             super(name);
         }
         
-        public ComparableByName(String name, Object value) {
+        public ComparableByName(String name, V value) {
             super(name, value);
         }
         
-        public int compareTo(Object other) {
-            ComparableByName b = (ComparableByName)other;            
-            if(other == null)
+        public int compareTo(ComparableByName b) {            
+            if(b == null)
                 return 1;
             String nameB = b.getName();
             String name = getName();

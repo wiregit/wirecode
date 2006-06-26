@@ -79,7 +79,7 @@ public class DirectAltLoc extends AlternateLocation {
 	}
 	
 	public RemoteFileDesc createRemoteFileDesc(int size) {
-		Set urnSet = new HashSet();
+		Set<URN> urnSet = new HashSet<URN>(1);
 		urnSet.add(getSHA1Urn());
         int quality = 3;
 		RemoteFileDesc ret = new RemoteFileDesc(_node.getAddress(), _node.getPort(),

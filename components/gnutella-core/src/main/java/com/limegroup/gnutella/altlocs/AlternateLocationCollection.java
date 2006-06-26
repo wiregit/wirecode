@@ -16,7 +16,7 @@ import com.limegroup.gnutella.util.FixedSizeSortedSet;
  * @see AlternateLocation
  */
 public class AlternateLocationCollection 
-	implements HTTPHeaderValue {
+	implements HTTPHeaderValue, Iterable<AlternateLocation> {
 	    
     private static final int MAX_SIZE = 100;
     
@@ -43,7 +43,8 @@ public class AlternateLocationCollection
      * AlternateLocationCollection.class first, never the other way around.
      */
  
-	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
+	private final FixedSizeSortedSet<AlternateLocation> LOCATIONS = 
+        new FixedSizeSortedSet<AlternateLocation>(MAX_SIZE);
 	
         
     /**
@@ -146,7 +147,7 @@ public class AlternateLocationCollection
 			throw new IllegalArgumentException("SHA1 does not match");
 		
 		synchronized(this) {
-            AlternateLocation alt = (AlternateLocation)LOCATIONS.get(al);
+            AlternateLocation alt = LOCATIONS.get(al);
             boolean ret = false;
             if(alt==null) {//it was not in collections.
                 ret = true;
@@ -176,7 +177,7 @@ public class AlternateLocationCollection
 			return false; //it cannot be in this list if it has a different SHA1
 		
 		synchronized(this) {
-            AlternateLocation loc = (AlternateLocation)LOCATIONS.get(al);
+            AlternateLocation loc = LOCATIONS.get(al);
             if(loc==null) //it's not in locations, cannot remove
                 return false;
             if(loc.isDemoted()) {//if its demoted remove it
@@ -246,7 +247,7 @@ public class AlternateLocationCollection
 		return LOCATIONS.size();
     }
     
-    public Iterator iterator() {
+    public Iterator<AlternateLocation> iterator() {
         return LOCATIONS.iterator();
     }
 

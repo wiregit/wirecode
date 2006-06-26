@@ -19,7 +19,7 @@ public class GenericsUtils {
     }
 
     private GenericsUtils() {}
-
+    
     /**
      * Utility method for calling scanForMap(o, k, v, mode, null).
      * If NEW_COPY_REMOVED is the ScanMode, this will throw a NullPointerException.

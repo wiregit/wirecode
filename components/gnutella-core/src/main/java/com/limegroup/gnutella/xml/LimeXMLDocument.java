@@ -19,8 +19,8 @@ import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
-import com.limegroup.gnutella.licenses.LicenseConstants;
 import com.limegroup.gnutella.licenses.LicenseFactory;
+import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.util.NameValue;
 
 
@@ -61,7 +61,7 @@ public class LimeXMLDocument implements Serializable {
     /**
      * Map of canonical attribute name -> value.
      */
-    private Map fieldToValue = new HashMap();
+    private Map<String, String> fieldToValue = new HashMap<String, String>();
     
     /**
      * The schema of this LimeXMLDocument.
@@ -94,10 +94,10 @@ public class LimeXMLDocument implements Serializable {
      * Cached list of keywords.  Because keywords are only filled up
      * upon construction, they can be cached upon retrieval.
      */
-    private transient List CACHED_KEYWORDS = null;
+    private transient List<String> CACHED_KEYWORDS = null;
     
     /** The kind of license this has. */
-    private transient int licenseType = LicenseConstants.NO_LICENSE;
+    private transient LicenseType licenseType = LicenseType.NO_LICENSE;
 
     /**
      * Constructs a LimeXMLDocument with the given string.
@@ -114,7 +114,7 @@ public class LimeXMLDocument implements Serializable {
         if (result.schemaURI == null)
             throw new SchemaNotFoundException("no schema");
 
-        this.fieldToValue = (Map)result.get(0);
+        this.fieldToValue = result.get(0);
         this.schemaUri = result.schemaURI;
         setFields(result.canonicalKeyPrefix);
         
@@ -130,7 +130,7 @@ public class LimeXMLDocument implements Serializable {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */    
-    LimeXMLDocument(Map map, String schemaURI, String keyPrefix) 
+    LimeXMLDocument(Map<String, String> map, String schemaURI, String keyPrefix) 
       throws IOException {
         if(map.isEmpty())
             throw new IllegalArgumentException("empty map");
@@ -153,7 +153,8 @@ public class LimeXMLDocument implements Serializable {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */
-    public LimeXMLDocument(Collection nameValueList, String schemaURI) {
+    public LimeXMLDocument(Collection<? extends Map.Entry<String, String>> nameValueList,
+                           String schemaURI) {
         if(nameValueList.isEmpty())
             throw new IllegalArgumentException("empty list");
 
@@ -161,12 +162,8 @@ public class LimeXMLDocument implements Serializable {
         this.schemaUri = schemaURI;
                 
         //iterate over the passed list of fieldnames & values
-        for(Iterator i = nameValueList.iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            String name = (String)next.getKey();
-            Object value = next.getValue();
-            fieldToValue.put(name.trim(), value);
-        }
+        for(Map.Entry<String, String> next : nameValueList)
+            fieldToValue.put(next.getKey().trim(), next.getValue());
         
         // scan for action/id/etc..
         scanFields();
@@ -217,15 +214,14 @@ public class LimeXMLDocument implements Serializable {
      * use getIndivisibleKeywords().  Indivisible keywords are
      * those which QRP will not split up.
      */
-    public List getKeyWords() {
+    public List<String> getKeyWords() {
         if( CACHED_KEYWORDS != null )
             return CACHED_KEYWORDS;
 
-        List retList = new ArrayList();
-        Iterator iter = fieldToValue.keySet().iterator();
-        while(iter.hasNext()){
-            String currKey = (String) iter.next();
-            String val = (String) fieldToValue.get(currKey);
+        List<String> retList = new ArrayList<String>();
+        for(Map.Entry<String, String> entry : fieldToValue.entrySet()) {
+            String currKey = entry.getKey();
+            String val = entry.getValue();
             if(val != null && !val.equals("") && !isIndivisible(currKey)) {
                 try {
                     Double.parseDouble(val); // will trigger NFE.
@@ -241,8 +237,8 @@ public class LimeXMLDocument implements Serializable {
     /**
      * Returns all the indivisible keywords for entry into QRP tables.
      */
-    public List getKeyWordsIndivisible() {
-        return LicenseConstants.getIndivisible(licenseType);
+    public List<String> getKeyWordsIndivisible() {
+        return licenseType.getIndivisibleKeywords();
     }
 
     /**
@@ -334,21 +330,21 @@ public class LimeXMLDocument implements Serializable {
      * canonicalized field name (placeholder), and its corresponding value in
      * the XML Document.
      */
-    public Set getNameValueSet() {
+    public Set<Map.Entry<String, String>> getNameValueSet() {
         return fieldToValue.entrySet();
     }
     
     /**
      * Returns a set of the names within this LimeXMLDocument.
      */
-    public Set getNameSet() {
+    public Set<String> getNameSet() {
         return fieldToValue.keySet();
     }
     
     /**
      * Returns a collection of the values of this LimeXMLDocument.
      */
-    public Collection getValueList() {
+    public Collection<String> getValueList() {
         return fieldToValue.values();
     }
     
@@ -356,7 +352,7 @@ public class LimeXMLDocument implements Serializable {
      * Determines if a license exists that this LimeXMLDocument knows about.
      */
     public boolean isLicenseAvailable() {
-        return licenseType != LicenseConstants.NO_LICENSE;
+        return licenseType != LicenseType.NO_LICENSE;
     }
     
     /**
@@ -377,10 +373,10 @@ public class LimeXMLDocument implements Serializable {
         return null;
     }
     
-    private static String getVerifiableLicenseElement(int type) {
-        if (type == LicenseConstants.CC_LICENSE)
+    private static String getVerifiableLicenseElement(LicenseType type) {
+        if (type == LicenseType.CC_LICENSE)
             return LimeXMLDocument.XML_LICENSE_ATTRIBUTE;
-        if (LicenseConstants.isDRMLicense(type))
+        if (type.isDRMLicense())
             return LimeXMLDocument.XML_LICENSE_TYPE_ATTRIBUTE;
         return null;
     }
@@ -400,14 +396,14 @@ public class LimeXMLDocument implements Serializable {
      * Returns a list of attributes and their values in the same order
      * as is in the schema.
      */
-    public List getOrderedNameValueList() {
+    public List<NameValue<String>> getOrderedNameValueList() {
         String[] fNames = getSchema().getCanonicalizedFieldNames();
-        List retList = new ArrayList(fNames.length);
+        List<NameValue<String>> retList = new ArrayList<NameValue<String>>(fNames.length);
         for (int i = 0; i < fNames.length; i++) {
             String name = fNames[i].trim();
-            Object value = fieldToValue.get(name);
+            String value = fieldToValue.get(name);
             if (value != null)
-                retList.add(new NameValue(name, value));
+                retList.add(new NameValue<String>(name, value));
         }
             
         return retList;
@@ -417,7 +413,7 @@ public class LimeXMLDocument implements Serializable {
      * Returns the value associated with this canonicalized fieldname.
      */
     public String getValue(String fieldName) {
-        return (String)fieldToValue.get(fieldName);
+        return fieldToValue.get(fieldName);
     }
     
     /**
@@ -458,7 +454,7 @@ public class LimeXMLDocument implements Serializable {
      * to easily be marked as invalid.
      */
     private String constructAttributeString() {
-        List attributes = getOrderedNameValueList();
+        List<NameValue<String>> attributes = getOrderedNameValueList();
         if(attributes.isEmpty())
             return ""; // invalid.
             
@@ -469,8 +465,7 @@ public class LimeXMLDocument implements Serializable {
         tag.append("<");
         tag.append(type);
 
-        for(Iterator i = attributes.iterator(); i.hasNext(); ) {
-            NameValue nv = (NameValue)i.next();
+        for(NameValue<String> nv : attributes) {
             String name = XMLStringUtils.getLastField(canonicalKey, nv.getName());
             if(name == null)
                 continue;
@@ -478,7 +473,7 @@ public class LimeXMLDocument implements Serializable {
             tag.append(" ");
             tag.append(name);
             tag.append("=\"");
-            tag.append(LimeXMLUtils.encodeXML((String)nv.getValue()));
+            tag.append(LimeXMLUtils.encodeXML(nv.getValue()));
             tag.append("\"");
         }
         
@@ -559,11 +554,11 @@ public class LimeXMLDocument implements Serializable {
      */
     private void setFields(String prefix) {
         // store action.
-        action = (String)fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
+        action = fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
 
         // deal with updating license_type based on the license
-        String license = (String)fieldToValue.get(prefix + XML_LICENSE_ATTRIBUTE);
-        String type = (String)fieldToValue.get(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
+        String license = fieldToValue.get(prefix + XML_LICENSE_ATTRIBUTE);
+        String type = fieldToValue.get(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
         
         if(LOG.isDebugEnabled())
             LOG.debug("type: " + type);
@@ -572,8 +567,8 @@ public class LimeXMLDocument implements Serializable {
         // CC licenses require that the 'license' field has the CC_URI_PREFIX & CC_URL_INDICATOR
         // somewhere.  Weed licenses require that the 'license type' field has WeedInfo.LINFO,
         // a content id & a version id.
-        licenseType = LicenseConstants.determineLicenseType(license, type);
-        if (licenseType == LicenseConstants.CC_LICENSE)
+        licenseType = LicenseType.determineLicenseType(license, type);
+        if (licenseType == LicenseType.CC_LICENSE)
             fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
 
         if(LOG.isDebugEnabled())
@@ -583,11 +578,11 @@ public class LimeXMLDocument implements Serializable {
     /**
      * Derives a canonicalKey from a collection of Map.Entry's.
      */
-    private String getCanonicalKey(Collection entries) {
+    private String getCanonicalKey(Collection<? extends Map.Entry<String, String>> entries) {
         if(entries.isEmpty())
             return null;
-        Map.Entry firstEntry = (Map.Entry)entries.iterator().next();
-        String firstKey = (String)firstEntry.getKey();
+        Map.Entry<String, String> firstEntry = entries.iterator().next();
+        String firstKey = firstEntry.getKey();
         
         // The canonicalKey is always going to be x__x__<other stuff here>
         int idx = firstKey.indexOf(XMLStringUtils.DELIMITER);

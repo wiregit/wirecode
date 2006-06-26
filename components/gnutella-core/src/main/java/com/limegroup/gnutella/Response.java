@@ -79,7 +79,7 @@ public class Response {
 	 * as specified in HUGE v0.94.  This is guaranteed to be non-null, 
 	 * although it is often empty.
      */
-    private final Set urns;
+    private final Set<URN> urns;
 
 	/**
 	 * The bytes between the nulls for the <tt>Response</tt>, as specified
@@ -165,7 +165,7 @@ public class Response {
 	 * @param extensions The raw unparsed extension bytes.
      */
     private Response(long index, long size, String name,
-					 Set urns, LimeXMLDocument doc, 
+					 Set<? extends URN> urns, LimeXMLDocument doc, 
 					 GGEPContainer ggepData, byte[] extensions) {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IllegalArgumentException("invalid index: " + index);
@@ -192,7 +192,7 @@ public class Response {
         this.nameBytes = temp;
 
 		if (urns == null)
-			this.urns = Collections.EMPTY_SET;
+			this.urns = Collections.emptySet();
 		else
 			this.urns = Collections.unmodifiableSet(urns);
 		
@@ -272,12 +272,14 @@ public class Response {
 			// \u001c is the HUGE v0.93 GEM delimiter
             HUGEExtension huge = new HUGEExtension(rawMeta);
 
-			Set urns = huge.getURNS();
+			Set<URN> urns = huge.getURNS();
 
 			LimeXMLDocument doc = null;
-            Iterator iter = huge.getMiscBlocks().iterator();
-            while (iter.hasNext() && doc == null)
-                doc = createXmlDocument(name, (String)iter.next());
+            for(String next : huge.getMiscBlocks()) {
+                doc = createXmlDocument(name, next);
+                if(doc != null)
+                    break;
+            }
 
 			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEP());
 
@@ -349,10 +351,10 @@ public class Response {
 		}
 		
 		if(bearShare1 || bearShare2 || gnotella) {//some metadata we understand
-		    List values = new ArrayList(3);
-		    values.add(new NameValue("audios__audio__title__", name));
-		    values.add(new NameValue("audios__audio__bitrate__", bitrate));
-		    values.add(new NameValue("audios__audio__seconds__", length));
+		    List<NameValue<String>> values = new ArrayList<NameValue<String>>(3);
+		    values.add(new NameValue<String>("audios__audio__title__", name));
+		    values.add(new NameValue<String>("audios__audio__bitrate__", bitrate));
+		    values.add(new NameValue<String>("audios__audio__seconds__", length));
 		    return new LimeXMLDocument(values, AudioMetaData.schemaURI);
 		}
 		
@@ -367,7 +369,7 @@ public class Response {
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
 	 *  constructing the byte array
 	 */
-	private static byte[] createExtBytes(Set urns, GGEPContainer ggep) {
+	private static byte[] createExtBytes(Set<? extends URN> urns, GGEPContainer ggep) {
         try {
             if( isEmpty(urns) && ggep.isEmpty() )
                 return DataUtils.EMPTY_BYTE_ARRAY;
@@ -375,9 +377,8 @@ public class Response {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();            
             if( !isEmpty(urns) ) {
                 // Add the extension for URNs, if any.
-    			Iterator iter = urns.iterator();
-    			while (iter.hasNext()) {
-    				URN urn = (URN)iter.next();
+                for(Iterator<? extends URN> iter = urns.iterator(); iter.hasNext(); ) {
+    				URN urn = iter.next();
                     Assert.that(urn!=null, "Null URN");
     				baos.write(urn.toString().getBytes());
     				// If there's another URN, add the separator.
@@ -408,7 +409,7 @@ public class Response {
     /**
      * Utility method to know if a set is empty or null.
      */
-    private static boolean isEmpty(Set set) {
+    private static boolean isEmpty(Set<?> set) {
         return set == null || set.isEmpty();
     }
     
@@ -416,17 +417,17 @@ public class Response {
      * Utility method for converting the non-firewalled elements of an
      * AlternateLocationCollection to a smaller set of endpoints.
      */
-    private static Set getAsEndpoints(AlternateLocationCollection col) {
+    private static Set<IpPort> getAsEndpoints(AlternateLocationCollection col) {
         if( col == null || !col.hasAlternateLocations() )
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         
         long now = System.currentTimeMillis();
         synchronized(col) {
-            Set endpoints = null;
+            Set<IpPort> endpoints = null;
             int i = 0;
-            for(Iterator iter = col.iterator();
+            for(Iterator<AlternateLocation> iter = col.iterator();
               iter.hasNext() && i < MAX_LOCATIONS;) {
-            	Object o = iter.next();
+                AlternateLocation o = iter.next();
             	if (!(o instanceof DirectAltLoc)) {
             	    if(LOG.isDebugEnabled())
                         LOG.debug("Got non-direct-loc: " + o);
@@ -437,7 +438,7 @@ public class Response {
                     IpPort host = al.getHost();
                     if( !NetworkUtils.isMe(host) ) {
                         if (endpoints == null)
-                            endpoints = new HashSet();
+                            endpoints = new HashSet<IpPort>();
                         
                         if (!(host instanceof Endpoint)) 
                         	host = new Endpoint(host.getAddress(),host.getPort());
@@ -449,7 +450,7 @@ public class Response {
                 } else if (!al.canBeSentAny())
                     iter.remove();
             }
-            return endpoints == null ? Collections.EMPTY_SET : endpoints;
+            return endpoints == null ? IpPort.EMPTY_SET : endpoints;
         }
     }    
 
@@ -539,7 +540,7 @@ public class Response {
 	 * this <tt>Response</tt>, guaranteed to be non-null, although the
 	 * set could be empty
 	 */
-    public Set getUrns() {
+    public Set<URN> getUrns() {
 		return urns;
     }
     
@@ -551,7 +552,7 @@ public class Response {
      * contain the same file described in this <tt>Response</tt>,
      * guaranteed to be non-null, although the set could be empty
      */
-    public Set getLocations() {
+    public Set<IpPort> getLocations() {
         return ggepData.locations;
     }
     
@@ -691,7 +692,7 @@ public class Response {
             if (ggep == null)
                 return GGEPContainer.EMPTY;
 
-            Set locations = null;
+            Set<IpPort> locations = null;
             long createTime = -1;
             
             // if the block has a ALTS value, get it, parse it,
@@ -712,8 +713,8 @@ public class Response {
                 GGEPContainer.EMPTY : new GGEPContainer(locations, createTime);
         }
         
-        private static Set parseLocations(byte[] locBytes) {
-            Set locations = null;
+        private static Set<IpPort> parseLocations(byte[] locBytes) {
+            Set<IpPort> locations = null;
             IPFilter ipFilter = IPFilter.instance();
  
             if (locBytes.length % 6 == 0) {
@@ -731,7 +732,7 @@ public class Response {
                         NetworkUtils.isMe(ip, port))
                         continue;
                     if (locations == null)
-                        locations = new HashSet();
+                        locations = new HashSet<IpPort>();
                     locations.add(new Endpoint(ip, port));
                 }
             }
@@ -743,7 +744,7 @@ public class Response {
      * A container for information we're putting in/out of GGEP blocks.
      */
     static final class GGEPContainer {
-        final Set locations;
+        final Set<IpPort> locations;
         final long createTime;
         private static final GGEPContainer EMPTY = new GGEPContainer();
         
@@ -751,8 +752,8 @@ public class Response {
             this(null, -1);
         }
         
-        GGEPContainer(Set locs, long create) {
-            locations = locs == null ? Collections.EMPTY_SET : locs;
+        GGEPContainer(Set<? extends IpPort> locs, long create) {
+            locations = locs == null ? IpPort.EMPTY_SET : Collections.unmodifiableSet(locs);
             createTime = create;
         }
         

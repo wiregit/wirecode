@@ -6,6 +6,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
@@ -85,7 +86,7 @@ public final class HostData {
     /**
      * The <tt>Set</tt> of PushProxies for this host.
      */
-    private final Set PROXIES;
+    private final Set<? extends IpPort> PROXIES;
 
     /**
      * Constant for the Firewalled Transfer status of this badboy.
@@ -296,7 +297,7 @@ public final class HostData {
      *
      * @return a <tt>Set</tt> of push proxies, which can be empty
      */
-    public Set getPushProxies() {
+    public Set<? extends IpPort> getPushProxies() {
         return PROXIES;
     }
 

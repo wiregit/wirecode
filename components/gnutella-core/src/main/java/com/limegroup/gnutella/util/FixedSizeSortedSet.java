@@ -16,7 +16,7 @@ import com.limegroup.gnutella.Assert;
  * and a Map, in order to efficiently look things up and keep them sorted.
  * This class is NOT SYNCHRONIZED.  Synchronization should be done externally.
  */
-public class FixedSizeSortedSet {
+public class FixedSizeSortedSet<E> {
 
     /**
      * The underlying set that efficiently
@@ -26,7 +26,7 @@ public class FixedSizeSortedSet {
      * INVARIANT: The size of this set must be equal to the size
      *            of _map.
      */
-    private SortedSet _sortedSet;
+    private SortedSet<E> _sortedSet;
     
     /**
      * The map that allows us to treat this FixedSizeSortedSet
@@ -36,7 +36,7 @@ public class FixedSizeSortedSet {
      * INVARIANT: The size of this map must be equal to the size
      *            of _sortedSet.
      */
-    private Map /*Object -> Object*/ _map;
+    private Map<E, E> _map;
     
     /**
      *  The maximum size of this, defaults to 50
@@ -57,15 +57,15 @@ public class FixedSizeSortedSet {
      */
     public FixedSizeSortedSet(int size) {
         _maxSize = size;
-        _sortedSet = new TreeSet();
-        _map = new HashMap();
+        _sortedSet = new TreeSet<E>();
+        _map = new HashMap<E, E>();
     }
 
     /**
      * Constructs a FixedSizeSortedSet with the specified comparator
      * for the SortedSet and a maximum size of 50.
      */
-    public FixedSizeSortedSet(Comparator c) {
+    public FixedSizeSortedSet(Comparator<? super E> c) {
         this(c,50);
     }
 
@@ -73,18 +73,19 @@ public class FixedSizeSortedSet {
      * Constructs a FixedSizeSortedSet with the specified comparator
      * and maximum size.
      */
-    public FixedSizeSortedSet(Comparator c, int maxSize) {
+    public FixedSizeSortedSet(Comparator<? super E> c, int maxSize) {
         _maxSize = maxSize;
-        _sortedSet = new TreeSet(c);
-        _map = new HashMap();
+        _sortedSet = new TreeSet<E>(c);
+        _map = new HashMap<E, E>();
     }
 
     
     ////////////////////////Sorted Set methods///////////////////////
+    @SuppressWarnings("unchecked")
     public Object  clone() {
-        FixedSizeSortedSet ret = new FixedSizeSortedSet(_maxSize);
-        ret._sortedSet = (SortedSet)((TreeSet)_sortedSet).clone();
-        ret._map = (Map)((HashMap)_map).clone();
+        FixedSizeSortedSet<E> ret = new FixedSizeSortedSet<E>(_maxSize);
+        ret._sortedSet = (SortedSet<E>)((TreeSet<E>)_sortedSet).clone();
+        ret._map = (Map<E, E>)((HashMap<E, E>)_map).clone();
         return ret;
     }
 
@@ -95,10 +96,10 @@ public class FixedSizeSortedSet {
      * (as specified by the Map's equals comparison), then it is ejected
      * and this newer version is used.
      */ 
-    public boolean add(Object o) {
+    public boolean add(E o) {
         if(o==null) 
             return false;
-        Object val = _map.get(o);
+        E val = _map.get(o);
         if(val != null) {//we have the object
             boolean removed = _sortedSet.remove(val);
             if(!removed)
@@ -109,7 +110,7 @@ public class FixedSizeSortedSet {
         }
         else {//we need to add it
             if(_map.size() >= _maxSize) { //need to remove highest element
-                Object highest = _sortedSet.last();
+                E highest = _sortedSet.last();
                 boolean removed = (_map.remove(highest)!=null);
                 if(!removed)
                     invariantsBroken(highest, highest);
@@ -128,11 +129,11 @@ public class FixedSizeSortedSet {
     /**
      * Adds all the elements of the specified collection to this set.
      */
-    public boolean addAll(Collection c) {
+    public boolean addAll(Collection<? extends E> c) {
         boolean ret = false;
-        Iterator iter = c.iterator();
-        while(iter.hasNext()) 
-            ret |= add(iter.next());
+        for(E e : c) {
+            ret |= add(e);
+        }
         return ret;
     }
     
@@ -140,21 +141,21 @@ public class FixedSizeSortedSet {
      * Retrieves the element that has an equals comparison with this
      * object and is in this FixedSizeSortedSet.
      */
-    public Object get(Object o) {
+    public E get(E o) {
         return _map.get(o);
     }
 
     /**
      * Returns the last element in the sorted set.
      */
-    public Object last() {
+    public E last() {
         return _sortedSet.last();
     }
 
     /**
      * Returns the first element in the sorted set.
      */
-    public Object first() {
+    public E first() {
         return _sortedSet.first();
     }
 
@@ -162,8 +163,8 @@ public class FixedSizeSortedSet {
      * Removes the specified object from this sorted set.
      * Equality is determined by equals, not compareTo.
      */
-    public boolean remove(Object o) {
-        Object obj = _map.remove(o);
+    public boolean remove(E o) {
+        E obj = _map.remove(o);
         boolean b1 = (obj!=null);
         boolean b2 = _sortedSet.remove(obj);
         if(b1 != b2)
@@ -207,7 +208,7 @@ public class FixedSizeSortedSet {
         return _sortedSet.isEmpty(); 
     }
     
-    public Iterator iterator() { 
+    public Iterator<E> iterator() { 
         return new FSSSIterator();
     }
     
@@ -220,7 +221,7 @@ public class FixedSizeSortedSet {
     /**
      * Notification that the invariants have broken, triggers an error.
      */
-    private void invariantsBroken(Object key, Object value) {
+    private void invariantsBroken(E key, E value) {
         String mapBefore = _map.toString();
         String setBefore = _sortedSet.toString();
         String mapSizeBefore = "" + _map.size();
@@ -269,10 +270,10 @@ public class FixedSizeSortedSet {
         }
     }
      
-     private class FSSSIterator implements Iterator {
+     private class FSSSIterator implements Iterator<E> {
      	
-     	private final Iterator _setIterator;
-     	private Object  _current;
+     	private final Iterator<E> _setIterator;
+     	private E  _current;
      	
      	public FSSSIterator() {
      		_setIterator=_sortedSet.iterator();
@@ -283,7 +284,7 @@ public class FixedSizeSortedSet {
      		return _setIterator.hasNext();
      	}
      	
-     	public Object next() {
+     	public E next() {
      		_current = _setIterator.next();
      		return _current;
      	}

@@ -5,6 +5,7 @@ import java.util.Set;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.IpPort;
 
 class QueryReplyData {
 
@@ -45,7 +46,7 @@ class QueryReplyData {
     private volatile short uniqueResultURNs;
 
     /** the PushProxy info for this hit. */ 
-    private volatile Set proxies; 
+    private volatile Set<? extends IpPort> proxies; 
     
     /** Whether or not this is a result from a browse-host reply. */  
     private volatile boolean browseHostReply;  
@@ -172,11 +173,11 @@ class QueryReplyData {
         this.hostData = hostData;
     }
 
-    public Set getProxies() {
+    public Set<? extends IpPort> getProxies() {
         return proxies;
     }
 
-    public void setProxies(Set proxies) {
+    public void setProxies(Set<? extends IpPort> proxies) {
         this.proxies = proxies;
     }
 

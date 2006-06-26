@@ -25,6 +25,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -115,7 +116,7 @@ public class QueryReply extends Message implements SecureMessage {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              DataUtils.EMPTY_BYTE_ARRAY,
              false, false, false, false, false, false, true, isMulticastReply,
-             false, Collections.EMPTY_SET);
+             false, IpPort.EMPTY_SET);
     }
 
 
@@ -144,7 +145,7 @@ public class QueryReply extends Message implements SecureMessage {
              DataUtils.EMPTY_BYTE_ARRAY,
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true, isMulticastReply, false, Collections.EMPTY_SET);
+             true, isMulticastReply, false, IpPort.EMPTY_SET);
     }
 
 
@@ -179,7 +180,7 @@ public class QueryReply extends Message implements SecureMessage {
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, needsPush, isBusy,  finishedUpload, measuredSpeed, 
-             supportsChat, isMulticastReply, Collections.EMPTY_SET);
+             supportsChat, isMulticastReply, IpPort.EMPTY_SET);
     }
 
     /** 
@@ -211,7 +212,7 @@ public class QueryReply extends Message implements SecureMessage {
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, Set proxies) 
+            boolean isMulticastReply, Set<? extends IpPort> proxies) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
@@ -249,7 +250,7 @@ public class QueryReply extends Message implements SecureMessage {
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, boolean supportsFWTransfer, Set proxies) 
+            boolean isMulticastReply, boolean supportsFWTransfer, Set<? extends IpPort> proxies) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
@@ -322,7 +323,7 @@ public class QueryReply extends Message implements SecureMessage {
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
              boolean isMulticastReply, boolean supportsFWTransfer, 
-             Set proxies) {
+             Set<? extends IpPort> proxies) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -411,7 +412,7 @@ public class QueryReply extends Message implements SecureMessage {
                 
                 //e) private area: one byte with flags 
                 //for chat support
-                byte chatSupport=(byte)(supportsChat ? CHAT_MASK : 0);
+                byte chatSupport = supportsChat ? CHAT_MASK : 0;
                 baos.write(chatSupport);
                 
                 //f) the GGEP block
@@ -559,12 +560,12 @@ public class QueryReply extends Message implements SecureMessage {
     /** Returns an iterator that will yield the results, each as an
      *  instance of the Response class.  Throws BadPacketException if
      *  this data couldn't be extracted.  */
-    public Iterator getResults() throws BadPacketException {
+    public Iterator<Response> getResults() throws BadPacketException {
         parseResults();
         Response[] responses = _data.getResponses();
         if (responses==null)
             throw new BadPacketException();
-        List list=Arrays.asList(responses);
+        List<Response> list = Arrays.asList(responses);
         return list.iterator();
     }
 
@@ -572,12 +573,12 @@ public class QueryReply extends Message implements SecureMessage {
     /** Returns a List that will yield the results, each as an
      *  instance of the Response class.  Throws BadPacketException if
      *  this data couldn't be extracted.  */
-    public List getResultsAsList() throws BadPacketException {
+    public List<Response> getResultsAsList() throws BadPacketException {
         parseResults();
         Response[] responses = _data.getResponses();        
         if (responses==null)
             throw new BadPacketException("results are null");
-        List list=Arrays.asList(responses);
+        List<Response> list = Arrays.asList(responses);
         return list;
     }
 
@@ -777,7 +778,7 @@ public class QueryReply extends Message implements SecureMessage {
     /**
      * @return null or a non-zero lenght array of PushProxy hosts.
      */
-    public Set getPushProxies() {
+    public Set<? extends IpPort> getPushProxies() {
         parseResults();
         return _data.getProxies();
     }
@@ -834,7 +835,7 @@ public class QueryReply extends Message implements SecureMessage {
         //silently caught.
         int left=getResultCount();          //number of records left to get
         Response[] responses=new Response[left];
-        Set urns = new HashSet(); // set for the urns carried in this reply
+        Set<URN> urns = new HashSet<URN>(); // set for the urns carried in this reply
         short uniqueURNs = 0;
         try {
             InputStream bais = 
@@ -927,7 +928,7 @@ public class QueryReply extends Message implements SecureMessage {
             boolean supportsChatT=false;
             boolean supportsBrowseHostT=false;
             boolean replyToMulticastT=false;
-            Set proxies=null;
+            Set<IpPort> proxies=null;
             
             //a) extract vendor code
             try {
@@ -1033,7 +1034,7 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setSupportsBrowseHost(supportsBrowseHostT);
             _data.setReplyToMulticast(replyToMulticastT);
             if(proxies == null)
-                _data.setProxies(Collections.EMPTY_SET);
+                _data.setProxies(IpPort.EMPTY_SET);
             else
                 _data.setProxies(proxies);
             
@@ -1317,8 +1318,8 @@ public class QueryReply extends Message implements SecureMessage {
          * @param ggeps the array of GGEP extensions that may or may not
          *  contain push proxy data
          */
-        public Set getPushProxies(GGEP ggep) {
-            Set proxies = null;
+        public Set<IpPort> getPushProxies(GGEP ggep) {
+            Set<IpPort> proxies = null;
             
             if (ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY)) {
                 try {
@@ -1338,7 +1339,7 @@ public class QueryReply extends Message implements SecureMessage {
             }
             
             if(proxies == null)
-                return Collections.EMPTY_SET;
+                return Collections.emptySet();
             else
                 return proxies;
         }

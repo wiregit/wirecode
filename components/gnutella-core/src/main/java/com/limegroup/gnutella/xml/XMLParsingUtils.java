@@ -33,8 +33,8 @@ public class XMLParsingUtils {
     /**
      * a ThreadLocal to contain the instance of the Lime parser
      */
-    private static ThreadLocal _parserContainer = new ThreadLocal() {
-        protected Object initialValue() {
+    private static ThreadLocal<LimeParser> _parserContainer = new ThreadLocal<LimeParser>() {
+        protected LimeParser initialValue() {
             return new LimeParser();
         }
     };
@@ -58,7 +58,7 @@ public class XMLParsingUtils {
     public static ParseResult parse(InputSource inputSource, int responseCount) 
       throws IOException, SAXException {
         ParseResult result = new ParseResult(responseCount);
-        LimeParser parser = (LimeParser)_parserContainer.get();
+        LimeParser parser = _parserContainer.get();
         parser.parse(result,inputSource);
         return result;
     }
@@ -68,8 +68,8 @@ public class XMLParsingUtils {
      * @param aggregatedXmlDocuments
      * @return List of Strings
      */    
-    public static List split(String aggregatedXmlDocuments) {
-        List results = new ArrayList();
+    public static List<String> split(String aggregatedXmlDocuments) {
+        List<String> results = new ArrayList<String>();
         
         int begin=aggregatedXmlDocuments.indexOf(XML_START);
         int end=aggregatedXmlDocuments.indexOf(XML_START,begin+1);
@@ -90,7 +90,7 @@ public class XMLParsingUtils {
      * A list of maps, also containing the Schema URI, the type and
      * the canonical key prefix
      */
-    public static class ParseResult extends ArrayList {
+    public static class ParseResult extends ArrayList<Map<String, String>> {
         
         public ParseResult(int size) {
             super(size*2/3);
@@ -157,7 +157,7 @@ public class XMLParsingUtils {
             
             int attributesLength = attributes.getLength();
             if(attributesLength > 0) {
-                Map attributeMap = new HashMap(attributesLength);
+                Map<String, String> attributeMap = new HashMap<String, String>(attributesLength);
                 for(int i = 0; i < attributesLength; i++) {
                     attributeMap.put(_result.canonicalKeyPrefix + 
                                      attributes.getQName(i) + "__",
@@ -165,7 +165,8 @@ public class XMLParsingUtils {
                 }
                 _result.add(attributeMap);
             } else {
-                _result.add(Collections.EMPTY_MAP);
+                Map<String, String> empty = Collections.emptyMap();
+                _result.add(empty);
             }
         }
     }
