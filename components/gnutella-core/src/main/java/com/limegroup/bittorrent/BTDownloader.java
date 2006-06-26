@@ -280,7 +280,7 @@ implements TorrentLifecycleListener {
 
 	public void setSaveFile(File saveDirectory, String fileName,
 			boolean overwrite) throws SaveLocationException {
-		// TODO: decide how to deal with this...
+		throw new IllegalArgumentException("not supported");
 	}
 
 	public File getSaveFile() {

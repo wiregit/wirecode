@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
@@ -514,6 +515,29 @@ public class BTMetaInfo implements Serializable {
 		if (!(t_pieces instanceof byte []))
 			throw new ValueException("bad metainfo - no pieces key found");
 		_hashes = parsePieces((byte [])t_pieces);
+		
+		// create the info hash, we could create the info hash while reading it
+		// but that would make the code a lot more complex. This works well too,
+		// because the order of a list is not changed during the process of
+		// decoding or encoding it and Maps are always sorted alphanumerically
+		// when encoded.
+		// So the data we encoded is always exactly the same as the data before
+		// we decoded it. This is intended that way by the protocol.
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			BEncoder.encodeDict(baos, info);
+		} catch (IOException ioe) {
+			ErrorService.error(ioe);
+		}
+		
+		MessageDigest md = new SHA1();
+		_infoHash = md.digest(baos.toByteArray());
+		
+		try {
+			_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
+		} catch (IOException impossible) {
+			ErrorService.error(impossible);
+		}
 
 		// piece length, also very important.
 		Object t_pieceLength = info.get("piece length");
@@ -556,8 +580,13 @@ public class BTMetaInfo implements Serializable {
 		if (info.containsKey("files") == info.containsKey("length"))
 			throw new ValueException("single/multiple file mix");
 
-		_incompleteFile = new File(SharingSettings.INCOMPLETE_DIRECTORY
-				.getValue(), _name);
+		File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+		try {
+			incompleteDir = incompleteDir.getCanonicalFile();
+		} catch (IOException iox){}
+		
+		_incompleteFile = new File(incompleteDir, 
+				Base32.encode(_infoHash)+File.separator+_name);
 
 		if (info.containsKey("files")) {
 			Object t_files = info.get("files");
@@ -590,30 +619,10 @@ public class BTMetaInfo implements Serializable {
 						.getCanonicalPath());
 				_files[0].begin = 0;
 				_files[0].end = _hashes.length;
-			} catch (IOException ie) {
-				throw new ValueException("bad metainfo - file path");
+			} catch (IOException bad) {
+				throw new ValueException("bad path");
 			}
-		}
-
-		// create the info hash, we could create the info hash while reading it
-		// but that would make the code a lot more complex. This works well too,
-		// because the order of a list is not changed during the process of
-		// decoding or encoding it and Maps are always sorted alphanumerically
-		// when encoded.
-		// So the data we encoded is always exactly the same as the data before
-		// we decoded it. This is intended that way by the protocol.
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			BEncoder.encodeDict(baos, info);
-		} catch (IOException ioe) {
-			ErrorService.error(ioe);
-		}
-		MessageDigest md = new SHA1();
-		_infoHash = md.digest(baos.toByteArray());
-		try {
-		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
-		} catch (IOException impossible) {
-			ErrorService.error(impossible);
+			
 		}
 
 		// _infoMap is not to be messed with.

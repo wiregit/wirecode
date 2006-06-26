@@ -85,7 +85,8 @@ public class BTConnectionFetcher  {
 		handshake.put("LIME".getBytes());
 		handshake.put(RouterService.getMyGUID());
 		handshake.flip();
-		
+		// Note: with gathering writes everything but the info hash 
+		// can be shared.
 		_handshake = handshake.asReadOnlyBuffer(); 
 	}
 	

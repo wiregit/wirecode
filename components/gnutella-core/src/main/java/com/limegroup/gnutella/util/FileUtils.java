@@ -12,7 +12,9 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -420,4 +422,28 @@ public class FileUtils {
 
 		return file.delete();
 	}
+    
+    /**
+     * @return true if the two files are the same.  If they are both
+     * directories returns true if there is at least one file that 
+     * conflicts.
+     */
+    public static boolean conflictsAny(File a, File b) {
+    	if (a.equals(b))
+    		return true;
+    	Set<File> unique = new HashSet<File>();
+    	unique.add(a);
+    	for (File recursive: getFilesRecursive(a,null))
+    		unique.add(recursive);
+    	
+    	if (unique.contains(b))
+    		return true;
+    	for (File recursive: getFilesRecursive(b,null)) {
+    		if (unique.contains(recursive))
+    			return true;
+    	}
+    	
+    	return false;
+    	
+    }
 }
