@@ -390,6 +390,9 @@ public class BTMetaInfo implements Serializable {
 					+ completeFile.length());
 			return false;
 		}
+		
+		File torrentFolder = incFile.getParentFile();
+		FileUtils.deleteRecursive(torrentFolder);
 
 		// Add file to library.
 		// first check if it conflicts with the saved dir....

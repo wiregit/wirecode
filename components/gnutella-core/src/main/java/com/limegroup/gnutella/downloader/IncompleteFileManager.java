@@ -600,6 +600,11 @@ public class IncompleteFileManager implements Serializable {
      */
     public static String getCompletedName(File incompleteFile) 
             throws IllegalArgumentException {
+    	
+    	String torrent = getCompletedTorrentName(incompleteFile);
+    	if (torrent != null)
+    		return torrent;
+    	
         //Given T-<size>-<name> return <name>.
         //       i      j
         //This is not as strict as it could be.  TODO: what about (x) suffix?
@@ -613,6 +618,17 @@ public class IncompleteFileManager implements Serializable {
         if (j==name.length()-1)
             throw new IllegalArgumentException("No name after last separator");
         return name.substring(j+1);
+    }
+    
+    private static String getCompletedTorrentName(File incompleteDir) {
+    	if (incompleteDir.isDirectory() && incompleteDir.getName().length() == 32) {
+    		File [] list = incompleteDir.listFiles();
+    		if (list.length != 1)
+    			return null;
+    		
+    		return list[0].getName();
+    	}
+    	return null;
     }
 
     /**
