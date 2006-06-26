@@ -82,7 +82,7 @@ public class Tag {
     
     Tag(ContactNode node, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
-        this(node.getNodeID(), node.getSocketAddress(), message, responseHandler, node.getAdaptativeTimeOut());
+        this(node.getNodeID(), node.getSocketAddress(), message, responseHandler, node.getAdaptativeTimeout());
     }
     
     Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
