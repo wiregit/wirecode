@@ -19,6 +19,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.settings.NetworkSettings;
 
@@ -63,7 +64,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
         ROUTER_SERVICE.start();
         
         DHT_MANAGER = RouterService.getLimeDHTManager();
-
+        
     }
 
     private static void setSettings() throws Exception {
@@ -140,6 +141,31 @@ public class LimeDHTManagerTest extends BaseTestCase {
         sleep(3000);
         //TODO: incomplete
         leaf.close();
+    }
+    
+    public void testSwitchPassiveActive() throws Exception{
+        DHTSettings.PERSIST_DHT.setValue(true);
+        RouterService.initializeDHT(false);
+        assertTrue(DHT_MANAGER.isRunning());
+        KUID nodeId = DHT_MANAGER.getMojitoDHT().getLocalNodeID();
+        //try to bootstrap at the same time
+        DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
+        DHT_MANAGER.setPassive(true);
+        //we should have switched IDs
+        assertTrue(DHT_MANAGER.isRunning());
+        KUID passiveNodeId = DHT_MANAGER.getMojitoDHT().getLocalNodeID();
+        assertNotEquals(nodeId, passiveNodeId);
+        DHT_MANAGER.setPassive(true);
+        //this should not change anything
+        DHT_MANAGER.setPassive(true);
+        assertEquals(passiveNodeId, DHT_MANAGER.getMojitoDHT().getLocalNodeID());
+        
+        DHT_MANAGER.setPassive(false);
+        //we should have the same ID again!
+        assertEquals(nodeId, DHT_MANAGER.getMojitoDHT().getLocalNodeID());
+        DHT_MANAGER.setPassive(true);
+        //and now it should be different from last passive time
+        assertNotEquals(passiveNodeId, DHT_MANAGER.getMojitoDHT().getLocalNodeID());
     }
     
     public void tearDown() {

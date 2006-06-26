@@ -84,16 +84,19 @@ public class LimeDHTManager implements LifecycleListener {
     
     private boolean isActive = false;
     
-    private final LimeDHTRoutingTable limeDHTRouteTable;
-    
+    private LimeDHTRoutingTable limeDHTRouteTable;
     
     public LimeDHTManager() {
-        
+        init();
+    }
+    
+    public void init() {
+        MojitoDHT mDHT = null;
         if (DHTSettings.PERSIST_DHT.getValue() && 
-                    FILE.exists() && FILE.isFile()) {
+                FILE.exists() && FILE.isFile()) {
             try {
                 FileInputStream in = new FileInputStream(FILE);
-                dht = MojitoDHT.load(in);
+                mDHT = MojitoDHT.load(in);
                 in.close();
             } catch (FileNotFoundException e) {
                 LOG.error("FileNotFoundException", e);
@@ -104,8 +107,10 @@ public class LimeDHTManager implements LifecycleListener {
             }
         }
         
-        if (dht == null) {
+        if (mDHT == null) {
             dht = new MojitoDHT("LimeMojitoDHT");
+        } else {
+            dht = mDHT;
         }
         
         limeDHTRouteTable = (LimeDHTRoutingTable) dht.setRoutingTable(LimeDHTRoutingTable.class);
@@ -118,16 +123,16 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     /**
-     * Initializes the Mojito DHT and connects it to the network in either passive mode
+     * Start the Mojito DHT and connects it to the network in either passive mode
      * or active mode if we are not firewalled.
-     * The initialization preconditions are the following:
+     * The start preconditions are the following:
      * 1) if we want to actively connect: We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
      * 2) We are not an ultrapeer while excluding ultrapeers from the active network
      * 3) We are not already connected or trying to bootstrap
      * 
      * @param forcePassive true to connect to the DHT in passive mode
      */
-    public synchronized void init(boolean forcePassive) {
+    public synchronized void start(boolean forcePassive) {
         if (running) {
             return;
         }
@@ -141,6 +146,7 @@ public class LimeDHTManager implements LifecycleListener {
         //if we want to connect actively, we either shouldn't be an ultrapeer
         //or should be DHT capable
         if (!forcePassive && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+            
             if(!DHTSettings.DHT_CAPABLE.getValue() ||
                (RouterService.isSupernode() &&
                DHTSettings.EXCLUDE_ULTRAPEERS.getValue())) {
@@ -153,11 +159,7 @@ public class LimeDHTManager implements LifecycleListener {
         }
         
         //set firewalled status
-        if (forcePassive){
-            dht.setFirewalled(true);
-        } else {
-            dht.setFirewalled(!RouterService.acceptedIncomingConnection());
-        }
+        dht.setFirewalled(forcePassive);
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Initializing the DHT");
@@ -228,9 +230,8 @@ public class LimeDHTManager implements LifecycleListener {
             return;
         }
         
-        if (!running) {
+        if (!running) 
             return;
-        }
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Shutting down DHT");
@@ -287,7 +288,8 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public synchronized void addLeafDHTNode(String host, int port) {
-        if(!running) return;
+        if(!running) 
+            return;
         InetSocketAddress addr = new InetSocketAddress(host, port);
         if(waiting) {
             addBootstrapHost(addr);
@@ -297,7 +299,8 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public synchronized void removeLeafDHTNode(String host, int port) {
-        if(!running) return;
+        if(!running) 
+            return;
         limeDHTRouteTable.removeLeafDHTNode(host, port);
     }
     
@@ -313,9 +316,34 @@ public class LimeDHTManager implements LifecycleListener {
         return running & !isActive;
     }
     
-    public void setPassive(boolean firewalled) {
-        //TODO here: see Jira: MOJITO-53
-        if(running && !waiting) dht.setFirewalled(true);
+    /**
+     * Sets the mode 
+     * 
+     * 
+     * @param passive
+     */
+    public void setPassive(boolean passive) {
+        boolean wasPassive = dht.isFirewalled();
+        if((passive && wasPassive) || (!passive && !wasPassive)) 
+            return; //no change
+        
+        boolean wasRunning = running;
+        shutdown(true);
+        
+        //we are becoming active: load dht from last active session
+        if(wasPassive && !passive) {
+            DHTSettings.PERSIST_DHT.setValue(true);
+            init();
+        } 
+        //we are becoming passive: start new DHT with new nodeID so that 
+        //the node is not part of the DHT anymore
+        else if(!wasPassive && passive) {
+            DHTSettings.PERSIST_DHT.setValue(false);
+            init();
+        } 
+        
+        if(wasRunning)
+            start(true);
     }
 
     /**
@@ -341,12 +369,9 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public void addressChanged() {
-        if(!running) {
+        if(!running) 
             return;
-        }
-        
-        dht.stop();
-        init(false);
+        dht.stop(); //the node assigner will take care of restarting it!
     }
     
     public int getVersion() {

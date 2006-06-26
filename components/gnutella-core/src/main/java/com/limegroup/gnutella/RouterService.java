@@ -1828,7 +1828,7 @@ public class RouterService {
     
     public static void initializeDHT(boolean passiveMode) {
         if(isDHTNode()) return;
-        dhtManager.init(passiveMode);
+        dhtManager.start(passiveMode);
     }
     
     public static void shutdownDHT() {
