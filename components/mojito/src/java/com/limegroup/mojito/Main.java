@@ -63,6 +63,7 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
+import com.limegroup.mojito.util.ContactUtils;
 
 
 public class Main {
@@ -338,7 +339,7 @@ public class Main {
 
             public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
                 if (nodeId != null) {
-                    System.out.println("*** Ping to " + ContactNode.toString(nodeId, address) + " failed");
+                    System.out.println("*** Ping to " + ContactUtils.toString(nodeId, address) + " failed");
                 } else {
                     System.out.println("*** Ping to " + address + " failed");
                 }
@@ -402,7 +403,7 @@ public class Main {
                 buffer.append("STORED KEY_VALUES: ").append(keyValue).append("\n");
                 int i = 0;
                 for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-                    Node node = (Node) iter.next();
+                    Contact node = (Contact) iter.next();
                     buffer.append(i).append(": ").append(node).append("\n");
                     i++;
                 }
@@ -430,7 +431,7 @@ public class Main {
                 buffer.append("REMOVED KEY_VALUES: ").append(keyValue).append("\n");
                 int i = 0;
                 for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-                    Node node = (Node) iter.next();
+                    Contact node = (Contact) iter.next();
                     buffer.append(i).append(": ").append(node).append("\n");
                     i++;
                 }

@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.Database;
@@ -42,6 +41,7 @@ import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;

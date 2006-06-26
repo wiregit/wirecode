@@ -25,13 +25,13 @@ import java.net.SocketAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.util.ContactUtils;
 
 
 public class StatsResponseHandler extends AbstractResponseHandler {
@@ -63,14 +63,14 @@ public class StatsResponseHandler extends AbstractResponseHandler {
     protected void timeout(final KUID nodeId, final SocketAddress dst, 
             final RequestMessage message, final long time) throws IOException {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Stats request to " + ContactNode.toString(nodeId, dst) 
+            LOG.trace("Stats request to " + ContactUtils.toString(nodeId, dst) 
                     + " failed");
         }
     }
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         if (LOG.isErrorEnabled()) {
-            LOG.error("Sending a stats request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+            LOG.error("Sending a stats request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
         }
         
         fireTimeout(nodeId, dst, message, -1L);

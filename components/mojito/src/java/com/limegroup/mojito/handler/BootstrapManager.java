@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapListener;
@@ -97,7 +96,7 @@ public class BootstrapManager implements PingListener, LookupListener {
         
         if (contacts.hasNext()) {
             startTime = System.currentTimeMillis();
-            this.context.ping((ContactNode)contacts.next(), this);
+            this.context.ping((Contact)contacts.next(), this);
         } else {
             fireNoBootstrapHost();
         }
@@ -227,7 +226,14 @@ public class BootstrapManager implements PingListener, LookupListener {
             firePhaseOneFinished();
             
             try {
-                context.getRouteTable().refreshBuckets(true, this);
+                buckets = context.getRouteTable().getRefreshIDs(true);
+                if (buckets.isEmpty()) {
+                    firePhaseTwoFinished();
+                } else {
+                    for(KUID nodeId : buckets) {
+                        context.lookup(nodeId, this);
+                    }
+                }
             } catch (IOException err) {
                 LOG.error("Beginning second phase failed: ", err);
                 firePhaseTwoFinished();
@@ -241,14 +247,6 @@ public class BootstrapManager implements PingListener, LookupListener {
             if (buckets.isEmpty()) {
                 firePhaseTwoFinished();
             }
-        }
-    }
-
-    public void setBuckets(List<KUID> buckets) {
-        this.buckets = buckets;
-        
-        if (buckets.isEmpty()) {
-            firePhaseTwoFinished();
         }
     }
     

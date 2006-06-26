@@ -19,13 +19,11 @@
  
 package com.limegroup.mojito.routing;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.handler.BootstrapManager;
 
 
 /**
@@ -93,13 +91,9 @@ public interface RouteTable {
     public List<? extends Contact> getCachedNodes();
     
     /**
-     * Refreshes the routing table's buckets
      * 
-     * @param force true to refresh all buckets, false otherwise
-     * @param manager the BootstrapManager callback
-     * @throws IOException
      */
-    public void refreshBuckets(boolean force, BootstrapManager manager) throws IOException;
+    public List<KUID> getRefreshIDs(boolean force);
     
     /**
      * Clears all elements from the RoutingTable

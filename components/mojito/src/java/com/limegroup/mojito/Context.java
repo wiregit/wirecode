@@ -56,7 +56,6 @@ import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
-import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.RouteTable.SpoofChecker;
@@ -222,7 +221,7 @@ public class Context {
         }
 
         if (clazz == null) {
-            clazz = PatriciaRouteTable.class;
+            clazz = RouteTableImpl.class;
         }
         
         try {

@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingListener;
@@ -34,6 +33,7 @@ import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * The PingResponseHandler handles ping responses from Nodes
@@ -85,7 +85,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
             SocketAddress dst, RequestMessage message, long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Ping to " + ContactNode.toString(nodeId, dst) 
+            LOG.trace("Ping to " + ContactUtils.toString(nodeId, dst) 
                     + " failed after " + time + "ms");
         }
 
@@ -95,7 +95,7 @@ public class PingResponseHandler extends AbstractResponseHandler {
     protected void resend(KUID nodeId, SocketAddress dst, RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Re-sending Ping to " + ContactNode.toString(nodeId, dst));
+            LOG.trace("Re-sending Ping to " + ContactUtils.toString(nodeId, dst));
         }
         
         super.resend(nodeId, dst, message);
@@ -103,14 +103,14 @@ public class PingResponseHandler extends AbstractResponseHandler {
 
     protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Giving up to ping " + ContactNode.toString(nodeId, dst) 
+            LOG.trace("Giving up to ping " + ContactUtils.toString(nodeId, dst) 
                     + " after " + getMaxErrors() + " errors and a total time of "+ time() + "ms");
         }
     }
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         if (LOG.isErrorEnabled()) {
-            LOG.error("Sending a ping to " + ContactNode.toString(nodeId, dst) + " failed", e);
+            LOG.error("Sending a ping to " + ContactUtils.toString(nodeId, dst) + " failed", e);
         }
         
         fireTimeout(nodeId, dst, message, -1L);

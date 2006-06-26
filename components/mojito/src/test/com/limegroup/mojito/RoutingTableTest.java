@@ -30,6 +30,8 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.old.BucketNode;
+import com.limegroup.mojito.old.ContactNode;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;

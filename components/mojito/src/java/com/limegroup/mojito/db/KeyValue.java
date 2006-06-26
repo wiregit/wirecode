@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
 
 /**

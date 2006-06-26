@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -41,6 +40,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * The StoreResponseHandler handles storing of one or more 
@@ -162,7 +162,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         if (LOG.isErrorEnabled()) {
-            LOG.error("Sending a store request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+            LOG.error("Sending a store request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
         }
         
         fireTimeout(nodeId, dst, message, -1L);

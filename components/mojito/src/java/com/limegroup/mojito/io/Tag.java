@@ -27,7 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.NoOpResponseHandler;
 import com.limegroup.mojito.handler.ResponseHandler;
@@ -44,6 +43,7 @@ import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * The Tag class is a wrapper for outgoing DHTMessages. For 
@@ -216,12 +216,12 @@ public class Tag {
             if(timeout < 0L) {
                 long t = responseHandler.timeout();
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Default timeout: " + t + "ms for " + ContactNode.toString(nodeId, dst));
+                    LOG.debug("Default timeout: " + t + "ms for " + ContactUtils.toString(nodeId, dst));
                 }
                 return time >= t;
             } else {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Timeout: " + timeout + "ms for " + ContactNode.toString(nodeId, dst));
+                    LOG.debug("Timeout: " + timeout + "ms for " + ContactUtils.toString(nodeId, dst));
                 }
                 return time >= timeout;
             }

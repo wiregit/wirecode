@@ -42,6 +42,7 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
@@ -54,6 +55,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
@@ -75,7 +77,7 @@ public class MojitoDHT {
         this(name, null, CryptoHelper.createKeyPair());
     }
     
-    private MojitoDHT(String name, ContactNode local, KeyPair keyPair) {
+    private MojitoDHT(String name, Contact local, KeyPair keyPair) {
         if (name == null) {
             name = "DHT";
         }
@@ -89,7 +91,7 @@ public class MojitoDHT {
             int flags = 0;
             int instanceId = 0;
             
-            local = new ContactNode(vendor, version, nodeId, addr, instanceId, flags);
+            local = new ContactNode(vendor, version, nodeId, addr, instanceId, flags, State.UNKNOWN);
         }
 
         context = new Context(name, local, keyPair);
@@ -618,8 +620,8 @@ public class MojitoDHT {
             instanceId = 0;
         }
         
-        ContactNode local = new ContactNode(vendor, version, nodeId, 
-                new InetSocketAddress(0), instanceId, flags);
+        Contact local = new ContactNode(vendor, version, nodeId, 
+                new InetSocketAddress(0), instanceId, flags, State.UNKNOWN);
         
         // Create an instance w/o a KeyPair for now (will set it later!)
         MojitoDHT dht = new MojitoDHT(name, local, null);

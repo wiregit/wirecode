@@ -38,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.LookupListener;
@@ -51,6 +50,7 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
 import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
 import com.limegroup.mojito.statistics.SingleLookupStatisticContainer;
+import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.KeyValueCollection;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.TrieUtils;
@@ -134,9 +134,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             lookupStat = new FindNodeLookupStatisticContainer(context, lookup);
         }
         
-        List bucketList = context.getRouteTable().select(lookup, resultSetSize, false, true);
-        for(Iterator it = bucketList.iterator(); it.hasNext(); ) {
-            addYetToBeQueried((ContactNode)it.next(), 1);
+        List<? extends Contact> nodes = context.getRouteTable().select(lookup, resultSetSize, false, true);
+        for(Contact node : nodes) {
+            addYetToBeQueried(node, 1);
         }
         
         addResponse(new ContactNodeEntry(context.getLocalNode()));
@@ -249,10 +249,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             
             if (LOG.isTraceEnabled()) {
                 if (isValueLookup()) {
-                    LOG.trace(ContactNode.toString(nodeId, dst) 
+                    LOG.trace(ContactUtils.toString(nodeId, dst) 
                             + " did not respond to our FIND_VALUE request");   
                 } else {
-                    LOG.trace(ContactNode.toString(nodeId, dst) 
+                    LOG.trace(ContactUtils.toString(nodeId, dst) 
                             + " did not respond to our FIND_NODE request");
                 }
             }
@@ -270,9 +270,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     public void handleError(final KUID nodeId, final SocketAddress dst, final RequestMessage message, Exception e) {
         if (LOG.isErrorEnabled()) {
             if (isValueLookup()) {
-                LOG.error("Sending a FIND_VALUE request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+                LOG.error("Sending a FIND_VALUE request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
             } else {
-                LOG.error("Sending a FIND_NODE request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+                LOG.error("Sending a FIND_NODE request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
             }
         }
         

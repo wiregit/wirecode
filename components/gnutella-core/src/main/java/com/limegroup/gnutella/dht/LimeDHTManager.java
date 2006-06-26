@@ -33,10 +33,10 @@ import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.old.ContactNode;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 

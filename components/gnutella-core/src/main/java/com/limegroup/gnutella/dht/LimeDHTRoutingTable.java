@@ -11,13 +11,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.routing.PatriciaRouteTable;
+import com.limegroup.mojito.old.ContactNode;
+import com.limegroup.mojito.old.PatriciaRouteTable;
 import com.limegroup.mojito.settings.ContextSettings;
 
 public class LimeDHTRoutingTable extends PatriciaRouteTable {

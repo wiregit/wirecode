@@ -22,6 +22,7 @@ package com.limegroup.mojito;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 
+import com.limegroup.mojito.old.ContactNode;
 import com.limegroup.mojito.routing.RouteTable;
 
 class MojitoHelper {

@@ -31,6 +31,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.Trie.Cursor;
@@ -359,6 +360,36 @@ public class RouteTableImpl implements RouteTable {
             }
         });
         return nodes;
+    }
+    
+    public List<KUID> getRefreshIDs(final boolean force) {
+        final List<KUID> ids = new ArrayList<KUID>();
+        
+        bucketTrie.traverse(new Cursor<KUID, Bucket>() {
+            public boolean select(Entry<KUID, Bucket> entry) {
+                Bucket bucket = entry.getValue();
+                if (!bucket.contains(context.getLocalNodeID())) {
+                    long d = System.currentTimeMillis() - bucket.getTimeStamp();
+                    if (d >= RouteTableSettings.BUCKET_REFRESH_TIME.getValue()
+                            || bucket.getLiveSize() < KademliaSettings.REPLICATION_PARAMETER.getValue()
+                            || bucket.getLiveSize() != bucket.getLiveWithZeroFailures()
+                            || force) {
+                        
+                        // Select a random ID with this prefix
+                        KUID randomId = KUID.createPrefxNodeID(bucket.getBucketID(), bucket.getDepth());
+                        
+                        if(LOG.isTraceEnabled()) {
+                            LOG.trace("Refreshing bucket:" + bucket + " with random ID: " + randomId);
+                        }
+                        
+                        ids.add(randomId);
+                    }
+                }
+                return false;
+            }
+        });
+        
+        return ids;
     }
     
     public List<? extends Bucket> getBuckets() {

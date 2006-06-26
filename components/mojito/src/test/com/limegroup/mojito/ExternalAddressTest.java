@@ -31,6 +31,7 @@ import com.limegroup.mojito.handler.request.PingRequestHandler;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.old.ContactNode;
 
 
 public class ExternalAddressTest extends BaseTestCase {

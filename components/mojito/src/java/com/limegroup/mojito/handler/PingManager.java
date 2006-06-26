@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingListener;
@@ -215,7 +214,7 @@ public class PingManager implements PingListener {
         }
     }
 
-    public boolean cancel(ContactNode node) {
+    public boolean cancel(Contact node) {
         return cancel(node.getSocketAddress());
     }
     

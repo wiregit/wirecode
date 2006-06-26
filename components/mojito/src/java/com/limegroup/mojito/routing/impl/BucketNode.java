@@ -34,6 +34,7 @@ import com.limegroup.mojito.util.FixedSizeHashMap;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.Trie;
 import com.limegroup.mojito.util.TrieUtils;
+import com.limegroup.mojito.util.Trie.Cursor;
 
 /**
  * 
@@ -184,7 +185,7 @@ class BucketNode implements Bucket {
     
     public Contact getLeastRecentlySeenLiveNode() {
         final Contact[] leastRecentlySeen = new Contact[]{ null };
-        Trie.Cursor<KUID, Contact> cursor = new Trie.Cursor<KUID, Contact>() {
+        nodeTrie.traverse(new Cursor<KUID, Contact>() {
             public boolean select(Map.Entry<KUID, Contact> entry) {
                 Contact node = entry.getValue();
                 Contact lrs = leastRecentlySeen[0];
@@ -193,14 +194,13 @@ class BucketNode implements Bucket {
                 }
                 return false;
             }
-        };
-        nodeTrie.traverse(cursor);
+        });
         return leastRecentlySeen[0];
     }
     
     public Contact getMostRecentlySeenLiveNode() {
         final Contact[] mostRecentlySeen = new Contact[]{ null };
-        Trie.Cursor<KUID, Contact> cursor = new Trie.Cursor<KUID, Contact>() {
+        nodeTrie.traverse(new Cursor<KUID, Contact>() {
             public boolean select(Map.Entry<KUID, Contact> entry) {
                 Contact node = entry.getValue();
                 Contact mrs = mostRecentlySeen[0];
@@ -209,8 +209,7 @@ class BucketNode implements Bucket {
                 }
                 return false;
             }
-        };
-        nodeTrie.traverse(cursor);
+        });
         return mostRecentlySeen[0];
     }
 
@@ -267,6 +266,20 @@ class BucketNode implements Bucket {
     
     public int getLiveSize() {
         return nodeTrie.size();
+    }
+    
+    public int getLiveWithZeroFailures() {
+        final int[] zeroFailures = new int[]{ 0 };
+        nodeTrie.traverse(new Cursor<KUID, Contact>() {
+            public boolean select(Map.Entry<KUID, Contact> entry) {
+                Contact node = entry.getValue();
+                if (!node.hasFailed()) {
+                    zeroFailures[0]++;
+                }
+                return false;
+            }
+        });
+        return zeroFailures[0];
     }
     
     public int getCacheSize() {

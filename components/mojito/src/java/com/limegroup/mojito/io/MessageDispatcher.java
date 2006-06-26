@@ -35,7 +35,6 @@ import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.DefaultMessageHandler;
@@ -63,6 +62,7 @@ import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 
 /**
@@ -195,7 +195,7 @@ public abstract class MessageDispatcher implements Runnable {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
-                        + " to ourself " + ContactNode.toString(nodeId, dst));
+                        + " to ourself " + ContactUtils.toString(nodeId, dst));
             }
             tag.handleError(new IOException("Cannot send message to yourself"));
             return false;
@@ -203,10 +203,10 @@ public abstract class MessageDispatcher implements Runnable {
         
         if (!NetworkUtils.isValidSocketAddress(dst)) {
             if (LOG.isErrorEnabled()) {
-                LOG.error("The IP/Port of " + ContactNode.toString(nodeId, dst) + " is not valid");
+                LOG.error("The IP/Port of " + ContactUtils.toString(nodeId, dst) + " is not valid");
             }
             
-            tag.handleError(new IllegalSocketAddressException("Invalid IP/Port: " + ContactNode.toString(nodeId, dst)));
+            tag.handleError(new IllegalSocketAddressException("Invalid IP/Port: " + ContactUtils.toString(nodeId, dst)));
             return false;
         }
         
@@ -328,21 +328,21 @@ public abstract class MessageDispatcher implements Runnable {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
-                        + " from ourself " + ContactNode.toString(nodeId, src));
+                        + " from ourself " + ContactUtils.toString(nodeId, src));
             }
             return;
         }
         
         if (!NetworkUtils.isValidSocketAddress(src)) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(ContactNode.toString(nodeId, src) + " has an invalid IP/Port");
+                LOG.error(ContactUtils.toString(nodeId, src) + " has an invalid IP/Port");
             }
             return;
         }
         
         if (!accept(message)) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Dropping message from " + ContactNode.toString(nodeId, src));
+                LOG.info("Dropping message from " + ContactUtils.toString(nodeId, src));
             }
             return;
         }
@@ -445,7 +445,7 @@ public abstract class MessageDispatcher implements Runnable {
                 try {
                     SocketAddress dst = tag.getSocketAddres();
                     ByteBuffer data = tag.getData();
-                    assert data == null : " Somebody set Data to null";
+                    assert (data != null);
                     
                     if (send(channel, dst, data)) {
                         // Wohoo! Message was sent!

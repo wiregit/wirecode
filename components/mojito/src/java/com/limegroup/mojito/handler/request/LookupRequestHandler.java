@@ -88,22 +88,21 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         QueryKey queryKey = QueryKey.getQueryKey(
                 request.getContact().getSocketAddress());
         
-        List<? extends Contact> bucketList = Collections.emptyList();
+        List<? extends Contact> nodes = (List<? extends Contact>)Collections.EMPTY_LIST;
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
-                List<? extends Contact> nodes = context.getRouteTable().getNodes();
+                nodes = context.getRouteTable().getNodes();
                 nodes = BucketUtils.sort(nodes);
                 nodes = nodes.subList(0, Math.min(nodes.size(), KademliaSettings.REPLICATION_PARAMETER.getValue()));
-                bucketList = nodes;
             } else {
-                bucketList = context.getRouteTable().select(lookup, 
+                nodes = context.getRouteTable().select(lookup, 
                         KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);
             }
         }
         
         if (LOG.isTraceEnabled()) {
-            if (!bucketList.isEmpty()) {
-                LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));
+            if (!nodes.isEmpty()) {
+                LOG.trace("Sending back: " + CollectionUtils.toString(nodes));
             } else {
                 LOG.trace("Sending back an empty List");
             }
@@ -112,7 +111,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
         
         FindNodeResponse response = context.getMessageHelper()
-                    .createFindNodeResponse(request, queryKey, bucketList);
+                    .createFindNodeResponse(request, queryKey, nodes);
         
         context.getMessageDispatcher().send(request.getContact(), response);
     }

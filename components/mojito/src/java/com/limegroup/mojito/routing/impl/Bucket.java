@@ -68,6 +68,8 @@ interface Bucket {
 
     public int getLiveSize();
 
+    public int getLiveWithZeroFailures();
+    
     public int getCacheSize();
 
     public void clear();

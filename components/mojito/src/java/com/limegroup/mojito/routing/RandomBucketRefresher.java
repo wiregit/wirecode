@@ -20,12 +20,14 @@
 package com.limegroup.mojito.routing;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 /**
@@ -81,7 +83,10 @@ public class RandomBucketRefresher implements Runnable {
                     return;
                 }
                 
-                context.getRouteTable().refreshBuckets(false, null);
+                List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
+                for(KUID nodeId : ids) {
+                    context.lookup(nodeId);
+                }
             }
         } catch (IOException ex) {
             LOG.error("IOException", ex);
