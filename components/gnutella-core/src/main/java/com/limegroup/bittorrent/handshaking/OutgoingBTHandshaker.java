@@ -26,13 +26,16 @@ implements ConnectObserver {
 		super(loc);
 		this.torrent = torrent;
 	}
+
+	public void setSock(Socket sock) {
+		this.sock = (NIOSocket)sock;
+	}
 	
 	public void handleConnect(Socket socket) throws IOException {
 		if (LOG.isDebugEnabled())
 			LOG.debug("established connection to "+socket.getInetAddress());
 		
-		sock = (NIOSocket)socket;
-		
+		setSock(socket);
 		// connection was established - init the buffers and interests.
 		initOutgoingHandshake();
 		initIncomingHandshake();

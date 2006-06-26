@@ -2,6 +2,7 @@ package com.limegroup.bittorrent;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,13 +119,14 @@ public class BTConnectionFetcher  {
 		}
 		
 		OutgoingBTHandshaker connector = new OutgoingBTHandshaker(ep, _torrent);
-		fetchers.add(connector);
 		try {
-			Sockets.connect(ep.getAddress(),
+			Socket s = Sockets.connect(ep.getAddress(),
 					ep.getPort(), Constants.TIMEOUT, connector);
+			connector.setSock(s);
 		} catch (IOException impossible) {
 			ErrorService.error(impossible);
 		}
+		fetchers.add(connector);
 	}
 	
 	synchronized void shutdown() {

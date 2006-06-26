@@ -39,7 +39,9 @@ implements TorrentLifecycleListener {
 
 	private DownloadManager manager;
 	
-	private long startTime, stopTime;
+	private volatile long startTime, stopTime;
+	
+	private volatile boolean complete;
 	
 	public BTDownloader(BTMetaInfo info) {
 		_info = info;
@@ -79,7 +81,7 @@ implements TorrentLifecycleListener {
 		case ManagedTorrent.PAUSED:
 		case ManagedTorrent.STOPPED:
 		case ManagedTorrent.TRACKER_FAILURE:
-			return true;
+			return !complete;
 		}
 		return false;
 	}
@@ -301,7 +303,8 @@ implements TorrentLifecycleListener {
 	public void torrentComplete(ManagedTorrent t) {
 		if (_torrent == t) {
 			// the download stops now. even though the torrent goes on
-			stopTime = System.currentTimeMillis(); 
+			stopTime = System.currentTimeMillis();
+			complete = true;
 			manager.remove(this, true);
 		}
 	}
@@ -312,11 +315,10 @@ implements TorrentLifecycleListener {
 	}
 
 	public void torrentStopped(ManagedTorrent t) {
-		if (_torrent == t) {
-			if (stopTime == 0) // do not update the stop time if was completed.
-				stopTime = System.currentTimeMillis();
-			manager.remove(this, isCompleted());
-		}
+		if (_torrent == t && stopTime == 0) {
+			stopTime = System.currentTimeMillis();
+			manager.remove(this, !isResumable());
+		} // otherwise torrent was already completed.
 	}
 	
 	private void writeObject(ObjectOutputStream out) 

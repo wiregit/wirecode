@@ -33,7 +33,7 @@ ChannelWriter, ChannelReadObserver {
 	
 	protected InterestWriteChannel writeChannel;
 	protected InterestScatteringByteChannel readChannel;
-	protected NIOSocket sock;
+	protected volatile NIOSocket sock;
 	
 	protected boolean incomingDone, finishingHandshakes;
 	private volatile boolean shutdown;
@@ -141,8 +141,7 @@ ChannelWriter, ChannelReadObserver {
 		if (torrent != null)
 			torrent.getFetcher().handshakerDone(this);
 		
-		if (sock != null)
-			sock.close();
+		sock.close();
 	}
 
 	public void setWriteChannel(InterestWriteChannel newChannel) {
