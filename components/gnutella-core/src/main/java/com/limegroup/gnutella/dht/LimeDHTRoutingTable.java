@@ -48,7 +48,7 @@ public class LimeDHTRoutingTable extends PatriciaRouteTable {
                 try {
                     context.ping(host, new PingListener() {
                         public void response(ResponseMessage response, long t) {
-                            dhtNode[0] = response.getContactNode();
+                            dhtNode[0] = response.getContact();
                             synchronized (dhtNode) {
                                 dhtNode.notify();
                             }

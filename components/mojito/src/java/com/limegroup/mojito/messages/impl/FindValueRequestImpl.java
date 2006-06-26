@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.FindValueRequest;
@@ -35,9 +35,9 @@ public class FindValueRequestImpl extends AbstractLookupRequest
         implements FindValueRequest {
 
     public FindValueRequestImpl(Context context, 
-            ContactNode contactNode, KUID messageId, KUID lookupId) {
+            Contact contact, KUID messageId, KUID lookupId) {
         super(context, OpCode.FIND_VALUE_REQUEST, 
-                contactNode, messageId, lookupId);
+                contact, messageId, lookupId);
     }
     
     public FindValueRequestImpl(Context context, 

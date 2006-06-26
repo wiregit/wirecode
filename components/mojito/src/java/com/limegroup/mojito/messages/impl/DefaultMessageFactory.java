@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.ByteBufferOutputStream;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -111,52 +111,52 @@ public class DefaultMessageFactory implements MessageFactory {
         return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
     }
 
-    public FindNodeRequest createFindNodeRequest(ContactNode contactNode, KUID messageId, 
+    public FindNodeRequest createFindNodeRequest(Contact contact, KUID messageId, 
             KUID lookupId) {
-        return new FindNodeRequestImpl(context, contactNode, messageId, lookupId);
+        return new FindNodeRequestImpl(context, contact, messageId, lookupId);
     }
 
-    public FindNodeResponse createFindNodeResponse(ContactNode contactNode, KUID messageId, 
-            QueryKey queryKey, Collection<ContactNode> nodes) {
-        return new FindNodeResponseImpl(context, contactNode, messageId, queryKey, nodes);
+    public FindNodeResponse createFindNodeResponse(Contact contact, KUID messageId, 
+            QueryKey queryKey, Collection<? extends Contact> nodes) {
+        return new FindNodeResponseImpl(context, contact, messageId, queryKey, nodes);
     }
 
-    public FindValueRequest createFindValueRequest(ContactNode contactNode, KUID messageId, 
+    public FindValueRequest createFindValueRequest(Contact contact, KUID messageId, 
             KUID lookupId) {
-        return new FindValueRequestImpl(context, contactNode, messageId, lookupId);
+        return new FindValueRequestImpl(context, contact, messageId, lookupId);
     }
 
-    public FindValueResponse createFindValueResponse(ContactNode contactNode, KUID messageId, 
+    public FindValueResponse createFindValueResponse(Contact contact, KUID messageId, 
             Collection<KeyValue> values) {
-        return new FindValueResponseImpl(context, contactNode, messageId, values);
+        return new FindValueResponseImpl(context, contact, messageId, values);
     }
 
-    public PingRequest createPingRequest(ContactNode contactNode, KUID messageId) {
-        return new PingRequestImpl(context, contactNode, messageId);
+    public PingRequest createPingRequest(Contact contact, KUID messageId) {
+        return new PingRequestImpl(context, contact, messageId);
     }
 
-    public PingResponse createPingResponse(ContactNode contactNode, KUID messageId, 
+    public PingResponse createPingResponse(Contact contact, KUID messageId, 
             SocketAddress externalAddress, int estimatedSize) {
-        return new PingResponseImpl(context, contactNode, messageId, externalAddress, estimatedSize);
+        return new PingResponseImpl(context, contact, messageId, externalAddress, estimatedSize);
     }
 
-    public StatsRequest createStatsRequest(ContactNode contactNode, KUID messageId, 
+    public StatsRequest createStatsRequest(Contact contact, KUID messageId, 
             int stats) {
-        return new StatsRequestImpl(context, contactNode, messageId, stats);
+        return new StatsRequestImpl(context, contact, messageId, stats);
     }
 
-    public StatsResponse createStatsResponse(ContactNode contactNode, KUID messageId, 
+    public StatsResponse createStatsResponse(Contact contact, KUID messageId, 
             String statistics) {
-        return new StatsResponseImpl(context, contactNode, messageId, statistics);
+        return new StatsResponseImpl(context, contact, messageId, statistics);
     }
 
-    public StoreRequest createStoreRequest(ContactNode contactNode, KUID messageId, 
+    public StoreRequest createStoreRequest(Contact contact, KUID messageId, 
             QueryKey queryKey, KeyValue keyValue) {
-        return new StoreRequestImpl(context, contactNode, messageId, queryKey, keyValue);
+        return new StoreRequestImpl(context, contact, messageId, queryKey, keyValue);
     }
 
-    public StoreResponse createStoreResponse(ContactNode contactNode, KUID messageId, 
+    public StoreResponse createStoreResponse(Contact contact, KUID messageId, 
             KUID valueId, StoreStatus status) {
-        return new StoreResponseImpl(context, contactNode, messageId, valueId, status);
+        return new StoreResponseImpl(context, contact, messageId, valueId, status);
     }
 }

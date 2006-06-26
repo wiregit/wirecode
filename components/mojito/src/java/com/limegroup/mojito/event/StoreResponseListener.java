@@ -22,7 +22,7 @@ package com.limegroup.mojito.event;
 import java.net.SocketAddress;
 import java.util.List;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 
 /**
@@ -30,7 +30,7 @@ import com.limegroup.mojito.KUID;
  */
 public interface StoreResponseListener extends ResponseListener {
 
-    public void storeSucceeded(ContactNode node, List keyValues);
+    public void storeSucceeded(Contact node, List keyValues);
     
     public void storeFailed(KUID nodeId, SocketAddress dst, List keyValues);
 }

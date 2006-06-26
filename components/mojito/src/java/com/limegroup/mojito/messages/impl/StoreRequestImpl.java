@@ -24,7 +24,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -42,9 +42,9 @@ public class StoreRequestImpl extends AbstractRequestMessage
     private KeyValue keyValue;
 
     public StoreRequestImpl(Context context, 
-            ContactNode contactNode, KUID messageId,
+            Contact contact, KUID messageId,
             QueryKey queryKey, KeyValue keyValue) {
-        super(context, OpCode.STORE_REQUEST, contactNode, messageId);
+        super(context, OpCode.STORE_REQUEST, contact, messageId);
 
         this.queryKey = queryKey;
         this.keyValue = keyValue;

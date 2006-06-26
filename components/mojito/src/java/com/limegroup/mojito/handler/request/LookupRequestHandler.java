@@ -28,7 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -39,6 +39,7 @@ import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.CollectionUtils;
 
 
@@ -60,7 +61,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(request.getContactNode() + " is trying to lookup " + lookup);
+            LOG.trace(request.getContact() + " is trying to lookup " + lookup);
         }
         
         if (request instanceof FindNodeRequest) {
@@ -85,13 +86,15 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         
         KUID lookup = request.getLookupID();
         QueryKey queryKey = QueryKey.getQueryKey(
-                request.getContactNode().getSocketAddress());
+                request.getContact().getSocketAddress());
         
-        List<ContactNode> bucketList = Collections.emptyList();
+        List<? extends Contact> bucketList = Collections.emptyList();
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
-                bucketList = context.getRouteTable().getMRSNodes(
-                        KademliaSettings.REPLICATION_PARAMETER.getValue());
+                List<? extends Contact> nodes = context.getRouteTable().getNodes();
+                nodes = BucketUtils.sort(nodes);
+                nodes = nodes.subList(0, Math.min(nodes.size(), KademliaSettings.REPLICATION_PARAMETER.getValue()));
+                bucketList = nodes;
             } else {
                 bucketList = context.getRouteTable().select(lookup, 
                         KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);
@@ -111,7 +114,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         FindNodeResponse response = context.getMessageHelper()
                     .createFindNodeResponse(request, queryKey, bucketList);
         
-        context.getMessageDispatcher().send(request.getContactNode(), response);
+        context.getMessageDispatcher().send(request.getContact(), response);
     }
     
     private void handleFindValueRequest(LookupRequest request) throws IOException {
@@ -126,7 +129,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             
             FindValueResponse response = context.getMessageHelper()
                         .createFindValueResponse(request, values);
-            context.getMessageDispatcher().send(request.getContactNode(), response);
+            context.getMessageDispatcher().send(request.getContact(), response);
         } else {
             // OK, send ContactNodes instead!
             handleFindNodeRequest(request);

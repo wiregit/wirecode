@@ -31,10 +31,11 @@ import java.util.Collections;
 import java.util.List;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
 
 /**
@@ -118,7 +119,7 @@ public class MessageInputStream extends DataInputStream {
         return signature;
     }
 	
-    public ContactNode readContactNode() throws IOException {
+    public Contact readContact() throws IOException {
         int vendor = readInt();
         int version = readUnsignedShort();
         KUID nodeId = readNodeID();
@@ -126,15 +127,15 @@ public class MessageInputStream extends DataInputStream {
         return new ContactNode(vendor, version, nodeId, addr);
     }
     
-    public List<ContactNode> readContactNodes() throws IOException {
+    public List<Contact> readContacts() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.emptyList();
         }
         
-        ContactNode[] nodes = new ContactNode[size];
+        Contact[] nodes = new Contact[size];
         for(int i = 0; i < nodes.length; i++) {
-            nodes[i] = readContactNode();
+            nodes[i] = readContact();
         }
         return Arrays.asList(nodes);
     }

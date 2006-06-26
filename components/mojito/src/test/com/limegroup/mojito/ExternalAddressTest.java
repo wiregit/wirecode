@@ -110,7 +110,7 @@ public class ExternalAddressTest extends BaseTestCase {
 
         public void handleRequest(RequestMessage message) throws IOException {
             
-            ContactNode node = message.getContactNode();
+            ContactNode node = message.getContact();
             SocketAddress addr = externalAddress != null ? externalAddress : node.getSocketAddress();
 
             System.out.println("Received Ping from " + node.getSocketAddress());

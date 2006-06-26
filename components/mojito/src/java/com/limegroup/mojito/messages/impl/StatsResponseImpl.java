@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
@@ -41,8 +41,8 @@ public class StatsResponseImpl extends AbstractResponseMessage
     private String statistics;
 
     public StatsResponseImpl(Context context, 
-            ContactNode contactNode, KUID messageId, String statistics) {
-        super(context, OpCode.STATS_RESPONSE, contactNode, messageId);
+            Contact contact, KUID messageId, String statistics) {
+        super(context, OpCode.STATS_RESPONSE, contact, messageId);
 
         this.statistics = statistics;
     }

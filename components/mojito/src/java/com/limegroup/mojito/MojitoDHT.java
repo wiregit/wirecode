@@ -137,7 +137,7 @@ public class MojitoDHT {
         return context.getLocalNodeID();
     }
     
-    public ContactNode getLocalNode() {
+    public Contact getLocalNode() {
         return context.getLocalNode();
     }
     
@@ -297,17 +297,17 @@ public class MojitoDHT {
      * @return The responding <tt>ContactNode</tt> or null if there was a timeout
      * @throws IOException
      */
-    public ContactNode ping(SocketAddress dst) throws IOException {
+    public Contact ping(SocketAddress dst) throws IOException {
         return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
     }
     
-    private ContactNode ping(SocketAddress dst, long timeout) throws IOException {
-        final ContactNode[] node = new ContactNode[] {null};
+    private Contact ping(SocketAddress dst, long timeout) throws IOException {
+        final Contact[] node = new Contact[] {null};
         
         synchronized (node) {
             ping(dst, new PingListener() {
                 public void response(ResponseMessage response, long t) {
-                    node[0] = response.getContactNode();
+                    node[0] = response.getContact();
                     synchronized (node) {
                         node.notify();
                     }
@@ -363,8 +363,8 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    Collection<ContactNode> getNodes() {
-        return context.getRouteTable().getAllNodes();
+    Collection<? extends Contact> getNodes() {
+        return context.getRouteTable().getNodes();
     }
     
     public boolean put(KUID key, byte[] value) 
@@ -521,7 +521,7 @@ public class MojitoDHT {
         oos.writeObject(context.getName());
         
         // ContactNode
-        ContactNode local = context.getLocalNode();
+        Contact local = context.getLocalNode();
         oos.writeInt(local.getVendor());
         oos.writeShort(local.getVersion());
         oos.writeObject(local.getNodeID());
@@ -532,12 +532,10 @@ public class MojitoDHT {
         // Store the RouteTable
         oos.writeBoolean(storeRouteTable);
         if (storeRouteTable) {
-            List nodes = context.getRouteTable().getAllNodes();
+            List<? extends Contact> nodes = context.getRouteTable().getNodes();
             
             KUID nodeId = local.getNodeID();
-            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-                ContactNode node = (ContactNode)it.next();
-                
+            for(Contact node : nodes) {
                 if (!node.getNodeID().equals(nodeId)) {
                     oos.writeObject(node);
                 }
@@ -631,10 +629,10 @@ public class MojitoDHT {
         if (storeRouteTable) {
             RouteTable routeTable = dht.context.getRouteTable();
             
-            ContactNode node = null;
-            while((node = (ContactNode)ois.readObject()) != null) {
+            Contact node = null;
+            while((node = (Contact)ois.readObject()) != null) {
                 if (!timeout) {
-                    routeTable.add(node, false);
+                    routeTable.add(node);
                 }
             }
         }

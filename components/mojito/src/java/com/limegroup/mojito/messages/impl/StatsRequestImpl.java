@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import java.security.Signature;
 import java.security.SignatureException;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
@@ -45,8 +45,8 @@ public class StatsRequestImpl extends AbstractRequestMessage
     private byte[] signature;
     
     public StatsRequestImpl(Context context, 
-            ContactNode contactNode, KUID messageId, int request) {
-        super(context, OpCode.STATS_REQUEST, contactNode, messageId);
+            Contact contact, KUID messageId, int request) {
+        super(context, OpCode.STATS_REQUEST, contact, messageId);
 
         this.request = request;
         this.signature = null;

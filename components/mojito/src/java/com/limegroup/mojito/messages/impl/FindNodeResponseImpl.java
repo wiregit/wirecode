@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
@@ -40,12 +40,12 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
 
     private QueryKey queryKey;
 
-    private Collection<ContactNode> nodes;
+    private Collection<? extends Contact> nodes;
 
     public FindNodeResponseImpl(Context context, 
-            ContactNode contactNode, KUID messageId, 
-            QueryKey queryKey, Collection<ContactNode> nodes) {
-        super(context, OpCode.FIND_NODE_RESPONSE, contactNode, messageId);
+            Contact contact, KUID messageId, 
+            QueryKey queryKey, Collection<? extends Contact> nodes) {
+        super(context, OpCode.FIND_NODE_RESPONSE, contact, messageId);
 
         this.queryKey = queryKey;
         this.nodes = nodes;
@@ -58,20 +58,20 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
         MessageInputStream in = getMessageInputStream();
         
         this.queryKey = in.readQueryKey();
-        this.nodes = in.readContactNodes();
+        this.nodes = in.readContacts();
     }
     
     public QueryKey getQueryKey() {
         return queryKey;
     }
 
-    public Collection<ContactNode> getNodes() {
+    public Collection<? extends Contact> getNodes() {
         return nodes;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeQueryKey(queryKey);
-        out.writeContactNodes(nodes);
+        out.writeContacts(nodes);
     }
     
     public String toString() {

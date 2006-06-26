@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.NoOpResponseHandler;
@@ -66,11 +67,11 @@ public class Tag {
     
     private long timeout = -1L;
     
-    Tag(ContactNode node, ResponseMessage message) 
+    Tag(Contact contact, ResponseMessage message) 
             throws IOException {
         
-        this.nodeId = node.getNodeID();
-        this.dst = node.getSocketAddress();
+        this.nodeId = contact.getNodeID();
+        this.dst = contact.getSocketAddress();
         
         this.message = message;
     }
@@ -80,9 +81,9 @@ public class Tag {
         this(null, dst, message, handler, -1L);
     }
     
-    Tag(ContactNode node, RequestMessage message, ResponseHandler responseHandler) 
+    Tag(Contact contact, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
-        this(node.getNodeID(), node.getSocketAddress(), message, responseHandler, node.getAdaptativeTimeOut());
+        this(contact.getNodeID(), contact.getSocketAddress(), message, responseHandler, contact.getAdaptativeTimeout());
     }
     
     Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
@@ -231,7 +232,7 @@ public class Tag {
                 return (message instanceof PingRequest)
                     || (message instanceof StatsRequest);
             } else {
-                ContactNode node = response.getContactNode();
+                Contact node = response.getContact();
                 return nodeId.equals(node.getNodeID());
             }
         }
@@ -239,7 +240,7 @@ public class Tag {
         // This is actually not really necessary. The QueryKey in
         // MessageID should take care of it.
         private boolean compareSocketAddress(ResponseMessage response) {
-            ContactNode node = response.getContactNode();
+            Contact node = response.getContact();
             return Tag.this.dst.equals(node.getSocketAddress());
         }
         

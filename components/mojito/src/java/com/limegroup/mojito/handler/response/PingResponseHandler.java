@@ -25,6 +25,7 @@ import java.net.SocketAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -61,14 +62,14 @@ public class PingResponseHandler extends AbstractResponseHandler {
     protected void response(ResponseMessage message, long time) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Received pong from " + message.getContactNode() 
+            LOG.trace("Received pong from " + message.getContact() 
                     + " after " + getErrors() + " errors and a total time of " + time() + "ms");
         }
         
         PingResponse response = (PingResponse)message;
         SocketAddress externalAddress = response.getExternalAddress();
         
-        ContactNode node = response.getContactNode();
+        Contact node = response.getContact();
         if (node.getSocketAddress().equals(externalAddress)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(node + " is trying to set our external address to its address!");

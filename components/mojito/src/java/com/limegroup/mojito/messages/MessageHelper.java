@@ -24,7 +24,7 @@ import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -53,7 +53,7 @@ public class MessageHelper {
         return factory;
     }
     
-    protected ContactNode getLocalNode() {
+    protected Contact getLocalNode() {
         return context.getLocalNode();
     }
 
@@ -87,7 +87,7 @@ public class MessageHelper {
     }
 
     public FindNodeResponse createFindNodeResponse(RequestMessage request, 
-            QueryKey queryKey, Collection<ContactNode> nodes) {
+            QueryKey queryKey, Collection<? extends Contact> nodes) {
         return factory.createFindNodeResponse(getLocalNode(), request.getMessageID(), 
                 queryKey, nodes);
     }

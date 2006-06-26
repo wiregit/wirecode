@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 
 /**
  * Miscellaneous utilities for Buckets
@@ -36,25 +36,25 @@ public final class BucketUtils {
      * Returns the most recently seen contact from the list.
      * Use BucketUtils.sort() prior to calling this Method!
      */
-    public static ContactNode getMostRecentlySeen(List<ContactNode> bucketList) {
-        return bucketList.get(0);
+    public static Contact getMostRecentlySeen(List<? extends Contact> nodes) {
+        return nodes.get(0);
     }
     
     /**
      * Returns the least recently seen contact from the list.
      * Use BucketUtils.sort() prior to calling this Method!
      */
-    public static ContactNode getLeastRecentlySeen(List<ContactNode> bucketList) {
-        return bucketList.get(bucketList.size()-1);
+    public static Contact getLeastRecentlySeen(List<? extends Contact> nodes) {
+        return nodes.get(nodes.size()-1);
     }
     
     /**
      * Sorts the contacts from most recently seen to
      * least recently seen
      */
-    public static List<ContactNode> sort(List<ContactNode> bucketList) {
-        Collections.sort(bucketList, new Comparator<ContactNode>() {
-            public int compare(ContactNode a, ContactNode b) {
+    public static List<? extends Contact> sort(List<? extends Contact> nodes) {
+        Collections.sort(nodes, new Comparator<Contact>() {
+            public int compare(Contact a, Contact b) {
                 long t1 = a.getTimeStamp();
                 long t2 = b.getTimeStamp();
                 if (t1 == t2) {
@@ -66,7 +66,7 @@ public final class BucketUtils {
                 }
             }
         });
-        return bucketList;
+        return nodes;
     }
     
     /**
@@ -75,9 +75,9 @@ public final class BucketUtils {
      * 
      * Used when loading the routing table
      */
-    public static List<ContactNode> sortLastDeadOrAlive(List<ContactNode> nodesList) {
-        Collections.sort(nodesList, new Comparator<ContactNode>() {
-            public int compare(ContactNode a, ContactNode b) {
+    public static List<? extends Contact> sortLastDeadOrAlive(List<? extends Contact> nodes) {
+        Collections.sort(nodes, new Comparator<Contact>() {
+            public int compare(Contact a, Contact b) {
                 long t1 = a.getLastDeadOrAliveTime();
                 long t2 = b.getLastDeadOrAliveTime();
                 if (!a.hasFailed() && !b.hasFailed()) {
@@ -103,6 +103,6 @@ public final class BucketUtils {
                 }
             }
         });
-        return nodesList;
+        return nodes;
     }
 }

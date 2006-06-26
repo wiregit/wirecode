@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -76,7 +77,7 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleResponse(ResponseMessage message, long time) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message);
+        addLiveContactInfo(message.getContact(), message);
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
@@ -85,14 +86,14 @@ public class DefaultMessageHandler extends MessageHandler
     }
 
     public void handleRequest(RequestMessage message) throws IOException {
-        addLiveContactInfo(message.getContactNode(), message);
+        addLiveContactInfo(message.getContact(), message);
     }
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         // never called
     }
     
-    private void addLiveContactInfo(ContactNode node, DHTMessage message) throws IOException {
+    private void addLiveContactInfo(Contact node, DHTMessage message) throws IOException {
         
         if (node.isFirewalled()) {
             return;
@@ -102,7 +103,7 @@ public class DefaultMessageHandler extends MessageHandler
         boolean newNode = false;
         //only do store forward if it is a new node in our routing table (we are (re)connecting to the network) 
         //or a node that is reconnecting
-        ContactNode existingNode = routeTable.get(node.getNodeID());
+        Contact existingNode = routeTable.get(node.getNodeID());
         if (existingNode == null || existingNode.getInstanceID() != node.getInstanceID()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
@@ -111,14 +112,14 @@ public class DefaultMessageHandler extends MessageHandler
         }
         
         //add node to the routing table -- update timestamp and info if needed
-        routeTable.add(node, true);
+        routeTable.add(node);
 
         if (newNode) {
             
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
             //are we one of the K closest nodes to the contact?
-            List<ContactNode> closestNodes = routeTable.select(node.getNodeID(), k, false, false);
+            List<? extends Contact> closestNodes = routeTable.select(node.getNodeID(), k, false, false);
             
             if (closestNodes.contains(context.getLocalNode())) {
                 List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
@@ -131,8 +132,8 @@ public class DefaultMessageHandler extends MessageHandler
                         //To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
                         //or if it's ID is closer than any other ID (except the new closest one of course)
                         //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                        List<ContactNode> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
-                        ContactNode closest = (ContactNode)closestNodesToKey.get(0);
+                        List<? extends Contact> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
+                        Contact closest = closestNodesToKey.get(0);
                         
                         if (context.isLocalNode(closest)   
                                 || ((node.equals(closest)
@@ -154,7 +155,7 @@ public class DefaultMessageHandler extends MessageHandler
                             
                         } else if (closestNodesToKey.size() == k) {
                             //if we are the furthest node: delete non-local value from local db
-                            ContactNode furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
+                            Contact furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
                             if(context.isLocalNode(furthest)) {
                                 int count = bag.removeAll(true);
                                 databaseStats.STORE_FORWARD_REMOVALS.addData(count);
@@ -165,7 +166,7 @@ public class DefaultMessageHandler extends MessageHandler
                 
                 if (!keyValuesToForward.isEmpty()) {
                     if (message instanceof FindNodeResponse) {
-                        store(message.getContactNode(), 
+                        store(message.getContact(), 
                                 ((FindNodeResponse)message).getQueryKey(), 
                                 keyValuesToForward);
                     } else {
@@ -180,7 +181,7 @@ public class DefaultMessageHandler extends MessageHandler
         }
     }
     
-    private void store(ContactNode node, QueryKey queryKey, List<KeyValue> keyValues) throws IOException {
+    private void store(Contact node, QueryKey queryKey, List<KeyValue> keyValues) throws IOException {
         new StoreResponseHandler(context, queryKey, keyValues).store(node);
     }
     
@@ -197,14 +198,14 @@ public class DefaultMessageHandler extends MessageHandler
             
             FindNodeResponse response = (FindNodeResponse)message;
             
-            Collection<ContactNode> nodes = response.getNodes();
-            for(ContactNode node : nodes) {
+            Collection<? extends Contact> nodes = response.getNodes();
+            for(Contact node : nodes) {
                 // We did a FIND_NODE lookup use the info
                 // to fill our routing table
-                context.getRouteTable().add(node, false);
+                context.getRouteTable().add(node);
             }
             
-            ContactNode node = message.getContactNode();
+            Contact node = message.getContact();
             store(node, response.getQueryKey(), keyValues);
         }
 

@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -159,9 +160,9 @@ public abstract class MessageDispatcher implements Runnable {
         return null;
     }
     
-    public boolean send(ContactNode node, ResponseMessage response) 
+    public boolean send(Contact contact, ResponseMessage response) 
             throws IOException {
-        return send(new Tag(node, response)); 
+        return send(new Tag(contact, response)); 
     }
     
     public boolean send(SocketAddress dst, RequestMessage request, 
@@ -174,9 +175,9 @@ public abstract class MessageDispatcher implements Runnable {
         return send(new Tag(nodeId, dst, request, responseHandler));
     }
     
-    public boolean send(ContactNode node, RequestMessage request, 
+    public boolean send(Contact contact, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(node, request, responseHandler));
+        return send(new Tag(contact, request, responseHandler));
     }
     
     protected boolean send(Tag tag) throws IOException {
@@ -309,7 +310,7 @@ public abstract class MessageDispatcher implements Runnable {
      */
     private boolean verifyQueryKey(ResponseMessage response) {
         KUID messageId = response.getMessageID();
-        ContactNode node = response.getContactNode();
+        Contact node = response.getContact();
         return messageId.verifyQueryKey(node.getSocketAddress());
     }
     
@@ -318,7 +319,7 @@ public abstract class MessageDispatcher implements Runnable {
      */
     protected void handleMessage(DHTMessage message) throws IOException {
         // Make sure we're not receiving messages from ourself.
-        ContactNode node = message.getContactNode();
+        Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
         SocketAddress src = node.getSocketAddress();
         
@@ -354,7 +355,7 @@ public abstract class MessageDispatcher implements Runnable {
             // to that Host!
             if (!verifyQueryKey(response)) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(response.getContactNode() + " sent us an unrequested response!");
+                    LOG.warn(response.getContact() + " sent us an unrequested response!");
                 }
                 return;
             }
@@ -373,14 +374,14 @@ public abstract class MessageDispatcher implements Runnable {
                     // response type have the extpected values.
                     if (!receipt.sanityCheck(response)) {
                         if (LOG.isWarnEnabled()) {
-                            LOG.warn("Response from " + response.getContactNode() 
+                            LOG.warn("Response from " + response.getContact() 
                                     + " did not pass the sanity check");
                         }
                         return;
                     }
                     
                     // Set the Round Trip Time (RTT)
-                    message.getContactNode().setRoundTripTime(receipt.time());
+                    message.getContact().setRoundTripTime(receipt.time());
                     
                     // OK, all checks passed. We can remove the receipt now!
                     receiptMap.remove(message.getMessageID());
@@ -606,7 +607,7 @@ public abstract class MessageDispatcher implements Runnable {
             if (passed) {
                 process(this);
             } else if (LOG.isErrorEnabled()) {
-                LOG.error(response.getContactNode() 
+                LOG.error(response.getContact() 
                         + " send us a signed Response but the signatures do not match!");
             }
         }
@@ -633,7 +634,7 @@ public abstract class MessageDispatcher implements Runnable {
         
         private void processLateResponse() {
             
-            ContactNode node = response.getContactNode();
+            Contact node = response.getContact();
             
             if (LOG.isTraceEnabled()) {
                 if (response instanceof PingResponse) {
@@ -650,7 +651,7 @@ public abstract class MessageDispatcher implements Runnable {
             }
             
             networkStats.LATE_MESSAGES_COUNT.incrementStat();
-            context.getRouteTable().add(node, true);
+            context.getRouteTable().add(node);
         }
     }
     
@@ -669,7 +670,7 @@ public abstract class MessageDispatcher implements Runnable {
             if (passed) {
                 process(this);
             } else if (LOG.isErrorEnabled()) {
-                LOG.error(request.getContactNode() 
+                LOG.error(request.getContact() 
                         + " send us a signed Request but the signatures do not match!");
             }
         }
@@ -678,7 +679,7 @@ public abstract class MessageDispatcher implements Runnable {
             // Make sure a singe Node cannot monopolize our resources
             if (!allow(request)) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(request.getContactNode() + " refused");
+                    LOG.trace(request.getContact() + " refused");
                 }
                 networkStats.FILTERED_MESSAGES.incrementStat();
                 return;

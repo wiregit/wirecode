@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
@@ -40,9 +40,9 @@ public class StoreResponseImpl extends AbstractResponseMessage
     private StoreStatus status;
 
     public StoreResponseImpl(Context context, 
-            ContactNode contactNode, KUID messageId, 
+            Contact contact, KUID messageId, 
             KUID valueId, StoreStatus status) {
-        super(context, OpCode.STORE_RESPONSE, contactNode, messageId);
+        super(context, OpCode.STORE_RESPONSE, contact, messageId);
 
         this.valueId = valueId;
         this.status = status;

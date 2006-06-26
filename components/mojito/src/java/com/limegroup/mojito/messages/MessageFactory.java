@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
@@ -41,32 +41,32 @@ public interface MessageFactory {
     public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 
             throws IOException;
     
-    public PingRequest createPingRequest(ContactNode contactNode, KUID messageId);
+    public PingRequest createPingRequest(Contact contact, KUID messageId);
 
-    public PingResponse createPingResponse(ContactNode contactNode, KUID messageId, 
+    public PingResponse createPingResponse(Contact contact, KUID messageId, 
             SocketAddress externalAddress, int estimatedSize);
 
-    public FindNodeRequest createFindNodeRequest(ContactNode contactNode, KUID messageId, 
+    public FindNodeRequest createFindNodeRequest(Contact contact, KUID messageId, 
             KUID lookupId);
 
-    public FindNodeResponse createFindNodeResponse(ContactNode contactNode, KUID messageId, 
-            QueryKey queryKey, Collection<ContactNode> nodes);
+    public FindNodeResponse createFindNodeResponse(Contact contact, KUID messageId, 
+            QueryKey queryKey, Collection<? extends Contact> nodes);
 
-    public FindValueRequest createFindValueRequest(ContactNode contactNode, KUID messageId, 
+    public FindValueRequest createFindValueRequest(Contact contact, KUID messageId, 
             KUID lookupId);
 
-    public FindValueResponse createFindValueResponse(ContactNode contactNode, KUID messageId, 
+    public FindValueResponse createFindValueResponse(Contact contact, KUID messageId, 
             Collection<KeyValue> values);
 
-    public StoreRequest createStoreRequest(ContactNode contactNode, KUID messageId, 
+    public StoreRequest createStoreRequest(Contact contact, KUID messageId, 
             QueryKey queryKey, KeyValue keyValue);
 
-    public StoreResponse createStoreResponse(ContactNode contactNode, KUID messageId, 
+    public StoreResponse createStoreResponse(Contact contact, KUID messageId, 
             KUID valueId, StoreStatus status);
 
-    public StatsRequest createStatsRequest(ContactNode contactNode, KUID messageId, 
+    public StatsRequest createStatsRequest(Contact contact, KUID messageId, 
             int stats);
 
-    public StatsResponse createStatsResponse(ContactNode contactNode, KUID messageId, 
+    public StatsResponse createStatsResponse(Contact contact, KUID messageId, 
             String statistics);
 }

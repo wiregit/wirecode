@@ -27,7 +27,7 @@ import com.limegroup.mojito.settings.RouteTableSettings;
 /**
  * A ContactNode is an actual Node in DHT
  */
-public class ContactNode extends Node {
+public class ContactNode extends Node implements Contact {
     
     private static final long serialVersionUID = -5416538917308950549L;
 

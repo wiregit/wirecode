@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
@@ -39,9 +39,9 @@ public abstract class AbstractLookupRequest extends AbstractRequestMessage
     protected final KUID lookupId;
     
     public AbstractLookupRequest(Context context, 
-            OpCode opcode, ContactNode contactNode, 
+            OpCode opcode, Contact contact, 
             KUID messageId, KUID lookupId) {
-        super(context, opcode, contactNode, messageId);
+        super(context, opcode, contact, messageId);
         
         this.lookupId = lookupId;
     }

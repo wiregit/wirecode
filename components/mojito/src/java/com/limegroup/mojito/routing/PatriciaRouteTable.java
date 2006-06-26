@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.BucketNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -741,8 +742,8 @@ public class PatriciaRouteTable implements RouteTable {
         return nodesTrie.containsKey(nodeId);
     }
 
-    public synchronized ContactNode select(KUID lookup) {
-        return nodesTrie.select(lookup);
+    public synchronized ContactNode select(KUID nodeId) {
+        return nodesTrie.select(nodeId);
     }
     
     /** 
@@ -751,17 +752,17 @@ public class PatriciaRouteTable implements RouteTable {
      * sort method to sort the Nodes from least-recently 
      * to most-recently seen.
      */
-    public synchronized List<ContactNode> select(KUID lookup, int k, 
-            boolean onlyLiveNodes, boolean willContact) {
+    public synchronized List<Contact> select(KUID nodeId, int count, 
+            boolean liveNodes, boolean willContact) {
         //only touch bucket if we know we are going to contact it's nodes
         if(willContact) {
-            touchBucket(lookup);
+            touchBucket(nodeId);
         }
         
-        if (onlyLiveNodes) {
-            return TrieUtils.select(nodesTrie, lookup, k, SELECT_ALIVE_CONTACTS);
+        if (liveNodes) {
+            return TrieUtils.select(nodesTrie, nodeId, count, SELECT_ALIVE_CONTACTS);
         } else {
-            return TrieUtils.select(nodesTrie, lookup, k);
+            return TrieUtils.select(nodesTrie, nodeId, count);
         }
     }
     
@@ -849,7 +850,7 @@ public class PatriciaRouteTable implements RouteTable {
         }
         
         public void response(ResponseMessage response, long time) {
-            ContactNode node = response.getContactNode();
+            ContactNode node = response.getContact();
             touchBucket(node.getNodeID());
             
             if (LOG.isWarnEnabled()) {

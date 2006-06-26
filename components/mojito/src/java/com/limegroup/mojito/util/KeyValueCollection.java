@@ -22,7 +22,7 @@ package com.limegroup.mojito.util;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.FindValueResponse;
 
@@ -33,19 +33,19 @@ public final class KeyValueCollection implements Collection<KeyValue> {
     
     private static final long serialVersionUID = 3740150886075929145L;
     
-    private ContactNode source;
+    private Contact source;
     private Collection<KeyValue> keyValues;
     
     public KeyValueCollection(FindValueResponse response) {
-        this(response.getContactNode(), response.getValues());
+        this(response.getContact(), response.getValues());
     }
     
-    public KeyValueCollection(ContactNode source, Collection<KeyValue> keyValues) {
+    public KeyValueCollection(Contact source, Collection<KeyValue> keyValues) {
         this.source = source;
         this.keyValues = keyValues;
     }
     
-    public ContactNode getSource() {
+    public Contact getSource() {
         return source;
     }
 

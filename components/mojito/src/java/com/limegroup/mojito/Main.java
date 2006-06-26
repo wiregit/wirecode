@@ -299,7 +299,7 @@ public class Main {
         System.out.println("Local ContactNode: " + dht.getLocalNode());
         System.out.println("Is running: " + dht.isRunning());
         System.out.println("Database Size: " + dht.getDatabase().size());
-        System.out.println("RouteTable Size: " + dht.getRoutingTable().size());
+        System.out.println("RouteTable Size: " + dht.getRoutingTable().getNodes().size());
         System.out.println("Size: " + dht.size());
     }
     
@@ -333,7 +333,7 @@ public class Main {
         System.out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
             public void response(ResponseMessage response, long time) {
-                System.out.println("*** Ping to " + response.getContactNode() + " succeeded: " + time + "ms");
+                System.out.println("*** Ping to " + response.getContact() + " succeeded: " + time + "ms");
             }
 
             public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {

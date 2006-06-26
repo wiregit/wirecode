@@ -56,7 +56,7 @@ public class StatsResponseHandler extends AbstractResponseHandler {
     
     protected void response(final ResponseMessage message, final long time) throws IOException {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Stats request to " + message.getContactNode() + " succeeded");
+            LOG.trace("Stats request to " + message.getContact() + " succeeded");
         }
     }
 

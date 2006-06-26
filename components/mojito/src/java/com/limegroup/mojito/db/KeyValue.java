@@ -28,6 +28,7 @@ import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.security.CryptoHelper;
@@ -71,7 +72,7 @@ public class KeyValue implements Map.Entry<KUID, byte[]>, Serializable {
     
     /** Constrcuts a local KeyValue */
     public static KeyValue createLocalKeyValue(KUID key, byte[] value, 
-            ContactNode node) {
+            Contact node) {
         return createKeyValue(key, value, 
                 node.getNodeID(), node.getSocketAddress(), null, null, true);
     }

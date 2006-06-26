@@ -62,7 +62,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         if (queryKey == null) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(request.getContactNode() 
+                LOG.error(request.getContact() 
                         + " does not provide a QueryKey");
             }
             networkStats.STORE_REQUESTS_NO_QK.incrementStat();
@@ -70,12 +70,12 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         }
         
         QueryKey expected = QueryKey.getQueryKey(
-                request.getContactNode().getSocketAddress());
+                request.getContact().getSocketAddress());
         
         if (!expected.equals(queryKey)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Expected " + expected + " from " 
-                        + request.getContactNode() 
+                        + request.getContact() 
                         + " but got " + queryKey);
             }
             networkStats.STORE_REQUESTS_BAD_QK.incrementStat();
@@ -86,7 +86,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         KUID valueId = keyValue.getKey();
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace(request.getContactNode() 
+            LOG.trace(request.getContact() 
                     + " requested us to store the KeyValues " + keyValue);
         }
         
@@ -118,6 +118,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         StoreResponse response 
             = context.getMessageHelper().createStoreResponse(request, valueId, status);
-        context.getMessageDispatcher().send(request.getContactNode(), response);
+        context.getMessageDispatcher().send(request.getContact(), response);
     }
 }

@@ -24,7 +24,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -41,9 +41,9 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     private Collection<KeyValue> values;
 
     public FindValueResponseImpl(Context context, 
-            ContactNode contactNode, KUID messageId, 
+            Contact contact, KUID messageId, 
             Collection<KeyValue> values) {
-        super(context, OpCode.FIND_VALUE_RESPONSE, contactNode, messageId);
+        super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId);
 
         this.values = values;
     }

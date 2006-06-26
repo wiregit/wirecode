@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.security.CryptoHelper;
@@ -120,7 +120,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     }
 
     protected boolean allow(DHTMessage message) {
-        ContactNode node = message.getContactNode();
+        Contact node = message.getContact();
         return filter.allow(node.getSocketAddress());
     }
     

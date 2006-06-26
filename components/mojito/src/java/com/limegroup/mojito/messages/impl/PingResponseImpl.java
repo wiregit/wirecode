@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
@@ -40,9 +40,9 @@ public class PingResponseImpl extends AbstractResponseMessage
     private int estimatedSize;
 
     public PingResponseImpl(Context context, 
-	    ContactNode contactNode, KUID messageId, 
+	    Contact contact, KUID messageId, 
 	    SocketAddress externalAddress, int estimatedSize) {
-        super(context, OpCode.PING_RESPONSE, contactNode, messageId);
+        super(context, OpCode.PING_RESPONSE, contact, messageId);
 
         this.externalAddress = externalAddress;
         this.estimatedSize = estimatedSize;

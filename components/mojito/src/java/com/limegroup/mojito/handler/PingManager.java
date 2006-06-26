@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -107,11 +108,11 @@ public class PingManager implements PingListener {
         return ping(null, address, listener);
     }
 
-    public boolean ping(ContactNode node) throws IOException {
+    public boolean ping(Contact node) throws IOException {
         return ping(node.getNodeID(), node.getSocketAddress(), null);
     }
     
-    public boolean ping(ContactNode node, PingListener listener) throws IOException {
+    public boolean ping(Contact node, PingListener listener) throws IOException {
         return ping(node.getNodeID(), node.getSocketAddress(), listener);
     }
 
@@ -125,7 +126,7 @@ public class PingManager implements PingListener {
      * the equals() method properly so that there can be only one 
      * SpoofChecker per address.
      */
-    public boolean spoofCheckPing(ContactNode node, SpoofChecker checker) throws IOException {
+    public boolean spoofCheckPing(Contact node, SpoofChecker checker) throws IOException {
         return ping(node.getNodeID(), node.getSocketAddress(), checker, false);
     }
     
@@ -166,7 +167,7 @@ public class PingManager implements PingListener {
         synchronized (pingLock()) {
             
             SocketAddress address 
-                = response.getContactNode().getSocketAddress();
+                = response.getContact().getSocketAddress();
             
             PingResponseHandler handler 
                 = handlerMap.remove(address);

@@ -29,6 +29,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -41,6 +42,7 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.util.BucketUtils;
 
 /**
  * The BootstrapManager performs a lookup for the local Node ID
@@ -88,7 +90,10 @@ public class BootstrapManager implements PingListener, LookupListener {
      */
     public void bootstrap(BootstrapListener listener) throws IOException {
         this.listener = listener;
-        this.contacts = context.getRouteTable().getAllNodesMRS().iterator();
+        
+        List<? extends Contact> nodes = context.getRouteTable().getNodes();
+        nodes = BucketUtils.sort(nodes);
+        this.contacts = nodes.iterator();
         
         if (contacts.hasNext()) {
             startTime = System.currentTimeMillis();
@@ -172,7 +177,9 @@ public class BootstrapManager implements PingListener, LookupListener {
         // Possible switch from Iterator of SocketAddresses to an
         // Iterator of ContactNodes (but not vice versa).
         if (contacts == null || !contacts.hasNext()) {
-            contacts = context.getRouteTable().getAllNodesMRS().iterator();
+            List<? extends Contact> nodes = context.getRouteTable().getNodes();
+            nodes = BucketUtils.sort(nodes);
+            contacts = nodes.iterator();
         }
         
         while(contacts.hasNext()) {
@@ -183,8 +190,8 @@ public class BootstrapManager implements PingListener, LookupListener {
                 context.ping(addr, this);
                 return true;
                 
-            } else if (obj instanceof ContactNode) {
-                ContactNode node = (ContactNode)obj;
+            } else if (obj instanceof Contact) {
+                Contact node = (Contact)obj;
                 //do not send to ourselve or the node which just timed out
                 if (!node.getNodeID().equals(context.getLocalNodeID()) 
                         && !node.getSocketAddress().equals(address)) {

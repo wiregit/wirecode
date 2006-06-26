@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageOutputStream;
@@ -36,8 +36,8 @@ public class PingRequestImpl extends AbstractRequestMessage
         implements PingRequest {
 
     public PingRequestImpl(Context context,
-            ContactNode contactNode, KUID messageId) {
-        super(context, OpCode.PING_REQUEST, contactNode, messageId);
+            Contact contact, KUID messageId) {
+        super(context, OpCode.PING_REQUEST, contact, messageId);
     }
     
     public PingRequestImpl(Context context, 
@@ -50,6 +50,6 @@ public class PingRequestImpl extends AbstractRequestMessage
     }
     
     public String toString() {
-        return "PingRequest: " + getContactNode();
+        return "PingRequest: " + getContact();
     }
 }
