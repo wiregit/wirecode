@@ -154,12 +154,12 @@ public final class HTTPUploader implements Uploader {
     /**
      * The alternate locations that have been written out (as good) locations.
      */
-    private Set _writtenLocs;
+    private Set<DirectAltLoc> _writtenLocs;
     
     /**
      * The firewalled alternate locations that have been written out as good locations.
      */
-    private Set _writtenPushLocs;
+    private Set<PushAltLoc> _writtenPushLocs;
     
     /**
      * The maximum number of alts to write per http transfer.
@@ -255,10 +255,10 @@ public final class HTTPUploader implements Uploader {
 	    // initializd here because we'll only write locs if a FileDesc exists
 	    // only initialize once, so we don't write out previously written locs
 	    if( _writtenLocs == null )
-	        _writtenLocs = new HashSet();
+	        _writtenLocs = new HashSet<DirectAltLoc>();
 	    
 	    if( _writtenPushLocs == null )
-	        _writtenPushLocs = new HashSet(); 
+	        _writtenPushLocs = new HashSet<PushAltLoc>(); 
 	    
         // if there already was an input stream, close it.
         if( _fis != null ) {
@@ -590,20 +590,22 @@ public final class HTTPUploader implements Uploader {
      * Returns an AlternateLocationCollection of alternates that
      * have not been sent out already.
      */
-    Set getNextSetOfAltsToSend() {
-        AlternateLocationCollection coll = RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn());
-        Set ret = null;
+    Set<DirectAltLoc> getNextSetOfAltsToSend() {
+        AlternateLocationCollection<DirectAltLoc> coll =
+            RouterService.getAltlocManager().getDirect(_fileDesc.getSHA1Urn());
+        Set<DirectAltLoc> ret = null;
         long now = System.currentTimeMillis();
         synchronized(coll) {
-            Iterator iter  = coll.iterator();
+            Iterator<DirectAltLoc> iter  = coll.iterator();
             for(int i = 0; iter.hasNext() && i < MAX_LOCATIONS;) {
-                AlternateLocation al = (AlternateLocation)iter.next();
+                DirectAltLoc al = iter.next();
                 if(_writtenLocs.contains(al))
                     continue;
                 
                 if (al.canBeSent(AlternateLocation.MESH_LEGACY)) {
                     _writtenLocs.add(al);
-                    if(ret == null) ret = new HashSet();
+                    if(ret == null)
+                        ret = new HashSet<DirectAltLoc>();
                     ret.add(al);
                     i++;
                     al.send(now,AlternateLocation.MESH_LEGACY);
@@ -611,28 +613,34 @@ public final class HTTPUploader implements Uploader {
                     iter.remove();
             }
         }
-        return ret == null ? Collections.EMPTY_SET : ret;
+        if(ret == null)
+            return Collections.emptySet();
+        else
+            return ret;
      
     }
     
-    Set getNextSetOfPushAltsToSend() {
+    Set<PushAltLoc> getNextSetOfPushAltsToSend() {
         if (!_wantsFalts)
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         
-    	AlternateLocationCollection fwt = 
+    	AlternateLocationCollection<PushAltLoc> fwt = 
             RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), true);
         
-        AlternateLocationCollection push = _FWTVersion > 0 ? AlternateLocationCollection.EMPTY : 
-            RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
+        AlternateLocationCollection<PushAltLoc> push;
+        if(_FWTVersion > 0)
+            push = AlternateLocationCollection.getEmptyCollection();
+        else
+            push = RouterService.getAltlocManager().getPush(_fileDesc.getSHA1Urn(), false);
     	
-    	Set ret = null;
+    	Set<PushAltLoc> ret = null;
     	long now = System.currentTimeMillis();
     	synchronized(push) {
     	    synchronized (fwt) {
-    	        Iterator iter  = 
-    	        	new MultiRRIterator(new Iterator[]{fwt.iterator(),push.iterator()});
+    	        Iterator<PushAltLoc> iter  = 
+    	        	new MultiRRIterator<PushAltLoc>(fwt.iterator(),push.iterator());
     	        for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
-    	            PushAltLoc al = (PushAltLoc)iter.next();
+    	            PushAltLoc al = iter.next();
     	            
     	            if(_writtenPushLocs.contains(al))
     	                continue;
@@ -648,7 +656,8 @@ public final class HTTPUploader implements Uploader {
                         al.send(now,AlternateLocation.MESH_LEGACY);
                         _writtenPushLocs.add(al);
                         
-                        if(ret == null) ret = new HashSet();
+                        if(ret == null)
+                            ret = new HashSet<PushAltLoc>();
                         ret.add(al);
                         i++;
                     } else if (!al.canBeSentAny())
@@ -656,8 +665,11 @@ public final class HTTPUploader implements Uploader {
     	        }
     	    }
     	}
-
-        return ret == null ? Collections.EMPTY_SET : ret;
+        
+        if(ret == null)
+            return Collections.emptySet();
+        else
+            return ret;
     }
     
     /**
@@ -859,7 +871,7 @@ public final class HTTPUploader implements Uploader {
 	 *
      * @return true if it had a X-Downloaded header
      */
-    private boolean readXDownloadedHeader(String str) throws IOException {
+    private boolean readXDownloadedHeader(String str) {
         
         if ( !HTTPHeaderName.DOWNLOADED.matchesStartOfString(str) )
             return false;
@@ -1250,9 +1262,9 @@ public final class HTTPUploader implements Uploader {
                     RouterService.getAltlocManager().remove(al, null);
                         
                 if (al instanceof DirectAltLoc)
-                 	_writtenLocs.add(al);
-                else
-                 	_writtenPushLocs.add(al); // no problem if we add an existing pushloc
+                 	_writtenLocs.add((DirectAltLoc)al);
+                else 
+                 	_writtenPushLocs.add((PushAltLoc)al); // no problem if we add an existing pushloc
             } catch(IOException e) {
                 // just return without adding it.
                 continue;

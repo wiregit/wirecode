@@ -158,7 +158,7 @@ public class RandomDownloadStrategy implements SelectionStrategy {
             if (randomFragmentNumber == fragmentCount)
                 return neededBytes.getLast().high + 1;
             else
-                return ((Interval)neededBytes.getAllIntervalsAsList().get(randomFragmentNumber)).low;
+                return (neededBytes.getAllIntervalsAsList().get(randomFragmentNumber)).low;
         } else {
             // There are fragments to spare, so download from a random location
             return getRandomLocation(neededBytes.getFirst().low, neededBytes.getLast().high, blockSize);

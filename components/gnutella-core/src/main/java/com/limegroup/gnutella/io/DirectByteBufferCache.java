@@ -5,7 +5,7 @@ import java.util.Stack;
 
 public class DirectByteBufferCache {
 
-    private final Stack CACHE = new Stack();
+    private final Stack<ByteBuffer> CACHE = new Stack<ByteBuffer>();
 
     public ByteBuffer get() {
         synchronized (CACHE) {
@@ -13,7 +13,7 @@ public class DirectByteBufferCache {
                 ByteBuffer buf = ByteBuffer.allocateDirect(8192);
                 return buf;
             } else {
-                return (ByteBuffer) CACHE.pop();
+                return CACHE.pop();
             }
         }
     }

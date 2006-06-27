@@ -27,7 +27,7 @@ public abstract class SpamFilter {
      */
     public static SpamFilter newPersonalFilter() {
         
-        Vector /* of SpamFilter */ buf=new Vector();
+        Vector<SpamFilter> buf=new Vector<SpamFilter>();
 
         //1. IP-based techniques.
         String[] badIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
@@ -78,7 +78,7 @@ public abstract class SpamFilter {
     public static SpamFilter newRouteFilter() {
         //Assemble spam filters. Order matters a little bit.
         
-        Vector /* of SpamFilter */ buf=new Vector();
+        Vector<SpamFilter>  buf=new Vector<SpamFilter> ();
 
         //1. Eliminate old LimeWire requeries.
         buf.add(new RequeryFilter());        
@@ -109,13 +109,13 @@ public abstract class SpamFilter {
      * Returns a composite filter of the given filters.
      * @param filters a Vector of SpamFilter.
      */
-    private static SpamFilter compose(Vector /* of SpamFilter */ filters) {
+    private static SpamFilter compose(Vector<? extends SpamFilter>  filters) {
         //As a minor optimization, we avoid a few method calls in
         //special cases.
         if (filters.size()==0)
             return new AllowFilter();
         else if (filters.size()==1)
-            return (SpamFilter)filters.get(0);
+            return filters.get(0);
         else {
             SpamFilter[] delegates=new SpamFilter[filters.size()];
             filters.copyInto(delegates);

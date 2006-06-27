@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.filters;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public class IPList {
     /** The list of IP's. */
-    private List /* of IP */ ips = new LinkedList();
+    private List<IP> ips = new LinkedList<IP>();
 
     public IPList () {}
 
@@ -39,8 +38,7 @@ public class IPList {
      * @returns true if ip_address is contained somewhere in the list of IPs
      */
     public boolean contains (IP ip) {
-        for (Iterator iter=ips.iterator(); iter.hasNext(); ) {
-            IP pattern=(IP)iter.next();
+        for(IP pattern : ips) {
             if (pattern.contains(ip))
                 return true;
         }
@@ -85,8 +83,7 @@ public class IPList {
         // though we're representing 32-bit unsinged values as
         // Java ints.
        int min_distance = Integer.MAX_VALUE;
-       for (Iterator iter=ips.iterator(); iter.hasNext();) {
-           IP ipRange = (IP) iter.next();
+       for(IP ipRange : ips) {
            int distance = Integer.MIN_VALUE ^ ipRange.getDistanceTo(ip);
            if (min_distance > distance) {
                min_distance = distance;

@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.util.List;
 
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.io.IOState;
 import com.limegroup.gnutella.io.IOStateMachine;
 import com.limegroup.gnutella.io.IOStateObserver;
 import com.limegroup.gnutella.io.NIOMultiplexor;
@@ -22,7 +23,7 @@ public class AsyncIncomingHandshaker implements Handshaker, IOStateObserver {
                                    HandshakeObserver observer) {
         this.socket = socket;
         this.support = new HandshakeSupport(socket.getInetAddress().getHostAddress());
-        List states = HandshakeState.getIncomingHandshakeStates(support, responder);
+        List<IOState> states = HandshakeState.getIncomingHandshakeStates(support, responder);
         this.shaker = new IOStateMachine(this, states);
         this.observer = observer;
     }

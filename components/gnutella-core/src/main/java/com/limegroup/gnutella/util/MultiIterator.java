@@ -5,12 +5,12 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 
-public class MultiIterator implements Iterator {
+public class MultiIterator<T> implements Iterator<T> {
 
-	protected final Iterator [] iterators;
+	protected final Iterator<T> [] iterators;
 	protected int current;
 	
-	public MultiIterator(Iterator [] iterators) {
+	public MultiIterator(Iterator<T> [] iterators) {
 		this.iterators = iterators;
 	}
 	
@@ -29,7 +29,7 @@ public class MultiIterator implements Iterator {
 		return false;
 	}
 
-	public Object next() {
+	public T next() {
 		if (iterators.length == 0)
 			throw new NoSuchElementException();
 		

@@ -77,7 +77,7 @@ public class MessageFactory {
      * if no such MessageParser is registered.
      */
     public static MessageParser getParser(byte functionId) {
-        return (MessageParser)PARSERS[functionId & 0xFF];
+        return PARSERS[functionId & 0xFF];
     }
     
     /**
@@ -229,7 +229,7 @@ public class MessageFactory {
      * byte[].
      */
     public static Message createMessage(byte[] header, byte[] payload,
-            byte softMax, int network) throws BadPacketException, IOException {
+            byte softMax, int network) throws BadPacketException {
         if (header.length < 19)
             throw new IllegalArgumentException("header must be >= 19 bytes.");
 

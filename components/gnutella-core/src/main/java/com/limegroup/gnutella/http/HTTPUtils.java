@@ -285,8 +285,8 @@ public final class HTTPUtils {
     /**
      * Utlity method for getting the currently supported features.
      */
-    private static Set getFeaturesValue() {
-        Set features = new HashSet(4);
+    private static Set<HTTPHeaderValue> getFeaturesValue() {
+        Set<HTTPHeaderValue> features = new HashSet<HTTPHeaderValue>(4);
         features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
         if (ChatSettings.CHAT_ENABLED.getValue())
             features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);

@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
@@ -51,7 +50,7 @@ public class FLACMetaData extends AudioMetaData {
 			DataInputStream dis = new DataInputStream(is);
 			if (!readHeader(dis))
 				return;
-			Set comments = searchAndReadMetaData(dis);
+			Set<String> comments = searchAndReadMetaData(dis);
 			parseVorbisComment(comments);
 		} finally {
             IOUtils.close(is);
@@ -65,9 +64,9 @@ public class FLACMetaData extends AudioMetaData {
 
 	private static final byte FIRST_BIT = (byte) (1 << 7);
 
-	private Set searchAndReadMetaData(DataInputStream dis)
+	private Set<String> searchAndReadMetaData(DataInputStream dis)
 			throws IOException {
-		Set ret = new HashSet();
+		Set<String> ret = new HashSet<String>();
 		boolean shouldStop = false;
 		do {
 			byte[] blockHeader = new byte[4];
@@ -119,7 +118,7 @@ public class FLACMetaData extends AudioMetaData {
 		setLength((int) (totalSamples / sampleRate));
 	}
 
-	private void readVorbisComments(DataInputStream dis, Set comments)
+	private void readVorbisComments(DataInputStream dis, Set<String> comments)
 			throws IOException {
 		// read size of vendor string
 		byte[] dword = new byte[4];
@@ -144,9 +143,8 @@ public class FLACMetaData extends AudioMetaData {
 		}
 	}
 
-	private void parseVorbisComment(Set comments) {
-		for (Iterator iter = comments.iterator(); iter.hasNext();) {
-			String str = iter.next().toString();
+	private void parseVorbisComment(Set<String> comments) {
+        for(String str : comments) {
 			int index = str.indexOf('=');
 			String key = str.substring(0, index);
 			key = key.toLowerCase(Locale.US);

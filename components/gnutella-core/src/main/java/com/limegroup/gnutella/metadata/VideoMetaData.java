@@ -42,8 +42,7 @@ public abstract class VideoMetaData extends MetaData {
     /**
      * Constructs a blank VideoMetaData object.
      */
-    protected VideoMetaData() throws IOException {
-    }
+    protected VideoMetaData() {}
 
     /**
      * Parses the file for data.
@@ -106,8 +105,8 @@ public abstract class VideoMetaData extends MetaData {
             ;
     }
 	
-	public List toNameValueList() {
-        List list = new ArrayList();
+	public List<NameValue<String>> toNameValueList() {
+        List<NameValue<String>> list = new ArrayList<NameValue<String>>();
         add(list, title, TITLE_KEY);
         add(list, year, YEAR_KEY);
         add(list, length, LENGTH_KEY);
@@ -120,14 +119,14 @@ public abstract class VideoMetaData extends MetaData {
         return list;
 	}
     
-    private void add(List list, String value, String key) {
+    private void add(List<NameValue<String>> list, String value, String key) {
         if(isValid(value))
-            list.add(new NameValue(key, value.trim()));
+            list.add(new NameValue<String>(key, value.trim()));
     }
     
-    private void add(List list, int value, String key) {
+    private void add(List<NameValue<String>> list, int value, String key) {
         if(isValid(value))
-            list.add(new NameValue(key, "" + value));
+            list.add(new NameValue<String>(key, "" + value));
     }
     
     private boolean isValid(String s) {

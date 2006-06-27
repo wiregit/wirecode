@@ -76,7 +76,7 @@ public final class QueryKey {
     private QueryKey(byte[] key, boolean prepareForNet) throws IllegalArgumentException {
         if(!isValidQueryKeyBytes(key))
             throw new IllegalArgumentException();
-        key = (byte[]) key.clone();
+        key = key.clone();
         
         if (prepareForNet)  {
             for (int i = key.length - 1; i >= 0; --i) {
@@ -97,7 +97,7 @@ public final class QueryKey {
             // f(x) = (2*x*x + x) mod 2**N
             // We only care about the low-order 32-bits, so there's no
             // need to use longs to emulate 32-bit unsigned multiply.
-            code = (int) (code * ((code << 1) + 1));
+            code = (code * ((code << 1) + 1));
             // Left circular shift (rotate) code by 5 bits
             code = (code >>> 27) | (code << 5);
         }

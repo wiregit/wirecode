@@ -17,7 +17,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  */
 public class KeywordFilter extends SpamFilter {
     /** INVARIANT: strings in ban contain only lowercase */
-    private List /* of String */ ban=new ArrayList();
+    private List<String> ban=new ArrayList<String>();
 
     /** 
      * @modifies this
@@ -130,7 +130,7 @@ public class KeywordFilter extends SpamFilter {
     protected boolean matches(String phrase) {
         String canonical=phrase.toLowerCase();
         for (int i=0; i<ban.size(); i++) {
-            String badWord=(String)ban.get(i);
+            String badWord = ban.get(i);
             //phrase contains badWord?
             //Hopefully indexOf uses some reasonably efficient 
             //algorithm, such as Knuth-Morris-Pratt.

@@ -12,7 +12,6 @@ import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -240,7 +239,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
      */
     private class BlockingObserver implements AcceptObserver {
         /** List of all pending sockets that can be accepted. */
-        private final List pendingSockets = new LinkedList();
+        private final List<Socket> pendingSockets = new LinkedList<Socket>();
         /** An exception that was stored and should be thrown during the next accept */
         private IOException storedException = null;
         /** Lock to be used for synchronizing access to pendingSockets. */
@@ -278,7 +277,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
                     throw new SocketException("Not Bound!");
                 else {
                     LOG.debug("Retrieved a socket!");
-                    return (Socket)pendingSockets.remove(0);
+                    return pendingSockets.remove(0);
                 }
             }
         }        
@@ -303,9 +302,10 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
         public void shutdown() {
             synchronized(LOCK) {
                 // Shutdown all sockets it created.
-                for(Iterator i = pendingSockets.iterator(); i.hasNext(); ) {
-                    NIOSocket next = (NIOSocket)i.next();
-                    next.close();
+                for(Socket next : pendingSockets) {
+                    try {
+                        next.close(); 
+                    } catch(IOException ignored) {}
                 }
                 pendingSockets.clear();
                 

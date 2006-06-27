@@ -18,7 +18,7 @@ public class PushList {
     private static final Log LOG = LogFactory.getLog(PushList.class);
 
     /** Map of clientGUID -> List of potential pushes with that GUID. */
-    private final TreeMap /* GUID -> List (of Push) */ pushers = new TreeMap(GUID.GUID_BYTE_COMPARATOR);
+    private final TreeMap<byte[], List<Push>> pushers = new TreeMap<byte[], List<Push>>(GUID.GUID_BYTE_COMPARATOR);
     
     /** Adds a host that wants to be notified of a push. */
     public void addPushHost(PushDetails details, HTTPConnectObserver observer) {
@@ -26,9 +26,9 @@ public class PushList {
             LOG.debug("Adding observer for details: " + details);
         synchronized(pushers) {
             byte[] clientGUID = details.getClientGUID();
-            List perGUID = (List)pushers.get(clientGUID);
+            List<Push> perGUID = pushers.get(clientGUID);
             if(perGUID == null) {
-                perGUID = new LinkedList();
+                perGUID = new LinkedList<Push>();
                 pushers.put(clientGUID, perGUID);
             }
             perGUID.add(new Push(details, observer));
@@ -42,7 +42,7 @@ public class PushList {
         
         synchronized(pushers) {
             byte[] clientGUID = details.getClientGUID();
-            List perGUID = (List)pushers.get(clientGUID);
+            List<Push> perGUID = pushers.get(clientGUID);
             if(perGUID == null) {
                 LOG.debug("No pushes waiting on those exact details.");
                 return null;
@@ -64,7 +64,7 @@ public class PushList {
             LOG.debug("Retrieving best match for address: " + address + ", guid: " + new GUID(clientGUID));
         
         synchronized(pushers) {
-            List perGUID = (List)pushers.get(clientGUID);
+            List<Push> perGUID = pushers.get(clientGUID);
             if(perGUID == null) {
                 LOG.debug("No pushes waiting on that GUID.");
                 return null;
@@ -81,14 +81,12 @@ public class PushList {
     }
     
     /** Returns all existing HTTPConnectObservers and clears the list. */
-    public List /* of HTTPConnectObserver */ getAllAndClear() {
-        List allConnectors = new LinkedList();
+    public List<HTTPConnectObserver> getAllAndClear() {
+        List<HTTPConnectObserver> allConnectors = new LinkedList<HTTPConnectObserver>();
         synchronized(pushers) {
-            for(Iterator i = pushers.values().iterator(); i.hasNext(); ) {
-                List list = (List)i.next();
+            for(List<Push> list : pushers.values()) {
                 if(list != null) {
-                    for(Iterator j = list.iterator(); j.hasNext(); ) {
-                        Push next = (Push)j.next();
+                    for(Push next : list) {
                         allConnectors.add(next.observer);
                     }
                 }
@@ -99,13 +97,13 @@ public class PushList {
     }
     
     /** Returns the first matching Push in the list, or a random one if none match. */
-    private Push getBestHost(List hosts, String address) {
+    private Push getBestHost(List<? extends Push> hosts, String address) {
         if(hosts.isEmpty())
             return null;
         
         // First try to find one that exactly matches the IP address.
-        for(Iterator i = hosts.iterator(); i.hasNext(); ) {
-            Push next = (Push)i.next();
+        for(Iterator<? extends Push> i = hosts.iterator(); i.hasNext(); ) {
+            Push next = i.next();
             if(next.details.getAddress().equals(address)) {
                 LOG.debug("Found an exact match!");
                 i.remove();
@@ -115,8 +113,8 @@ public class PushList {
         
         // Then try and find the first private address.
         LOG.debug("No exact match, using first private|bogus address.");
-        for(Iterator i = hosts.iterator(); i.hasNext();) {
-            Push next = (Push)i.next();
+        for(Iterator<? extends Push> i = hosts.iterator(); i.hasNext();) {
+            Push next = i.next();
             if(NetworkUtils.isPrivateAddress(next.details.getAddress()) ||
                next.details.getAddress().equals(RemoteFileDesc.BOGUS_IP)) {
                 i.remove();
@@ -129,13 +127,13 @@ public class PushList {
     }
     
     /** Returns the exact Push in the list. */
-    private Push getExactHost(List hosts, PushDetails details) {
+    private Push getExactHost(List<? extends Push> hosts, PushDetails details) {
         if(hosts.isEmpty())
             return null;
         
         // First try to find one that exactly matches the IP address.
-        for(Iterator i = hosts.iterator(); i.hasNext(); ) {
-            Push next = (Push)i.next();
+        for(Iterator<? extends Push> i = hosts.iterator(); i.hasNext(); ) {
+            Push next = i.next();
             if(next.details.equals(details)) {
                 i.remove();
                 return next;

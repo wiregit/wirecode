@@ -363,7 +363,7 @@ public class IntervalSet implements Iterable<Interval>{
      * (so they should never be modified), but the TreeSet this is
      * backed off of is new.
      */
-    public Object clone() {
+    public IntervalSet clone() {
         IntervalSet ret = new IntervalSet();
         for (Iterator<Interval> iter = getAllIntervals(); iter.hasNext(); )
             // access the internal TreeSet directly, - it's faster that way.

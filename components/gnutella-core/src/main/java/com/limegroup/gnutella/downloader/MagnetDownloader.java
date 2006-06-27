@@ -186,7 +186,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         if (port<0)
             port=80;      //assume default for HTTP (not 6346)
         
-        Set urns=new HashSet(1);
+        Set<URN> urns=new HashSet<URN>(1);
         if (urn!=null)
             urns.add(urn);
         

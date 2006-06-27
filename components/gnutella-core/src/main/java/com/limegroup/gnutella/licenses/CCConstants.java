@@ -57,9 +57,9 @@ public final class CCConstants {
     public static final String ATTRIBUTION_SHARE_URI = "http://creativecommons.org/licenses/by-sa/2.5/";
     public static final String ATTRIBUTION_SHARE_NON_COMMERCIAL_URI = "http://creativecommons.org/licenses/by-nc-sa/2.5/";
     
-    private static final Map LICENSE_URI_MAP;
+    private static final Map<Integer, String> LICENSE_URI_MAP;
     static {
-        LICENSE_URI_MAP = new HashMap();
+        LICENSE_URI_MAP = new HashMap<Integer, String>();
         LICENSE_URI_MAP.put(new Integer(ATTRIBUTION),ATTRIBUTION_URI);
         LICENSE_URI_MAP.put(new Integer(ATTRIBUTION_NO_DERIVS),ATTRIBUTION_NO_DERIVS_URI);
         LICENSE_URI_MAP.put(new Integer(ATTRIBUTION_NON_COMMERCIAL),ATTRIBUTION_NON_COMMERCIAL_URI);
@@ -69,7 +69,7 @@ public final class CCConstants {
     }
     
     public static String getLicenseURI(int licenseType) {
-        return (String) LICENSE_URI_MAP.get(new Integer(licenseType));
+        return LICENSE_URI_MAP.get(new Integer(licenseType));
     }
     
     public static String getLicenseElement(int licenseType) {

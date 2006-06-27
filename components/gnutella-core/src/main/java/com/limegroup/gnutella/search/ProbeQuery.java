@@ -61,10 +61,10 @@ final class ProbeQuery {
         // hop for probes to give them more time -- also weight
         // this depending on how many TTL=1 probes we're sending
         if(!TTL_2_PROBES.isEmpty()) 
-            return (long)((double)QUERY_HANDLER.getTimeToWaitPerHop()*1.3);
+            return (long)(QUERY_HANDLER.getTimeToWaitPerHop()*1.3);
         if(!TTL_1_PROBES.isEmpty()) 
-            return (long)((double)QUERY_HANDLER.getTimeToWaitPerHop()*
-                ((double)TTL_1_PROBES.size()/2.0));
+            return (long)(QUERY_HANDLER.getTimeToWaitPerHop()*
+                (TTL_1_PROBES.size()/2.0));
         return 0L;
     }
     

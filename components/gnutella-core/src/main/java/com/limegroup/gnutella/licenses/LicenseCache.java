@@ -19,6 +19,8 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.GenericsUtils;
+import com.limegroup.gnutella.util.IOUtils;
 
 
 /**
@@ -42,13 +44,13 @@ class LicenseCache {
     /**
      * A map of Licenses.  One License per URI.
      */
-    private Map /* URI -> License */ licenses;
+    private Map<URI, License> licenses;
     
     /**
      * An extra map of data that Licenses can use
      * to cache info.  This information lasts forever.
      */
-    private Map /* Object -> Object */ data;
+    private Map<Object, Object> data;
     
     /**
      * Whether or not data is dirty since the last time we wrote to disk.
@@ -80,7 +82,7 @@ class LicenseCache {
      * the license string for a new one.
      */
     synchronized License getLicense(String licenseString, URI licenseURI) {
-        License license = (License)licenses.get(licenseURI);
+        License license = licenses.get(licenseURI);
         if(license != null)
             return license.copy(licenseString, licenseURI);
         else
@@ -98,7 +100,7 @@ class LicenseCache {
      * Determines if the license is verified for the given URN and URI.
      */
     synchronized boolean isVerifiedAndValid(URN urn, URI uri) {
-        License license = (License)licenses.get(uri);
+        License license = licenses.get(uri);
         return license != null && license.isValid(urn);
     }
     
@@ -111,41 +113,22 @@ class LicenseCache {
             ois = new ObjectInputStream(
                     new BufferedInputStream(
                         new FileInputStream(CACHE_FILE)));
-            Map map = (Map)ois.readObject();
-            if(map != null) {
-                for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-                    // Remove values that aren't correct.
-                    Map.Entry next = (Map.Entry)i.next();
-                    Object key = next.getKey();
-                    Object value = next.getValue();
-                    if( !(key instanceof URI) || !(value instanceof License) ) {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("Invalid k[" + key + "], v[" + value + "]");
-                        i.remove();
-                    }
-                }
-            } else 
-            	map = new HashMap();
-            
-            licenses = map;
-            
-            data = (Map)ois.readObject();
+            Object o = ois.readObject();
+            if(o != null) 
+                licenses = GenericsUtils.scanForMap(o, URI.class, License.class, GenericsUtils.ScanMode.REMOVE);
+            o = ois.readObject();
+            if(o != null)
+                data = GenericsUtils.scanForMap(o, Object.class, Object.class, GenericsUtils.ScanMode.REMOVE);
             removeOldEntries();
         } catch(Throwable t) {
             LOG.error("Can't read licenses", t);
         } finally {
-            if (ois != null) {
-                try {
-                    ois.close();
-                } catch (IOException e) {
-                    // all we can do is try to close it
-                }
-            }
+            IOUtils.close(ois);
             
             if(licenses == null)
-                licenses = new HashMap();
+                licenses = new HashMap<URI, License>();
             if(data == null)
-                data = new HashMap();
+                data = new HashMap<Object, Object>();
         }
     }
     
@@ -157,8 +140,8 @@ class LicenseCache {
         long cutoff = System.currentTimeMillis() - EXPIRY_TIME;
         
         // discard outdated info
-        for(Iterator i = licenses.values().iterator(); i.hasNext(); ) {
-            License license = (License)i.next();
+        for(Iterator<License> i = licenses.values().iterator(); i.hasNext(); ) {
+            License license = i.next();
             if(license.getLastVerifiedTime() < cutoff) {
                 dirty = true;
                 i.remove();
@@ -183,11 +166,7 @@ class LicenseCache {
         } catch (IOException e) {
             ErrorService.error(e);
         } finally {
-            if(oos != null) {
-                try {
-                    oos.close();
-                } catch(IOException ignored) {}
-            }
+            IOUtils.close(oos);
         }
         
         dirty = false;

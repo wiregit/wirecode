@@ -498,7 +498,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
      * Accessor for the available ranges.
      */
     public IntervalSet getAvailableRanges() {
-        return (IntervalSet)_availableRanges.clone();
+        return _availableRanges.clone();
     }
 
     /**

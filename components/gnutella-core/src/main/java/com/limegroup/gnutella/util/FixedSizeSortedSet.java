@@ -16,7 +16,7 @@ import com.limegroup.gnutella.Assert;
  * and a Map, in order to efficiently look things up and keep them sorted.
  * This class is NOT SYNCHRONIZED.  Synchronization should be done externally.
  */
-public class FixedSizeSortedSet<E> {
+public class FixedSizeSortedSet<E> implements Iterable<E> {
 
     /**
      * The underlying set that efficiently

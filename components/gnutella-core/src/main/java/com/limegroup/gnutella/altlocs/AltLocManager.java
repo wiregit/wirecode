@@ -29,7 +29,8 @@ public class AltLocManager {
      */
     public boolean add(AlternateLocation al, Object source) {
         URN sha1 = al.getSHA1Urn();
-        AlternateLocationCollection col = null;
+        AlternateLocationCollection<DirectAltLoc> dCol = null;
+        AlternateLocationCollection<PushAltLoc>   pCol = null;
         
         URNData data;
         synchronized(urnMap) {
@@ -45,23 +46,31 @@ public class AltLocManager {
             if (al instanceof DirectAltLoc) { 
                 if (data.direct == AlternateLocationCollection.EMPTY)
                     data.direct = AlternateLocationCollection.create(sha1);
-                col = data.direct;
-            }
-            else {
+                dCol = data.direct;
+            } else if(al instanceof PushAltLoc) {
                 PushAltLoc push = (PushAltLoc) al;
                 if (push.supportsFWTVersion() < 1) { 
                     if (data.push == AlternateLocationCollection.EMPTY)
                         data.push = AlternateLocationCollection.create(sha1);
-                    col = data.push;
+                    pCol = data.push;
                 } else { 
                     if (data.fwt == AlternateLocationCollection.EMPTY)
                         data.fwt = AlternateLocationCollection.create(sha1);
-                    col = data.fwt;
+                    pCol = data.fwt;
                 }
+            } else {
+                throw new IllegalStateException("unknown loc class: " + al.getClass());
             }
         }
         
-        boolean ret = col.add(al);
+        boolean ret = false;
+        if(dCol != null) {
+            ret = dCol.add((DirectAltLoc)al);
+        } else if(pCol != null) {
+            ret = pCol.add((PushAltLoc)al);
+        } else {
+            throw new IllegalStateException("didn't set a collection!");
+        }
         
         // notify any listeners other than the source
         for(AltLocListener listener : data.getListeners()) {
@@ -81,24 +90,32 @@ public class AltLocManager {
         URNData data = urnMap.get(sha1);
         if (data == null)
             return false;
-        
-        AlternateLocationCollection col;
+
+        AlternateLocationCollection<DirectAltLoc> dCol = null;
+        AlternateLocationCollection<PushAltLoc>   pCol = null;
         synchronized(data) {
-            if (al instanceof DirectAltLoc) 
-                col = data.direct;
-            else {
+            if (al instanceof DirectAltLoc) { 
+                dCol = data.direct;
+            } else {
                 PushAltLoc push = (PushAltLoc) al;
                 if (push.supportsFWTVersion() < 1)
-                    col = data.push;
+                    pCol = data.push;
                 else
-                    col = data.fwt;
+                    pCol = data.fwt;
             }
         }
-        
-        if (col == null)
+
+        AlternateLocationCollection col = null;
+        boolean ret = false;
+        if(dCol != null) {
+            ret = dCol.remove((DirectAltLoc)al);
+            col = dCol;
+        } else if(pCol != null) {
+            ret = pCol.remove((PushAltLoc)al);
+            col = pCol;
+        } else {
             return false;
-        
-        boolean ret = col.remove(al);
+        }
         
         // if we emptied the current collection, see if the rest are empty as well
         if (!col.hasAlternateLocations())
@@ -125,10 +142,10 @@ public class AltLocManager {
      * @param sha1 the URN for which to get altlocs
      * @param size the maximum number of altlocs to return
      */
-    public AlternateLocationCollection getDirect(URN sha1) {
+    public AlternateLocationCollection<DirectAltLoc> getDirect(URN sha1) {
         URNData data = urnMap.get(sha1);
         if (data == null)
-            return AlternateLocationCollection.EMPTY;
+            return AlternateLocationCollection.getEmptyCollection();
         
         synchronized(data) {
             return data.direct;
@@ -140,10 +157,10 @@ public class AltLocManager {
      * @param size the maximum number of altlocs to return
      * @param FWTOnly whether the altlocs must support FWT
      */
-    public AlternateLocationCollection getPush(URN sha1, boolean FWTOnly) {
+    public AlternateLocationCollection<PushAltLoc> getPush(URN sha1, boolean FWTOnly) {
         URNData data = urnMap.get(sha1);
         if (data == null)
-            return AlternateLocationCollection.EMPTY;
+            return AlternateLocationCollection.getEmptyCollection();
         
         synchronized(data) {
             return FWTOnly ? data.fwt : data.push;
@@ -199,9 +216,9 @@ public class AltLocManager {
          * The three alternate locations we keep with this urn.
          * LOCKING: this
          */
-        public AlternateLocationCollection direct = AlternateLocationCollection.EMPTY;
-        public AlternateLocationCollection push = AlternateLocationCollection.EMPTY;
-        public AlternateLocationCollection fwt = AlternateLocationCollection.EMPTY;
+        public AlternateLocationCollection<DirectAltLoc> direct = AlternateLocationCollection.getEmptyCollection();
+        public AlternateLocationCollection<PushAltLoc> push = AlternateLocationCollection.getEmptyCollection();
+        public AlternateLocationCollection<PushAltLoc> fwt = AlternateLocationCollection.getEmptyCollection();
         
         private volatile List<AltLocListener> listeners = Collections.emptyList();
         

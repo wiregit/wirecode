@@ -62,7 +62,7 @@ public class ResetTableMessage extends RouteTableMessage {
     protected ResetTableMessage(byte[] guid, 
                                 byte ttl, 
                                 byte hops,
-                                byte[] payload) throws BadPacketException {
+                                byte[] payload) {
         super(guid, ttl, hops, payload.length, 
               RouteTableMessage.RESET_VARIANT);
         //TODO: maybe we shouldn't enforce this

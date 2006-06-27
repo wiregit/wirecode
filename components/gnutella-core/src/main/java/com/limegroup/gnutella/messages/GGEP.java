@@ -94,7 +94,7 @@ public class GGEP {
      * strings.  But strings are conventient for keys since they define hashCode
      * and equals.
      */
-    private final Map /*String->byte[]*/ _props = new TreeMap();
+    private final Map<String, Object> _props = new TreeMap<String, Object>();
 
     /**
      * False iff this should COBS encode values to prevent null bytes.
@@ -406,9 +406,8 @@ public class GGEP {
      * Adds all the specified key/value pairs.
      * TODO: Allow a value to be compressed.
      */
-    public void putAll(List /* of NameValue */ fields) throws IllegalArgumentException {
-        for(Iterator i = fields.iterator(); i.hasNext(); ) {
-            NameValue next = (NameValue)i.next();
+    public void putAll(List<? extends NameValue<?>> fields) throws IllegalArgumentException {
+        for(NameValue<?> next : fields) {
             String key = next.getName();
             Object value = next.getValue();
             if(value == null)
@@ -579,7 +578,7 @@ public class GGEP {
      * @return a set of all the GGEP extension header name in this, each
      *  as a String.
      */
-    public Set getHeaders() {
+    public Set<String> getHeaders() {
         return _props.keySet();
     }
     

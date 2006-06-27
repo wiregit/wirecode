@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.limegroup.gnutella.io.IOState;
+
 /** Outlines all the states an asynchronous handshake can be in. */
 class HandshakeState {
     
@@ -14,9 +16,9 @@ class HandshakeState {
      * @param responder The responder to use when we write a response.
      * @return
      */
-    static List /* of HandshakeState */ getIncomingHandshakeStates(HandshakeSupport support,
-                                                                   HandshakeResponder responder) {
-        List list = new ArrayList(3);
+    static List<IOState> getIncomingHandshakeStates(HandshakeSupport support,
+                                                    HandshakeResponder responder) {
+        List<IOState> list = new ArrayList<IOState>(3);
         list.add(new ReadHandshakeState.ReadRequestState(support));
         list.add(new WriteHandshakeState.WriteResponseState(support, responder, false));
         list.add(new ReadHandshakeState.ReadResponseState(support));
@@ -31,10 +33,10 @@ class HandshakeState {
      * @param responder The responder to use when we write a response.
      * @return
      */
-    static List /* of HandshakeState */ getOutgoingHandshakeStates(HandshakeSupport support,
-                                                                  Properties request,
-                                                                  HandshakeResponder responder) {
-        List list = new ArrayList(3);
+    static List<IOState> getOutgoingHandshakeStates(HandshakeSupport support,
+                                                    Properties request,
+                                                    HandshakeResponder responder) {
+        List<IOState> list = new ArrayList<IOState>(3);
         list.add(new WriteHandshakeState.WriteRequestState(support, request));
         list.add(new ReadHandshakeState.ReadResponseState(support));
         list.add(new WriteHandshakeState.WriteResponseState(support, responder, true));

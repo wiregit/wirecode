@@ -3,14 +3,13 @@ package com.limegroup.gnutella;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.util.DualIterator;
 import com.limegroup.gnutella.util.ForgetfulHashMap;
+import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -53,8 +52,7 @@ public class ResponseVerifier {
     /**
      *  A mapping from GUIDs to the words of the search made with that GUID.
      */
-    private ForgetfulHashMap /* GUID -> RequestData */ mapper =
-        new ForgetfulHashMap(15);
+    private ForgetfulHashMap<GUID, RequestData> mapper = new ForgetfulHashMap<GUID, RequestData>(15);
     /** The characters to use in stripping apart queries. */
     private static final String DELIMITERS="+ ";
     /** The size of a Mandragore worm response, i.e., 8KB. */
@@ -80,7 +78,7 @@ public class ResponseVerifier {
     }
 
     public synchronized boolean matchesQuery(byte [] guid, Response response) {
-        RequestData data = (RequestData) mapper.get(new GUID(guid));
+        RequestData data = mapper.get(new GUID(guid));
         if (data == null || data.queryWords == null) 
             return false;
         
@@ -93,12 +91,9 @@ public class ResponseVerifier {
 
         LimeXMLDocument doc = response.getDocument();
         if (doc != null) {
-            for (Iterator iter = new DualIterator(
-                    doc.getKeyWords().iterator(),doc.getKeyWordsIndivisible().iterator()); 
-                    iter.hasNext();) {
-                String xmlWord = (String) iter.next();
-                if (score(data.queryWords,xmlWord) > minGood ) return true;
-            }
+            for(String xmlWord : new MultiIterable<String>(doc.getKeyWords(), doc.getKeyWordsIndivisible()))
+                if (score(data.queryWords,xmlWord) > minGood )
+                    return true;
         }
         
         return false;
@@ -147,7 +142,7 @@ public class ResponseVerifier {
      * conservatively returns true.
      */
     public boolean matchesType(byte[] guid, Response response) {
-        RequestData request=(RequestData)mapper.get(new GUID(guid));
+        RequestData request = mapper.get(new GUID(guid));
         if (request == null || request.type==null)
             return true;
         String reply = response.getName();
@@ -161,7 +156,7 @@ public class ResponseVerifier {
      * returns false.
      */
     public boolean isMandragoreWorm(byte[] guid, Response response) {
-        RequestData request=(RequestData)mapper.get(new GUID(guid));
+        RequestData request = mapper.get(new GUID(guid));
         if (request == null)
             return false;
         return response.getSize()==Mandragore_SIZE 

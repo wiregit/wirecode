@@ -18,6 +18,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.ByteArrayCache;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.PowerOf2ByteArrayCache;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
@@ -68,7 +69,7 @@ public class VerifyingFile {
     /**
      * A list of DelayedWrites that will write when space becomes available in the cache.
      */
-    private static final List DELAYED = new LinkedList();
+    private static final List<DelayedWrite> DELAYED = new LinkedList<DelayedWrite>();
     
     /**  A cache for byte[]s. */
     private static final ByteArrayCache CACHE = new ByteArrayCache(512, HTTPDownloader.BUF_LENGTH);
@@ -232,7 +233,7 @@ public class VerifyingFile {
     /**
      * Writes bytes to the underlying file
      */
-    public boolean writeBlock(long pos, byte[] data) throws InterruptedException {
+    public boolean writeBlock(long pos, byte[] data) {
         return writeBlock(pos, 0, data.length, data);
     }
     
@@ -416,14 +417,14 @@ public class VerifyingFile {
     /**
      * Returns all downloaded blocks with an Iterator.
      */
-    public synchronized Iterator getBlocks() {
+    public synchronized Iterator<Interval> getBlocks() {
         return getBlocksAsList().iterator();
     }
     
     /**
      * Returns all verified blocks with an Iterator.
      */
-    public synchronized Iterator getVerifiedBlocks() {
+    public synchronized Iterator<Interval> getVerifiedBlocks() {
         return verifiedBlocks.getAllIntervals();
     }
     
@@ -443,28 +444,18 @@ public class VerifyingFile {
      */
     public synchronized List<Interval> getSerializableBlocks() {
         IntervalSet ret = new IntervalSet();
-        for (Iterator iter = verifiedBlocks.getAllIntervals(); iter.hasNext();) 
-            ret.add((Interval) iter.next());
-        for (Iterator iter = partialBlocks.getAllIntervals(); iter.hasNext();) 
-            ret.add((Interval) iter.next());
-        for (Iterator iter = savedCorruptBlocks.getAllIntervals(); iter.hasNext();) 
-            ret.add((Interval) iter.next());
-        
+        for(Interval next : new MultiIterable<Interval>(verifiedBlocks, partialBlocks, savedCorruptBlocks))
+            ret.add(next);
         return ret.getAllIntervalsAsList();
         
     }
     /**
      * @return all downloaded blocks as list
      */
-    public synchronized List getBlocksAsList() {
-        List l = new ArrayList();
-        l.addAll(verifiedBlocks.getAllIntervalsAsList());
-        l.addAll(partialBlocks.getAllIntervalsAsList());
-        l.addAll(savedCorruptBlocks.getAllIntervalsAsList());
-        l.addAll(pendingBlocks.getAllIntervalsAsList());
+    public synchronized List<Interval> getBlocksAsList() {
         IntervalSet ret = new IntervalSet();
-        for (Iterator iter = l.iterator();iter.hasNext();)
-            ret.add((Interval)iter.next());
+        for(Interval next : new MultiIterable<Interval>(verifiedBlocks, partialBlocks, savedCorruptBlocks, pendingBlocks))
+            ret.add(next);
         return ret.getAllIntervalsAsList();
     }
     
@@ -724,12 +715,10 @@ public class VerifyingFile {
 	private void verifyChunks(long existingFileSize) {
         boolean fullScan = existingFileSize != -1;
 	    HashTree tree = getHashTree(); // capture the tree.
-	    if(tree != null) {
-            // if we have a tree, see if there is a completed chunk in the partial list
-            for (Iterator iter = findVerifyableBlocks(existingFileSize).iterator(); iter.hasNext();)  {
-                Interval i = (Interval)iter.next();
+        // if we have a tree, see if there is a completed chunk in the partial list
+        if(tree != null) {
+            for(Interval i : findVerifyableBlocks(existingFileSize)) {
                 boolean good = verifyChunk(i, tree);
-                
                 synchronized (this) {
                     partialBlocks.delete(i);
                     if (good)
@@ -783,17 +772,17 @@ public class VerifyingFile {
      * some (verifiable) full chunks.  Its not possible to verify more than two chunks
      * per method call unless the downloader is being deserialized from disk
      */
-    private synchronized List findVerifyableBlocks(long existingFileSize) {
+    private synchronized List<Interval> findVerifyableBlocks(long existingFileSize) {
         if (LOG.isTraceEnabled())
             LOG.trace("trying to find verifyable blocks out of "+partialBlocks);
         
         boolean fullScan = existingFileSize != -1;
-        List verifyable = new ArrayList(2);
-        List partial;
+        List<Interval> verifyable = new ArrayList<Interval>(2);
+        List<Interval> partial;
         int chunkSize = getChunkSize();
         
         if(fullScan) {
-            IntervalSet temp = (IntervalSet)partialBlocks.clone();
+            IntervalSet temp = partialBlocks.clone();
             temp.add(new Interval(0, existingFileSize));
             partial = temp.getAllIntervalsAsList();
         } else {
@@ -801,7 +790,7 @@ public class VerifyingFile {
         }
         
         for (int i = 0; i < partial.size() ; i++) {
-            Interval current = (Interval)partial.get(i);
+            Interval current = partial.get(i);
             
             // find the beginning of the first chunk offset
             int lowChunkOffset = current.low - current.low % chunkSize;
@@ -819,7 +808,7 @@ public class VerifyingFile {
             int lastChunkOffset = completedSize - (completedSize % chunkSize);
             if (lastChunkOffset == completedSize)
                 lastChunkOffset-=chunkSize;
-            Interval last = (Interval) partial.get(partial.size() - 1);
+            Interval last = partial.get(partial.size() - 1);
             if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
                 if(LOG.isDebugEnabled())
                      LOG.debug("adding the last chunk for verification");
@@ -895,7 +884,7 @@ public class VerifyingFile {
                     LOG.debug("Nothing delayed to run.");
                     return;
                 }
-                dw = (DelayedWrite)DELAYED.get(0);
+                dw = DELAYED.get(0);
             }
 
             // write & notify outside of lock

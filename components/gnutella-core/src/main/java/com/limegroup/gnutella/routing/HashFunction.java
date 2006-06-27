@@ -32,7 +32,7 @@ public class HashFunction {
         // product (ignore overflowing bits of the 64-bit product result).
         // The constant factor should distribute equally each byte of x in
         // the returned bits.
-        return (int)(x * A_INT) >>> (32 - bits);
+        return (x * A_INT) >>> (32 - bits);
     }
 
     /*

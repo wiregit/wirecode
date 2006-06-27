@@ -15,10 +15,10 @@ public class TimeoutController {
     
     private static final Log LOG = LogFactory.getLog(TimeoutController.class);
     
-    private final BinaryHeap items = new BinaryHeap(20, true);
+    private final BinaryHeap<Timeout> items = new BinaryHeap<Timeout>(20, true);
     
     // used to store timed out items to notify outside of lock.
-    private final List timedout = new ArrayList(100);
+    private final List<Timeout> timedout = new ArrayList<Timeout>(100);
     
     synchronized int getNumPendingTimeouts() {
         return items.size();
@@ -37,7 +37,7 @@ public class TimeoutController {
     public void processTimeouts(long now) {
         synchronized(this) {
             while(!items.isEmpty()) {
-                Timeout t = (Timeout)items.getMax();
+                Timeout t = items.getMax();
                 if(t != null && now >= t.expireTime) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Timing out: " + t + ", expired: " + t.expireTime + ", now: " + now + ", length: " + t.timeoutLength);
@@ -52,7 +52,7 @@ public class TimeoutController {
         }
         
         for(int i = 0; i < timedout.size(); i++) {
-            Timeout t = (Timeout)timedout.get(i);
+            Timeout t = timedout.get(i);
             t.timeoutable.notifyTimeout(now, t.expireTime, t.timeoutLength);
         }
         timedout.clear();
@@ -63,11 +63,11 @@ public class TimeoutController {
         if(items.isEmpty())
             return -1;
         else
-            return ((Timeout)items.getMax()).expireTime;
+            return items.getMax().expireTime;
     }
     
     /** Keep an expireTime & timeoutable together as one happy couple. */
-    private static class Timeout implements Comparable {
+    private static class Timeout implements Comparable<Timeout> {
         private long expireTime;
         private Timeoutable timeoutable;
         private long timeoutLength;
@@ -82,8 +82,7 @@ public class TimeoutController {
          * Makes items that expire sooner considered 'larger' so the max BinaryHeap is
          * sorted correctly
          */
-        public int compareTo(Object o) {
-            Timeout b = (Timeout)o;
+        public int compareTo(Timeout b) {
             return expireTime < b.expireTime ? 1 : expireTime > b.expireTime ? -1 : 0;
         }
         

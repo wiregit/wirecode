@@ -5,17 +5,17 @@ import java.util.Iterator;
 /**
  * An iterator that iterates over two other iterators, in order.
  */
-public class DualIterator implements Iterator {
+public class DualIterator<T> implements Iterator<T> {
     
     /**
      * The primary iterator.
      */
-    private final Iterator i1;
+    private final Iterator<T> i1;
     
     /**
      * The secondary iterator.
      */
-    private final Iterator i2;
+    private final Iterator<T> i2;
     
     /**
      * Whether or not we have reached the secondary iterator.
@@ -25,7 +25,7 @@ public class DualIterator implements Iterator {
     /**
      * Constructs a new DualIterator backed by two iterators.
      */
-    public DualIterator(Iterator a, Iterator b) {
+    public DualIterator(Iterator<T> a, Iterator<T> b) {
         i1 = a; i2 = b;
         onOne = true;
     }
@@ -40,7 +40,7 @@ public class DualIterator implements Iterator {
     /**
      * Retrieves the next element from the current backing iterator.
      */
-    public Object next() {
+    public T next() {
         if(i1.hasNext())
             return i1.next();
         else {

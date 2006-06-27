@@ -2,7 +2,6 @@ package com.limegroup.gnutella.http;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Properties;
 
 import com.limegroup.gnutella.statistics.Statistic;
 

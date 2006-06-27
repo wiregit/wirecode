@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import com.limegroup.gnutella.ByteOrder;
@@ -33,7 +32,7 @@ public class OGMMetaData extends VideoMetaData {
 		try {
 			is = new FileInputStream(file);
 			DataInputStream dis = new DataInputStream(is);
-			Set set = readMetaData(dis);
+			Set<String> set = readMetaData(dis);
 			parseMetaData(set);
 		} finally {
 			IOUtils.close(is);
@@ -48,8 +47,8 @@ public class OGMMetaData extends VideoMetaData {
 	 * @return Set of String containing Vorbis comments
 	 * @throws IOException
 	 */
-	private Set readMetaData(DataInputStream dis) throws IOException {
-		Set set = new HashSet();
+	private Set<String> readMetaData(DataInputStream dis) throws IOException {
+		Set<String> set = new HashSet<String>();
 		boolean shouldStop = false;
 		do {
 			int pageSize = readHeader(dis);
@@ -95,7 +94,7 @@ public class OGMMetaData extends VideoMetaData {
 	 * skip the data.
 	 */
 	private boolean parseCommentBlock(int pageSize, DataInputStream dis,
-			Set comments) throws IOException {
+			Set<String> comments) throws IOException {
 		int type = dis.readByte();
 		pageSize--;
 
@@ -153,9 +152,8 @@ public class OGMMetaData extends VideoMetaData {
 	 * @param data
 	 *            a Set of String containing Vorbis comments
 	 */
-	private void parseMetaData(Set data) {
-		for (Iterator iter = data.iterator(); iter.hasNext();) {
-			String comment = iter.next().toString();
+	private void parseMetaData(Set<String> data) {
+        for(String comment : data) {
 			int index = comment.indexOf('=');
 			if (index <= 0)
 				continue;

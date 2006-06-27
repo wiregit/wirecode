@@ -16,8 +16,7 @@ import java.util.NoSuchElementException;
  *
  * @see FixedsizePriorityQueueTest
  */
-public class BinaryHeap
-{
+public class BinaryHeap<T extends Comparable<T>> implements Iterable<T> {
     /**
      * number of elements currently present in the heap
      */
@@ -26,7 +25,7 @@ public class BinaryHeap
     /**
      * The array to keep the elements of the heap
      */
-    private Comparable[] array;
+    private T[] array;
 
     /**
      * The maximum number of elements that can be put in the heap.  Memory
@@ -58,12 +57,13 @@ public class BinaryHeap
      * @param resizable true iff this should grow the heap to allow more 
      *  elements
      */
+    @SuppressWarnings("unchecked")
     public BinaryHeap(int maxSize, boolean resizable)
     {
         this.resizable=resizable;
         currentSize = 0;
         this.maxSize = maxSize;
-        array = new Comparable[maxSize + 1];
+        array = (T[])new Comparable[maxSize + 1];
     }
 
     /**
@@ -85,7 +85,7 @@ public class BinaryHeap
      * @see BinaryHeap#currentSize
      * @see BinaryHeap#maxSize 
      */
-    public BinaryHeap(Comparable[] array)
+    public BinaryHeap(T ... array)
     {
         this.array = array;
         this.currentSize = array.length -1;
@@ -98,6 +98,7 @@ public class BinaryHeap
      * If this is resizable and if the heap is full, allocates more memory.
      * Returns true if the heap was actually resized.
      */
+    @SuppressWarnings("unchecked")
     private boolean resize() 
     {
         if (! isFull())
@@ -110,7 +111,7 @@ public class BinaryHeap
         this.maxSize = currentSize*2;
         Comparable[] newArray=new Comparable[1+maxSize];
         System.arraycopy(array, 1, newArray, 1, currentSize);
-        this.array = newArray;
+        this.array = (T[])newArray;
         return true;
     }
 
@@ -188,7 +189,7 @@ public class BinaryHeap
      */
     private void swap(int i, int j)
     {
-        Comparable temp = array[i];
+        T temp = array[i];
         array[i] = array[j];
         array[j] = temp;
     }
@@ -200,11 +201,11 @@ public class BinaryHeap
      *  element, though not necessarily the smallest) is removed and returned.
      *  Otherwise, returns null; 
      */
-    public Comparable insert(Comparable x)
+    public T insert(T x)
     {
         resize();
 
-        Comparable ret=null;
+        T ret=null;
         //Normal case
         if (currentSize<maxSize) {
             currentSize++;
@@ -237,7 +238,7 @@ public class BinaryHeap
      * Returns the largest element in this, without modifying this.  If this is
      * empty, throws NoSuchElementException instead.  
      */
-    public Comparable getMax() throws NoSuchElementException
+    public T getMax() throws NoSuchElementException
     {
         if(currentSize < 1)
             throw new NoSuchElementException();
@@ -251,18 +252,18 @@ public class BinaryHeap
      * @effects removes and returns the largest element in this.
      *  If this is empty, throws NoSuchElementException instead.
      */
-    public Comparable extractMax() throws NoSuchElementException
+    public T extractMax() throws NoSuchElementException
     {
 
         //check if there is atleast one element in the heap
         if(currentSize < 1)
-        throw new NoSuchElementException();
+            throw new NoSuchElementException();
 
 
         //first element (root) is the max
         //save it, swap first and last element, decrease the size of heap by one
         //and heapify it from the root
-        Comparable max = array[1];
+        T max = array[1];
         array[1] = array[currentSize];
         array[currentSize] = null; // allow GC to clean the object later on.
         currentSize--;
@@ -277,22 +278,20 @@ public class BinaryHeap
      * @effects returns an iterator that yields the max element first, then the
      *   rest of the elements in any order.  
      */
-    public Iterator iterator()
+    public Iterator<T> iterator()
     {
         //TODO1: test me!
         return new BinaryHeapIterator();
     }
 
-    class BinaryHeapIterator extends UnmodifiableIterator
-    {
+    class BinaryHeapIterator extends UnmodifiableIterator<T> {
         int next=1;
 
         public boolean hasNext() {
             return next<=currentSize;
         }
 
-        public Object next() throws NoSuchElementException
-        {
+        public T next() throws NoSuchElementException {
             if (! hasNext())
                 throw new NoSuchElementException();
             
@@ -329,11 +328,10 @@ public class BinaryHeap
     public String toString()
     {
         StringBuffer ret=new StringBuffer("[");
-        for (Iterator iter=iterator(); iter.hasNext(); ) {
-            ret.append(iter.next().toString());
-            ret.append(", ");
+        for(T t : this) {
+            ret.append(t.toString()+ ", ");
         }
         ret.append("]");
         return ret.toString();
     }
-}//end of class BinaryHeap
+}

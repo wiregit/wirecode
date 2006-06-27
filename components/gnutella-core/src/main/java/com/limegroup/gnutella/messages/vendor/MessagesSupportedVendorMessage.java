@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import com.limegroup.gnutella.ByteOrder;
@@ -23,7 +22,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     public static final int VERSION = 0;
 
-    private final Set _messagesSupported = new HashSet();
+    private final Set<SupportedMessageBlock> _messagesSupported = new HashSet<SupportedMessageBlock>();
 
     private static MessagesSupportedVendorMessage _instance;
 
@@ -64,17 +63,13 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * Constructs the payload for supporting all of the messages.
      */
     private static byte[] derivePayload() {
-        Set hashSet = new HashSet();
+        Set<SupportedMessageBlock> hashSet = new HashSet<SupportedMessageBlock>();
         addSupportedMessages(hashSet);
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)hashSet.size(), baos);
-            Iterator iter = hashSet.iterator();
-            while (iter.hasNext()) {
-                SupportedMessageBlock currSMP = 
-                    (SupportedMessageBlock) iter.next();
+            for(SupportedMessageBlock currSMP : hashSet)
                 currSMP.encode(baos);
-            }
             return baos.toByteArray();
         } catch (IOException ioe) {
             ErrorService.error(ioe); // impossible.
@@ -85,7 +80,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     // ADD NEW MESSAGES HERE AS YOU BUILD THEM....
     // you should only add messages supported over TCP
-    private static void addSupportedMessages(Set hashSet) {
+    private static void addSupportedMessages(Set<? super SupportedMessageBlock> hashSet) {
         SupportedMessageBlock smp = null;
         // TCP Connect Back
         smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK,
@@ -159,10 +154,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * of the message supported.
      */
     public int supportsMessage(byte[] vendorID, int selector) {
-        Iterator iter = _messagesSupported.iterator();
-        while (iter.hasNext()) {
-            SupportedMessageBlock currSMP = 
-                (SupportedMessageBlock) iter.next();
+        for(SupportedMessageBlock currSMP : _messagesSupported) {
             int version = currSMP.matches(vendorID, selector);
             if (version > -1)
                 return version;
@@ -347,7 +339,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             hashCode += 37*version;
             hashCode += 37*selector;
             for (int i = 0; i < vendorID.length; i++)
-                hashCode += (int) 37*vendorID[i];
+                hashCode += 37*vendorID[i];
             return hashCode;
         }
     }

@@ -14,9 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -43,7 +40,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 public class Response {
     
-    private static final Log LOG = LogFactory.getLog(Response.class);
+    //private static final Log LOG = LogFactory.getLog(Response.class);
     
     /**
      * The magic byte to use as extension separators.
@@ -417,40 +414,37 @@ public class Response {
      * Utility method for converting the non-firewalled elements of an
      * AlternateLocationCollection to a smaller set of endpoints.
      */
-    private static Set<IpPort> getAsEndpoints(AlternateLocationCollection col) {
+    private static Set<Endpoint> getAsEndpoints(AlternateLocationCollection<DirectAltLoc> col) {
         if( col == null || !col.hasAlternateLocations() )
             return Collections.emptySet();
         
         long now = System.currentTimeMillis();
         synchronized(col) {
-            Set<IpPort> endpoints = null;
+            Set<Endpoint> endpoints = null;
             int i = 0;
-            for(Iterator<AlternateLocation> iter = col.iterator();
-              iter.hasNext() && i < MAX_LOCATIONS;) {
-                AlternateLocation o = iter.next();
-            	if (!(o instanceof DirectAltLoc)) {
-            	    if(LOG.isDebugEnabled())
-                        LOG.debug("Got non-direct-loc: " + o);
-            		continue;
-                }
-                DirectAltLoc al = (DirectAltLoc)o;
+            for(Iterator<DirectAltLoc> iter = col.iterator(); iter.hasNext() && i < MAX_LOCATIONS;) {
+                DirectAltLoc al = iter.next();
                 if (al.canBeSent(AlternateLocation.MESH_RESPONSE)) {
                     IpPort host = al.getHost();
                     if( !NetworkUtils.isMe(host) ) {
                         if (endpoints == null)
-                            endpoints = new HashSet<IpPort>();
+                            endpoints = new HashSet<Endpoint>();
                         
-                        if (!(host instanceof Endpoint)) 
-                        	host = new Endpoint(host.getAddress(),host.getPort());
-                        
-                        endpoints.add( host );
+                        if (!(host instanceof Endpoint)) {
+                        	endpoints.add(new Endpoint(host.getAddress(),host.getPort()));
+                        } else {
+                            endpoints.add((Endpoint)host);
+                        }
                         i++;
                         al.send(now, AlternateLocation.MESH_RESPONSE);
                     }
                 } else if (!al.canBeSentAny())
                     iter.remove();
             }
-            return endpoints == null ? IpPort.EMPTY_SET : endpoints;
+            if(endpoints == null)
+                return Collections.emptySet();
+            else
+                return endpoints;
         }
     }    
 
@@ -552,7 +546,7 @@ public class Response {
      * contain the same file described in this <tt>Response</tt>,
      * guaranteed to be non-null, although the set could be empty
      */
-    public Set<IpPort> getLocations() {
+    public Set<Endpoint> getLocations() {
         return ggepData.locations;
     }
     
@@ -662,9 +656,8 @@ public class Response {
             if(ggep.locations.size() > 0) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 try {
-                    for(Iterator i = ggep.locations.iterator(); i.hasNext();) {
+                    for(Endpoint ep : ggep.locations) {
                         try {
-                            Endpoint ep = (Endpoint)i.next();
                             baos.write(ep.getHostBytes());
                             ByteOrder.short2leb((short)ep.getPort(), baos);
                         } catch(UnknownHostException uhe) {
@@ -692,7 +685,7 @@ public class Response {
             if (ggep == null)
                 return GGEPContainer.EMPTY;
 
-            Set<IpPort> locations = null;
+            Set<Endpoint> locations = null;
             long createTime = -1;
             
             // if the block has a ALTS value, get it, parse it,
@@ -713,8 +706,8 @@ public class Response {
                 GGEPContainer.EMPTY : new GGEPContainer(locations, createTime);
         }
         
-        private static Set<IpPort> parseLocations(byte[] locBytes) {
-            Set<IpPort> locations = null;
+        private static Set<Endpoint> parseLocations(byte[] locBytes) {
+            Set<Endpoint> locations = null;
             IPFilter ipFilter = IPFilter.instance();
  
             if (locBytes.length % 6 == 0) {
@@ -732,7 +725,7 @@ public class Response {
                         NetworkUtils.isMe(ip, port))
                         continue;
                     if (locations == null)
-                        locations = new HashSet<IpPort>();
+                        locations = new HashSet<Endpoint>();
                     locations.add(new Endpoint(ip, port));
                 }
             }
@@ -744,7 +737,7 @@ public class Response {
      * A container for information we're putting in/out of GGEP blocks.
      */
     static final class GGEPContainer {
-        final Set<IpPort> locations;
+        final Set<Endpoint> locations;
         final long createTime;
         private static final GGEPContainer EMPTY = new GGEPContainer();
         
@@ -752,8 +745,11 @@ public class Response {
             this(null, -1);
         }
         
-        GGEPContainer(Set<? extends IpPort> locs, long create) {
-            locations = locs == null ? IpPort.EMPTY_SET : Collections.unmodifiableSet(locs);
+        GGEPContainer(Set<? extends Endpoint> locs, long create) {
+            if(locs == null)
+                locations = Collections.emptySet();
+            else
+                locations = Collections.unmodifiableSet(locs);
             createTime = create;
         }
         

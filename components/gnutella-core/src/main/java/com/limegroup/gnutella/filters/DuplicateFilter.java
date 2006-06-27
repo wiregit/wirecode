@@ -42,7 +42,7 @@ public class DuplicateFilter extends SpamFilter {
      *
      * INVARIANT: the youngest entries have largest timestamps
      */
-    private Buffer /* of GUIDPair */ guids=new Buffer(BUF_SIZE);
+    private Buffer<GUIDPair> guids=new Buffer<GUIDPair>(BUF_SIZE);
     /** The time, in milliseconds, allowed between similar messages. */
     private static final int GUID_LAG=500;
     /** 
@@ -86,8 +86,8 @@ public class DuplicateFilter extends SpamFilter {
      *  INVARIANT: queryClearTime=querySwapTime+QUERY_LAG. */
     private long queryClearTime=QUERY_LAG;
     /** INVARIANT: youngQueries and oldQueries are disjoint. */
-    private Set /* of QueryPair */ youngQueries=new HashSet();
-    private Set /* of QueryPair */ oldQueries=new HashSet();
+    private Set<QueryPair> youngQueries=new HashSet<QueryPair>();
+    private Set<QueryPair> oldQueries=new HashSet<QueryPair>();
     
 
     /** Returns the approximate system time in milliseconds. */
@@ -122,7 +122,7 @@ public class DuplicateFilter extends SpamFilter {
         //of this...
         int z = guids.getSize();
         for(int j=0; j<z ; j++){             
-            GUIDPair other=(GUIDPair)guids.get(j);
+            GUIDPair other = guids.get(j);
             //The following assertion fails for mysterious reasons on the
             //Macintosh.  Also, it can fail if the user adjusts the clock, e.g.,
             //for daylight savings time.  Luckily it need not hold for the code
@@ -155,7 +155,7 @@ public class DuplicateFilter extends SpamFilter {
         if (time > querySwapTime) {
             if (time <= queryClearTime) {
                 //A little time has passed.  Promote youngQueries.
-                Set tmp=oldQueries;
+                Set<QueryPair> tmp=oldQueries;
                 oldQueries=youngQueries;
                 youngQueries=tmp;
                 youngQueries.clear();
@@ -177,7 +177,7 @@ public class DuplicateFilter extends SpamFilter {
         if (oldQueries.contains(qp)) {
             return false;
         } else {
-            boolean added=youngQueries.add(qp);
+            boolean added = youngQueries.add(qp);
             return added;     //allow if wasn't already in young set
         }
     }

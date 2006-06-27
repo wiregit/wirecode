@@ -193,9 +193,9 @@ public abstract class VendorMessage extends Message {
         hashCode += 17*version;
         hashCode += 17*selector;
         for (int i = 0; i < vendorID.length; i++)
-            hashCode += (int) 17*vendorID[i];
+            hashCode += 17*vendorID[i];
         for (int i = 0; i < payload.length; i++)
-            hashCode += (int) 17*payload[i];
+            hashCode += 17*payload[i];
         return hashCode;
     }
 

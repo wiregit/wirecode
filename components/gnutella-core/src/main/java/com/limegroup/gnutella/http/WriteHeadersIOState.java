@@ -35,7 +35,7 @@ public abstract class WriteHeadersIOState extends WriteState {
             outgoing = createOutgoingData();
         }
         
-        int written = ((WritableByteChannel)channel).write(outgoing);
+        int written = channel.write(outgoing);
         stat.addData(written);
         amountWritten += written;
         

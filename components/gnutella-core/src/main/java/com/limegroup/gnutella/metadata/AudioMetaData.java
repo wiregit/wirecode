@@ -9,10 +9,8 @@ package com.limegroup.gnutella.metadata;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -60,15 +58,14 @@ public abstract class AudioMetaData extends MetaData {
     public static final String PRICE_KEY    = KPX + "price"    + DLM;
     public static final String LICENSE_TYPE_KEY = KPX + "licensetype" + DLM;
         
-    protected AudioMetaData() throws IOException {
-    }
+    protected AudioMetaData() {}
 
     public AudioMetaData(File f) throws IOException{
     	parseFile(f);
     }
     
     
-    public static AudioMetaData parseAudioFile(File f) throws IOException{
+    public static AudioMetaData parseAudioFile(File f) throws IOException {
     	if (LimeXMLUtils.isMP3File(f))
     		return new MP3MetaData(f);
     	if (LimeXMLUtils.isOGGFile(f))
@@ -150,8 +147,8 @@ public abstract class AudioMetaData extends MetaData {
     /**
      * Writes the data to a NameValue list.
      */
-    public List toNameValueList() {
-        List list = new ArrayList();
+    public List<NameValue<String>> toNameValueList() {
+        List<NameValue<String>> list = new ArrayList<NameValue<String>>();
         add(list, title, TITLE_KEY);
         add(list, artist, ARTIST_KEY);
         add(list, album, ALBUM_KEY);
@@ -166,14 +163,14 @@ public abstract class AudioMetaData extends MetaData {
         return list;
     }
     
-    private void add(List list, String value, String key) {
+    private void add(List<NameValue<String>> list, String value, String key) {
         if(isValid(value))
-            list.add(new NameValue(key, value.trim()));
+            list.add(new NameValue<String>(key, value.trim()));
     }
     
-    private void add(List list, int value, String key) {
+    private void add(List<NameValue<String>> list, int value, String key) {
         if(isValid(value))
-            list.add(new NameValue(key, "" + value));
+            list.add(new NameValue<String>(key, "" + value));
     }
     
     private boolean isValid(String s) {
@@ -218,11 +215,9 @@ public abstract class AudioMetaData extends MetaData {
         if(!schemaURI.equals(doc.getSchemaURI()))
             return false;
 
-        Set existing = doc.getNameValueSet();
-        for(Iterator i = existing.iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            final String name = (String)entry.getKey();
-            String value = (String)entry.getValue();
+        for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
             // album & artist were the corrupted fields ...
             if( name.equals(ALBUM_KEY) || name.equals(ARTIST_KEY) ) {
                 if( value.length() == 30 ) {
@@ -241,12 +236,10 @@ public abstract class AudioMetaData extends MetaData {
      * Creates a new LimeXMLDocument without corruption.
      */
     public static LimeXMLDocument fixCorruption(LimeXMLDocument oldDoc) {
-        Set existing = oldDoc.getNameValueSet();
-        List info = new ArrayList(existing.size());
-        for(Iterator i = existing.iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            final String name = (String)entry.getKey();
-            String value = (String)entry.getValue();
+        List<NameValue<String>> info = new ArrayList<NameValue<String>>(oldDoc.getNumFields());
+        for(Map.Entry<String, String> entry : oldDoc.getNameValueSet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
             // album & artist were the corrupted fields ...
             if( name.equals(ALBUM_KEY) || name.equals(ARTIST_KEY) ) {
                 if( value.length() == 30 ) {
@@ -256,7 +249,7 @@ public abstract class AudioMetaData extends MetaData {
                         value = value.substring(0, 29).trim();
                 }
             }
-            info.add(new NameValue(name, value));
+            info.add(new NameValue<String>(name, value));
         }
         return new LimeXMLDocument(info, oldDoc.getSchemaURI());
     }

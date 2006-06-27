@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import com.limegroup.gnutella.ByteOrder;
@@ -51,7 +50,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /**
      * The capabilities supported.
      */
-    private final Set _capabilitiesSupported = new HashSet();
+    private final Set<SupportedMessageBlock> _capabilitiesSupported = new HashSet<SupportedMessageBlock>();
 
     /**
      * The current instance of this CVM that this node will forward to others
@@ -93,15 +92,13 @@ public final class CapabilitiesVM extends VendorMessage {
      * Generates the default payload, using all our supported messages.
      */
     private static byte[] derivePayload() {
-        Set hashSet = new HashSet();
+        Set<SupportedMessageBlock> hashSet = new HashSet<SupportedMessageBlock>();
         addSupportedMessages(hashSet);
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)hashSet.size(), baos);
-            for(Iterator i = hashSet.iterator(); i.hasNext(); ) {
-                SupportedMessageBlock currSMP = (SupportedMessageBlock)i.next();
+            for(SupportedMessageBlock currSMP : hashSet)
                 currSMP.encode(baos);
-            }
             return baos.toByteArray();
         } catch (IOException ioe) {
             ErrorService.error(ioe); // impossible.
@@ -114,7 +111,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /**
      * Adds all supported capabilities to the given set.
      */
-    private static void addSupportedMessages(Set hashSet) {
+    private static void addSupportedMessages(Set<? super SupportedMessageBlock> hashSet) {
         SupportedMessageBlock smp = null;
         smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
                                         FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
@@ -145,9 +142,7 @@ public final class CapabilitiesVM extends VendorMessage {
      * of the message supported.
      */
     public int supportsCapability(byte[] capabilityName) {
-        Iterator iter = _capabilitiesSupported.iterator();
-        while (iter.hasNext()) {
-            SupportedMessageBlock currSMP = (SupportedMessageBlock) iter.next();
+        for(SupportedMessageBlock currSMP : _capabilitiesSupported) {
             int version = currSMP.matches(capabilityName);
             if (version > -1)
                 return version;
@@ -289,7 +284,7 @@ public final class CapabilitiesVM extends VendorMessage {
             int hashCode = 0;
             hashCode += 37*version;
             for (int i = 0; i < capabilityName.length; i++)
-                hashCode += (int) 37*capabilityName[i];
+                hashCode += 37*capabilityName[i];
             return hashCode;
         }
     }

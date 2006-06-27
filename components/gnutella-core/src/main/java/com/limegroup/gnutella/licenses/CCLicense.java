@@ -34,7 +34,7 @@ class CCLicense extends AbstractLicense {
     private transient String license;
     
     /** The license information for each Work. */
-    private Map /* URN -> Details */ allWorks;
+    private Map<URN, Details> allWorks;
     
     /**
      * Constructs a new CCLicense.
@@ -78,15 +78,22 @@ class CCLicense extends AbstractLicense {
      * with a different license string.
      */
     public License copy(String license, URI licenseURI) {
-        CCLicense newL = null;
-        try {
-            newL = (CCLicense)clone();
+        CCLicense newL = clone();
+        if(newL != null) {
             newL.license = license;
             newL.licenseLocation = licenseURI;
-        } catch(CloneNotSupportedException error) {
-            ErrorService.error(error);
         }
         return newL;
+    }
+    
+    /** Clones this CCLicense. */
+    protected CCLicense clone() {
+        try {
+            return (CCLicense)super.clone();
+        } catch(CloneNotSupportedException cnse) {
+            ErrorService.error(cnse);
+            return null;
+        }
     }
     
     /**
@@ -94,9 +101,9 @@ class CCLicense extends AbstractLicense {
      * probibited, and required.
      */
     public String getLicenseDescription(URN urn) {
-        List permitted = Collections.EMPTY_LIST;
-        List prohibited = Collections.EMPTY_LIST;
-        List required = Collections.EMPTY_LIST;
+        List<String> permitted = Collections.emptyList();
+        List<String> prohibited = Collections.emptyList();
+        List<String> required = Collections.emptyList();
         Details details = getDetails(urn);
         if(details != null) {
             permitted = details.permitted;
@@ -107,7 +114,7 @@ class CCLicense extends AbstractLicense {
         StringBuffer sb = new StringBuffer();
         if(permitted != null && !permitted.isEmpty()) {
             sb.append("Permitted: ");
-            for(Iterator i = permitted.iterator(); i.hasNext(); ) {
+            for(Iterator<String> i = permitted.iterator(); i.hasNext(); ) {
                 sb.append(i.next().toString());
                 if(i.hasNext())
                     sb.append(", ");
@@ -117,7 +124,7 @@ class CCLicense extends AbstractLicense {
             if(sb.length() != 0)
                 sb.append("\n");
             sb.append("Prohibited: ");
-            for(Iterator i = prohibited.iterator(); i.hasNext(); ) {
+            for(Iterator<String> i = prohibited.iterator(); i.hasNext(); ) {
                 sb.append(i.next().toString());
                 if(i.hasNext())
                     sb.append(", ");
@@ -127,7 +134,7 @@ class CCLicense extends AbstractLicense {
             if(sb.length() != 0)
                 sb.append("\n");
             sb.append("Required: ");
-            for(Iterator i = required.iterator(); i.hasNext(); ) {
+            for(Iterator<String> i = required.iterator(); i.hasNext(); ) {
                 sb.append(i.next().toString());
                 if(i.hasNext())
                     sb.append(", ");
@@ -195,7 +202,7 @@ class CCLicense extends AbstractLicense {
             LOG.debug("Adding new " + details + " for urn: " + urn);
 
         if(allWorks == null)
-            allWorks = new HashMap(1); // assume it's small.
+            allWorks = new HashMap<URN, Details>(1); // assume it's small.
         allWorks.put(urn, details); // it is fine if urn is null.
     }   
     
@@ -207,7 +214,7 @@ class CCLicense extends AbstractLicense {
             return null;
         
         // First see if there's a details that matches exactly.
-        Details details = (Details)allWorks.get(urn);
+        Details details = allWorks.get(urn);
         if(details != null)
             return details;
             
@@ -215,22 +222,21 @@ class CCLicense extends AbstractLicense {
         
         // If we want a specific URN, we can only give back the 'null' one.
         if(urn != null)
-            return (Details)allWorks.get(null);
+            return allWorks.get(null);
         
         // We must have wanted the null one.  Give back the first one we find.
-        return (Details)allWorks.values().iterator().next();
+        return allWorks.values().iterator().next();
     }
     
     /**
      * Locates all details that use the given License URL.
      */
-    private List getDetailsForLicenseURL(URL url) {
+    private List<Details> getDetailsForLicenseURL(URL url) {
         if(allWorks == null || url == null)
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         
-        List details = new LinkedList();
-        for(Iterator i = allWorks.values().iterator(); i.hasNext(); ) {
-            Details detail = (Details)i.next();
+        List<Details> details = new LinkedList<Details>();
+        for(Details detail : allWorks.values()) {
             if(detail.licenseURL != null && url.equals(detail.licenseURL))
                 details.add(detail);
         }
@@ -244,9 +250,9 @@ class CCLicense extends AbstractLicense {
         private static final long serialVersionUID =  -1719502030054241350L;
                 
         URL licenseURL;
-        List required;
-        List permitted;
-        List prohibited;
+        List<String> required;
+        List<String> permitted;
+        List<String> prohibited;
         
         // for de-serializing.
         Details() { }
@@ -367,7 +373,7 @@ class CCLicense extends AbstractLicense {
         // Get the license URL. 
         NamedNodeMap attributes = license.getAttributes();
         Node about = attributes.getNamedItem("rdf:about");
-        List details = Collections.EMPTY_LIST;
+        List<Details> details = Collections.emptyList();
         if(about != null) {
             String value = about.getNodeValue();
             try {
@@ -381,9 +387,9 @@ class CCLicense extends AbstractLicense {
         if(!details.iterator().hasNext())
             return;
         
-        List required = null;
-        List prohibited = null;
-        List permitted = null;
+        List<String> required = null;
+        List<String> prohibited = null;
+        List<String> permitted = null;
         
         // Get the 'permit', 'requires', and 'prohibits' values.
         NodeList children = license.getChildNodes();
@@ -392,22 +398,21 @@ class CCLicense extends AbstractLicense {
             String name = child.getNodeName();
             if(name.equalsIgnoreCase("requires")) {
                 if(required == null)
-                    required = new LinkedList();
+                    required = new LinkedList<String>();
                 addPermission(required, child);
             } else if(name.equalsIgnoreCase("permits")) {
                 if(permitted == null)
-                    permitted = new LinkedList();
+                    permitted = new LinkedList<String>();
                 addPermission(permitted, child);
             } else if(name.equalsIgnoreCase("prohibits")) {
                 if(prohibited == null)
-                    prohibited = new LinkedList();
+                    prohibited = new LinkedList<String>();
                 addPermission(prohibited, child);
             }
         }
         
         // Okay, now iterate through each details and set the lists.
-        for(Iterator i = details.iterator(); i.hasNext(); ) {
-            Details detail = (Details)i.next();
+        for(Details detail : details) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Setting license details for " + details);
             detail.required = required;
@@ -421,7 +426,7 @@ class CCLicense extends AbstractLicense {
     /**
      * Adds a single permission to the list.
      */
-    private void addPermission(List permissions, Node node) {
+    private void addPermission(List<String> permissions, Node node) {
         NamedNodeMap attributes = node.getAttributes();
         Node resource = attributes.getNamedItem("rdf:resource");
         if(resource != null) {

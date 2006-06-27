@@ -59,7 +59,7 @@ public class OGGMetaData extends AudioMetaData{
 		}
 		
 		
-		setBitrate((int)(vfile.bitrate(-1)/1024));
+		setBitrate(vfile.bitrate(-1)/1024);
 		setLength((int)vfile.time_total(-1));
 		
 		comments = vfile.getComment();

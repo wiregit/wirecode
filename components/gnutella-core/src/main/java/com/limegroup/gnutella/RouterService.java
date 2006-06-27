@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.channels.Channel;
+import java.nio.channels.SelectableChannel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -217,7 +217,7 @@ public class RouterService {
         // Link the multiplexor & NIODispatcher together.
         UDPSelectorProvider provider = UDPSelectorProvider.instance();
         UDP_MULTIPLEXOR = (UDPMultiplexor)provider.openSelector();
-        Channel socketChannel = provider.openSocketChannel();
+        SelectableChannel socketChannel = provider.openSocketChannel();
         try {
             socketChannel.close();
         } catch(IOException ignored) {}

@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -45,32 +44,24 @@ public class UDPCrawlerPong extends VendorMessage {
 		byte format = (byte)(request.getFormat() & UDPCrawlerPing.FEATURE_MASK);
 		
 		//get a list of all ultrapeers and leafs we have connections to
-		List endpointsUP = new LinkedList();
-		List endpointsLeaf = new LinkedList();
-		
-		Iterator iter = RouterService.getConnectionManager()
-			.getInitializedConnections().iterator();
+		List<Connection> endpointsUP = new LinkedList<Connection>();
+		List<Connection> endpointsLeaf = new LinkedList<Connection>();
 		
 		//add only good ultrapeers or just those who support UDP pinging
 		//(they support UDP ponging, obviously)
 		boolean newOnly = request.hasNewOnly();
 		
-		while(iter.hasNext()) {
-			Connection c = (Connection)iter.next();
+        for(Connection c : RouterService.getConnectionManager().getInitializedConnections()) {
 			if (newOnly) {  
 				if (c.remoteHostSupportsUDPCrawling() >= 1)
 					endpointsUP.add(c);
-			}else 
-			if (c.isGoodUltrapeer()) 
-				endpointsUP.add(c);
+			} else if (c.isGoodUltrapeer())  {
+			    endpointsUP.add(c);
+            }
 		}
 		
-		iter = RouterService.getConnectionManager()
-			.getInitializedClientConnections().iterator();
-		
 		//add all leaves.. or not?
-		while(iter.hasNext()) {
-			Connection c = (Connection)iter.next();
+        for(Connection c : RouterService.getConnectionManager().getInitializedClientConnections()) {
 			//if (c.isGoodLeaf()) //uncomment if you decide you want only good leafs 
 				endpointsLeaf.add(c);
 		}
@@ -100,15 +91,15 @@ public class UDPCrawlerPong extends VendorMessage {
 			
 			//move the connections with the locale pref to the head of the lists
 			//we prioritize these disregarding the other criteria (such as isGoodUltrapeer, etc.)
-			List prefedcons = RouterService.getConnectionManager().
-					getInitializedConnectionsMatchLocale(myLocale);
+			List<Connection> prefedcons =
+                RouterService.getConnectionManager().getInitializedConnectionsMatchLocale(myLocale);
 			
 			endpointsUP.removeAll(prefedcons);
 			prefedcons.addAll(endpointsUP); 
 			endpointsUP=prefedcons;
 			
-			prefedcons = RouterService.getConnectionManager().
-				getInitializedClientConnectionsMatchLocale(myLocale);
+			prefedcons =
+                RouterService.getConnectionManager().getInitializedClientConnectionsMatchLocale(myLocale);
 	
 			endpointsLeaf.removeAll(prefedcons);
 			prefedcons.addAll(endpointsLeaf); 
@@ -158,10 +149,8 @@ public class UDPCrawlerPong extends VendorMessage {
         //cache the call to currentTimeMillis() cause its not always cheap
 		long now = System.currentTimeMillis();
 		
-		iter = endpointsUP.iterator();
-		while(iter.hasNext()) {
+        for(Connection c : endpointsUP) {
 			//pack each entry into a 6 byte array and add it to the result.
-			Connection c = (Connection)iter.next();
 			System.arraycopy(
 					packIPAddress(c.getInetAddress(),c.getPort()),
 					0,
@@ -190,9 +179,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		//in the same order as the results.
 		if (request.hasUserAgent()) {
 			StringBuffer agents = new StringBuffer();
-			iter = endpointsUP.iterator();
-			while(iter.hasNext()) {
-				Connection c = (Connection)iter.next();
+            for(Connection c: endpointsUP) {
 				String agent = c.getUserAgent();
 				agent = StringUtils.replace(agent,AGENT_SEP,"\\"+AGENT_SEP);
 				agents.append(agent).append(AGENT_SEP);

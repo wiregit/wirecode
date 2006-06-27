@@ -19,7 +19,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     /** Observer to notify when this finishes or fails. */
     private IOStateObserver observer;
     /** The states this will use while handshaking.*/
-    private List /* of IOState */ states;
+    private List<IOState> states;
     /** The current state. */
     private IOState currentState;
     /** The sink we write to. */
@@ -31,16 +31,16 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     /** Whether or not we've shutdown this handshaker. */
     private volatile boolean shutdown;
     
-    public IOStateMachine(IOStateObserver observer, List states) {
+    public IOStateMachine(IOStateObserver observer, List<IOState> states) {
         this(observer, states, 2048);
     }
 
-    public IOStateMachine(IOStateObserver observer, List states, int bufferSize) {
+    public IOStateMachine(IOStateObserver observer, List<IOState> states, int bufferSize) {
         this.observer = observer;
         this.states = states;
         this.readBuffer = NIODispatcher.instance().getBufferCache().getHeap(bufferSize);
         if(!states.isEmpty())
-            this.currentState = (IOState)states.remove(0);
+            this.currentState = states.remove(0);
     }
     
     /**
@@ -64,7 +64,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     /**
      * Adds a collection of new states to process.
      */
-    public void addStates(final List /* of IOState */ newStates) {
+    public void addStates(final List<? extends IOState> newStates) {
         NIODispatcher.instance().invokeLater(new Runnable() {
             public void run() {
                 if(LOG.isDebugEnabled())
@@ -79,7 +79,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     /**
      * Adds an array of new states to process.
      */
-    public void addStates(final IOState[] newStates) {
+    public void addStates(final IOState... newStates) {
         NIODispatcher.instance().invokeLater(new Runnable() {
             public void run() {
                 if(LOG.isDebugEnabled())
@@ -202,7 +202,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
             writeSink.interest(this, false);
             observer.handleStatesFinished();
         } else {
-            currentState = (IOState)states.remove(0);
+            currentState = states.remove(0);
             if(LOG.isDebugEnabled())
                 LOG.debug("Incrementing state to: " + currentState);
             

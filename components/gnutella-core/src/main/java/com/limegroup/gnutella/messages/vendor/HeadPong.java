@@ -119,12 +119,12 @@ public class HeadPong extends VendorMessage {
 	/**
 	 * the altlocs that were sent, if any
 	 */
-	private Set _altLocs;
+	private Set<IpPort> _altLocs;
 	
 	/**
 	 * the firewalled altlocs that were sent, if any
 	 */
-	private Set _pushLocs;
+	private Set<PushEndpoint> _pushLocs;
 	
 	/**
 	 * the queue status, can be negative
@@ -215,7 +215,7 @@ public class HeadPong extends VendorMessage {
     			
     		//parse any included altlocs
     		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
-    			_altLocs=readLocs(dais);
+    			_altLocs= readLocs(dais);
 		} catch(IOException oops) {
 			throw new BadPacketException(oops.getMessage());
 		}
@@ -315,18 +315,18 @@ public class HeadPong extends VendorMessage {
     				HeadPing.FWT_PUSH_ALTLOCS;
                 
                 if (FWTOnly) {
-                    AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
+                    AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPush(urn,true);
                     synchronized(push) {
                         didNotSendPushAltLocs = !writePushLocs(caos,push.iterator());
                     }
                 } else {
-                    AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
-                    AlternateLocationCollection fwt = RouterService.getAltlocManager().getPush(urn,false);
+                    AlternateLocationCollection<PushAltLoc> push = RouterService.getAltlocManager().getPush(urn,true);
+                    AlternateLocationCollection<PushAltLoc> fwt = RouterService.getAltlocManager().getPush(urn,false);
                     synchronized(push) {
                         synchronized(fwt) {
                             didNotSendPushAltLocs = 
                                 !writePushLocs(caos,
-                                        new MultiRRIterator(new Iterator[]{push.iterator(),fwt.iterator()}));
+                                        new MultiRRIterator<PushAltLoc>(push.iterator(),fwt.iterator()));
                         }
                     }
                 }
@@ -334,7 +334,7 @@ public class HeadPong extends VendorMessage {
     		
     		//now add any non-firewalled altlocs in case they were requested. 
     		if (ping.requestsAltlocs()) {
-                AlternateLocationCollection col = RouterService.getAltlocManager().getDirect(urn);
+                AlternateLocationCollection<DirectAltLoc> col = RouterService.getAltlocManager().getDirect(urn);
                 synchronized(col) {
                     didNotSendAltLocs=!writeLocs(caos, col.iterator());
                 }
@@ -394,7 +394,7 @@ public class HeadPong extends VendorMessage {
 	 * @return set of <tt>Endpoint</tt> 
 	 * containing any alternate locations this alternate location returned.
 	 */
-	public Set getAltLocs() {
+	public Set<IpPort> getAltLocs() {
 		return _altLocs;
 	}
 	
@@ -403,7 +403,7 @@ public class HeadPong extends VendorMessage {
 	 * @return set of <tt>PushEndpoint</tt>
 	 * containing any firewalled locations this alternate location returned.
 	 */
-	public Set getPushLocs() {
+	public Set<PushEndpoint> getPushLocs() {
 		return _pushLocs;
 	}
 	
@@ -411,20 +411,18 @@ public class HeadPong extends VendorMessage {
 	 * @return all altlocs carried in the pong as 
 	 * set of <tt>RemoteFileDesc</tt>
 	 */
-	public Set getAllLocsRFD(RemoteFileDesc original){
-		Set ret = new HashSet();
+	public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original){
+		Set<RemoteFileDesc> ret = new HashSet<RemoteFileDesc>();
 		
-		if (_altLocs!=null)
-			for(Iterator iter = _altLocs.iterator();iter.hasNext();) {
-				IpPort current = (IpPort)iter.next();
+		if (_altLocs!=null) {
+            for(IpPort current : _altLocs)
 				ret.add(new RemoteFileDesc(original,current));
-			}
-		
-		if (_pushLocs!=null)
-			for(Iterator iter = _pushLocs.iterator();iter.hasNext();) {
-				PushEndpoint current = (PushEndpoint)iter.next();
+        }
+        
+		if (_pushLocs!=null) {
+            for(PushEndpoint current : _pushLocs)
 				ret.add(new RemoteFileDesc(original,current));
-			}
+        }
 		
 		return ret;
 	}
@@ -508,12 +506,12 @@ public class HeadPong extends VendorMessage {
 	/**
 	 * reads firewalled alternate locations from an input stream
 	 */
-	private final Set readPushLocs(DataInputStream dais) 
+	private final Set<PushEndpoint> readPushLocs(DataInputStream dais) 
 		throws IOException, BadPacketException {
 		int size = dais.readUnsignedShort();
 		byte [] altlocs = new byte[size];
 		dais.readFully(altlocs);
-		Set ret = new HashSet();
+		Set<PushEndpoint> ret = new HashSet<PushEndpoint>();
 		ret.addAll(NetworkUtils.unpackPushEPs(new ByteArrayInputStream(altlocs)));
 		return ret;
 	}
@@ -521,12 +519,12 @@ public class HeadPong extends VendorMessage {
 	/**
 	 * reads non-firewalled alternate locations from an input stream
 	 */
-	private final Set readLocs(DataInputStream dais) 
+	private final Set<IpPort> readLocs(DataInputStream dais) 
 		throws IOException, BadPacketException {
 		int size = dais.readUnsignedShort();
 		byte [] altlocs = new byte[size];
 		dais.readFully(altlocs);
-		Set ret = new HashSet();
+		Set<IpPort> ret = new HashSet<IpPort>();
 		ret.addAll(NetworkUtils.unpackIps(altlocs));
 		return ret;
 	}
@@ -556,7 +554,7 @@ public class HeadPong extends VendorMessage {
 		}
 	}
 	
-	private static final boolean writePushLocs(CountingOutputStream caos, Iterator pushlocs) 
+	private static final boolean writePushLocs(CountingOutputStream caos, Iterator<PushAltLoc> pushlocs) 
     throws IOException {
 	
         if (!pushlocs.hasNext())
@@ -577,7 +575,7 @@ public class HeadPong extends VendorMessage {
         long now = System.currentTimeMillis();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         while (pushlocs.hasNext() && available > 0) {
-            PushAltLoc loc = (PushAltLoc) pushlocs.next();
+            PushAltLoc loc = pushlocs.next();
 
             if (loc.getPushAddress().getProxies().isEmpty()) {
                 pushlocs.remove();
@@ -604,7 +602,7 @@ public class HeadPong extends VendorMessage {
 		}
 	}
 	
-	private static final boolean writeLocs(CountingOutputStream caos, Iterator altlocs) 
+	private static final boolean writeLocs(CountingOutputStream caos, Iterator<DirectAltLoc> altlocs) 
     throws IOException {
 		
 		//do we have any altlocs?
@@ -624,7 +622,7 @@ public class HeadPong extends VendorMessage {
         int sent = 0;
         long now = System.currentTimeMillis();
 		while(altlocs.hasNext() && sent < toSend) {
-            DirectAltLoc loc = (DirectAltLoc) altlocs.next();
+            DirectAltLoc loc = altlocs.next();
             if (loc.canBeSent(AlternateLocation.MESH_PING)) {
                 loc.send(now,AlternateLocation.MESH_PING);
                 baos.write(loc.getHost().getInetAddress().getAddress());

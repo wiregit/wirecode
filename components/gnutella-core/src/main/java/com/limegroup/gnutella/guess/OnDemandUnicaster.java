@@ -21,7 +21,7 @@ public class OnDemandUnicaster {
 
     /** GUESSEndpoints => QueryKey.
      */
-    private static final Map _queryKeys;
+    private static final Map<GUESSEndpoint, QueryKey> _queryKeys;
 
     /** Access to UDP traffic.
      */
@@ -30,12 +30,12 @@ public class OnDemandUnicaster {
     /** Short term store for queries waiting for query keys.
      *  GUESSEndpoints => URNs
      */
-    private static final Map _bufferedURNs;
+    private static final Map<GUESSEndpoint, SendLaterBundle> _bufferedURNs;
 
     static {
         // static initializers are only called once, right?
-        _queryKeys = new Hashtable(); // need sychronization
-        _bufferedURNs = new Hashtable(); // synchronization handy
+        _queryKeys = new Hashtable<GUESSEndpoint, QueryKey>(); // need sychronization
+        _bufferedURNs = new Hashtable<GUESSEndpoint, SendLaterBundle>(); // synchronization handy
         _udp = UDPService.instance();
         // schedule a runner to clear various data structures
         RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
@@ -70,8 +70,7 @@ public class OnDemandUnicaster {
 
         // if a buffered query exists, send it...
         // -----
-        SendLaterBundle bundle = 
-            (SendLaterBundle) _bufferedURNs.remove(endpoint);
+        SendLaterBundle bundle = _bufferedURNs.remove(endpoint);
         if (bundle != null) {
             QueryRequest query = 
                 QueryRequest.createQueryKeyQuery(bundle._queryURN, qk);
@@ -100,7 +99,7 @@ public class OnDemandUnicaster {
 
         // see if you have a QueryKey - if not, request one
         // ------
-        QueryKey key = (QueryKey) _queryKeys.get(ep);
+        QueryKey key = _queryKeys.get(ep);
         if (key == null) {
             GUESSEndpoint endpoint = new GUESSEndpoint(ep.getAddress(),
                                                        ep.getPort());
@@ -166,11 +165,8 @@ public class OnDemandUnicaster {
         // Get rid of all the buffered URNs that should be expired
         // ------
         synchronized (_bufferedURNs) {
-            Iterator iter = _bufferedURNs.entrySet().iterator();
-            while (iter.hasNext()) {
-                Map.Entry entry = (Map.Entry) iter.next();
-                SendLaterBundle bundle = 
-                (SendLaterBundle) entry.getValue();
+            for(Iterator<SendLaterBundle> iter =  _bufferedURNs.values().iterator(); iter.hasNext(); ) {
+                SendLaterBundle bundle = iter.next();
                 if (bundle.shouldExpire())
                     iter.remove();
             }

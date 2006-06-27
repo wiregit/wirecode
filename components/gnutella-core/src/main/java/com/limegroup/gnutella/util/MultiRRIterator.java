@@ -4,9 +4,9 @@ package com.limegroup.gnutella.util;
 import java.util.Iterator;
 
 
-public class MultiRRIterator extends MultiIterator {
+public class MultiRRIterator<T> extends MultiIterator<T> {
 	
-	public MultiRRIterator(Iterator [] iterators) {
+	public MultiRRIterator(Iterator<T> ... iterators ) {
 		super(iterators);
 		current = iterators.length - 1;
 	}

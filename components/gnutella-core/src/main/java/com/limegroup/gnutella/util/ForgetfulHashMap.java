@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -20,7 +19,7 @@ import java.util.Map;
  * implementation really easy. =) Also, ForgetfulHashMap is <b>not
  * synchronized</b>.
  */
-public class ForgetfulHashMap extends HashMap {
+public class ForgetfulHashMap<K, V> extends HashMap<K, V> {
     /* The current implementation is a hashtable for the mapping and
      * a queue maintaining the ordering.
      *
@@ -70,8 +69,8 @@ public class ForgetfulHashMap extends HashMap {
      *  older mapping if necessary.  The return value is undefined; it
      *  exists solely to conform with the superclass' signature.
      */
-    public Object put(Object key, Object value) {
-        Object ret=super.put(key,value);
+    public V put(K key, V value) {
+        V ret=super.put(key,value);
         //Purge oldest entry if we're all full, or if we'll become full
         //after adding this entry.  It's ok if queue[next] is no longer
         //in the map.
@@ -90,12 +89,9 @@ public class ForgetfulHashMap extends HashMap {
 
     /** Calls put on all keys in t.  See put(Object, Object) for 
      *  specification. */
-    public void putAll(Map t) {
-        Iterator iter=t.keySet().iterator();
-        while (iter.hasNext()) {
-            Object key=iter.next();
-            put(key,t.get(key));
-        }
+    public void putAll(Map<? extends K, ? extends V> t) {
+        for(Map.Entry<? extends K, ? extends V> entry : t.entrySet())
+            put(entry.getKey(), entry.getValue());
     }
 }
 

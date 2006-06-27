@@ -11,7 +11,7 @@ public class HeapByteBufferCache {
     // Store up to 1MB of byte[] here.
     private static final int MAX_SIZE = 1024 * 1024;
     
-    private final IntHashMap /* int -> List<ByteBuffer> */ CACHE = new IntHashMap();
+    private final IntHashMap<List<ByteBuffer>> CACHE = new IntHashMap<List<ByteBuffer>>();
         
     /** The total size of bytes stored in cache. */
     private long totalCacheSize;
@@ -28,10 +28,10 @@ public class HeapByteBufferCache {
         }
         
         // if not, see if we have a buffer of the exact size
-        List l = (List) CACHE.get(size);
+        List<ByteBuffer> l = CACHE.get(size);
         // if yes, return it.
         if (l != null && !l.isEmpty()) {
-            ByteBuffer buf = (ByteBuffer)l.remove(l.size() -1);
+            ByteBuffer buf = l.remove(l.size() -1);
             totalCacheSize -= buf.capacity();
             return buf;
         } else {
@@ -45,9 +45,9 @@ public class HeapByteBufferCache {
         
         int size = toReturn.capacity();
         toReturn.clear();
-        List l = (List) CACHE.get(size);
+        List<ByteBuffer> l = CACHE.get(size);
         if (l == null) { 
-            l = new ArrayList(1);
+            l = new ArrayList<ByteBuffer>(1);
             CACHE.put(size, l);
         }
         l.add(toReturn);

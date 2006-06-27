@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
@@ -23,7 +24,7 @@ public class MetaDataReader {
 		if(data == null)
 		    throw new IOException("unable to parse file");
 		
-		List nameValList = data.toNameValueList();
+		List<NameValue<String>> nameValList = data.toNameValueList();
 		if(nameValList.isEmpty())
 			throw new IOException("invalid/no data.");
 		

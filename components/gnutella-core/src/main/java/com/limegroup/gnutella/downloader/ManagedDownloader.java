@@ -37,6 +37,7 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SavedFileManager;
@@ -64,6 +65,7 @@ import com.limegroup.gnutella.util.ApproximateMatcher;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -239,7 +241,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
-    private Set cachedRFDs;
+    private Set<RemoteFileDesc> cachedRFDs;
 
 	/**
 	 * The ranker used to select the next host we should connect to
@@ -302,7 +304,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * LOCKING: copy on write on this 
      * 
      */    
-    private volatile List /* of DownloadWorker */ _activeWorkers;
+    private volatile List<DownloadWorker> _activeWorkers;
     
     /**
      * A List of workers in progress.  Used to make sure that we do
@@ -314,19 +316,19 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * 
      * LOCKING: synchronize on this
      */
-    private List /*of DownloadWorker*/ _workers;
+    private List<DownloadWorker> _workers;
 
     /**
      * Stores the queued threads and the corresponding queue position
      * LOCKING: copy on write on this
      */
-    private volatile Map /*DownloadWorker -> Integer*/ _queuedWorkers;
+    private volatile Map<DownloadWorker, Integer> _queuedWorkers;
 
     /**
      * Set of RFDs where we store rfds we are currently connected to or
      * trying to connect to.
      */
-    private Set /*of RemoteFileDesc */ currentRFDs;
+    private Set<RemoteFileDesc> currentRFDs;
     
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
@@ -337,18 +339,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * The collection of alternate locations we successfully downloaded from
      * somthing from.
      */
-	private Set validAlts; 
+	private Set<AlternateLocation> validAlts; 
 	
 	/**
 	 * A list of the most recent failed locations, so we don't try them again.
 	 */
-	private Set invalidAlts;
+	private Set<RemoteHostData> invalidAlts;
 
     /**
      * Cache the most recent failed locations. 
      * Holds <tt>AlternateLocation</tt> instances
      */
-    private Set recentInvalidAlts;
+    private Set<AlternateLocation> recentInvalidAlts;
     
     /**
      * Manages writing stuff to disk, remember what's leased, what's verified,
@@ -477,9 +479,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * may be used by GUI, to keep some additional information about
      * the download.
      */
-    protected Map attributes = new HashMap();
+    protected Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 
-    protected Map propertiesMap;
+    protected Map<String, Serializable> propertiesMap;
     
     protected static final String DEFAULT_FILENAME = "defaultFileName";
     protected static final String FILE_SIZE = "fileSize";
@@ -526,9 +528,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 		if(ifc == null) {
 			throw new NullPointerException("null incomplete file manager");
 		}
-        this.cachedRFDs = new HashSet();
+        this.cachedRFDs = new HashSet<RemoteFileDesc>();
 		cachedRFDs.addAll(Arrays.asList(files));
-		this.propertiesMap = new HashMap();
+		this.propertiesMap = new HashMap<String, Serializable>();
 		if (files.length > 0) 
 			initPropertiesMap(files[0]);
 
@@ -554,9 +556,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     private void writeObject(ObjectOutputStream stream)
             throws IOException {
         
-        Set cached = new HashSet();
-        Map properties = new HashMap();
+        Set<RemoteFileDesc> cached = new HashSet<RemoteFileDesc>();
+        Map<String, Serializable> properties = new HashMap<String, Serializable>();
         IncompleteFileManager ifm;
+        
+        if ( !propertiesMap.containsKey(ATTRIBUTES) )
+            propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
         
         synchronized(this) {
             cached.addAll(cachedRFDs);
@@ -571,9 +576,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         synchronized (ifm) {
             stream.writeObject(ifm);
         }
-
-        if ( !propertiesMap.containsKey(ATTRIBUTES) )
-	    propertiesMap.put(ATTRIBUTES, attributes);
 
         stream.writeObject(properties);
     }
@@ -596,22 +598,21 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             RemoteFileDesc [] rfds=(RemoteFileDesc[])next;
             if (rfds != null && rfds.length > 0) 
                 defaultRFD = rfds[0];
-            cachedRFDs = new HashSet(Arrays.asList(rfds));
-        } else {
-            // new format
-            cachedRFDs = (Set) next;
+            cachedRFDs = new HashSet<RemoteFileDesc>(Arrays.asList(rfds));
+        } else if(next instanceof Set) {
+            cachedRFDs = GenericsUtils.scanForSet(next, RemoteFileDesc.class, GenericsUtils.ScanMode.REMOVE);
             if (cachedRFDs.size() > 0) {
-                defaultRFD = (RemoteFileDesc)cachedRFDs.iterator().next();
+                defaultRFD = cachedRFDs.iterator().next();
             }
         }
 		
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
         
         Object map = stream.readObject();
-        if (map instanceof Map) 
-            propertiesMap = (Map)map;
+        if (map instanceof Map)
+            propertiesMap = GenericsUtils.scanForMap(map, String.class, Serializable.class, GenericsUtils.ScanMode.REMOVE);
         else if (propertiesMap == null)
-            propertiesMap =  new HashMap();
+            propertiesMap =  new HashMap<String, Serializable>();
 		
 		if (defaultRFD != null) {
 			initPropertiesMap(defaultRFD);
@@ -620,11 +621,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (propertiesMap.get(DEFAULT_FILENAME) == null) {
             propertiesMap.put(DEFAULT_FILENAME,"Unknown "+(++unknownIndex));
         }
+        
         if (propertiesMap.containsKey(ATTRIBUTES)) 
-            attributes = (Map) propertiesMap.get(ATTRIBUTES);
+            attributes = (Map<String, Serializable>) propertiesMap.get(ATTRIBUTES);
 
 	if (attributes == null)
-	    attributes = new HashMap();
+	    attributes = new HashMap<String, Serializable>();
     }
 
     /** 
@@ -643,10 +645,10 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
-        currentRFDs = new HashSet();
-        _activeWorkers=new LinkedList();
-        _workers=new ArrayList();
-        _queuedWorkers = new HashMap();
+        currentRFDs = new HashSet<RemoteFileDesc>();
+        _activeWorkers=new LinkedList<DownloadWorker>();
+        _workers=new ArrayList<DownloadWorker>();
+        _queuedWorkers = new HashMap<DownloadWorker, Integer>();
 		chatList=new DownloadChatList();
         browseList=new DownloadBrowseHostList();
         stopped=false;
@@ -669,9 +671,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         	downloadSHA1 = (URN)propertiesMap.get(SHA1_URN);
         
         synchronized(this) {
-            for(Iterator iter = cachedRFDs.iterator();
-            iter.hasNext() && downloadSHA1 == null;) {
-                RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
+            for(RemoteFileDesc rfd : cachedRFDs) {
+                if(downloadSHA1 != null)
+                    break;
                 downloadSHA1 = rfd.getSHA1Urn();
             }
         }
@@ -685,11 +687,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         verifyAllFiles();
 		
         synchronized(altLock) {
-            validAlts = new HashSet();
+            validAlts = new HashSet<AlternateLocation>();
             // stores up to 1000 locations for up to an hour each
-            invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
+            invalidAlts = new FixedSizeExpiringSet<RemoteHostData>(1000,60*60*1000L);
             // stores up to 10 locations for up to 10 minutes
-            recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
+            recentInvalidAlts = new FixedSizeExpiringSet<AlternateLocation>(10, 10*60*1000L);
         }
         synchronized (this) {
             if(shouldInitAltLocs(deserializedFromDisk)) {
@@ -721,8 +723,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if(downloadSHA1 == null)
             return ;
         
-		for (Iterator iter = cachedRFDs.iterator(); iter.hasNext();) {
-			RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+		for (Iterator<RemoteFileDesc> iter = cachedRFDs.iterator(); iter.hasNext();) {
+			RemoteFileDesc rfd = iter.next();
 			if (rfd.getSHA1Urn() != null && !downloadSHA1.equals(rfd.getSHA1Urn()))
 				iter.remove();
 		}
@@ -954,7 +956,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             return false;
             
         MessageRouter mr = RouterService.getMessageRouter();
-        Set guessLocs = mr.getGuessLocs(this.originalQueryGUID);
+        Set<GUESSEndpoint> guessLocs = mr.getGuessLocs(this.originalQueryGUID);
         if(guessLocs == null || guessLocs.isEmpty())
             return false;
 
@@ -963,9 +965,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 
         //TODO: should we increment a stat to get a sense of
         //how much this is happening?
-        for (Iterator i = guessLocs.iterator(); i.hasNext() ; ) {
-            // send a guess query
-            GUESSEndpoint ep = (GUESSEndpoint) i.next();
+        for(GUESSEndpoint ep : guessLocs) {
             OnDemandUnicaster.query(ep, downloadSHA1);
             // TODO: see if/how we can wait 750 seconds PER send again.
             // if we got a result, no need to continue GUESSing.
@@ -1090,7 +1090,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                                                downloadSHA1, getContentLength());
         }
         
-        LOG.warn("Incomplete File: " + incompleteFile);
+        if(LOG.isWarnEnabled())
+            LOG.warn("Incomplete File: " + incompleteFile);
     }
     
     /**
@@ -1143,31 +1144,26 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Adds the alternate locations from the collections as possible
      * download sources.
      */
-    private void addLocationsToDownload(AlternateLocationCollection direct,
-            AlternateLocationCollection push,
-            AlternateLocationCollection fwt,
+    private void addLocationsToDownload(AlternateLocationCollection<? extends AlternateLocation> direct,
+                                        AlternateLocationCollection<? extends AlternateLocation>  push,
+                                        AlternateLocationCollection<? extends AlternateLocation>  fwt,
                                         int size) {
-        List locs = new ArrayList(direct.getAltLocsSize()+push.getAltLocsSize()+fwt.getAltLocsSize());
-        // always add the direct alt locs.
+        List<RemoteFileDesc> locs =
+            new ArrayList<RemoteFileDesc>(direct.getAltLocsSize()+push.getAltLocsSize()+fwt.getAltLocsSize());
+
         synchronized(direct) {
-            for (Iterator iter = direct.iterator(); iter.hasNext();) {
-                AlternateLocation loc = (AlternateLocation) iter.next();
+            for(AlternateLocation loc : direct)
                 locs.add(loc.createRemoteFileDesc(size));
-            }
         }
         
         synchronized(push) {
-            for (Iterator iter = push.iterator(); iter.hasNext();) {
-                AlternateLocation loc = (AlternateLocation) iter.next();
+            for(AlternateLocation loc : push)
                 locs.add(loc.createRemoteFileDesc(size));
-            }
         }
         
         synchronized(fwt) {
-            for (Iterator iter = fwt.iterator(); iter.hasNext();) {
-                AlternateLocation loc = (AlternateLocation) iter.next();
+            for(AlternateLocation loc : fwt)
                 locs.add(loc.createRemoteFileDesc(size));
-            }
         }
                 
         addPossibleSources(locs);
@@ -1198,7 +1194,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 			if (!hasRFD()) {
 				return false;
 			}
-			rfd = (RemoteFileDesc)cachedRFDs.iterator().next();
+			rfd = cachedRFDs.iterator().next();
 		}
 		if (rfd != null) {
 			try {
@@ -1351,9 +1347,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
                 return otherUrn.equals(downloadSHA1);
             
             // compare to previously cached rfds
-            for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
-                // get current info....
-                RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            for(RemoteFileDesc rfd : cachedRFDs) {
                 final String thisName = rfd.getFileName();
                 final long thisLength = rfd.getFileSize();
 				
@@ -1376,8 +1370,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         //last.  Allow 10% edit difference in filenames or 6 characters,
         //whichever is smaller.
         int allowedDifferences=Math.round(Math.min(
-             0.10f*((float)(StringUtils.ripExtension(one)).length()),
-             0.10f*((float)(StringUtils.ripExtension(two)).length())));
+             0.10f*((StringUtils.ripExtension(one)).length()),
+             0.10f*((StringUtils.ripExtension(two)).length())));
         allowedDifferences=Math.min(allowedDifferences, 6);
 
         synchronized (matcher) {
@@ -1436,9 +1430,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (stopped || isCompleted())
             return false;
         
-        List l = new ArrayList(c.size());
-        for (Iterator iter = c.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>(c.size());
+        for(RemoteFileDesc rfd : c) {
             if (hostIsAllowed(rfd) && allowAddition(rfd))
                 l.add(rfd);
         }
@@ -1482,12 +1475,12 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return true;
     }
     
-    protected synchronized final boolean addDownloadForced(Collection c, boolean cache) {
+    protected synchronized final boolean addDownloadForced(Collection<? extends RemoteFileDesc> c, boolean cache) {
         // remove any rfds we're currently downloading from 
         c.removeAll(currentRFDs);
         
-        for (Iterator iter = c.iterator(); iter.hasNext();) {
-            RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+        for (Iterator<? extends RemoteFileDesc> iter = c.iterator(); iter.hasNext();) {
+            RemoteFileDesc rfd =  iter.next();
             if (rfd.isMe()) {
                 iter.remove();
                 continue;
@@ -1639,20 +1632,16 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * Kills all workers & shuts down all push waiters.
      */    
     private void killAllWorkers() {
-        List workers = getAllWorkers();
+        List<DownloadWorker> workers = getAllWorkers();
         
         // cannot interrupt while iterating through the main list, because that
         // could cause ConcurrentMods.
-        for (Iterator iter = workers.iterator(); iter.hasNext();) {
-            DownloadWorker doomed = (DownloadWorker) iter.next();
+        for(DownloadWorker doomed : workers)
             doomed.interrupt();
-        }
         
-        List pushObservers = pushes.getAllAndClear();
-        for(Iterator i = pushObservers.iterator(); i.hasNext(); ) {
-            HTTPConnectObserver next = (HTTPConnectObserver)i.next();
+        List<HTTPConnectObserver> pushObservers = pushes.getAllAndClear();
+        for(HTTPConnectObserver next : pushObservers)
             next.shutdown();
-        }
     }
     
     /**
@@ -1722,8 +1711,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             RouterService.getAltlocManager().remove(loc, this);
 
         // add to the downloaders
-        for(Iterator iter=getActiveWorkers().iterator(); iter.hasNext();) {
-            HTTPDownloader httpDloader = ((DownloadWorker)iter.next()).getDownloader();
+        for(DownloadWorker worker : getActiveWorkers()) {
+            HTTPDownloader httpDloader = worker.getDownloader();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
             
             // no need to tell uploader about itself and since many firewalled
@@ -1793,8 +1782,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         // if any guys were busy, reduce their retry time to 0,
         // since the user really wants to resume right now.
-        for(Iterator i = cachedRFDs.iterator(); i.hasNext(); )
-            ((RemoteFileDesc)i.next()).setRetryAfter(0);
+        for(RemoteFileDesc rfd : cachedRFDs)
+            rfd.setRetryAfter(0);
 
         if(paused) {
             paused = false;
@@ -1938,7 +1927,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /** 
      * This method is used to determine where the file will be saved once downloaded.
      *
-     * @return A File representation of the directory or regular file where this file will be saved.  null indicates the program-wide default save directory.
+     * @return A File representation of the directory or regular file where this file will be saved.
+     *         null indicates the program-wide default save directory.
      */
     public synchronized File getSaveFile() {
         Object saveFile = propertiesMap.get(SAVE_FILE);
@@ -1959,10 +1949,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             RouterService.getAltlocManager().removeListener(downloadSHA1, this);
         
         if(cachedRFDs != null) {
-            for (Iterator iter = cachedRFDs.iterator(); iter.hasNext();) {
-				RemoteFileDesc rfd = (RemoteFileDesc) iter.next();
+            for(RemoteFileDesc rfd : cachedRFDs)
 				rfd.setDownloading(false);
-			}
         }       
     }
 
@@ -2233,7 +2221,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         //be hashed again when added to the library -- reduces
         //the time of the 'Saving File' state.
         if(fileHash != null) {
-            Set urns = new HashSet(1);
+            Set<URN> urns = new HashSet<URN>(1);
             urns.add(fileHash);
             File file = saveFile;
             try {
@@ -2354,7 +2342,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     
     synchronized boolean removeActiveWorker(DownloadWorker worker) {
         currentRFDs.remove(worker.getRFD());
-        List l = new ArrayList(getActiveWorkers());
+        List<DownloadWorker> l = new ArrayList<DownloadWorker>(getActiveWorkers());
         boolean removed = l.remove(worker);
         _activeWorkers = Collections.unmodifiableList(l);
         return removed;
@@ -2363,7 +2351,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     synchronized void addActiveWorker(DownloadWorker worker) {
         // only add if not already added.
         if(!getActiveWorkers().contains(worker)) {
-            List l = new ArrayList(getActiveWorkers());
+            List<DownloadWorker> l = new ArrayList<DownloadWorker>(getActiveWorkers());
             l.add(worker);
             _activeWorkers = Collections.unmodifiableList(l);
         }
@@ -2371,25 +2359,23 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 
     synchronized String getWorkersInfo() {
         String workerState = "";
-        for (Iterator iter = _workers.iterator(); iter.hasNext();) {
-            DownloadWorker worker = (DownloadWorker) iter.next();
-            workerState+=worker.getInfo();
-        }
+        for(DownloadWorker worker : _workers)
+            workerState += worker.getInfo();
         return workerState;
     }
     /**
      * @return The alternate locations we have successfully downloaded from
      */
-    Set getValidAlts() {
+    Set<AlternateLocation> getValidAlts() {
         synchronized(altLock) {
-            Set ret;
+            Set<AlternateLocation> ret;
             
             if (validAlts != null) {
-                ret = new HashSet();
-                for (Iterator iter = validAlts.iterator();iter.hasNext();)
-                    ret.add(iter.next());
+                ret = new HashSet<AlternateLocation>();
+                for(AlternateLocation next : validAlts)
+                    ret.add(next);
             } else
-                ret = Collections.EMPTY_SET;
+                ret = Collections.emptySet();
             
             return ret;
         }
@@ -2398,16 +2384,17 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * @return The alternate locations we have failed to downloaded from
      */
-    Set getInvalidAlts() {
+    Set<AlternateLocation> getInvalidAlts() {
         synchronized(altLock) {
-            Set ret;
+            Set<AlternateLocation>  ret;
             
             if (invalidAlts != null) {
-                ret = new HashSet();
-                for (Iterator iter = recentInvalidAlts.iterator();iter.hasNext();)
-                    ret.add(iter.next());
-            } else
-                ret = Collections.EMPTY_SET;
+                ret = new HashSet<AlternateLocation> ();
+                for(AlternateLocation next : recentInvalidAlts)
+                    ret.add(next);
+            } else {
+                ret = Collections.emptySet();
+            }
             
             return ret;
         }
@@ -2560,8 +2547,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             return false;
             
         // there needs to be at least one slow worker.
-        for (Iterator iter = _workers.iterator(); iter.hasNext();) {
-            DownloadWorker victim = (DownloadWorker) iter.next();
+        for(DownloadWorker victim : _workers) {
             if (!victim.isStealing() && victim.isSlow())
                 return true;
         }
@@ -2691,18 +2677,16 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     /**
      * Returns the union of all XML metadata documents from all hosts.
      */
-    private synchronized List getXMLDocuments() {
+    private synchronized List<LimeXMLDocument> getXMLDocuments() {
         //TODO: we don't actually union here.  Also, should we only consider
         //those locations that we download from?
-        List allDocs = new ArrayList();
+        List<LimeXMLDocument> allDocs = new ArrayList<LimeXMLDocument>();
 
         // get all docs possible
-        for (Iterator iter = cachedRFDs.iterator();iter.hasNext();) {
-			RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
+        for(RemoteFileDesc rfd : cachedRFDs) {
 			LimeXMLDocument doc = rfd.getXMLDocument();
-			if(doc != null) {
+			if(doc != null)
 				allDocs.add(doc);
-			}
         }
 
         return allDocs;
@@ -2878,19 +2862,19 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     /** Returns the list of all active workers. */
-    List getActiveWorkers() {
+    List<DownloadWorker> getActiveWorkers() {
         return _activeWorkers;
     }
     
     /** Returns a copy of the list of all workers. */
-    synchronized List getAllWorkers() {
-        return new ArrayList(_workers);
+    synchronized List<DownloadWorker> getAllWorkers() {
+        return new ArrayList<DownloadWorker>(_workers);
     }
     
     void removeQueuedWorker(DownloadWorker unQueued) {
         if (getQueuedWorkers().containsKey(unQueued)) {
             synchronized(this) {
-                Map m = new HashMap(getQueuedWorkers());
+                Map<DownloadWorker, Integer> m = new HashMap<DownloadWorker, Integer>(getQueuedWorkers());
                 m.remove(unQueued);
                 _queuedWorkers = Collections.unmodifiableMap(m);
             }
@@ -2909,17 +2893,17 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             queuePosition = position;
             queuedVendor = queued.getDownloader().getVendor();
         }
-        Map m = new HashMap(getQueuedWorkers());
-        m.put(queued,new Integer(position));
+        Map<DownloadWorker, Integer> m = new HashMap<DownloadWorker, Integer>(getQueuedWorkers());
+        m.put(queued, new Integer(position));
         _queuedWorkers = Collections.unmodifiableMap(m);
     }
     
-    Map getQueuedWorkers() {
+    Map<DownloadWorker, Integer> getQueuedWorkers() {
         return _queuedWorkers;
     }
     
     int getWorkerQueuePosition(DownloadWorker worker) {
-        Integer i = (Integer) getQueuedWorkers().get(worker);
+        Integer i = getQueuedWorkers().get(worker);
         return i == null ? -1 : i.intValue();
     }
     
@@ -3091,7 +3075,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @return A prvious value of the attribute, or <code>null</code>
      *         if the attribute wasn't set.
      */
-    public Object setAttribute( String key, Object value ) {
+    public Serializable setAttribute( String key, Serializable value ) {
         return attributes.put( key, value );
     }
 
@@ -3103,7 +3087,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * @return The value of the specified attribute,
      *         or <code>null</code> if value was not specified.
      */
-    public Object getAttribute( String key ) {
+    public Serializable getAttribute( String key ) {
         return attributes.get( key );
     }
 

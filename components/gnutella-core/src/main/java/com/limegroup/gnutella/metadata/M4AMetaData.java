@@ -127,26 +127,26 @@ public class M4AMetaData extends AudioMetaData {
 		
 			positionMetaDataStream(fin);
 		
-			Map metaData = populateMetaDataMap(fin);
+			Map<Integer, byte[]> metaData = populateMetaDataMap(fin);
 		
 			//the title, artist album and comment tags are in string format.
 			//so we just set them
-			byte []current = (byte []) metaData.get(new Integer(NAME_ATOM));
+			byte []current = metaData.get(new Integer(NAME_ATOM));
 			setTitle(current == null ? "" : new String(current, "UTF-8"));
 		
-			current = (byte []) metaData.get(new Integer(ARTIST_ATOM));
+			current = metaData.get(new Integer(ARTIST_ATOM));
 			setArtist(current == null ? "" : new String(current, "UTF-8"));
 		
-			current = (byte []) metaData.get(new Integer(ALBUM_ATOM));
+			current = metaData.get(new Integer(ALBUM_ATOM));
 			setAlbum(current == null ? "" : new String(current,"UTF-8"));
 		
-			current = (byte []) metaData.get(new Integer(COMMENT_ATOM));
+			current = metaData.get(new Integer(COMMENT_ATOM));
 			setComment(current == null ? "" : new String(current,"UTF-8"));
 		
 		
 			//	the genre is byte encoded the same way as with id3 tags
 			//	except that the table is shifted one position
-			current = (byte []) metaData.get(new Integer(GENRE_ATOM));
+			current = metaData.get(new Integer(GENRE_ATOM));
 			if (current!=null) {
 				if (current[3] == 1) {
 					//we have a custom genre.
@@ -160,7 +160,7 @@ public class M4AMetaData extends AudioMetaData {
 		
 		
 			//the date is plaintext.  Store only the year
-			current = (byte []) metaData.get(new Integer(DATE_ATOM));
+			current = metaData.get(new Integer(DATE_ATOM));
 			if (current==null)
 				setYear("");
 			else {
@@ -171,7 +171,7 @@ public class M4AMetaData extends AudioMetaData {
 			}
 		
 			//get the track # & total # of tracks on album
-			current = (byte []) metaData.get(new Integer(TRACK_ATOM));
+			current = metaData.get(new Integer(TRACK_ATOM));
 			if (current != null) {
 				short trackShort = ByteOrder.beb2short(current,current.length-6);
 				setTrack(trackShort);
@@ -180,7 +180,7 @@ public class M4AMetaData extends AudioMetaData {
 			}
 		
 			//get the disk # & total # of disks on album
-			current = (byte []) metaData.get(new Integer(DISK_ATOM));
+			current = metaData.get(new Integer(DISK_ATOM));
 			if (current != null) {
 				short diskShort = ByteOrder.beb2short(current,current.length-4);
 				setDisk(diskShort);
@@ -190,9 +190,8 @@ public class M4AMetaData extends AudioMetaData {
 		
 		//TODO: add more fields as we discover their meaning.
 			
-		}finally {
-			if (fin!=null)
-			try{fin.close();}catch(IOException ignored){}
+		} finally {
+            IOUtils.close(fin);
 		}
 		
 	}
@@ -258,7 +257,7 @@ public class M4AMetaData extends AudioMetaData {
 
 		int timeScale = in.readInt();
 		int timeUnits = in.readInt();
-		setLength((int) ( timeUnits/timeScale));
+		setLength(timeUnits/timeScale);
 		IOUtils.ensureSkip(in,mvhdSize);
                         
         //extract the bitrate.
@@ -327,7 +326,7 @@ public class M4AMetaData extends AudioMetaData {
             length -= IOUtils.ensureSkip(in,skip);
             int avgBitrate = in.readInt();
             length -= 4;
-            setBitrate((int)(avgBitrate/1000)); // bits to kbits
+            setBitrate(avgBitrate/1000); // bits to kbits
             
             IOUtils.ensureSkip(in,length); // ignore the rest of this atom
         }
@@ -336,8 +335,8 @@ public class M4AMetaData extends AudioMetaData {
 	 * populates the metaData map with values read from the file
 	 * @throws IOException parsing failed
 	 */
-	private Map populateMetaDataMap(InputStream rawIn) throws IOException {
-		Map metaData = new HashMap();
+	private Map<Integer, byte[]> populateMetaDataMap(InputStream rawIn) throws IOException {
+		Map<Integer, byte[]> metaData = new HashMap<Integer, byte[]>();
 		CountingInputStream cin = new CountingInputStream(rawIn);
 		DataInputStream in = new DataInputStream(cin);
 		

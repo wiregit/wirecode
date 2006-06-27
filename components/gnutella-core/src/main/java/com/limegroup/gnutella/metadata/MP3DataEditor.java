@@ -57,7 +57,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	        //fall thro' we'll deal with it later -- frames will be null
 	    }
 	    
-	    List framesToUpdate = new ArrayList();
+	    List<ID3v2Frame> framesToUpdate = new ArrayList<ID3v2Frame>();
 	    addAllNeededFrames(framesToUpdate);
 	    if(framesToUpdate.size() == 0) //we have nothing to update
 	        return LimeXMLReplyCollection.NORMAL;
@@ -68,7 +68,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	            int index = framesToUpdate.indexOf(oldFrame);
 	            ID3v2Frame newFrame = null;
 	            if(index >=0) {
-	                newFrame = (ID3v2Frame)framesToUpdate.remove(index);
+	                newFrame = framesToUpdate.remove(index);
 	                if(Arrays.equals(oldFrame.getContent(), 
 	                                                   newFrame.getContent()))
 	                    continue;//no need to update, skip this frame
@@ -83,17 +83,15 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	    }
 	    //now we are left with the ones we need to add only, if there were no
 	    //old tags this will be all the frames that need to get updated
-	    for(Iterator iter = framesToUpdate.iterator(); iter.hasNext() ; ) {
-	        ID3v2Frame frame = (ID3v2Frame)iter.next();
+        for(ID3v2Frame frame : framesToUpdate)
 	        id3Handler.addFrame(frame);
-	    }
 	    
 	    id3Handler.update();
 	    //No Exceptions? We are home
 	    return LimeXMLReplyCollection.NORMAL;
 	}
 	
-	private void addAllNeededFrames(List updateList) {
+	private void addAllNeededFrames(List<ID3v2Frame> updateList) {
 	    add(updateList, title_, TITLE_ID);
 	    add(updateList, artist_, ARTIST_ID);
 	    add(updateList, album_, ALBUM_ID);
@@ -104,7 +102,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	    add(updateList, license_, LICENSE_ID);
 	}
 	
-	private void add(List list, String data, String id) {
+	private void add(List<ID3v2Frame> list, String data, String id) {
 	    if(data != null && !data.equals("")) {
 	        // genre needs to be updated.
 	        if(id == GENRE_ID && getGenreByte() > -1)

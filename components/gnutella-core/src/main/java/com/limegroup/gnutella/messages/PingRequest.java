@@ -90,7 +90,7 @@ public class PingRequest extends Message {
     /**
      * Creates a ping with the specified GUID, ttl, and GGEP fields.
      */
-    private PingRequest(byte[] guid, byte ttl, List /* of NameValue */ ggeps) {
+    private PingRequest(byte[] guid, byte ttl, List<NameValue<?>> ggeps) {
         super(guid, (byte)0x0, ttl, (byte)0, 0);
         addGGEPs(ggeps);
     }
@@ -99,7 +99,7 @@ public class PingRequest extends Message {
      * Creates a Query Key ping.
      */
     public static PingRequest createQueryKeyRequest() {
-        List l = new LinkedList();
+        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
         l.add(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
         return new PingRequest(GUID.makeGuid(), (byte)1, l);
     }
@@ -109,7 +109,7 @@ public class PingRequest extends Message {
      * for sending to UDP hosts.
      */
     public static PingRequest createUDPPing() {
-        List l = new LinkedList();
+        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
         return new PingRequest(populateUDPGGEPList(l).bytes(), (byte)1, l);
     }
     
@@ -118,7 +118,7 @@ public class PingRequest extends Message {
      * for sending to UHCs.
      */    
     public static PingRequest createUHCPing() {
-        List ggeps = new LinkedList();
+        List<NameValue<?>> ggeps = new LinkedList<NameValue<?>>();
         GUID guid = populateUDPGGEPList(ggeps);
         ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
         return new PingRequest(guid.bytes(),(byte)1,ggeps);
@@ -128,7 +128,7 @@ public class PingRequest extends Message {
      * @param l list to put the standard extentions we add to UDP pings
      * @return the guid to use for the ping
      */
-    private static GUID populateUDPGGEPList(List l) {
+    private static GUID populateUDPGGEPList(List<? super NameValue<?>> l) {
         GUID guid;
         if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
             guid = new GUID();
@@ -141,7 +141,7 @@ public class PingRequest extends Message {
             data[0] = SCP_ULTRAPEER;
         else
             data[0] = SCP_LEAF;
-        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
+        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
         
         return guid;
     }
@@ -157,8 +157,8 @@ public class PingRequest extends Message {
             data[0] = 0x1;
         else
             data[0] = 0x0;
-        List l = new LinkedList();
-        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
+        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
+        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
         return new PingRequest(guid.bytes(), (byte)1, l);
     }    
             
@@ -208,7 +208,7 @@ public class PingRequest extends Message {
      * an ip:port info.
      */
     public void addIPRequest() {
-        List l = new LinkedList();
+        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
         l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
         addGGEPs(l);
     }
@@ -218,8 +218,8 @@ public class PingRequest extends Message {
      * Currently adds a Locale field.
      */
     private void addBasicGGEPs() {
-        List l = new LinkedList();
-        l.add(new NameValue(GGEP.GGEP_HEADER_CLIENT_LOCALE, 
+        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
+        l.add(new NameValue<String>(GGEP.GGEP_HEADER_CLIENT_LOCALE, 
                             ApplicationSettings.LANGUAGE.getValue()));
         addGGEPs(l);
     }
@@ -227,7 +227,7 @@ public class PingRequest extends Message {
     /**
      * Adds the specified GGEPs.
      */
-     private void addGGEPs(List /* of NameValue */ ggeps) {
+     private void addGGEPs(List<? extends NameValue<?>> ggeps) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             if (_ggep == null)

@@ -22,7 +22,7 @@ public final class MutableGUIDFilter extends SpamFilter {
      *
      * LOCKING: Never modify -- instead synchronize & replace.
      */
-    private Set _guids = new TreeSet(new GUID.GUIDByteComparator());
+    private Set<byte[]> _guids = new TreeSet<byte[]>(new GUID.GUIDByteComparator());
     
     /**
      * The underlying filter.
@@ -33,7 +33,7 @@ public final class MutableGUIDFilter extends SpamFilter {
      * Adds a guid to be scanned for keyword filters.
      */
     public synchronized void addGUID(byte[] guid) {
-        Set guids = new TreeSet(new GUID.GUIDByteComparator());
+        Set<byte[]> guids = new TreeSet<byte[]>(new GUID.GUIDByteComparator());
         guids.addAll(guids);
         guids.add(guid);
         _guids = guids;
@@ -48,7 +48,7 @@ public final class MutableGUIDFilter extends SpamFilter {
         } else {
             synchronized(this) {
                 if(_guids.size() > 0) {
-                    Set guids = new TreeSet(new GUID.GUIDByteComparator());
+                    Set<byte[]> guids = new TreeSet<byte[]>(new GUID.GUIDByteComparator());
                     guids.addAll(_guids);
                     guids.remove(guid);
                     _guids = guids;

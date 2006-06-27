@@ -29,8 +29,8 @@ public class GreedyQueryFilter extends SpamFilter {
             return false; 
         if (this.isVeryGeneralSearch(query) ||
             this.isObfuscatedGeneralSearch(query)) {
-            int hops = (int)m.getHops();
-            int ttl = (int)m.getTTL();
+            int hops = m.getHops();
+            int ttl = m.getTTL();
             if (hops >= GreedyQueryFilter.GREEDY_QUERY_MAX)
                 return false;
             if ( (hops + ttl) > GreedyQueryFilter.GREEDY_QUERY_MAX) 

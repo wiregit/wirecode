@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
@@ -58,7 +59,7 @@ public abstract class MetaData {
 	/**
 	 * Writes the data to a NameValue list.
 	 */
-	public abstract List toNameValueList();
+	public abstract List<NameValue<String>> toNameValueList();
 	
 	/** 
 	 * Retrieves the XML schema URI that this MetaData can be read with.

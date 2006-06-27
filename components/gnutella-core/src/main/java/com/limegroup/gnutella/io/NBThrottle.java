@@ -107,7 +107,7 @@ public class NBThrottle implements Throttle {
      * is available.  New ThrottleListeners should not be added to this if they are
      * already in interested.
      */
-    private Set /* of ThrottleListener */ _requests = new HashSet();
+    private Set<ThrottleListener> _requests = new HashSet<ThrottleListener>();
     
     /**
      * Attachments that are interested -> ThrottleListener that owns the attachment.
@@ -116,7 +116,7 @@ public class NBThrottle implements Throttle {
      * When something is written, so long as it writes > 0, it is removed from the
      * list (and put back at the bottom).
      */
-    private Map /* of Object (ThrottleListener.getAttachment()) -> ThrottleListener */ _interested = new LinkedHashMap();
+    private Map<Object, ThrottleListener> _interested = new LinkedHashMap<Object, ThrottleListener>();
     
     /**
      * Attachments that are ready-op'd.
@@ -124,7 +124,7 @@ public class NBThrottle implements Throttle {
      * This is temporary per each selectableKeys call, but is cached to avoid regenerating
      * each time.
      */
-    private Map /* of Object (ThrottleListener.getAttachment()) */ _ready = new HashMap();
+    private Map<Object, SelectionKey> _ready = new HashMap<Object, SelectionKey>();
     
     /** Whether or not we're currently active in the selectableKeys portion. */
     private boolean _active = false;
@@ -188,10 +188,10 @@ public class NBThrottle implements Throttle {
     /**
      * Notification from the NIODispatcher that a bunch of keys are now selectable.
      */
-    void selectableKeys(Collection /* of SelectionKey */ keys) {
+    void selectableKeys(Collection<? extends SelectionKey> keys) {
         if(_available >= MINIMUM_TO_GIVE && !_interested.isEmpty()) {
-            for(Iterator i = keys.iterator(); i.hasNext(); ) {
-                SelectionKey key = (SelectionKey)i.next();
+            for(Iterator<? extends SelectionKey> i = keys.iterator(); i.hasNext(); ) {
+                SelectionKey key = i.next();
                 try {
                     if(key.isValid() && (_write ? key.isWritable() : key.isReadable())) {
                         Object attachment = NIODispatcher.instance().attachment(key.attachment());
@@ -209,11 +209,12 @@ public class NBThrottle implements Throttle {
             
             _active = true;
             long now = System.currentTimeMillis();
-            for(Iterator i = _interested.entrySet().iterator(); !_ready.isEmpty() && i.hasNext(); ) {
-                Map.Entry next = (Map.Entry)i.next();
-                ThrottleListener listener = (ThrottleListener)next.getValue();
+            Iterator<Map.Entry<Object, ThrottleListener>> i = _interested.entrySet().iterator();
+            for(; !_ready.isEmpty() && i.hasNext(); ) {
+                Map.Entry<Object, ThrottleListener> next = i.next();
+                ThrottleListener listener = next.getValue();
                 Object attachment = next.getKey();
-                SelectionKey key = (SelectionKey)_ready.remove(attachment);
+                SelectionKey key = _ready.remove(attachment);
                 if(!listener.isOpen()) {
                     //LOG.trace("Removing closed but interested party: " + next.getKey());
                     i.remove();
@@ -287,8 +288,7 @@ public class NBThrottle implements Throttle {
     private void spreadBandwidth() {
         synchronized(_requests) {
             if(!_requests.isEmpty()) {
-                for(Iterator i = _requests.iterator(); i.hasNext(); ) {
-                    ThrottleListener req = (ThrottleListener)i.next();
+                for(ThrottleListener req : _requests) {
                     Object attachment = req.getAttachment();
                     if(attachment == null)
                         throw new IllegalStateException("must have an attachment");

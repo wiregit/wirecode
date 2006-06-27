@@ -3,7 +3,6 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -24,10 +23,11 @@ public class VendorMessageFactory {
     
     private static final Log LOG = LogFactory.getLog(VendorMessageFactory.class);
     
-    private static final Comparator COMPARATOR = new ByteArrayComparator();
+    private static final Comparator<byte[]> COMPARATOR = new ByteArrayComparator();
     
     /** Map (VendorID -> Map (selector -> Parser)) */
-    private static volatile Map VENDORS = new TreeMap(COMPARATOR);
+    private static volatile Map<byte[], IntHashMap<VendorMessageParser>> VENDORS =
+        new TreeMap<byte[], IntHashMap<VendorMessageParser>>(COMPARATOR);
     
     private static final BadPacketException UNRECOGNIZED_EXCEPTION =
         new BadPacketException("Unrecognized Vendor Message");
@@ -83,11 +83,11 @@ public class VendorMessageFactory {
         
         Object o = null;
         synchronized (VENDORS) {
-            Map vendors = copyVendors();
+            Map<byte[], IntHashMap<VendorMessageParser>> vendors = copyVendors();
 
-            IntHashMap selectors = (IntHashMap)vendors.get(vendorId);
+            IntHashMap<VendorMessageParser> selectors = vendors.get(vendorId);
             if (selectors == null) {
-                selectors = new IntHashMap();
+                selectors = new IntHashMap<VendorMessageParser>();
                 vendors.put(vendorId, selectors);
             }
             
@@ -101,20 +101,15 @@ public class VendorMessageFactory {
         }
     }
     
-    /**
-     * A helper method to create a deep copy of the VENDORS
-     * TreeMap.
-     */
-    private static Map copyVendors() {
-        Map copy = new TreeMap(COMPARATOR);
-        for(Iterator it = VENDORS.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            
-            byte[] vendor = (byte[])entry.getKey();
-            IntHashMap selectors = (IntHashMap)entry.getValue();
-            
-            copy.put(vendor, new IntHashMap(selectors));
+    /** A helper method to create a deep copy of the VENDORS TreeMap. */
+    private static Map<byte[], IntHashMap<VendorMessageParser>> copyVendors() {
+        Map<byte[], IntHashMap<VendorMessageParser>> copy =
+            new TreeMap<byte[], IntHashMap<VendorMessageParser>>(COMPARATOR);
+        
+        for(Map.Entry<byte[], IntHashMap<VendorMessageParser>> entry : VENDORS.entrySet()) {
+            copy.put(entry.getKey(), new IntHashMap<VendorMessageParser>(entry.getValue()));
         }
+        
         return copy;
     }
     
@@ -123,11 +118,12 @@ public class VendorMessageFactory {
      * and vendor ID or null if no such parser is registered.
      */
     public static VendorMessageParser getParser(int selector, byte[] vendorId) {
-        IntHashMap selectors = (IntHashMap)VENDORS.get(vendorId);
+        IntHashMap<VendorMessageParser> selectors = VENDORS.get(vendorId);
         if (selectors == null) {
             return null;
         }
-        return (VendorMessageParser)selectors.get(selector);
+        
+        return selectors.get(selector);
     }
     
     public static VendorMessage deriveVendorMessage(byte[] guid, byte ttl,
@@ -361,11 +357,8 @@ public class VendorMessageFactory {
         }
     }
     
-    private static class ByteArrayComparator implements Comparator {
-        public int compare(Object o1, Object o2) {
-            byte[] a = (byte[])o1;
-            byte[] b = (byte[])o2;
-            
+    private static class ByteArrayComparator implements Comparator<byte[]> {
+        public int compare(byte[] a, byte[] b) {
             int d = 0;
             for(int i = 0; i < a.length; i++) {
                 d = (a[i] & 0xFF) - (b[i] & 0xFF);

@@ -73,8 +73,8 @@ public class PatchTableMessage extends RouteTableMessage {
         byte[] buf=new byte[4+data.length];
         buf[0]=(byte)sequenceNumber;
         buf[1]=(byte)sequenceSize;
-        buf[2]=(byte)compressor;
-        buf[3]=(byte)entryBits;
+        buf[2]=compressor;
+        buf[3]=entryBits;
         System.arraycopy(data, 0, buf, 4, data.length); //TODO3: avoid
         out.write(buf);  
 		SentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);

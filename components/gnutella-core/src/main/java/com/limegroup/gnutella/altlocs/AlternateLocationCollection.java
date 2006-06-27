@@ -15,8 +15,8 @@ import com.limegroup.gnutella.util.FixedSizeSortedSet;
  * <p>
  * @see AlternateLocation
  */
-public class AlternateLocationCollection 
-	implements HTTPHeaderValue, Iterable<AlternateLocation> {
+public class AlternateLocationCollection<T extends AlternateLocation>
+	implements HTTPHeaderValue, Iterable<T> {
 	    
     private static final int MAX_SIZE = 100;
     
@@ -30,7 +30,18 @@ public class AlternateLocationCollection
         }
         EMPTY = col;
     }
-
+    
+    /**
+     * Returns a type-safe empty collection.
+     * 
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends AlternateLocation> AlternateLocationCollection<T> getEmptyCollection() {
+        return (AlternateLocationCollection<T>)EMPTY;
+    }
+    
 	/**
 	 * This uses a <tt>FixedSizeSortedSet</tt> so that the highest * entry
      * inserted is removed when the limit is reached.  
@@ -43,8 +54,8 @@ public class AlternateLocationCollection
      * AlternateLocationCollection.class first, never the other way around.
      */
  
-	private final FixedSizeSortedSet<AlternateLocation> LOCATIONS = 
-        new FixedSizeSortedSet<AlternateLocation>(MAX_SIZE);
+	private final FixedSizeSortedSet<T> LOCATIONS = 
+        new FixedSizeSortedSet<T>(MAX_SIZE);
 	
         
     /**
@@ -60,8 +71,8 @@ public class AlternateLocationCollection
      * @return a new <tt>AlternateLocationCollection</tt> instance for
      *  this SHA1
      */
-	public static AlternateLocationCollection create(URN sha1) {
-		return new AlternateLocationCollection(sha1);
+	public static <T extends AlternateLocation> AlternateLocationCollection<T> create(URN sha1) {
+		return new AlternateLocationCollection<T>(sha1);
 	}
 
 	/**
@@ -80,7 +91,7 @@ public class AlternateLocationCollection
 	 * this method if you want to recreate the collection.  It seems to be used only
 	 * in downloader.HeadRequester 
 	 */
-	public static AlternateLocationCollection 
+	public static AlternateLocationCollection<AlternateLocation> 
 		createCollectionFromHttpValue(final String value) {
 		if(value == null) {
 			throw new NullPointerException("cannot create an "+
@@ -88,13 +99,13 @@ public class AlternateLocationCollection
 										   "from a null value");
 		}
 		StringTokenizer st = new StringTokenizer(value, ",");
-		AlternateLocationCollection alc = null;
+		AlternateLocationCollection<AlternateLocation> alc = null;
 		while(st.hasMoreTokens()) {
 			String curTok = st.nextToken();
 			try {
 				AlternateLocation al = AlternateLocation.create(curTok);
 				if(alc == null)
-					alc = new AlternateLocationCollection(al.getSHA1Urn());
+					alc = new AlternateLocationCollection<AlternateLocation>(al.getSHA1Urn());
 
 				if(al.getSHA1Urn().equals(alc.getSHA1Urn()))
 					alc.add(al);
@@ -141,13 +152,13 @@ public class AlternateLocationCollection
 	 * 
      * @return true if added, false otherwise.  
      */
-	public boolean add(AlternateLocation al) {
+	public boolean add(T al) {
 		URN sha1 = al.getSHA1Urn();
 		if(!sha1.equals(SHA1))
 			throw new IllegalArgumentException("SHA1 does not match");
 		
 		synchronized(this) {
-            AlternateLocation alt = LOCATIONS.get(al);
+            T alt = LOCATIONS.get(al);
             boolean ret = false;
             if(alt==null) {//it was not in collections.
                 ret = true;
@@ -171,13 +182,13 @@ public class AlternateLocationCollection
 	 * Removes this <tt>AlternateLocation</tt> from the active locations
 	 * and adds it to the removed locations.
 	 */
-	 public boolean remove(AlternateLocation al) {
+	 public boolean remove(T al) {
 	    URN sha1 = al.getSHA1Urn();
         if(!sha1.equals(SHA1)) 
 			return false; //it cannot be in this list if it has a different SHA1
 		
 		synchronized(this) {
-            AlternateLocation loc = LOCATIONS.get(al);
+            T loc = LOCATIONS.get(al);
             if(loc==null) //it's not in locations, cannot remove
                 return false;
             if(loc.isDemoted()) {//if its demoted remove it
@@ -247,7 +258,7 @@ public class AlternateLocationCollection
 		return LOCATIONS.size();
     }
     
-    public Iterator<AlternateLocation> iterator() {
+    public Iterator<T> iterator() {
         return LOCATIONS.iterator();
     }
 
@@ -262,9 +273,7 @@ public class AlternateLocationCollection
 		StringBuffer sb = new StringBuffer();
 		sb.append("Alternate Locations: ");
 		synchronized(this) {
-			Iterator iter = LOCATIONS.iterator();
-			while(iter.hasNext()) {
-				AlternateLocation curLoc = (AlternateLocation)iter.next();
+            for(T curLoc : LOCATIONS) {
 				sb.append(curLoc.toString());
 				sb.append("\n");
 			}
@@ -294,7 +303,7 @@ public class AlternateLocationCollection
         return ret;
     }
       
-    private static class EmptyCollection extends AlternateLocationCollection {
+    private static class EmptyCollection extends AlternateLocationCollection<AlternateLocation> {
         EmptyCollection() throws IOException {
             super(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
         }
