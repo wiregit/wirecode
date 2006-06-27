@@ -223,13 +223,8 @@ public class LimeDHTManager implements LifecycleListener {
     /**
      * Shuts down the dht and persists it
      * 
-     * TODO: remove "force" arg
      */
-    public synchronized void shutdown(boolean force){
-        if(!force && DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-            return;
-        }
-        
+    public synchronized void shutdown(){
         if (!running) 
             return;
         
@@ -328,7 +323,7 @@ public class LimeDHTManager implements LifecycleListener {
             return; //no change
         
         boolean wasRunning = running;
-        shutdown(true);
+        shutdown();
         
         //we are becoming active: load dht from last active session
         if(wasPassive && !passive) {
@@ -354,12 +349,12 @@ public class LimeDHTManager implements LifecycleListener {
             //protect against change of state
             if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
                     && RouterService.isSupernode()) {
-                shutdown(false);
+                setPassive(true);
             }
             return;
         } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            if(running) {
-                shutdown(false);
+            if(running && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+                shutdown();
             }
         }
     }
