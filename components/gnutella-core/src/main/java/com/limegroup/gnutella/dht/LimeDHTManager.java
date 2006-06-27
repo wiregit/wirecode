@@ -11,7 +11,6 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
@@ -265,7 +264,7 @@ public class LimeDHTManager implements LifecycleListener {
      */
     public synchronized void addBootstrapHost(SocketAddress hostAddress) {
         synchronized (bootstrapHosts) {
-            // TODO: as a param? Keep bootstrap list small because it should be updated often
+            //Keep bootstrap list small because it should be updated often
             if(bootstrapHosts.size() >= 10) {
                 bootstrapHosts.removeLast();
             }

@@ -160,7 +160,7 @@ public class NodeAssignerTest extends BaseTestCase {
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{
-              ROUTER_SERVICE.start();
+          ROUTER_SERVICE.start();
         connect();
         assertFalse("should be not be an ultrapeer", RouterService.isSupernode());
         PrivilegedAccessor.setValue(ROUTER_SERVICE.getAcceptor(),"_acceptedIncoming",new Boolean(true));
@@ -249,8 +249,6 @@ public class NodeAssignerTest extends BaseTestCase {
         Connection UP;
         
         private Socket socket;
-        
-        private boolean running = true;
         
         public void run(){
             while(true) {

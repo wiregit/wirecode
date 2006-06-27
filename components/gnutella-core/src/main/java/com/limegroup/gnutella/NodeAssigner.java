@@ -104,7 +104,10 @@ public class NodeAssigner {
      */
     private static boolean _willTryToBeUltrapeer;
     
-    
+    /**
+     * Wether or not this node is "Hardcore" capable
+     */
+    private static boolean _isHardcoreCapable;
 
     /** 
      * Creates a new <tt>NodeAssigner</tt>. 
@@ -177,6 +180,8 @@ public class NodeAssigner {
             DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(_maxDownstreamBytesPerSec);
         }
         
+        setHardcoreCapable();
+        
         //check if became ultrapeer capable
         assignUltrapeerNode();
         //check if became DHT capable
@@ -188,8 +193,8 @@ public class NodeAssigner {
      * function such as beeing an ultrapeer or connecting to the dht
      * 
      */
-    private static boolean isHardcoreCapable() {
-        boolean isHardcore = 
+    private static void setHardcoreCapable() {
+        _isHardcoreCapable = 
         //Is upstream OR downstream high enough?
         ((_maxUpstreamBytesPerSec >= 
                 UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue() ||
@@ -205,9 +210,6 @@ public class NodeAssigner {
         ULTRAPEER_OS &&
         //AND I do not have a private address
         !NetworkUtils.isPrivate());
-        
-        return isHardcore;
-        
     }
     
     /**
@@ -239,7 +241,7 @@ public class NodeAssigner {
         }
 
         boolean isUltrapeerCapable = 
-            (isHardcoreCapable() &&
+            (_isHardcoreCapable &&
             //AND is my average uptime OR current uptime high enough?
                     //TODO: GET Average connection uptime here! 
             (ApplicationSettings.AVERAGE_UPTIME.getValue() >= UltrapeerSettings.MIN_AVG_UPTIME.getValue() ||
@@ -368,7 +370,7 @@ public class NodeAssigner {
         }
 
         boolean isActiveDHTCapable = 
-            (isHardcoreCapable() &&
+            (_isHardcoreCapable &&
             //AND is my average uptime AND current uptime high enough?
             (ApplicationSettings.AVERAGE_UPTIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() &&
              _currentUptime >= DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
@@ -395,7 +397,7 @@ public class NodeAssigner {
                 };
             ThreadFactory.startThread(dhtInitializer, "dhtInitializeThread");
             
-        } else if(!isActiveDHTCapable) { //for now, disconnect node as soon as not anymore DHT capable
+        } else if(!isActiveDHTCapable && RouterService.isActiveDHTNode()) { //for now, disconnect node as soon as not anymore DHT capable
             RouterService.shutdownDHT();
         }
     }
