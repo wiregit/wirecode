@@ -271,6 +271,7 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     private void sendRequestForDHTHosts() {
+        if(!RouterService.isConnected()) return;
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
         RouterService.getHostCatcher().sendMessage(m, new DHTNodesRequestListener(), new UDPPingCanceller());
     }
@@ -370,6 +371,12 @@ public class LimeDHTManager implements LifecycleListener {
                     && RouterService.isSupernode()) {
                 setPassive(true);
             }
+            
+            //we were waiting and had no connection to the gnutella network
+            //now we do --> start sending UDP pings to request bootstrap nodes
+            if(waiting) {
+                sendRequestForDHTHosts();
+            }
             return;
         } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(running && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
@@ -443,7 +450,8 @@ public class LimeDHTManager implements LifecycleListener {
     
     private class UDPPingCanceller implements Cancellable{
         public boolean isCancelled() {
-            return !waiting;
+            //stop when not waiting anymore OR when not connected to the Gnutella network
+            return (!waiting || !RouterService.isConnected());
         }
     }
     
