@@ -444,7 +444,7 @@ public abstract class MessageDispatcher implements Runnable {
                 try {
                     SocketAddress dst = tag.getSocketAddres();
                     ByteBuffer data = tag.getData();
-                    assert data == null : " Somebody set Data to null";
+                    assert data != null : "Somebody set Data to null";
                     
                     if (send(channel, dst, data)) {
                         // Wohoo! Message was sent!
