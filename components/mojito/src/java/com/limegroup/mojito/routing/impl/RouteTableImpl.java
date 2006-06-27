@@ -45,7 +45,7 @@ public class RouteTableImpl implements RouteTable {
     
     private static final Log LOG = LogFactory.getLog(RouteTableImpl.class);
     
-    private Context context;
+    protected final Context context;
     
     /**
      * The <tt>StatisticsContainer</tt> for the routing table stats.
@@ -322,6 +322,14 @@ public class RouteTableImpl implements RouteTable {
     
     protected boolean remove(KUID nodeId) {
         return bucketTrie.select(nodeId).remove(nodeId);
+    }
+    
+    public synchronized boolean isCloseToLocal(KUID nodeId) {
+        return bucketTrie.select(nodeId).contains(context.getLocalNodeID());
+    }
+    
+    protected synchronized Bucket bucket(KUID nodeId) {
+        return bucketTrie.select(nodeId);
     }
     
     public synchronized Contact select(KUID nodeId) {

@@ -33,7 +33,6 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 import com.limegroup.mojito.util.PatriciaTrie;
-import com.limegroup.mojito.util.Trie;
 import com.limegroup.mojito.util.TrieUtils;
 import com.limegroup.mojito.util.Trie.Cursor;
 
@@ -72,10 +71,6 @@ class BucketNode implements Bucket {
         return depth;
     }
     
-    Trie<KUID, Contact> trie() {
-        return nodeTrie;
-    }
-    
     public void touch() {
         timeStamp = System.currentTimeMillis();
     }
@@ -101,8 +96,10 @@ class BucketNode implements Bucket {
         cache.put(node.getNodeID(), node);
     }
     
+    // TODO: Disable/Delete when finished with testing!
     private void checkNodeID(Contact node) {
         if (depth <= 0) {
+            // This is the ROOT Bucket!
             return;
         }
         

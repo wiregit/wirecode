@@ -101,10 +101,11 @@ public class DefaultMessageHandler extends MessageHandler
         
         RouteTable routeTable = getRouteTable();
         boolean newNode = false;
-        //only do store forward if it is a new node in our routing table (we are (re)connecting to the network) 
-        //or a node that is reconnecting
-        Contact existingNode = routeTable.get(node.getNodeID());
-        if (existingNode == null || existingNode.getInstanceID() != node.getInstanceID()) {
+        
+        // Only do store forward if it is a new node in our routing table 
+        // (we are (re)connecting to the network) or a node that is reconnecting
+        Contact existing = routeTable.get(node.getNodeID());
+        if (existing == null || existing.getInstanceID() != node.getInstanceID()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
             }
@@ -118,10 +119,8 @@ public class DefaultMessageHandler extends MessageHandler
             
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             
-            //are we one of the K closest nodes to the contact?
-            List<Contact> closestNodes = routeTable.select(node.getNodeID(), k, false, false);
-            
-            if (closestNodes.contains(context.getLocalNode())) {
+            // Are we one of the K closest nodes to the contact?
+            if (routeTable.isCloseToLocal(node.getNodeID())) {
                 List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
                 
                 Database database = context.getDatabase();
@@ -129,9 +128,9 @@ public class DefaultMessageHandler extends MessageHandler
                     Collection<KeyValueBag> bags = database.getKeyValueBags();
                     for(KeyValueBag bag : bags) {
                         
-                        //To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
-                        //or if it's ID is closer than any other ID (except the new closest one of course)
-                        //TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
+                        // To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
+                        // or if it's ID is closer than any other ID (except the new closest one of course)
+                        // TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
                         List<Contact> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
                         Contact closest = closestNodesToKey.get(0);
                         
@@ -143,8 +142,9 @@ public class DefaultMessageHandler extends MessageHandler
                                         && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                             
                             if (LOG.isTraceEnabled()) {
-                                LOG.trace("Node "+node+" is now close enough to a value and we are responsible for xfer");   
+                                LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
                             }
+                            
                             databaseStats.STORE_FORWARD_COUNT.incrementStat();
                             for(KeyValue keyValue : bag.values()) {
                                 KUID originatorID = keyValue.getNodeID();

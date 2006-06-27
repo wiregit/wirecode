@@ -48,6 +48,14 @@ public final class BucketUtils {
         return nodes.get(nodes.size()-1);
     }
     
+    public static <T extends Contact> List<T> getMostRecentlySeenContacts(List<T> nodes) {
+        return sort(nodes);
+    }
+    
+    public static <T extends Contact> List<T> getMostRecentlySeenContacts(List<T> nodes, int count) {
+        return sort(nodes).subList(0, Math.min(count, nodes.size()));
+    }
+    
     /**
      * Sorts the contacts from most recently seen to
      * least recently seen

@@ -91,9 +91,10 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
-                nodes = context.getRouteTable().getContacts();
-                nodes = BucketUtils.sort(nodes);
-                nodes = nodes.subList(0, Math.min(nodes.size(), KademliaSettings.REPLICATION_PARAMETER.getValue()));
+                nodes = BucketUtils.getMostRecentlySeenContacts(
+                            context.getRouteTable().getContacts(), 
+                            KademliaSettings.REPLICATION_PARAMETER.getValue());
+                
             } else {
                 nodes = context.getRouteTable().select(lookup, 
                         KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);

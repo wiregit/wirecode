@@ -28,7 +28,7 @@ import com.limegroup.mojito.KUID;
 /**
  * An interface for Buckets
  */
-interface Bucket {
+public interface Bucket {
 
     /**
      * Returns the Bucket KUID
