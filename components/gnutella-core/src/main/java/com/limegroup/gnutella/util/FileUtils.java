@@ -31,7 +31,7 @@ public class FileUtils {
      * @param filename The name of the file to which to write the passed map
      * @param map The map to be stored
      */
-    public static void writeMap(String filename, Map map)
+    public static void writeObject(String filename, Object obj)
         throws IOException {
         ObjectOutputStream out = null;
         try {
@@ -43,7 +43,7 @@ public class FileUtils {
             		new BufferedOutputStream(
             				new FileOutputStream(f)));
             //write to the file
-            out.writeObject(map);	
+            out.writeObject(obj);	
             out.flush();
         } finally {
             //close the stream
@@ -57,7 +57,7 @@ public class FileUtils {
      * @param filename The file from where to read the Map
      * @return The map that was read
      */
-    public static Map readMap(String filename)
+    public static Object readObject(String filename)
         throws IOException, ClassNotFoundException {
         ObjectInputStream in = null;
         try {
@@ -66,7 +66,7 @@ public class FileUtils {
             		new BufferedInputStream(
             				new FileInputStream(filename)));
             //read and return the object
-            return (Map)in.readObject();	
+            return in.readObject();	
         } finally {
             //close the file
             IOUtils.close(in);

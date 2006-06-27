@@ -18,6 +18,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.bitzi.util.Base32;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -542,6 +543,19 @@ public class IncompleteFileManager implements Serializable {
         blocks.put(incompleteFile,vf);
         
         registerIncompleteFile(incompleteFile);
+    }
+    
+    public synchronized void addTorrentEntry(URN urn) {
+    	String torrentDirPath = 
+    		SharingSettings.INCOMPLETE_DIRECTORY.getValue().getAbsolutePath() +
+    		File.separator +
+    		Base32.encode(urn.getBytes());
+    	File torrentDir = new File(torrentDirPath);
+    	hashes.put(urn, torrentDir);
+    }
+    
+    public synchronized void removeTorrentEntry(URN urn) {
+    	hashes.remove(urn);
     }
 
     public synchronized VerifyingFile getEntry(File incompleteFile) {

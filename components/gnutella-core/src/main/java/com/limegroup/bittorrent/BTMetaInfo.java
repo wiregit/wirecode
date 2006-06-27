@@ -95,14 +95,6 @@ public class BTMetaInfo implements Serializable {
 	private File _completeFile;
 
 	/*
-	 * A map containing the _infoMap of this torrent, - the bencoded value of
-	 * this map is a unique identifier for the torrent. It is not necessary to
-	 * store it, but at a later date we may want to add support for certain
-	 * extensions stored in this data field
-	 */
-	private Map _infoMap;
-
-	/*
 	 * the sha1-hash of te beencoded _infoMap Object
 	 */
 	private byte[] _infoHash;
@@ -288,15 +280,6 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * Accessor for the _infoMap object-
-	 * 
-	 * @return <tt>Map</tt> _infoMap.
-	 */
-	public Map getInfo() {
-		return _infoMap;
-	}
-
-	/**
 	 * Accessor for the torrent's name
 	 * 
 	 * @return <tt>String</tt>, the name
@@ -354,10 +337,10 @@ public class BTMetaInfo implements Serializable {
 	 */
 	public void saveInfoMapInIncomplete() 
 	throws IOException {
-		FileUtils.writeMap(_incompleteFile.getParent()+
+		FileUtils.writeObject(_incompleteFile.getParent()+
 				File.separator +
 				".dat"+_name,
-				_infoMap);
+				this);
 	}
 	
 	/**
@@ -639,10 +622,6 @@ public class BTMetaInfo implements Serializable {
 			}
 			
 		}
-
-		// _infoMap is not to be messed with.
-		_infoMap = Collections.unmodifiableMap(info);
-
 		
 		_totalSize = calculateTotalSize(_files);
 
@@ -675,7 +654,6 @@ public class BTMetaInfo implements Serializable {
 		toWrite.put("_files",_files);
 		toWrite.put("_completeFile",_completeFile);
 		toWrite.put("_incompleteFile",_incompleteFile);
-		toWrite.put("_infoMap",_infoMap);
 		toWrite.put("_infoHash",_infoHash);
 		toWrite.put("_trackers",_trackers);
 		toWrite.put("_totalSize",new Long(_totalSize));
@@ -703,7 +681,6 @@ public class BTMetaInfo implements Serializable {
 		_files = (TorrentFile[]) toRead.get("_files");
 		_incompleteFile = (File) toRead.get("_incompleteFile");
 		_completeFile = (File) toRead.get("_completeFile");
-		_infoMap = (Map) toRead.get("_infoMap");
 		_infoHash = (byte []) toRead.get("_infoHash");
 		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
 		_trackers = (URL []) toRead.get("_trackers");
@@ -714,8 +691,7 @@ public class BTMetaInfo implements Serializable {
 		if (_hashes == null || pieceLength == null ||
 				_name == null || _files == null ||
 				_incompleteFile == null || _completeFile == null ||
-				_infoMap == null || _infoHash == null ||
-				_trackers == null ||
+				 _infoHash == null || _trackers == null ||
 				totalSize == null || folderData == null)
 			throw new IOException("cannot read BTMetaInfo");
 		

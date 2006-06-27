@@ -21,6 +21,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
 
 /**
  * This class enables the rest of LW to treat this as a regular download.
@@ -39,12 +40,15 @@ implements TorrentLifecycleListener {
 
 	private DownloadManager manager;
 	
+	private final IncompleteFileManager ifm;
+	
 	private volatile long startTime, stopTime;
 	
 	private volatile boolean complete;
 	
-	public BTDownloader(BTMetaInfo info) {
+	public BTDownloader(BTMetaInfo info, IncompleteFileManager ifm) {
 		_info = info;
+		this.ifm = ifm;
 	}
 
 	/**
@@ -55,8 +59,10 @@ implements TorrentLifecycleListener {
 	 */
 	public void stop() {
 		if (_torrent.isActive() &&
-				_torrent.getState() != ManagedTorrent.SEEDING)
+				_torrent.getState() != ManagedTorrent.SEEDING) {
+			complete = true;
 			_torrent.stop();
+		}
 	}
 
 	public void pause() {
@@ -306,12 +312,14 @@ implements TorrentLifecycleListener {
 			stopTime = System.currentTimeMillis();
 			complete = true;
 			manager.remove(this, true);
+			ifm.removeTorrentEntry(_info.getURN());
 		}
 	}
 
 	public void torrentStarted(ManagedTorrent t) {
 		startTime = System.currentTimeMillis();
 		stopTime = 0;
+		complete = false;
 	}
 
 	public void torrentStopped(ManagedTorrent t) {
@@ -348,6 +356,7 @@ implements TorrentLifecycleListener {
 		BTUploader uploader = new BTUploader(_torrent,_info);
 		_torrent.addLifecycleListener(uploader);
 		_torrent.addLifecycleListener(RouterService.getTorrentManager());
+		ifm.addTorrentEntry(_info.getURN());
 	}
 	
 	public void startDownload() {

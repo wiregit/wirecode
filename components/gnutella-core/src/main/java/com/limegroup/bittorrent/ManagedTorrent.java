@@ -313,6 +313,11 @@ public class ManagedTorrent {
 		// close the files and write the snapshot
 		Runnable saver = new Runnable() {
 			public void run() {
+				if (!_folder.isComplete()) {
+					try {
+						_info.saveInfoMapInIncomplete();
+					} catch (IOException ignored){}
+				}
 				_folder.close();
 				_state.setInt(finalState);
 			}
@@ -415,6 +420,7 @@ public class ManagedTorrent {
 		try {
 			_folder.open(this);
 			_info.saveInfoMapInIncomplete();
+			
 		} catch (IOException ioe) {
 			// problem opening files cannot recover.
 			if (LOG.isDebugEnabled()) 

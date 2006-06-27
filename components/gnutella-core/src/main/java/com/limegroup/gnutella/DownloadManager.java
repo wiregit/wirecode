@@ -698,6 +698,9 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 			throw new SaveLocationException
 			(SaveLocationException.FILE_ALREADY_DOWNLOADING, incompleteFile);
 		}
+		
+		if (IncompleteFileManager.isTorrentFolder(incompleteFile)) 
+			return resumeTorrentDownload(incompleteFile);
 
         //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
         //to the GUI, so they know what they're overwriting.
@@ -741,6 +744,31 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         
         initializeDownload(downloader);
         return downloader;
+    }
+    
+    private Downloader resumeTorrentDownload(File torrentFolder) 
+    throws CantResumeException {
+    	File infohash = null; 
+    	for (File f : torrentFolder.listFiles()){
+    		if (f.getName().startsWith(".dat")) {
+    			infohash = f;
+    			break;
+    		}
+    	}
+    	
+    	String name = IncompleteFileManager.getCompletedName(torrentFolder);
+    	BTMetaInfo info = null;
+    	try {
+    		Object infoObj = FileUtils.readObject(infohash.getAbsolutePath());
+    		if (!(infoObj instanceof BTMetaInfo))
+    			throw new IOException();
+    		info = (BTMetaInfo)infoObj;
+    	} catch (ClassNotFoundException bad) {
+    		throw new CantResumeException(name);
+    	} catch (IOException iox) {
+    		throw new CantResumeException(name);
+    	}
+    	return downloadTorrent(info);
     }
     
     /**
@@ -787,21 +815,25 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     }
     
     private Downloader downloadTorrent(byte [] metaInfo) throws IOException {
-    	// TODO figure out the SaveLocation exception stuff
     	try {
-			BTMetaInfo info = BTMetaInfo.readFromBytes(metaInfo);
-			for (Downloader current : activeAndWaiting) {
-				if (info.getURN().equals(current.getSHA1Urn())) 
-					return current; // eventually implement adding of trackers
-			}
-			AbstractDownloader ret = new BTDownloader(info);
-			initializeDownload(ret);
-			return ret;
-		} catch (IOException e) {
-			if (LOG.isDebugEnabled())
-				LOG.debug("bad torrent data", e);
-			throw e;
-		}
+    		BTMetaInfo info = BTMetaInfo.readFromBytes(metaInfo);
+    		return downloadTorrent(info);
+    	} catch (IOException e) {
+    		if (LOG.isDebugEnabled())
+    			LOG.debug("bad torrent data", e);
+    		throw e;
+    	}
+    }
+    
+    private Downloader downloadTorrent(BTMetaInfo info) {
+    	// TODO figure out the SaveLocation exception stuff
+    	for (Downloader current : activeAndWaiting) {
+    		if (info.getURN().equals(current.getSHA1Urn())) 
+    			return current; // eventually implement adding of trackers
+    	}
+    	AbstractDownloader ret = new BTDownloader(info, incompleteFileManager);
+    	initializeDownload(ret);
+    	return ret;
     }
     
     /**
