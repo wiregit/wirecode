@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -31,6 +33,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.ContactNode;
 import com.limegroup.mojito.KUID;
@@ -183,12 +186,29 @@ public class LimeDHTManager implements LifecycleListener {
      * 
      */
     private void bootstrap() {
-        final List<SocketAddress> snapshot 
-            = new ArrayList<SocketAddress>(bootstrapHosts.size());
-        
+        final LinkedList<SocketAddress> snapshot = new LinkedList<SocketAddress>();
         synchronized (bootstrapHosts) {
-            snapshot.addAll(bootstrapHosts);
+             snapshot.addAll(bootstrapHosts);
         }
+        
+        String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
+
+        for (int i = 0; i < simppHosts.length; i++) {
+            String hostString = simppHosts[i];
+            int index = hostString.indexOf(":");
+            if(index == hostString.length() -1 || index < 0)
+                LOG.error(new UnknownHostException("invalid host: " + hostString));
+            
+            try {
+                String host = hostString.substring(0, index);
+                int port = Integer.parseInt(hostString.substring(index+1).trim());
+                InetSocketAddress addr = new InetSocketAddress(host, port);
+                snapshot.addFirst(addr);
+            } catch(NumberFormatException nfe) {
+                LOG.error(new UnknownHostException("invalid host: " + hostString));
+            }
+        }
+        
         System.out.println("snapshot:" + snapshot);
         try {
             dht.bootstrap(snapshot, new BootstrapListener() {

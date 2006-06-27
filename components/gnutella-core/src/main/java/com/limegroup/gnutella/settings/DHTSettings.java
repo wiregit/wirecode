@@ -3,6 +3,12 @@ package com.limegroup.gnutella.settings;
 public class DHTSettings extends LimeProps{
 
     private DHTSettings() {}
+    
+    /**
+     * A settable list of bootstrap hosts in the host:port format
+     */
+    public static final StringArraySetting DHT_BOOTSTRAP_HOSTS =
+        FACTORY.createSettableStringArraySetting("DHT_BOOTSTRAP_HOSTS", new String[0], "dht_bootstrap_hosts");
 
     /**
      * Setting for whether or not we are DHT capable.
@@ -14,7 +20,7 @@ public class DHTSettings extends LimeProps{
      * Setting to force DHT capability -- TODO for testing only - remove.
      */
     public static final BooleanSetting FORCE_DHT_CONNECT =
-        FACTORY.createSettableBooleanSetting("FORCE_DHT_CONNECT", true, "DHTSettings.ForceDHTConnect"); //TODO switch to false
+        FACTORY.createSettableBooleanSetting("FORCE_DHT_CONNECT", false, "DHTSettings.ForceDHTConnect"); //TODO switch to false
 
     /**
      * Setting for wether or not the DHT should be active at all.
@@ -33,6 +39,7 @@ public class DHTSettings extends LimeProps{
      */
     public static final IntSetting MIN_DHT_AVG_UPTIME =
         FACTORY.createSettableIntSetting("MIN_DHT_AVG_UPTIME",120*60,"DHTSettings.MinDHTAvgUptime",120*60,48*3600);
+    
     /**
      * The minimum current uptime (in seconds) that a node must have to join the DHT.
      */
