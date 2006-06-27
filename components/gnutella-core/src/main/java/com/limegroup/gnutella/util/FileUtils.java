@@ -32,17 +32,22 @@ public class FileUtils {
      * @param map The map to be stored
      */
     public static void writeMap(String filename, Map map)
-        throws IOException, ClassNotFoundException {
+        throws IOException {
         ObjectOutputStream out = null;
         try {
+        	File f = new File(filename);
+        	if (f.exists())
+        		f.createNewFile();
             //open the file
-            out = new ObjectOutputStream(new FileOutputStream(filename));
+            out = new ObjectOutputStream(
+            		new BufferedOutputStream(
+            				new FileOutputStream(f)));
             //write to the file
             out.writeObject(map);	
+            out.flush();
         } finally {
             //close the stream
-            if(out != null)
-                out.close();
+            IOUtils.close(out);
         }
     }
     
@@ -57,13 +62,14 @@ public class FileUtils {
         ObjectInputStream in = null;
         try {
             //open the file
-            in = new ObjectInputStream(new FileInputStream(filename));
+            in = new ObjectInputStream(
+            		new BufferedInputStream(
+            				new FileInputStream(filename)));
             //read and return the object
             return (Map)in.readObject();	
         } finally {
             //close the file
-            if(in != null)
-                in.close();
+            IOUtils.close(in);
         }    
     }
     
@@ -445,5 +451,14 @@ public class FileUtils {
     	
     	return false;
     	
+    }
+    
+    public static long getLengthRecursive(File f) {
+    	if (!f.isDirectory())
+    		return f.length();
+    	long ret = 0;
+    	for (File file : getFilesRecursive(f,null))
+    		ret += file.length();
+    	return ret;
     }
 }

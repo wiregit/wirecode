@@ -241,7 +241,7 @@ public class ManagedTorrent {
 		boolean shouldFetch = false;
 		synchronized(_state) {
 			if (_state.getInt() != VERIFYING && _state.getInt() != QUEUED)
-				throw new IllegalArgumentException("cannot start connecting");
+				throw new IllegalArgumentException("cannot start connecting "+_state.getInt());
 			
 			// kick off connectors if we already have some addresses
 			if (_peers.size() > 0) {
@@ -414,6 +414,7 @@ public class ManagedTorrent {
 	private void initializeFolder() {
 		try {
 			_folder.open(this);
+			_info.saveInfoMapInIncomplete();
 		} catch (IOException ioe) {
 			// problem opening files cannot recover.
 			if (LOG.isDebugEnabled()) 

@@ -349,6 +349,18 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
+	 * Saves the torrent data in the incomplete folder for this torrent
+	 * for easier resuming.
+	 */
+	public void saveInfoMapInIncomplete() 
+	throws IOException {
+		FileUtils.writeMap(_incompleteFile.getParent()+
+				File.separator +
+				".dat"+_name,
+				_infoMap);
+	}
+	
+	/**
 	 * private helper, copies file, updates FileManager and _files
 	 * 
 	 * @param incFile

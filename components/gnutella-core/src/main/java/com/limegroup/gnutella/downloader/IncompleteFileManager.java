@@ -621,14 +621,34 @@ public class IncompleteFileManager implements Serializable {
     }
     
     private static String getCompletedTorrentName(File incompleteDir) {
-    	if (incompleteDir.isDirectory() && incompleteDir.getName().length() == 32) {
-    		File [] list = incompleteDir.listFiles();
-    		if (list.length != 1)
+    	if (!isTorrentFolder(incompleteDir))
     			return null;
     		
+    	File [] list = incompleteDir.listFiles();
+    	if (list[0].getName().startsWith(".dat"))
+    		return list[1].getName();
+    	else
     		return list[0].getName();
-    	}
-    	return null;
+    }
+    
+    public static boolean isTorrentFolder(File file) {
+		if (!file.isDirectory() || file.getName().length() != 32)
+			return false;
+		
+		File [] files = file.listFiles();
+		if (files.length != 2)
+			return false;
+		
+		File datFile = files[0];
+		File otherFile = files[1];
+		if (!datFile.getName().startsWith(".dat")) {
+			datFile = files[1];
+			otherFile = files[0];
+		}
+		if (!datFile.getName().startsWith(".dat"))
+			return false;
+		
+		return datFile.getName().equals(".dat"+otherFile.getName());
     }
 
     /**
