@@ -23,14 +23,14 @@ public class SettingsBasedContentAuthority implements ContentAuthority {
      */
     public boolean initialize() {
         String[] hosts = ContentSettings.AUTHORITIES.getValue();
-        List dns = new ArrayList(hosts.length);
+        List<ContentAuthority> dns = new ArrayList<ContentAuthority>(hosts.length);
         for(int i = 0; i < hosts.length; i++) {
             try {
                 dns.add(new IpPortContentAuthority(new IpPortImpl(hosts[i])));
             } catch(UnknownHostException uhe) {}
         }
         
-        authorities = (ContentAuthority[])dns.toArray(new ContentAuthority[dns.size()]);
+        authorities = dns.toArray(new ContentAuthority[dns.size()]);
         return !dns.isEmpty();
     }
     

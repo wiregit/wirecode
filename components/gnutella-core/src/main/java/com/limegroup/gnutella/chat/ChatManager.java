@@ -31,8 +31,8 @@ public final class ChatManager {
 	/** 
 	 * <tt>List</tt> of InstantMessenger objects.
 	 */
-	private List _chatsInProgress 
-		= Collections.synchronizedList(new LinkedList());
+	private List<InstantMessenger> _chatsInProgress 
+		= Collections.synchronizedList(new LinkedList<InstantMessenger>());
 
 	/**
 	 * Instance accessor for the <tt>ChatManager</tt>.
@@ -64,7 +64,7 @@ public final class ChatManager {
 		String host = socket.getInetAddress().getHostAddress();
 		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
         
-		List bannedList = Arrays.asList(bannedIPs);
+		List<String> bannedList = Arrays.asList(bannedIPs);
 		if (bannedList.contains(host) ) {
 			try {
   				socket.close();
@@ -98,17 +98,12 @@ public final class ChatManager {
 	 */
 	public Chatter request(String host, int port) {
 		InstantMessenger im = null;
-		try {
-			ActivityCallback callback = 
-			    RouterService.getCallback();
-			im = new InstantMessenger(host, port, this, callback);
-			// insert the newly created InstantMessager into the list
-			_chatsInProgress.add(im);
-			im.start();
-		} catch (IOException e) {
-            // TODO: shouldn't we do some cleanup here?  Remove the session
-            // from _chatsInProgress??
-		} 
+		ActivityCallback callback = 
+		    RouterService.getCallback();
+		im = new InstantMessenger(host, port, this, callback);
+		// insert the newly created InstantMessager into the list
+		_chatsInProgress.add(im);
+		im.start();
 		return im;
 	}
 
@@ -138,7 +133,7 @@ public final class ChatManager {
 	
 	public void unblockHost(String host) {
 		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-		List bannedList = Arrays.asList(bannedIPs);
+		List<String> bannedList = Arrays.asList(bannedIPs);
 		synchronized (this) {
 			if (bannedList.remove(host) )
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.

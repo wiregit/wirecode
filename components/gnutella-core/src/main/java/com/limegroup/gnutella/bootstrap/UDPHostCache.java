@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -26,8 +25,8 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
  * A collection of UDP Host Caches.
@@ -58,9 +57,8 @@ public class UDPHostCache {
      * INVARIANT: udpHosts contains no duplicates and contains exactly
      *  the same elements and udpHostsSet
      * LOCKING: obtain this' monitor before modifying either */
-    private final List /* of ExtendedEndpoint */ udpHosts =
-        new ArrayList(PERMANENT_SIZE);
-    private final Set /* of ExtendedEndpoint */ udpHostsSet = new HashSet();
+    private final List<ExtendedEndpoint> udpHosts = new ArrayList<ExtendedEndpoint>(PERMANENT_SIZE);
+    private final Set<ExtendedEndpoint> udpHostsSet = new HashSet<ExtendedEndpoint>();
     
     private final UDPPinger pinger;
     
@@ -68,7 +66,7 @@ public class UDPHostCache {
      * A set of hosts who we've recently contacted, so we don't contact them
      * again.
      */
-    private final Set /* of ExtendedEndpoint */ attemptedHosts;
+    private final Set<ExtendedEndpoint> attemptedHosts;
     
     /**
      * Whether or not we need to resort the udpHosts by failures.
@@ -93,7 +91,7 @@ public class UDPHostCache {
      * the given amount of time, in msecs.
      */
     public UDPHostCache(long expiryTime,UDPPinger pinger) {
-        attemptedHosts = new FixedSizeExpiringSet(PERMANENT_SIZE, expiryTime);
+        attemptedHosts = new FixedSizeExpiringSet<ExtendedEndpoint>(PERMANENT_SIZE, expiryTime);
         this.pinger = pinger;
     }
     
@@ -101,8 +99,7 @@ public class UDPHostCache {
      * Writes this' info out to the stream.
      */
     public synchronized void write(Writer out) throws IOException {
-        for(Iterator iter = udpHosts.iterator(); iter.hasNext(); ) {
-            ExtendedEndpoint e = (ExtendedEndpoint)iter.next();
+        for(ExtendedEndpoint e: udpHosts) {
             e.write(out);
         }
         writeDirty = false;
@@ -135,8 +132,7 @@ public class UDPHostCache {
      * Decrements the failure count for each known cache.
      */
     protected synchronized void decrementFailures() {
-        for(Iterator i = attemptedHosts.iterator(); i.hasNext(); ) {
-            ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+        for(ExtendedEndpoint ep : attemptedHosts) {
             ep.decrementUDPHostCacheFailure();
             // if we brought this guy down back to a managable
             // failure size, add'm back if we have room.
@@ -165,15 +161,16 @@ public class UDPHostCache {
         }
         
         // Keep only the first FETCH_AMOUNT of the valid hosts.
-        List validHosts = new ArrayList(Math.min(FETCH_AMOUNT, udpHosts.size()));
-        List invalidHosts = new LinkedList();
-        for(Iterator i = udpHosts.iterator(); i.hasNext() && validHosts.size() < FETCH_AMOUNT; ) {
-            Object next = i.next();
+        List<ExtendedEndpoint> validHosts = new ArrayList<ExtendedEndpoint>(Math.min(FETCH_AMOUNT, udpHosts.size()));
+        List<ExtendedEndpoint> invalidHosts = new LinkedList<ExtendedEndpoint>();
+        for(ExtendedEndpoint next : udpHosts) {
+            if(validHosts.size() >= FETCH_AMOUNT)
+                break;
             if(attemptedHosts.contains(next))
                 continue;
                 
             // if it was private (couldn't look up too) drop it.
-            if(NetworkUtils.isPrivateAddress(((ExtendedEndpoint)next).getAddress())) {
+            if(NetworkUtils.isPrivateAddress(next.getAddress())) {
                 invalidHosts.add(next);
                 continue;
             }
@@ -182,8 +179,9 @@ public class UDPHostCache {
         }
         
         // Remove all invalid hosts.
-        for(Iterator i = invalidHosts.iterator(); i.hasNext();  )
-            remove((ExtendedEndpoint)i.next());
+        for(ExtendedEndpoint next : invalidHosts) {
+            remove(next);
+        }
 
         attemptedHosts.addAll(validHosts);
         
@@ -193,7 +191,7 @@ public class UDPHostCache {
      /**
       * Fetches endpoints from the given collection of hosts.
       */
-     protected synchronized boolean fetch(Collection hosts) {
+     protected synchronized boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
         if(hosts.isEmpty()) {
             LOG.debug("No hosts to fetch");
             return false;
@@ -306,34 +304,33 @@ public class UDPHostCache {
      */
     private class HostExpirer implements MessageListener {
 
-        private final Set hosts = new IpPortSet();
+        private final Set<ExtendedEndpoint> hosts = new StrictIpPortSet<ExtendedEndpoint>();
         
         // allHosts contains all the hosts, so that we can
         // iterate over successful caches too.
-        private final Set allHosts;
+        private final Set<ExtendedEndpoint> allHosts;
         private byte[] guid;
         
         /**
          * Constructs a new HostExpirer for the specified hosts.
          */
-        public HostExpirer(Collection hostsToAdd) {
+        public HostExpirer(Collection<? extends ExtendedEndpoint> hostsToAdd) {
             hosts.addAll(hostsToAdd);
-            allHosts = new HashSet(hostsToAdd);
+            allHosts = new HashSet<ExtendedEndpoint>(hostsToAdd);
             removeDuplicates(hostsToAdd, hosts);
         }
         
         /**
          * Removes any hosts that exist in 'all' but not in 'some'.
          */
-        private void removeDuplicates(Collection all, Collection some) {
+        private void removeDuplicates(Collection<? extends ExtendedEndpoint> all, Collection<? extends ExtendedEndpoint> some) {
             // Iterate through what's in our collection vs whats in our set.
             // If any entries exist in the collection but not in the set,
             // then that means they resolved to the same address.
             // Automatically eject entries that resolve to the same address.
-            Set duplicates = new HashSet(all);
+            Set<ExtendedEndpoint> duplicates = new HashSet<ExtendedEndpoint>(all);
             duplicates.removeAll(some); // remove any hosts we're keeping.
-            for(Iterator i = duplicates.iterator(); i.hasNext(); ) {
-                ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+            for(ExtendedEndpoint ep : duplicates) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Removing duplicate entry: " + ep);
                 remove(ep);
@@ -373,8 +370,7 @@ public class UDPHostCache {
         public void unregistered(byte[] g) {
             synchronized(UDPHostCache.this) {
                 // Record the failures...
-                for(Iterator i = hosts.iterator(); i.hasNext(); ) {
-                    ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+                for(ExtendedEndpoint ep : hosts) {
                     if(LOG.isTraceEnabled())
                         LOG.trace("No response from cache: " + ep);
                     ep.recordUDPHostCacheFailure();
@@ -385,8 +381,7 @@ public class UDPHostCache {
                 }
                 // Then record the successes...
                 allHosts.removeAll(hosts);
-                for(Iterator i = allHosts.iterator(); i.hasNext(); ) {
-                    ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+                for(ExtendedEndpoint ep : allHosts) {
                     if(LOG.isTraceEnabled())
                         LOG.trace("Valid response from cache: " + ep);
                     ep.recordUDPHostCacheSuccess();
@@ -400,11 +395,9 @@ public class UDPHostCache {
     /**
      * The only FailureComparator we'll ever need.
      */
-    private static final Comparator FAILURE_COMPARATOR = new FailureComparator();
-    private static class FailureComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            ExtendedEndpoint e1 = (ExtendedEndpoint)a;
-            ExtendedEndpoint e2 = (ExtendedEndpoint)b;
+    private static final Comparator<ExtendedEndpoint> FAILURE_COMPARATOR = new FailureComparator();
+    private static class FailureComparator implements Comparator<ExtendedEndpoint> {
+        public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
             return e1.getUDPHostCacheFailures() - e2.getUDPHostCacheFailures();
         }
     }

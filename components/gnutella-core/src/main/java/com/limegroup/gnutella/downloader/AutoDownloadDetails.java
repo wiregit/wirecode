@@ -39,7 +39,7 @@ public class AutoDownloadDetails implements Serializable {
     private transient MediaType type = null;
     // the list of downloads made so far - should not exceed size
     // MAX_DOWNLOADS
-    private List /* of RemoteFileDesc */ dlList = null;
+    private List<RemoteFileDesc> dlList = null;
     
     /**
      * The description of the media type.
@@ -75,7 +75,7 @@ public class AutoDownloadDetails implements Serializable {
     /** the set of words that are already being downloaded.  this can be used
      *  as a heuristic when determining what to download.....
      */
-    private Set wordSet = null;
+    private Set<String> wordSet = null;
 
     static {
         matcher.setIgnoreCase(true);
@@ -104,8 +104,8 @@ public class AutoDownloadDetails implements Serializable {
             mediaDesc = type.getMimeType();
         else
             mediaDesc = null;
-        dlList = new Vector();
-        wordSet = new HashSet();
+        dlList = new Vector<RemoteFileDesc>();
+        wordSet = new HashSet<String>();
     }
     
     /**
@@ -200,7 +200,7 @@ public class AutoDownloadDetails implements Serializable {
                     processedFileName = matcher.process(inputFileName);
                 }
                 for (int i = 0; i < dlList.size(); i++) {
-                    RemoteFileDesc currRFD = (RemoteFileDesc) dlList.get(i);
+                    RemoteFileDesc currRFD = dlList.get(i);
                     String currFileName = currRFD.getFileName();
                     String currProcessedFileName;
                     int diffs = 0;

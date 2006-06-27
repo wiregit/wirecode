@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.ObjectInputStream.GetField;
+import java.io.ObjectOutputStream.PutField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -66,6 +68,11 @@ public class IncompleteFileManager implements Serializable {
      * List<Interval>.  Similarly, we do the inverse transformation after calling
      * defaultReadObject.  This is backward-compatible and will make versioning
      * less difficult in the future.
+     * 
+     * Starting with CVS version 1.50, better custom serialization is used,
+     * relying on PutFields & GetFields so that the 'blocks' and 'hashes' variables
+     * never have incorrect data, at any time.  The data is verified and transformed
+     * prior to writing (when serializing) or setting local variables (when deserializing).
      *
      * The moral of the story is this: be very careful when modifying this class
      * in any way!  IncompleteFileManagerTest has some test case to check
@@ -79,8 +86,8 @@ public class IncompleteFileManager implements Serializable {
      * one interval.  Note that blocks are not sorted; there are typically few
      * blocks so performance isn't an issue.  
      */
-    private Map /* File -> VerifyingFile */ blocks=
-        new TreeMap(Comparators.fileComparator());
+    private Map<File, VerifyingFile> blocks=
+        new TreeMap<File, VerifyingFile>(Comparators.fileComparator());
     /**
      * Bijection between SHA1 hashes (URN) and incomplete files (File).  This is
      * used to ensure that any two RemoteFileDesc with the same hash get the
@@ -100,7 +107,7 @@ public class IncompleteFileManager implements Serializable {
      * INVARIANT: the range (value set) of hashes contains no duplicates.  
      * INVARIANT: for all keys k in hashes, k.isSHA1() 
      */
-    private Map /* URN -> File */ hashes=new HashMap();
+    private Map<URN, File> hashes = new HashMap<URN, File>();
     
 
     ///////////////////////////////////////////////////////////////////////////
@@ -113,8 +120,8 @@ public class IncompleteFileManager implements Serializable {
     public synchronized boolean purge() {
         boolean ret=false;
         //Remove any blocks for which the file doesn't exist.
-        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
-            File file=(File)iter.next();
+        for (Iterator<File> iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+            File file = iter.next();
             if (!file.exists() ) {
                 ret=true;
                 RouterService.getFileManager().removeFileIfShared(file);
@@ -135,8 +142,8 @@ public class IncompleteFileManager implements Serializable {
     public synchronized boolean initialPurge(Collection activeFiles) {
         //Remove any files that are old.
         boolean ret = false;
-        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
-            File file=(File)iter.next();
+        for (Iterator<File> iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+            File file = iter.next();
             try {
                 file = FileUtils.getCanonicalFile(file);
             } catch (IOException iox) {
@@ -149,8 +156,8 @@ public class IncompleteFileManager implements Serializable {
                 iter.remove();
             }
         }
-        for (Iterator iter=hashes.values().iterator(); iter.hasNext(); ) {
-            File file=(File)iter.next();
+        for (Iterator<File> iter=hashes.values().iterator(); iter.hasNext(); ) {
+            File file = iter.next();
             if (!file.exists()) {
                 iter.remove();
                 ret=true;
@@ -274,7 +281,7 @@ public class IncompleteFileManager implements Serializable {
         try {
 
         if (sha1!=null) {
-            File file=(File)hashes.get(sha1);
+            File file = hashes.get(sha1);
             if (file!=null) {
                 //File already allocated for hash
                 return file;
@@ -335,7 +342,7 @@ public class IncompleteFileManager implements Serializable {
         if( urn == null )
             throw new NullPointerException("null urn");
         
-        return (File)hashes.get(urn);
+        return hashes.get(urn);
     }
 
     /** 
@@ -365,40 +372,18 @@ public class IncompleteFileManager implements Serializable {
     
     private synchronized void readObject(ObjectInputStream stream) 
                                    throws IOException, ClassNotFoundException {
-        //Ensure hashes non-null if not present.
-        hashes=new HashMap();
-        //Read hashes and blocks.
-        stream.defaultReadObject();
-        //Convert blocks from interval lists to VerifyingFile.
-        //See serialization note above.
-        if (LOG.isDebugEnabled())
-            LOG.debug("blocks before transform "+blocks);
-        blocks=transform(blocks);
-        if (LOG.isDebugEnabled())
-            LOG.debug("blocks after transform "+blocks);
-        //Ensure that all information in hashes is canonicalized.  This must be
-        //done because older LimeWires did not canonicalize the files before
-        //adding them.
-        hashes = verifyHashes();
+        GetField gets = stream.readFields();
+        blocks = transform(gets.get("blocks", null));
+        hashes = verifyHashes(gets.get("hashes", null));
         //Notify FileManager about the new incomplete files.
         registerAllIncompleteFiles();
     }
 
-    private synchronized void writeObject(ObjectOutputStream stream) 
-                                throws IOException, ClassNotFoundException {
-        //Temporarily change blocks from VerifyingFile to interval lists...
-        Map blocksSave=blocks;        
-        try {
-            if (LOG.isDebugEnabled())
-                LOG.debug("blocks before invtransform: "+blocks);
-            blocks=invTransform();
-            if (LOG.isDebugEnabled())
-                LOG.debug("blocks after invtransform: "+blocks);
-            stream.defaultWriteObject();
-        } finally {
-            //...and restore when done.  See serialization note above.
-            blocks=blocksSave;
-        }
+    private synchronized void writeObject(ObjectOutputStream stream) throws IOException {
+        PutField puts = stream.putFields();
+        puts.put("blocks", invTransform());
+        puts.put("hashes", hashes);
+        stream.writeFields();
     }
     
     /**
@@ -409,10 +394,15 @@ public class IncompleteFileManager implements Serializable {
      * in multiple downloads thinking they're going to seperate files,
      * but actually going to the same file.
      */
-    private Map verifyHashes() {
-        Map retMap = new HashMap();
-
-        for(Iterator i = hashes.entrySet().iterator(); i.hasNext(); ) {
+    private static Map<URN, File> verifyHashes(Object read) {
+        if(read == null || !(read instanceof Map)) {
+            LOG.debug("Read null or not map hashes: " + read);
+            return new HashMap<URN, File>();
+        }
+        
+        Map<URN, File> retMap = new HashMap<URN, File>();
+        Map map = (Map)read;
+        for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
             if(entry.getKey() instanceof URN && 
                entry.getValue() instanceof File) {
@@ -434,9 +424,14 @@ public class IncompleteFileManager implements Serializable {
 
     /** Takes a map of File->List<Interval> and returns a new equivalent Map
      *  of File->VerifyingFile*/
-    private Map transform(Object object) {
-        Map map = (Map)object;
-        Map retMap = new TreeMap(Comparators.fileComparator());
+    private static Map<File, VerifyingFile> transform(Object read) {
+        if(read == null || !(read instanceof Map)) {
+            LOG.debug("Read null or not map blocks: " + read);
+            return new HashMap<File, VerifyingFile>();
+        }
+        
+        Map map = (Map)read;
+        Map<File, VerifyingFile> retMap = new TreeMap<File, VerifyingFile>(Comparators.fileComparator());
         for(Iterator i = map.keySet().iterator(); i.hasNext();) {
             Object incompleteFile = i.next();
             Object o = map.get(incompleteFile);
@@ -461,14 +456,18 @@ public class IncompleteFileManager implements Serializable {
                 }
                 List list = (List)o;
                 for(Iterator iter = list.iterator(); iter.hasNext(); ) {
-                    Interval interval = (Interval) iter.next();
-                    // older intervals excuded the high'th byte, so we decrease
-                    // the value of interval.high. An effect of this is that
-                    // an older client with a newer download.dat downloads one
-                    // byte extra for each interval.
-                    interval = new Interval(interval.low, interval.high - 1);
-                    vf.addInterval(interval);
+                    Object next = iter.next();
+                    if(next instanceof Interval) {
+                        Interval interval = (Interval)next;
+                        // older intervals excuded the high'th byte, so we decrease
+                        // the value of interval.high. An effect of this is that
+                        // an older client with a newer download.dat downloads one
+                        // byte extra for each interval.
+                        interval = new Interval(interval.low, interval.high - 1);
+                        vf.addInterval(interval);
+                    }
                 }
+                
                 if(list.isEmpty()) {
                 	try {
                 		vf.setScanForExistingBlocks(true, f.length());
@@ -484,17 +483,18 @@ public class IncompleteFileManager implements Serializable {
     
     /** Takes a map of File->VerifyingFile and returns a new equivalent Map
      *  of File->List<Interval>*/
-    private Map invTransform() {
-        Map retMap = new HashMap();
-        for(Iterator iter=blocks.keySet().iterator(); iter.hasNext();) {
-            List writeList = new ArrayList();//the list we will write out
-            Object incompleteFile = iter.next();
-            VerifyingFile vf  = (VerifyingFile)blocks.get(incompleteFile);
+    private Map<File, List<Interval>> invTransform() {
+        Map<File, List<Interval>> retMap = new HashMap<File, List<Interval>>();
+        for(Map.Entry<File, VerifyingFile> entry : blocks.entrySet()) {
+            File incompleteFile = entry.getKey();
+            VerifyingFile vf  = entry.getValue();
+            List<Interval> writeList;
             synchronized(vf) {
-                List l = vf.getSerializableBlocks();
+                List<Interval> l = vf.getSerializableBlocks();
+                writeList = new ArrayList<Interval>(l.size());
                 for(int i=0; i< l.size(); i++ ) {
                     //clone the list because we cant mutate VerifyingFile's List
-                    Interval inter = (Interval)l.get(i);
+                    Interval inter = l.get(i);
                     //Increment interval.high by 1 to maintain semantics of
                     //Inerval
                     Interval interval = new Interval(inter.low,inter.high+1);
@@ -517,8 +517,8 @@ public class IncompleteFileManager implements Serializable {
         blocks.remove(incompleteFile);
         //Remove any key k from hashes for which hashes[k]=incompleteFile.
         //There should be at most one value of k.
-        for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry entry=(Map.Entry)iter.next();
+        for (Iterator<Map.Entry<URN, File>> iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
+            Map.Entry<URN, File> entry = iter.next();
             if (incompleteFile.equals(entry.getValue()))
                 //Could also break here as a small optimization.
                 iter.remove();
@@ -532,8 +532,7 @@ public class IncompleteFileManager implements Serializable {
      * Associates the incompleteFile with the VerifyingFile vf.
      * Notifies FileManager about a new Incomplete File.
      */
-    public synchronized void addEntry(File incompleteFile, VerifyingFile vf) 
-      throws IOException {
+    public synchronized void addEntry(File incompleteFile, VerifyingFile vf) {
         // We must canonicalize the file.
         try {
             incompleteFile = canonicalize(incompleteFile);
@@ -545,29 +544,24 @@ public class IncompleteFileManager implements Serializable {
     }
 
     public synchronized VerifyingFile getEntry(File incompleteFile) {
-        Object o = blocks.get(incompleteFile);
-        return (VerifyingFile)o;
+        return blocks.get(incompleteFile);
     }
     
     public synchronized int getBlockSize(File incompleteFile) {
-        Object o = blocks.get(incompleteFile);
-        if(o==null)
+        VerifyingFile vf = blocks.get(incompleteFile);
+        if(vf==null)
             return 0;
-        else {
-            VerifyingFile vf = (VerifyingFile)o;
+        else
             return vf.getBlockSize();
-        }
     }
     
     /**
      * Notifies file manager about all incomplete files.
      */
     public synchronized void registerAllIncompleteFiles() {
-        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
-            File file=(File)iter.next();
-            if (file.exists() && !isOld(file)) {
+        for(File file : blocks.keySet()) {
+            if (file.exists() && !isOld(file)) 
                 registerIncompleteFile(file);
-            }
         }
     }
     
@@ -576,7 +570,7 @@ public class IncompleteFileManager implements Serializable {
      */
     private synchronized void registerIncompleteFile(File incompleteFile) {
         // Only register if it has a SHA1 -- otherwise we can't share.
-        Set completeHashes = getAllCompletedHashes(incompleteFile);
+        Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
         
         RouterService.getFileManager().addIncompleteFile(
@@ -666,11 +660,10 @@ public class IncompleteFileManager implements Serializable {
      * @param incompleteFile a file returned by getFile
      * @return a set of known hashes
      */
-    public synchronized Set getAllCompletedHashes(File incompleteFile) {
-        Set urns = new HashSet(1);
+    public synchronized Set<URN> getAllCompletedHashes(File incompleteFile) {
+        Set<URN> urns = new HashSet<URN>(1);
         //Return a set S s.t. for each K in S, hashes.get(k)==incpleteFile
-        for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry entry=(Map.Entry)iter.next();
+        for(Map.Entry<URN, File> entry : hashes.entrySet()) {
             if (incompleteFile.equals(entry.getValue()))
                 urns.add(entry.getKey());
         }
@@ -681,13 +674,12 @@ public class IncompleteFileManager implements Serializable {
         StringBuffer buf=new StringBuffer();
         buf.append("{");
         boolean first=true;
-        for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
+        for(File file : blocks.keySet()) {
             if (! first)
                 buf.append(", ");
 
-            File key=(File)iter.next();
-            List intervals=((VerifyingFile)blocks.get(key)).getVerifiedBlocksAsList();
-            buf.append(key);
+            List<Interval> intervals= blocks.get(file).getVerifiedBlocksAsList();
+            buf.append(file);
             buf.append(":");
             buf.append(intervals.toString());            
 

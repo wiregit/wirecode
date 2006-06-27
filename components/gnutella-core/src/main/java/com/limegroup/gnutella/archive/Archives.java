@@ -35,10 +35,10 @@ public class Archives {
 	 */
 //	public static final int MEDIA_SOFTWARE = 4;
 
-	private static final Map _mediaStrings;
+	private static final Map<Integer, String> _mediaStrings;
 	
 	static {
-		Map m = new HashMap();
+		Map<Integer, String> m = new HashMap<Integer, String>();
 		
 		m.put( _mediaMovies, "movies" );
 		m.put( _mediaAudio, "audio" );
@@ -55,10 +55,10 @@ public class Archives {
 	public static final int TYPE_SOUND = 2;
 	private static final Integer _typeSound = new Integer( TYPE_SOUND );
 	
-	private static final Map _typeStrings;
+	private static final Map<Integer, String> _typeStrings;
 	
 	static {
-		Map m = new HashMap();
+		Map<Integer, String> m = new HashMap<Integer, String>();
 		
 		m.put( _typeMovingImage, "MovingImage" );
 		m.put( _typeSound, "Sound" );
@@ -86,14 +86,14 @@ public class Archives {
 	private static final Integer _collectionOpensourceAudio =
 		new Integer( COLLECTION_OPENSOURCE_AUDIO );
 	
-	private static final Map _collectionStrings;
-	private static final Map _defaultCollectionsForMedia;
-	private static final Map _defaultTypesForMedia;
+	private static final Map<Integer, String> _collectionStrings;
+	private static final Map<Integer, Integer> _defaultCollectionsForMedia;
+	private static final Map<Integer, Integer> _defaultTypesForMedia;
 	
 	static {
-		Map mCS = new HashMap();
-		Map mDCFM = new HashMap();
-		Map mDTFM = new HashMap();
+		Map<Integer, String> mCS = new HashMap<Integer, String>();
+		Map<Integer, Integer> mDCFM = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> mDTFM = new HashMap<Integer, Integer>();
 		
 		mCS.put( _collectionOpensourceMovies, "opensource_movies" );		
 		mCS.put( _collectionOpensourceAudio, "opensource_audio" );
@@ -110,16 +110,15 @@ public class Archives {
 	}
 
 	static String getMediaString( int media ) {
-		return (String) _mediaStrings.get( new Integer( media ) );
+		return _mediaStrings.get( new Integer( media ) );
 	}
 	
 	static String getCollectionString( int collection ) {
-		return (String) _collectionStrings
-			.get( new Integer( collection ) );
+		return  _collectionStrings.get( new Integer( collection ) );
 	}
 	
 	static String getTypeString( int type ) {
-		return (String) _typeStrings.get( new Integer( type ));
+		return _typeStrings.get( new Integer( type ));
 	}
 	
 	/**
@@ -130,7 +129,7 @@ public class Archives {
 	 *         If media is not valid
 	 */
 	static int defaultCollectionForMedia( int media ) {
-		Integer c = (Integer) _defaultCollectionsForMedia.get( new Integer( media ) );
+		Integer c =  _defaultCollectionsForMedia.get( new Integer( media ) );
 		
 		if ( c == null ) {
 			throw new IllegalArgumentException( "Invalid media type: " + media );
@@ -146,7 +145,7 @@ public class Archives {
 	 *          If media is not valid
 	 */
 	static int defaultTypesForMedia( int media ) {
-		Integer c = (Integer) _defaultTypesForMedia.get( new Integer( media ));
+		Integer c = _defaultTypesForMedia.get( new Integer( media ));
 		
 		if (c == null ) {
 			throw new IllegalArgumentException( "Invalid media type: " + media );

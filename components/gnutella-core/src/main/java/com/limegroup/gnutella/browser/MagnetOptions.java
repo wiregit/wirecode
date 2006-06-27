@@ -31,13 +31,21 @@ public class MagnetOptions implements Serializable {
      *  have a download name and can't calculate one from the URN. */
     private static final String DOWNLOAD_PREFIX="MAGNET download from ";
 	
-	private final Map optionsMap;
-	
-	private static final String XS = "XS";
-	private static final String XT = "XT";
-	private static final String AS = "AS";
-	private static final String DN = "DN";
-	private static final String KT = "KT";
+	private final Map<Option, List<String>> optionsMap;
+    
+    private enum Option {
+        XS, XT, AS, DN, KT;
+        
+        public static Option valueFor(String str) {
+            for(Option option : values()) {
+                if(str.toUpperCase().startsWith(option.toString()))
+                    return option;
+            }
+            return null;
+        }
+        
+        
+    }
 	
 	private transient String [] defaultURLs;
 	private transient String localizedErrorMessage;
@@ -53,11 +61,13 @@ public class MagnetOptions implements Serializable {
 	 * @return
 	 */
 	public static MagnetOptions createMagnet(FileDetails fileDetails) {
-		HashMap map = new HashMap();
-		map.put(DN, fileDetails.getFileName());
+		Map<Option, List<String>> map = new HashMap<Option, List<String>>();
+        List<String> name = new ArrayList<String>(1);
+        name.add(fileDetails.getFileName());
+		map.put(Option.DN, name);
 		URN urn = fileDetails.getSHA1Urn();
 		if (urn != null) {
-			addAppend(map, XT, urn.httpStringValue());
+			addAppend(map, Option.XT, urn.httpStringValue());
 		}
 		InetSocketAddress isa = fileDetails.getSocketAddress();
 		String url = null;
@@ -67,7 +77,7 @@ public class MagnetOptions implements Serializable {
 			.append(isa.getPort()).append("/uri-res/N2R?");
 			addr.append(urn.httpStringValue());
 			url = addr.toString();
-			addAppend(map, XS, url);
+			addAppend(map, Option.XS, url);
 		}
 		MagnetOptions magnet = new MagnetOptions(map);
 		// set already known values
@@ -91,15 +101,19 @@ public class MagnetOptions implements Serializable {
 	 */
 	public static MagnetOptions createMagnet(String keywordTopics, String fileName,
 											 URN urn, String[] defaultURLs) {
-		HashMap map = new HashMap();
-		map.put(KT, keywordTopics);
-		map.put(DN, fileName);
+		Map<Option, List<String>> map = new HashMap<Option, List<String>>();
+        List<String> kt = new ArrayList<String>(1);
+        kt.add(keywordTopics);
+		map.put(Option.KT, kt);
+        List<String> dn = new ArrayList<String>(1);
+        dn.add(fileName);
+		map.put(Option.DN, dn);
 		if (urn != null) {
-			addAppend(map, XT, urn.httpStringValue());
+			addAppend(map, Option.XT, urn.httpStringValue());
 		}
 		if (defaultURLs != null) {
 			for (int i = 0; i < defaultURLs.length; i++) {
-				addAppend(map, AS, defaultURLs[i]);
+				addAppend(map, Option.AS, defaultURLs[i]);
 			}
 		}
 		MagnetOptions magnet = new MagnetOptions(map);
@@ -123,7 +137,7 @@ public class MagnetOptions implements Serializable {
 	 */
 	public static MagnetOptions[] parseMagnet(String arg) {
 	    
-		HashMap options = new HashMap();
+		Map<Integer, Map<Option, List<String>>> options = new HashMap<Integer, Map<Option, List<String>>>();
 
 		// Strip out any single quotes added to escape the string
 		if ( arg.startsWith("'") )
@@ -149,7 +163,7 @@ public class MagnetOptions implements Serializable {
 		
 		// Process each key=value pair
      	while (st.hasMoreTokens()) {
-			Map curOptions;
+			Map<Option, List<String>> curOptions;
 		    keystr = st.nextToken();
 			keystr = keystr.trim();
 			start  = keystr.indexOf("=")+1;
@@ -173,45 +187,35 @@ public class MagnetOptions implements Serializable {
 			}
 			// Add to any existing options
 			iIndex = new Integer(index);
-			curOptions = (Map) options.get(iIndex);			
+			curOptions = options.get(iIndex);			
 			if (curOptions == null) {
-				curOptions = new HashMap();
+				curOptions = new HashMap<Option, List<String>>();
 				options.put(iIndex,curOptions);
 			}
 			
-			if ( keystr.startsWith("xt") ) {
-				addAppend(curOptions, XT, cmdstr);				
-			} else if ( keystr.startsWith("dn") ) {
-				curOptions.put(DN,cmdstr);
-			} else if ( keystr.startsWith("kt") ) {
-				curOptions.put(KT,cmdstr);
-			} else if ( keystr.startsWith("xs") ) {
-				addAppend(curOptions, XS, cmdstr );
-			} else if ( keystr.startsWith("as") ) {
-				addAppend(curOptions, AS, cmdstr );
-			}
+            Option option = Option.valueFor(keystr);
+            if(option != null)
+                addAppend(curOptions, option, cmdstr);
 		}
 		
 		MagnetOptions[] ret = new MagnetOptions[options.size()];
 		int i = 0;
-		for (Iterator iter = options.values().iterator(); iter.hasNext(); i++) {
-			Map current = (Map)iter.next();
-			ret[i] = new MagnetOptions(current);
-		}
+        for(Map<Option, List<String>> current : options.values()) 
+            ret[i++] = new MagnetOptions(current);
 		return ret;
 	}
 		
 	
-	private static void addAppend(Map map, String key, String value) {
-		List l = (List) map.get(key);
+	private static void addAppend(Map<Option, List<String>> map, Option key, String value) {
+		List<String> l = map.get(key);
 		if (l == null) {
-			l = new ArrayList(1);
+			l = new ArrayList<String>(1);
 			map.put(key,l);
 		}
 		l.add(value);
 	}
 	
-    private MagnetOptions(Map options) {
+    private MagnetOptions(Map<Option, List<String>> options) {
 		optionsMap = Collections.unmodifiableMap(options);
     }
     
@@ -364,21 +368,20 @@ public class MagnetOptions implements Serializable {
 		return null;
     }
 	
-	private List getPotentialURLs() {
-		List urls = new ArrayList();
+	private List<String> getPotentialURLs() {
+		List<String> urls = new ArrayList<String>();
 		urls.addAll(getPotentialURLs(getExactTopics()));
 		urls.addAll(getPotentialURLs(getXS()));
 		urls.addAll(getPotentialURLs(getAS()));
 		return urls;
 	}
 	
-	private List getPotentialURLs(List strings) {
-		List ret = new ArrayList();
-		for (Iterator iter = strings.iterator(); iter.hasNext(); ) {
-			String str = (String)iter.next();
-			if (str.startsWith(HTTP))
-				ret.add(str);
-		}
+	private List<String> getPotentialURLs(List<String> strings) {
+		List<String> ret = new ArrayList<String>();
+        for(String str: strings) {
+            if(str.startsWith(HTTP))
+                ret.add(str);
+        }
 		return ret;
 	}
 	 
@@ -388,18 +391,17 @@ public class MagnetOptions implements Serializable {
 	 */
 	public String[] getDefaultURLs() {
 		if (defaultURLs == null) {
-			List urls = getPotentialURLs();
-			for(Iterator it = urls.iterator(); it.hasNext(); ) {
+			List<String> urls = getPotentialURLs();
+			for(Iterator<String> it = urls.iterator(); it.hasNext(); ) {
 				try {
-					String nextURL = (String)it.next();
+					String nextURL = it.next();
 					new URI(nextURL.toCharArray());  // is it a valid URI?
-				}
-				catch(URIException e) {
+				} catch(URIException e) {
 					it.remove(); // if not, remove it from the list.
 					localizedErrorMessage = e.getLocalizedMessage();
 				}
 			}
-			defaultURLs = (String[])urls.toArray(new String[urls.size()]); 
+			defaultURLs = urls.toArray(new String[urls.size()]); 
 		}
 		return defaultURLs;
 	}
@@ -409,7 +411,11 @@ public class MagnetOptions implements Serializable {
 	 * @return
 	 */
     public String getDisplayName() {
-        return (String)optionsMap.get(DN);
+        List<String> list = optionsMap.get(Option.DN);
+        if(list == null || list.isEmpty())
+            return null;
+        else
+            return list.get(0);
     }
     
     /**
@@ -474,36 +480,43 @@ public class MagnetOptions implements Serializable {
      * @return
      */
     public String getKeywordTopic() {
-        return (String)optionsMap.get(KT);
+        List<String> list = optionsMap.get(Option.KT);
+        if(list == null || list.isEmpty())
+            return null;
+        else
+            return list.get(0);
     }
     
     /**
      * Returns a list of exact topic strings, they can be url or urn string.
      * @return
      */
-    public List getExactTopics() {
-		return getList(XT); 
+    public List<String> getExactTopics() {
+		return getList(Option.XT); 
     }
     
     /**
      * Returns the list of exact source strings, they should be urls.
      * @return
      */
-    public List getXS() {
-        return getList(XS);
+    public List<String> getXS() {
+        return getList(Option.XS);
     }
 	
     /**
      * Returns the list of alternate source string, they should  be urls.
      * @return
      */
-    public List getAS() { 
-        return getList(AS);
+    public List<String> getAS() { 
+        return getList(Option.AS);
     }
 	
-	private List getList(String key) {
-		List l = (List) optionsMap.get(key);
-		return l == null ? Collections.EMPTY_LIST : l;
+	private List<String> getList(Option key) {
+		List<String> l = optionsMap.get(key);
+        if(l == null)
+            return Collections.emptyList();
+        else
+            return l;
 	}
     
 	

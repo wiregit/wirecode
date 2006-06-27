@@ -12,7 +12,7 @@ import com.limegroup.gnutella.messages.Message;
  */
 public class BasicQueue implements MessageQueue {
     
-    private List QUEUE = new LinkedList();
+    private List<Message> QUEUE = new LinkedList<Message>();
     
     
     /** Adds a new message */
@@ -25,7 +25,7 @@ public class BasicQueue implements MessageQueue {
         if(QUEUE.isEmpty())
             return null;
         else
-            return (Message)QUEUE.remove(0);
+            return QUEUE.remove(0);
     }
     
     /** No-op. */

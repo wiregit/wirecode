@@ -508,7 +508,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		    
 		    LOG.debug("Looking for stale mappings...");
 		    
-			Set mappings = new HashSet();
+			Set<Mapping> mappings = new HashSet<Mapping>();
 			Action getGeneric = _service.getAction("GetGenericPortMappingEntry");
 			
 			if(getGeneric == null) {
@@ -546,8 +546,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 				LOG.debug("Stale cleaner found "+mappings.size()+ " total mappings");
 			
 			// iterate and clean up
-			for (Iterator iter = mappings.iterator();iter.hasNext();) {
-				Mapping current = (Mapping)iter.next();
+            for(Mapping current : mappings) {
 				if(LOG.isDebugEnabled())
 				    LOG.debug("Analyzing: " + current);
 				    

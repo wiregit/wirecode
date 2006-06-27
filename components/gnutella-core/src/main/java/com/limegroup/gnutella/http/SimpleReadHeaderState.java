@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 import com.limegroup.gnutella.statistics.Statistic;
@@ -19,7 +20,7 @@ public class SimpleReadHeaderState extends ReadHeadersIOState {
         // Does nothing.
     }
     
-    public Properties getHeaders() {
+    public Map<String, String> getHeaders() {
         return support.getHeaders();
     }
     

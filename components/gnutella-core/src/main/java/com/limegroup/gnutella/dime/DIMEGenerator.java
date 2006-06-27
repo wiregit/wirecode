@@ -28,7 +28,7 @@ public class DIMEGenerator {
     /**
      * The list of records that will be written out.
      */
-    private final List RECORDS = new LinkedList();
+    private final List<DIMERecord> RECORDS = new LinkedList<DIMERecord>();
     
     /**
      * The amount of bytes that write(OutputStream) will write.
@@ -59,10 +59,10 @@ public class DIMEGenerator {
         if(RECORDS.isEmpty())
             return;
         
-        Iterator iter = RECORDS.iterator();
+        Iterator<DIMERecord> iter = RECORDS.iterator();
         int size = RECORDS.size();
         for(int i = 0; i < size; i++) {
-            DIMERecord current = (DIMERecord)iter.next();
+            DIMERecord current = iter.next();
             if(i == 0)
                 current.setFirstRecord(true);
             else

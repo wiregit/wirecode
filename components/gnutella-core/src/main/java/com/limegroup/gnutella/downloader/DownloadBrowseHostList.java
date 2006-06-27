@@ -17,7 +17,7 @@ final class DownloadBrowseHostList {
 	 * Constant for the <tt>List</tt> of browsable <tt>HTTPDownloader</tt>s
 	 * for this <tt>ManagedDownloader</tt>.
 	 */
-	private final List BROWSE_LIST = new ArrayList();
+	private final List<HTTPDownloader> BROWSE_LIST = new ArrayList<HTTPDownloader>();
 
 
 	/**
@@ -36,7 +36,7 @@ final class DownloadBrowseHostList {
 	 */
 	synchronized RemoteFileDesc getBrowseHostEnabledHost() {		
 		if(BROWSE_LIST.isEmpty()) return null;
-		HTTPDownloader downloader = (HTTPDownloader)BROWSE_LIST.get(BROWSE_LIST.size()-1);
+		HTTPDownloader downloader = BROWSE_LIST.get(BROWSE_LIST.size()-1);
 		return downloader.getRemoteFileDesc();
 	}
 

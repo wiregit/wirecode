@@ -17,7 +17,7 @@ final class DownloadChatList {
 	 * Constant for the <tt>List</tt> of chattable <tt>HTTPDownloader</tt>s
 	 * for this <tt>ManagedDownloader</tt>.
 	 */
-	private final List CHAT_LIST = new ArrayList();
+	private final List<HTTPDownloader> CHAT_LIST = new ArrayList<HTTPDownloader>();
 
 
 	/**
@@ -36,7 +36,7 @@ final class DownloadChatList {
 	 */
 	synchronized Endpoint getChatEnabledHost() {		
 		if(CHAT_LIST.isEmpty()) return null;
-		HTTPDownloader downloader = (HTTPDownloader)CHAT_LIST.get(CHAT_LIST.size()-1);
+		HTTPDownloader downloader = CHAT_LIST.get(CHAT_LIST.size()-1);
 		return new Endpoint(downloader.getInetAddress().getHostAddress(),
 							downloader.getPort());
 	}

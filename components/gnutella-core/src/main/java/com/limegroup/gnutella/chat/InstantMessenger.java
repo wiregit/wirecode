@@ -53,7 +53,7 @@ public class InstantMessenger implements Chatter {
 
 	/** constructor for an outgoing chat request */
 	public InstantMessenger(String host, int port, ChatManager manager,
-							ActivityCallback callback) throws IOException {
+							ActivityCallback callback) {
 		_host = host;
 		_port = port;
 		_manager = manager;

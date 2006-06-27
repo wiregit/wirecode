@@ -157,7 +157,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 		
 		int j = 2;
 		for (Iterator i = files.iterator(); i.hasNext();) {
-			final File f = (File) i.next();
+			final ArchiveFile f = (ArchiveFile) i.next();
 			fileNames[j] = f.getRemoteFileName();
 			fileSizes[j] = f.getFileSize();
 			j++;
@@ -227,7 +227,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 				
 				// upload contributed files
 				for (final Iterator i = files.iterator(); i.hasNext();) {
-					final File f = (File) i.next();
+					final ArchiveFile f = (ArchiveFile) i.next();
 					
 					uploadFile( f.getRemoteFileName(), 
 							new FileInputStream( f.getIOFile() ),
@@ -369,7 +369,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 			final Iterator filesIterator = getFiles().iterator();
 			
 			if ( filesIterator.hasNext() ) {
-				final File firstFile = (File) filesIterator.next();
+				final ArchiveFile firstFile = (ArchiveFile) filesIterator.next();
 				final String licenseUrl = firstFile.getLicenseUrl();
 				if ( licenseUrl != null ) {
 					final Element licenseUrlElement = document.createElement( LICENSE_URL_ELEMENT );
@@ -438,7 +438,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 			Collection files = getFiles();
 			
 			for (final Iterator i = files.iterator(); i.hasNext();) {
-				final File file = (File) i.next();
+				final ArchiveFile file = (ArchiveFile) i.next();
 				
 				final Element fileElement = file.getElement( document );
 				filesElement.appendChild( fileElement );

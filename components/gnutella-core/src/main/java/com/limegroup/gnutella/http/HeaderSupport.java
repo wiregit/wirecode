@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.http;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HeaderSupport {
 
-    private Properties headers = new Properties();
+    private Map<String, String> headers = new HashMap<String, String>();
     
     /** 
      * Process a single read header.
@@ -29,7 +30,7 @@ public class HeaderSupport {
         return headers.size();
     }
     
-    public Properties getHeaders() {
+    public Map<String, String> getHeaders() {
         return headers;
     }
 

@@ -9,13 +9,11 @@ import java.util.Comparator;
  * because Strings in 1.1.8 do not implement the Comparable interface, unlike
  * Strings in 1.2+. 
  */
-final class StringComparator implements Comparator, Serializable {
+final class StringComparator implements Comparator<String>, Serializable {
     static final long serialVersionUID = -624599003446177506L;
 
     /** Returns ((String)a).compareTo((String)b). */
-    public int compare(Object a, Object b) {
-        String as=(String)a;
-        String bs=(String)b;
+    public int compare(String as, String bs) {
         return as.compareTo(bs);
     }
 }

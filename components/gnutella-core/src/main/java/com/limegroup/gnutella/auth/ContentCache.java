@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IOUtils;
 
 
@@ -36,7 +37,7 @@ class ContentCache {
         new File(CommonUtils.getUserSettingsDir(), "responses.cache");
     
     /** Map of SHA1 to Responses. */
-    private Map /* URN -> ContentResponseData */ responses = new HashMap();    
+    private Map<URN, ContentResponseData> responses = new HashMap<URN, ContentResponseData>();    
     
     /** Whether or not data is dirty since the last time we wrote to disk. */
     private boolean dirty = false;
@@ -59,7 +60,7 @@ class ContentCache {
     
     /** Gets the response for the given URN. */
     synchronized ContentResponseData getResponse(URN urn) {
-        return (ContentResponseData)responses.get(urn);
+        return responses.get(urn);
     }
     
     /** Initializes this cache. */
@@ -85,37 +86,29 @@ class ContentCache {
         try {
             ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(CACHE_FILE)));
             Map map = (Map)ois.readObject();
-            if(map != null) {
-                for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-                    // Remove values that aren't correct.
-                    Map.Entry next = (Map.Entry)i.next();
-                    Object key = next.getKey();
-                    Object value = next.getValue();
-                    if( !(key instanceof URN) || !(value instanceof ContentResponseData) ) {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("Invalid k[" + key + "], v[" + value + "]");
-                        i.remove();
-                        dirty = true;
-                    }
-                    if(((ContentResponseData)value).getCreationTime() < cutoff) {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("Removing old response [" + value + "]");
-                        i.remove();
-                        dirty = true;
-                    }
+            Map<URN, ContentResponseData> checked = 
+                GenericsUtils.scanForMap(map, URN.class, ContentResponseData.class, GenericsUtils.ScanMode.REMOVE);
+            if(checked.size() != map.size())
+                dirty = true;
+            
+            for(Iterator<ContentResponseData> i = checked.values().iterator(); i.hasNext(); ) {
+                ContentResponseData data = i.next();
+                if(data.getCreationTime() < cutoff) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Removing old response [" + data + "]");
+                    i.remove();
+                    dirty = true;
                 }
-            } else {
-                map = new HashMap();
             }
             
-            responses = map;
+            responses = checked;
         } catch(Throwable t) {
             dirty = true;
             LOG.error("Can't read responses", t);
         } finally {
             IOUtils.close(ois);
             if(responses == null)
-                responses = new HashMap();
+                responses = new HashMap<URN, ContentResponseData>();
         }
     }
 

@@ -9,7 +9,6 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -110,7 +109,7 @@ public class BootstrapServerManager {
      *  LOCKING: this 
      *  INVARIANT: _servers.size()<MAX_BOOTSTRAP_SERVERS
      */        
-    private final List /* of BootstrapServer */ SERVERS=new ArrayList();
+    private final List<BootstrapServer> SERVERS=new ArrayList<BootstrapServer>();
     
     /** The last bootstrap server we successfully connected to, or null if none.
      *  Used for sending updates.  _lastConnectable will generally be in
@@ -169,7 +168,7 @@ public class BootstrapServerManager {
             SERVERS.add(server);
         }
         if (SERVERS.size()>MAX_BOOTSTRAP_SERVERS) {
-            removeServer((BootstrapServer)SERVERS.get(0));
+            removeServer(SERVERS.get(0));
         }
     }
     
@@ -201,8 +200,7 @@ public class BootstrapServerManager {
      * Writes the list of servers to disk.
      */
     public synchronized void write(FileWriter out) throws IOException {
-        for (Iterator iter = getBootstrapServers(); iter.hasNext(); ){
-            BootstrapServer e=(BootstrapServer)iter.next();
+        for(BootstrapServer e : getBootstrapServers()) {
             out.write(e.toString());
             out.write(ExtendedEndpoint.EOL);
         }
@@ -223,8 +221,8 @@ public class BootstrapServerManager {
      * iterator.
      * @return an Iterator of BootstrapServer.
      */
-    public synchronized Iterator /*of BootstrapServer*/ getBootstrapServers() {
-        return SERVERS.iterator();
+    public synchronized Iterable<BootstrapServer> getBootstrapServers() {
+        return SERVERS;
     }
 
     /** 
@@ -377,7 +375,7 @@ public class BootstrapServerManager {
                     if(LOG.isWarnEnabled())
                         LOG.warn("Used up all servers, last: " + _lastIndex);
                 } else {
-                    e = (BootstrapServer)SERVERS.get(_lastIndex);
+                    e = SERVERS.get(_lastIndex);
                     _lastIndex++;
                 }
             }
@@ -423,7 +421,7 @@ public class BootstrapServerManager {
             if(SERVERS.size() == 0)
                 return null;
             else
-                return (BootstrapServer)SERVERS.get(randomServer());
+                return SERVERS.get(randomServer());
         }
         
         public String toString() {
@@ -481,7 +479,7 @@ public class BootstrapServerManager {
             if(SERVERS.size() == 0)
                 return null;
             else
-                return (BootstrapServer)SERVERS.get(randomServer());
+                return SERVERS.get(randomServer());
         }
         
         public String toString() {

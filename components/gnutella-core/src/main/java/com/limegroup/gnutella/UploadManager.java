@@ -1760,7 +1760,7 @@ public class UploadManager implements BandwidthTracker {
             if (_lastRequest - _firstRequest <= FIRST_CHECK_TIME) {
     			return false;
     		} else  {
-    		    return ((double)(_lastRequest - _firstRequest) / _numRequests)
+    		    return ((_lastRequest - _firstRequest) / _numRequests)
     		           < MAX_REQUESTS;
     		}
     	}

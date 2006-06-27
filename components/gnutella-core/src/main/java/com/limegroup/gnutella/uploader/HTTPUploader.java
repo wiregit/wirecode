@@ -1098,7 +1098,7 @@ public final class HTTPUploader implements Uploader {
     }	
 
     private boolean readQueueVersion(String str) {
-        if (! HTTPHeaderName.QUEUE_HEADER.matchesStartOfString(str))
+        if (! HTTPHeaderName.QUEUE.matchesStartOfString(str))
             return false;
         
         //String s = HTTPUtils.extractHeaderValue(str);

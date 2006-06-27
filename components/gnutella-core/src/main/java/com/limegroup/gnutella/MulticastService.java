@@ -136,8 +136,7 @@ public final class MulticastService implements Runnable {
      *  return value of newListeningSocket(int).  A value of null disables 
      *  Multicast sending and receiving.
 	 */
-	void setListeningSocket(MulticastSocket multicastSocket)
-	  throws IOException {
+	void setListeningSocket(MulticastSocket multicastSocket) {
         //a) Close old socket (if non-null) to alert lock holders...
         if (_socket != null) 
             _socket.close();

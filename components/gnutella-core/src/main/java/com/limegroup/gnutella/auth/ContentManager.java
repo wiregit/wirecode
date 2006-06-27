@@ -28,16 +28,17 @@ public class ContentManager {
     private static final Log LOG = LogFactory.getLog(ContentManager.class);
     
     /** Map of SHA1 to Observers listening for responses to the SHA1. */
-    private final Map /* URN -> List (of Responder) */ OBSERVERS = Collections.synchronizedMap(new HashMap());
+    private final Map<URN, Collection<Responder>> OBSERVERS =
+        Collections.synchronizedMap(new HashMap<URN, Collection<Responder>>());
     
     /** List of Responder's that are currently waiting, in order of timeout. */
-    private final List RESPONDERS = new ArrayList();
+    private final List<Responder> RESPONDERS = new ArrayList<Responder>();
     
     /** Set or URNs that we've already requested. */
-    private final Set REQUESTED = Collections.synchronizedSet(new HashSet());
+    private final Set<URN> REQUESTED = Collections.synchronizedSet(new HashSet<URN>());
     
     /** Set of URNs that have failed requesting. */
-    private final Set TIMEOUTS = Collections.synchronizedSet(new HashSet());
+    private final Set<URN> TIMEOUTS = Collections.synchronizedSet(new HashSet<URN>());
     
     /* 
      * LOCKING OF THE ABOVE:
@@ -182,13 +183,11 @@ public class ContentManager {
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding response (" + response + ") for URN: " + urn);
     
-            Collection responders = (Collection)OBSERVERS.remove(urn);
+            Collection<Responder> responders = OBSERVERS.remove(urn);
             if(responders != null) {
                 removeResponders(responders);
-                for(Iterator i = responders.iterator(); i.hasNext(); ) {
-                    Responder next = (Responder)i.next();
+                for(Responder next : responders)
                     next.observer.handleResponse(next.urn, response);
-                }
             }
         } else if(LOG.isWarnEnabled()) {
             if(urn == null) {
@@ -202,12 +201,12 @@ public class ContentManager {
     /**
      * Removes all responders from RESPONDERS.
      */
-    protected void removeResponders(Collection responders) {
+    protected void removeResponders(Collection<Responder> responders) {
         int size = responders.size();
         int removed = 0;
         synchronized(RESPONDERS) {
             for(int i = RESPONDERS.size() - 1; i >= 0; i--) {
-                Responder next = (Responder)RESPONDERS.get(i);
+                Responder next = RESPONDERS.get(i);
                 if(responders.contains(next)) {
                     RESPONDERS.remove(i);
                     removed++;
@@ -231,9 +230,9 @@ public class ContentManager {
      */
     protected void addResponder(Responder responder) {
         synchronized(OBSERVERS) {
-            Set observers = (Set)OBSERVERS.get(responder.urn);
+            Collection<Responder> observers = OBSERVERS.get(responder.urn);
             if(observers == null)
-                observers = new HashSet();
+                observers = new HashSet<Responder>();
             observers.add(responder);
             OBSERVERS.put(responder.urn, observers);
             
@@ -247,7 +246,7 @@ public class ContentManager {
         synchronized (RESPONDERS) {
             if (RESPONDERS.isEmpty()) {
                 RESPONDERS.add(responder);
-            } else if (responder.dead <= ((Responder) RESPONDERS.get(RESPONDERS.size() - 1)).dead) {
+            } else if (responder.dead <= RESPONDERS.get(RESPONDERS.size() - 1).dead) {
                 RESPONDERS.add(responder);
             } else {
                 // Quick lookup.
@@ -261,16 +260,16 @@ public class ContentManager {
     
     /** Times out old responders. */
     protected void timeout(long now) {
-        List responders = null;
+        List<Responder> responders = null;
         synchronized(RESPONDERS) {
             Responder next = null;
             for(int i = RESPONDERS.size() - 1; i >= 0; i--) {
-                next = (Responder)RESPONDERS.get(i);
+                next = RESPONDERS.get(i);
                 if(next.dead <= now) {
                     REQUESTED.remove(next.urn);
                     TIMEOUTS.add(next.urn);
                     if(responders == null)
-                        responders = new ArrayList(2);
+                        responders = new ArrayList<Responder>(2);
                     responders.add(next);
                     RESPONDERS.remove(i);
                     next = null;
@@ -283,7 +282,7 @@ public class ContentManager {
         // Now call outside of lock.
         if (responders != null) {
             for (int i = 0; i < responders.size(); i++) {
-                Responder next = (Responder) responders.get(i);
+                Responder next = responders.get(i);
                 if (LOG.isDebugEnabled())
                     LOG.debug("Timing out responder: " + next + " for URN: " + next.urn);
                 try {
@@ -342,7 +341,7 @@ public class ContentManager {
             // and then send off those requested.
             // note that the timeouts on processing older requests will be lagging slightly.
             if (auth != null) {
-                Set alreadyReq = new HashSet();
+                Set<URN> alreadyReq = new HashSet<URN>();
                 synchronized(REQUESTED) {
                     alreadyReq.addAll(REQUESTED);
                     setContentAuthority(auth);
@@ -361,7 +360,7 @@ public class ContentManager {
     /**
      * A simple struct to allow ResponseObservers to be timed out.
      */
-    private static class Responder implements Comparable {
+    private static class Responder implements Comparable<Responder> {
         private final long dead;
         private final ContentResponseObserver observer;
         private final URN urn;
@@ -375,8 +374,7 @@ public class ContentManager {
             this.urn = urn;
         }
 
-        public int compareTo(Object a) {
-            Responder o = (Responder)a;
+        public int compareTo(Responder o) {
             return dead < o.dead ? 1 : dead > o.dead ? -1 : 0;
         }
     }    

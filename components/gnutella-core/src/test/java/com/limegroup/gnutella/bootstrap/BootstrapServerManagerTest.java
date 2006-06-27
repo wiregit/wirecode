@@ -131,7 +131,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         assertEquals(null, s1.getRequest());   //wasn't contacted
         //Check that we got the right results.  First make sure we kept the old
         //server list...
-        Iterator iter=bman.getBootstrapServers();
+        Iterator iter=bman.getBootstrapServers().iterator();
         assertEquals(url3, iter.next());
         assertEquals(url2, iter.next());
         assertEquals(url1, iter.next());
@@ -149,7 +149,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         s3.shutdown();
         bman.fetchEndpointsAsync();
         sleep();
-        Iterator iter=bman.getBootstrapServers();
+        Iterator iter=bman.getBootstrapServers().iterator();
         assertEquals(url2, iter.next());
         assertEquals(url1, iter.next());
         if(iter.hasNext())
@@ -163,7 +163,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         s3.setResponse("HTTP/1.0 503 Service Unavailable");
         bman.fetchEndpointsAsync();
         sleep();
-        Iterator iter=bman.getBootstrapServers();
+        Iterator iter=bman.getBootstrapServers().iterator();
         assertEquals(url2, iter.next());
         assertEquals(url1, iter.next());
         if(iter.hasNext())
@@ -177,7 +177,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         bman.fetchEndpointsAsync();
         sleep();
 
-        Iterator iter=bman.getBootstrapServers();
+        Iterator iter=bman.getBootstrapServers().iterator();
         assertEquals(url2, iter.next());
         assertEquals(url1, iter.next());
         if(iter.hasNext())
@@ -191,7 +191,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         bman.fetchEndpointsAsync();
         sleep();
 
-        Iterator iter=bman.getBootstrapServers();
+        Iterator iter=bman.getBootstrapServers().iterator();
         assertEquals(url2, iter.next());
         assertEquals(url1, iter.next());
         if(iter.hasNext())
@@ -206,7 +206,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         bman.fetchEndpointsAsync();
         sleep();
 
-        Iterator iter=bman.getBootstrapServers();
+        Iterator iter=bman.getBootstrapServers().iterator();
         assertEquals(url2, iter.next());
         assertEquals(url1, iter.next());
         if(iter.hasNext())
@@ -231,7 +231,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         bman.fetchBootstrapServersAsync();
         sleep();
 
-        Iterator iter=bman.getBootstrapServers();
+        Iterator iter=bman.getBootstrapServers().iterator();
         assertEquals(url2, iter.next());
         assertEquals(url1, iter.next());
         assertTrue(! url3.equals(iter.next()));
@@ -294,7 +294,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
             sleep();
             assertEquals(null, s1.getRequest());
             assertEquals(0, catcher.list.size());
-            Iterator iter=bman.getBootstrapServers();
+            Iterator iter=bman.getBootstrapServers().iterator();
             assertEquals(url1, iter.next());
             if(iter.hasNext())
                 fail("had another: " + iter.next());
@@ -314,7 +314,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
             }
         }
         int count=0;
-        for (Iterator iter=bman.getBootstrapServers(); 
+        for (Iterator iter=bman.getBootstrapServers().iterator(); 
                  iter.hasNext(); 
                  iter.next()) { 
             count++; 
@@ -330,7 +330,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         s1.shutdown();
         bman.fetchEndpointsAsync();
         sleep();
-        assertTrue(! bman.getBootstrapServers().hasNext());
+        assertTrue(! bman.getBootstrapServers().iterator().hasNext());
 
         //Now second call should load defaults...and actually go on the network!
         bman.fetchEndpointsAsync();
@@ -338,7 +338,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
 
         //Make sure defaults were loaded
         int count=0;
-        for (Iterator iter=bman.getBootstrapServers(); 
+        for (Iterator iter=bman.getBootstrapServers().iterator(); 
                  iter.hasNext(); 
                  iter.next()) { 
             count++; 

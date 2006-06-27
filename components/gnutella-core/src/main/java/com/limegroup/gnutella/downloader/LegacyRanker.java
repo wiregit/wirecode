@@ -20,10 +20,10 @@ public class LegacyRanker extends SourceRanker {
     
     private static final Log LOG = LogFactory.getLog(LegacyRanker.class);
 
-	private final Set rfds;  
+	private final Set<RemoteFileDesc> rfds;  
 	
 	public LegacyRanker() {
-		rfds = new HashSet();
+		rfds = new HashSet<RemoteFileDesc>();
 	}
 	
 	public synchronized boolean addToPool(RemoteFileDesc host) {
@@ -58,8 +58,8 @@ public class LegacyRanker extends SourceRanker {
         return ret;
     }
     
-    static RemoteFileDesc getBest(Iterator iter) {
-        RemoteFileDesc ret=(RemoteFileDesc)iter.next();
+    static RemoteFileDesc getBest(Iterator<RemoteFileDesc> iter) {
+        RemoteFileDesc ret= iter.next();
         
         long now = System.currentTimeMillis();
         //Find max of each (remaining) element, storing in max.
@@ -69,7 +69,7 @@ public class LegacyRanker extends SourceRanker {
         //3) Find a better quality host (avoid dud locations)
         //4) Find a speedier host (avoid slow downloads)
         while (iter.hasNext()) {
-            RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
+            RemoteFileDesc rfd= iter.next();
             
             // 1.            
             if (rfd.isBusy(now))
@@ -102,11 +102,11 @@ public class LegacyRanker extends SourceRanker {
 		return !rfds.isEmpty();
 	}
 
-    protected Collection getShareableHosts() {
+    protected Collection<RemoteFileDesc> getShareableHosts() {
         return rfds;
     }
     
-    protected Collection getPotentiallyBusyHosts() {
+    protected Collection<RemoteFileDesc> getPotentiallyBusyHosts() {
         return rfds;
     }
     

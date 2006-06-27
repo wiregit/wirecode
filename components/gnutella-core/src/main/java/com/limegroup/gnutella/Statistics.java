@@ -49,7 +49,7 @@ public class Statistics {
      * @see calculateFractionalUptime
      */
     public int calculateDailyUptime() {
-        return (int)(calculateFractionalUptime()*(float)SECONDS_PER_DAY);
+        return (int)(calculateFractionalUptime()*SECONDS_PER_DAY);
     }
 
     /** 

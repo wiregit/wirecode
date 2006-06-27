@@ -1073,13 +1073,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 			int completedSize = (int) IncompleteFileManager.getCompletedSize(incompleteFile);
 			commonOutFile = new VerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
-			try {
-				// we must add an entry in IncompleteFileManager
-				incompleteFileManager.addEntry(incompleteFile, commonOutFile);
-			} catch (IOException ioe) {
-				ErrorService.error(ioe, "file: " + incompleteFile);
-				throw ioe;
-			}
+			//we must add an entry in IncompleteFileManager
+			incompleteFileManager.addEntry(incompleteFile, commonOutFile);
 		}
 	}
 
@@ -1437,7 +1432,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return addDownloadForced(rfd, cache);
     }
     
-    public synchronized boolean addDownload(Collection c, boolean cache) {
+    public synchronized boolean addDownload(Collection<? extends RemoteFileDesc> c, boolean cache) {
         if (stopped || isCompleted())
             return false;
         
@@ -1776,7 +1771,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
     }
 
-    public synchronized void addPossibleSources(Collection c) {
+    public synchronized void addPossibleSources(Collection<? extends RemoteFileDesc> c) {
         addDownload(c,false);
     }
     

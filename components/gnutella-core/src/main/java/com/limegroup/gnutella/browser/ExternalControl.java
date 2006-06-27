@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -108,7 +109,7 @@ public class ExternalControl {
 		
 		// ask callback if it wants to handle the magnets itself
 		if (!callback.handleMagnets(options)) {
-		downloadMagnet(options);
+		    downloadMagnet(options);
 		}
 	}
 	
@@ -263,7 +264,7 @@ public class ExternalControl {
 	 * @return array may be empty, but is never <code>null</code>
 	 */
 	public static MagnetOptions[] parseMagnets(String magnets) {
-		ArrayList list = new ArrayList();
+		List<MagnetOptions> list = new ArrayList<MagnetOptions>();
 		StringTokenizer tokens = new StringTokenizer
 			(magnets, System.getProperty("line.separator"));
 		while (tokens.hasMoreTokens()) {
@@ -273,6 +274,6 @@ public class ExternalControl {
 				list.addAll(Arrays.asList(options));			    
 			}
 		}
-		return (MagnetOptions[])list.toArray(new MagnetOptions[0]);
+		return list.toArray(new MagnetOptions[0]);
 	}
 }

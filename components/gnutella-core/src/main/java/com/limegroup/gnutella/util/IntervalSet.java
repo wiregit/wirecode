@@ -20,16 +20,16 @@ import com.limegroup.gnutella.downloader.Interval;
  * classes in the util package should be stand alone, but we need to have 
  * Interval stay in downloads for reasons of backward compatibility.
  */
-public class IntervalSet {
+public class IntervalSet implements Iterable<Interval>{
     
     /**
      * The sorted set of intervals this contains.
      */
-    private final List /*of Interval*/ intervals;
+    private final List<Interval> intervals;
     
     //constructor.
     public IntervalSet() {
-        intervals = new ArrayList();
+        intervals = new ArrayList<Interval>();
     }
 
     /**
@@ -166,7 +166,7 @@ public class IntervalSet {
         if(intervals.isEmpty())
             throw new NoSuchElementException();
         
-        return (Interval)intervals.get(0);
+        return intervals.get(0);
     }
     
     /**
@@ -177,7 +177,7 @@ public class IntervalSet {
         if(intervals.isEmpty())
             throw new NoSuchElementException();
         
-        Interval ret = (Interval)intervals.get(intervals.size()-1);
+        Interval ret = intervals.get(intervals.size()-1);
         return ret;
     }
     
@@ -229,7 +229,7 @@ public class IntervalSet {
      * If there are no overlaps, this method returns an empty List.
      */
     public List getOverlapIntervals(Interval checkInterval) {
-        List overlapBlocks = new ArrayList(); //initialize for this write
+        List<Interval> overlapBlocks = new ArrayList<Interval>(); //initialize for this write
         long high =checkInterval.high;
         long low = checkInterval.low;
         if (low > high)
@@ -269,12 +269,16 @@ public class IntervalSet {
         return overlapBlocks;
     }
 
-    public Iterator getAllIntervals() {
+    public Iterator<Interval> getAllIntervals() {
+        return intervals.iterator();
+    }
+    
+    public Iterator<Interval> iterator() {
         return intervals.iterator();
     }
 
-    public List getAllIntervalsAsList() {
-        return new ArrayList(intervals);
+    public List<Interval> getAllIntervalsAsList() {
+        return new ArrayList<Interval>(intervals);
     }
 
     public int getSize() {
@@ -361,7 +365,7 @@ public class IntervalSet {
      */
     public Object clone() {
         IntervalSet ret = new IntervalSet();
-        for (Iterator iter = getAllIntervals(); iter.hasNext(); )
+        for (Iterator<Interval> iter = getAllIntervals(); iter.hasNext(); )
             // access the internal TreeSet directly, - it's faster that way.
             ret.intervals.add(iter.next());
         return ret;
@@ -391,11 +395,9 @@ public class IntervalSet {
     /**
      * Comparator for intervals.
      */
-    private static class IntervalComparator implements Comparator {
+    private static class IntervalComparator implements Comparator<Interval> {
         private static final IntervalComparator INSTANCE = new IntervalComparator();
-        public int compare(Object a, Object b) {
-            Interval ia=(Interval)a;
-            Interval ib=(Interval)b;
+        public int compare(Interval ia, Interval ib) {
             if ( ia.low > ib.low ) 
                 return 1;
             else if (ia.low < ib.low )
@@ -453,10 +455,10 @@ public class IntervalSet {
     private void fix() {
         String preIntervals = intervals.toString();
         
-        List oldIntervals = new ArrayList(intervals);
+        List<Interval> oldIntervals = new ArrayList<Interval>(intervals);
         intervals.clear();
-        for(Iterator i = oldIntervals.iterator(); i.hasNext(); )
-            add((Interval)i.next());
+        for(Iterator<Interval> i = oldIntervals.iterator(); i.hasNext(); )
+            add(i.next());
         
         String postIntervals = intervals.toString();
         

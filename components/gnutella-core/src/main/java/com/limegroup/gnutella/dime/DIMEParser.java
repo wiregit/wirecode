@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
  * (or http://www.perfectxml.com/DIME.asp )
  * for information about DIME.
  */
-public class DIMEParser implements Iterator {
+public class DIMEParser implements Iterator<DIMERecord> {
     
     /**
      * The input stream this parser is working off of.
@@ -43,7 +43,7 @@ public class DIMEParser implements Iterator {
     /**
      * Returns the next element.
      */
-    public Object next() {
+    public DIMERecord next() {
         try {
             return nextRecord();
         } catch(IOException ioe) {
@@ -63,11 +63,11 @@ public class DIMEParser implements Iterator {
      *
      * If all records are already read, returns an empty list.
      */
-    public List getRecords() throws IOException {
+    public List<DIMERecord> getRecords() throws IOException {
         if(_lastRead)
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         
-        List records = new LinkedList();
+        List<DIMERecord> records = new LinkedList<DIMERecord>();
         while(!_lastRead)
             records.add(getNext());
         

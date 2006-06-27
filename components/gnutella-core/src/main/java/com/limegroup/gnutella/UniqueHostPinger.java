@@ -11,7 +11,7 @@ public class UniqueHostPinger extends UDPPinger {
     /**
      * set of endpoints we pinged since last expiration
      */
-    private final Set _recent = new IpPortSet();
+    private final Set<IpPort> _recent = new IpPortSet();
     
     public UniqueHostPinger() {
         super();

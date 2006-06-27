@@ -14,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -40,9 +39,11 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.http.SimpleHTTPHeaderValue;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.io.IOState;
@@ -65,7 +66,6 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
@@ -189,47 +189,47 @@ public class HTTPDownloader implements BandwidthTracker {
 	/**
 	 * The new alternate locations we've received for this file.
 	 */
-	private HashSet _locationsReceived;
+	private Set<RemoteFileDesc> _locationsReceived;
 
     /**
      *  The good locations to send the uploaders as in the alts list
      */
-    private Set _goodLocs;
+    private Set<DirectAltLoc> _goodLocs;
     
     /**
      * The firewalled locations to send to uploaders that are interested
      */
-    private Set _goodPushLocs;
+    private Set<PushAltLoc> _goodPushLocs;
     
     /**
      * The bad firewalled locations to send to uploaders that are interested
      */
-    private Set _badPushLocs;
+    private Set<PushAltLoc> _badPushLocs;
     
     /** 
      * The list to send in the n-alts list
      */
-    private Set _badLocs;
+    private Set<DirectAltLoc> _badLocs;
     
     /**
      * The list of already written alts, used to stop duplicates
      */
-    private Set _writtenGoodLocs;
+    private Set<DirectAltLoc> _writtenGoodLocs;
     
     /**
      * The list of already written n-alts, used to stop duplicates
      */ 
-    private Set _writtenBadLocs;
+    private Set<DirectAltLoc> _writtenBadLocs;
     
     /**
      * The list of already written push alts, used to stop duplicates
      */
-    private Set _writtenPushLocs;
+    private Set<PushAltLoc> _writtenPushLocs;
     
     /**
      * The list of already written bad push alts, used to stop duplicates
      */
-    private Set _writtenBadPushLocs;
+    private Set<PushAltLoc> _writtenBadPushLocs;
 
     
 	private int _port;
@@ -319,15 +319,15 @@ public class HTTPDownloader implements BandwidthTracker {
 		_host = rfd.getHost();
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
-        _locationsReceived = new HashSet();
-        _goodLocs = new HashSet();
-        _badLocs = new HashSet();
-        _goodPushLocs = new HashSet();
-        _badPushLocs = new HashSet();
-        _writtenGoodLocs = new HashSet();
-        _writtenBadLocs = new HashSet();
-        _writtenPushLocs = new HashSet();
-        _writtenBadPushLocs = new HashSet();
+        _locationsReceived = new HashSet<RemoteFileDesc>();
+        _goodLocs = new HashSet<DirectAltLoc>();
+        _badLocs = new HashSet<DirectAltLoc>();
+        _goodPushLocs = new HashSet<PushAltLoc>();
+        _badPushLocs = new HashSet<PushAltLoc>();
+        _writtenGoodLocs = new HashSet<DirectAltLoc>();
+        _writtenBadLocs = new HashSet<DirectAltLoc>();
+        _writtenPushLocs = new HashSet<PushAltLoc>();
+        _writtenBadPushLocs = new HashSet<PushAltLoc>();
 		_amountRead = 0;
 		_totalAmountRead = 0;
         _inNetwork = inNetwork;
@@ -344,7 +344,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  received locations, can be <tt>null</tt> if we could not create
      *  a collection, or could be empty
      */
-    Collection getLocationsReceived() { 
+    Collection<RemoteFileDesc> getLocationsReceived() { 
 	    return _locationsReceived;
     }
     
@@ -359,10 +359,9 @@ public class HTTPDownloader implements BandwidthTracker {
     		}
     		synchronized(_goodLocs) {
     			if(!_writtenGoodLocs.contains(loc)) //not written earlier
-    				_goodLocs.add(loc); //duplicates make no difference
+    				_goodLocs.add((DirectAltLoc)loc); //duplicates make no difference
     		}
-    	}
-    	else {
+    	} else if(loc instanceof PushAltLoc){
     		synchronized(_badPushLocs) {
     			//If we ever thought loc was bad, forget that we did, so that we can
     			//add it to the n-alts list again, if it fails -- remove from
@@ -372,10 +371,12 @@ public class HTTPDownloader implements BandwidthTracker {
     		}
     		synchronized(_goodPushLocs) {
     			if(!_writtenPushLocs.contains(loc)) //not written earlier
-    				_goodPushLocs.add(loc); //duplicates make no difference
+    				_goodPushLocs.add((PushAltLoc)loc); //duplicates make no difference
     				
     		}
-    	}
+    	} else {
+    	    throw new IllegalStateException("bad location of class: " + loc.getClass());
+        }
     }
     
     void addFailedAltLoc(AlternateLocation loc) {
@@ -390,10 +391,9 @@ public class HTTPDownloader implements BandwidthTracker {
         
     		synchronized(_badLocs) {
     			if(!_writtenBadLocs.contains(loc))//no need to repeat to uploader
-    				_badLocs.add(loc); //duplicates make no difference
+    				_badLocs.add((DirectAltLoc)loc); //duplicates make no difference
     		}
-    	}
-    	else {
+    	} else if(loc instanceof PushAltLoc){
     		synchronized(_goodPushLocs) {
     			_writtenPushLocs.remove(loc);
     			_goodPushLocs.remove(loc);
@@ -401,9 +401,11 @@ public class HTTPDownloader implements BandwidthTracker {
         
     		synchronized(_badPushLocs) {
     			if(!_writtenBadPushLocs.contains(loc))//no need to repeat to uploader
-    				_badPushLocs.add(loc); //duplicates make no difference
+    				_badPushLocs.add((PushAltLoc)loc); //duplicates make no difference
     		}
-    	}
+    	} else {
+            throw new IllegalStateException("bad location of class: " + loc.getClass());
+        }
     }
     
     ///////////////////////////////// Connection /////////////////////////////
@@ -494,14 +496,14 @@ public class HTTPDownloader implements BandwidthTracker {
 		
         observerHandler.setDelegate(observer);
         
-        Map headers = new LinkedHashMap();
-        Set features = new HashSet();
+        Map<HTTPHeaderName, HTTPHeaderValue> headers = new LinkedHashMap<HTTPHeaderName, HTTPHeaderValue>();
+        Set<HTTPHeaderValue> features = new HashSet<HTTPHeaderValue>();
         
-        headers.put("HOST", _host + ":" + _port);
-        headers.put("User-Agent", CommonUtils.getHttpServer());
+        headers.put(HTTPHeaderName.HOST, new SimpleHTTPHeaderValue(_host + ":" + _port));
+        headers.put(HTTPHeaderName.USER_AGENT, ConstantHTTPHeaderValue.USER_AGENT);
 
         if (supportQueueing) {
-            headers.put("X-Queue", "0.1");
+            headers.put(HTTPHeaderName.QUEUE, ConstantHTTPHeaderValue.QUEUE_VERSION);
             features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
         }
         
@@ -518,8 +520,7 @@ public class HTTPDownloader implements BandwidthTracker {
         // Add ourselves to the mesh if the partial file is valid
         //if I'm firewalled add myself only if the other guy wants falts
         if( isPartialFileValid() && 
-        	 (RouterService.acceptedIncomingConnection() ||
-        			_wantsFalts)) {
+        	 (RouterService.acceptedIncomingConnection() || _wantsFalts)) {
         		AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
         		if (me != null)
         			addSuccessfulAltLoc(me);
@@ -532,17 +533,15 @@ public class HTTPDownloader implements BandwidthTracker {
         //We don't want to hold locks while doing network operations, so we use
         //this variable to clone _goodLocs and _badLocs and write to network
         //while iterating over the clone
-        Set writeClone = null;
+        Set<AlternateLocation> writeClone = null;
         
         //write altLocs 
         synchronized(_goodLocs) {
             if(_goodLocs.size() > 0) {
-                writeClone = new HashSet();
-                Iterator iter = _goodLocs.iterator();
-                while(iter.hasNext()) {
-                    Object next = iter.next();
-                    writeClone.add(next);
-                    _writtenGoodLocs.add(next);
+                writeClone = new HashSet<AlternateLocation>();
+                for(DirectAltLoc loc : _goodLocs) {
+                    writeClone.add(loc);
+                    _writtenGoodLocs.add(loc);
                 }
                 _goodLocs.clear();
             }
@@ -554,12 +553,10 @@ public class HTTPDownloader implements BandwidthTracker {
         //write-nalts        
         synchronized(_badLocs) {
             if(_badLocs.size() > 0) {
-                writeClone = new HashSet();
-                Iterator iter = _badLocs.iterator();
-                while(iter.hasNext()) {
-                    Object next = iter.next();
-                    writeClone.add(next);
-                    _writtenBadLocs.add(next);
+                writeClone = new HashSet<AlternateLocation>();
+                for(DirectAltLoc loc : _badLocs) {
+                    writeClone.add(loc);
+                    _writtenBadLocs.add(loc);
                 }
                 _badLocs.clear();
             }
@@ -581,21 +578,18 @@ public class HTTPDownloader implements BandwidthTracker {
         	writeClone = null;
         	synchronized(_goodPushLocs) {
         		if(_goodPushLocs.size() > 0) {
-        			writeClone = new HashSet();
-        			Iterator iter = _goodPushLocs.iterator();
-        			while(iter.hasNext()) {
-        				PushAltLoc next = (PushAltLoc)iter.next();
-        				
+        			writeClone = new HashSet<AlternateLocation>();
+                    for(PushAltLoc loc : _goodPushLocs) {
         				// we should not have empty proxies unless this is ourselves
-        				if (next.getPushAddress().getProxies().isEmpty()) {
-        				    if (next.getPushAddress() instanceof PushEndpointForSelf)
+        				if (loc.getPushAddress().getProxies().isEmpty()) {
+        				    if (loc.getPushAddress() instanceof PushEndpointForSelf)
         				        continue;
         				    else
         				        Assert.that(false,"empty pushloc in downloader");
         				}
         				
-        				writeClone.add(next);
-        				_writtenPushLocs.add(next);
+        				writeClone.add(loc);
+        				_writtenPushLocs.add(loc);
         			}
         			_goodPushLocs.clear();
         		}
@@ -607,16 +601,13 @@ public class HTTPDownloader implements BandwidthTracker {
         	writeClone = null;
         	synchronized(_badPushLocs) {
                 if(_badPushLocs.size() > 0) {
-                    writeClone = new HashSet();
-                    Iterator iter = _badPushLocs.iterator();
-                    while(iter.hasNext()) {
-                        PushAltLoc next = (PushAltLoc)iter.next();
-                        
+                    writeClone = new HashSet<AlternateLocation>();
+                    for(PushAltLoc loc : _badPushLocs) {
                         // no empty proxies allowed here
-        				Assert.that(!next.getPushAddress().getProxies().isEmpty());
+        				Assert.that(!loc.getPushAddress().getProxies().isEmpty());
         				
-        				writeClone.add(next);
-                        _writtenBadPushLocs.add(next);
+        				writeClone.add(loc);
+                        _writtenBadPushLocs.add(loc);
                     }
                     _badPushLocs.clear();
                 }
@@ -629,18 +620,18 @@ public class HTTPDownloader implements BandwidthTracker {
         
         
 
-        headers.put("Range", "bytes=" + _initialReadingPoint + "-" + (stop-1));
+        headers.put(HTTPHeaderName.RANGE, new SimpleHTTPHeaderValue("bytes=" + _initialReadingPoint + "-" + (stop-1)));
         
 		if (RouterService.acceptedIncomingConnection() &&
            !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
             int port = RouterService.getPort();
             String host = NetworkUtils.ip2string(RouterService.getAddress());
-            headers.put("X-Node", host + ":" + port);
+            headers.put(HTTPHeaderName.NODE, new SimpleHTTPHeaderValue(host + ":" + port));
             features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
             // Legacy chat header. Replaced by X-Features header / X-Node
             // header
             if (ChatSettings.CHAT_ENABLED.getValue()) {
-                headers.put("Chat", host + ":" + port);
+                headers.put(HTTPHeaderName.CHAT, new SimpleHTTPHeaderValue(host + ":" + port));
                 features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
             }
         }	
@@ -652,7 +643,7 @@ public class HTTPDownloader implements BandwidthTracker {
         // Write X-Downloaded header to inform uploader about
         // how many bytes already transferred for this file
         if ( amountDownloaded > 0 ) {
-            headers.put(HTTPHeaderName.DOWNLOADED, "" + amountDownloaded);
+            headers.put(HTTPHeaderName.DOWNLOADED, new SimpleHTTPHeaderValue("" + amountDownloaded));
         }
 		
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
@@ -705,9 +696,9 @@ public class HTTPDownloader implements BandwidthTracker {
         
         observerHandler.setDelegate(observer);
         
-        Map headers = new LinkedHashMap();
-        headers.put("HOST", _host + ":" + _port);
-        headers.put("User-Agent", CommonUtils.getHttpServer());
+        Map<HTTPHeaderName, HTTPHeaderValue> headers = new LinkedHashMap<HTTPHeaderName, HTTPHeaderValue>();
+        headers.put(HTTPHeaderName.HOST, new SimpleHTTPHeaderValue(_host + ":" + _port));
+        headers.put(HTTPHeaderName.USER_AGENT, ConstantHTTPHeaderValue.USER_AGENT);
         
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
                 "GET " + _thexUri + " HTTP/1.1",
@@ -772,18 +763,17 @@ public class HTTPDownloader implements BandwidthTracker {
      * Ensures a content-length is included,
      * and if queued returns a queued response.
      */
-    private ConnectionStatus parseThexHeaders(int code, boolean failed) throws IOException {
+    private ConnectionStatus parseThexHeaders(int code, boolean failed) {
         if(LOG.isDebugEnabled())
             LOG.debug(_rfd + " consuming headers");
         
         _contentLength = -1;
-        for(Iterator i = _headerReader.getHeaders().entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            String header = (String)next.getKey();
+        for(Map.Entry<String, String> entry : _headerReader.getHeaders().entrySet()) {
+            String header = entry.getKey();
             if(HTTPHeaderName.CONTENT_LENGTH.is(header))
-                _contentLength = readContentLength((String)next.getValue());
+                _contentLength = readContentLength(entry.getValue());
             if(code == 503 && HTTPHeaderName.QUEUE.is(header)) {
-                String value = (String)next.getValue();
+                String value = entry.getValue();
                 int queueInfo[] = { -1, -1, -1 };
                 parseQueueHeaders(value, queueInfo);
                 int min = queueInfo[0];
@@ -825,7 +815,7 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	public void parseHeaders() throws IOException {
         String connectLine = _headerReader.getConnectLine();
-        Properties headers = _headerReader.getHeaders();
+        Map<String, String> headers = _headerReader.getHeaders();
         
         if (connectLine == null || connectLine.equals(""))
             throw new IOException();
@@ -836,10 +826,9 @@ public class HTTPDownloader implements BandwidthTracker {
         //ignores 2 of them - queue length, and maxUploadSlots.
         int[] refQueueInfo = {-1,-1,-1};
         //Now read each header...
-        for(Iterator i = headers.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            String header = (String)next.getKey();
-            String value = (String)next.getValue();
+        for(Map.Entry<String, String> entry : headers.entrySet()) {
+            String header = entry.getKey();
+            String value = entry.getValue();
 			
             //For "Content-Range" headers, we store what the remote side is
             //going to give us.  Users should examine the interval and
@@ -1821,8 +1810,8 @@ public class HTTPDownloader implements BandwidthTracker {
         
         if ( downloadThrottle < 100 )
         {
-            downloadRate = (((float)downloadThrottle/100.f)*
-             ((float)ConnectionSettings.CONNECTION_SPEED.getValue()/8.f))*1024.f;
+            downloadRate = ((downloadThrottle/100.f)*
+             (ConnectionSettings.CONNECTION_SPEED.getValue()/8.f))*1024.f;
         }
         setRate( downloadRate );
     }

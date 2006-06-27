@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -23,6 +22,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
 
@@ -161,14 +161,12 @@ public final class ConnectionChecker implements Runnable {
      */
     public synchronized void run() {
         try {
-            List hostList = Arrays.asList(STANDARD_HOSTS);
+            List<String> hostList = Arrays.asList(STANDARD_HOSTS);
             
             // Add some randomization.
             Collections.shuffle(hostList);
             
-            Iterator iter = hostList.iterator();
-            while(iter.hasNext()) {
-                String curHost = (String)iter.next();
+            for(String curHost : hostList) {
                 connectToHost(curHost);
                 
                 // Break out of the loop if we've already discovered that we're 
@@ -236,7 +234,7 @@ public final class ConnectionChecker implements Runnable {
      */
     private boolean udpIsDead() {
         PingRequest ping = PingRequest.createUDPPing();
-        Collection hosts = RouterService.getPreferencedHosts(false,"en",50);
+        Collection<IpPort> hosts = RouterService.getPreferencedHosts(false,"en",50);
         UDPPinger myPinger = RouterService.getHostCatcher().getPinger();
         UDPChecker checker = new UDPChecker();
         

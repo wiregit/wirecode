@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
@@ -61,7 +62,7 @@ public final class UrnCache {
      * UrnCache is a singleton, so obtaining UrnCache's monitor is sufficient--
      * and slightly more convenient.
      */
-    private static final Map /* UrnSetKey -> HashSet */ URN_MAP = createMap();
+    private final Map<UrnSetKey, Set<URN>> URN_MAP;
     
     /**
      * The ProcessingQueue that Files are hashed in.
@@ -71,7 +72,7 @@ public final class UrnCache {
     /**
      * The set of files that are pending hashing to the callbacks that are listening to them.
      */
-    private Map /* File -> List (of UrnCallback) */ pendingHashing = new HashMap();
+    private Map<File, List<UrnCallback>> pendingHashing = new HashMap<File, List<UrnCallback>>();
     
     /**
      * Whether or not data is dirty since the last time we saved.
@@ -92,8 +93,11 @@ public final class UrnCache {
     /**
      * Create and initialize urn cache.
      */
+    @SuppressWarnings("unchecked")
     private UrnCache() {
-		dirty = removeOldEntries(URN_MAP);
+        Map map = createMap();
+		dirty = scanAndRemoveOldEntries(map);
+        URN_MAP = (Map<UrnSetKey, Set<URN>>)map;
 	}
 
     /**
@@ -103,7 +107,7 @@ public final class UrnCache {
      * completes, fails, or is interrupted.
      */
     public synchronized void calculateAndCacheUrns(File file, UrnCallback callback) {			
-    	Set urns = getUrns(file);
+    	Set<URN> urns = getUrns(file);
         // TODO: If we ever create more URN types (other than SHA1)
         // we cannot just check for size == 0, we must check for
         // size == NUM_URNS_WE_WANT, and calculateUrns should only
@@ -113,9 +117,9 @@ public final class UrnCache {
         } else {
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding: " + file + " to be hashed.");
-            List list = (List)pendingHashing.get(file);
+            List<UrnCallback> list = pendingHashing.get(file);
             if(list == null) {
-                list = new ArrayList(1);
+                list = new ArrayList<UrnCallback>(1);
                 pendingHashing.put(file, list);
             }
             list.add(callback);
@@ -130,10 +134,10 @@ public final class UrnCache {
         if(LOG.isDebugEnabled())
             LOG.debug("Clearing all pending hashes owned by: " + owner);
         
-        for(Iterator i = pendingHashing.values().iterator(); i.hasNext(); ) {
-            List callbacks = (List)i.next();
+        for(Iterator<List<UrnCallback>> i = pendingHashing.values().iterator(); i.hasNext(); ) {
+            List<UrnCallback> callbacks = i.next();
             for(int j = callbacks.size() - 1; j >= 0; j--) {
-                UrnCallback c = (UrnCallback)callbacks.get(j);
+                UrnCallback c = callbacks.get(j);
                 if(c.isOwner(owner))
                     callbacks.remove(j);
             }            
@@ -149,10 +153,10 @@ public final class UrnCache {
     public synchronized void clearPendingHashesFor(File file, Object owner) {
         if(LOG.isDebugEnabled())
             LOG.debug("Clearing all pending hashes for: " + file + ", owned by: " + owner);
-        List callbacks = (List)pendingHashing.get(file);
+        List<UrnCallback> callbacks = pendingHashing.get(file);
         if(callbacks != null) {
             for(int j = callbacks.size() - 1; j >= 0; j--) {
-                UrnCallback c = (UrnCallback)callbacks.get(j);
+                UrnCallback c = callbacks.get(j);
                 if(c.isOwner(owner))
                     callbacks.remove(j);
             }
@@ -171,8 +175,8 @@ public final class UrnCache {
      * the calling thread is interrupted while executing this, returns an empty
      * set.
      */
-    public Set calculateUrns(File file) throws IOException, InterruptedException {
-        Set set = new HashSet(1);
+    public Set<URN> calculateUrns(File file) throws IOException, InterruptedException {
+        Set<URN> set = new HashSet<URN>(1);
         set.add(URN.createSHA1Urn(file));
         return set;
 	}
@@ -187,17 +191,17 @@ public final class UrnCache {
 	 *  speficied <tt>File</tt> instance, guaranteed to be non-null and 
 	 *  unmodifiable, but possibly empty
      */
-    public synchronized Set getUrns(File file) {
+    public synchronized Set<URN> getUrns(File file) {
         // don't trust failed mod times
         if (file.lastModified() == 0L)
-			return Collections.EMPTY_SET;
+			return Collections.emptySet();
 
 		UrnSetKey key = new UrnSetKey(file);
 
         // one or more "urn:" names for this file 
-		Set cachedUrns = (Set)URN_MAP.get(key);
+		Set<URN> cachedUrns = URN_MAP.get(key);
 		if(cachedUrns == null)
-			return Collections.EMPTY_SET;
+			return Collections.emptySet();
 
 		return cachedUrns;
     }
@@ -216,7 +220,7 @@ public final class UrnCache {
 	 *
 	 * @param file the <tt>File</tt> instance containing URNs to store
      */
-    public synchronized void addUrns(File file, Set urns) {
+    public synchronized void addUrns(File file, Set<? extends URN> urns) {
 		UrnSetKey key = new UrnSetKey(file);
         URN_MAP.put(key, Collections.unmodifiableSet(urns));
         dirty = true;
@@ -226,7 +230,7 @@ public final class UrnCache {
      * Loads values from cache file, if available.  If the cache file is
      * not readable, tries the backup.
      */
-    private static Map createMap() {
+    private Map createMap() {
         Map result;
         result = readMap(URN_CACHE_FILE);
         if(result == null)
@@ -239,25 +243,20 @@ public final class UrnCache {
     /**
      * Loads values from cache file, if available.
      */
-    private static Map readMap(File file) {
-        Map result;
+    @SuppressWarnings("unchecked")
+    private static Map<UrnSetKey, Set<URN>> readMap(File file) {
+        Map<UrnSetKey, Set<URN>> result;
         ObjectInputStream ois = null;
 		try {
             ois = new ConverterObjectInputStream(
                     new BufferedInputStream(
                         new FileInputStream(file)));
-			result = (Map)ois.readObject();
+            result = (Map)ois.readObject();
 	    } catch(Throwable t) {
 	        LOG.error("Unable to read UrnCache", t);
 	        result = null;
 	    } finally {
-            if(ois != null) {
-                try {
-                    ois.close();
-                } catch(IOException e) {
-                    // all we can do is try to close it
-                }
-            }
+            IOUtils.close(ois);
         }
         return result;
 	}
@@ -268,26 +267,42 @@ public final class UrnCache {
 	 *
 	 * @param map the <tt>Map</tt> to check
 	 */
-	private static boolean removeOldEntries(Map map) {
+	@SuppressWarnings("unchecked")
+    private static boolean scanAndRemoveOldEntries(Map map) {
         // discard outdated info
         boolean dirty = false;
-        Iterator iter = map.keySet().iterator();
-        while (iter.hasNext()) {
-            Object next = iter.next();
-            if(next instanceof UrnSetKey) {
-                UrnSetKey key = (UrnSetKey)next;
-    
-                if(key == null) continue;
-    
-                // check to see if file still exists unmodified
-                File f = new File(key._path);
-                if (!f.exists() || f.lastModified() != key._modTime) {
-                    dirty = true;
-                    iter.remove();
-                }
-            } else {
+        for(Iterator<Map.Entry> i = map.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry entry = i.next();
+            if(!(entry.getKey() instanceof UrnSetKey)) {
+                i.remove();
                 dirty = true;
-                iter.remove();
+                continue;
+            }
+            
+            UrnSetKey key = (UrnSetKey)entry.getKey();
+            File f = new File(key._path);
+            if (!f.exists() || f.lastModified() != key._modTime) {
+                dirty = true;
+                i.remove();
+                continue;
+            }
+            
+            if(!(entry.getValue() instanceof Set)) {
+                i.remove();
+                dirty = true;
+                continue;
+            }
+            
+            Set set = GenericsUtils.scanForSet(entry.getValue(), URN.class, GenericsUtils.ScanMode.NEW_COPY_REMOVED, HashSet.class);
+            if(set.isEmpty()) {
+                i.remove();
+                dirty = true;
+                continue;
+            }
+            
+            if(set != entry.getValue()) { // if it changed, replace the value w/ unmodifiable
+                dirty = true;
+                entry.setValue(Collections.unmodifiableSet(set));
             }
         }
         return dirty;
@@ -326,11 +341,11 @@ public final class UrnCache {
         }
         
         public void run() {
-            Set urns;
-            List callbacks;
+            Set<URN> urns;
+            List<UrnCallback> callbacks;
             
             synchronized(UrnCache.this) {
-                callbacks = (List)pendingHashing.remove(file);
+                callbacks = pendingHashing.remove(file);
                 urns = getUrns(file); // already calculated?
             }
             
@@ -355,7 +370,7 @@ public final class UrnCache {
                 // we don't need to synchronize while iterating over it, because
                 // nothing else can modify it now.
                 for(int i = 0; i < callbacks.size(); i++)
-                    ((UrnCallback)callbacks.get(i)).urnsCalculated(file, urns);
+                    callbacks.get(i).urnsCalculated(file, urns);
             }
         }
     }

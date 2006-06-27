@@ -441,7 +441,7 @@ public class VerifyingFile {
     /**
      * @return List of Intervals that should be serialized.  Excludes pending intervals.
      */
-    public synchronized List getSerializableBlocks() {
+    public synchronized List<Interval> getSerializableBlocks() {
         IntervalSet ret = new IntervalSet();
         for (Iterator iter = verifiedBlocks.getAllIntervals(); iter.hasNext();) 
             ret.add((Interval) iter.next());
@@ -471,7 +471,7 @@ public class VerifyingFile {
     /**
      * Returns all verified blocks as a List.
      */ 
-    public synchronized List getVerifiedBlocksAsList() {
+    public synchronized List<Interval> getVerifiedBlocksAsList() {
         return verifiedBlocks.getAllIntervalsAsList();
     }
 

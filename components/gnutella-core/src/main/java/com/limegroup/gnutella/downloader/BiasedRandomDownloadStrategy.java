@@ -121,7 +121,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
      *         downloaded from the beginning of the file.
      */
     private float getBiasProbability(long previewBytesDownloaded, long fileSize) {
-        long goal = Math.max((long)MIN_PREVIEW_BYTES, (long)(MIN_PREVIEW_FRACTION * fileSize));
+        long goal = Math.max(MIN_PREVIEW_BYTES, (long)(MIN_PREVIEW_FRACTION * fileSize));
         // If we don't have our goal yet, devote 100% of resources to extending 
         // the previewable length
         if (previewBytesDownloaded < goal) 

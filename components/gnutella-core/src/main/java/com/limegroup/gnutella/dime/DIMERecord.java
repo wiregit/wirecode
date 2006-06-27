@@ -164,7 +164,7 @@ public class DIMERecord {
     /**
      * A Map of the options.
      */
-    private Map _optionsMap = null;
+    private Map<String, String> _optionsMap = null;
     
     /**
      * Constructs a new DIMERecord with the given data.
@@ -430,7 +430,7 @@ public class DIMERecord {
      * @throws DIMEMessageException
      *             in case of a problem reading the message
      */
-    public Map getOptionsMap() throws DIMEMessageException {
+    public Map<String, String> getOptionsMap() throws DIMEMessageException {
         if (_optionsMap == null)
             _optionsMap = parseOptions(getOptions());
         return _optionsMap;
@@ -574,9 +574,9 @@ public class DIMERecord {
     /**
      * Parses a byte array of options into a Map.
      */
-    private static Map parseOptions(byte[] options)
+    private static Map<String, String> parseOptions(byte[] options)
         throws DIMEMessageException {
-        Map map = new HashMap();
+        Map<String, String> map = new HashMap<String, String>();
         int offset = 0;
         while (offset < options.length) {
             if (options.length - offset < 4)

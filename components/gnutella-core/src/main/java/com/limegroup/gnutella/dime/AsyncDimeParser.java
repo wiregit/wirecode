@@ -26,7 +26,7 @@ public class AsyncDimeParser extends ReadState {
     private boolean lastRead = false;
     
     /** A list of DIMERecords this has read. */
-    private List records = new LinkedList();
+    private List<DIMERecord> records = new LinkedList<DIMERecord>();
     
     private long amountRead = 0;
     
@@ -79,7 +79,7 @@ public class AsyncDimeParser extends ReadState {
         }
     }
     
-    public List getRecords() {
+    public List<DIMERecord> getRecords() {
         return records;
     }
 

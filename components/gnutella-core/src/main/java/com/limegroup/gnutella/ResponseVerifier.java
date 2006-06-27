@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -176,7 +177,7 @@ public class ResponseVerifier {
         String[] terms = null;
         // combine xml and standard keywords
         // ---------------------------------------
-        HashSet qWords=new HashSet();
+        Set<String> qWords=new HashSet<String>();
         terms = StringUtils.split(query.toLowerCase(), DELIMITERS);
         // add the standard query words..
         for (int i = 0; i < terms.length; i++)
@@ -193,7 +194,7 @@ public class ResponseVerifier {
             }
         }
         
-        return Collections.unmodifiableList(new ArrayList(qWords));
+        return Collections.unmodifiableList(new ArrayList<String>(qWords));
     }
 }
 

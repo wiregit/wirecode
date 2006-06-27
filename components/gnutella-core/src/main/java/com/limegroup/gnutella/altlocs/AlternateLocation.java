@@ -2,7 +2,6 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.Endpoint;
@@ -183,7 +182,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
             if (rfd.getPushAddr() != null) 
                 copy = rfd.getPushAddr();
             else 
-                copy = new PushEndpoint(rfd.getClientGUID(),Collections.EMPTY_SET,0,0,null);
+                copy = new PushEndpoint(rfd.getClientGUID(),IpPort.EMPTY_SET,0,0,null);
 		    return new PushAltLoc(copy,urn);
 		} 
 	}

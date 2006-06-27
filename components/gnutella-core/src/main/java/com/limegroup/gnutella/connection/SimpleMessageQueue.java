@@ -8,7 +8,7 @@ import com.limegroup.gnutella.util.Buffer;
  * Simple LIFO or FIFO message queue.
  */
 public class SimpleMessageQueue extends AbstractMessageQueue {
-    private Buffer _buf;
+    private Buffer<Message> _buf;
     private boolean _lifo;
     
     /**
@@ -26,12 +26,12 @@ public class SimpleMessageQueue extends AbstractMessageQueue {
                                  int capacity, 
                                  boolean lifo) {
         super(cycle, timeout);
-        this._buf=new Buffer(capacity);
+        this._buf=new Buffer<Message>(capacity);
         this._lifo=lifo;
     }
 
     protected Message addInternal(Message m) {
-        return (Message)_buf.addLast(m);
+        return _buf.addLast(m);
     }
 
     protected Message removeNextInternal() {
@@ -39,9 +39,9 @@ public class SimpleMessageQueue extends AbstractMessageQueue {
             return null;
 
         if (_lifo)
-            return (Message)_buf.removeLast();
+            return _buf.removeLast();
         else
-            return (Message)_buf.removeFirst();
+            return _buf.removeFirst();
     }
     
     public int size() {

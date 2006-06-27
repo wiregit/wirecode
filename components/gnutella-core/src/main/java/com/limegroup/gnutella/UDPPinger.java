@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,14 +47,14 @@ public class UDPPinger {
     /**
      * Ranks the specified Collection of hosts.
      */
-    public void rank(Collection hosts) {
+    public void rank(Collection<? extends IpPort> hosts) {
         rank(hosts, null, null, null);
     }
     
     /**
      * Ranks the specified Collection of hosts with the given message.
      */
-    public void rank(Collection hosts, Message message) {
+    public void rank(Collection<? extends IpPort> hosts, Message message) {
         rank(hosts, null, null, message);
     }
     
@@ -63,7 +62,7 @@ public class UDPPinger {
      * Ranks the specified Collection of hosts with the given
      * Canceller.
      */
-    public void rank(Collection hosts, Cancellable canceller) {
+    public void rank(Collection<? extends IpPort> hosts, Cancellable canceller) {
         rank(hosts, null, canceller, null);
     }
     
@@ -71,7 +70,7 @@ public class UDPPinger {
      * Ranks the specified collection of hosts with the given 
      * MessageListener.
      */
-    public void rank(Collection hosts, MessageListener listener) {
+    public void rank(Collection<? extends IpPort> hosts, MessageListener listener) {
         rank(hosts, listener, null, null);
     }
     
@@ -79,7 +78,7 @@ public class UDPPinger {
      * Ranks the specified collection of hosts with the given
      * MessageListener & Cancellable.
      */
-    public void rank(Collection hosts, MessageListener listener,
+    public void rank(Collection<? extends IpPort> hosts, MessageListener listener,
                             Cancellable canceller) {
         rank(hosts, listener, canceller, null);
     }
@@ -96,7 +95,7 @@ public class UDPPinger {
      * @throws <tt>NullPointerException</tt> if the hosts argument is 
      *  <tt>null</tt>
      */
-    public void rank(final Collection hosts,
+    public void rank(final Collection<? extends IpPort> hosts,
                             final MessageListener listener,
                             Cancellable canceller,
                             final Message message) {
@@ -133,7 +132,7 @@ public class UDPPinger {
     /**
      * Sends the given send bundle.
      */
-    protected void send(Collection hosts, 
+    protected void send(Collection<? extends IpPort> hosts, 
             final MessageListener listener,
             Cancellable canceller,
             Message message) {
@@ -151,9 +150,11 @@ public class UDPPinger {
             RouterService.getMessageRouter().registerMessageListener(messageGUID, listener);
 
         
-        Iterator iter = hosts.iterator();
-        while(iter.hasNext() && !canceller.isCancelled()) 
-            sendSingleMessage((IpPort)iter.next(),message);
+        for(IpPort ipp : hosts) {
+            if(canceller.isCancelled())
+                break;
+            sendSingleMessage(ipp, message);
+        }
 
         // also take care of any MessageListeners
         if (listener != null) {
@@ -195,12 +196,12 @@ public class UDPPinger {
      * Simple bundle that can send itself.
      */
     private class SenderBundle implements Runnable {
-        private final Collection hosts;
+        private final Collection<? extends IpPort> hosts;
         private final MessageListener listener;
         private final Cancellable canceller;
         private final Message message;
         
-        public SenderBundle(Collection hosts, MessageListener listener,
+        public SenderBundle(Collection<? extends IpPort> hosts, MessageListener listener,
                       Cancellable canceller, Message message) {
             this.hosts = hosts;
             this.listener = listener;

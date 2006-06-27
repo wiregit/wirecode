@@ -643,15 +643,14 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @param httpString comma-separated list of proxies
 	 * @throws IOException if parsing of the http fails.
 	 */
-	public static void overwriteProxies(byte [] guid, String httpString) 
-		throws IOException {
+	public static void overwriteProxies(byte [] guid, String httpString) {
 	    Set<IpPort> newSet = new HashSet<IpPort>();
 	    StringTokenizer tok = new StringTokenizer(httpString,",");
 	    while(tok.hasMoreTokens()) {
 	        String proxy = tok.nextToken().trim();
 	        try {
 	            newSet.add(parseIpPort(proxy));
-	        }catch(IOException ohWell){}
+	        } catch(IOException ohWell){}
 	    }
 
         overwriteProxies(guid, newSet);

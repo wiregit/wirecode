@@ -6,5 +6,5 @@ import com.limegroup.gnutella.RemoteFileDesc;
 
 public interface MeshHandler {
     void informMesh(RemoteFileDesc rfd, boolean good);
-    void addPossibleSources(Collection hosts);
+    void addPossibleSources(Collection<? extends RemoteFileDesc> hosts);
 }

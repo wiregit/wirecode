@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.archive;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,7 +16,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
-class File {
+class ArchiveFile {
 
 	/*
 	 * From http://www.archive.org/help/contrib-advanced.php:
@@ -38,7 +40,7 @@ class File {
 	 * dynamically generated so check back later for newly acceptable formats.
 	 */
 
-	private static final HashMap _mp3Formats = new HashMap();
+	private static final Map<Integer, String> _mp3Formats = new HashMap<Integer, String>();
 
 	static {
 
@@ -73,7 +75,7 @@ class File {
 	/*
 	 * @throws UnsupportedFormatException
 	 */
-	File(FileDesc fd) {
+	ArchiveFile(FileDesc fd) {
 		_fd = fd;
 		
 		final LimeXMLDocument xmlDoc = _fd.getXMLDocument();
@@ -93,7 +95,7 @@ class File {
 					final Integer bitRate = Integer.valueOf( bitRateStr );
 					
 					if (_mp3Formats.get( bitRate ) != null ) {
-						_format = (String) _mp3Formats.get( bitRate );
+						_format = _mp3Formats.get( bitRate );
 					} 
 				}
 			} catch (NumberFormatException e) {
@@ -162,7 +164,7 @@ class File {
 		return _fd.getFileSize();
 	}
 	
-	java.io.File getIOFile() {
+	File getIOFile() {
 		return _fd.getFile();
 	}
 	

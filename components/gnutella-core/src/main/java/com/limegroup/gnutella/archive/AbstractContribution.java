@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.util.CoWList;
 
 
 abstract class AbstractContribution implements Contribution {
@@ -24,11 +23,10 @@ abstract class AbstractContribution implements Contribution {
 
 	private String _username, _password;
 	
-	private final LinkedHashMap _files = new LinkedHashMap();
+	private final LinkedHashMap<FileDesc, ArchiveFile> _files = new LinkedHashMap<FileDesc, ArchiveFile>();
     
 	
-	/** String -> String */
-	private HashMap _fields = new HashMap();
+	private HashMap<String, String> _fields = new HashMap<String, String>();
 
 	private volatile boolean _cancelled;
     
@@ -39,12 +37,12 @@ abstract class AbstractContribution implements Contribution {
     private long _totalBytesSent;
     
     protected long _totalUploadSize;
-    protected final Map _fileNames2Progress = new HashMap();
+    protected final Map<String, UploadFileProgress> _fileNames2Progress = new HashMap<String, UploadFileProgress>();
 
     
-    private int _id = NOT_CONNECTED;
+    private ContributionState _id = ContributionState.NOT_CONNECTED;
     
-    private final List _uploadListeners = new CoWList(CoWList.ARRAY_LIST);
+    private final List<UploadListener> _uploadListeners = new CopyOnWriteArrayList<UploadListener>();
 	
     /* (non-Javadoc)
 	 * @see com.limegroup.gnutella.archive.Contribution#getVerificationUrl()
@@ -71,7 +69,7 @@ abstract class AbstractContribution implements Contribution {
 	 * @see com.limegroup.gnutella.archive.Contribution#addFileDesc(com.limegroup.gnutella.FileDesc)
 	 */
 	public void addFileDesc( FileDesc fd ) { 
-		_files.put( fd, new File(fd));
+		_files.put( fd, new ArchiveFile(fd));
 	}
 	
 	/* (non-Javadoc)
@@ -228,7 +226,7 @@ abstract class AbstractContribution implements Contribution {
 	 * @see com.limegroup.gnutella.archive.Contribution#getField(java.lang.String)
 	 */
 	public String getField( String field ) {
-		return (String) _fields.get( field );
+		return _fields.get( field );
 	}
 	
 	/* (non-Javadoc)
@@ -238,7 +236,7 @@ abstract class AbstractContribution implements Contribution {
 		_fields.remove( field );
 	}
 	
-	protected Map getFields() {
+	protected Map<String, String> getFields() {
 		return Collections.unmodifiableMap( _fields );
 	}
     
@@ -282,9 +280,7 @@ abstract class AbstractContribution implements Contribution {
     }
     
     private void notifyStateChange() {
-        for (Iterator i = _uploadListeners.iterator(); i.hasNext();) {
-            UploadListener l = (UploadListener) i.next();
-            
+        for(UploadListener l : _uploadListeners) {
             switch ( _id ) {
             case FILE_STARTED:
                 l.fileStarted();
@@ -330,7 +326,7 @@ abstract class AbstractContribution implements Contribution {
 	 * @see com.limegroup.gnutella.archive.Contribution#getFileBytesSent()
 	 */
     public synchronized long getFileBytesSent() {
-        return ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).getBytesSent();       
+        return  _fileNames2Progress.get( _curFileName ).getBytesSent();       
 
     }
     
@@ -338,7 +334,7 @@ abstract class AbstractContribution implements Contribution {
 	 * @see com.limegroup.gnutella.archive.Contribution#getFileSize()
 	 */
     public synchronized long getFileSize() {
-        return ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).getFileSize();
+        return _fileNames2Progress.get( _curFileName ).getFileSize();
     }
     
     
@@ -368,21 +364,21 @@ abstract class AbstractContribution implements Contribution {
     /* (non-Javadoc)
 	 * @see com.limegroup.gnutella.archive.Contribution#getID()
 	 */
-    public int getID() {
+    public ContributionState getID() {
         return _id;
     }
     
     
     void connected() {
-        _id = CONNECTED;
+        _id = ContributionState.CONNECTED;
     }
     
     
     void fileStarted( String fileName, long bytesSent ) {
-        _id = FILE_STARTED;
+        _id = ContributionState.FILE_STARTED;
         synchronized(this) {
             _curFileName = fileName;
-            ((UploadFileProgress) _fileNames2Progress.get( fileName )).setBytesSent( bytesSent );
+            _fileNames2Progress.get( fileName ).setBytesSent( bytesSent );
         }
         notifyStateChange();
     }
@@ -400,10 +396,10 @@ abstract class AbstractContribution implements Contribution {
      *         If fileName does not match the current fileName
      */
     void fileProgressed( long bytesSent ) {
-        _id = FILE_PROGRESSED;
+        _id = ContributionState.FILE_PROGRESSED;
         
         synchronized(this) {
-            UploadFileProgress progress = (UploadFileProgress) _fileNames2Progress.get( _curFileName );
+            UploadFileProgress progress = _fileNames2Progress.get( _curFileName );
             // find delta       
             long delta = bytesSent - progress.getBytesSent();
             _totalBytesSent += delta;
@@ -421,10 +417,10 @@ abstract class AbstractContribution implements Contribution {
      *         If fileName does not match the current fileName
      */
     void fileProgressedDelta( long bytesSentDelta ) {
-        _id = FILE_PROGRESSED;
+        _id = ContributionState.FILE_PROGRESSED;
         synchronized(this) {
             _totalBytesSent += bytesSentDelta;
-            ((UploadFileProgress) _fileNames2Progress.get( _curFileName )).incrBytesSent( bytesSentDelta );
+             _fileNames2Progress.get( _curFileName ).incrBytesSent( bytesSentDelta );
         }
         notifyStateChange();
     }
@@ -437,10 +433,10 @@ abstract class AbstractContribution implements Contribution {
      *         If fileName does not match the current fileName
      */
     void fileCompleted() {
-        _id = FILE_COMPLETED;
+        _id = ContributionState.FILE_COMPLETED;
         
         synchronized(this) {
-            UploadFileProgress progress = (UploadFileProgress) _fileNames2Progress.get( _curFileName );
+            UploadFileProgress progress =  _fileNames2Progress.get( _curFileName );
             progress.setBytesSent( progress.getFileSize() );
             _filesSent++;
         }
@@ -448,12 +444,12 @@ abstract class AbstractContribution implements Contribution {
     }
     
     void checkinStarted() {
-        _id = CHECKIN_STARTED;
+        _id = ContributionState.CHECKIN_STARTED;
         notifyStateChange();
     }
     
     void checkinCompleted() {
-        _id = CHECKIN_COMPLETED;
+        _id = ContributionState.CHECKIN_COMPLETED;
         notifyStateChange();
     }
 	

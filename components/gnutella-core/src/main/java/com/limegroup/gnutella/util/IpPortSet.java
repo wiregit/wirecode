@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.TreeSet;
 
 /**
@@ -19,7 +18,4 @@ public class IpPortSet extends TreeSet<IpPort> {
         addAll(c);
     }
     
-    public IpPortSet(Comparator<? super IpPort> c) {
-        this(); // always use default comparator
-    }
 }

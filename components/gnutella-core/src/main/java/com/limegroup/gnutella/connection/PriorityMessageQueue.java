@@ -33,7 +33,7 @@ public class PriorityMessageQueue extends AbstractMessageQueue {
      *  volumes into this many buckets.  You could use different numbers of
      *  priorities according to the type of message, but this is convenient. */
     private static final int PRIORITIES=8;
-    private BucketQueue _queue;
+    private BucketQueue<Message> _queue;
 
     /**
      * @param cycle the number of messages to return per cycle, i.e., between 
@@ -48,11 +48,11 @@ public class PriorityMessageQueue extends AbstractMessageQueue {
                                 int capacity) {
         super(cycle, timeout);
         //Note that this allocates PRIORITIES*capacity storage.
-        this._queue=new BucketQueue(PRIORITIES, capacity);
+        this._queue=new BucketQueue<Message>(PRIORITIES, capacity);
     }
 
     protected Message addInternal (Message m) {
-        return (Message)_queue.insert(m, priority(m));
+        return _queue.insert(m, priority(m));
     }
 
     /** Calculates a m's priority according to its message type.  Larger values
@@ -109,7 +109,7 @@ public class PriorityMessageQueue extends AbstractMessageQueue {
         if (_queue.isEmpty())
             return null;
         else
-            return (Message)_queue.extractMax();
+            return _queue.extractMax();
     }
     
     public int size() {

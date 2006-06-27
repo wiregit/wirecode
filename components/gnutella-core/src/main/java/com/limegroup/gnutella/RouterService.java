@@ -1533,7 +1533,7 @@ public class RouterService {
 	 */
 	public static BrowseHostHandler doAsynchronousBrowseHost(
 	  final String host, final int port, GUID guid, GUID serventID, 
-	  final Set proxies, final boolean canDoFWTransfer) {
+	  final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
         final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
         ThreadFactory.startThread(new Runnable() {

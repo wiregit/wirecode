@@ -107,15 +107,15 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * and removed when hashing finishes.
 	 * IntWrapper stores the amount of bytes read.
 	 */
-	private static final Map /* File -> IntWrapper */ progressMap =
-	    Collections.synchronizedMap(new HashMap());
+	private static final Map<File, IntWrapper> progressMap =
+	    Collections.synchronizedMap(new HashMap<File, IntWrapper>());
 	
 	/**
 	 * Gets the amount of bytes hashed for a file that is being hashed.
 	 * Returns -1 if the file is not being hashed at all.
 	 */
 	public static int getHashingProgress(File file) {
-	    IntWrapper progress = (IntWrapper)progressMap.get(file);
+	    IntWrapper progress = progressMap.get(file);
 	    if ( progress == null )
 	        return -1;
 	    else

@@ -58,7 +58,7 @@ public class UDPService implements ReadWriteObserver {
 	/**
 	 * The list of messages to be sent, as SendBundles.
 	 */
-	private final List OUTGOING_MSGS;
+	private final List<SendBundle> OUTGOING_MSGS;
 	
 	/**
 	 * The buffer that's re-used for reading incoming messages.
@@ -151,7 +151,7 @@ public class UDPService implements ReadWriteObserver {
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
 	protected UDPService() {	   
-	    OUTGOING_MSGS = new LinkedList();
+	    OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
 	    BUFFER = ByteBuffer.wrap(backing);
         scheduleServices();
@@ -467,7 +467,7 @@ public class UDPService implements ReadWriteObserver {
 	    synchronized(OUTGOING_MSGS) {
 	        while(!OUTGOING_MSGS.isEmpty()) {
                 boolean releaseBuffer = true;
-                SendBundle bundle = (SendBundle)OUTGOING_MSGS.remove(0);
+                SendBundle bundle = OUTGOING_MSGS.remove(0);
 	            try {
     	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
     	                // we removed the bundle from the list but couldn't send it,
@@ -475,13 +475,15 @@ public class UDPService implements ReadWriteObserver {
     	                OUTGOING_MSGS.add(0, bundle);
                         releaseBuffer = false;
     	                return true; // no room left to send.
-                    } else if(bundle.custom) {
-                        bundle.buffer.rewind();
-                        releaseBuffer = false;
                     }
                 } catch(IOException ignored) {
                     LOG.warn("Ignoring exception on socket", ignored);
                 } finally {
+                    if(bundle.custom) {
+                        bundle.buffer.rewind();
+                        releaseBuffer = false;
+                    }
+                    
                     if (releaseBuffer)
                         NIODispatcher.instance().getBufferCache().release(bundle.buffer);
                 }

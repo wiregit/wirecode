@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -41,26 +40,26 @@ public final class SavedFileManager implements Runnable {
      *
      * LOCKING: Obtain this
      */
-    private Set /* of URN  */ _urns = new HashSet();
+    private Set<URN> _urns = new HashSet<URN>();
 
     /**
      * A set of the filenames of the saved files.
      *
      * LOCKING: Obtain this
      */
-    private Set /* of String */ _names =
-        new TreeSet(Comparators.caseInsensitiveStringComparator());
+    private Set<String> _names =
+        new TreeSet<String>(Comparators.caseInsensitiveStringComparator());
         
     /**
      * Adds a new Saved File with the given URNs.
      */
-    public synchronized void addSavedFile(File f, Set urns) {
+    public synchronized void addSavedFile(File f, Set<? extends URN> urns) {
         if(LOG.isDebugEnabled())
             LOG.debug("Adding: " + f + " with: " + urns);
         
         _names.add(f.getName());
-        for(Iterator i = urns.iterator(); i.hasNext();)
-            _urns.add(i.next());
+        for(URN urn : urns)
+            _urns.add(urn);
     }
     
     /**
@@ -86,10 +85,10 @@ public final class SavedFileManager implements Runnable {
      */
     private void load() {
         LOG.trace("Loading Saved Files");
-        Set urns = new HashSet();
-        Set names = new TreeSet(Comparators.caseInsensitiveStringComparator());
+        Set<URN> urns = new HashSet<URN>();
+        Set<String> names = new TreeSet<String>(Comparators.caseInsensitiveStringComparator());
         UrnCallback callback = new UrnCallback() {
-            public void urnsCalculated(File f, Set urns) {
+            public void urnsCalculated(File f, Set<? extends URN> urns) {
                 synchronized(SavedFileManager.this) {
                     _urns.addAll(urns);
                 }
@@ -100,9 +99,9 @@ public final class SavedFileManager implements Runnable {
             }
         };
         
-        Set saveDirs = SharingSettings.getAllSaveDirectories();
-        for(Iterator i = saveDirs.iterator(); i.hasNext(); )
-            loadDirectory((File)i.next(), urns, names, callback);
+        Set<File> saveDirs = SharingSettings.getAllSaveDirectories();
+        for(File next : saveDirs)
+            loadDirectory(next, urns, names, callback);
             
         synchronized(this) {
             _urns.addAll(urns);
@@ -113,7 +112,7 @@ public final class SavedFileManager implements Runnable {
     /**
      * Loads a single saved directory.
      */
-    private void loadDirectory(File directory, Set tempUrns, Set tempNames, UrnCallback callback) {
+    private void loadDirectory(File directory, Set<? super URN> tempUrns, Set<String> tempNames, UrnCallback callback) {
         File[] savedFiles = directory.listFiles();
         if(savedFiles == null)
             return;
@@ -126,7 +125,7 @@ public final class SavedFileManager implements Runnable {
                 LOG.trace("Loading: " + file);
                 
             tempNames.add(file.getName());
-            Set urns = UrnCache.instance().getUrns(file);
+            Set<URN> urns = UrnCache.instance().getUrns(file);
             if(urns.isEmpty()) // if not calculated, calculate at some point.
                 UrnCache.instance().calculateAndCacheUrns(file, callback);
             else // otherwise, add without waiting.

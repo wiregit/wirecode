@@ -60,16 +60,16 @@ public final class RouteTable {
      *  into ConnectionManager._initialized[Client]Connections, we would not
      *  need _idMap either.  However, this increases dependenceies.  
      */
-    private Map /* byte[] -> RouteTableEntry */ _newMap=
-        new TreeMap(new GUID.GUIDByteComparator());
-    private Map /* byte[] -> RouteTableEntry */ _oldMap=
-        new TreeMap(new GUID.GUIDByteComparator());
+    private Map<byte[], RouteTableEntry> _newMap =
+        new TreeMap<byte[], RouteTableEntry>(new GUID.GUIDByteComparator());
+    private Map<byte[], RouteTableEntry> _oldMap=
+        new TreeMap<byte[], RouteTableEntry>(new GUID.GUIDByteComparator());
     private int _mseconds;
     private long _nextSwitchTime;
     private int _maxSize;
 
-    private Map /* Integer -> ReplyHandler */ _idMap=new HashMap();
-    private Map /* ReplyHandler -> Integer */ _handlerMap=new HashMap();
+    private Map<Integer, ReplyHandler> _idMap  = new HashMap<Integer, ReplyHandler>();
+    private Map<ReplyHandler, Integer> _handlerMap = new HashMap<ReplyHandler, Integer>();
     private int _nextID;
 
     /** Values stored in _newMap/_oldMap. */
@@ -138,9 +138,9 @@ public final class RouteTable {
         //routed if found.  Note that if the guid is found in _newMap, we don't
         //need to look in _oldMap.
         int id=handler2id(replyHandler).intValue();
-        RouteTableEntry entry=(RouteTableEntry)_newMap.remove(guid);
+        RouteTableEntry entry = _newMap.remove(guid);
         if (entry==null)
-            entry=(RouteTableEntry)_oldMap.remove(guid);
+            entry = _oldMap.remove(guid);
 
         //Now map the guid to the new reply handler, using the volume routed if
         //found, or zero otherwise.
@@ -215,9 +215,9 @@ public final class RouteTable {
             throw new IllegalArgumentException("Bad ttl input (get/set): " +
                                                getTTL + "/" + setTTL);
 
-        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        RouteTableEntry entry = _newMap.get(guid);
         if (entry==null)
-            entry=(RouteTableEntry)_oldMap.get(guid);
+            entry = _oldMap.get(guid);
         
         if ((entry != null) && (entry.getTTL() == getTTL)) {
                 entry.setTTL(setTTL);
@@ -240,9 +240,9 @@ public final class RouteTable {
         repOk();
 
         //Look up guid in _newMap. If not there, check _oldMap. 
-        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        RouteTableEntry entry = _newMap.get(guid);
         if (entry==null)
-            entry=(RouteTableEntry)_oldMap.get(guid);
+            entry = _oldMap.get(guid);
 
         //Note that id2handler may return null.
         return (entry==null) ? null : id2handler(new Integer(entry.handlerID));
@@ -266,9 +266,9 @@ public final class RouteTable {
         repOk();
 
         //Look up guid in _newMap. If not there, check _oldMap. 
-        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        RouteTableEntry entry = _newMap.get(guid);
         if (entry==null)
-            entry=(RouteTableEntry)_oldMap.get(guid);
+            entry = _oldMap.get(guid);
         
         //If no mapping for guid, or guid maps to a removed reply handler,
         //return null.
@@ -346,7 +346,7 @@ public final class RouteTable {
      */
     private Integer handler2id(ReplyHandler handler) {
         //Have we encountered this handler recently?  If so, return the id.
-        Integer id=(Integer)_handlerMap.get(handler);
+        Integer id = _handlerMap.get(handler);
         if (id!=null)
             return id;
     
@@ -370,7 +370,7 @@ public final class RouteTable {
      * null if none.
      */
     private ReplyHandler id2handler(Integer id) {
-        return (ReplyHandler)_idMap.get(id);
+        return _idMap.get(id);
     }
 
     /**
@@ -391,7 +391,7 @@ public final class RouteTable {
         //                   +_oldMap.size()+" old, "
         //                   +_newMap.size()+" new");
         _oldMap.clear();
-        Map tmp=_oldMap;
+        Map<byte[], RouteTableEntry> tmp=_oldMap;
         _oldMap=_newMap;
         _newMap=tmp;
         _nextSwitchTime=now+_mseconds;
@@ -401,7 +401,7 @@ public final class RouteTable {
     public synchronized String toString() {
         //Inefficient, but this is only for debugging anyway.
         StringBuffer buf=new StringBuffer("{");
-        Map bothMaps=new TreeMap(new GUID.GUIDByteComparator());
+        Map<byte[], RouteTableEntry> bothMaps=new TreeMap<byte[], RouteTableEntry>(new GUID.GUIDByteComparator());
         bothMaps.putAll(_oldMap);
         bothMaps.putAll(_newMap);
 
@@ -410,7 +410,7 @@ public final class RouteTable {
             byte[] key=(byte[])iter.next();
             buf.append(new GUID(key)); // GUID
             buf.append("->");
-            int id=((RouteTableEntry)bothMaps.get(key)).handlerID;
+            int id= bothMaps.get(key).handlerID;
             ReplyHandler handler=id2handler(new Integer(id));
             buf.append(handler==null ? "null" : handler.toString());//connection
             if (iter.hasNext())

@@ -3,7 +3,6 @@ package com.limegroup.gnutella.altlocs;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,10 +16,10 @@ public class AltLocManager {
     }
     
     /**
-     * Mapping of URN - > array of three alternate locations.
+     * Map of the alternate location collections for each URN.
      * LOCKING: itself for all map operations as well as operations on the contained arrays
      */
-    private final Map urnMap = Collections.synchronizedMap(new HashMap());
+    private final Map<URN, URNData> urnMap = Collections.synchronizedMap(new HashMap<URN, URNData>());
     
     private AltLocManager() {}
     
@@ -34,7 +33,7 @@ public class AltLocManager {
         
         URNData data;
         synchronized(urnMap) {
-            data = (URNData) urnMap.get(sha1);
+            data = urnMap.get(sha1);
             
             if (data == null) {
                 data = new URNData();
@@ -65,8 +64,7 @@ public class AltLocManager {
         boolean ret = col.add(al);
         
         // notify any listeners other than the source
-        for (Iterator iter = data.getListeners().iterator(); iter.hasNext();) {
-            AltLocListener listener = (AltLocListener) iter.next();
+        for(AltLocListener listener : data.getListeners()) {
             if (listener == source)
                 continue;
             listener.locationAdded(al);
@@ -80,7 +78,7 @@ public class AltLocManager {
      */
     public boolean remove(AlternateLocation al, Object source) {
         URN sha1 = al.getSHA1Urn();
-        URNData data = (URNData) urnMap.get(sha1);
+        URNData data = urnMap.get(sha1);
         if (data == null)
             return false;
         
@@ -128,7 +126,7 @@ public class AltLocManager {
      * @param size the maximum number of altlocs to return
      */
     public AlternateLocationCollection getDirect(URN sha1) {
-        URNData data = (URNData) urnMap.get(sha1);
+        URNData data = urnMap.get(sha1);
         if (data == null)
             return AlternateLocationCollection.EMPTY;
         
@@ -143,7 +141,7 @@ public class AltLocManager {
      * @param FWTOnly whether the altlocs must support FWT
      */
     public AlternateLocationCollection getPush(URN sha1, boolean FWTOnly) {
-        URNData data = (URNData) urnMap.get(sha1);
+        URNData data = urnMap.get(sha1);
         if (data == null)
             return AlternateLocationCollection.EMPTY;
         
@@ -161,7 +159,7 @@ public class AltLocManager {
     }
     
     public boolean hasAltlocs(URN sha1) {
-        URNData data = (URNData) urnMap.get(sha1);
+        URNData data = urnMap.get(sha1);
         if (data == null)
             return false;
         
@@ -169,7 +167,7 @@ public class AltLocManager {
     }
     
     public int getNumLocs(URN sha1) {
-        URNData data = (URNData) urnMap.get(sha1);
+        URNData data = urnMap.get(sha1);
         if (data == null)
             return 0;
         return data.getNumLocs();
@@ -178,7 +176,7 @@ public class AltLocManager {
     public void addListener(URN sha1, AltLocListener listener) {
         URNData data; 
         synchronized(urnMap){
-            data = (URNData) urnMap.get(sha1);
+            data = urnMap.get(sha1);
             
             if (data == null) {
                 data = new URNData();
@@ -189,7 +187,7 @@ public class AltLocManager {
     }
     
     public void removeListener(URN sha1, AltLocListener listener) {
-        URNData data = (URNData) urnMap.get(sha1);
+        URNData data =  urnMap.get(sha1);
         if (data == null)
             return;
         data.removeListener(listener);
@@ -205,7 +203,7 @@ public class AltLocManager {
         public AlternateLocationCollection push = AlternateLocationCollection.EMPTY;
         public AlternateLocationCollection fwt = AlternateLocationCollection.EMPTY;
         
-        private volatile List listeners = Collections.EMPTY_LIST;
+        private volatile List<AltLocListener> listeners = Collections.emptyList();
         
         public synchronized boolean hasAltLocs() {
             return direct.hasAlternateLocations() || 
@@ -218,18 +216,18 @@ public class AltLocManager {
         }
         
         public synchronized void addListener(AltLocListener listener) {
-            List updated = new ArrayList(listeners);
+            List<AltLocListener> updated = new ArrayList<AltLocListener>(listeners);
             updated.add(listener);
             listeners = updated;
         }
         
         public synchronized void removeListener(AltLocListener listener) {
-            List updated = new ArrayList(listeners);
+            List<AltLocListener> updated = new ArrayList<AltLocListener>(listeners);
             updated.remove(listener);
             listeners = updated;
         }
         
-        public List getListeners() {
+        public List<AltLocListener> getListeners() {
             return listeners;
         }
     }

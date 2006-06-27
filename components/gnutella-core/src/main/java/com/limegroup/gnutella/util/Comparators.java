@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Comparator;
 
@@ -32,12 +33,12 @@ public final class Comparators {
     /**
      * <tt>Comparator</tt> for comparing two <tt>String</tt>s.
      */
-    private static final Comparator STRING_COMPARATOR = new StringComparator();
+    private static final Comparator<String> STRING_COMPARATOR = new StringComparator();
     
     /**
      * <tt>Comparator</tt> for comparing two <tt>File</tt>s.
      */
-    private static final Comparator FILE_COMPARATOR = new FileComparator();
+    private static final Comparator<File> FILE_COMPARATOR = new FileComparator();
     
     /**
      * <tt>Comparator</tt> for comparing two <tt>String</tt>s regardless of
@@ -99,7 +100,7 @@ public final class Comparators {
      * 
      * @return the <tt>StringComparator</tt> instance
      */
-    public static Comparator stringComparator() {
+    public static Comparator<String> stringComparator() {
         return STRING_COMPARATOR;
     }
 
@@ -112,7 +113,7 @@ public final class Comparators {
      * 
      * @return the <tt>FileComparator</tt> instance
      */
-    public static Comparator fileComparator() {
+    public static Comparator<File> fileComparator() {
         return FILE_COMPARATOR;
     }
     
