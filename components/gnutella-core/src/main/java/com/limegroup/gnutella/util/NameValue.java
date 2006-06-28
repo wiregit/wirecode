@@ -13,7 +13,7 @@ import java.util.Map;
  * be any object. 
  * @author  asingla
  */
-public class NameValue<V> implements Map.Entry<String, V> {
+public class NameValue <V> implements Map.Entry<String, V> {
 
     private final String _name;
     private V _value;

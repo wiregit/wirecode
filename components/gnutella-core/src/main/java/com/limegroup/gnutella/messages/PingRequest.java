@@ -128,7 +128,7 @@ public class PingRequest extends Message {
      * @param l list to put the standard extentions we add to UDP pings
      * @return the guid to use for the ping
      */
-    private static GUID populateUDPGGEPList(List<? super NameValue<?>> l) {
+    private static GUID populateUDPGGEPList(List<NameValue<?>> l) {
         GUID guid;
         if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
             guid = new GUID();
