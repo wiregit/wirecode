@@ -83,7 +83,8 @@ class BucketNode implements Bucket {
         checkNodeID(node);
         assert (isLiveFull() == false);
         
-        nodeTrie.put(node.getNodeID(), node);
+        Contact existing = nodeTrie.put(node.getNodeID(), node);
+        assert (existing == null);
     }
     
     public void addCachedContact(Contact node) {
@@ -93,7 +94,26 @@ class BucketNode implements Bucket {
             cache = new FixedSizeHashMap<KUID, Contact>(maxSize/2, 0.75f, true, maxSize);
         }
         
-        cache.put(node.getNodeID(), node);
+        Contact existing = cache.put(node.getNodeID(), node);
+        assert (existing == null);
+    }
+    
+    public Contact updateContact(Contact existing, Contact node) {
+        checkNodeID(existing);
+        checkNodeID(node);
+        
+        KUID existingId = existing.getNodeID();
+        KUID nodeId = node.getNodeID();
+        
+        assert (existingId.equals(nodeId));
+        
+        if (containsLiveContact(existingId)) {
+            return nodeTrie.put(nodeId, node);
+        } else if (containsCachedContact(existingId)) {
+            return cache.put(nodeId, node);
+        }
+        
+        throw new IllegalStateException(node + " is not in this Bucket " + toString());
     }
     
     // TODO: Disable/Delete when finished with testing!

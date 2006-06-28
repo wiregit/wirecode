@@ -90,9 +90,10 @@ public class RouteTableImpl implements RouteTable {
         
         KUID nodeId = node.getNodeID();
         Bucket bucket = bucketTrie.select(nodeId);
+        Contact existing = bucket.get(nodeId);
         
-        if (bucket.contains(nodeId)) {
-            update(bucket, node);
+        if (existing != null) {
+            update(bucket, existing, node);
         } else if (!bucket.isLiveFull()) {
             add(bucket, node);
         } else if (split(bucket)) {
@@ -102,15 +103,19 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    protected void update(Bucket bucket, Contact node) {
-        Contact existing = bucket.get(node.getNodeID());
-        assert (existing != null);
+    protected synchronized void update(Bucket bucket, Contact existing, Contact node) {
+        assert (existing.getNodeID().equals(node.getNodeID()));
+        
+        /*
+         * A non-live Contact will never replace a live Contact!
+         */
         
         if (!existing.isAlive() 
-                || existing.equals(node)
+                || existing.equals(node) // <- checks nodeId + address!
                 || ContactUtils.areLocalContacts(existing, node)) {
             
-            existing.set(node);
+            existing.set(node); // TODO clone!
+            bucket.updateContact(existing, node);
             if (node.isAlive()) {
                 touchBucket(bucket);
             }
@@ -122,7 +127,7 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    protected void doSpoofCheck(Bucket bucket, Contact existing, final Contact node) {
+    protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
         PingListener listener = new PingListener() {
             public void response(ResponseMessage response, long time) {
                 if (LOG.isWarnEnabled()) {
@@ -141,12 +146,15 @@ public class RouteTableImpl implements RouteTable {
                 
                 synchronized (RouteTableImpl.this) {
                     Bucket bucket = bucketTrie.select(nodeId);
-                    Contact existing = bucket.get(nodeId);
-                    if (existing != null) {
-                        existing.set(node);
+                    Contact current = bucket.get(nodeId);
+                    if (current != null && current.equals(existing)) {
+                        current.set(node); // TODO clone!
+                        bucket.updateContact(current, node);
+                        
+                        // If the Node is in the Cache then ping the least recently
+                        // seen live Node which might promote the new Node to a
+                        // live Contact!
                         if (bucket.containsCachedContact(nodeId)) {
-                            // We have found a live contact in the bucket's replacement cache!
-                            // It's a good time to replace this bucket's dead entry with this node
                             ping (bucket.getLeastRecentlySeenLiveContact());
                         }
                     } else {
@@ -159,7 +167,7 @@ public class RouteTableImpl implements RouteTable {
         ping(existing, listener);
     }
     
-    protected void add(Bucket bucket, Contact node) {
+    protected synchronized void add(Bucket bucket, Contact node) {
         bucket.addLiveContact(node);
         
         if (node.isAlive()) {
@@ -169,7 +177,7 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    protected boolean split(Bucket bucket) {
+    protected synchronized boolean split(Bucket bucket) {
         
         // Three conditions for splitting:
         // 1. Bucket contains nodeID.
@@ -220,7 +228,7 @@ public class RouteTableImpl implements RouteTable {
         return false;
     }
     
-    protected void replace(Bucket bucket, Contact node) {
+    protected synchronized void replace(Bucket bucket, Contact node) {
         
         if (node.isAlive()) {
             Contact leastRecentlySeen = bucket.getLeastRecentlySeenLiveContact();
