@@ -368,7 +368,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                 // Add them to the routing table as not alive
                 // contacts. We're likely going to add them
                 // anyways!
-                context.getRouteTable().add(node);
+                context.getRouteTable().addContact(node);
             }
         }
         

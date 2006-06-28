@@ -73,11 +73,9 @@ public class RouteTableImpl implements RouteTable {
         
         consecutiveFailures = 0;
         smallestSubtreeBucket = null;
-        
-        add(context.getLocalNode());
     }
     
-    public synchronized void add(Contact node) {
+    public synchronized void addContact(Contact node) {
         
         if (node.isFirewalled()) {
             if (LOG.isTraceEnabled()) {
@@ -93,17 +91,17 @@ public class RouteTableImpl implements RouteTable {
         Contact existing = bucket.get(nodeId);
         
         if (existing != null) {
-            update(bucket, existing, node);
+            updateContactInBucket(bucket, existing, node);
         } else if (!bucket.isLiveFull()) {
-            add(bucket, node);
+            addContactToBucket(bucket, node);
         } else if (split(bucket)) {
-            add(node);
+            addContact(node);
         } else {
-            replace(bucket, node);
+            replaceContactInBucket(bucket, node);
         }
     }
     
-    protected synchronized void update(Bucket bucket, Contact existing, Contact node) {
+    protected synchronized void updateContactInBucket(Bucket bucket, Contact existing, Contact node) {
         assert (existing.getNodeID().equals(node.getNodeID()));
         
         /*
@@ -112,7 +110,8 @@ public class RouteTableImpl implements RouteTable {
         
         if (!existing.isAlive() 
                 || existing.equals(node) // <- checks nodeId + address!
-                || ContactUtils.areLocalContacts(existing, node)) {
+                || ContactUtils.areLocalContacts(existing, node)
+                || context.isLocalNode(node)) {
             
             existing.set(node); // TODO clone!
             bucket.updateContact(existing, node);
@@ -158,7 +157,7 @@ public class RouteTableImpl implements RouteTable {
                             ping (bucket.getLeastRecentlySeenLiveContact());
                         }
                     } else {
-                        add(node);
+                        addContact(node);
                     }
                 }
             }
@@ -167,7 +166,7 @@ public class RouteTableImpl implements RouteTable {
         ping(existing, listener);
     }
     
-    protected synchronized void add(Bucket bucket, Contact node) {
+    protected synchronized void addContactToBucket(Bucket bucket, Contact node) {
         bucket.addLiveContact(node);
         
         if (node.isAlive()) {
@@ -228,7 +227,7 @@ public class RouteTableImpl implements RouteTable {
         return false;
     }
     
-    protected synchronized void replace(Bucket bucket, Contact node) {
+    protected synchronized void replaceContactInBucket(Bucket bucket, Contact node) {
         
         if (node.isAlive()) {
             Contact leastRecentlySeen = bucket.getLeastRecentlySeenLiveContact();

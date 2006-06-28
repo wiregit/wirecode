@@ -155,7 +155,7 @@ public class Context {
         
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode);
+        routeTable.addContact(localNode);
     }
 
     private void initEventQueue() {
@@ -226,7 +226,7 @@ public class Context {
         try {
             Constructor c = clazz.getConstructor(Context.class);
             routeTable = (RouteTable)c.newInstance(this);
-            routeTable.add(localNode);
+            routeTable.addContact(localNode);
             return routeTable;
         } catch (Exception err) {
             throw new RuntimeException(err);

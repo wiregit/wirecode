@@ -113,7 +113,7 @@ public class DefaultMessageHandler extends MessageHandler
         }
         
         //add node to the routing table -- update timestamp and info if needed
-        routeTable.add(node);
+        routeTable.addContact(node);
 
         if (newNode) {
             
@@ -202,7 +202,7 @@ public class DefaultMessageHandler extends MessageHandler
             for(Contact node : nodes) {
                 // We did a FIND_NODE lookup use the info
                 // to fill our routing table
-                context.getRouteTable().add(node);
+                context.getRouteTable().addContact(node);
             }
             
             Contact node = message.getContact();

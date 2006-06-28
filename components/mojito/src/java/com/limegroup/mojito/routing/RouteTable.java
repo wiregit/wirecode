@@ -37,7 +37,7 @@ public interface RouteTable {
      * 
      * @param node the Contact we would like to add
      */
-    public void add(Contact node);
+    public void addContact(Contact node);
     
     /**
      * Returns a Contact from the local RoutingTable if such Contact exists 

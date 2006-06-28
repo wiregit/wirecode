@@ -77,7 +77,7 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
                 
                 node.setState(State.ALIVE);
                 node.setTimeStamp(Long.MAX_VALUE);
-                add(node);
+                addContact(node);
             }
         }
     }

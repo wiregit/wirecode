@@ -634,7 +634,7 @@ public class MojitoDHT {
             Contact node = null;
             while((node = (Contact)ois.readObject()) != null) {
                 if (!timeout) {
-                    routeTable.add(node);
+                    routeTable.addContact(node);
                 }
             }
         }

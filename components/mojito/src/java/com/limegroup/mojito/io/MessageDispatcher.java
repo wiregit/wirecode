@@ -651,7 +651,7 @@ public abstract class MessageDispatcher implements Runnable {
             }
             
             networkStats.LATE_MESSAGES_COUNT.incrementStat();
-            context.getRouteTable().add(node);
+            context.getRouteTable().addContact(node);
         }
     }
     

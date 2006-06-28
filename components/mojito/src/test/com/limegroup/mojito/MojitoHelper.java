@@ -52,7 +52,7 @@ class MojitoHelper {
         
         ContactNode node = new ContactNode(vendor, version, nodeId, new InetSocketAddress(0));
         node.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(node, false);
+        routeTable.addContactToBucket(node, false);
         
         try {
             Field localNode = Context.class.getDeclaredField("localNode");

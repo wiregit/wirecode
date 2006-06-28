@@ -104,7 +104,7 @@ public class SerializeTest {
         RouteTable rtable = dht.getContext().getRouteTable();
         for (int i = 0; i < 5000; i++) {
             ContactNode node = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress(i));
-            rtable.add(node,false);
+            rtable.addContactToBucket(node,false);
         }
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
