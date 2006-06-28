@@ -1,17 +1,15 @@
 package com.limegroup.bittorrent;
 
-import java.io.Serializable;
+import java.io.File;
 
 /*
  * simple class holding the length and the path of a file
  */
-class TorrentFile implements Serializable {
+class TorrentFile extends File {
 	private static final long serialVersionUID = 4051327846800962608L;
 
-	final long LENGTH;
+	private final long length;
 
-	final String PATH;
-	
 	/** 
 	 * The indices of the first and last blocks 
 	 * of the torrent this file occupies
@@ -19,13 +17,14 @@ class TorrentFile implements Serializable {
 	int begin, end;
 
 	TorrentFile(long length, String path) {
-		LENGTH = length;
-		PATH = path;
+		super(path);
+		this.length = length;
 		begin = -1; //these need to be initialized.
 		end = -1; 
 	}
 	
-	public String toString() {
-		return PATH + " " + LENGTH;
+	public long length() {
+		return length;
 	}
+	
 }

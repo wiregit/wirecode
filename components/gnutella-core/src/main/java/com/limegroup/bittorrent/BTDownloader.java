@@ -40,15 +40,14 @@ implements TorrentLifecycleListener {
 
 	private DownloadManager manager;
 	
-	private final IncompleteFileManager ifm;
+	private IncompleteFileManager ifm;
 	
 	private volatile long startTime, stopTime;
 	
 	private volatile boolean complete;
 	
-	public BTDownloader(BTMetaInfo info, IncompleteFileManager ifm) {
+	public BTDownloader(BTMetaInfo info) {
 		_info = info;
-		this.ifm = ifm;
 	}
 
 	/**
@@ -351,6 +350,7 @@ implements TorrentLifecycleListener {
 			FileManager fm, 
 			DownloadCallback callback) {
 		this.manager = manager;
+		ifm = manager.getIncompleteFileManager();
 		_torrent = new ManagedTorrent(_info); 
 		_torrent.addLifecycleListener(this);
 		BTUploader uploader = new BTUploader(_torrent,_info);
@@ -379,11 +379,8 @@ implements TorrentLifecycleListener {
 		return !isResumable();
 	}
 	
-	public boolean conflicts(URN urn, String fileName, int fileSize) {
-		String myName = _info.getCompleteFile().getName(); //TODO: look over this
-		return myName.equals(fileName) && 
-			_info.getTotalSize() == fileSize &&
-			_info.getURN().equals(urn);
+	public boolean conflicts(URN urn, File fileName, int fileSize) {
+		return false; // TODO: implement
 	}
 
 	public boolean conflictsWithIncompleteFile(File incomplete) {

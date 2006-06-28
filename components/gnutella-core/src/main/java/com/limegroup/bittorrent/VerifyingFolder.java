@@ -60,7 +60,7 @@ public class VerifyingFolder {
 	/*
 	 * The files of this torrent as an array
 	 */
-	private final TorrentFile[] _files;
+	private final List<TorrentFile> _files;
 
 	/**
 	 * Object to lock on during all disk operations.
@@ -224,10 +224,10 @@ public class VerifyingFolder {
 				throw new IOException("file closed");
 			long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
 			int written = 0;
-			for (int i = 0; i < _files.length && written < buf.length; i++) {
-				if (startOffset < _files[i].LENGTH) {
+			for (int i = 0; i < _files.size() && written < buf.length; i++) {
+				if (startOffset < _files.get(i).length()) {
 					_fos[i].seek(startOffset);
-					int toWrite = (int) Math.min(_files[i].LENGTH - startOffset,
+					int toWrite = (int) Math.min(_files.get(i).length()- startOffset,
 							buf.length - written);
 					
 					if (_fos[i].length() < startOffset + toWrite)
@@ -237,7 +237,7 @@ public class VerifyingFolder {
 					startOffset += toWrite;
 					written += toWrite;
 				} 
-				startOffset -= _files[i].LENGTH;
+				startOffset -= _files.get(i).length();
 			}
 		}
 		
@@ -330,24 +330,23 @@ public class VerifyingFolder {
 	}
 	
 	private void closeAnyCompletedFiles(int pieceNum) {
-		List<Integer> possiblyCompleted = null;
-		for (int i = 0; i < _files.length; i++) {
-			if (_files[i].begin > pieceNum)
+		List<TorrentFile> possiblyCompleted = null;
+		for (TorrentFile t : _files) {
+			if (t.begin > pieceNum)
 				continue;
-			if (_files[i].end < pieceNum)
+			if (t.end < pieceNum)
 				break;
 			
 			if (possiblyCompleted == null)
-				possiblyCompleted = new ArrayList<Integer>();
+				possiblyCompleted = new ArrayList<TorrentFile>();
 			
-			possiblyCompleted.add(i);
+			possiblyCompleted.add(t);
 		}
 		
 		if (possiblyCompleted == null)
 			return;
 		
-		for (int index : possiblyCompleted) {
-			TorrentFile file = _files[index];
+		for (TorrentFile file : possiblyCompleted) {
 			boolean done = true;
 			for(int i = file.begin; i <= file.end; i++) {
 				if (!hasBlock(i)) {
@@ -361,8 +360,9 @@ public class VerifyingFolder {
 				try {
 					synchronized(DISK_LOCK) {
 						if (isOpen()) {
+							int index = _files.indexOf(file);
 							_fos[index].close();
-							_fos[index] = new RandomAccessFile(file.PATH, "r");
+							_fos[index] = new RandomAccessFile(file.getPath(), "r");
 						}
 					}
 				} catch (FileNotFoundException bs) {
@@ -410,7 +410,7 @@ public class VerifyingFolder {
 			if (_fos != null)
 				throw new IOException("Files already open!");
 			
-			_fos = new RandomAccessFile[_files.length];
+			_fos = new RandomAccessFile[_files.size()];
 		}
 		
 		this.torrent = torrent;
@@ -423,8 +423,8 @@ public class VerifyingFolder {
 		long pos = 0;
 		
 		List<TorrentFile> filesToVerify = null;
-		for (int i = 0; i < _files.length; i++) {
-			File file = new File(_files[i].PATH);
+		for (int i = 0; i < _files.size(); i++) {
+			TorrentFile file = _files.get(i);
 
 			// if the file is complete, just open it for reading and be done
 			// with it
@@ -471,13 +471,13 @@ public class VerifyingFolder {
 				// if a file exists, try to verify it
 				if (isVerifying && file.length() > 0) {
 					if (filesToVerify == null)
-						filesToVerify = new ArrayList<TorrentFile>(_files.length);
-					filesToVerify.add(_files[i]);
+						filesToVerify = new ArrayList<TorrentFile>(_files.size());
+					filesToVerify.add(file);
 				}
 			}
 
 			// increment pos to point to the first byte of the next file
-			pos += _files[i].LENGTH;
+			pos += file.length();
 		}
 		
 		// verify any files that needed verification
@@ -620,9 +620,10 @@ public class VerifyingFolder {
 		synchronized(DISK_LOCK) {
 			if (!isOpen())
 				throw new IOException("file closed");
-			for (int i = 0; i < _files.length && read < length; i++) {
-				while (position < _files[i].LENGTH && read < length) {
-					if (_fos[i].length() < _files[i].LENGTH && position >= _fos[i].length())
+			for (int i = 0; i < _files.size() && read < length; i++) {
+				File f = _files.get(i);
+				while (position < f.length() && read < length) {
+					if (_fos[i].length() < f.length() && position >= _fos[i].length())
 						return read;
 					int toRead = (int) Math.min(_fos[i].length() - position, length
 							- read);
@@ -633,7 +634,7 @@ public class VerifyingFolder {
 					position += t_read;
 					read += t_read;
 				}
-				position -= _files[i].LENGTH;
+				position -= f.length();
 			}
 		}
 		return read;

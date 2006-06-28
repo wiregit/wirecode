@@ -602,7 +602,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 		throws SaveLocationException {
 
 		String fName = getFileName(files, fileName);
-        if (conflicts(files, fName)) {
+        if (conflicts(files, new File(saveDir,fName))) {
 			throw new SaveLocationException
 			(SaveLocationException.FILE_ALREADY_DOWNLOADING,
 					new File(fName != null ? fName : ""));
@@ -665,7 +665,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         if (fileName == null) {
         	fileName = magnet.getFileNameForSaving();
         }
-        if (conflicts(magnet.getSHA1Urn(), fileName, 0)) {
+        if (conflicts(magnet.getSHA1Urn(), new File(saveDir,fileName), 0)) {
 			throw new SaveLocationException
 			(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
@@ -768,7 +768,11 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     	} catch (IOException iox) {
     		throw new CantResumeException(name);
     	}
-    	return downloadTorrent(info);
+    	
+    	Downloader ret = downloadTorrent(info);
+    	if (ret.isResumable())
+    		ret.resume();
+    	return ret;
     }
     
     /**
@@ -779,7 +783,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         File dir = FileManager.PREFERENCE_SHARE;
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
-        if(conflicts(info.getUpdateURN(), info.getUpdateFileName(), (int)info.getSize()))
+        if(conflicts(info.getUpdateURN(), f, (int)info.getSize()))
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge();
@@ -831,7 +835,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     		if (info.getURN().equals(current.getSHA1Urn())) 
     			return current; // eventually implement adding of trackers
     	}
-    	AbstractDownloader ret = new BTDownloader(info, incompleteFileManager);
+    	AbstractDownloader ret = new BTDownloader(info);
     	initializeDownload(ret);
     	return ret;
     }
@@ -868,7 +872,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 	 * @param rfds
 	 * @return
 	 */
-	private boolean conflicts(RemoteFileDesc[] rfds, String fileName) {
+	private boolean conflicts(RemoteFileDesc[] rfds, File fileName) {
 		URN urn = null;
 		for (int i = 0; i < rfds.length && urn == null; i++) {
 			urn = rfds[0].getSHA1Urn();
@@ -883,7 +887,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 	 * and the fileSize is performed
 	 * @return
 	 */
-	public boolean conflicts(URN urn, String fileName, int fileSize) {
+	public boolean conflicts(URN urn, File fileName, int fileSize) {
 		
 		if (urn == null && fileSize == 0) {
 			return false;

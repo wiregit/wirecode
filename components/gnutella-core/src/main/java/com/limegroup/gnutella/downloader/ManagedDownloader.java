@@ -1209,13 +1209,13 @@ implements MeshHandler, AltLocListener {
 	 * @param fileSize, can be 0
 	 * @return
 	 */
-	public boolean conflicts(URN urn, String fileName, int fileSize) {
+	public boolean conflicts(URN urn, File fileName, int fileSize) {
 		if (urn != null && downloadSHA1 != null) {
 			return urn.equals(downloadSHA1);
 		}
 		if (fileSize > 0) {
 			try {
-				File file = incompleteFileManager.getFile(fileName, null, fileSize);
+				File file = incompleteFileManager.getFile(fileName.getName(), null, fileSize);
 				return conflictsWithIncompleteFile(file);
 			} catch (IOException e) {
 			}
