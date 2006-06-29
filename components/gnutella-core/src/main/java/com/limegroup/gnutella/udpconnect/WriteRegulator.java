@@ -274,7 +274,7 @@ public class WriteRegulator {
 		if ( gettingSlow > 0 )
 			gettingSlow--;
 
-        return (long) sleepTime;
+        return sleepTime;
         //------------- Sleep ------------------------
     }
 

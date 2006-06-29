@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
 import java.text.Collator;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,7 +25,7 @@ public class StringUtils {
     /**
      * Trivial words that are not considered keywords.
      */
-    private static final List TRIVIAL_WORDS;
+    private static final List<String> TRIVIAL_WORDS;
 
     /**
      * Collator used for internationalization.
@@ -34,11 +33,8 @@ public class StringUtils {
     private final static Collator COLLATOR;
     
     static {
-        TRIVIAL_WORDS = new ArrayList(3);        
-        TRIVIAL_WORDS.add("the");  //must be lower-case
-        TRIVIAL_WORDS.add("an");
-        TRIVIAL_WORDS.add("a");
-        TRIVIAL_WORDS.add("and");
+        // must be lower-case
+        TRIVIAL_WORDS = Arrays.asList("the", "an", "a", "and");
         
         COLLATOR = Collator.getInstance
             (new Locale(ApplicationSettings.LANGUAGE.getValue(),
@@ -174,11 +170,11 @@ public class StringUtils {
      *  Note that this is <b>not internationalized</b>; but it is fast.
      */
     public static final char toOtherCase(char c) {
-        int i=(int)c; 
-        final int A=(int)'A';   //65
-        final int Z=(int)'Z';   //90
-        final int a=(int)'a';   //97
-        final int z=(int)'z';   //122
+        int i = c; 
+        final int A= 'A';   //65
+        final int Z= 'Z';   //90
+        final int a= 'a';   //97
+        final int z= 'z';   //122
         final int SHIFT=a-A;
 
         if (i<A)          //non alphabetic
@@ -217,14 +213,14 @@ public class StringUtils {
     public static String[] split(String s, String delimiters) {
         //Tokenize s based on delimiters, adding to buffer.
         StringTokenizer tokenizer = new StringTokenizer(s, delimiters);
-        Vector buf = new Vector();        
+        Vector<String> buf = new Vector<String>();        
         while (tokenizer.hasMoreTokens())
             buf.add(tokenizer.nextToken());
 
         //Copy from buffer to array.
         String[] ret = new String[buf.size()];
         for(int i=0; i<buf.size(); i++)
-            ret[i] = (String)buf.get(i);
+            ret[i] = buf.get(i);
 
         return ret;
     }
@@ -257,7 +253,7 @@ public class StringUtils {
     public static String[] splitNoCoalesce(String s, String delimiters) {
         //Tokenize s based on delimiters, adding to buffer.
         StringTokenizer tokenizer = new StringTokenizer(s, delimiters, true);
-        Vector buf = new Vector(); 
+        Vector<String> buf = new Vector<String>(); 
         //True if last token was a delimiter.  Initialized to true to force
         //an empty string if s starts with a delimiter.
         boolean gotDelimiter=true; 
@@ -282,7 +278,7 @@ public class StringUtils {
         //Copy from buffer to array.
         String[] ret = new String[buf.size()];
         for(int i=0; i<buf.size(); i++)
-            ret[i] = (String)buf.get(i);
+            ret[i] = buf.get(i);
 
         return ret;
     }
@@ -389,7 +385,7 @@ public class StringUtils {
      * "a" & "b"
      */
     public static Set getSetofValues(String values){
-        Set valueSet = new HashSet();
+        Set<String> valueSet = new HashSet<String>();
         //tokenize the values
         StringTokenizer st = new StringTokenizer(values,
             Constants.ENTRY_SEPARATOR);
@@ -553,7 +549,7 @@ public class StringUtils {
 	 * @param fileName
 	 * @return
 	 */
-	public static final Set keywords(String fileName) {
+	public static final Set<String> keywords(String fileName) {
 		return keywords(fileName, false);
 	}
 	
@@ -566,12 +562,12 @@ public class StringUtils {
      * in the result set
      * @return
      */
-    public static final Set keywords(String fileName, boolean allowNumbers) {
+    public static final Set<String> keywords(String fileName, boolean allowNumbers) {
         //Remove extension
         fileName = ripExtension(fileName);
 		
         //Separate by whitespace and _, etc.
-        Set ret=new LinkedHashSet();
+        Set<String> ret=new LinkedHashSet<String>();
         String delim = FileManager.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuffer sb = new StringBuffer(delim.length() + illegal.length);

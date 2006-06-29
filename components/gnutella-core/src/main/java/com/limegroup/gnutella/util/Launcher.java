@@ -106,7 +106,7 @@ public final class Launcher {
 	 * @return the error code of the native call, -1 if the call failed
 	 *  for any reason
 	 */
-	private static int openURLWindows(String url) throws IOException {
+	private static int openURLWindows(String url) {
 		return new WindowsLauncher().openURL(url);
 	}
 	
@@ -226,7 +226,7 @@ public final class Launcher {
 	 *
 	 * @return an int for the exit code of the native method
 	 */
-	private static int launchFileWindows(String path) throws IOException {		
+	private static int launchFileWindows(String path) {		
 		return new WindowsLauncher().launchFile(path);
 	}
 

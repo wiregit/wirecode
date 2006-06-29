@@ -40,7 +40,7 @@ public class SchemaFieldInfo
      * List (of NameValue) to store enumerated values, if associated with this
      *field
      */
-    private List _enumerationList = null;
+    private List<NameValue<String>> _enumerationList = null;
     
     /**
      * Canonicalized field name for which it stores the info
@@ -83,10 +83,10 @@ public class SchemaFieldInfo
     {
         //create a new list, if doesnt exist
         if(_enumerationList == null)
-            _enumerationList = new LinkedList();
+            _enumerationList = new LinkedList<NameValue<String>>();
         
         //add the value
-        _enumerationList.add(new NameValue(name, value));
+        _enumerationList.add(new NameValue<String>(name, value));
         
         //also set the field type to be OPTIONS
         _fieldType = OPTIONS;
@@ -178,7 +178,7 @@ public class SchemaFieldInfo
      * Returns the List (of NameValue) to store enumerated values, 
      * if associated with this field
      */
-    public List getEnumerationList()
+    public List<NameValue<String>> getEnumerationList()
     {
         return _enumerationList;
     }

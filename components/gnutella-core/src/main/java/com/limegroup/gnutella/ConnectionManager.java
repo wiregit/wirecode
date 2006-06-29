@@ -1048,9 +1048,9 @@ public class ConnectionManager {
      * String loc.
      * create a new linkedlist to return.
      */
-    public List<Connection> getInitializedConnectionsMatchLocale(String loc) {
-        List<Connection> matches = new LinkedList<Connection>();
-        for(Connection conn : _initializedConnections) {
+    public List<ManagedConnection> getInitializedConnectionsMatchLocale(String loc) {
+        List<ManagedConnection> matches = new LinkedList<ManagedConnection>();
+        for(ManagedConnection conn : _initializedConnections) {
             if(loc.equals(conn.getLocalePref()))
                 matches.add(conn);
         }
@@ -1073,9 +1073,9 @@ public class ConnectionManager {
      * String loc.
      * create a new linkedlist to return.
      */
-    public List<Connection> getInitializedClientConnectionsMatchLocale(String loc) {
-    	List<Connection>  matches = new LinkedList<Connection>();
-        for(Connection conn : _initializedClientConnections) {
+    public List<ManagedConnection> getInitializedClientConnectionsMatchLocale(String loc) {
+    	List<ManagedConnection>  matches = new LinkedList<ManagedConnection>();
+        for(ManagedConnection conn : _initializedClientConnections) {
             if(loc.equals(conn.getLocalePref()))
                 matches.add(conn);
         }

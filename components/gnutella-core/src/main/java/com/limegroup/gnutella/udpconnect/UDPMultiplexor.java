@@ -11,7 +11,6 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -34,10 +33,10 @@ public class UDPMultiplexor extends AbstractSelector {
 	private volatile UDPSocketChannel[] _channels;
     
     /** A list of overflowed channels when registering. */
-    private final List channelsToRemove = new LinkedList();
+    private final List<SelectableChannel> channelsToRemove = new LinkedList<SelectableChannel>();
     
     /** A set of the currently connected keys. */
-    private Set selectedKeys = new HashSet(256);
+    private Set<SelectionKey> selectedKeys = new HashSet<SelectionKey>(256);
 
 	/** Keep track of the last assigned connection id so that we can use a 
 		circular assignment algorithm.  This should cut down on message
@@ -76,13 +75,13 @@ public class UDPMultiplexor extends AbstractSelector {
      */
 	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr) {
         UDPSocketChannel[] array = _channels;
-		int connID = (int) msg.getConnectionID() & 0xff;
+		int connID = msg.getConnectionID() & 0xff;
 
 		// If connID equals 0 and SynMessage then associate with a connection
         // that appears to want it (connecting and with knowledge of it).
 		if ( connID == 0 && msg instanceof SynMessage ) {
 			for (int i = 1; i < array.length; i++) {
-                UDPSocketChannel channel = (UDPSocketChannel)array[i];
+                UDPSocketChannel channel = array[i];
                 if(channel == null)
                     continue;
                 
@@ -95,7 +94,7 @@ public class UDPMultiplexor extends AbstractSelector {
 			// so it is safe to throw away premature ones
 
 		} else if(array[connID] != null) {  // If valid connID then send on to connection
-            UDPSocketChannel channel = (UDPSocketChannel)array[connID];
+            UDPSocketChannel channel = array[connID];
 			if (channel.getRemoteSocketAddress().equals(addr) )
                 channel.getProcessor().handleMessage(msg);
 		}
@@ -149,16 +148,16 @@ public class UDPMultiplexor extends AbstractSelector {
     /**
      * Returns all SelectionKeys this Selector is currently in control of.
      */
-    public Set keys() {
+    public Set<SelectionKey> keys() {
         UDPSocketChannel[] channels = _channels;
-        Set keys = new HashSet();
+        Set<SelectionKey> keys = new HashSet<SelectionKey>();
         for(int i = 0; i < channels.length; i++) {
             if(channels[i] != null)
                 keys.add(channels[i].keyFor(this));
         }
         synchronized(this) {
-            for(Iterator i = channelsToRemove.iterator(); i.hasNext(); )
-                keys.add(((SelectableChannel)i.next()).keyFor(this));
+            for(SelectableChannel channel : channelsToRemove)
+                keys.add(channel.keyFor(this));
         }
         return keys;
     }
@@ -171,7 +170,7 @@ public class UDPMultiplexor extends AbstractSelector {
         throw new UnsupportedOperationException("blocking select not supported");
     }
 
-    public Set selectedKeys() {
+    public Set<SelectionKey> selectedKeys() {
         return selectedKeys;
     }
 
@@ -183,7 +182,7 @@ public class UDPMultiplexor extends AbstractSelector {
         selectedKeys.clear();
         
         for (int i = 0; i < array.length; i++) {
-            UDPSocketChannel channel = (UDPSocketChannel) array[i];
+            UDPSocketChannel channel = array[i];
             if (channel == null)
                 continue;
 
@@ -221,8 +220,7 @@ public class UDPMultiplexor extends AbstractSelector {
             }
             
             if(!channelsToRemove.isEmpty()) {
-                for(Iterator i = channelsToRemove.iterator(); i.hasNext(); ) {
-                    SelectableChannel next = (SelectableChannel)i.next();
+                for(SelectableChannel next : channelsToRemove) {
                     UDPSelectionKey key = (UDPSelectionKey)next.keyFor(this);
                     key.cancel();
                     key.setReadyOps(0);

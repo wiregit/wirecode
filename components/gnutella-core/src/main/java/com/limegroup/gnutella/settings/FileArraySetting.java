@@ -2,9 +2,7 @@ package com.limegroup.gnutella.settings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -111,12 +109,10 @@ public class FileArraySetting extends Setting {
 	public synchronized int indexOf(File file) {
 	    if (file == null)
 	        return -1;
-	    
-        List list = Arrays.asList(value);
-        Iterator it = list.iterator();
-        for (int i = 0; it.hasNext(); i++) {
+
+        for (int i = 0; i < value.length; i++) {
             try {
-                if ((FileUtils.getCanonicalFile((File)it.next())).equals(FileUtils.getCanonicalFile(file)))
+                if ((FileUtils.getCanonicalFile(value[i])).equals(FileUtils.getCanonicalFile(file)))
                     return i;
             } catch(IOException ioe) {
                 continue;
@@ -183,7 +179,7 @@ public class FileArraySetting extends Setting {
 	 * Removes non-existent members from this.
 	 */
 	public synchronized void clean() {
-		List list = new LinkedList();
+		List<File> list = new ArrayList<File>(value.length);
 		File file = null;
 		for (int i = 0; i < value.length; i++) {
 			file = value[i];
@@ -193,6 +189,6 @@ public class FileArraySetting extends Setting {
 				continue;
 			list.add(file);
 		}
-		setValue((File[])list.toArray(new File[0]));
+		setValue(list.toArray(new File[list.size()]));
 	}
 }

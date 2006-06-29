@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -33,6 +32,7 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.StringUtils;
 
@@ -83,10 +83,9 @@ public class UpdateHandler {
     private volatile UpdateInformation _updateInfo;
     
     /**
-     * A collection of UpdateInformation's that we need to retrieve
-     * an update for.
+     * A collection of DownloadInformation's that we need to retrieve an update for.
      */
-    private volatile List _updatesToDownload;
+    private volatile List<DownloadInformation> _updatesToDownload;
     
     /**
      * The most recent id of the update info.
@@ -266,14 +265,14 @@ public class UpdateHandler {
                     style,
                     javaV);
 
-        List updatesToDownload = uc.getUpdatesWithDownloadInformation();
+        List<DownloadInformation> updatesToDownload = uc.getUpdatesWithDownloadInformation();
         _killingObsoleteNecessary = true;
         
         // if we have an update for our machine, prepare the command line
         // and move our update to the front of the list of updates
         if (updateInfo != null && updateInfo.getUpdateURN() != null) {
             prepareUpdateCommand(updateInfo);
-            updatesToDownload = new LinkedList(updatesToDownload);
+            updatesToDownload = new LinkedList<DownloadInformation>(updatesToDownload);
             updatesToDownload.add(0,updateInfo);
         }
 
@@ -345,15 +344,13 @@ public class UpdateHandler {
      * Tries to download updates.
      * @return whether we had any non-hopeless updates.
      */
-    private void downloadUpdates(List toDownload, ReplyHandler source) {
+    private void downloadUpdates(List<? extends DownloadInformation> toDownload, ReplyHandler source) {
         if (toDownload == null)
-            toDownload = Collections.EMPTY_LIST;
+            toDownload = Collections.emptyList();
         
         killObsoleteUpdates(toDownload);
         
-        for(Iterator i = toDownload.iterator(); i.hasNext(); ) {
-            DownloadInformation next = (DownloadInformation)i.next();
-            
+        for(DownloadInformation next : toDownload) {
             if (isHopeless(next))
                 continue; 
 
@@ -362,7 +359,7 @@ public class UpdateHandler {
             if(dm.isGUIInitd() && fm.isLoadFinished()) {
                 
                 FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
-                ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
+                ManagedDownloader md = dm.getDownloaderForURN(next.getUpdateURN());
                 if(LOG.isDebugEnabled())
                     LOG.debug("Looking for: " + next + ", got: " + shared);
                 
@@ -399,7 +396,7 @@ public class UpdateHandler {
      * kills all in-network downloaders whose URNs are not listed in the list of updates.
      * Deletes any files in the folder that are not listed in the update message.
      */
-    private void killObsoleteUpdates(List toDownload) {
+    private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
     	DownloadManager dm = RouterService.getDownloadManager();
     	FileManager fm = RouterService.getFileManager();
     	if (!dm.isGUIInitd() || !fm.isLoadFinished())
@@ -409,11 +406,9 @@ public class UpdateHandler {
             _killingObsoleteNecessary = false;
             dm.killDownloadersNotListed(toDownload);
             
-            Set urns = new HashSet(toDownload.size());
-            for (Iterator iter = toDownload.iterator(); iter.hasNext();) {
-				UpdateData data = (UpdateData) iter.next();
-				urns.add(data.getUpdateURN());
-			}
+            Set<URN> urns = new HashSet<URN>(toDownload.size());
+            for(DownloadInformation data : toDownload)
+                urns.add(data.getUpdateURN());
             
             FileDesc [] shared = fm.getSharedFileDescriptors(FileManager.PREFERENCE_SHARE);
             for (int i = 0; i < shared.length; i++) {
@@ -430,9 +425,7 @@ public class UpdateHandler {
      * Adds all current connections that have the right update ID as a source for this download.
      */
     private void addCurrentDownloadSources(ManagedDownloader md, DownloadInformation info) {
-        List connections = RouterService.getConnectionManager().getConnections();
-        for(Iterator i = connections.iterator(); i.hasNext(); ) {
-            ManagedConnection mc = (ManagedConnection)i.next();
+        for(ManagedConnection mc : RouterService.getConnectionManager().getConnections()) {
             if(mc.getRemoteHostUpdateVersion() == _lastId) {
                 LOG.debug("Adding source: " + mc);
                 md.addDownload(rfd(mc, info), false);
@@ -445,7 +438,7 @@ public class UpdateHandler {
      * Constructs an RFD out of the given information & connection.
      */
     private RemoteFileDesc rfd(ReplyHandler rh, DownloadInformation info) {
-        HashSet urns = new HashSet(1);
+        Set<URN> urns = new HashSet<URN>(1);
         urns.add(info.getUpdateURN());
         return new RemoteFileDesc(rh.getAddress(),               // address
                                   rh.getPort(),                 // port
@@ -462,7 +455,7 @@ public class UpdateHandler {
                                   false,                        // reply to MCast
                                   false,                        // is firewalled
                                   "LIME",                        // vendor
-                                  Collections.EMPTY_SET,        // push proxies
+                                  IpPort.EMPTY_SET,             // push proxies
                                   0,                            // creation time
                                   0);                           // firewalled transfer
     }
@@ -554,7 +547,7 @@ public class UpdateHandler {
     /**
      * @return whether we killed any hopeless update downloads
      */
-    private static void killHopelessUpdates(List updates) {
+    private static void killHopelessUpdates(List<? extends DownloadInformation> updates) {
         if (updates == null)
             return;
         
@@ -563,8 +556,7 @@ public class UpdateHandler {
             return;
         
         long now = clock.now();
-        for (Iterator iter = updates.iterator(); iter.hasNext();) {
-            DownloadInformation info = (DownloadInformation) iter.next();
+        for(DownloadInformation info : updates) {
             Downloader downloader = dm.getDownloaderForURN(info.getUpdateURN());
             if (downloader != null && downloader instanceof InNetworkDownloader) {
                 InNetworkDownloader iDownloader = (InNetworkDownloader)downloader;

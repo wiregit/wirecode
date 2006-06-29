@@ -181,8 +181,8 @@ final public class ApproximateMatcher
      */
     public final boolean matches(String s1, String s2, float precision) {
         int s1n=s1.length();
-        int n=(int)(precision*((float)s1n));  //number UNchanged
-        int maxOps=s1n-n;                     //number changed
+        int n=(int)(precision*(s1n));  //number UNchanged
+        int maxOps=s1n-n;              //number changed
         return matches(s1, s2, maxOps);
     }
         

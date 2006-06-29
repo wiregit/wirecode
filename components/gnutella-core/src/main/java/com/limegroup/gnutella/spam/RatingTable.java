@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -21,6 +20,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IOUtils;
 
 public class RatingTable {
@@ -52,7 +52,7 @@ public class RatingTable {
      * the RatingTable to return the actual Token that should
      * be used inplace of that Token (one that has rating data).
 	 */
-	private final Map _tokenMap;
+	private final Map<Token, Token> _tokenMap;
 
 	/**
 	 * constructor, tries to deserialize filter data from disc, which will fail
@@ -187,7 +187,7 @@ public class RatingTable {
 	 * @return token or the matching copy of it from _tokenMap
 	 */
 	private synchronized Token lookup(Token token) {
-        Token stored = (Token)_tokenMap.get(token);
+        Token stored = _tokenMap.get(token);
         
         if(stored == null) {
             _tokenMap.put(token, token);
@@ -203,19 +203,15 @@ public class RatingTable {
 	 * 
 	 * @return Map of <tt>Token</tt> to <tt>Token</tt> as read from disk
 	 */
-	private Map readData() {
+	private Map<Token, Token> readData() {
 		ObjectInputStream is = null;
 		try {
 			is = new ObjectInputStream(
                     new BufferedInputStream(
                             new FileInputStream(getSpamDat())));
-            Object read = is.readObject();
-            if(read instanceof Map)
-                return (Map)read;
-            else 
-                return new HashMap();
+            return GenericsUtils.scanForMap(is.readObject(), Token.class, Token.class, GenericsUtils.ScanMode.REMOVE);
 		} catch(Throwable someKindOfError) {
-			return new HashMap();
+			return new HashMap<Token, Token>();
 		} finally {
             IOUtils.close(is);
 		}
@@ -225,12 +221,12 @@ public class RatingTable {
      * Save data from this table to disk.
      */
     public void save() {
-        Map copy;
+        Map<Token, Token> copy;
         
         synchronized(this) {
             if (_tokenMap.size() > MAX_SIZE)
                 pruneEntries();
-            copy = new HashMap(_tokenMap);
+            copy = new HashMap<Token, Token>(_tokenMap);
         }
         
         if (LOG.isDebugEnabled())
@@ -254,8 +250,8 @@ public class RatingTable {
      * shut down)
      */
     public synchronized void ageAndSave() {
-        for (Iterator iter = _tokenMap.values().iterator(); iter.hasNext();)
-            ((Token) iter.next()).incrementAge();
+        for(Token token : _tokenMap.values()) 
+            token.incrementAge();
         save();
     }
     
@@ -286,14 +282,15 @@ public class RatingTable {
         }
         
         // Make a set of sorted tokens, low importance first
-        Set sortedTokens = new TreeSet(_tokenMap.values());
-        Iterator it = sortedTokens.iterator();
-        while (tokensToRemove > 0) {
+        Set<Token> sortedTokens = new TreeSet<Token>(_tokenMap.values());
+        for(Token token : sortedTokens) {
             // Note: Although we are iterating over the sorted values or the map,
             // and then removing from it using those items (as opposed to the keys),
             // this works fine because the Map stores the same element in key/value.
-            _tokenMap.remove(it.next());
+            _tokenMap.remove(token);
             --tokensToRemove;
+            if(tokensToRemove == 0)
+                break;
         }
 	}
     

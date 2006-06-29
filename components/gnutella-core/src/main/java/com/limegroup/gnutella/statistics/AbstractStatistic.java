@@ -168,7 +168,7 @@ public abstract class AbstractStatistic implements Statistic {
 					if(_fileName == null || _fileName.equals("")) {
 						Class superclass = getClass().getSuperclass();
 						Class declaringClass = getClass().getDeclaringClass();
-						List fieldsList = new LinkedList();
+						List<Field> fieldsList = new LinkedList<Field>();
 						if(superclass != null) {
 							fieldsList.addAll(Arrays.asList(superclass.getFields()));
 						}
@@ -176,7 +176,7 @@ public abstract class AbstractStatistic implements Statistic {
 							fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
 						}
 						fieldsList.addAll(Arrays.asList(getClass().getFields()));
-						Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
+						Field[] fields = fieldsList.toArray(new Field[0]);
 						for(int i=0; i<fields.length; i++) {
 							try {
 								Object fieldObject = fields[i].get(null);

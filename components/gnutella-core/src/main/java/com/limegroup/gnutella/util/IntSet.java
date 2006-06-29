@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.limegroup.gnutella.Assert;
@@ -37,7 +38,7 @@ public class IntSet {
      *
      * INVARIANT: for all i<j, list[i].high < (list[j].low-1)
      */
-    public ArrayList /* of Interval */ list;
+    private ArrayList<Interval> list;
 
     /**
      * The size of this.  
@@ -99,7 +100,7 @@ public class IntSet {
     
     /** Returns the i'th Interval in this. */
     private final Interval get(int i) {
-        return (Interval)list.get(i);
+        return list.get(i);
     }
 
 
@@ -136,11 +137,11 @@ public class IntSet {
     //////////////////////// Set-like Public Methods //////////////////////////
 
     public IntSet() {
-        this.list=new ArrayList();
+        this.list=new ArrayList<Interval>();
     }
 
     public IntSet(int expectedSize) {
-        this.list=new ArrayList(expectedSize);
+        this.list=new ArrayList<Interval>(expectedSize);
     }
 
     public int size() {
@@ -282,15 +283,15 @@ public class IntSet {
         //We can't modify this while iterating over it, so we need to
         //maintain an external list of items that must go.
         //TODO2: implement more efficiently!
-        ArrayList removeList=new ArrayList();
-        for (IntSetIterator iter=this.iterator(); iter.hasNext(); ) {
-            int x=iter.next();
+        List<Integer> removeList = new ArrayList<Integer>();
+        for (IntSetIterator iter = this.iterator(); iter.hasNext(); ) {
+            int x = iter.next();
             if (! s.contains(x))
                 removeList.add(new Integer(x));
         }
         //It's marginally more efficient to remove items from end to beginning.
         for (int i=removeList.size()-1; i>=0; i--) {
-            int x=((Integer)removeList.get(i)).intValue();
+            int x = (removeList.get(i)).intValue();
             this.remove(x);
         }
         //Did we remove any items?

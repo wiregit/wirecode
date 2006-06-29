@@ -70,9 +70,9 @@ public class SequenceNumberExtender {
 		}
 
 		if ( sequenceNumber < HIGH_BASE_SWITCH_POINT ) {
-			extendedSeqNo = ((long) sequenceNumber) + lowBase;
+			extendedSeqNo = sequenceNumber + lowBase;
 		} else {
-			extendedSeqNo = ((long) sequenceNumber) + highBase;
+			extendedSeqNo = sequenceNumber + highBase;
 		}
 	
 		return extendedSeqNo;

@@ -16,7 +16,7 @@ public class ProcessingQueue implements ThreadPool {
     /**
      * The list of items to be processed.
      */
-    private final List QUEUE = new LinkedList();
+    private final List<Runnable> QUEUE = new LinkedList<Runnable>();
     
     /**
      * The name of the thread to be created.
@@ -114,7 +114,7 @@ public class ProcessingQueue implements ThreadPool {
      */
     private synchronized Runnable next() {
         if(QUEUE.size() > 0)
-            return (Runnable)QUEUE.remove(0);
+            return QUEUE.remove(0);
         else
             return null;
     }

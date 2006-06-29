@@ -2,7 +2,6 @@ package com.limegroup.gnutella.spam;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +72,7 @@ public class Tokenizer {
 	public static Token[] getTokens(RemoteFileDesc desc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("tokenizing: " + desc);
-		Set set = new HashSet();
+		Set<Token> set = new HashSet<Token>();
 		set.addAll(getKeywordTokens(desc));
 		if (desc.getSHA1Urn() != null)
 			set.add(getUrnToken(desc));
@@ -81,7 +80,7 @@ public class Tokenizer {
         set.add(getVendorToken(desc));
 		set.add(getAddressToken(desc));
 		Token[] tokens = new Token[set.size()];
-		tokens = (Token[]) set.toArray(tokens);
+		tokens = set.toArray(tokens);
 		return tokens;
 	}
 
@@ -96,7 +95,7 @@ public class Tokenizer {
 	 * @return an array of Tokens, will never be empty
 	 */
 	public static Token[] getTokens(RemoteFileDesc[] descs) {
-		Set set = new HashSet();
+		Set<Token> set = new HashSet<Token>();
 		for (int i = 0; i < descs.length; i++) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("tokenizing: " + descs[i]);
@@ -108,7 +107,7 @@ public class Tokenizer {
 			set.add(getAddressToken(descs[i]));
 		}
 		Token[] tokens = new Token[set.size()];
-		tokens = (Token[]) set.toArray(tokens);
+		tokens = set.toArray(tokens);
 		return tokens;
 	}
 
@@ -123,11 +122,11 @@ public class Tokenizer {
 	public static Token[] getTokens(QueryRequest qr) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("tokenizing: " + qr);
-		Set set = new HashSet();
+		Set<Token> set = new HashSet<Token>();
 		set.addAll(getKeywordTokens(qr));
 		set.addAll(getUrnTokens(qr));
 		Token[] tokens = new Token[set.size()];
-		tokens = (Token[]) set.toArray(tokens);
+		tokens = set.toArray(tokens);
 		return tokens;
 	}
 
@@ -152,13 +151,12 @@ public class Tokenizer {
 	 *            the QueryRequest we are tokenizing
 	 * @return a Set of UrnToken, built from the query urns
 	 */
-	private static Set getUrnTokens(QueryRequest qr) {
+	private static Set<Token> getUrnTokens(QueryRequest qr) {
 		if (qr.getQueryUrns().isEmpty())
-			return Collections.EMPTY_SET;
-		Set urns = qr.getQueryUrns();
-		Set ret = new HashSet();
-		for (Iterator iter = urns.iterator(); iter.hasNext();)
-			ret.add(new UrnToken((URN) iter.next()));
+			return Collections.emptySet();
+		Set<Token> ret = new HashSet<Token>();
+        for(URN urn : qr.getQueryUrns())
+            ret.add(new UrnToken(urn));
 		return ret;
 	}
 
@@ -200,7 +198,7 @@ public class Tokenizer {
 	 *            the RemoteFileDesc we are tokenizing
 	 * @return a Set of KeywordToken and XMLKeywordToken
 	 */
-	private static Set getKeywordTokens(RemoteFileDesc desc) {
+	private static Set<Token> getKeywordTokens(RemoteFileDesc desc) {
 		return getKeywordTokens(desc.getFileName(), desc.getXMLDocument());
 	}
 
@@ -211,7 +209,7 @@ public class Tokenizer {
 	 *            the QueryRequest we are tokenizing
 	 * @return a Set of KeywordToken and XMLKeywordToken
 	 */
-	private static Set getKeywordTokens(QueryRequest qr) {
+	private static Set<Token> getKeywordTokens(QueryRequest qr) {
 		return getKeywordTokens(qr.getQuery(), qr.getRichQuery());
 	}
 
@@ -224,14 +222,12 @@ public class Tokenizer {
 	 *            the LimeXMLDocument that should be split into XMLKeywordToken
 	 * @return a Set of XMLKeywordToken
 	 */
-	private static Set getKeywordTokens(String fname, LimeXMLDocument doc) {
-		Set tokens = getKeywordTokens(fname.toLowerCase(Locale.US));
+	private static Set<Token> getKeywordTokens(String fname, LimeXMLDocument doc) {
+		Set<Token> tokens = getKeywordTokens(fname.toLowerCase(Locale.US));
 		if (doc != null) {
-			for (Iterator iter = doc.getNameValueSet().iterator(); iter
-					.hasNext();) {
-				Map.Entry next = (Map.Entry) iter.next();
-				tokens.addAll(getXMLKeywords(next.getKey().toString()
-						.toLowerCase(Locale.US), next.getValue().toString()
+            for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
+				tokens.addAll(getXMLKeywords(entry.getKey().toString()
+						.toLowerCase(Locale.US), entry.getValue().toString()
 						.toLowerCase(Locale.US)));
 			}
 		}
@@ -248,10 +244,10 @@ public class Tokenizer {
 	 *            the value String
 	 * @return a Set of XMLKeywordToken
 	 */
-	private static Set getXMLKeywords(String name, String value) {
+	private static Set<Token> getXMLKeywords(String name, String value) {
 		name = extractSimpleFieldName(name);
 
-		Set ret = new HashSet();
+		Set<Token> ret = new HashSet<Token>();
 
 		StringTokenizer tok = new StringTokenizer(value, KEYWORD_DELIMITERS);
 		while (tok.hasMoreTokens()) {
@@ -319,8 +315,8 @@ public class Tokenizer {
 	 *            the String to tokenize
 	 * @return a Set of KeywordToken
 	 */
-	private static Set getKeywordTokens(String str) {
-		Set ret = new HashSet();
+	private static Set<Token> getKeywordTokens(String str) {
+		Set<Token> ret = new HashSet<Token>();
 
 		StringTokenizer tok = new StringTokenizer(str, KEYWORD_DELIMITERS);
 		byte[] last = null;

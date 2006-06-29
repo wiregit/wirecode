@@ -25,14 +25,15 @@ public final class QueryDispatcher implements Runnable {
 	/**
 	 * <tt>Map</tt> of outstanding queries.  
 	 */
-	private final Map QUERIES = new HashMap(); // GUID -> QueryHandler
+	private final Map<GUID, QueryHandler> QUERIES = new HashMap<GUID, QueryHandler>();
 
 	/**
 	 * <tt>List</tt> of new queries to add.
 	 * LOCKING: Thread-safe, although you must obtain a lock on NEW_QUERIES if
 	 * it's ever iterated over.  
 	 */
-	private final List NEW_QUERIES = Collections.synchronizedList(new LinkedList());
+	private final List<QueryHandler> NEW_QUERIES =
+        Collections.synchronizedList(new LinkedList<QueryHandler>());
 
 	/**
 	 * <tt>QueryDispatcher</tt> instance following singleton.
@@ -102,7 +103,7 @@ public final class QueryDispatcher implements Runnable {
      */
     public void updateLeafResultsForQuery(GUID queryGUID, int numResults) {
         synchronized (QUERIES) {
-            QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
+            QueryHandler qh = QUERIES.get(queryGUID);
             if (qh != null)
                 qh.updateLeafResults(numResults);
         }
@@ -113,7 +114,7 @@ public final class QueryDispatcher implements Runnable {
      */
     public int getLeafResultsForQuery(GUID queryGUID) {
         synchronized (QUERIES) {
-            QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
+            QueryHandler qh = QUERIES.get(queryGUID);
             if (qh == null)
                 return -1;
             else
@@ -129,18 +130,18 @@ public final class QueryDispatcher implements Runnable {
      */
     private void remove(ReplyHandler handler) {
         synchronized(NEW_QUERIES) {
-            Iterator iter = NEW_QUERIES.iterator();
+            Iterator<QueryHandler> iter = NEW_QUERIES.iterator();
             while(iter.hasNext()) {
-                QueryHandler qh = (QueryHandler)iter.next();
+                QueryHandler qh = iter.next();
                 if(qh.getReplyHandler() == handler)
                     iter.remove();
             }
         }
         
         synchronized(QUERIES) {
-            Iterator iter = QUERIES.values().iterator();
+            Iterator<QueryHandler> iter = QUERIES.values().iterator();
             while(iter.hasNext()) {
-                QueryHandler qh = (QueryHandler)iter.next();
+                QueryHandler qh = iter.next();
                 if(qh.getReplyHandler() == handler)
                     iter.remove();
             }
@@ -154,18 +155,18 @@ public final class QueryDispatcher implements Runnable {
      */
     private void remove(GUID guid) {
         synchronized(NEW_QUERIES) {
-            Iterator iter = NEW_QUERIES.iterator();
+            Iterator<QueryHandler> iter = NEW_QUERIES.iterator();
             while(iter.hasNext()) {
-                QueryHandler qh = (QueryHandler)iter.next();
+                QueryHandler qh = iter.next();
                 if(qh.getGUID().equals(guid))
                     iter.remove();
             }
         }
         
         synchronized(QUERIES) {
-            Iterator iter = QUERIES.values().iterator();
+            Iterator<QueryHandler> iter = QUERIES.values().iterator();
             while(iter.hasNext()) {
-                QueryHandler qh = (QueryHandler)iter.next();
+                QueryHandler qh = iter.next();
                 if(qh.getGUID().equals(guid))
                     iter.remove();
             }
@@ -208,20 +209,17 @@ public final class QueryDispatcher implements Runnable {
 	private boolean processQueries() {
 		synchronized(NEW_QUERIES) {
             synchronized(QUERIES) {
-                Iterator iter = NEW_QUERIES.iterator();
-                while (iter.hasNext()) {
-                    QueryHandler qh = (QueryHandler) iter.next();
+                for(QueryHandler qh : NEW_QUERIES)
                     QUERIES.put(qh.getGUID(), qh);
-                }
             }
 			NEW_QUERIES.clear();
 		}
 
 	    
         synchronized(QUERIES) {
-            Iterator iter = QUERIES.values().iterator();
+            Iterator<QueryHandler> iter = QUERIES.values().iterator();
             while(iter.hasNext()) {
-                QueryHandler handler = (QueryHandler)iter.next();
+                QueryHandler handler = iter.next();
                 handler.sendQuery();
                 if(handler.hasEnoughResults())
                     iter.remove();

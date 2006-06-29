@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.search;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,12 +17,12 @@ final class ProbeQuery {
     /**
      * Constant list of hosts to probe query at ttl=1.
      */
-    private final List TTL_1_PROBES;
+    private final List<ManagedConnection> TTL_1_PROBES;
     
     /**
      * Constant list of hosts to probe query at ttl=2.
      */
-    private final List TTL_2_PROBES;
+    private final List<ManagedConnection> TTL_2_PROBES;
 
     /**
      * Constant reference to the query handler instance.
@@ -39,13 +39,12 @@ final class ProbeQuery {
      * @param qh the <tt>QueryHandler</tt> instance containing data
      *  for the probe
      */
-    ProbeQuery(List connections, QueryHandler qh) {
+    ProbeQuery(List<? extends ManagedConnection> connections, QueryHandler qh) {
         QUERY_HANDLER = qh;
-        LinkedList[] lists = 
-            createProbeLists(connections, qh.QUERY);
+        List<List<ManagedConnection>> lists = createProbeLists(connections, qh.QUERY);
 
-        TTL_1_PROBES = lists[0];
-        TTL_2_PROBES = lists[1];        
+        TTL_1_PROBES = lists.get(0);
+        TTL_2_PROBES = lists.get(1);        
     }
     
 
@@ -76,24 +75,14 @@ final class ProbeQuery {
      *  probe
      */
     int sendProbe() {
-        Iterator iter = TTL_1_PROBES.iterator();
         int hosts = 0;
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
-        while(iter.hasNext()) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
-            hosts += 
-                QueryHandler.sendQueryToHost(query, 
-                                             mc, QUERY_HANDLER);
-        }
+        for(ManagedConnection mc : TTL_1_PROBES)
+            hosts += QueryHandler.sendQueryToHost(query, mc, QUERY_HANDLER);
         
         query = QUERY_HANDLER.createQuery((byte)2);
-        iter = TTL_2_PROBES.iterator();
-        while(iter.hasNext()) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
-            hosts += 
-                QueryHandler.sendQueryToHost(query, 
-                                             mc, QUERY_HANDLER);
-        }
+        for(ManagedConnection mc : TTL_2_PROBES)
+            hosts += QueryHandler.sendQueryToHost(query, mc, QUERY_HANDLER);
         
         TTL_1_PROBES.clear();
         TTL_2_PROBES.clear();
@@ -106,19 +95,16 @@ final class ProbeQuery {
      * This list will vary in size depending on how popular the content appears
      * to be.
      */
-    private static LinkedList[] createProbeLists(List connections, 
-        QueryRequest query) {
-        Iterator iter = connections.iterator();
+    private static List<List<ManagedConnection>> createProbeLists(
+            List<? extends ManagedConnection> connections, QueryRequest query) {
         
-        LinkedList missConnections = new LinkedList();
-        LinkedList oldConnections  = new LinkedList();
-        LinkedList hitConnections  = new LinkedList();
+        LinkedList<ManagedConnection> missConnections = new LinkedList<ManagedConnection>();
+        LinkedList<ManagedConnection> oldConnections  = new LinkedList<ManagedConnection>();
+        LinkedList<ManagedConnection> hitConnections  = new LinkedList<ManagedConnection>();
 
         // iterate through our connections, adding them to the hit, miss, or
         // old connections list
-        while(iter.hasNext()) {
-            ManagedConnection mc = (ManagedConnection)iter.next();
-            
+        for(ManagedConnection mc : connections) {
             if(mc.isUltrapeerQueryRoutingConnection()) {
                 if(mc.shouldForwardQuery(query)) { 
                     hitConnections.add(mc);
@@ -131,11 +117,11 @@ final class ProbeQuery {
         }
 
         // final list of connections to query
-        LinkedList[] returnLists = new LinkedList[2];
-        LinkedList ttl1List = new LinkedList();
-        LinkedList ttl2List = new LinkedList();
-        returnLists[0] = ttl1List;
-        returnLists[1] = ttl2List;        
+        List<List<ManagedConnection>> returnLists = new ArrayList<List<ManagedConnection>>(2);
+        LinkedList<ManagedConnection> ttl1List = new LinkedList<ManagedConnection>();
+        LinkedList<ManagedConnection> ttl2List = new LinkedList<ManagedConnection>();
+        returnLists.add(ttl1List);
+        returnLists.add(ttl2List);        
 
         // do we have adequate data to determine some measure of the file's 
         // popularity?
@@ -153,7 +139,7 @@ final class ProbeQuery {
 
         int numHitConnections = hitConnections.size();
         double popularity = 
-            (double)((double)numHitConnections/
+            (numHitConnections/
                      ((double)missConnections.size()+numHitConnections));
         
         // if the file appears to be very popular, send it to only one host
@@ -197,8 +183,10 @@ final class ProbeQuery {
      *  <tt>listToAddTo</tt> -- note that this number will not be reached
      *  if the list1.size()+list2.size() < numElements
      */
-    private static void addToList(List listToAddTo, List list1, List list2, 
-                                  int numElements) {
+    private static <T> void addToList(List<T> listToAddTo,
+                                      List<? extends T> list1,
+                                      List<? extends T> list2, 
+                                      int numElements) {
         if(list1.size() >= numElements) {
             listToAddTo.addAll(list1.subList(0, numElements));
             return;
@@ -228,17 +216,19 @@ final class ProbeQuery {
      * @param hitConnections the <tt>List</tt> of connections with hits
      * @param returnLists the array of TTL=1 and TTL=2 connections to query
      */
-    private static LinkedList[] 
-        createAggressiveProbe(List oldConnections, List missConnections,
-                              List hitConnections, LinkedList[] returnLists) {
+    private static <T> List<List<T>>
+        createAggressiveProbe(List<? extends T> oldConnections,
+                              List<? extends T> missConnections,
+                              List<? extends T> hitConnections,
+                              List<List<T>> returnLists) {
         
         // add as many connections as possible from first the old connections
         // list, then the connections that did not have hits
-        addToList(returnLists[1], oldConnections, missConnections, 3);
+        addToList(returnLists.get(1), oldConnections, missConnections, 3);
 
         // add any hits there are to the TTL=1 list
         int maxIndex = Math.min(4, hitConnections.size());
-        returnLists[0].addAll(hitConnections.subList(0, maxIndex));
+        returnLists.get(0).addAll(hitConnections.subList(0, maxIndex));
 
         return returnLists;        
     }

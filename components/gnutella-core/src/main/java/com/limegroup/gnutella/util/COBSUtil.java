@@ -16,7 +16,7 @@ public class COBSUtil {
      *  cobsDecode(cobsEncode(src)) ==  src.
      *  @return a COBS encoded version of src.
      */
-    public static byte[] cobsEncode(byte[] src) throws IOException {
+    public static byte[] cobsEncode(byte[] src) {
         final int srcLen = src.length;
         int code = 1;
         int currIndex = 0;
@@ -51,8 +51,7 @@ public class COBSUtil {
     }
 
     private static int finishBlock(int code, ByteArrayOutputStream sink, 
-                                   byte[] src, int begin, int end) 
-        throws IOException {
+                                   byte[] src, int begin, int end) {
         sink.write(code);
         if (begin > -1)
             sink.write(src, begin, (end-begin)+1);
@@ -76,7 +75,7 @@ public class COBSUtil {
             if ((currIndex+(code-2)) >= srcLen)
                 throw new IOException();
             for (int i = 1; i < code; i++) {
-                sink.write((int)src[currIndex++]);
+                sink.write(src[currIndex++]);
             }
             if (currIndex < srcLen) // don't write this last one, it isn't used
                 if (code < 0xFF) sink.write(0);

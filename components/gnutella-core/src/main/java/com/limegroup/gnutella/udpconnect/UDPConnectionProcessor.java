@@ -529,7 +529,7 @@ public class UDPConnectionProcessor {
      */
     private synchronized void writeDataActivation() {
         // Schedule at a reasonable time
-        long rto = (long)_sendWindow.getRTO();
+        long rto = _sendWindow.getRTO();
         scheduleWriteDataEvent( _lastDataSendTime + (rto/4) );
 	}
 
@@ -803,11 +803,11 @@ public class UDPConnectionProcessor {
             int rto         = _sendWindow.getRTO();
 			if (rto == 0) 
 				rto = (int) DEFAULT_RTO_WAIT_TIME;
-            long waitTime    = drec.sentTime + ((long)rto);
+            long waitTime    = drec.sentTime + rto;
 
             // If there was a resend then base the wait off of current time
             if ( _ackResendCount > 0 ) {
-                waitTime    = _lastSendTime + ((long)rto);
+                waitTime    = _lastSendTime + rto;
                _ackResendCount = 0;
             }
 

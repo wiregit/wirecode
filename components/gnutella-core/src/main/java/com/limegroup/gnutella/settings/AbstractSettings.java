@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.settings;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.Properties;
 
 import com.limegroup.gnutella.util.CommonUtils;
@@ -105,9 +104,7 @@ public abstract class AbstractSettings implements Settings {
      */
     public Setting getSetting(String key) {
         synchronized(FACTORY) {
-            Iterator iter = FACTORY.iterator();
-            while(iter.hasNext()) {
-                Setting currSetting = (Setting)iter.next();
+            for(Setting currSetting : FACTORY) {
                 if(currSetting.getKey().equals(key))
                     return currSetting;
             }

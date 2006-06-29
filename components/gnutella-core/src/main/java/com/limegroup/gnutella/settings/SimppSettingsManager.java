@@ -4,10 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,20 +30,14 @@ public class SimppSettingsManager {
      * settings, ie. the user pref settings. 
      * Note 2: See note in revertToUserPrefs method
      */
-    private final HashMap /* Setting -> String*/ _userPrefs;
+    private final Map<Setting, String> _userPrefs;
 
     /**
      * A mapping of simppKeys to simppValues which have not been initialized
      * yet. Newly created settings must check with this map to see if they
      * should load defualt value or the simpp value
      */
-    private final HashMap /* String -> String */ _remainderSimppSettings;
-    
-    /**
-     * true if we have not applied the simpp settings, or have since reverted to
-     * them, false otherwise
-     */
-    private boolean _usingUserPrefs;
+    private final Map<String, String> _remainderSimppSettings;
      
     /**
      *  The instance
@@ -54,12 +46,11 @@ public class SimppSettingsManager {
 
     //constructor
     private SimppSettingsManager() {
-        _usingUserPrefs = true; //we are using defualt settings by default
         String simppSettings = SimppManager.instance().getPropsString();
         if(simppSettings == null)
-            throw new IllegalArgumentException("SimppManager unexpected state");
-        _userPrefs = new HashMap();
-        _remainderSimppSettings = new HashMap();
+            throw new IllegalStateException("SimppManager unexpected state");
+        _userPrefs = new HashMap<Setting, String>();
+        _remainderSimppSettings = new HashMap<String, String>();
         updateSimppSettings(simppSettings);
     }
 
@@ -100,12 +91,10 @@ public class SimppSettingsManager {
     public void activateSimppSettings() {
         LOG.debug("activating new settings");
         synchronized(_simppProps) {
-            Set set = _simppProps.entrySet();
-            for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
-                Map.Entry currEntry = (Map.Entry)iter.next();
-                String settingKey = (String)currEntry.getKey();
+            for(Map.Entry<Object, Object> entry : _simppProps.entrySet()) {
+                String settingKey = (String)entry.getKey();
                 Setting simppSetting = getSimppSettingForKey(settingKey);
-                String simppValue = (String)currEntry.getValue();
+                String simppValue = (String)entry.getValue();
                 //If this setting is null, it means that the SettingsFactory has
                 //not loaded this setting yet. Let's cache the value in a
                 //hashmap which will be referenced everytime a setting is
@@ -121,40 +110,16 @@ public class SimppSettingsManager {
                 if(!simppSetting.isSimppEnabled())
                     continue;
                 //get the default/current value and cache it                
-                String userSetValue = (String)simppSetting.getValueAsString();
+                String userSetValue = simppSetting.getValueAsString();
                 if(LOG.isDebugEnabled())
                     LOG.debug("current value:"+userSetValue);
                 _userPrefs.put(simppSetting, userSetValue);
                 //set the setting to the value that simpp says
                 simppSetting.setValue(simppValue);
             }
-        }//end of synchronized block
-        _usingUserPrefs = false;
+        }
     }
     
-    /**
-     * Call this method if you want to restore the values of the settings the
-     * activateSimppSettings method set. 
-     * 
-     * Note: As of now, nothing will cause this method to be called, we could
-     * save a little memory by not having this method, and not having the
-     * _userPrefs map around, but it may be useful...who knows where this code
-     * will go...
-     */
-    public void revertToUserPrefs() {
-        if(_usingUserPrefs) //we are already at default values
-            return;
-        synchronized(_simppProps) {
-            Set set = _simppProps.keySet();
-            for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
-                Setting currSetting = (Setting)iter.next();
-                String userSetValue = (String)_userPrefs.get(currSetting);
-                currSetting.loadValue(userSetValue);
-            }            
-        } //end of synchronized 
-        _usingUserPrefs = true;
-    }
-
     /**
      * @return the simpp value for a simppkey from the map that remembers simpp
      * settings which have not been loaded yet. Removes the entry from the
@@ -163,7 +128,7 @@ public class SimppSettingsManager {
      */
     String getRemanentSimppValue(String simppKey) {
         synchronized(_simppProps) {
-            return (String)_remainderSimppSettings.remove(simppKey);
+            return _remainderSimppSettings.remove(simppKey);
         }
     }
 

@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for a long setting.
  */
-public class LongSetting extends AbstractNumberSetting {
+public class LongSetting extends AbstractNumberSetting<Long> {
     
     private long value;
 
@@ -59,7 +59,7 @@ public class LongSetting extends AbstractNumberSetting {
         }
     }
     
-    protected Comparable convertToComparable(String value) {
+    protected Comparable<Long> convertToComparable(String value) {
         return new Long(value);
     }
 }

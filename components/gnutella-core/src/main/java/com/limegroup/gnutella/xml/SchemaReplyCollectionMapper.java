@@ -12,12 +12,12 @@ import java.util.Map;
  */
 public class SchemaReplyCollectionMapper{
     
-    private Map mapper;
+    private Map<String, LimeXMLReplyCollection> mapper;
     private static SchemaReplyCollectionMapper instance;
     
     //constructor
     private SchemaReplyCollectionMapper() {
-        mapper = new HashMap();
+        mapper = new HashMap<String, LimeXMLReplyCollection>();
     }
 
 
@@ -47,14 +47,14 @@ public class SchemaReplyCollectionMapper{
      * or <tt>null</tt> if we the requested mapping does not exist
      */
     public synchronized LimeXMLReplyCollection getReplyCollection(String schemaURI) {
-        return (LimeXMLReplyCollection)mapper.get(schemaURI);
+        return mapper.get(schemaURI);
     }
     
     /**
      * Returns a collection of all available LimeXMLReplyCollections.
      * YOU MUST SYNCHRONIZE ITERATION OVER THE COLLECTION IF IT CAN BE MODIFIED.
      */
-    public synchronized Collection getCollections() {
+    public synchronized Collection<LimeXMLReplyCollection> getCollections() {
         return mapper.values();
     }
 }

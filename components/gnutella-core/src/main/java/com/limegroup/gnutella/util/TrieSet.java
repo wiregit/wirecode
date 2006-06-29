@@ -18,11 +18,11 @@ import java.util.List;
  *      2. disallowed adding duplicates
  *
  */
-public class TrieSet implements AutoCompleteDictionary {
+public class TrieSet implements AutoCompleteDictionary, Iterable<String> {
     /**
      * The backing map. A binary-sorted Trie.
      */
-    private transient Trie map;
+    private transient Trie<String> map;
 
     /**
      * This constuctor sets up a dictionary where case IS significant
@@ -30,7 +30,7 @@ public class TrieSet implements AutoCompleteDictionary {
      * All Strings are stored with the case of the last entry added.
      */
     public TrieSet(boolean caseSensitive) {
-        map = new Trie(caseSensitive);
+        map = new Trie<String>(caseSensitive);
     }
 
     /**
@@ -74,23 +74,23 @@ public class TrieSet implements AutoCompleteDictionary {
      * Return null if no such String exist in the current set.
      */
     public String lookup(String data) {
-        Iterator it = map.getPrefixedBy(data);
+        Iterator<String> it = map.getPrefixedBy(data);
         if (!it.hasNext())
             return null;
-        return (String)it.next();
+        return it.next();
     }
 
     /**
      * Returns all values (entire TrieSet)
      */
-    public Iterator getIterator() {
+    public Iterator<String> iterator() {
         return map.getIterator();
     }
 
     /**
      * Returns all potential matches off the given String.
      */
-    public Iterator getIterator(String s) {
+    public Iterator<String> iterator(String s) {
         return map.getPrefixedBy(s);
     }
     
@@ -98,11 +98,11 @@ public class TrieSet implements AutoCompleteDictionary {
      * Clears all items in the dictionary.
      */
     public void clear() {
-        List l = new LinkedList();
-        for(Iterator i = getIterator(); i.hasNext(); )
-            l.add(i.next());
-        for(Iterator i = l.iterator(); i.hasNext(); )
-            removeEntry((String)i.next());
+        List<String> l = new LinkedList<String>();
+        for(String string : this)
+            l.add(string);
+        for(String string : l)
+            removeEntry(string);
     }
 }
 

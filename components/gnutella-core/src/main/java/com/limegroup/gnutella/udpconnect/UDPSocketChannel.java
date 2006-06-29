@@ -42,7 +42,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
     private volatile WriteObserver writer;
     
     /** The list of buffered chunks that need to be written out. */
-    private ArrayList /* of ByteBuffer */ chunks;
+    private ArrayList<ByteBuffer> chunks;
     
     /** The current chunk we're writing to. */
     private ByteBuffer activeChunk;
@@ -60,7 +60,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
         super(provider);
         this.processor = new UDPConnectionProcessor(this);
         this.readData = processor.getReadWindow();
-        this.chunks = new ArrayList(5);
+        this.chunks = new ArrayList<ByteBuffer>(5);
         allocateNewChunk();
         try {
             configureBlocking(false);
@@ -74,7 +74,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
         super(null);
         this.processor = processor;
         this.readData = processor.getReadWindow();
-        this.chunks = new ArrayList(5);
+        this.chunks = new ArrayList<ByteBuffer>(5);
         allocateNewChunk();
         try {
             configureBlocking(false);
@@ -154,7 +154,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
      * @return
      */
     private int transfer(DataRecord record, ByteBuffer to) {
-        DataMessage msg = (DataMessage)record.msg;
+        DataMessage msg = record.msg;
         int read = 0;
         
         ByteBuffer chunk = msg.getData1Chunk();
@@ -239,7 +239,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
             ByteBuffer rChunk;
             if ( chunks.size() > 0 ) {
                 // Return the oldest chunk 
-                rChunk = (ByteBuffer)chunks.remove(0);
+                rChunk = chunks.remove(0);
                 rChunk.flip();
             } else if (activeChunk.position() > 0) {
                 rChunk = activeChunk;

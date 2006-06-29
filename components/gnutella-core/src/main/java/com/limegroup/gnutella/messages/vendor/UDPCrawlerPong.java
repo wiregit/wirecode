@@ -18,6 +18,7 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -91,19 +92,19 @@ public class UDPCrawlerPong extends VendorMessage {
 			
 			//move the connections with the locale pref to the head of the lists
 			//we prioritize these disregarding the other criteria (such as isGoodUltrapeer, etc.)
-			List<Connection> prefedcons =
+			List<ManagedConnection> prefedcons =
                 RouterService.getConnectionManager().getInitializedConnectionsMatchLocale(myLocale);
-			
-			endpointsUP.removeAll(prefedcons);
-			prefedcons.addAll(endpointsUP); 
-			endpointsUP=prefedcons;
+			for(Connection c : prefedcons) {
+			    endpointsUP.remove(c);
+                endpointsUP.add(0, c);
+            }
 			
 			prefedcons =
                 RouterService.getConnectionManager().getInitializedClientConnectionsMatchLocale(myLocale);
-	
-			endpointsLeaf.removeAll(prefedcons);
-			prefedcons.addAll(endpointsLeaf); 
-			endpointsLeaf=prefedcons;
+            for(Connection c : prefedcons) {
+                endpointsLeaf.remove(c);
+                endpointsLeaf.add(0, c);
+            }
 			
 			//then trim down to the requested number
 			if (request.getNumberUP() != UDPCrawlerPing.ALL && 

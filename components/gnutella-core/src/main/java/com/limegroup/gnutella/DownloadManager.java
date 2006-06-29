@@ -67,7 +67,6 @@ import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
-import com.limegroup.gnutella.version.UpdateInformation;
 
 
 /** 
@@ -86,6 +85,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
+@SuppressWarnings("unchecked")
 public class DownloadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
@@ -273,12 +273,12 @@ public class DownloadManager implements BandwidthTracker {
      * Kills all in-network downloaders that are not present in the list of URNs
      * @param urns a current set of urns that we are downloading in-network.
      */
-    public synchronized void killDownloadersNotListed(Collection<? extends UpdateInformation> updates) {
+    public synchronized void killDownloadersNotListed(Collection<? extends DownloadInformation> updates) {
         if (updates == null)
             return;
         
         Set<String> urns = new HashSet<String>(updates.size());
-        for(UpdateInformation ui : updates)
+        for(DownloadInformation ui : updates)
             urns.add(ui.getUpdateURN().httpStringValue());
         
         for (Iterator iter = new DualIterator(waiting.iterator(),active.iterator());

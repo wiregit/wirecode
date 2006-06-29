@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Stores and provides access to various XML schemas that me might have.
@@ -26,8 +25,8 @@ public class LimeXMLSchemaRepository
     /**
      * Mapping from URI (string) to an instance of XMLSchema
      */
-    private Map /* Schema URI (String) ==> LimeXMLSchema */ _uriSchemaMap 
-        = new HashMap();
+    private Map<String, LimeXMLSchema> _uriSchemaMap 
+        = new HashMap<String, LimeXMLSchema>();
     
     /**
      * An instance of this class
@@ -52,24 +51,18 @@ public class LimeXMLSchemaRepository
                 LimeXMLProperties.instance().getAllXMLSchemaFiles();
         
         //if there are some files there,initialize from those files
-        if(schemaFiles != null)
-        {
+        if(schemaFiles != null) {
             LimeXMLSchema limeXmlSchema;
             //create schema objects and put them in the _uriSchemaMap
-            for(int i=0; i < schemaFiles.length; i++)
-            {
+            for(int i=0; i < schemaFiles.length; i++) {
                 try
                 {
                     limeXmlSchema = new LimeXMLSchema(schemaFiles[i]);
                     _uriSchemaMap.put(limeXmlSchema.getSchemaURI(),limeXmlSchema);
-                }
-                catch(IOException ioe)
-                {
-                    //no problem
-                }//end of try
-            }//end of for
-        }//end of if
-    }//end of fn initialize
+                } catch(IOException ioe) {}
+            }
+        }
+    }
     
     /**
      * Returns an instance of this class. Adheres to Singleton design pattern.
@@ -90,14 +83,14 @@ public class LimeXMLSchemaRepository
     {
         synchronized(_uriSchemaMap)
         {
-            return (LimeXMLSchema)_uriSchemaMap.get(uri);
+            return _uriSchemaMap.get(uri);
         }
     }
     
     /**
      * Returns all availble schemas.
      */
-    public Collection getAvailableSchemas() {
+    public Collection<LimeXMLSchema> getAvailableSchemas() {
         return Collections.unmodifiableCollection(_uriSchemaMap.values());
     }
     
@@ -108,10 +101,8 @@ public class LimeXMLSchemaRepository
     public String[] getAvailableSchemaURIs()
     {
         String[] schemaURIs;
-        synchronized(_uriSchemaMap)
-        {
-            Set keySet = _uriSchemaMap.keySet();
-            schemaURIs = (String[])keySet.toArray(new String[0]);
+        synchronized(_uriSchemaMap) {
+            schemaURIs = _uriSchemaMap.keySet().toArray(new String[0]);
         }
         Arrays.sort(schemaURIs);
         return schemaURIs;

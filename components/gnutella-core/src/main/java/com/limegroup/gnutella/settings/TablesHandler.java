@@ -36,7 +36,7 @@ public final class TablesHandler extends AbstractSettings {
     * The name of the setting is in the format of:
     * <columnId>_<width|order|visible>
     */
-    private static final Map SETS /* String -> Setting */ = new HashMap();
+    private static final Map<String, Setting> SETS = new HashMap<String, Setting>();
 
     /**
      * Returns the IntSetting for the specified column's width.

@@ -4,28 +4,26 @@ import java.util.Properties;
 
 import com.limegroup.gnutella.Assert;
 
-public abstract class AbstractNumberSetting extends Setting {
+public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> extends Setting {
 
     /**
      * Adds a safeguard against simpp making a setting take a value beyond the
      * reasonable max 
      */
-    protected final Number MAX_VALUE;
+    protected final T MAX_VALUE;
 
     /**
      * Adds a safeguard against simpp making a setting take a value below the
      * reasonable min
      */
-    protected final Number MIN_VALUE;
+    protected final T MIN_VALUE;
     
     protected AbstractNumberSetting(Properties defaultProps, Properties props,
                                     String key, String defaultValue, 
-                              String simppKey, Number min, Number max) {
+                              String simppKey, T min, T max) {
         super(defaultProps, props, key, defaultValue, simppKey);
         if(max != null && min != null) {//do we need to check max, min?
-            // All standard library Numbers implement Comparable
-            Comparable comparableMax = (Comparable) max;
-            if(comparableMax.compareTo(min) < 0) //max less than min?
+            if(max.compareTo(min) < 0) //max less than min?
                 throw new IllegalArgumentException("max less than min");
         }
         MAX_VALUE = max;
@@ -53,7 +51,7 @@ public abstract class AbstractNumberSetting extends Setting {
      * Normalizes a value to an acceptable value for this setting.
      */
     protected String normalizeValue(String value) {
-        Comparable comparableValue = null;
+        Comparable<T> comparableValue = null;
         try {
             comparableValue = convertToComparable(value);
         } catch (NumberFormatException e) {
@@ -70,6 +68,6 @@ public abstract class AbstractNumberSetting extends Setting {
     /**
      * Converts a String to a Comparable of the same type as MAX_VALUE and MIN_VALUE.
      */
-    abstract protected Comparable convertToComparable(String value);
+    abstract protected Comparable<T> convertToComparable(String value);
     
 }

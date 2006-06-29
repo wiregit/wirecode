@@ -48,8 +48,8 @@ public class XMLStringUtils {
      * most structural element, and the last one the actual field/attribute
      * name
      */ 
-    public static List split(String canonicalizedField) {
-        List returnList = new ArrayList();
+    public static List<String> split(String canonicalizedField) {
+        List<String> returnList = new ArrayList<String>();
         
         int lastIndex = 0;
         int index = 0;

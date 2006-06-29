@@ -21,6 +21,8 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.GenericsUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
@@ -47,12 +49,12 @@ public final class TigerTreeCache {
     /**
      * A tree that is not fully constructed yet
      */
-    private static final Object BUSH = new Object();
+    private static final HashTree BUSH = HashTree.INVALID;
     
     /**
      * TigerTreeCache container.
      */
-    private static Map /* SHA1_URN -> HashTree */ TREE_MAP;
+    private static Map<URN, HashTree> TREE_MAP;
 
     /**
      * File where the Mapping SHA1->TIGERTREE is stored
@@ -85,10 +87,9 @@ public final class TigerTreeCache {
      * @return HashTree for File
      */
     public synchronized HashTree getHashTree(FileDesc fd) {
-        Object obj = TREE_MAP.get(fd.getSHA1Urn());
-        if (obj != null && obj.equals(BUSH))
+        HashTree tree = TREE_MAP.get(fd.getSHA1Urn());
+        if (tree != null && tree == BUSH)
             return null;
-        HashTree tree = (HashTree) obj;
         if (tree == null) {
             TREE_MAP.put(fd.getSHA1Urn(), BUSH);
             QUEUE.add(new HashRunner(fd));
@@ -104,12 +105,12 @@ public final class TigerTreeCache {
      * @return HashTree for URN
      */
     public synchronized HashTree getHashTree(URN sha1) {
-        Object tree = TREE_MAP.get(sha1);
+        HashTree tree = TREE_MAP.get(sha1);
         
-        if (tree != null && tree.equals(BUSH))
+        if (tree != null && tree == BUSH)
             return null;
         
-        return (HashTree)tree;
+        return tree;
     }
     
     /**
@@ -151,35 +152,18 @@ public final class TigerTreeCache {
      * 
      * @return Map of SHA1->HashTree
      */
-    private static Map createMap() {
+    private static Map<URN, HashTree> createMap() {
         ObjectInputStream ois = null;
         try {
             ois = new ConverterObjectInputStream(
                     new BufferedInputStream(
                         new FileInputStream(CACHE_FILE)));
-            Map map = (Map)ois.readObject();
-            if(map != null) {
-                for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-                    // Remove values that aren't correct.
-                    Map.Entry next = (Map.Entry)i.next();
-                    Object key = next.getKey();
-                    Object value = next.getValue();
-                    if( !(key instanceof URN) || !(value instanceof HashTree) )
-                        i.remove();
-                }
-            }
-            return map;
+            return GenericsUtils.scanForMap(ois.readObject(), URN.class, HashTree.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable t) {
             LOG.error("Can't read tiger trees", t);
-            return new HashMap();
+            return new HashMap<URN, HashTree>();
         } finally {
-            if (ois != null) {
-                try {
-                    ois.close();
-                } catch (IOException e) {
-                    // all we can do is try to close it
-                }
-            }
+            IOUtils.close(ois);
         }
     }
 
@@ -190,11 +174,11 @@ public final class TigerTreeCache {
      * @param map
      *            the <tt>Map</tt> to check
      */
-    private static void removeOldEntries(Map map) {
+    private static void removeOldEntries(Map <URN, HashTree> map) {
         // discard outdated info
-        Iterator iter = map.keySet().iterator();
+        Iterator<URN> iter = map.keySet().iterator();
         while (iter.hasNext()) {
-            URN sha1 = (URN) iter.next();
+            URN sha1 = iter.next();
             if (map.get(sha1) != BUSH) {
                 if (RouterService.getFileManager().getFileDescForUrn(sha1) != null)
                     continue;
@@ -232,11 +216,7 @@ public final class TigerTreeCache {
         } catch (IOException e) {
             ErrorService.error(e);
         } finally {
-            if(oos != null) {
-                try {
-                    oos.close();
-                } catch(IOException ignored) {}
-            }
+            IOUtils.close(oos);
         }
         
         dirty = true;

@@ -28,7 +28,7 @@ class LimitedSocketController extends SimpleSocketController {
     /**
      * Any non-blocking Requestors waiting on a pending socket.
      */
-    private final List WAITING_REQUESTS = new LinkedList();
+    private final List<Requestor> WAITING_REQUESTS = new LinkedList<Requestor>();
     
     /**
      * Constructs a new LimitedSocketController that only allows 'max'
@@ -77,8 +77,8 @@ class LimitedSocketController extends SimpleSocketController {
      * because the connection will never be attempted.
      */
     public synchronized boolean removeConnectObserver(ConnectObserver observer) {
-        for(Iterator i = WAITING_REQUESTS.iterator(); i.hasNext(); ) {
-            Requestor next = (Requestor)i.next();
+        for(Iterator<Requestor> i = WAITING_REQUESTS.iterator(); i.hasNext(); ) {
+            Requestor next = i.next();
             if(next.observer == observer) {
                 i.remove();
                 return true;
@@ -109,11 +109,11 @@ class LimitedSocketController extends SimpleSocketController {
     private void runWaitingRequests() {
         // We must connect outside of the lock, so as not to expose being locked to external
         // entities.
-        List toBeProcessed = new ArrayList(Math.min(WAITING_REQUESTS.size(),
+        List<Requestor> toBeProcessed = new ArrayList<Requestor>(Math.min(WAITING_REQUESTS.size(),
                                            Math.max(0, MAX_CONNECTING_SOCKETS - _socketsConnecting)));
         synchronized(this) {
             while(_socketsConnecting < MAX_CONNECTING_SOCKETS && !WAITING_REQUESTS.isEmpty()) {
-                Requestor next = (Requestor)WAITING_REQUESTS.remove(0);
+                Requestor next = WAITING_REQUESTS.remove(0);
                 if(!next.socket.isClosed()) {
                     toBeProcessed.add(next);
                     _socketsConnecting++;
@@ -122,7 +122,7 @@ class LimitedSocketController extends SimpleSocketController {
         }
         
         for(int i = 0; i < toBeProcessed.size(); i++) {
-            Requestor next = (Requestor)toBeProcessed.get(i);
+            Requestor next = toBeProcessed.get(i);
             next.socket.setShutdownObserver(null);
             next.socket.connect(next.addr, next.timeout, new DelegateConnector(next.observer));
         }

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.tigertree;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
@@ -39,8 +38,8 @@ class HashTreeNodeManager {
      * The fixed-size portion is not used and is instead handled
      * by the maximum node size externally calculated.
      */
-    private FixedsizeForgetfulHashMap /* of HashTree -> List */ MAP = 
-        new FixedsizeForgetfulHashMap(MAX_NODES/2); // will never hit max.
+    private FixedsizeForgetfulHashMap<HashTree, List<List<byte[]>>> MAP = 
+        new FixedsizeForgetfulHashMap<HashTree, List<List<byte[]>>>(MAX_NODES/2); // will never hit max.
         
     /**
      * The current amount of nodes stored in memory.
@@ -50,14 +49,14 @@ class HashTreeNodeManager {
     /**
      * Returns all intermediary nodes for the tree.
      */
-    List /* of List of byte[] */ getAllNodes(HashTree tree) {
+    List<List<byte[]>> getAllNodes(HashTree tree) {
         int depth = tree.getDepth();
         if(tree.getDepth() == 0) {
             // trees of depth 0 have only one row.
-            List outer = new ArrayList(1);
+            List<List<byte[]>> outer = new ArrayList<List<byte[]>>(1);
             outer.add(tree.getNodes());
             return outer;
-        }else if (depth <2 || depth >= 7)
+        } else if (depth <2 || depth >= 7)
             // trees of depth 1 & 2 are really easy to calculate, so
             // always do those on the fly.
             // trees deeper than 7 take up too much memory to store,
@@ -71,7 +70,7 @@ class HashTreeNodeManager {
     /**
      * Registers the given list of nodes for the tree.
      */
-    void register(HashTree tree, List nodes) {
+    void register(HashTree tree, List<List<byte[]>> nodes) {
         // don't register depths 0-2 and 7-11
         int depth = tree.getDepth();
         if(depth > 2 && depth < 7 && !MAP.containsKey(tree))
@@ -87,8 +86,8 @@ class HashTreeNodeManager {
      * from the map until enough room is available for this list of nodes
      * to be added.
      */
-    private synchronized List getAllNodesImpl(HashTree tree) {
-        List nodes = (List)MAP.get(tree);
+    private synchronized List<List<byte[]>> getAllNodesImpl(HashTree tree) {
+        List<List<byte[]>> nodes = MAP.get(tree);
         if(nodes != null) {
             // Make sure the map remembers that we want this entry.
             MAP.put(tree, nodes);
@@ -104,7 +103,7 @@ class HashTreeNodeManager {
      * Inserts the given entry into the Map, possibly purging older entries
      * in order to make room.
      */
-    private synchronized void insertEntry(HashTree tree, List nodes) {
+    private synchronized void insertEntry(HashTree tree, List<List<byte[]>> nodes) {
         int size = calculateSize(nodes);
         while(_currentNodes + size > MAX_NODES) {
             if(MAP.isEmpty())
@@ -121,17 +120,17 @@ class HashTreeNodeManager {
      * the _currentNodes size.
      */
     private synchronized void purgeLRU() {
-        List nodes = (List)MAP.removeLRUEntry();
+        List<List<byte[]>> nodes = MAP.removeLRUEntry();
         _currentNodes -= calculateSize(nodes);
     }
     
     /**
      * Determines how many entries are within each list in this list.
      */
-    private static int calculateSize(List /* of List */ nodes) {
+    private static int calculateSize(List<List<byte[]>> nodes) {
         int size = 0;
-        for(Iterator i = nodes.iterator(); i.hasNext(); )
-            size += ((List)i.next()).size();
+        for(List<byte[]> next : nodes)
+            size += next.size();
         return size;
     }
 }

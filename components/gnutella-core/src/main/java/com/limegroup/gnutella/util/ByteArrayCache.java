@@ -16,7 +16,7 @@ public class ByteArrayCache {
     private static final int DEFAULT_LENGTH = 1024;
 
     /** Holds cached byte[]'s for future re-use. */
-    private final Stack CACHE = new Stack();
+    private final Stack<byte[]> CACHE = new Stack<byte[]>();
     
     /** The total size of the bytes stored in the cache. */
     private int _totalSize;
@@ -55,7 +55,7 @@ public class ByteArrayCache {
     public synchronized byte[] get() throws InterruptedException {
         while(true) {
             if (!CACHE.isEmpty()) {
-                byte[] b = (byte[])CACHE.pop();
+                byte[] b = CACHE.pop();
                 _totalSize -= b.length;
                 return b;
             } else if (_numCreated < _maxSize) {
@@ -73,7 +73,7 @@ public class ByteArrayCache {
      */
     public synchronized byte[] getQuick() {
         if (!CACHE.isEmpty()) {
-            byte[] b = (byte[])CACHE.pop();
+            byte[] b = CACHE.pop();
             _totalSize -= b.length;
             return b;
         } else if (_numCreated < _maxSize) {

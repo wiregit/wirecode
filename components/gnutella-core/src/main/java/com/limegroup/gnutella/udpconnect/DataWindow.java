@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.udpconnect;
 
-import java.util.HashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.util.LongHashMap;
 
 /**
  *  This class defines a DataWindow for sending or receiving data 
@@ -26,7 +26,7 @@ public class DataWindow
     private static final float RTT_GAIN            = 1.0f / 8.0f;
     private static final float DEVIATION_GAIN      = 1.0f / 4.0f;
 
-	private final HashMap window;
+	private final LongHashMap<DataRecord> window;
 	private long    windowStart;
 	private int     windowSize;
 	private long    averageRTT;
@@ -51,7 +51,7 @@ public class DataWindow
 	public DataWindow(int size, long start) {
 		windowStart = start;
 		windowSize  = size;
-		window      = new HashMap(size+2);
+		window      = new LongHashMap<DataRecord>(size+2);
 	}
 
     /*
@@ -62,11 +62,11 @@ public class DataWindow
 			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
 
         long seqNo = msg.getSequenceNumber();
-		DataRecord d = new DataRecord(seqNo, msg);
+		DataRecord d = new DataRecord(msg);
         if(seqNo == windowStart)
             readableData = true;
         
-		window.put(d.pkey, d);
+		window.put(seqNo, d);
 
         return d;
 	}
@@ -75,7 +75,7 @@ public class DataWindow
      *  Get the block based on the sequenceNumber.
      */
 	public DataRecord getBlock(long pnum) {
-		return (DataRecord) window.get(new Long(pnum));
+		return window.get(pnum);
 	}
 
     /** 
@@ -98,12 +98,10 @@ public class DataWindow
      */
     public int getUsedSpots() {
         DataRecord d;
-        Long     pkey;
         int        count = 0;
         for (long i = windowStart; i < windowStart+windowSize+3; i++) {
-            pkey = new Long(i);
             // Count the spots that are full and not written
-            if ( (d = (DataRecord) window.get(pkey)) != null &&
+            if ( (d = window.get(i)) != null &&
                   (!d.read || i != windowStart))
                 count++;
         }
@@ -123,12 +121,10 @@ public class DataWindow
      */
 	public int calculateWaitTime(long time, int n) {
         DataRecord d;
-        Long     pkey;
         int        count = 0;
 		long       totalDelta = 0;
         for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-            pkey = new Long(i);
-            d = (DataRecord) window.get(pkey);
+            d = window.get(i);
             if ( d != null && d.acks == 0 ) {
                 count++;
 				totalDelta += time - d.sentTime;
@@ -148,13 +144,11 @@ public class DataWindow
      */
 	public int clearLowAckedBlocks(ChunkReleaser releaser) {
         DataRecord d;
-        Long     pkey;
         int        count = 0;
         for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-            pkey = new Long(i);
-            d = (DataRecord) window.get(pkey);
+            d = window.get(i);
             if ( d != null && d.acks > 0 ) {
-                window.remove(pkey);
+                window.remove(i);
                 count++;
                 
                 if(releaser != null)
@@ -172,10 +166,8 @@ public class DataWindow
      *  i.e. sequenceNumber
      */
     public long getLowestUnsentBlock() {
-        Long pkey;
         for (long i = windowStart; i < windowStart+windowSize+1; i++) {
-            pkey = new Long(i);
-            if (window.get(pkey) == null)
+            if (window.get(i) == null)
                 return(i);
         }
         return -1;
@@ -189,11 +181,9 @@ public class DataWindow
      */
     public int countHigherAckBlocks() {
         DataRecord d;
-        Long     pkey;
         int        count = 0;
         for (long i = windowStart+1; i < windowStart+windowSize+1; i++) {
-            pkey = new Long(i);
-            d = (DataRecord) window.get(pkey);
+            d = window.get(i);
             if ( d != null && d.acks > 0 ) {
                 count++;
             } 
@@ -276,7 +266,7 @@ public class DataWindow
 			// Add to the averageRTT
 			if ( drec.acks == 1 && drec.sends == 1 ) {
 				long  rtt    = (drec.ackTime-drec.sentTime);
-                float delta  = ((float) rtt) - srtt;
+                float delta  = rtt - srtt;
 				if ( rtt > 0 ) {
                     // Compute RTO
 					if ( srtt <= 0.1 )
@@ -399,7 +389,6 @@ public class DataWindow
      */
 	public int clearEarlyReadBlocks() {
         DataRecord d;
-        Long     pkey;
         int        count = 0;
 
 	//	long maxBlock      = windowStart+windowSize;
@@ -421,10 +410,9 @@ public class DataWindow
         // potential space.   
         //for (int i = windowStart; i < lastBlock - windowSize + 1; i++) {
         for (long i = windowStart; i < windowStart + windowSize + 1; i++) {
-            pkey = new Long(i);
-            d = (DataRecord) window.get(pkey);
+            d = window.get(i);
             if ( d != null && d.read) {
-                window.remove(pkey);
+                window.remove(i);
                 count++;
             } else {
                 if(d == null)
@@ -509,7 +497,6 @@ public class DataWindow
  *  round trip time and a calculation for timeout resends.
  */
 class DataRecord {
-	final Long 				    pkey;     // sequence number as a Long
 	final DataMessage  msg;      // the actual data message
     int                         sends;    // count of the sends
 	boolean 		            read;     // whether the data was read
@@ -517,8 +504,7 @@ class DataRecord {
     long                        sentTime; // when it was sent
     long                        ackTime;  // when it was acked
     
-    DataRecord(long pnum, DataMessage msg) {
-    	pkey = new Long(pnum);
+    DataRecord(DataMessage msg) {
     	this.msg=msg;
     }
 }

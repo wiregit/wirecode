@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,14 +32,13 @@ public final class LimeXMLDocumentHelper{
      * TO be used when a Query Reply comes with a chunk of meta-data
      * we want to get LimeXMLDocuments out of it
      */
-    public static List getDocuments(String aggregatedXML, int totalResponseCount) {
+    public static List<LimeXMLDocument[]> getDocuments(String aggregatedXML, int totalResponseCount) {
         if(aggregatedXML==null || aggregatedXML.equals("") || totalResponseCount <= 0)
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         
-        List results = new ArrayList();
+        List<LimeXMLDocument[]> results = new ArrayList<LimeXMLDocument[]>();
         
-        for(Iterator i = XMLParsingUtils.split(aggregatedXML).iterator(); i.hasNext(); ) {
-            String xmlDocument = (String)i.next();
+        for(String xmlDocument : XMLParsingUtils.split(aggregatedXML)) {
             XMLParsingUtils.ParseResult parsingResult;
             try {
                 parsingResult = XMLParsingUtils.parse(xmlDocument,totalResponseCount);
@@ -49,28 +47,27 @@ public final class LimeXMLDocumentHelper{
                 continue;// bad xml, ignore
             } catch (IOException bad) {
                 LOG.warn("IOX while parsing: " + aggregatedXML, bad);
-                return Collections.EMPTY_LIST; // abort
+                return Collections.emptyList(); // abort
             }
             
             final String indexKey = parsingResult.canonicalKeyPrefix +
                                     LimeXMLDocument.XML_INDEX_ATTRIBUTE;
             LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
-            for(Iterator j = parsingResult.iterator(); j.hasNext(); ) {
-                Map attributes = (Map)j.next();
-                String sindex = (String)attributes.remove(indexKey);
+            for(Map<String, String> attributes : parsingResult) {
+                String sindex = attributes.remove(indexKey);
                 if (sindex == null)
-                    return Collections.EMPTY_LIST;
+                    return Collections.emptyList();
                 
                 int index = -1;
                 try {
                     index = Integer.parseInt(sindex);
                 } catch(NumberFormatException bad) { //invalid document
                     LOG.warn("NFE while parsing", bad);
-                    return Collections.EMPTY_LIST;
+                    return Collections.emptyList();
                 }
                 
                 if (index >= documents.length || index < 0)
-                    return Collections.EMPTY_LIST; // malicious document, can't trust it.
+                    return Collections.emptyList(); // malicious document, can't trust it.
                 
                 if(!attributes.isEmpty()) {
                     try {
@@ -92,12 +89,12 @@ public final class LimeXMLDocumentHelper{
      * If no responses have XML, an empty string is returned.
      */
     public static String getAggregateString(Response[] responses) {
-        HashMap /* LimeXMLSchema -> StringBuffer */ allXML = new HashMap();
+        Map<LimeXMLSchema, StringBuffer> allXML = new HashMap<LimeXMLSchema, StringBuffer>();
         for(int i = 0; i < responses.length; i++) {
             LimeXMLDocument doc = responses[i].getDocument();
             if(doc != null) {
                 LimeXMLSchema schema = doc.getSchema();
-                StringBuffer built = (StringBuffer)allXML.get(schema);
+                StringBuffer built = allXML.get(schema);
                 if(built == null) {
                     built = new StringBuffer();
                     allXML.put(schema, built);
@@ -109,12 +106,9 @@ public final class LimeXMLDocumentHelper{
         // Iterate through each schema and build a string containing
         // a bunch of XML docs, each beginning with XML_HEADER.   
         StringBuffer fullXML = new StringBuffer();
-        for(Iterator i = allXML.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            LimeXMLSchema schema = (LimeXMLSchema)entry.getKey();
-            StringBuffer buffer = (StringBuffer)entry.getValue();
-            buildXML(fullXML, schema, buffer.toString());
-        }
+        for(Map.Entry<LimeXMLSchema, StringBuffer> entry : allXML.entrySet())
+            buildXML(fullXML, entry.getKey(), entry.getValue().toString());
+        
         return fullXML.toString();
     }
     

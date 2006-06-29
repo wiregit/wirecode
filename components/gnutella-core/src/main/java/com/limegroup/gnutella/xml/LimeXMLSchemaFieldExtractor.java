@@ -1,13 +1,7 @@
-/*
- * LimeXMLSchemaFieldExtractor.java
- *
- * Created on May 1, 2001, 1:23 PM
- */
-
 package com.limegroup.gnutella.xml;
+
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +43,8 @@ class LimeXMLSchemaFieldExtractor
     /**
      * The map from names to corresponding SchemaFieldInfoList
      */
-    private Map _nameSchemaFieldInfoListMap = new HashMap();
+    private Map<String, List<SchemaFieldInfoPair>> _nameSchemaFieldInfoListMap =
+        new HashMap<String, List<SchemaFieldInfoPair>>();
     
     /**
      * A dummy name to be used when there's no name for a field
@@ -64,7 +59,7 @@ class LimeXMLSchemaFieldExtractor
     /**
      * Set of primitive types (as per XML Schema specifications)
      */
-    private static final Set PRIMITIVE_TYPES = new HashSet();;
+    private static final Set<String> PRIMITIVE_TYPES = new HashSet<String>();
     
     /**
      * A counter to generate unique number which can be appened to strings
@@ -86,7 +81,7 @@ class LimeXMLSchemaFieldExtractor
      * The field names that are referenced/used from some other field
      * (ie which can not be root element)
      */
-    private Set _referencedNames = new HashSet();
+    private Set<String> _referencedNames = new HashSet<String>();
     
     //initialize the static variables
     static
@@ -131,7 +126,7 @@ class LimeXMLSchemaFieldExtractor
      * @throws <tt>NullPointerException</tt> if the <tt>Document</tt> argument
      *  is <tt>null</tt>
      */
-    public List getFields(Document document) {
+    public List<SchemaFieldInfo> getFields(Document document) {
         if(document == null) {
             throw new NullPointerException("null document");
         }
@@ -144,11 +139,11 @@ class LimeXMLSchemaFieldExtractor
         String rootElementName = getRootElementName();
         
         //create a list to store the field names
-        List fieldNames = new LinkedList(); 
+        List<SchemaFieldInfo> fieldNames = new LinkedList<SchemaFieldInfo>(); 
         
         //fill the list with field names
         fillWithFieldNames(fieldNames, 
-                           (List)_nameSchemaFieldInfoListMap.get(rootElementName),
+                           _nameSchemaFieldInfoListMap.get(rootElementName),
                            rootElementName);
         
         //return the list of field names
@@ -162,41 +157,27 @@ class LimeXMLSchemaFieldExtractor
      * @param prefix The prefix to be prepended to the new fields
      * being added
      */
-    private void  fillWithFieldNames(List fieldNames,
-                                     List fieldInfoList,
-                                     final String prefix) {
-        //get the iterator over the elements in the fieldInfoList
-        Iterator iterator = fieldInfoList.iterator();
-        //iterate
-        while(iterator.hasNext()) {
-            //get the next SchemaFieldInfoPair
-            SchemaFieldInfoPair fieldInfoPair = (SchemaFieldInfoPair)iterator.next();
-            
+    private void fillWithFieldNames(List<? super SchemaFieldInfo> fieldNames,
+                                    List<? extends SchemaFieldInfoPair> fieldInfoList,
+                                    final String prefix) {
+        for(SchemaFieldInfoPair fieldInfoPair : fieldInfoList) {
             //get the field type set corresponding to this field pair's type
-            List newSchemaFieldInfoList 
-                = (List)_nameSchemaFieldInfoListMap.get(
-                fieldInfoPair.getSchemaFieldInfo().getType());
+            List<SchemaFieldInfoPair> newSchemaFieldInfoList =
+                _nameSchemaFieldInfoListMap.get(
+                      fieldInfoPair.getSchemaFieldInfo().getType());
             
-            //get the field
             String field = fieldInfoPair.getField();
-            
-            //get the field info object for this field
-            SchemaFieldInfo fieldInfo = 
-                fieldInfoPair.getSchemaFieldInfo();
+            SchemaFieldInfo fieldInfo = fieldInfoPair.getSchemaFieldInfo();
 
             //if datatype is not defined elsewhere in the schema (may be
             //because it is a primitive type or so)
-            if(newSchemaFieldInfoList == null)
-            {
+            if(newSchemaFieldInfoList == null) {
                 //if not a dummy field
-                if(!isDummy(field))
-                {
+                if(!isDummy(field)) {
                     //set the field name in the field info
                     fieldInfo.setCanonicalizedFieldName(prefix 
                         + XMLStringUtils.DELIMITER + field);
-                }
-                else
-                {
+                } else {
                     //else just add the prefix (without field, as the 
                     //field is a dummy)
                     
@@ -206,22 +187,17 @@ class LimeXMLSchemaFieldExtractor
                 
                 //add to fieldNames
                 fieldNames.add(fieldInfo);
-            }
-            else
-            {
+            } else {
                 //else (i.e. when the datatype is further defined)
                 
                 //if not a dummy field
-                if(!isDummy(field))
-                {
+                if(!isDummy(field)) {
                     //recursively call the method with the new values
                     //change the prefix to account for the field
                     fillWithFieldNames(fieldNames,newSchemaFieldInfoList,
                         prefix + XMLStringUtils.DELIMITER
                         + field);
-                }
-                else
-                {
+                } else {
                     //recursively call the method with the new values
                     //prefix is not changed (since the field is dummy)
                     fillWithFieldNames(fieldNames,newSchemaFieldInfoList,prefix);
@@ -250,20 +226,14 @@ class LimeXMLSchemaFieldExtractor
     {
         //get the set of keys in _nameSchemaFieldInfoListMap
         //one of this is the root element
-        Set possibleRoots = ((HashMap)((HashMap)_nameSchemaFieldInfoListMap).clone()).keySet();
+        Set<String> possibleRoots = new HashSet<String>(_nameSchemaFieldInfoListMap.keySet());
         
         //Iterate over set of _referencedNames
         //and remove those from possibleRoots
-        Iterator iterator = _referencedNames.iterator();
-        while(iterator.hasNext())
-        {
-            //remove from set of possibleRoots
-            possibleRoots.remove(iterator.next());
-        }
+        for(String string : _referencedNames)
+            possibleRoots.remove(string);
         
-        //return the first element in the set
-        Iterator possibleRootsIterator = possibleRoots.iterator();
-        return (String)possibleRootsIterator.next();
+        return possibleRoots.iterator().next();
     }
     
 
@@ -330,7 +300,7 @@ class LimeXMLSchemaFieldExtractor
         }
         
         //get new field info list
-        List fieldInfoList = new LinkedList();
+        List<SchemaFieldInfoPair> fieldInfoList = new LinkedList<SchemaFieldInfoPair>();
         
         //get and process children
         NodeList children = n.getChildNodes();
@@ -356,8 +326,7 @@ class LimeXMLSchemaFieldExtractor
      * @modifies fieldInfoList
      */
     private void processChildOfComplexType(Node n, 
-        List fieldInfoList)
-    {
+                                           List<SchemaFieldInfoPair> fieldInfoList) {
             //get the name of the node
             String nodeName = n.getNodeName();
             
@@ -390,8 +359,7 @@ class LimeXMLSchemaFieldExtractor
      * is to be put
      * @modifies fieldInfoList
      */
-    private void processChildElementTag(Node n, List fieldInfoList)
-    {
+    private void processChildElementTag(Node n, List<SchemaFieldInfoPair> fieldInfoList) {
          //get attributes
         NamedNodeMap  attributes = n.getAttributes();
         
@@ -489,8 +457,7 @@ class LimeXMLSchemaFieldExtractor
      * is to be put
      * @modifies fieldInfoList
      */
-    private void processChildAttributeTag(Node n, List fieldInfoList)
-    {
+    private void processChildAttributeTag(Node n, List<SchemaFieldInfoPair> fieldInfoList) {
         //get attributes
         NamedNodeMap attributes = n.getAttributes();
         
@@ -569,19 +536,10 @@ class LimeXMLSchemaFieldExtractor
      * child elements (Summet needs it), and also so that attributes remain
      * in order.
      */
-    private void addAttributeSchemaFieldInfoPair(
-        SchemaFieldInfoPair schemaFieldInfoPair,
-        List fieldInfoList)
-    {
+    private void addAttributeSchemaFieldInfoPair(SchemaFieldInfoPair schemaFieldInfoPair,
+                                                 List<SchemaFieldInfoPair> fieldInfoList) {
         int attributeCount = 0;
-        //iterate over the fieldInfoList
-        for(Iterator iterator = fieldInfoList.iterator();
-                iterator.hasNext();)
-        {
-            //get the next element in the list
-            SchemaFieldInfoPair nextElement = 
-                (SchemaFieldInfoPair)iterator.next();
-            
+        for(SchemaFieldInfoPair nextElement : fieldInfoList) {            
             //if the element is an attribute
             if(isAttribute(nextElement.getField()))
             {
@@ -769,7 +727,7 @@ class LimeXMLSchemaFieldExtractor
     private void addToSchemaFieldInfoListMap(String field, String typeName)
     {
         //get new fieldinfo list
-        List fieldInfoList = new LinkedList();
+        List<SchemaFieldInfoPair> fieldInfoList = new LinkedList<SchemaFieldInfoPair>();
         fieldInfoList.add(new SchemaFieldInfoPair(DUMMY, new SchemaFieldInfo(
             removeNameSpace(typeName))));
         

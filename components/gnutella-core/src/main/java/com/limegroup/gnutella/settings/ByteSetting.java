@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for a byte setting.
  */
-public final class ByteSetting extends AbstractNumberSetting {
+public final class ByteSetting extends AbstractNumberSetting<Byte> {
     
     private byte value;
 
@@ -59,7 +59,7 @@ public final class ByteSetting extends AbstractNumberSetting {
         }
     }
     
-    protected Comparable convertToComparable(String value) {
+    protected Comparable<Byte> convertToComparable(String value) {
         return new Byte(value);
     }
 }

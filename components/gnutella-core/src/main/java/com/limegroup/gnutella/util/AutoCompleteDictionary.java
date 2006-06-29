@@ -22,7 +22,7 @@ import java.util.Iterator;
  *      added getIterator() & getIterator(String) for enhanced AutoCompleteTextField use.
  *
  */
-public interface AutoCompleteDictionary {
+public interface AutoCompleteDictionary extends Iterable<String> {
     /**
      * Adds an entry to the dictionary.
      *
@@ -54,13 +54,13 @@ public interface AutoCompleteDictionary {
      * Returns all available entries in dictionary
      *
      */
-    public Iterator getIterator();
+    public Iterator<String> iterator();
 
     /**
      * Returns an iterator of potential matches from the given string.
      *
      */
-    public Iterator getIterator(String s);
+    public Iterator<String> iterator(String s);
     
     /**
      * Clears the dictionary.

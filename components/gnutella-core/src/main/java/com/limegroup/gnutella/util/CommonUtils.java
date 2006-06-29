@@ -11,12 +11,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1201,29 +1199,21 @@ public final class CommonUtils {
      * occured.
      */
     public static String getAllStackTraces() {
-        if (!CommonUtils.isJava15OrLater()) {
-            return "";
-        }
-        
         try {
-            Method m = Thread.class.getDeclaredMethod("getAllStackTraces", new Class[0]);
-            Map map = (Map)m.invoke(null, new Object[0]);
+            Map<Thread, StackTraceElement[]> map = Thread.getAllStackTraces();
             
-            List sorted = new ArrayList(map.entrySet());
-            Collections.sort(sorted, new Comparator() {
-                public int compare(Object a, Object b) {
-                    Thread threadA = (Thread)((Map.Entry)a).getKey();
-                    Thread threadB = (Thread)((Map.Entry)b).getKey();
-                    return threadA.getName().compareTo(threadB.getName());
+            List<Map.Entry<Thread, StackTraceElement[]>> sorted =
+                new ArrayList<Map.Entry<Thread, StackTraceElement[]>>(map.entrySet());
+            Collections.sort(sorted, new Comparator<Map.Entry<Thread, StackTraceElement[]>>() {
+                public int compare(Map.Entry<Thread, StackTraceElement[]> a, Map.Entry<Thread, StackTraceElement[]> b) {
+                    return a.getKey().getName().compareTo(b.getKey().getName());
                 }
             });
             
             StringBuffer buffer = new StringBuffer();
-            Iterator it = sorted.iterator();
-            while(it.hasNext()) {
-                Map.Entry entry = (Map.Entry)it.next();
-                Thread key = (Thread)entry.getKey();
-                StackTraceElement[] value = (StackTraceElement[])entry.getValue();
+            for(Map.Entry<Thread, StackTraceElement[]> entry : sorted) {
+                Thread key = entry.getKey();
+                StackTraceElement[] value = entry.getValue();
                 
                 buffer.append(key.getName()).append("\n");
                 for(int i = 0; i < value.length; i++) {

@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for an int setting.
  */
-public final class IntSetting extends AbstractNumberSetting {
+public final class IntSetting extends AbstractNumberSetting<Integer> {
     
     private int value;
 
@@ -62,7 +62,7 @@ public final class IntSetting extends AbstractNumberSetting {
         }
     }
     
-    protected Comparable convertToComparable(String value) {
+    protected Comparable<Integer> convertToComparable(String value) {
         return new Integer(value);
     }
 }

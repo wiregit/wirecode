@@ -29,6 +29,7 @@ import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataEditor;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NameValue;
@@ -54,14 +55,14 @@ public class LimeXMLReplyCollection {
      * SYNCHRONIZATION: Synchronize on mainMap when accessing, 
      *  adding or removing.
      */
-    private final Map /* URN -> LimeXMLDocument */ mainMap;
+    private final Map<URN, LimeXMLDocument> mainMap;
     
     /**
      * The old map that was read off disk.
      *
      * Used while initially processing FileDescs to add.
      */
-    private final Map /* URN -> LimeXMLDocument */ oldMap;
+    private final Map<URN, LimeXMLDocument> oldMap;
     
     /**
      * A mapping of fields in the LimeXMLDocument to a Trie
@@ -73,7 +74,7 @@ public class LimeXMLReplyCollection {
      * SYNCHRONIZATION: Synchronize on mainMap when accessing,
      *  adding or removing.
      */
-    private final Map /* String -> Trie (String -> List) */ trieMap;
+    private final Map<String, Trie<List<LimeXMLDocument>>> trieMap;
     
     /**
      * Whether or not data became dirty after we last wrote to disk.
@@ -108,10 +109,10 @@ public class LimeXMLReplyCollection {
      */
     public LimeXMLReplyCollection(String URI) {
         this.schemaURI = URI;
-        this.trieMap = new HashMap();
+        this.trieMap = new HashMap<String, Trie<List<LimeXMLDocument>>>();
         this.dataFile = new File(LimeXMLProperties.instance().getXMLDocsDir(),
                                  LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
-        this.mainMap = new HashMap();
+        this.mainMap = new HashMap<URN, LimeXMLDocument>();
         this.oldMap = readMapFromDisk();
     }
     
@@ -119,13 +120,12 @@ public class LimeXMLReplyCollection {
      * Initializes the map using either LimeXMLDocuments in the list of potential
      * documents, or elements stored in oldMap.  Items in potential take priority.
      */
-    LimeXMLDocument initialize(FileDesc fd, List potential) {
+    LimeXMLDocument initialize(FileDesc fd, List<? extends LimeXMLDocument> potential) {
         URN urn = fd.getSHA1Urn();
         LimeXMLDocument doc = null;
         
         // First try to get a doc from the potential list.
-        for(Iterator i = potential.iterator(); i.hasNext(); ) {
-            LimeXMLDocument next = (LimeXMLDocument)i.next();
+        for(LimeXMLDocument next : potential) {
             if(next.getSchemaURI().equals(schemaURI)) {
                 doc = next;
                 break;
@@ -134,7 +134,7 @@ public class LimeXMLReplyCollection {
         
         // Then try to get it from the old map.
         if(doc == null)
-            doc = (LimeXMLDocument)oldMap.get(urn);
+            doc = oldMap.get(urn);
         
         
         // Then try and see it, with validation and all.
@@ -143,7 +143,7 @@ public class LimeXMLReplyCollection {
             if(doc != null) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Adding old document for file: " + fd.getFile() + ", doc: " + doc);
-                    addReply(fd, doc);
+                addReply(fd, doc);
             }
         }
         
@@ -232,23 +232,20 @@ public class LimeXMLReplyCollection {
      * existing annotations).
      */
     private LimeXMLDocument update(LimeXMLDocument older, LimeXMLDocument newer) {
-        Map fields = new HashMap();
-        for(Iterator i = newer.getNameValueSet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
+        Map<String, String> fields = new HashMap<String, String>();
+        for(Map.Entry<String, String> next : newer.getNameValueSet()) {
             fields.put(next.getKey(), next.getValue());
         }
         
-        for(Iterator i = older.getNameValueSet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
+        for(Map.Entry<String, String> next : older.getNameValueSet()) {
             if(!fields.containsKey(next.getKey()))
                 fields.put(next.getKey(), next.getValue());
         }
 
-        List nameValues = new ArrayList(fields.size());
-        for(Iterator i = fields.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            nameValues.add(new NameValue((String)next.getKey(), next.getValue()));
-        }
+        List<NameValue<String>> nameValues = new ArrayList<NameValue<String>>(fields.size());
+        for(Map.Entry<String, String> next : fields.entrySet())
+            nameValues.add(new NameValue<String>(next.getKey(), next.getValue()));
+        
         return new LimeXMLDocument(nameValues, newer.getSchemaURI());
      }
         
@@ -278,15 +275,11 @@ public class LimeXMLReplyCollection {
      * <p>
      * delegates to the individual documents and collates the list
      */
-    protected List getKeyWords(){
-        List retList = new ArrayList();
-        Iterator docs;
+    protected List<String> getKeyWords(){
+        List<String> retList = new ArrayList<String>();
         synchronized(mainMap){
-            docs = mainMap.values().iterator();
-            while(docs.hasNext()){
-                LimeXMLDocument d = (LimeXMLDocument)docs.next();
+            for(LimeXMLDocument d : mainMap.values())
                 retList.addAll(d.getKeyWords());
-            }
         }
         return retList;
     }
@@ -297,15 +290,11 @@ public class LimeXMLReplyCollection {
      * <p>
      * Delegates to the individual documents and collates the list
      */
-    protected List getKeyWordsIndivisible(){
-        List retList = new ArrayList();
-        Iterator docs;
+    protected List<String> getKeyWordsIndivisible(){
+        List<String> retList = new ArrayList<String>();
         synchronized(mainMap){
-            docs = mainMap.values().iterator();
-            while(docs.hasNext()){
-                LimeXMLDocument d = (LimeXMLDocument)docs.next();
+            for(LimeXMLDocument d : mainMap.values())
                 retList.addAll(d.getKeyWordsIndivisible());
-            }
         }
         return retList;
     }
@@ -323,21 +312,19 @@ public class LimeXMLReplyCollection {
      */
     private void addKeywords(LimeXMLDocument doc) {
         synchronized(mainMap) {
-            for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)i.next();
-                final String name = (String)entry.getKey();
-                final String value = 
-                    I18NConvert.instance().getNorm((String)entry.getValue());
-                Trie trie = (Trie)trieMap.get(name);
+            for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
+                final String name = entry.getKey();
+                final String value = I18NConvert.instance().getNorm(entry.getValue());
+                Trie<List<LimeXMLDocument>> trie = trieMap.get(name);
                 // if no lookup table created yet, create one & insert.
                 if(trie == null) {
-                    trie = new Trie(true); //ignore case.
+                    trie = new Trie<List<LimeXMLDocument>>(true); //ignore case.
                     trieMap.put(name, trie);
                 }
-                List allDocs = (List)trie.get(value);
+                List<LimeXMLDocument> allDocs = trie.get(value);
                 // if no list of docs for this value created, create & insert.
                 if( allDocs == null ) {
-                    allDocs = new LinkedList();
+                    allDocs = new LinkedList<LimeXMLDocument>();
                     trie.add(value, allDocs);
                 }
                 //Add the value to the list of docs
@@ -352,18 +339,15 @@ public class LimeXMLReplyCollection {
      */
     private void removeKeywords(LimeXMLDocument doc) {
         synchronized(mainMap) {
-            for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)i.next();
-                final String name = (String)entry.getKey();
-                
-                Trie trie = (Trie)trieMap.get(name);
+            for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
+                final String name = entry.getKey();
+                Trie<List<LimeXMLDocument>> trie = trieMap.get(name);
                 // if no trie, ignore.
                 if(trie == null)
                     continue;
                     
-                final String value = 
-                    I18NConvert.instance().getNorm((String)entry.getValue());
-                List allDocs = (List)trie.get(value);
+                final String value = I18NConvert.instance().getNorm(entry.getValue());
+                List<LimeXMLDocument> allDocs = trie.get(value);
                 // if no list, ignore.
                 if( allDocs == null )
                     continue;
@@ -406,7 +390,7 @@ public class LimeXMLReplyCollection {
      */
     public LimeXMLDocument getDocForHash(URN hash){
         synchronized(mainMap){
-            return (LimeXMLDocument)mainMap.get(hash);
+            return mainMap.get(hash);
         }
     }
         
@@ -427,65 +411,61 @@ public class LimeXMLReplyCollection {
      * 4) Returns an empty list if nothing matched or
      *    a list of the matching documents.
      */    
-    List getMatchingReplies(LimeXMLDocument query) {
+    List<LimeXMLDocument> getMatchingReplies(LimeXMLDocument query) {
         // First get a list of anything that could possibly match.
         // This uses a set so we don't add the same doc twice ...
-        Set matching = null;
+        Set<LimeXMLDocument> matching = null;
         synchronized(mainMap) {
-            for(Iterator i = query.getNameValueSet().iterator(); i.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)i.next();
-
+            
+            for(Map.Entry<String, String> entry : query.getNameValueSet()) {
                 // Get the name of the particular field being queried for.
-                final String name = (String)entry.getKey();
+                final String name = entry.getKey();
                 // Lookup the matching Trie for that field.
-                Trie trie = (Trie)trieMap.get(name);
+                Trie<List<LimeXMLDocument>> trie = trieMap.get(name);
                 // No matching trie?.. Ignore.
                 if(trie == null)
                     continue;
 
                 // Get the value of that field being queried for.    
-                final String value = (String)entry.getValue();
+                final String value = entry.getValue();
                 // Get our shared XML docs that match this value.
                 // This query is from the network, and is therefore already
                 // normalized -- SHOULD NOT NORMALIZE AGAIN!!
-                Iterator /* of List */ iter = trie.getPrefixedBy(value);
+                Iterator<List<LimeXMLDocument>> iter = trie.getPrefixedBy(value);
                 // If some matches and 'matching' not allocated yet,
                 // allocate a new Set for storing matches
                 if(iter.hasNext()) {
                     if (matching == null)
-                        matching = new HashSet();
+                        matching = new HashSet<LimeXMLDocument>();
                     // Iterate through each set of matches the Trie found
                     // and add those matching-lists to our set of matches.
                     // Note that the trie.getPrefixedBy returned
                     // an Iterator of Lists -- this is because the Trie
                     // does prefix matching, so there are many Lists of XML
                     // docs that could match.
-                    while(iter.hasNext()) {
-                        List matchesVal = (List)iter.next();
-                        matching.addAll(matchesVal);
-                    }
+                    while(iter.hasNext())
+                        matching.addAll(iter.next());
                 }
             }
         }
         
         // no matches?... exit.
         if( matching == null || matching.size() == 0)
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         
         // Now filter that list using the real XML matching tool...
-        List actualMatches = null;
-        for(Iterator i = matching.iterator(); i.hasNext(); ) {
-            LimeXMLDocument currReplyDoc = (LimeXMLDocument)i.next();
+        List<LimeXMLDocument> actualMatches = null;
+        for(LimeXMLDocument currReplyDoc : matching) {
             if (LimeXMLUtils.match(currReplyDoc, query, false)) {
                 if( actualMatches == null ) // delayed allocation of the list..
-                    actualMatches = new LinkedList();
+                    actualMatches = new LinkedList<LimeXMLDocument>();
                 actualMatches.add(currReplyDoc);
             }
         }
         
         // No actual matches?... exit.
         if( actualMatches == null || actualMatches.size() == 0 )
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
 
         return actualMatches;
     }
@@ -502,7 +482,7 @@ public class LimeXMLReplyCollection {
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap) {
             dirty = true;
-            oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
+            oldDoc = mainMap.put(hash,newDoc);
             if(oldDoc == null) 
                 Assert.that(false, "attempted to replace doc that did not exist!!");
             removeKeywords(oldDoc);
@@ -521,13 +501,13 @@ public class LimeXMLReplyCollection {
     public boolean removeDoc(FileDesc fd) {
         LimeXMLDocument val;
         synchronized(mainMap) {
-            val = (LimeXMLDocument)mainMap.remove(fd.getSHA1Urn());
+            val = mainMap.remove(fd.getSHA1Urn());
             if(val != null)
                 dirty = true;
         }
         
         if(val != null) {
-            fd.removeLimeXMLDocument((LimeXMLDocument)val);
+            fd.removeLimeXMLDocument(val);
             removeKeywords(val);
         }
         
@@ -671,18 +651,18 @@ public class LimeXMLReplyCollection {
     }
     
     /** Reads the map off of the disk. */
-    private Map readMapFromDisk() {
+    private Map<URN, LimeXMLDocument> readMapFromDisk() {
         ObjectInputStream in = null;
-        Map read = null;
+        Map<URN, LimeXMLDocument> read = null;
         try {
             in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
-            read = (Map)in.readObject();
+            read = GenericsUtils.scanForMap(in.readObject(), URN.class, LimeXMLDocument.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable t) {
             LOG.error("Unable to read LimeXMLCollection", t);
         } finally {
             IOUtils.close(in);
         }
         
-        return read == null ? new HashMap() : read;
+        return read == null ? new HashMap<URN, LimeXMLDocument>() : read;
     }
 }

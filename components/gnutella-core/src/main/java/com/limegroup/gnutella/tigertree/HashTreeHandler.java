@@ -201,10 +201,9 @@ class HashTreeHandler {
          * Writes the tree's data to the specified output stream.
          */
         public void writeData(OutputStream out) throws IOException {
-            for(Iterator i = TREE.getAllNodes().iterator(); i.hasNext(); ) {
-                Iterator iter = ((List)i.next()).iterator();
-                while (iter.hasNext())
-                    out.write((byte[])iter.next());
+            for(List<byte[]> list : TREE.getAllNodes()) {
+                for(byte[] b : list)
+                    out.write(b);
             }
             writePadding(getDataLength(), out);
         }
@@ -239,7 +238,7 @@ class HashTreeHandler {
      * @throws IOException
      *             in case of a problem reading from the InputStream
      */
-    static List read(InputStream is, long fileSize, String root32)
+    static List<List<byte[]>> read(InputStream is, long fileSize, String root32)
       throws IOException {
         LOG.trace("creating HashTreeHandler from network");
         DIMEParser parser = new DIMEParser(is);
@@ -256,13 +255,13 @@ class HashTreeHandler {
      * @return
      * @throws IOException
      */
-    static List nodesFromRecords(Iterator iterator, long fileSize, String root32) throws IOException {
+    static List<List<byte[]>> nodesFromRecords(Iterator<DIMERecord> iterator, long fileSize, String root32) throws IOException {
         if(!iterator.hasNext())
             throw new IOException("no xml record");
-        DIMERecord xmlRecord = (DIMERecord)iterator.next();
+        DIMERecord xmlRecord = iterator.next();
         if(!iterator.hasNext())
             throw new IOException("no tree record");
-        DIMERecord treeRecord = (DIMERecord)iterator.next();
+        DIMERecord treeRecord = iterator.next();
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("xml id: [" + xmlRecord.getIdentifier() + "]");
@@ -522,9 +521,9 @@ class HashTreeHandler {
          * 
          * @throws IOException if the hashes did not match.
          */
-        List getAllNodes(long fileSize) throws IOException {
+        List<List<byte[]>> getAllNodes(long fileSize) throws IOException {
             int depth = HashTree.calculateDepth(fileSize);
-            List hashes = new ArrayList();
+            List<byte[]> hashes = new ArrayList<byte[]>();
             byte[] data = DATA;
 
             if (data.length % HASH_SIZE != 0) {
@@ -541,17 +540,17 @@ class HashTreeHandler {
             }
 
             // iterator of all hashes we read
-            Iterator hashIterator = hashes.iterator();
+            Iterator<byte[]> hashIterator = hashes.iterator();
             // the current generation we are working on
-            List generation = new ArrayList(1);
+            List<byte[]> generation = new ArrayList<byte[]>(1);
             // stores the last verified generation
-            List parent = null;
+            List<byte[]> parent = null;
             // index of the generation we are working on.
             int genIndex = 0;
             // whether or not the current row is verified.
             boolean verified = false;
             
-            List allNodes = new ArrayList(depth+1);
+            List<List<byte[]>> allNodes = new ArrayList<List<byte[]>>(depth+1);
             
             // Iterate through the read elements and see if they match
             // what we calculate.
@@ -583,7 +582,7 @@ class HashTreeHandler {
             
             while (genIndex <= depth && hashIterator.hasNext()) {
                 verified = false;
-                byte[] hash = (byte[]) hashIterator.next();
+                byte[] hash = hashIterator.next();
                 generation.add(hash);
                 if (parent == null) {
                     verified = true;
@@ -591,29 +590,26 @@ class HashTreeHandler {
                     genIndex++;
                     parent = generation;
                     allNodes.add(generation);
-                    generation = new ArrayList(2);
+                    generation = new ArrayList<byte[]>(2);
                 } else if (generation.size() > parent.size() * 2) {
                     // the current generation is already too big => the hash
                     // tree is corrupted, abort at once!
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("parent");
                         String str = "";
-                        for (Iterator iter = parent.iterator(); iter.hasNext(); ) {
-                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
-                        }
+                        for(byte[] b : parent)
+                            str = str + Base32.encode(b) + "; "; 
                         LOG.debug(str);
                         str = "";
                         LOG.debug("newparent");
-                        List newparent = HashTree.createParentGeneration(generation);
-                        for (Iterator iter = newparent.iterator(); iter.hasNext(); ) {
-                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
-                        }
+                        List<byte[]> newparent = HashTree.createParentGeneration(generation);
+                        for(byte[] b : newparent)
+                            str = str + Base32.encode(b) + "; ";
                         LOG.debug(str);
                         str = "";
                         LOG.debug("generation");
-                        for (Iterator iter = generation.iterator(); iter.hasNext(); ) {
-                            str = str + Base32.encode((byte[])iter.next()) + "; "; 
-                        }
+                        for(byte[] b : generation)
+                            str = str + Base32.encode(b) + "; ";
                         LOG.debug(str);
                         str = "";
 
@@ -621,7 +617,7 @@ class HashTreeHandler {
                     throw new IOException("corrupted hash tree detected");
                 } else if (generation.size() == parent.size() * 2 - 1 ||
                            generation.size() == parent.size() * 2) {
-                    List calculatedParent =
+                    List<byte[]> calculatedParent =
                         HashTree.createParentGeneration(generation);
                     if(isMatching(parent, calculatedParent)) {
                         // the current generation is complete and verified!
@@ -630,7 +626,7 @@ class HashTreeHandler {
                         allNodes.add(Collections.unmodifiableList(generation));
                         // only create room for a new generation if one exists
                         if(genIndex <= depth && hashIterator.hasNext())
-                            generation = new ArrayList(parent.size() * 2);
+                            generation = new ArrayList<byte[]>(parent.size() * 2);
                         verified = true;
                     }
                 }

@@ -47,10 +47,8 @@ public class KeepAliveMessage extends UDPConnectionMessage {
       	super(guid, ttl, hops, payload);
 
         // Parse the added windowStart and windowSpace information
-        _windowStart = (long)
-          getShortInt(guid[GUID_DATA_START],guid[GUID_DATA_START+1]);
-        _windowSpace = 
-          getShortInt(guid[GUID_DATA_START+2],guid[GUID_DATA_START+3]);
+        _windowStart = getShortInt(guid[GUID_DATA_START],guid[GUID_DATA_START+1]);
+        _windowSpace = getShortInt(guid[GUID_DATA_START+2],guid[GUID_DATA_START+3]);
     }
 
     /**

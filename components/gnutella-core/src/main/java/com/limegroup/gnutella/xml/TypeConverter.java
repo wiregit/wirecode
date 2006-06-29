@@ -2,6 +2,7 @@ package com.limegroup.gnutella.xml;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Converts XML Schema types of Java types. Contains a hashMap of
@@ -9,7 +10,7 @@ import java.util.HashMap;
  * @author Sumeet Thadani
  */
 public class TypeConverter{
-    private static HashMap map;
+    private static Map<String, Class> map;
     /**
      * This list only contains the types we are using in the schemas of the
      * first release.
@@ -20,7 +21,7 @@ public class TypeConverter{
      * XMLTableLineComparator
      */
     static{
-        map = new HashMap();
+        map = new HashMap<String, Class>();
         map.put("string",String.class);
         map.put("DUMMY_SIMPLETYPE",String.class);
         map.put("int",Integer.class);
@@ -37,10 +38,10 @@ public class TypeConverter{
      * For types not in the hashmap we return string
      */
     public static Class getType(String str){
-        Object val = map.get(str);
+        Class val = map.get(str);
         if(val==null)
             return String.class;
-        return ((Class)val);
+        return val;
     }
 }
             

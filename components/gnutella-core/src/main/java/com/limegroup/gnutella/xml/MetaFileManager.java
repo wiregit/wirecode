@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +24,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataReader;
+import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.NameValue;
 
 /**
@@ -91,11 +91,11 @@ public class MetaFileManager extends FileManager {
      *   <tt>LimeXMLDocuments</tt> to add to the response
      */
     protected void addXMLToResponse(Response response, FileDesc fd) {
-        List docs = fd.getLimeXMLDocuments();
+        List<LimeXMLDocument> docs = fd.getLimeXMLDocuments();
         if( docs.size() == 0 )
             return;
         if( docs.size() == 1 )
-            response.setDocument((LimeXMLDocument)docs.get(0));
+            response.setDocument(docs.get(0));
     }
     
     /**
@@ -128,7 +128,7 @@ public class MetaFileManager extends FileManager {
         CreationTimeCache ctCache = CreationTimeCache.instance();
         final Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
 
-        List xmlDocs = fd.getLimeXMLDocuments();        
+        List<LimeXMLDocument> xmlDocs = fd.getLimeXMLDocuments();        
         if(LimeXMLUtils.isEditableFormat(f)) {
             try {
                 LimeXMLDocument diskDoc = MetaDataReader.readDocument(f);
@@ -136,7 +136,7 @@ public class MetaFileManager extends FileManager {
             } catch(IOException e) {
                 // if we were unable to read this document,
                 // then simply add the file without metadata.
-                xmlDocs = Collections.EMPTY_LIST;
+                xmlDocs = Collections.emptyList();
             }
         }
 
@@ -179,13 +179,13 @@ public class MetaFileManager extends FileManager {
      * Finds the audio metadata document in allDocs, and makes it's id3 fields
      * identical with the fields of id3doc (which are only id3).
      */
-    private List resolveWriteableDocs(List allDocs, LimeXMLDocument id3Doc) {
+    private List<LimeXMLDocument> resolveWriteableDocs(List<LimeXMLDocument> allDocs,
+                                                       LimeXMLDocument id3Doc) {
         LimeXMLDocument audioDoc = null;
         LimeXMLSchema audioSchema = 
         LimeXMLSchemaRepository.instance().getSchema(AudioMetaData.schemaURI);
         
-        for(Iterator iter = allDocs.iterator(); iter.hasNext() ;) {
-            LimeXMLDocument doc = (LimeXMLDocument)iter.next();
+        for(LimeXMLDocument doc : allDocs) {
             if(doc.getSchema() == audioSchema) {
                 audioDoc = doc;
                 break;
@@ -195,7 +195,7 @@ public class MetaFileManager extends FileManager {
         if(id3Doc.equals(audioDoc)) //No issue -- both documents are the same
             return allDocs; //did not modify list, keep using it
         
-        List retList = new ArrayList();
+        List<LimeXMLDocument> retList = new ArrayList<LimeXMLDocument>();
         retList.addAll(allDocs);
         
         if(audioDoc == null) {//nothing to resolve
@@ -207,10 +207,10 @@ public class MetaFileManager extends FileManager {
         retList.remove(audioDoc);
         
         //now add the non-id3 tags from audioDoc to id3doc
-        List audioList = audioDoc.getOrderedNameValueList();
-        List id3List = id3Doc.getOrderedNameValueList();
+        List<NameValue<String>> audioList = audioDoc.getOrderedNameValueList();
+        List<NameValue<String>> id3List = id3Doc.getOrderedNameValueList();
         for(int i = 0; i < audioList.size(); i++) {
-            NameValue nameVal = (NameValue)audioList.get(i);
+            NameValue<String> nameVal = audioList.get(i);
             if(AudioMetaData.isNonLimeAudioField(nameVal.getName()))
                 id3List.add(nameVal);
         }
@@ -237,12 +237,11 @@ public class MetaFileManager extends FileManager {
         // We must remember the schemas and then remove the doc, or we will
         // get a concurrent mod exception because removing the doc also
         // removes it from the FileDesc.
-        List xmlDocs = fd.getLimeXMLDocuments();
-        List schemas = new LinkedList();
-        for(Iterator i = xmlDocs.iterator(); i.hasNext(); )
-            schemas.add( ((LimeXMLDocument)i.next()).getSchemaURI() );
-        for(Iterator i = schemas.iterator(); i.hasNext(); ) {
-            String uri = (String)i.next();
+        List<LimeXMLDocument> xmlDocs = fd.getLimeXMLDocuments();
+        List<String> schemas = new LinkedList<String>();
+        for(LimeXMLDocument doc : xmlDocs)
+            schemas.add(doc.getSchemaURI());
+        for(String uri : schemas) {
             LimeXMLReplyCollection col = mapper.getReplyCollection(uri);
             if( col != null )
                 col.removeDoc( fd );
@@ -277,9 +276,9 @@ public class MetaFileManager extends FileManager {
             RouterService.schedule(saver,60*1000,60*1000);
         }
         
-        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
-        for(Iterator i = replies.iterator(); i.hasNext(); )
-            ((LimeXMLReplyCollection)i.next()).loadFinished();
+        Collection<LimeXMLReplyCollection> replies =  SchemaReplyCollectionMapper.instance().getCollections();
+        for(LimeXMLReplyCollection col : replies)
+            col.loadFinished();
         
         RouterService.getCallback().setAnnotateEnabled(true);
 
@@ -289,15 +288,15 @@ public class MetaFileManager extends FileManager {
     /**
      * Notification that a single FileDesc has its URNs.
      */
-    protected void loadFile(FileDesc fd, File file, List metadata, Set urns) {
+    protected void loadFile(FileDesc fd, File file, List<? extends LimeXMLDocument> metadata, Set urns) {
         super.loadFile(fd, file, metadata, urns);
         boolean added = false;
         
-        Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
-        for(Iterator i = replies.iterator(); i.hasNext(); )
-            added |= (((LimeXMLReplyCollection)i.next()).initialize(fd, metadata) != null);
-        for(Iterator i = replies.iterator(); i.hasNext(); )
-            added |= (((LimeXMLReplyCollection)i.next()).createIfNecessary(fd) != null);
+        Collection<LimeXMLReplyCollection> replies =  SchemaReplyCollectionMapper.instance().getCollections();
+        for(LimeXMLReplyCollection col : replies)
+            added |= col.initialize(fd, metadata) != null;
+        for(LimeXMLReplyCollection col : replies)
+            added |= col.createIfNecessary(fd) != null;
             
         if(added) {
             synchronized(this) {
@@ -309,9 +308,9 @@ public class MetaFileManager extends FileManager {
     
     protected void save() {
         if(isLoadFinished()) {
-            Collection replies =  SchemaReplyCollectionMapper.instance().getCollections();
-            for(Iterator i = replies.iterator(); i.hasNext(); )
-                ((LimeXMLReplyCollection)i.next()).writeMapToDisk();
+            Collection<LimeXMLReplyCollection> replies =  SchemaReplyCollectionMapper.instance().getCollections();
+            for(LimeXMLReplyCollection col : replies)
+                col.writeMapToDisk();
         }
 
         super.save();
@@ -335,7 +334,7 @@ public class MetaFileManager extends FileManager {
         // did not have metadata but the other did, causing two
         // responses for the same file.
             
-        Set unionSet = new HashSet();
+        Set<Response> unionSet = new HashSet<Response>();
         for(int i = 0; i < metas.length; i++)
             unionSet.add(metas[i]);
         for(int i = 0; i < normals.length; i++)
@@ -343,7 +342,7 @@ public class MetaFileManager extends FileManager {
 
         //The set contains all the elements that are the union of the 2 arrays
         Response[] retArray = new Response[unionSet.size()];
-        retArray = (Response[])unionSet.toArray(retArray);
+        retArray = unionSet.toArray(retArray);
         return retArray;
     }
 
@@ -354,13 +353,8 @@ public class MetaFileManager extends FileManager {
      */
     protected void buildQRT() {
         super.buildQRT();
-        Iterator iter = getXMLKeyWords().iterator();
-        while(iter.hasNext())
-            _queryRouteTable.add((String)iter.next());
-        
-        iter = getXMLIndivisibleKeyWords().iterator();
-        while(iter.hasNext())
-            _queryRouteTable.addIndivisible((String)iter.next());
+        for(String string : new MultiIterable<String>(getXMLKeyWords(), getXMLIndivisibleKeyWords()))
+            _queryRouteTable.add(string);
     }
 
     /**
@@ -368,8 +362,8 @@ public class MetaFileManager extends FileManager {
      * numbers. The list also includes the set of words that is contained
      * in the names of the files.
      */
-    private List getXMLKeyWords(){
-        ArrayList words = new ArrayList();
+    private List<String> getXMLKeyWords(){
+        List<String> words = new ArrayList<String>();
         //Now get a list of keywords from each of the ReplyCollections
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
@@ -389,8 +383,8 @@ public class MetaFileManager extends FileManager {
     /** @return A List of KeyWords from the FS that one does NOT want broken
      *  upon hashing into a QRT.  Initially being used for schema uri hashing.
      */
-    private List getXMLIndivisibleKeyWords() {
-        ArrayList words = new ArrayList();
+    private List<String> getXMLIndivisibleKeyWords() {
+        List<String> words = new ArrayList<String>();
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
         String[] schemas = rep.getAvailableSchemaURIs();
@@ -417,7 +411,7 @@ public class MetaFileManager extends FileManager {
         if(replyCol == null)//no matching reply collection for schema
             return null;
 
-        List matchingReplies = replyCol.getMatchingReplies(queryDoc);
+        List<LimeXMLDocument> matchingReplies = replyCol.getMatchingReplies(queryDoc);
         //matchingReplies = a List of LimeXMLDocuments that match the query
         int s = matchingReplies.size();
         if( s == 0 ) // no matching replies.
@@ -425,8 +419,7 @@ public class MetaFileManager extends FileManager {
         
         Response[] retResponses = new Response[s];
         int z = 0;
-        for(Iterator i = matchingReplies.iterator(); i.hasNext(); ) {
-            LimeXMLDocument currDoc = (LimeXMLDocument)i.next();
+        for(LimeXMLDocument currDoc : matchingReplies) {
             File file = currDoc.getIdentifier();//returns null if none
             Response res = null;
             if (file == null) { //pure metadata (no file)

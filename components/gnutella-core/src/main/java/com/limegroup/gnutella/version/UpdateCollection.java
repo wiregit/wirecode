@@ -3,7 +3,6 @@ package com.limegroup.gnutella.version;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,12 +43,12 @@ class UpdateCollection {
     /**
      * The list of UpdateData's in this collection.
      */
-    private List updateDataList = new LinkedList();
+    private List<UpdateData> updateDataList = new LinkedList<UpdateData>();
     
     /**
      * The list of DownloadDatas in this collection.
      */
-    private List downloadDataList = new LinkedList();
+    private List<DownloadInformation> downloadDataList = new LinkedList<DownloadInformation>();
     
     /**
      * Ensure that this is only created by using the factory constructor.
@@ -81,14 +80,14 @@ class UpdateCollection {
     /**
      * Gets the UpdateData objects.
      */
-    List getUpdateData() {
+    List<UpdateData> getUpdateData() {
         return updateDataList;
     }
     
     /**
      * Gets all updates that have information so we can download them.
      */
-    List getUpdatesWithDownloadInformation() {
+    List<DownloadInformation> getUpdatesWithDownloadInformation() {
         return Collections.unmodifiableList(downloadDataList);
     }
     
@@ -104,8 +103,7 @@ class UpdateCollection {
         // Iterate through them till we find an acceptable version.
         // Remember for the 'English' and 'Exact' match --
         // If we got an exact, use that.  Otherwise, use English.
-        for(Iterator i = updateDataList.iterator(); i.hasNext(); ) {
-            UpdateData next = (UpdateData)i.next();
+        for(UpdateData next : updateDataList) {
             if(next.isAllowed(currentV, currentPro, currentStyle, currentJava)) {
                 if(lang.equals(next.getLanguage())) {
                     exactMatch = next;

@@ -1,10 +1,8 @@
 package com.limegroup.gnutella.statistics;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 
 /**
@@ -15,17 +13,17 @@ public final class StatisticsManager implements Runnable {
 	/**
 	 * <tt>List</tt> of all statistics classes.
 	 */
-	private volatile List BASIC_STATS = new LinkedList();
+	private volatile List<Statistic> BASIC_STATS = new LinkedList<Statistic>();
 
 	/**
 	 * <tt>List</tt> of all advanced statistics classes.
 	 */
-	private volatile List ADVANCED_STATS = new LinkedList();
+	private volatile List<Statistic> ADVANCED_STATS = new LinkedList<Statistic>();
 
 	/**
 	 * <tt>List</tt> of all advanced numberical statistics classes.
 	 */
-	private volatile List NUMERICAL_STATS = new LinkedList();
+	private volatile List<Statistic> NUMERICAL_STATS = new LinkedList<Statistic>();
 
 	/**
 	 * Boolean for whether or not advanced statistics should be 
@@ -113,26 +111,15 @@ public final class StatisticsManager implements Runnable {
 	 * their collections of historical data.
 	 */
 	public void run() {
-		try {
-			synchronized(BASIC_STATS) {
-				Iterator iter = BASIC_STATS.iterator();
-				while(iter.hasNext()) {
-					Statistic stat = (Statistic)iter.next();
+		synchronized(BASIC_STATS) {
+            for(Statistic stat : BASIC_STATS)
+				stat.storeCurrentStat();
+		}
+		if(_recordAdvancedStatistics) {
+			synchronized(ADVANCED_STATS) {
+                for(Statistic stat : ADVANCED_STATS)
 					stat.storeCurrentStat();
-				}
 			}
-			if(_recordAdvancedStatistics) {
-				synchronized(ADVANCED_STATS) {
-					Iterator advancedIter = ADVANCED_STATS.iterator();
-					while(advancedIter.hasNext()) {
-						Statistic stat = 
-							(Statistic)advancedIter.next();
-						stat.storeCurrentStat();
-					}			
-				}
-			}
-		} catch(Throwable t) {
-			ErrorService.error(t);
 		}
 	}
 

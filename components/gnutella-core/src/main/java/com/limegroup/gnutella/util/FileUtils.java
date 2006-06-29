@@ -7,12 +7,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -24,46 +22,6 @@ import com.limegroup.gnutella.UploadManager;
  * @author Anurag Singla
  */
 public class FileUtils {
-    /**
-     * Writes the passed map to corresponding file
-     * @param filename The name of the file to which to write the passed map
-     * @param map The map to be stored
-     */
-    public static void writeMap(String filename, Map map)
-        throws IOException, ClassNotFoundException {
-        ObjectOutputStream out = null;
-        try {
-            //open the file
-            out = new ObjectOutputStream(new FileOutputStream(filename));
-            //write to the file
-            out.writeObject(map);	
-        } finally {
-            //close the stream
-            if(out != null)
-                out.close();
-        }
-    }
-    
-    /**
-     * Reads the map stored, in serialized object form, 
-     * in the passed file and returns it. from the file where it is stored
-     * @param filename The file from where to read the Map
-     * @return The map that was read
-     */
-    public static Map readMap(String filename)
-        throws IOException, ClassNotFoundException {
-        ObjectInputStream in = null;
-        try {
-            //open the file
-            in = new ObjectInputStream(new FileInputStream(filename));
-            //read and return the object
-            return (Map)in.readObject();	
-        } finally {
-            //close the file
-            if(in != null)
-                in.close();
-        }    
-    }
     
     /**
      * Gets the canonical path, catching buggy Windows errors
@@ -238,11 +196,7 @@ public class FileUtils {
                 ioe.initCause(failed);
                 throw ioe;
             } finally {
-                if(fos != null) {
-                    try {
-                        fos.close();
-                    } catch(IOException ignored) {}
-                }
+                IOUtils.close(fos);
             }
         }
     }
@@ -342,9 +296,9 @@ public class FileUtils {
      */
     public static File[] getFilesRecursive(File directory,
                                            String[] filter) {
-        ArrayList dirs = new ArrayList();
+        List<File> dirs = new ArrayList<File>();
         // the return array of files...
-        ArrayList retFileArray = new ArrayList();
+        List<File> retFileArray = new ArrayList<File>();
         File[] retArray = new File[0];
 
         // bootstrap the process
@@ -353,7 +307,7 @@ public class FileUtils {
 
         // while i have dirs to process
         while (dirs.size() > 0) {
-            File currDir = (File) dirs.remove(0);
+            File currDir = dirs.remove(0);
             String[] listedFiles = currDir.list();
             for (int i = 0; (listedFiles != null) && (i < listedFiles.length); i++) {
                 File currFile = new File(currDir,listedFiles[i]);
@@ -384,7 +338,7 @@ public class FileUtils {
         if (!retFileArray.isEmpty()) {
             retArray = new File[retFileArray.size()];
             for (int i = 0; i < retArray.length; i++)
-                retArray[i] = (File) retFileArray.get(i);
+                retArray[i] = retFileArray.get(i);
         }
 
         return retArray;

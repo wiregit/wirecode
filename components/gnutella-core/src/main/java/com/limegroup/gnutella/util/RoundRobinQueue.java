@@ -8,16 +8,16 @@ import java.util.LinkedList;
 /**
  * a round-robin queue.  basically two lists that flip back and forth.
  */
-public class RoundRobinQueue  {
+public class RoundRobinQueue<T>  {
 
-	LinkedList _current;
+	private LinkedList<T> _current;
 	
 	
 	/**
 	 * do not create the terminating elements
 	 */
 	public RoundRobinQueue() {
-		_current = new LinkedList();
+		_current = new LinkedList<T>();
 		
 
 	}
@@ -26,7 +26,7 @@ public class RoundRobinQueue  {
 	 * enqueues the specified object in the round-robin queue.
 	 * @param value the object to add to the queue
 	 */
-	public synchronized void enqueue(Object value) {
+	public synchronized void enqueue(T value) {
 		
 		_current.addLast(value);
 		
@@ -35,8 +35,8 @@ public class RoundRobinQueue  {
 	/**
 	 * @return the next object in the round robin queue
 	 */
-	public synchronized Object next() {
-		Object ret = _current.removeFirst();
+	public synchronized T next() {
+		T ret = _current.removeFirst();
 		_current.addLast(ret);
 		return ret;
 	}

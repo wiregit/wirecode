@@ -29,6 +29,9 @@ public class PingRequest extends Message {
     public static final byte SCP_ULTRAPEER_OR_LEAF_MASK = 0x1;
     public static final byte SCP_LEAF = 0x0;
     public static final byte SCP_ULTRAPEER = 0x1;
+    
+    public static final byte SCP_SUPPORTS_DHT_IPP_MASK = 0x2;
+    public static final byte SCP_SUPPORTS_DHT_IPP = 0x1 << 1;
    
 
     /**
@@ -141,6 +144,8 @@ public class PingRequest extends Message {
             data[0] = SCP_ULTRAPEER;
         else
             data[0] = SCP_LEAF;
+        
+        data[0] |= SCP_SUPPORTS_DHT_IPP;
         l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
         
         return guid;

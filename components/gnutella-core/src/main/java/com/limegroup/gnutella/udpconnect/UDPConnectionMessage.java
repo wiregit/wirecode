@@ -63,7 +63,7 @@ public abstract class UDPConnectionMessage extends Message {
     public static UDPConnectionMessage createMessage(
       byte[] guid, byte ttl, byte hops, byte[] payload) 
       throws BadPacketException {
-        byte opcode         = (byte)((int)(guid[1] & 0xf0) >> 4); 
+        byte opcode         = (byte)((guid[1] & 0xf0) >> 4); 
  
         // Create appropriate UDPConnectionMessage
         switch (opcode) {
@@ -188,11 +188,11 @@ public abstract class UDPConnectionMessage extends Message {
     private void unpackFromWire(byte[] guid, byte[] payload) 
       throws BadPacketException {
         _connectionID   = guid[0];
-        _opcode         = (byte)((int)(guid[1] & 0xf0) >> 4); 
+        _opcode         = (byte)((guid[1] & 0xf0) >> 4); 
         _sequenceNumber = 
           (((long) guid[2] & 0xff) << 8) | ((long) guid[3] & 0xff);
 
-        _data1 = ByteBuffer.wrap(guid, GUID_DATA_START, ((int) guid[1] & 0x0f));
+        _data1 = ByteBuffer.wrap(guid, GUID_DATA_START, (guid[1] & 0x0f));
         _data2 = ByteBuffer.wrap(payload);
 
         if ( _data1.remaining() > MAX_GUID_DATA )
@@ -238,7 +238,7 @@ public abstract class UDPConnectionMessage extends Message {
      *  Return an int from 2 unsigned bytes
      */
     public static int getShortInt(byte b1, byte b2) {
-          return (((int) b1 & 0xff) << 8) | ((int) b2 & 0xff);
+          return ((b1 & 0xff) << 8) | (b2 & 0xff);
     }
 
     /** 

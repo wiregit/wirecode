@@ -6,6 +6,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 
 import com.limegroup.gnutella.dime.AsyncDimeParser;
+import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.io.ReadState;
 
 public class AsyncHashTreeHandler extends ReadState implements ThexReader {
@@ -28,7 +29,7 @@ public class AsyncHashTreeHandler extends ReadState implements ThexReader {
     }
 
     public HashTree getHashTree() throws IOException {
-        List records = parser.getRecords();
+        List<DIMERecord> records = parser.getRecords();
         return new HashTree(HashTreeHandler.nodesFromRecords(records.iterator(), fileSize, root32), sha1, fileSize);
     }
     

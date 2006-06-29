@@ -57,7 +57,7 @@ public final class SearchResultHandler {
     /** Used to keep track of the number of non-filtered responses per GUID.
      *  I need synchronization for every call I make, so a Vector is fine.
      */
-    private final List GUID_COUNTS = new Vector();
+    private final List<GuidCount> GUID_COUNTS = new Vector<GuidCount>();
 
     /*---------------------------------------------------    
       PUBLIC INTERFACE METHODS
@@ -103,26 +103,24 @@ public final class SearchResultHandler {
      * the network, based on the number of results they've had and/or
      * whether or not they're new enough.
      */
-    public List getQueriesToReSend() {
+    public List<QueryRequest> getQueriesToReSend() {
         LOG.trace("entered SearchResultHandler.getQueriesToSend()");
-        List reSend = null;
+        List<QueryRequest> reSend = null;
         synchronized (GUID_COUNTS) {
             long now = System.currentTimeMillis();
-            Iterator iter = GUID_COUNTS.iterator();
-            while (iter.hasNext()) {
-                GuidCount currGC = (GuidCount) iter.next();
+            for(GuidCount currGC : GUID_COUNTS) {
                 if( isQueryStillValid(currGC, now) ) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("adding " + currGC + 
                                   " to list of queries to resend");
                     if( reSend == null )
-                        reSend = new LinkedList();
+                        reSend = new LinkedList<QueryRequest>();
                     reSend.add(currGC.getQueryRequest());
                 }
             }
         }
         if( reSend == null )
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         else
             return reSend;
     }        
@@ -201,7 +199,7 @@ public final class SearchResultHandler {
             }
         }
 
-        List results = null;
+        List<Response> results = null;
         try {
             results = qr.getResultsAsList();
         } catch (BadPacketException e) {
@@ -219,9 +217,7 @@ public final class SearchResultHandler {
         int numGoodSentToFrontEnd = 0;
         double numBadSentToFrontEnd = 0;
             
-        for (Iterator iter = results.iterator(); iter.hasNext();) {
-            Response response = (Response) iter.next();
-
+        for(Response response : results) {
             if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
                 if (!RouterService.matchesType(data.getMessageGUID(), response)) {
                     continue;
@@ -307,9 +303,9 @@ public final class SearchResultHandler {
 
     private GuidCount removeQueryInternal(GUID guid) {
         synchronized (GUID_COUNTS) {
-            Iterator iter = GUID_COUNTS.iterator();
+            Iterator<GuidCount> iter = GUID_COUNTS.iterator();
             while (iter.hasNext()) {
-                GuidCount currGC = (GuidCount) iter.next();
+                GuidCount currGC = iter.next();
                 if (currGC.getGUID().equals(guid)) {
                     iter.remove();  // get rid of this dude
                     return currGC;  // and return it...
@@ -322,9 +318,7 @@ public final class SearchResultHandler {
 
     private GuidCount retrieveGuidCount(GUID guid) {
         synchronized (GUID_COUNTS) {
-            Iterator iter = GUID_COUNTS.iterator();
-            while (iter.hasNext()) {
-                GuidCount currGC = (GuidCount) iter.next();
+            for(GuidCount currGC : GUID_COUNTS) {
                 if (currGC.getGUID().equals(guid))
                     return currGC;
             }

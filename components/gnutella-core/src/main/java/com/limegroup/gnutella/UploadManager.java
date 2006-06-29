@@ -94,6 +94,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  *
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
+@SuppressWarnings("unchecked")
 public class UploadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);

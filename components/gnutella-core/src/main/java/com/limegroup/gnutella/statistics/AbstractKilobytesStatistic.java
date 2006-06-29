@@ -21,7 +21,7 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	 */
 	public double getAverage() {
 		if(_totalStatsRecorded == 0) return 0;
-		return (double)((_total/_totalStatsRecorded)/BYTES_PER_KILOBYTE);
+		return (_total/_totalStatsRecorded)/BYTES_PER_KILOBYTE;
 	}
 
 	/** 
@@ -31,7 +31,7 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	 *  in kilobytes 
 	 */
 	public double getMax() {
-		return (double)(_max/BYTES_PER_KILOBYTE);
+		return _max/BYTES_PER_KILOBYTE;
 	}
 
 	/** 
@@ -40,6 +40,6 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	 * @return the total for this statistic in kilobytes 
 	 */
 	public double getTotal() {
-		return (double)(_total/BYTES_PER_KILOBYTE);
+		return _total/BYTES_PER_KILOBYTE;
 	}
 }

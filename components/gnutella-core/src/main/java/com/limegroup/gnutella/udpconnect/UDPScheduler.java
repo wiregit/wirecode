@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.udpconnect;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 import com.limegroup.gnutella.util.ManagedThread;
 
@@ -23,7 +23,7 @@ public class UDPScheduler extends ManagedThread {
 	private static final String NAME_OF_THREAD = "UDPScheduler";
 
     /** The active list of scheduled events */
-	private ArrayList           _connectionEvents;
+	private List<UDPTimerEvent> _connectionEvents;
 
     /** The next event to be handled */
 	private UDPTimerEvent       _scheduledEvent;
@@ -61,7 +61,7 @@ public class UDPScheduler extends ManagedThread {
     private UDPScheduler() {
         super(NAME_OF_THREAD);
         
-		_connectionEvents    = new ArrayList();
+		_connectionEvents    = new ArrayList<UDPTimerEvent>();
 		_scheduledEvent      = NO_EVENT;
         _started             = false;
         _updateThread        = null;
@@ -119,15 +119,16 @@ public class UDPScheduler extends ManagedThread {
      *  Shortcut test for a second thread to deal with the new schedule handoff
      */
     class UpdateThread extends ManagedThread {
-        ArrayList _listSchedule,_listRegister;
+        List<UDPTimerEvent> _listSchedule;
+        List<UDPTimerEvent> _listRegister;
 
         /**
          *  Initialize the list of pending event updates
          */
         public UpdateThread() {
             super("UDPUpdateThread");
-            _listSchedule = new ArrayList();
-            _listRegister = new ArrayList();
+            _listSchedule = new ArrayList<UDPTimerEvent>();
+            _listRegister = new ArrayList<UDPTimerEvent>();
         }
 
         /**
@@ -149,7 +150,8 @@ public class UDPScheduler extends ManagedThread {
          */
         public void managedRun() {
             UDPTimerEvent evt;
-            ArrayList localListSchedule,localListRegister;
+            List<UDPTimerEvent> localListSchedule;
+            List<UDPTimerEvent> localListRegister;
             while (true) {
                // Make sure that there is some idle time in the event updating
                // Otherwise, it will burn cpu
@@ -159,20 +161,20 @@ public class UDPScheduler extends ManagedThread {
 
                 // Clone list for safe unlocked access
                 synchronized(this) {
-                    localListSchedule = (ArrayList) _listSchedule.clone();
+                    localListSchedule = new ArrayList<UDPTimerEvent>(_listSchedule);
                     _listSchedule.clear();
-                    localListRegister = (ArrayList) _listRegister.clone();
+                    localListRegister = new ArrayList<UDPTimerEvent>(_listRegister);
                     _listRegister.clear();
                 }
 
                 
                 //then add any events
-                for (Iterator iter = localListRegister.iterator();iter.hasNext();)
-                	registerSync((UDPTimerEvent)iter.next());
+                for(int i = 0; i < localListRegister.size(); i++)
+                    registerSync(localListRegister.get(i));
                 
                 //then reschedule any events
                 for (int i=0; i < localListSchedule.size(); i++) {
-                    evt = (UDPTimerEvent) localListSchedule.get(i);
+                    evt = localListSchedule.get(i);
                     updateSchedule(evt);
                 }
                 
@@ -276,7 +278,7 @@ public class UDPScheduler extends ManagedThread {
 
 		_scheduledEvent      = NO_EVENT;
 		for (int i = 0; i < _connectionEvents.size(); i++) {
-			evt = (UDPTimerEvent) _connectionEvents.get(i);
+			evt = _connectionEvents.get(i);
 			time = evt.getEventTime();
 			if ( evt  != NO_EVENT && 
 				 (time < _scheduledEvent.getEventTime() || 

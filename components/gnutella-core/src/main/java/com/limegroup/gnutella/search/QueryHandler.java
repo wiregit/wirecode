@@ -148,12 +148,12 @@ public final class QueryHandler {
 	/**
 	 * Constant list of connections that have already been queried.
 	 */
-	private final List QUERIED_CONNECTIONS = new ArrayList();
+	private final List<ManagedConnection> QUERIED_CONNECTIONS = new ArrayList<ManagedConnection>();
 
     /**
      * <tt>List</tt> of TTL=1 probe connections that we've already used.
      */
-    private final List QUERIED_PROBE_CONNECTIONS = new ArrayList();
+    private final List<ManagedConnection> QUERIED_PROBE_CONNECTIONS = new ArrayList<ManagedConnection>();
 
 	/**
 	 * The time the query started.
@@ -411,7 +411,7 @@ public final class QueryHandler {
             // connections because we'll be modifying it.
             int newHosts = 
                 sendQuery(
-                    new ArrayList(
+                    new ArrayList<ManagedConnection>(
                             _connectionManager.getInitializedConnections()));
             if(newHosts == 0) {
                 // if we didn't query any new hosts, wait awhile for new
@@ -466,10 +466,10 @@ public final class QueryHandler {
      * @return the number of new hosts theoretically reached by this
      *  query iteration
      */
-    private int sendQuery(List ultrapeersAll) {
+    private int sendQuery(List<ManagedConnection> ultrapeersAll) {
 
         //we want to try to use all connections in ultrapeersLocale first.
-        List ultrapeers = /** method returns a copy */
+        List<ManagedConnection> ultrapeers = // method returns a copy
             _connectionManager.getInitializedConnectionsMatchLocale
             (_prefLocale);
             
@@ -503,8 +503,7 @@ public final class QueryHandler {
 
         // weed out all connections that aren't yet stable
         for(int i=0; i<length; i++) {
-			ManagedConnection curConnection = 
-                (ManagedConnection)ultrapeers.get(i);			
+			ManagedConnection curConnection = ultrapeers.get(i);			
 
 			// if the connection hasn't been up for long, don't use it,
             // as the replies will never make it back to us if the
@@ -537,7 +536,7 @@ public final class QueryHandler {
             // QUERIED_CONNECTIONS and QUERIED_PROBE_CONNECTIONS do
             // not have any of the same entries, as this connection
             // will be added to QUERIED_CONNECTIONS
-            mc = (ManagedConnection)QUERIED_PROBE_CONNECTIONS.remove(0);
+            mc = QUERIED_PROBE_CONNECTIONS.remove(0);
             probeConnection = true;
         }
         

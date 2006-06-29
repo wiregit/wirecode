@@ -11,7 +11,7 @@ public class DefaultThreadPool implements ThreadPool {
     /**
      * The list of items to be processed.
      */
-    private final List QUEUE = new LinkedList();
+    private final List<Runnable> QUEUE = new LinkedList<Runnable>();
     
     /**
      * The name of the threads to be created.
@@ -109,7 +109,7 @@ public class DefaultThreadPool implements ThreadPool {
      */
     private synchronized Runnable next() {
         if(!QUEUE.isEmpty())
-            return (Runnable)QUEUE.remove(0);
+            return QUEUE.remove(0);
         else
             return null;
     }

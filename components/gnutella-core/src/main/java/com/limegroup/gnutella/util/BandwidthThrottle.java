@@ -90,7 +90,7 @@ public class BandwidthThrottle {
      * (not milliseconds!)  
      */
     public void setRate(float bytesPerSecond) {
-        _bytesPerTick = (int)((float)bytesPerSecond / TICKS_PER_SECOND);
+        _bytesPerTick = (int)(bytesPerSecond / TICKS_PER_SECOND);
         if(_switching)
             fixBytesPerTick(true);
     }

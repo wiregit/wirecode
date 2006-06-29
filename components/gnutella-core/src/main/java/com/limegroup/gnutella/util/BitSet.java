@@ -690,7 +690,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
 	int highPart = (int)(highestUnit >>> 32);
         return 64 * (unitsInUse - 1) +
                (highPart == 0 ? bitLen((int)highestUnit)
-                              : 32 + bitLen((int)highPart));
+                              : 32 + bitLen(highPart));
     }
 
     /**

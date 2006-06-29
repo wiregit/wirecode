@@ -23,6 +23,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.security.TigerTree;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * This class stores HashTrees and is capable of verifying a file it is also
@@ -44,13 +45,16 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     private static transient final int  MB                   = 1024 * KB;
             static transient final int  BLOCK_SIZE           = 1024;
     private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
+    
+    /** An invalid HashTree. */
+    public static final HashTree INVALID = new HashTree();
 
     // constants written to the outputstream when serialized.
     
     /**
      * The lowest depth list of nodes.
      */
-    private final List /* of byte[] */ NODES;
+    private final List<byte[]> NODES;
     
     /**
      * The tigertree root hash.
@@ -81,12 +85,21 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * The size of each node
      */
     private transient int _nodeSize;
+    
+    /** Constructs an invalid HashTree. */
+    private HashTree() {
+        NODES = null;
+        ROOT_HASH = null;
+        FILE_SIZE = -1;
+        DEPTH = -1;
+        THEX_URI = null;
+    }
 
     /**
      * Constructs a new HashTree out of the given nodes, root, sha1
      * and filesize.
      */
-    HashTree(List allNodes, String sha1, long fileSize) {
+    HashTree(List<List<byte[]>> allNodes, String sha1, long fileSize) {
         this(allNodes,sha1,fileSize,calculateNodeSize(fileSize,allNodes.size()-1));
     }
     
@@ -94,11 +107,11 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Constructs a new HashTree out of the given nodes, root, sha1
      * filesize and chunk size.
      */
-    private HashTree(List allNodes, String sha1, long fileSize, int nodeSize) {
+    private HashTree(List<List<byte[]>> allNodes, String sha1, long fileSize, int nodeSize) {
         THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
-        NODES = (List)allNodes.get(allNodes.size()-1);
+        NODES = allNodes.get(allNodes.size()-1);
         FILE_SIZE = fileSize;
-        ROOT_HASH = (byte[])((List)allNodes.get(0)).get(0);
+        ROOT_HASH = allNodes.get(0).get(0);
         DEPTH = allNodes.size()-1;
         Assert.that(TigerTree.log2Ceil(NODES.size()) == DEPTH);
         Assert.that(NODES.size() * nodeSize >= fileSize);
@@ -117,11 +130,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             in = fd.createInputStream();
             return createHashTree(fd.getFileSize(), in, fd.getSHA1Urn());
         } finally {
-            if(in != null) {
-                try {
-                    in.close();
-                } catch(IOException ignored) {}
-            }
+            IOUtils.close(in);
         }                
     }
     
@@ -179,10 +188,10 @@ public class HashTree implements HTTPHeaderValue, Serializable {
                                            URN sha1) throws IOException {
         // do the actual hashing
         int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
-        List nodes = createTTNodes(nodeSize, fileSize, is);
+        List<byte[]> nodes = createTTNodes(nodeSize, fileSize, is);
         
         // calculate the intermediary nodes to get the root hash & others.
-        List allNodes = createAllParentNodes(nodes);
+        List<List<byte[]>> allNodes = createAllParentNodes(nodes);
         return new HashTree(allNodes, sha1.toString(), fileSize, nodeSize);
     }
 
@@ -239,7 +248,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
             TigerTree digest = new TigerTree();
             digest.update(data, 0, length);
             byte [] hash = digest.digest();
-            byte [] treeHash = (byte [])NODES.get(in.low / _nodeSize);
+            byte [] treeHash = NODES.get(in.low / _nodeSize);
             boolean ok = Arrays.equals(treeHash, hash);
             if (LOG.isDebugEnabled())
                 LOG.debug("interval "+in+" verified "+ok);
@@ -328,7 +337,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     /**
      * @return List the NODES.
      */
-    public List getNodes() {
+    public List<byte[]> getNodes() {
         return NODES;
     }
     
@@ -361,7 +370,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
     /**
      * @return all nodes.
      */
-    public List getAllNodes() {
+    public List<List<byte[]>> getAllNodes() {
         return HashTreeNodeManager.instance().getAllNodes(this);
     }
 
@@ -443,8 +452,8 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * The 0th element of the returned List will always be a List of size
      * 1, containing a byte[] of the root hash.
      */
-    static List createAllParentNodes(List nodes) {
-        List allNodes = new ArrayList();
+    static List<List<byte[]>> createAllParentNodes(List<byte[]> nodes) {
+        List<List<byte[]>> allNodes = new ArrayList<List<byte[]>>();
         allNodes.add(Collections.unmodifiableList(nodes));
         while (nodes.size() > 1) {
             nodes = createParentGeneration(nodes);
@@ -457,16 +466,16 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * Create the parent generation of the Merkle HashTree for a given child
      * generation
      */
-    static List createParentGeneration(List nodes) {
+    static List<byte[]> createParentGeneration(List<byte[]> nodes) {
         MessageDigest md = new Tiger();
         int size = nodes.size();
         size = size % 2 == 0 ? size / 2 : (size + 1) / 2;
-        List ret = new ArrayList(size);
-        Iterator iter = nodes.iterator();
+        List<byte[]> ret = new ArrayList<byte[]>(size);
+        Iterator<byte[]> iter = nodes.iterator();
         while (iter.hasNext()) {
-            byte[] left = (byte[]) iter.next();
+            byte[] left = iter.next();
             if (iter.hasNext()) {
-                byte[] right = (byte[]) iter.next();
+                byte[] right = iter.next();
                 md.reset();
                 md.update(INTERNAL_HASH_PREFIX);
                 md.update(left, 0, left.length);
@@ -485,9 +494,9 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      * 2^n (n>=10) or we will not get the expected generation of nodes of a
      * Merkle HashTree
      */
-    private static List createTTNodes(int nodeSize, long fileSize,
-                                      InputStream is) throws IOException {
-        List ret = new ArrayList((int)Math.ceil((double)fileSize/nodeSize));
+    private static List<byte[]> createTTNodes(int nodeSize, long fileSize,
+                                              InputStream is) throws IOException {
+        List<byte[]> ret = new ArrayList<byte[]>((int)Math.ceil((double)fileSize/nodeSize));
         MessageDigest tt = new TigerTree();
         byte[] block = new byte[BLOCK_SIZE * 128];
         long offset = 0;

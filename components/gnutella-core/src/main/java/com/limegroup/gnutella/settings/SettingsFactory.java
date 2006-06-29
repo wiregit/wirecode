@@ -26,7 +26,7 @@ import com.limegroup.gnutella.util.FileUtils;
  * to choose a unique string key for your setting name -- otherwise there
  * will be conflicts.
  */
-public final class SettingsFactory {    
+public final class SettingsFactory implements Iterable<Setting> {    
     /**
      * Time interval, after which the accumulated information expires
      */
@@ -57,7 +57,7 @@ public final class SettingsFactory {
     /* List of all settings associated with this factory 
      * LOCKING: must hold this monitor
      */
-    private ArrayList /* of Settings */ settings = new ArrayList(10);
+    private ArrayList<Setting> settings = new ArrayList<Setting>(10);
 
     /**
      * A mapping of simppKeys to Settings. Only Simpp Enabled settings will be
@@ -65,7 +65,7 @@ public final class SettingsFactory {
      * that when simpp settings are loaded, it's easy to find the targeted
      * settings.
      */
-    private Map /* String -> Setting */ simppKeyToSetting = new HashMap();
+    private Map<String, Setting> simppKeyToSetting = new HashMap<String, Setting>();
     
 
     private boolean expired = false;
@@ -100,7 +100,7 @@ public final class SettingsFactory {
      * LOCKING: The caller must ensure that this factory's monitor
      *   is held while iterating over the iterator.
      */
-    public synchronized Iterator iterator() {
+    public synchronized Iterator<Setting> iterator() {
         return settings.iterator();
     }
 
@@ -152,11 +152,8 @@ public final class SettingsFactory {
         }
         
         // Reload all setting values
-        Iterator ii = settings.iterator(); 
-        while (ii.hasNext()) {
-            Setting set = (Setting)ii.next();
+        for(Setting set : settings)
             set.reload();
-        }
         
         setExpireValue();
     }
@@ -195,11 +192,8 @@ public final class SettingsFactory {
      * Reverts all settings to their factory defaults.
      */
     public synchronized void revertToDefault() {
-        Iterator ii = settings.iterator();
-        while( ii.hasNext() ) {
-            Setting set = (Setting)ii.next();
+        for(Setting set : settings)
             set.revertToDefault();
-        }
     }
     
     /**
@@ -219,9 +213,7 @@ public final class SettingsFactory {
         Properties toSave = (Properties)PROPS.clone();
 
         //Add any settings which require saving or aren't default
-        Iterator ii = settings.iterator();
-        while( ii.hasNext() ) {
-            Setting set = (Setting)ii.next();
+        for(Setting set : settings) {
             if( !set.shouldAlwaysSave() && set.isDefault() )
                 toSave.remove( set.getKey() );
         }
@@ -721,7 +713,7 @@ public final class SettingsFactory {
      * Package access for getting a loaded setting corresponding to a simppKey
      */
     synchronized Setting getSettingForSimppKey(String simppKey) {
-        return (Setting)simppKeyToSetting.get(simppKey);
+        return simppKeyToSetting.get(simppKey);
     }
 
 }

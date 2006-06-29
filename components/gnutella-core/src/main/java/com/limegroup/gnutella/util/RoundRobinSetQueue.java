@@ -7,20 +7,20 @@ import java.util.Set;
 /**
  * a Round Robin queue where elements are unique.
  */
-public class RoundRobinSetQueue extends RoundRobinQueue {
+public class RoundRobinSetQueue<T> extends RoundRobinQueue<T> {
 	
-	private Set _uniqueness;
+	private Set<T> _uniqueness;
 	
 	public RoundRobinSetQueue() {
 		super();
-		_uniqueness =  new HashSet();
+		_uniqueness =  new HashSet<T>();
 	}
 
 	
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.util.RoundRobinQueue#enqueue(java.lang.Object)
 	 */
-	public synchronized void enqueue(Object value) {
+	public synchronized void enqueue(T value) {
 		if (_uniqueness.add(value)) 
 			super.enqueue(value);
 		

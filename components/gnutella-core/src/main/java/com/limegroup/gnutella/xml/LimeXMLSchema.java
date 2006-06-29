@@ -32,10 +32,9 @@ import org.xml.sax.SAXException;
  */
 public class LimeXMLSchema {
     /**
-     * List<String> of fields (in canonicalized form to preserve the structural
-     * information)
+     * List of fields (in canonicalized form to preserve the structural information)
      */
-    private final List /* of SchemaFieldInfo */ _canonicalizedFields;
+    private final List<SchemaFieldInfo> _canonicalizedFields;
     
     /**
      * The URI for this schema
@@ -202,8 +201,7 @@ public class LimeXMLSchema {
      * @return unmodifiable list (of SchemaFieldInfo) of all the fields 
      * in this schema.
      */
-    public List getCanonicalizedFields()
-    {
+    public List<SchemaFieldInfo> getCanonicalizedFields() {
         return _canonicalizedFields;
     }
     
@@ -211,18 +209,13 @@ public class LimeXMLSchema {
     /**
      * Returns only those fields which are of enumeration type
      */
-    public List getEnumerationFields()
-    {
+    public List<SchemaFieldInfo> getEnumerationFields() {
         //create a new list
-        List enumerationFields = new LinkedList();
+        List<SchemaFieldInfo> enumerationFields = new LinkedList<SchemaFieldInfo>();
         
         //iterate over canonicalized fields, and add only those which are 
         //of enumerative type
-        Iterator iterator = _canonicalizedFields.iterator();
-        while(iterator.hasNext())
-        {
-            //get next schema field 
-            SchemaFieldInfo schemaFieldInfo = (SchemaFieldInfo)iterator.next();
+        for(SchemaFieldInfo schemaFieldInfo : _canonicalizedFields) {
             //if enumerative type, add to the list of enumeration fields
             if(schemaFieldInfo.getEnumerationList() != null)
                 enumerationFields.add(schemaFieldInfo);
@@ -256,16 +249,13 @@ public class LimeXMLSchema {
     public String[] getCanonicalizedFieldNames()
     {
         //get the fields
-        List canonicalizedFields = this.getCanonicalizedFields();
+        List<SchemaFieldInfo> canonicalizedFields = this.getCanonicalizedFields();
         
         //extract field names out of those
         String[] fieldNames = new String[canonicalizedFields.size()];
-        Iterator iterator = canonicalizedFields.iterator();
+        Iterator<SchemaFieldInfo> iterator = canonicalizedFields.iterator();
         for(int i=0; i < fieldNames.length; i++)
-        {
-            fieldNames[i] = ((SchemaFieldInfo)iterator.next())
-                .getCanonicalizedFieldName();
-        }
+            fieldNames[i] = iterator.next().getCanonicalizedFieldName();
         
         //return the field names
         return fieldNames;

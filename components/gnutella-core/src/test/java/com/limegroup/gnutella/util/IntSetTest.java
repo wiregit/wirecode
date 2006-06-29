@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import junit.framework.Test;
@@ -29,19 +30,19 @@ public class IntSetTest extends BaseTestCase {
         s=new TestingIntSet();
         assertEquals(-1, search(s, 0));
 
-        s.list.add(newInterval(0));          //[0]
+        add(s, newInterval(0));          //[0]
         assertEquals(-1, search(s, -1));
         assertEquals(0, search(s, 0));
         assertEquals(0, search(s, 1));
         
-        s.list.add(newInterval(10));          //[0, 10]
+        add(s, newInterval(10));          //[0, 10]
         assertEquals(-1, search(s, -1));
         assertEquals(0, search(s, 0));
         assertEquals(0, search(s, 1));
         assertEquals(1, search(s, 10));
         assertEquals(1, search(s, 11));
 
-        s.list.add(newInterval(20));          //[0, 10, 20]
+        add(s, newInterval(20));          //[0, 10, 20]
         assertEquals(-1, search(s, -1));
         assertEquals(0, search(s, 0));
         assertEquals(0, search(s, 1));
@@ -50,7 +51,7 @@ public class IntSetTest extends BaseTestCase {
         assertEquals(2, search(s, 20));
         assertEquals(2, search(s, 21));
 
-        s.list.add(newInterval(30));          //[0, 10, 20, 30]
+        add(s, newInterval(30));          //[0, 10, 20, 30]
         assertEquals(-1, search(s, -1));
         assertEquals(0, search(s, 0));
         assertEquals(0, search(s, 9));
@@ -227,6 +228,11 @@ public class IntSetTest extends BaseTestCase {
         return PrivilegedAccessor.invokeConstructor(
             interval, new Object[] { new Integer(num) },
             new Class[] { int.class } );
+    }
+    
+    private static void add(IntSet set, Object o) throws Exception {
+        List list = (List)PrivilegedAccessor.getValue(set, "list");
+        list.add(o);
     }
 
     /**

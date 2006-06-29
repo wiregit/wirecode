@@ -13,7 +13,7 @@ public final class SettingsHandler {
     private SettingsHandler() { }
         
     
-    private static final List PROPS = new ArrayList();
+    private static final List<Settings> PROPS = new ArrayList<Settings>();
     
     /**
      * Adds a settings class to the list of factories that 
@@ -36,7 +36,7 @@ public final class SettingsHandler {
      */
     public static void reload() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((Settings)PROPS.get(i)).reload();
+            PROPS.get(i).reload();
     }
     
     /**
@@ -44,7 +44,7 @@ public final class SettingsHandler {
      */
     public static void save() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((Settings)PROPS.get(i)).save();
+            PROPS.get(i).save();
     }
     
     /**
@@ -52,7 +52,7 @@ public final class SettingsHandler {
      */
     public static void revertToDefault() {
         for(int i = 0; i < PROPS.size(); i++)
-            ((Settings)PROPS.get(i)).revertToDefault();
+            PROPS.get(i).revertToDefault();
     }
     
     /**
@@ -60,6 +60,6 @@ public final class SettingsHandler {
      */
     public static void setShouldSave(boolean shouldSave) {
         for(int i = 0; i < PROPS.size(); i++)
-            ((Settings)PROPS.get(i)).setShouldSave(shouldSave);
+            PROPS.get(i).setShouldSave(shouldSave);
     }
 }    

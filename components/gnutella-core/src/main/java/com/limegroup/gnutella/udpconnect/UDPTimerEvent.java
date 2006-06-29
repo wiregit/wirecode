@@ -21,14 +21,14 @@ public abstract class UDPTimerEvent implements Comparable {
     private volatile boolean _shouldUnregister;
     
     /** the UDPConnectionProcessor this event refers to */
-    protected final WeakReference _udpCon;
+    protected final WeakReference<UDPConnectionProcessor> _udpCon;
 
    /**
     *  Create a timer event with a default time.
     */
     UDPTimerEvent(long eventTime, UDPConnectionProcessor conn) {
         _eventTime = eventTime;
-        _udpCon= new WeakReference(conn);
+        _udpCon= new WeakReference<UDPConnectionProcessor>(conn);
     }
     
     /**
@@ -69,8 +69,7 @@ public abstract class UDPTimerEvent implements Comparable {
 
   
     public final void handleEvent(){
-    	UDPConnectionProcessor udpCon = 
-    		(UDPConnectionProcessor) _udpCon.get();
+    	UDPConnectionProcessor udpCon = _udpCon.get();
     	
     	if (udpCon==null)
     		return;

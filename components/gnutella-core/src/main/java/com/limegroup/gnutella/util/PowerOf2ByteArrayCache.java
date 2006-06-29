@@ -1,14 +1,12 @@
 package com.limegroup.gnutella.util;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /** 
  * A ByteArrayCache that stores byte[]'s to their nearest >= power of 2.
  */
 public class PowerOf2ByteArrayCache {
     
-    private final Map CACHE = new HashMap(20);
+    private final IntHashMap<byte[]> CACHE = new IntHashMap<byte[]>(20);
     private volatile int totalStored = 0;
     
     /**
@@ -25,12 +23,11 @@ public class PowerOf2ByteArrayCache {
         // since we want to cache only powers of two,
         // we will use exp from hereon.
         
-        Integer i = new Integer(exp);
-        byte[] ret = (byte[]) CACHE.get(i);
+        byte[] ret = CACHE.get(exp);
         if (ret == null) {
             ret = new byte[exp];
             totalStored += exp;
-            CACHE.put(i, ret);
+            CACHE.put(exp, ret);
         }
         return ret;
     }
