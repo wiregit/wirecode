@@ -99,8 +99,8 @@ public class DefaultMessageHandler extends MessageHandler
             return;
         }
         
-        RouteTable routeTable = getRouteTable();
-        boolean newNode = false;
+        RouteTable routeTable = context.getRouteTable();
+        boolean doStoreForward = false;
         
         // Only do store forward if it is a new node in our routing table 
         // (we are (re)connecting to the network) or a node that is reconnecting
@@ -109,73 +109,78 @@ public class DefaultMessageHandler extends MessageHandler
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
             }
-            newNode = true;
+            doStoreForward = true;
         }
         
         //add node to the routing table -- update timestamp and info if needed
-        routeTable.addContact(node);
+        routeTable.add(node);
 
-        if (newNode) {
+        if (doStoreForward) {
+            forward(node, message);
+        }
+    }
+    
+    private void forward(Contact node, DHTMessage message) throws IOException {
+        
+        RouteTable routeTable = context.getRouteTable();
+        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        
+        // Are we one of the K closest nodes to the contact?
+        if (routeTable.isCloseToLocal(node.getNodeID())) {
+            List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
             
-            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-            
-            // Are we one of the K closest nodes to the contact?
-            if (routeTable.isCloseToLocal(node.getNodeID())) {
-                List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
-                
-                Database database = context.getDatabase();
-                synchronized(database) {
-                    Collection<KeyValueBag> bags = database.getKeyValueBags();
-                    for(KeyValueBag bag : bags) {
+            Database database = context.getDatabase();
+            synchronized(database) {
+                Collection<KeyValueBag> bags = database.getKeyValueBags();
+                for(KeyValueBag bag : bags) {
+                    
+                    // To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
+                    // or if it's ID is closer than any other ID (except the new closest one of course)
+                    // TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
+                    List<Contact> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
+                    Contact closest = closestNodesToKey.get(0);
+                    
+                    if (context.isLocalNode(closest)   
+                            || ((node.equals(closest)
+                                    //maybe we haven't added him to the routing table
+                                    || node.getNodeID().isNearer(closest.getNodeID(), bag.getKey())) 
+                                    && (closestNodesToKey.size() > 1)
+                                    && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                         
-                        // To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
-                        // or if it's ID is closer than any other ID (except the new closest one of course)
-                        // TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                        List<Contact> closestNodesToKey = routeTable.select(bag.getKey(), k, false, false);
-                        Contact closest = closestNodesToKey.get(0);
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
+                        }
                         
-                        if (context.isLocalNode(closest)   
-                                || ((node.equals(closest)
-                                        //maybe we haven't added him to the routing table
-                                        || node.getNodeID().isNearer(closest.getNodeID(), bag.getKey())) 
-                                        && (closestNodesToKey.size() > 1)
-                                        && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
-                            
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
+                        databaseStats.STORE_FORWARD_COUNT.incrementStat();
+                        for(KeyValue keyValue : bag.values()) {
+                            KUID originatorID = keyValue.getNodeID();
+                            if(originatorID != null && !originatorID.equals(node.getNodeID())) {
+                                keyValuesToForward.add(keyValue);
                             }
-                            
-                            databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                            for(KeyValue keyValue : bag.values()) {
-                                KUID originatorID = keyValue.getNodeID();
-                                if(originatorID != null && !originatorID.equals(node.getNodeID())) {
-                                    keyValuesToForward.add(keyValue);
-                                }
-                            }
-                            
-                        } else if (closestNodesToKey.size() == k) {
-                            //if we are the furthest node: delete non-local value from local db
-                            Contact furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
-                            if(context.isLocalNode(furthest)) {
-                                int count = bag.removeAll(true);
-                                databaseStats.STORE_FORWARD_REMOVALS.addData(count);
-                            }
+                        }
+                        
+                    } else if (closestNodesToKey.size() == k) {
+                        //if we are the furthest node: delete non-local value from local db
+                        Contact furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
+                        if(context.isLocalNode(furthest)) {
+                            int count = bag.removeAll(true);
+                            databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                         }
                     }
                 }
-                
-                if (!keyValuesToForward.isEmpty()) {
-                    if (message instanceof FindNodeResponse) {
-                        store(message.getContact(), 
-                                ((FindNodeResponse)message).getQueryKey(), 
-                                keyValuesToForward);
-                    } else {
-                        ResponseHandler handler = new GetQueryKeyHandler(keyValuesToForward);
-                        RequestMessage request = context.getMessageHelper()
-                            .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
-                        
-                        context.getMessageDispatcher().send(node, request, handler);
-                    }
+            }
+            
+            if (!keyValuesToForward.isEmpty()) {
+                if (message instanceof FindNodeResponse) {
+                    store(message.getContact(), 
+                            ((FindNodeResponse)message).getQueryKey(), 
+                            keyValuesToForward);
+                } else {
+                    ResponseHandler handler = new GetQueryKeyHandler(keyValuesToForward);
+                    RequestMessage request = context.getMessageHelper()
+                        .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
+                    
+                    context.getMessageDispatcher().send(node, request, handler);
                 }
             }
         }
@@ -202,7 +207,7 @@ public class DefaultMessageHandler extends MessageHandler
             for(Contact node : nodes) {
                 // We did a FIND_NODE lookup use the info
                 // to fill our routing table
-                context.getRouteTable().addContact(node);
+                context.getRouteTable().add(node);
             }
             
             Contact node = message.getContact();

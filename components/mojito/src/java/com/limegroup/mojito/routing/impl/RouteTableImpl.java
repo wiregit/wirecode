@@ -75,7 +75,7 @@ public class RouteTableImpl implements RouteTable {
         smallestSubtreeBucket = null;
     }
     
-    public synchronized void addContact(Contact node) {
+    public synchronized void add(Contact node) {
         
         if (node.isFirewalled()) {
             if (LOG.isTraceEnabled()) {
@@ -95,7 +95,7 @@ public class RouteTableImpl implements RouteTable {
         } else if (!bucket.isLiveFull()) {
             addContactToBucket(bucket, node);
         } else if (split(bucket)) {
-            addContact(node);
+            add(node); // re-try to add
         } else {
             replaceContactInBucket(bucket, node);
         }
@@ -109,12 +109,12 @@ public class RouteTableImpl implements RouteTable {
          */
         
         if (!existing.isAlive() 
+                || context.isLocalNode(node)
                 || existing.equals(node) // <- checks nodeId + address!
-                || ContactUtils.areLocalContacts(existing, node)
-                || context.isLocalNode(node)) {
+                || ContactUtils.areLocalContacts(existing, node)) {
             
             existing.set(node); // TODO clone!
-            bucket.updateContact(existing, node);
+            //bucket.updateContact(existing, node);
             if (node.isAlive()) {
                 touchBucket(bucket);
             }
@@ -148,7 +148,7 @@ public class RouteTableImpl implements RouteTable {
                     Contact current = bucket.get(nodeId);
                     if (current != null && current.equals(existing)) {
                         current.set(node); // TODO clone!
-                        bucket.updateContact(current, node);
+                        //bucket.updateContact(current, node);
                         
                         // If the Node is in the Cache then ping the least recently
                         // seen live Node which might promote the new Node to a
@@ -157,7 +157,7 @@ public class RouteTableImpl implements RouteTable {
                             ping (bucket.getLeastRecentlySeenLiveContact());
                         }
                     } else {
-                        addContact(node);
+                        add(node);
                     }
                 }
             }
@@ -179,7 +179,7 @@ public class RouteTableImpl implements RouteTable {
     protected synchronized boolean split(Bucket bucket) {
         
         // Three conditions for splitting:
-        // 1. Bucket contains nodeID.
+        // 1. Bucket contains the local Node
         // 2. New node part of the smallest subtree to the local node
         // 3. current_depth mod symbol_size != 0
         
@@ -323,11 +323,11 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    protected boolean remove(Contact node) {
+    protected synchronized boolean remove(Contact node) {
         return remove(node.getNodeID());
     }
     
-    protected boolean remove(KUID nodeId) {
+    protected synchronized boolean remove(KUID nodeId) {
         return bucketTrie.select(nodeId).remove(nodeId);
     }
     
@@ -335,7 +335,7 @@ public class RouteTableImpl implements RouteTable {
         return bucketTrie.select(nodeId).contains(context.getLocalNodeID());
     }
     
-    protected synchronized Bucket bucket(KUID nodeId) {
+    protected synchronized Bucket getBucket(KUID nodeId) {
         return bucketTrie.select(nodeId);
     }
     

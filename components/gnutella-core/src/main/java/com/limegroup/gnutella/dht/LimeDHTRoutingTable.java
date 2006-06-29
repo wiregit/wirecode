@@ -77,7 +77,7 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
                 
                 node.setState(State.ALIVE);
                 node.setTimeStamp(Long.MAX_VALUE);
-                addContact(node);
+                add(node);
             }
         }
     }
@@ -97,7 +97,7 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
     }
     
     protected synchronized void replaceWithMostRecentlySeenCachedContact(KUID nodeId) {
-        Bucket bucket = bucket(nodeId);
+        Bucket bucket = getBucket(nodeId);
         boolean removed = bucket.remove(nodeId);
         assert (removed == true);
         

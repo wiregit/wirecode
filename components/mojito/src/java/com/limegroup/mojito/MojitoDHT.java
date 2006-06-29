@@ -428,6 +428,7 @@ public class MojitoDHT {
         return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
     }
     
+    @SuppressWarnings("unchecked")
     public Collection<KeyValue> get(KUID key, long timeout) throws IOException {
         final Collection[] values = new Collection[] {
             Collections.emptyList()
@@ -634,7 +635,7 @@ public class MojitoDHT {
             Contact node = null;
             while((node = (Contact)ois.readObject()) != null) {
                 if (!timeout) {
-                    routeTable.addContact(node);
+                    routeTable.add(node);
                 }
             }
         }
