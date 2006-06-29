@@ -145,6 +145,11 @@ public interface Contact {
     /**
      * 
      */
+    public int getFailures();
+    
+    /**
+     * 
+     */
     public void handleFailure();
     
     /**
@@ -160,5 +165,5 @@ public interface Contact {
     /**
      * 
      */
-    public Contact mergeContacts(Contact node);
+    public void updateWithExistingContact(Contact existing);
 }

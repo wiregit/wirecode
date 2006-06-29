@@ -118,11 +118,11 @@ public class RouteTableImpl implements RouteTable {
              * See JIRA issue MOJITO-54
              */
             
-            Contact contact = existing.mergeContacts(node);
-            Contact replaced = bucket.updateContact(contact);
+            node.updateWithExistingContact(existing);
+            Contact replaced = bucket.updateContact(node);
             assert (replaced == existing);
             
-            if (contact.isAlive()) {
+            if (node.isAlive()) {
                 touchBucket(bucket);
             }
             
@@ -159,8 +159,8 @@ public class RouteTableImpl implements RouteTable {
                          * See JIRA issue MOJITO-54
                          */
                         
-                        Contact contact = current.mergeContacts(node);
-                        Contact replaced = bucket.updateContact(contact);
+                        node.updateWithExistingContact(current);
+                        Contact replaced = bucket.updateContact(node);
                         assert (replaced == current);
                         
                         // If the Node is in the Cache then ping the least recently

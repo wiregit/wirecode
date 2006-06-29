@@ -56,10 +56,6 @@ public class ContactNode implements Contact, Serializable {
     
     private transient State state = State.UNKNOWN;
     
-    private ContactNode(KUID nodeId) {
-        this.nodeId = nodeId;
-    }
-    
     public ContactNode(int vendor, int version, KUID nodeId, 
             SocketAddress address, State state) {
         this(vendor, version, nodeId, address, 0, 0, state);
@@ -93,39 +89,21 @@ public class ContactNode implements Contact, Serializable {
             this.lastDeadOrAliveTime = timeStamp;
         }
     }
-    
-    public Contact mergeContacts(Contact node) {
-        if (!nodeId.equals(node.getNodeID())) {
+
+    public void updateWithExistingContact(Contact existing) {
+        if (!nodeId.equals(existing.getNodeID())) {
             throw new IllegalArgumentException("Node IDs do not match");
         }
         
-        ContactNode contact = new ContactNode(nodeId);
-        contact.vendor = node.getVendor();
-        contact.version = node.getVersion();
-        contact.address = node.getSocketAddress();
-        contact.instanceId = node.getInstanceID();
-        
-        if (node.getRoundTripTime() > 0L) {
-            contact.rtt = node.getRoundTripTime();
-        } else {
-            contact.rtt = getRoundTripTime();
+        if (rtt < 0L) {
+            rtt = existing.getRoundTripTime();
         }
         
-        if (node.isAlive()) {
-            contact.state = State.ALIVE;
-            contact.timeStamp = node.getTimeStamp();
-            contact.lastDeadOrAliveTime = node.getLastDeadOrAliveTime();
-            contact.failures = 0;
-            contact.flags = node.getFlags();
-        } else {
-            contact.state = State.UNKNOWN;
-            contact.timeStamp = getTimeStamp();
-            contact.lastDeadOrAliveTime = getLastDeadOrAliveTime();
-            contact.failures = getFailures();
-            contact.flags = getFlags();
+        if (!isAlive()) {
+            timeStamp = existing.getTimeStamp();
+            lastDeadOrAliveTime = existing.getLastDeadOrAliveTime();
+            failures = existing.getFailures();
         }
-        
-        return contact;
     }
     
     public int getFlags() {
@@ -289,6 +267,7 @@ public class ContactNode implements Contact, Serializable {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(ContactUtils.toString(getNodeID(), getSocketAddress()))
+            .append(", rtt=").append(getRoundTripTime())
             .append(", failures=").append(getFailures())
             .append(", instanceId=").append(getInstanceID())
             .append(", state=").append(getState())
