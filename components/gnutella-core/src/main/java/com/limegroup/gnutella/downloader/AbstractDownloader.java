@@ -1,20 +1,39 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.FileUtils;
 
 public abstract class AbstractDownloader implements Downloader, Serializable {
 
 	protected static final String ATTRIBUTES = "attributes";
+
+	protected static final String DEFAULT_FILENAME = "defaultFileName";
+
+	protected static final String FILE_SIZE = "fileSize";
+
+	protected Map propertiesMap = new HashMap();
+
+	/**
+	 * The key under which the saveFile File is stored in the attribute map
+	 * used in serializing and deserializing ManagedDownloaders. 
+	 */
+	protected static final String SAVE_FILE = "saveFile";
 	
 	/**
 	 * The current priority of this download -- only valid if inactive.
@@ -31,6 +50,9 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 */
 	protected Map attributes = new HashMap();
 
+	protected AbstractDownloader() {
+		propertiesMap.put(ATTRIBUTES, attributes);
+	}
 	/**
 	 * Sets the inactive priority of this download.
 	 */
@@ -120,10 +142,77 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
      */
 	public abstract void finish();
 	
-	public abstract boolean conflicts(URN urn, File fileName, int fileSize);
+	public abstract boolean conflicts(URN urn, int fileSize, File... files);
 	
 	public abstract boolean conflictsWithIncompleteFile(File incomplete);
 	
 	public abstract void initialize(DownloadManager m, 
 			FileManager fm, DownloadCallback ac);
+
+	/**
+	 * Sets the file name and directory where the download will be saved once
+	 * complete.
+	 * 
+	 * @param overwrite true if overwriting an existing file is allowed
+	 * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
+	 */
+	public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
+	    if (saveDirectory == null)
+	        saveDirectory = SharingSettings.getSaveDirectory();
+	    if (fileName == null)
+	        fileName = getDefaultFileName();
+	    
+	    if (!saveDirectory.isDirectory()) {
+	        if (saveDirectory.exists())
+	            throw new SaveLocationException(SaveLocationException.NOT_A_DIRECTORY, saveDirectory);
+	        throw new SaveLocationException(SaveLocationException.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
+	    }
+	    
+	    File candidateFile = new File(saveDirectory, fileName);
+	    try {
+	        if (!FileUtils.isReallyParent(saveDirectory, candidateFile))
+	            throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, candidateFile);
+	    } catch (IOException e) {
+	        throw new SaveLocationException(SaveLocationException.FILESYSTEM_ERROR, candidateFile);
+	    }
+		
+	    if (! FileUtils.setWriteable(saveDirectory))    
+	        throw new SaveLocationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE,saveDirectory);
+		
+	    if (candidateFile.exists()) {
+	        if (!candidateFile.isFile())
+	            throw new SaveLocationException(SaveLocationException.FILE_NOT_REGULAR, candidateFile);
+	        if (!overwrite)
+	            throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, candidateFile);
+	    }
+		
+		// check if another existing download is being saved to this download
+		// we ignore the overwrite flag on purpose in this case
+		if (RouterService.getDownloadManager().isSaveLocationTaken(candidateFile)) {
+			throw new SaveLocationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
+		}
+	     
+	    // Passed sanity checks, so save file
+	    synchronized (this) {
+	        if (!isRelocatable())
+	            throw new SaveLocationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
+	        propertiesMap.put(SAVE_FILE, candidateFile);
+	    }
+	}
+	
+    /**
+	 * Returns the value for the key {@link #DEFAULT_FILENAME} from
+	 * the properties map.
+	 * <p>
+	 * Subclasses should put the name into the map or overriede this
+	 * method.
+	 */
+    protected synchronized String getDefaultFileName() {       
+        String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
+         if (fileName == null) {
+             Assert.that(false,"defaultFileName is null, "+
+                         "subclass may have not overridden getDefaultFileName");
+         }
+		 return CommonUtils.convertFileName(fileName);
+    }
 }

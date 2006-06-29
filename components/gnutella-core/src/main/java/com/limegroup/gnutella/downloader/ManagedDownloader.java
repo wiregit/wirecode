@@ -463,16 +463,6 @@ implements MeshHandler, AltLocListener {
      */
     private long lastQuerySent;
     
-    protected Map propertiesMap;
-    
-    protected static final String DEFAULT_FILENAME = "defaultFileName";
-    protected static final String FILE_SIZE = "fileSize";
-    /**
-	 * The key under which the saveFile File is stored in the attribute map
-     * used in serializing and deserializing ManagedDownloaders. 
-	 */
-    protected static final String SAVE_FILE = "saveFile";
-    
     /** The key under which the URN is stored in the attribute map */
     protected static final String SHA1_URN = "sha1Urn";
 
@@ -1209,13 +1199,13 @@ implements MeshHandler, AltLocListener {
 	 * @param fileSize, can be 0
 	 * @return
 	 */
-	public boolean conflicts(URN urn, File fileName, int fileSize) {
+	public boolean conflicts(URN urn, int fileSize, File... fileName) {
 		if (urn != null && downloadSHA1 != null) {
 			return urn.equals(downloadSHA1);
 		}
 		if (fileSize > 0) {
 			try {
-				File file = incompleteFileManager.getFile(fileName.getName(), null, fileSize);
+				File file = incompleteFileManager.getFile(fileName[0].getName(), null, fileSize);
 				return conflictsWithIncompleteFile(file);
 			} catch (IOException e) {
 			}
@@ -1896,59 +1886,6 @@ implements MeshHandler, AltLocListener {
         return 0;//Nothing to preview!
     }
 
-    /**
-	 * Sets the file name and directory where the download will be saved once
-	 * complete.
-     * 
-     * @param overwrite true if overwriting an existing file is allowed
-     * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
-     */
-    public void setSaveFile(File saveDirectory, String fileName,
-							boolean overwrite) 
-		throws SaveLocationException {
-        if (saveDirectory == null)
-            saveDirectory = SharingSettings.getSaveDirectory();
-        if (fileName == null)
-            fileName = getDefaultFileName();
-        
-        if (!saveDirectory.isDirectory()) {
-            if (saveDirectory.exists())
-                throw new SaveLocationException(SaveLocationException.NOT_A_DIRECTORY, saveDirectory);
-            throw new SaveLocationException(SaveLocationException.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
-        }
-        
-        File candidateFile = new File(saveDirectory, fileName);
-        try {
-            if (!FileUtils.isReallyParent(saveDirectory, candidateFile))
-                throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, candidateFile);
-        } catch (IOException e) {
-            throw new SaveLocationException(SaveLocationException.FILESYSTEM_ERROR, candidateFile);
-        }
-		
-        if (! FileUtils.setWriteable(saveDirectory))    
-            throw new SaveLocationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE,saveDirectory);
-		
-        if (candidateFile.exists()) {
-            if (!candidateFile.isFile())
-                throw new SaveLocationException(SaveLocationException.FILE_NOT_REGULAR, candidateFile);
-            if (!overwrite)
-                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, candidateFile);
-        }
-		
-		// check if another existing download is being saved to this download
-		// we ignore the overwrite flag on purpose in this case
-		if (RouterService.getDownloadManager().isSaveLocationTaken(candidateFile)) {
-			throw new SaveLocationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
-		}
-         
-        // Passed sanity checks, so save file
-        synchronized (this) {
-            if (!isRelocatable())
-                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
-            propertiesMap.put(SAVE_FILE, candidateFile);
-        }
-    }
-   
     /** 
      * This method is used to determine where the file will be saved once downloaded.
      *
@@ -2768,23 +2705,6 @@ implements MeshHandler, AltLocListener {
             return Integer.MAX_VALUE;
         }
     }
-
-    /**
-	 * Returns the value for the key {@link #DEFAULT_FILENAME} from
-	 * the properties map.
-	 * <p>
-	 * Subclasses should put the name into the map or overriede this
-	 * method.
-	 */
-    protected synchronized String getDefaultFileName() {       
-        String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
-         if (fileName == null) {
-             Assert.that(false,"defaultFileName is null, "+
-                         "subclass may have not overridden getDefaultFileName");
-         }
-		 return CommonUtils.convertFileName(fileName);
-    }
-
 
 	/**
      *  Certain subclasses would like to know whether we have at least one good

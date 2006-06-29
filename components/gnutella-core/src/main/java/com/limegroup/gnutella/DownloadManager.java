@@ -665,7 +665,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         if (fileName == null) {
         	fileName = magnet.getFileNameForSaving();
         }
-        if (conflicts(magnet.getSHA1Urn(), new File(saveDir,fileName), 0)) {
+        if (conflicts(magnet.getSHA1Urn(), 0, new File(saveDir,fileName))) {
 			throw new SaveLocationException
 			(SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
@@ -783,7 +783,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         File dir = FileManager.PREFERENCE_SHARE;
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
-        if(conflicts(info.getUpdateURN(), f, (int)info.getSize()))
+        if(conflicts(info.getUpdateURN(), (int)info.getSize(), f))
 			throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge();
@@ -872,13 +872,13 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 	 * @param rfds
 	 * @return
 	 */
-	private boolean conflicts(RemoteFileDesc[] rfds, File fileName) {
+	private boolean conflicts(RemoteFileDesc[] rfds, File... fileName) {
 		URN urn = null;
 		for (int i = 0; i < rfds.length && urn == null; i++) {
 			urn = rfds[0].getSHA1Urn();
 		}
 		
-		return conflicts(urn, fileName, rfds[0].getSize());
+		return conflicts(urn, rfds[0].getSize(), fileName);
 	}
 	
 	/**
@@ -887,7 +887,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 	 * and the fileSize is performed
 	 * @return
 	 */
-	public boolean conflicts(URN urn, File fileName, int fileSize) {
+	public boolean conflicts(URN urn, int fileSize, File... fileName) {
 		
 		if (urn == null && fileSize == 0) {
 			return false;
@@ -895,7 +895,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 		
 		synchronized (this) {
 			for (AbstractDownloader md : activeAndWaiting) {
-				if (md.conflicts(urn, fileName, fileSize)) 
+				if (md.conflicts(urn, fileSize, fileName)) 
 					return true;
 			}
 			return false;

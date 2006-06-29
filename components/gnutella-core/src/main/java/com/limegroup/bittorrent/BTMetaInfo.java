@@ -88,12 +88,6 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private Collection<File> _folders = new HashSet<File>();
 	
-	/**
-	 * An iterable for the files and folders.
-	 */
-	private MultiIterable<File> filesAndFolders = 
-		new MultiIterable<File>(_files,_folders);
-
 	/*
 	 * A <tt> File </tt> pointing to the file/directory where the incomplete
 	 * torrent is written.
@@ -163,8 +157,8 @@ public class BTMetaInfo implements Serializable {
 		return _files;
 	}
 	
-	public Iterable<File> getFilesAndFolders() {
-		return filesAndFolders;
+	boolean conflicts(File f) {// TODO: this is wrong - compare vs. complete folder
+		return _files.contains(f) || _folders.contains(f);
 	}
 
 	/**

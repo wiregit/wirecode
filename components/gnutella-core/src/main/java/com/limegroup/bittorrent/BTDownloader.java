@@ -48,8 +48,10 @@ implements TorrentLifecycleListener {
 	
 	public BTDownloader(BTMetaInfo info) {
 		_info = info;
+		propertiesMap.put(METAINFO, info);
+		propertiesMap.put(DEFAULT_FILENAME, info.getName());
 	}
-
+	
 	/**
 	 * Stops a torrent download.  If the torrent is in
 	 * seeding state, it does nothing.
@@ -333,16 +335,17 @@ implements TorrentLifecycleListener {
 	private void writeObject(ObjectOutputStream out) 
 	throws IOException {
 		Map<String, Serializable> m = new HashMap<String, Serializable>();
-		m.put(ATTRIBUTES, (Serializable)attributes);
-		m.put(METAINFO, _info);
+		synchronized(this) {
+			m.putAll(propertiesMap);
+		}
 		out.writeObject(m);
 	}
 	
 	private void readObject(ObjectInputStream in)
 	throws IOException, ClassNotFoundException {
-		Map<String, Serializable> m = (Map<String, Serializable>)in.readObject();
-		attributes = (Map)m.get(ATTRIBUTES);
-		_info = (BTMetaInfo)m.get(METAINFO);
+		propertiesMap = (Map<String, Serializable>)in.readObject();
+		attributes = (Map)propertiesMap.get(ATTRIBUTES);
+		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
 		if (attributes == null || _info == null)
 			throw new IOException("invalid serailized data");
 		
@@ -381,8 +384,12 @@ implements TorrentLifecycleListener {
 		return !isResumable();
 	}
 	
-	public boolean conflicts(URN urn, File fileName, int fileSize) {
-		return false; // TODO: implement
+	public boolean conflicts(URN urn, int fileSize, File... fileName) {
+		for (File f : fileName) {
+			if (_info.conflicts(f))
+				return true;
+		}
+		return false;
 	}
 
 	public boolean conflictsWithIncompleteFile(File incomplete) {
