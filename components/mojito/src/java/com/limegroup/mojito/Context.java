@@ -441,6 +441,7 @@ public class Context {
         
         this.localAddress = localAddress;
         localNode.setSocketAddress(localAddress);
+        localNode.nextInstanceID();
         
         messageDispatcher.bind(localAddress);
     }

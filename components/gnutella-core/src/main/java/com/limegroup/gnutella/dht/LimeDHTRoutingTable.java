@@ -75,7 +75,6 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
             synchronized (this) {
                 leafDHTNodes.put(new IpPortImpl(host), node.getNodeID());
                 
-                node.setState(State.ALIVE);
                 node.setTimeStamp(Long.MAX_VALUE);
                 add(node);
             }

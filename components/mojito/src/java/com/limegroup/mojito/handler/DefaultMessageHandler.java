@@ -100,22 +100,20 @@ public class DefaultMessageHandler extends MessageHandler
         }
         
         RouteTable routeTable = context.getRouteTable();
-        boolean doStoreForward = false;
         
         // Only do store forward if it is a new node in our routing table 
         // (we are (re)connecting to the network) or a node that is reconnecting
         Contact existing = routeTable.get(node.getNodeID());
-        if (existing == null || existing.getInstanceID() != node.getInstanceID()) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
-            }
-            doStoreForward = true;
-        }
         
         //add node to the routing table -- update timestamp and info if needed
         routeTable.add(node);
 
-        if (doStoreForward) {
+        if (existing == null || existing.getInstanceID() != node.getInstanceID()) {
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
+            }
+            
             forward(node, message);
         }
     }

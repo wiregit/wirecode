@@ -28,6 +28,9 @@ import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.ContactUtils;
 
+/**
+ * 
+ */
 public class ContactNode implements Contact, Serializable {
     
     private static final long serialVersionUID = 833079992601013124L;
@@ -126,18 +129,16 @@ public class ContactNode implements Contact, Serializable {
         return instanceId;
     }
     
+    public void nextInstanceID() {
+        this.instanceId = (instanceId + 1) % 0xFF;
+    }
+
     public SocketAddress getSocketAddress() {
         return address;
     }
     
     public void setSocketAddress(SocketAddress address) {
         this.address = address;
-        
-        this.instanceId = (instanceId + 1) % 0xFF;
-    }
-    
-    public void setInstanceID(int instanceId) {
-        this.instanceId = instanceId;
     }
 
     public long getRoundTripTime() {
