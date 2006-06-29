@@ -174,6 +174,11 @@ public interface Downloader extends BandwidthTracker {
 	 *  <tt>Downloader</tt>, <tt>false</tt> otherwise
 	 */
 	public boolean hasChatEnabledHost();
+	
+	/**
+	 * @return if this downloader can be launched.
+	 */
+	public boolean isLaunchable();
 
     /**
      * either treats a corrupt file as normal file and saves it, or 

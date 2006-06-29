@@ -81,6 +81,10 @@ implements TorrentLifecycleListener {
 		return isResumable() || _torrent.getState() == ManagedTorrent.QUEUED;
 	}
 	
+	public boolean isLaunchable() {
+		return _info.getFiles().size() == 1 && _torrent.isComplete();
+	}
+	
 	public boolean isResumable() {
 		switch(_torrent.getState()) {
 		case ManagedTorrent.PAUSED:
@@ -102,10 +106,8 @@ implements TorrentLifecycleListener {
 	}
 
 	public File getDownloadFragment() {
-		// previewing torrents is not so simple, since we are downloading
-		// chunks in random order
-		if (!_torrent.isComplete())
-			return null;
+		if (!isLaunchable())
+			throw new IllegalStateException("can't preview this torrent");
 		return getFile();
 	}
 

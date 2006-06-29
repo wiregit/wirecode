@@ -639,6 +639,11 @@ public class ManagedTorrent {
 				// close all seed connections
 				for (BTConnection seed : seeds)
 					seed.close();
+				
+				// clear the state as we no longer need it
+				// (until source exchange is implemented)
+				_peers.clear();
+				_badPeers.clear();
 			}
 		};
 		networkInvoker.invokeLater(r);

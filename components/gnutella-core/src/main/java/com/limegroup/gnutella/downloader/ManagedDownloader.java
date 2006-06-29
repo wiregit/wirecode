@@ -1609,6 +1609,10 @@ implements MeshHandler, AltLocListener {
     	return isInactive() && state != QUEUED;
     }
     
+    public boolean isLaunchable() {
+    	return getAmountRead() > 0;
+    }
+    
     /**
      * Stops this download.
      */
