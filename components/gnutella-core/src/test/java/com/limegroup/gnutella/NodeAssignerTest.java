@@ -165,10 +165,10 @@ public class NodeAssignerTest extends BaseTestCase {
         assertFalse("should be not be an ultrapeer", RouterService.isSupernode());
         PrivilegedAccessor.setValue(ROUTER_SERVICE.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         setUltrapeerCapabilities();
-        PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
-                new Long(System.currentTimeMillis() - 10800000));
         DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.setValue(1);
         ULTRAPEER.setAcceptsUltrapeers(true);
+        PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
+                new Long(System.currentTimeMillis() - 24*3600*1000));
         sleep(1000);
         assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
         assertFalse("should not be a DHT node", RouterService.isActiveDHTNode());
@@ -189,7 +189,7 @@ public class NodeAssignerTest extends BaseTestCase {
         PrivilegedAccessor.setValue(ROUTER_SERVICE.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.setValue(1);
         PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
-                new Long(System.currentTimeMillis() - 10800000));
+                new Long(System.currentTimeMillis() - 24*3600*1000));
         sleep(2000);
         assertFalse("should not be a DHT node", RouterService.isActiveDHTNode());
         assertTrue("should be an ultrapeer", RouterService.isSupernode());

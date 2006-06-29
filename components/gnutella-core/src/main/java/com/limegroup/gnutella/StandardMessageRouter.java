@@ -128,28 +128,39 @@ public class StandardMessageRouter extends MessageRouter {
             } catch(IOException tooBad) { }
         }
         
-        byte[] data = request.getSupportsCachedPongData();
-        Collection hosts = Collections.EMPTY_LIST;
-        int numHosts = ConnectionSettings.NUM_RETURN_PONGS.getValue();
-        //TODO: DHT IPP and regular IPP mutually exclusive? For now, DHTIPP gets preference
+        List dhthosts = Collections.EMPTY_LIST;
+        int maxHosts = ConnectionSettings.NUM_HOSTS_PONG.getValue();
+        
         if (request.requestsDHTIPP() && RouterService.isDHTNode()) {
-            hosts = RouterService.getLimeDHTManager().getDHTNodes(numHosts);
-        } else if(data != null){
+            dhthosts = RouterService.getLimeDHTManager().getDHTNodes(maxHosts);
+        }
+        
+        int numDHTHosts = dhthosts.size();
+        
+        byte[] data = request.getSupportsCachedPongData();
+        Collection gnuthosts = Collections.EMPTY_LIST;
+        if(data != null){
             boolean isUltrapeer =
                 data.length >= 1 && 
                 (data[0] & PingRequest.SCP_ULTRAPEER_OR_LEAF_MASK) ==
                     PingRequest.SCP_ULTRAPEER;
-            hosts = RouterService.getPreferencedHosts(
+                
+            int dhtFraction = ConnectionSettings.DHT_TO_GNUT_HOSTS_PONG.getValue();
+            int maxDHTHosts = Math.round(((float)dhtFraction/100)*maxHosts);
+            
+            gnuthosts = RouterService.getPreferencedHosts(
                         isUltrapeer, 
                         request.getLocale(),
-                        numHosts);
-        }
+                        maxHosts - Math.min(numDHTHosts, maxDHTHosts));
+            //remove extra dht hosts
+            dhthosts = dhthosts.subList(0, Math.min(numDHTHosts,maxHosts - gnuthosts.size()));
+        } 
         
         PingReply reply;
     	if (ipport != null)
-    	    reply = PingReply.create(request.getGUID(), (byte)1, ipport, hosts);
+    	    reply = PingReply.create(request.getGUID(), (byte)1, ipport, gnuthosts, dhthosts);
     	else
-    	    reply = PingReply.create(request.getGUID(), (byte)1, hosts);
+    	    reply = PingReply.create(request.getGUID(), (byte)1, gnuthosts, dhthosts);
         
         sendPingReply(reply, handler);
         

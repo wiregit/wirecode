@@ -230,10 +230,10 @@ public class LimeDHTManager implements LifecycleListener {
                 }
                 public void phaseTwoComplete(boolean foundNodes, long time) {
                     //Notify our connections that we are now a full DHT node 
-                    CapabilitiesVM.reconstructInstance();
-                    RouterService.getConnectionManager().sendUpdatedCapabilities();
+                    sendUpdatedCapabilities();
                 }
             });
+            
         } catch (IOException err) {
             LOG.error("IOException", err);
         }
@@ -256,8 +256,7 @@ public class LimeDHTManager implements LifecycleListener {
         waiting = false;
         
         //Notify our connections that we disconnected
-        CapabilitiesVM.reconstructInstance();
-        RouterService.getConnectionManager().sendUpdatedCapabilities();
+        sendUpdatedCapabilities();
         
         try {
             if(DHTSettings.PERSIST_DHT.getValue()) {
@@ -274,6 +273,11 @@ public class LimeDHTManager implements LifecycleListener {
         if(!RouterService.isConnected()) return;
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
         RouterService.getHostCatcher().sendMessage(m, new DHTNodesRequestListener(), new UDPPingCanceller());
+    }
+    
+    private void sendUpdatedCapabilities() {
+        CapabilitiesVM.reconstructInstance();
+        RouterService.getConnectionManager().sendUpdatedCapabilities();
     }
     
     /**
@@ -403,7 +407,7 @@ public class LimeDHTManager implements LifecycleListener {
         return waiting;
     }
     
-    public Collection<IpPort> getDHTNodes(int numNodes){
+    public List<IpPort> getDHTNodes(int numNodes){
         if(!running) {
             return Collections.emptyList();
         }

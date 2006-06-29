@@ -375,9 +375,9 @@ public class NodeAssigner {
             (ApplicationSettings.AVERAGE_UPTIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() &&
              _currentUptime >= DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
                      
-        //don't give capability to ultrapeers
-        if((RouterService.isSupernode() || _willTryToBeUltrapeer) && 
-                DHTSettings.EXCLUDE_ULTRAPEERS.getValue()){
+        //don't give active capability to ultrapeers
+        if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() &&
+                (RouterService.isSupernode() || _willTryToBeUltrapeer)){
             isActiveDHTCapable = false;
         }
                      
@@ -396,8 +396,11 @@ public class NodeAssigner {
                     }
                 };
             ThreadFactory.startThread(dhtInitializer, "dhtInitializeThread");
-            
-        } else if(!isActiveDHTCapable && RouterService.isActiveDHTNode()) { //for now, disconnect node as soon as not anymore DHT capable
+            return;
+        } 
+
+        // for now, disconnect node as soon as not anymore DHT capable
+        if(RouterService.isActiveDHTNode()) { 
             RouterService.shutdownDHT();
         }
     }

@@ -618,8 +618,8 @@ public final class MessageRouterTest extends BaseTestCase {
         // and add a lot again, make sure we only get as many we reqeust.
         addFreeUltrapeerSlotHosts(20);
         requested = 15;
-        int original = ConnectionSettings.NUM_RETURN_PONGS.getValue();
-        ConnectionSettings.NUM_RETURN_PONGS.setValue(requested);
+        int original = ConnectionSettings.NUM_HOSTS_PONG.getValue();
+        ConnectionSettings.NUM_HOSTS_PONG.setValue(requested);
         hosts = RouterService.getPreferencedHosts(true, null,requested);
         assertEquals(hosts.toString(), requested, hosts.size());
         pr = PingRequest.createUDPPing();
@@ -630,7 +630,7 @@ public final class MessageRouterTest extends BaseTestCase {
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
         assertEquals(requested, reply.getPackedIPPorts().size());
-        ConnectionSettings.NUM_RETURN_PONGS.setValue(original);
+        ConnectionSettings.NUM_HOSTS_PONG.setValue(original);
         
         // Now try again, without an SCP request, and make sure we got none.
         pr = new PingRequest((byte)1);
@@ -657,9 +657,7 @@ public final class MessageRouterTest extends BaseTestCase {
         if(mojitoFile.exists()) {
             mojitoFile.delete();
         }
-        MojitoDHT dht = new MojitoDHT("test DHT");
-        dht.bind(new InetSocketAddress("localhost",3000));
-        dht.start();
+        
         //now start the router service
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
@@ -668,7 +666,15 @@ public final class MessageRouterTest extends BaseTestCase {
         RouterService.preGuiInit();
         rs.start();
         RouterService.initializeDHT(true);
-        RouterService.getLimeDHTManager().addLeafDHTNode("localhost", 3000);
+        //start a few dhts and add them to our rt
+        MojitoDHT dht;
+        for(int i = 0; i < 20; i++) {
+            dht = new MojitoDHT("test DHT");
+            int port = 3000+i;
+            dht.bind(new InetSocketAddress("localhost",port));
+            dht.start();
+            RouterService.getLimeDHTManager().addLeafDHTNode("localhost", port);
+        }
         Thread.sleep(300);
         //create the request
         PingRequest pr = PingRequest.createUDPingWithDHTIPPRequest();
@@ -681,12 +687,13 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals(1, stub.sentPongs.size());
         PingReply reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
-        assertEquals(1, reply.getPackedIPPorts().size());
-        IpPort ipp = (IpPort) reply.getPackedIPPorts().get(0);
-        assertEquals(3000, ipp.getPort());
+        assertEquals(ConnectionSettings.NUM_HOSTS_PONG.getValue(), reply.getPackedDHTIPPorts().size());
+        IpPort ipp = (IpPort) reply.getPackedDHTIPPorts().get(1);
+        assertEquals(3019, ipp.getPort());
         
         //try requesting other IPP too -- this should not change anything
         GUID guid = new GUID();
+        RouterService.getHostCatcher().clear();
         List<NameValue> l = new LinkedList<NameValue>();
         l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[] {PingRequest.SCP_LEAF}));
         l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
@@ -700,9 +707,34 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
-        assertEquals(1, reply.getPackedIPPorts().size());
-        ipp = (IpPort) reply.getPackedIPPorts().get(0);
-        assertEquals(3000, ipp.getPort());
+        assertEquals(ConnectionSettings.NUM_HOSTS_PONG.getValue(), reply.getPackedDHTIPPorts().size());
+        assertEquals(0, reply.getPackedIPPorts().size());
+        ipp = (IpPort) reply.getPackedDHTIPPorts().get(1);
+        assertEquals(3019, ipp.getPort());
+        
+        //now try adding some gnutella IPPs
+        ConnectionSettings.DHT_TO_GNUT_HOSTS_PONG.setValue(60);
+        addFreeLeafSlotHosts(20);
+        guid = new GUID();
+        l = new LinkedList<NameValue>();
+        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[] {PingRequest.SCP_LEAF}));
+        l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
+        args = new Object[] {guid.bytes(), (byte)1, l};
+        types = new Class[] {byte[].class, byte.class, List.class}; 
+        pr = (PingRequest) PrivilegedAccessor.invokeConstructor(PingRequest.class, args, types);
+        assertTrue(pr.requestsDHTIPP());
+        assertTrue(pr.supportsCachedPongs());
+        assertFalse(pr.requestsIP());
+        stub.respondToUDPPingRequest(pr, addr, null);
+        assertEquals(1, stub.sentPongs.size());
+        reply = (PingReply)stub.sentPongs.get(0);
+        stub.sentPongs.clear();
+        assertEquals(ConnectionSettings.NUM_HOSTS_PONG.getValue(), 
+                     reply.getPackedDHTIPPorts().size() + reply.getPackedIPPorts().size());
+        assertEquals(4, reply.getPackedIPPorts().size());
+        assertEquals(6, reply.getPackedDHTIPPorts().size());
+        ipp = (IpPort) reply.getPackedDHTIPPorts().get(1);
+        assertEquals(3019, ipp.getPort());
     }
     
     public void testHeadPingForwarding() throws Exception {
