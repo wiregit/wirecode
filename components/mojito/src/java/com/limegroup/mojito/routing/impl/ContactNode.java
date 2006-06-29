@@ -26,6 +26,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
+import com.limegroup.mojito.util.ContactUtils;
 
 public class ContactNode implements Contact, Serializable {
     
@@ -274,26 +275,12 @@ public class ContactNode implements Contact, Serializable {
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(toString(getNodeID(), getSocketAddress()))
+        buffer.append(ContactUtils.toString(getNodeID(), getSocketAddress()))
             .append(", failures=").append(getFailureCount())
             .append(", instanceId=").append(getInstanceID())
             .append(", state=").append(getState())
             .append(", firewalled=").append(isFirewalled());
         
         return buffer.toString();
-    }
-
-    public static String toString(KUID nodeId, SocketAddress address) {
-        if (nodeId != null) {
-            if (address != null) {
-                return nodeId + " (" + address + ")";
-            } else {
-                return nodeId.toString();
-            }
-        } else if (address != null) {
-            return address.toString();
-        } else {
-            return "null";
-        }
     }
 }

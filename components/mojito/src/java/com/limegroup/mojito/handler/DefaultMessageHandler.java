@@ -41,10 +41,10 @@ import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
+import com.limegroup.mojito.util.ContactUtils;
 
 
 /**
@@ -215,7 +215,7 @@ public class DefaultMessageHandler extends MessageHandler
         public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
             
             if (LOG.isErrorEnabled()) {
-                LOG.error("Getting the QueryKey from " + ContactNode.toString(nodeId, dst) + " failed", e);
+                LOG.error("Getting the QueryKey from " + ContactUtils.toString(nodeId, dst) + " failed", e);
             }
             
             fireTimeout(nodeId, dst, message, -1L);

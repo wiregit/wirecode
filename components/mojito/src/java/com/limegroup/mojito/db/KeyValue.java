@@ -30,8 +30,8 @@ import java.util.Map;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * The KeyValue class is essentially a <Key, Value> Tuple with
@@ -346,9 +346,9 @@ public class KeyValue implements Map.Entry<KUID, byte[]>, Serializable {
     public String toString() {
         if (!isEmptyValue()) {
             return key.toString() + " = " + new String(value) 
-                + ", originator=" + ContactNode.toString(nodeId, address);
+                + ", originator=" + ContactUtils.toString(nodeId, address);
         } else {
-            return key.toString() + ", originator=" + ContactNode.toString(nodeId, address) + " (REMOVE)";
+            return key.toString() + ", originator=" + ContactUtils.toString(nodeId, address) + " (REMOVE)";
         }
     }
 }

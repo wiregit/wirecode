@@ -278,15 +278,6 @@ class BucketNode implements Bucket {
             }
         }
         
-        /*for (Node node : cache()) {
-            KUID nodeId = node.getNodeID();
-            if (!nodeId.isBitSet(depth)) {
-                left.addCache(node);
-            } else {
-                right.addCache(node);
-            }
-        }*/
-        
         assert ((left.size() + right.size()) == size());
         return Arrays.asList(left, right);
     }
