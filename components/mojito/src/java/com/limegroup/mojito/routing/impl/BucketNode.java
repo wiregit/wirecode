@@ -98,18 +98,13 @@ class BucketNode implements Bucket {
         assert (existing == null);
     }
     
-    public Contact updateContact(Contact existing, Contact node) {
-        checkNodeID(existing);
+    public Contact updateContact(Contact node) {
         checkNodeID(node);
         
-        KUID existingId = existing.getNodeID();
         KUID nodeId = node.getNodeID();
-        
-        assert (existingId.equals(nodeId));
-        
-        if (containsLiveContact(existingId)) {
+        if (containsLiveContact(nodeId)) {
             return nodeTrie.put(nodeId, node);
-        } else if (containsCachedContact(existingId)) {
+        } else if (containsCachedContact(nodeId)) {
             return cache.put(nodeId, node);
         }
         

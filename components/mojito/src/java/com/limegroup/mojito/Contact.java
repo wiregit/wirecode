@@ -160,5 +160,5 @@ public interface Contact {
     /**
      * 
      */
-    public void set(Contact node);
+    public Contact mergeContacts(Contact node);
 }

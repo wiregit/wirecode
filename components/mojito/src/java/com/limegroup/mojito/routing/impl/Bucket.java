@@ -63,11 +63,10 @@ public interface Bucket {
     public void addCachedContact(Contact node);
 
     /**
-     * @param existing TODO
      * @return TODO
      * 
      */
-    public Contact updateContact(Contact existing, Contact node);
+    public Contact updateContact(Contact node);
     
     /**
      * Returns the Contact that has the provided KUID.

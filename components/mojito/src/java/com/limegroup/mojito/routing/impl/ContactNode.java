@@ -34,11 +34,11 @@ public class ContactNode implements Contact, Serializable {
 
     private static final int FIREWALLED = 0x01;
     
+    private KUID nodeId;
+    
     private int vendor;
     
     private int version;
-    
-    private KUID nodeId;
     
     private int instanceId;
     
@@ -55,6 +55,10 @@ public class ContactNode implements Contact, Serializable {
     private transient int failures = 0;
     
     private transient State state = State.UNKNOWN;
+    
+    private ContactNode(KUID nodeId) {
+        this.nodeId = nodeId;
+    }
     
     public ContactNode(int vendor, int version, KUID nodeId, 
             SocketAddress address, State state) {
@@ -90,29 +94,38 @@ public class ContactNode implements Contact, Serializable {
         }
     }
     
-    public void set(Contact node) {
+    public Contact mergeContacts(Contact node) {
         if (!nodeId.equals(node.getNodeID())) {
             throw new IllegalArgumentException("Node IDs do not match");
         }
         
-        this.vendor = node.getVendor();
-        this.version = node.getVersion();
-        this.address = node.getSocketAddress();
-        this.state = State.UNKNOWN;
+        ContactNode contact = new ContactNode(nodeId);
+        contact.vendor = node.getVendor();
+        contact.version = node.getVersion();
+        contact.address = node.getSocketAddress();
+        contact.instanceId = node.getInstanceID();
+        
+        if (node.getRoundTripTime() > 0L) {
+            contact.rtt = node.getRoundTripTime();
+        } else {
+            contact.rtt = getRoundTripTime();
+        }
         
         if (node.isAlive()) {
-            this.state = State.ALIVE;
-            
-            this.instanceId = node.getInstanceID();
-            
-            if (node.getRoundTripTime() > 0L) {
-                this.rtt = node.getRoundTripTime();
-            }
-            
-            this.timeStamp = System.currentTimeMillis();
-            this.lastDeadOrAliveTime = timeStamp;
-            this.failures = 0;
+            contact.state = State.ALIVE;
+            contact.timeStamp = node.getTimeStamp();
+            contact.lastDeadOrAliveTime = node.getLastDeadOrAliveTime();
+            contact.failures = 0;
+            contact.flags = node.getFlags();
+        } else {
+            contact.state = State.UNKNOWN;
+            contact.timeStamp = getTimeStamp();
+            contact.lastDeadOrAliveTime = getLastDeadOrAliveTime();
+            contact.failures = getFailures();
+            contact.flags = getFlags();
         }
+        
+        return contact;
     }
     
     public int getFlags() {
@@ -224,7 +237,7 @@ public class ContactNode implements Contact, Serializable {
                     < RouteTableSettings.MIN_RECONNECTION_TIME.getValue());
     }
     
-    public int getFailureCount() {
+    public int getFailures() {
         return failures;
     }
     
@@ -276,7 +289,7 @@ public class ContactNode implements Contact, Serializable {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(ContactUtils.toString(getNodeID(), getSocketAddress()))
-            .append(", failures=").append(getFailureCount())
+            .append(", failures=").append(getFailures())
             .append(", instanceId=").append(getInstanceID())
             .append(", state=").append(getState())
             .append(", firewalled=").append(isFirewalled());

@@ -113,9 +113,16 @@ public class RouteTableImpl implements RouteTable {
                 || existing.equals(node) // <- checks nodeId + address!
                 || ContactUtils.areLocalContacts(existing, node)) {
             
-            existing.set(node); // TODO clone!
-            //bucket.updateContact(existing, node);
-            if (node.isAlive()) {
+            
+            /*
+             * See JIRA issue MOJITO-54
+             */
+            
+            Contact contact = existing.mergeContacts(node);
+            Contact replaced = bucket.updateContact(contact);
+            assert (replaced == existing);
+            
+            if (contact.isAlive()) {
                 touchBucket(bucket);
             }
             
@@ -147,8 +154,14 @@ public class RouteTableImpl implements RouteTable {
                     Bucket bucket = bucketTrie.select(nodeId);
                     Contact current = bucket.get(nodeId);
                     if (current != null && current.equals(existing)) {
-                        current.set(node); // TODO clone!
-                        //bucket.updateContact(current, node);
+                        
+                        /*
+                         * See JIRA issue MOJITO-54
+                         */
+                        
+                        Contact contact = current.mergeContacts(node);
+                        Contact replaced = bucket.updateContact(contact);
+                        assert (replaced == current);
                         
                         // If the Node is in the Cache then ping the least recently
                         // seen live Node which might promote the new Node to a
