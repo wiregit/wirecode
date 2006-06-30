@@ -344,7 +344,10 @@ public class UpdateHandler {
      * Tries to download updates.
      * @return whether we had any non-hopeless updates.
      */
-    private void downloadUpdates(List<? extends DownloadInformation> toDownload, ReplyHandler source) {
+    // TODO: first paramater should really be '? extends DownloadInformation',
+    //       but Eclipse 3.1 freaks out on the '= emptyList()' in that case.
+    //       When 3.2 is released, use that.
+    private void downloadUpdates(List<DownloadInformation> toDownload, ReplyHandler source) {
         if (toDownload == null)
             toDownload = Collections.emptyList();
         
