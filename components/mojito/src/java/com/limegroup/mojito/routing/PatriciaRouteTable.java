@@ -548,6 +548,11 @@ public class PatriciaRouteTable implements RouteTable {
         if (nodeId == null) {
             return;
         }
+        
+        // this should never happen -- who knows?!!
+        if(context.isLocalNodeID(nodeId)) {
+            return;
+        }
 
         boolean fromCache = false;
         BucketNode bucket = bucketsTrie.select(nodeId);
@@ -580,13 +585,6 @@ public class PatriciaRouteTable implements RouteTable {
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Handling failure for nodeId: "+nodeId);
-        }
-        
-        //this should never happen -- who knows?!!
-        if(context.isLocalNodeID(nodeId)) {
-            if(LOG.isErrorEnabled()) {
-                LOG.error("Local node marked as dead!");
-            }
         }
         
         if (!fromCache) {
