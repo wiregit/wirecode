@@ -125,7 +125,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     protected boolean enqueueOutput(Tag tag) {
         InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
         ByteBuffer data = tag.getData();
-        UDPService.instance().send(data, dst.getAddress(), dst.getPort(), false);
+        UDPService.instance().send(data, dst.getAddress(), dst.getPort(), true);
         registerInput(tag);
         return true;
     }
