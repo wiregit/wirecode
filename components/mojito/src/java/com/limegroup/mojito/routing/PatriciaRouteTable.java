@@ -540,7 +540,7 @@ public class PatriciaRouteTable implements RouteTable {
      * and replace with a node from the replacement cache.
      * 
      */
-    public synchronized void handleFailure(KUID nodeId) {
+    public synchronized void handleFailure(KUID nodeId, SocketAddress address) {
         
         // NodeID might be null if we sent a ping to
         // an unknown Node (i.e. we knew only the
@@ -549,6 +549,27 @@ public class PatriciaRouteTable implements RouteTable {
             return;
         }
 
+        boolean fromCache = false;
+        BucketNode bucket = bucketsTrie.select(nodeId);
+        ContactNode node = nodesTrie.get(nodeId);
+        if (node == null) {
+            node = bucket.getReplacementNode(nodeId);
+            fromCache = true;
+        }
+        
+        // The Node is not in our RoutingTable nor replacement cache
+        if (node == null) {
+            return;
+        }
+        
+        // Make sure the addresses are equal
+        if (!node.getSocketAddress().equals(address)) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(node + " address and " + address + " do not match");
+            }
+            return;
+        }
+        
         //ignore failure if we start getting to many disconnections in a row
         if (consecutiveFailures++ >= RouteTableSettings.MAX_CONSECUTIVE_FAILURES.getValue()) {
             if (LOG.isTraceEnabled()) {
@@ -568,32 +589,19 @@ public class PatriciaRouteTable implements RouteTable {
             }
         }
         
-        ContactNode node = nodesTrie.get(nodeId);
-        //get closest bucket
-        BucketNode bucket = bucketsTrie.select(nodeId);
-        if (node != null) {
-            //TODO: we delete dead contacts immediately for now!...maybe relax?
+        if (!fromCache) {
             if (handleNodeFailure(node)) {
                 removeNodeAndReplace(nodeId, bucket, true);
             }
-            /*
-            //only remove if node considered stale and the bucket is full and it's replacement cache is not empty
-            if(handleNodeFailure(node)
-                    && (bucket.getNodeCount() >= K) 
-                    && (bucket.getReplacementCacheSize() > 0)) {
-                
-                //remove node and replace with most recent alive one from cache 
-            */
         } else {
-            node = bucket.removeReplacementNode(nodeId);
-            if(node != null) {
-                if (!handleNodeFailure(node)) {
-                    bucket.addReplacementNode(node);
-                }
-                
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Removed node: "+node+" from replacement cache");
-                }
+            bucket.removeReplacementNode(nodeId);
+            
+            if (!handleNodeFailure(node)) {
+                bucket.addReplacementNode(node);
+            }
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Removed node: "+node+" from replacement cache");
             }
         }
     }

@@ -20,6 +20,7 @@
 package com.limegroup.mojito.routing;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.List;
 
 import com.limegroup.mojito.BucketNode;
@@ -107,7 +108,7 @@ public interface RouteTable {
      * Notifies the RoutingTable that the ContactNode with the provided
      * KUID has failed to a request
      */
-    public void handleFailure(KUID nodeId);
+    public void handleFailure(KUID nodeId, SocketAddress address);
     
     /**
      * Returns all ContactNodes as List

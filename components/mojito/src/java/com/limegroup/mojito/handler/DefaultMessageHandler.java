@@ -81,7 +81,7 @@ public class DefaultMessageHandler extends MessageHandler
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
-        context.getRouteTable().handleFailure(nodeId);
+        context.getRouteTable().handleFailure(nodeId, dst);
     }
 
     public void handleRequest(RequestMessage message) throws IOException {
