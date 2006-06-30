@@ -88,6 +88,9 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private Collection<File> _folders = new HashSet<File>();
 	
+	private Iterable<File> _filesAndFolders = 
+		new MultiIterable<File>(_files,_folders);
+	
 	/*
 	 * A <tt> File </tt> pointing to the file/directory where the incomplete
 	 * torrent is written.
@@ -163,6 +166,10 @@ public class BTMetaInfo implements Serializable {
 		return _files;
 	}
 	
+	public Iterable<File> getFilesAndFolders() {
+		return _filesAndFolders;
+	}
+	
 	boolean conflicts(File f) {
 		return _files.contains(f) || _folders.contains(f);
 	}
@@ -189,6 +196,7 @@ public class BTMetaInfo implements Serializable {
 	
 	void setCompleteFile(File f) {
 		updateReferences(f, _files);
+		updateFolderReferences(f);
 		_completeFile = f;
 	}
 	
@@ -462,8 +470,8 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * updates all reference in _files
-	 * 
+	 * Updates the files in the torrent to start at the 
+	 * new base path.
 	 * @param completeBase
 	 *            the top file in the torrent
 	 */
@@ -476,7 +484,20 @@ public class BTMetaInfo implements Serializable {
 					+ current.getPath().substring(offset));
 			l.set(i,updated);
 		}
-
+	}
+	
+	/**
+	 * Updates the files in the torrent to start at the 
+	 * new base path.
+	 */
+	private void updateFolderReferences(File completeBase) {
+		int offset = _completeFile.getAbsolutePath().length();
+		String newPath = completeBase.getAbsolutePath();
+		Collection<File> newFolders = new HashSet<File>(_folders.size());
+		for (File f: _folders) 
+			newFolders.add(new File(newPath + f.getPath().substring(offset)));
+		_folders.clear();
+		_folders.addAll(newFolders); // the reference is held in the MultiIterable
 	}
 
 	/**

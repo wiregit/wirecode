@@ -184,7 +184,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	        throw new SaveLocationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE,saveDirectory);
 		
 	    if (candidateFile.exists()) {
-	        if (!candidateFile.isFile())
+	        if (!candidateFile.isFile()) // TODO: how does this mix with torrents?
 	            throw new SaveLocationException(SaveLocationException.FILE_NOT_REGULAR, candidateFile);
 	        if (!overwrite)
 	            throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, candidateFile);

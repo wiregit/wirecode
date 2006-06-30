@@ -747,7 +747,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     }
     
     private Downloader resumeTorrentDownload(File torrentFolder) 
-    throws CantResumeException {
+    throws CantResumeException, SaveLocationException {
     	File infohash = null; 
     	for (File f : torrentFolder.listFiles()){
     		if (f.getName().startsWith(".dat")) {
@@ -829,11 +829,27 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     	}
     }
     
-    private Downloader downloadTorrent(BTMetaInfo info) {
-    	// TODO figure out the SaveLocation exception stuff
-    	for (Downloader current : activeAndWaiting) {
-    		if (info.getURN().equals(current.getSHA1Urn())) 
-    			return current; // eventually implement adding of trackers
+    private Downloader downloadTorrent(BTMetaInfo info) throws SaveLocationException {
+    	for (File f : info.getFiles()) {
+    		// its ok to download to an already existing directory so
+    		// we only check for files.
+    		if (RouterService.getFileManager().isFileShared(f))
+    			throw new SaveLocationException
+    			(SaveLocationException.FILE_ALREADY_EXISTS, f);
+    	}
+    	
+    	for (AbstractDownloader current : activeAndWaiting) {
+    		if (info.getURN().equals(current.getSHA1Urn())) {
+    			// this is the place to add new trackers eventually.
+    			throw new SaveLocationException
+    			(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, info.getBaseFile());
+    		}
+    		for (File f : info.getFilesAndFolders()) {
+    			if (current.conflictsSaveFile(f)) {
+    				throw new SaveLocationException
+    				(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, f);
+    			}
+    		}
     	}
     	AbstractDownloader ret = new BTDownloader(info);
     	initializeDownload(ret);

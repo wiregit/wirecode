@@ -1567,7 +1567,7 @@ public class RouterService {
 	 *             in case there was a problem reading the file 
 	 */
 	public static Downloader downloadTorrent(File torrentFile)
-			throws IOException {
+			throws SaveLocationException, IOException {
 		return downloader.downloadTorrent(torrentFile);
 	}
     
@@ -1580,7 +1580,7 @@ public class RouterService {
 	 *             in case there was a problem downloading the .torrent
 	 */
 	public static Downloader downloadTorrent(URL url)
-			throws IOException {
+			throws SaveLocationException, IOException {
 		return downloader.downloadTorrent(url);
 	}
 	
