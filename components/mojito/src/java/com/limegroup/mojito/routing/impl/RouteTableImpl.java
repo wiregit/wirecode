@@ -271,7 +271,7 @@ public class RouteTableImpl implements RouteTable {
         ping(bucket.getLeastRecentlySeenLiveContact());
     }
     
-    public synchronized void handleFailure(KUID nodeId) {
+    public synchronized void handleFailure(KUID nodeId, SocketAddress address) {
         
         // NodeID might be null if we sent a ping to
         // an unknown Node (i.e. we knew only the
@@ -290,6 +290,13 @@ public class RouteTableImpl implements RouteTable {
         if (node == null) {
             // It's neither a live nor a cached Node
             // in the bucket!
+            return;
+        }
+        
+        if (!node.getSocketAddress().equals(address)) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(node + " address and " + address + " do not match");
+            }
             return;
         }
         
@@ -312,19 +319,29 @@ public class RouteTableImpl implements RouteTable {
                     LOG.trace("Removing " + node + " and replacing it with the MRS Node from Cache");
                 }
                 
-                bucket.removeLiveContact(nodeId);
-                assert (bucket.isLiveFull() == false);
+                // Remove a live-dead Contact only if there's something 
+                // in the replacement cache.
                 
                 Contact mrs = bucket.getMostRecentlySeenCachedContact();
                 if (mrs != null) {
+                    
                     boolean removed = bucket.removeCachedContact(mrs.getNodeID());
                     assert (removed == true);
+                    
+                    bucket.removeLiveContact(nodeId);
+                    assert (bucket.isLiveFull() == false);
                     
                     mrs.unknown();
                     bucket.addLiveContact(mrs);
                     touchBucket(bucket);
                 }
             } else {
+                
+                // On first glance this might look like as if it is
+                // not necessary since we're never contacting cached
+                // Contacts but that's not absolutely true. FIND_NODE
+                // lookups may return Contacts that are in our cache
+                // and if they don't respond we want to remove them...
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Removing " + node + " from Cache");

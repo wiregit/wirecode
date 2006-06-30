@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.routing;
 
+import java.net.SocketAddress;
 import java.util.List;
 
 import com.limegroup.mojito.Contact;
@@ -70,7 +71,7 @@ public interface RouteTable {
      * Notifies the RoutingTable that the Contact with the provided
      * KUID has failed to answert to a request.
      */
-    public void handleFailure(KUID nodeId);
+    public void handleFailure(KUID nodeId, SocketAddress address);
     
     /**
      * Returns all Contacts as List
