@@ -204,7 +204,7 @@ public class ManagedTorrent {
 	 * @return true if the torrent is complete.
 	 */
 	public boolean isComplete() {
-		return _folder.isComplete();
+		return _state.getInt() != DISK_PROBLEM && _folder.isComplete();
 	}
 
 	/**
@@ -651,6 +651,9 @@ public class ManagedTorrent {
 		// save the files to the destination folder
 		saveFiles();
 		
+		if (_state.getInt() == DISK_PROBLEM)
+			return;
+		
 		// resume uploads
 		choker.rechoke();
 		
@@ -678,29 +681,27 @@ public class ManagedTorrent {
 			LOG.debug("folder closed");
 		_state.setInt(SAVING);
 		boolean diskProblem = !_info.moveToCompleteFolder();
-		if (LOG.isDebugEnabled())
-			LOG.debug("could not save: " + diskProblem);
 		
-		// folder has to be updated with the new files
-		_folder = _info.getVerifyingFolder();
-		if (LOG.isDebugEnabled())
-			LOG.debug("new veryfing folder");
-		
-		try {
-			_folder.open(this);
-		} catch (IOException ioe) {
-			LOG.debug(ioe);
-			diskProblem = true;
+		if (!diskProblem) {
+			// folder has to be updated with the new files
+			_folder = _info.getVerifyingFolder();
+			if (LOG.isDebugEnabled())
+				LOG.debug("new veryfing folder");
+			
+			try {
+				_folder.open(this);
+			} catch (IOException ioe) {
+				LOG.debug(ioe);
+				diskProblem = true;
+			}
+			if (LOG.isDebugEnabled())
+				LOG.debug("folder opened");
 		}
-		if (LOG.isDebugEnabled())
-			LOG.debug("folder opened");
-
-		if (diskProblem) {
+		
+		if (diskProblem) 
 			diskExceptionHappened();
-		} else
+		else
 			_state.setInt(SEEDING); 
-
-		// remember attempt to save the file
 	}
 	
 	/**

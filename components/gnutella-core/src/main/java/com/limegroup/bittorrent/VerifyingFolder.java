@@ -129,7 +129,7 @@ public class VerifyingFolder {
 	 * @param complete if the download is completed
 	 */
 	public VerifyingFolder(BTMetaInfo info, boolean complete, Map data) {
-		_files = info.getFiles();
+		_files = complete? info.getFiles() : info.getIncompleteFiles();
 		_info = info;
 		_corruptedBytes = 0;
 		partialBlocks = new BlockRangeMap();

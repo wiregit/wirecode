@@ -153,11 +153,17 @@ public class BTMetaInfo implements Serializable {
 	 * @return array of TorrentFile storing the path and the length for each
 	 *         file
 	 */
+	public List<TorrentFile> getIncompleteFiles() {
+		List<TorrentFile> ret = new ArrayList<TorrentFile>(_files);
+		updateReferences(_incompleteFile,ret);
+		return ret;
+	}
+	
 	public List<TorrentFile> getFiles() {
 		return _files;
 	}
 	
-	boolean conflicts(File f) {// TODO: this is wrong - compare vs. complete folder
+	boolean conflicts(File f) {
 		return _files.contains(f) || _folders.contains(f);
 	}
 
@@ -178,11 +184,14 @@ public class BTMetaInfo implements Serializable {
 	 *         the only file in this torrent
 	 */
 	public File getCompleteFile() {
-		if (_completeFile == null) // initialize default
-			_completeFile = new File(SharingSettings.getSaveDirectory(), _name);
 		return _completeFile;
 	}
-
+	
+	void setCompleteFile(File f) {
+		updateReferences(f, _files);
+		_completeFile = f;
+	}
+	
 	/**
 	 * @return FileDesc for the GUI.
 	 */
@@ -234,17 +243,11 @@ public class BTMetaInfo implements Serializable {
 	public boolean moveToCompleteFolder() {
 		
 		if (!saveFile(_incompleteFile,
-				SharingSettings.DIRECTORY_FOR_SAVING_FILES.getValue()))
+				_completeFile))
 			return false;
-
-		_completeFile = new File(SharingSettings.DIRECTORY_FOR_SAVING_FILES
-				.getValue(), _name);
 
 		// purge the stored FakeFileDesc
 		_desc = null;
-
-		// now fix the reference to this file in _files
-		updateReferences(_completeFile);
 
 		LOG.trace("saved files");
 		initializeVerifyingFolder(null, true);
@@ -357,41 +360,40 @@ public class BTMetaInfo implements Serializable {
 	 * 
 	 * @param incFile
 	 *            the <tt>File</tt> from incomplete directory
-	 * @param completeParent
+	 * @param completeDest
 	 *            the <tt>File</tt> representing incFile's parent in the
 	 *            complete directory
 	 * @return true if successful
 	 */
-	private boolean saveFile(File incFile, File completeParent) {
+	private boolean saveFile(File incFile, File completeDest) {
 		try {
-			completeParent = completeParent.getCanonicalFile();
+			completeDest = completeDest.getCanonicalFile();
 		} catch (IOException ioe) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(ioe);
 			return false;
 		}
 
-		FileUtils.setWriteable(completeParent);
+		FileUtils.setWriteable(completeDest.getParentFile());
 		if (incFile.isDirectory())
-			return saveDirectory(incFile, completeParent);
+			return saveDirectory(incFile, completeDest);
 		long incLength = incFile.length();
 		// set parent to writeable
 
-		File completeFile = new File(completeParent, incFile.getName());
 
 		// overwrite complete file and make complete File writeable
-		completeFile.delete();
-		FileUtils.setWriteable(completeFile);
-		if (!FileUtils.forceRename(incFile, completeFile)) {
+		completeDest.delete();
+		FileUtils.setWriteable(completeDest);
+		if (!FileUtils.forceRename(incFile, completeDest)) {
 			LOG.debug("could not rename file " + incFile);
 			return false;
 		}
 
 		// there have been problems with FileUtils.forceRename()
-		if (incLength != completeFile.length()) {
+		if (incLength != completeDest.length()) {
 			LOG.debug("length of complete file does not match incomplete file "
-					+ completeFile + " , " + incLength + ":"
-					+ completeFile.length());
+					+ completeDest + " , " + incLength + ":"
+					+ completeDest.length());
 			return false;
 		}
 		
@@ -400,8 +402,8 @@ public class BTMetaInfo implements Serializable {
 
 		// Add file to library.
 		// first check if it conflicts with the saved dir....
-		RouterService.getFileManager().removeFileIfShared(completeFile);
-		RouterService.getFileManager().addFileIfShared(completeFile);
+		RouterService.getFileManager().removeFileIfShared(completeDest);
+		RouterService.getFileManager().addFileIfShared(completeDest);
 
 		return true;
 	}
@@ -422,21 +424,22 @@ public class BTMetaInfo implements Serializable {
 	 *            the destination to move the directory to
 	 * @return true if successful
 	 */
-	private boolean saveDirectory(File incFile, File completeParent) {
-		File completeDir = new File(completeParent, incFile.getName());
+	private boolean saveDirectory(File incFile, File completeDir) {
 
 		// we will delete completeDir if it exists and if it is not a directory
 		if (completeDir.exists()) {
 			// completeDir is not a directory
 			if (!completeDir.isDirectory()) {
 				if (!(completeDir.delete() && completeDir.mkdirs())) {
-					LOG.debug("could not create complete dir " + completeDir);
+					if (LOG.isDebugEnabled())
+						LOG.debug("could not create complete dir " + completeDir);
 					return false;
 				}
 			}
 		} else if (!completeDir.mkdirs()) {
 			// completeDir does not exist...
-			LOG.debug("could not create complete dir " + completeDir);
+			if (LOG.isDebugEnabled())
+				LOG.debug("could not create complete dir " + completeDir);
 			return false;
 		}
 
@@ -446,12 +449,9 @@ public class BTMetaInfo implements Serializable {
 		// it is still empty at this point
 		RouterService.getFileManager().addFileIfShared(completeDir);
 
-		File[] files = incFile.listFiles();
-
-		for (int i = 0; i < files.length; i++) {
-			if (!saveFile(files[i], completeDir)) {
+		for (File f : incFile.listFiles()) {
+			if (!saveFile(f, new File(completeDir, f.getName()))) 
 				return false;
-			}
 		}
 
 		// remove the empty directory from the incomplete folder.
@@ -467,14 +467,14 @@ public class BTMetaInfo implements Serializable {
 	 * @param completeBase
 	 *            the top file in the torrent
 	 */
-	private void updateReferences(File completeBase) {
-		int offset = _incompleteFile.getAbsolutePath().length();
+	private void updateReferences(File completeBase, List<TorrentFile> l) {
+		int offset = _completeFile.getAbsolutePath().length();
 		String newPath = completeBase.getAbsolutePath();
-		for (int i = 0; i < _files.size(); i++) {
-			TorrentFile current = _files.get(i);
+		for (int i = 0; i < l.size(); i++) {
+			TorrentFile current = l.get(i);
 			TorrentFile updated = new TorrentFile(current.length(), newPath
 					+ current.getPath().substring(offset));
-			_files.set(i,updated);
+			l.set(i,updated);
 		}
 
 	}
@@ -596,12 +596,13 @@ public class BTMetaInfo implements Serializable {
 		
 		_incompleteFile = new File(incompleteDir, 
 				Base32.encode(_infoHash)+File.separator+_name);
-
+		_completeFile = new File(SharingSettings.getSaveDirectory(), _name);
+		
 		if (info.containsKey("files")) {
 			Object t_files = info.get("files");
 			if (!(t_files instanceof List))
 				throw new ValueException("bad metainfo - bad files value");
-			List<TorrentFile> files = parseFiles((List) t_files, _incompleteFile
+			List<TorrentFile> files = parseFiles((List) t_files, _completeFile
 					.getAbsolutePath());
 			if (files.size() == 0)
 				throw new ValueException("bad metainfo - bad files value " + t_files);
@@ -615,6 +616,7 @@ public class BTMetaInfo implements Serializable {
 			}
 			
 			_files = files;
+			_folders.add(_completeFile);
 		} else {
 			Object t_length = info.get("length");
 			if (!(t_length instanceof Long))
@@ -622,7 +624,7 @@ public class BTMetaInfo implements Serializable {
 			long length = ((Long) t_length).longValue();
 			_files = new ArrayList<TorrentFile>(1);
 			try {
-				TorrentFile f = new TorrentFile(length, _incompleteFile
+				TorrentFile f = new TorrentFile(length, _completeFile
 						.getCanonicalPath());
 				f.begin = 0;
 				f.end = _hashes.length;
@@ -771,7 +773,7 @@ public class BTMetaInfo implements Serializable {
 		}
 
 		StringBuffer paths = new StringBuffer(basePath);
-
+		
 		int numParsed = 0;
 		// prefer the utf8 path if possible
 		if (t_path_utf8 != null) {

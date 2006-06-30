@@ -146,6 +146,10 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	
 	public abstract boolean conflictsWithIncompleteFile(File incomplete);
 	
+	public boolean conflictsSaveFile(File saveFile) {
+		return getSaveFile().equals(saveFile);
+	}
+	
 	public abstract void initialize(DownloadManager m, 
 			FileManager fm, DownloadCallback ac);
 

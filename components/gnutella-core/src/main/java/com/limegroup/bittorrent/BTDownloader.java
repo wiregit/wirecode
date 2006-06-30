@@ -284,12 +284,14 @@ implements TorrentLifecycleListener {
 	}
 
 	public boolean isRelocatable() {
-		return false;
+		return !isCompleted();
 	}
 
 	public void setSaveFile(File saveDirectory, String fileName,
 			boolean overwrite) throws SaveLocationException {
-		throw new IllegalArgumentException("not supported");
+		super.setSaveFile(saveDirectory, fileName, overwrite);
+		// if this didn't throw target is ok.
+		_info.setCompleteFile(new File(saveDirectory, fileName));
 	}
 
 	public File getSaveFile() {
@@ -384,16 +386,20 @@ implements TorrentLifecycleListener {
 		return !isResumable();
 	}
 	
-	public boolean conflicts(URN urn, int fileSize, File... fileName) {
-		for (File f : fileName) {
-			if (_info.conflicts(f))
+	public boolean conflicts(URN urn, int fileSize, File... file) {
+		for (File f : file) {
+			if (conflictsSaveFile(f));
 				return true;
 		}
 		return false;
 	}
+	
+	public boolean conflictsSaveFile(File candidate) {
+		return _info.conflicts(candidate);
+	}
 
 	public boolean conflictsWithIncompleteFile(File incomplete) {
-		return false; // we do our own checking for pre-existing incompletes
+		return _info.getBaseFile().getParentFile().equals(incomplete); 
 	}
 
 	public void finish() {

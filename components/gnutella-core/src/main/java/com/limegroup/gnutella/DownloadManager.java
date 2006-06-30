@@ -910,7 +910,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
 	 */
 	public synchronized boolean isSaveLocationTaken(File candidateFile) {
 		for (AbstractDownloader md : activeAndWaiting) {
-			if (FileUtils.conflictsAny(candidateFile,md.getSaveFile())) 
+			if (md.conflictsSaveFile(candidateFile)) 
 				return true;
 		}
 		return false;
