@@ -56,7 +56,7 @@ public class FixedSizeHashMap<K, V> extends LinkedHashMap<K, V> implements Seria
         this.maxSize = maxSize;
     }
 
-    public FixedSizeHashMap(Map<K, V> m, int maxSize) {
+    public FixedSizeHashMap(Map<? extends K, ? extends V> m, int maxSize) {
         super(m);
         this.maxSize = maxSize;
     }
