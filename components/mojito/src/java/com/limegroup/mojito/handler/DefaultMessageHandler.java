@@ -124,7 +124,7 @@ public class DefaultMessageHandler extends MessageHandler
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // Are we one of the K closest nodes to the contact?
-        if (routeTable.isCloseToLocal(node.getNodeID())) {
+        if (routeTable.isNearToLocal(node.getNodeID())) {
             List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
             
             Database database = context.getDatabase();

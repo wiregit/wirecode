@@ -101,7 +101,7 @@ public interface RouteTable {
      * the provided KUID is (hypothetically) in the same 
      * Bucket in the RouteTable as the local Contact is.
      */
-    public boolean isCloseToLocal(KUID nodeId);
+    public boolean isNearToLocal(KUID nodeId);
     
     /**
      * Clears all elements from the RoutingTable
