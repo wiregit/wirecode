@@ -331,9 +331,11 @@ public class RouteTableImpl implements RouteTable {
                     bucket.removeLiveContact(nodeId);
                     assert (bucket.isLiveFull() == false);
                     
-                    mrs.unknown();
                     bucket.addLiveContact(mrs);
-                    touchBucket(bucket);
+                    
+                    if (mrs.isAlive() && mrs.hasBeenRecentlyAlive()) {
+                        touchBucket(bucket);
+                    }
                 }
             } else {
                 

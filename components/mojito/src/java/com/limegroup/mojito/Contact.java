@@ -155,11 +155,6 @@ public interface Contact {
     public boolean isUnknown();
     
     /**
-     * Sets the state of this Contact to unknown
-     */
-    public void unknown();
-    
-    /**
      * Updates this Contact with information from an existing Contact.
      * 
      * The updated fields are:
