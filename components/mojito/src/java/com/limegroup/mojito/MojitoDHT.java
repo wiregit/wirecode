@@ -535,7 +535,7 @@ public class MojitoDHT {
         // Store the RouteTable
         oos.writeBoolean(storeRouteTable);
         if (storeRouteTable) {
-            List<? extends Contact> nodes = context.getRouteTable().getContacts();
+            List<Contact> nodes = context.getRouteTable().getContacts();
             
             KUID nodeId = local.getNodeID();
             for(Contact node : nodes) {
@@ -553,11 +553,9 @@ public class MojitoDHT {
         boolean anyLocalKeyValue = false;
         
         if (storeDatabase) {
-            Collection keyValues = context.getDatabase().getValues();
+            Collection<KeyValue> keyValues = context.getDatabase().getValues();
             
-            for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                KeyValue keyValue = (KeyValue)it.next();
-                
+            for(KeyValue keyValue : keyValues) {
                 if (!storeRouteTable 
                         && !keyValue.isLocalKeyValue()) {
                     continue;
