@@ -57,7 +57,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
     private List<KeyValue> keyValues;
     
     public StoreResponseHandler(Context context, QueryKey queryKey, KeyValue keyValue) {
-        this(context, queryKey, Arrays.asList(new KeyValue[]{keyValue}));
+        this(context, queryKey, Arrays.asList(keyValue));
     }
     
     public StoreResponseHandler(Context context, QueryKey queryKey, List<KeyValue> keyValues) {

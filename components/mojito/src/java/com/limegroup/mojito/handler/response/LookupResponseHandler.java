@@ -52,6 +52,7 @@ import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
 import com.limegroup.mojito.statistics.SingleLookupStatisticContainer;
 import com.limegroup.mojito.util.KeyValueCollection;
 import com.limegroup.mojito.util.PatriciaTrie;
+import com.limegroup.mojito.util.Trie;
 import com.limegroup.mojito.util.TrieUtils;
 
 /**
@@ -75,10 +76,10 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     private Set<KUID> queried = new HashSet<KUID>();
     
     /** Trie of ContactNodes we're going to query */
-    private PatriciaTrie<KUID, ContactNode> toQuery = new PatriciaTrie<KUID, ContactNode>();
+    private Trie<KUID, ContactNode> toQuery = new PatriciaTrie<KUID, ContactNode>();
     
     /** Trie of ContactNodes that did respond */
-    private PatriciaTrie<KUID, ContactNodeEntry> responses = new PatriciaTrie<KUID, ContactNodeEntry>();
+    private Trie<KUID, ContactQueryKeyEntry> responses = new PatriciaTrie<KUID, ContactQueryKeyEntry>();
     
     /** A Map we're using to count the number of hops */
     private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
@@ -138,7 +139,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             addYetToBeQueried((ContactNode)it.next(), 1);
         }
         
-        addResponse(new ContactNodeEntry(context.getLocalNode()));
+        addResponse(new ContactQueryKeyEntry(context.getLocalNode()));
         markAsQueried(context.getLocalNode());
     }
 
@@ -372,7 +373,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         if (!nodes.isEmpty()) {
-            addResponse(new ContactNodeEntry(response));
+            addResponse(new ContactQueryKeyEntry(response));
         }
         
         lookupStep(hop);
@@ -424,7 +425,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         if (responses.size() >= resultSetSize) {
-            KUID worst = responses.select(furthest).getNodeID();
+            KUID worst = responses.select(furthest).getKey().getNodeID();
             
             KUID best = null;            
             if (!toQuery.isEmpty()) {
@@ -543,8 +544,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     /** Adds the ContactNodeEntry to the response Trie */
-    private void addResponse(ContactNodeEntry entry) {
-        responses.put(entry.getNodeID(), entry);
+    private void addResponse(ContactQueryKeyEntry entry) {
+        responses.put(entry.getKey().getNodeID(), entry);
         
         if (responses.size() > resultSetSize) {
             ContactNode worst = responses.select(furthest).getKey();
@@ -586,35 +587,27 @@ public class LookupResponseHandler extends AbstractResponseHandler {
      * 
      * This class is immutable!
      */
-    private static class ContactNodeEntry 
+    private static class ContactQueryKeyEntry 
             implements Map.Entry<ContactNode, QueryKey> {
         
         private ContactNode node;
         private QueryKey queryKey;
         
-        private ContactNodeEntry(ContactNode node) {
+        private ContactQueryKeyEntry(ContactNode node) {
             this(node, null);
         }
         
-        private ContactNodeEntry(FindNodeResponse response) {
+        private ContactQueryKeyEntry(FindNodeResponse response) {
             this(response.getContactNode(), response.getQueryKey());
         }
         
-        private ContactNodeEntry(ContactNode node, QueryKey queryKey) {
+        private ContactQueryKeyEntry(ContactNode node, QueryKey queryKey) {
             this.queryKey = queryKey;
             this.node = node;
         }
         
         public ContactNode getKey() {
             return node;
-        }
-        
-        private KUID getNodeID() {
-            return node.getNodeID();
-        }
-        
-        public QueryKey getQueryKey() {
-            return queryKey;
         }
         
         public QueryKey getValue() {
