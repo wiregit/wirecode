@@ -32,7 +32,7 @@ import com.limegroup.mojito.settings.NetworkSettings;
 
 /**
  * The NoOpResponseHandler does litteraly nothing. Its pupose
- * is to have a non-null ResponseHandler because deling with
+ * is to have a non-null ResponseHandler because dealing with
  * nulls is a PITA.
  */
 public final class NoOpResponseHandler implements ResponseHandler {

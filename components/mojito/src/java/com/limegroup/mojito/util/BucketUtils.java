@@ -36,7 +36,8 @@ public final class BucketUtils {
      * Returns the most recently seen contact from the list.
      * Use BucketUtils.sort() prior to calling this Method!
      */
-    public static Contact getMostRecentlySeen(List<? extends Contact> nodes) {
+    public static <T extends Contact> Contact getMostRecentlySeen(List<T> nodes) {
+        assert (nodes.get(0).getTimeStamp() >= nodes.get(nodes.size()-1).getTimeStamp());
         return nodes.get(0);
     }
     
@@ -44,7 +45,8 @@ public final class BucketUtils {
      * Returns the least recently seen contact from the list.
      * Use BucketUtils.sort() prior to calling this Method!
      */
-    public static Contact getLeastRecentlySeen(List<? extends Contact> nodes) {
+    public static <T extends Contact> Contact getLeastRecentlySeen(List<T> nodes) {
+        assert (nodes.get(nodes.size()-1).getTimeStamp() <= nodes.get(0).getTimeStamp());
         return nodes.get(nodes.size()-1);
     }
     

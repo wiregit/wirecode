@@ -20,10 +20,6 @@
 package com.limegroup.mojito.handler;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.io.MessageDispatcher;
-import com.limegroup.mojito.messages.MessageFactory;
-import com.limegroup.mojito.messages.MessageHelper;
-import com.limegroup.mojito.routing.RouteTable;
 
 /**
  * An abstract MessageHandler
@@ -34,21 +30,5 @@ public abstract class MessageHandler {
     
     public MessageHandler(Context context) {
         this.context = context;
-    }
-    
-    protected MessageDispatcher getMessageDispatcher() {
-        return context.getMessageDispatcher();
-    }
-    
-    protected RouteTable getRouteTable() {
-        return context.getRouteTable();
-    }
-    
-    protected MessageHelper getMessageHelper() {
-        return context.getMessageHelper();
-    }
-    
-    protected MessageFactory getMessageFactory() {
-        return context.getMessageFactory();
     }
 }
