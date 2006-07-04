@@ -732,6 +732,10 @@ public class Acceptor implements ConnectionAcceptor {
         public int read(ByteBuffer dst) {
             return BufferUtils.transfer(buffer, dst, false);
         }
+
+        public long read(ByteBuffer [] dst) {
+        	return BufferUtils.transfer(buffer, dst, 0, dst.length, false);
+        }
     }
 
 

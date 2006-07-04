@@ -70,7 +70,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
     }
     
     public long read(ByteBuffer[] dst, int offset, int length) {
-    	return BufferUtils.transfer(buffer,dst, offset, length);
+    	return BufferUtils.transfer(buffer,dst, offset, length, true);
     }
     
     public long read(ByteBuffer [] dst) {

@@ -118,7 +118,7 @@ ChannelWriter, ChannelReadObserver {
 					torrent, true);
 			
 			if (LOG.isDebugEnabled())
-				LOG.debug("added outgoing connection "
+				LOG.debug("added connection "
 						+ sock.getInetAddress().getHostAddress());
 
 			// add the connection and re-schedule fetching.
