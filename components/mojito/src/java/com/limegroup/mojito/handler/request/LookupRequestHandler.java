@@ -97,7 +97,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
                 
             } else {
                 nodes = context.getRouteTable().select(lookup, 
-                        KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);
+                        KademliaSettings.REPLICATION_PARAMETER.getValue(), false);
             }
         }
         

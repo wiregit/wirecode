@@ -209,7 +209,7 @@ public class BootstrapManager {
         private List<Contact> contacts;
         
         public RouteTablePhaseZero() {
-            contacts = BucketUtils.sort(context.getRouteTable().getContacts());
+            contacts = BucketUtils.sort(context.getRouteTable().getLiveContacts());
         }
 
         protected boolean pingNextFromList() throws IOException {

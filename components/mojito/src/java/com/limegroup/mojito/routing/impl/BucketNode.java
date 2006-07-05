@@ -285,18 +285,18 @@ class BucketNode implements Bucket {
         return nodeTrie.size();
     }
     
-    public int getLiveWithZeroFailures() {
-        final int[] zeroFailures = new int[]{ 0 };
+    private int getLiveNotDeadCount() {
+        final int[] notDead = new int[]{ 0 };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
             public boolean select(Map.Entry<KUID, Contact> entry) {
                 Contact node = entry.getValue();
-                if (!node.hasFailed()) {
-                    zeroFailures[0]++;
+                if (!node.isDead()) {
+                    notDead[0]++;
                 }
                 return false;
             }
         });
-        return zeroFailures[0];
+        return notDead[0];
     }
     
     public int getCacheSize() {
@@ -313,7 +313,8 @@ class BucketNode implements Bucket {
             return true;
         }
         
-        if (getLiveSize() != getLiveWithZeroFailures()) {
+        //we may have dead nodes in a bucket that has an empty replacement cache
+        if (getLiveSize() != getLiveNotDeadCount()) {
             return true;
         }
         

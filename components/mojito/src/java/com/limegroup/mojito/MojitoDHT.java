@@ -535,7 +535,7 @@ public class MojitoDHT {
         // Store the RouteTable
         oos.writeBoolean(storeRouteTable);
         if (storeRouteTable) {
-            List<Contact> nodes = context.getRouteTable().getContacts();
+            List<Contact> nodes = context.getRouteTable().getLiveContacts();
             
             KUID nodeId = local.getNodeID();
             for(Contact node : nodes) {

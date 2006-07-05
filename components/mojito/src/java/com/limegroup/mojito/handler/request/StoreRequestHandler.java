@@ -93,10 +93,11 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         // under the assumption that the requester sent us a lookup before
         // check if we are part of the closest alive nodes to this value
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        List nodesList = context.getRouteTable().select(valueId, k, false, false);
+        List nodesList = context.getRouteTable().select(valueId, k, false);
         
         if (!nodesList.contains(context.getLocalNode())) {
-            nodesList = context.getRouteTable().select(valueId, k, true, false);
+            //try getting only nodes that have never failed, i.e. a larger key-space
+            nodesList = context.getRouteTable().select(valueId, k, true);
             if (!nodesList.contains(context.getLocalNode())) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("We are not close to " + keyValue.getKey() 

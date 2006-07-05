@@ -62,10 +62,9 @@ public interface RouteTable {
      * @param nodeId the lookup KUID
      * @param count the number of Contact (maybe less if RoutingTable has less than 'count' entries!)
      * @param liveContacts wheather or not only live Contacts should be in the result set
-     * @param willContact wheather or not we'll contact these Contacts
      * @return list of Contacts sorted by closeness
      */
-    public List<Contact> select(KUID nodeId, int count, boolean liveContacts, boolean willContact);
+    public List<Contact> select(KUID nodeId, int count, boolean liveContacts);
     
     /**
      * Notifies the RoutingTable that the Contact with the provided

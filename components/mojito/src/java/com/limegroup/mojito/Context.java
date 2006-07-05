@@ -685,7 +685,7 @@ public class Context {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // TODO only live nodes?
-        List<Contact> nodes = routeTable.select(localNodeId, k, false, false);
+        List<Contact> nodes = routeTable.select(localNodeId, k, false);
         
         // TODO accoriding to Az code it works only with more than
         // two Nodes

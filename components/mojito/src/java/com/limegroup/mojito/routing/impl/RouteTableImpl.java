@@ -122,7 +122,7 @@ public class RouteTableImpl implements RouteTable {
             Contact replaced = bucket.updateContact(node);
             assert (replaced == existing);
             
-            if (node.isAlive()) {
+            if (node.isAlive() && !bucket.containsCachedContact(node.getNodeID())) {
                 touchBucket(bucket);
             }
             
@@ -142,6 +142,8 @@ public class RouteTableImpl implements RouteTable {
                 
                 // DO NOTHING! The DefaultMessageHandler 
                 // takes care of everything else!
+                
+                //TODO add spoofer to ban list
             }
 
             public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
@@ -333,9 +335,6 @@ public class RouteTableImpl implements RouteTable {
                     
                     bucket.addLiveContact(mrs);
                     
-                    if (mrs.isAlive() && mrs.hasBeenRecentlyAlive()) {
-                        touchBucket(bucket);
-                    }
                 }
             } else {
                 
@@ -384,7 +383,7 @@ public class RouteTableImpl implements RouteTable {
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
             public boolean select(Entry<KUID, Bucket> entry) {
                 Bucket bucket = entry.getValue();
-                nodes.addAll(bucket.select(nodeId, count-nodes.size()));
+                nodes.addAll(bucket.select(nodeId, count - nodes.size()));
                 return nodes.size() >= count;
             }
         });
@@ -393,7 +392,7 @@ public class RouteTableImpl implements RouteTable {
     
     
     public synchronized List<Contact> select(final KUID nodeId, final int count, 
-            final boolean liveContacts, final boolean willContact) {
+            final boolean liveContacts) {
         
         final List<Contact> nodes = new ArrayList<Contact>(count);
         
@@ -401,16 +400,11 @@ public class RouteTableImpl implements RouteTable {
             bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
                 public boolean select(Entry<KUID, Bucket> entry) {
                     Bucket bucket = entry.getValue();
-                    for(Contact contact : bucket.select(nodeId, count-nodes.size())) {
+                    for(Contact contact : bucket.select(nodeId, count - nodes.size())) {
                         if (!contact.hasFailed()) {
                             nodes.add(contact);
                         }
                     }
-                    
-                    if (willContact) {
-                        touchBucket(bucket);
-                    }
-                    
                     return nodes.size() >= count;
                 }
             });
@@ -418,11 +412,7 @@ public class RouteTableImpl implements RouteTable {
             bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
                 public boolean select(Entry<KUID, Bucket> entry) {
                     Bucket bucket = entry.getValue();
-                    nodes.addAll(bucket.select(nodeId, count-nodes.size()));
-                    
-                    if (willContact) {
-                        touchBucket(bucket);
-                    }
+                    nodes.addAll(bucket.select(nodeId, count - nodes.size()));
                     
                     return nodes.size() >= count;
                 }

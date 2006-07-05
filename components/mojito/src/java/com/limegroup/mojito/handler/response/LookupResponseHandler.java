@@ -134,7 +134,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             lookupStat = new FindNodeLookupStatisticContainer(context, lookup);
         }
         
-        List<Contact> nodes = context.getRouteTable().select(lookup, resultSetSize, false, true);
+        List<Contact> nodes = context.getRouteTable().select(lookup, resultSetSize, false);
         for(Contact node : nodes) {
             addYetToBeQueried(node, 1);
         }
