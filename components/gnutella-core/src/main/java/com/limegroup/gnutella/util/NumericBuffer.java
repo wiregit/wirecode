@@ -6,24 +6,23 @@ public class NumericBuffer<T extends Number> extends Buffer<T> {
 		super(size);
 	}
 
-	public NumericBuffer(Buffer<T> other) {
+	public NumericBuffer(Buffer<? extends T> other) {
 		super(other);
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void initialize() {
-		if (buf == null)
-			buf = (T[])new Number[size + 1];
+	protected T[] createArray(int size) {
+		return (T[])new Number[size + 1];
 	}
 	
 	public double average() {
 		double result = 0;
 		int num = 0;
-		for (T n : buf) {
-			if (n != null) {
-				result = result + n.doubleValue();
-				num++;
-			}
+		for (int i = 0; i < buf.length; i++) {
+			if (buf[i] == null)
+				continue;
+			result = result + buf[i].doubleValue();
+			num++;
 		}
 		return result / num;
 	}
