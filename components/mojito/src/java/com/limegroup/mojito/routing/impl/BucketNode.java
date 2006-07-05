@@ -94,8 +94,17 @@ class BucketNode implements Bucket {
             cache = new FixedSizeHashMap<KUID, Contact>(maxSize/2, 0.75f, true, maxSize);
         }
         
-        Contact existing = cache.put(node.getNodeID(), node);
-        assert (existing == null);
+        if (!isCacheFull()) {
+            Contact existing = cache.put(node.getNodeID(), node);
+            assert (existing == null);
+        } else {
+            Contact lrs = getLeastRecentlySeenCachedContact();
+            if (!lrs.isAlive() || (!lrs.hasBeenRecentlyAlive() && node.isAlive())) {
+                Contact c = cache.remove(lrs.getNodeID());
+                assert (c == lrs);
+                cache.put(node.getNodeID(), node);
+            }
+        }
     }
     
     public Contact updateContact(Contact node) {
