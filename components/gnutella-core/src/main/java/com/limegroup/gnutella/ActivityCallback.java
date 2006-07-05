@@ -34,17 +34,17 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener
     /**
      *  Add a new unitialized connection.
      */
-    public void connectionInitializing(Connection c);
+    public void connectionInitializing(ManagedConnection c);
 
     /**
      *  Mark a connection as initialized
      */
-    public void connectionInitialized(Connection c);
+    public void connectionInitialized(ManagedConnection c);
 
     /**
      *  Mark a connection as closed
      */
-    public void connectionClosed(Connection c);
+    public void connectionClosed(ManagedConnection c);
     
     /**
      * Notify the UI that we are disconnected from the network
@@ -60,7 +60,7 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener
      * @param data the data for the host returning the result
      * @param locs the <tt>Set</tt> of alternate locations for the file
      */
-	public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set locs);
+	public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set<Endpoint> locs);
 
     /**
      * Add a query string to the monitor screen

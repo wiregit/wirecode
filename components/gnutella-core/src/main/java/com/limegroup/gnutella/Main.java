@@ -103,16 +103,16 @@ public class Main implements ActivityCallback, ErrorCallback {
 
     /////////////////////////// ActivityCallback methods //////////////////////
 
-    public void connectionInitializing(Connection c) {
+    public void connectionInitializing(ManagedConnection c) {
     }
 
-    public void connectionInitialized(Connection c) {
+    public void connectionInitialized(ManagedConnection c) {
 //		String host = c.getOrigHost();
 //		int    port = c.getOrigPort();
 		;//System.out.println("Connected to "+host+":"+port+".");
     }
 
-    public void connectionClosed(Connection c) {
+    public void connectionClosed(ManagedConnection c) {
 //		String host = c.getOrigHost();
 //		int    port = c.getOrigPort();
 		//System.out.println("Connection to "+host+":"+port+" closed.");

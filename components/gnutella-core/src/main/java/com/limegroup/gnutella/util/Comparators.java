@@ -17,7 +17,7 @@ public final class Comparators {
     /**
      * <tt>Comparator</tt> for comparing two <tt>Integer</tt>s.
      */
-    private static final Comparator INT_COMPARATOR = new IntComparator();
+    private static final Comparator<Integer> INT_COMPARATOR = new IntComparator();
 
     /**
      * <tt>Comparator</tt> for comparing two <tt>Long</tt>s.
@@ -61,7 +61,7 @@ public final class Comparators {
      * 
      * @return the <tt>IntComparator</tt> instance
      */
-    public static Comparator integerComparator() {
+    public static Comparator<Integer> integerComparator() {
         return INT_COMPARATOR;
     }
     
@@ -133,11 +133,11 @@ public final class Comparators {
      * Compares two Integers. 
      */
     private static final class IntComparator implements
-        Comparator, Serializable {
+        Comparator<Integer>, Serializable {
         private static final long serialVersionUID = 830281396810831681L;        
             
-        public int compare(Object o1, Object o2) {
-            return intCompareTo((Integer)o1, (Integer)o2);
+        public int compare(Integer o1, Integer o2) {
+            return intCompareTo(o1, o2);
         }
     }
 

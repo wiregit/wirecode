@@ -10,6 +10,7 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -28,9 +29,9 @@ public class ActivityCallbackStub implements ActivityCallback {
     public boolean corruptChecked = false;
 
     public void componentLoading(String component) {}
-    public void connectionInitializing(Connection c) { }
-    public void connectionInitialized(Connection c) { }
-    public void connectionClosed(Connection c) { }
+    public void connectionInitializing(ManagedConnection c) { }
+    public void connectionInitialized(ManagedConnection c) { }
+    public void connectionClosed(ManagedConnection c) { }
     public void knownHost(Endpoint e) { }
     public void disconnected() { }
     //public void handleQueryReply( QueryReply qr ) { }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.Reader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.zip.DeflaterOutputStream;
@@ -172,6 +173,14 @@ public class IOUtils {
     	        skipped += current;
     	}
     	return skipped;
+    }
+
+    public static void close(Reader in) {
+        if(in != null) {
+            try {
+                in.close();
+            } catch(IOException ignored) {}
+        }
     }
     
     public static void close(InputStream in) {
