@@ -253,6 +253,8 @@ public class BTMetaInfo implements Serializable {
 		if (!saveFile(_incompleteFile,
 				_completeFile))
 			return false;
+		
+		FileUtils.deleteRecursive(_incompleteFile.getParentFile());
 
 		// purge the stored FakeFileDesc
 		_desc = null;
@@ -405,9 +407,6 @@ public class BTMetaInfo implements Serializable {
 			return false;
 		}
 		
-		File torrentFolder = incFile.getParentFile();
-		FileUtils.deleteRecursive(torrentFolder);
-
 		// Add file to library.
 		// first check if it conflicts with the saved dir....
 		RouterService.getFileManager().removeFileIfShared(completeDest);
