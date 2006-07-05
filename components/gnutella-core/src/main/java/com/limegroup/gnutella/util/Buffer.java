@@ -36,7 +36,7 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
      *            0<=head, tail<size
      *            size>=2
      */
-    private final int size;
+    protected final int size;
     protected E buf[];
     private int head;
     private int tail;
@@ -73,7 +73,7 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     
     /** Initializes the internal buf if necessary. */
     @SuppressWarnings("unchecked")
-    private void initialize() {
+    protected void initialize() {
         if(buf == null)
             buf = (E[])new Object[size+1];
     }

@@ -10,6 +10,12 @@ public class NumericBuffer<T extends Number> extends Buffer<T> {
 		super(other);
 	}
 	
+	@SuppressWarnings("unchecked")
+	protected void initialize() {
+		if (buf == null)
+			buf = (T[])new Number[size + 1];
+	}
+	
 	public double average() {
 		double result = 0;
 		int num = 0;

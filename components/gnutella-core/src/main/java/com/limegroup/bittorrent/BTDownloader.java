@@ -22,6 +22,7 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.util.NumericBuffer;
 
 /**
  * This class enables the rest of LW to treat this as a regular download.
@@ -45,6 +46,9 @@ implements TorrentLifecycleListener {
 	private volatile long startTime, stopTime;
 	
 	private volatile boolean complete;
+	
+	private NumericBuffer<Float> averagedBandwidth = 
+		new NumericBuffer<Float>(10);
 	
 	public BTDownloader(BTMetaInfo info) {
 		_info = info;
@@ -273,10 +277,13 @@ implements TorrentLifecycleListener {
 
 	public void measureBandwidth() {
 		_torrent.measureBandwidth();
+		averagedBandwidth.add(_torrent.getMeasuredBandwidth(true));
 	}
 
 	public float getMeasuredBandwidth() throws InsufficientDataException {
-		return _torrent.getMeasuredBandwidth(true);
+		if (averagedBandwidth.size() < 3)
+			throw new InsufficientDataException();
+		return (float)averagedBandwidth.average();
 	}
 
 	public float getAverageBandwidth() {
@@ -352,6 +359,7 @@ implements TorrentLifecycleListener {
 		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
 		if (attributes == null || _info == null)
 			throw new IOException("invalid serailized data");
+		averagedBandwidth = new NumericBuffer<Float>(10);
 		
 	}
 
