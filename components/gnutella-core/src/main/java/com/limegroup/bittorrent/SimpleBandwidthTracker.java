@@ -47,7 +47,7 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 		if (now - _lastTimeMeasured < _interval)
 			return;
 
-		_measuredBandwidth = 1000f * (_amount - _lastAmount)
+		_measuredBandwidth = (_amount - _lastAmount)
 				/ (now - _lastTimeMeasured) ;
 		_lastAmount = _amount;
 		_lastTimeMeasured = now;
@@ -60,7 +60,7 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 	}
 
 	public float getAverageBandwidth() {
-		return 1000f * _amount
+		return _amount
 				/ (System.currentTimeMillis() - _firstTimeMeasured);
 	}
 }

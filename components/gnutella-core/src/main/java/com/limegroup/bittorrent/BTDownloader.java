@@ -276,7 +276,7 @@ implements TorrentLifecycleListener {
 	}
 
 	public float getMeasuredBandwidth() throws InsufficientDataException {
-		return _torrent.getMeasuredBandwidth(true) / 1024;
+		return _torrent.getMeasuredBandwidth(true);
 	}
 
 	public float getAverageBandwidth() {

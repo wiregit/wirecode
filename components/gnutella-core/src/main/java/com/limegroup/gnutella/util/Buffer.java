@@ -15,7 +15,7 @@ import com.limegroup.gnutella.Assert;
  * Buffers to be created that may not be used.
  * This is not thread-safe.
  */
-public class Buffer implements Cloneable {
+public class Buffer<E> implements Cloneable, Iterable<E> {
     /**
      * The abstraction function is
      *   [ buf[head], buf[head+1], ..., buf[tail-1] ] if head<=tail
@@ -37,7 +37,7 @@ public class Buffer implements Cloneable {
      *            size>=2
      */
     private final int size;
-    private Object buf[];
+    protected E buf[];
     private int head;
     private int tail;
 
@@ -57,13 +57,14 @@ public class Buffer implements Cloneable {
     }
 
     /** "Copy constructor": constructs a new shallow copy of other. */
-    public Buffer(Buffer other) {
+    @SuppressWarnings("unchecked")
+    public Buffer(Buffer<? extends E> other) {
         this.size=other.size;
         this.head=other.head;
         this.tail=other.tail;
 
         if(other.buf != null) {
-            this.buf=new Object[other.buf.length];
+            this.buf = (E[])new Object[other.buf.length];
             System.arraycopy(other.buf, 0,
                             this.buf, 0,
                             other.buf.length);
@@ -71,9 +72,10 @@ public class Buffer implements Cloneable {
     }
     
     /** Initializes the internal buf if necessary. */
+    @SuppressWarnings("unchecked")
     private void initialize() {
         if(buf == null)
-            buf = new Object[size+1];
+            buf = (E[])new Object[size+1];
     }
 
     /** Returns true iff this is empty. */
@@ -132,7 +134,7 @@ public class Buffer implements Cloneable {
 
     /** If i<0 or i>=getSize(), throws IndexOutOfBoundsException.
       * Else returns this[i] */
-    public Object get(int i) throws IndexOutOfBoundsException {
+    public E get(int i) throws IndexOutOfBoundsException {
         initialize();
         return buf[index(i)];
     }
@@ -142,13 +144,13 @@ public class Buffer implements Cloneable {
      * @effects If i<0 or i>=getSize(), throws IndexOutOfBoundsException 
      *  and does not modify this.  Else this[i]=o.
      */
-    public void set(int i, Object o) throws IndexOutOfBoundsException {
+    public void set(int i, E o) throws IndexOutOfBoundsException {
         initialize();
         buf[index(i)]=o;
     }
 
     /** Same as addFirst(x). */
-    public Object add(Object x) {
+    public E add(E x) {
         return addFirst(x);
     }
 
@@ -159,9 +161,9 @@ public class Buffer implements Cloneable {
      *  or equal to the maximum size.  Returns the element removed, or null
      *  if none was removed.
      */
-    public Object addFirst(Object x) {
+    public E addFirst(E x) {
         initialize();
-        Object ret=null;
+        E ret=null;
         if (isFull())
             ret=removeLast();
         head=decrement(head);
@@ -176,9 +178,9 @@ public class Buffer implements Cloneable {
      *  or equal to the maximum size.  Returns the element removed, or null
      *  if none was removed.
      */
-    public Object addLast(Object x) {
+    public E addLast(E x) {
         initialize();
-        Object ret=null;
+        E ret=null;
         if (isFull())
             ret=removeFirst();
         buf[tail]=x;
@@ -191,10 +193,10 @@ public class Buffer implements Cloneable {
      * Returns true if the input object x is in the buffer.
      */
     public boolean contains(Object x) {
-        Iterator iterator = iterator();
-        while (iterator.hasNext())
-            if (iterator.next().equals(x))
+        for(E e : this) {
+            if(e.equals(x))
                 return true;
+        }
         return false;
     }
 
@@ -203,7 +205,7 @@ public class Buffer implements Cloneable {
      * Returns the head of this, or throws NoSuchElementException if
      * this is empty.
      */
-    public Object first() throws NoSuchElementException {
+    public E first() throws NoSuchElementException {
         if (isEmpty())
             throw new NoSuchElementException();
         return buf[head];
@@ -213,7 +215,7 @@ public class Buffer implements Cloneable {
      * Returns the tail of this, or throws NoSuchElementException if
      * this is empty.
      */
-    public Object last() throws NoSuchElementException {
+    public E last() throws NoSuchElementException {
         if (isEmpty())
             throw new NoSuchElementException();
         return buf[decrement(tail)];
@@ -224,10 +226,10 @@ public class Buffer implements Cloneable {
      * @effects Removes and returns the head of this, or throws 
      *   NoSuchElementException if this is empty.
      */
-    public Object removeFirst() throws NoSuchElementException {
+    public E removeFirst() throws NoSuchElementException {
         if (isEmpty())
             throw new NoSuchElementException();
-        Object ret=buf[head];
+        E ret=buf[head];
         buf[head]=null;     //optimization: don't retain removed values
         head=increment(head);
         return ret;
@@ -238,11 +240,11 @@ public class Buffer implements Cloneable {
      * @effects Removes and returns the tail of this, or throws 
      *   NoSuchElementException if this is empty.
      */
-    public Object removeLast() throws NoSuchElementException {
+    public E removeLast() throws NoSuchElementException {
         if (isEmpty())
             throw new NoSuchElementException();
         tail=decrement(tail);
-        Object ret=buf[tail];
+        E ret=buf[tail];
         buf[tail]=null;    //optimization: don't retain removed values
         return ret;
     }
@@ -254,8 +256,8 @@ public class Buffer implements Cloneable {
      *  of this.  In the worst case, this runs in linear time with
      *  respect to size().
      */ 
-    public Object remove(int i) throws IndexOutOfBoundsException {
-        Object ret=get(i);
+    public E remove(int i) throws IndexOutOfBoundsException {
+        E ret=get(i);
         //Shift all elements to left.  This could be micro-optimized.
         for (int j=index(i); j!=tail; j=increment(j)) {
             buf[j]=buf[increment(j)];
@@ -316,13 +318,13 @@ public class Buffer implements Cloneable {
      *  order, from head to tail.
      * @requires this not modified will iterator in use.
      */
-    public Iterator iterator() {
+    public Iterator<E> iterator() {
         // will either throw NoSuchElementException
         // or already be initialized.
         return new BufferIterator();
     }
 
-    private class BufferIterator extends UnmodifiableIterator {
+    private class BufferIterator extends UnmodifiableIterator<E> {
         /** The index of the next element to yield. */
         int i;	
         /** Defensive programming; detect modifications while
@@ -341,11 +343,11 @@ public class Buffer implements Cloneable {
             return i!=tail;
         }
 
-        public Object next() throws NoSuchElementException {
+        public E next() throws NoSuchElementException {
             ensureNoModifications();
             if (!hasNext()) 
                 throw new NoSuchElementException();
-            Object ret=buf[i];
+            E ret=buf[i];
             i=increment(i);
             return ret;
         }
@@ -357,8 +359,8 @@ public class Buffer implements Cloneable {
     }
 
     /** Returns a shallow copy of this, of type Buffer */
-    public Object clone() {
-        return new Buffer(this);        
+    public Buffer<E> clone() {
+        return new Buffer<E>(this);        
     }
 
     public String toString() {
