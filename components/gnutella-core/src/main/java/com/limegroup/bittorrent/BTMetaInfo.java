@@ -88,8 +88,7 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private Collection<File> _folders = new HashSet<File>();
 	
-	private Iterable<File> _filesAndFolders = 
-		new MultiIterable<File>(_files,_folders);
+	private Iterable<File> _filesAndFolders;
 	
 	/*
 	 * A <tt> File </tt> pointing to the file/directory where the incomplete
@@ -167,6 +166,8 @@ public class BTMetaInfo implements Serializable {
 	}
 	
 	public Iterable<File> getFilesAndFolders() {
+		if (_filesAndFolders == null)
+			_filesAndFolders = new MultiIterable<File>(_files,_folders);
 		return _filesAndFolders;
 	}
 	
