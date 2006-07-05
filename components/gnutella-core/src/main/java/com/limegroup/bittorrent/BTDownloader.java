@@ -63,7 +63,9 @@ implements TorrentLifecycleListener {
 				_torrent.getState() != ManagedTorrent.SEEDING) {
 			complete = true;
 			_torrent.stop();
-		}
+		} else if (isInactive())
+			manager.remove(this, true);
+			
 	}
 
 	public void pause() {

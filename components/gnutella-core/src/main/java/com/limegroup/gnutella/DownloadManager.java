@@ -793,7 +793,8 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         return d;
     }
     
-    public synchronized Downloader downloadTorrent(URL url) throws IOException {
+    public synchronized Downloader downloadTorrent(URL url) 
+    throws SaveLocationException, IOException {
 		if (LOG.isDebugEnabled())
 			LOG.debug("downloading torrent from " + url);
 		HttpMethod get = new GetMethod(url.toExternalForm());
@@ -814,26 +815,38 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     }
      
     
-    public synchronized Downloader downloadTorrent(File torrentFile) throws IOException {
+    public synchronized Downloader downloadTorrent(File torrentFile) 
+    throws SaveLocationException, IOException {
     	return downloadTorrent(FileUtils.readFileFully(torrentFile));
     }
     
-    private Downloader downloadTorrent(byte [] metaInfo) throws IOException {
+    private Downloader downloadTorrent(byte [] metaInfo) 
+    throws SaveLocationException, IOException {
+    	BTMetaInfo info = null;
     	try {
-    		BTMetaInfo info = BTMetaInfo.readFromBytes(metaInfo);
-    		return downloadTorrent(info);
+    		info = BTMetaInfo.readFromBytes(metaInfo);
     	} catch (IOException e) {
     		if (LOG.isDebugEnabled())
     			LOG.debug("bad torrent data", e);
     		throw e;
     	}
+    	return downloadTorrent(info);
+    }
+
+    private Downloader downloadTorrent(BTMetaInfo info) throws SaveLocationException {
+    	checkTargetLocation(info);
+    	AbstractDownloader ret = new BTDownloader(info);
+    	initializeDownload(ret);
+    	return ret;
     }
     
-    private Downloader downloadTorrent(BTMetaInfo info) throws SaveLocationException {
+    private void checkTargetLocation(BTMetaInfo info) 
+    throws SaveLocationException{
     	for (File f : info.getFiles()) {
     		// its ok to download to an already existing directory so
     		// we only check for files.
-    		if (RouterService.getFileManager().isFileShared(f))
+    		if (RouterService.getFileManager().isFileShared(f) ||
+    				f.exists())
     			throw new SaveLocationException
     			(SaveLocationException.FILE_ALREADY_EXISTS, f);
     	}
@@ -842,7 +855,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     		if (info.getURN().equals(current.getSHA1Urn())) {
     			// this is the place to add new trackers eventually.
     			throw new SaveLocationException
-    			(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, info.getBaseFile());
+    			(SaveLocationException.FILE_ALREADY_DOWNLOADING, info.getCompleteFile());
     		}
     		for (File f : info.getFilesAndFolders()) {
     			if (current.conflictsSaveFile(f)) {
@@ -851,9 +864,6 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     			}
     		}
     	}
-    	AbstractDownloader ret = new BTDownloader(info);
-    	initializeDownload(ret);
-    	return ret;
     }
     
     /**

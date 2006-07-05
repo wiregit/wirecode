@@ -482,6 +482,8 @@ public class BTMetaInfo implements Serializable {
 			TorrentFile current = l.get(i);
 			TorrentFile updated = new TorrentFile(current.length(), newPath
 					+ current.getPath().substring(offset));
+			updated.begin = current.begin;
+			updated.end = current.end;
 			l.set(i,updated);
 		}
 	}
