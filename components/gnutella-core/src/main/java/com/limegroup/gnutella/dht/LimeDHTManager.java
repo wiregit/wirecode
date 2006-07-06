@@ -187,7 +187,7 @@ public class LimeDHTManager implements LifecycleListener {
      * 
      */
     private void bootstrap() {
-        final LinkedList<SocketAddress> snapshot = new LinkedList<SocketAddress>();
+        final List<SocketAddress> snapshot = new LinkedList<SocketAddress>();
         
         //first add bootstrap host list coming from the network
         synchronized (bootstrapHosts) {
@@ -195,7 +195,10 @@ public class LimeDHTManager implements LifecycleListener {
         }
 
         //then append SIMPP hosts if we have any
-        snapshot.addAll(getSIMPPHosts());
+        SocketAddress simppBootstrapHost = getSIMPPHost();
+        if(simppBootstrapHost != null) {
+            snapshot.add(simppBootstrapHost);
+        }
         
         System.out.println("snapshot:" + snapshot);
         try {
@@ -377,9 +380,14 @@ public class LimeDHTManager implements LifecycleListener {
         }
     }
     
-    private List<? extends SocketAddress> getSIMPPHosts(){
+    /**
+     * Gets the SIMPP host responsible for the keyspace containing the local node ID
+     * 
+     * @return
+     */
+    private SocketAddress getSIMPPHost(){
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
-        ArrayList<InetSocketAddress> hostList = new ArrayList<InetSocketAddress>(simppHosts.length);
+        List<InetSocketAddress> hostList = new ArrayList<InetSocketAddress>(simppHosts.length);
 
         for (int i = 0; i < simppHosts.length; i++) {
             String hostString = simppHosts[i];
@@ -396,7 +404,17 @@ public class LimeDHTManager implements LifecycleListener {
                 LOG.error(new UnknownHostException("invalid host: " + hostString));
             }
         }
-        return hostList;
+
+        if(hostList.isEmpty()) {
+            return null;
+        }
+        //each host in the list is responsible for a subspace of the keyspace
+        int localPrefix = (int)((dht.getLocalNodeID().getBytes()[0] & 0xF0) >> 4);
+        
+        int index = (int)((float)hostList.size()/15f * localPrefix) % hostList.size();
+        SocketAddress addr = hostList.get(index);
+        
+        return addr;
     }
     
     public MojitoDHT getMojitoDHT() {
