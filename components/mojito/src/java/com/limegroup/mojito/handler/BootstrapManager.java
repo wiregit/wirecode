@@ -21,6 +21,7 @@ package com.limegroup.mojito.handler;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -58,6 +59,8 @@ public class BootstrapManager implements PingListener, LookupListener {
     private boolean foundNewNodes = false;
     
     private BootstrapListener listener;
+    
+    private ArrayList<SocketAddress> failedHosts = new ArrayList<SocketAddress>(); 
     
     /**
      * List of Bucket IDs
@@ -159,6 +162,7 @@ public class BootstrapManager implements PingListener, LookupListener {
         if (LOG.isErrorEnabled()) {
             LOG.error("Initial bootstrap ping timeout, failure " + failures);
         }
+        failedHosts.add(address);
         
         failures++;
         if (failures >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
@@ -276,7 +280,7 @@ public class BootstrapManager implements PingListener, LookupListener {
         if (listener != null) {
             context.fireEvent(new Runnable() {
                 public void run() {
-                    listener.noBootstrapHost();
+                    listener.noBootstrapHost(failedHosts);
                 }
             });
         }

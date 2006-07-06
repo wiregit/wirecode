@@ -212,9 +212,9 @@ public class LimeDHTManager implements LifecycleListener {
         System.out.println("snapshot:" + snapshot);
         try {
             dht.bootstrap(snapshot, new BootstrapListener() {
-                public void noBootstrapHost() {
+                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
                     synchronized (bootstrapHosts) {
-                        bootstrapHosts.removeAll(snapshot);
+                        bootstrapHosts.removeAll(failedHosts);
                         if(!bootstrapHosts.isEmpty()) {
                             //hosts were added --> try again
                             bootstrap();
@@ -225,6 +225,7 @@ public class LimeDHTManager implements LifecycleListener {
                         }
                     }
                 }
+
                 public void phaseOneComplete(long time) {
                     waiting = false;
                 }
@@ -298,8 +299,8 @@ public class LimeDHTManager implements LifecycleListener {
             bootstrapHosts.remove(hostAddress);
             bootstrapHosts.addFirst(hostAddress);
         }
-        System.out.println("adding: "+hostAddress);
-        System.out.println("waiting: "+waiting);
+        System.out.println("adding: "+ hostAddress);
+        System.out.println("waiting: "+ waiting);
         if(waiting) {
             waiting = false;
             bootstrap();
@@ -337,7 +338,6 @@ public class LimeDHTManager implements LifecycleListener {
     
     /**
      * Sets the mode 
-     * 
      * 
      * @param passive
      */
@@ -469,10 +469,7 @@ public class LimeDHTManager implements LifecycleListener {
                 addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
             }
         }
-
         public void registered(byte[] guid) {}
-
         public void unregistered(byte[] guid) {}
     }
-
 }

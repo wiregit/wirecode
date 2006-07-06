@@ -107,7 +107,8 @@ public class MojitoDHT {
                 bootstrap(new BootstrapListener() {
                     public void phaseOneComplete(long time) {}
                     public void phaseTwoComplete(boolean foundNodes, long time) {}
-                    public void noBootstrapHost() {}
+                    public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {}
+                    
                 });
             } catch (IOException err) {
                 LOG.error("Firewalled to non-firewalled re-bootstrap error: ", err);
@@ -244,7 +245,7 @@ public class MojitoDHT {
                     }
                 }
 
-                public void noBootstrapHost() {
+                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
                     synchronized (time) {
                         time.notify();
                     }

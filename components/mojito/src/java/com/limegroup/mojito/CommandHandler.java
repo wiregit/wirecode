@@ -33,6 +33,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
@@ -187,8 +188,7 @@ public class CommandHandler {
                 out.flush();
             }
 
-            public void noBootstrapHost() {
-            }
+            public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {}
         });
     }
     

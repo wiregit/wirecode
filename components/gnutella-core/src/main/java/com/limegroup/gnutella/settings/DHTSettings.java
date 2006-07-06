@@ -58,6 +58,15 @@ public class DHTSettings extends LimeProps{
     public static final FloatSetting DHT_TO_ULTRAPEER_PROBABILITY =
         FACTORY.createSettableFloatSetting("DHT_TO_ULTRAPEER_PROBABILITY", 0F, "DHTSettings.DHTToUltrapeerProbability",0F,1F);
     
+    /**
+     * Setting for whether or not the DHT should be persisted on disk
+     */
     public static final BooleanSetting PERSIST_DHT = 
         FACTORY.createBooleanSetting("PERSIST_DHT", true);
+    
+    /**
+     * Probabilistic logic for whether or not the node should join the DHT
+     */
+    public static final FloatSetting DHT_ACCEPT_PROBABILITY = 
+        FACTORY.createSettableFloatSetting("DHT_ACCEPT_PROBABILITY", 1F, "DHTSettings.DHTAcceptProbability", 0F, 1F);
 }

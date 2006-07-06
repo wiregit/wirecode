@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.event;
 
+import java.net.SocketAddress;
+import java.util.List;
+
 /**
  * The interface for reciving Bootstrap events.
  */
@@ -27,5 +30,5 @@ public interface BootstrapListener {
     public void phaseOneComplete(long time);
     public void phaseTwoComplete(boolean foundNodes, long time);
     
-    public void noBootstrapHost();
+    public void noBootstrapHost(List<? extends SocketAddress> failedHosts);
 }

@@ -144,7 +144,7 @@ public class PlanetLab {
                     }
                     
                     dht.bootstrap(dst, new BootstrapListener() {
-                        public void noBootstrapHost() {
+                        public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
                             System.out.println(index + ": no bootstrap host!");
                         }
 
@@ -398,7 +398,7 @@ public class PlanetLab {
                             dht.start();
                             
                             dht.bootstrap(bootstrapServer, new BootstrapListener() {
-                                public void noBootstrapHost() {
+                                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
                                     synchronized(lock) {
                                         lock.notify();
                                     }
