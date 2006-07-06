@@ -29,11 +29,6 @@ import com.limegroup.mojito.KUID;
 public interface LookupListener extends ResponseListener {
     
     /**
-     * Called for every found Value or Node(s)
-     */
-    public void found(KUID lookup, Collection c, long time);
-    
-    /**
      * Called after a lookup has finished.
      */
     public void finish(KUID lookup, Collection c, long time);

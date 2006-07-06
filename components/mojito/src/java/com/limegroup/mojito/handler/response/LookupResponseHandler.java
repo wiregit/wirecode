@@ -221,59 +221,67 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
         
-        if (!isStopped() && activeSearches > 0) {
-            lookupStat.addReply();
-            activeSearches--;
-            
-            Contact node = message.getContact();
-            int hop = hopMap.get(node.getNodeID()).intValue();
-            
-            if (message instanceof FindValueResponse) {
-                if (isValueLookup()) {
-                    handleFindValueResponse((FindValueResponse)message, time, hop);
-                } else {
-                    // Some Idot sent us a FIND_VALUE response for a
-                    // FIND_NODE lookup! Ignore? We're losing one
-                    // parallel lookup (temporarily) if we do nothing.
-                    // I think it's better to kick off a new lookup
-                    // now rather than to wait for a yet another
-                    // response/lookup that would re-activate this one.
-                    lookupStep(hop);
-                }
+        if (isStopped()) {
+            return;
+        }
+        
+        assert (activeSearches > 0);
+        
+        lookupStat.addReply();
+        activeSearches--;
+        
+        Contact node = message.getContact();
+        int hop = hopMap.get(node.getNodeID()).intValue();
+        
+        if (message instanceof FindValueResponse) {
+            if (isValueLookup()) {
+                handleFindValueResponse((FindValueResponse)message, time, hop);
             } else {
-                handleFindNodeResponse((FindNodeResponse)message, time, hop);
+                // Some Idot sent us a FIND_VALUE response for a
+                // FIND_NODE lookup! Ignore? We're losing one
+                // parallel lookup (temporarily) if we do nothing.
+                // I think it's better to kick off a new lookup
+                // now rather than to wait for a yet another
+                // response/lookup that would re-activate this one.
+                lookupStep(hop);
             }
-            
-            if (activeSearches == 0) {
-                finishLookup(time(), hop);
-            }
+        } else {
+            handleFindNodeResponse((FindNodeResponse)message, time, hop);
+        }
+        
+        if (activeSearches == 0) {
+            finishLookup(time(), hop);
         }
     }
     
     protected synchronized void timeout(KUID nodeId, 
             SocketAddress dst, RequestMessage message, long time) throws IOException {
         
-        if (!isStopped() && activeSearches > 0) {
-            lookupStat.addTimeout();
-            activeSearches--;
-            
-            if (LOG.isTraceEnabled()) {
-                if (isValueLookup()) {
-                    LOG.trace(ContactUtils.toString(nodeId, dst) 
-                            + " did not respond to our FIND_VALUE request");   
-                } else {
-                    LOG.trace(ContactUtils.toString(nodeId, dst) 
-                            + " did not respond to our FIND_NODE request");
-                }
-            }
+        if (isStopped()) {
+            return;
+        }
         
-            
-            int hop = hopMap.get(nodeId).intValue();
-            lookupStep(hop);
-            
-            if (activeSearches == 0) {
-                finishLookup(time(), hop);
+        assert (activeSearches > 0);
+        
+        lookupStat.addTimeout();
+        activeSearches--;
+        
+        if (LOG.isTraceEnabled()) {
+            if (isValueLookup()) {
+                LOG.trace(ContactUtils.toString(nodeId, dst) 
+                        + " did not respond to our FIND_VALUE request");   
+            } else {
+                LOG.trace(ContactUtils.toString(nodeId, dst) 
+                        + " did not respond to our FIND_NODE request");
             }
+        }
+    
+        
+        int hop = hopMap.get(nodeId).intValue();
+        lookupStep(hop);
+        
+        if (activeSearches == 0) {
+            finishLookup(time(), hop);
         }
     }
     
@@ -334,8 +342,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             }
             found.add(c);
             
-            fireFound(c, totalTime);
-            
             if (isExhaustiveValueLookup()) {
                 lookupStep(hop);
             } else {
@@ -354,15 +360,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         for(Contact node : nodes) {
             
             if (!NetworkUtils.isValidSocketAddress(node.getSocketAddress())) {
-                /*if (response.getNodeID().equals(node.getNodeID())) {
-                    node.setSocketAddress(response.getSocketAddress());
-                } else {*/
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error(response.getContact() 
-                                + " sent us a ContactNode with an invalid IP/Port " + node);
-                    }
-                    continue;
-                //}
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(response.getContact() 
+                            + " sent us a ContactNode with an invalid IP/Port " + node);
+                }
+                continue;
             }
             
             if (!isQueried(node) 
@@ -498,20 +500,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         fireFinish(found, time);
     }
     
-    /*protected void resend(KUID nodeId, 
-            SocketAddress dst, RequestMessage message) throws IOException {
-        
-        // This method is never called if max errors is set to 0!
-        // Setting max errors to something else than 0 in lookups
-        // is algorithmically incorrect!
-        super.resend(nodeId, dst, message);
-    }
-
-    public void handleTimeout(KUID nodeId, 
-            SocketAddress dst, RequestMessage message, long time) throws IOException {
-        super.handleTimeout(nodeId, dst, message, time);
-    }*/
-    
     private void doLookup(Contact node) throws IOException {
         markAsQueried(node);
         context.getMessageDispatcher().send(node, createRequest(node.getSocketAddress()), this);
@@ -564,19 +552,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             //hopMap.remove(node.getNodeID()); // TODO
         }
         responseCount++;
-    }
-    
-    private void fireFound(final Collection c, final long time) {
-        context.fireEvent(new Runnable() {
-            public void run() {
-                if (!isStopped()) {
-                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                        LookupListener listener = (LookupListener)it.next();
-                        listener.found(lookupId, c, time);
-                    }
-                }
-            }
-        });
     }
     
     private void fireFinish(final Collection c, final long time) {

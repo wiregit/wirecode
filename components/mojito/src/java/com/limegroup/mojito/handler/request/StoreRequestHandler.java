@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -93,12 +94,12 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         // under the assumption that the requester sent us a lookup before
         // check if we are part of the closest alive nodes to this value
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        List nodesList = context.getRouteTable().select(valueId, k, false);
+        List<Contact> nodes = context.getRouteTable().select(valueId, k, false);
         
-        if (!nodesList.contains(context.getLocalNode())) {
+        if (!nodes.contains(context.getLocalNode())) {
             //try getting only nodes that have never failed, i.e. a larger key-space
-            nodesList = context.getRouteTable().select(valueId, k, true);
-            if (!nodesList.contains(context.getLocalNode())) {
+            nodes = context.getRouteTable().select(valueId, k, true);
+            if (!nodes.contains(context.getLocalNode())) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("We are not close to " + keyValue.getKey() 
                             + ". KeyValue will expire faster!");

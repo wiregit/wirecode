@@ -154,22 +154,6 @@ public class LookupManager implements LookupListener {
         }
     }
     
-    public void found(final KUID lookup, final Collection c, final long time) {
-        synchronized (handlerMap) {
-            LookupResponseHandler handler = handlerMap.remove(lookup);
-            
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    synchronized (listeners) {
-                        for(LookupListener listener : listeners) {
-                            listener.found(lookup, c, time);
-                        }
-                    }
-                }
-            });
-        }
-    }
-    
     public void finish(final KUID lookup, final Collection c, final long time) {
         synchronized (handlerMap) {
             LookupResponseHandler handler = handlerMap.remove(lookup);
