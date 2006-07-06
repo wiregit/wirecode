@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.Reader;
+import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.zip.DeflaterOutputStream;
@@ -187,6 +188,14 @@ public class IOUtils {
         if(in != null) {
             try {
                 in.close();
+            } catch(IOException ignored) {}
+        }
+    }
+    
+    public static void close(Writer out) {
+        if(out != null) {
+            try {
+                out.close();
             } catch(IOException ignored) {}
         }
     }

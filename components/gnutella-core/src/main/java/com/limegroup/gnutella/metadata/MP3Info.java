@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.metadata;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.util.IOUtils;
 /**
  * Provide MP3 file info derived from the file header data
  *
@@ -196,11 +199,11 @@ public final class MP3Info {
 		int pos = 0; 		//position in file, start at the beginning, duh...
 		int adjustedEOB = 0;//adjusted end depending on actual bytes read
 		int c = 0; 			//number of actual bytes read from file
-		FileInputStream fis = null;
+		InputStream fis = null;
 		byte[] buf = new byte[2048];
 
 		try {
-			fis = new FileInputStream(_file);
+			fis = new BufferedInputStream(new FileInputStream(_file));
 			
 			//initially check the first few bytes
 			c = fis.read(buf, 0, buf.length);
@@ -360,11 +363,8 @@ public final class MP3Info {
 		} 
 		
 	    } finally { //cleanup
-			try {				
-				if( fis != null )
-				    fis.close(); 
-			} catch (IOException e) {}//ignore
-		}
+            IOUtils.close(fis);
+        }
     }
 
     public int getBitRate() {
