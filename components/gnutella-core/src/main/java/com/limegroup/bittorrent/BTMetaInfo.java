@@ -51,22 +51,6 @@ public class BTMetaInfo implements Serializable {
 	private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
 
-	/*
-	 * for creating FakeFileDescs
-	 */
-	private static final Set FAKE_URN_SET = new HashSet();
-
-	static {
-		// initialize FAKE_URN_SET.
-		try {
-			FAKE_URN_SET
-					.add(URN
-							.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
-		} catch (IOException ioe) {
-			ErrorService.error(ioe);
-		}
-	}
-	
 	private BitSet fullSet = new FullBitSet();
 
 	/* a two dimensional array storing the hashes for this file */
@@ -209,9 +193,11 @@ public class BTMetaInfo implements Serializable {
 	 * @return FileDesc for the GUI.
 	 */
 	public FileDesc getFileDesc() {
-		if (_desc == null)
-			_desc = new FakeFileDesc(_completeFile == null ? _incompleteFile
-					: _completeFile);
+		if (_desc == null) {
+			Set s = new HashSet();
+			s.add(getURN());
+			_desc = new FakeFileDesc(_completeFile,s);
+		}
 		return _desc;
 	}
 
@@ -861,8 +847,8 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	public class FakeFileDesc extends FileDesc {
-		public FakeFileDesc(File file) {
-			super(file, FAKE_URN_SET, Integer.MAX_VALUE);
+		public FakeFileDesc(File file, Set s) {
+			super(file, s, Integer.MAX_VALUE);
 		}
 	}
 	
