@@ -127,12 +127,6 @@ public class ManagedTorrent {
 	 */
 	private final IntWrapper _state = new IntWrapper(QUEUED);
 	
-	/**
-	 * A listener for the life of this torrent, if any.
-	 */
-	private final List<TorrentLifecycleListener> lifeCycleListeners =
-		new CopyOnWriteArrayList<TorrentLifecycleListener>();
-	
 	/** The total uploaded and downloaded data */
 	private volatile long totalUp, totalDown;
 	
@@ -158,13 +152,6 @@ public class ManagedTorrent {
 		choker = new Choker(this, networkInvoker);
 	}
 
-	/**
-	 * adds a listener to the life events of this torrent
-	 */
-	void addLifecycleListener(TorrentLifecycleListener listener) {
-		lifeCycleListeners.add(listener);
-	}
-	
 	void setState(int newState) {
 		_state.setInt(newState);
 	}
@@ -330,8 +317,8 @@ public class ManagedTorrent {
 			networkInvoker.invokeLater(closer);
 		}
 		
-		for (TorrentLifecycleListener listener : lifeCycleListeners)
-			listener.torrentStopped(this);
+		TorrentEvent stop = new TorrentEvent(this, TorrentEvent.Type.STOPPED, this); 
+		RouterService.getTorrentManager().dispatchTorrentEvent(stop);
 		
 		LOG.debug("Torrent stopped!");
 	}
@@ -402,8 +389,8 @@ public class ManagedTorrent {
 				new FixedSizeExpiringSet<TorrentLocation>(500, 60 * 60 * 1000));
 		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
 
-		for (TorrentLifecycleListener listener : lifeCycleListeners)
-			listener.torrentStarted(this);
+		TorrentEvent start = new TorrentEvent(this, TorrentEvent.Type.STARTED, this); 
+		RouterService.getTorrentManager().dispatchTorrentEvent(start);
 		
 		_connectionFetcher = new BTConnectionFetcher(this);
 
@@ -655,8 +642,8 @@ public class ManagedTorrent {
 		// tell the tracker we are a seed now
 		trackerManager.announceComplete();
 		
-		for(TorrentLifecycleListener listener : lifeCycleListeners)
-			listener.torrentComplete(this);
+		TorrentEvent complete = new TorrentEvent(this, TorrentEvent.Type.COMPLETE, this); 
+		RouterService.getTorrentManager().dispatchTorrentEvent(complete);
 	}
 
 	/**

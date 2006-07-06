@@ -23,8 +23,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  *  <li>Error messages
  *  </ul>
  */
-public interface ActivityCallback extends DownloadCallback, FileEventListener,
-TorrentPrompt {
+public interface ActivityCallback extends DownloadCallback, FileEventListener {
     
     /**
      * The address of the program has changed or we've

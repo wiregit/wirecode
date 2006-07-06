@@ -11,33 +11,28 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
 /**
  * A facade for the GUI to treat a single BitTorrent download as a single upload.
  */
-public class BTUploader implements Uploader, TorrentLifecycleListener {
+public class BTUploader implements Uploader, TorrentEventListener {
 	
 	private final ManagedTorrent _torrent;
 	
 	private final BTMetaInfo _info;
 	
-	private final TorrentPrompt _prompt;
-
 	private long startTime, stopTime;
 
-	public BTUploader(ManagedTorrent torrent, BTMetaInfo info, TorrentPrompt prompt) {
+	public BTUploader(ManagedTorrent torrent, BTMetaInfo info) {
 		_torrent = torrent;
 		_info = info;
-		_prompt = prompt;
 	}
 
 	public void stop() {
-		boolean stop = true;
-		
-		if (_torrent.isDownloading())
-			stop = _prompt.promptAboutStopping();
-		else if (_torrent.getState() == ManagedTorrent.SEEDING && 
-				_torrent.getTotalUploaded() < _torrent.getTotalDownloaded())
-			stop = _prompt.promptAboutSeeding();
-
-		if (stop)
-			_torrent.stop();
+		TorrentEvent stopping = new TorrentEvent(this,
+				TorrentEvent.Type.STOP_REQUESTED,
+				_torrent);
+		RouterService.getTorrentManager().dispatchTorrentEvent(stopping);
+	}
+	
+	public void performStop() {
+		_torrent.stop();
 	}
 
 	public String getFileName() {
@@ -142,28 +137,32 @@ public class BTUploader implements Uploader, TorrentLifecycleListener {
 		return _torrent.getMeasuredBandwidth(false) / 1024;
 	}
 
+	public void handleTorrentEvent(TorrentEvent evt) {
+		if (evt.getSource() == this || evt.getTorrent() != _torrent)
+			return;
+		if (evt.getType() == TorrentEvent.Type.STARTED)
+			torrentStarted();
+		else if (evt.getType() == TorrentEvent.Type.STOPPED)
+			torrentStopped();
+		else if (evt.getType() == TorrentEvent.Type.STOP_REQUESTED)
+			_torrent.stop();
+	}
+	
 	public float getAverageBandwidth() {
 		long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
 		long runTime = (now - startTime);
 		return runTime > 0 ? getTotalAmountUploaded() / runTime : 0;
 	}
 	
-	public void torrentStarted(ManagedTorrent t) {
-		if (t == _torrent) {
-			startTime = System.currentTimeMillis();
-			stopTime = 0;
-			RouterService.getCallback().addUpload(this);
-		}
+	private void torrentStarted() {
+		startTime = System.currentTimeMillis();
+		stopTime = 0;
+		RouterService.getCallback().addUpload(this);
 	}
 	
-	public void torrentStopped(ManagedTorrent t) {
-		if (t == _torrent) {
-			RouterService.getCallback().removeUpload(this);
-			stopTime = System.currentTimeMillis();
-		}
+	private void torrentStopped() {
+		RouterService.getCallback().removeUpload(this);
+		stopTime = System.currentTimeMillis();
 	}
 	
-	public void torrentComplete(ManagedTorrent t){
-		// nothing.
-	}
 }

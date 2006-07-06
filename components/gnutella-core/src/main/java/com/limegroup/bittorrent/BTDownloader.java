@@ -27,8 +27,8 @@ import com.limegroup.gnutella.util.NumericBuffer;
 /**
  * This class enables the rest of LW to treat this as a regular download.
  */
-public class BTDownloader extends AbstractDownloader
-implements TorrentLifecycleListener {
+public class BTDownloader extends AbstractDownloader 
+implements TorrentEventListener {
 	
     private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
@@ -320,24 +320,33 @@ implements TorrentLifecycleListener {
 		return _torrent.getNumConnections();
 	}
 
-	public void torrentComplete(ManagedTorrent t) {
-		if (_torrent == t) {
-			// the download stops now. even though the torrent goes on
-			stopTime = System.currentTimeMillis();
-			complete = true;
-			manager.remove(this, true);
-			ifm.removeTorrentEntry(_info.getURN());
-		}
+	public void handleTorrentEvent(TorrentEvent evt) {
+		if (evt.getSource() == this || evt.getTorrent() != _torrent)
+			return;
+		if (evt.getType() == TorrentEvent.Type.STARTED)
+			torrentStarted();
+		else if (evt.getType() == TorrentEvent.Type.STOPPED)
+			torrentStopped();
+		else if (evt.getType() == TorrentEvent.Type.COMPLETE)
+			torrentComplete();
+	}
+	
+	private void torrentComplete() {
+		// the download stops now. even though the torrent goes on
+		stopTime = System.currentTimeMillis();
+		complete = true;
+		manager.remove(this, true);
+		ifm.removeTorrentEntry(_info.getURN());
 	}
 
-	public void torrentStarted(ManagedTorrent t) {
+	private void torrentStarted() {
 		startTime = System.currentTimeMillis();
 		stopTime = 0;
 		complete = false;
 	}
 
-	public void torrentStopped(ManagedTorrent t) {
-		if (_torrent == t && stopTime == 0) {
+	private void torrentStopped() {
+		if (stopTime == 0) {
 			stopTime = System.currentTimeMillis();
 			manager.remove(this, !isResumable());
 		} // otherwise torrent was already completed.
@@ -368,11 +377,11 @@ implements TorrentLifecycleListener {
 			DownloadCallback callback) {
 		this.manager = manager;
 		ifm = manager.getIncompleteFileManager();
+		TorrentManager torrentManager = RouterService.getTorrentManager();
 		_torrent = new ManagedTorrent(_info); 
-		_torrent.addLifecycleListener(this);
-		BTUploader uploader = new BTUploader(_torrent,_info, RouterService.getCallback());
-		_torrent.addLifecycleListener(uploader);
-		_torrent.addLifecycleListener(RouterService.getTorrentManager());
+		torrentManager.addTorrentEventListener(this);
+		BTUploader uploader = new BTUploader(_torrent,_info);
+		torrentManager.addTorrentEventListener(uploader);
 		ifm.addTorrentEntry(_info.getURN());
 	}
 	

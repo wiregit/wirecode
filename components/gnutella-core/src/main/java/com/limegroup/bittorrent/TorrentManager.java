@@ -4,7 +4,9 @@ import java.io.File;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 import org.apache.commons.logging.Log;
@@ -34,7 +36,7 @@ import com.limegroup.bittorrent.ManagedTorrent;
  * the new torrent is queued.
  */
 public class TorrentManager 
-implements ConnectionAcceptor, TorrentLifecycleListener {
+implements ConnectionAcceptor, TorrentEventListener {
 	
 
 	private static final Log LOG = LogFactory.getLog(TorrentManager.class);
@@ -49,7 +51,9 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 	 * INVARIANT: subset of _active.
 	 */
 	private Set <ManagedTorrent>_seeding = new HashSet<ManagedTorrent>();
-
+	
+	private List <TorrentEventListener> listeners = 
+		new CopyOnWriteArrayList<TorrentEventListener>();
 
 	/**
 	 * Initializes this. Always call this method before starting any torrents.
@@ -66,6 +70,9 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 				this,
 				new String[]{word.toString()},
 				false,false);
+		
+		// we are a torrent event listener too.
+		listeners.add(this);
 	}
 	
 	/**
@@ -85,6 +92,26 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 
 	}
 	
+	public void addTorrentEventListener(TorrentEventListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void dispatchTorrentEvent(TorrentEvent evt) {
+		for(TorrentEventListener l : listeners)
+			l.handleTorrentEvent(evt);
+	}
+	
+	public void handleTorrentEvent(TorrentEvent evt) {
+		if (evt.getSource() == this)
+			return;
+		if (evt.getType() == TorrentEvent.Type.STARTED)
+			torrentStarted(evt.getTorrent());
+		else if (evt.getType() == TorrentEvent.Type.STOPPED)
+			torrentStopped(evt.getTorrent());
+		else if (evt.getType() == TorrentEvent.Type.COMPLETE)
+			torrentComplete(evt.getTorrent());
+	}
+	
 	/**
 	 * @return active torrent for the given infoHash, null if no such.
 	 */
@@ -102,12 +129,12 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 		shaker.startHandshaking();
 	}
 
-	public synchronized void torrentComplete(ManagedTorrent t) {
+	private synchronized void torrentComplete(ManagedTorrent t) {
 		Assert.that(_active.contains(t));
 		_seeding.add(t);
 	}
 
-	public synchronized void torrentStarted(ManagedTorrent t) {
+	private synchronized void torrentStarted(ManagedTorrent t) {
 		// if the user is adding a seeding torrent.. 
 		// effectively restart it
 		if (_seeding.remove(t))
@@ -128,7 +155,7 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 		_active.add(t);
 	}
 
-	public synchronized void torrentStopped(ManagedTorrent t) {
+	private synchronized void torrentStopped(ManagedTorrent t) {
 		_active.remove(t);
 		_seeding.remove(t);
 	}
