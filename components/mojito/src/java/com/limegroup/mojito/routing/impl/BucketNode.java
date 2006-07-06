@@ -85,6 +85,10 @@ class BucketNode implements Bucket {
         
         Contact existing = nodeTrie.put(node.getNodeID(), node);
         assert (existing == null);
+        
+        if(node.isAlive()) {
+            touch();
+        }
     }
     
     public void addCachedContact(Contact node) {
