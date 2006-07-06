@@ -246,7 +246,7 @@ public class RouteTableImpl implements RouteTable {
         
         if (node.isAlive()) {
             Contact leastRecentlySeen = bucket.getLeastRecentlySeenLiveContact();
-            if (leastRecentlySeen.isUnknown()) {
+            if (leastRecentlySeen.isUnknown() || leastRecentlySeen.isDead()) {
                 if (LOG.isTraceEnabled()) {
                     LOG.info("Replacing " + leastRecentlySeen + " with " + node);
                 }
