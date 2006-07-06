@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Set;
 
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
