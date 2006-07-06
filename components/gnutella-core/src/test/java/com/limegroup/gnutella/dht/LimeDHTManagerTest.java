@@ -86,7 +86,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     }
     
     public void testBootstrap() throws Exception {
-        RouterService.initializeDHT(false);
+        RouterService.startDHT(true);
         sleep(500);
         assertTrue(DHT_MANAGER.isRunning());
         assertTrue(DHT_MANAGER.isActiveNode());
@@ -97,13 +97,12 @@ public class LimeDHTManagerTest extends BaseTestCase {
         assertFalse(DHT_MANAGER.isWaiting());
         sleep(100);
         assertGreaterThan(-1, CapabilitiesVM.instance().supportsDHT());
-        assertFalse(DHT_MANAGER.isWaiting());
     }
     
     public void testAddBootstrapHost() throws Exception{
         NetworkSettings.MAX_ERRORS.setValue(1);
         NetworkSettings.MAX_TIMEOUT.setValue(300);
-        RouterService.initializeDHT(false);
+        RouterService.startDHT(true);
         sleep(300);
         //add invalid hosts
         DHT_MANAGER.addBootstrapHost(new InetSocketAddress("localhost",2000));
@@ -121,6 +120,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
         //by now, should have failed previous unsuccessfull bootstrap and bootstrapped correctly
         bootstrapHosts = (List) PrivilegedAccessor.getValue(DHT_MANAGER, "bootstrapHosts");
         assertFalse(DHT_MANAGER.isWaiting());
+//        assertTrue()
     }
     
     public void testLeafDHTNode() throws Exception{
@@ -128,7 +128,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 
-        RouterService.initializeDHT(false);
+        RouterService.startDHT(true);
         //get ready to accept connections
         RouterService.clearHostCatcher();
         RouterService.connect();  
@@ -145,7 +145,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     public void testSwitchPassiveActive() throws Exception{
         DHTSettings.PERSIST_DHT.setValue(true);
-        RouterService.initializeDHT(false);
+        RouterService.startDHT(true);
         assertTrue(DHT_MANAGER.isRunning());
         KUID nodeId = DHT_MANAGER.getMojitoDHT().getLocalNodeID();
         //try to bootstrap at the same time

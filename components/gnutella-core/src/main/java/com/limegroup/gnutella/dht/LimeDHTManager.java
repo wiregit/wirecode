@@ -132,13 +132,13 @@ public class LimeDHTManager implements LifecycleListener {
      * 2) We are not an ultrapeer while excluding ultrapeers from the active network
      * 3) We are not already connected or trying to bootstrap
      * 
-     * @param forcePassive true to connect to the DHT in passive mode
+     * @param activeMode true to connect to the DHT in active mode
      */
-    public synchronized void start(boolean forcePassive) {
+    public synchronized void start(boolean activeMode) {
         if (running) {
             return;
         }
-        isActive = !forcePassive;
+        isActive = activeMode;
         
         if(DHTSettings.DISABLE_DHT_NETWORK.getValue() 
                 || DHTSettings.DISABLE_DHT_USER.getValue()) { 
@@ -147,7 +147,7 @@ public class LimeDHTManager implements LifecycleListener {
         
         //if we want to connect actively, we either shouldn't be an ultrapeer
         //or should be DHT capable
-        if (!forcePassive && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+        if (isActive && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
             
             if(!DHTSettings.DHT_CAPABLE.getValue() ||
                (RouterService.isSupernode() &&
@@ -161,7 +161,7 @@ public class LimeDHTManager implements LifecycleListener {
         }
         
         //set firewalled status
-        dht.setFirewalled(forcePassive);
+        dht.setFirewalled(activeMode);
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Initializing the DHT");
@@ -187,27 +187,14 @@ public class LimeDHTManager implements LifecycleListener {
      */
     private void bootstrap() {
         final LinkedList<SocketAddress> snapshot = new LinkedList<SocketAddress>();
+        
+        //first add bootstrap host list coming from the network
         synchronized (bootstrapHosts) {
              snapshot.addAll(bootstrapHosts);
         }
-        
-        String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
 
-        for (int i = 0; i < simppHosts.length; i++) {
-            String hostString = simppHosts[i];
-            int index = hostString.indexOf(":");
-            if(index == hostString.length() -1 || index < 0)
-                LOG.error(new UnknownHostException("invalid host: " + hostString));
-            
-            try {
-                String host = hostString.substring(0, index);
-                int port = Integer.parseInt(hostString.substring(index+1).trim());
-                InetSocketAddress addr = new InetSocketAddress(host, port);
-                snapshot.addFirst(addr);
-            } catch(NumberFormatException nfe) {
-                LOG.error(new UnknownHostException("invalid host: " + hostString));
-            }
-        }
+        //then append SIMPP hosts if we have any
+        snapshot.addAll(getSIMPPHosts());
         
         System.out.println("snapshot:" + snapshot);
         try {
@@ -362,7 +349,7 @@ public class LimeDHTManager implements LifecycleListener {
         } 
         
         if(wasRunning)
-            start(true);
+            start(!passive);
     }
 
     /**
@@ -387,6 +374,28 @@ public class LimeDHTManager implements LifecycleListener {
                 shutdown();
             }
         }
+    }
+    
+    private List<? extends SocketAddress> getSIMPPHosts(){
+        String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
+        ArrayList<InetSocketAddress> hostList = new ArrayList<InetSocketAddress>(simppHosts.length);
+
+        for (int i = 0; i < simppHosts.length; i++) {
+            String hostString = simppHosts[i];
+            int index = hostString.indexOf(":");
+            if(index == hostString.length() -1 || index < 0)
+                LOG.error(new UnknownHostException("invalid host: " + hostString));
+            
+            try {
+                String host = hostString.substring(0, index);
+                int port = Integer.parseInt(hostString.substring(index+1).trim());
+                InetSocketAddress addr = new InetSocketAddress(host, port);
+                hostList.add(addr);
+            } catch(NumberFormatException nfe) {
+                LOG.error(new UnknownHostException("invalid host: " + hostString));
+            }
+        }
+        return hostList;
     }
     
     public MojitoDHT getMojitoDHT() {

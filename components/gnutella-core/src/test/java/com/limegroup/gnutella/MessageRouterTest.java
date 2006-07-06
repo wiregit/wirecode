@@ -665,7 +665,7 @@ public final class MessageRouterTest extends BaseTestCase {
         RouterService rs = new RouterService(new ActivityCallbackStub());
         RouterService.preGuiInit();
         rs.start();
-        RouterService.initializeDHT(true);
+        RouterService.startDHT(false);
         //start a few dhts and add them to our rt
         MojitoDHT dht;
         for(int i = 0; i < 20; i++) {

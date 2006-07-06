@@ -233,7 +233,7 @@ public class NodeAssigner {
         //or if we were allready connected active before, switch to passive mode
         if(RouterService.isSupernode()) {
             if(!RouterService.isDHTNode()) {
-                RouterService.initializeDHT(true);
+                RouterService.startDHT(false);
             } else if(RouterService.isActiveDHTNode()) {
                 RouterService.setPassiveDHTNode(true);
             }
@@ -392,7 +392,7 @@ public class NodeAssigner {
             Runnable dhtInitializer = 
                 new Runnable() {
                     public void run() {
-                        RouterService.initializeDHT(false);
+                        RouterService.startDHT(true);
                     }
                 };
             ThreadFactory.startThread(dhtInitializer, "dhtInitializeThread");
