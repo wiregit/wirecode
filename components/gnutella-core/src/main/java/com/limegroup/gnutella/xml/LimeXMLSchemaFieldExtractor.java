@@ -499,6 +499,12 @@ class LimeXMLSchemaFieldExtractor
             if(hiddenAttribute.getNodeValue().equalsIgnoreCase("true"))
                 fieldInfo.setHidden(true);
         }
+        
+        Node invisibleAttribute = attributes.getNamedItem("invisible");
+        if(invisibleAttribute != null) {
+            if(invisibleAttribute.getNodeValue().equalsIgnoreCase("true"))
+                fieldInfo.setInvisible(true);
+        }
 
         Node defaultVizAttribute = attributes.getNamedItem("defaultViz");
         if(defaultVizAttribute != null) {

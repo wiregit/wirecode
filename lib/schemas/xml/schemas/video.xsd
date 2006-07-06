@@ -54,7 +54,7 @@
       <attribute name="height" minOccurs="0" maxOccurs="1" type="int" editable="false"/>
       <attribute name="width" minOccurs="0" maxOccurs="1" type="int" editable="false"/>
       <attribute name="bitrate" type="short" editable="false"/>
-      <attribute name="action" minOccurs="0" maxOccurs="0" type="string" hidden="true"/>
+      <attribute name="action" minOccurs="0" maxOccurs="0" type="string" hidden="true" invisible="true"/>
       <attribute name="director" minOccurs="0" maxOccurs="1" type="string" />
       <attribute name="studio" minOccurs="0" maxOccurs="1" type="string" />
       <attribute name="language" minOccurs="0" maxOccurs="1" type="string"/>

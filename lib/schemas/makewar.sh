@@ -2,10 +2,13 @@
 
 ### Builds the xml.war & places it in GUI.
 
-VALID_ITEMS="application audio image text video"
+VALID_ITEMS="application audio image document video"
 
 rm -f xml.war
+mkdir xml/data
+touch xml/data/delete_me
 jar -c0Mf xml.war xml/data/delete_me
+rm -rf xml/data
 
 for i in $VALID_ITEMS
 do

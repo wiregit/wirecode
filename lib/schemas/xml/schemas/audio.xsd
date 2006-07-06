@@ -171,7 +171,7 @@
         </simpleType>
       </attribute>
       <attribute name="license" type="string"/>
-      <attribute name="action" type="string" hidden="true"/>
+      <attribute name="action" type="string" hidden="true" invisible="true"/>
     </all>
   </complexType>
 

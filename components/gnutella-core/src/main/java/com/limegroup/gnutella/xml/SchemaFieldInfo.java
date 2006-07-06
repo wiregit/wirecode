@@ -27,6 +27,11 @@ public class SchemaFieldInfo
     private boolean _hidden = false;
     
     /**
+     * Whether the field should be completely hidden (including from searches.)
+     */
+    private boolean _invisible = false;
+    
+    /**
      * The default width this field should have in columns.
      */
     private int _width = 60;
@@ -120,13 +125,28 @@ public class SchemaFieldInfo
     void setHidden(boolean hidden) {
         this._hidden = hidden;
     }
-    
+
     /**
      * Gets whether or not this field is hidden.
      */
     public boolean isHidden() {
         return _hidden;
     }
+
+    /**
+     * Sets whether or not this field should be hidden.
+     */
+    void setInvisible(boolean inviz) {
+        this._invisible = inviz;
+    }
+    
+    /**
+     * Gets whether or not this field is hidden.
+     */
+    public boolean isInvisible() {
+        return _invisible;
+    }
+    
     
     /**
      * Sets the default width.
