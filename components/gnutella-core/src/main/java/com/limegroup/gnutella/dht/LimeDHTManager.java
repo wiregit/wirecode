@@ -10,8 +10,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +31,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
@@ -139,6 +136,7 @@ public class LimeDHTManager implements LifecycleListener {
         if (running) {
             return;
         }
+        
         isActive = activeMode;
         
         if(DHTSettings.DISABLE_DHT_NETWORK.getValue() 
@@ -150,9 +148,9 @@ public class LimeDHTManager implements LifecycleListener {
         //or should be DHT capable
         if (isActive && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
             
-            if(!DHTSettings.DHT_CAPABLE.getValue() ||
-               (RouterService.isSupernode() &&
-               DHTSettings.EXCLUDE_ULTRAPEERS.getValue())) {
+            if(!DHTSettings.DHT_CAPABLE.getValue() 
+                    || (RouterService.isSupernode() 
+                    && DHTSettings.EXCLUDE_ULTRAPEERS.getValue())) {
             
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Cannot initialize DHT - node is not DHT capable or is an ultrapeer");
@@ -220,6 +218,7 @@ public class LimeDHTManager implements LifecycleListener {
                 public void phaseOneComplete(long time) {
                     waiting = false;
                 }
+                
                 public void phaseTwoComplete(boolean foundNodes, long time) {
                     //Notify our connections that we are now a full DHT node 
                     sendUpdatedCapabilities();
@@ -236,8 +235,9 @@ public class LimeDHTManager implements LifecycleListener {
      * 
      */
     public synchronized void shutdown(){
-        if (!running) 
+        if (!running) {
             return;
+        }
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Shutting down DHT");
@@ -262,7 +262,10 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     private void sendRequestForDHTHosts() {
-        if(!RouterService.isConnected()) return;
+        if(!RouterService.isConnected()) {
+            return;
+        }
+        
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
         RouterService.getHostCatcher().sendMessage(m, new DHTNodesRequestListener(), new UDPPingCanceller());
     }
@@ -299,8 +302,10 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public synchronized void addLeafDHTNode(String host, int port) {
-        if(!running) 
+        if(!running) {
             return;
+        }
+        
         InetSocketAddress addr = new InetSocketAddress(host, port);
         if(waiting) {
             addBootstrapHost(addr);
@@ -310,8 +315,10 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public synchronized void removeLeafDHTNode(String host, int port) {
-        if(!running) 
+        if(!running) {
             return;
+        }
+        
         limeDHTRouteTable.removeLeafDHTNode(host, port);
     }
     
@@ -334,8 +341,9 @@ public class LimeDHTManager implements LifecycleListener {
      */
     public void setPassive(boolean passive) {
         boolean wasPassive = dht.isFirewalled();
-        if((passive && wasPassive) || (!passive && !wasPassive)) 
+        if((passive && wasPassive) || (!passive && !wasPassive)) {
             return; //no change
+        }
         
         boolean wasRunning = running;
         shutdown();
@@ -352,8 +360,9 @@ public class LimeDHTManager implements LifecycleListener {
             init();
         } 
         
-        if(wasRunning)
+        if(wasRunning) {
             start(!passive);
+        }
     }
 
     /**
@@ -372,7 +381,6 @@ public class LimeDHTManager implements LifecycleListener {
             if(waiting) {
                 sendRequestForDHTHosts();
             }
-            return;
         } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(running && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
                 shutdown();
@@ -387,13 +395,17 @@ public class LimeDHTManager implements LifecycleListener {
      */
     private SocketAddress getSIMPPHost(){
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
-        List<InetSocketAddress> hostList = new ArrayList<InetSocketAddress>(simppHosts.length);
+        List<SocketAddress> hostList = new ArrayList<SocketAddress>(simppHosts.length);
 
-        for (int i = 0; i < simppHosts.length; i++) {
-            String hostString = simppHosts[i];
+        for (String hostString : simppHosts) {
             int index = hostString.indexOf(":");
-            if(index == hostString.length() -1 || index < 0)
-                LOG.error(new UnknownHostException("invalid host: " + hostString));
+            if(index < 0 || index == hostString.length()-1) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(new UnknownHostException("invalid host: " + hostString));
+                }
+                
+                continue;
+            }
             
             try {
                 String host = hostString.substring(0, index);
@@ -408,13 +420,12 @@ public class LimeDHTManager implements LifecycleListener {
         if(hostList.isEmpty()) {
             return null;
         }
+        
         //each host in the list is responsible for a subspace of the keyspace
         int localPrefix = (int)((dht.getLocalNodeID().getBytes()[0] & 0xF0) >> 4);
         
         int index = (int)((float)hostList.size()/15f * localPrefix) % hostList.size();
-        SocketAddress addr = hostList.get(index);
-        
-        return addr;
+        return hostList.get(index);
     }
     
     public MojitoDHT getMojitoDHT() {
@@ -422,8 +433,10 @@ public class LimeDHTManager implements LifecycleListener {
     }
     
     public void addressChanged() {
-        if(!running) 
+        if(!running) {
             return;
+        }
+        
         dht.stop(); //the node assigner will take care of restarting it!
     }
     

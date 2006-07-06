@@ -14,7 +14,6 @@ import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -45,23 +44,23 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
         
         final Contact[] dhtNode = new Contact[] { null };
         synchronized (dhtNode) {
-                try {
-                    context.ping(host, new PingListener() {
-                        public void response(ResponseMessage response, long t) {
-                            dhtNode[0] = response.getContact();
-                            synchronized (dhtNode) {
-                                dhtNode.notify();
-                            }
+            try {
+                context.ping(host, new PingListener() {
+                    public void response(ResponseMessage response, long t) {
+                        dhtNode[0] = response.getContact();
+                        synchronized (dhtNode) {
+                            dhtNode.notify();
                         }
+                    }
 
-                        public void timeout(KUID nodeId, SocketAddress address, 
-                                RequestMessage request, long t) {
-                            synchronized (dhtNode) {
-                                dhtNode.notify();
-                            }
+                    public void timeout(KUID nodeId, SocketAddress address, 
+                            RequestMessage request, long t) {
+                        synchronized (dhtNode) {
+                            dhtNode.notify();
                         }
-                    });
-                } catch (IOException ignored) {}
+                    }
+                });
+            } catch (IOException ignored) {}
                 
             try {
                 dhtNode.wait(ContextSettings.SYNC_PING_TIMEOUT.getValue());

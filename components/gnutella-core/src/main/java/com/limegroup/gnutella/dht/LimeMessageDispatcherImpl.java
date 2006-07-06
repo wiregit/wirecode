@@ -95,14 +95,17 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         messageRouter.setUDPMessageHandler(StatsResponseImpl.class, this);
     }
 
+    @Override
     protected boolean allow(DHTMessage message) {
         return true;
     }
 
+    @Override
     public void bind(SocketAddress address) throws IOException {
         running = true;
     }
 
+    @Override
     public boolean isOpen() {
         return running;
     }
@@ -122,6 +125,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
      * sends it over UDPService and registers it in the input
      * map if it's a RequestMessage.
      */
+    @Override
     protected boolean enqueueOutput(Tag tag) {
         InetSocketAddress dst = (InetSocketAddress)tag.getSocketAddres();
         ByteBuffer data = tag.getData();
@@ -155,7 +159,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
             LOG.error("IOException", err);
         }
     }
-
+    
     protected void interestRead(boolean on) {
         // DO NOTHING
     }
