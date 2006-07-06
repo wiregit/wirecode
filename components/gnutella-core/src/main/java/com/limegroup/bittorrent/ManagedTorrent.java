@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
@@ -129,8 +130,8 @@ public class ManagedTorrent {
 	/**
 	 * A listener for the life of this torrent, if any.
 	 */
-	private final List<TorrentLifecycleListener> lifeCycleListeners = 
-		Collections.synchronizedList(new ArrayList<TorrentLifecycleListener>(2));
+	private final List<TorrentLifecycleListener> lifeCycleListeners =
+		new CopyOnWriteArrayList<TorrentLifecycleListener>();
 	
 	/** The total uploaded and downloaded data */
 	private volatile long totalUp, totalDown;
@@ -161,10 +162,7 @@ public class ManagedTorrent {
 	 * adds a listener to the life events of this torrent
 	 */
 	void addLifecycleListener(TorrentLifecycleListener listener) {
-		synchronized(lifeCycleListeners) {
-			if (!lifeCycleListeners.contains(listener))
-				lifeCycleListeners.add(listener);
-		}
+		lifeCycleListeners.add(listener);
 	}
 	
 	void setState(int newState) {
@@ -298,43 +296,42 @@ public class ManagedTorrent {
 		if (!stopState())
 			throw new IllegalArgumentException("stopping in wrong state "+_state);
 		
-		synchronized(lifeCycleListeners) {
-			for (TorrentLifecycleListener listener : lifeCycleListeners)
-				listener.torrentStopped(this);
-		}
 		
-		
-		
+		_folder.close();
+		_state.setInt(finalState);
 		choker.stop();
 		trackerManager.announceStop();
 		if (keepAliveSender != null)
 			keepAliveSender.cancel(true);
 		
-		// close the files and write the snapshot
-		Runnable saver = new Runnable() {
-			public void run() {
-				if (!_folder.isComplete()) {
+		// write the snapshot if not complete
+		if (!_folder.isComplete()) {
+			Runnable saver = new Runnable() {
+				public void run() {
 					try {
 						_info.saveInfoMapInIncomplete();
 					} catch (IOException ignored){}
 				}
-				_folder.close();
-				_state.setInt(finalState);
-			}
-		};
-		diskInvoker.invokeLater(saver);
+			};
+			diskInvoker.invokeLater(saver);
+		}
 		
-		// close connections
-		Runnable closer = new Runnable() {
-			public void run() {
-				_connectionFetcher.shutdown();
-				while(!_connections.isEmpty()) {
-					BTConnection toClose = _connections.get(_connections.size() - 1);
-					toClose.close(); // this removes itself from the list.
+		// close connections if any
+		if (!_connections.isEmpty()) {
+			Runnable closer = new Runnable() {
+				public void run() {
+					_connectionFetcher.shutdown();
+					while(!_connections.isEmpty()) {
+						BTConnection toClose = _connections.get(_connections.size() - 1);
+						toClose.close(); // this removes itself from the list.
+					}
 				}
-			}
-		};
-		networkInvoker.invokeLater(closer);
+			};
+			networkInvoker.invokeLater(closer);
+		}
+		
+		for (TorrentLifecycleListener listener : lifeCycleListeners)
+			listener.torrentStopped(this);
 		
 		LOG.debug("Torrent stopped!");
 	}
@@ -405,10 +402,8 @@ public class ManagedTorrent {
 				new FixedSizeExpiringSet<TorrentLocation>(500, 60 * 60 * 1000));
 		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
 
-		synchronized(lifeCycleListeners) {
-			for (TorrentLifecycleListener listener : lifeCycleListeners)
-				listener.torrentStarted(this);
-		}
+		for (TorrentLifecycleListener listener : lifeCycleListeners)
+			listener.torrentStarted(this);
 		
 		_connectionFetcher = new BTConnectionFetcher(this);
 
@@ -660,10 +655,8 @@ public class ManagedTorrent {
 		// tell the tracker we are a seed now
 		trackerManager.announceComplete();
 		
-		synchronized(lifeCycleListeners) {
-			for(TorrentLifecycleListener listener : lifeCycleListeners)
-				listener.torrentComplete(this);
-		}
+		for(TorrentLifecycleListener listener : lifeCycleListeners)
+			listener.torrentComplete(this);
 	}
 
 	/**

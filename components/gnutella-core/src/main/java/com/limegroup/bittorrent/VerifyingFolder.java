@@ -25,6 +25,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.MultiIterator;
@@ -219,26 +220,28 @@ public class VerifyingFolder {
 		if (hasBlock(in.getId()))
 			return;
 		
-		synchronized(DISK_LOCK) {
-			if (!isOpen())
-				throw new IOException("file closed");
-			long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
-			int written = 0;
-			for (int i = 0; i < _files.size() && written < buf.length; i++) {
-				if (startOffset < _files.get(i).length()) {
-					_fos[i].seek(startOffset);
-					int toWrite = (int) Math.min(_files.get(i).length()- startOffset,
-							buf.length - written);
-					
-					if (_fos[i].length() < startOffset + toWrite)
-						_fos[i].setLength(startOffset + toWrite);
-					
-					_fos[i].write(buf, written, toWrite);
-					startOffset += toWrite;
-					written += toWrite;
-				} 
-				startOffset -= _files.get(i).length();
-			}
+		long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
+		int written = 0;
+		for (int i = 0; i < _files.size() && written < buf.length; i++) {
+			if (startOffset < _files.get(i).length()) {
+				RandomAccessFile currentFile;
+				synchronized(DISK_LOCK) {
+					if (!isOpen())
+						throw new IOException("file closed");
+					currentFile = _fos[i];
+				}
+				currentFile.seek(startOffset);
+				int toWrite = (int) Math.min(_files.get(i).length()- startOffset,
+						buf.length - written);
+				
+				if (currentFile.length() < startOffset + toWrite)
+					currentFile.setLength(startOffset + toWrite);
+				
+				currentFile.write(buf, written, toWrite);
+				startOffset += toWrite;
+				written += toWrite;
+			} 
+			startOffset -= _files.get(i).length();
 		}
 		
 		boolean shouldVerify;
@@ -515,17 +518,15 @@ public class VerifyingFolder {
 	public void close() {
 		LOG.debug("closing the file");
 		synchronized(DISK_LOCK) {
-			if (_fos == null)
+			if (!isOpen())
 				return;
-			for (int i = 0; i < _fos.length; i++) {
-				try {
-					if (_fos[i] != null)
-						_fos[i].close();
-				} catch (IOException ioe) {
-					// ignored
-				}
-			}
+			
+			for (RandomAccessFile f : _fos)
+				IOUtils.close(f);
+			
 			_fos = null;
+		}
+		synchronized(this) {
 			pendingRanges.clear();
 		}
 		torrent = null;
@@ -617,25 +618,27 @@ public class VerifyingFolder {
 					"buffer to small to store supplied number of bytes");
 		
 		int read = 0;
-		synchronized(DISK_LOCK) {
-			if (!isOpen())
-				throw new IOException("file closed");
-			for (int i = 0; i < _files.size() && read < length; i++) {
-				File f = _files.get(i);
-				while (position < f.length() && read < length) {
-					if (_fos[i].length() < f.length() && position >= _fos[i].length())
-						return read;
-					int toRead = (int) Math.min(_fos[i].length() - position, length
-							- read);
-					_fos[i].seek(position);
-					int t_read = _fos[i].read(buf, read + offset, toRead);
-					if (t_read == -1)
-						throw new IOException();
-					position += t_read;
-					read += t_read;
+		for (int i = 0; i < _files.size() && read < length; i++) {
+			File f = _files.get(i);
+			while (position < f.length() && read < length) {
+				RandomAccessFile currentFile;
+				synchronized(DISK_LOCK) {
+					if (!isOpen())
+						throw new IOException("file closed");
+					currentFile = _fos[i];
 				}
-				position -= f.length();
+				if (currentFile.length() < f.length() && position >= currentFile.length())
+					return read;
+				int toRead = (int) Math.min(_fos[i].length() - position, length
+						- read);
+				currentFile.seek(position);
+				int t_read = currentFile.read(buf, read + offset, toRead);
+				if (t_read == -1)
+					throw new IOException();
+				position += t_read;
+				read += t_read;
 			}
+			position -= f.length();
 		}
 		return read;
 	}

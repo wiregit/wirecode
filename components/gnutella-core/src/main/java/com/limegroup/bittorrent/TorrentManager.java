@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent;
 
+import java.io.File;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -143,4 +144,23 @@ implements ConnectionAcceptor, TorrentLifecycleListener {
 	synchronized boolean hasNonSeeding() {
 		return _active.size() > _seeding.size();
 	}
-}
+	
+	public boolean killTorrentForFile(File f) {
+		ManagedTorrent found = null;
+		synchronized(this) {
+			for (ManagedTorrent t: _active) {
+				if (t.getMetaInfo().conflicts(f) ||
+						t.getMetaInfo().conflictsIncomplete(f)) {
+					found = t;
+					break;
+				}
+			}
+		}
+		
+		if (found != null) {
+			found.stop();
+			return true;
+		} else 
+			return false;
+	}
+}	

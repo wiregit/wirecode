@@ -269,11 +269,14 @@ public class FileUtils {
                 // This must all be synchronized so that a new upload
                 // doesn't lock the file before we rename it.
                 synchronized(upMan) {
-                    if( upMan.killUploadsForFileDesc(fd) )
+                    if( upMan.killUploadsForFileDesc(fd))
                         success = a.renameTo(b);
                 }
             }
         }
+        
+        if (!success && RouterService.getTorrentManager().killTorrentForFile(a)) 
+        	success = a.renameTo(b);
         
         // If that didn't work, try copying the file.
         if (!success) {

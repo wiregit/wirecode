@@ -245,7 +245,7 @@ public class UploadSlotManager {
 				ret += user.getMeasuredBandwidth();
 			} catch (InsufficientDataException ide) {}
 		}
-		return ret / 1024;
+		return ret;
 	}
 	
 	/**

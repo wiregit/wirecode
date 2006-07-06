@@ -174,6 +174,10 @@ public class BTMetaInfo implements Serializable {
 	boolean conflicts(File f) {
 		return _files.contains(f) || _folders.contains(f);
 	}
+	
+	boolean conflictsIncomplete(File f) {
+		return getBaseFile().getParentFile().equals(f);
+	}
 
 	/**
 	 * Accessor for the base file of the torrent, this may be a directory.

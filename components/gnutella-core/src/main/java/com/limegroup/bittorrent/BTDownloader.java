@@ -398,7 +398,7 @@ implements TorrentLifecycleListener {
 	
 	public boolean conflicts(URN urn, int fileSize, File... file) {
 		for (File f : file) {
-			if (conflictsSaveFile(f));
+			if (conflictsSaveFile(f))
 				return true;
 		}
 		return false;
@@ -409,7 +409,7 @@ implements TorrentLifecycleListener {
 	}
 
 	public boolean conflictsWithIncompleteFile(File incomplete) {
-		return _info.getBaseFile().getParentFile().equals(incomplete); 
+		return _info.conflictsIncomplete(incomplete); 
 	}
 
 	public void finish() {
