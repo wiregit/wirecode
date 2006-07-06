@@ -281,5 +281,15 @@ public class Main implements ActivityCallback, ErrorCallback {
 	public void acceptedIncomingChanged(boolean status) { }
 
     public void disconnected() {}
+
+    // assume the user knows what they're doing
+	public boolean promptAboutSeeding() {
+		return true;
+	}
+	public boolean promptAboutStopping() {
+		return true;
+	}
+    
+    
     
 }

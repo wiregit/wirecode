@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import com.limegroup.bittorrent.TorrentPrompt;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
@@ -22,8 +23,8 @@ import com.limegroup.gnutella.version.UpdateInformation;
  *  <li>Error messages
  *  </ul>
  */
-public interface ActivityCallback extends DownloadCallback, FileEventListener 
-{
+public interface ActivityCallback extends DownloadCallback, FileEventListener,
+TorrentPrompt {
     
     /**
      * The address of the program has changed or we've

@@ -370,7 +370,7 @@ implements TorrentLifecycleListener {
 		ifm = manager.getIncompleteFileManager();
 		_torrent = new ManagedTorrent(_info); 
 		_torrent.addLifecycleListener(this);
-		BTUploader uploader = new BTUploader(_torrent,_info);
+		BTUploader uploader = new BTUploader(_torrent,_info, RouterService.getCallback());
 		_torrent.addLifecycleListener(uploader);
 		_torrent.addLifecycleListener(RouterService.getTorrentManager());
 		ifm.addTorrentEntry(_info.getURN());

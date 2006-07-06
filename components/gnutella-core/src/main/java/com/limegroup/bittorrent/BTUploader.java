@@ -13,19 +13,31 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
  */
 public class BTUploader implements Uploader, TorrentLifecycleListener {
 	
-	private ManagedTorrent _torrent;
+	private final ManagedTorrent _torrent;
 	
-	private BTMetaInfo _info;
+	private final BTMetaInfo _info;
+	
+	private final TorrentPrompt _prompt;
 
 	private long startTime, stopTime;
 
-	public BTUploader(ManagedTorrent torrent, BTMetaInfo info) {
+	public BTUploader(ManagedTorrent torrent, BTMetaInfo info, TorrentPrompt prompt) {
 		_torrent = torrent;
 		_info = info;
+		_prompt = prompt;
 	}
 
 	public void stop() {
-		_torrent.stop();
+		boolean stop = true;
+		
+		if (_torrent.isDownloading())
+			stop = _prompt.promptAboutStopping();
+		else if (_torrent.getState() == ManagedTorrent.SEEDING && 
+				_torrent.getTotalUploaded() < _torrent.getTotalDownloaded())
+			stop = _prompt.promptAboutSeeding();
+
+		if (stop)
+			_torrent.stop();
 	}
 
 	public String getFileName() {

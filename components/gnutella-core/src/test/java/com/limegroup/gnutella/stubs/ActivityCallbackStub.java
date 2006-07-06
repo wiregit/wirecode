@@ -79,4 +79,13 @@ public class ActivityCallbackStub implements ActivityCallback {
 		return false;
 	}
 	public void acceptedIncomingChanged(boolean status) { }
+	public void handleTorrent(File torrentFile) {
+	}
+	public boolean promptAboutSeeding() {
+		return false;
+	}
+	public boolean promptAboutStopping() {
+		return false;
+	}
+	
 }
