@@ -80,10 +80,14 @@ public class LookupManager implements LookupListener {
     }
     
     public boolean lookup(KUID lookup) throws IOException {
-        return lookup(lookup, null);
+        return lookup(lookup, -1, null);
     }
     
     public boolean lookup(KUID lookup, LookupListener listener) throws IOException {
+        return lookup(lookup, -1, listener);
+    }
+    
+    public boolean lookup(KUID lookup, int count, LookupListener listener) throws IOException {
         if (!lookup.isNodeID() && !lookup.isValueID()) {
             throw new IllegalArgumentException("Lookup ID must be either a NodeID or ValueID");
         }
@@ -91,7 +95,7 @@ public class LookupManager implements LookupListener {
         synchronized (handlerMap) {
             LookupResponseHandler handler = handlerMap.get(lookup);
             if (handler == null) {
-                handler = new LookupResponseHandler(lookup, context);
+                handler = new LookupResponseHandler(context, lookup, count);
                 handler.addLookupListener(this);
                 
                 if (listener != null) {

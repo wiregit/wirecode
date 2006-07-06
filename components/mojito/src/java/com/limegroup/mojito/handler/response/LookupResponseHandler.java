@@ -113,7 +113,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
      */
     private Collection found = Collections.EMPTY_LIST;
     
-    public LookupResponseHandler(KUID lookup, Context context) {
+    public LookupResponseHandler(Context context, KUID lookup) {
+        this(context, lookup, -1);
+    }
+    
+    public LookupResponseHandler(Context context, KUID lookup, int resultSetSize) {
         super(context);
         
         if (!lookup.isNodeID() && !lookup.isValueID()) {
@@ -123,7 +127,12 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         this.lookup = lookup;
         this.furthest = lookup.invert();
         
-        resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        if (isValueLookup() || resultSetSize < 0) {
+            this.resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        } else {
+            this.resultSetSize = resultSetSize;
+        }
+        
         setMaxErrors(0); // Don't retry on timeout - takes too long!
 
         if (isValueLookup()) {
@@ -134,9 +143,9 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             lookupStat = new FindNodeLookupStatisticContainer(context, lookup);
         }
         
-        List bucketList = context.getRouteTable().select(lookup, resultSetSize, false, true);
-        for(Iterator it = bucketList.iterator(); it.hasNext(); ) {
-            addYetToBeQueried((ContactNode)it.next(), 1);
+        List<ContactNode> bucketList = context.getRouteTable().select(lookup, resultSetSize, false, true);
+        for(ContactNode node : bucketList) {
+            addYetToBeQueried(node, 1);
         }
         
         addResponse(new ContactQueryKeyEntry(context.getLocalNode()));
