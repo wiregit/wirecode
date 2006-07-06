@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -694,21 +694,10 @@ public class KUID implements Comparable<KUID>, Serializable {
      * @param prefix the fixed prefix bytes
      * @return a random KUID starting with the given prefix
      */
-    private static KUID createPrefxNodeID(byte[] prefix, int depth, byte[] random) {
-        depth++;
-        int length = (int)depth/8;
-        System.arraycopy(prefix, 0, random, 0, length);
-        
-        int bitsToCopy = depth % 8;
-        if (bitsToCopy != 0) {
-            // Mask has the low-order (8-bits) bits set
-            int mask = (1 << (8-bitsToCopy)) - 1;
-            int prefixByte = prefix[length];
-            int randByte   = random[length];
-            random[length] = (byte) ((prefixByte & ~mask) | (randByte & mask));
-        }
-        
-        return KUID.createNodeID(random);
+    public static KUID createPrefxNodeID(KUID prefix, int depth) {
+        byte[] random = new byte[20];
+        GENERATOR.nextBytes(random);
+        return createPrefxNodeID(prefix, depth, random);
     }
     
     /**
@@ -717,10 +706,21 @@ public class KUID implements Comparable<KUID>, Serializable {
      * @param prefix the fixed prefix bytes
      * @return a random KUID starting with the given prefix
      */
-    public static KUID createPrefxNodeID(byte[] prefix, int depth) {
-        byte[] random = new byte[20];
-        GENERATOR.nextBytes(random);
-        return createPrefxNodeID(prefix,depth,random);
+    private static KUID createPrefxNodeID(KUID prefix, int depth, byte[] random) {
+        depth++;
+        int length = (int)depth/8;
+        System.arraycopy(prefix.id, 0, random, 0, length);
+        
+        int bitsToCopy = depth % 8;
+        if (bitsToCopy != 0) {
+            // Mask has the low-order (8-bits) bits set
+            int mask = (1 << (8-bitsToCopy)) - 1;
+            int prefixByte = prefix.id[length];
+            int randByte   = random[length];
+            random[length] = (byte) ((prefixByte & ~mask) | (randByte & mask));
+        }
+        
+        return KUID.createNodeID(random);
     }
     
     /**

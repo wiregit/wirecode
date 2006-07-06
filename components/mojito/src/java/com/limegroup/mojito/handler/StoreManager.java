@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 package com.limegroup.mojito.handler;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -81,13 +81,13 @@ public class StoreManager implements LookupListener {
     
     public void finish(KUID lookup, Collection c, long time) {
         // List of ContactNodes where we stored the KeyValues.
-        final List<ContactNode> storeTargets = new ArrayList<ContactNode>(c.size());
+        final List<Contact> storeTargets = new ArrayList<Contact>(c.size());
         
         for(Iterator it = c.iterator(); it.hasNext(); ) {
-            Entry<ContactNode, QueryKey> entry 
-                    = (Entry<ContactNode, QueryKey>)it.next();
+            Entry<Contact, QueryKey> entry 
+                    = (Entry<Contact, QueryKey>)it.next();
             
-            ContactNode node = entry.getKey();
+            Contact node = entry.getKey();
             QueryKey queryKey = entry.getValue();
             
             if (context.isLocalNodeID(node.getNodeID())) {

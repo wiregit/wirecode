@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,7 +47,6 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mojito.settings.NetworkSettings;
-
 
 public class Main {
     

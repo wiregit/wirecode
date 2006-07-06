@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,8 @@ import junit.framework.Test;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
+import com.limegroup.mojito.util.Trie;
+import com.limegroup.mojito.util.TrieUtils;
 
 
 public class PatriciaTest extends BaseTestCase {
@@ -51,13 +53,13 @@ public class PatriciaTest extends BaseTestCase {
                 "Banane", "Blabla", "Amber", "Ammun", "Akka", "Akko",
                 "Albertoo", "Amma" };
 
-        PatriciaTrie trie = new PatriciaTrie();
+        Trie<KUID, String> trie = new PatriciaTrie<KUID, String>();
         for (int i = 0; i < keys.length; i++) {
             trie.put(toKUID(keys[i]), keys[i]);
         }
 
         int k = 6;
-        List list = trie.select(toKUID("Albert"), k);
+        List<String> list = TrieUtils.select(trie, toKUID("Albert"), k);
         assertEquals(k, list.size());
         
         /*for (Iterator it = list.iterator(); it.hasNext(); ) {
@@ -128,7 +130,7 @@ public class PatriciaTest extends BaseTestCase {
             "F735922C5C8B54FFD9424EB46066236E7D5BBA8D"
         };
         
-        PatriciaTrie trie = new PatriciaTrie();
+        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>();
         for(int i = 0; i < nodes.length; i++) {
             KUID kuid = KUID.createNodeID(ArrayUtils.parseHexString(nodes[i]));
             trie.put(kuid, kuid);
@@ -139,7 +141,7 @@ public class PatriciaTest extends BaseTestCase {
         //System.out.println(trie);
         
         KUID key = KUID.createNodeID(ArrayUtils.parseHexString(lookup));
-        List items = trie.select(key, nodes.length);
+        List<KUID> items = TrieUtils.select(trie, key, nodes.length);
         
         System.out.println();
         System.out.println("Key: \n" + key + " = " + key.toBinString() + "\n");
@@ -163,7 +165,7 @@ public class PatriciaTest extends BaseTestCase {
             "94850358CEFD33CD0BDE1F468AEA1E646B3F8724"
         };
         
-        PatriciaTrie trie = new PatriciaTrie();
+        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>();
         for(int i = 0; i < nodes.length; i++) {
             KUID kuid = KUID.createNodeID(ArrayUtils.parseHexString(nodes[i]));
             trie.put(kuid, kuid);
@@ -183,7 +185,7 @@ public class PatriciaTest extends BaseTestCase {
         
         
         System.out.println();
-        List items = trie.select(inverted, trie.size());
+        List<KUID> items = TrieUtils.select(trie, inverted, trie.size());
         for(Iterator it = items.iterator(); it.hasNext(); ) {
             KUID kuid = (KUID)it.next();
             System.out.println(kuid + " = " + kuid.toBinString());
@@ -199,7 +201,7 @@ public class PatriciaTest extends BaseTestCase {
         System.out.println("Selected for inverted: " + selected);
         
         System.out.println();
-        System.out.println(trie.select(inverted, 1));
+        System.out.println(TrieUtils.select(trie, inverted, 1));
     }
     
     // Not an unit test!

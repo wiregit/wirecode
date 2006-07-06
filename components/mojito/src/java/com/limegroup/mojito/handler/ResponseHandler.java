@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,15 +31,33 @@ import com.limegroup.mojito.messages.ResponseMessage;
  */
 public interface ResponseHandler {
     
+    /**
+     *
+     */
     public void addTime(long time);
     
+    /**
+     *
+     */
     public long time();
     
+    /**
+     *
+     */
     public long timeout();
     
+    /**
+     *
+     */
     public void handleResponse(ResponseMessage message, long time) throws IOException;
     
+    /**
+     *
+     */
     public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException;
     
+    /**
+     *
+     */
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
 }

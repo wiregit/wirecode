@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 package com.limegroup.mojito.handler;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingListener;
@@ -37,7 +37,6 @@ import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.routing.RouteTable.SpoofChecker;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -107,30 +106,16 @@ public class PingManager implements PingListener {
         return ping(null, address, listener);
     }
 
-    public boolean ping(ContactNode node) throws IOException {
+    public boolean ping(Contact node) throws IOException {
         return ping(node.getNodeID(), node.getSocketAddress(), null);
     }
     
-    public boolean ping(ContactNode node, PingListener listener) throws IOException {
+    public boolean ping(Contact node, PingListener listener) throws IOException {
         return ping(node.getNodeID(), node.getSocketAddress(), listener);
     }
 
-    public boolean ping(KUID nodeId, SocketAddress address, PingListener listener) throws IOException {
-        return ping(nodeId, address, listener, true);
-    }
-    
-    /**
-     * A spoof check ping is not different from a regular ping.
-     * The only difference is that the SpoofChecker must overwrite 
-     * the equals() method properly so that there can be only one 
-     * SpoofChecker per address.
-     */
-    public boolean spoofCheckPing(ContactNode node, SpoofChecker checker) throws IOException {
-        return ping(node.getNodeID(), node.getSocketAddress(), checker, false);
-    }
-    
-    private boolean ping(KUID nodeId, SocketAddress address, 
-            PingListener listener, boolean duplicates) throws IOException {
+    public boolean ping(KUID nodeId, SocketAddress address, 
+            PingListener listener) throws IOException {
         
         synchronized (pingLock()) {
             PingResponseHandler responseHandler = handlerMap.get(address);
@@ -151,10 +136,7 @@ public class PingManager implements PingListener {
                 return true;
                 
             } else if (listener != null) {
-                if (duplicates 
-                        || !responseHandler.hasResponseListener(listener)) {
-                    responseHandler.addPingListener(listener);
-                }
+                responseHandler.addPingListener(listener);
             }
             return false;
         }
@@ -166,7 +148,7 @@ public class PingManager implements PingListener {
         synchronized (pingLock()) {
             
             SocketAddress address 
-                = response.getContactNode().getSocketAddress();
+                = response.getContact().getSocketAddress();
             
             PingResponseHandler handler 
                 = handlerMap.remove(address);
@@ -214,7 +196,7 @@ public class PingManager implements PingListener {
         }
     }
 
-    public boolean cancel(ContactNode node) {
+    public boolean cancel(Contact node) {
         return cancel(node.getSocketAddress());
     }
     

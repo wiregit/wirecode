@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,16 +19,11 @@
  
 package com.limegroup.mojito.routing;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.List;
 
-import com.limegroup.mojito.BucketNode;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.handler.BootstrapManager;
-
 
 /**
  * RouteTable interface that all LimeDHT route table implementations
@@ -37,114 +32,83 @@ import com.limegroup.mojito.handler.BootstrapManager;
 public interface RouteTable {
     
     /**
+     * Adds a new Contact or if it's already in the RouteTable updates 
+     * its contact information.
+     * 
+     * @param node the Contact we would like to add
+     */
+    public void add(Contact node);
+    
+    /**
+     * Returns a Contact from the local RoutingTable if such Contact exists 
+     * and null if it doesn't.
+     */
+    public Contact get(KUID nodeId);
+    
+    /**
+     * Selects the best matching Contact for the provided KUID.
+     * This method will gueanteed return a non-null value if the
+     * RoutingTable is not empty.
+     */
+    public Contact select(KUID nodeId);
+    
+    /**
+     * Selects the best matching k ContactNodes for the provided KUID. The returned
+     * Contacts are sorted by their closeness to the lookup Key from closest to
+     * least closest Contact. Use {@link com.limegroup.mojito.util.BucketUtils#sort(List)}
+     * to sort the list from least-recently-seen to most-recently-seen ContactNode.
+     * 
+     * @param nodeId the lookup KUID
+     * @param count the number of Contact (maybe less if RoutingTable has less than 'count' entries!)
+     * @param liveContacts wheather or not only live Contacts should be in the result set
+     * @return list of Contacts sorted by closeness
+     */
+    public List<Contact> select(KUID nodeId, int count, boolean liveContacts);
+    
+    /**
+     * Notifies the RoutingTable that the Contact with the provided
+     * KUID has failed to answert to a request.
+     */
+    public void handleFailure(KUID nodeId, SocketAddress address);
+    
+    /**
+     * Returns all Contacts as List
+     */
+    public List<Contact> getContacts();
+    
+    /**
+     * Returns Contacts that are actively used for routing
+     */
+    public List<Contact> getLiveContacts();
+    
+    /**
+     * Returns cached Contacts that are in the replacement cache
+     */
+    public List<Contact> getCachedContacts();
+    
+    /**
+     * Returns a List of KUIDs that need to be looked up in order
+     * to refresh the RouteTable.
+     * 
+     * @param force whether or not the refresh is forced 
+     */
+    public List<KUID> getRefreshIDs(boolean force);
+    
+    /**
+     * Returns whether or not the local Contact (i.e. we)
+     * are close to the provided KUID. In other words if
+     * the provided KUID is (hypothetically) in the same 
+     * Bucket in the RouteTable as the local Contact is.
+     */
+    public boolean isNearToLocal(KUID nodeId);
+    
+    /**
      * Clears all elements from the RoutingTable
      */
     public void clear();
     
     /**
-     * Returns true if the RoutingTable is empty (initial state)
-     */
-    public boolean isEmpty();
-    
-    /**
-     * Returns the number of ContactNodes.
+     * Returns the number of live and cached Contacts in the Route Table
      */
     public int size();
-    
-    /**
-     * Returns the number of Buckets
-     */
-    public int getBucketCount();
-    
-    /**
-     * Adds a new ContactNode or if it's already known updates its
-     * contact information.
-     * 
-     * @param node the ContactNode we would like to add
-     * @param knownToBeAlive wheather or not this ContactNode is known to be alive
-     * @return true if ContactNode was added
-     */
-    public boolean add(ContactNode node, boolean knownToBeAlive);
-    
-    /**
-     * Returns a ContactNode from the local RoutingTable if such Node exists 
-     * and null if it doesn't.
-     */
-    public ContactNode get(KUID nodeId);
-    
-    /**
-     * Returns a ContactNode from the local RoutingTable if such Node exists 
-     * and null if it doesn't.
-     */
-    public ContactNode get(KUID nodeId, boolean checkAndUpdateCache);
-    
-    /**
-     * Selects the best matching ContactNode for the provided KUID.
-     * This method will gueanteed return a non-null value if the
-     * RoutingTable is not empty.
-     */
-    public ContactNode select(KUID lookup);
-    
-    /**
-     * Selects the best matching k ContactNodes for the provided KUID. The returned
-     * ContactNodes are sorted by their closeness to the lookup Key from closest to
-     * least closest ContactNode. Use {@link com.limegroup.mojito.util.BucketUtils#sort(List)}
-     * to sort the list from least-recently-seen to most-recently-seen ContactNode.
-     * 
-     * @param lookup the lookup KUID
-     * @param k the number of ContactNodes (maybe less if RoutingTable has less than k entries!)
-     * @param onlyLiveNodes wheather or not only live nodes should be in the result set
-     * @param willContact wheather or not we'll contact these ContactNodes
-     * @return list of ContactNodes sorted by closeness
-     */
-    public List<ContactNode> select(KUID lookup, int k, boolean onlyLiveNodes, boolean willContact);
-    
-    /**
-     * Returns true if the RoutingTable contains a ContactNode with this KUID.
-     */
-    public boolean containsNode(KUID nodeId);
-    
-    /**
-     * Notifies the RoutingTable that the ContactNode with the provided
-     * KUID has failed to a request
-     */
-    public void handleFailure(KUID nodeId, SocketAddress address);
-    
-    /**
-     * Returns all ContactNodes as List
-     */
-    public List<ContactNode> getAllNodes();
-    
-    /**
-     * Returns all ContactNodes ordered by most recently seen first as List
-     */
-    public List<ContactNode> getAllNodesMRS();
-    
-    /**
-     * Returns ContactNodes ordered by most recently seen first as List
-     * 
-     * @param numNodes
-     */
-    public List<ContactNode> getMRSNodes(int numNodes);
-    
-    /**
-     * Returns all BucketNodes as List
-     */
-    public List<BucketNode> getAllBuckets();
-    
-    /**
-     * Refreshes the routing table's buckets
-     * 
-     * @param force true to refresh all buckets, false otherwise
-     * @param manager the BootstrapManager callback
-     * @throws IOException
-     */
-    public void refreshBuckets(boolean force, BootstrapManager manager) throws IOException;
-    
-    /**
-     * 
-     */
-    public static interface SpoofChecker extends PingListener {
-        
-    }
 }

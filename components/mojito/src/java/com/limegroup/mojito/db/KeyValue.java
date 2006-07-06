@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,9 +28,10 @@ import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Map;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.security.CryptoHelper;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * The KeyValue class is essentially a <Key, Value> Tuple with
@@ -71,7 +72,7 @@ public class KeyValue implements Map.Entry<KUID, byte[]>, Serializable {
     
     /** Constrcuts a local KeyValue */
     public static KeyValue createLocalKeyValue(KUID key, byte[] value, 
-            ContactNode node) {
+            Contact node) {
         return createKeyValue(key, value, 
                 node.getNodeID(), node.getSocketAddress(), null, null, true);
     }
@@ -345,9 +346,9 @@ public class KeyValue implements Map.Entry<KUID, byte[]>, Serializable {
     public String toString() {
         if (!isEmptyValue()) {
             return key.toString() + " = " + new String(value) 
-                + ", originator=" + ContactNode.toString(nodeId, address);
+                + ", originator=" + ContactUtils.toString(nodeId, address);
         } else {
-            return key.toString() + ", originator=" + ContactNode.toString(nodeId, address) + " (REMOVE)";
+            return key.toString() + ", originator=" + ContactUtils.toString(nodeId, address) + " (REMOVE)";
         }
     }
 }

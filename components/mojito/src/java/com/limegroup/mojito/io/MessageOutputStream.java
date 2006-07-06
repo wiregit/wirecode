@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ import java.security.PublicKey;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
@@ -65,7 +65,7 @@ public class MessageOutputStream extends DataOutputStream {
         writeSignature(keyValue.getSignature());
     }
     
-    public void writeKeyValues(Collection<KeyValue> values) throws IOException {
+    public void writeKeyValues(Collection<? extends KeyValue> values) throws IOException {
         writeByte(values.size());
         for(KeyValue kv : values) {
             writeKeyValue(kv);
@@ -91,17 +91,17 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    public void writeContactNode(ContactNode node) throws IOException {
+    public void writeContact(Contact node) throws IOException {
         writeInt(node.getVendor());
         writeShort(node.getVersion());
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getSocketAddress());
     }
     
-    public void writeContactNodes(Collection<ContactNode> nodes) throws IOException {
+    public void writeContacts(Collection<? extends Contact> nodes) throws IOException {
         writeByte(nodes.size());
-        for(ContactNode node : nodes) {
-            writeContactNode(node);
+        for(Contact node : nodes) {
+            writeContact(node);
         }
     }
     

@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,9 @@ package com.limegroup.mojito;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
 
 class MojitoHelper {
     
@@ -49,9 +51,9 @@ class MojitoHelper {
         int vendor = context.getVendor();
         int version = context.getVersion();
         
-        ContactNode node = new ContactNode(vendor, version, nodeId, new InetSocketAddress(0));
+        Contact node = new ContactNode(vendor, version, nodeId, new InetSocketAddress(0), State.UNKNOWN);
         node.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(node, false);
+        routeTable.add(node);
         
         try {
             Field localNode = Context.class.getDeclaredField("localNode");

@@ -1,22 +1,22 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 package com.limegroup.mojito.messages.impl;
 
 import java.io.ByteArrayInputStream;
@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
@@ -41,8 +41,8 @@ public class StatsResponseImpl extends AbstractResponseMessage
     private String statistics;
 
     public StatsResponseImpl(Context context, 
-            ContactNode contactNode, KUID messageId, String statistics) {
-        super(context, OpCode.STATS_RESPONSE, contactNode, messageId);
+            Contact contact, KUID messageId, String statistics) {
+        super(context, OpCode.STATS_RESPONSE, contact, messageId);
 
         this.statistics = statistics;
     }

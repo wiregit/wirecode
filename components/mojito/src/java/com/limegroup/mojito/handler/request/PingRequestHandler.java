@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.PingRequest;
@@ -49,14 +49,14 @@ public class PingRequestHandler extends AbstractRequestHandler {
     public void handleRequest(RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getContactNode() + " sent us a Ping");
+            LOG.trace(message.getContact() + " sent us a Ping");
         }
         
         networkStats.PING_REQUESTS.incrementStat();
         
         PingRequest request = (PingRequest)message;
         
-        ContactNode node = request.getContactNode();
+        Contact node = request.getContact();
         PingResponse response = context.getMessageHelper()
                 .createPingResponse(request, node.getSocketAddress());
 

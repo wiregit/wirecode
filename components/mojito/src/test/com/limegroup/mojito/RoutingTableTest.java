@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,8 @@ import java.util.Iterator;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.old.BucketNode;
+import com.limegroup.mojito.old.ContactNode;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -81,9 +83,9 @@ public class RoutingTableTest extends BaseTestCase {
 
     public void testLiveNodesOnly() {
         ContactNode node = new ContactNode(KUID.createRandomNodeID(), addr);
-        routingTable.add(node,true);
+        routingTable.addContactToBucket(node,true);
         node = new ContactNode(KUID.createRandomNodeID(), addr);
-        routingTable.add(node,false);
+        routingTable.addContactToBucket(node,false);
         routingTable.handleFailure(node.getNodeID());
         routingTable.handleFailure(node.getNodeID());
         routingTable.handleFailure(node.getNodeID());
@@ -101,7 +103,7 @@ public class RoutingTableTest extends BaseTestCase {
     public void testBuckets() {
         for (int i = 0; i < 22; i++) {
             ContactNode node = new ContactNode(KUID.createRandomNodeID(), addr);
-            routingTable.add(node,true);
+            routingTable.addContactToBucket(node,true);
             System.out.println(routingTable.toString());
         }
         Collection bucketsList = routingTable.getAllBuckets();
@@ -135,11 +137,11 @@ public class RoutingTableTest extends BaseTestCase {
         prefix[0] = (byte)(0x01);
         for (int i = 0; i < 2; i++) {
             ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 3000+i));
-            routingTable.add(node,true);
+            routingTable.addContactToBucket(node,true);
         }
         
         ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30010));
-        routingTable.add(node1, true);
+        routingTable.addContactToBucket(node1, true);
         
         try {
             Thread.sleep(1000);
@@ -147,7 +149,7 @@ public class RoutingTableTest extends BaseTestCase {
             e.printStackTrace();
         }
         
-        routingTable.add(node1, true);
+        routingTable.addContactToBucket(node1, true);
     }
     
     public void testreplaceBucketStaleNodes() {
@@ -157,11 +159,11 @@ public class RoutingTableTest extends BaseTestCase {
         node1.failure();
         node1.failure();
         node1.failure();
-        routingTable.add(node1, false);
+        routingTable.addContactToBucket(node1, false);
         
         for (int i = 0; i < 2; i++) {
             ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 3000+i));
-            routingTable.add(node, true);
+            routingTable.addContactToBucket(node, true);
         }
     }
     
@@ -169,13 +171,13 @@ public class RoutingTableTest extends BaseTestCase {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30010));
-        routingTable.add(node1, true);
+        routingTable.addContactToBucket(node1, true);
         System.out.println(routingTable.toString());
         ContactNode node2 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30011));
-        routingTable.add(node2, true);
+        routingTable.addContactToBucket(node2, true);
         System.out.println(routingTable.toString());
         ContactNode node3 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), new InetSocketAddress("localhost", 30012));
-        routingTable.add(node3, true);
+        routingTable.addContactToBucket(node3, true);
         System.out.println(routingTable.toString());
     }
     
@@ -183,24 +185,24 @@ public class RoutingTableTest extends BaseTestCase {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix, 4), addr);
-        routingTable.add(node1,true);
+        routingTable.addContactToBucket(node1,true);
         
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        routingTable.add(node1, true);
+        routingTable.addContactToBucket(node1, true);
     }
 
     public void testRemoveNode() {
         byte[] prefix = new byte[1];
         prefix[0] = (byte)(0x01);
         ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
-        routingTable.add(node1, true);
+        routingTable.addContactToBucket(node1, true);
         for (int i = 0; i < 20; i++) {
             ContactNode node = new ContactNode(KUID.createPrefxNodeID(prefix,4),addr);
-            routingTable.add(node, true);
+            routingTable.addContactToBucket(node, true);
         }
         routingTable.handleFailure(node1.getNodeID());
         routingTable.handleFailure(node1.getNodeID());
@@ -216,16 +218,16 @@ public class RoutingTableTest extends BaseTestCase {
         
         try {
             ContactNode node1 = new ContactNode(KUID.createPrefxNodeID(prefix,4), new InetSocketAddress("localhost", 30010));
-            routingTable.add(node1, true);
+            routingTable.addContactToBucket(node1, true);
             Thread.sleep(50);
             ContactNode node2 = new ContactNode(KUID.createPrefxNodeID(prefix,4), new InetSocketAddress("localhost", 30011));
-            routingTable.add(node2, true);
+            routingTable.addContactToBucket(node2, true);
             Thread.sleep(50);
             node3 = new ContactNode(KUID.createPrefxNodeID(prefix,4), new InetSocketAddress("localhost", 30012));
-            routingTable.add(node3, true);
+            routingTable.addContactToBucket(node3, true);
             Thread.sleep(50);
             node4 = new ContactNode(KUID.createPrefxNodeID(prefix,4), new InetSocketAddress("localhost", 30013));
-            routingTable.add(node4, true);
+            routingTable.addContactToBucket(node4, true);
             node4.failure();
             Thread.sleep(50);
             node1.failure();

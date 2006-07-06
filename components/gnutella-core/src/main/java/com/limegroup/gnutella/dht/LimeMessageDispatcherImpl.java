@@ -147,7 +147,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         }
         
         DHTMessage dhtMessage = (DHTMessage)msg;
-        dhtMessage.getContactNode().setSocketAddress(addr);
+        dhtMessage.getContact().setSocketAddress(addr);
         
         try {
             handleMessage(dhtMessage);

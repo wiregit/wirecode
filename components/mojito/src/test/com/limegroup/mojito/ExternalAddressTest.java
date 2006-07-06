@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -110,7 +110,7 @@ public class ExternalAddressTest extends BaseTestCase {
 
         public void handleRequest(RequestMessage message) throws IOException {
             
-            ContactNode node = message.getContactNode();
+            Contact node = message.getContact();
             SocketAddress addr = externalAddress != null ? externalAddress : node.getSocketAddress();
 
             System.out.println("Received Ping from " + node.getSocketAddress());

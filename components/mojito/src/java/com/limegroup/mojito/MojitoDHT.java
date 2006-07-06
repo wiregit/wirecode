@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,6 +42,7 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
@@ -54,6 +55,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
@@ -75,7 +77,7 @@ public class MojitoDHT {
         this(name, null, CryptoHelper.createKeyPair());
     }
     
-    private MojitoDHT(String name, ContactNode local, KeyPair keyPair) {
+    private MojitoDHT(String name, Contact local, KeyPair keyPair) {
         if (name == null) {
             name = "DHT";
         }
@@ -89,7 +91,7 @@ public class MojitoDHT {
             int flags = 0;
             int instanceId = 0;
             
-            local = new ContactNode(vendor, version, nodeId, addr, instanceId, flags);
+            local = new ContactNode(vendor, version, nodeId, addr, instanceId, flags, State.UNKNOWN);
         }
 
         context = new Context(name, local, keyPair);
@@ -138,7 +140,7 @@ public class MojitoDHT {
         return context.getLocalNodeID();
     }
     
-    public ContactNode getLocalNode() {
+    public Contact getLocalNode() {
         return context.getLocalNode();
     }
     
@@ -298,17 +300,17 @@ public class MojitoDHT {
      * @return The responding <tt>ContactNode</tt> or null if there was a timeout
      * @throws IOException
      */
-    public ContactNode ping(SocketAddress dst) throws IOException {
+    public Contact ping(SocketAddress dst) throws IOException {
         return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
     }
     
-    private ContactNode ping(SocketAddress dst, long timeout) throws IOException {
-        final ContactNode[] node = new ContactNode[] {null};
+    private Contact ping(SocketAddress dst, long timeout) throws IOException {
+        final Contact[] node = new Contact[] {null};
         
         synchronized (node) {
             ping(dst, new PingListener() {
                 public void response(ResponseMessage response, long t) {
-                    node[0] = response.getContactNode();
+                    node[0] = response.getContact();
                     synchronized (node) {
                         node.notify();
                     }
@@ -364,8 +366,8 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    Collection<ContactNode> getNodes() {
-        return context.getRouteTable().getAllNodes();
+    Collection<Contact> getNodes() {
+        return context.getRouteTable().getContacts();
     }
     
     public boolean put(KUID key, byte[] value) 
@@ -427,6 +429,7 @@ public class MojitoDHT {
         return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
     }
     
+    @SuppressWarnings("unchecked")
     public Collection<KeyValue> get(KUID key, long timeout) throws IOException {
         final Collection[] values = new Collection[] {
             Collections.emptyList()
@@ -522,7 +525,7 @@ public class MojitoDHT {
         oos.writeObject(context.getName());
         
         // ContactNode
-        ContactNode local = context.getLocalNode();
+        Contact local = context.getLocalNode();
         oos.writeInt(local.getVendor());
         oos.writeShort(local.getVersion());
         oos.writeObject(local.getNodeID());
@@ -533,12 +536,10 @@ public class MojitoDHT {
         // Store the RouteTable
         oos.writeBoolean(storeRouteTable);
         if (storeRouteTable) {
-            List nodes = context.getRouteTable().getAllNodes();
+            List<Contact> nodes = context.getRouteTable().getLiveContacts();
             
             KUID nodeId = local.getNodeID();
-            for(Iterator it = nodes.iterator(); it.hasNext(); ) {
-                ContactNode node = (ContactNode)it.next();
-                
+            for(Contact node : nodes) {
                 if (!node.getNodeID().equals(nodeId)) {
                     oos.writeObject(node);
                 }
@@ -553,11 +554,9 @@ public class MojitoDHT {
         boolean anyLocalKeyValue = false;
         
         if (storeDatabase) {
-            Collection keyValues = context.getDatabase().getValues();
+            Collection<KeyValue> keyValues = context.getDatabase().getValues();
             
-            for(Iterator it = keyValues.iterator(); it.hasNext(); ) {
-                KeyValue keyValue = (KeyValue)it.next();
-                
+            for(KeyValue keyValue : keyValues) {
                 if (!storeRouteTable 
                         && !keyValue.isLocalKeyValue()) {
                     continue;
@@ -621,8 +620,8 @@ public class MojitoDHT {
             instanceId = 0;
         }
         
-        ContactNode local = new ContactNode(vendor, version, nodeId, 
-                new InetSocketAddress(0), instanceId, flags);
+        Contact local = new ContactNode(vendor, version, nodeId, 
+                new InetSocketAddress(0), instanceId, flags, State.UNKNOWN);
         
         // Create an instance w/o a KeyPair for now (will set it later!)
         MojitoDHT dht = new MojitoDHT(name, local, null);
@@ -632,10 +631,10 @@ public class MojitoDHT {
         if (storeRouteTable) {
             RouteTable routeTable = dht.context.getRouteTable();
             
-            ContactNode node = null;
-            while((node = (ContactNode)ois.readObject()) != null) {
+            Contact node = null;
+            while((node = (Contact)ois.readObject()) != null) {
                 if (!timeout) {
-                    routeTable.add(node, false);
+                    routeTable.add(node);
                 }
             }
         }
@@ -663,4 +662,3 @@ public class MojitoDHT {
         return dht;
     }
 }
-

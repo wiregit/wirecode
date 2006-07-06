@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-
 package com.limegroup.mojito;
 
 import java.io.File;
@@ -46,6 +45,7 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
+import com.limegroup.mojito.util.ContactUtils;
 
 public class CommandHandler {
     
@@ -152,13 +152,13 @@ public class CommandHandler {
         out.println("Pinging... " + addr);
         dht.ping(addr, new PingListener() {
             public void response(ResponseMessage response, long time) {
-                out.println("Ping to " + response.getContactNode() + " succeeded: " + time + "ms");
+                out.println("Ping to " + response.getContact() + " succeeded: " + time + "ms");
                 out.flush();
             }
 
             public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
                 if (nodeId != null) {
-                    out.println("Ping to " + ContactNode.toString(nodeId, address) + " failed");
+                    out.println("Ping to " + ContactUtils.toString(nodeId, address) + " failed");
                 } else {
                     out.println("Ping to " + address + " failed");
                 }
@@ -225,7 +225,7 @@ public class CommandHandler {
                     buffer.append("STORED KEY_VALUES: ").append(keyValue).append("\n");
                     int i = 0;
                     for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-                        Node node = (Node) iter.next();
+                        Contact node = (Contact) iter.next();
                         buffer.append(i).append(": ").append(node).append("\n");
                         i++;
                     }
@@ -257,7 +257,7 @@ public class CommandHandler {
                     buffer.append("REMOVED KEY_VALUES: ").append(keyValue).append("\n");
                     int i = 0;
                     for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-                        Node node = (Node) iter.next();
+                        Contact node = (Contact) iter.next();
                         buffer.append(i).append(": ").append(node).append("\n");
                         i++;
                     }

@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -40,6 +40,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * The StoreResponseHandler handles storing of one or more 
@@ -87,7 +88,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         return keyValues;
     }
     
-    public void store(ContactNode node) throws IOException {
+    public void store(Contact node) throws IOException {
         if (index < keyValues.size() && !isStopped()) {
             KeyValue keyValue = keyValues.get(index);
             
@@ -110,30 +111,30 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             
             if (!current.getKey().equals(valueId)) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(message.getContactNode() + " is ACK'ing a KeyValue " 
+                    LOG.error(message.getContact() + " is ACK'ing a KeyValue " 
                             + valueId + " we have not requested to store!");
                 }
                 
-                ContactNode node = message.getContactNode();
+                Contact node = message.getContact();
                 fireStoreFailed(node.getNodeID(), node.getSocketAddress());
                 return;
             }
             
             if (status == StoreStatus.SUCCEEDED) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(message.getContactNode() + " sucessfully stored KeyValue " + valueId);
+                    LOG.trace(message.getContact() + " sucessfully stored KeyValue " + valueId);
                 }
             } else if (status == StoreStatus.FAILED) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(message.getContactNode() + " failed to store KeyValue " + valueId);
+                    LOG.trace(message.getContact() + " failed to store KeyValue " + valueId);
                 }
             } else {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(message.getContactNode() + " returned unknown status code " 
+                    LOG.error(message.getContact() + " returned unknown status code " 
                             + status + " for KeyValue " + valueId);
                 }
                 
-                ContactNode node = message.getContactNode();
+                Contact node = message.getContact();
                 fireStoreFailed(node.getNodeID(), node.getSocketAddress());
                 return;
             }
@@ -144,9 +145,9 @@ public class StoreResponseHandler extends AbstractResponseHandler {
             // Store next...
             index++;
             if (index < keyValues.size()) {
-                store(message.getContactNode());
+                store(message.getContact());
             } else {
-                fireStoreSucceeded(message.getContactNode());
+                fireStoreSucceeded(message.getContact());
             }
         }
     }
@@ -161,14 +162,14 @@ public class StoreResponseHandler extends AbstractResponseHandler {
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         if (LOG.isErrorEnabled()) {
-            LOG.error("Sending a store request to " + ContactNode.toString(nodeId, dst) + " failed", e);
+            LOG.error("Sending a store request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
         }
         
         fireTimeout(nodeId, dst, message, -1L);
         fireStoreFailed(nodeId, dst);
     }
     
-    public void fireStoreSucceeded(final ContactNode node) {
+    public void fireStoreSucceeded(final Contact node) {
         context.fireEvent(new Runnable() {
             public void run() {
                 if (!isStopped()) {

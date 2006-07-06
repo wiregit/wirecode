@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,64 +16,45 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 package com.limegroup.mojito.handler;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.messages.PingRequest;
-import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.util.BucketUtils;
 
 /**
  * The BootstrapManager performs a lookup for the local Node ID
  * which is essentially the bootstrap process.
  */
-public class BootstrapManager implements PingListener, LookupListener {
+public class BootstrapManager {
     
     private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
     
-    private Context context;
-
-    private long startTime = 0L;
-    
-    private boolean phaseTwo = false;
-    private boolean foundNewNodes = false;
+    protected final Context context;
     
     private BootstrapListener listener;
     
-    private ArrayList<SocketAddress> failedHosts = new ArrayList<SocketAddress>(); 
+    private long startTime = -1L;
     
-    /**
-     * List of Bucket IDs
-     */
-    private List<KUID> buckets = Collections.emptyList();
-    
-    /** 
-     * An Iterator of SocketAddresses or ContactNodes depending on
-     * the initialization.
-     */
-    private Iterator contacts;
-    
-    private int failures;
+    private List<SocketAddress> failedHosts = new ArrayList<SocketAddress>();
     
     private NetworkStatisticContainer networkStats;
     
@@ -82,171 +63,27 @@ public class BootstrapManager implements PingListener, LookupListener {
         networkStats = context.getNetworkStats();
     }
     
-    private long time() {
-        return System.currentTimeMillis() - startTime;
-    }
-    
-    /**
-     * Tries to bootstrap from the local Route Table.
-     */
-    public void bootstrap(BootstrapListener listener) throws IOException {
+    public void bootstrap(BootstrapListener listener) {
         this.listener = listener;
-        this.contacts = context.getRouteTable().getAllNodesMRS().iterator();
         
-        if (contacts.hasNext()) {
-            startTime = System.currentTimeMillis();
-            this.context.ping((ContactNode)contacts.next(), this);
-        } else {
-            fireNoBootstrapHost();
-        }
+        startTime = System.currentTimeMillis();
+        (new RouteTablePhaseZero()).start();
     }
     
-    /**
-     * Tries to bootstrap from a List of Hosts.
-     */
     public void bootstrap(List<? extends SocketAddress> hostList, 
-            BootstrapListener listener) throws IOException {
-        
+            BootstrapListener listener) {
         this.listener = listener;
-        this.contacts = hostList.iterator();
         
-        if (contacts.hasNext()) {
-            startTime = System.currentTimeMillis();
-            context.ping((SocketAddress)contacts.next(), this);
-        } else {
-            fireNoBootstrapHost();
-        }
+        startTime = System.currentTimeMillis();
+        (new HostListPhaseZero(hostList)).start();
     }
     
-    public void response(ResponseMessage response, long time) {
-        if (response instanceof PingResponse) {
-            pingSucceeded((PingResponse)response);
-        }
-    }
-
-    /**
-     * Initialized the lookup process after a successfull
-     * ping request
-     */
-    private void pingSucceeded(PingResponse response) {
-        try {
-            context.lookup(context.getLocalNodeID(), this);
-        } catch (IOException err) {
-            LOG.error("Bootstrap lookup failed: ", err);
-            
-            firePhaseOneFinished();
-            firePhaseTwoFinished();
-        }
-    }
-    
-    public void timeout(KUID nodeId, SocketAddress address, 
-            RequestMessage request, long time) {
-        if (request instanceof PingRequest) {
-            try {
-                if (!pingFailed(address)) {
-                    fireNoBootstrapHost();
-                }
-            } catch (IOException err) {
-                LOG.error(err);
-                fireNoBootstrapHost();
-            }
-        }
-    }
-    
-    /**
-     * Tries the next SocketAddress or ContactNode. Returns false
-     * if we should give up.
-     */
-    private boolean pingFailed(SocketAddress address) throws IOException {
-        networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
-        if (LOG.isErrorEnabled()) {
-            LOG.error("Initial bootstrap ping timeout, failure " + failures);
-        }
-        failedHosts.add(address);
-        
-        failures++;
-        if (failures >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failures + " tries");
-            }
-            
-            return false;
+    public long time() {
+        if (startTime < 0L) {
+            return -1L;
         }
         
-        // Possible switch from Iterator of SocketAddresses to an
-        // Iterator of ContactNodes (but not vice versa).
-        if (contacts == null || !contacts.hasNext()) {
-            contacts = context.getRouteTable().getAllNodesMRS().iterator();
-        }
-        
-        while(contacts.hasNext()) {
-            Object obj = contacts.next();
-            
-            if (obj instanceof SocketAddress) {
-                SocketAddress addr = (SocketAddress)obj;
-                context.ping(addr, this);
-                return true;
-                
-            } else if (obj instanceof ContactNode) {
-                ContactNode node = (ContactNode)obj;
-                //do not send to ourselve or the node which just timed out
-                if (!node.getNodeID().equals(context.getLocalNodeID()) 
-                        && !node.getSocketAddress().equals(address)) {
-                    
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Retrying bootstrap ping with node: " + node);
-                    }
-                    
-                    context.ping(node, this);
-                    return true;
-                }
-            } else {
-                
-                if (LOG.isFatalEnabled()) {
-                    if (obj != null) {
-                        LOG.fatal("Expected either a SocketAddress or ContactNode but got: " + obj + "/" + obj.getClass());
-                    } else {
-                        LOG.fatal("Expected either a SocketAddress or ContactNode but got: " + obj);
-                    }
-                }
-            }
-        }
-        
-        return false;
-    }
-    
-    public void found(KUID lookup, Collection c, long time) {
-    }
-    
-    public void finish(KUID lookup, Collection c, long time) {
-        if (!phaseTwo) {
-            phaseTwo = true;
-            firePhaseOneFinished();
-            
-            try {
-                context.getRouteTable().refreshBuckets(true, this);
-            } catch (IOException err) {
-                LOG.error("Beginning second phase failed: ", err);
-                firePhaseTwoFinished();
-            }
-        } else {
-            if (!c.isEmpty()) {
-                foundNewNodes = true;
-            }
-            
-            buckets.remove(lookup);
-            if (buckets.isEmpty()) {
-                firePhaseTwoFinished();
-            }
-        }
-    }
-
-    public void setBuckets(List<KUID> buckets) {
-        this.buckets = buckets;
-        
-        if (buckets.isEmpty()) {
-            firePhaseTwoFinished();
-        }
+        return System.currentTimeMillis() - startTime;
     }
     
     private void firePhaseOneFinished() {
@@ -261,7 +98,7 @@ public class BootstrapManager implements PingListener, LookupListener {
         }
     }
     
-    private void firePhaseTwoFinished() {
+    private void firePhaseTwoFinished(final boolean foundNewNodes) {
         context.setBootstrapping(false);
         
         if (listener != null) {
@@ -283,6 +120,178 @@ public class BootstrapManager implements PingListener, LookupListener {
                     listener.noBootstrapHost(failedHosts);
                 }
             });
+        }
+    }
+    
+    private abstract class PhaseZero implements PingListener {
+        
+        public void start() {
+            next();
+        }
+        
+        public void response(ResponseMessage response, long time) {
+            try {
+                PhaseOne phaseOne = new PhaseOne();
+                context.lookup(context.getLocalNodeID(), phaseOne);
+            } catch (IOException err) {
+                LOG.error("Bootstrap lookup failed: ", err);
+                
+                firePhaseOneFinished();
+                firePhaseTwoFinished(false);
+            }
+        }
+        
+        public void timeout(KUID nodeId, SocketAddress address, 
+                RequestMessage request, long time) {
+            
+            failedHosts.add(address);
+            
+            networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Initial bootstrap ping timeout, failure " + failedHosts.size());
+            }
+            
+            if (failedHosts.size() < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                next();
+                return;
+            }
+            
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failedHosts.size() + " tries");
+            }
+            
+            fireNoBootstrapHost();
+        }
+        
+        private void next() {
+            try {
+                if (!pingNextFromList()) {
+                    fireNoBootstrapHost();
+                }
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+                fireNoBootstrapHost();
+            }
+        }
+        
+        protected abstract boolean pingNextFromList() throws IOException;
+    }
+    
+    private class HostListPhaseZero extends PhaseZero {
+        
+        private int index = 0;
+        private List<? extends SocketAddress> hostList;
+        
+        private HostListPhaseZero(List<? extends SocketAddress> hostList) {
+            this.hostList = hostList;
+        }
+        
+        protected boolean pingNextFromList() throws IOException {
+            if (index < hostList.size()) {
+                SocketAddress address = hostList.get(index++);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Trying to bootstrap from " + address);
+                }
+                
+                context.ping(address, this);
+                return true;
+            }
+            
+            
+            // Try the entries in the RouteTable
+            (new RouteTablePhaseZero()).start();
+            return true;
+        }
+    }
+    
+    private class RouteTablePhaseZero extends PhaseZero {
+        
+        private int index = 0;
+        private List<Contact> contacts;
+        
+        public RouteTablePhaseZero() {
+            contacts = BucketUtils.sort(context.getRouteTable().getLiveContacts());
+        }
+
+        protected boolean pingNextFromList() throws IOException {
+            if (index < contacts.size()) {
+                Contact node = contacts.get(index++);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Trying to bootstrap from " + node);
+                }
+                
+                context.ping(node, this);
+                return true;
+            }
+            
+            return false;
+        }
+    }
+
+    private class PhaseOne implements LookupListener {
+
+        public void response(ResponseMessage response, long time) {
+        }
+
+        public void timeout(KUID nodeId, SocketAddress address, 
+                RequestMessage request, long time) {
+        }
+        
+        public void found(KUID lookup, Collection c, long time) {
+        }
+        
+        public void finish(KUID lookup, Collection c, long time) {
+            firePhaseOneFinished();
+            
+            List<KUID> ids = context.getRouteTable().getRefreshIDs(true);
+            if (ids.isEmpty()) {
+                firePhaseTwoFinished(false);
+                return;
+            }
+            
+            try {
+                PhaseTwo phaseTwo = new PhaseTwo(ids);
+                for(KUID nodeId : ids) {
+                    context.lookup(nodeId, phaseTwo);
+                }
+            } catch (IOException err) {
+                LOG.error("Beginning second phase failed: ", err);
+                firePhaseTwoFinished(false);
+            }
+        }
+    }
+    
+    private class PhaseTwo implements LookupListener {
+        
+        private List<KUID> ids;
+        
+        private boolean foundNewNodes = false;
+        
+        private PhaseTwo(List<KUID> ids) {
+            this.ids = ids;
+        }
+        
+        public void response(ResponseMessage response, long time) {
+        }
+
+        public void timeout(KUID nodeId, SocketAddress address, 
+                RequestMessage request, long time) {
+        }
+        
+        public void found(KUID lookup, Collection c, long time) {
+        }
+        
+        public void finish(KUID lookup, Collection c, long time) {
+            if (!c.isEmpty()) {
+                foundNewNodes = true;
+            }
+            
+            boolean removed = ids.remove(lookup);
+            assert (removed == true);
+            
+            if (ids.isEmpty()) {
+                firePhaseTwoFinished(foundNewNodes);
+            }
         }
     }
 }

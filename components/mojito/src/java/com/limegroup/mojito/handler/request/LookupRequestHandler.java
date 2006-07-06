@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
@@ -39,6 +39,7 @@ import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.CollectionUtils;
 
 
@@ -60,7 +61,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(request.getContactNode() + " is trying to lookup " + lookup);
+            LOG.trace(request.getContact() + " is trying to lookup " + lookup);
         }
         
         if (request instanceof FindNodeRequest) {
@@ -85,22 +86,24 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         
         KUID lookup = request.getLookupID();
         QueryKey queryKey = QueryKey.getQueryKey(
-                request.getContactNode().getSocketAddress());
+                request.getContact().getSocketAddress());
         
-        List<ContactNode> bucketList = Collections.emptyList();
+        List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
-                bucketList = context.getRouteTable().getMRSNodes(
-                        KademliaSettings.REPLICATION_PARAMETER.getValue());
+                nodes = BucketUtils.getMostRecentlySeenContacts(
+                            context.getRouteTable().getContacts(), 
+                            KademliaSettings.REPLICATION_PARAMETER.getValue());
+                
             } else {
-                bucketList = context.getRouteTable().select(lookup, 
-                        KademliaSettings.REPLICATION_PARAMETER.getValue(), false, false);
+                nodes = context.getRouteTable().select(lookup, 
+                        KademliaSettings.REPLICATION_PARAMETER.getValue(), false);
             }
         }
         
         if (LOG.isTraceEnabled()) {
-            if (!bucketList.isEmpty()) {
-                LOG.trace("Sending back: " + CollectionUtils.toString(bucketList));
+            if (!nodes.isEmpty()) {
+                LOG.trace("Sending back: " + CollectionUtils.toString(nodes));
             } else {
                 LOG.trace("Sending back an empty List");
             }
@@ -109,9 +112,9 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
         
         FindNodeResponse response = context.getMessageHelper()
-                    .createFindNodeResponse(request, queryKey, bucketList);
+                    .createFindNodeResponse(request, queryKey, nodes);
         
-        context.getMessageDispatcher().send(request.getContactNode(), response);
+        context.getMessageDispatcher().send(request.getContact(), response);
     }
     
     private void handleFindValueRequest(LookupRequest request) throws IOException {
@@ -126,7 +129,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
             
             FindValueResponse response = context.getMessageHelper()
                         .createFindValueResponse(request, values);
-            context.getMessageDispatcher().send(request.getContactNode(), response);
+            context.getMessageDispatcher().send(request.getContact(), response);
         } else {
             // OK, send ContactNodes instead!
             handleFindNodeRequest(request);

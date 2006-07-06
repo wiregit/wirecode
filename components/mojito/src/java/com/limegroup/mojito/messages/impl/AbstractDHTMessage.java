@@ -1,22 +1,22 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
@@ -29,12 +29,14 @@ import java.security.SignatureException;
 
 import com.limegroup.gnutella.util.ByteBufferInputStream;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.routing.impl.ContactNode;
 
 /**
  * An abstract implementation of DHTMessage
@@ -55,21 +57,21 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     private OpCode opcode;
     
-    private ContactNode contactNode;
+    private Contact contact;
     
     private KUID messageId;
     
     private MessageInputStream in;
     
     public AbstractDHTMessage(Context context, 
-            OpCode opcode, ContactNode contactNode, KUID messageId) {
+            OpCode opcode, Contact contact, KUID messageId) {
 
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
         }
         
-        if (contactNode == null) {
-            throw new NullPointerException("ContactNode is null");
+        if (contact == null) {
+            throw new NullPointerException("Contact is null");
         }
 
         if (messageId == null) {
@@ -82,7 +84,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         
         this.context = context;
         this.opcode = opcode;
-        this.contactNode = contactNode;
+        this.contact = contact;
         this.messageId = messageId;
     }
 
@@ -103,7 +105,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         KUID nodeId = in.readNodeID();
         int instanceId = in.readUnsignedByte();
         int flags = in.readUnsignedByte();
-        this.contactNode = new ContactNode(vendor, version, nodeId, src, instanceId, flags);
+        this.contact = new ContactNode(vendor, version, nodeId, src, instanceId, flags, State.ALIVE);
         
         this.messageId = in.readMessageID();
         
@@ -133,8 +135,8 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
         return opcode;
     }
 
-    public ContactNode getContactNode() {
-        return contactNode;
+    public Contact getContact() {
+        return contact;
     }
     
     public KUID getMessageID() {
@@ -155,11 +157,11 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
         out.writeOpCode(getOpCode()); // 0
-        out.writeInt(getContactNode().getVendor()); // 1-3
-        out.writeShort(getContactNode().getVersion()); // 4-5
-        out.writeKUID(getContactNode().getNodeID()); // 6-26
-        out.writeByte(getContactNode().getInstanceID()); // 27
-        out.writeByte(getContactNode().getFlags()); // 28
+        out.writeInt(getContact().getVendor()); // 1-3
+        out.writeShort(getContact().getVersion()); // 4-5
+        out.writeKUID(getContact().getNodeID()); // 6-26
+        out.writeByte(getContact().getInstanceID()); // 27
+        out.writeByte(getContact().getFlags()); // 28
         out.writeKUID(getMessageID()); // 29-48
         out.writeByte(0); // 49
         out.writeInt(0); // 50-53
@@ -175,7 +177,7 @@ public abstract class AbstractDHTMessage extends AbstractMessage implements DHTM
             signature.update(NetworkUtils.getBytes(myExternalAddress));
 
             // Source
-            SocketAddress contactAddress = getContactNode().getSocketAddress();
+            SocketAddress contactAddress = getContact().getSocketAddress();
             signature.update(NetworkUtils.getBytes(contactAddress));
         } catch (UnknownHostException err) {
             throw new SignatureException(err);

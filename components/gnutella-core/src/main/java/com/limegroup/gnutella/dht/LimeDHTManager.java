@@ -35,10 +35,11 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.util.BucketUtils;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -422,9 +423,11 @@ public class LimeDHTManager implements LifecycleListener {
         }
         
         List<IpPort> ipps = new ArrayList<IpPort>();
-        Collection<ContactNode> nodes = limeDHTRouteTable.getMRSNodes(numNodes);
+        List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
+                limeDHTRouteTable.getLiveContacts(), numNodes);
+        
         KUID localNode = dht.getLocalNodeID();
-        for(ContactNode cn : nodes) {
+        for(Contact cn : nodes) {
             if(!isActive && cn.getNodeID().equals(localNode)) {
                 continue;
             }
@@ -442,7 +445,7 @@ public class LimeDHTManager implements LifecycleListener {
         
         private final int port;
         
-        public IpPortContactNode(ContactNode node) {
+        public IpPortContactNode(Contact node) {
             InetSocketAddress addr = (InetSocketAddress) node.getSocketAddress();
             this.nodeAddress = addr.getAddress();
             this.port = addr.getPort();

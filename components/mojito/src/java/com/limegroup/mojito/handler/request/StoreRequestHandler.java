@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         if (queryKey == null) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(request.getContactNode() 
+                LOG.error(request.getContact() 
                         + " does not provide a QueryKey");
             }
             networkStats.STORE_REQUESTS_NO_QK.incrementStat();
@@ -70,12 +70,12 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         }
         
         QueryKey expected = QueryKey.getQueryKey(
-                request.getContactNode().getSocketAddress());
+                request.getContact().getSocketAddress());
         
         if (!expected.equals(queryKey)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Expected " + expected + " from " 
-                        + request.getContactNode() 
+                        + request.getContact() 
                         + " but got " + queryKey);
             }
             networkStats.STORE_REQUESTS_BAD_QK.incrementStat();
@@ -86,17 +86,18 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         KUID valueId = keyValue.getKey();
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace(request.getContactNode() 
+            LOG.trace(request.getContact() 
                     + " requested us to store the KeyValues " + keyValue);
         }
         
         // under the assumption that the requester sent us a lookup before
         // check if we are part of the closest alive nodes to this value
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        List nodesList = getRouteTable().select(valueId, k, false, false);
+        List nodesList = context.getRouteTable().select(valueId, k, false);
         
         if (!nodesList.contains(context.getLocalNode())) {
-            nodesList = getRouteTable().select(valueId, k, true, false);
+            //try getting only nodes that have never failed, i.e. a larger key-space
+            nodesList = context.getRouteTable().select(valueId, k, true);
             if (!nodesList.contains(context.getLocalNode())) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("We are not close to " + keyValue.getKey() 
@@ -118,6 +119,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         StoreResponse response 
             = context.getMessageHelper().createStoreResponse(request, valueId, status);
-        context.getMessageDispatcher().send(request.getContactNode(), response);
+        context.getMessageDispatcher().send(request.getContact(), response);
     }
 }

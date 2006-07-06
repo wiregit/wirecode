@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
@@ -72,8 +73,8 @@ public class NodeIDSpoofTest extends BaseTestCase {
             spoofer.bootstrap(bootstrap.getSocketAddress());
         
             Context context = MojitoHelper.getContext(bootstrap);
-            List<ContactNode> nodes = context.getRouteTable().getAllNodes();
-            for(ContactNode node : nodes) {
+            List<Contact> nodes = context.getRouteTable().getContacts();
+            for(Contact node : nodes) {
                 assertNotEquals(spoofer.getSocketAddress(), 
                         node.getSocketAddress());
             }
@@ -126,10 +127,10 @@ public class NodeIDSpoofTest extends BaseTestCase {
             Thread.sleep(4L * NetworkSettings.MAX_TIMEOUT.getValue());
             
             Context context = MojitoHelper.getContext(bootstrap);
-            List<ContactNode> nodes = context.getRouteTable().getAllNodes();
+            List<Contact> nodes = context.getRouteTable().getContacts();
             
             boolean contains = false;
-            for(ContactNode node : nodes) {
+            for(Contact node : nodes) {
                 if (node.getSocketAddress()
                         .equals(replacement.getSocketAddress())) {
                     contains = true;

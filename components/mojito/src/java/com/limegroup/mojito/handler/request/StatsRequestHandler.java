@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,13 +52,13 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         
         if (!request.isSecure()) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(message.getContactNode() + " sent us an invalid Stats Request");
+                LOG.warn(message.getContact() + " sent us an invalid Stats Request");
             }
             return;
         }
         
         if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getContactNode() + " sent us a Stats Request");
+            LOG.trace(message.getContact() + " sent us a Stats Request");
         }
         
         networkStats.STATS_REQUEST.incrementStat();
@@ -85,6 +85,6 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         StatsResponse response = context.getMessageHelper()
             .createStatsResponse(message, writer.toString());
         
-        context.getMessageDispatcher().send(message.getContactNode(), response);
+        context.getMessageDispatcher().send(message.getContact(), response);
     }
 }

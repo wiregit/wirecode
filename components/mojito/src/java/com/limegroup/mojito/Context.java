@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,10 +56,9 @@ import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
-import com.limegroup.mojito.routing.PatriciaRouteTable;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.RouteTable.SpoofChecker;
+import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -80,7 +79,7 @@ public class Context {
     private KeyPair masterKeyPair;
     
     private String name;
-    private ContactNode localNode;
+    private Contact localNode;
     private SocketAddress localAddress;
     private SocketAddress tmpExternalAddress;
 
@@ -117,7 +116,7 @@ public class Context {
     private ThreadPoolExecutor eventExecutor;
     private ScheduledThreadPoolExecutor scheduledExecutor;
     
-    public Context(String name, ContactNode localNode, KeyPair keyPair) {
+    public Context(String name, Contact localNode, KeyPair keyPair) {
         this.name = name;
         this.localNode = localNode;
         this.keyPair = keyPair;
@@ -143,7 +142,7 @@ public class Context {
         databaseStats = new DatabaseStatisticContainer(this);
         
         database = new Database(this);
-        routeTable = new PatriciaRouteTable(this);
+        routeTable = new RouteTableImpl(this);
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
@@ -156,7 +155,7 @@ public class Context {
         
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode, false);
+        routeTable.add(localNode);
     }
 
     private void initEventQueue() {
@@ -221,13 +220,13 @@ public class Context {
         }
 
         if (clazz == null) {
-            clazz = PatriciaRouteTable.class;
+            clazz = RouteTableImpl.class;
         }
         
         try {
             Constructor c = clazz.getConstructor(Context.class);
             routeTable = (RouteTable)c.newInstance(this);
-            routeTable.add(localNode, false);
+            routeTable.add(localNode);
             return routeTable;
         } catch (Exception err) {
             throw new RuntimeException(err);
@@ -287,11 +286,11 @@ public class Context {
         return keyPair.getPrivate();
     }
     
-    public ContactNode getLocalNode() {
+    public Contact getLocalNode() {
         return localNode;
     }
     
-    public boolean isLocalNode(ContactNode node) {
+    public boolean isLocalNode(Contact node) {
         return isLocalNodeID(node.getNodeID());
     }
     
@@ -441,10 +440,8 @@ public class Context {
         }
         
         this.localAddress = localAddress;
-        
         localNode.setSocketAddress(localAddress);
-        int instanceId = (localNode.getInstanceID() + 1) % 0xFF;
-        localNode.setInstanceID(instanceId);
+        localNode.nextInstanceID();
         
         messageDispatcher.bind(localAddress);
     }
@@ -584,18 +581,13 @@ public class Context {
     }
     
     /** Pings the given Node */
-    public void ping(ContactNode node) throws IOException {
+    public void ping(Contact node) throws IOException {
         pingManager.ping(node);
     }
     
     /** Pings the given Node */
-    public void ping(ContactNode node, PingListener listener) throws IOException {
+    public void ping(Contact node, PingListener listener) throws IOException {
         pingManager.ping(node, listener);
-    }
-    
-    /** Pings the given Node */
-    public void spoofCheckPing(ContactNode node, SpoofChecker checker) throws IOException {
-        pingManager.spoofCheckPing(node, checker);
     }
     
     /** Starts a value for the given KUID */
@@ -693,7 +685,7 @@ public class Context {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // TODO only live nodes?
-        List<ContactNode> nodes = routeTable.select(localNodeId, k, false, false);
+        List<Contact> nodes = routeTable.select(localNodeId, k, false);
         
         // TODO accoriding to Az code it works only with more than
         // two Nodes
@@ -711,7 +703,7 @@ public class Context {
         BigInteger sum2 = BigInteger.ZERO;
         
         for(int i = 1; i < nodes.size(); i++) {
-            ContactNode node = nodes.get(i);
+            Contact node = nodes.get(i);
             
             BigInteger distance = localNodeId.xor(node.getNodeID()).toBigInteger();
             BigInteger j = BigInteger.valueOf(i);

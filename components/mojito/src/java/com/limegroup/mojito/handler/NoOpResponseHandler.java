@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ import com.limegroup.mojito.settings.NetworkSettings;
 
 /**
  * The NoOpResponseHandler does litteraly nothing. Its pupose
- * is to have a non-null ResponseHandler because deling with
+ * is to have a non-null ResponseHandler because dealing with
  * nulls is a PITA.
  */
 public final class NoOpResponseHandler implements ResponseHandler {

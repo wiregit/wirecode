@@ -11,20 +11,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.routing.PatriciaRouteTable;
+import com.limegroup.mojito.routing.impl.Bucket;
+import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.settings.ContextSettings;
 
-public class LimeDHTRoutingTable extends PatriciaRouteTable {
+public class LimeDHTRoutingTable extends RouteTableImpl {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTRoutingTable.class);
     
-    Map<IpPortImpl, KUID> leafDHTNodes = new HashMap<IpPortImpl, KUID>();
+    private Map<IpPortImpl, KUID> leafDHTNodes = new HashMap<IpPortImpl, KUID>();
 
     public LimeDHTRoutingTable(Context context) {
         super(context);
@@ -37,18 +39,16 @@ public class LimeDHTRoutingTable extends PatriciaRouteTable {
      * @param node The DHT leaf node to be added
      */
     public void addLeafDHTNode(InetSocketAddress host) {
-        IpPortImpl node = new IpPortImpl(host);
-        final ContactNode[] dhtNode = new ContactNode[] {null};
-
         if(LOG.isDebugEnabled()) {
             LOG.debug("Pinging node: " + host);
         }
         
+        final Contact[] dhtNode = new Contact[] { null };
         synchronized (dhtNode) {
                 try {
                     context.ping(host, new PingListener() {
                         public void response(ResponseMessage response, long t) {
-                            dhtNode[0] = response.getContactNode();
+                            dhtNode[0] = response.getContact();
                             synchronized (dhtNode) {
                                 dhtNode.notify();
                             }
@@ -69,10 +69,15 @@ public class LimeDHTRoutingTable extends PatriciaRouteTable {
                 LOG.error("InterruptedException", err);
             }
         }
-        if(dhtNode[0] != null) {
-            leafDHTNodes.put(node, dhtNode[0].getNodeID());
-            dhtNode[0].setTimeStamp(Long.MAX_VALUE);
-            super.add(dhtNode[0],true);
+        
+        Contact node = dhtNode[0];
+        if(node != null) {
+            synchronized (this) {
+                leafDHTNodes.put(new IpPortImpl(host), node.getNodeID());
+                
+                node.setTimeStamp(Long.MAX_VALUE);
+                add(node);
+            }
         }
     }
     
@@ -80,13 +85,27 @@ public class LimeDHTRoutingTable extends PatriciaRouteTable {
      * Removes this DHT leaf from our routing table.
      * 
      */
-    public void removeLeafDHTNode(String host, int port) {
+    public synchronized void removeLeafDHTNode(String host, int port) {
         try {
             IpPortImpl node = new IpPortImpl(host, port);
             KUID nodeId = leafDHTNodes.remove(node);
             if(nodeId != null) {
-                super.removeNodeAndReplace(nodeId, true);
+                replaceWithMostRecentlySeenCachedContact(nodeId);
             }
         } catch (UnknownHostException ignored) {}
+    }
+    
+    protected synchronized void replaceWithMostRecentlySeenCachedContact(KUID nodeId) {
+        Bucket bucket = getBucket(nodeId);
+        boolean removed = bucket.remove(nodeId);
+        assert (removed == true);
+        
+        Contact mrs = bucket.getMostRecentlySeenCachedContact();
+        if (mrs != null) {
+            removed = bucket.removeCachedContact(mrs.getNodeID());
+            assert (removed == true);
+            
+            bucket.addLiveContact(mrs);
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,9 @@ import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.util.zip.GZIPOutputStream;
 
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.util.PatriciaTrie;
 
 
@@ -47,7 +49,7 @@ public class SerializeTest {
         PatriciaTrie trie = new PatriciaTrie();
         for(int i = 0; i < 300; i++) {
             KUID nodeId = KUID.createRandomNodeID();
-            ContactNode node = new ContactNode(nodeId, new InetSocketAddress(i));
+            Contact node = new ContactNode(0, 0, nodeId, new InetSocketAddress(i), State.UNKNOWN);
             trie.put(nodeId, node);
         }
         
@@ -102,8 +104,8 @@ public class SerializeTest {
 //        Thread.sleep(3*1000);
         RouteTable rtable = dht.getContext().getRouteTable();
         for (int i = 0; i < 5000; i++) {
-            ContactNode node = new ContactNode(KUID.createRandomNodeID(),new InetSocketAddress(i));
-            rtable.add(node,false);
+            Contact node = new ContactNode(0, 0, KUID.createRandomNodeID(),  new InetSocketAddress(i), State.UNKNOWN);
+            rtable.add(node);
         }
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

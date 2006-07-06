@@ -1,5 +1,5 @@
 /*
- * Mojito Distributed Hash Tabe (DHT)
+ * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@ package com.limegroup.mojito.messages;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.mojito.ContactNode;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 
 /**
@@ -97,7 +97,7 @@ public interface DHTMessage {
     public OpCode getOpCode();
     
     /** Returns the sender of this Message */
-    public ContactNode getContactNode();
+    public Contact getContact();
     
     /** Returns the Message ID of the Message */
     public KUID getMessageID();
