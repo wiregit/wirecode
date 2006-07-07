@@ -262,48 +262,54 @@ public class UDPService implements ReadWriteObserver {
 	 * Notification that a read can happen.
 	 */
 	public void handleRead() throws IOException {
-        while(true) {
-            BUFFER.clear();
-            
-            SocketAddress from;
-            try {
-                from = _channel.receive(BUFFER);
-            } catch(IOException iox) {
-                break;
-            } catch(Error error) {
-                // Stupid implementations giving bogus errors.  Grrr!.
-                break;
-            }
-            
-            // no packet.
-            if(from == null)
-                break;
-            
-            if(!(from instanceof InetSocketAddress)) {
-                Assert.silent(false, "non-inet SocketAddress: " + from);
-                continue;
-            }
-            
-            InetSocketAddress addr = (InetSocketAddress)from;
-                
-            if(!NetworkUtils.isValidAddress(addr.getAddress()))
-                continue;
-            if(!NetworkUtils.isValidPort(addr.getPort()))
-                continue;
-                
-            byte[] data = BUFFER.array();
-            int length = BUFFER.position();
-            try {
-                // we do things the old way temporarily
-                InputStream in = new ByteArrayInputStream(data, 0, length);
-                Message message = MessageFactory.read(in, Message.N_UDP, IN_HEADER_BUF);
-                if(message == null)
+        try {
+            while (true) {
+                BUFFER.clear();
+
+                SocketAddress from;
+                try {
+                    from = _channel.receive(BUFFER);
+                } catch (IOException iox) {
+                    break;
+                } catch (Error error) {
+                    // Stupid implementations giving bogus errors. Grrr!.
+                    break;
+                }
+
+                // no packet.
+                if (from == null)
+                    break;
+
+                if (!(from instanceof InetSocketAddress)) {
+                    Assert.silent(false, "non-inet SocketAddress: " + from);
+                    continue;
+                }
+
+                InetSocketAddress addr = (InetSocketAddress) from;
+
+                if (!NetworkUtils.isValidAddress(addr.getAddress()))
+                    continue;
+                if (!NetworkUtils.isValidPort(addr.getPort()))
                     continue;
 
-                processMessage(message, addr);
-            } catch (IOException ignored) {
-            } catch (BadPacketException ignored) {
-            }
+                byte[] data = BUFFER.array();
+                int length = BUFFER.position();
+                try {
+                    // we do things the old way temporarily
+                    InputStream in = new ByteArrayInputStream(data, 0, length);
+                    Message message = MessageFactory.read(in, Message.N_UDP, IN_HEADER_BUF);
+                    if (message == null)
+                        continue;
+
+                    processMessage(message, addr);
+                } catch (IOException ignored) {
+                } catch (BadPacketException ignored) {
+                }
+            } 
+        } catch(Throwable t) {
+            // Do not let the exceptions propogate out, as that could
+            // close UDPService.
+            ErrorService.error(t);
         }
 	}
 	
@@ -464,35 +470,41 @@ public class UDPService implements ReadWriteObserver {
 	 * Notification that a write can happen.
 	 */
 	public boolean handleWrite() throws IOException {
-	    synchronized(OUTGOING_MSGS) {
-	        while(!OUTGOING_MSGS.isEmpty()) {
-                boolean releaseBuffer = true;
-                SendBundle bundle = OUTGOING_MSGS.remove(0);
-	            try {
-    	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
-    	                // we removed the bundle from the list but couldn't send it,
-    	                // so we have to put it back in.
-    	                OUTGOING_MSGS.add(0, bundle);
-                        releaseBuffer = false;
-    	                return true; // no room left to send.
+        try {
+    	    synchronized(OUTGOING_MSGS) {
+    	        while(!OUTGOING_MSGS.isEmpty()) {
+                    boolean releaseBuffer = true;
+                    SendBundle bundle = OUTGOING_MSGS.remove(0);
+    	            try {
+        	            if(_channel.send(bundle.buffer, bundle.addr) == 0) {
+        	                // we removed the bundle from the list but couldn't send it,
+        	                // so we have to put it back in.
+        	                OUTGOING_MSGS.add(0, bundle);
+                            releaseBuffer = false;
+        	                return true; // no room left to send.
+                        }
+                    } catch(IOException ignored) {
+                        LOG.warn("Ignoring exception on socket", ignored);
+                    } finally {
+                        if(bundle.custom) {
+                            bundle.buffer.rewind();
+                            releaseBuffer = false;
+                        }
+                        
+                        if (releaseBuffer)
+                            NIODispatcher.instance().getBufferCache().release(bundle.buffer);
                     }
-                } catch(IOException ignored) {
-                    LOG.warn("Ignoring exception on socket", ignored);
-                } finally {
-                    if(bundle.custom) {
-                        bundle.buffer.rewind();
-                        releaseBuffer = false;
-                    }
-                    
-                    if (releaseBuffer)
-                        NIODispatcher.instance().getBufferCache().release(bundle.buffer);
-                }
-	        }
-	        
-	        // if there's no data left to send, we don't wanna be notified of write events.
-	        NIODispatcher.instance().interestWrite(_channel, false);
-	        return false;
-	    }
+    	        }
+    	        
+    	        // if there's no data left to send, we don't wanna be notified of write events.
+    	        NIODispatcher.instance().interestWrite(_channel, false);
+    	        return false;
+    	    }
+        } catch(Throwable t) {
+            // Don't let it propogate, since that could close UDPService!
+            ErrorService.error(t);
+            return true;
+        }
     }       
 	
 	/** Wrapper for outgoing data */
