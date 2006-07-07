@@ -27,52 +27,33 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.StatsListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.util.ContactUtils;
+import com.limegroup.mojito.messages.StatsResponse;
 
-
-public class StatsResponseHandler extends AbstractResponseHandler {
+public class StatsResponseHandler extends AbstractResponseHandler<StatsResponse> {
 
     private static final Log LOG = LogFactory.getLog(StatsResponseHandler.class);
     
     public StatsResponseHandler(Context context) {
         super(context);
     }
-
-    public void addStatsListener(StatsListener listener) {
-        listeners.add(listener);
-    }
     
-    public void removeStatsListener(StatsListener listener) {
-        listeners.remove(listener);
-    }
-
-    public StatsListener[] getStatsListeners() {
-        return (StatsListener[])listeners.toArray(new StatsListener[0]);
-    }
-    
-    protected void response(final ResponseMessage message, final long time) throws IOException {
+    protected void response(ResponseMessage message, long time) throws IOException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Stats request to " + message.getContact() + " succeeded");
         }
+        
+        setReturnValue((StatsResponse)message);
     }
 
-    protected void timeout(final KUID nodeId, final SocketAddress dst, 
-            final RequestMessage message, final long time) throws IOException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Stats request to " + ContactUtils.toString(nodeId, dst) 
-                    + " failed");
-        }
+    protected void timeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time) throws IOException {
+        fireTimeoutException(nodeId, dst, message, time);
     }
     
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-        if (LOG.isErrorEnabled()) {
-            LOG.error("Sending a stats request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
-        }
-        
-        fireTimeout(nodeId, dst, message, -1L);
+    public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        setException(new Exception(message.toString(), e));
     }
 }

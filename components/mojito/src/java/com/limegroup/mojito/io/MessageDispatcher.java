@@ -21,7 +21,6 @@ package com.limegroup.mojito.io;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.Iterator;
@@ -442,12 +441,18 @@ public abstract class MessageDispatcher implements Runnable {
             while(!outputQueue.isEmpty() && isRunning()) {
                 Tag tag = outputQueue.removeFirst();
                 
+                if (tag.isCancelled()) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(tag + " was cancelled");
+                    }
+                    continue;
+                }
+                
                 try {
                     SocketAddress dst = tag.getSocketAddres();
                     ByteBuffer data = tag.getData();
                     assert data != null : "Somebody set Data to null";
 
-                    
                     if (send(channel, dst, data)) {
                         // Wohoo! Message was sent!
                         registerInput(tag);
@@ -456,8 +461,8 @@ public abstract class MessageDispatcher implements Runnable {
                         outputQueue.addFirst(tag);
                         break;
                     }
-                } catch (SocketException err) {
-                    LOG.error("Failed to send a message due to a SocketException", err);
+                } catch (IOException err) {
+                    LOG.error("IOException", err);
                     tag.handleError(err);
                 }
             }

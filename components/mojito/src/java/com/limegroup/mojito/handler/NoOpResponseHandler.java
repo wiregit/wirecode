@@ -67,6 +67,10 @@ public final class NoOpResponseHandler implements ResponseHandler {
             RequestMessage message, long time) throws IOException {
     }
 
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        LOG.error(e);
+    }
+    
     public long time() {
         return time;
     }
@@ -75,7 +79,7 @@ public final class NoOpResponseHandler implements ResponseHandler {
         return timeout;
     }
     
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-        LOG.error(e);
+    public boolean isCancelled() {
+        return false;
     }
 }

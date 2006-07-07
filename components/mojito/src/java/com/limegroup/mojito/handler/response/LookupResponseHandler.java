@@ -22,15 +22,13 @@ package com.limegroup.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +38,6 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.LookupListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueResponse;
@@ -60,12 +57,12 @@ import com.limegroup.mojito.util.TrieUtils;
  * The LookupResponseHandler handles Node as well as Value
  * lookups.
  */
-public class LookupResponseHandler extends AbstractResponseHandler {
+public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
     
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     
     /** The key we're looking for */
-    private KUID lookupId;
+    protected final KUID lookupId;
     
     /** Inverted lookup key (furthest away) */
     private KUID furthestId;
@@ -79,7 +76,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     /** Trie of Contacts we're going to query */
     private Trie<KUID, Contact> toQuery = new PatriciaTrie<KUID, Contact>();
 
-    /** Trie of ContactNodes that did respond */
+    /** Trie of Contacts that did respond */
     private Trie<KUID, ContactQueryKeyEntry> responses = new PatriciaTrie<KUID, ContactQueryKeyEntry>();
     
     /** A Map we're using to count the number of hops */
@@ -108,17 +105,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
      */
     private SingleLookupStatisticContainer lookupStat;
     
-    /**
-     * Either a collection of KeyValueCollections or ContactNodes
-     * depending on whether this is a Node or Value lookup.
-     */
-    private Collection found = Collections.EMPTY_LIST;
-    
-    public LookupResponseHandler(Context context, KUID lookupId) {
+    LookupResponseHandler(Context context, KUID lookupId) {
         this(context, lookupId, -1);
     }
     
-    public LookupResponseHandler(Context context, KUID lookupId, int resultSetSize) {
+    LookupResponseHandler(Context context, KUID lookupId, int resultSetSize) {
         super(context);
         
         if (!lookupId.isNodeID() && !lookupId.isValueID()) {
@@ -151,18 +142,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         
         addResponse(new ContactQueryKeyEntry(context.getLocalNode()));
         markAsQueried(context.getLocalNode());
-    }
-
-    public void addLookupListener(LookupListener listener) {
-        listeners.add(listener);
-    }
-    
-    public void removeLookupListener(LookupListener listener) {
-        listeners.remove(listener);
-    }
-
-    public LookupListener[] getPingListeners() {
-        return (LookupListener[])listeners.toArray(new LookupListener[0]);
     }
     
     public KUID getLookupID() {
@@ -198,18 +177,8 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         if (sent == 0) {
-            finishLookup(-1L, 0);
+            doFinishLookup(-1L, 0);
         }
-    }
-    
-    public void stop() {
-        super.stop();
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Stopping lookup for " + lookupId);
-        }
-        
-        finishLookup(-1L, 0);
     }
     
     public long time() {
@@ -220,10 +189,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
     }
     
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
-        
-        if (isStopped()) {
-            return;
-        }
         
         assert (activeSearches > 0);
         
@@ -250,16 +215,12 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
         
         if (activeSearches == 0) {
-            finishLookup(time(), hop);
+            doFinishLookup(time(), hop);
         }
     }
     
     protected synchronized void timeout(KUID nodeId, 
             SocketAddress dst, RequestMessage message, long time) throws IOException {
-        
-        if (isStopped()) {
-            return;
-        }
         
         assert (activeSearches > 0);
         
@@ -281,19 +242,11 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         lookupStep(hop);
         
         if (activeSearches == 0) {
-            finishLookup(time(), hop);
+            doFinishLookup(time(), hop);
         }
     }
     
-    public void handleError(final KUID nodeId, final SocketAddress dst, final RequestMessage message, Exception e) {
-        if (LOG.isErrorEnabled()) {
-            if (isValueLookup()) {
-                LOG.error("Sending a FIND_VALUE request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
-            } else {
-                LOG.error("Sending a FIND_NODE request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
-            }
-        }
-        
+    public void error(final KUID nodeId, final SocketAddress dst, final RequestMessage message, Exception e) {
         if (e instanceof SocketException) {
             context.fireEvent(new Runnable() {
                 public void run() {
@@ -301,12 +254,21 @@ public class LookupResponseHandler extends AbstractResponseHandler {
                         timeout(nodeId, dst, message, -1L);
                     } catch (IOException err) {
                         LOG.error(err);
+                        
+                        if (activeSearches == 0) {
+                            setException(err);
+                        }
                     }
                 }
             });
+            
+            return;
         }
         
-        fireTimeout(nodeId, dst, message, -1L);
+        activeSearches--;
+        if (activeSearches == 0) {
+            setException(e);
+        }
     }
     
     private void handleFindValueResponse(FindValueResponse response, long time, int hop) throws IOException {
@@ -337,10 +299,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             }
             foundValueLocs++;
             
-            if (found == Collections.EMPTY_LIST) {
-                found = new ArrayList();
-            }
-            found.add(c);
+            handleFoundValues(c);
             
             if (isExhaustiveValueLookup()) {
                 lookupStep(hop);
@@ -356,7 +315,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             return;
         }
         
-        Collection<? extends Contact> nodes = response.getNodes();
+        Collection<Contact> nodes = response.getNodes();
         for(Contact node : nodes) {
             
             if (!NetworkUtils.isValidSocketAddress(node.getSocketAddress())) {
@@ -477,28 +436,41 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    private void finishLookup(long time, int hop) {
+    private void doFinishLookup(long time, int hops) {
         lookupFinished = true;
 
         if (time >= 0L) {
             if (isValueLookup()) {
-                if (found.isEmpty()) {
+                if (foundValueLocs == 0) {
                     ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_FAILURE.incrementStat();
                 } else {
                     ((FindValueLookupStatisticContainer)lookupStat).FIND_VALUE_OK.incrementStat();
                 }
             } else {
-                lookupStat.setHops(hop, false);
+                lookupStat.setHops(hops, false);
                 lookupStat.setTime((int)time, false);
                 
                 // addResponse(ContactNode) limits the size of the
                 // Trie to K and we can thus use the size method of it!
-                found = TrieUtils.select(responses, lookupId, responses.size());
+                List<? extends Entry<Contact,QueryKey>> nodes 
+                        = TrieUtils.select(responses, lookupId, responses.size());
+                
+                handleFoundNodes(nodes);
             }
         }
         
-        fireFinish(found, time);
+        handleLookupFinished(time, hops);
     }
+    
+    protected void handleFoundValues(KeyValueCollection c) {
+        throw new UnsupportedOperationException();
+    }
+    
+    protected void handleFoundNodes(List<? extends Entry<Contact, QueryKey>> nodes) {
+        throw new UnsupportedOperationException();
+    }
+    
+    protected abstract void handleLookupFinished(long time, int hops);
     
     private void doLookup(Contact node) throws IOException {
         markAsQueried(node);
@@ -507,13 +479,7 @@ public class LookupResponseHandler extends AbstractResponseHandler {
         activeSearches++;
     }
     
-    private RequestMessage createRequest(SocketAddress address) {
-        if (isValueLookup()) {
-            return context.getMessageHelper().createFindValueRequest(address, lookupId);
-        } else {
-            return context.getMessageHelper().createFindNodeRequest(address, lookupId);
-        }
-    }
+    protected abstract RequestMessage createRequest(SocketAddress address);
     
     /** Returns whether or not the Node has been queried */
     private boolean isQueried(Contact node) {
@@ -552,19 +518,6 @@ public class LookupResponseHandler extends AbstractResponseHandler {
             //hopMap.remove(node.getNodeID()); // TODO
         }
         responseCount++;
-    }
-    
-    private void fireFinish(final Collection c, final long time) {
-        context.fireEvent(new Runnable() {
-            public void run() {
-                if (!isStopped()) {
-                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                        LookupListener listener = (LookupListener)it.next();
-                        listener.finish(lookupId, c, time);
-                    }
-                }
-            }
-        });
     }
     
     /**

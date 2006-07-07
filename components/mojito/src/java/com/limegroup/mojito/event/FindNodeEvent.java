@@ -16,27 +16,33 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.event;
 
-import java.net.SocketAddress;
-import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
 
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 
-/**
- * An abstract class for receiving Lookup events.
- */
-public abstract class LookupAdapter implements LookupListener {
-
-    public void response(ResponseMessage response, long time) {
-    }
-
-    public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+public class FindNodeEvent {
+    
+    private KUID lookupId;
+    
+    private List<Entry<Contact, QueryKey>> nodes;
+    
+    @SuppressWarnings("unchecked")
+    public FindNodeEvent(KUID lookupId, List<? extends Entry<Contact, QueryKey>> nodes) {
+        this.lookupId = lookupId;
+        this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
     }
     
-    public void finish(KUID lookup, Collection c, long time) {
+    public KUID getLooupID() {
+        return lookupId;
+    }
+    
+    public List<Entry<Contact, QueryKey>> getNodes() {
+        return nodes;
     }
 }

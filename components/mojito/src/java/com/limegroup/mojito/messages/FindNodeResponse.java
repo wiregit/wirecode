@@ -28,5 +28,5 @@ public interface FindNodeResponse extends LookupResponse {
 
     public QueryKey getQueryKey();
 
-    public Collection<? extends Contact> getNodes();
+    public Collection<Contact> getNodes();
 }

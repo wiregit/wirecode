@@ -16,24 +16,41 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.event;
+
+package com.limegroup.mojito.handler.response;
 
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.util.KeyValueCollection;
 
 /**
- * The ResponseListener is called for every response this
- * Node has received
+ * 
  */
-@Deprecated
-public interface ResponseListener {
+public class FindValueResponseHandler extends LookupResponseHandler<List<KeyValueCollection>> {
+
+    private List<KeyValueCollection> values = new ArrayList<KeyValueCollection>();
     
-    public void response(ResponseMessage response, long time);
-    
-    public void timeout(KUID nodeId, SocketAddress address, 
-            RequestMessage request, long time);
+    public FindValueResponseHandler(Context context, KUID lookupId) {
+        super(context, lookupId.assertValueID());
+    }
+
+    @Override
+    protected RequestMessage createRequest(SocketAddress address) {
+        return context.getMessageHelper().createFindValueRequest(address, lookupId);
+    }
+
+    @Override
+    protected void handleFoundValues(KeyValueCollection c) {
+        values.add(c);
+    }
+
+    @Override
+    protected void handleLookupFinished(long time, int hops) {
+        setReturnValue(values);
+    }
 }

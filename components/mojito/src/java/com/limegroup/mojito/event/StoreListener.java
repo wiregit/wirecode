@@ -26,6 +26,7 @@ import com.limegroup.mojito.db.KeyValue;
 /**
  * 
  */
+@Deprecated
 public interface StoreListener {
     
     /**

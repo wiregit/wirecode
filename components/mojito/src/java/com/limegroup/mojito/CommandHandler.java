@@ -33,19 +33,17 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
-import com.limegroup.mojito.util.ContactUtils;
+import com.limegroup.mojito.util.KeyValueCollection;
 
 public class CommandHandler {
     
@@ -143,28 +141,42 @@ public class CommandHandler {
         out.println(buffer);
     }
     
-    public static void ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
+    public static Future<Contact> ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
         String host = args[1];
         int port = Integer.parseInt(args[2]);
         
         SocketAddress addr = new InetSocketAddress(host, port);
         
         out.println("Pinging... " + addr);
-        dht.ping(addr, new PingListener() {
-            public void response(ResponseMessage response, long time) {
-                out.println("Ping to " + response.getContact() + " succeeded: " + time + "ms");
+        /*dht.ping(addr, new PingListener() {
+            public void handleResult(Contact result) {
+                out.println("Ping to " + result + " succeeded: " + result.getRoundTripTime() + "ms");
                 out.flush();
             }
-
-            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-                if (nodeId != null) {
+            
+            public void handleException(Exception ex) {
+                if (ex instanceof DHTException) {
+                    DHTException dhtEx = (DHTException)ex;
+                    KUID nodeId = dhtEx.getNodeID();
+                    SocketAddress address = dhtEx.getSocketAddress();
                     out.println("Ping to " + ContactUtils.toString(nodeId, address) + " failed");
                 } else {
-                    out.println("Ping to " + address + " failed");
+                    ex.printStackTrace(out);
                 }
                 out.flush();
             }
-        });
+        });*/
+        
+        Future<Contact> future = dht.ping(addr);
+        try {
+            Contact result = future.get();
+            out.println("Ping to " + result + " succeeded: " + result.getRoundTripTime() + "ms");
+        } catch (Exception err) {
+            err.printStackTrace(out);
+        }
+        out.flush();
+        
+        return future;
     }
     
     public static void reqstats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
@@ -304,8 +316,10 @@ public class CommandHandler {
             });*/
             
             long start = System.currentTimeMillis();
-            Collection c = dht.get(key);
-            long time = System.currentTimeMillis() - start;
+            Future<List<KeyValueCollection>> c = dht.get(key);
+            c.cancel(true);
+            
+            /*long time = System.currentTimeMillis() - start;
             
             if (!c.isEmpty()) {
                 StringBuffer buffer = new StringBuffer();
@@ -315,7 +329,7 @@ public class CommandHandler {
                 out.println(buffer.toString());
             } else {
                 out.println(key + " was not found after " + time + "ms");
-            }
+            }*/
             
             out.println();
             

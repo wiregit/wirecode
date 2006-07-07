@@ -24,10 +24,11 @@ import com.limegroup.mojito.Context;
 /**
  * An abstract base class for RequestHandlers
  */
-public abstract class AbstractRequestHandler extends MessageHandler 
-        implements RequestHandler {
+public abstract class AbstractRequestHandler implements RequestHandler {
+    
+    protected final Context context;
     
     public AbstractRequestHandler(Context context) {
-        super(context);
+        this.context = context;
     }
 }

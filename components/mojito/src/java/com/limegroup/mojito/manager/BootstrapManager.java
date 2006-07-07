@@ -17,12 +17,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.handler;
+package com.limegroup.mojito.manager;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -32,10 +31,10 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.LookupListener;
+import com.limegroup.mojito.event.DHTException;
+import com.limegroup.mojito.event.FindNodeEvent;
+import com.limegroup.mojito.event.FindNodeListener;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.BucketUtils;
@@ -129,7 +128,7 @@ public class BootstrapManager {
             next();
         }
         
-        public void response(ResponseMessage response, long time) {
+        public void handleResult(Contact result) {
             try {
                 PhaseOne phaseOne = new PhaseOne();
                 context.lookup(context.getLocalNodeID(), phaseOne);
@@ -141,27 +140,31 @@ public class BootstrapManager {
             }
         }
         
-        public void timeout(KUID nodeId, SocketAddress address, 
-                RequestMessage request, long time) {
-            
-            failedHosts.add(address);
-            
-            networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Initial bootstrap ping timeout, failure " + failedHosts.size());
-            }
-            
-            if (failedHosts.size() < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-                next();
-                return;
-            }
-            
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failedHosts.size() + " tries");
+        public void handleException(Exception ex) {
+            if (ex instanceof DHTException) {
+                DHTException dhtEx = (DHTException)ex;
+                SocketAddress address = dhtEx.getSocketAddress();
+                
+                failedHosts.add(address);
+                
+                networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Initial bootstrap ping timeout, failure " + failedHosts.size());
+                }
+                
+                if (failedHosts.size() < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    next();
+                    return;
+                }
+                
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failedHosts.size() + " tries");
+                }
             }
             
             fireNoBootstrapHost();
         }
+
         
         private void next() {
             try {
@@ -228,19 +231,9 @@ public class BootstrapManager {
         }
     }
 
-    private class PhaseOne implements LookupListener {
-
-        public void response(ResponseMessage response, long time) {
-        }
-
-        public void timeout(KUID nodeId, SocketAddress address, 
-                RequestMessage request, long time) {
-        }
+    private class PhaseOne implements FindNodeListener {
         
-        public void found(KUID lookup, Collection c, long time) {
-        }
-        
-        public void finish(KUID lookup, Collection c, long time) {
+        public void handleResult(FindNodeEvent result) {
             firePhaseOneFinished();
             
             List<KUID> ids = context.getRouteTable().getRefreshIDs(true);
@@ -259,9 +252,14 @@ public class BootstrapManager {
                 firePhaseTwoFinished(false);
             }
         }
+        
+        public void handleException(Exception ex) {
+            firePhaseOneFinished();
+            firePhaseTwoFinished(false);
+        }
     }
     
-    private class PhaseTwo implements LookupListener {
+    private class PhaseTwo implements FindNodeListener {
         
         private List<KUID> ids;
         
@@ -271,27 +269,21 @@ public class BootstrapManager {
             this.ids = ids;
         }
         
-        public void response(ResponseMessage response, long time) {
-        }
-
-        public void timeout(KUID nodeId, SocketAddress address, 
-                RequestMessage request, long time) {
-        }
         
-        public void found(KUID lookup, Collection c, long time) {
-        }
-        
-        public void finish(KUID lookup, Collection c, long time) {
-            if (!c.isEmpty()) {
+        public void handleResult(FindNodeEvent result) {
+            if (!result.getNodes().isEmpty()) {
                 foundNewNodes = true;
             }
             
-            boolean removed = ids.remove(lookup);
+            boolean removed = ids.remove(result.getLooupID());
             assert (removed == true);
             
             if (ids.isEmpty()) {
                 firePhaseTwoFinished(foundNewNodes);
             }
+        }
+
+        public void handleException(Exception ex) {
         }
     }
 }

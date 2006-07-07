@@ -53,15 +53,17 @@ import com.limegroup.mojito.util.ContactUtils;
  * is not full, updating the last seen time stamp of Nodes and 
  * so forth.
  */
-public class DefaultMessageHandler extends MessageHandler 
-        implements RequestHandler, ResponseHandler {
+public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
     
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
     
     private DatabaseStatisticContainer databaseStats;
     
+    protected final Context context;
+    
     public DefaultMessageHandler(Context context) {
-        super(context);
+        this.context = context;
+        
         databaseStats = context.getDatabaseStats();
     }
     
@@ -74,6 +76,10 @@ public class DefaultMessageHandler extends MessageHandler
     
     public long timeout() {
         return NetworkSettings.MAX_TIMEOUT.getValue();
+    }
+
+    public boolean isCancelled() {
+        return false;
     }
 
     public void handleResponse(ResponseMessage message, long time) throws IOException {
@@ -201,7 +207,7 @@ public class DefaultMessageHandler extends MessageHandler
             
             FindNodeResponse response = (FindNodeResponse)message;
             
-            Collection<? extends Contact> nodes = response.getNodes();
+            Collection<Contact> nodes = response.getNodes();
             for(Contact node : nodes) {
                 // We did a FIND_NODE lookup use the info
                 // to fill our routing table
@@ -215,13 +221,10 @@ public class DefaultMessageHandler extends MessageHandler
         protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         }
 
-        public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-            
+        public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Getting the QueryKey from " + ContactUtils.toString(nodeId, dst) + " failed", e);
             }
-            
-            fireTimeout(nodeId, dst, message, -1L);
         }
     }
 }

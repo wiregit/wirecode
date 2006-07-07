@@ -34,9 +34,9 @@ import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
@@ -46,19 +46,18 @@ import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.LookupAdapter;
-import com.limegroup.mojito.event.LookupListener;
+import com.limegroup.mojito.event.FindNodeListener;
+import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
+import com.limegroup.mojito.util.KeyValueCollection;
 
 /**
  * The Mojito DHT. All you need to know is here!
@@ -200,7 +199,7 @@ public class MojitoDHT {
         return context.getPingListeners();
     }
     
-    public void addLookupListener(LookupListener listener) {
+    /*public void addLookupListener(LookupListener listener) {
         context.addLookupListener(listener);
     }
     
@@ -210,7 +209,7 @@ public class MojitoDHT {
     
     public LookupListener[] getLookupListeners() {
         return context.getLookupListeners();
-    }
+    }*/
     
     public void setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher) {
         context.setMessageDispatcher(messageDispatcher);
@@ -300,8 +299,9 @@ public class MojitoDHT {
      * @return The responding <tt>ContactNode</tt> or null if there was a timeout
      * @throws IOException
      */
-    public Contact ping(SocketAddress dst) throws IOException {
-        return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
+    public Future<Contact> ping(SocketAddress dst) throws IOException {
+        //return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
+        return context.ping(dst);
     }
     
     private Contact ping(SocketAddress dst, long timeout) throws IOException {
@@ -309,15 +309,14 @@ public class MojitoDHT {
         
         synchronized (node) {
             ping(dst, new PingListener() {
-                public void response(ResponseMessage response, long t) {
-                    node[0] = response.getContact();
+                public void handleResult(Contact result) {
+                    node[0] = result;
                     synchronized (node) {
                         node.notify();
                     }
                 }
-
-                public void timeout(KUID nodeId, SocketAddress address, 
-                        RequestMessage request, long t) {
+                
+                public void handleException(Exception ex) {
                     synchronized (node) {
                         node.notify();
                     }
@@ -425,8 +424,9 @@ public class MojitoDHT {
         return false;
     }
     
-    public Collection<KeyValue> get(KUID key) throws IOException {
-        return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
+    public Future<List<KeyValueCollection>> get(KUID key) throws IOException {
+        //return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
+        return context.get(key, null);
     }
     
     @SuppressWarnings("unchecked")
@@ -436,13 +436,17 @@ public class MojitoDHT {
         };
         
         synchronized (values) {
-            get(key, new LookupAdapter() {
-                public void finish(KUID lookup, Collection c, long time) {
-                    values[0] = c;
+            get(key, new FindValueListener() {
+                public void handleResult(List<KeyValueCollection> result) {
+                    values[0] = result;
                     synchronized (values) {
                         values.notify();
                     }
                 }
+                
+                public void handleException(Exception ex) {
+                }
+                
             });
             
             try {
@@ -455,16 +459,16 @@ public class MojitoDHT {
         return values[0];
     }
     
-    public void get(KUID key, LookupListener listener) throws IOException {
+    public Future<List<KeyValueCollection>> get(KUID key, FindValueListener listener) throws IOException {
         if (!key.isValueID()) {
             throw new IllegalArgumentException("Key must be a Value ID");
         }
         
         if (listener == null) {
-            throw new NullPointerException("LookupListener is null");
+            throw new NullPointerException("FindValueListener is null");
         }
         
-        context.get(key, listener);
+        return context.get(key, listener);
     }
     
     public boolean remove(KUID key) throws IOException {
@@ -481,7 +485,7 @@ public class MojitoDHT {
     }
 
     // TODO for debugging purposes only
-    void lookup(KUID lookup, LookupListener listener) throws IOException {
+    void lookup(KUID lookup, FindNodeListener listener) throws IOException {
         context.lookup(lookup, listener);
     }
     

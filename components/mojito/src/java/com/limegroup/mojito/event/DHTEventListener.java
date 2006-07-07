@@ -16,20 +16,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.event;
 
-import java.util.Collection;
 
-import com.limegroup.mojito.KUID;
-
-/**
- * The interface for receiving Lookup events.
- */
-public interface LookupListener extends ResponseListener {
+public interface DHTEventListener<T> {
     
-    /**
-     * Called after a lookup has finished.
-     */
-    public void finish(KUID lookup, Collection c, long time);
+    public void handleResult(T result);
+    
+    public void handleException(Exception ex);
 }

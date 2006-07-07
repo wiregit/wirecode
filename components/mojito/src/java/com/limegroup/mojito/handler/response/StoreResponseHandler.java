@@ -22,7 +22,6 @@ package com.limegroup.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -33,7 +32,6 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.event.StoreResponseListener;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -48,7 +46,7 @@ import com.limegroup.mojito.util.ContactUtils;
  * waits for the response and sends the next KeyValue until
  * all KeyValues were sent.
  */
-public class StoreResponseHandler extends AbstractResponseHandler {
+public class StoreResponseHandler extends AbstractResponseHandler<Contact> {
     
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
         
@@ -68,18 +66,6 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         this.keyValues = keyValues;
     }
     
-    public void addStoreListener(StoreResponseListener listener) {
-        listeners.add(listener);
-    }
-    
-    public void removeStoreListener(StoreResponseListener listener) {
-        listeners.remove(listener);
-    }
-
-    public StoreResponseListener[] getStoreListeners() {
-        return (StoreResponseListener[])listeners.toArray(new StoreResponseListener[0]);
-    }
-    
     public QueryKey getQueryKey() {
         return queryKey;
     }
@@ -89,7 +75,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
     }
     
     public void store(Contact node) throws IOException {
-        if (index < keyValues.size() && !isStopped()) {
+        if (index < keyValues.size() && !isCancelled()) {
             KeyValue keyValue = keyValues.get(index);
             
             StoreRequest request = context.getMessageHelper()
@@ -115,8 +101,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
                             + valueId + " we have not requested to store!");
                 }
                 
-                Contact node = message.getContact();
-                fireStoreFailed(node.getNodeID(), node.getSocketAddress());
+                fireStoreFailed(message.getContact());
                 return;
             }
             
@@ -134,8 +119,7 @@ public class StoreResponseHandler extends AbstractResponseHandler {
                             + status + " for KeyValue " + valueId);
                 }
                 
-                Contact node = message.getContact();
-                fireStoreFailed(node.getNodeID(), node.getSocketAddress());
+                fireStoreFailed(message.getContact());
                 return;
             }
             
@@ -152,46 +136,32 @@ public class StoreResponseHandler extends AbstractResponseHandler {
         }
     }
     
-    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Max number of errors occured. Giving up!");
-        }
-        
-        fireStoreFailed(nodeId, dst);
+    protected void timeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time) throws IOException {
+        fireTimeoutException(nodeId, dst, message, time);
     }
     
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+    public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         if (LOG.isErrorEnabled()) {
             LOG.error("Sending a store request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
         }
         
-        fireTimeout(nodeId, dst, message, -1L);
-        fireStoreFailed(nodeId, dst);
+        setException(new Exception(message.toString(), e));
     }
     
-    public void fireStoreSucceeded(final Contact node) {
-        context.fireEvent(new Runnable() {
-            public void run() {
-                if (!isStopped()) {
-                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                        StoreResponseListener listener = (StoreResponseListener)it.next();
-                        listener.storeSucceeded(node, keyValues);
-                    }
-                }
-            }
-        });
+    private void fireStoreSucceeded(Contact node) {
+        setReturnValue(node);
     }
     
-    public void fireStoreFailed(final KUID nodeId, final SocketAddress dst) {
-        context.fireEvent(new Runnable() {
-            public void run() {
-                if (!isStopped()) {
-                    for(Iterator it = listeners.iterator(); it.hasNext(); ) {
-                        StoreResponseListener listener = (StoreResponseListener)it.next();
-                        listener.storeFailed(nodeId, dst, keyValues);
-                    }
-                }
-            }
-        });
+    public void fireStoreFailed(Contact node) {
+        setException(new StoreException(node));
+    }
+    
+    public static class StoreException extends Exception {
+        private static final long serialVersionUID = 7739569179285045326L;
+
+        public StoreException(Contact node) {
+            super(node.toString());
+        }
     }
 }

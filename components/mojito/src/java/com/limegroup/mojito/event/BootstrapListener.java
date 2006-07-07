@@ -25,6 +25,7 @@ import java.util.List;
 /**
  * The interface for reciving Bootstrap events.
  */
+@Deprecated
 public interface BootstrapListener {
     
     public void phaseOneComplete(long time);

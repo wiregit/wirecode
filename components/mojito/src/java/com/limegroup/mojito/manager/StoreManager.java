@@ -17,13 +17,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.handler;
+package com.limegroup.mojito.manager;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -35,18 +32,17 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.event.LookupListener;
+import com.limegroup.mojito.event.FindNodeEvent;
+import com.limegroup.mojito.event.FindNodeListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 
 /**
  * The StoreManager performs a lookup for the Value ID we're
  * going to store and stores the KeyValue at the k closest 
  * Nodes of the result set.
  */
-public class StoreManager implements LookupListener {
+public class StoreManager implements FindNodeListener {
     
     private static final Log LOG = LogFactory.getLog(StoreManager.class);
     
@@ -68,24 +64,12 @@ public class StoreManager implements LookupListener {
         this.context.lookup(nodeId, this);
     }
     
-    public void response(ResponseMessage response, long time) {
-    }
-
-    public void timeout(KUID nodeId, SocketAddress address, 
-            RequestMessage request, long time) {
-    }
-    
-    public void found(KUID lookup, Collection c, long time) {
+    public void handleResult(FindNodeEvent result) {
         
-    }
-    
-    public void finish(KUID lookup, Collection c, long time) {
-        // List of ContactNodes where we stored the KeyValues.
-        final List<Contact> storeTargets = new ArrayList<Contact>(c.size());
+        List<Entry<Contact, QueryKey>> nodes = result.getNodes();
+        final List<Contact> storeTargets = new ArrayList<Contact>(nodes.size());
         
-        for(Iterator it = c.iterator(); it.hasNext(); ) {
-            Entry<Contact, QueryKey> entry 
-                    = (Entry<Contact, QueryKey>)it.next();
+        for (Entry<Contact, QueryKey> entry : nodes) {
             
             Contact node = entry.getKey();
             QueryKey queryKey = entry.getValue();
@@ -123,5 +107,8 @@ public class StoreManager implements LookupListener {
                 }
             });
         }
+    }
+    
+    public void handleException(Exception ex) {
     }
 }

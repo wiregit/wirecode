@@ -171,6 +171,13 @@ public class Tag {
         }
     }
     
+    public boolean isCancelled() {
+        if (responseHandler != null) {
+            return responseHandler.isCancelled();
+        }
+        return false;
+    }
+    
     /**
      * The Receipt class keeps track of requests we've sent and 
      * handles the response messages.

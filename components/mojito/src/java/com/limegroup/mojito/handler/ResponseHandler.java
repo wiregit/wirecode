@@ -47,6 +47,11 @@ public interface ResponseHandler {
     public long timeout();
     
     /**
+     * 
+     */
+    public boolean isCancelled();
+    
+    /**
      *
      */
     public void handleResponse(ResponseMessage message, long time) throws IOException;

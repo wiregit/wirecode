@@ -31,9 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
@@ -142,9 +141,9 @@ public class RouteTableImpl implements RouteTable {
     
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
         PingListener listener = new PingListener() {
-            public void response(ResponseMessage response, long time) {
+            public void handleResult(Contact result) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(node + " is trying to spoof " + response.getContact());
+                    LOG.warn(node + " is trying to spoof " + result);
                 }
                 
                 // DO NOTHING! The DefaultMessageHandler 
@@ -152,8 +151,20 @@ public class RouteTableImpl implements RouteTable {
                 
                 //TODO add spoofer to ban list
             }
-
-            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
+            
+            public void handleException(Exception ex) {
+                if (!(ex instanceof DHTException)) {
+                    return;
+                }
+                
+                DHTException dhtEx = (DHTException)ex;
+                /*if (!(dhtEx.getCause() instanceof TimeoutException)) {
+                    return;
+                }*/
+                
+                KUID nodeId = dhtEx.getNodeID();
+                SocketAddress address = dhtEx.getSocketAddress();
+                
                 if (LOG.isInfoEnabled()) {
                     LOG.info(ContactUtils.toString(nodeId, address) 
                             + " did not respond! Replacing it with " + node);
