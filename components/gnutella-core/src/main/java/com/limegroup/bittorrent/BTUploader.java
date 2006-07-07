@@ -36,10 +36,6 @@ public class BTUploader implements Uploader, TorrentEventListener {
 				_torrent);
 		dispatcher.dispatchEvent(stopping);
 	}
-	
-	public void performStop() {
-		_torrent.stop();
-	}
 
 	public String getFileName() {
 		return _info.getName();
@@ -84,14 +80,6 @@ public class BTUploader implements Uploader, TorrentEventListener {
 		return Uploader.UPLOADING;
 	}
 
-	public void setState(int state) {
-		// do nothing
-	}
-
-	public void writeResponse() throws IOException {
-		// do nothing
-	}
-
 	public boolean isChatEnabled() {
 		return false;
 	}
@@ -106,18 +94,6 @@ public class BTUploader implements Uploader, TorrentEventListener {
 
 	public String getUserAgent() {
 		return "BitTorrent";
-	}
-
-	public boolean isHeaderParsed() {
-		return true;
-	}
-
-	public boolean supportsQueueing() {
-		return false;
-	}
-
-	public HTTPRequestMethod getMethod() {
-		return HTTPRequestMethod.GET;
 	}
 
 	public int getQueuePosition() {
@@ -140,7 +116,7 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	public float getMeasuredBandwidth() throws InsufficientDataException {
 		if (!_torrent.isActive())
 			return 0.f;
-		return _torrent.getMeasuredBandwidth(false) / 1024;
+		return _torrent.getMeasuredBandwidth(false);
 	}
 
 	public void handleTorrentEvent(TorrentEvent evt) {
@@ -149,7 +125,7 @@ public class BTUploader implements Uploader, TorrentEventListener {
 		
 		switch(evt.getType()) {
 		case STARTED : torrentStarted(); break;
-		case STOP_REQUESTED : _torrent.stop(); break;
+		case STOP_APPROVED: _torrent.stop(); break;
 		case STOPPED : 
 			torrentStopped();
 			dispatcher.removeEventListener(this);

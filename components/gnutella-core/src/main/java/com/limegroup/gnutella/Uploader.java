@@ -96,13 +96,6 @@ public interface Uploader extends BandwidthTracker {
     public int getLastTransferState();
 
 	/**
-	 * Sets the state of this uploader.
-	 */
-	public void setState(int state);
-
-	public void writeResponse() throws IOException;
-
-	/**
 	 * returns true if chat for the host is on, false if it is not.
 	 */
 	public boolean isChatEnabled();
@@ -122,18 +115,6 @@ public interface Uploader extends BandwidthTracker {
 	 */
 	public String getUserAgent();
 	
-	/** 
-	 * return whether or not the headers have been parsed
-	 */
-	public boolean isHeaderParsed();
-
-    public boolean supportsQueueing();
-    
-    /**
-     * returns the current request method.
-     */
-    public HTTPRequestMethod getMethod();
-    
     /**
      * Returns the current queue position if queued.
      */

@@ -382,11 +382,13 @@ implements TorrentEventListener {
 		TorrentManager torrentManager = RouterService.getTorrentManager();
 		_torrent = new ManagedTorrent(_info, torrentManager); 
 		torrentManager.addEventListener(this);
-		BTUploader uploader = new BTUploader(_torrent,_info, torrentManager);
 		ifm.addTorrentEntry(_info.getURN());
 	}
 	
 	public void startDownload() {
+		BTUploader uploader = new BTUploader(_torrent,
+				_info, 
+				RouterService.getTorrentManager());
 		_torrent.start();
 	}
 	

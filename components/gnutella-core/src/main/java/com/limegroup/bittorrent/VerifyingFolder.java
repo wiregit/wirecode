@@ -64,11 +64,6 @@ public class VerifyingFolder {
 	private final List<TorrentFile> _files;
 
 	/**
-	 * Object to lock on during all disk operations.
-	 */
-	private final Object DISK_LOCK = new Object();
-	
-	/**
 	 * The instances RandomAccessFile for all files contained in this torrent
 	 * LOCKING: this reference as well as the elements of the array - DISK_LOCK
 	 */
@@ -225,7 +220,7 @@ public class VerifyingFolder {
 		for (int i = 0; i < _files.size() && written < buf.length; i++) {
 			if (startOffset < _files.get(i).length()) {
 				RandomAccessFile currentFile;
-				synchronized(DISK_LOCK) {
+				synchronized(this) {
 					if (!isOpen())
 						throw new IOException("file closed");
 					currentFile = _fos[i];
@@ -361,7 +356,7 @@ public class VerifyingFolder {
 				// TODO: decide if files should be moved to the save
 				// location as they are completed.. cool but not trivial
 				try {
-					synchronized(DISK_LOCK) {
+					synchronized(this) {
 						if (isOpen()) {
 							int index = _files.indexOf(file);
 							_fos[index].close();
@@ -409,7 +404,7 @@ public class VerifyingFolder {
 	 * else. If there is no completion size, this fails.
 	 */
 	public void open(final ManagedTorrent torrent) throws IOException {
-		synchronized(DISK_LOCK) {
+		synchronized(this) {
 			if (_fos != null)
 				throw new IOException("Files already open!");
 			
@@ -433,7 +428,7 @@ public class VerifyingFolder {
 			// with it
 			if (isComplete()) {
 				LOG.info("opening torrent in read-only mode");
-				synchronized(DISK_LOCK) {
+				synchronized(this) {
 					_fos[i] = new RandomAccessFile(file, "r");
 				}
 			} else {
@@ -467,7 +462,7 @@ public class VerifyingFolder {
 				} 
 				
 				FileUtils.setWriteable(file);
-				synchronized(DISK_LOCK) {
+				synchronized(this) {
 					_fos[i] = new RandomAccessFile(file, "rw");
 				}
 				
@@ -517,7 +512,7 @@ public class VerifyingFolder {
 	 */
 	public void close() {
 		LOG.debug("closing the file");
-		synchronized(DISK_LOCK) {
+		synchronized(this) {
 			if (!isOpen())
 				return;
 			
@@ -525,8 +520,6 @@ public class VerifyingFolder {
 				IOUtils.close(f);
 			
 			_fos = null;
-		}
-		synchronized(this) {
 			pendingRanges.clear();
 		}
 		torrent = null;
@@ -538,10 +531,8 @@ public class VerifyingFolder {
 	/**
 	 * determines whether the files for this torrent are open.
 	 */
-	public boolean isOpen() {
-		synchronized(DISK_LOCK) {
-			return _fos != null;
-		}
+	public synchronized boolean isOpen() {
+		return _fos != null;
 	}
 
 	public void sendPiece(BTInterval in, BTConnection c) throws IOException {
@@ -622,7 +613,7 @@ public class VerifyingFolder {
 			File f = _files.get(i);
 			while (position < f.length() && read < length) {
 				RandomAccessFile currentFile;
-				synchronized(DISK_LOCK) {
+				synchronized(this) {
 					if (!isOpen())
 						throw new IOException("file closed");
 					currentFile = _fos[i];

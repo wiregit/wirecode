@@ -11,15 +11,15 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 
 	private final int _interval;
 
-	private volatile long _lastAmount = 0;
+	private long _lastAmount = 0;
 
-	private volatile long _lastTimeMeasured = 0;
+	private long _lastTimeMeasured = 0;
 
-	private volatile long _firstTimeMeasured = 0;
+	private long _firstTimeMeasured = 0;
 
-	private volatile long _amount = 0;
+	private long _amount = 0;
 
-	private volatile float _measuredBandwidth = -1f;
+	private float _measuredBandwidth = -1f;
 
 	public SimpleBandwidthTracker() {
 		this(DEFAULT_INTERVAL);
@@ -29,15 +29,15 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 		_interval = interval;
 	}
 
-	public void count(int added) {
+	public synchronized void count(int added) {
 		_amount += added;
 	}
 
-	public long getTotalAmount() {
+	public synchronized long getTotalAmount() {
 		return _amount;
 	}
 
-	public void measureBandwidth() {
+	public synchronized void measureBandwidth() {
 		long now = System.currentTimeMillis();
 		if (_firstTimeMeasured == 0) {
 			_firstTimeMeasured = now;
@@ -53,14 +53,14 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 		_lastTimeMeasured = now;
 	}
 
-	public float getMeasuredBandwidth() throws InsufficientDataException {
+	public synchronized float getMeasuredBandwidth() throws InsufficientDataException {
 		if (_measuredBandwidth < 0)
 			throw new InsufficientDataException();
 		return _measuredBandwidth;
 	}
 
-	public float getAverageBandwidth() {
-		return _amount
-				/ (System.currentTimeMillis() - _firstTimeMeasured);
+	public synchronized float getAverageBandwidth() {
+		long time = System.currentTimeMillis() - _firstTimeMeasured; 
+		return time <= 0 ? 0 :_amount / time ;
 	}
 }

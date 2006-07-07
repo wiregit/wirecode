@@ -216,6 +216,8 @@ public class ManagedTorrent {
 				initializeTorrent();
 				initializeFolder();
 				
+				dispatchEvent(TorrentEvent.Type.STARTED); 
+				
 				int state = _state.getInt();
 				if (state == SEEDING || state == VERIFYING) 
 					return;
@@ -281,7 +283,7 @@ public class ManagedTorrent {
 	/**
 	 * Performs the actual stop.  It does not modify the torrent state.
 	 */
-	private void stopImpl(final int finalState) {
+	private synchronized void stopImpl(int finalState) {
 		
 		if (!stopState())
 			throw new IllegalArgumentException("stopping in wrong state "+_state);
@@ -320,10 +322,14 @@ public class ManagedTorrent {
 			networkInvoker.invokeLater(closer);
 		}
 		
-		TorrentEvent stop = new TorrentEvent(this, TorrentEvent.Type.STOPPED, this); 
-		dispatcher.dispatchEvent(stop);
+		dispatchEvent(TorrentEvent.Type.STOPPED); 
 		
 		LOG.debug("Torrent stopped!");
+	}
+	
+	private void dispatchEvent(TorrentEvent.Type type) {
+		TorrentEvent evt = new TorrentEvent(this, type, this);
+		dispatcher.dispatchEvent(evt);
 	}
 	
 	/**
@@ -392,11 +398,8 @@ public class ManagedTorrent {
 				new FixedSizeExpiringSet<TorrentLocation>(500, 60 * 60 * 1000));
 		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
 
-		TorrentEvent start = new TorrentEvent(this, TorrentEvent.Type.STARTED, this); 
-		dispatcher.dispatchEvent(start);
-		
 		_connectionFetcher = new BTConnectionFetcher(this);
-
+		
 		if (LOG.isDebugEnabled())
 			LOG.debug("Starting torrent");
 	}
@@ -603,7 +606,7 @@ public class ManagedTorrent {
 	/**
 	 * saves the complete files to the shared folder
 	 */
-	private void completeTorrentDownload() {
+	private synchronized void completeTorrentDownload() {
 		
 		// cancel requests
 		Runnable r = new Runnable(){
@@ -645,21 +648,21 @@ public class ManagedTorrent {
 		// tell the tracker we are a seed now
 		trackerManager.announceComplete();
 		
-		TorrentEvent complete = new TorrentEvent(this, TorrentEvent.Type.COMPLETE, this); 
-		dispatcher.dispatchEvent(complete);
+		dispatchEvent(TorrentEvent.Type.COMPLETE); 
 	}
 
 	/**
-	 * Save the complete files to disc. this is executed within the timer thread
-	 * but since we don't want to upload or download anything while we are
-	 * saving the files, it should be okay
+	 * Saves the complete files to destination folder.
 	 */
 	private void saveFiles() {
 
-		if (!_folder.isOpen())
-			return;
+		synchronized(_folder) {
+			if (!_folder.isOpen())
+				return;
+			
+			_folder.close();
+		}
 		
-		_folder.close();
 		if (LOG.isDebugEnabled())
 			LOG.debug("folder closed");
 		_state.setInt(SAVING);

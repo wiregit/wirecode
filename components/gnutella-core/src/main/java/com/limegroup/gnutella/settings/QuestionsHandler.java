@@ -155,4 +155,18 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final BooleanSetting TORRENT_DOWNLOAD_FAILURE =
         FACTORY.createBooleanSetting("TORRENT_DOWNLOAD_FAILURE ", false);
+    
+    /**
+     * Setting for whether ot not to display a message that cancelling a 
+     * torrent upload will kill its corresponding download
+     */
+    public static final IntSetting TORRENT_STOP_UPLOAD =
+    	FACTORY.createIntSetting("TORRENT_STOP_UPLOAD", 0);
+    
+    /**
+     * Setting for whether ot not to display a message that the user
+     * should let a seeding torrent reach 1:1 ratio.
+     */
+    public static final IntSetting TORRENT_SEED_MORE =
+    	FACTORY.createIntSetting("TORRENT_SEED_MORE", 0);
 }
