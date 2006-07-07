@@ -69,4 +69,16 @@ public class DHTSettings extends LimeProps{
      */
     public static final FloatSetting DHT_ACCEPT_PROBABILITY = 
         FACTORY.createSettableFloatSetting("DHT_ACCEPT_PROBABILITY", 1F, "DHTSettings.DHTAcceptProbability", 0F, 1F);
+    
+    /**
+     * Setting for the delay between DHT node fetcher runs
+     */
+    public static final LongSetting DHT_NODE_FETCHER_TIME =
+        FACTORY.createSettableLongSetting("DHT_NODE_FETCHER_TIME", 30L * 60L * 1000L, "DHTSettings.DHTNodeFetcherTime", 0L, 30L * 60L * 1000L);
+    
+    /**
+     * The maximum amount of time for which we will ping the network for DHT nodes
+     */
+    public static final LongSetting MAX_NODE_FETCHER_TIME = 
+        FACTORY.createSettableLongSetting("MAX_NODE_FETCHER_TIME", 30L * 1000L, "DHTSettings.MaxNodeFetcherTime", 0L, 5L * 60L * 1000L);
 }

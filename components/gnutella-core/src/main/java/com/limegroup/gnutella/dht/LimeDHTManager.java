@@ -67,7 +67,14 @@ public class LimeDHTManager implements LifecycleListener {
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
     
-    /** The instance of the DHT */
+    /**
+     * The Gnutella DHT node fetcher 
+     */
+    private DHTNodeFetcher dhtNodeFetcher;
+
+    /**
+     * The instance of the DHT
+     */
     private MojitoDHT dht;
 
     private volatile boolean running = false;
@@ -211,8 +218,11 @@ public class LimeDHTManager implements LifecycleListener {
                             bootstrap();
                         } else {
                             waiting = true;
+                            if(dhtNodeFetcher == null) {
+                                dhtNodeFetcher = new DHTNodeFetcher(LimeDHTManager.this);
+                            }
                             //send UDPPings -- non blocking
-                            sendRequestForDHTHosts();
+                            dhtNodeFetcher.requestDHTHosts();
                         }
                     }
                 }
@@ -224,6 +234,8 @@ public class LimeDHTManager implements LifecycleListener {
                 public void phaseTwoComplete(boolean foundNodes, long time) {
                     //Notify our connections that we are now a full DHT node 
                     sendUpdatedCapabilities();
+                    
+                    //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
                 }
             });
             
@@ -261,15 +273,6 @@ public class LimeDHTManager implements LifecycleListener {
         } catch (IOException err) {
             LOG.error("IOException", err);
         }
-    }
-    
-    private void sendRequestForDHTHosts() {
-        if(!RouterService.isConnected()) {
-            return;
-        }
-        
-        Message m = PingRequest.createUDPingWithDHTIPPRequest();
-        RouterService.getHostCatcher().sendMessage(m, new DHTNodesRequestListener(), new UDPPingCanceller());
     }
     
     private void sendUpdatedCapabilities() {
@@ -381,7 +384,7 @@ public class LimeDHTManager implements LifecycleListener {
             //we were waiting and had no connection to the gnutella network
             //now we do --> start sending UDP pings to request bootstrap nodes
             if(waiting) {
-                sendRequestForDHTHosts();
+                dhtNodeFetcher.requestDHTHosts();
             }
         } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(running && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
@@ -508,26 +511,5 @@ public class LimeDHTManager implements LifecycleListener {
         public int getPort() {
             return port;
         }
-    }
-    
-    private class UDPPingCanceller implements Cancellable{
-        public boolean isCancelled() {
-            //stop when not waiting anymore OR when not connected to the Gnutella network
-            return (!waiting || !RouterService.isConnected());
-        }
-    }
-    
-    private class DHTNodesRequestListener implements MessageListener{
-        public void processMessage(Message m, ReplyHandler handler) {
-            if(!(m instanceof PingReply)) return;
-            PingReply reply = (PingReply) m;
-            List<IpPort> l = reply.getPackedIPPorts();
-            
-            for (IpPort ipp : l) {
-                addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
-            }
-        }
-        public void registered(byte[] guid) {}
-        public void unregistered(byte[] guid) {}
     }
 }
