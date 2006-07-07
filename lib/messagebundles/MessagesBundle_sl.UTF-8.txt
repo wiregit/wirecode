@@ -1,18 +1,18 @@
-################################################################################
+﻿################################################################################
 # Messages Bundle for LimeWire 4.8.2
-# Specialization for: Slovak - Slovakian Republic
-# Dummy resources bundle for missing translation.
+# Default locale for: Slovenian - Slovenia
+# Thanks to: Aleks Reinhardt.
 ################################################################################
-LOCALE_LANGUAGE_CODE=sk
-LOCALE_LANGUAGE_NAME=Slovensky
+LOCALE_LANGUAGE_CODE=sl
+LOCALE_LANGUAGE_NAME=Slovenšcina
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=Slovenskej Republiky
+LOCALE_COUNTRY_NAME=Slovenija
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Latn
 LOCALE_SCRIPT_NAME=Latin (Central European)
-LOCALE_ENGLISH_LANGUAGE_NAME=Slovak
-LOCALE_NSIS_NAME=Slovak
+LOCALE_ENGLISH_LANGUAGE_NAME=Slovenian
+LOCALE_NSIS_NAME=Slovenian
 DISABLE_BOLD_CHARACTERS=false
 LAYOUT_RIGHT_TO_LEFT=false
 HAS_TIPS_OF_THE_DAY=false
