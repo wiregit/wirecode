@@ -9,10 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.parsers.SAXParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -25,7 +28,7 @@ import com.limegroup.gnutella.ErrorService;
  */
 public class XMLParsingUtils {
     
-    //private static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
+    private static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
     
 
     static final private String XML_START = "<?xml";
@@ -44,6 +47,7 @@ public class XMLParsingUtils {
      */
     public static ParseResult parse(String xml, int responseCount) 
       throws IOException, SAXException {
+        xml = LimeXMLUtils.scanForBadCharacters(xml);
         return parse(new InputSource(new StringReader(xml)),responseCount);
     }
     
@@ -116,6 +120,7 @@ public class XMLParsingUtils {
             try {
                 reader = new SAXParser();
                 reader.setContentHandler(this);
+                reader.setErrorHandler(this);
                 reader.setFeature("http://xml.org/sax/features/namespaces", false);
             }catch(SAXException bad) {
                 ErrorService.error(bad);
@@ -168,6 +173,17 @@ public class XMLParsingUtils {
                 Map<String, String> empty = Collections.emptyMap();
                 _result.add(empty);
             }
+        }
+
+        @Override
+        public void fatalError(SAXParseException e) throws SAXException {
+            LOG.fatal("Fatal parsing error", e);
+            throw e;
+        }
+
+        @Override
+        public void warning(SAXParseException e) throws SAXException {
+            LOG.warn("parse warning", e);
         }
     }
 }

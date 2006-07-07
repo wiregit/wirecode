@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 
@@ -11,11 +12,14 @@ import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.NameValue;
 
 /**
  * Tests for the XMLParsingUtils class
  */
 public class XMLParsingUtilsTest extends BaseTestCase {
+    
+    private static final String AUDIO_SCHEMA = "http://www.limewire.com/schemas/audio.xsd";
     
     public XMLParsingUtilsTest(String name) {
         super(name);
@@ -106,6 +110,31 @@ public class XMLParsingUtilsTest extends BaseTestCase {
         assertNotNull(r.canonicalKeyPrefix);
         assertNull(r.schemaURI);
         
+    }
+    
+    public void testParseEncodings() throws Exception {
+        List<NameValue<String>> list = new ArrayList<NameValue<String>>();
+        list.add(new NameValue<String>("audios__audio__title__", "Rock 'n Roll"));
+        list.add(new NameValue<String>("audios__audio__album__", "m&alformed"));
+        list.add(new NameValue<String>("audios__audio__comments__", "Sung by \"Joe Smith\""));
+        list.add(new NameValue<String>("audios__audio__artist__", "also <malformed"));
+        list.add(new NameValue<String>("audios__audio__license__", ">still malformed"));
+        list.add(new NameValue<String>("audios__audio__language__", "s\tpace"));
+        list.add(new NameValue<String>("audios__audio__seconds__", "even[ m£r½] c²aîécters"));
+        list.add(new NameValue<String>("audios__audio__bitrate__", "a\u0002\u0003\u0004b"));
+        String xml = new LimeXMLDocument(list, AUDIO_SCHEMA).getXMLString();
+        XMLParsingUtils.ParseResult r = XMLParsingUtils.parse(xml,1);
+        assertEquals("http://www.limewire.com/schemas/audio.xsd", r.schemaURI);
+        assertEquals("audio", r.type);
+        Map<String, String> result = r.get(0);
+        assertEquals(result.toString(), "m&alformed", result.get("audios__audio__album__"));
+        assertEquals(result.toString(), "Rock 'n Roll", result.get("audios__audio__title__"));
+        assertEquals(result.toString(), "Sung by \"Joe Smith\"", result.get("audios__audio__comments__"));
+        assertEquals(result.toString(), "also <malformed", result.get("audios__audio__artist__"));
+        assertEquals(result.toString(), ">still malformed", result.get("audios__audio__license__"));
+        assertEquals(result.toString(), "s pace", result.get("audios__audio__language__"));
+        assertEquals(result.toString(), "even[ m£r½] c²aîécters", result.get("audios__audio__seconds__"));
+        assertEquals(result.toString(), "a   b", result.get("audios__audio__bitrate__"));
     }
     
     public void testParseInvalid() throws Exception {

@@ -12,6 +12,28 @@ public class LimeXMLUtilsTest extends BaseTestCase {
     public LimeXMLUtilsTest(String name) {
         super(name);
     }
+    
+    public void testUnencodeXML() throws Exception {
+        assertEquals("this is a test", LimeXMLUtils.unencodeXML("this is a test"));
+        assertEquals("this is a &test;", LimeXMLUtils.unencodeXML("this is a &test;"));
+        assertEquals("this is a &test", LimeXMLUtils.unencodeXML("this is a &amp;test"));
+        assertEquals("a <<>>test", LimeXMLUtils.unencodeXML("a <&lt;&gt;>test"));
+        assertEquals("'a\" 't\"e> <<st", LimeXMLUtils.unencodeXML("'a\" &apos;t&quot;e&gt; &lt;<st"));
+        String test = "no change";
+        assertSame(test, LimeXMLUtils.unencodeXML(test));
+    }
+    
+    public void testScanForBadCharacters() throws Exception {
+        assertEquals("this  is a test", LimeXMLUtils.scanForBadCharacters("this\u0002 is\u0003a\u0004test"));
+        String test = "no change";
+        assertSame(test, LimeXMLUtils.scanForBadCharacters(test));
+    }
+    
+    public void testEncodeXML() throws Exception {
+        assertEquals("a&amp; b&gt;&gt; &lt;&apos;&quot;end ", LimeXMLUtils.encodeXML("a&\u0004b>> <'\"end\u0004"));
+        String test = "no change";
+        assertSame(test, LimeXMLUtils.encodeXML(test));
+    }
 
     /**
      * Tests the method for matching two XML documents -- used for incoming

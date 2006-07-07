@@ -38,6 +38,8 @@ import com.limegroup.gnutella.util.IOUtils;
  * @author  asingla
  */
 public class LimeXMLUtils {
+    
+    //private static final Log LOG = LogFactory.getLog(LimeXMLUtils.class);
 
     private static final double MATCHING_RATE = .9;
 
@@ -453,71 +455,176 @@ public class LimeXMLUtils {
     }
     
     /**
+     * Scans over the given String and returns a new String that contains
+     * no invalid whitespace XML characters if any exist.  If none exist
+     * the original string is returned.
+     * 
+     * This DOES NOT CONVERT entities such as & or <, it will only remove
+     * invalid characters such as \u0002, \u0004, etc...
+     */
+    public static String scanForBadCharacters(String input) {
+        if(input == null)
+            return null;
+        
+        int length = input.length();
+        //lazily create the buffer so that we can scan & return the string
+        //itself w/o recreating it if we didn't have to.
+        StringBuilder buffer = null;
+        for (int i = 0; i < length; ) {
+            int c = input.codePointAt(i);
+            // TODO: do other types need to be blanked out?
+            if(Character.getType(c) == Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE) {
+                if(buffer == null)
+                    buffer = createBuffer(input, i);
+                buffer.append(' ');
+            } else {
+                if(buffer != null)
+                    buffer.appendCodePoint(c);
+            }
+            
+            i += Character.charCount(c);
+        }
+        
+        if(buffer == null)
+            return input;
+        else
+            return buffer.toString();
+    }
+    
+    /**
+     * Attempts to unencode any leftover encoded entities in the XML.
+     * This is generally caused by poor ID3 writers that write "&amp;" instead of "&".
+     */
+    public static String unencodeXML(String input) {
+        //return null, if null is passed as argument
+        if(input == null)
+            return null;
+        
+        int length = input.length();        
+        
+        //lazily create the buffer so that we can scan & return the string
+        //itself w/o recreating it if we didn't have to.
+        StringBuilder buffer = null;
+
+        for (int i = 0; i < length; ) {
+            int c = input.codePointAt(i);
+            if(c == '&') {
+                if(input.regionMatches(i+1, "amp;", 0, 4)) {
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("&");
+                    i += 4;
+                } else if(input.regionMatches(i+1, "lt;", 0, 3)) {
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("<");
+                    i += 3;
+                } else if(input.regionMatches(i+1, "gt;", 0, 3)) {
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append(">");
+                    i += 3;
+                } else if(input.regionMatches(i+1, "quot;", 0, 5)) {
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("\"");
+                    i += 5;
+                } else if(input.regionMatches(i+1, "apos;", 0, 5)) {
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("'");
+                    i += 5;
+                } else {
+                    if(buffer != null)
+                        buffer.appendCodePoint(c);
+                }
+            } else { 
+                if(buffer != null)
+                    buffer.appendCodePoint(c);
+            }
+            
+            i += Character.charCount(c);
+        }
+        
+        // If we never created the buffer, return the string itself.
+        if(buffer == null)
+            return input;
+        else
+            return buffer.toString();       
+    }
+    
+    /**
      * Parses the passed string, and encodes the special characters (used in
      * xml for special purposes) with the appropriate codes.
      * e.g. '<' is changed to '&lt;'
      * @return the encoded string. Returns null, if null is passed as argument
      */
-    public static String encodeXML(String inData)
-    {
+    public static String encodeXML(String input) {
         //return null, if null is passed as argument
-        if(inData == null)
+        if(input == null)
             return null;
         
-        //if no special characters, just return
-        //(for optimization. Though may be an overhead, but for most of the
-        //strings, this will save time)
-        if((inData.indexOf('&') == -1)
-            && (inData.indexOf('<') == -1)
-            && (inData.indexOf('>') == -1)
-            && (inData.indexOf('\'') == -1)
-            && (inData.indexOf('\"') == -1))
-        {
-            return inData;
+        int length = input.length();        
+        
+        //lazily create the buffer so that we can scan & return the string
+        //itself w/o recreating it if we didn't have to.
+        StringBuilder buffer = null;
+
+        for (int i = 0; i < length; ) {
+            int c = input.codePointAt(i);
+            // TODO: do other types need to be blanked out?
+            if(Character.getType(c) == Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE) {
+                if(buffer == null)
+                    buffer = createBuffer(input, i);
+                buffer.append(' ');
+            } else {
+                switch (c) {
+                case '&':
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("&amp;");
+                    break;
+                case '<':
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("&lt;");
+                    break;
+                case '>':
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("&gt;");
+                    break;
+                case '\"':
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("&quot;");
+                    break;
+                case '\'':
+                    if(buffer == null)
+                        buffer = createBuffer(input, i);
+                    buffer.append("&apos;");
+                    break;
+                default:
+                    if(buffer != null)
+                        buffer.appendCodePoint(c);
+                }
+            }
+            
+            i += Character.charCount(c);
         }
         
-        //get the length of input String
-        int length = inData.length();
-        //create a StringBuffer of double the size (size is just for guidance
-        //so as to reduce increase-capacity operations. The actual size of
-        //the resulting string may be even greater than we specified, but is
-        //extremely rare)
-        StringBuffer buffer = new StringBuffer(2 * length);
-        
-        char charToCompare;
-        //iterate over the input String
-        for(int i=0; i < length; i++)
-        {
-            charToCompare = inData.charAt(i);
-            //if the ith character is special character, replace by code
-            if(charToCompare == '&')
-            {
-                buffer.append("&amp;");
-            }
-            else if(charToCompare == '<')
-            {
-                buffer.append("&lt;");
-            }
-            else if(charToCompare == '>')
-            {
-                buffer.append("&gt;");
-            }
-            else if(charToCompare == '\"')
-            {
-                buffer.append("&quot;");
-            }
-            else if(charToCompare == '\'')
-            {
-                buffer.append("&apos;");
-            }
-            else
-            {
-                buffer.append(charToCompare);
-            }
-        }
-        
-    //return the encoded string
-    return buffer.toString();
+        // If we never created the buffer, return the string itself.
+        if(buffer == null)
+            return input;
+        else
+            return buffer.toString();
+    }
+    
+    /** Creates a StringBuilder from the given data, up to the right length. */
+    private static StringBuilder createBuffer(String data, int upTo) {
+        StringBuilder sb = new StringBuilder(data.length() * 2);
+        sb.append(data, 0, upTo);
+        return sb;
     }
 
     /** @return A properly formatted version of the input data.
