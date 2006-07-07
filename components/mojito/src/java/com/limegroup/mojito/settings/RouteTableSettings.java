@@ -53,9 +53,16 @@ public final class RouteTableSettings extends MojitoProps {
         = FACTORY.createSettableIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);
     
     // TODO reasonable min and max values
-    // 15 minutes for now
+    // 30 minutes for now
     public static final LongSetting BUCKET_REFRESH_TIME
-        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_TIME", 15L*60L*1000L, "bucket_refresh_time", 15L*60L*1000L, 15L*60L*1000L);
+        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_TIME", 30L*60L*1000L, "bucket_refresh_time", 15L*60L*1000L, 120L*60L*1000L);
+    
+    /**
+     * A minimum time (in sec) to pass before pinging the least recently
+     * seen node of a bucket again
+     */
+    public static final LongSetting BUCKET_PING_LIMIT
+        = FACTORY.createLongSetting("BUCKET_PING_LIMIT", 30L * 1000L);
     
     public static final IntSetting MAX_CONSECUTIVE_FAILURES
         = FACTORY.createIntSetting("MAX_CONSECUTIVE_FAILURES", 100);
