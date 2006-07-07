@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
@@ -25,7 +27,7 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTRoutingTable.class);
     
-    private Map<IpPortImpl, KUID> leafDHTNodes = new HashMap<IpPortImpl, KUID>();
+    private Map<IpPort, KUID> leafDHTNodes = new HashMap<IpPort, KUID>();
 
     public LimeDHTRoutingTable(Context context) {
         super(context);
@@ -86,7 +88,7 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
      */
     public synchronized void removeLeafDHTNode(String host, int port) {
         try {
-            IpPortImpl node = new IpPortImpl(host, port);
+            IpPort node = new IpPortImpl(host, port);
             KUID nodeId = leafDHTNodes.remove(node);
             if(nodeId != null) {
                 replaceWithMostRecentlySeenCachedContact(nodeId);
@@ -106,5 +108,13 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
             
             bucket.addLiveContact(mrs);
         }
+    }
+    
+    public boolean hasDHTLeaves() {
+        return leafDHTNodes.isEmpty();
+    }
+    
+    public synchronized Collection<IpPort> getDHTLeaves(){
+        return leafDHTNodes.keySet();
     }
 }

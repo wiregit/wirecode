@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +26,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -128,11 +130,11 @@ public class StandardMessageRouter extends MessageRouter {
             } catch(IOException tooBad) { }
         }
         
-        List dhthosts = Collections.EMPTY_LIST;
+        List<IpPort> dhthosts = Collections.emptyList();
         int maxHosts = ConnectionSettings.NUM_HOSTS_PONG.getValue();
         
         if (request.requestsDHTIPP() && RouterService.isDHTNode()) {
-            dhthosts = RouterService.getLimeDHTManager().getDHTNodes(maxHosts);
+                dhthosts = RouterService.getLimeDHTManager().getActiveDHTNodes(maxHosts);
         }
         
         int numDHTHosts = dhthosts.size();

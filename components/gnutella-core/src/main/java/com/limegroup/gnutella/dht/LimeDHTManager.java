@@ -10,6 +10,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -448,21 +450,34 @@ public class LimeDHTManager implements LifecycleListener {
         return waiting;
     }
     
-    public List<IpPort> getDHTNodes(int numNodes){
+    public List<IpPort> getActiveDHTNodes(int maxNodes){
         if(!running) {
             return Collections.emptyList();
         }
         
-        List<IpPort> ipps = new ArrayList<IpPort>();
+        //IF we are active and bootstrapped: we need only return ourselves
+        if(isActive && !waiting) {
+            IpPort localNode = new IpPortContactNode(dht.getLocalNode());
+            return Arrays.asList(localNode);
+        }
+        
+        //ELSE IF we have any DHT leaves we return them directly
+        if(limeDHTRouteTable.hasDHTLeaves()) {
+            List<IpPort> dhtLeaves = new ArrayList<IpPort>(limeDHTRouteTable.getDHTLeaves());
+            //size will be > 0
+            return dhtLeaves.subList(0,Math.min(maxNodes, dhtLeaves.size()));
+        }
+        
+        //ELSE return the MRS node of our routing table
         List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
-                limeDHTRouteTable.getLiveContacts(), numNodes);
+                limeDHTRouteTable.getLiveContacts(), maxNodes);
         
         KUID localNode = dht.getLocalNodeID();
+        List<IpPort> ipps = new ArrayList<IpPort>();
         for(Contact cn : nodes) {
             if(!isActive && cn.getNodeID().equals(localNode)) {
                 continue;
             }
-            
             ipps.add(new IpPortContactNode(cn));
         }
         return ipps;
