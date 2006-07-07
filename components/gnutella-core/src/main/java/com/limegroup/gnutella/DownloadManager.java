@@ -769,7 +769,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     		throw new CantResumeException(name);
     	}
     	
-    	Downloader ret = downloadTorrent(info);
+    	Downloader ret = downloadTorrent(info, false);
     	if (ret.isResumable())
     		ret.resume();
     	return ret;
@@ -793,64 +793,28 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         return d;
     }
     
-    public synchronized Downloader downloadTorrent(URL url) 
-    throws SaveLocationException, IOException {
-		if (LOG.isDebugEnabled())
-			LOG.debug("downloading torrent from " + url);
-		HttpMethod get = new GetMethod(url.toExternalForm());
-		get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
-		get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
-				"close");
-		get.setFollowRedirects(true);
-
-		HttpClient http = HttpClientManager.getNewClient(Constants.TIMEOUT,
-				Constants.TIMEOUT);
-		http.executeMethod(get);
-
-		if (get.getStatusCode() < 200 || get.getStatusCode() >= 300)
-			throw new IOException("bad status code, downloading .torrent file "
-					+ get.getStatusCode());
-
-		return downloadTorrent(get.getResponseBody());
-    }
-     
-    
-    public synchronized Downloader downloadTorrent(File torrentFile) 
-    throws SaveLocationException, IOException {
-    	return downloadTorrent(FileUtils.readFileFully(torrentFile));
-    }
-    
-    private Downloader downloadTorrent(byte [] metaInfo) 
-    throws SaveLocationException, IOException {
-    	BTMetaInfo info = null;
-    	try {
-    		info = BTMetaInfo.readFromBytes(metaInfo);
-    	} catch (IOException e) {
-    		if (LOG.isDebugEnabled())
-    			LOG.debug("bad torrent data", e);
-    		throw e;
-    	}
-    	return downloadTorrent(info);
-    }
-
-    private Downloader downloadTorrent(BTMetaInfo info) throws SaveLocationException {
-    	checkTargetLocation(info);
+    public synchronized Downloader downloadTorrent(BTMetaInfo info, boolean overwrite) 
+    throws SaveLocationException {
+    	checkTargetLocation(info, overwrite);
+    	if (overwrite)
+    		RouterService.getTorrentManager().killTorrentForFile(info.getCompleteFile());
     	AbstractDownloader ret = new BTDownloader(info);
     	initializeDownload(ret);
     	return ret;
     }
     
-    private void checkTargetLocation(BTMetaInfo info) 
+    private void checkTargetLocation(BTMetaInfo info, boolean overwrite) 
     throws SaveLocationException{
-    	for (File f : info.getFiles()) {
-    		// its ok to download to an already existing directory so
-    		// we only check for files.
-    		if (RouterService.getFileManager().isFileShared(f) ||
-    				f.exists())
-    			throw new SaveLocationException
-    			(SaveLocationException.FILE_ALREADY_EXISTS, f);
+    	if (!overwrite) {
+    		for (File f : info.getFiles()) {
+    			// its ok to download to an already existing directory so
+    			// we only check for files.
+    			if (RouterService.getFileManager().isFileShared(f) ||
+    					f.exists())
+    				throw new SaveLocationException
+    				(SaveLocationException.FILE_ALREADY_EXISTS, f);
+    		}
     	}
-    	
     	for (AbstractDownloader current : activeAndWaiting) {
     		if (info.getURN().equals(current.getSHA1Urn())) {
     			// this is the place to add new trackers eventually.

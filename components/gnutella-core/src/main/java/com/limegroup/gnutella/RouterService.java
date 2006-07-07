@@ -20,6 +20,7 @@ import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -1566,24 +1567,11 @@ public class RouterService {
 	 * @throws IOException
 	 *             in case there was a problem reading the file 
 	 */
-	public static Downloader downloadTorrent(File torrentFile)
-			throws SaveLocationException, IOException {
-		return downloader.downloadTorrent(torrentFile);
+	public static Downloader downloadTorrent(BTMetaInfo info, boolean overwrite)
+			throws SaveLocationException {
+		return downloader.downloadTorrent(info, overwrite);
 	}
     
-    /**
-	 * Starts a torrent download for a given Inputstream to the .torrent file
-	 * 
-	 * @param url
-	 *            the url, where the .torrent file is located
-	 * @throws IOException
-	 *             in case there was a problem downloading the .torrent
-	 */
-	public static Downloader downloadTorrent(URL url)
-			throws SaveLocationException, IOException {
-		return downloader.downloadTorrent(url);
-	}
-	
 	/**
 	 * Creates and returns a new chat to the given host and port.
 	 */

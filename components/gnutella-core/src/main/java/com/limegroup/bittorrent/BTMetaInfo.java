@@ -183,7 +183,7 @@ public class BTMetaInfo implements Serializable {
 		return _completeFile;
 	}
 	
-	void setCompleteFile(File f) {
+	public void setCompleteFile(File f) {
 		updateReferences(f, _files);
 		updateFolderReferences(f);
 		_completeFile = f;

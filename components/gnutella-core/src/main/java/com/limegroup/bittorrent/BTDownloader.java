@@ -409,6 +409,8 @@ implements TorrentEventListener {
 	}
 	
 	public boolean conflicts(URN urn, int fileSize, File... file) {
+		if (_info.getURN().equals(urn))
+			return true;
 		for (File f : file) {
 			if (conflictsSaveFile(f))
 				return true;
