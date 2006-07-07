@@ -167,6 +167,9 @@ public class VerifyingFile {
      */
     private long existingFileSize = -1;
     
+    /** The number of chunks scheduled to be written. */
+    private static int chunksScheduled = 0;
+    
     /**
      * Constructs a new VerifyingFile, without a given completion size.
      *
@@ -332,7 +335,11 @@ public class VerifyingFile {
             }
         }
         
-        QUEUE.add(new ChunkHandler(temp, intvl));
+        synchronized(VerifyingFile.class) {
+            chunksScheduled++;
+            QUEUE.add(new ChunkHandler(temp, intvl));
+        }
+        
         return true;
     }
     
@@ -859,6 +866,10 @@ public class VerifyingFile {
                     storedException = diskIO;
                 }
             } finally {
+                synchronized(VerifyingFile.class) {
+                    chunksScheduled--;
+                }
+                
             	try {
             		releaseChunk(buf, true);
             	} catch (IllegalStateException bad) {
@@ -876,6 +887,11 @@ public class VerifyingFile {
 	}
     
     private static void runDelayedWrites() {
+        synchronized(VerifyingFile.class) {
+            if(chunksScheduled > 0)
+                return;
+        }
+        
         while(CACHE.isBufferAvailable()) {
             DelayedWrite dw;
             
