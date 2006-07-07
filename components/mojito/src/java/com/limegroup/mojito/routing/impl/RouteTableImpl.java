@@ -122,7 +122,14 @@ public class RouteTableImpl implements RouteTable {
             Contact replaced = bucket.updateContact(node);
             assert (replaced == existing);
             
-            if (node.isAlive() && !bucket.containsCachedContact(node.getNodeID())) {
+            if (node.isAlive()) {
+                // a good time to ping least recently seen node if we know we
+                // have a node alive in the replacement cache. Don't do this too often!
+                long delay = System.currentTimeMillis() - bucket.getTimeStamp();
+                if(bucket.containsCachedContact(node.getNodeID())
+                        && (delay > RouteTableSettings.BUCKET_PING_LIMIT.getValue())) {
+                    pingLeastRecentlySeenNode(bucket);
+                }
                 touchBucket(bucket);
             }
             
@@ -270,7 +277,7 @@ public class RouteTableImpl implements RouteTable {
         bucket.addCachedContact(node);
         routingStats.REPLACEMENT_COUNT.incrementStat();
         
-        ping(bucket.getLeastRecentlySeenLiveContact());
+        pingLeastRecentlySeenNode(bucket);
     }
     
     public synchronized void handleFailure(KUID nodeId, SocketAddress address) {
@@ -497,6 +504,10 @@ public class RouteTableImpl implements RouteTable {
         }
         
         bucket.touch();
+    }
+    
+    private void pingLeastRecentlySeenNode(Bucket bucket) {
+        ping(bucket.getLeastRecentlySeenLiveContact());
     }
     
     private void ping(Contact node) {
