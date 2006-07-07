@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
@@ -22,6 +21,7 @@ import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -130,6 +130,7 @@ public class ManagedTorrent {
 	/** The total uploaded and downloaded data */
 	private volatile long totalUp, totalDown;
 	
+	private final EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher;
 
 	/**
 	 * Constructs new ManagedTorrent
@@ -141,7 +142,8 @@ public class ManagedTorrent {
 	 * @param callback
 	 *            the <tt>ActivityCallback</tt>
 	 */
-	public ManagedTorrent(BTMetaInfo info) {
+	public ManagedTorrent(BTMetaInfo info, 
+			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher) {
 		_info = info;
 		_info.setManagedTorrent(this);
 		_folder = info.getVerifyingFolder();
@@ -150,6 +152,7 @@ public class ManagedTorrent {
 		_badPeers = Collections.EMPTY_SET;
 		trackerManager = new TrackerManager(this);
 		choker = new Choker(this, networkInvoker);
+		this.dispatcher = dispatcher;
 	}
 
 	void setState(int newState) {
@@ -318,7 +321,7 @@ public class ManagedTorrent {
 		}
 		
 		TorrentEvent stop = new TorrentEvent(this, TorrentEvent.Type.STOPPED, this); 
-		RouterService.getTorrentManager().dispatchTorrentEvent(stop);
+		dispatcher.dispatchEvent(stop);
 		
 		LOG.debug("Torrent stopped!");
 	}
@@ -390,7 +393,7 @@ public class ManagedTorrent {
 		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
 
 		TorrentEvent start = new TorrentEvent(this, TorrentEvent.Type.STARTED, this); 
-		RouterService.getTorrentManager().dispatchTorrentEvent(start);
+		dispatcher.dispatchEvent(start);
 		
 		_connectionFetcher = new BTConnectionFetcher(this);
 
@@ -643,7 +646,7 @@ public class ManagedTorrent {
 		trackerManager.announceComplete();
 		
 		TorrentEvent complete = new TorrentEvent(this, TorrentEvent.Type.COMPLETE, this); 
-		RouterService.getTorrentManager().dispatchTorrentEvent(complete);
+		dispatcher.dispatchEvent(complete);
 	}
 
 	/**

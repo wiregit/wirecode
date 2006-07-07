@@ -321,14 +321,16 @@ implements TorrentEventListener {
 	}
 
 	public void handleTorrentEvent(TorrentEvent evt) {
-		if (evt.getSource() == this || evt.getTorrent() != _torrent)
+		if (evt.getTorrent() != _torrent)
 			return;
-		if (evt.getType() == TorrentEvent.Type.STARTED)
-			torrentStarted();
-		else if (evt.getType() == TorrentEvent.Type.STOPPED)
+		
+		switch(evt.getType()) {
+		case STARTED : torrentStarted(); break;
+		case COMPLETE : torrentComplete(); break;
+		case STOPPED : 
 			torrentStopped();
-		else if (evt.getType() == TorrentEvent.Type.COMPLETE)
-			torrentComplete();
+			RouterService.getTorrentManager().removeEventListener(this);
+		}
 	}
 	
 	private void torrentComplete() {
@@ -378,10 +380,9 @@ implements TorrentEventListener {
 		this.manager = manager;
 		ifm = manager.getIncompleteFileManager();
 		TorrentManager torrentManager = RouterService.getTorrentManager();
-		_torrent = new ManagedTorrent(_info); 
-		torrentManager.addTorrentEventListener(this);
-		BTUploader uploader = new BTUploader(_torrent,_info);
-		torrentManager.addTorrentEventListener(uploader);
+		_torrent = new ManagedTorrent(_info, torrentManager); 
+		torrentManager.addEventListener(this);
+		BTUploader uploader = new BTUploader(_torrent,_info, torrentManager);
 		ifm.addTorrentEntry(_info.getURN());
 	}
 	

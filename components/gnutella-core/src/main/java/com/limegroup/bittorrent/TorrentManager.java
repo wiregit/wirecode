@@ -16,6 +16,7 @@ import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.*;
 import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.bittorrent.ManagedTorrent;
 
 /**
@@ -36,7 +37,8 @@ import com.limegroup.bittorrent.ManagedTorrent;
  * the new torrent is queued.
  */
 public class TorrentManager 
-implements ConnectionAcceptor, TorrentEventListener {
+implements ConnectionAcceptor, TorrentEventListener, 
+EventDispatcher<TorrentEvent, TorrentEventListener> {
 	
 
 	private static final Log LOG = LogFactory.getLog(TorrentManager.class);
@@ -92,13 +94,19 @@ implements ConnectionAcceptor, TorrentEventListener {
 
 	}
 	
-	public void addTorrentEventListener(TorrentEventListener listener) {
+	public void addEventListener(TorrentEventListener listener) {
 		listeners.add(listener);
 	}
 	
-	public void dispatchTorrentEvent(TorrentEvent evt) {
-		for(TorrentEventListener l : listeners)
-			l.handleTorrentEvent(evt);
+	public void removeEventListener(TorrentEventListener listener) {
+		listeners.remove(listener);
+	}
+	
+	public void dispatchEvent(TorrentEvent evt) {
+		for(TorrentEventListener l : listeners) {
+			if (l != evt.getSource())
+				l.handleTorrentEvent(evt);
+		}
 	}
 	
 	public void handleTorrentEvent(TorrentEvent evt) {

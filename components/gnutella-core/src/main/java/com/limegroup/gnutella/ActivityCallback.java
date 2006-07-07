@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
-import com.limegroup.bittorrent.TorrentPrompt;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;

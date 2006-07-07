@@ -7,6 +7,7 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
  * A facade for the GUI to treat a single BitTorrent download as a single upload.
@@ -18,17 +19,22 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	private final BTMetaInfo _info;
 	
 	private long startTime, stopTime;
+	
+	private final EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher;
 
-	public BTUploader(ManagedTorrent torrent, BTMetaInfo info) {
+	public BTUploader(ManagedTorrent torrent, BTMetaInfo info,
+			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher) {
 		_torrent = torrent;
 		_info = info;
+		this.dispatcher = dispatcher;
+		dispatcher.addEventListener(this);
 	}
 
 	public void stop() {
 		TorrentEvent stopping = new TorrentEvent(this,
 				TorrentEvent.Type.STOP_REQUESTED,
 				_torrent);
-		RouterService.getTorrentManager().dispatchTorrentEvent(stopping);
+		dispatcher.dispatchEvent(stopping);
 	}
 	
 	public void performStop() {
@@ -138,14 +144,17 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	}
 
 	public void handleTorrentEvent(TorrentEvent evt) {
-		if (evt.getSource() == this || evt.getTorrent() != _torrent)
+		if (evt.getTorrent() != _torrent)
 			return;
-		if (evt.getType() == TorrentEvent.Type.STARTED)
-			torrentStarted();
-		else if (evt.getType() == TorrentEvent.Type.STOPPED)
+		
+		switch(evt.getType()) {
+		case STARTED : torrentStarted(); break;
+		case STOP_REQUESTED : _torrent.stop(); break;
+		case STOPPED : 
 			torrentStopped();
-		else if (evt.getType() == TorrentEvent.Type.STOP_REQUESTED)
-			_torrent.stop();
+			dispatcher.removeEventListener(this);
+			break;
+		}
 	}
 	
 	public float getAverageBandwidth() {
