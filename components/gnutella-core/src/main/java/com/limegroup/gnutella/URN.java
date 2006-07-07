@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -20,6 +21,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.SystemUtils;
 
@@ -99,7 +101,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	/**
 	 * Cached hash code that is lazily initialized.
 	 */
-	private volatile transient int hashCode = 0;  
+	private volatile transient int hashCode = 0;
 	
 	/**
 	 * The progress of files currently being hashed.
@@ -109,6 +111,15 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	private static final Map<File, IntWrapper> progressMap =
 	    Collections.synchronizedMap(new HashMap<File, IntWrapper>());
+    
+    /** Cache for byte[] used while creating the hash */
+    private static final ThreadLocal<byte[]> threadLocal = new ThreadLocal<byte[]>() {
+        @Override
+        protected byte[] initialValue() {
+            return new byte[65536];
+        }
+        
+    };
 	
 	/**
 	 * Gets the amount of bytes hashed for a file that is being hashed.
@@ -604,22 +615,22 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	private static String createSHA1String(final File file) 
       throws IOException, InterruptedException {
-        
 		MessageDigest md = new SHA1();
-        byte[] buffer = new byte[65536];
+        byte[] buffer = threadLocal.get();
         int read;
         IntWrapper progress = new IntWrapper(0);
         progressMap.put( file, progress );
-        FileInputStream fis = null;        
+        InputStream fis = null;        
         
         try {
+            // this is purposely NOT a BufferedInputStream because we
+            // read it in the chunks that we want to.
 		    fis = new FileInputStream(file);
             while ((read=fis.read(buffer))!=-1) {
                 long start = System.currentTimeMillis();
                 md.update(buffer,0,read);
                 progress.addInt( read );
-                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME &&
-		    SharingSettings.FRIENDLY_HASHING.getValue()) {
+                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME && SharingSettings.FRIENDLY_HASHING.getValue()) {
                     long end = System.currentTimeMillis();
                     long interval = end - start;
                     if(interval > 0)
@@ -630,11 +641,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
             }
         } finally {		
             progressMap.remove(file);
-            if(fis != null) {
-                try {
-                    fis.close();
-                } catch(IOException ignored) {}
-            }
+            IOUtils.close(fis);
         }
 
 		byte[] sha1 = md.digest();
