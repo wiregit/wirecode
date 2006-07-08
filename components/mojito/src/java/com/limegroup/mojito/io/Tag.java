@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.handler.NoOpResponseHandler;
 import com.limegroup.mojito.handler.ResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
@@ -98,10 +97,6 @@ public class Tag {
         this.dst = dst;
         
         this.message = message;
-        
-        if (responseHandler == null) {
-            responseHandler = new NoOpResponseHandler();
-        }
         
         this.responseHandler = responseHandler;
         this.timeout = timeout;

@@ -316,10 +316,9 @@ public class CommandHandler {
             });*/
             
             long start = System.currentTimeMillis();
-            Future<List<KeyValueCollection>> c = dht.get(key);
-            c.cancel(true);
+            List<KeyValueCollection> c = dht.get(key).get();
             
-            /*long time = System.currentTimeMillis() - start;
+            long time = System.currentTimeMillis() - start;
             
             if (!c.isEmpty()) {
                 StringBuffer buffer = new StringBuffer();
@@ -329,11 +328,11 @@ public class CommandHandler {
                 out.println(buffer.toString());
             } else {
                 out.println(key + " was not found after " + time + "ms");
-            }*/
+            }
             
             out.println();
             
-        } catch (NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             e.printStackTrace(out);
         }
     }
