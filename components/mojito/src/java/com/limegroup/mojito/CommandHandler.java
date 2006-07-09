@@ -33,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
 import com.limegroup.mojito.db.Database;
@@ -43,6 +44,7 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
+import com.limegroup.mojito.util.CollectionUtils;
 import com.limegroup.mojito.util.KeyValueCollection;
 
 public class CommandHandler {
@@ -231,7 +233,7 @@ public class CommandHandler {
             md.reset();
             
             out.println("Storing... " + key);
-            dht.put(key, value, new StoreListener() {
+            /*dht.put(key, value, new StoreListener() {
                 public void store(KeyValue keyValue, Collection nodes) {
                     StringBuilder buffer = new StringBuilder();
                     buffer.append("STORED KEY_VALUES: ").append(keyValue).append("\n");
@@ -244,8 +246,15 @@ public class CommandHandler {
                     out.println(buffer.toString());
                     out.flush();
                 }
-            });
-        } catch (NoSuchAlgorithmException err) {
+            });*/
+            
+            Entry<KeyValue,List<Contact>> entry = dht.put(key, value).get();
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("STORE RESULT:\n");
+            buffer.append(entry.getKey()).append("\n");
+            buffer.append(CollectionUtils.toString(entry.getValue()));
+            out.println(buffer.toString());
+        } catch (Exception err) {
             err.printStackTrace(out);
         }
     }
@@ -263,21 +272,29 @@ public class CommandHandler {
             md.reset();
             
             out.println("Removing... " + key);
-            dht.remove(key, new StoreListener() {
-                public void store(KeyValue keyValue, Collection nodes) {
+            /*dht.remove(key, new StoreListener() {
+                public void handleResult(Entry<KeyValue, List<Contact>> result) {
                     StringBuffer buffer = new StringBuffer();
-                    buffer.append("REMOVED KEY_VALUES: ").append(keyValue).append("\n");
-                    int i = 0;
-                    for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-                        Contact node = (Contact) iter.next();
-                        buffer.append(i).append(": ").append(node).append("\n");
-                        i++;
-                    }
+                    buffer.append("REMOVED KEY_VALUES: ").append(result.getKey()).append("\n");
+                    buffer.append(CollectionUtils.toString(result.getValue()));
                     out.println(buffer.toString());
                     out.flush();
                 }
-            });
-        } catch (NoSuchAlgorithmException e) {
+                
+                public void handleException(Exception ex) {
+                    ex.printStackTrace(out);
+                    out.flush();
+                }
+            });*/
+            
+            Entry<KeyValue,List<Contact>> entry = dht.remove(key).get();
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("REMOVE RESULT:\n");
+            buffer.append(entry.getKey()).append("\n");
+            buffer.append(CollectionUtils.toString(entry.getValue()));
+            out.println(buffer.toString());
+            
+        } catch (Exception e) {
             e.printStackTrace(out);
         }
     }

@@ -45,4 +45,15 @@ public class FindNodeEvent {
     public List<Entry<Contact, QueryKey>> getNodes() {
         return nodes;
     }
+    
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(lookupId).append("\n");
+        int i = 0;
+        for (Entry<Contact, QueryKey> entry : nodes) {
+            buffer.append(i++).append(": ").append(entry.getKey())
+                .append(" qk=").append(entry.getValue()).append("\n");
+        }
+        return buffer.toString();
+    }
 }

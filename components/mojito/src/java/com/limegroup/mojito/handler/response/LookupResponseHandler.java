@@ -48,6 +48,7 @@ import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
 import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
 import com.limegroup.mojito.statistics.SingleLookupStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
+import com.limegroup.mojito.util.EntryImpl;
 import com.limegroup.mojito.util.KeyValueCollection;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.Trie;
@@ -77,7 +78,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     private Trie<KUID, Contact> toQuery = new PatriciaTrie<KUID, Contact>();
 
     /** Trie of Contacts that did respond */
-    private Trie<KUID, ContactQueryKeyEntry> responses = new PatriciaTrie<KUID, ContactQueryKeyEntry>();
+    private Trie<KUID, Entry<Contact,QueryKey>> responses = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>();
     
     /** A Map we're using to count the number of hops */
     private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
@@ -140,7 +141,9 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             addYetToBeQueried(node, 1);
         }
         
-        addResponse(new ContactQueryKeyEntry(context.getLocalNode()));
+        Entry<Contact,QueryKey> entry 
+            = new EntryImpl<Contact,QueryKey>(context.getLocalNode(), null, true);
+        addResponse(entry);
         markAsQueried(context.getLocalNode());
     }
     
@@ -156,27 +159,21 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         return KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
     }
     
-    public synchronized void start() throws IOException {
+    protected synchronized void start() throws Exception {
         startTime = System.currentTimeMillis();
         
         // Get the first round of alpha nodes and send them requests
         List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, KademliaSettings.LOOKUP_PARAMETER.getValue());
         
-        int sent = 0;
         for(Contact node : alphaList) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Sending " + node + " a Find request for " + lookupId);
             }
             
-            try {
-                doLookup(node);
-                sent++;
-            } catch (SocketException err) {
-                LOG.error("A SocketException occured", err);
-            }
+            doLookup(node);                
         }
         
-        if (sent == 0) {
+        if (activeSearches == 0) {
             doFinishLookup(-1L, 0);
         }
     }
@@ -345,7 +342,8 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
         
         if (!nodes.isEmpty()) {
-            addResponse(new ContactQueryKeyEntry(response));
+            Entry<Contact,QueryKey> entry = new EntryImpl<Contact,QueryKey>(response.getContact(), response.getQueryKey(), true);
+            addResponse(entry);
         }
         
         lookupStep(hop);
@@ -438,7 +436,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     private void doFinishLookup(long time, int hops) {
         lookupFinished = true;
-
         if (time >= 0L) {
             if (isValueLookup()) {
                 if (foundValueLocs == 0) {
@@ -472,18 +469,24 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     protected abstract void handleLookupFinished(long time, int hops);
     
-    private void doLookup(Contact node) throws IOException {
+    private boolean doLookup(Contact node) throws IOException {
         markAsQueried(node);
-        context.getMessageDispatcher().send(node, createRequest(node.getSocketAddress()), this);
-        lookupStat.addRequest();
-        activeSearches++;
+        
+        boolean sent = context.getMessageDispatcher()
+            .send(node, createRequest(node.getSocketAddress()), this);
+        
+        if (sent) {
+            lookupStat.addRequest();
+            activeSearches++;
+        }
+        return sent;
     }
     
     protected abstract RequestMessage createRequest(SocketAddress address);
     
     /** Returns whether or not the Node has been queried */
     private boolean isQueried(Contact node) {
-        return queried.contains(node.getNodeID());
+        return queried.contains(node.getNodeID());            
     }
     
     /** Marks the Node as queried */
@@ -494,7 +497,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     /** Returns whether or not the Node is in the to-query Trie */
     private boolean isYetToBeQueried(Contact node) {
-        return toQuery.containsKey(node.getNodeID());
+        return toQuery.containsKey(node.getNodeID());            
     }
     
     /** Adds the Node to the to-query Trie */
@@ -509,7 +512,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     /** Adds the ContactNodeEntry to the response Trie */
-    private void addResponse(ContactQueryKeyEntry entry) {
+    private void addResponse(Map.Entry<Contact, QueryKey> entry) {
         responses.put(entry.getKey().getNodeID(), entry);
         
         if (responses.size() > resultSetSize) {
@@ -518,47 +521,5 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             //hopMap.remove(node.getNodeID()); // TODO
         }
         responseCount++;
-    }
-    
-    /**
-     * A simple implementation of Map.Entry to store <ContactNode, QueryKey>
-     * tuples. The Key is the ContactNode and the QueryKey is the Value.
-     * 
-     * This class is immutable!
-     */
-    private static class ContactQueryKeyEntry 
-            implements Map.Entry<Contact, QueryKey> {
-        
-        private Contact node;
-        private QueryKey queryKey;
-        
-        private ContactQueryKeyEntry(Contact node) {
-            this(node, null);
-        }
-        
-        private ContactQueryKeyEntry(FindNodeResponse response) {
-            this(response.getContact(), response.getQueryKey());
-        }
-        
-        private ContactQueryKeyEntry(Contact node, QueryKey queryKey) {
-            this.queryKey = queryKey;
-            this.node = node;
-        }
-        
-        public Contact getKey() {
-            return node;
-        }
-        
-        public QueryKey getValue() {
-            return queryKey;
-        }
-        
-        public QueryKey setValue(QueryKey qk) {
-            throw new UnsupportedOperationException("This is an immutable class");
-        }
-        
-        public String toString() {
-            return node + ", queryKey: " + queryKey;
-        }
     }
 }

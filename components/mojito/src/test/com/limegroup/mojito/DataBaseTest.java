@@ -38,7 +38,7 @@ public class DataBaseTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static FutureChainTest suite() {
         return buildTestSuite(DataBaseTest.class);
     }
 

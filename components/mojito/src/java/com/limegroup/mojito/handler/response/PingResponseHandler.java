@@ -30,6 +30,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -42,10 +43,30 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
     
     private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
     
-    public PingResponseHandler(Context context) {
-        super(context);
+    private KUID nodeId;
+    
+    private SocketAddress address;
+    
+    public PingResponseHandler(Context context, SocketAddress address) {
+        this(context, null, address);
+    }
+    
+    public PingResponseHandler(Context context, Contact contact) {
+        this(context, contact.getNodeID(), contact.getSocketAddress());
     }
 
+    public PingResponseHandler(Context context, KUID nodeId, SocketAddress address) {
+        super(context);
+        
+        this.nodeId = nodeId;
+        this.address = address;
+    }
+
+    protected void start() throws Exception {
+        PingRequest request = context.getMessageHelper().createPingRequest(address);
+        context.getMessageDispatcher().send(nodeId, address, request, this);
+    }
+    
     protected void response(ResponseMessage message, long time) throws IOException {
         
         PingResponse response = (PingResponse)message;

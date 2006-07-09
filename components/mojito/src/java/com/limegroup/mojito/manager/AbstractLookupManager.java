@@ -17,10 +17,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 package com.limegroup.mojito.manager;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,20 +69,19 @@ abstract class AbstractLookupManager<L extends DHTEventListener, V> {
         }
     }
     
-    public Future<V> lookup(KUID lookupId) throws IOException {
+    public Future<V> lookup(KUID lookupId) {
         return lookup(lookupId, -1, null);
     }
     
-    public Future<V> lookup(KUID lookupId, L l) throws IOException {
+    public Future<V> lookup(KUID lookupId, L l) {
         return lookup(lookupId, -1, l);
     }
     
-    public Future<V> lookup(KUID lookupId, int count, L l) throws IOException {
+    public Future<V> lookup(KUID lookupId, int count, L l) {
         synchronized(getLookupLock()) {
             LookupFuture future = futureMap.get(lookupId);
             if (future == null) {
                 LookupResponseHandler<V> handler = createLookupHandler(lookupId, count);
-                handler.start();
                 
                 future = new LookupFuture(lookupId, handler);
                 futureMap.put(lookupId, future);
@@ -126,7 +123,7 @@ abstract class AbstractLookupManager<L extends DHTEventListener, V> {
         public LookupResponseHandler<V> getLookupResponseHandler() {
             return handler;
         }
-        
+
         @Override
         protected void done() {
             super.done();
@@ -172,6 +169,10 @@ abstract class AbstractLookupManager<L extends DHTEventListener, V> {
                     l.handleException(ex);
                 }
             }
+        }
+        
+        public String toString() {
+            return "Future: " + lookupId + ", " + handler;
         }
     }
 }

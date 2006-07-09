@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.routing;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
@@ -66,30 +65,26 @@ public class RandomBucketRefresher implements Runnable {
             LOG.trace("Random bucket refresh");
         }
         
-        try {
-            synchronized (context) {
-                ScheduledFuture f = future;
-                if (f == null || f.isCancelled()) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("RandomBucketRefresher is canceled");
-                    }
-                    return;
+        synchronized (context) {
+            ScheduledFuture f = future;
+            if (f == null || f.isCancelled()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("RandomBucketRefresher is canceled");
                 }
-                
-                if (context.isBootstrapping()) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
-                    }
-                    return;
-                }
-                
-                List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
-                for(KUID nodeId : ids) {
-                    context.lookup(nodeId);
-                }
+                return;
             }
-        } catch (IOException ex) {
-            LOG.error("IOException", ex);
+            
+            if (context.isBootstrapping()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
+                }
+                return;
+            }
+            
+            List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
+            for(KUID nodeId : ids) {
+                context.lookup(nodeId);
+            }
         }
     }
 }

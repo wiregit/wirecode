@@ -16,99 +16,129 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.manager;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.event.FindNodeEvent;
-import com.limegroup.mojito.event.FindNodeListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 
-/**
- * The StoreManager performs a lookup for the Value ID we're
- * going to store and stores the KeyValue at the k closest 
- * Nodes of the result set.
- */
-public class StoreManager implements FindNodeListener {
+public class StoreManager extends AbstractManager {
     
-    private static final Log LOG = LogFactory.getLog(StoreManager.class);
-    
-    private Context context;
-    
-    private KeyValue keyValue;
-    private StoreListener listener;
+    private List<StoreListener> globalListeners = new ArrayList<StoreListener>();
     
     public StoreManager(Context context) {
-        this.context = context;
+        super(context);
     }
     
-    public void store(KeyValue keyValue, 
-            StoreListener listener) throws IOException {
-        this.keyValue = keyValue;
-        this.listener = listener;
-        
-        KUID nodeId = keyValue.getKey().toNodeID();
-        this.context.lookup(nodeId, this);
+    public void addStoreListener(StoreListener listener) {
+        synchronized (globalListeners) {
+            globalListeners.add(listener);
+        }
     }
     
-    public void handleResult(FindNodeEvent result) {
+    public void removeStoreListener(StoreListener listener) {
+        synchronized (globalListeners) {
+            globalListeners.remove(listener);
+        }
+    }
+
+    public StoreListener[] getStoreListeners() {
+        synchronized (globalListeners) {
+            return globalListeners.toArray(new StoreListener[0]);
+        }
+    }
+    
+    public Future<Entry<KeyValue,List<Contact>>> store(KeyValue value) {
+        return store(value, null);
+    }
+
+    public Future<Entry<KeyValue,List<Contact>>> store(KeyValue keyValue, StoreListener l) {
+        StoreResponseHandler handler = new StoreResponseHandler(context, keyValue);
+        StoreFuture future = new StoreFuture(handler);
         
-        List<Entry<Contact, QueryKey>> nodes = result.getNodes();
-        final List<Contact> storeTargets = new ArrayList<Contact>(nodes.size());
+        if (l != null) {
+            future.addStoreListener(l);
+        }
         
-        for (Entry<Contact, QueryKey> entry : nodes) {
-            
-            Contact node = entry.getKey();
-            QueryKey queryKey = entry.getValue();
-            
-            if (context.isLocalNodeID(node.getNodeID())) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Skipping local Node as KeyValue is already stored at this Node");
-                }
-                storeTargets.add(node);
-                continue;
+        context.execute(future);
+        return future;
+    }
+    
+    public Future<Entry<KeyValue,List<Contact>>> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
+        StoreResponseHandler handler = new StoreResponseHandler(context, node, queryKey, keyValue);
+        StoreFuture future = new StoreFuture(handler);
+        context.execute(future);
+        return future;
+    }
+    
+    private class StoreFuture extends FutureTask<Entry<KeyValue,List<Contact>>> {
+        
+        private List<StoreListener> listeners = null;
+        
+        public StoreFuture(Callable<Entry<KeyValue,List<Contact>>> callable) {
+            super(callable);
+        }
+
+        public void addStoreListener(StoreListener l) {
+            if (listeners == null) {
+                listeners = new ArrayList<StoreListener>();
             }
             
-            if (queryKey == null) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Cannot store " + keyValue + " at " 
-                            + node + " because we have no QueryKey for it");
-                }
-                continue;
-            }
+            listeners.add(l);
+        }
+        
+        @Override
+        protected void done() {
+            super.done();
             
             try {
-                new StoreResponseHandler(context, queryKey, keyValue).store(node);
-                storeTargets.add(node);
-            } catch (IOException err) {
-                LOG.error("Failed to store KeyValue", err);
+                Entry<KeyValue,List<Contact>> entry = get();
+                fireResult(entry);
+            } catch (CancellationException ignore) {
+            } catch (InterruptedException ignore) {
+            } catch (Exception err) {
+                fireException(err);
             }
         }
         
-        keyValue.setNumLocs(storeTargets.size());
-        
-        if (listener != null) {
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    listener.store(keyValue, storeTargets);
+        private void fireResult(final Entry<KeyValue,List<Contact>> result) {
+            synchronized(globalListeners) {
+                for (StoreListener l : globalListeners) {
+                    l.handleResult(result);
                 }
-            });
+            }
+            
+            if (listeners != null) {
+                for (StoreListener l : listeners) {
+                    l.handleResult(result);
+                }
+            }
         }
-    }
-    
-    public void handleException(Exception ex) {
+        
+        private void fireException(final Exception ex) {
+            synchronized(globalListeners) {
+                for (StoreListener l : globalListeners) {
+                    l.handleException(ex);
+                }
+            }
+            
+            if (listeners != null) {
+                for (StoreListener l : listeners) {
+                    l.handleException(ex);
+                }
+            }
+        }
     }
 }

@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.routing.impl;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -187,7 +186,7 @@ public class RouteTableImpl implements RouteTable {
                         // seen live Node which might promote the new Node to a
                         // live Contact!
                         if (bucket.containsCachedContact(nodeId)) {
-                            ping (bucket.getLeastRecentlySeenLiveContact());
+                            context.ping (bucket.getLeastRecentlySeenLiveContact());
                         }
                     } else {
                         add(node);
@@ -196,7 +195,7 @@ public class RouteTableImpl implements RouteTable {
             }
         };
         
-        ping(existing, listener);
+        context.ping(existing, listener);
     }
     
     protected synchronized void addContactToBucket(Bucket bucket, Contact node) {
@@ -518,23 +517,7 @@ public class RouteTableImpl implements RouteTable {
     }
     
     private void pingLeastRecentlySeenNode(Bucket bucket) {
-        ping(bucket.getLeastRecentlySeenLiveContact());
-    }
-    
-    private void ping(Contact node) {
-        try {
-            context.ping(node);
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
-    }
-    
-    private void ping(Contact node, PingListener listener) {
-        try {
-            context.ping(node, listener);
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
+        context.ping(bucket.getLeastRecentlySeenLiveContact());
     }
     
     public synchronized int size() {

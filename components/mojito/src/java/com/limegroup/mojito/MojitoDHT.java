@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
@@ -369,18 +370,16 @@ public class MojitoDHT {
         return context.getRouteTable().getContacts();
     }
     
-    public boolean put(KUID key, byte[] value) 
-            throws IOException {
+    public Future<Entry<KeyValue,List<Contact>>> put(KUID key, byte[] value) {
         return put(key, value, null, null);
     }
     
-    public boolean put(KUID key, byte[] value, StoreListener listener) 
+    public Future<Entry<KeyValue,List<Contact>>> put(KUID key, byte[] value, StoreListener listener) 
             throws IOException {
         return put(key, value, listener, null);
     }
     
-    public boolean put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) 
-            throws IOException {
+    public Future<Entry<KeyValue,List<Contact>>> put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) {
         
         try {
             KeyValue keyValue = 
@@ -411,8 +410,7 @@ public class MojitoDHT {
                         context.createNewKeyPair();
                     }
                     
-                    context.store(keyValue, listener);
-                    return true;
+                    return context.store(keyValue, listener);
                 }
             }
         } catch (InvalidKeyException e) {
@@ -421,7 +419,7 @@ public class MojitoDHT {
             LOG.error("SignatureException", e);
         }
         
-        return false;
+        return null;
     }
     
     public Future<List<KeyValueCollection>> get(KUID key) throws IOException {
@@ -471,15 +469,15 @@ public class MojitoDHT {
         return context.get(key, listener);
     }
     
-    public boolean remove(KUID key) throws IOException {
+    public Future<Entry<KeyValue,List<Contact>>> remove(KUID key) {
         return remove(key, null, null);
     }
     
-    public boolean remove(KUID key, StoreListener listener) throws IOException {
+    public Future<Entry<KeyValue,List<Contact>>> remove(KUID key, StoreListener listener) {
         return remove(key, listener, null);
     }
 
-    public boolean remove(KUID key, StoreListener listener, PrivateKey privateKey) throws IOException {
+    public Future<Entry<KeyValue,List<Contact>>> remove(KUID key, StoreListener listener, PrivateKey privateKey) {
         // To remove a KeyValue you just store an empty value!
         return put(key, new byte[0], listener, privateKey);
     }

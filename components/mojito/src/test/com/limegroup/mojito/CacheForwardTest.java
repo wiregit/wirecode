@@ -33,7 +33,7 @@ public class CacheForwardTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static FutureChainTest suite() {
         return buildTestSuite(CacheForwardTest.class);
     }
 

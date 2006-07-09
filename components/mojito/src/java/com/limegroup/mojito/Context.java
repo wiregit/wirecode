@@ -30,12 +30,13 @@ import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -45,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.KeyValuePublisher;
@@ -104,6 +106,7 @@ public class Context {
     private PingManager pingManager;
     private FindNodeManager findNodeManager;
     private FindValueManager findValueManager;
+    private StoreManager storeManager;
     
     private volatile boolean bootstrapping = false;
     private boolean running = false;
@@ -143,8 +146,6 @@ public class Context {
         masterKeyPair = new KeyPair(masterKey, null);
         
         initContextEventQueue();
-        initContextTimer();
-        initContextExecutor();
         
         dhtStats = new DHTNodeStat(this);
         
@@ -164,6 +165,7 @@ public class Context {
         pingManager = new PingManager(this);
         findNodeManager = new FindNodeManager(this);
         findValueManager = new FindValueManager(this);
+        storeManager = new StoreManager(this);
         
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
@@ -201,10 +203,6 @@ public class Context {
         scheduledExecutor = new ScheduledThreadPoolExecutor(1, factory);
     }
     
-    public ScheduledExecutorService getScheduledExecutor() {
-        return scheduledExecutor;
-    }
-    
     private void initContextExecutor() {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
@@ -215,13 +213,7 @@ public class Context {
             }
         };
         
-        //contextExecutor = (ThreadPoolExecutor)Executors.newCachedThreadPool(factory);
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        contextExecutor = new ThreadPoolExecutor(1, 5, 60L, TimeUnit.SECONDS, queue, factory);
-    }
-    
-    public ExecutorService getContextExecutor() {
-        return contextExecutor;
+        contextExecutor = (ThreadPoolExecutor)Executors.newCachedThreadPool(factory);
     }
     
     public String getName() {
@@ -498,6 +490,9 @@ public class Context {
             return;
         }
         
+        initContextTimer();
+        initContextExecutor();
+        
         pingManager.init();
         findNodeManager.init();
         findValueManager.init();
@@ -529,8 +524,8 @@ public class Context {
         publisher.stop();
         
         eventExecutor.getQueue().clear();
-        scheduledExecutor.getQueue().clear();
-        contextExecutor.getQueue().clear();
+        scheduledExecutor.shutdownNow();
+        contextExecutor.shutdownNow();
         messageDispatcher.stop();
         
         lastEstimateTime = 0L;
@@ -608,22 +603,22 @@ public class Context {
      * @param l the PingListener for incoming pongs
      * @throws IOException
      */
-    public Future<Contact> ping(SocketAddress address) throws IOException {
+    public Future<Contact> ping(SocketAddress address) {
         return pingManager.ping(address);
     }
     
     /** Pings the given Node */
-    public Future<Contact> ping(SocketAddress address, PingListener listener) throws IOException {
+    public Future<Contact> ping(SocketAddress address, PingListener listener) {
         return pingManager.ping(address, listener);
     }
     
     /** Pings the given Node */
-    public Future<Contact> ping(Contact node) throws IOException {
+    public Future<Contact> ping(Contact node) {
         return pingManager.ping(node);
     }
     
     /** Pings the given Node */
-    public Future<Contact> ping(Contact node, PingListener listener) throws IOException {
+    public Future<Contact> ping(Contact node, PingListener listener) {
         return pingManager.ping(node, listener);
     }
     
@@ -633,13 +628,13 @@ public class Context {
     }
     
     /** Starts a lookup for the given KUID */
-    public Future<FindNodeEvent> lookup(KUID lookup) throws IOException {
-        return findNodeManager.lookup(lookup);
+    public Future<FindNodeEvent> lookup(KUID lookupId) {
+        return findNodeManager.lookup(lookupId);
     }
     
     /** Starts a lookup for the given KUID */
-    public Future<FindNodeEvent> lookup(KUID lookup, FindNodeListener listener) throws IOException {
-        return findNodeManager.lookup(lookup, listener);
+    public Future<FindNodeEvent> lookup(KUID lookupId, FindNodeListener listener) {
+        return findNodeManager.lookup(lookupId, listener);
     }
     
     /**
@@ -670,9 +665,25 @@ public class Context {
         new BootstrapManager(this).bootstrap(hostList, listener);
     }
     
-    /** Stores a given KeyValue */
-    public void store(KeyValue keyValue, StoreListener listener) throws IOException {
-        new StoreManager(this).store(keyValue, listener);
+    /** 
+     * Stores the given KeyValue 
+     */
+    public Future<Entry<KeyValue,List<Contact>>> store(KeyValue keyValue) {
+        return storeManager.store(keyValue);
+    }
+    
+    /** 
+     * Stores the given KeyValue 
+     */
+    public Future<Entry<KeyValue,List<Contact>>> store(KeyValue keyValue, StoreListener listener) {
+        return storeManager.store(keyValue, listener);
+    }
+    
+    /** 
+     * Stores the given KeyValue 
+     */
+    public Future<Entry<KeyValue,List<Contact>>> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
+        return storeManager.store(node, queryKey, keyValue);
     }
     
     /**

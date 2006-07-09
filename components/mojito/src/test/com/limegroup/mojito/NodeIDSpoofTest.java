@@ -38,7 +38,7 @@ public class NodeIDSpoofTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static FutureChainTest suite() {
         return buildTestSuite(NodeIDSpoofTest.class);
     }
 

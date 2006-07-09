@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.manager;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +33,6 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
-import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -86,33 +84,30 @@ public class PingManager {
         }
     }
     
-    public Future<Contact> ping(SocketAddress address) throws IOException {
+    public Future<Contact> ping(SocketAddress address) {
         return ping(null, address, null);
     }
 
-    public Future<Contact> ping(SocketAddress address, PingListener listener) throws IOException {
+    public Future<Contact> ping(SocketAddress address, PingListener listener) {
         return ping(null, address, listener);
     }
 
-    public Future<Contact> ping(Contact node) throws IOException {
+    public Future<Contact> ping(Contact node) {
         return ping(node.getNodeID(), node.getSocketAddress(), null);
     }
     
-    public Future<Contact> ping(Contact node, PingListener listener) throws IOException {
+    public Future<Contact> ping(Contact node, PingListener listener) {
         return ping(node.getNodeID(), node.getSocketAddress(), listener);
     }
 
-    public Future<Contact> ping(KUID nodeId, SocketAddress address, 
-            PingListener listener) throws IOException {
+    public Future<Contact> ping(KUID nodeId, SocketAddress address, PingListener listener) {
         
         synchronized (getPingLock()) {
             PingFuture future = futureMap.get(address);
             
             if (future == null) {
-                PingResponseHandler handler = new PingResponseHandler(context);
-                PingRequest request = context.getMessageHelper().createPingRequest(address);
-                context.getMessageDispatcher().send(nodeId, address, request, handler);
-
+                PingResponseHandler handler = new PingResponseHandler(context, nodeId, address);
+                
                 future = new PingFuture(address, handler);
                 futureMap.put(address, future);
                 networkStats.PINGS_SENT.incrementStat();

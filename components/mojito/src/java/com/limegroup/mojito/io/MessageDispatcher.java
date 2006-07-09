@@ -215,9 +215,8 @@ public abstract class MessageDispatcher implements Runnable {
         if (size >= MAX_MESSAGE_SIZE) {
             IOException iox = new IOException("Message (" + message.getClass().getName()  + ") is too large: " 
                     + size + " >= " + MAX_MESSAGE_SIZE);
-            //tag.handleError(iox);
-            //return false;
-            throw iox;
+            tag.handleError(iox);
+            return false;
         }
         
         tag.setData(data);

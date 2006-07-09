@@ -52,6 +52,8 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     
     private final Object lock = new Object();
     
+    private volatile boolean started = false;
+    
     private volatile boolean cancelled = false;
     
     private volatile boolean done = false;
@@ -94,6 +96,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         } else {
             this.maxErrors = maxErrors;
         }
+    }
+    
+    protected void start() throws Exception {
+        
     }
     
     public void setTimeout(long timeout) {
@@ -204,26 +210,8 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         error(nodeId, dst, message, e);
     }
     
-    public boolean cancel(boolean mayInterruptIfRunning) {
-        synchronized(lock) {
-            if (done) {
-                return false;
-            }
-            
-            if (cancelled) {
-                return true;
-            }
-            
-            cancelled = true;
-            lock.notifyAll();
-            return true;
-        }
-    }
-    
     public boolean isCancelled() {
-        synchronized (lock) {
-            return cancelled;            
-        }
+        return cancelled;            
     }
     
     protected void setReturnValue(V value) {
@@ -259,32 +247,42 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
     
     public V call() throws Exception {
-        synchronized (lock) {
-            if (!done && !cancelled) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException err) {
-                    cancelled = true;
-                    throw err;
+        try {
+            synchronized (lock) {
+                if (!started) {
+                    started = true;
+                    start();
                 }
+                
+                if (!done && !cancelled) {
+                    lock.wait();
+                }
+    
+                if (!done) {
+                    cancelled = true;
+                }
+                
+                if (cancelled && ex == null) {
+                    ex = new CancellationException();
+                }
+                
+                if (ex != null) {
+                    throw ex;
+                }
+                
+                return value;
             }
-
-            if (!done) {
-                cancelled = true;
-            }
-            
-            if (cancelled) {
-                throw new CancellationException();
-            }
-            
-            if (ex != null) {
-                throw ex;
-            }
-            
-            return value;
+        } catch (InterruptedException err) {
+            cancelled = true;
+            ex = err;
+            cancelled();
+            throw err;
         }
     }
 
+    protected void cancelled() throws Exception {
+    }
+    
     protected void fireTimeoutException(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
         TimeoutException timeout = new TimeoutException(
                 ContactUtils.toString(nodeId, address) + " timed out after " + time + "ms");

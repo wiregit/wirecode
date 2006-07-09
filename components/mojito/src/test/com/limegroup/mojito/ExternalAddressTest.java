@@ -39,7 +39,7 @@ public class ExternalAddressTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static FutureChainTest suite() {
         return buildTestSuite(ExternalAddressTest.class);
     }
 

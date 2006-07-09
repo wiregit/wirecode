@@ -35,7 +35,6 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.Database.KeyValueBag;
-import com.limegroup.mojito.handler.response.StoreResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -190,8 +189,10 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         }
     }
     
-    private void store(Contact node, QueryKey queryKey, List<KeyValue> keyValues) throws IOException {
-        new StoreResponseHandler(context, queryKey, keyValues).store(node);
+    private void store(Contact node, QueryKey queryKey, List<KeyValue> keyValues) {
+        for (KeyValue keyValue : keyValues) {
+            context.store(node, queryKey, keyValue);
+        }
     }
     
     private class GetQueryKeyHandler extends AbstractResponseHandler {

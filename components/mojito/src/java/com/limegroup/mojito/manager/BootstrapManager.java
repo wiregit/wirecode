@@ -129,15 +129,15 @@ public class BootstrapManager {
         }
         
         public void handleResult(Contact result) {
-            try {
+            //try {
                 PhaseOne phaseOne = new PhaseOne();
                 context.lookup(context.getLocalNodeID(), phaseOne);
-            } catch (IOException err) {
+            /*} catch (IOException err) {
                 LOG.error("Bootstrap lookup failed: ", err);
                 
                 firePhaseOneFinished();
                 firePhaseTwoFinished(false);
-            }
+            }*/
         }
         
         public void handleException(Exception ex) {
@@ -242,15 +242,15 @@ public class BootstrapManager {
                 return;
             }
             
-            try {
+            //try {
                 PhaseTwo phaseTwo = new PhaseTwo(ids);
                 for(KUID nodeId : ids) {
                     context.lookup(nodeId, phaseTwo);
                 }
-            } catch (IOException err) {
+            /*} catch (IOException err) {
                 LOG.error("Beginning second phase failed: ", err);
                 firePhaseTwoFinished(false);
-            }
+            }*/
         }
         
         public void handleException(Exception ex) {

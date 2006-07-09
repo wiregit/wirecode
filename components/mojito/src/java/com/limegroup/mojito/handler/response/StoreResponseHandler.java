@@ -16,13 +16,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,132 +39,125 @@ import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
-import com.limegroup.mojito.messages.StoreResponse;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
-import com.limegroup.mojito.util.ContactUtils;
+import com.limegroup.mojito.util.EntryImpl;
 
-/**
- * The StoreResponseHandler handles storing of one or more 
- * KeyValues at a given Node. It sends one KeyValue at once,
- * waits for the response and sends the next KeyValue until
- * all KeyValues were sent.
- */
-public class StoreResponseHandler extends AbstractResponseHandler<Contact> {
-    
+public class StoreResponseHandler extends AbstractResponseHandler<Entry<KeyValue,List<Contact>>> {
+
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
-        
+    
+    private Contact node;
     private QueryKey queryKey;
     
-    private int index = 0;
-    private List<KeyValue> keyValues;
+    private KeyValue keyValue;
     
-    public StoreResponseHandler(Context context, QueryKey queryKey, KeyValue keyValue) {
-        this(context, queryKey, Arrays.asList(keyValue));
+    private List<Contact> targets = new ArrayList<Contact>();
+    
+    private int countDown = 0;
+    
+    public static List<Contact> store(Context context, KeyValue keyValue, 
+            Contact node, QueryKey queryKey) throws Exception {
+        
+        StoreResponseHandler handler = new StoreResponseHandler(context, keyValue);
+        Map.Entry<Contact, QueryKey> entry = new EntryImpl<Contact, QueryKey>(node, queryKey);
+        List<Map.Entry<Contact, QueryKey>> nodes = Arrays.asList(entry);
+        handler.storeAt(nodes);
+        
+        return Arrays.asList(node);
     }
     
-    public StoreResponseHandler(Context context, QueryKey queryKey, List<KeyValue> keyValues) {
+    public StoreResponseHandler(Context context, KeyValue keyValue) {
+        super(context);
+        this.keyValue = keyValue;
+    }
+
+    public StoreResponseHandler(Context context, Contact node, 
+            QueryKey queryKey, KeyValue keyValue) {
         super(context);
         
+        this.node = node;
         this.queryKey = queryKey;
-        this.keyValues = keyValues;
+        this.keyValue = keyValue;
     }
     
-    public QueryKey getQueryKey() {
-        return queryKey;
+    @Override
+    protected void start() throws Exception {
+        
+        List<Entry<Contact,QueryKey>> nodes = null;
+        
+        if (node == null && queryKey == null) {
+            FindNodeResponseHandler handler 
+                = new FindNodeResponseHandler(context, keyValue.getKey().toNodeID());
+            nodes = handler.call().getNodes();   
+        } else {
+            Entry<Contact, QueryKey> entry 
+                = new EntryImpl<Contact, QueryKey>(node, queryKey);
+            nodes = Arrays.asList(entry);
+        }
+        
+        storeAt(nodes);
     }
     
-    public List<KeyValue> getKeyValues() {
-        return keyValues;
-    }
-    
-    public void store(Contact node) throws IOException {
-        if (index < keyValues.size() && !isCancelled()) {
-            KeyValue keyValue = keyValues.get(index);
+    private synchronized void storeAt(List<? extends Map.Entry<Contact,QueryKey>> nodes) throws Exception {
+        for (Map.Entry<Contact, QueryKey> entry : nodes) {
+            Contact node = entry.getKey();
+            QueryKey queryKey = entry.getValue();
+            
+            if (context.isLocalNodeID(node.getNodeID())) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Skipping local Node as KeyValue is already stored at this Node");
+                }
+                
+                synchronized (targets) {
+                    targets.add(node);                    
+                }
+                continue;
+            }
+            
+            if (queryKey == null) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Cannot store " + keyValue + " at " 
+                            + node + " because we have no QueryKey for it");
+                }
+                continue;
+            }
             
             StoreRequest request = context.getMessageHelper()
                 .createStoreRequest(node.getSocketAddress(), queryKey, keyValue);
             
             context.getMessageDispatcher().send(node, request, this);
+            countDown++;
         }
+        
+        fireEventIfFinished();
     }
-    
-    public void response(ResponseMessage message, long time) throws IOException {
 
-        StoreResponse response = (StoreResponse)message;
-        
-        KUID valueId = response.getValueID();
-        StoreStatus status = response.getStatus();
-        
-        if (index < keyValues.size()) {
-            KeyValue current = keyValues.get(index);
-            
-            if (!current.getKey().equals(valueId)) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(message.getContact() + " is ACK'ing a KeyValue " 
-                            + valueId + " we have not requested to store!");
-                }
-                
-                fireStoreFailed(message.getContact());
-                return;
-            }
-            
-            if (status == StoreStatus.SUCCEEDED) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(message.getContact() + " sucessfully stored KeyValue " + valueId);
-                }
-            } else if (status == StoreStatus.FAILED) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(message.getContact() + " failed to store KeyValue " + valueId);
-                }
-            } else {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(message.getContact() + " returned unknown status code " 
-                            + status + " for KeyValue " + valueId);
-                }
-                
-                fireStoreFailed(message.getContact());
-                return;
-            }
-            
-            // Reset the error counter
-            resetErrors();
-            
-            // Store next...
-            index++;
-            if (index < keyValues.size()) {
-                store(message.getContact());
-            } else {
-                fireStoreSucceeded(message.getContact());
-            }
+    @Override
+    protected void response(ResponseMessage message, long time) throws IOException {
+        synchronized (targets) {
+            targets.add(message.getContact());
         }
+        fireEventIfFinished();
     }
     
-    protected void timeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time) throws IOException {
-        fireTimeoutException(nodeId, dst, message, time);
+    @Override
+    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+        fireEventIfFinished();
     }
     
-    public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-        if (LOG.isErrorEnabled()) {
-            LOG.error("Sending a store request to " + ContactUtils.toString(nodeId, dst) + " failed", e);
-        }
-        
-        setException(new Exception(message.toString(), e));
+    @Override
+    protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        fireEventIfFinished();
     }
-    
-    private void fireStoreSucceeded(Contact node) {
-        setReturnValue(node);
-    }
-    
-    public void fireStoreFailed(Contact node) {
-        setException(new StoreException(node));
-    }
-    
-    public static class StoreException extends Exception {
-        private static final long serialVersionUID = 7739569179285045326L;
 
-        public StoreException(Contact node) {
-            super(node.toString());
+    private synchronized void fireEventIfFinished() {
+        assert (countDown >= 0);
+        if (countDown == 0) {
+            keyValue.setNumLocs(targets.size());
+            
+            Entry<KeyValue,List<Contact>> entry
+                = new EntryImpl<KeyValue,List<Contact>>(keyValue, targets);
+            setReturnValue(entry);
         }
+        countDown--;
     }
 }

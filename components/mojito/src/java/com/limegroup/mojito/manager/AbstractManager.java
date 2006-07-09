@@ -16,18 +16,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.event;
 
-import java.util.List;
-import java.util.Map.Entry;
+package com.limegroup.mojito.manager;
 
-import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.Context;
 
-/**
- * 
- */
-public interface StoreListener extends DHTEventListener<Entry<KeyValue, List<Contact>>>{
+class AbstractManager {
     
+    protected final Context context;
+    
+    public AbstractManager(Context context) {
+        this.context = context;
+    }
 }

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.dht;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -54,8 +53,6 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
             LOG.error("InterruptedException", err);
         } catch (ExecutionException err) {
             LOG.error("ExecutionException", err);
-        } catch (IOException err) {
-            LOG.error("IOException", err);
         }
     }
     
