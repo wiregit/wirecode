@@ -21,19 +21,24 @@ package com.limegroup.mojito.handler.response;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.util.KeyValueCollection;
+import com.limegroup.mojito.util.EntryImpl;
 
 /**
  * 
  */
-public class FindValueResponseHandler extends LookupResponseHandler<List<KeyValueCollection>> {
+public class FindValueResponseHandler extends LookupResponseHandler<FindValueEvent> {
 
-    private List<KeyValueCollection> values = new ArrayList<KeyValueCollection>();
+    private List<Entry<Contact,Collection<KeyValue>>> values = new ArrayList<Entry<Contact,Collection<KeyValue>>>();
     
     public FindValueResponseHandler(Context context, KUID lookupId) {
         super(context, lookupId.assertValueID());
@@ -45,12 +50,14 @@ public class FindValueResponseHandler extends LookupResponseHandler<List<KeyValu
     }
 
     @Override
-    protected void handleFoundValues(KeyValueCollection c) {
-        values.add(c);
+    protected void handleFoundValues(Contact node, Collection<KeyValue> c) {
+        Entry<Contact, Collection<KeyValue>> entry 
+            = new EntryImpl<Contact, Collection<KeyValue>>(node, c);
+        values.add(entry);
     }
 
     @Override
     protected void handleLookupFinished(long time, int hops) {
-        setReturnValue(values);
+        setReturnValue(new FindValueEvent(getLookupID(), values));
     }
 }

@@ -41,6 +41,9 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.util.EntryImpl;
 
+/**
+ * 
+ */
 public class StoreResponseHandler extends AbstractResponseHandler<Entry<KeyValue,List<Contact>>> {
 
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);

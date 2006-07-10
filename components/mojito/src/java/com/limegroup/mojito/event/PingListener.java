@@ -21,6 +21,9 @@ package com.limegroup.mojito.event;
 
 import com.limegroup.mojito.Contact;
 
+/**
+ * 
+ */
 public interface PingListener extends DHTEventListener<Contact> {
     
 }

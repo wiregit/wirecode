@@ -25,6 +25,9 @@ import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindNodeListener;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 
+/**
+ * 
+ */
 public class FindNodeManager extends AbstractLookupManager<FindNodeListener, FindNodeEvent> {
 
     public FindNodeManager(Context context) {

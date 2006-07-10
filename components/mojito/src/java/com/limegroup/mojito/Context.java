@@ -51,6 +51,7 @@ import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindNodeListener;
+import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
@@ -74,7 +75,6 @@ import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
-import com.limegroup.mojito.util.KeyValueCollection;
 
 /**
  * The Context is the heart of Mojito where everything comes 
@@ -578,7 +578,7 @@ public class Context {
     }
     
     /** Starts a value for the given KUID */
-    public Future<List<KeyValueCollection>> get(KUID key, FindValueListener listener) throws IOException {
+    public Future<FindValueEvent> get(KUID key, FindValueListener listener) throws IOException {
         return findValueManager.lookup(key, listener);
     }
     

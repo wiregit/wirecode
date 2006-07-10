@@ -38,6 +38,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueResponse;
@@ -49,7 +50,6 @@ import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
 import com.limegroup.mojito.statistics.SingleLookupStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
-import com.limegroup.mojito.util.KeyValueCollection;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.Trie;
 import com.limegroup.mojito.util.TrieUtils;
@@ -262,9 +262,9 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     private void handleFindValueResponse(FindValueResponse response, long time, int hop) throws IOException {
         
         long totalTime = time();
-        KeyValueCollection c = new KeyValueCollection(response);
+        Collection<KeyValue> values = response.getValues();
         
-        if (c.isEmpty()) {
+        if (values.isEmpty()) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(response.getContact()
                     + " returned an empty KeyValueCollection for " + lookupId);
@@ -287,7 +287,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             }
             foundValueLocs++;
             
-            handleFoundValues(c);
+            handleFoundValues(response.getContact(), values);
             
             if (isExhaustiveValueLookup()) {
                 lookupStep(hop);
@@ -450,7 +450,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         handleLookupFinished(time, hops);
     }
     
-    protected void handleFoundValues(KeyValueCollection c) {
+    protected void handleFoundValues(Contact node, Collection<KeyValue> c) {
         throw new UnsupportedOperationException();
     }
     

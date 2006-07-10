@@ -19,43 +19,45 @@
 
 package com.limegroup.mojito.event;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
 
 /**
  * 
  */
-public class FindNodeEvent {
+public class FindValueEvent {
     
-    private KUID lookupId;
+    public KUID lookupId;
     
-    private List<Entry<Contact, QueryKey>> nodes;
+    private List<Entry<Contact, Collection<KeyValue>>> values;
     
     @SuppressWarnings("unchecked")
-    public FindNodeEvent(KUID lookupId, List<? extends Entry<Contact, QueryKey>> nodes) {
+    public FindValueEvent(KUID lookupId, List<? extends Entry<Contact,Collection<KeyValue>>> values) {
         this.lookupId = lookupId;
-        this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
+        this.values = (List<Entry<Contact,Collection<KeyValue>>>)values;
     }
     
-    public KUID getLooupID() {
+    public KUID getLookupID() {
         return lookupId;
     }
     
-    public List<Entry<Contact, QueryKey>> getNodes() {
-        return nodes;
+    public List<Entry<Contact,Collection<KeyValue>>> getValues() {
+        return values;
     }
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(lookupId).append("\n");
-        int i = 0;
-        for (Entry<Contact, QueryKey> entry : nodes) {
-            buffer.append(i++).append(": ").append(entry.getKey())
-                .append(" qk=").append(entry.getValue()).append("\n");
+        for (Entry<Contact, Collection<KeyValue>> entry : values) {
+            buffer.append(entry.getKey()).append("\n");
+            for (KeyValue keyValue : entry.getValue()) {
+                buffer.append("  ").append(keyValue).append("\n");
+            }
         }
         return buffer.toString();
     }

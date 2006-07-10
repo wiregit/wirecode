@@ -37,6 +37,9 @@ import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.util.BucketUtils;
 
+/**
+ * 
+ */
 public class BootstrapManager extends AbstractManager {
     
     private List<BootstrapListener> globalListeners = new ArrayList<BootstrapListener>();

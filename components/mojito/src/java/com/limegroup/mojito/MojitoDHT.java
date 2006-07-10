@@ -48,6 +48,7 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindNodeListener;
+import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreListener;
@@ -58,7 +59,6 @@ import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
-import com.limegroup.mojito.util.KeyValueCollection;
 
 /**
  * The Mojito DHT. All you need to know is here!
@@ -330,11 +330,11 @@ public class MojitoDHT {
         return null;
     }
     
-    public Future<List<KeyValueCollection>> get(KUID key) throws IOException {
+    public Future<FindValueEvent> get(KUID key) throws IOException {
         return context.get(key, null);
     }
     
-    public Future<List<KeyValueCollection>> get(KUID key, FindValueListener listener) throws IOException {
+    public Future<FindValueEvent> get(KUID key, FindValueListener listener) throws IOException {
         if (!key.isValueID()) {
             throw new IllegalArgumentException("Key must be a Value ID");
         }

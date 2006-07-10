@@ -19,11 +19,9 @@
 
 package com.limegroup.mojito.event;
 
-import java.util.List;
-
-import com.limegroup.mojito.util.KeyValueCollection;
-
-public interface FindValueListener extends DHTEventListener
-            <List<KeyValueCollection>> {
+/**
+ * 
+ */
+public interface FindValueListener extends DHTEventListener<FindValueEvent> {
 
 }

@@ -34,6 +34,9 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 
+/**
+ * 
+ */
 public class StoreManager extends AbstractManager {
     
     private List<StoreListener> globalListeners = new ArrayList<StoreListener>();

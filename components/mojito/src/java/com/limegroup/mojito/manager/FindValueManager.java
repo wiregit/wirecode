@@ -19,15 +19,16 @@
 
 package com.limegroup.mojito.manager;
 
-import java.util.List;
-
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.handler.response.FindValueResponseHandler;
-import com.limegroup.mojito.util.KeyValueCollection;
 
-public class FindValueManager extends AbstractLookupManager<FindValueListener, List<KeyValueCollection>> {
+/**
+ * 
+ */
+public class FindValueManager extends AbstractLookupManager<FindValueListener, FindValueEvent> {
     
     public FindValueManager(Context context) {
         super(context);

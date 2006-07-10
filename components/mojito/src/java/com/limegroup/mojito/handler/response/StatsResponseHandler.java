@@ -32,6 +32,9 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StatsResponse;
 
+/**
+ * 
+ */
 public class StatsResponseHandler extends AbstractResponseHandler<StatsResponse> {
 
     private static final Log LOG = LogFactory.getLog(StatsResponseHandler.class);

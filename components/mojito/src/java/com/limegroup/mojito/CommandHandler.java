@@ -39,12 +39,12 @@ import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.CollectionUtils;
-import com.limegroup.mojito.util.KeyValueCollection;
 
 public class CommandHandler {
     
@@ -344,14 +344,13 @@ public class CommandHandler {
             });*/
             
             long start = System.currentTimeMillis();
-            List<KeyValueCollection> c = dht.get(key).get();
-            
+            FindValueEvent evt = dht.get(key).get();
             long time = System.currentTimeMillis() - start;
             
-            if (!c.isEmpty()) {
+            if (!evt.getValues().isEmpty()) {
                 StringBuffer buffer = new StringBuffer();
                 buffer.append(key).append(" in ").append(time).append("ms\n");
-                buffer.append(c);
+                buffer.append(evt);
                 buffer.append("\n");
                 out.println(buffer.toString());
             } else {
