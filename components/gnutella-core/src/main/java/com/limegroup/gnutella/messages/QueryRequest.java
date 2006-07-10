@@ -23,6 +23,7 @@ import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.UrnType;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -194,8 +195,7 @@ public class QueryRequest extends Message implements Serializable{
         if(sha1 == null) {
             throw new NullPointerException("null sha1");
         }
-		Set<URN> sha1Set = new HashSet<URN>();
-		sha1Set.add(sha1);
+		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, 
                                 DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
@@ -216,8 +216,7 @@ public class QueryRequest extends Message implements Serializable{
         if(sha1 == null) {
             throw new NullPointerException("null sha1");
         }
-		Set<URN> sha1Set = new HashSet<URN>();
-		sha1Set.add(sha1);
+		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
                                 DEFAULT_URN_QUERY, "",  UrnType.SHA1_SET, 
                                 sha1Set, null,
@@ -244,8 +243,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(filename.length() == 0) {
 			filename = DEFAULT_URN_QUERY;
 		}
-		Set<URN> sha1Set = new HashSet<URN>();
-		sha1Set.add(sha1);
+		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
@@ -272,8 +270,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(filename.length() == 0) {
 			filename = DEFAULT_URN_QUERY;
 		}
-		Set<URN> sha1Set = new HashSet<URN>();
-		sha1Set.add(sha1);
+		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
@@ -300,8 +297,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(ttl <= 0 || ttl > 6) {
 			throw new IllegalArgumentException("invalid TTL: "+ttl);
 		}
-		Set<URN> sha1Set = new HashSet<URN>();
-		sha1Set.add(sha1);
+		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
@@ -762,8 +758,7 @@ public class QueryRequest extends Message implements Serializable{
         if(key == null) {
             throw new NullPointerException("null query key");
         }
-		Set<URN> sha1Set = new HashSet<URN>();
-		sha1Set.add(sha1);
+		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
                                 "", UrnType.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
@@ -1152,7 +1147,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		
 		if(queryUrns != null) {
-			tempQueryUrns = new HashSet<URN>(queryUrns);
+			tempQueryUrns = new UrnSet(queryUrns);
 		} else {
 			tempQueryUrns = URN.NO_URN_SET;
 		}

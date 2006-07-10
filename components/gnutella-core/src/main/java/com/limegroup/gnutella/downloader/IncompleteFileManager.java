@@ -10,7 +10,6 @@ import java.io.ObjectOutputStream.PutField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Comparators;
@@ -661,7 +661,7 @@ public class IncompleteFileManager implements Serializable {
      * @return a set of known hashes
      */
     public synchronized Set<URN> getAllCompletedHashes(File incompleteFile) {
-        Set<URN> urns = new HashSet<URN>(1);
+        Set<URN> urns = new UrnSet();
         //Return a set S s.t. for each K in S, hashes.get(k)==incpleteFile
         for(Map.Entry<URN, File> entry : hashes.entrySet()) {
             if (incompleteFile.equals(entry.getValue()))

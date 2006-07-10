@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -176,9 +175,7 @@ public final class UrnCache {
      * set.
      */
     public Set<URN> calculateUrns(File file) throws IOException, InterruptedException {
-        Set<URN> set = new HashSet<URN>(1);
-        set.add(URN.createSHA1Urn(file));
-        return set;
+        return new UrnSet(URN.createSHA1Urn(file));
 	}
     
     /**
@@ -293,7 +290,10 @@ public final class UrnCache {
                 continue;
             }
             
-            Set set = GenericsUtils.scanForSet(entry.getValue(), URN.class, GenericsUtils.ScanMode.NEW_COPY_REMOVED, HashSet.class);
+            Set<URN> set = GenericsUtils.scanForSet(entry.getValue(),
+                                                    URN.class,
+                                                    GenericsUtils.ScanMode.NEW_COPY_REMOVED,
+                                                    UrnSet.class);
             if(set.isEmpty()) {
                 i.remove();
                 dirty = true;

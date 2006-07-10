@@ -24,6 +24,7 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -441,8 +442,7 @@ public class UpdateHandler {
      * Constructs an RFD out of the given information & connection.
      */
     private RemoteFileDesc rfd(ReplyHandler rh, DownloadInformation info) {
-        Set<URN> urns = new HashSet<URN>(1);
-        urns.add(info.getUpdateURN());
+        Set<URN> urns = new UrnSet(info.getUpdateURN());
         return new RemoteFileDesc(rh.getAddress(),               // address
                                   rh.getPort(),                 // port
                                   Integer.MAX_VALUE,            // index (unknown)

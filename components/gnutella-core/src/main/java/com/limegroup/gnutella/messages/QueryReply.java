@@ -835,7 +835,7 @@ public class QueryReply extends Message implements SecureMessage {
         //silently caught.
         int left=getResultCount();          //number of records left to get
         Response[] responses=new Response[left];
-        Set<URN> urns = new HashSet<URN>(); // set for the urns carried in this reply
+        Set<URN> urns = new HashSet<URN>(responses.length); // set for the urns carried in this reply
         short uniqueURNs = 0;
         try {
             InputStream bais = 

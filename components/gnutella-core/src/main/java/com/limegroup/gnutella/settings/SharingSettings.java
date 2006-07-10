@@ -40,7 +40,7 @@ public class SharingSettings extends LimeProps {
      * The directory for saving files.
      */
     public static final FileSetting DIRECTORY_FOR_SAVING_FILES = 
-        (FileSetting)FACTORY.createFileSetting("DIRECTORY_FOR_SAVING_FILES", 
+        FACTORY.createFileSetting("DIRECTORY_FOR_SAVING_FILES", 
             DEFAULT_SAVE_DIR).setAlwaysSave(true);
     
     /**

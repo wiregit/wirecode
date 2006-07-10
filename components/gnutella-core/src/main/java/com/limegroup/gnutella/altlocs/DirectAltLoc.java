@@ -3,7 +3,6 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.limegroup.gnutella.Endpoint;
@@ -11,6 +10,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.IpPort;
@@ -79,8 +79,7 @@ public class DirectAltLoc extends AlternateLocation {
 	}
 	
 	public RemoteFileDesc createRemoteFileDesc(int size) {
-		Set<URN> urnSet = new HashSet<URN>(1);
-		urnSet.add(getSHA1Urn());
+		Set<URN> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
 		RemoteFileDesc ret = new RemoteFileDesc(_node.getAddress(), _node.getPort(),
 								  0, HTTPConstants.URI_RES_N2R+SHA1_URN, size,  

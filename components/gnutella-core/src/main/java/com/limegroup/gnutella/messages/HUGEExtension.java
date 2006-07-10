@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.UrnType;
 
 /** 
@@ -86,7 +87,7 @@ public class HUGEExtension {
                             // it's an URN to match, of form "urn:namespace:etc"
                             URN urn = URN.createSHA1Urn(curExtStr);
                             if(_urns == null) 
-                                _urns = new HashSet<URN>(1);
+                                _urns = new UrnSet();
                             _urns.add(urn);
                         } else if (UrnType.isSupportedUrnType(curExtStr)) {
                             // it's an URN type to return, of form "urn" or 

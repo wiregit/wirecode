@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -26,6 +25,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -186,7 +186,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         if (port<0)
             port=80;      //assume default for HTTP (not 6346)
         
-        Set<URN> urns=new HashSet<URN>(1);
+        Set<URN> urns= new UrnSet();
         if (urn!=null)
             urns.add(urn);
         

@@ -12,14 +12,12 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
@@ -415,10 +413,15 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
             // According to some bug reports, it seems that the
             // Urn Set has some java.io.Files inserted into it.
             // Here we check for this case and remove the offending object.
-            Set<URN> newUrns = GenericsUtils.scanForSet(_urns, URN.class, GenericsUtils.ScanMode.NEW_COPY_REMOVED, HashSet.class);
-            if(_urns != newUrns) {
+            Set<URN> newUrns = GenericsUtils.scanForSet(_urns,
+                                                        URN.class,
+                                                        GenericsUtils.ScanMode.NEW_COPY_REMOVED,
+                                                        UrnSet.class);
+            
+            // if it was converted or recreated while scanning,
+            // ensure it's unmodifiable.
+            if(_urns != newUrns)
                 _urns = Collections.unmodifiableSet(newUrns);
-            }
         }
                 
 		// preserve the invariant that the LimeXMLDocument array either be
@@ -905,20 +908,11 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
         if (_urns.isEmpty() && other._urns.isEmpty())
             return nullEquals(_filename, other._filename);
         else
-            return urnSetEquals(_urns, other._urns);
+            return _urns.equals(other._urns);
     }
     
     private boolean nullEquals(Object one, Object two) {
         return one == null ? two == null : one.equals(two);
-    }
-    
-    private boolean urnSetEquals(Set one, Set two) {
-        for (Iterator iter = one.iterator(); iter.hasNext(); ) {
-            if (two.contains(iter.next())) {
-                return true;
-            }
-        }
-        return false;
     }
 
 	/**

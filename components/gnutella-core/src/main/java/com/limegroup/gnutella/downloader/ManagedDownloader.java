@@ -44,6 +44,7 @@ import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -2221,8 +2222,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         //be hashed again when added to the library -- reduces
         //the time of the 'Saving File' state.
         if(fileHash != null) {
-            Set<URN> urns = new HashSet<URN>(1);
-            urns.add(fileHash);
+            Set<URN> urns = new UrnSet(fileHash);
             File file = saveFile;
             try {
                 file = FileUtils.getCanonicalFile(saveFile);
