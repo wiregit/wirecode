@@ -326,7 +326,7 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * notification that some bytes have been read on this connection
 	 */
-	private void readBytes(int read) {
+	public void readBytes(int read) {
 		down.count(read);
 		_torrent.countDownloaded(read);
 	}
@@ -562,7 +562,7 @@ public class BTConnection implements UploadSlotListener {
 				if (LOG.isDebugEnabled())
 					LOG.debug("disk read done for "+in);
 				prepareForPiece(true);
-				_writer.enqueue(new BTPiece(in, data));
+				_writer.enqueue(new BTPieceMessage(in, data));
 			}
 		};
 		NIODispatcher.instance().invokeLater(pieceSender);
@@ -675,9 +675,6 @@ public class BTConnection implements UploadSlotListener {
 		case BTMessage.HAVE:
 			handleHave((BTHave) message);
 			break;
-		case BTMessage.PIECE:
-			handlePiece((BTPiece) message);
-			break;
 		case BTMessage.REQUEST:
 			handleRequest((BTRequest) message);
 			break;
@@ -778,21 +775,9 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * handles a piece message and sends its payload to disk
 	 */
-	private void handlePiece(BTPiece message) {
-		final BTInterval in = message.getInterval();
-		final byte[] data = message.getData();
-		
-		readBytes(data.length);
-		
-		
+	public void handlePiece(BTPieceFactory factory) {
 		try {
-			VerifyingFolder v = _info.getVerifyingFolder();
-			if (v.hasBlock(in.getId()))
-				return;
-			
-			_info.getVerifyingFolder().writeBlock(
-					in,
-					data);
+			_info.getVerifyingFolder().writeBlock(factory);
 		} catch (IOException ioe) {
 			close();
 			// inform the user and stop the download

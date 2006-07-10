@@ -23,21 +23,6 @@ public class BTChoke extends BTMessage {
 	private BTChoke() {
 		super(CHOKE);
 	}
-	
-	/**
-	 * read message from network
-	 */
-	public static BTChoke readMessage(ByteBuffer payload) throws BadBTMessageException {
-		// check message.
-		if (payload.remaining() != 0) {
-			byte[] msg = new byte[payload.remaining()];
-			payload.get(msg);
-			throw new BadBTMessageException(
-					"unexpected payload in choke message: "
-							+ new String(msg));
-		}
-		return INSTANCE;
-	}
 
 	/**
 	 * @return ByteBuffer for this message

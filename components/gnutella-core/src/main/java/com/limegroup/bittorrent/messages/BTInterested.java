@@ -24,27 +24,6 @@ public class BTInterested extends BTMessage {
 		super(INTERESTED);
 	}
 
-	/**
-	 * read message from network
-	 * 
-	 * @param payload
-	 *            ByteBuffer with data from network
-	 * @return BTInterested message
-	 * @throws BadBTMessageException
-	 */
-	public static BTInterested readMessage(ByteBuffer payload)
-			throws BadBTMessageException {
-		// check message.
-		if (payload.remaining() != 0) {
-			byte[] msg = new byte[payload.remaining()];
-			payload.get(msg);
-			throw new BadBTMessageException(
-					"unexpected payload in interested message: "
-							+ new String(msg));
-		}
-		return INSTANCE;
-	}
-
 	public ByteBuffer getPayload() {
 		return EMPTY_PAYLOAD;
 	}

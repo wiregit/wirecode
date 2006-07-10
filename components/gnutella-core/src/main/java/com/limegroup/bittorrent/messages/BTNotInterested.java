@@ -24,21 +24,6 @@ public class BTNotInterested extends BTMessage {
 		super(NOT_INTERESTED);
 	}
 
-	/**
-	 * read message from network
-	 */
-	public static BTNotInterested readMessage(ByteBuffer payload) throws BadBTMessageException {
-		// check message.
-		if (payload.remaining() != 0) {
-			byte[] msg = new byte[payload.remaining()];
-			payload.get(msg);
-			throw new BadBTMessageException(
-					"unexpected payload in notinterested message: "
-							+ new String(msg));
-		}
-		return INSTANCE;
-	}
-
 	public ByteBuffer getPayload() {
 		return EMPTY_PAYLOAD;
 	}

@@ -159,16 +159,12 @@ public class VerifyingFolder {
 	}
 	
 	
-	public void writeBlock(BTInterval in, byte [] data) 
+	public void writeBlock(BTPieceFactory factory) 
 	throws IOException {
 		IOException stored = storedException;
 		if (stored != null)
 			throw stored;
-		synchronized(this) {
-			pendingRanges.addInterval(in);
-			requestedRanges.removeInterval(in);
-		}
-		QUEUE.invokeLater(new WriteJob(in, data),_info.getURN());
+		QUEUE.invokeLater(new WriteJob(factory),_info.getURN());
 	}
 	
 	/**
@@ -176,17 +172,24 @@ public class VerifyingFolder {
 	 * the two should eventually be abstracted somehow.
 	 */
 	private class WriteJob implements Runnable {
-		private final BTInterval in;
-		private final byte [] data;
+		private final BTPieceFactory factory;
 		
-		WriteJob(BTInterval in, byte [] data) {
-			this.in = in;
-			this.data = data;
+		WriteJob(BTPieceFactory factory) {
+			this.factory = factory;
 		}
 		
 		public void run() {
 			if (storedException != null)
 				return;
+			
+			BTPiece piece = factory.getPiece();
+			BTInterval in = piece.getInterval();
+			byte [] data = piece.getData();
+			
+			synchronized(VerifyingFolder.this) {
+				pendingRanges.addInterval(in);
+				requestedRanges.removeInterval(in);
+			}
 			
 			try {
 				writeBlockImpl(in, data);

@@ -3,6 +3,8 @@ package com.limegroup.bittorrent.messages;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.limegroup.gnutella.util.CircularByteBuffer;
+
 /**
  * indicates that we will not upload anything to the remote host
  */
@@ -29,10 +31,8 @@ public class BTHave extends BTMessage {
 	 */
 	public static BTHave readMessage(ByteBuffer payload) throws BadBTMessageException {
 
-		if (payload.remaining() != 4)
-			throw new BadBTMessageException(
-					"unexpected payload in have message: "
-							+ new String(payload.array()));
+		if (payload.remaining() < 4)
+			throw new BadBTMessageException();
 
 		payload.order(ByteOrder.BIG_ENDIAN);
 		int pieceNum = payload.getInt();

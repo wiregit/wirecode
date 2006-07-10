@@ -24,21 +24,6 @@ public class BTUnchoke extends BTMessage {
 		super(UNCHOKE);
 	}
 	
-	/**
-	 * reads message from network
-	 */
-	public static BTUnchoke readMessage(ByteBuffer payload) throws BadBTMessageException {
-		// check message.
-		if (payload.remaining() != 0) {
-			byte[] msg = new byte[payload.remaining()];
-			payload.get(msg);
-			throw new BadBTMessageException(
-					"unexpected payload in unchoke message: "
-							+ new String(msg));
-		}
-		return INSTANCE;
-	}
-
 	public ByteBuffer getPayload() {
 		return EMPTY_PAYLOAD;
 	}

@@ -4,11 +4,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import com.limegroup.bittorrent.BTInterval;
+import com.limegroup.bittorrent.BTPiece;
 
 /**
  * indicates that we will not upload anything to the remote host
  */
-public class BTPiece extends BTMessage {
+public class BTPieceMessage extends BTMessage implements BTPiece {
 	private BTInterval in;
 
 	private final byte[] _data;
@@ -16,7 +17,7 @@ public class BTPiece extends BTMessage {
 	/**
 	 * Constructs new BTPiece message
 	 */
-	public BTPiece(BTInterval in, byte[] data) {
+	public BTPieceMessage(BTInterval in, byte[] data) {
 		super(PIECE);
 		this.in = in;
 		_data = data;

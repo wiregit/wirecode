@@ -3,19 +3,23 @@ package com.limegroup.bittorrent;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import com.limegroup.gnutella.util.CircularByteBuffer;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
 import com.limegroup.bittorrent.messages.BTBitField;
 import com.limegroup.bittorrent.messages.BTMessage;
-import com.limegroup.bittorrent.messages.BTPiece;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 public class BTMessageReader implements ChannelReadObserver {
@@ -36,14 +40,14 @@ public class BTMessageReader implements ChannelReadObserver {
 	private final BTConnection _connection;
 
 	// the ByteBuffer for the message currently being read from the network.
-	private ByteBuffer _in;
+	private CircularByteBuffer _in;
 
 	// the length of the message we are currently reading.
 	private int _length = -1;
 	
 	// whether this is the first message we're reading
 	private boolean first = true;
-
+	
 	/** Whether this reader is shutdown */
 	private volatile boolean shutdown;
 	
@@ -57,7 +61,7 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * Constructor
 	 */
 	public BTMessageReader(BTConnection connection) {
-		_in = ByteBuffer.allocate(BUFFER_SIZE);
+		_in = new CircularByteBuffer(BUFFER_SIZE, false);
 		_connection = connection;
 		LENGTH_STATE = new LengthState();
 		TYPE_STATE = new TypeState();
@@ -67,30 +71,30 @@ public class BTMessageReader implements ChannelReadObserver {
 	/**
 	 * Notification that read can be performed
 	 */
-	public void handleRead() throws IOException {
+	public synchronized void handleRead() throws IOException {
 		if (shutdown)
 			return;
 		
 		while(true) {
 			int read = 0;
 			int thisTime = 0;
-			while( _in.hasRemaining() && (read = _channel.read(_in)) > 0 )
+			while( _in.size() < _in.capacity() && (read = _in.read(_channel)) > 0 )
 				thisTime += read;
 			if (thisTime > 0)
 				count(thisTime);
 			else if (read == -1)
 				throw new IOException();
-			else
+			else {
+				if (_in.size() == _in.capacity())
+					_channel.interest(false);
 				break;
-			
-			_in.flip();
+			}
 			processState();
-			_in.compact();
 		}
 	}
 	
 	private void processState() throws BadBTMessageException {
-		while(true) {
+		while(currentState != null) {
 			BTReadMessageState next = currentState.addData();
 			if (next == null)
 				break;
@@ -158,7 +162,7 @@ public class BTMessageReader implements ChannelReadObserver {
 	 */
 	private class LengthState implements BTReadMessageState {
 		public BTReadMessageState addData() throws BadBTMessageException {
-			if (_in.remaining() < 4)
+			if (_in.size() < 4)
 				return null;
 			
 			_in.order(ByteOrder.BIG_ENDIAN);
@@ -187,7 +191,7 @@ public class BTMessageReader implements ChannelReadObserver {
 	private class TypeState implements BTReadMessageState {
 		private byte type = -1;
 		public BTReadMessageState addData() throws BadBTMessageException {
-			if (_in.remaining() < 1)
+			if (_in.size() < 1)
 				return null;
 			
 			type = _in.get();
@@ -217,18 +221,16 @@ public class BTMessageReader implements ChannelReadObserver {
 		}
 		
 		public BTReadMessageState addData() throws BadBTMessageException {
-			if (_in.remaining() < _length) 
+			if (_in.size() < _length) 
 				return null;
 			
 			ByteBuffer buf;
 			if (_length == 0)
 				buf = BTMessage.EMPTY_PAYLOAD; // TODO: use the one from BufferUtils
 			else {
-				int oldLimit = _in.limit();
-				_in.limit(_length + _in.position());
-				buf = _in.slice();
-				_in.position(_in.limit());
-				_in.limit(oldLimit);
+				buf = ByteBuffer.allocate(_length);
+				_in.get(buf);
+				buf.clear();
 			}
 			BTMessage message = BTMessage.parseMessage(buf, type);
 			_connection.processMessage(message);
@@ -241,45 +243,37 @@ public class BTMessageReader implements ChannelReadObserver {
 	 */
 	private class BitfieldState implements BTReadMessageState {
 		/* 
-		 * If the BitField is small enough to fit our current buffer,
-		 * we create it and process it in-place.
-		 * 
-		 * Otherwise, we use a BufferByteArrayOutputStream 
+		 * We use a BufferByteArrayOutputStream 
 		 * that grows as data arrives on the wire. It is deliberately 
 		 * not pre-allocated even though we know how large it will 
 		 * eventually get.
 		 */
 		private BufferByteArrayOutputStream bbaos;
+		private WritableByteChannel bbaosChan;
 		
 		public BTReadMessageState addData() throws BadBTMessageException {
-			int limit = _in.limit();
 			
-			// if the entire BitField was received just process it
-			if (bbaos == null && _in.remaining() >= _length) {
-				LOG.debug("parsing BitField in-place");
-				_in.limit(_in.position() + _length);
-				countAndProcess(_in.slice());
-				_in.position(_in.limit());
-				_in.limit(limit);
-				return LENGTH_STATE;
-			} else {
-				if (bbaos == null)
-					bbaos = new BufferByteArrayOutputStream();
-				
-				int toWrite = Math.min(_in.position() + _length - bbaos.size(), 
-						_in.limit());
-				_in.limit(toWrite);
-				bbaos.write(_in);
-				_in.limit(limit);
-				
-				if (LOG.isDebugEnabled())
-					LOG.debug("parsing bitfield incrementally, so far " + bbaos.size());
-				
-				if (bbaos.size() == _length) { 
-					countAndProcess(ByteBuffer.wrap(bbaos.toByteArray()));
-					return LENGTH_STATE;
-				}
+
+			if (bbaos == null) {
+				bbaos = new BufferByteArrayOutputStream();
+				bbaosChan = Channels.newChannel(bbaos);
 			}
+			
+			int toWrite = _length - bbaos.size();
+			try {
+				_in.write(bbaosChan, toWrite);
+			} catch (IOException impossible) {
+				ErrorService.error(impossible);
+			}
+			
+			if (LOG.isDebugEnabled())
+				LOG.debug("parsing bitfield incrementally, so far " + bbaos.size());
+			
+			if (bbaos.size() == _length) { 
+				countAndProcess(ByteBuffer.wrap(bbaos.toByteArray()));
+				return LENGTH_STATE;
+			}
+			
 			return null;
 		}
 			
@@ -295,16 +289,19 @@ public class BTMessageReader implements ChannelReadObserver {
 	/**
 	 * State that parses the Piece message. 
 	 */
-	private class PieceState implements BTReadMessageState {
-		int chunkId = -1;
-		int offset = -1;
-		int currentOffset;
+	private class PieceState implements BTReadMessageState, BTPieceFactory {
+		private int chunkId = -1;
+		private int offset = -1;
+		private int currentOffset;
+		private BTInterval complete;
 		
 		/** Whether we actually requested this piece */
-		boolean welcome;
+		private boolean welcome;
+		/** Whether we are expecting someone to write our data to disk */
+		private boolean writeExpected;
 		
 		public BTReadMessageState addData() throws BadBTMessageException {
-			if (_in.remaining() < 4 && (chunkId < 0 || offset < 0))
+			if (_in.size() < 4 && (chunkId < 0 || offset < 0))
 				return null;
 			
 			// read chunk id
@@ -319,50 +316,77 @@ public class BTMessageReader implements ChannelReadObserver {
 				_in.order(ByteOrder.BIG_ENDIAN);
 				offset = _in.getInt();
 				currentOffset = offset;
-				
 				// check if the piece was requested
-				BTInterval complete = new BTInterval(offset, offset + _length - 9, chunkId); 
+				complete = new BTInterval(offset, offset + _length - 9, chunkId); 
 				welcome = _connection.startReceivingPiece(complete);
 			}
 			
-			if (!_in.hasRemaining())
+			if (_in.size() == 0)
 				return null;
-			
-			int oldLimit = _in.limit();
-			int newLimit = Math.min(oldLimit, 
-					_in.position() + _length + offset - currentOffset - 8);
-			
-			_in.limit(newLimit);
-			BTInterval interval = new BTInterval(currentOffset, 
-					currentOffset + _in.remaining() - 1,
-					chunkId);
-			
-			currentOffset += _in.remaining();
 			
 			// if the piece was requested, we process it.
 			// otherwise we skip it.
 			if (welcome) {
-				byte []data = new byte[_in.remaining()];
-				_in.get(data);
-				BTPiece piece = new BTPiece(interval, data);
-				_connection.processMessage(piece);
-			} else
-				_in.position(_in.limit());
+				// if the buffer is full, turn off read interest
+				if (_in.size() == _in.capacity()) 
+					_channel.interest(false);
+				
+				if (!writeExpected) { 
+					writeExpected = true;
+					_connection.handlePiece(this);
+				}
+			}
 			
-			_in.limit(oldLimit);
-			
-			if (currentOffset == offset + _length - 8) {
+			if (currentOffset + _in.size() >= complete.high) {
 				// we're done receiving this piece
 				_connection.requestIfPossible();
 				BTMessageStat.INCOMING_PIECE.incrementStat();
 				BTMessageStatBytes.INCOMING_PIECE.addData(5 + _length);
-				return LENGTH_STATE;
 			}
-			else
-				return null;
+			return null;
 		}
+		
+		public BTPiece getPiece() {
+			synchronized(BTMessageReader.this) {
+				Assert.that(writeExpected);
+				writeExpected = false;
+				int toRead = Math.min(_in.size(), complete.high - currentOffset + 1);
+				
+				_channel.interest(true); // this may be better off flagged
+				
+				BTInterval in = new BTInterval(currentOffset, 
+						currentOffset + toRead - 1,
+						chunkId);
+				currentOffset += toRead;
+				_connection.readBytes(toRead);
+				byte []data = new byte[toRead];
+				_in.get(data);
+				if (currentOffset > complete.high) 
+					currentState = LENGTH_STATE;
+				
+				return new ReceivedPiece(in, data);
+			}
+		}
+		
 	}
 	
+	private class ReceivedPiece implements BTPiece {
+		private final BTInterval interval;
+		private final byte [] data;
+		
+		ReceivedPiece(BTInterval interval, byte [] data) {
+			this.interval = interval;
+			this.data = data;
+		}
+		
+		public BTInterval getInterval() {
+			return interval;
+		}
+		
+		public byte [] getData() {
+			return data;
+		}
+	}
 }
 
 

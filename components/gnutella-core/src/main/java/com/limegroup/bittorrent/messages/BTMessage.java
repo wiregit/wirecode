@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
+import com.limegroup.gnutella.util.CircularByteBuffer;
 
 public abstract class BTMessage {
 	// private static final Log LOG = LogFactory.getLog(BTMessage.class);
@@ -102,19 +103,19 @@ public abstract class BTMessage {
 		case CHOKE:
 			BTMessageStat.INCOMING_CHOKE.incrementStat();
 			BTMessageStatBytes.INCOMING_CHOKE.addData(5);
-			return BTChoke.readMessage(in);
+			return BTChoke.createMessage();
 		case UNCHOKE:
 			BTMessageStat.INCOMING_UNCHOKE.incrementStat();
 			BTMessageStatBytes.INCOMING_UNCHOKE.addData(5);
-			return BTUnchoke.readMessage(in);
+			return BTUnchoke.createMessage();
 		case INTERESTED:
 			BTMessageStat.INCOMING_INTERESTED.incrementStat();
 			BTMessageStatBytes.INCOMING_INTERESTED.addData(5);
-			return BTInterested.readMessage(in);
+			return BTInterested.createMessage();
 		case NOT_INTERESTED:
 			BTMessageStat.INCOMING_NOT_INTERESTED.incrementStat();
 			BTMessageStatBytes.INCOMING_NOT_INTERESTED.addData(5);
-			return BTNotInterested.readMessage(in);
+			return BTNotInterested.createMessage();
 		case HAVE:
 			BTMessageStat.INCOMING_HAVE.incrementStat();
 			BTMessageStatBytes.INCOMING_HAVE.addData(9);
