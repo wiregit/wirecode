@@ -313,9 +313,15 @@ public class Connection implements IpPort {
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
         if (vm instanceof CapabilitiesVM) {
             _capabilities = (CapabilitiesVM) vm;
-            //add DHT node to our DHT RT as soon as we know
-            if(_capabilities.supportsDHT() > -1 && RouterService.isDHTNode())
-                RouterService.getLimeDHTManager().addLeafDHTNode(_host, _port);
+            if(RouterService.isDHTNode()) {
+                //add DHT node to our DHT RT as soon as we know
+                if(_capabilities.supportsDHT() > -1) {
+                    RouterService.getLimeDHTManager().addLeafDHTNode(_host, _port);
+                } else {
+                    RouterService.getLimeDHTManager().removeLeafDHTNode(_host,_port);
+                }
+                
+            }
         }
         if (vm instanceof HeaderUpdateVendorMessage) {
             HeaderUpdateVendorMessage huvm = (HeaderUpdateVendorMessage)vm;

@@ -169,7 +169,7 @@ public class LimeDHTManager implements LifecycleListener {
         }
         
         //set firewalled status
-        dht.setFirewalled(activeMode);
+        dht.setFirewalled(!activeMode);
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Initializing the DHT");
