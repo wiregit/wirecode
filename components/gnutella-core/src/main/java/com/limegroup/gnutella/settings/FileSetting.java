@@ -59,5 +59,10 @@ public class FileSetting extends Setting {
         value = new File(sValue);
         absolutePath = value.getAbsolutePath();
     }
+    
+    public FileSetting setAlwaysSave(boolean on) {
+        super.setAlwaysSave(on);
+        return this;
+    }
 
 }

@@ -1,4 +1,6 @@
 package com.limegroup.gnutella.settings;
+import java.io.File;
+
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
@@ -222,6 +224,10 @@ public class ApplicationSettings extends LimeProps {
      */
     public static final BooleanSetting USE_SECURE_RESULTS =
         FACTORY.createBooleanSetting("USE_SECURE_RESULTS", true);
+    
+    /** The last directory used for opening a file chooser. */
+    public static final FileSetting LAST_FILECHOOSER_DIRECTORY =
+        FACTORY.createFileSetting("LAST_FILECHOOSER_DIR", new File("")).setAlwaysSave(true);
     
     /**
      * Gets the current language setting.
