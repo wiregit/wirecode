@@ -39,6 +39,9 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     
     /** The last time we flushed, so we don't flush again too soon. */
     private long lastFlushTime;
+    
+    /** Whether buffering is disabled */
+    private volatile boolean immediateFlush;
 
     /** Constructs a new DelayedBufferWriter whose buffer is the given size. */
     public DelayedBufferWriter(int size) {
@@ -105,6 +108,14 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         sink = newChannel;
         newChannel.interest(this,true);
     }
+    
+    /**
+     * @param on whether this delayer should not delay writes.
+     */
+    public void setImmediateFlush(boolean on) {
+    	immediateFlush = on;
+    }
+
 
     /** Unused, Unsupported */
     public void handleIOException(IOException iox) {
@@ -127,7 +138,17 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
      * buffer is emptied or no data can be written to the sink.
      */
     public int write(ByteBuffer buffer) throws IOException {
-        int originalPos = buffer.position();
+    	if (immediateFlush) {
+    		long now = System.currentTimeMillis();
+    		if (hasBufferedData()) {
+    			flush(now);
+    			if (hasBufferedData())
+    				return 0;
+    		} else
+    			lastFlushTime = now;
+    		return sink.write(buffer);
+    	}
+    	int originalPos = buffer.position();
         while(buffer.hasRemaining()) {
             if(buf.hasRemaining()) {
                 int remaining = buf.remaining();
@@ -176,7 +197,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         		sink.interest(this,false);
         		
         		// If still no data after that, we've written everything we want -- exit.
-        		if (buf.position() == 0) 
+        		if (!hasBufferedData()) 
         			return false;
         		else {
         			// otherwise schedule a flushing event.
@@ -200,7 +221,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         chan.write(buf);
 
         // if we wrote anything, consider this flushed
-        if (buf.position() > 0) {
+        if (hasBufferedData()) {
             lastFlushTime = now;
             if (buf.hasRemaining())
                 buf.compact();
@@ -209,6 +230,10 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         } else  {
             buf.position(buf.limit()).limit(buf.capacity());
         }
+    }
+    
+    private boolean hasBufferedData() {
+    	return buf.position() > 0;
     }
     
     private class Interester implements Runnable {

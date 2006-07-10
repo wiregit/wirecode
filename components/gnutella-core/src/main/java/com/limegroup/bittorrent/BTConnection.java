@@ -165,6 +165,9 @@ public class BTConnection implements UploadSlotListener {
 	/** Watchdog for this connection */
 	private StalledUploadWatchdog watchdog;
 	
+	/** Delayer for this connection */
+	private final DelayedBufferWriter delayer;
+	
 	/** Whether this connection is currently closing */
 	private volatile boolean closing;
 	
@@ -198,7 +201,7 @@ public class BTConnection implements UploadSlotListener {
 		
 		ThrottleWriter throttle = new ThrottleWriter(_torrent
 				.getUploadThrottle());
-		DelayedBufferWriter delayer = new DelayedBufferWriter(1400, 3000);
+		delayer = new DelayedBufferWriter(1400, 3000);
 		_writer.setWriteChannel(delayer);
 		delayer.setWriteChannel(throttle);
 		socket.setReadObserver(_reader);
@@ -503,7 +506,7 @@ public class BTConnection implements UploadSlotListener {
 	void pieceSent() {
 		Assert.that(usingSlot, "incosistent slot state");
 		usingSlot = false;
-		watchdog.deactivate();
+		prepareForPiece(false);
 		RouterService.getUploadSlotManager().requestDone(this);
 		readyForWriting();
 	}
@@ -558,13 +561,27 @@ public class BTConnection implements UploadSlotListener {
 			public void run() {
 				if (LOG.isDebugEnabled())
 					LOG.debug("disk read done for "+in);
-				if (watchdog == null)
-					watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
-				watchdog.activate(_writer);
+				prepareForPiece(true);
 				_writer.enqueue(new BTPiece(in, data));
 			}
 		};
 		NIODispatcher.instance().invokeLater(pieceSender);
+	}
+	
+	/**
+	 * Prepares the connection for sending a piece
+	 * @param start whether we are starting a piece or finishing it.
+	 */
+	private void prepareForPiece(boolean start) {
+		if (start) {
+			if (watchdog == null)
+				watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
+			watchdog.activate(_writer);
+			delayer.setImmediateFlush(true);
+		} else {
+			watchdog.deactivate();
+			delayer.setImmediateFlush(false);
+		}
 	}
 	
 	/**
