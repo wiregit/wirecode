@@ -11,7 +11,6 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,22 +21,18 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
-import com.limegroup.gnutella.MessageListener;
-import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.manager.BootstrapManager.BootstrapException;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
@@ -210,33 +205,33 @@ public class LimeDHTManager implements LifecycleListener {
         System.out.println("snapshot:" + snapshot);
         try {
             dht.bootstrap(snapshot, new BootstrapListener() {
-                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
-                    synchronized (bootstrapHosts) {
-                        bootstrapHosts.removeAll(failedHosts);
-                        if(!bootstrapHosts.isEmpty()) {
-                            //hosts were added --> try again
-                            bootstrap();
-                        } else {
-                            waiting = true;
-                            if(dhtNodeFetcher == null) {
-                                dhtNodeFetcher = new DHTNodeFetcher(LimeDHTManager.this);
+                public void handleResult(BootstrapEvent result) {
+                    waiting = false;
+                    // Notify our connections that we are now a full DHT node 
+                    sendUpdatedCapabilities();
+                }
+                
+                public void handleException(Exception ex) {
+                    if (ex instanceof BootstrapException) {
+                        synchronized (bootstrapHosts) {
+                            BootstrapException bex = (BootstrapException)ex;
+                            bootstrapHosts.removeAll(bex.getFailedHostList());
+                            
+                            if(!bootstrapHosts.isEmpty()) {
+                                //hosts were added --> try again
+                                bootstrap();
+                            } else {
+                                waiting = true;
+                                if(dhtNodeFetcher == null) {
+                                    dhtNodeFetcher = new DHTNodeFetcher(LimeDHTManager.this);
+                                }
+                                //send UDPPings -- non blocking
+                                dhtNodeFetcher.requestDHTHosts();
                             }
-                            //send UDPPings -- non blocking
-                            dhtNodeFetcher.requestDHTHosts();
                         }
                     }
                 }
-
-                public void phaseOneComplete(long time) {
-                    waiting = false;
-                }
                 
-                public void phaseTwoComplete(boolean foundNodes, long time) {
-                    //Notify our connections that we are now a full DHT node 
-                    sendUpdatedCapabilities();
-                    
-                    //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
-                }
             });
             
         } catch (IOException err) {

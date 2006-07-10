@@ -29,7 +29,6 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -38,8 +37,8 @@ import java.util.concurrent.Future;
 
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -192,7 +191,19 @@ public class CommandHandler {
         
         out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void phaseOneComplete(long time) {
+
+            public void handleResult(BootstrapEvent result) {
+                out.println("Bootstraping finished: " + result);
+                out.flush();
+            }
+            
+            public void handleException(Exception ex) {
+                out.println("Bootstraping failed");
+                ex.printStackTrace(out);
+                out.flush();
+            }
+
+            /*public void phaseOneComplete(long time) {
                 out.println("Bootstraping phase #1 finished in " + time + " ms");
                 out.flush();
             }
@@ -202,7 +213,7 @@ public class CommandHandler {
                 out.flush();
             }
 
-            public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {}
+            public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {}*/
         });
     }
     

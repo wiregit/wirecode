@@ -16,274 +16,304 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.manager;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.event.FindNodeEvent;
-import com.limegroup.mojito.event.FindNodeListener;
-import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.settings.KademliaSettings;
-import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
+import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.util.BucketUtils;
 
-/**
- * The BootstrapManager performs a lookup for the local Node ID
- * which is essentially the bootstrap process.
- */
-public class BootstrapManager {
+public class BootstrapManager extends AbstractManager {
     
-    private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
+    private List<BootstrapListener> globalListeners = new ArrayList<BootstrapListener>();
     
-    protected final Context context;
+    private Object lock = new Object();
     
-    private BootstrapListener listener;
-    
-    private long startTime = -1L;
-    
-    private List<SocketAddress> failedHosts = new ArrayList<SocketAddress>();
-    
-    private NetworkStatisticContainer networkStats;
+    private BootstrapFuture future = null;
     
     public BootstrapManager(Context context) {
-        this.context = context;
-        networkStats = context.getNetworkStats();
+        super(context);
     }
     
-    public void bootstrap(BootstrapListener listener) {
-        this.listener = listener;
-        
-        startTime = System.currentTimeMillis();
-        (new RouteTablePhaseZero()).start();
-    }
-    
-    public void bootstrap(List<? extends SocketAddress> hostList, 
-            BootstrapListener listener) {
-        this.listener = listener;
-        
-        startTime = System.currentTimeMillis();
-        (new HostListPhaseZero(hostList)).start();
-    }
-    
-    public long time() {
-        if (startTime < 0L) {
-            return -1L;
+    public void addBootstrapListener(BootstrapListener l) {
+        synchronized (globalListeners) {
+            globalListeners.add(l);
         }
-        
-        return System.currentTimeMillis() - startTime;
     }
     
-    private void firePhaseOneFinished() {
-        if (listener != null) {
-            final long time = time();
+    public void removeBootstrapListener(BootstrapListener l) {
+        synchronized (globalListeners) {
+            globalListeners.remove(l);
+        }
+    }
+
+    public BootstrapListener[] getBootstrapListeners() {
+        synchronized (globalListeners) {
+            return globalListeners.toArray(new BootstrapListener[0]);
+        }
+    }
+    
+    public boolean isBootstrapping() {
+        synchronized(lock) {
+            return future != null;
+        }
+    }
+    
+    public Future<BootstrapEvent> bootstrap(BootstrapListener l) {
+        synchronized(lock) {
+            if (future == null) {
+                Bootstrapper bootstrapper = new Bootstrapper();
+                future = new BootstrapFuture(bootstrapper);
+                
+                context.execute(future);
+            }
             
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    listener.phaseOneComplete(time);
-                }
-            });
-        }
-    }
-    
-    private void firePhaseTwoFinished(final boolean foundNewNodes) {
-        context.setBootstrapping(false);
-        
-        if (listener != null) {
-            final long time = time();
+            if (l != null) {
+                future.addBootstrapListener(l);
+            }
             
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    listener.phaseTwoComplete(foundNewNodes, time);
-                }
-            });
+            return future;
         }
     }
     
-    private void fireNoBootstrapHost() {
-        context.setBootstrapping(false);
-        if (listener != null) {
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    listener.noBootstrapHost(failedHosts);
-                }
-            });
+    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList, BootstrapListener l) {
+        synchronized (lock) {
+            if (future == null) {
+                Bootstrapper bootstrapper = new Bootstrapper(hostList);
+                future = new BootstrapFuture(bootstrapper);
+                
+                context.execute(future);
+            }
+            
+            if (l != null) {
+                future.addBootstrapListener(l);
+            }
+            
+            return future;
         }
     }
     
-    private abstract class PhaseZero implements PingListener {
+    /**
+     * Ping
+     * Lookup own Node ID
+     * Lookup radnom IDs
+     */
+    private class Bootstrapper implements Callable<BootstrapEvent> {
         
-        public void start() {
-            next();
+        private List<SocketAddress> hostList = null;
+        
+        private long start = 0L;
+        private long phaseOneStart = 0L;
+        private long phaseTwoStart = 0L;
+        private long stop = 0L;
+        
+        private List<SocketAddress> failed = new ArrayList<SocketAddress>();
+        
+        private Bootstrapper() {
         }
         
-        public void handleResult(Contact result) {
-            //try {
-                PhaseOne phaseOne = new PhaseOne();
-                context.lookup(context.getLocalNodeID(), phaseOne);
-            /*} catch (IOException err) {
-                LOG.error("Bootstrap lookup failed: ", err);
-                
-                firePhaseOneFinished();
-                firePhaseTwoFinished(false);
-            }*/
+        @SuppressWarnings("unchecked")
+        private Bootstrapper(List<? extends SocketAddress> hostList) {
+            this.hostList = (List<SocketAddress>)hostList;
         }
         
-        public void handleException(Exception ex) {
-            if (ex instanceof DHTException) {
-                DHTException dhtEx = (DHTException)ex;
-                SocketAddress address = dhtEx.getSocketAddress();
-                
-                failedHosts.add(address);
-                
-                networkStats.BOOTSTRAP_PING_FAILURES.incrementStat();
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Initial bootstrap ping timeout, failure " + failedHosts.size());
-                }
-                
-                if (failedHosts.size() < KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-                    next();
-                    return;
-                }
-                
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Initial bootstrap ping timeout, giving up bootstrap after " + failedHosts.size() + " tries");
+        public BootstrapEvent call() throws Exception {
+            start = System.currentTimeMillis();
+            Contact node = null;
+            if (hostList != null) {
+                node = bootstrapFromHostList();
+            }
+            
+            if (node == null) {
+                node = bootstrapFromRouteTable();
+            }
+            
+            if (node == null) {
+                throw new BootstrapException(this);
+            }
+            
+            phaseOneStart = System.currentTimeMillis();
+            phaseOne();
+            
+            phaseTwoStart = System.currentTimeMillis();
+            boolean foundNewContacts = phaseTwo();
+            
+            stop = System.currentTimeMillis();
+            
+            long phaseZeroTime = phaseOneStart - start;
+            long phaseOneTime = phaseTwoStart - phaseOneStart;
+            long phaseTwoTime = stop - phaseTwoStart;
+            
+            /*long totalTime = stop - start;
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("foundNewNodes: ").append(foundNewNodes).append("\n");
+            buffer.append("phaseZeroTime: ").append(phaseZeroTime).append("\n");
+            buffer.append("phaseOneTime: ").append(phaseOneTime).append("\n");
+            buffer.append("phaseTwoTime: ").append(phaseTwoTime).append("\n");
+            buffer.append("totalTime: ").append(totalTime).append("\n");
+            System.out.println(buffer.toString());*/
+            
+            return new BootstrapEvent(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
+        }
+        
+        /**
+         * Tries to ping the IPPs from the hostList and returns the first
+         * Contact that responds or null if none of them did respond
+         */
+        private Contact bootstrapFromHostList() throws Exception {
+            for (SocketAddress address : hostList) {
+                PingResponseHandler handler = new PingResponseHandler(context, address);
+                try {
+                    return handler.call();
+                } catch (DHTException ignore) {
+                    failed.add(address);
                 }
             }
             
-            fireNoBootstrapHost();
+            return null;
+        }
+        
+        /**
+         * Tries to ping the IPPs from the Route Table and returns the
+         * first Contact that responds or null if none of them did respond
+         */
+        private Contact bootstrapFromRouteTable() throws Exception {
+            List<Contact> nodes = BucketUtils.sort(context.getRouteTable().getLiveContacts());
+            for (Contact node : nodes) {
+                if (context.isLocalNode(node)) {
+                    continue;
+                }
+                
+                PingResponseHandler handler = new PingResponseHandler(context, node);
+                try {
+                    return handler.call();
+                } catch (DHTException ignore) {
+                    failed.add(node.getSocketAddress());
+                }
+            }
+            
+            return null;
+        }
+        
+        /**
+         * Do a lookup for myself (Phase one)
+         */
+        private FindNodeEvent phaseOne() throws Exception {
+            FindNodeResponseHandler handler 
+                = new FindNodeResponseHandler(context, context.getLocalNodeID());
+            return handler.call();
+        }
+        
+        /**
+         * Refresh all Buckets (Phase two)
+         */
+        private boolean phaseTwo() throws Exception {
+            boolean foundNewContacts = false;
+            List<KUID> randomId = context.getRouteTable().getRefreshIDs(true);
+            for (KUID nodeId : randomId) {
+                FindNodeResponseHandler handler 
+                    = new FindNodeResponseHandler(context, nodeId);
+                try {
+                    FindNodeEvent evt = handler.call();
+                    if (!foundNewContacts && !evt.getNodes().isEmpty()) {
+                        foundNewContacts = true;
+                    }
+                } catch (DHTException ignore) {}
+            }
+            return foundNewContacts;
+        }
+    }
+    
+    /**
+     * 
+     */
+    public class BootstrapException extends Exception {
+
+        private static final long serialVersionUID = 7008814571814909344L;
+        
+        private Bootstrapper bootstrapper;
+        
+        private BootstrapException(Bootstrapper bootstrapper) {
+            this.bootstrapper = bootstrapper;
+        }
+        
+        public List<SocketAddress> getFailedHostList() {
+            return bootstrapper.failed;
+        }
+    }
+    
+    private class BootstrapFuture extends FutureTask<BootstrapEvent> {
+        
+        private List<BootstrapListener> listeners = new ArrayList<BootstrapListener>();
+        
+        public BootstrapFuture(Callable<BootstrapEvent> task) {
+            super(task);
         }
 
+        public void addBootstrapListener(BootstrapListener l) {
+            if (listeners == null) {
+                listeners = new ArrayList<BootstrapListener>();
+            }
+            
+            listeners.add(l);
+        }
         
-        private void next() {
+        @Override
+        protected void done() {
+            super.done();
+            
+            synchronized(lock) {
+                future = null;
+            }
+            
             try {
-                if (!pingNextFromList()) {
-                    fireNoBootstrapHost();
+                BootstrapEvent result = get();
+                fireResult(result);
+            } catch (Exception err) {
+                fireException(err);
+            }
+        }
+        
+        private void fireResult(final BootstrapEvent result) {
+            synchronized(globalListeners) {
+                for (BootstrapListener l : globalListeners) {
+                    l.handleResult(result);
                 }
-            } catch (IOException err) {
-                LOG.error("IOException", err);
-                fireNoBootstrapHost();
             }
-        }
-        
-        protected abstract boolean pingNextFromList() throws IOException;
-    }
-    
-    private class HostListPhaseZero extends PhaseZero {
-        
-        private int index = 0;
-        private List<? extends SocketAddress> hostList;
-        
-        private HostListPhaseZero(List<? extends SocketAddress> hostList) {
-            this.hostList = hostList;
-        }
-        
-        protected boolean pingNextFromList() throws IOException {
-            if (index < hostList.size()) {
-                SocketAddress address = hostList.get(index++);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Trying to bootstrap from " + address);
+            
+            if (listeners != null) {
+                for (BootstrapListener l : listeners) {
+                    l.handleResult(result);
                 }
-                
-                context.ping(address, this);
-                return true;
             }
-            
-            
-            // Try the entries in the RouteTable
-            (new RouteTablePhaseZero()).start();
-            return true;
         }
-    }
-    
-    private class RouteTablePhaseZero extends PhaseZero {
         
-        private int index = 0;
-        private List<Contact> contacts;
-        
-        public RouteTablePhaseZero() {
-            contacts = BucketUtils.sort(context.getRouteTable().getLiveContacts());
-        }
-
-        protected boolean pingNextFromList() throws IOException {
-            if (index < contacts.size()) {
-                Contact node = contacts.get(index++);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Trying to bootstrap from " + node);
+        private void fireException(final Exception ex) {
+            synchronized(globalListeners) {
+                for (BootstrapListener l : globalListeners) {
+                    l.handleException(ex);
                 }
-                
-                context.ping(node, this);
-                return true;
             }
             
-            return false;
-        }
-    }
-
-    private class PhaseOne implements FindNodeListener {
-        
-        public void handleResult(FindNodeEvent result) {
-            firePhaseOneFinished();
-            
-            List<KUID> ids = context.getRouteTable().getRefreshIDs(true);
-            if (ids.isEmpty()) {
-                firePhaseTwoFinished(false);
-                return;
-            }
-            
-            //try {
-                PhaseTwo phaseTwo = new PhaseTwo(ids);
-                for(KUID nodeId : ids) {
-                    context.lookup(nodeId, phaseTwo);
+            if (listeners != null) {
+                for (BootstrapListener l : listeners) {
+                    l.handleException(ex);
                 }
-            /*} catch (IOException err) {
-                LOG.error("Beginning second phase failed: ", err);
-                firePhaseTwoFinished(false);
-            }*/
-        }
-        
-        public void handleException(Exception ex) {
-            firePhaseOneFinished();
-            firePhaseTwoFinished(false);
-        }
-    }
-    
-    private class PhaseTwo implements FindNodeListener {
-        
-        private List<KUID> ids;
-        
-        private boolean foundNewNodes = false;
-        
-        private PhaseTwo(List<KUID> ids) {
-            this.ids = ids;
-        }
-        
-        
-        public void handleResult(FindNodeEvent result) {
-            if (!result.getNodes().isEmpty()) {
-                foundNewNodes = true;
             }
-            
-            boolean removed = ids.remove(result.getLooupID());
-            assert (removed == true);
-            
-            if (ids.isEmpty()) {
-                firePhaseTwoFinished(foundNewNodes);
-            }
-        }
-
-        public void handleException(Exception ex) {
         }
     }
 }

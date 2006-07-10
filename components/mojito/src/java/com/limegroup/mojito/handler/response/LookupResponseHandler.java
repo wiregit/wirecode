@@ -245,25 +245,16 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     public void error(final KUID nodeId, final SocketAddress dst, final RequestMessage message, Exception e) {
         if (e instanceof SocketException) {
-            context.fireEvent(new Runnable() {
-                public void run() {
-                    try {
-                        timeout(nodeId, dst, message, -1L);
-                    } catch (IOException err) {
-                        LOG.error(err);
-                        
-                        if (activeSearches == 0) {
-                            setException(err);
-                        }
-                    }
+            try {
+                timeout(nodeId, dst, message, -1L);
+            } catch (IOException err) {
+                LOG.error(err);
+                
+                if (activeSearches == 0) {
+                    setException(err);
                 }
-            });
-            
-            return;
-        }
-        
-        activeSearches--;
-        if (activeSearches == 0) {
+            }
+        } else {
             setException(e);
         }
     }

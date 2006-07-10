@@ -46,6 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindNodeListener;
 import com.limegroup.mojito.event.FindValueListener;
@@ -105,16 +106,7 @@ public class MojitoDHT {
         // change from firewalled to non-firewalled? re-bootstrap
         if (context.isFirewalled() && !firewalled) {
             context.setFirewalled(false);
-            try {
-                bootstrap(new BootstrapListener() {
-                    public void phaseOneComplete(long time) {}
-                    public void phaseTwoComplete(boolean foundNodes, long time) {}
-                    public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {}
-                    
-                });
-            } catch (IOException err) {
-                LOG.error("Firewalled to non-firewalled re-bootstrap error: ", err);
-            }
+            context.bootstrap(null);
         } else {
             context.setFirewalled(firewalled);
         }
@@ -228,40 +220,10 @@ public class MojitoDHT {
      * @return The bootstrap time
      * @throws IOException
      */
-    public long bootstrap(SocketAddress address) throws IOException {
-        return bootstrap(address, ContextSettings.SYNC_BOOTSTRAP_TIMEOUT.getValue());
-    }
     
-    public long bootstrap(SocketAddress address, long timeout) throws IOException {
-        final long[] time = new long[]{ -1L };
-        
-        synchronized (time) {
-            bootstrap(address, new BootstrapListener() {
-                public void phaseOneComplete(long time) {
-                }
-
-                public void phaseTwoComplete(boolean foundNodes, long t) {
-                    time[0] = t;
-                    synchronized (time) {
-                        time.notify();
-                    }
-                }
-
-                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
-                    synchronized (time) {
-                        time.notify();
-                    }
-                }
-            });
-            
-            try {
-                time.wait(timeout);
-            } catch (InterruptedException err) {
-                LOG.error("InterruptedException", err);
-            }
-        }
-        
-        return time[0];
+    public Future<BootstrapEvent> bootstrap(SocketAddress address) {
+        List<SocketAddress> hostList = Arrays.asList(address);
+        return context.bootstrap(hostList, null);
     }
     
     /**
@@ -270,14 +232,14 @@ public class MojitoDHT {
      * @return The bootstrap time
      * @throws IOException
      */
-    public void bootstrap(BootstrapListener listener) 
+    public Future<BootstrapEvent> bootstrap(BootstrapListener listener) 
             throws IOException {
-        context.bootstrap(listener);
+        return context.bootstrap(listener);
     }
 
-    public void bootstrap(SocketAddress address, BootstrapListener listener) 
+    public Future<BootstrapEvent> bootstrap(SocketAddress address, BootstrapListener listener) 
             throws IOException {
-        bootstrap(Arrays.asList(address), listener);
+        return context.bootstrap(Arrays.asList(address), listener);
     }
     
     /**

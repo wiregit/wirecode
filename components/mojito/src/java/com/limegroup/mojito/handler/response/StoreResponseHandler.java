@@ -59,7 +59,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<Entry<KeyValue
         
         StoreResponseHandler handler = new StoreResponseHandler(context, keyValue);
         Map.Entry<Contact, QueryKey> entry = new EntryImpl<Contact, QueryKey>(node, queryKey);
-        List<Map.Entry<Contact, QueryKey>> nodes = Arrays.asList(entry);
+        List<Entry<Contact, QueryKey>> nodes = Arrays.asList(entry);
         handler.storeAt(nodes);
         
         return Arrays.asList(node);

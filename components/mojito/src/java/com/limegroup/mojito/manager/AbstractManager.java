@@ -21,7 +21,7 @@ package com.limegroup.mojito.manager;
 
 import com.limegroup.mojito.Context;
 
-class AbstractManager {
+abstract class AbstractManager {
     
     protected final Context context;
     

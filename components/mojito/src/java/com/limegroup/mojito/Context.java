@@ -31,12 +31,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -50,6 +47,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.KeyValuePublisher;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindNodeListener;
@@ -107,8 +105,8 @@ public class Context {
     private FindNodeManager findNodeManager;
     private FindValueManager findValueManager;
     private StoreManager storeManager;
+    private BootstrapManager bootstrapManager;
     
-    private volatile boolean bootstrapping = false;
     private boolean running = false;
     
     private DHTStats dhtStats = null;
@@ -125,7 +123,6 @@ public class Context {
     
     private ThreadFactory threadFactory = new DefaultThreadFactory();
     
-    private ThreadPoolExecutor eventExecutor;
     private ScheduledThreadPoolExecutor scheduledExecutor;
     private ThreadPoolExecutor contextExecutor;
     
@@ -144,8 +141,6 @@ public class Context {
             LOG.fatal("Loading the MasterKey failed!", err);
         }
         masterKeyPair = new KeyPair(masterKey, null);
-        
-        initContextEventQueue();
         
         dhtStats = new DHTNodeStat(this);
         
@@ -166,28 +161,11 @@ public class Context {
         findNodeManager = new FindNodeManager(this);
         findValueManager = new FindValueManager(this);
         storeManager = new StoreManager(this);
+        bootstrapManager = new BootstrapManager(this);
         
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
         routeTable.add(localNode);
-    }
-
-    private void initContextEventQueue() {
-        ThreadFactory factory = new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread thread = getThreadFactory().newThread(r);
-                thread.setName(getName() + "-ContextEventQueue");
-                thread.setDaemon(true);
-                return thread;
-            }
-        };
-        
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        eventExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, queue, factory);
-    }
-    
-    public ExecutorService getEventExecutor() {
-        return eventExecutor;
     }
     
     private void initContextTimer() {
@@ -416,12 +394,8 @@ public class Context {
         return messageDispatcher.isOpen();
     }
     
-    public void setBootstrapping(boolean bootstrapped) {
-        this.bootstrapping = bootstrapped;
-    }
-    
     public boolean isBootstrapping() {
-        return (isRunning() && bootstrapping);
+        return (isRunning() && bootstrapManager.isBootstrapping());
     }
     
     public int getReceivedMessagesCount() {
@@ -518,12 +492,10 @@ public class Context {
         }
         
         running = false;
-        bootstrapping = false;
         
         bucketRefresher.stop();
         publisher.stop();
         
-        eventExecutor.getQueue().clear();
         scheduledExecutor.shutdownNow();
         contextExecutor.shutdownNow();
         messageDispatcher.stop();
@@ -561,23 +533,6 @@ public class Context {
     
     public void execute(Runnable command) {
         contextExecutor.execute(command);
-    }
-    
-    /**
-     * Fire's an Event
-     */
-    public void fireEvent(Runnable event) {
-        if (!isRunning()) {
-            LOG.error("Discarding Event as DHT is not running");
-            return;
-        }
-        
-        if (event == null) {
-            LOG.error("Discarding Event as it is null");
-            return;
-        }
-
-        eventExecutor.execute(event);
     }
     
     /** Adds a global PingListener */
@@ -640,13 +595,8 @@ public class Context {
     /**
      * Tries to bootstrap from the local Route Table.
      */
-    public void bootstrap(BootstrapListener listener) throws IOException {
-        if(isBootstrapping()) {
-            return;
-        }
-        
-        setBootstrapping(true);
-        new BootstrapManager(this).bootstrap(listener);
+    public Future<BootstrapEvent> bootstrap(BootstrapListener listener) {
+        return bootstrapManager.bootstrap(listener);
     }
     
     /**
@@ -654,15 +604,9 @@ public class Context {
      * size of the list it may fall back to bootstrapping from
      * the local Route Table!
      */
-    public void bootstrap(List<? extends SocketAddress> hostList, 
-            BootstrapListener listener) throws IOException {
-        
-        if(isBootstrapping()) {
-            return;
-        }
-        
-        setBootstrapping(true);
-        new BootstrapManager(this).bootstrap(hostList, listener);
+    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList, 
+                BootstrapListener listener) {
+        return bootstrapManager.bootstrap(hostList, listener);
     }
     
     /** 

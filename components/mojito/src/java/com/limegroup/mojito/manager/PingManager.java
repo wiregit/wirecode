@@ -39,10 +39,8 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
  * The PingManager takes care of concurrent Pings and makes sure
  * a single Node cannot be pinged multiple times.
  */
-public class PingManager {
+public class PingManager extends AbstractManager {
     
-    private Context context;
-
     private Map<SocketAddress, PingFuture> futureMap 
         = new HashMap<SocketAddress, PingFuture>();
     
@@ -52,7 +50,7 @@ public class PingManager {
     private NetworkStatisticContainer networkStats;
     
     public PingManager(Context context) {
-        this.context = context;
+        super(context);
         networkStats = context.getNetworkStats();
     }
     

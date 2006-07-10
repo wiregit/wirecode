@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Connection;
@@ -46,6 +47,7 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.settings.NetworkSettings;
 
 public class Main {
@@ -128,14 +130,12 @@ public class Main {
     private static void run(InetAddress addr, int port, List<MojitoDHT> dhts) throws Exception {
         long time = 0L;
         for(int i = 1; i < dhts.size(); i++) {
-            long t = dhts.get(i).bootstrap(dhts.get(i-1).getSocketAddress());
+            Future<BootstrapEvent> future = dhts.get(i).bootstrap(dhts.get(i-1).getSocketAddress());
+            BootstrapEvent evt = future.get();
             
-            if (t >= 0L) {
-                time += t;
-                System.out.println("Node #" + i + " finished bootstrapping in " + t + "ms");
-            } else {
-                System.out.println("Node #" + i + " failed to bootstrap");
-            }
+            //System.out.println(evt);
+            time += evt.getTotalTime();
+            System.out.println("Node #" + i + " finished bootstrapping in " + evt.getTotalTime() + "ms");
         }
         System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
