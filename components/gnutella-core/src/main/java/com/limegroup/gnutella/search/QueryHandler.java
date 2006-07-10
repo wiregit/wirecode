@@ -466,10 +466,10 @@ public final class QueryHandler {
      * @return the number of new hosts theoretically reached by this
      *  query iteration
      */
-    private int sendQuery(List<ManagedConnection> ultrapeersAll) {
+    private int sendQuery(List<? extends ManagedConnection> ultrapeersAll) {
 
         //we want to try to use all connections in ultrapeersLocale first.
-        List<ManagedConnection> ultrapeers = // method returns a copy
+        List<? extends ManagedConnection> ultrapeers = // method returns a copy
             _connectionManager.getInitializedConnectionsMatchLocale
             (_prefLocale);
             
