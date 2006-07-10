@@ -275,7 +275,13 @@ public class LimeDHTManager implements LifecycleListener {
         }
     }
     
+    /**
+     * Sends the updated capabilities to our ultrapeers -- only if we are an active node!
+     */
     private void sendUpdatedCapabilities() {
+        if(!isActive) {
+            return;
+        }
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
     }

@@ -220,6 +220,10 @@ public class BootstrapManager {
                     LOG.debug("Trying to bootstrap from " + node);
                 }
                 
+                if(node.equals(context.getLocalNode())) {
+                    return pingNextFromList();
+                }
+                
                 context.ping(node, this);
                 return true;
             }
