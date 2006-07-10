@@ -54,17 +54,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<Entry<KeyValue
     
     private int countDown = 0;
     
-    public static List<Contact> store(Context context, KeyValue keyValue, 
-            Contact node, QueryKey queryKey) throws Exception {
-        
-        StoreResponseHandler handler = new StoreResponseHandler(context, keyValue);
-        Map.Entry<Contact, QueryKey> entry = new EntryImpl<Contact, QueryKey>(node, queryKey);
-        List<Entry<Contact, QueryKey>> nodes = Arrays.asList(entry);
-        handler.storeAt(nodes);
-        
-        return Arrays.asList(node);
-    }
-    
     public StoreResponseHandler(Context context, KeyValue keyValue) {
         super(context);
         this.keyValue = keyValue;
@@ -98,7 +87,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<Entry<KeyValue
     }
     
     private synchronized void storeAt(List<? extends Map.Entry<Contact,QueryKey>> nodes) throws Exception {
-        for (Map.Entry<Contact, QueryKey> entry : nodes) {
+        for (Entry<Contact, QueryKey> entry : nodes) {
             Contact node = entry.getKey();
             QueryKey queryKey = entry.getValue();
             

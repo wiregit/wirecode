@@ -101,7 +101,7 @@ public class CommandHandler {
         out.println("Local ContactNode: " + dht.getLocalNode());
         out.println("Is running: " + dht.isRunning());
         out.println("Database Size: " + dht.getDatabase().size());
-        out.println("RouteTable Size: " + dht.getRoutingTable().size());
+        out.println("RouteTable Size: " + dht.getRouteTable().size());
         out.println("Estimated DHT Size: " + dht.size());
     }
     
@@ -136,7 +136,7 @@ public class CommandHandler {
     public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         StringBuilder buffer = new StringBuilder("\n");
         
-        RouteTable routingTable = dht.getRoutingTable();
+        RouteTable routingTable = dht.getRouteTable();
         buffer.append(routingTable.toString());
         
         out.println(buffer);

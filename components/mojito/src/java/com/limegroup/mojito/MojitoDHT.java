@@ -33,7 +33,6 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -180,30 +179,6 @@ public class MojitoDHT {
         context.setMessageFactory(messageFactory);
     }
     
-    public void addPingListener(PingListener listener) {
-        context.addPingListener(listener);
-    }
-    
-    public void removePingListener(PingListener listener) {
-        context.removePingListener(listener);
-    }
-    
-    public PingListener[] getPingListeners() {
-        return context.getPingListeners();
-    }
-    
-    /*public void addLookupListener(LookupListener listener) {
-        context.addLookupListener(listener);
-    }
-    
-    public void removeLookupListener(LookupListener listener) {
-        context.removeLookupListener(listener);
-    }
-    
-    public LookupListener[] getLookupListeners() {
-        return context.getLookupListeners();
-    }*/
-    
     public void setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher) {
         context.setMessageDispatcher(messageDispatcher);
     }
@@ -263,36 +238,7 @@ public class MojitoDHT {
      * @throws IOException
      */
     public Future<Contact> ping(SocketAddress dst) throws IOException {
-        //return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
         return context.ping(dst);
-    }
-    
-    private Contact ping(SocketAddress dst, long timeout) throws IOException {
-        final Contact[] node = new Contact[] {null};
-        
-        synchronized (node) {
-            ping(dst, new PingListener() {
-                public void handleResult(Contact result) {
-                    node[0] = result;
-                    synchronized (node) {
-                        node.notify();
-                    }
-                }
-                
-                public void handleException(Exception ex) {
-                    synchronized (node) {
-                        node.notify();
-                    }
-                }
-            });
-            
-            try {
-                node.wait(timeout);
-            } catch (InterruptedException err) {
-                LOG.error("InterruptedException", err);
-            }
-        }
-        return node[0];
     }
     
     /**
@@ -328,7 +274,7 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    Collection<Contact> getNodes() {
+    Collection<Contact> getContacts() {
         return context.getRouteTable().getContacts();
     }
     
@@ -385,38 +331,7 @@ public class MojitoDHT {
     }
     
     public Future<List<KeyValueCollection>> get(KUID key) throws IOException {
-        //return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
         return context.get(key, null);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public Collection<KeyValue> get(KUID key, long timeout) throws IOException {
-        final Collection[] values = new Collection[] {
-            Collections.emptyList()
-        };
-        
-        synchronized (values) {
-            get(key, new FindValueListener() {
-                public void handleResult(List<KeyValueCollection> result) {
-                    values[0] = result;
-                    synchronized (values) {
-                        values.notify();
-                    }
-                }
-                
-                public void handleException(Exception ex) {
-                }
-                
-            });
-            
-            try {
-                values.wait(timeout);
-            } catch (InterruptedException err) {
-                LOG.error("InterruptedException", err);
-            }
-        }
-        
-        return values[0];
     }
     
     public Future<List<KeyValueCollection>> get(KUID key, FindValueListener listener) throws IOException {
@@ -455,7 +370,7 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    RouteTable getRoutingTable() {
+    RouteTable getRouteTable() {
         return context.getRouteTable();
     }
     
