@@ -2,7 +2,6 @@ package com.limegroup.gnutella.util;
 
 import java.util.LinkedList;
 
-
 /**
  *
  * A simple FIFO queue that can report its average size as defined
@@ -10,10 +9,14 @@ import java.util.LinkedList;
  */
 public class CountingQueue<Element> extends LinkedList<Element> {
 
+	private static final long NANO_BASE = System.nanoTime();
 	private NumericBuffer<Long> timesInQueue;
 	private LinkedList<Long> arrivalTimes;
 	private long timeStart;
-
+	
+	private static long now() {
+		return System.nanoTime() - NANO_BASE;
+	}
 	/**
 	 * @param historySize how many elements of history to record
 	 */
@@ -24,10 +27,12 @@ public class CountingQueue<Element> extends LinkedList<Element> {
 	}
 	
 	public boolean offer(Element el) {
-		long now = System.currentTimeMillis();
-		if (timeStart == 0)
-			timeStart = now;
-		arrivalTimes.add(now);
+		synchronized(this) {
+			long now = now();
+			if (timeStart == 0)
+				timeStart = now;
+			arrivalTimes.add(now);
+		}
 		return super.add(el);
 	}
 	
@@ -44,22 +49,19 @@ public class CountingQueue<Element> extends LinkedList<Element> {
 		return ret;
 	}
 	
-	private void countDeparture() {
-		long now = System.currentTimeMillis();
+	private synchronized void countDeparture() {
 		timeStart = arrivalTimes.removeFirst();
-		timesInQueue.add(now - timeStart);
+		timesInQueue.add(now() - timeStart);
 	}
 	
 	/**
 	 * @return the average number of elements in the queue
 	 */
-	public double getAverageSize() {
-		if (timesInQueue.size() < timesInQueue.getCapacity())
+	public synchronized double getAverageSize() {
+		if (timesInQueue.size() < timesInQueue.getCapacity()) 
 			return -1;
-		
-		double rate = ((double)timesInQueue.getCapacity()) / 
-		(Math.max(1,System.currentTimeMillis() - timeStart));
-		
+
+		double rate = ((double)timesInQueue.getCapacity()) / (Math.max(1,now() - timeStart));
 		return timesInQueue.average() * rate;
 	}
 }
