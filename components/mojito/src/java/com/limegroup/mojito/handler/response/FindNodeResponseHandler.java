@@ -43,6 +43,10 @@ public class FindNodeResponseHandler
         super(context, lookupId.assertNodeID());
     }
     
+    public FindNodeResponseHandler(Context context, Contact force, KUID lookupId) {
+        super(context, force, lookupId.assertNodeID());
+    }
+    
     public FindNodeResponseHandler(Context context, KUID lookupId, int resultSetSize) {
         super(context, lookupId.assertNodeID(), resultSetSize);
     }

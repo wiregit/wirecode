@@ -150,10 +150,10 @@ public class BootstrapManager extends AbstractManager {
             }
             
             phaseOneStart = System.currentTimeMillis();
-            phaseOne();
+            phaseOne(node);
             
             phaseTwoStart = System.currentTimeMillis();
-            boolean foundNewContacts = phaseTwo();
+            boolean foundNewContacts = phaseTwo(node);
             
             stop = System.currentTimeMillis();
             
@@ -215,16 +215,16 @@ public class BootstrapManager extends AbstractManager {
         /**
          * Do a lookup for myself (Phase one)
          */
-        private FindNodeEvent phaseOne() throws Exception {
+        private FindNodeEvent phaseOne(Contact node) throws Exception {
             FindNodeResponseHandler handler 
-                = new FindNodeResponseHandler(context, context.getLocalNodeID());
+                = new FindNodeResponseHandler(context, node, context.getLocalNodeID());
             return handler.call();
         }
         
         /**
          * Refresh all Buckets (Phase two)
          */
-        private boolean phaseTwo() throws Exception {
+        private boolean phaseTwo(Contact node) throws Exception {
             boolean foundNewContacts = false;
             List<KUID> randomId = context.getRouteTable().getRefreshIDs(true);
             for (KUID nodeId : randomId) {

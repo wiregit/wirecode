@@ -192,9 +192,8 @@ public class CommandHandler {
         
         out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-
             public void handleResult(BootstrapEvent result) {
-                out.println("Bootstraping finished: " + result);
+                out.println("Bootstraping finished:\n" + result);
                 out.flush();
             }
             
@@ -203,18 +202,6 @@ public class CommandHandler {
                 ex.printStackTrace(out);
                 out.flush();
             }
-
-            /*public void phaseOneComplete(long time) {
-                out.println("Bootstraping phase #1 finished in " + time + " ms");
-                out.flush();
-            }
-
-            public void phaseTwoComplete(boolean foundNodes, long time) {
-                out.println("Bootstraping phase #2 " + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
-                out.flush();
-            }
-
-            public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {}*/
         });
     }
     

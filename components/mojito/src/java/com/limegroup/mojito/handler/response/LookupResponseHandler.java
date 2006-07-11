@@ -106,17 +106,28 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      */
     private SingleLookupStatisticContainer lookupStat;
     
+    private Contact force = null;
+    
     LookupResponseHandler(Context context, KUID lookupId) {
-        this(context, lookupId, -1);
+        this(context, null, lookupId, -1);
     }
     
     LookupResponseHandler(Context context, KUID lookupId, int resultSetSize) {
+        this(context, null, lookupId, resultSetSize);
+    }
+    
+    LookupResponseHandler(Context context, Contact force, KUID lookupId) {
+        this(context, force, lookupId, -1);
+    }
+    
+    LookupResponseHandler(Context context, Contact force, KUID lookupId, int resultSetSize) {
         super(context);
         
         if (!lookupId.isNodeID() && !lookupId.isValueID()) {
             throw new IllegalArgumentException("Lookup ID bust be either a NodeID or ValueID");
         }
         
+        this.force = force;
         this.lookupId = lookupId;
         this.furthestId = lookupId.invert();
         
@@ -141,6 +152,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             addYetToBeQueried(node, 1);
         }
         
+        if (force != null) {
+            addYetToBeQueried(force, 1);
+        }
+        
         Entry<Contact,QueryKey> entry 
             = new EntryImpl<Contact,QueryKey>(context.getLocalNode(), null, true);
         addResponse(entry);
@@ -163,7 +178,13 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         startTime = System.currentTimeMillis();
         
         // Get the first round of alpha nodes and send them requests
-        List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, KademliaSettings.LOOKUP_PARAMETER.getValue());
+        List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, 
+                                        KademliaSettings.LOOKUP_PARAMETER.getValue());
+        
+        if (force != null && !alphaList.contains(force)) {
+            alphaList.add(0, force);
+            alphaList.remove(alphaList.size()-1);
+        }
         
         for(Contact node : alphaList) {
             if (LOG.isTraceEnabled()) {
@@ -173,7 +194,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             doLookup(node);                
         }
         
-        if (activeSearches == 0) {
+        if (hasActiveSearches() == false) {
             doFinishLookup(-1L, 0);
         }
     }
@@ -187,10 +208,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
         
-        assert (activeSearches > 0);
+        assert (hasActiveSearches());
         
         lookupStat.addReply();
-        activeSearches--;
+        decrementActiveSearches();
         
         Contact node = message.getContact();
         int hop = hopMap.get(node.getNodeID()).intValue();
@@ -211,7 +232,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             handleFindNodeResponse((FindNodeResponse)message, time, hop);
         }
         
-        if (activeSearches == 0) {
+        if (hasActiveSearches() == false) {
             doFinishLookup(time(), hop);
         }
     }
@@ -219,10 +240,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected synchronized void timeout(KUID nodeId, 
             SocketAddress dst, RequestMessage message, long time) throws IOException {
         
-        assert (activeSearches > 0);
+        assert (hasActiveSearches());
         
         lookupStat.addTimeout();
-        activeSearches--;
+        decrementActiveSearches();
         
         if (LOG.isTraceEnabled()) {
             if (isValueLookup()) {
@@ -238,19 +259,19 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         int hop = hopMap.get(nodeId).intValue();
         lookupStep(hop);
         
-        if (activeSearches == 0) {
+        if (hasActiveSearches() == false) {
             doFinishLookup(time(), hop);
         }
     }
     
     public void error(final KUID nodeId, final SocketAddress dst, final RequestMessage message, Exception e) {
-        if (e instanceof SocketException) {
+        if (e instanceof SocketException && hasActiveSearches()) {
             try {
                 timeout(nodeId, dst, message, -1L);
             } catch (IOException err) {
-                LOG.error(err);
+                LOG.error("IOException", err);
                 
-                if (activeSearches == 0) {
+                if (hasActiveSearches() == false) {
                     setException(err);
                 }
             }
@@ -292,14 +313,14 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             if (isExhaustiveValueLookup()) {
                 lookupStep(hop);
             } else {
-                lookupFinished = true;
+                setLookupFinished(true);
             }
         }
     }
 
     private void handleFindNodeResponse(FindNodeResponse response, long time, int hop) throws IOException {
         
-        if (lookupFinished) {
+        if (isLookupFinished()) {
             return;
         }
         
@@ -320,9 +341,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                     LOG.trace("Adding " + node + " to the yet-to-be queried list");
                 }
                 
-                if (!lookupFinished) {
-                    addYetToBeQueried(node, hop+1);
-                }
+                addYetToBeQueried(node, hop+1);
                 
                 // Add them to the routing table as not alive
                 // contacts. We're likely going to add them
@@ -333,7 +352,8 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
         
         if (!nodes.isEmpty()) {
-            Entry<Contact,QueryKey> entry = new EntryImpl<Contact,QueryKey>(response.getContact(), response.getQueryKey(), true);
+            Entry<Contact,QueryKey> entry 
+                = new EntryImpl<Contact,QueryKey>(response.getContact(), response.getQueryKey(), true);
             addResponse(entry);
         }
         
@@ -342,7 +362,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     private void lookupStep(int hop) throws IOException {
         
-        if (lookupFinished) {
+        if (isLookupFinished()) {
             return;
         }
         
@@ -355,11 +375,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
 
             // Setting activeSearches to 0 and returning 
             // from here will fire a finishLookup() event!
-            activeSearches = 0;
+            setActiveSearches(0);
             return;
         }
         
-        if (activeSearches == 0) {
+        if (!hasActiveSearches()) {
             
             // Finish if nothing left to query...
             if (toQuery.isEmpty()) {
@@ -425,8 +445,17 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
     }
     
+    private boolean isLookupFinished() {
+        return lookupFinished;
+    }
+    
+    private void setLookupFinished(boolean lookupFinished) {
+        this.lookupFinished = lookupFinished;
+    }
+    
     private void doFinishLookup(long time, int hops) {
-        lookupFinished = true;
+        setLookupFinished(true);
+        
         if (time >= 0L) {
             if (isValueLookup()) {
                 if (foundValueLocs == 0) {
@@ -440,7 +469,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                 
                 // addResponse(ContactNode) limits the size of the
                 // Trie to K and we can thus use the size method of it!
-                List<? extends Entry<Contact,QueryKey>> nodes 
+                List<Entry<Contact,QueryKey>> nodes 
                         = TrieUtils.select(responses, lookupId, responses.size());
                 
                 handleFoundNodes(nodes);
@@ -468,9 +497,28 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         
         if (sent) {
             lookupStat.addRequest();
-            activeSearches++;
+            incrementActiveSearches();
         }
         return sent;
+    }
+    
+    private void incrementActiveSearches() {
+        activeSearches++;
+        //System.out.println("inc: " + activeSearches);
+    }
+    
+    private void decrementActiveSearches() {
+        activeSearches--;
+        //System.out.println("dec: " + activeSearches);
+    }
+    
+    private void setActiveSearches(int activeSearches) {
+        this.activeSearches = activeSearches;
+        //System.out.println("set: " + activeSearches);
+    }
+    
+    private boolean hasActiveSearches() {
+        return activeSearches > 0;
     }
     
     protected abstract RequestMessage createRequest(SocketAddress address);

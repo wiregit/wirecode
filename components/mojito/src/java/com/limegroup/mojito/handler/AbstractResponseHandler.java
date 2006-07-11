@@ -141,7 +141,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     
     public void handleResponse(ResponseMessage response, long time) throws IOException {
         
-        if (isCancelled()) {
+        if (isCancelled() || isDone()) {
             return;
         }
         
@@ -161,7 +161,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     public void handleTimeout(KUID nodeId, 
             SocketAddress dst, RequestMessage request, long time) throws IOException {
         
-        if (isCancelled()) {
+        if (isCancelled() || isDone()) {
             return;
         }
         
@@ -199,7 +199,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         
-        if (isCancelled()) {
+        if (isCancelled() || isDone()) {
             return;
         }
         
@@ -212,6 +212,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     
     public boolean isCancelled() {
         return cancelled;            
+    }
+    
+    private boolean isDone() {
+        return done;
     }
     
     protected void setReturnValue(V value) {
