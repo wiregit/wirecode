@@ -434,6 +434,10 @@ public class RouterService {
             fileManager.start();
             LOG.trace("STOP FileManager");
     
+            LOG.trace("START TorrentManager");
+			torrentManager.initialize();
+			LOG.trace("STOP TorrentManager");
+			
             // Restore any downloads in progress.
             LOG.trace("START DownloadManager.postGuiInit");
             callback.componentLoading("DOWNLOAD_MANAGER_POST_GUI");
@@ -479,10 +483,6 @@ public class RouterService {
             LOG.trace("START loading StaticMessages");
             StaticMessages.initialize();
             LOG.trace("END loading StaticMessages");
-            
-			LOG.trace("START TorrentManager");
-			torrentManager.initialize();
-			LOG.trace("STOP TorrentManager");
             
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
