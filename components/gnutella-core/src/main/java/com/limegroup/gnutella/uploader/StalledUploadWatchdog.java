@@ -67,6 +67,7 @@ public final class StalledUploadWatchdog extends Periodic {
     	if (LOG.isDebugEnabled())
     		LOG.debug("Deactivated on "+closer.shutdownable);
         unschedule();
+        closer.shutdownable = null;
         return closer.closed;
     }
     

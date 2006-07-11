@@ -312,7 +312,12 @@ public class VerifyingFolder {
 		}
 		
 		byte [] sha1 = md.digest();
-		return Arrays.equals(sha1, _info.getHash(pieceNum));
+		synchronized(_info) {
+			boolean ret = Arrays.equals(sha1, _info.getHash(pieceNum));
+			if (ret)
+				_info.forgetHash(pieceNum);
+			return ret;
+		}
 	}
 	
 	/**

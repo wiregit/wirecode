@@ -51,6 +51,12 @@ public class BTMessageReader implements ChannelReadObserver {
 	/** Whether this reader is shutdown */
 	private volatile boolean shutdown;
 	
+	/** 
+	 * Whether we've stopped reading from the network
+	 * (not same as connection choking) 
+	 */
+	private boolean choked;
+	
 	/** The current state that is parsing the input */
 	private BTReadMessageState currentState;
 	
@@ -74,23 +80,32 @@ public class BTMessageReader implements ChannelReadObserver {
 	public synchronized void handleRead() throws IOException {
 		if (shutdown)
 			return;
-		
 		while(true) {
 			int read = 0;
 			int thisTime = 0;
-			while( _in.size() < _in.capacity() && (read = _in.read(_channel)) > 0 )
+			while( !bufferFull() && (read = _in.read(_channel)) > 0 )
 				thisTime += read;
 			if (thisTime > 0)
 				count(thisTime);
 			else if (read == -1)
 				throw new IOException();
-			else {
-				if (_in.size() == _in.capacity())
-					_channel.interest(false);
+			else 
 				break;
-			}
 			processState();
+			if (bufferFull())  
+				choke(true);
 		}
+	}
+	
+	private void choke(boolean choke) {
+		if (choked != choke) {
+			_channel.interest(!choke);
+			choked = choke;
+		}
+	}
+	
+	private boolean bufferFull() {
+		return _in.size() == _in.capacity();
 	}
 	
 	private void processState() throws BadBTMessageException {
@@ -321,23 +336,25 @@ public class BTMessageReader implements ChannelReadObserver {
 				welcome = _connection.startReceivingPiece(complete);
 			}
 			
-			if (_in.size() == 0)
+			int available = getAmountLeft();
+			if (available == 0)
 				return null;
 			
 			// if the piece was requested, we process it.
 			// otherwise we skip it.
 			if (welcome) {
 				// if the buffer is full, turn off read interest
-				if (_in.size() == _in.capacity()) 
-					_channel.interest(false);
-				
 				if (!writeExpected) { 
 					writeExpected = true;
 					_connection.handlePiece(this);
 				}
+			} else {
+				_in.discard(available);
+				currentOffset += available;
+				available = 0;
 			}
 			
-			if (currentOffset + _in.size() >= complete.high) {
+			if (currentOffset + available == complete.high + 1) {
 				// we're done receiving this piece
 				_connection.requestIfPossible();
 				BTMessageStat.INCOMING_PIECE.incrementStat();
@@ -346,13 +363,17 @@ public class BTMessageReader implements ChannelReadObserver {
 			return null;
 		}
 		
+		private int getAmountLeft() {
+			return Math.min(_in.size(), complete.high - currentOffset + 1);
+		}
+		
 		public BTPiece getPiece() {
 			synchronized(BTMessageReader.this) {
 				Assert.that(writeExpected);
 				writeExpected = false;
-				int toRead = Math.min(_in.size(), complete.high - currentOffset + 1);
+				int toRead = getAmountLeft();
 				
-				_channel.interest(true); // this may be better off flagged
+				choke(false);
 				
 				BTInterval in = new BTInterval(currentOffset, 
 						currentOffset + toRead - 1,

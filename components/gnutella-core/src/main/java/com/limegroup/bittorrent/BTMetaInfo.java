@@ -54,7 +54,7 @@ public class BTMetaInfo implements Serializable {
 	private BitSet fullSet = new FullBitSet();
 
 	/* a two dimensional array storing the hashes for this file */
-	private byte[][] _hashes;
+	private List<byte []> _hashes;
 
 	/* the length of one piece */
 	private int _pieceLength;
@@ -209,7 +209,11 @@ public class BTMetaInfo implements Serializable {
 	 * @return the hash of the piece
 	 */
 	public byte[] getHash(int pieceNum) {
-		return _hashes[pieceNum];
+		return _hashes.get(pieceNum);
+	}
+	
+	public void forgetHash(int pieceNum) {
+		_hashes.set(pieceNum, null);
 	}
 
 	/**
@@ -554,6 +558,7 @@ public class BTMetaInfo implements Serializable {
 		
 		MessageDigest md = new SHA1();
 		_infoHash = md.digest(baos.toByteArray());
+		baos = null;
 		
 		try {
 			_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
@@ -640,7 +645,7 @@ public class BTMetaInfo implements Serializable {
 				TorrentFile f = new TorrentFile(length, _completeFile
 						.getCanonicalPath());
 				f.begin = 0;
-				f.end = _hashes.length;
+				f.end = _hashes.size();
 				_files.add(f);
 			} catch (IOException bad) {
 				throw new ValueException("bad path");
@@ -701,7 +706,7 @@ public class BTMetaInfo implements Serializable {
 			throws IOException, ClassNotFoundException {
 		Map toRead = (Map) in.readObject();
 		
-		_hashes = (byte [][]) toRead.get("_hashes");
+		_hashes = (List<byte[]>) toRead.get("_hashes");
 		Integer pieceLength = (Integer)toRead.get("_pieceLength"); 
 		_name = (String) toRead.get("_name");
 		_files = (List<TorrentFile>) toRead.get("_files");
@@ -834,14 +839,15 @@ public class BTMetaInfo implements Serializable {
 	 * @return two dimensional byte array containing the hashes.
 	 * @throws ValueException
 	 */
-	private static byte[][] parsePieces(byte [] pieces) throws ValueException {
+	private static List<byte[]> parsePieces(byte [] pieces) throws ValueException {
 		if (pieces.length % 20 != 0)
 			throw new ValueException("bad metainfo - bad pieces key");
-		byte[][] ret = new byte[pieces.length / 20][20];
+		List<byte[]> ret = new ArrayList<byte[]>(pieces.length / 20);
 
-		int k = 0;
 		for (int i = 0; i < pieces.length; i += 20) {
-			System.arraycopy(pieces, i, ret[k++], 0, 20);
+			byte [] hash = new byte[20];
+			System.arraycopy(pieces,i, hash, 0, 20);
+			ret.add(hash);
 		}
 		return ret;
 	}
