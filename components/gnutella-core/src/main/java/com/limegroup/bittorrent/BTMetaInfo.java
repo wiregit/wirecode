@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +52,8 @@ public class BTMetaInfo implements Serializable {
 	private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
 
+	private static final byte [] VERIFIED_HASH = new byte[0];
+	                                                      
 	private BitSet fullSet = new FullBitSet();
 
 	/* a two dimensional array storing the hashes for this file */
@@ -201,19 +204,14 @@ public class BTMetaInfo implements Serializable {
 		return _desc;
 	}
 
-	/**
-	 * Accessor for the hash of a certain piece.
-	 * 
-	 * @param the
-	 *            int identifying the piece for which to return the hash
-	 * @return the hash of the piece
-	 */
-	public byte[] getHash(int pieceNum) {
-		return _hashes.get(pieceNum);
-	}
-	
-	public void forgetHash(int pieceNum) {
-		_hashes.set(pieceNum, null);
+	public boolean verify(byte [] sha1, int pieceNum) {
+		byte [] hash = _hashes.get(pieceNum);
+		if (hash == VERIFIED_HASH)
+			return true;
+		boolean ok = Arrays.equals(sha1, hash);
+		if (ok)
+			_hashes.set(pieceNum, VERIFIED_HASH);
+		return ok;
 	}
 
 	/**
