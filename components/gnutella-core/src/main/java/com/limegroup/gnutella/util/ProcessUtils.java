@@ -20,13 +20,10 @@ public final class ProcessUtils {
         
         try {
             in = new BufferedInputStream(p.getInputStream());
-            int len = -1;
             byte[] buf = new byte[1024];
-            while((len = in.read(buf, 0, buf.length)) >= 0) {
-                //System.out.println(new String(buf, 0, len));
-            }
+            while(in.read(buf, 0, buf.length) >= 0);
         } finally {
-            in.close();
+            IOUtils.close(in);
         }
     }
 }
