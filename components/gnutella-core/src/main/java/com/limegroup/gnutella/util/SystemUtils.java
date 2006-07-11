@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -212,6 +213,73 @@ public class SystemUtils {
     	if (CommonUtils.isWindows() && isLoaded)
     		return firewallRemoveNative(path);
     	return false;
+    }
+    
+    /**
+     * Deletes the given file or directory.
+     */
+    public static boolean delete(File file) {
+        if (!file.exists()) {
+            return false;
+        }
+        
+        if (CommonUtils.isMacOSX()) {
+            try {
+                return moveToTrashOSX(file);
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+            }
+        } else {
+            file.delete();
+        }
+        
+        return !file.exists();
+    }
+    
+    /**
+     * Moves the given file or directory to Trash. 
+     * 
+     * @param file The file or directory to move to Trash
+     * @throws IOException if the canonical path cannot be resolved 
+     *          or if the move process is interrupted
+     * @return true on success
+     */
+    private static boolean moveToTrashOSX(File file) throws IOException {
+        String[] command = moveToTrashCommand(file);
+        Process process = Runtime.getRuntime().exec(command);
+        try {
+            process.waitFor();
+        } catch (InterruptedException err) {
+            throw new IOException(err.getMessage());
+        }
+        
+        return !file.exists();
+    }
+    
+    /**
+     * Creates and returns the the osascript command to move
+     * a file or directory to the Trash
+     * 
+     * @param file The file or directory to move to Trash
+     * @throws IOException if the canonical path cannot be resolved
+     * @return OSAScript command
+     */
+    private static String[] moveToTrashCommand(File file) throws IOException {
+        String canonicalPath = file.getCanonicalPath();
+        String fileOrFolder = (file.isFile() ? "file" : "folder");
+        
+        String[] command = new String[] { 
+            "osascript", 
+            "-e", "set unixPath to \"" + canonicalPath + "\"",
+            "-e", "set hfsPath to POSIX file unixPath",
+            "-e", "tell application \"Finder\"", 
+            "-e",    "if " + fileOrFolder + " hfsPath exists then", 
+            "-e",        "move " + fileOrFolder + " hfsPath to trash",
+            "-e",    "end if",
+            "-e", "end tell" 
+        };
+        
+        return command;
     }
 
     // Native methods implemented in C++ code in WindowsFirewall.dll
