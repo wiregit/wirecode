@@ -32,9 +32,6 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	
 	private static final Log LOG =
         LogFactory.getLog(MP3DataEditor.class);
-
-    private static final String ISO_LATIN_1 = "8859_1";
-    private static final String UNICODE = "Unicode";
     
     static final String TITLE_ID = "TIT2";
     static final String ARTIST_ID = "TPE1";
@@ -49,7 +46,12 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	 * Actually writes the ID3 tags out to the ID3V3 section of the mp3 file
 	 */
 	private int writeID3V2DataToDisk(File file) throws IOException, ID3v2Exception {
-	    ID3v2 id3Handler = new ID3v2(file);        
+	    ID3v2 id3Handler = new ID3v2(file);
+        id3Handler.setUseUnsynchronization(false);
+        id3Handler.setUseExtendedHeader(false);
+        id3Handler.setUseCRC(false);
+        id3Handler.setUsePadding(false);
+        
 	    Vector frames = null;
 	    try {
 	        frames = (Vector)id3Handler.getFrames().clone();
@@ -116,33 +118,33 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	
 	private ID3v2Frame makeFrame(String frameID, String value) {
 	    
-	    boolean isISOLatin1 = true;
-	    
-	    // Basic/ISO-Latin-1: 0x0000 ... 0x00FF
-	    // Unicode: > 0x00FF ??? Even with 3byte chars?
-	    for(int i = 0; i < value.length(); i++) {
-	        if (value.charAt(i) > 0x00FF) {
-	            isISOLatin1 = false;
-	            break;
-	        }
-	    }
-	    
 	    try {
-	        return new ID3v2Frame(frameID, 
-	                          value.getBytes((isISOLatin1) ? ISO_LATIN_1 : UNICODE), 
-	                          true, //discard tag if it's altered/unrecognized
-	                          true, //discard tag if file altered/unrecognized
+	        return new ID3v2Frame(frameID,
+	                          addLEBom(value), 
+	                          false, //discard tag if it's altered/unrecognized
+                              false, //discard tag if file altered/unrecognized
 	                          false,//read/write
 	                          ID3v2Frame.NO_COMPRESSION, //no compression
 	                          (byte)0,//no encryption
 	                          (byte)0, //no Group
-	                          isISOLatin1);
+	                          false);
 	    } catch(ID3v2DecompressionException cx) {
 	        return null;
 	    } catch (UnsupportedEncodingException err) {
 	        return null;
 	    }
 	}
+    
+    /** Forces the data to be encoded in Unicode LE. */
+    private byte[] addLEBom(String value) throws UnsupportedEncodingException {
+        byte[] data = value.getBytes("UTF-16LE");
+        byte[] b = new byte[data.length + 2];
+        b[0] = (byte)0xFF;
+        b[1] = (byte)0xFE;
+        System.arraycopy(data, 0, b, 2, data.length);
+        return b;
+    }
+    
 	/**
 	 * Actually writes the ID3 tags out to the ID3V1 section of mp3 file.
 	 */
@@ -228,7 +230,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	        Arrays.fill(fromString,0,maxLen,(byte)0);//fill it all with 0
 	    } else {
 	        try {
-	            fromString = val.getBytes(ISO_LATIN_1);
+	            fromString = val.getBytes("8859_1");
 	        } catch (UnsupportedEncodingException err) {
 	            // Should never happen
 	            return false;
