@@ -21,7 +21,6 @@ package com.limegroup.mojito.manager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
@@ -31,6 +30,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 
@@ -63,11 +63,11 @@ public class StoreManager extends AbstractManager {
         }
     }
     
-    public Future<Entry<KeyValue,List<Contact>>> store(KeyValue value) {
+    public Future<StoreEvent> store(KeyValue value) {
         return store(value, null);
     }
 
-    public Future<Entry<KeyValue,List<Contact>>> store(KeyValue keyValue, StoreListener l) {
+    public Future<StoreEvent> store(KeyValue keyValue, StoreListener l) {
         StoreResponseHandler handler = new StoreResponseHandler(context, keyValue);
         StoreFuture future = new StoreFuture(handler);
         
@@ -79,18 +79,18 @@ public class StoreManager extends AbstractManager {
         return future;
     }
     
-    public Future<Entry<KeyValue,List<Contact>>> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
+    public Future<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
         StoreResponseHandler handler = new StoreResponseHandler(context, node, queryKey, keyValue);
         StoreFuture future = new StoreFuture(handler);
         context.execute(future);
         return future;
     }
     
-    private class StoreFuture extends FutureTask<Entry<KeyValue,List<Contact>>> {
+    private class StoreFuture extends FutureTask<StoreEvent> {
         
         private List<StoreListener> listeners = null;
         
-        public StoreFuture(Callable<Entry<KeyValue,List<Contact>>> callable) {
+        public StoreFuture(Callable<StoreEvent> callable) {
             super(callable);
         }
 
@@ -107,7 +107,7 @@ public class StoreManager extends AbstractManager {
             super.done();
             
             try {
-                Entry<KeyValue,List<Contact>> entry = get();
+                StoreEvent entry = get();
                 fireResult(entry);
             } catch (CancellationException ignore) {
             } catch (InterruptedException ignore) {
@@ -116,7 +116,7 @@ public class StoreManager extends AbstractManager {
             }
         }
         
-        private void fireResult(final Entry<KeyValue,List<Contact>> result) {
+        private void fireResult(final StoreEvent result) {
             synchronized(globalListeners) {
                 for (StoreListener l : globalListeners) {
                     l.handleResult(result);

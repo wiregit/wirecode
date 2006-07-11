@@ -19,10 +19,18 @@
 
 package com.limegroup.mojito.event;
 
-
+/**
+ * 
+ */
 public interface DHTEventListener<T> {
     
+    /**
+     * 
+     */
     public void handleResult(T result);
     
+    /**
+     * 
+     */
     public void handleException(Exception ex);
 }

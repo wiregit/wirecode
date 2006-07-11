@@ -122,7 +122,7 @@ public class Database {
         }
         return false;
     }
-
+    
     public synchronized boolean contains(KeyValue keyValue) {
         KUID key = keyValue.getKey();
         KeyValueBag bag = database.get(key);
@@ -331,11 +331,12 @@ public class Database {
          * See add() for constraints!
          */
         private boolean remove(KeyValue keyValue) {
-            if (!keyValue.isEmptyValue()) {
-                throw new IllegalArgumentException();
+            // Network or local remove?
+            if (keyValue.isEmptyValue()) {
+                return addOrRemove(keyValue);
+            } else {
+                return values.remove(keyValue.getNodeID()) != null;
             }
-            
-            return addOrRemove(keyValue);
         }
         
         /**

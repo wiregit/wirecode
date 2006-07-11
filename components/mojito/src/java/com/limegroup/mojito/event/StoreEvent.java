@@ -19,47 +19,38 @@
 
 package com.limegroup.mojito.event;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 
-/**
- * 
- */
-public class FindValueEvent {
+public class StoreEvent {
     
-    public KUID lookupId;
+    private KeyValue value;
     
-    private List<Entry<Contact, Collection<KeyValue>>> values;
+    private List<Contact> nodes;
     
     @SuppressWarnings("unchecked")
-    public FindValueEvent(KUID lookupId, List<? extends Entry<Contact,Collection<KeyValue>>> values) {
-        this.lookupId = lookupId;
-        this.values = (List<Entry<Contact,Collection<KeyValue>>>)values;
+    public StoreEvent(KeyValue value, List<? extends Contact> nodes) {
+        this.value = value;
+        this.nodes = (List<Contact>)nodes;
     }
     
-    public KUID getLookupID() {
-        return lookupId;
+    public KeyValue getKeyValue() {
+        return value;
     }
     
-    public List<Entry<Contact,Collection<KeyValue>>> getValues() {
-        return values;
+    public List<Contact> getNodes() {
+        return nodes;
     }
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(lookupId).append("\n");
+        buffer.append(value).append("\n");
         
         int i = 0;
-        for (Entry<Contact, Collection<KeyValue>> entry : values) {
-            buffer.append(entry.getKey()).append("\n");
-            for (KeyValue keyValue : entry.getValue()) {
-                buffer.append("  ").append(i++).append(": ").append(keyValue).append("\n");
-            }
+        for (Contact node : nodes) {
+            buffer.append("  ").append(i++).append(": ").append(node).append("\n");
         }
         return buffer.toString();
     }

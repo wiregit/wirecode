@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
@@ -51,6 +50,7 @@ import com.limegroup.mojito.event.FindNodeListener;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.PingListener;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
@@ -278,16 +278,16 @@ public class MojitoDHT {
         return context.getRouteTable().getContacts();
     }
     
-    public Future<Entry<KeyValue,List<Contact>>> put(KUID key, byte[] value) {
+    public Future<StoreEvent> put(KUID key, byte[] value) {
         return put(key, value, null, null);
     }
     
-    public Future<Entry<KeyValue,List<Contact>>> put(KUID key, byte[] value, StoreListener listener) 
+    public Future<StoreEvent> put(KUID key, byte[] value, StoreListener listener) 
             throws IOException {
         return put(key, value, listener, null);
     }
     
-    public Future<Entry<KeyValue,List<Contact>>> put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) {
+    public Future<StoreEvent> put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) {
         
         try {
             KeyValue keyValue = 
@@ -346,15 +346,15 @@ public class MojitoDHT {
         return context.get(key, listener);
     }
     
-    public Future<Entry<KeyValue,List<Contact>>> remove(KUID key) {
+    public Future<StoreEvent> remove(KUID key) {
         return remove(key, null, null);
     }
     
-    public Future<Entry<KeyValue,List<Contact>>> remove(KUID key, StoreListener listener) {
+    public Future<StoreEvent> remove(KUID key, StoreListener listener) {
         return remove(key, listener, null);
     }
 
-    public Future<Entry<KeyValue,List<Contact>>> remove(KUID key, StoreListener listener, PrivateKey privateKey) {
+    public Future<StoreEvent> remove(KUID key, StoreListener listener, PrivateKey privateKey) {
         // To remove a KeyValue you just store an empty value!
         return put(key, new byte[0], listener, privateKey);
     }

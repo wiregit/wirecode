@@ -30,14 +30,13 @@ import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -54,6 +53,7 @@ import com.limegroup.mojito.event.FindNodeListener;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.PingListener;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
@@ -123,8 +123,8 @@ public class Context {
     
     private ThreadFactory threadFactory = new DefaultThreadFactory();
     
-    private ScheduledThreadPoolExecutor scheduledExecutor;
-    private ThreadPoolExecutor contextExecutor;
+    private ScheduledExecutorService scheduledExecutor;
+    private ExecutorService contextExecutor;
     
     public Context(String name, Contact localNode, KeyPair keyPair) {
         this.name = name;
@@ -178,7 +178,7 @@ public class Context {
             }
         };
         
-        scheduledExecutor = new ScheduledThreadPoolExecutor(1, factory);
+        scheduledExecutor = Executors.newScheduledThreadPool(1, factory);
     }
     
     private void initContextExecutor() {
@@ -191,7 +191,7 @@ public class Context {
             }
         };
         
-        contextExecutor = (ThreadPoolExecutor)Executors.newCachedThreadPool(factory);
+        contextExecutor = Executors.newCachedThreadPool(factory);
     }
     
     public String getName() {
@@ -612,21 +612,21 @@ public class Context {
     /** 
      * Stores the given KeyValue 
      */
-    public Future<Entry<KeyValue,List<Contact>>> store(KeyValue keyValue) {
+    public Future<StoreEvent> store(KeyValue keyValue) {
         return storeManager.store(keyValue);
     }
     
     /** 
      * Stores the given KeyValue 
      */
-    public Future<Entry<KeyValue,List<Contact>>> store(KeyValue keyValue, StoreListener listener) {
+    public Future<StoreEvent> store(KeyValue keyValue, StoreListener listener) {
         return storeManager.store(keyValue, listener);
     }
     
     /** 
      * Stores the given KeyValue 
      */
-    public Future<Entry<KeyValue,List<Contact>>> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
+    public Future<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
         return storeManager.store(node, queryKey, keyValue);
     }
     

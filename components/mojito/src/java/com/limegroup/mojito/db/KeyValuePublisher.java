@@ -19,18 +19,15 @@
  
 package com.limegroup.mojito.db;
 
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
-import com.limegroup.mojito.util.CollectionUtils;
 
 // TODO rename to Publisher?
 public class KeyValuePublisher implements Runnable {
@@ -125,18 +122,14 @@ public class KeyValuePublisher implements Runnable {
             }
         }
         
-        Entry<KeyValue, List<Contact>> entry = context.store(keyValue).get();
+        StoreEvent evt = context.store(keyValue).get();
         published++;
         
         if (LOG.isTraceEnabled()) {
-            List<Contact> nodes = entry.getValue();
-            if (!nodes.isEmpty()) {
-                StringBuffer buffer = new StringBuffer("\nStoring ");
-                buffer.append(keyValue).append(" at the following Nodes:\n");
-                buffer.append(CollectionUtils.toString(nodes));
-                LOG.trace(buffer);
-            } else {
+            if (evt.getNodes().isEmpty()) {
                 LOG.trace("Failed to store " + keyValue);
+            } else {
+                LOG.trace(evt.toString());
             }
         }
     }

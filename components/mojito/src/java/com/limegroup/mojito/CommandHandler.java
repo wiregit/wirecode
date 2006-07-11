@@ -40,6 +40,7 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -259,11 +260,10 @@ public class CommandHandler {
                 }
             });*/
             
-            Entry<KeyValue,List<Contact>> entry = dht.put(key, value).get();
+            StoreEvent evt = dht.put(key, value).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
-            buffer.append(entry.getKey()).append("\n");
-            buffer.append(CollectionUtils.toString(entry.getValue()));
+            buffer.append(evt.toString());
             out.println(buffer.toString());
         } catch (Exception err) {
             err.printStackTrace(out);
@@ -298,11 +298,10 @@ public class CommandHandler {
                 }
             });*/
             
-            Entry<KeyValue,List<Contact>> entry = dht.remove(key).get();
+            StoreEvent evt = dht.remove(key).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("REMOVE RESULT:\n");
-            buffer.append(entry.getKey()).append("\n");
-            buffer.append(CollectionUtils.toString(entry.getValue()));
+            buffer.append(evt.toString());
             out.println(buffer.toString());
             
         } catch (Exception e) {

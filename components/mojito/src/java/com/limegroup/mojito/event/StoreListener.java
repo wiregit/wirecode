@@ -19,15 +19,10 @@
  
 package com.limegroup.mojito.event;
 
-import java.util.List;
-import java.util.Map.Entry;
-
-import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.db.KeyValue;
 
 /**
  * 
  */
-public interface StoreListener extends DHTEventListener<Entry<KeyValue, List<Contact>>>{
+public interface StoreListener extends DHTEventListener<StoreEvent>{
     
 }

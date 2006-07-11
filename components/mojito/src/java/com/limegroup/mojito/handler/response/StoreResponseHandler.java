@@ -35,6 +35,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -44,7 +45,7 @@ import com.limegroup.mojito.util.EntryImpl;
 /**
  * 
  */
-public class StoreResponseHandler extends AbstractResponseHandler<Entry<KeyValue,List<Contact>>> {
+public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
 
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
     
@@ -85,6 +86,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<Entry<KeyValue
                 = new EntryImpl<Contact, QueryKey>(node, queryKey);
             nodes = Arrays.asList(entry);
         }
+        
+        //System.out.println("Storing at:");
+        //System.out.println(CollectionUtils.toString(nodes));
         
         storeAt(nodes);
     }
@@ -145,10 +149,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<Entry<KeyValue
         assert (countDown >= 0);
         if (countDown == 0) {
             keyValue.setNumLocs(targets.size());
-            
-            Entry<KeyValue,List<Contact>> entry
-                = new EntryImpl<KeyValue,List<Contact>>(keyValue, targets);
-            setReturnValue(entry);
+            setReturnValue(new StoreEvent(keyValue, targets));
         }
         countDown--;
     }

@@ -55,7 +55,7 @@ public class FindNodeEvent {
         int i = 0;
         for (Entry<Contact, QueryKey> entry : nodes) {
             buffer.append(i++).append(": ").append(entry.getKey())
-                .append(" qk=").append(entry.getValue()).append("\n");
+                .append(", qk=").append(entry.getValue()).append("\n");
         }
         return buffer.toString();
     }
