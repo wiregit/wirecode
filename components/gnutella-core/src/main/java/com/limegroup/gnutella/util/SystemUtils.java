@@ -243,7 +243,10 @@ public class SystemUtils {
     private static boolean moveToTrashOSX(File file) {
         try {
             String[] command = moveToTrashCommand(file);
-            Process process = new ProcessBuilder(command).start();
+            ProcessBuilder builder = new ProcessBuilder(command);
+            builder.redirectErrorStream();
+            Process process = builder.start();
+            ProcessUtils.consumeAllInput(process);
             process.waitFor();
         } catch (InterruptedException err) {
             LOG.error("InterruptedException", err);
