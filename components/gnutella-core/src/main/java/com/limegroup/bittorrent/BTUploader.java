@@ -45,19 +45,15 @@ public class BTUploader implements Uploader, TorrentEventListener {
 		return _info.getTotalSize();
 	}
 
-	public long getAmountRequested() {
-		// not used in GUI...
-		return 0;
-	}
-
 	public FileDesc getFileDesc() {
 		return _info.getFileDesc();
 	}
 
 	public int getIndex() {
-		return _info.getFileDesc().getIndex();
+		// negative will make sure it never conflicts with regular uploads
+		return 0 - Math.abs(_info.getURN().hashCode());
 	}
-
+ 
 	public long amountUploaded() {
 		return _torrent.getTotalUploaded();
 	}
@@ -67,7 +63,7 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	}
 
 	public String getHost() {
-		return "Multiple";
+		return "Swarm for "+getFileName();
 	}
 
 	public int getState() {

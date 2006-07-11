@@ -45,11 +45,6 @@ public interface Uploader extends BandwidthTracker {
 	public long getFileSize();
 	
 	/**
-	 * returns the length of the requested size for uploading
-	 */ 
-	public long getAmountRequested();	
-
-	/**
 	 * Returns the <tt>FileDesc</tt> for this uploader -- the file that
 	 * is being uploaded.
 	 *
