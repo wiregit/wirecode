@@ -224,11 +224,7 @@ public class SystemUtils {
         }
         
         if (CommonUtils.isMacOSX()) {
-            try {
-                return moveToTrashOSX(file);
-            } catch (IOException err) {
-                LOG.error("IOException", err);
-            }
+            return moveToTrashOSX(file);
         } else {
             file.delete();
         }
@@ -244,15 +240,16 @@ public class SystemUtils {
      *          or if the move process is interrupted
      * @return true on success
      */
-    private static boolean moveToTrashOSX(File file) throws IOException {
-        String[] command = moveToTrashCommand(file);
-        Process process = Runtime.getRuntime().exec(command);
+    private static boolean moveToTrashOSX(File file) {
         try {
+            String[] command = moveToTrashCommand(file);
+            Process process = new ProcessBuilder(command).start();
             process.waitFor();
         } catch (InterruptedException err) {
-            throw new IOException(err.getMessage());
+            LOG.error("InterruptedException", err);
+        } catch (IOException err) {
+            LOG.error("IOException", err);
         }
-        
         return !file.exists();
     }
     
@@ -264,13 +261,20 @@ public class SystemUtils {
      * @throws IOException if the canonical path cannot be resolved
      * @return OSAScript command
      */
-    private static String[] moveToTrashCommand(File file) throws IOException {
-        String canonicalPath = file.getCanonicalPath();
+    private static String[] moveToTrashCommand(File file) {
+        String path = null;
+        try {
+            path = file.getCanonicalPath();
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+            path = file.getAbsolutePath();
+        }
+        
         String fileOrFolder = (file.isFile() ? "file" : "folder");
         
         String[] command = new String[] { 
             "osascript", 
-            "-e", "set unixPath to \"" + canonicalPath + "\"",
+            "-e", "set unixPath to \"" + path + "\"",
             "-e", "set hfsPath to POSIX file unixPath",
             "-e", "tell application \"Finder\"", 
             "-e",    "if " + fileOrFolder + " hfsPath exists then", 
