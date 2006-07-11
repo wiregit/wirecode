@@ -507,7 +507,7 @@ public class VerifyingFolder {
 	 * @return true if the whole torrent has been written and verified
 	 */
 	synchronized boolean isComplete() {
-		return verifiedBlocks.cardinality() == _info.getNumBlocks();
+		return verifiedBlocks == _info.getFullBitSet();
 	}
 
 	/**
