@@ -499,10 +499,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			Set requestedUrnSet1 = new HashSet();
 			Set requestedUrnSet2 = new HashSet();
 			Set requestedUrnSet3 = new HashSet();
-			requestedUrnSet1.add(UrnType.ANY_TYPE);
-			requestedUrnSet2.add(UrnType.SHA1);
-			requestedUrnSet3.add(UrnType.ANY_TYPE);
-			requestedUrnSet3.add(UrnType.SHA1);
+			requestedUrnSet1.add(URN.Type.ANY_TYPE);
+			requestedUrnSet2.add(URN.Type.SHA1);
+			requestedUrnSet3.add(URN.Type.ANY_TYPE);
+			requestedUrnSet3.add(URN.Type.SHA1);
 			Set[] requestedUrnSets = {requestedUrnSet0, requestedUrnSet1, 
 									  requestedUrnSet2, requestedUrnSet3};
 			Set queryUrnSet = new HashSet();

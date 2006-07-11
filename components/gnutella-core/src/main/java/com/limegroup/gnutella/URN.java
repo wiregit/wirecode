@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -36,10 +37,92 @@ import com.limegroup.gnutella.util.SystemUtils;
  *
  * @see UrnCache
  * @see FileDesc
- * @see UrnType
  * @see java.io.Serializable
  */
 public final class URN implements HTTPHeaderValue, Serializable {
+    
+    /** The range of all types for URNs. */
+    public static enum Type {        
+        /** UrnType for a SHA1 URN */
+        SHA1("sha1:"),
+        
+        /** UrnType for a bitprint URN */
+        BITPRINT("bitprint:"),
+        
+        /** UrnType for any kind of URN. */
+        ANY_TYPE(""),
+
+        /** UrnType for an invalid Urn Type. */
+        INVALID("Invalid");
+
+        private static final long serialVersionUID = -8211681448456483713L;
+        
+        private final String descriptor;
+        
+        private Type(String descriptor) {
+            this.descriptor = descriptor;
+        }
+        
+        /** Returns the descriptor used for printing out a URN of this type. */
+        public String getDescriptor() {
+            return descriptor;
+        }
+
+        /** A set of types that allow only SHA1s. */
+        public static final Set<URN.Type> SHA1_SET = EnumSet.of(SHA1);     
+
+        /** A set of types that allow any kind of URN. */
+        public static final Set<URN.Type> ANY_TYPE_SET = EnumSet.of(ANY_TYPE);
+        
+        /** A set of types that disallow any URN. */
+        public static final Set<URN.Type> NO_TYPE_SET = EnumSet.noneOf(URN.Type.class);
+        
+        /**
+         * The leading URN string identifier, as specified in
+         * RFC 2141.  This is equal to "urn:", although note that this
+         * should be used in a case-insensitive manner in compliance with
+         * the URN specification (RFC 2141).
+         */
+        public static final String URN_NAMESPACE_ID = "urn:";
+
+        /**
+         * Returns the string representation of this URN type.
+         *
+         * @return the string representation of this URN type
+         */
+        public String toString() {
+            return URN_NAMESPACE_ID + descriptor;
+        }
+
+        /**
+         * Factory method for obtaining <tt>UrnType</tt> instances from strings.
+         * If the isSupportedUrnType method returns <tt>true</tt> this is
+         * guaranteed to return a non-null UrnType.
+         *
+         * @param type the string representation of the urn type
+         * @return the <tt>UrnType</tt> instance corresponding with the specified
+         *  string, or <tt>null</tt> if the type is not supported
+         */
+        public static URN.Type createUrnType(String descriptor) {
+            descriptor = descriptor.toLowerCase().trim();
+            for(Type type : values())
+                if(type.toString().equals(descriptor))
+                    return type;
+            return null;
+        }
+
+        /**
+         * Returns whether or not the string argument is a urn type that
+         * we know about.
+         *
+         * @param descriptor to string to check 
+         * @return <tt>true</tt> if it is a valid URN type, <tt>false</tt>
+         *  otherwise
+         */
+        public static boolean isSupportedUrnType(String descriptor) {
+            return createUrnType(descriptor) != null;
+        }
+    }
 
 	private static final long serialVersionUID = -6053855548211564799L;
     
@@ -49,7 +132,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	/**
 	 * A constant invalid URN that classes can use to represent an invalid URN.
 	 */
-	public static final URN INVALID = new URN("bad:bad", UrnType.INVALID);
+	public static final URN INVALID = new URN("bad:bad", Type.INVALID);
 	
 	/**
 	 * The amount of time we must be idle before we start
@@ -96,7 +179,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	/**
 	 * Variable for the <tt>UrnType</tt> instance for this URN.
 	 */
-	private transient UrnType _urnType;
+	private transient Type _urnType;
 
 	/**
 	 * Cached hash code that is lazily initialized.
@@ -147,7 +230,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static URN createSHA1Urn(File file) 
 		throws IOException, InterruptedException {
-		return new URN(createSHA1String(file), UrnType.SHA1);
+		return new URN(createSHA1String(file), Type.SHA1);
 	}
 
 	/**
@@ -165,9 +248,9 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	public static URN createSHA1Urn(final String urnString) 
 		throws IOException {
         String typeString = URN.getTypeString(urnString).toLowerCase(Locale.US);
-        if (typeString.indexOf(UrnType.SHA1_STRING) == 4)
+        if (typeString.indexOf(Type.SHA1.getDescriptor()) == 4)
     		return createSHA1UrnFromString(urnString);
-        else if (typeString.indexOf(UrnType.BITPRINT_STRING) == 4)
+        else if (typeString.indexOf(Type.BITPRINT.getDescriptor()) == 4)
             return createSHA1UrnFromBitprint(urnString);
         else
             throw new IOException("unsupported or malformed URN");
@@ -178,7 +261,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static String getTigerTreeRoot(final String urnString) throws IOException {
         String typeString = URN.getTypeString(urnString).toLowerCase(Locale.US);
-        if (typeString.indexOf(UrnType.BITPRINT_STRING) == 4)
+        if (typeString.indexOf(Type.BITPRINT.getDescriptor()) == 4)
             return getTTRootFromBitprint(urnString);
         else
             throw new IOException("unsupported or malformed URN");
@@ -276,10 +359,9 @@ public final class URN implements HTTPHeaderValue, Serializable {
 			throw new IOException("invalid urn string: "+urnString);
 		}
 		String typeString = URN.getTypeString(urnString);
-		if(!UrnType.isSupportedUrnType(typeString)) {
+        Type type = Type.createUrnType(typeString);
+        if(type == null)
 			throw new IOException("urn type not recognized: "+typeString);
-		}
-		UrnType type = UrnType.createUrnType(typeString);
 		return new URN(urnString, type);
 	}
 
@@ -303,7 +385,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
                 bitprintString.indexOf(':', 4) + 1, dotIdx);
 
         return createSHA1UrnFromString(
-            UrnType.URN_NAMESPACE_ID + UrnType.SHA1_STRING + sha1);
+            Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + sha1);
     }
     
 	/**
@@ -331,7 +413,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @param urnType the type of URN to construct for the <tt>File</tt>
 	 *  instance, such as SHA1_URN
 	 */
-	private URN(final String urnString, final UrnType urnType) {
+	private URN(final String urnString, final Type urnType) {
         int lastColon = urnString.lastIndexOf(":");
         String nameSpace = urnString.substring(0,lastColon+1);
         String hash = urnString.substring(lastColon+1);
@@ -357,7 +439,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * @return the <tt>UrnType</tt> instance for this <tt>URN</tt>
 	 */
-	public UrnType getUrnType() {
+	public Type getUrnType() {
 		return _urnType;
 	}
 
@@ -385,7 +467,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return <tt>true</tt> if this is a SHA1 URN, <tt>false</tt> otherwise
 	 */
 	public boolean isSHA1() {
-		return _urnType.isSHA1();
+		return _urnType == Type.SHA1;
 	}
 
     /**
@@ -650,7 +732,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		// note that all URNs are case-insensitive for the "urn:<type>:" part,
 		// but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
 		// insensitive)
-		return UrnType.URN_NAMESPACE_ID+UrnType.SHA1_STRING+Base32.encode(sha1);
+		return Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + Base32.encode(sha1);
 	}
 
 	/**
@@ -691,7 +773,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		    return false;
 		
 		String urnType = urnString.substring(0, colon2Index+1);
-		if(!UrnType.isSupportedUrnType(urnType) ||
+		if(!Type.isSupportedUrnType(urnType) ||
 		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
 			return false;
 		}
@@ -733,20 +815,20 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * Deserializes this <tt>URN</tt> instance, validating the urn string
 	 * to ensure that it's valid.
 	 */
-	private void readObject(ObjectInputStream s) 
-		throws IOException, ClassNotFoundException {
-		s.defaultReadObject();
-		_urnString = s.readUTF();
-		_urnType = (UrnType)s.readObject();
-		if(!URN.isValidUrn(_urnString)) {
-			throw new InvalidObjectException("invalid urn: "+_urnString);
-		}
-		if(_urnType.isSHA1()) {
-			// this preserves instance equality for all SHA1 run types
-			_urnType = UrnType.SHA1;
-		}
-		else {
-			throw new InvalidObjectException("invalid urn type: "+_urnType);
-		}		
+	@SuppressWarnings("deprecation")
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        _urnString = s.readUTF();
+        Object type = s.readObject();
+        // convert from older serialized UrnTypes to the URN.Type enum
+        if(type instanceof UrnType)
+            type = Type.createUrnType(((UrnType)type).getType());        
+        _urnType = (Type)type;
+        
+        if(_urnType != URN.Type.SHA1)
+            throw new InvalidObjectException("invalid urn type: " + type);
+
+        if (!URN.isValidUrn(_urnString))
+            throw new InvalidObjectException("invalid urn: "+_urnString);		
 	}
 }

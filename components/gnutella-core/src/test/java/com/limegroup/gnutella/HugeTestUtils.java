@@ -259,7 +259,7 @@ public final class HugeTestUtils {
 	/**
 	 * Array of URNType instances for use by tests.
 	 */
-	public static final UrnType[] URN_TYPES = new UrnType[VALID_URN_STRINGS.length];
+	public static final URN.Type[] URN_TYPES = new URN.Type[VALID_URN_STRINGS.length];
 
 	public static final URL[] UNEQUAL_URLS = new URL[HOST_STRINGS.length];
 	public static final URL[] EQUAL_URLS = new URL[HOST_STRINGS.length];

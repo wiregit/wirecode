@@ -2,12 +2,12 @@ package com.limegroup.gnutella.messages;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.UrnType;
 
 /** 
  * Encapsulation of a HUGE block.  Offers various get methods to retrieve its
@@ -20,7 +20,7 @@ public class HUGEExtension {
     // -----------------------------------------
     private GGEP _ggep = null;
     private Set<URN> _urns = null;
-    private Set<UrnType> _urnTypes = null;
+    private Set<URN.Type> _urnTypes = null;
     private Set<String> _miscBlocks = null;
     // -----------------------------------------
 
@@ -39,7 +39,7 @@ public class HUGEExtension {
     }
     /** @return the set of URN Type Objects in this HUGE extension.
      */
-    public Set<UrnType> getURNTypes() {
+    public Set<URN.Type> getURNTypes() {
         if (_urnTypes == null)
             return Collections.emptySet();
         else
@@ -89,14 +89,10 @@ public class HUGEExtension {
                             if(_urns == null) 
                                 _urns = new UrnSet();
                             _urns.add(urn);
-                        } else if (UrnType.isSupportedUrnType(curExtStr)) {
-                            // it's an URN type to return, of form "urn" or 
-                            // "urn:namespace"
-                            if(UrnType.isSupportedUrnType(curExtStr)) {
-                                if(_urnTypes == null) 
-                                    _urnTypes = new HashSet<UrnType>(1);
-                                _urnTypes.add(UrnType.createUrnType(curExtStr));
-                            }
+                        } else if (URN.Type.isSupportedUrnType(curExtStr)) {
+                            if(_urnTypes == null)
+                                _urnTypes = EnumSet.noneOf(URN.Type.class);
+                            _urnTypes.add(URN.Type.createUrnType(curExtStr));
                         } else {
                             // miscellaneous, but in the case of queries, xml
                             if (_miscBlocks == null)

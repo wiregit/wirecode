@@ -217,7 +217,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 			URN urn = URN.createSHA1Urn(curFile);
 			assertTrue("should be a valid SHA1", urn.isSHA1());
 			assertTrue("should be considered a urn", URN.isUrn(urn.toString()));
-			assertEquals("should be == UrnTypes", urn.getUrnType(), UrnType.SHA1);
+			assertEquals("should be == UrnTypes", urn.getUrnType(), URN.Type.SHA1);
             URN newURN = URN.createSHA1Urn(urn.toString());
             assertEquals("urns should be equal", urn, newURN);
 		}
@@ -284,11 +284,11 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 		};
 		
 		for(int i=0; i<validURNTypes.length; i++) {			
-			assertTrue("should be supported URNType", UrnType.isSupportedUrnType(validURNTypes[i]));
+			assertTrue("should be supported URNType", URN.Type.isSupportedUrnType(validURNTypes[i]));
 		}
 
 		for(int i=0; i<invalidURNTypes.length; i++) {
-			assertTrue("should not be supported URNType", !UrnType.isSupportedUrnType(invalidURNTypes[i]));
+			assertTrue("should not be supported URNType", !URN.Type.isSupportedUrnType(invalidURNTypes[i]));
 		}
 	}
 

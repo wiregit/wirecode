@@ -15,7 +15,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnType;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -295,7 +294,7 @@ public final class QueryRequestTest extends BaseTestCase {
 			URN_BYTES[i].write(0);
 			Set curUrnSet = new HashSet();
 			Set curUrnTypeSet = new HashSet();
-			curUrnTypeSet.add(UrnType.ANY_TYPE_SET);
+			curUrnTypeSet.add(URN.Type.ANY_TYPE_SET);
 			curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
 			for(int j=i; j<HugeTestUtils.URNS.length; j++) {
 				URN_BYTES[i].write(HugeTestUtils.URNS[j].toString().getBytes());
@@ -484,7 +483,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		QueryRequest qr =
 			QueryRequest.createQueryKeyQuery("test", key);
 
-		runStandardChecks(qr, false, UrnType.ANY_TYPE_SET, 
+		runStandardChecks(qr, false, URN.Type.ANY_TYPE_SET, 
 						  Collections.EMPTY_SET, key);		
 		assertEquals("unexpected query", "test", qr.getQuery());
 		assertNull("unexpected xml query", qr.getRichQuery());
@@ -509,7 +508,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		assertEquals("unexpected query", "\\", qr.getQuery());
 		assertNull("xml should be empty", qr.getRichQuery());
 		assertTrue("should have URNs", qr.hasQueryUrns());
-		assertEquals("unexpected requested URN types", UrnType.SHA1_SET, 
+		assertEquals("unexpected requested URN types", URN.Type.SHA1_SET, 
 					 qr.getRequestedUrnTypes());
 		assertTrue("should be a requery", qr.isLimeRequery());
 	}
@@ -518,7 +517,7 @@ public final class QueryRequestTest extends BaseTestCase {
 		assertEquals("unexpected query", query, qr.getQuery());
 		assertNull("xml should be null", qr.getRichQuery());
 		assertTrue("should not have URNs", !qr.hasQueryUrns());
-		assertEquals("unexpected requested URN types", UrnType.ANY_TYPE_SET, 
+		assertEquals("unexpected requested URN types", URN.Type.ANY_TYPE_SET, 
 					 qr.getRequestedUrnTypes());
 		assertTrue("should be a requery", qr.isLimeRequery());
 	}
@@ -561,17 +560,17 @@ public final class QueryRequestTest extends BaseTestCase {
 
 	private void runStandardChecksMulticast(QueryRequest qr, String query) {
 		assertEquals("queries should be equal", query, qr.getQuery());
-		runStandardChecks(qr, true, UrnType.ANY_TYPE_SET,
+		runStandardChecks(qr, true, URN.Type.ANY_TYPE_SET,
 						  Collections.EMPTY_SET, null);
 	}
 
 	private void runStandardChecks(QueryRequest qr) {
-		runStandardChecks(qr, false, UrnType.ANY_TYPE_SET,
+		runStandardChecks(qr, false, URN.Type.ANY_TYPE_SET,
 						  Collections.EMPTY_SET, null);
 	}
 
 	private void runStandardChecks(QueryRequest qr, Set urns) {
-		runStandardChecks(qr, false, UrnType.SHA1_SET, urns, null);
+		runStandardChecks(qr, false, URN.Type.SHA1_SET, urns, null);
 	}
 	
 	/**

@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -24,7 +24,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.UrnType;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
@@ -124,7 +123,7 @@ public class QueryRequest extends Message implements Serializable{
     /** 
 	 * The types of requested URNs.
 	 */
-    private final Set<UrnType> REQUESTED_URN_TYPES;
+    private final Set<URN.Type> REQUESTED_URN_TYPES;
 
     /** 
 	 * Specific URNs requested.
@@ -198,7 +197,7 @@ public class QueryRequest extends Message implements Serializable{
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, 
                                 DEFAULT_URN_QUERY, "", 
-                                UrnType.SHA1_SET, sha1Set, null,
+                                URN.Type.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false, 0, false, 0);
 
@@ -218,7 +217,7 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, 
-                                DEFAULT_URN_QUERY, "",  UrnType.SHA1_SET, 
+                                DEFAULT_URN_QUERY, "",  URN.Type.SHA1_SET, 
                                 sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false, 0, false, 0);
@@ -245,7 +244,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
-                                UrnType.SHA1_SET, sha1Set, null,
+                                URN.Type.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false, 0, false, 0);
 
@@ -272,7 +271,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
-                                UrnType.SHA1_SET, sha1Set, null,
+                                URN.Type.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false, 0, false, 0);
 
@@ -299,7 +298,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
-                                UrnType.SHA1_SET, sha1Set, null,
+                                URN.Type.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false, 0, false, 0);
 	}
@@ -312,7 +311,7 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> for the specied UrnTypes and URNs
 	 * @throws <tt>NullPointerException</tt> if either sets are null.
 	 */
-	public static QueryRequest createQuery(Set<? extends UrnType> urnTypeSet, Set<? extends URN> urnSet) {
+	public static QueryRequest createQuery(Set<URN.Type> urnTypeSet, Set<? extends URN> urnSet) {
 	    if(urnSet == null)
 	        throw new NullPointerException("null urnSet");
 	    if(urnTypeSet == null)
@@ -731,7 +730,7 @@ public class QueryRequest extends Message implements Serializable{
             throw new NullPointerException("null query key");
         }
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
-                                UrnType.ANY_TYPE_SET, URN.NO_URN_SET, key,
+                                URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false, 0, false, 0);
     }
@@ -760,7 +759,7 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set<URN> sha1Set = new UrnSet(sha1);
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
-                                "", UrnType.SHA1_SET, sha1Set, key,
+                                "", URN.Type.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false, 0, false, 0);
     }
@@ -830,7 +829,7 @@ public class QueryRequest extends Message implements Serializable{
 	public static QueryRequest createBrowseHostQuery() {
 		return new QueryRequest(newQueryGUID(false), (byte)1, 
 				FileManager.INDEXING_QUERY, "", 
-                UrnType.ANY_TYPE_SET, URN.NO_URN_SET, null,
+                URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
                 !RouterService.acceptedIncomingConnection(), 
 				Message.N_UNKNOWN, false, 0, false, 0);
 	}
@@ -848,7 +847,7 @@ public class QueryRequest extends Message implements Serializable{
 		createNonFirewalledQuery(String query, byte ttl) {
 		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
-                                UrnType.ANY_TYPE_SET, URN.NO_URN_SET, null,
+                                URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
                                 false, Message.N_UNKNOWN, false, 0, false, 0);
 	}
 
@@ -906,7 +905,7 @@ public class QueryRequest extends Message implements Serializable{
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
-        this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, URN.NO_URN_SET, null,
+        this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
              false, 0, false, 0);
     }
@@ -921,7 +920,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          MediaType type) {
-        this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, URN.NO_URN_SET, null,
+        this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
              false, 0, false, getMetaFlag(type));
     }
@@ -936,7 +935,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          boolean canReceiveOutOfBandReplies) {
-        this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, URN.NO_URN_SET, null,
+        this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
              canReceiveOutOfBandReplies, 0, false, 0);
     }
@@ -951,7 +950,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
                          boolean canReceiveOutOfBandReplies, MediaType type) {
-        this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, URN.NO_URN_SET, null,
+        this(guid, ttl, query, richQuery, URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
              canReceiveOutOfBandReplies, 0, false, getMetaFlag(type));
     }
@@ -997,7 +996,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl,  
                         String query, String richQuery, 
-                        Set<? extends UrnType> requestedUrnTypes,
+                        Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         QueryKey queryKey, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
@@ -1026,7 +1025,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl,  
                         String query, String richQuery, 
-                        Set<? extends UrnType> requestedUrnTypes,
+                        Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         QueryKey queryKey, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
@@ -1055,7 +1054,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed,
                         String query, String richQuery, 
-                        Set<? extends UrnType> requestedUrnTypes,
+                        Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
                         QueryKey queryKey, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
@@ -1138,12 +1137,12 @@ public class QueryRequest extends Message implements Serializable{
             }
             this.XML_DOC = doc;
 		}
-		Set<UrnType> tempRequestedUrnTypes = null;
+		Set<URN.Type> tempRequestedUrnTypes = null;
 		Set<URN> tempQueryUrns = null;
 		if(requestedUrnTypes != null) {
-			tempRequestedUrnTypes = new HashSet<UrnType>(requestedUrnTypes);
+			tempRequestedUrnTypes = EnumSet.copyOf(requestedUrnTypes);
 		} else {
-			tempRequestedUrnTypes = UrnType.NO_TYPE_SET;
+			tempRequestedUrnTypes = URN.Type.NO_TYPE_SET;
 		}
 		
 		if(queryUrns != null) {
@@ -1276,7 +1275,7 @@ public class QueryRequest extends Message implements Serializable{
 		String tempRichQuery = "";
 		int tempMinSpeed = 0;
 		Set<URN> tempQueryUrns = null;
-		Set<UrnType> tempRequestedUrnTypes = null;
+		Set<URN.Type> tempRequestedUrnTypes = null;
         QueryKey tempQueryKey = null;
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
@@ -1434,7 +1433,7 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return the <tt>Set</tt> of <tt>UrnType</tt> instances requested for this
      * query, which may be empty (not null) if no types were requested
 	 */
-    public Set<UrnType> getRequestedUrnTypes() {
+    public Set<URN.Type> getRequestedUrnTypes() {
 		return REQUESTED_URN_TYPES;
     }
     
