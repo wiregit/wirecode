@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 /**
@@ -83,7 +84,13 @@ public class RandomBucketRefresher implements Runnable {
             
             List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
             for(KUID nodeId : ids) {
-                context.lookup(nodeId);
+                FindNodeResponseHandler handler = new FindNodeResponseHandler(context, nodeId);
+                
+                try {
+                    handler.call();
+                } catch (Exception err) {
+                    LOG.error("Exception", err);
+                }
             }
         }
     }

@@ -335,6 +335,13 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                 continue;
             }
             
+            if (context.isLocalNode(node)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Skipping local node");
+                }
+                continue;
+            }
+            
             if (!isQueried(node) 
                     && !isYetToBeQueried(node)) {
                 if (LOG.isTraceEnabled()) {
