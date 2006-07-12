@@ -93,6 +93,14 @@ public final class URN implements HTTPHeaderValue, Serializable {
         public String toString() {
             return URN_NAMESPACE_ID + descriptor;
         }
+        
+        static URN.Type createFromDescriptor(String desc) {
+            desc = desc.toLowerCase().trim();
+            for(Type type : values())
+                if(type.descriptor.equals(desc))
+                    return type;
+            return null;
+        }
 
         /**
          * Factory method for obtaining <tt>UrnType</tt> instances from strings.
@@ -103,10 +111,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
          * @return the <tt>UrnType</tt> instance corresponding with the specified
          *  string, or <tt>null</tt> if the type is not supported
          */
-        public static URN.Type createUrnType(String descriptor) {
-            descriptor = descriptor.toLowerCase().trim();
+        public static URN.Type createUrnType(String value) {
+            value = value.toLowerCase().trim();
             for(Type type : values())
-                if(type.toString().equals(descriptor))
+                if(type.toString().equals(value))
                     return type;
             return null;
         }
@@ -115,12 +123,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
          * Returns whether or not the string argument is a urn type that
          * we know about.
          *
-         * @param descriptor to string to check 
+         * @param value to string to check 
          * @return <tt>true</tt> if it is a valid URN type, <tt>false</tt>
          *  otherwise
          */
-        public static boolean isSupportedUrnType(String descriptor) {
-            return createUrnType(descriptor) != null;
+        public static boolean isSupportedUrnType(String value) {
+            return createUrnType(value) != null;
         }
     }
 
@@ -822,7 +830,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
         Object type = s.readObject();
         // convert from older serialized UrnTypes to the URN.Type enum
         if(type instanceof UrnType)
-            type = Type.createUrnType(((UrnType)type).getType());        
+            type = Type.createFromDescriptor(((UrnType)type).getType());        
         _urnType = (Type)type;
         
         if(_urnType != URN.Type.SHA1)
