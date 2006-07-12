@@ -329,7 +329,8 @@ implements TorrentEventListener {
 		case COMPLETE : torrentComplete(); break;
 		case STOPPED : 
 			torrentStopped();
-			RouterService.getTorrentManager().removeEventListener(this);
+			if (!isResumable())
+				RouterService.getTorrentManager().removeEventListener(this);
 		}
 	}
 	
