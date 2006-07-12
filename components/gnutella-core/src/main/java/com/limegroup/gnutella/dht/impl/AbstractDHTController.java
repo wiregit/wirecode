@@ -111,15 +111,6 @@ public abstract class AbstractDHTController implements DHTController, LifecycleL
             dht.start();
             running = true;
             
-            //TODO:
-            /*
-            //append SIMPP hosts to the end of the list if we have any
-            SocketAddress simppBootstrapHost = getSIMPPHost();
-            if(simppBootstrapHost != null) {
-                bootstrapHosts.add(simppBootstrapHost);
-            }
-            */
-            
             bootstrap();
         } catch (IOException err) {
             LOG.error(err);
@@ -133,6 +124,12 @@ public abstract class AbstractDHTController implements DHTController, LifecycleL
      * 
      */
     private void bootstrap() {
+        
+        //append SIMPP host to the end of the list if we have any
+        SocketAddress simppBootstrapHost = getSIMPPHost();
+        if(simppBootstrapHost != null) {
+            bootstrapHosts.add(simppBootstrapHost);
+        }
         
         try {
             dht.bootstrap(bootstrapHosts, new BootstrapListener() {
@@ -200,7 +197,7 @@ public abstract class AbstractDHTController implements DHTController, LifecycleL
     public synchronized void addBootstrapHost(SocketAddress hostAddress) {
         synchronized (bootstrapHosts) {
             //Keep bootstrap list small because it should be updated often
-            if(bootstrapHosts.size() >= 10) {
+            if(bootstrapHosts.size() >= 20) {
                 bootstrapHosts.removeLast();
             }
             

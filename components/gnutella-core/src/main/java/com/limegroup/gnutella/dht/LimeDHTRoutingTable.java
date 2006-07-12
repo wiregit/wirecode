@@ -111,7 +111,7 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
     }
     
     public boolean hasDHTLeaves() {
-        return leafDHTNodes.isEmpty();
+        return !leafDHTNodes.isEmpty();
     }
     
     public synchronized Collection<IpPort> getDHTLeaves(){

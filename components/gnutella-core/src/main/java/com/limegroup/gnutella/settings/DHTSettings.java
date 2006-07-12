@@ -81,4 +81,8 @@ public class DHTSettings extends LimeProps{
      */
     public static final LongSetting MAX_NODE_FETCHER_TIME = 
         FACTORY.createSettableLongSetting("MAX_NODE_FETCHER_TIME", 30L * 1000L, "DHTSettings.MaxNodeFetcherTime", 0L, 5L * 60L * 1000L);
+
+    
+    public static final IntSetting NUM_PERSISTED_NODES = 
+        FACTORY.createIntSetting("MAX_PERSISTED_NODES", 20);
 }
