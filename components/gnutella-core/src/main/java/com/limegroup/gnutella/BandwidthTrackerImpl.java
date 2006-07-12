@@ -86,8 +86,7 @@ public class BandwidthTrackerImpl implements Serializable {
         int size = snapShots.getSize();
         if (size  < 3 )
             throw new InsufficientDataException();
-        float total = 0;
-        cachedBandwidth = (float)snapShots.average();
+        cachedBandwidth = snapShots.average().floatValue();
         return cachedBandwidth;
     }
     

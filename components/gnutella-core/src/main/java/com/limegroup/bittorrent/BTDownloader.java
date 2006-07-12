@@ -283,7 +283,7 @@ implements TorrentEventListener {
 	public float getMeasuredBandwidth() throws InsufficientDataException {
 		if (averagedBandwidth.size() < 3)
 			throw new InsufficientDataException();
-		return (float)averagedBandwidth.average();
+		return averagedBandwidth.average().floatValue();
 	}
 
 	public float getAverageBandwidth() {
