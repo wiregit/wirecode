@@ -21,6 +21,8 @@ public class NumericBuffer<T extends Number> extends Buffer<T> {
 	 * and long otherwise.  
 	 */
 	public Number average() {
+		if (isEmpty())
+			return 0;
 		Number sum = sum();
 		if (sum instanceof Double)
 			return sum().doubleValue() / size();

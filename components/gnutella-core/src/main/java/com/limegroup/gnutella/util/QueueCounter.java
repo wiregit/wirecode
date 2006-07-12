@@ -39,7 +39,9 @@ public class QueueCounter {
 	/**
 	 * @return the average number of elements in the system
 	 */
-	public synchronized double getAverageSize2() {
+	public synchronized double getAverageSize() {
+		if (timesInSystem.getSize() < timesInSystem.getCapacity())
+			return -1;
 		return timesInSystem.average().doubleValue() / interarrivalTimes.average().doubleValue();
 	}
 	
