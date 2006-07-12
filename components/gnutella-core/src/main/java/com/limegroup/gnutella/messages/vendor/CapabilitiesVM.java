@@ -13,7 +13,7 @@ import java.util.Set;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.LimeDHTManager;
+import com.limegroup.gnutella.dht.impl.AbstractDHTController;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -137,7 +137,7 @@ public final class CapabilitiesVM extends VendorMessage {
         
         if(RouterService.isActiveDHTNode()) {
             smp = new SupportedMessageBlock(LIME_DHT_CAPABLE_BYTES,
-                                            RouterService.getLimeDHTManager().getVersion());
+                                            RouterService.getLimeDHTManager().getDHTVersion());
             hashSet.add(smp);
         }
         

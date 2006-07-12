@@ -23,6 +23,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.LifecycleEvent.LifeEvent;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
@@ -3011,7 +3012,11 @@ public abstract class MessageRouter {
     
     public class VendorMessageHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ((ManagedConnection)handler).handleVendorMessage((VendorMessage)msg);
+            ManagedConnection c = (ManagedConnection)handler;
+            c.handleVendorMessage((VendorMessage)msg);
+            //fire a vendor event
+            _manager.dispatchLifecycleEvent(new LifecycleEvent(MessageRouter.this, 
+                    LifeEvent.CONNECTION_VENDORED , c));
         }
     }
     

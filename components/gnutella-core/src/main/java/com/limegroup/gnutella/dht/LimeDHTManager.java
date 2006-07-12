@@ -1,521 +1,124 @@
 package com.limegroup.gnutella.dht;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ThreadFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
-import com.limegroup.gnutella.MessageListener;
-import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.dht.impl.AbstractDHTController;
+import com.limegroup.gnutella.dht.impl.ActiveDHTNodeController;
+import com.limegroup.gnutella.dht.impl.PassiveDHTNodeController;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
-import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.util.BucketUtils;
 
-/**
- * The manager for the LimeWire Gnutella DHT. 
- * A node should connect to the DHT only if it has previously been designated as capable 
- * by the <tt>NodeAssigner</tt> or if it is forced to. 
- * Once the node is a DHT node, if <tt>EXCLUDE_ULTRAPEERS</tt> is set to true, 
- * it should no try to connect as an ultrapeer (@see RouterService.isExclusiveDHTNode()). 
- *
- * The NodeAssigner should be the only class to have the authority to 
- * initialize the DHT and connect to the network.
- * 
- * This manager can be in one of the four following states:
- * 1) not running.
- * 2) running and bootstrapping: the dht is trying to bootstrap.
- * 3) running and waiting: the dht has failed the bootstrap and is waiting for additional bootstrap hosts.
- * 3) running and bootstrapped.
- * 
- * The current implementation is dependant on the MojitoDHT. 
- */
-public class LimeDHTManager implements LifecycleListener {
-    
-    private static final Log LOG = LogFactory.getLog(LimeDHTManager.class);
-    
-    /**
-     * The file to persist this Mojito DHT
-     */
-    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
-    
-    /**
-     * The Gnutella DHT node fetcher 
-     */
-    private DHTNodeFetcher dhtNodeFetcher;
+public class LimeDHTManager implements LifecycleListener{
 
-    /**
-     * The instance of the DHT
-     */
-    private MojitoDHT dht;
-
-    private volatile boolean running = false;
+    private DHTController dhtController;
     
-    /**
-     * A boolean to represent the state when we have failed last bootstrap
-     * and are waiting for new bootstrap hosts
-     */
-    private volatile boolean waiting = false;
+    public LimeDHTManager() {}
     
-    /**
-     * A list of DHT bootstrap hosts comming from the Gnutella network
-     */
-    private volatile LinkedList<SocketAddress> bootstrapHosts 
-            = new LinkedList<SocketAddress>();
-    
-    private boolean isActive = false;
-    
-    private LimeDHTRoutingTable limeDHTRouteTable;
-    
-    public LimeDHTManager() {
-        init();
-    }
-    
-    public void init() {
-        MojitoDHT mDHT = null;
-        if (DHTSettings.PERSIST_DHT.getValue() && 
-                FILE.exists() && FILE.isFile()) {
-            try {
-                FileInputStream in = new FileInputStream(FILE);
-                mDHT = MojitoDHT.load(in);
-                in.close();
-            } catch (FileNotFoundException e) {
-                LOG.error("FileNotFoundException", e);
-            } catch (ClassNotFoundException e) {
-                LOG.error("ClassNotFoundException", e);
-            } catch (IOException e) {
-                LOG.error("IOException", e);
+    public void startDHT(boolean activeMode) {
+        
+        if(dhtController == null) {
+            if(activeMode) {
+                dhtController = new ActiveDHTNodeController();
+            } else {
+                dhtController = new PassiveDHTNodeController();
             }
-        }
+        } else if(activeMode 
+                && !dhtController.isActiveNode()) {
+            dhtController.shutdown();
+            dhtController = new ActiveDHTNodeController();
+        } else if(!activeMode 
+                && dhtController.isActiveNode()) {
+            dhtController.shutdown();
+            dhtController = new PassiveDHTNodeController();
+        } 
         
-        if (mDHT == null) {
-            dht = new MojitoDHT("LimeMojitoDHT");
-        } else {
-            dht = mDHT;
-        }
-        
-        limeDHTRouteTable = (LimeDHTRoutingTable) dht.setRoutingTable(LimeDHTRoutingTable.class);
-        dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
-        dht.setThreadFactory(new ThreadFactory() {
-            public Thread newThread(Runnable runnable) {
-                return new ManagedThread(runnable);
-            }
-        });
+        dhtController.start();
     }
     
-    /**
-     * Start the Mojito DHT and connects it to the network in either passive mode
-     * or active mode if we are not firewalled.
-     * The start preconditions are the following:
-     * 1) if we want to actively connect: We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
-     * 2) We are not an ultrapeer while excluding ultrapeers from the active network
-     * 3) We are not already connected or trying to bootstrap
-     * 
-     * @param activeMode true to connect to the DHT in active mode
-     */
-    public synchronized void start(boolean activeMode) {
-        if (running) {
+    public void switchMode(boolean toActiveMode) {
+        if(dhtController == null || !dhtController.isRunning()) {
             return;
         }
         
-        isActive = activeMode;
-        
-        if(DHTSettings.DISABLE_DHT_NETWORK.getValue() 
-                || DHTSettings.DISABLE_DHT_USER.getValue()) { 
-            return;
-        }
-        
-        //if we want to connect actively, we either shouldn't be an ultrapeer
-        //or should be DHT capable
-        if (isActive && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-            
-            if(!DHTSettings.DHT_CAPABLE.getValue() 
-                    || (RouterService.isSupernode() 
-                    && DHTSettings.EXCLUDE_ULTRAPEERS.getValue())) {
-            
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Cannot initialize DHT - node is not DHT capable or is an ultrapeer");
-                }
-                return;
-            }
-        }
-        
-        //set firewalled status
-        dht.setFirewalled(!activeMode);
-        
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Initializing the DHT");
-        }
-        
-        try {
-            InetAddress addr = InetAddress.getByAddress(RouterService.getAddress());
-            int port = RouterService.getPort();
-            dht.bind(new InetSocketAddress(addr, port));
-            dht.start();
-            running = true;
-            bootstrap();
-        } catch (IOException err) {
-            LOG.error(err);
-        }
-    }
-    
-    /**
-     * Tries to bootstrap of a list of bootstrap hosts. 
-     * If bootstraping fails, the manager clears the list and 
-     * puts itself in a waiting state until new hosts are added. 
-     * 
-     */
-    private void bootstrap() {
-        final List<SocketAddress> snapshot = new LinkedList<SocketAddress>();
-        
-        //first add bootstrap host list coming from the network
-        synchronized (bootstrapHosts) {
-             snapshot.addAll(bootstrapHosts);
-        }
-
-        //then append SIMPP hosts if we have any
-        SocketAddress simppBootstrapHost = getSIMPPHost();
-        if(simppBootstrapHost != null) {
-            snapshot.add(simppBootstrapHost);
-        }
-        
-        System.out.println("snapshot:" + snapshot);
-        try {
-            dht.bootstrap(snapshot, new BootstrapListener() {
-                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
-                    synchronized (bootstrapHosts) {
-                        bootstrapHosts.removeAll(failedHosts);
-                        if(!bootstrapHosts.isEmpty()) {
-                            //hosts were added --> try again
-                            bootstrap();
-                        } else {
-                            waiting = true;
-                            if(dhtNodeFetcher == null) {
-                                dhtNodeFetcher = new DHTNodeFetcher(LimeDHTManager.this);
-                            }
-                            //send UDPPings -- non blocking
-                            dhtNodeFetcher.requestDHTHosts();
-                        }
-                    }
-                }
-
-                public void phaseOneComplete(long time) {
-                    waiting = false;
-                }
-                
-                public void phaseTwoComplete(boolean foundNodes, long time) {
-                    //Notify our connections that we are now a full DHT node 
-                    sendUpdatedCapabilities();
-                    
-                    //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
-                }
-            });
-            
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
-    }
-    
-    /**
-     * Shuts down the dht and persists it
-     * 
-     */
-    public synchronized void shutdown(){
-        if (!running) {
-            return;
-        }
-        
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Shutting down DHT");
-        }
-        
-        dht.stop();
-        running = false;
-        waiting = false;
-        
-        //Notify our connections that we disconnected
-        sendUpdatedCapabilities();
-        
-        try {
-            if(DHTSettings.PERSIST_DHT.getValue()) {
-                FileOutputStream out = new FileOutputStream(FILE);
-                dht.store(out);
-                out.close();
-            }
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
-    }
-    
-    /**
-     * Sends the updated capabilities to our ultrapeers -- only if we are an active node!
-     */
-    private void sendUpdatedCapabilities() {
-        if(!isActive) {
-            return;
-        }
-        CapabilitiesVM.reconstructInstance();
-        RouterService.getConnectionManager().sendUpdatedCapabilities();
-    }
-    
-    /**
-     * Adds a host to the head of a list of boostrap hosts ordered by Most Recently Seen.
-     * If the manager is waiting for hosts, this method tries to bootstrap 
-     * immediately after.
-     * 
-     * @param hostAddress The SocketAddress of the new bootstrap host.
-     */
-    public synchronized void addBootstrapHost(SocketAddress hostAddress) {
-        synchronized (bootstrapHosts) {
-            //Keep bootstrap list small because it should be updated often
-            if(bootstrapHosts.size() >= 10) {
-                bootstrapHosts.removeLast();
-            }
-            
-            //always put/replace the host to the head of the list
-            bootstrapHosts.remove(hostAddress);
-            bootstrapHosts.addFirst(hostAddress);
-        }
-        System.out.println("adding: "+ hostAddress);
-        System.out.println("waiting: "+ waiting);
-        if(waiting) {
-            waiting = false;
-            bootstrap();
-        }
-    }
-    
-    public synchronized void addLeafDHTNode(String host, int port) {
-        if(!running) {
-            return;
-        }
-        
-        InetSocketAddress addr = new InetSocketAddress(host, port);
-        if(waiting) {
-            addBootstrapHost(addr);
-        } else {
-            limeDHTRouteTable.addLeafDHTNode(addr);
-        }
-    }
-    
-    public synchronized void removeLeafDHTNode(String host, int port) {
-        if(!running) {
-            return;
-        }
-        
-        limeDHTRouteTable.removeLeafDHTNode(host, port);
-    }
-    
-    public boolean isRunning() {
-        return running;
-    }
-    
-    public boolean isActiveNode() {
-        return running & isActive;
-    }
-    
-    public boolean isPassiveNode() {
-        return running & !isActive;
-    }
-    
-    /**
-     * Sets the mode 
-     * 
-     * @param passive
-     */
-    public void setPassive(boolean passive) {
-        boolean wasPassive = dht.isFirewalled();
-        if((passive && wasPassive) || (!passive && !wasPassive)) {
+        boolean wasActive = dhtController.isActiveNode();
+        if((toActiveMode && wasActive) || (!toActiveMode && !wasActive)) {
             return; //no change
         }
         
-        boolean wasRunning = running;
-        shutdown();
-        
-        //we are becoming active: load dht from last active session
-        if(wasPassive && !passive) {
-            DHTSettings.PERSIST_DHT.setValue(true);
-            init();
-        } 
-        //we are becoming passive: start new DHT with new nodeID so that 
-        //the node is not part of the DHT anymore
-        else if(!wasPassive && passive) {
-            DHTSettings.PERSIST_DHT.setValue(false);
-            init();
-        } 
-        
-        if(wasRunning) {
-            start(!passive);
-        }
+        startDHT(toActiveMode);
     }
 
-    /**
-     * Shuts the DHT down if we got disconnected from the network.
-     */
-    public void handleLifecycleEvent(LifecycleEvent evt) {
-        if(evt.isConnectedEvent()) {
-            //protect against change of state
-            if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                    && RouterService.isSupernode()) {
-                setPassive(true);
-            }
-            
-            //we were waiting and had no connection to the gnutella network
-            //now we do --> start sending UDP pings to request bootstrap nodes
-            if(waiting) {
-                dhtNodeFetcher.requestDHTHosts();
-            }
-        } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            if(running && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-                shutdown();
-            }
-        }
-    }
-    
-    /**
-     * Gets the SIMPP host responsible for the keyspace containing the local node ID
-     * 
-     * @return
-     */
-    private SocketAddress getSIMPPHost(){
-        String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
-        List<SocketAddress> hostList = new ArrayList<SocketAddress>(simppHosts.length);
-
-        for (String hostString : simppHosts) {
-            int index = hostString.indexOf(":");
-            if(index < 0 || index == hostString.length()-1) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(new UnknownHostException("invalid host: " + hostString));
-                }
-                
-                continue;
-            }
-            
-            try {
-                String host = hostString.substring(0, index);
-                int port = Integer.parseInt(hostString.substring(index+1).trim());
-                InetSocketAddress addr = new InetSocketAddress(host, port);
-                hostList.add(addr);
-            } catch(NumberFormatException nfe) {
-                LOG.error(new UnknownHostException("invalid host: " + hostString));
-            }
-        }
-
-        if(hostList.isEmpty()) {
-            return null;
-        }
-        
-        //each host in the list is responsible for a subspace of the keyspace
-        int localPrefix = (int)((dht.getLocalNodeID().getBytes()[0] & 0xF0) >> 4);
-        
-        int index = (int)((float)hostList.size()/15f * localPrefix) % hostList.size();
-        return hostList.get(index);
-    }
-    
-    public MojitoDHT getMojitoDHT() {
-        return dht;
+    public synchronized void addBootstrapHost(SocketAddress hostAddress) {
+        dhtController.addBootstrapHost(hostAddress);
     }
     
     public void addressChanged() {
-        if(!running) {
+        if(dhtController == null || !dhtController.isRunning()) {
             return;
         }
         
-        dht.stop(); //the node assigner will take care of restarting it!
-    }
-    
-    public int getVersion() {
-        return dht.getVersion();
-    }
-    
-    public boolean isWaiting() {
-        return waiting;
+        boolean wasRunning = dhtController.isRunning();
+        
+        dhtController.shutdown();
+        
+        if(wasRunning) {
+            dhtController.start();
+        }
     }
     
     public List<IpPort> getActiveDHTNodes(int maxNodes){
-        if(!running) {
+        if(dhtController == null) {
             return Collections.emptyList();
         }
         
-        //IF we are active and bootstrapped: we need only return ourselves
-        if(isActive && !waiting) {
-            IpPort localNode = new IpPortContactNode(dht.getLocalNode());
-            return Arrays.asList(localNode);
-        }
-        
-        //ELSE IF we have any DHT leaves we return them directly
-        if(limeDHTRouteTable.hasDHTLeaves()) {
-            List<IpPort> dhtLeaves = new ArrayList<IpPort>(limeDHTRouteTable.getDHTLeaves());
-            //size will be > 0
-            return dhtLeaves.subList(0,Math.min(maxNodes, dhtLeaves.size()));
-        }
-        
-        //ELSE return the MRS node of our routing table
-        List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
-                limeDHTRouteTable.getLiveContacts(), maxNodes);
-        
-        KUID localNode = dht.getLocalNodeID();
-        List<IpPort> ipps = new ArrayList<IpPort>();
-        for(Contact cn : nodes) {
-            if(!isActive && cn.getNodeID().equals(localNode)) {
-                continue;
-            }
-            ipps.add(new IpPortContactNode(cn));
-        }
-        return ipps;
+        return dhtController.getActiveDHTNodes(maxNodes);
     }
     
+    public boolean isActiveNode() {
+        if(dhtController != null) {
+            return dhtController.isActiveNode();
+        }
+     
+        return false;
+    }
     
-    
-    private class IpPortContactNode implements IpPort {
-        
-        private final InetAddress nodeAddress;
-        
-        private final int port;
-        
-        public IpPortContactNode(Contact node) {
-            InetSocketAddress addr = (InetSocketAddress) node.getSocketAddress();
-            this.nodeAddress = addr.getAddress();
-            this.port = addr.getPort();
-        }
-        
-        public String getAddress() {
-            return nodeAddress.getHostAddress();
-        }
-
-        public InetAddress getInetAddress() {
-            return nodeAddress;
-        }
-
-        public int getPort() {
-            return port;
+    public void shutdown(){
+        if(dhtController != null) {
+            dhtController.shutdown();
         }
     }
+    
+    public boolean isRunning() {
+        if(dhtController != null) {
+            return dhtController.isRunning();
+        }
+        return false;
+    }
+    
+    public int getDHTVersion() {
+        if(dhtController != null) {
+            return dhtController.getDHTVersion();
+        }
+        return -1;
+    }
+    
+    public MojitoDHT getMojitoDHT() {
+        if(dhtController != null) {
+            return dhtController.getMojitoDHT();
+        }
+        return null;
+    }
+
+    public void handleLifecycleEvent(LifecycleEvent evt) {
+        if(dhtController != null) {
+            dhtController.handleLifecycleEvent(evt);
+        }
+    }
+
 }

@@ -4,18 +4,31 @@ import java.util.EventObject;
 
 public class LifecycleEvent extends EventObject {
     
-    public static final int CONNECTING = 1;
-    public static final int CONNECTED = 2;
-    public static final int DISCONNECTED = 3;
-    public static final int NO_INTERNET = 4;
-    public static final int CONNECTION_INITIALIZING = 6;
-    public static final int CONNECTION_INITIALIZED = 7;
-    public static final int CONNECTION_CLOSED = 8;
-   
-    private final Connection connection;
-    private final int type;
+    public static enum LifeEvent {
+        CONNECTING("connecting"), 
+        CONNECTED("connected"), 
+        DISCONNECTED("disconnected"), 
+        NO_INTERNET("no_internet"), 
+        CONNECTION_INITIALIZING("connection_initializing"), 
+        CONNECTION_INITIALIZED("connection_initialized"), 
+        CONNECTION_CLOSED("connection_closed"),
+        CONNECTION_VENDORED("connection_vendored");
+        
+        private final String name;
+        
+        LifeEvent(String name) {
+            this.name = name;
+        }
+        
+        public String getName() {
+            return name;
+        }
+    }
     
-    public LifecycleEvent(Object source, int type, Connection c) {
+    private final Connection connection;
+    private final LifeEvent type;
+    
+    public LifecycleEvent(Object source, LifeEvent type, Connection c) {
         super(source);
         this.connection = c;
         this.type = type;
@@ -28,11 +41,11 @@ public class LifecycleEvent extends EventObject {
      * 
      * @param manager
      */
-    public LifecycleEvent(Object source, int type) {
+    public LifecycleEvent(Object source, LifeEvent type) {
         this(source, type, null);
     }
 
-    public int getType() {
+    public LifeEvent getType() {
         return type;
     }
 
@@ -41,62 +54,40 @@ public class LifecycleEvent extends EventObject {
     }
 
     public boolean isConnectingEvent() {
-        return (type == CONNECTING); 
+        return (type == LifeEvent.CONNECTING); 
     }
     
     public boolean isConnectedEvent() {
-        return (type == CONNECTED);
+        return (type == LifeEvent.CONNECTED);
     }
     
     public boolean isDisconnectedEvent() {
-        return (type == DISCONNECTED);
+        return (type == LifeEvent.DISCONNECTED);
     }
     
     public boolean isNoInternetEvent() {
-        return (type == NO_INTERNET);
+        return (type == LifeEvent.NO_INTERNET);
     }
     
     public boolean isConnectionInitializingEvent() {
-        return (type == CONNECTION_INITIALIZING);
+        return (type == LifeEvent.CONNECTION_INITIALIZING);
     }
     
     public boolean isConnectionClosedEvent() {
-        return (type == CONNECTION_CLOSED);
+        return (type == LifeEvent.CONNECTION_CLOSED);
     }
     
     public boolean isConnectionInitializedEvent() {
-        return (type == CONNECTION_INITIALIZED);
+        return (type == LifeEvent.CONNECTION_INITIALIZED);
+    }
+    
+    public boolean isConnectionVendoredEvent() {
+        return (type == LifeEvent.CONNECTION_VENDORED);
     }
     
     public String toString() {
         StringBuffer buffer = new StringBuffer("LifecycleEvent: [event=");
-    
-        switch(type) {
-            case CONNECTING:
-                buffer.append("ADD");
-                break;
-            case CONNECTED:
-                buffer.append("CONNECTED");
-                break;
-            case DISCONNECTED:
-                buffer.append("DISCONNECTED");
-                break;
-            case NO_INTERNET:
-                buffer.append("NO_INTERNET");
-                break;
-            case CONNECTION_INITIALIZING:
-                buffer.append("CONNECTION_INITIALIZING");
-                break;
-            case CONNECTION_INITIALIZED:
-                buffer.append("CONNECTION_INITIALIZED");
-                break;
-            case CONNECTION_CLOSED:
-                buffer.append("CONNECTION_CLOSED");
-                break;
-            default:
-                buffer.append("UNKNOWN");
-                break;
-        }
+        buffer.append(type.getName());
         buffer.append(", connection=");
         if(connection != null) {
             buffer.append(connection.toString());

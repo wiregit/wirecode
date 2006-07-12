@@ -25,6 +25,7 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.dht.LimeDHTManager;
+import com.limegroup.gnutella.dht.impl.AbstractDHTController;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -221,7 +222,7 @@ public class RouterService {
     /**
      * Initialize the class that manages the DHT.
      */
-    private static LimeDHTManager dhtManager;
+    private static LimeDHTManager dhtManager = new LimeDHTManager();
     
     /**
      * The Node assigner class
@@ -311,7 +312,6 @@ public class RouterService {
 		RouterService.callback = callback;
         fileManager.registerFileManagerEventListener(callback);
         RouterService.router = router;
-        dhtManager = new LimeDHTManager();
 
         manager.registerLifecycleListener(callback);
         manager.registerLifecycleListener(dhtManager);
@@ -1579,29 +1579,17 @@ public class RouterService {
     }
     
     /**
-     * Tells whether this node is *actively* connected to the DHT
-     * @see <tt>isPassiveDHTNode</tt>
-     */
-    public static boolean isActiveDHTNode() {
-        if(dhtManager != null)
-            return dhtManager.isActiveNode();
-        else return false;
-    }
-    
-    /**
-     * Tells whether this node is *passively* connected to the DHT, i.e. can perform queries
+     * Tells whether this node is *actively* connected to the DHT or 
+     * is *passively* connected to the DHT, i.e. can perform queries
      * and store requests but is not part of the DHT routing table 
      * (does not store data or respond to queries)
      */
-    public static boolean isPassiveDHTNode() {
-        if(dhtManager != null)
-            return dhtManager.isPassiveNode();
-        else return false;
+    public static boolean isActiveDHTNode() {
+        return dhtManager.isActiveNode();
     }
     
-    public static void setPassiveDHTNode(boolean passive) {
-        if(dhtManager != null)
-            dhtManager.setPassive(passive);
+    public static void switchMode(boolean toActiveNode) {
+        dhtManager.switchMode(toActiveNode);
     }
     
 	/**
@@ -1676,8 +1664,7 @@ public class RouterService {
         if(callback != null)
             callback.handleAddressStateChanged();        
         
-        if(dhtManager != null)
-            dhtManager.addressChanged();
+        dhtManager.addressChanged();
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1827,8 +1814,7 @@ public class RouterService {
     }
     
     public static void startDHT(boolean activeMode) {
-        if(isDHTNode()) return;
-        dhtManager.start(activeMode);
+        dhtManager.startDHT(activeMode);
     }
     
     public static void shutdownDHT() {

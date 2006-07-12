@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.dht;
 
-import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -8,12 +7,12 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.impl.AbstractDHTController;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -87,14 +86,15 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     public void testBootstrap() throws Exception {
         RouterService.startDHT(true);
+        AbstractDHTController controller = getController();
         sleep(500);
-        assertTrue(DHT_MANAGER.isRunning());
-        assertTrue(DHT_MANAGER.isActiveNode());
-        assertTrue(DHT_MANAGER.isWaiting());
+        assertTrue(controller.isRunning());
+        assertTrue(controller.isActiveNode());
+        assertTrue(controller.isWaiting());
         
         //add to the manager
         DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
-        assertFalse(DHT_MANAGER.isWaiting());
+        assertFalse(controller.isWaiting());
         sleep(100);
         assertGreaterThan(-1, CapabilitiesVM.instance().supportsDHT());
     }
@@ -103,23 +103,24 @@ public class LimeDHTManagerTest extends BaseTestCase {
         NetworkSettings.MAX_ERRORS.setValue(1);
         NetworkSettings.MAX_TIMEOUT.setValue(300);
         RouterService.startDHT(true);
+        AbstractDHTController controller = getController();
         sleep(300);
         //add invalid hosts
         DHT_MANAGER.addBootstrapHost(new InetSocketAddress("localhost",2000));
-        assertFalse(DHT_MANAGER.isWaiting());
+        assertFalse(controller.isWaiting());
         for(int i = 1; i < 10; i++) {
             DHT_MANAGER.addBootstrapHost(new InetSocketAddress("0.0.0.0",i));
         }
         //now add valid: should be first in the list
         DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
-        List bootstrapHosts = (List) PrivilegedAccessor.getValue(DHT_MANAGER, "bootstrapHosts");
+        List bootstrapHosts = (List) PrivilegedAccessor.getValue(controller, "bootstrapHosts");
         assertEquals(10, bootstrapHosts.size());
         assertEquals(BOOTSTRAP_DHT.getLocalAddress(), bootstrapHosts.get(0));
         assertFalse(bootstrapHosts.contains(new InetSocketAddress("localhost",2000)));
         sleep(1000);
         //by now, should have failed previous unsuccessfull bootstrap and bootstrapped correctly
-        bootstrapHosts = (List) PrivilegedAccessor.getValue(DHT_MANAGER, "bootstrapHosts");
-        assertFalse(DHT_MANAGER.isWaiting());
+        bootstrapHosts = (List) PrivilegedAccessor.getValue(controller, "bootstrapHosts");
+        assertFalse(controller.isWaiting());
 //        assertTrue()
     }
     
@@ -145,27 +146,34 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     public void testSwitchPassiveActive() throws Exception{
         DHTSettings.PERSIST_DHT.setValue(true);
-        RouterService.startDHT(true);
+        DHT_MANAGER.startDHT(true);
+        AbstractDHTController controller = getController();
         assertTrue(DHT_MANAGER.isRunning());
-        KUID nodeId = DHT_MANAGER.getMojitoDHT().getLocalNodeID();
+        assertTrue(DHT_MANAGER.isActiveNode());
+        KUID nodeId = controller.getMojitoDHT().getLocalNodeID();
         //try to bootstrap at the same time
         DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
-        DHT_MANAGER.setPassive(true);
+        DHT_MANAGER.switchMode(false);
+        controller = getController();
         //we should have switched IDs
         assertTrue(DHT_MANAGER.isRunning());
-        KUID passiveNodeId = DHT_MANAGER.getMojitoDHT().getLocalNodeID();
+        assertFalse(DHT_MANAGER.isActiveNode());
+        KUID passiveNodeId = controller.getMojitoDHT().getLocalNodeID();
         assertNotEquals(nodeId, passiveNodeId);
-        DHT_MANAGER.setPassive(true);
+        DHT_MANAGER.switchMode(false);
         //this should not change anything
-        DHT_MANAGER.setPassive(true);
-        assertEquals(passiveNodeId, DHT_MANAGER.getMojitoDHT().getLocalNodeID());
+        DHT_MANAGER.switchMode(false);
+        controller = getController();
+        assertEquals(passiveNodeId, controller.getMojitoDHT().getLocalNodeID());
         
-        DHT_MANAGER.setPassive(false);
+        DHT_MANAGER.switchMode(true);
+        controller = getController();
         //we should have the same ID again!
-        assertEquals(nodeId, DHT_MANAGER.getMojitoDHT().getLocalNodeID());
-        DHT_MANAGER.setPassive(true);
+        assertEquals(nodeId, controller.getMojitoDHT().getLocalNodeID());
+        DHT_MANAGER.switchMode(false);
+        controller = getController();
         //and now it should be different from last passive time
-        assertNotEquals(passiveNodeId, DHT_MANAGER.getMojitoDHT().getLocalNodeID());
+        assertNotEquals(passiveNodeId, controller.getMojitoDHT().getLocalNodeID());
     }
     
     public void tearDown() {
@@ -176,6 +184,10 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     private void sleep() {
         sleep(300);
+    }
+    
+    private AbstractDHTController getController() throws Exception{
+        return (AbstractDHTController) PrivilegedAccessor.getValue(DHT_MANAGER, "dhtController");
     }
 
     private void sleep(int milliseconds) {

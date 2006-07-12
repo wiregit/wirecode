@@ -2,17 +2,23 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.SocketAddress;
+import java.util.List;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.LimeDHTManager;
+import com.limegroup.gnutella.dht.impl.AbstractDHTController;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.mojito.MojitoDHT;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
@@ -169,9 +175,51 @@ public class CapabilitiesVMTest
     }
 
     private class LimeDHTManagerStub extends LimeDHTManager {
-        public boolean isRunning() {
-            return true;
+        public boolean isRunning() {return true;}
+
+
+        @Override
+        public List<IpPort> getActiveDHTNodes(int maxNodes) {return null;}
+
+
+        @Override
+        public boolean isActiveNode() {return true;}
+
+
+        @Override
+        public synchronized void addBootstrapHost(SocketAddress hostAddress) {}
+
+
+        @Override
+        public void addressChanged() {}
+
+
+        @Override
+        public int getDHTVersion() {
+            return 1;
         }
+
+
+        @Override
+        public MojitoDHT getMojitoDHT() {
+            return null;
+        }
+
+
+        @Override
+        public void handleLifecycleEvent(LifecycleEvent evt) {}
+
+
+        @Override
+        public void shutdown() {}
+
+
+        @Override
+        public void startDHT(boolean activeMode) {}
+
+
+        @Override
+        public void switchMode(boolean toActiveMode) {}
     }
 
 }

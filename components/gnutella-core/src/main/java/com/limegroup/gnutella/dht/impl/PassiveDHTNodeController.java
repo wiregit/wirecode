@@ -1,0 +1,128 @@
+package com.limegroup.gnutella.dht.impl;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.LifecycleEvent;
+import com.limegroup.gnutella.dht.LimeDHTRoutingTable;
+import com.limegroup.gnutella.dht.impl.AbstractDHTController.IpPortContactNode;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.util.BucketUtils;
+
+public class PassiveDHTNodeController extends AbstractDHTController{
+    
+    private LimeDHTRoutingTable limeDHTRouteTable;
+
+    public PassiveDHTNodeController() {
+        super();
+    }
+
+    @Override
+    public void init() {
+        dht = new MojitoDHT("LimeMojitoDHT");
+        //TODO: here, load the small list of MRS nodes 
+        limeDHTRouteTable = (LimeDHTRoutingTable) dht.setRoutingTable(LimeDHTRoutingTable.class);
+        setLimeMessageDispatcher();
+    }
+
+    @Override
+    public void start() {
+        super.start(false);
+    }
+    
+    private synchronized void addLeafDHTNode(String host, int port) {
+        if(!running) {
+            return;
+        }
+        
+        InetSocketAddress addr = new InetSocketAddress(host, port);
+        if(waiting) {
+            addBootstrapHost(addr);
+        } else {
+            limeDHTRouteTable.addLeafDHTNode(addr);
+        }
+    }
+    
+    private synchronized void removeLeafDHTNode(String host, int port) {
+        if(!running) {
+            return;
+        }
+        
+        limeDHTRouteTable.removeLeafDHTNode(host, port);
+    }
+
+    @Override
+    protected void sendUpdatedCapabilities() {}
+
+    @Override
+    public synchronized void shutdown() {
+        //TODO: here, save a small list of MRS nodes for next bootstrap
+        super.shutdown();
+    };
+    
+    public boolean isActiveNode() {
+        return false;
+    }
+
+    @Override
+    public List<IpPort> getActiveDHTNodes(int maxNodes) {
+        if(!running || waiting) {
+            return Collections.emptyList();
+        }
+        
+        //IF we have any DHT leaves we return them directly
+        if(limeDHTRouteTable.hasDHTLeaves()) {
+            List<IpPort> dhtLeaves = new ArrayList<IpPort>(limeDHTRouteTable.getDHTLeaves());
+            //size will be > 0
+            return dhtLeaves.subList(0,Math.min(maxNodes, dhtLeaves.size()));
+        }
+        
+        //ELSE return the MRS node of our routing table
+        List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
+                limeDHTRouteTable.getLiveContacts(), maxNodes);
+        
+        KUID localNode = dht.getLocalNodeID();
+        List<IpPort> ipps = new ArrayList<IpPort>();
+        for(Contact cn : nodes) {
+            if(cn.getNodeID().equals(localNode)) {
+                continue;
+            }
+            ipps.add(new IpPortContactNode(cn));
+        }
+        return ipps;
+    }
+    
+    public void handleLifecycleEvent(LifecycleEvent evt) {
+        //handle network connections - disconnections
+        super.handleLifecycleEvent(evt);
+        
+        //handle connection specific events
+        Connection c = evt.getConnection();
+        if( c == null) {
+            return;
+        }
+        
+        String host = c.getAddress();
+        int port = c.getPort();
+        
+        if(evt.isConnectionClosedEvent()) {
+            removeLeafDHTNode( host , port );
+            
+        } else if(evt.isConnectionVendoredEvent()){
+            
+            if(c.remostHostIsDHTNode() > -1) {
+                addLeafDHTNode( host , port );
+            } else {
+                removeLeafDHTNode( host , port );
+            }
+                
+        } 
+    }
+    
+}

@@ -6,6 +6,7 @@ import java.util.List;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.impl.AbstractDHTController;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -16,7 +17,7 @@ import com.limegroup.gnutella.util.IpPort;
 /**
  * This class takes care of fetching DHT hosts from the Gnutella network 
  * using UDP pings. It uses the ranker from the HostCatcher class, which it cancels
- * when the <tt>LimeDHTManager</tt> is able to bootstrap. 
+ * when the <tt>AbstractDHTController</tt> is able to bootstrap. 
  * 
  * This class can also start a timer task to periodically requests hosts until 
  * the manager is able to bootstrap. TODO: ability to cancel timer task
@@ -26,14 +27,14 @@ public class DHTNodeFetcher {
     
     private static final long FETCH_DELAY = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
     
-    private final LimeDHTManager manager;
+    private final AbstractDHTController controller;
     
     private long lastRequest = 0L;
     
     private boolean isTaskRunning;
 
-    public DHTNodeFetcher(LimeDHTManager manager) {
-        this.manager = manager;
+    public DHTNodeFetcher(AbstractDHTController controller) {
+        this.controller = controller;
     }
     
     /**
@@ -70,7 +71,7 @@ public class DHTNodeFetcher {
     
     private class TimedFetcher implements Runnable {
         public void run() {
-            if (!manager.isWaiting()) {
+            if (!controller.isWaiting()) {
                 return;
             }
             requestDHTHosts();
@@ -83,7 +84,7 @@ public class DHTNodeFetcher {
             long delay = System.currentTimeMillis() - lastRequest;
             //stop when not waiting anymore OR when not connected to the Gnutella network 
             //OR timeout
-            return (!manager.isWaiting() 
+            return (!controller.isWaiting() 
                     || !RouterService.isConnected()
                     || (delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue()));
         }
@@ -100,7 +101,7 @@ public class DHTNodeFetcher {
             List<IpPort> l = reply.getPackedIPPorts();
             
             for (IpPort ipp : l) {
-                manager.addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
+                controller.addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
             }
         }
         public void registered(byte[] guid) {}

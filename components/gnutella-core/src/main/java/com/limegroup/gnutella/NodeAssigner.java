@@ -235,7 +235,7 @@ public class NodeAssigner {
             if(!RouterService.isDHTNode()) {
                 RouterService.startDHT(false);
             } else if(RouterService.isActiveDHTNode()) {
-                RouterService.setPassiveDHTNode(true);
+                RouterService.switchMode(false);
             }
             return;
         }
@@ -298,7 +298,7 @@ public class NodeAssigner {
         _willTryToBeUltrapeer = false;
         //here: we are not an ultrapeer and will not try to connect as one
         //maybe a demotion from ultrapeer to leaf --> disconnect the DHT if it is the case
-        if(RouterService.isPassiveDHTNode()) {
+        if(RouterService.isDHTNode() && !RouterService.isActiveDHTNode()) {
             RouterService.shutdownDHT();
         }
     }
@@ -330,7 +330,7 @@ public class NodeAssigner {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Randomly switching from DHT node to ultrapeer!");
                 }
-                RouterService.setPassiveDHTNode(true);
+                RouterService.switchMode(false);
                 return true;
             } else {
                 return false;

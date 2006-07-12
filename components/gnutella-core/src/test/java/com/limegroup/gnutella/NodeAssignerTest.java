@@ -150,7 +150,8 @@ public class NodeAssignerTest extends BaseTestCase {
         ULTRAPEER.setAcceptsUltrapeers(true);
         connect();
         assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
-        assertTrue("should be passively connected to the DHT", RouterService.isPassiveDHTNode());
+        assertTrue("should be passively connected to the DHT", RouterService.isDHTNode() 
+                && !RouterService.isActiveDHTNode());
         
         //make sure you can't be an active DHT node at the same time
         setDHTCapabilities();

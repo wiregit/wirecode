@@ -673,7 +673,8 @@ public final class MessageRouterTest extends BaseTestCase {
             int port = 3000+i;
             dht.bind(new InetSocketAddress("localhost",port));
             dht.start();
-            RouterService.getLimeDHTManager().addLeafDHTNode("localhost", port);
+            //TODO!
+//            RouterService.getLimeDHTManager().addLeafDHTNode("localhost", port);
         }
         Thread.sleep(300);
         //create the request

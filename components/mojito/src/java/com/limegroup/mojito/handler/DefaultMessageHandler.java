@@ -133,7 +133,7 @@ public class DefaultMessageHandler extends MessageHandler
                 for(KeyValueBag bag : bags) {
                     
                     // To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
-                    // or if it's ID is closer than any other ID (except the new closest one of course)
+                    // or if its ID is closer than any other ID (except the new closest one of course)
                     // TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
                     List<Contact> closestNodesToKey = routeTable.select(bag.getKey(), k, false);
                     Contact closest = closestNodesToKey.get(0);

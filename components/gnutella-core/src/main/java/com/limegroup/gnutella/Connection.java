@@ -16,7 +16,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.connection.GnetConnectObserver;
-import com.limegroup.gnutella.dht.LimeDHTManager;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
 import com.limegroup.gnutella.handshaking.BlockingIncomingHandshaker;
 import com.limegroup.gnutella.handshaking.BlockingOutgoingHandshaker;
@@ -313,15 +312,6 @@ public class Connection implements IpPort {
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
         if (vm instanceof CapabilitiesVM) {
             _capabilities = (CapabilitiesVM) vm;
-            if(RouterService.isDHTNode()) {
-                //add DHT node to our DHT RT as soon as we know
-                if(_capabilities.supportsDHT() > -1) {
-                    RouterService.getLimeDHTManager().addLeafDHTNode(_host, _port);
-                } else {
-                    RouterService.getLimeDHTManager().removeLeafDHTNode(_host,_port);
-                }
-                
-            }
         }
         if (vm instanceof HeaderUpdateVendorMessage) {
             HeaderUpdateVendorMessage huvm = (HeaderUpdateVendorMessage)vm;
@@ -1136,10 +1126,6 @@ public class Connection implements IpPort {
             try {				
                 _socket.close();
             } catch(IOException e) {}
-        }
-        //remove node from local DHT routing table if it was part of it
-        if(remostHostIsDHTNode() > -1) {
-            RouterService.getLimeDHTManager().removeLeafDHTNode(_host, _port);
         }
         
         // tell the inflater & deflater that we're done with them.

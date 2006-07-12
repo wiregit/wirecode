@@ -33,6 +33,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.SystemUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.LifecycleEvent.LifeEvent;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -1347,7 +1348,7 @@ public class ConnectionManager {
         }
         
         dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                LifecycleEvent.DISCONNECTED, null));
+                LifecycleEvent.LifeEvent.DISCONNECTED, null));
     }
 
     /**
@@ -1473,7 +1474,7 @@ public class ConnectionManager {
 
         // 4) Notify the listener
         dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this, 
-                LifecycleEvent.CONNECTION_CLOSED,
+                LifeEvent.CONNECTION_CLOSED,
                 c));
 
         // 5) Clean up Unicaster
@@ -1605,10 +1606,10 @@ public class ConnectionManager {
             }
             _fetchers.addAll(fetchers);
             dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifecycleEvent.CONNECTING, null));
+                    LifeEvent.CONNECTING, null));
         } else if (need == 0) {
             dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifecycleEvent.CONNECTED, null));
+                    LifeEvent.CONNECTED, null));
         }
 
         // Stop ConnectionFetchers as necessary, but it's possible there
@@ -1700,7 +1701,7 @@ public class ConnectionManager {
             // with a Connection.
         }
         dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                LifecycleEvent.CONNECTION_INITIALIZING,
+                LifeEvent.CONNECTION_INITIALIZING,
                 mc));
      
         try {
@@ -1869,7 +1870,7 @@ public class ConnectionManager {
                 adjustConnectionFetchers();
             }
             dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifecycleEvent.CONNECTION_INITIALIZING,
+                    LifeEvent.CONNECTION_INITIALIZING,
                     c));
         }
 
@@ -1921,7 +1922,7 @@ public class ConnectionManager {
                 adjustConnectionFetchers();
             }
             dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifecycleEvent.CONNECTION_INITIALIZING,
+                    LifeEvent.CONNECTION_INITIALIZING,
                     c));
         }
 
@@ -1947,7 +1948,7 @@ public class ConnectionManager {
             boolean connectionOpen = connectionInitialized(mc);
             if(connectionOpen) {
                 dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                        LifecycleEvent.CONNECTION_INITIALIZED,
+                        LifeEvent.CONNECTION_INITIALIZED,
                         mc));
                 setPreferredConnections();
             }
@@ -2216,7 +2217,7 @@ public class ConnectionManager {
         // Notify the user that they have no internet connection and that
         // we will automatically retry
         dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                LifecycleEvent.NO_INTERNET));
+                LifeEvent.NO_INTERNET));
 
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're
