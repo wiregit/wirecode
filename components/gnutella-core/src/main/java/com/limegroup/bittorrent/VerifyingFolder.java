@@ -270,7 +270,7 @@ public class VerifyingFolder {
 	private synchronized void markPieceCompleted(int blockId) {
 		verifiedBlocks.set(blockId);
 		bitFieldDirty = true;
-		if (isComplete()) 
+		if (verifiedBlocks.cardinality() == _info.getNumBlocks()) 
 			verifiedBlocks = _info.getFullBitSet();
 	}
 	
