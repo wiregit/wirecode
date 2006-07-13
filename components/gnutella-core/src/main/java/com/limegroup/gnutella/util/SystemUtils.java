@@ -31,7 +31,7 @@ public class SystemUtils {
                 if(CommonUtils.isWindows2000orXP()) {
                     System.loadLibrary("WindowsV5PlusUtils");
                 }
-                System.loadLibrary("WindowsFirewall");
+                System.loadLibrary("SystemUtilities");
             }
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
