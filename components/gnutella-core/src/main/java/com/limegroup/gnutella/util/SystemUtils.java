@@ -27,10 +27,14 @@ public class SystemUtils {
             if(CommonUtils.isMacOSX()) {
                 System.loadLibrary("SystemUtilities");
             } else if(CommonUtils.isWindows()) {
-                System.loadLibrary("GenericWindowsUtils");
+
+            	/*
+            	System.loadLibrary("GenericWindowsUtils");
                 if(CommonUtils.isWindows2000orXP()) {
                     System.loadLibrary("WindowsV5PlusUtils");
                 }
+                */
+
                 System.loadLibrary("SystemUtilities");
             }
             canLoad = true;
@@ -49,9 +53,20 @@ public class SystemUtils {
      * the mouse.  The time returned is in milliseconds.
      */
     public static long getIdleTime() {
-        if(supportsIdleTime()) 
+    	
+    	if (supportsIdleTime()) {
+    		
+    		long i;
+    		i = idleTime();
+    		System.out.println("Idle Time is " + i);
+    		return i;
+    	}
+
+    	/*
+    	if(supportsIdleTime()) 
             return idleTime();
-        
+        */
+    	
         return 0;
     }
     

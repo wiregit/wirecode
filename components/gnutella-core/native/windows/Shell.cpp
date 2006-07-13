@@ -54,6 +54,9 @@ bool Recycle(LPCTSTR path) {
 // Takes a path to a file on the disk, like "C:\Folder\file.txt"
 // Removes its read-only setting
 // Returns the result from _chmod
+JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWriteable(JNIEnv *e, jclass c, jstring j) {
+	return SetFileWritable(GetString(e, j));
+}
 int SetFileWritable(LPCTSTR path) {
 
 	// Use the Windows implementation of the Unix _chmod file function
@@ -61,6 +64,9 @@ int SetFileWritable(LPCTSTR path) {
 }
 
 // Returns the tick count when the user last moved the mouse or pressed a key, or 0 on error
+JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime(JNIEnv *e, jclass c) {
+	return GetIdleTime();
+}
 DWORD GetIdleTime() {
 
 	// Get a function pointer to GetLastInputInfo() in user32.dll, which won't be there in Windows 98
