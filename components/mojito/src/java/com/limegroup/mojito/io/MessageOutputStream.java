@@ -44,12 +44,12 @@ public class MessageOutputStream extends DataOutputStream {
         super(out);
     }
 	
-    public void writeKUID(KUID key) throws IOException {
-        if (key == null) {
+    public void writeKUID(KUID kuid) throws IOException {
+        if (kuid == null) {
             throw new NullPointerException("KUID cannot be null");
         }
         
-        write(key.getBytes());
+        kuid.write(this);
     }
     
     public void writeKeyValue(KeyValue keyValue) throws IOException {

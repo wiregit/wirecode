@@ -19,6 +19,8 @@
  
 package com.limegroup.mojito;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -28,9 +30,9 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.util.ArrayUtils;
@@ -124,7 +126,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     private Type type;
     private byte[] id;
     
-    private int hashCode;
+    private int hashCode = -1;
     
     protected KUID(Type type, byte[] id) {
         if (id == null) {
@@ -137,7 +139,15 @@ public class KUID implements Comparable<KUID>, Serializable {
         
         this.type = type;
         this.id = id;
-        this.hashCode = Arrays.hashCode(id);
+    }
+    
+    /**
+     * 
+     * @param out
+     * @throws IOException
+     */
+    public void write(OutputStream out) throws IOException {
+        out.write(id, 0, id.length);
     }
     
     /**
@@ -361,6 +371,12 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     public int hashCode() {
+        if (hashCode == -1) {
+            hashCode = Arrays.hashCode(id);
+            if (hashCode == -1) {
+                hashCode = 0;
+            }
+        }
         return hashCode;
     }
     
@@ -465,11 +481,11 @@ public class KUID implements Comparable<KUID>, Serializable {
          */
         MessageDigestInput properties = new MessageDigestInput() {
             public void update(MessageDigest md) {
+                Properties props = System.getProperties();
                 try {
-                    Properties props = System.getProperties();
-                    for(Enumeration e = props.keys(); e.hasMoreElements(); ) {
-                        String key = (String)e.nextElement();
-                        String value = (String)props.get(key);
+                    for (Entry entry : props.entrySet()) {
+                        String key = (String)entry.getKey();
+                        String value = (String)entry.getValue();
                         
                         md.update(key.getBytes("UTF-8"));
                         md.update(value.getBytes("UTF-8"));
