@@ -5,9 +5,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.MultiIterable;
+import com.limegroup.gnutella.util.NumericBuffer;
 
 
 /**
@@ -15,7 +20,9 @@ import com.limegroup.gnutella.util.MultiIterable;
  * More information available here:  
  * http://limewire.org/wiki/index.php?title=UploadSlotsAndBT
  */
-public class UploadSlotManager {
+public class UploadSlotManager implements BandwidthTracker {
+	
+	private static final Log LOG = LogFactory.getLog(UploadSlotManager.class);
 	
 	/**
 	 * The three priority levels
@@ -50,6 +57,11 @@ public class UploadSlotManager {
 	
 	private final MultiIterable<UploadSlotRequest> allRequests;
 	
+	private final NumericBuffer<Float> bandwidth = new NumericBuffer<Float>(10);
+	
+	private float sessionAverage;
+	private int numMeasures;
+	
 	public UploadSlotManager() {
 		active = new ArrayList<UploadSlotRequest>(UploadSettings.HARD_MAX_UPLOADS.getValue());
 		queued = new ArrayList<HTTPSlotRequest>(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
@@ -66,6 +78,8 @@ public class UploadSlotManager {
 	 * 0 if it can proceed immediately
 	 */
 	public int pollForSlot(UploadSlotUser user, boolean queue) {
+		if (LOG.isDebugEnabled())
+			LOG.debug(user+" polling for slot, queuable "+queue);
 		return requestSlot(new HTTPSlotRequest(user, queue));
 	}
 	
@@ -79,6 +93,8 @@ public class UploadSlotManager {
 	 * it can proceed immediately.
 	 */
 	public int requestSlot(UploadSlotListener listener, boolean highPriority) {
+		if (LOG.isDebugEnabled())
+			LOG.debug(listener+" requesting slot, high priority "+highPriority);
 		return requestSlot(new BTSlotRequest(listener, highPriority));
 	}
 
@@ -236,7 +252,23 @@ public class UploadSlotManager {
 		}
 	}
 	
-	public synchronized float getUploadBandwidth() {
+	public synchronized void measureBandwidth() {
+		float bw = getTotalBandwidth();
+		sessionAverage = ((sessionAverage * numMeasures) + bw) / (++numMeasures);
+		bandwidth.add(getTotalBandwidth());
+	}
+	
+	public synchronized float getMeasuredBandwidth() throws InsufficientDataException {
+		if (bandwidth.size() < bandwidth.getCapacity())
+			throw new InsufficientDataException();
+		return bandwidth.average().floatValue();
+	}
+	
+	public synchronized float getAverageBandwidth() {
+		return sessionAverage;
+	}
+	
+	private float getTotalBandwidth() {
 		float ret = 0;
 		for (UploadSlotRequest request : active) {
 			UploadSlotUser user = (UploadSlotUser) request.getUser();
@@ -257,6 +289,10 @@ public class UploadSlotManager {
 		if (queue.size() == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
 			return -1;
 		queue.add((T)request);
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("queued "+request.getUser()+" at position "+queue.size());
+		
 		return queue.size();
 	}
 	
@@ -270,6 +306,10 @@ public class UploadSlotManager {
 			if (current.getPriority() < request.getPriority()) 
 				break;
 		}
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("added active request "+request.getUser()+" at position "+i);
+		
 		active.add(i,request);
 	}
 	
@@ -277,6 +317,8 @@ public class UploadSlotManager {
 	 * Cancels the request issued by this UploadSlotListener
 	 */
 	public synchronized void cancelRequest(UploadSlotUser user) {
+		if (LOG.isDebugEnabled())
+			LOG.debug(user +" cancelling request");
 		if (!removeIfQueued(user))
 			requestDone(user);
 	}
@@ -291,6 +333,8 @@ public class UploadSlotManager {
 			UploadSlotRequest request = (UploadSlotRequest) iter.next();
 			if (request.getUser() == user) {
 				iter.remove();
+				if (LOG.isDebugEnabled())
+					LOG.debug("remove queued request by "+user);
 				return true;
 			}
 		}
@@ -300,10 +344,12 @@ public class UploadSlotManager {
 	/**
 	 * Notification that the UploadSlotUser is done with its request.
 	 */
-	public synchronized void requestDone(UploadSlotUser listener) {
+	public synchronized void requestDone(UploadSlotUser user) {
 		for (Iterator iter = active.iterator(); iter.hasNext();) {
 			UploadSlotRequest request = (UploadSlotRequest) iter.next();
-			if (request.getUser() == listener) {
+			if (request.getUser() == user) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("request finished for "+user);
 				iter.remove();
 				resumeQueued();
 				return;
@@ -324,6 +370,10 @@ public class UploadSlotManager {
 		iter.hasNext() && hasFreeSlot(active.size());) {
 			BTSlotRequest queuedRequest = (BTSlotRequest) iter.next();
 			iter.remove();
+			
+			if (LOG.isDebugEnabled())
+				LOG.debug("resuming queued request "+queuedRequest.getUser());
+			
 			active.add(queuedRequest);
 			queuedRequest.getListener().slotAvailable();
 		}

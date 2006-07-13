@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,7 +97,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  *
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
-public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
+public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
 
@@ -122,6 +123,12 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
     
     /** Number of force-shared active uploads */
     private int _forcedUploads;
+    
+    /**
+     * Number of active uploads that are not accounted in the
+     * slot manager but whose bandwidth is counted. (i.e. Multicast)
+     */
+    private Set<HTTPUploader> forceAllowedUploads = new CopyOnWriteArraySet<HTTPUploader>();
     
 	/**
 	 * LOCKING: obtain this' monitor before modifying any 
@@ -530,6 +537,8 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         
         uploader.closeFileStreams();
         
+        forceAllowedUploads.remove(uploader);
+        
         switch(state) {
             case Uploader.COMPLETE:
                 UploadStat.COMPLETED.incrementStat();
@@ -710,14 +719,17 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         // slot.
         if( !shouldBypassQueue(session.getUploader()) ) {
             // If we are forcing this upload, intercept the queue check.
-            if( forceAllow )
+            if( forceAllow ) {
                 queued = ACCEPTED;
+                forceAllowedUploads.add(session.getUploader());
             // Otherwise, determine whether or not to queue, accept
             // or reject the uploader.
-            else
+            } else
                 // note that checkAndQueue can throw an IOException
                 queued = checkAndQueue(session);
         } else {
+        	if (LOG.isDebugEnabled())
+        		LOG.debug("bypassing queue");
             queued = BYPASS_QUEUE;
         }
         
@@ -946,6 +958,9 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         
         int queued = slotManager.pollForSlot(session, 
         		!greedy && session.getUploader().supportsQueueing());
+        
+        if (LOG.isDebugEnabled())
+        	LOG.debug("queued at "+queued);
         
         if (queued == -1) {
             //Note: The current policy is to not put uploadrers in a queue, if they 
@@ -1444,69 +1459,6 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 
   	}
 
-    /** Calls measureBandwidth on each uploader. */
-    public void measureBandwidth() {
-        List activeCopy;
-        synchronized(this) {
-            activeCopy = new ArrayList(_activeUploadList);
-        }
-        
-        float currentTotal = 0f;
-        boolean c = false;
-        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
-			HTTPUploader up = (HTTPUploader)iter.next();
-            if (up.isForcedShare())
-                continue;
-            c = true;
-			up.measureBandwidth();
-			currentTotal += up.getAverageBandwidth();
-		}
-        
-		if ( c ) {
-            synchronized(this) {
-                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-                    / ++numMeasures;
-            }
-        }
-    }
-
-    /** Returns the total upload throughput, i.e., the sum over all uploads. */
-	public float getMeasuredBandwidth() {
-        List activeCopy;
-        synchronized(this) {
-            activeCopy = new ArrayList(_activeUploadList);
-        }
-        
-        float sum=0;
-        for (Iterator iter = activeCopy.iterator(); iter.hasNext(); ) {
-			HTTPUploader up = (HTTPUploader)iter.next();
-            if (up.isForcedShare())
-                continue;
-            
-            sum += up.getMeasuredBandwidth();
-		}
-
-        
-        lastMeasuredBandwidth = sum;
-        
-        return sum;
-	}
-	
-	/**
-	 * returns the summed average of the uploads
-	 */
-	public synchronized float getAverageBandwidth() {
-        return averageBandwidth;
-	}
-    
-    /**
-     * Returns the last value that getMeasuredBandwidth returned.
-     * @return
-     */
-    public float getLastMeasuredBandwidth() {
-        return lastMeasuredBandwidth;
-    }
-
     static void tBandwidthTracker(UploadManager upman) {
         upman.reportUploadSpeed(100000, 1000000);  //10 kB/s
         Assert.that(upman.measuredUploadSpeed()==-1);
@@ -1529,6 +1481,7 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
         upman.reportUploadSpeed(100000, 1000000);
         Assert.that(upman.measuredUploadSpeed()==80);
     }
+    
     
     /**
      * @return the bandwidth for uploads in bytes per second
@@ -1558,6 +1511,35 @@ public class UploadManager implements BandwidthTracker, ConnectionAcceptor {
 	    return ret;
     }
 
+    public void measureBandwidth() {
+    	slotManager.measureBandwidth();
+    	for (HTTPUploader forced : forceAllowedUploads) 
+    		forced.measureBandwidth();
+    }
+    
+    public float getMeasuredBandwidth() {
+    	float bw = 0;
+    	try {
+    		bw += slotManager.getMeasuredBandwidth();
+    	} catch (InsufficientDataException notEnough){}
+    	for (HTTPUploader forced : forceAllowedUploads)
+    		bw += forced.getMeasuredBandwidth();
+    	synchronized(this) {
+    		averageBandwidth = ( ( averageBandwidth * numMeasures) + bw) /
+    		++numMeasures;
+    	}
+    	lastMeasuredBandwidth = bw;
+    	return bw;
+    }
+    
+    public synchronized float getAverageBandwidth() {
+    	return averageBandwidth;
+    }
+    
+    public float getLastMeasuredBandwidth() {
+    	return lastMeasuredBandwidth;
+    }
+    
 	/**
 	 * This class keeps track of client requests.
 	 * 

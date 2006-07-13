@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
@@ -225,10 +226,14 @@ public final class ConnectionChecker implements Runnable {
         if (down != 0)
             return false;
         
-        RouterService.getUploadManager().measureBandwidth();
-        float up = RouterService.getUploadManager().getMeasuredBandwidth();
-        
-        return up == 0;
+        // query the upload slot manager, because multicast
+        // uploads do not use slots and we do not care about them.
+        RouterService.getUploadSlotManager().measureBandwidth();
+        try {
+        	return RouterService.getUploadSlotManager().getMeasuredBandwidth() == 0;
+        } catch (InsufficientDataException ide) {
+        	return true;
+        }
     }
     
     /**
