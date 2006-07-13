@@ -13,12 +13,11 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.dht.DHTController;
+import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.IpPort;
@@ -45,7 +44,7 @@ import com.limegroup.mojito.event.BootstrapListener;
  * 
  * The current implementation is dependant on the MojitoDHT. 
  */
-public abstract class AbstractDHTController implements DHTController, LifecycleListener {
+abstract class AbstractDHTController implements DHTController, LifecycleListener {
     
     private static final Log LOG = LogFactory.getLog(AbstractDHTController.class);
     

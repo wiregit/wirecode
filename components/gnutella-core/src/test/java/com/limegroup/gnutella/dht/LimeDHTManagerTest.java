@@ -7,7 +7,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.impl.AbstractDHTController;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -86,7 +85,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     public void testBootstrap() throws Exception {
         RouterService.startDHT(true);
-        AbstractDHTController controller = getController();
+        DHTController controller = getController();
         sleep(500);
         assertTrue(controller.isRunning());
         assertTrue(controller.isActiveNode());
@@ -103,7 +102,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
         NetworkSettings.MAX_ERRORS.setValue(1);
         NetworkSettings.MAX_TIMEOUT.setValue(300);
         RouterService.startDHT(true);
-        AbstractDHTController controller = getController();
+        DHTController controller = getController();
         sleep(300);
         //add invalid hosts
         DHT_MANAGER.addBootstrapHost(new InetSocketAddress("localhost",2000));
@@ -147,7 +146,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     public void testSwitchPassiveActive() throws Exception{
         DHTSettings.PERSIST_DHT.setValue(true);
         DHT_MANAGER.startDHT(true);
-        AbstractDHTController controller = getController();
+        DHTController controller = getController();
         assertTrue(DHT_MANAGER.isRunning());
         assertTrue(DHT_MANAGER.isActiveNode());
         KUID nodeId = controller.getMojitoDHT().getLocalNodeID();
@@ -186,8 +185,8 @@ public class LimeDHTManagerTest extends BaseTestCase {
         sleep(300);
     }
     
-    private AbstractDHTController getController() throws Exception{
-        return (AbstractDHTController) PrivilegedAccessor.getValue(DHT_MANAGER, "dhtController");
+    private DHTController getController() throws Exception{
+        return (DHTController) PrivilegedAccessor.getValue(DHT_MANAGER, "dhtController");
     }
 
     private void sleep(int milliseconds) {

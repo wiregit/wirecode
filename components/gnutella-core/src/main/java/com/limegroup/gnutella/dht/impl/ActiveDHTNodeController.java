@@ -12,16 +12,14 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.impl.AbstractDHTController.IpPortContactNode;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
-public class ActiveDHTNodeController extends AbstractDHTController{
+public class ActiveDHTNodeController extends AbstractDHTController {
     
     private static final Log LOG = LogFactory.getLog(ActiveDHTNodeController.class);
     

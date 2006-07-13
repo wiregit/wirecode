@@ -23,6 +23,8 @@ public interface DHTController extends LifecycleListener{
     
     public boolean isRunning();
     
+    public boolean isWaiting();
+    
     public int getDHTVersion();
     
     //TODO: remove! for testing only 

@@ -18,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.dht.LimeDHTRoutingTable;
-import com.limegroup.gnutella.dht.impl.AbstractDHTController.IpPortContactNode;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
@@ -104,7 +103,10 @@ public class PassiveDHTNodeController extends AbstractDHTController{
             FileOutputStream out = new FileOutputStream(FILE);
             ObjectOutputStream oos = new ObjectOutputStream(out);
             List<Contact> contacts = limeDHTRouteTable.getLiveContacts(); 
-            if(contacts.size() < 2) return;
+            if(contacts.size() < 2) {
+                return;
+            }
+            
             //sort by MRS
             BucketUtils.sort(contacts);
             //only save some nodes
@@ -182,5 +184,4 @@ public class PassiveDHTNodeController extends AbstractDHTController{
                 
         } 
     }
-    
 }

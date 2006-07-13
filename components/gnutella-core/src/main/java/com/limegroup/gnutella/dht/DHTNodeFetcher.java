@@ -6,7 +6,6 @@ import java.util.List;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.impl.AbstractDHTController;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -27,13 +26,13 @@ public class DHTNodeFetcher {
     
     private static final long FETCH_DELAY = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
     
-    private final AbstractDHTController controller;
+    private final DHTController controller;
     
     private long lastRequest = 0L;
     
     private boolean isTaskRunning;
 
-    public DHTNodeFetcher(AbstractDHTController controller) {
+    public DHTNodeFetcher(DHTController controller) {
         this.controller = controller;
     }
     
