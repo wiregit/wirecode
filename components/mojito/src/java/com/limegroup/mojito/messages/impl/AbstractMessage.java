@@ -34,7 +34,7 @@ import com.limegroup.gnutella.messages.Message;
  * See AbstractDHTMessage for how to remove this dependence if
  * you're not planning to send Messages through the CORE! 
  */
-abstract class AbstractMessage extends Message {
+public abstract class AbstractMessage extends Message {
     
     /** The function ID of our DHT Message */
     public static final byte F_DHT_MESSAGE = (byte)0x43;
