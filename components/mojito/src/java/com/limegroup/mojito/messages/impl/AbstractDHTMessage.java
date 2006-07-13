@@ -41,7 +41,7 @@ import com.limegroup.mojito.routing.impl.ContactNode;
 /**
  * An abstract implementation of DHTMessage
  */
-public abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage {
+abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage {
 
     /*
      *  To remove the (Gnutella) Message dependence don't

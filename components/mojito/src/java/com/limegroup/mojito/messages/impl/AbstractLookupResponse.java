@@ -31,7 +31,7 @@ import com.limegroup.mojito.messages.LookupResponse;
 /**
  * An abstract class for LookupResponse implementations
  */
-public abstract class AbstractLookupResponse extends AbstractResponseMessage 
+abstract class AbstractLookupResponse extends AbstractResponseMessage 
 	implements LookupResponse {
 
     public AbstractLookupResponse(Context context, 

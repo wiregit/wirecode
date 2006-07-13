@@ -33,7 +33,7 @@ import com.limegroup.mojito.messages.LookupRequest;
 /**
  * An abstract class for LookupRequest implementations
  */
-public abstract class AbstractLookupRequest extends AbstractRequestMessage
+abstract class AbstractLookupRequest extends AbstractRequestMessage
         implements LookupRequest {
 
     protected final KUID lookupId;

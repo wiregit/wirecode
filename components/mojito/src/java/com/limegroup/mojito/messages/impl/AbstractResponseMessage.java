@@ -31,7 +31,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 /**
  * An abstract base class for response messages
  */
-public abstract class AbstractResponseMessage extends AbstractDHTMessage
+abstract class AbstractResponseMessage extends AbstractDHTMessage
         implements ResponseMessage {
 
     public AbstractResponseMessage(Context context, 

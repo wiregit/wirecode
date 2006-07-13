@@ -31,7 +31,7 @@ import com.limegroup.mojito.messages.RequestMessage;
 /**
  * An abstract base class for request Messages
  */
-public abstract class AbstractRequestMessage extends AbstractDHTMessage
+abstract class AbstractRequestMessage extends AbstractDHTMessage
         implements RequestMessage {
 
     public AbstractRequestMessage(Context context, 
