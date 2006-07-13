@@ -66,31 +66,29 @@ public class RandomBucketRefresher implements Runnable {
             LOG.trace("Random bucket refresh");
         }
         
-        synchronized (context) {
-            ScheduledFuture f = future;
-            if (f == null || f.isCancelled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("RandomBucketRefresher is canceled");
-                }
-                return;
+        ScheduledFuture f = future;
+        if (f == null || f.isCancelled()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("RandomBucketRefresher is canceled");
             }
-            
-            if (context.isBootstrapping()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
-                }
-                return;
+            return;
+        }
+        
+        if (context.isBootstrapping()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
             }
+            return;
+        }
+        
+        List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
+        for(KUID nodeId : ids) {
+            FindNodeResponseHandler handler = new FindNodeResponseHandler(context, nodeId);
             
-            List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
-            for(KUID nodeId : ids) {
-                FindNodeResponseHandler handler = new FindNodeResponseHandler(context, nodeId);
-                
-                try {
-                    handler.call();
-                } catch (Exception err) {
-                    LOG.error("Exception", err);
-                }
+            try {
+                handler.call();
+            } catch (Exception err) {
+                LOG.error("Exception", err);
             }
         }
     }
