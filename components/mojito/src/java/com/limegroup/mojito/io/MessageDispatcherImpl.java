@@ -28,12 +28,9 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +68,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         filter = new Filter();
     }
     
+    @Override
     public void bind(SocketAddress address) throws IOException {
         if (isOpen()) {
             throw new IOException("Already open");
@@ -92,6 +90,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         setDatagramChannel(channel);
     }
     
+    @Override
     public synchronized void start() {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
@@ -102,8 +101,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
             }
         };
         
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, queue, factory);
+        executor = Executors.newFixedThreadPool(1, factory);
         
         thread = context.getThreadFactory().newThread(this);
         thread.setName(context.getName() + "-MessageDispatcherThread");
@@ -111,6 +109,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         thread.start();
     }
     
+    @Override
     public synchronized void stop() {
         try {
             if (selector != null) {
@@ -126,21 +125,26 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         clear();
     }
     
+    @Override
     public synchronized boolean isRunning() {
         return isOpen() && getDatagramChannel().isRegistered();
     }
 
+    @Override
     protected boolean allow(DHTMessage message) {
         Contact node = message.getContact();
         return filter.allow(node.getSocketAddress());
     }
     
+    
+    @Override
     protected void process(Runnable runnable) {
         if (isRunning()) {
             executor.execute(runnable);
         }
     }
     
+    @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
         verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
@@ -161,10 +165,12 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         } catch (CancelledKeyException ignore) {}
     }
 
+    @Override
     protected void interestRead(boolean on) {
         interest(SelectionKey.OP_READ, on);
     }
     
+    @Override
     protected void interestWrite(boolean on) {
         interest(SelectionKey.OP_WRITE, on);
     }

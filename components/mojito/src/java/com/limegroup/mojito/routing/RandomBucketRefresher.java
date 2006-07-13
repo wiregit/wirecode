@@ -82,14 +82,14 @@ public class RandomBucketRefresher implements Runnable {
         }
         
         List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
-        for(KUID nodeId : ids) {
-            FindNodeResponseHandler handler = new FindNodeResponseHandler(context, nodeId);
-            
-            try {
+        
+        try {
+            for(KUID nodeId : ids) {
+                FindNodeResponseHandler handler = new FindNodeResponseHandler(context, nodeId);
                 handler.call();
-            } catch (Exception err) {
-                LOG.error("Exception", err);
             }
+        } catch (Exception err) {
+            LOG.error("Exception", err);
         }
     }
 }

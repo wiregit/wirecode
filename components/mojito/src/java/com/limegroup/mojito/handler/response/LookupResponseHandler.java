@@ -548,8 +548,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     /** Adds the Node to the to-query Trie */
     private boolean addYetToBeQueried(Contact node, int hop) {
-        if (!isQueried(node) 
-                && !context.isLocalNodeID(node.getNodeID())) {
+        if (!isQueried(node) && !context.isLocalNode(node)) {
             toQuery.put(node.getNodeID(), node);
             hopMap.put(node.getNodeID(), new Integer(hop));
             return true;

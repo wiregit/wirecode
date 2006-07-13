@@ -107,7 +107,7 @@ public class Context {
     private StoreManager storeManager;
     private BootstrapManager bootstrapManager;
     
-    private boolean running = false;
+    private volatile boolean running = false;
     
     private DHTStats dhtStats = null;
     
@@ -300,7 +300,11 @@ public class Context {
     }
     
     public boolean isLocalNode(Contact node) {
-        return isLocalNodeID(node.getNodeID());
+        return isLocalNode(node.getNodeID(), node.getSocketAddress());
+    }
+    
+    public boolean isLocalNode(KUID nodeId, SocketAddress addr) {
+        return isLocalNodeID(nodeId) || isLocalAddress(addr);
     }
     
     public boolean isLocalNodeID(KUID nodeId) {
@@ -386,18 +390,6 @@ public class Context {
         return messageHelper.getMessageFactory();
     }
     
-    public synchronized boolean isRunning() {
-        return running;
-    }
-
-    public boolean isOpen() {
-        return messageDispatcher.isOpen();
-    }
-    
-    public boolean isBootstrapping() {
-        return (isRunning() && bootstrapManager.isBootstrapping());
-    }
-    
     public int getReceivedMessagesCount() {
         return messageDispatcher.getReceivedMessagesCount();
     }
@@ -431,6 +423,28 @@ public class Context {
      */
     public ThreadFactory getThreadFactory() {
         return threadFactory;
+    }
+    
+    /**
+     * Returns whether or not the MessageDispatcher has
+     * an open DatagramChannel
+     */
+    public boolean isOpen() {
+        return messageDispatcher.isOpen();
+    }
+    
+    /**
+     * Returns whether or not the MojitoDHT is running
+     */
+    public synchronized boolean isRunning() {
+        return running;
+    }
+
+    /**
+     * Returns whether or not the MojitoDHT is bootstrapping
+     */
+    public synchronized boolean isBootstrapping() {
+        return isRunning() && bootstrapManager.isBootstrapping();
     }
     
     /**
@@ -628,7 +642,7 @@ public class Context {
     /**
      * Returns the approximate DHT size
      */
-    public int size() {
+    public synchronized int size() {
         if (!isRunning()) {
             return 0;
         }
