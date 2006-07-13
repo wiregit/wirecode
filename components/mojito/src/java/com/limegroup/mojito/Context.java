@@ -473,12 +473,7 @@ public class Context {
         
         running = true;
         
-        Thread messageDispatcherThread 
-            = getThreadFactory().newThread(messageDispatcher);
-        messageDispatcherThread.setName(getName() + "-MessageDispatcherThread");
-        //messageDispatcherThread.setDaemon(true);
-        messageDispatcherThread.start();
-        
+        messageDispatcher.start();
         bucketRefresher.start();
         publisher.start();
     }

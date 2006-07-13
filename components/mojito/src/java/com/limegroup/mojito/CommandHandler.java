@@ -31,8 +31,6 @@ import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
 import com.limegroup.mojito.db.Database;
@@ -45,7 +43,6 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
-import com.limegroup.mojito.util.CollectionUtils;
 
 public class CommandHandler {
     

@@ -118,6 +118,8 @@ public abstract class MessageDispatcher implements Runnable {
     
     public abstract void bind(SocketAddress address) throws IOException;
     
+    public abstract void start();
+    
     public abstract void stop();
     
     public abstract boolean isRunning();
@@ -632,8 +634,9 @@ public abstract class MessageDispatcher implements Runnable {
                     receipt.getResponseHandler().addTime(receipt.time());
                     receipt.getResponseHandler().handleResponse(response, receipt.time());
                 }
-            } catch (IOException err) {
-                LOG.error("An error occured dusring processing the response", err);
+            } catch (Exception e) {
+                receipt.handleError(e);
+                LOG.error("An error occured dusring processing the response", e);
             }
         }
         
@@ -738,6 +741,7 @@ public abstract class MessageDispatcher implements Runnable {
                     receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
                 }
             } catch (Exception e) {
+                receipt.handleError(e);
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
             }
         }
