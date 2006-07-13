@@ -533,11 +533,11 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
                                    uploader.getTotalAmountUploaded());
             }
             removeFromList(uploader);
+            forceAllowedUploads.remove(uploader);
         }
         
         uploader.closeFileStreams();
         
-        forceAllowedUploads.remove(uploader);
         
         switch(state) {
             case Uploader.COMPLETE:
@@ -1532,12 +1532,25 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
     	return bw;
     }
     
+    
     public synchronized float getAverageBandwidth() {
     	return averageBandwidth;
     }
     
     public float getLastMeasuredBandwidth() {
     	return lastMeasuredBandwidth;
+    }
+    
+    /**
+     * @return whether there are any active internet (non-multicast) transfers
+     * going at speed greater than 0.
+     */
+    public boolean hasActiveInternetTransfers() {
+    	slotManager.measureBandwidth();
+    	try {
+    		return slotManager.getMeasuredBandwidth() > 0;
+    	} catch (InsufficientDataException ide) {}
+    	return false;
     }
     
 	/**

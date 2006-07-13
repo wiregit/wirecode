@@ -437,29 +437,6 @@ public class ManagedTorrent {
 	}
 	
 	/**
-	 * Handles requesting ranges from the remote host
-	 * 
-	 * @param btc
-	 *            the BTConnection to request from
-	 */
-	public void request(final BTConnection btc) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("requesting ranges from " + btc.toString());
-		
-		// don't request if complete
-		if (_folder.isComplete() || !isActive())
-			return;
-		BTInterval in = _folder.leaseRandom(btc.getAvailableRanges());
-		if (in != null)
-			btc.sendRequest(in);
-		else {
-			if (LOG.isDebugEnabled())
-				LOG.debug("connection not interesting anymore");
-			btc.sendNotInterested();
-		}
-	}
-
-	/**
 	 * notifies this, that a chunk has been completed and verified
 	 * 
 	 * @param in

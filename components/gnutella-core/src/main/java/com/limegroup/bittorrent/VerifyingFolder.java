@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,6 +81,11 @@ public class VerifyingFolder {
 	private BlockRangeMap requestedRanges;
 	
 	/**
+	 * A view of the blocks the requested and partial blocks.
+	 */
+	private Iterable<Integer> requestedAndPartial;
+	
+	/**
 	 * Mapping of the index of each block pending write and 
 	 * pending ranges within 
 	 */
@@ -132,6 +138,10 @@ public class VerifyingFolder {
 		requestedRanges = new BlockRangeMap();
 		pendingRanges = new BlockRangeMap();
 		
+		requestedAndPartial = 
+			new MultiIterable<Integer>(partialBlocks.keySet(), 
+					requestedRanges.keySet());
+		
 		if (complete) 
 			verifiedBlocks = _info.getFullBitSet();
 		else {
@@ -148,7 +158,7 @@ public class VerifyingFolder {
 	private void initialize(Map<String, Serializable> data) {
 		BlockRangeMap partial = (BlockRangeMap) data.get("partial");
 		if (partial != null)
-			partialBlocks = partial; 
+			partialBlocks.putAll(partial); 
 		
 		BitSet verified = (BitSet) data.get("verified");
 		if (verified != null) 
@@ -641,65 +651,47 @@ public class VerifyingFolder {
 	 * returns a random available range that has preferrably not yet been
 	 * requested
 	 * 
-	 * @param bbis
-	 *            the BitBasedIntervalSet of available ranges
+	 * @param bs the BitBasedIntervalSet of available ranges
+	 * @param exclude the set of ranges that the connection is already about to
+	 * request
 	 * @return an array with the chunk id as first element, 
 	 * offset and size within that chunk as second and third elements.
 	 */
-	public synchronized BTInterval leaseRandom(BitSet bs) {
+	public synchronized BTInterval leaseRandom(BitSet bs, Set<BTInterval> exclude) {
 		if (isComplete())
 			return null;
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
 		
-		// see which pieces we don't have
-		BitSet remote;
-		if (bs.cardinality() == _info.getNumBlocks()) {
-			remote = (BitSet) verifiedBlocks.clone();
-			remote.flip(0, _info.getNumBlocks());
-		} else {
-			remote = (BitSet) bs.clone();
-			remote.andNot(verifiedBlocks);
+		// first see if the remote has any pieces that are neither 
+		// partial nor already requested
+		int selected = -1;
+		int current = 1;
+		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
+			if (verifiedBlocks.get(i) || 
+					pendingRanges.containsKey(i) || 
+					partialBlocks.containsKey(i) ||
+					requestedRanges.containsKey(i))
+				continue;
+			if (Math.random() < 1f/current++)
+				selected = i;
 		}
 		
-		// if possible, do not request any chunks which are currently
-		// being requested
-		MultiIterable<Integer> iter = new MultiIterable<Integer>(
-				pendingRanges.keySet(),
-				requestedRanges.keySet(),
-				partialBlocks.keySet()
-		);
-		for (int chunk : iter)
-			remote.clear(chunk);
-		
-		
-		if (remote.cardinality() > 0) {
-			// the remote has new chunks we can get
-			int selected = -1;
-			int current = 1;
-			for (int i = remote.nextSetBit(0); i >= 0; i = remote.nextSetBit(i+1)) {
-				if (Math.random() < 1f/current++)
-					selected = i;
-			}
-			
+		if (selected != -1) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("selecting piece "+selected);
 			
 			BTInterval ret = new BTInterval(0,getPieceSize(selected) - 1,selected);
 			requestedRanges.addInterval(ret);
 			return ret;
-		} 
+		}
 		
 		// prepare a list of partial or requested blocks the remote host has
 		Collection<Integer> available = new HashSet<Integer>(requestedRanges.size()+partialBlocks.size());
-		available.addAll(requestedRanges.keySet());
-		available.addAll(partialBlocks.keySet());
-		for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext();) {
-			int i = iterator.next();
-			// if the other side doesn't have this block, its not an option
-			if (!bs.get(i) || verifiedBlocks.get(i)) 
-				iterator.remove();
+		for (int requested : requestedAndPartial) {
+			if (bs.get(requested))
+				available.add(requested);
 		}
 		
 		if (LOG.isDebugEnabled())
@@ -728,6 +720,7 @@ public class VerifyingFolder {
 			if (pending != null)
 				needed.delete(pending);
 			
+			
 			// try not to request any parts that are already requested
 			if (requested != null) {
 				needed.delete(requested);
@@ -735,9 +728,15 @@ public class VerifyingFolder {
 				// now, if we still have some parts of the chunk, get one of them
 				// if not and this is the last partial chunk, doubly-assign some
 				// part of it (is this endgame?)
-				if (needed.isEmpty() && !iterator.hasNext()) 
+				if (needed.isEmpty() && !iterator.hasNext()) {
+						LOG.debug("endgame");
 					needed = requested;
+				}
 			}
+			
+			// exclude any specified intervals 
+			for (Interval excluded : exclude) 
+				needed.delete(excluded);
 			
 			if (needed.isEmpty()) 
 				continue;
@@ -889,14 +888,17 @@ public class VerifyingFolder {
 	
 	/**
 	 * @return the number of pieces that we have verified
-	 * and the other host doesn't have
+	 * and the other bitset doesn't have
 	 */
 	synchronized int getNumMissing(BitSet other) {
 		if (isComplete())
 			return verifiedBlocks.cardinality() - other.cardinality();
-		BitSet clone = (BitSet)verifiedBlocks.clone();
-		clone.andNot(other);
-		return clone.cardinality();
+		int ret = 0;
+		for(int i=verifiedBlocks.nextSetBit(0); i>=0; i=verifiedBlocks.nextSetBit(i+1)) {
+			if (!other.get(i))
+				ret++;
+		}
+		return ret;
 	}
 	
 	/**
@@ -920,6 +922,15 @@ public class VerifyingFolder {
 	}
 	
 	private static class BlockRangeMap extends HashMap<Integer, IntervalSet> {
+		
+		BlockRangeMap() {
+			super();
+		}
+		
+		private BlockRangeMap(int size) {
+			super(size);
+		}
+		
 		public void addInterval(BTInterval in) {
 			IntervalSet s = get(in.blockId);
 			if (s == null) {
@@ -943,6 +954,13 @@ public class VerifyingFolder {
 			for (IntervalSet set : values()) 
 				ret += (long)set.getSize();
 			return ret;
+		}
+		
+		public Object clone() {
+			BlockRangeMap clone = new BlockRangeMap(size());
+			for (Map.Entry<Integer, IntervalSet> e : entrySet())
+				put(e.getKey(), (IntervalSet)e.getValue().clone());
+			return clone;
 		}
 	}
 }
