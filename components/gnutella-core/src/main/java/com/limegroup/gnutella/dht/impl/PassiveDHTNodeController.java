@@ -26,7 +26,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.util.BucketUtils;
 
-public class PassiveDHTNodeController extends AbstractDHTController{
+class PassiveDHTNodeController extends AbstractDHTController{
     
     private LimeDHTRoutingTable limeDHTRouteTable;
     

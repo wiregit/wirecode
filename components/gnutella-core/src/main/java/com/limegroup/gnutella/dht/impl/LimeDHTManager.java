@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.impl;
 
 import java.net.SocketAddress;
 import java.util.Collections;
@@ -6,8 +6,7 @@ import java.util.List;
 
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
-import com.limegroup.gnutella.dht.impl.ActiveDHTNodeController;
-import com.limegroup.gnutella.dht.impl.PassiveDHTNodeController;
+import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 

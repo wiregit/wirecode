@@ -19,7 +19,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
-public class ActiveDHTNodeController extends AbstractDHTController {
+class ActiveDHTNodeController extends AbstractDHTController {
     
     private static final Log LOG = LogFactory.getLog(ActiveDHTNodeController.class);
     

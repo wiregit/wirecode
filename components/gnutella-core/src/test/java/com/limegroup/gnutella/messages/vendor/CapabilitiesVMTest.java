@@ -11,7 +11,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.LimeDHTManager;
+import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;

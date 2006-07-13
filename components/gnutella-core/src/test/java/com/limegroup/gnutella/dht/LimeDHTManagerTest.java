@@ -7,6 +7,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;

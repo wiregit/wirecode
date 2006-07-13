@@ -24,7 +24,7 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
-import com.limegroup.gnutella.dht.LimeDHTManager;
+import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
