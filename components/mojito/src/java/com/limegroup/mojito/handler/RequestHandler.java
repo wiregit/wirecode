@@ -24,12 +24,15 @@ import java.io.IOException;
 import com.limegroup.mojito.messages.RequestMessage;
 
 /**
- * Interface for incomong requests
+ * Interface to handle incoming requests
  */
 public interface RequestHandler {
     
     /**
-     *
+     * Called to handle a request
+     * 
+     * @param message The Message to handle
+     * @throws IOException
      */
     public void handleRequest(RequestMessage message) throws IOException;
 }

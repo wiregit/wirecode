@@ -27,42 +27,53 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 
 /**
- * Interface for responses
+ * Interface to handle incoming responses
  */
 public interface ResponseHandler {
     
     /**
-     *
-     */
-    public void addTime(long time);
-    
-    /**
-     *
+     * Returns the total time that has elapsed since a
+     * request has been sent to Node
      */
     public long time();
     
     /**
-     *
+     * Returns the timeout (in milliseconds) of this handler.
      */
     public long timeout();
     
     /**
-     * 
+     * Returns whether or not this handler has been cancelled
      */
     public boolean isCancelled();
     
     /**
-     *
+     * Called to handle a response
+     * 
+     * @param message The Response Message
+     * @param time The Round Trip Time
+     * @throws IOException 
      */
     public void handleResponse(ResponseMessage message, long time) throws IOException;
     
     /**
-     *
+     * Called after the timeout time has elapsed and no response has arrived
+     * 
+     * @param nodeId The Node ID of the Contact (can be null)
+     * @param dst The Address where we sent the request
+     * @param message The Request Message
+     * @param time The total time that has elapsed
+     * @throws IOException
      */
     public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException;
     
     /**
-     *
+     * Called if an error occured in handleResponse() or handleTimeout()
+     * 
+     * @param nodeId
+     * @param dst
+     * @param message
+     * @param e
      */
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
 }

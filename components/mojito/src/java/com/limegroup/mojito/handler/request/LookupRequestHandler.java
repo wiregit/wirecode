@@ -55,15 +55,9 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         super(context);
     }
 
-    public void handleRequest(RequestMessage message) throws IOException {
+    public void request(RequestMessage message) throws IOException {
         
         LookupRequest request = (LookupRequest)message;
-        KUID lookup = request.getLookupID();
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(request.getContact() + " is trying to lookup " + lookup);
-        }
-        
         if (request instanceof FindNodeRequest) {
             handleFindNodeRequest(request);
         } else {

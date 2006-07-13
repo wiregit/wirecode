@@ -55,7 +55,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         this.networkStats = context.getNetworkStats();
     }
     
-    public void handleRequest(RequestMessage message) throws IOException {
+    public void request(RequestMessage message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
         networkStats.STORE_REQUESTS.incrementStat();
@@ -85,11 +85,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         KeyValue keyValue = request.getKeyValue();
         KUID valueId = keyValue.getKey();
-
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(request.getContact() 
-                    + " requested us to store the KeyValues " + keyValue);
-        }
         
         // under the assumption that the requester sent us a lookup before
         // check if we are part of the closest alive nodes to this value

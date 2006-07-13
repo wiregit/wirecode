@@ -21,9 +21,6 @@ package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
@@ -36,8 +33,6 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
  * The PingRequestHandler handles incoming Ping requests.
  */
 public class PingRequestHandler extends AbstractRequestHandler {
-
-    private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);
     
     private final NetworkStatisticContainer networkStats;
     
@@ -46,11 +41,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
         networkStats = context.getNetworkStats();
     }
     
-    public void handleRequest(RequestMessage message) throws IOException {
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getContact() + " sent us a Ping");
-        }
+    public void request(RequestMessage message) throws IOException {
         
         networkStats.PING_REQUESTS.incrementStat();
         

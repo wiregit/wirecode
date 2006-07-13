@@ -174,6 +174,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         return KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
     }
     
+    @Override
     protected synchronized void start() throws Exception {
         startTime = System.currentTimeMillis();
         
@@ -199,6 +200,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
     }
     
+    @Override
     public long time() {
         if (startTime > 0L) {
             return System.currentTimeMillis() - startTime;

@@ -43,25 +43,37 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     
     private static final Log LOG = LogFactory.getLog(AbstractResponseHandler.class);
     
+    /** The number of errors that have occured */
     private int errors = 0;
     
+    /** The total time that has elapsed since the request was sent */
     private long time;
+    
+    /** The timeout of this handler */
     private long timeout;
     
+    /** The maximum number of errors that may occur */
     private int maxErrors;
     
+    /** LOCK */
     private final Object lock = new Object();
     
+    /** Whether or not this handler has been started */
     private volatile boolean started = false;
     
+    /** Whether or not this handler was cancelled */
     private volatile boolean cancelled = false;
     
+    /** Whether or not this handler is done */
     private volatile boolean done = false;
     
+    /** The return value */
     private volatile V value = null;
     
+    /** The Exception we may throw */
     private volatile Exception ex = null;
     
+    /** A handle to Context */
     protected final Context context;
     
     public AbstractResponseHandler(Context context) {
@@ -86,23 +98,22 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         }
         
         if (maxErrors < 0) {
-            if (NetworkSettings.USE_RANDOM_MAX_ERRORS.getValue()) {
-                // MIN_RETRIES <= x <= MAX_ERRORS
-                this.maxErrors = Math.max(NetworkSettings.MIN_RETRIES.getValue(), 
-                        (int)(Math.random() * NetworkSettings.MAX_ERRORS.getValue()));
-            } else {
-                this.maxErrors = NetworkSettings.MAX_ERRORS.getValue();
-            }
+            this.maxErrors = NetworkSettings.MAX_ERRORS.getValue();
         } else {
             this.maxErrors = maxErrors;
         }
     }
     
+    /**
+     * Is called by call()
+     */
     protected void start() throws Exception {
-        
     }
     
-    public void setTimeout(long timeout) {
+    /**
+     * Sets the timeout of this handler
+     */
+    protected void setTimeout(long timeout) {
         this.timeout = timeout;
     }
     
@@ -110,7 +121,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         return timeout;
     }
     
-    public void addTime(long time) {
+    /**
+     * Increments the gobal time by time
+     */
+    protected void addTime(long time) {
         this.time += time;
     }
     
@@ -118,24 +132,38 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         return time;
     }
     
+    /**
+     * Resets the error counter
+     */
     protected void resetErrors() {
         errors = 0;
     }
     
-    public int getErrors() {
+    /**
+     * Returns the number of errors
+     */
+    protected int getErrors() {
         return errors;
     }
     
+    /**
+     * Sets the maximum number of errors that
+     * may occur before we're giving up
+     */
     public void setMaxErrors(int maxErrors) {
         this.maxErrors = maxErrors;
     }
     
+    /**
+     * Returns the maximum number of errors that
+     * may occur
+     */
     public int getMaxErrors() {
         return maxErrors;
     }
     
     /**
-     * 
+     * See handleResponse()
      */
     protected abstract void response(ResponseMessage message, long time) throws IOException;
     
@@ -144,6 +172,8 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         if (isCancelled() || isDone()) {
             return;
         }
+        
+        addTime(time);
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Received " + response + " from " + response.getContact() 
@@ -154,7 +184,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
 
     /**
-     * 
+     * See handleTimeout()
      */
     protected abstract void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException;
     
@@ -164,6 +194,8 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         if (isCancelled() || isDone()) {
             return;
         }
+        
+        addTime(time);
         
         if (LOG.isTraceEnabled()) {
             LOG.trace(request + " to " + ContactUtils.toString(nodeId, dst) 
@@ -181,7 +213,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
     
     /**
-     * 
+     * Resends the given Message to nodeId/dst
      */
     protected void resend(KUID nodeId, SocketAddress dst, RequestMessage message) throws IOException {
         
@@ -193,7 +225,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
     
     /**
-     * 
+     * See handleError()
      */
     protected abstract void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
     
@@ -214,10 +246,19 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         return cancelled;            
     }
     
+    /**
+     * Returns whether or not this handler is done which
+     * means if it has returnded a result or threw an
+     * Exception
+     */
     private boolean isDone() {
         return done;
     }
     
+    /**
+     * Sets the return value which will be returned by the 
+     * call() method
+     */
     protected void setReturnValue(V value) {
         synchronized (lock) {
             if (cancelled) {
@@ -234,6 +275,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         }
     }
     
+    /**
+     * Sets the Exception which will be thrown by the
+     * call() method
+     */
     protected void setException(Exception ex) {
         synchronized (lock) {
             if (cancelled) {
@@ -284,9 +329,15 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         }
     }
 
+    /**
+     * Called if this handler was cancelled externally (interrupted)
+     */
     protected void cancelled() throws Exception {
     }
     
+    /**
+     * A helper method to throw Timeout Exceptions
+     */
     protected void fireTimeoutException(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
         TimeoutException timeout = new TimeoutException(
                 ContactUtils.toString(nodeId, address) + " timed out after " + time + "ms");
