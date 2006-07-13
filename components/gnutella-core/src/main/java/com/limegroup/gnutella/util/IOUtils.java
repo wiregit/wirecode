@@ -11,7 +11,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import com.limegroup.gnutella.ErrorService;
@@ -245,9 +247,11 @@ public class IOUtils {
      */
     public static byte[] deflate(byte[] data) {
         OutputStream dos = null;
+        Deflater def = null;
         try {
+            def = Pools.getDeflaterPool().borrowObject();
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            dos = new DeflaterOutputStream(baos);
+            dos = new DeflaterOutputStream(baos, def);
             dos.write(data, 0, data.length);
             dos.close();                      //flushes bytes
             return baos.toByteArray();
@@ -256,6 +260,7 @@ public class IOUtils {
             return null;
         } finally {
             IOUtils.close(dos);
+            Pools.getDeflaterPool().returnObject(def);
         }
     }
     
@@ -264,8 +269,10 @@ public class IOUtils {
      */
     public static byte[] inflate(byte[] data) throws IOException {
         InputStream in = null;
+        Inflater inf = null;
         try {
-            in = new InflaterInputStream(new ByteArrayInputStream(data));
+            inf = Pools.getInflaterPool().borrowObject();
+            in = new InflaterInputStream(new ByteArrayInputStream(data), inf);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buf = new byte[64];
             while(true) {
@@ -279,6 +286,7 @@ public class IOUtils {
             throw new IOException(oome.getMessage());
         } finally {
             IOUtils.close(in);
+            Pools.getInflaterPool().returnObject(inf);
         }
     }    
 

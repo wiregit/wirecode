@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -41,6 +42,7 @@ import com.limegroup.gnutella.util.CompressingOutputStream;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.Pools;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.util.UncompressingInputStream;
@@ -184,12 +186,11 @@ public class Connection implements IpPort {
      * flag is set in shutdown() and then checked in initialize()
      * to insure the _socket.close() happens if shutdown is called
      * asynchronously before initialize() completes.  Note that the 
-     * connection may have been remotely closed even if _closed==true.  
-     * Protected (instead of private) for testing purposes only.
+     * connection may have been remotely closed even if _closed==true.
      * This also protects us from calling methods on the Inflater/Deflater
      * objects after end() has been called on them.
      */
-    protected volatile boolean _closed=false;
+    private final AtomicBoolean _closed = new AtomicBoolean(false);
 
     /** The <tt>HandshakeResponse</tt> wrapper for all headers we read from the remote side. */
     private HandshakeResponse _headersRead = HandshakeResponse.createEmptyResponse();
@@ -397,7 +398,7 @@ public class Connection implements IpPort {
                                           GnetConnectObserver observer) throws IOException,
             NoGnutellaOkException, BadHandshakeException {
         // Check to see if close() was called while the socket was initializing
-        if (_closed) {
+        if (_closed.get()) {
             _socket.close();
             throw CONNECTION_CLOSED;
         } 
@@ -509,12 +510,12 @@ public class Connection implements IpPort {
         // implicitly in the finalization of the Deflater & Inflater)
         // releases these buffers.
         if (isWriteDeflated()) {
-            _deflater = new Deflater();
+            _deflater = Pools.getDeflaterPool().borrowObject();
             _out = createDeflatedOutputStream(_out);
         }
         
         if (isReadDeflated()) {
-            _inflater = new Inflater();
+            _inflater = Pools.getInflaterPool().borrowObject();
             _in = createInflatedInputStream(_in);
         }
     }
@@ -618,7 +619,7 @@ public class Connection implements IpPort {
         //connections from dying.  The following works around the problem.  Note
         //that Message.read may still throw IOException below.
         //See note on _closed for more information.
-        if (_closed)
+        if (_closed.get())
             throw CONNECTION_CLOSED;
 
         Message m = null;
@@ -648,7 +649,7 @@ public class Connection implements IpPort {
             _in = new UncompressingInputStream(_in, _inflater);
 		    
         //See note in receive().
-        if (_closed)
+        if (_closed.get())
             throw CONNECTION_CLOSED;
 
         //temporarily change socket timeout.
@@ -1116,19 +1117,17 @@ public class Connection implements IpPort {
      * @return true until close() is called on this Connection
      */
     public boolean isOpen() {
-        return !_closed;
+        return !_closed.get();
     }
 
     /**
      *  Closes the Connection's socket and thus the connection itself.
      */
     public void close() {
-        if(_closed)
+        // return if it was already closed.
+        if(_closed.getAndSet(true))
             return;
         
-        // Setting this flag insures that the socket is closed if this
-        // method is called asynchronously before the socket is initialized.
-        _closed = true;
         if(_socket != null) {
             try {				
                 _socket.close();
@@ -1144,9 +1143,9 @@ public class Connection implements IpPort {
         // when the deflater/inflaters are garbage-collected they will call
         // end for us.
         if( _deflater != null )
-            _deflater.end();
+            Pools.getDeflaterPool().returnObject(_deflater);
         if( _inflater != null )
-            _inflater.end();
+            Pools.getInflaterPool().returnObject(_inflater);
         
        // closing _in (and possibly _out too) can cause NPE's
        // in Message.read (and possibly other places),

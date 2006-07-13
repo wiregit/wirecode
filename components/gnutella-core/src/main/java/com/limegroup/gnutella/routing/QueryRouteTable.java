@@ -16,6 +16,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.Pools;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -104,10 +105,14 @@ public class QueryRouteTable {
 
     /** The index of the next table entry to patch. */
     private int nextPatch;
+    
     /** The uncompressor. This state must be maintained to implement chunked
      *  PATCH messages.  (You may need data from message N-1 to apply the patch
      *  in message N.) */
     private Inflater uncompressor;
+    
+    /** A cleaner to ensure we return the uncompressor. */
+    private Cleaner cleaner;
 
 
 
@@ -470,7 +475,9 @@ public class QueryRouteTable {
             try {
                 //a) If first message, create uncompressor (if needed).
                 if (m.getSequenceNumber()==1) {
-                    uncompressor = new Inflater();
+                    if(cleaner == null)
+                        cleaner = new Cleaner(this);
+                    uncompressor = Pools.getInflaterPool().borrowObject();
                 }       
                 Assert.that(uncompressor!=null, 
                     "Null uncompressor.  Sequence: "+m.getSequenceNumber());
@@ -519,7 +526,7 @@ public class QueryRouteTable {
             this.nextPatch=0; //TODO: is this right?
             // if this last message was compressed, release the uncompressor.
             if( this.uncompressor != null ) {
-                this.uncompressor.end();
+                Pools.getInflaterPool().returnObject(uncompressor);
                 this.uncompressor = null;
             }
         }   
@@ -528,7 +535,7 @@ public class QueryRouteTable {
     /**
      * Stub for calling encode(QueryRouteTable, true).
      */
-    public List /* of RouteTableMessage */ encode(QueryRouteTable prev) {
+    public List<RouteTableMessage> encode(QueryRouteTable prev) {
         return encode(prev, true);
     }
 
@@ -708,5 +715,24 @@ public class QueryRouteTable {
             return (byte)(0xF0 | b);
         else
             return b;        
+    }
+    
+    /**
+     * A simple cleaner that will ensure inflater objects are returned.
+     * This is used so that only QueryRouteTables that have ever received
+     * an inflater are scheduled for finalization.
+     */
+    private static class Cleaner {
+        private final QueryRouteTable qrt;
+        
+        Cleaner(QueryRouteTable toClean) {
+            this.qrt = toClean;
+        }
+        
+        protected void finalize() {
+            Inflater inf = qrt.uncompressor;
+            if(inf != null);
+                Pools.getInflaterPool().returnObject(inf);
+        }
     }
 }

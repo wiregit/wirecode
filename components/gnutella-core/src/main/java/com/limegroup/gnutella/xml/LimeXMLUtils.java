@@ -21,8 +21,10 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import org.w3c.dom.Node;
@@ -32,6 +34,7 @@ import org.xml.sax.InputSource;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.Pools;
 
 /**
  * Contains utility methods
@@ -679,9 +682,11 @@ public class LimeXMLUtils {
     /** Returns a ZLIB'ed version of data. */
     private static byte[] compressZLIB(byte[] data) {
         DeflaterOutputStream gos = null;
+        Deflater def = null;
         try {
+            def = Pools.getDeflaterPool().borrowObject();
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            gos=new DeflaterOutputStream(baos);
+            gos=new DeflaterOutputStream(baos, def);
             gos.write(data, 0, data.length);
             gos.flush();
             gos.close(); // required to flush data  -- flush doesn't do it.
@@ -694,6 +699,7 @@ public class LimeXMLUtils {
             return null;
         } finally {
             IOUtils.close(gos);
+            Pools.getDeflaterPool().returnObject(def);
         }
     }
 
@@ -809,8 +815,10 @@ public class LimeXMLUtils {
     private static byte[] uncompressZLIB(byte[] data) throws IOException {
         ByteArrayInputStream bais=new ByteArrayInputStream(data);
         InflaterInputStream gis = null;
+        Inflater inf = null;
         try {
-            gis =new InflaterInputStream(bais);
+            inf = Pools.getInflaterPool().borrowObject();
+            gis =new InflaterInputStream(bais, inf);
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             while (true) {
                 int b=gis.read();
@@ -821,6 +829,7 @@ public class LimeXMLUtils {
             return baos.toByteArray();
         } finally {
             IOUtils.close(gis);
+            Pools.getInflaterPool().returnObject(inf);
         }
     }
 

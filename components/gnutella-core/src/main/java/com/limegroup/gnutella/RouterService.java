@@ -110,11 +110,6 @@ public class RouterService {
     private static FileManager fileManager = new MetaFileManager();
 
 	/**
-	 * Timer similar to java.util.Timer, which was not available on 1.1.8.
-	 */
-    private static final SimpleTimer timer = new SimpleTimer(true);
-
-	/**
 	 * <tt>Acceptor</tt> instance for accepting new connections, HTTP
 	 * requests, etc.
 	 */
@@ -672,7 +667,7 @@ public class RouterService {
      * @see com.limegroup.gnutella.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
     public static void schedule(Runnable task, long delay, long period) {
-        timer.schedule(task, delay, period);
+        SimpleTimer.sharedTimer().schedule(task, delay, period);
     }
 
     /**

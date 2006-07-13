@@ -2,10 +2,14 @@ package com.limegroup.gnutella.routing;
 
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.zip.Inflater;
+
+import org.apache.commons.pool.ObjectPool;
 
 import junit.framework.Test;
 
@@ -14,19 +18,18 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.Pools;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCase {
+    private final Random RND = new Random();
+    
     public QueryRouteTableTest(String name) {
         super(name);
     }
 
     public static Test suite() {
         return buildTestSuite(QueryRouteTableTest.class);
-    }
-
-    public void assertTrue(boolean test, String out) {
-        assertTrue(out, test);
     }
 
     /** May return null!
@@ -56,14 +59,6 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
             PrivilegedAccessor.setValue(source, "uncompressor", inflater);
     }
 
-    
-    private byte[] invokeCompress(QueryRouteTable source, byte[] chunk) throws Exception {
-        byte[] retBytes = new byte[0];
-        retBytes = IOUtils.deflate(chunk);
-        return retBytes;
-    }
-
-
     private byte[] invokeUncompress(QueryRouteTable source, byte[] chunk) throws Exception {
         byte[] retBytes = new byte[0];
             retBytes = 
@@ -74,6 +69,37 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
     private int entries(QueryRouteTable tbl) throws Exception{
         BitSet set = getBitTable(tbl);
         return set.cardinality();
+    }
+    
+    // fills the qrt table up with a lot of compressable strings.
+    private void fillWithCompressables(QueryRouteTable qrt) throws Exception {
+        for(int i = 0; i < 50; i++) {
+            int length = RND.nextInt(5) + 3;
+            StringBuilder sb = new StringBuilder(length * 10);
+            char next = (char)(RND.nextInt(26) + 'a');
+            for(int j = 0; j < length/2; j++) {
+                int times = RND.nextInt(10) + 1;
+                for(int k = 0; k < times; k++)
+                    sb.append(next);
+            }
+            for(int j = length/2; j < length; j++) {
+                int times = RND.nextInt(10) + 1;
+                for(int k = 0; k < times; k++)
+                    sb.append(next);
+            }
+          //  System.out.println("added[" + i + "]: " + sb.toString());
+            qrt.add(sb.toString());
+        }
+    }
+    
+    // splits a patch msg into two.
+    private List<PatchTableMessage> split(PatchTableMessage msg) {
+        List<PatchTableMessage> list = new ArrayList<PatchTableMessage>(2);
+        byte[] data = msg.getData();
+        int halfway = data.length / 2;
+        list.add(new PatchTableMessage((short)1, (short)2, msg.getCompressor(), msg.getEntryBits(), data, 0, halfway));
+        list.add(new PatchTableMessage((short)2, (short)2, msg.getCompressor(), msg.getEntryBits(), data, halfway, data.length));
+        return list;
     }
 
     public void testCompressionAndUncompress() throws Exception {
@@ -90,7 +116,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         for (int i=100; i<7000; i++) {
             data[i]=(byte)0;
         }
-        byte[] dataCompressed=invokeCompress(dummy, data);
+        byte[] dataCompressed= IOUtils.deflate(data);
         assertLessThan(data.length, dataCompressed.length);
     
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
@@ -103,8 +129,9 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
             i+=length;
         }
         baos.flush();
-        assertTrue(Arrays.equals(data, baos.toByteArray()),
-                    "Compress/uncompress loop failed");
+        assertEquals("Compress/uncompress loop failed", data, baos.toByteArray());
+
+        setUncompressor(dummy, null);
     }
     
     public void testHalveAndUnhalve() throws Exception {
@@ -214,8 +241,8 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
                 qrt2.reset((ResetTableMessage)m);
             }
             if (m instanceof PatchTableMessage)
-                assertTrue(((PatchTableMessage)m).getCompressor()
-                    ==PatchTableMessage.COMPRESSOR_DEFLATE);
+                assertEquals(PatchTableMessage.COMPRESSOR_DEFLATE,
+                             ((PatchTableMessage)m).getCompressor());
         }
         assertEquals(qrt2,qrt);
         assertEquals(entries(qrt),entries(qrt2));
@@ -226,6 +253,67 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         iter=(new QueryRouteTable(1000).encode(null).iterator()); //blank table
         assertInstanceof(ResetTableMessage.class, iter.next());
         assertTrue(! iter.hasNext());
+    }
+    
+    public void testDecodeUsesPoolForInflater() throws Exception {
+        ObjectPool pool = Pools.getInflaterPool();
+        int priorActive = pool.getNumActive();
+        
+        // set up initial qrt.
+        QueryRouteTable qrt = new QueryRouteTable();
+        fillWithCompressables(qrt);
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+
+        //3. encode-decode test--with compression
+        //qrt={good, book, bad}
+        QueryRouteTable qrt2=new QueryRouteTable();
+        List<RouteTableMessage> msgs = qrt.encode(null);
+        qrt2.reset((ResetTableMessage)msgs.remove(0));
+
+        // We didn't get enough, we need to forcibly add another patch in.
+        if(msgs.size() == 1)
+            msgs.addAll(split((PatchTableMessage)msgs.remove(0)));
+        
+        assertGreaterThan(1, msgs.size()); // this can only be tested if more than 2 msgs.
+        
+        // make sure the rest are compressed.
+        for(RouteTableMessage m : msgs)
+            assertEquals(PatchTableMessage.COMPRESSOR_DEFLATE, ((PatchTableMessage)m).getCompressor());
+        
+        qrt2.patch((PatchTableMessage)msgs.remove(0));
+        // make sure we leased an inflater
+        assertEquals(priorActive + 1, pool.getNumActive());
+        
+        for(RouteTableMessage m : msgs)
+            qrt2.patch((PatchTableMessage)m);
+        
+        // Make sure we deleased the inflater.
+        assertEquals(priorActive, pool.getNumActive());
+
+        // ... try again, except this time make sure GC releases it.
+        
+        fillWithCompressables(qrt);
+        assertNotEquals(qrt2, qrt);
+        msgs = qrt.encode(qrt2);
+        
+        // We didn't get enough, we need to forcibly add another patch in.
+        if(msgs.size() == 1)
+            msgs.addAll(split((PatchTableMessage)msgs.remove(0)));
+        assertGreaterThan(1, msgs.size()); // again, only testable w/ more than 1 patch
+        
+        // make sure the rest are compressed.
+        for(RouteTableMessage m : msgs)
+            assertEquals(PatchTableMessage.COMPRESSOR_DEFLATE, ((PatchTableMessage)m).getCompressor());
+        
+        qrt2.patch((PatchTableMessage)msgs.remove(0));
+        // Make sure we leased an inflater
+        assertEquals(priorActive + 1, pool.getNumActive());
+        
+        // Test to make sure object is returned on finalize.
+        qrt2 = null;
+        System.gc();
+        Thread.sleep(1000);
+        assertEquals(priorActive, pool.getNumActive());
     }
     
     public void testEncodeAndDecodeNoCompression() throws Exception {
