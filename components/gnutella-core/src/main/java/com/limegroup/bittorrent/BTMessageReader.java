@@ -13,6 +13,7 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 import com.limegroup.gnutella.util.CircularByteBuffer;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
@@ -67,7 +68,7 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * Constructor
 	 */
 	public BTMessageReader(BTConnection connection) {
-		_in = new CircularByteBuffer(BUFFER_SIZE, false);
+		_in = new CircularByteBuffer(BUFFER_SIZE, NIODispatcher.instance().getBufferCache());
 		_connection = connection;
 		LENGTH_STATE = new LengthState();
 		TYPE_STATE = new TypeState();

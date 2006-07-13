@@ -8,7 +8,9 @@ import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.io.ByteBufferCache;
 
 /**
  * A circular buffer - allows to read and write to and from channels and other buffers
@@ -18,20 +20,32 @@ public class CircularByteBuffer {
 
 	private static final DevNull DEV_NULL = new DevNull();
 	
-    private final ByteBuffer in, out;
+	private final ByteBufferCache cache;
+	private final int capacity;
+    private ByteBuffer in, out;
+    
+    private ByteOrder order;
     
     private boolean lastOut = true;
     
-    public CircularByteBuffer(int capacity, boolean direct) {
-        if (direct) 
-            in = ByteBuffer.allocateDirect(capacity);
-        else 
-            in = ByteBuffer.allocate(capacity);
-        
-        out = in.asReadOnlyBuffer();
+    public CircularByteBuffer(int capacity, ByteBufferCache cache) {
+    	this.cache = cache;
+    	this.capacity = capacity;
     }
     
+    private void initBuffers() {
+    	if (in == null) {
+    		Assert.that(out == null);
+    		in = cache.getHeap(capacity);
+    		out = in.asReadOnlyBuffer();
+    	} else 
+    		Assert.that(out != null);
+    }
+
     public final int remainingIn() {
+    	if (in == null)
+    		return capacity;
+    	
         int i = in.position();
         int o = out.position();
         if (i > o)
@@ -55,6 +69,7 @@ public class CircularByteBuffer {
         else 
         	return;
         
+        initBuffers();
         if (src.remaining() > in.remaining()) {
             int oldLimit = src.limit();
             src.limit(src.position() + in.remaining());
@@ -70,6 +85,7 @@ public class CircularByteBuffer {
         if (src.remainingOut() > remainingIn())
             throw new BufferOverflowException();
         
+        initBuffers();
         if (in.remaining() < src.remainingOut()) {
             src.out.limit(in.remaining());
             in.put(src.out);
@@ -87,7 +103,7 @@ public class CircularByteBuffer {
         if (!out.hasRemaining())
             out.rewind();
         byte ret = out.get();
-        allignIfEmpty();
+        releaseIfEmpty();
         lastOut = true;
         return ret;
     }
@@ -114,7 +130,7 @@ public class CircularByteBuffer {
         }
         
         out.get(dest,offset,length);
-        allignIfEmpty();
+        releaseIfEmpty();
     }
     
     public void get(ByteBuffer dest) {
@@ -133,13 +149,14 @@ public class CircularByteBuffer {
         out.limit(out.position() + dest.remaining());
         dest.put(out);
         out.limit(out.capacity());
-        allignIfEmpty();
+        releaseIfEmpty();
     }
     
-    private void allignIfEmpty() {
+    private void releaseIfEmpty() {
     	if (out.position() == in.position()) {
-    		out.position(0);
-    		in.position(0);
+    		cache.release(in);
+    		in = null;
+    		out = null;
     	}
     }
     
@@ -168,7 +185,7 @@ public class CircularByteBuffer {
             
             written += thisTime;
         }
-        allignIfEmpty();
+        releaseIfEmpty();
         return written;
     }
     
@@ -180,7 +197,8 @@ public class CircularByteBuffer {
         int read = 0;
         int thisTime = 0;
         
-        while (remainingIn() > 0){
+        while (remainingIn() > 0) {
+        	initBuffers();
             if (!in.hasRemaining())
                 in.rewind();
             if (out.position() > in.position()) 
@@ -209,7 +227,7 @@ public class CircularByteBuffer {
     }
     
     public int capacity() {
-    	return in.capacity();
+    	return capacity;
     }
     
     public String toString() {
@@ -217,14 +235,14 @@ public class CircularByteBuffer {
     }
     
     public void order(ByteOrder order) {
-    	out.order(order);
+    	this.order = order;
     }
     
     public int getInt() throws BufferUnderflowException {
     	if (remainingOut() < 4) 
     		throw new BufferUnderflowException();
     	
-    	if (out.order() == ByteOrder.BIG_ENDIAN)
+    	if (order == ByteOrder.BIG_ENDIAN)
     		return getU() << 24 | getU() << 16 | getU() << 8 | getU();
     	else
     		return getU() | getU() << 8 | getU() << 16 | getU() << 24;
@@ -233,6 +251,7 @@ public class CircularByteBuffer {
     private int getU() {
     	return get() & 0xFF;
     }
+    
     public void discard(int num) {
     	if (remainingOut() < num)
     		throw new BufferUnderflowException();
