@@ -153,7 +153,7 @@ public class CircularByteBuffer {
     }
     
     private void releaseIfEmpty() {
-    	if (out.position() == in.position()) {
+    	if (in != null && out != null && out.position() == in.position()) {
     		cache.release(in);
     		in = null;
     		out = null;
