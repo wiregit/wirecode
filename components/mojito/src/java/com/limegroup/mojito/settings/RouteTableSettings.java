@@ -54,8 +54,16 @@ public final class RouteTableSettings extends MojitoProps {
     
     // TODO reasonable min and max values
     // 30 minutes for now
-    public static final LongSetting BUCKET_REFRESH_TIME
-        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_TIME", 30L*60L*1000L, "bucket_refresh_time", 15L*60L*1000L, 120L*60L*1000L);
+    public static final LongSetting BUCKET_REFRESH_PERIOD
+        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_PERIOD", 30L*60L*1000L, "bucket_refresh_period", 15L*60L*1000L, 120L*60L*1000L);
+    
+    /**
+     * This setting is primarily for testing. It makes sure that
+     * the run-times of the RandomBucketRefreshers are uniformly
+     * distributed. 
+     */
+    public static final BooleanSetting UNIFORM_BUCKET_REFRESH_DISTRIBUTION
+        = FACTORY.createBooleanSetting("UNIFORM_BUCKET_REFRESH_DISTRIBUTION", false);
     
     /**
      * A minimum time (in sec) to pass before pinging the least recently

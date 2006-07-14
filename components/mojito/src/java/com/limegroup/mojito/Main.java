@@ -49,6 +49,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.settings.NetworkSettings;
+import com.limegroup.mojito.settings.RouteTableSettings;
 
 public class Main {
     
@@ -81,6 +82,8 @@ public class Main {
     }
     
     private static List<MojitoDHT> standalone(InetAddress addr, int port, int count) {
+        RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.setValue(true);
+        
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>(count);
         
         for(int i = 0; i < count; i++) {

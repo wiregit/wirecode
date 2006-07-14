@@ -56,9 +56,10 @@ public class KeyValuePublisher implements Runnable {
     public void start() {
         synchronized (lock) {
             if (future == null) {
-                future = context.scheduleAtFixedRate(this, 
-                        DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue(), 
-                        DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue());
+                long period = DatabaseSettings.REPUBLISH_PERIOD.getValue();
+                long delay = period;
+                
+                future = context.scheduleAtFixedRate(this, delay, period);
             }
         }
     }

@@ -48,9 +48,14 @@ public class RandomBucketRefresher implements Runnable {
     
     public synchronized void start() {
         if (future == null) {
-            future = context.scheduleAtFixedRate(this, 
-                    RouteTableSettings.BUCKET_REFRESH_TIME.getValue(),
-                    RouteTableSettings.BUCKET_REFRESH_TIME.getValue());
+            long period = RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue();
+            long delay = period;
+            
+            if (RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
+                delay = (long)(delay * Math.random());
+            }
+            
+            future = context.scheduleAtFixedRate(this, delay, period);
         }
     }
     
