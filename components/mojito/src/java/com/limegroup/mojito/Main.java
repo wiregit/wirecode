@@ -136,7 +136,7 @@ public class Main {
             if (bootstrapHost != null) {
                 host = bootstrapHost;
             } else {
-                host = new InetSocketAddress("localhost", port+i-1);
+                host = new InetSocketAddress("localhost", port);
             }
             
             try {
