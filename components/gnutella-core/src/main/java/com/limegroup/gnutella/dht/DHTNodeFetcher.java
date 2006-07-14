@@ -30,8 +30,6 @@ public class DHTNodeFetcher {
     
     private long lastRequest = 0L;
     
-    private boolean isTaskRunning;
-
     public DHTNodeFetcher(DHTController controller) {
         this.controller = controller;
     }
@@ -59,13 +57,8 @@ public class DHTNodeFetcher {
     }
     
     public void startTimerTask() {
-        isTaskRunning = true;
         RouterService.schedule(new TimedFetcher(),
                 FETCH_DELAY, FETCH_DELAY);
-    }
-    
-    public boolean isTimerTaskRunning() {
-        return isTaskRunning;
     }
     
     private class TimedFetcher implements Runnable {
@@ -97,7 +90,7 @@ public class DHTNodeFetcher {
             }
             
             PingReply reply = (PingReply) m;
-            List<IpPort> l = reply.getPackedIPPorts();
+            List<IpPort> l = reply.getPackedDHTIPPorts();
             
             for (IpPort ipp : l) {
                 controller.addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));

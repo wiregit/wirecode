@@ -7,10 +7,11 @@ import java.util.List;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.dht.DHTController;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
-public class LimeDHTManager implements LifecycleListener{
+public class LimeDHTManager implements DHTManager{
 
     private DHTController dhtController;
     

@@ -24,6 +24,7 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -220,7 +221,7 @@ public class RouterService {
     /**
      * Initialize the class that manages the DHT.
      */
-    private static LimeDHTManager dhtManager = new LimeDHTManager();
+    private static DHTManager dhtManager = new LimeDHTManager();
     
     /**
      * The Node assigner class
@@ -550,7 +551,7 @@ public class RouterService {
     /**
      * Accessor for the <tt>LimeDHTManager</tt> instance.
      */
-    public static LimeDHTManager getLimeDHTManager() {
+    public static DHTManager getLimeDHTManager() {
         return dhtManager;
     }
     

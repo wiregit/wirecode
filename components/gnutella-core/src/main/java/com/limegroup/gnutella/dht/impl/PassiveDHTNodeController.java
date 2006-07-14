@@ -77,6 +77,11 @@ class PassiveDHTNodeController extends AbstractDHTController{
         
         InetSocketAddress addr = new InetSocketAddress(host, port);
         if(waiting) {
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Adding host: "+addr+" to leaf dht nodes");
+            }
+            
             addBootstrapHost(addr);
         } else {
             limeDHTRouteTable.addLeafDHTNode(addr);
@@ -88,7 +93,11 @@ class PassiveDHTNodeController extends AbstractDHTController{
             return;
         }
         
-        limeDHTRouteTable.removeLeafDHTNode(host, port);
+        IpPort removed = limeDHTRouteTable.removeLeafDHTNode(host, port);
+
+        if(LOG.isDebugEnabled() && removed != null) {
+            LOG.debug("Removed host: "+removed+" from leaf dht nodes");
+        }
     }
 
     @Override

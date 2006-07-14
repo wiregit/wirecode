@@ -57,20 +57,24 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
     }
     
     /**
-     * Removes this DHT leaf from our routing table.
+     * Removes this DHT leaf from our routing table and returns it.
      * 
      */
-    public synchronized void removeLeafDHTNode(String host, int port) {
+    public synchronized IpPort removeLeafDHTNode(String host, int port) {
         try {
             IpPort node = new IpPortImpl(host, port);
             KUID nodeId = leafDHTNodes.remove(node);
             if(nodeId != null) {
-                replaceWithMostRecentlySeenCachedContact(nodeId);
+                removeAndReplaceWithMRSCachedContact(nodeId);
+                return node;
             }
-        } catch (UnknownHostException ignored) {}
+            return null;
+        } catch (UnknownHostException ignored) {
+            return null;
+        }
     }
     
-    protected synchronized void replaceWithMostRecentlySeenCachedContact(KUID nodeId) {
+    protected synchronized void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
         Bucket bucket = getBucket(nodeId);
         boolean removed = bucket.remove(nodeId);
         assert (removed == true);

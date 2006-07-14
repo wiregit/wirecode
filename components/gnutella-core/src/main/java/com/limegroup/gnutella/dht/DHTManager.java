@@ -8,29 +8,26 @@ import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
-public interface DHTController {
-    
-    public void init();
-    
-    public void start();
-    
-    public void shutdown();
+public interface DHTManager extends LifecycleListener{
+
+    public void startDHT(boolean activeMode);
+
+    public void switchMode(boolean toActiveMode);
+
+    public void addBootstrapHost(SocketAddress hostAddress);
+
+    public void addressChanged();
 
     public List<IpPort> getActiveDHTNodes(int maxNodes);
-    
-    public void addBootstrapHost(SocketAddress hostAddress);
-    
+
     public boolean isActiveNode();
-    
+
+    public void shutdown();
+
     public boolean isRunning();
-    
-    public boolean isWaiting();
-    
+
     public int getDHTVersion();
-    
-    //TODO: remove! for testing only 
+
     public MojitoDHT getMojitoDHT();
-    
-    public void handleLifecycleEvent(LifecycleEvent evt);
-    
+
 }
