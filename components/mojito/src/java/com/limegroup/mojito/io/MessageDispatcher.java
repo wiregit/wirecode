@@ -21,7 +21,6 @@ package com.limegroup.mojito.io;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.Iterator;
@@ -119,6 +118,8 @@ public abstract class MessageDispatcher implements Runnable {
     
     public abstract void bind(SocketAddress address) throws IOException;
     
+    public abstract void start();
+    
     public abstract void stop();
     
     public abstract boolean isRunning();
@@ -190,8 +191,7 @@ public abstract class MessageDispatcher implements Runnable {
         DHTMessage message = tag.getMessage();
         
         // Make sure we're not sending messages to ourself
-        if (context.isLocalNodeID(nodeId)
-                || context.isLocalAddress(dst)) {
+        if (context.isLocalNode(nodeId, dst)) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
@@ -216,9 +216,8 @@ public abstract class MessageDispatcher implements Runnable {
         if (size >= MAX_MESSAGE_SIZE) {
             IOException iox = new IOException("Message (" + message.getClass().getName()  + ") is too large: " 
                     + size + " >= " + MAX_MESSAGE_SIZE);
-            //tag.handleError(iox);
-            //return false;
-            throw iox;
+            tag.handleError(iox);
+            return false;
         }
         
         tag.setData(data);
@@ -323,8 +322,7 @@ public abstract class MessageDispatcher implements Runnable {
         KUID nodeId = node.getNodeID();
         SocketAddress src = node.getSocketAddress();
         
-        if (context.isLocalNodeID(nodeId)
-                || context.isLocalAddress(src)) {
+        if (context.isLocalNode(nodeId, src)) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
@@ -442,12 +440,18 @@ public abstract class MessageDispatcher implements Runnable {
             while(!outputQueue.isEmpty() && isRunning()) {
                 Tag tag = outputQueue.removeFirst();
                 
+                if (tag.isCancelled()) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(tag + " was cancelled");
+                    }
+                    continue;
+                }
+                
                 try {
                     SocketAddress dst = tag.getSocketAddres();
                     ByteBuffer data = tag.getData();
                     assert data != null : "Somebody set Data to null";
 
-                    
                     if (send(channel, dst, data)) {
                         // Wohoo! Message was sent!
                         registerInput(tag);
@@ -456,8 +460,8 @@ public abstract class MessageDispatcher implements Runnable {
                         outputQueue.addFirst(tag);
                         break;
                     }
-                } catch (SocketException err) {
-                    LOG.error("Failed to send a message due to a SocketException", err);
+                } catch (IOException err) {
+                    LOG.error("IOException", err);
                     tag.handleError(err);
                 }
             }
@@ -625,11 +629,11 @@ public abstract class MessageDispatcher implements Runnable {
             try {
                 defaultHandler.handleResponse(response, receipt.time());
                 if (receipt.getResponseHandler() != defaultHandler) {
-                    receipt.getResponseHandler().addTime(receipt.time());
                     receipt.getResponseHandler().handleResponse(response, receipt.time());
                 }
-            } catch (IOException err) {
-                LOG.error("An error occured dusring processing the response", err);
+            } catch (Exception e) {
+                receipt.handleError(e);
+                LOG.error("An error occured dusring processing the response", e);
             }
         }
         
@@ -730,10 +734,10 @@ public abstract class MessageDispatcher implements Runnable {
                 
                 defaultHandler.handleTimeout(nodeId, dst, msg, time);
                 if (receipt.getResponseHandler() != defaultHandler) {
-                    receipt.getResponseHandler().addTime(time);
                     receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
                 }
             } catch (Exception e) {
+                receipt.handleError(e);
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
             }
         }

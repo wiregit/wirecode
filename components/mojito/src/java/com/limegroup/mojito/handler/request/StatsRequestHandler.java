@@ -46,7 +46,7 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         networkStats = context.getNetworkStats();
     }
 
-    public void handleRequest(RequestMessage message) throws IOException {
+    public void request(RequestMessage message) throws IOException {
         
         StatsRequest request = (StatsRequest) message;
         
@@ -55,10 +55,6 @@ public class StatsRequestHandler extends AbstractRequestHandler {
                 LOG.warn(message.getContact() + " sent us an invalid Stats Request");
             }
             return;
-        }
-        
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(message.getContact() + " sent us a Stats Request");
         }
         
         networkStats.STATS_REQUEST.incrementStat();

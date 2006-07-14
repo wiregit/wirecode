@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.routing;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
@@ -28,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 /**
@@ -48,9 +48,14 @@ public class RandomBucketRefresher implements Runnable {
     
     public synchronized void start() {
         if (future == null) {
-            future = context.scheduleAtFixedRate(this, 
-                    RouteTableSettings.BUCKET_REFRESH_TIME.getValue(),
-                    RouteTableSettings.BUCKET_REFRESH_TIME.getValue());
+            long period = RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue();
+            long delay = period;
+            
+            if (RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
+                delay = (long)(delay * Math.random());
+            }
+            
+            future = context.scheduleAtFixedRate(this, delay, period);
         }
     }
     
@@ -66,30 +71,30 @@ public class RandomBucketRefresher implements Runnable {
             LOG.trace("Random bucket refresh");
         }
         
-        try {
-            synchronized (context) {
-                ScheduledFuture f = future;
-                if (f == null || f.isCancelled()) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("RandomBucketRefresher is canceled");
-                    }
-                    return;
-                }
-                
-                if (context.isBootstrapping()) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
-                    }
-                    return;
-                }
-                
-                List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
-                for(KUID nodeId : ids) {
-                    context.lookup(nodeId);
-                }
+        ScheduledFuture f = future;
+        if (f == null || f.isCancelled()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("RandomBucketRefresher is canceled");
             }
-        } catch (IOException ex) {
-            LOG.error("IOException", ex);
+            return;
+        }
+        
+        if (context.isBootstrapping()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
+            }
+            return;
+        }
+        
+        List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
+        
+        try {
+            for(KUID nodeId : ids) {
+                FindNodeResponseHandler handler = new FindNodeResponseHandler(context, nodeId);
+                handler.call();
+            }
+        } catch (Exception err) {
+            LOG.error("Exception", err);
         }
     }
 }

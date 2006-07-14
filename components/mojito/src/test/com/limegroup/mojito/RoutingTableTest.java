@@ -27,7 +27,7 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Iterator;
 
-import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.routing.RouteTable;
@@ -48,7 +48,7 @@ public class RoutingTableTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static TestSuite suite() {
         return buildTestSuite(RoutingTableTest.class);
     }
 

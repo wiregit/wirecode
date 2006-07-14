@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.util.ArrayUtils;
@@ -39,7 +39,7 @@ public class PatriciaTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static TestSuite suite() {
         return buildTestSuite(PatriciaTest.class);
     }
 

@@ -16,19 +16,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.handler;
 
-import com.limegroup.mojito.Context;
+package com.limegroup.mojito.event;
 
 /**
- * An abstract MessageHandler
+ * 
  */
-public abstract class MessageHandler {
+public interface DHTEventListener<T> {
     
-    protected final Context context;
+    /**
+     * 
+     */
+    public void handleResult(T result);
     
-    public MessageHandler(Context context) {
-        this.context = context;
-    }
+    /**
+     * 
+     */
+    public void handleException(Exception ex);
 }

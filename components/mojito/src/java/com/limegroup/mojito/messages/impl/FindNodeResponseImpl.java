@@ -40,15 +40,16 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
 
     private QueryKey queryKey;
 
-    private Collection<? extends Contact> nodes;
+    private Collection<Contact> nodes;
 
+    @SuppressWarnings("unchecked")
     public FindNodeResponseImpl(Context context, 
             Contact contact, KUID messageId, 
             QueryKey queryKey, Collection<? extends Contact> nodes) {
         super(context, OpCode.FIND_NODE_RESPONSE, contact, messageId);
 
         this.queryKey = queryKey;
-        this.nodes = nodes;
+        this.nodes = (Collection<Contact>)nodes;
     }
     
     public FindNodeResponseImpl(Context context, 
@@ -65,7 +66,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
         return queryKey;
     }
 
-    public Collection<? extends Contact> getNodes() {
+    public Collection<Contact> getNodes() {
         return nodes;
     }
 

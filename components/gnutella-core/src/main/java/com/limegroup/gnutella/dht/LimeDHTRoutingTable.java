@@ -1,12 +1,11 @@
 package com.limegroup.gnutella.dht;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,12 +15,8 @@ import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
-import com.limegroup.mojito.settings.ContextSettings;
 
 public class LimeDHTRoutingTable extends RouteTableImpl {
     
@@ -44,41 +39,20 @@ public class LimeDHTRoutingTable extends RouteTableImpl {
             LOG.debug("Pinging node: " + host);
         }
         
-        final Contact[] dhtNode = new Contact[] { null };
-        synchronized (dhtNode) {
-            try {
-                context.ping(host, new PingListener() {
-                    public void response(ResponseMessage response, long t) {
-                        dhtNode[0] = response.getContact();
-                        synchronized (dhtNode) {
-                            dhtNode.notify();
-                        }
-                    }
-
-                    public void timeout(KUID nodeId, SocketAddress address, 
-                            RequestMessage request, long t) {
-                        synchronized (dhtNode) {
-                            dhtNode.notify();
-                        }
-                    }
-                });
-            } catch (IOException ignored) {}
-                
-            try {
-                dhtNode.wait(ContextSettings.SYNC_PING_TIMEOUT.getValue());
-            } catch (InterruptedException err) {
-                LOG.error("InterruptedException", err);
+        try {
+            Contact node = context.ping(host).get();
+            if(node != null) {
+                synchronized (this) {
+                    leafDHTNodes.put(new IpPortImpl(host), node.getNodeID());
+                    
+                    node.setTimeStamp(Long.MAX_VALUE);
+                    add(node);
+                }
             }
-        }
-        
-        Contact node = dhtNode[0];
-        if(node != null) {
-            synchronized (this) {
-                leafDHTNodes.put(new IpPortImpl(host), node.getNodeID());
-                
-                node.setTimeStamp(Long.MAX_VALUE);
-                add(node);
-            }
+        } catch (InterruptedException err) {
+            LOG.error("InterruptedException", err);
+        } catch (ExecutionException err) {
+            LOG.error("ExecutionException", err);
         }
     }
     

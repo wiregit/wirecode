@@ -16,20 +16,42 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.event;
 
-import java.util.Collection;
+import java.util.List;
 
-import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.db.KeyValue;
 
-/**
- * The interface for receiving Lookup events.
- */
-public interface LookupListener extends ResponseListener {
+public class StoreEvent {
     
-    /**
-     * Called after a lookup has finished.
-     */
-    public void finish(KUID lookup, Collection c, long time);
+    private KeyValue value;
+    
+    private List<Contact> nodes;
+    
+    @SuppressWarnings("unchecked")
+    public StoreEvent(KeyValue value, List<? extends Contact> nodes) {
+        this.value = value;
+        this.nodes = (List<Contact>)nodes;
+    }
+    
+    public KeyValue getKeyValue() {
+        return value;
+    }
+    
+    public List<Contact> getNodes() {
+        return nodes;
+    }
+    
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(value).append("\n");
+        
+        int i = 0;
+        for (Contact node : nodes) {
+            buffer.append("  ").append(i++).append(": ").append(node).append("\n");
+        }
+        return buffer.toString();
+    }
 }

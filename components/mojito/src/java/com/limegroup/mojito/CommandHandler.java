@@ -29,23 +29,20 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.concurrent.Future;
 
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
-import com.limegroup.mojito.util.ContactUtils;
 
 public class CommandHandler {
     
@@ -102,7 +99,7 @@ public class CommandHandler {
         out.println("Local ContactNode: " + dht.getLocalNode());
         out.println("Is running: " + dht.isRunning());
         out.println("Database Size: " + dht.getDatabase().size());
-        out.println("RouteTable Size: " + dht.getRoutingTable().size());
+        out.println("RouteTable Size: " + dht.getRouteTable().size());
         out.println("Estimated DHT Size: " + dht.size());
     }
     
@@ -137,34 +134,48 @@ public class CommandHandler {
     public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         StringBuilder buffer = new StringBuilder("\n");
         
-        RouteTable routingTable = dht.getRoutingTable();
+        RouteTable routingTable = dht.getRouteTable();
         buffer.append(routingTable.toString());
         
         out.println(buffer);
     }
     
-    public static void ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
+    public static Future<Contact> ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
         String host = args[1];
         int port = Integer.parseInt(args[2]);
         
         SocketAddress addr = new InetSocketAddress(host, port);
         
         out.println("Pinging... " + addr);
-        dht.ping(addr, new PingListener() {
-            public void response(ResponseMessage response, long time) {
-                out.println("Ping to " + response.getContact() + " succeeded: " + time + "ms");
+        /*dht.ping(addr, new PingListener() {
+            public void handleResult(Contact result) {
+                out.println("Ping to " + result + " succeeded: " + result.getRoundTripTime() + "ms");
                 out.flush();
             }
-
-            public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-                if (nodeId != null) {
+            
+            public void handleException(Exception ex) {
+                if (ex instanceof DHTException) {
+                    DHTException dhtEx = (DHTException)ex;
+                    KUID nodeId = dhtEx.getNodeID();
+                    SocketAddress address = dhtEx.getSocketAddress();
                     out.println("Ping to " + ContactUtils.toString(nodeId, address) + " failed");
                 } else {
-                    out.println("Ping to " + address + " failed");
+                    ex.printStackTrace(out);
                 }
                 out.flush();
             }
-        });
+        });*/
+        
+        Future<Contact> future = dht.ping(addr);
+        try {
+            Contact result = future.get();
+            out.println("Ping to " + result + " succeeded: " + result.getRoundTripTime() + "ms");
+        } catch (Exception err) {
+            err.printStackTrace(out);
+        }
+        out.flush();
+        
+        return future;
     }
     
     public static void reqstats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
@@ -178,17 +189,16 @@ public class CommandHandler {
         
         out.println("Bootstraping... " + addr);
         dht.bootstrap(addr, new BootstrapListener() {
-            public void phaseOneComplete(long time) {
-                out.println("Bootstraping phase #1 finished in " + time + " ms");
+            public void handleResult(BootstrapEvent result) {
+                out.println("Bootstraping finished:\n" + result);
                 out.flush();
             }
-
-            public void phaseTwoComplete(boolean foundNodes, long time) {
-                out.println("Bootstraping phase #2 " + (foundNodes ? "succeded" : "failed") + " in " + time + " ms");
+            
+            public void handleException(Exception ex) {
+                out.println("Bootstraping failed");
+                ex.printStackTrace(out);
                 out.flush();
             }
-
-            public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {}
         });
     }
     
@@ -219,7 +229,7 @@ public class CommandHandler {
             md.reset();
             
             out.println("Storing... " + key);
-            dht.put(key, value, new StoreListener() {
+            /*dht.put(key, value, new StoreListener() {
                 public void store(KeyValue keyValue, Collection nodes) {
                     StringBuilder buffer = new StringBuilder();
                     buffer.append("STORED KEY_VALUES: ").append(keyValue).append("\n");
@@ -232,8 +242,14 @@ public class CommandHandler {
                     out.println(buffer.toString());
                     out.flush();
                 }
-            });
-        } catch (NoSuchAlgorithmException err) {
+            });*/
+            
+            StoreEvent evt = dht.put(key, value).get();
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("STORE RESULT:\n");
+            buffer.append(evt.toString());
+            out.println(buffer.toString());
+        } catch (Exception err) {
             err.printStackTrace(out);
         }
     }
@@ -251,21 +267,28 @@ public class CommandHandler {
             md.reset();
             
             out.println("Removing... " + key);
-            dht.remove(key, new StoreListener() {
-                public void store(KeyValue keyValue, Collection nodes) {
+            /*dht.remove(key, new StoreListener() {
+                public void handleResult(Entry<KeyValue, List<Contact>> result) {
                     StringBuffer buffer = new StringBuffer();
-                    buffer.append("REMOVED KEY_VALUES: ").append(keyValue).append("\n");
-                    int i = 0;
-                    for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-                        Contact node = (Contact) iter.next();
-                        buffer.append(i).append(": ").append(node).append("\n");
-                        i++;
-                    }
+                    buffer.append("REMOVED KEY_VALUES: ").append(result.getKey()).append("\n");
+                    buffer.append(CollectionUtils.toString(result.getValue()));
                     out.println(buffer.toString());
                     out.flush();
                 }
-            });
-        } catch (NoSuchAlgorithmException e) {
+                
+                public void handleException(Exception ex) {
+                    ex.printStackTrace(out);
+                    out.flush();
+                }
+            });*/
+            
+            StoreEvent evt = dht.remove(key).get();
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("REMOVE RESULT:\n");
+            buffer.append(evt.toString());
+            out.println(buffer.toString());
+            
+        } catch (Exception e) {
             e.printStackTrace(out);
         }
     }
@@ -304,13 +327,13 @@ public class CommandHandler {
             });*/
             
             long start = System.currentTimeMillis();
-            Collection c = dht.get(key);
+            FindValueEvent evt = dht.get(key).get();
             long time = System.currentTimeMillis() - start;
             
-            if (!c.isEmpty()) {
+            if (!evt.getValues().isEmpty()) {
                 StringBuffer buffer = new StringBuffer();
                 buffer.append(key).append(" in ").append(time).append("ms\n");
-                buffer.append(c);
+                buffer.append(evt);
                 buffer.append("\n");
                 out.println(buffer.toString());
             } else {
@@ -319,7 +342,7 @@ public class CommandHandler {
             
             out.println();
             
-        } catch (NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             e.printStackTrace(out);
         }
     }

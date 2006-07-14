@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -30,30 +31,38 @@ import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.KeyValuePublisher;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.LookupListener;
+import com.limegroup.mojito.event.FindNodeEvent;
+import com.limegroup.mojito.event.FindNodeListener;
+import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.PingListener;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.handler.BootstrapManager;
-import com.limegroup.mojito.handler.LookupManager;
-import com.limegroup.mojito.handler.PingManager;
-import com.limegroup.mojito.handler.StoreManager;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
+import com.limegroup.mojito.manager.BootstrapManager;
+import com.limegroup.mojito.manager.FindNodeManager;
+import com.limegroup.mojito.manager.FindValueManager;
+import com.limegroup.mojito.manager.PingManager;
+import com.limegroup.mojito.manager.StoreManager;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
@@ -94,10 +103,12 @@ public class Context {
     private RandomBucketRefresher bucketRefresher;
     
     private PingManager pingManager;
-    private LookupManager lookupManager;
+    private FindNodeManager findNodeManager;
+    private FindValueManager findValueManager;
+    private StoreManager storeManager;
+    private BootstrapManager bootstrapManager;
     
-    private volatile boolean bootstrapping = false;
-    private boolean running = false;
+    private volatile boolean running = false;
     
     private DHTStats dhtStats = null;
     
@@ -113,8 +124,8 @@ public class Context {
     
     private ThreadFactory threadFactory = new DefaultThreadFactory();
     
-    private ThreadPoolExecutor eventExecutor;
-    private ScheduledThreadPoolExecutor scheduledExecutor;
+    private ScheduledExecutorService scheduledExecutor;
+    private ExecutorService contextExecutor;
     
     public Context(String name, Contact localNode, KeyPair keyPair) {
         this.name = name;
@@ -132,9 +143,6 @@ public class Context {
         }
         masterKeyPair = new KeyPair(masterKey, null);
         
-        initEventQueue();
-        initContextTimer();
-        
         dhtStats = new DHTNodeStat(this);
         
         networkStats = new NetworkStatisticContainer(this);
@@ -151,25 +159,14 @@ public class Context {
         bucketRefresher = new RandomBucketRefresher(this);
         
         pingManager = new PingManager(this);
-        lookupManager = new LookupManager(this);
+        findNodeManager = new FindNodeManager(this);
+        findValueManager = new FindValueManager(this);
+        storeManager = new StoreManager(this);
+        bootstrapManager = new BootstrapManager(this);
         
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
         routeTable.add(localNode);
-    }
-
-    private void initEventQueue() {
-        ThreadFactory factory = new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread thread = getThreadFactory().newThread(r);
-                thread.setName(getName() + "-EventDispatcher");
-                thread.setDaemon(true);
-                return thread;
-            }
-        };
-        
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        eventExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, queue, factory);
     }
     
     private void initContextTimer() {
@@ -182,7 +179,20 @@ public class Context {
             }
         };
         
-        scheduledExecutor = new ScheduledThreadPoolExecutor(1, factory);
+        scheduledExecutor = Executors.newScheduledThreadPool(1, factory);
+    }
+    
+    private void initContextExecutor() {
+        ThreadFactory factory = new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread thread = getThreadFactory().newThread(r);
+                thread.setName(getName() + "-ContextExecutor");
+                thread.setDaemon(true);
+                return thread;
+            }
+        };
+        
+        contextExecutor = Executors.newCachedThreadPool(factory);
     }
     
     public String getName() {
@@ -291,7 +301,11 @@ public class Context {
     }
     
     public boolean isLocalNode(Contact node) {
-        return isLocalNodeID(node.getNodeID());
+        return isLocalNode(node.getNodeID(), node.getSocketAddress());
+    }
+    
+    public boolean isLocalNode(KUID nodeId, SocketAddress addr) {
+        return isLocalNodeID(nodeId) || isLocalAddress(addr);
     }
     
     public boolean isLocalNodeID(KUID nodeId) {
@@ -377,22 +391,6 @@ public class Context {
         return messageHelper.getMessageFactory();
     }
     
-    public synchronized boolean isRunning() {
-        return running;
-    }
-
-    public boolean isOpen() {
-        return messageDispatcher.isOpen();
-    }
-    
-    public void setBootstrapping(boolean bootstrapped) {
-        this.bootstrapping = bootstrapped;
-    }
-    
-    public boolean isBootstrapping() {
-        return (isRunning() && bootstrapping);
-    }
-    
     public int getReceivedMessagesCount() {
         return messageDispatcher.getReceivedMessagesCount();
     }
@@ -429,6 +427,28 @@ public class Context {
     }
     
     /**
+     * Returns whether or not the MessageDispatcher has
+     * an open DatagramChannel
+     */
+    public boolean isOpen() {
+        return messageDispatcher.isOpen();
+    }
+    
+    /**
+     * Returns whether or not the MojitoDHT is running
+     */
+    public synchronized boolean isRunning() {
+        return running;
+    }
+
+    /**
+     * Returns whether or not the MojitoDHT is bootstrapping
+     */
+    public synchronized boolean isBootstrapping() {
+        return isRunning() && bootstrapManager.isBootstrapping();
+    }
+    
+    /**
      * Binds the DatagramChannel to a specific address & port.
      * 
      * @param address
@@ -440,7 +460,13 @@ public class Context {
         }
         
         this.localAddress = localAddress;
-        localNode.setSocketAddress(localAddress);
+        
+        InetSocketAddress addr = (InetSocketAddress)localAddress;
+        if (addr.getAddress().isAnyLocalAddress()) {
+            addr = new InetSocketAddress("localhost", addr.getPort());
+        }
+        
+        localNode.setSocketAddress(addr);
         localNode.nextInstanceID();
         
         messageDispatcher.bind(localAddress);
@@ -459,17 +485,16 @@ public class Context {
             return;
         }
         
+        initContextTimer();
+        initContextExecutor();
+        
         pingManager.init();
-        lookupManager.init();
+        findNodeManager.init();
+        findValueManager.init();
         
         running = true;
         
-        Thread messageDispatcherThread 
-            = getThreadFactory().newThread(messageDispatcher);
-        messageDispatcherThread.setName(getName() + "-MessageDispatcherThread");
-        //messageDispatcherThread.setDaemon(true);
-        messageDispatcherThread.start();
-        
+        messageDispatcher.start();
         bucketRefresher.start();
         publisher.start();
     }
@@ -483,14 +508,12 @@ public class Context {
         }
         
         running = false;
-        bootstrapping = false;
         
         bucketRefresher.stop();
         publisher.stop();
         
-        eventExecutor.getQueue().clear();
-        scheduledExecutor.getQueue().clear();
-        
+        scheduledExecutor.shutdownNow();
+        contextExecutor.shutdownNow();
         messageDispatcher.stop();
         
         lastEstimateTime = 0L;
@@ -516,21 +539,16 @@ public class Context {
         return scheduledExecutor.scheduleAtFixedRate(r, delay, period, TimeUnit.MILLISECONDS);
     }
     
-    /**
-     * Fire's an Event
-     */
-    public void fireEvent(Runnable event) {
-        if (!isRunning()) {
-            LOG.error("Discarding Event as DHT is not running");
-            return;
-        }
-        
-        if (event == null) {
-            LOG.error("Discarding Event as it is null");
-            return;
-        }
-
-        eventExecutor.execute(event);
+    public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay) {
+        return scheduledExecutor.schedule(task, delay, TimeUnit.MILLISECONDS);
+    }
+    
+    public <V> Future<V> schedule(Callable<V> task) {
+        return contextExecutor.submit(task);
+    }
+    
+    public void execute(Runnable command) {
+        contextExecutor.execute(command);
     }
     
     /** Adds a global PingListener */
@@ -548,21 +566,6 @@ public class Context {
         return pingManager.getPingListeners();
     }
     
-    /** Adds a global LookupListener */
-    public void addLookupListener(LookupListener listener) {
-        lookupManager.addLookupListener(listener);
-    }
-    
-    /** Removes a global LookupListener */
-    public void removeLookupListener(LookupListener listener) {
-        lookupManager.removeLookupListener(listener);
-    }
-    
-    /** Returns all global LookupListeners */
-    public LookupListener[] getLookupListeners() {
-        return lookupManager.getLookupListeners();
-    }
-    
     /**
      * Pings the DHT node with the given SocketAddress. 
      * Warning: This method should not be used to ping contacts from the routing table
@@ -571,50 +574,45 @@ public class Context {
      * @param l the PingListener for incoming pongs
      * @throws IOException
      */
-    public void ping(SocketAddress address) throws IOException {
-        pingManager.ping(address);
+    public Future<Contact> ping(SocketAddress address) {
+        return pingManager.ping(address);
     }
     
     /** Pings the given Node */
-    public void ping(SocketAddress address, PingListener listener) throws IOException {
-        pingManager.ping(address, listener);
+    public Future<Contact> ping(SocketAddress address, PingListener listener) {
+        return pingManager.ping(address, listener);
     }
     
     /** Pings the given Node */
-    public void ping(Contact node) throws IOException {
-        pingManager.ping(node);
+    public Future<Contact> ping(Contact node) {
+        return pingManager.ping(node);
     }
     
     /** Pings the given Node */
-    public void ping(Contact node, PingListener listener) throws IOException {
-        pingManager.ping(node, listener);
+    public Future<Contact> ping(Contact node, PingListener listener) {
+        return pingManager.ping(node, listener);
     }
     
     /** Starts a value for the given KUID */
-    public void get(KUID key, LookupListener listener) throws IOException {
-        lookupManager.lookup(key, listener);
+    public Future<FindValueEvent> get(KUID key, FindValueListener listener) {
+        return findValueManager.lookup(key, listener);
     }
     
     /** Starts a lookup for the given KUID */
-    public void lookup(KUID lookup) throws IOException {
-        lookupManager.lookup(lookup);
+    public Future<FindNodeEvent> lookup(KUID lookupId) {
+        return findNodeManager.lookup(lookupId);
     }
     
     /** Starts a lookup for the given KUID */
-    public void lookup(KUID lookup, LookupListener listener) throws IOException {
-        lookupManager.lookup(lookup, listener);
+    public Future<FindNodeEvent> lookup(KUID lookupId, FindNodeListener listener) {
+        return findNodeManager.lookup(lookupId, listener);
     }
     
     /**
      * Tries to bootstrap from the local Route Table.
      */
-    public void bootstrap(BootstrapListener listener) throws IOException {
-        if(isBootstrapping()) {
-            return;
-        }
-        
-        setBootstrapping(true);
-        new BootstrapManager(this).bootstrap(listener);
+    public Future<BootstrapEvent> bootstrap(BootstrapListener listener) {
+        return bootstrapManager.bootstrap(listener);
     }
     
     /**
@@ -622,26 +620,36 @@ public class Context {
      * size of the list it may fall back to bootstrapping from
      * the local Route Table!
      */
-    public void bootstrap(List<? extends SocketAddress> hostList, 
-            BootstrapListener listener) throws IOException {
-        
-        if(isBootstrapping()) {
-            return;
-        }
-        
-        setBootstrapping(true);
-        new BootstrapManager(this).bootstrap(hostList, listener);
+    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList, 
+                BootstrapListener listener) {
+        return bootstrapManager.bootstrap(hostList, listener);
     }
     
-    /** Stores a given KeyValue */
-    public void store(KeyValue keyValue, StoreListener listener) throws IOException {
-        new StoreManager(this).store(keyValue, listener);
+    /** 
+     * Stores the given KeyValue 
+     */
+    public Future<StoreEvent> store(KeyValue keyValue) {
+        return storeManager.store(keyValue);
+    }
+    
+    /** 
+     * Stores the given KeyValue 
+     */
+    public Future<StoreEvent> store(KeyValue keyValue, StoreListener listener) {
+        return storeManager.store(keyValue, listener);
+    }
+    
+    /** 
+     * Stores the given KeyValue 
+     */
+    public Future<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
+        return storeManager.store(node, queryKey, keyValue);
     }
     
     /**
      * Returns the approximate DHT size
      */
-    public int size() {
+    public synchronized int size() {
         if (!isRunning()) {
             return 0;
         }

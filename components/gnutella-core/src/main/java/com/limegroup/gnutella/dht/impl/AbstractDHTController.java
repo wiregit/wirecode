@@ -24,7 +24,9 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.manager.BootstrapManager.BootstrapException;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -130,10 +132,20 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             bootstrapHosts.add(simppBootstrapHost);
         }
         
-        try {
-            dht.bootstrap(bootstrapHosts, new BootstrapListener() {
-                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
-                    synchronized (bootstrapHosts) {
+        dht.bootstrap(bootstrapHosts, new BootstrapListener() {
+            public void handleResult(BootstrapEvent result) {
+                waiting = false;
+                
+                // Notify our connections that we are now a full DHT node 
+                sendUpdatedCapabilities();
+                //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
+            }
+            
+            public void handleException(Exception ex) {
+                if (ex instanceof BootstrapException) {
+                    BootstrapException bex = (BootstrapException)ex;
+                    List<SocketAddress> failedHosts = bex.getFailedHostList();
+                    synchronized(bootstrapHosts) {
                         bootstrapHosts.removeAll(failedHosts);
                         if(!bootstrapHosts.isEmpty()) {
                             //hosts were added --> try again
@@ -148,22 +160,8 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
                         }
                     }
                 }
-
-                public void phaseOneComplete(long time) {
-                    waiting = false;
-                }
-                
-                public void phaseTwoComplete(boolean foundNodes, long time) {
-                    //Notify our connections that we are now a full DHT node 
-                    sendUpdatedCapabilities();
-                    
-                    //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
-                }
-            });
-            
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
+            }
+        });
     }
     
     /**

@@ -11,4 +11,4 @@ done
 
 export CLASSPATH
 
-java -ea com.limegroup.mojito.Main $1 $2 $3
+java -ea com.limegroup.mojito.Main $1 $2 $3 $4

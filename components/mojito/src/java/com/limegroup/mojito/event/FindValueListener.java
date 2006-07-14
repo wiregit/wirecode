@@ -16,22 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.event;
 
-import java.net.SocketAddress;
-import java.util.List;
-
-import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.KUID;
-
 /**
- * The interface for receiving Store events.
+ * 
  */
-@Deprecated
-public interface StoreResponseListener extends ResponseListener {
+public interface FindValueListener extends DHTEventListener<FindValueEvent> {
 
-    public void storeSucceeded(Contact node, List keyValues);
-    
-    public void storeFailed(KUID nodeId, SocketAddress dst, List keyValues);
 }

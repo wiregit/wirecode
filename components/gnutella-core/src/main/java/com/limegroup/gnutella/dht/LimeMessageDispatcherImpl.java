@@ -110,6 +110,13 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         return running;
     }
     
+    @Override
+    public void start() {
+        running = true;
+        startCleanupTask();
+    }
+    
+    @Override
     public void stop() {
         running = false;
         processingQueue.clear();
@@ -160,24 +167,29 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         }
     }
     
+    @Override
     protected void interestRead(boolean on) {
         // DO NOTHING
     }
 
+    @Override
     protected void interestWrite(boolean on) {
         // DO NOTHING
     }
 
+    @Override
     public boolean isRunning() {
         return running;
     }
 
+    @Override
     protected void process(Runnable runnable) {
         if (isRunning()) {
             processingQueue.add(runnable);
         }
     }
     
+    @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
         SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
         verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
@@ -185,8 +197,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
 
     // This is not running as a Thread!
     public void run() {
-        running = true;
-        startCleanupTask();
     }
     
     private synchronized void startCleanupTask() {

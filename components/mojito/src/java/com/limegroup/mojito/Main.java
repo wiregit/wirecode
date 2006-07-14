@@ -27,10 +27,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Connection;
@@ -46,39 +48,41 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.version.UpdateInformation;
-import com.limegroup.mojito.settings.NetworkSettings;
+import com.limegroup.mojito.event.BootstrapEvent;
+import com.limegroup.mojito.settings.RouteTableSettings;
 
 public class Main {
     
     public static void main(String[] args) throws Exception {
         
-        int count = 10;
-        String host = null;
-        int port = NetworkSettings.PORT.getValue();
+        int count = 0;
+        int port = 0;
         
-        if (args.length == 0) {
-            System.out.println("java Main DHTs count [host] port");
+        SocketAddress bootstrapHost = null;
+        
+        if (args.length != 2 && args.length != 4) {
+            System.out.println("java1 Main count port");
+            System.out.println("java Main count port host port");
             System.exit(-1);
         } else {
             count = Integer.parseInt(args[0]);
+            port = Integer.parseInt(args[1]);
             
-            if (args.length == 2) {
-                port = Integer.parseInt(args[1]);
-            } else {
-                host = args[1];
-                port = Integer.parseInt(args[2]);                
-            }
+            if (args.length >= 4) {
+                bootstrapHost = new InetSocketAddress(args[2], Integer.parseInt(args[3]));
+            }/* else {
+                bootstrapHost = new InetSocketAddress("localhost", port);
+            }*/
         }
         
-        InetAddress addr = host != null ? InetAddress.getByName(host) : null;
-        
-        List<MojitoDHT> dhts = standalone(addr, port, count);
-        //List<MojitoDHT> dhts = limewire(addr, port);
-        
-        run(addr, port, dhts);
+        List<MojitoDHT> dhts = standalone(null, port, count);
+        //List<MojitoDHT> dhts = limewire(null, port);
+        run(port, dhts, bootstrapHost);
     }
     
     private static List<MojitoDHT> standalone(InetAddress addr, int port, int count) {
+        RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.setValue(true);
+        
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>(count);
         
         for(int i = 0; i < count; i++) {
@@ -125,16 +129,25 @@ public class Main {
         return Arrays.asList(dht);
     }
     
-    private static void run(InetAddress addr, int port, List<MojitoDHT> dhts) throws Exception {
+    private static void run(int port, List<MojitoDHT> dhts, SocketAddress bootstrapHost) throws Exception {
         long time = 0L;
         for(int i = 1; i < dhts.size(); i++) {
-            long t = dhts.get(i).bootstrap(dhts.get(i-1).getSocketAddress());
-            
-            if (t >= 0L) {
-                time += t;
-                System.out.println("Node #" + i + " finished bootstrapping in " + t + "ms");
+            SocketAddress host = null;
+            if (bootstrapHost != null) {
+                host = bootstrapHost;
             } else {
+                host = new InetSocketAddress("localhost", port);
+            }
+            
+            try {
+                Future<BootstrapEvent> future = dhts.get(i).bootstrap(host);
+                BootstrapEvent evt = future.get();
+                
+                time += evt.getTotalTime();
+                System.out.println("Node #" + i + " finished bootstrapping in " + evt.getTotalTime() + "ms");
+            } catch (Exception err) {
                 System.out.println("Node #" + i + " failed to bootstrap");
+                err.printStackTrace();
             }
         }
         System.out.println("All Nodes finished bootstrapping in " + time + "ms");

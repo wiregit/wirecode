@@ -33,9 +33,9 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
@@ -44,15 +44,16 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.LookupAdapter;
-import com.limegroup.mojito.event.LookupListener;
+import com.limegroup.mojito.event.FindNodeListener;
+import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.PingListener;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
@@ -105,16 +106,7 @@ public class MojitoDHT {
         // change from firewalled to non-firewalled? re-bootstrap
         if (context.isFirewalled() && !firewalled) {
             context.setFirewalled(false);
-            try {
-                bootstrap(new BootstrapListener() {
-                    public void phaseOneComplete(long time) {}
-                    public void phaseTwoComplete(boolean foundNodes, long time) {}
-                    public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {}
-                    
-                });
-            } catch (IOException err) {
-                LOG.error("Firewalled to non-firewalled re-bootstrap error: ", err);
-            }
+            context.bootstrap(null);
         } else {
             context.setFirewalled(firewalled);
         }
@@ -188,30 +180,6 @@ public class MojitoDHT {
         context.setMessageFactory(messageFactory);
     }
     
-    public void addPingListener(PingListener listener) {
-        context.addPingListener(listener);
-    }
-    
-    public void removePingListener(PingListener listener) {
-        context.removePingListener(listener);
-    }
-    
-    public PingListener[] getPingListeners() {
-        return context.getPingListeners();
-    }
-    
-    public void addLookupListener(LookupListener listener) {
-        context.addLookupListener(listener);
-    }
-    
-    public void removeLookupListener(LookupListener listener) {
-        context.removeLookupListener(listener);
-    }
-    
-    public LookupListener[] getLookupListeners() {
-        return context.getLookupListeners();
-    }
-    
     public void setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher) {
         context.setMessageDispatcher(messageDispatcher);
     }
@@ -228,40 +196,10 @@ public class MojitoDHT {
      * @return The bootstrap time
      * @throws IOException
      */
-    public long bootstrap(SocketAddress address) throws IOException {
-        return bootstrap(address, ContextSettings.SYNC_BOOTSTRAP_TIMEOUT.getValue());
-    }
     
-    public long bootstrap(SocketAddress address, long timeout) throws IOException {
-        final long[] time = new long[]{ -1L };
-        
-        synchronized (time) {
-            bootstrap(address, new BootstrapListener() {
-                public void phaseOneComplete(long time) {
-                }
-
-                public void phaseTwoComplete(boolean foundNodes, long t) {
-                    time[0] = t;
-                    synchronized (time) {
-                        time.notify();
-                    }
-                }
-
-                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
-                    synchronized (time) {
-                        time.notify();
-                    }
-                }
-            });
-            
-            try {
-                time.wait(timeout);
-            } catch (InterruptedException err) {
-                LOG.error("InterruptedException", err);
-            }
-        }
-        
-        return time[0];
+    public Future<BootstrapEvent> bootstrap(SocketAddress address) {
+        List<SocketAddress> hostList = Arrays.asList(address);
+        return context.bootstrap(hostList, null);
     }
     
     /**
@@ -270,14 +208,12 @@ public class MojitoDHT {
      * @return The bootstrap time
      * @throws IOException
      */
-    public void bootstrap(BootstrapListener listener) 
-            throws IOException {
-        context.bootstrap(listener);
+    public Future<BootstrapEvent> bootstrap(BootstrapListener listener) {
+        return context.bootstrap(listener);
     }
 
-    public void bootstrap(SocketAddress address, BootstrapListener listener) 
-            throws IOException {
-        bootstrap(Arrays.asList(address), listener);
+    public Future<BootstrapEvent> bootstrap(SocketAddress address, BootstrapListener listener) {
+        return context.bootstrap(Arrays.asList(address), listener);
     }
     
     /**
@@ -287,8 +223,7 @@ public class MojitoDHT {
      * @param listener The listener for bootstrap events
      * @throws IOException
      */
-    public void bootstrap(List<? extends SocketAddress> hostList, BootstrapListener listener) 
-            throws IOException {
+    public void bootstrap(List<? extends SocketAddress> hostList, BootstrapListener listener) {
         context.bootstrap(hostList, listener);
     }
     
@@ -300,37 +235,8 @@ public class MojitoDHT {
      * @return The responding <tt>ContactNode</tt> or null if there was a timeout
      * @throws IOException
      */
-    public Contact ping(SocketAddress dst) throws IOException {
-        return ping(dst, ContextSettings.SYNC_PING_TIMEOUT.getValue());
-    }
-    
-    private Contact ping(SocketAddress dst, long timeout) throws IOException {
-        final Contact[] node = new Contact[] {null};
-        
-        synchronized (node) {
-            ping(dst, new PingListener() {
-                public void response(ResponseMessage response, long t) {
-                    node[0] = response.getContact();
-                    synchronized (node) {
-                        node.notify();
-                    }
-                }
-
-                public void timeout(KUID nodeId, SocketAddress address, 
-                        RequestMessage request, long t) {
-                    synchronized (node) {
-                        node.notify();
-                    }
-                }
-            });
-            
-            try {
-                node.wait(timeout);
-            } catch (InterruptedException err) {
-                LOG.error("InterruptedException", err);
-            }
-        }
-        return node[0];
+    public Future<Contact> ping(SocketAddress dst) {
+        return context.ping(dst);
     }
     
     /**
@@ -341,7 +247,7 @@ public class MojitoDHT {
      * @param listener
      * @throws IOException
      */
-    public void ping(SocketAddress dst, PingListener listener) throws IOException {
+    public void ping(SocketAddress dst, PingListener listener) {
         if (listener == null) {
             throw new NullPointerException("PingListener is null");
         }
@@ -366,22 +272,20 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    Collection<Contact> getNodes() {
+    Collection<Contact> getContacts() {
         return context.getRouteTable().getContacts();
     }
     
-    public boolean put(KUID key, byte[] value) 
-            throws IOException {
+    public Future<StoreEvent> put(KUID key, byte[] value) {
         return put(key, value, null, null);
     }
     
-    public boolean put(KUID key, byte[] value, StoreListener listener) 
+    public Future<StoreEvent> put(KUID key, byte[] value, StoreListener listener) 
             throws IOException {
         return put(key, value, listener, null);
     }
     
-    public boolean put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) 
-            throws IOException {
+    public Future<StoreEvent> put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) {
         
         try {
             KeyValue keyValue = 
@@ -412,8 +316,7 @@ public class MojitoDHT {
                         context.createNewKeyPair();
                     }
                     
-                    context.store(keyValue, listener);
-                    return true;
+                    return context.store(keyValue, listener);
                 }
             }
         } catch (InvalidKeyException e) {
@@ -422,66 +325,40 @@ public class MojitoDHT {
             LOG.error("SignatureException", e);
         }
         
-        return false;
+        return null;
     }
     
-    public Collection<KeyValue> get(KUID key) throws IOException {
-        return get(key, ContextSettings.SYNC_GET_VALUE_TIMEOUT.getValue());
+    public Future<FindValueEvent> get(KUID key) throws IOException {
+        return context.get(key, null);
     }
     
-    @SuppressWarnings("unchecked")
-    public Collection<KeyValue> get(KUID key, long timeout) throws IOException {
-        final Collection[] values = new Collection[] {
-            Collections.emptyList()
-        };
-        
-        synchronized (values) {
-            get(key, new LookupAdapter() {
-                public void finish(KUID lookup, Collection c, long time) {
-                    values[0] = c;
-                    synchronized (values) {
-                        values.notify();
-                    }
-                }
-            });
-            
-            try {
-                values.wait(timeout);
-            } catch (InterruptedException err) {
-                LOG.error("InterruptedException", err);
-            }
-        }
-        
-        return values[0];
-    }
-    
-    public void get(KUID key, LookupListener listener) throws IOException {
+    public Future<FindValueEvent> get(KUID key, FindValueListener listener) {
         if (!key.isValueID()) {
             throw new IllegalArgumentException("Key must be a Value ID");
         }
         
         if (listener == null) {
-            throw new NullPointerException("LookupListener is null");
+            throw new NullPointerException("FindValueListener is null");
         }
         
-        context.get(key, listener);
+        return context.get(key, listener);
     }
     
-    public boolean remove(KUID key) throws IOException {
+    public Future<StoreEvent> remove(KUID key) {
         return remove(key, null, null);
     }
     
-    public boolean remove(KUID key, StoreListener listener) throws IOException {
+    public Future<StoreEvent> remove(KUID key, StoreListener listener) {
         return remove(key, listener, null);
     }
 
-    public boolean remove(KUID key, StoreListener listener, PrivateKey privateKey) throws IOException {
+    public Future<StoreEvent> remove(KUID key, StoreListener listener, PrivateKey privateKey) {
         // To remove a KeyValue you just store an empty value!
         return put(key, new byte[0], listener, privateKey);
     }
 
     // TODO for debugging purposes only
-    void lookup(KUID lookup, LookupListener listener) throws IOException {
+    void lookup(KUID lookup, FindNodeListener listener) throws IOException {
         context.lookup(lookup, listener);
     }
     
@@ -491,7 +368,7 @@ public class MojitoDHT {
     }
     
     // TODO for debugging purposes only
-    RouteTable getRoutingTable() {
+    RouteTable getRouteTable() {
         return context.getRouteTable();
     }
     

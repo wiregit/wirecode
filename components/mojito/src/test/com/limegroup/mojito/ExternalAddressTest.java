@@ -24,7 +24,7 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.handler.request.PingRequestHandler;
@@ -39,7 +39,7 @@ public class ExternalAddressTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static TestSuite suite() {
         return buildTestSuite(ExternalAddressTest.class);
     }
 

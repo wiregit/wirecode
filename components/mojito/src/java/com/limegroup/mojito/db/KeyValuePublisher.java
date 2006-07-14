@@ -19,18 +19,15 @@
  
 package com.limegroup.mojito.db;
 
-import java.io.IOException;
-import java.util.Collection;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
-import com.limegroup.mojito.util.CollectionUtils;
 
 // TODO rename to Publisher?
 public class KeyValuePublisher implements Runnable {
@@ -59,9 +56,10 @@ public class KeyValuePublisher implements Runnable {
     public void start() {
         synchronized (lock) {
             if (future == null) {
-                future = context.scheduleAtFixedRate(this, 
-                        DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue(), 
-                        DatabaseSettings.RUN_REPUBLISHER_EVERY.getValue());
+                long period = DatabaseSettings.REPUBLISH_PERIOD.getValue();
+                long delay = period;
+                
+                future = context.scheduleAtFixedRate(this, delay, period);
             }
         }
     }
@@ -75,7 +73,7 @@ public class KeyValuePublisher implements Runnable {
         }
     }
     
-    private void publish(KeyValue keyValue) throws IOException {
+    private void publish(KeyValue keyValue) throws Exception {
         
         // Check if KeyValue is still in DB because we're
         // working with a copy of the Collection.
@@ -123,37 +121,25 @@ public class KeyValuePublisher implements Runnable {
                 }
                 return;
             }
-            
-            context.store(keyValue, new StoreListener() {
-                public void store(KeyValue keyValue, Collection nodes) {
-                    keyValue.setLastPublishTime(System.currentTimeMillis());
-                    keyValue.setNumLocs(nodes.size());
-                    published++;
-
-                    synchronized(lock) {
-                        lock.notify();
-                    }
-                    
-                    if (LOG.isTraceEnabled()) {
-                        if (!nodes.isEmpty()) {
-                            StringBuffer buffer = new StringBuffer("\nStoring ");
-                            buffer.append(keyValue).append(" at the following Nodes:\n");
-                            buffer.append(CollectionUtils.toString(nodes));
-                            LOG.trace(buffer);
-                        } else {
-                            LOG.trace("Failed to store " + keyValue);
-                        }
-                    }
-                }
-            });
-            
-            try {
-                lock.wait();
-            } catch (InterruptedException ignore) {}
+        }
+        
+        StoreEvent evt = context.store(keyValue).get();
+        published++;
+        
+        if (LOG.isTraceEnabled()) {
+            if (evt.getNodes().isEmpty()) {
+                LOG.trace("Failed to store " + keyValue);
+            } else {
+                LOG.trace(evt.toString());
+            }
         }
     }
 
     public void run() {
+        
+        published = 0;
+        evicted = 0;
+        
         for(KeyValue keyValue : database.getValues()) {
             if (context.isBootstrapping()) {
                 if (LOG.isInfoEnabled()) {
@@ -164,8 +150,8 @@ public class KeyValuePublisher implements Runnable {
             
             try {
                 publish(keyValue);
-            } catch (IOException err) {
-                LOG.error("IOException", err);
+            } catch (Exception err) {
+                LOG.error("Exception", err);
             }
         }
     }

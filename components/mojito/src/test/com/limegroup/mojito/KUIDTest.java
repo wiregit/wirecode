@@ -22,7 +22,7 @@ package com.limegroup.mojito;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
-import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -34,7 +34,7 @@ public class KUIDTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static TestSuite suite() {
         return buildTestSuite(KUIDTest.class);
     }
 

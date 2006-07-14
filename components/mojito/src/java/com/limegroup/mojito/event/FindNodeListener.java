@@ -16,27 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.event;
 
-import java.net.SocketAddress;
-import java.util.Collection;
-
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
-
 /**
- * An abstract class for receiving Lookup events.
+ * 
  */
-public abstract class LookupAdapter implements LookupListener {
+public interface FindNodeListener extends DHTEventListener<FindNodeEvent> {
 
-    public void response(ResponseMessage response, long time) {
-    }
-
-    public void timeout(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-    }
-    
-    public void finish(KUID lookup, Collection c, long time) {
-    }
 }

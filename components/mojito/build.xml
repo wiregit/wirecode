@@ -2,48 +2,61 @@
 <project name="MojitoDHT" default="build" basedir=".">
     <description>MojitoDHT</description>
 
-	<property name="basedir" value="."/>
-	<property name="src" value="${basedir}/src/java"/>
-	
-	<property name="coredir" value="../core"/>
-	<property name="lib" value="../lib"/>
-	<property name="jars" value="${lib}/jars"/>
-		
-	<path id="default.classpath" >
-		<fileset dir="${jars}" includes="**/*.jar"/>
-		<pathelement location="${coredir}" />
-	</path>
-	
+    <property name="basedir" value="."/>
+    <property name="src" value="${basedir}/src/java"/>
+
+    <property name="coredir" value="../core"/>
+    <property name="lib" value="../lib"/>
+    <property name="jars" value="${lib}/jars"/>
+
+    <path id="default.classpath" >
+        <fileset dir="${jars}" includes="**/*.jar"/>
+        <pathelement location="${coredir}" />
+    </path>
+
     <target name="build">
-	    	<javac srcdir="${src}" 
+        <javac srcdir="${src}" 
 				destdir="${src}"
-		    		target="1.4"
-		    		source="1.4"
-	    			compiler="javac1.4"
+		    		target="1.5"
+		    		source="1.5"
+	    			compiler="javac1.5"
 		    		debug="true"
 	    			optimize="false">
-			<classpath refid="default.classpath"/>
-    	    </javac>
+            <classpath refid="default.classpath" />
+        </javac>
     </target>
-		
-	<target name="clean">
-		<delete>
-			<fileset dir="${src}" 
+
+    <target name="build2">
+        <javac destdir="${src}" 
+	            target="1.5" 
+	            source="1.5" 
+	            compiler="javac1.5" 
+	            debug="true" 
+	            optimize="false">
+            <src path="${src}" />
+            <src path="${coredir}" />
+            <classpath refid="default.classpath"/>
+        </javac>
+    </target>
+
+    <target name="clean">
+        <delete>
+            <fileset dir="${src}" 
 				includes="**/*.class"
 			/>
-		</delete>
-	</target>
-	
-	<target name="jar" depends="clean, build">
-		<delete file="mojito.jar"/>
-		<jar destfile="mojito.jar" 
+        </delete>
+    </target>
+
+    <target name="jar" depends="clean, build">
+        <delete file="mojito.jar"/>
+        <jar destfile="mojito.jar" 
 				basedir="${src}"
 				includes="**/*.class"
 				compress="false">
-		</jar>
-	</target>
-	
-	<!--
+        </jar>
+    </target>
+
+    <!--
 	<target name="planetLab" depends="clean, build">
 		<delete file="planetlab.jar"/>
 		<jar destfile="planetlab.jar" 

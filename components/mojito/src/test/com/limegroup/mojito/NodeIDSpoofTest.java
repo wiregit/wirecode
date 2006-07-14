@@ -22,10 +22,9 @@ package com.limegroup.mojito;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
@@ -38,7 +37,7 @@ public class NodeIDSpoofTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static TestSuite suite() {
         return buildTestSuite(NodeIDSpoofTest.class);
     }
 

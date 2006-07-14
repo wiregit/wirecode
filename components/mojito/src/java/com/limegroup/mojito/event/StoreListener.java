@@ -19,20 +19,10 @@
  
 package com.limegroup.mojito.event;
 
-import java.util.Collection;
-
-import com.limegroup.mojito.db.KeyValue;
 
 /**
  * 
  */
-public interface StoreListener {
+public interface StoreListener extends DHTEventListener<StoreEvent>{
     
-    /**
-     * Called after a store request was processed
-     * 
-     * @param keyValue List of KeyValues we have stored
-     * @param nodes Collection of ContactNodes where the keyValues were sored
-     */
-    public void store(KeyValue keyValue, Collection nodes);
 }

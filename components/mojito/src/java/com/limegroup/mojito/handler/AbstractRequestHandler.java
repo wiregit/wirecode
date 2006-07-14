@@ -19,15 +19,39 @@
  
 package com.limegroup.mojito.handler;
 
+import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.messages.RequestMessage;
 
 /**
  * An abstract base class for RequestHandlers
  */
-public abstract class AbstractRequestHandler extends MessageHandler 
-        implements RequestHandler {
+public abstract class AbstractRequestHandler implements RequestHandler {
+    
+    private static final Log LOG = LogFactory.getLog(AbstractRequestHandler.class);
+    
+    /** A handle to Context */
+    protected final Context context;
     
     public AbstractRequestHandler(Context context) {
-        super(context);
+        this.context = context;
+    }
+
+    /**
+     * See handleRequest()
+     */
+    protected abstract void request(RequestMessage message) throws IOException;
+    
+    public void handleRequest(RequestMessage message) throws IOException {
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(message.getContact() + " is requesting " + message);
+        }
+        
+        request(message);
     }
 }

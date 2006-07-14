@@ -32,7 +32,6 @@ import java.util.Random;
 
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.LookupAdapter;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.PlanetLabTestsStatContainer;

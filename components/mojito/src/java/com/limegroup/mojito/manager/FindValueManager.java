@@ -16,22 +16,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.event;
 
-import java.net.SocketAddress;
-import java.util.List;
+package com.limegroup.mojito.manager;
 
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.FindValueListener;
+import com.limegroup.mojito.handler.response.FindValueResponseHandler;
 
 /**
- * The interface for receiving Store events.
+ * 
  */
-@Deprecated
-public interface StoreResponseListener extends ResponseListener {
-
-    public void storeSucceeded(Contact node, List keyValues);
+public class FindValueManager extends AbstractLookupManager<FindValueListener, FindValueEvent> {
     
-    public void storeFailed(KUID nodeId, SocketAddress dst, List keyValues);
+    public FindValueManager(Context context) {
+        super(context);
+    }
+
+    @Override
+    protected FindValueResponseHandler createLookupHandler(KUID lookupId, int count) {
+        return new FindValueResponseHandler(context, lookupId.assertValueID());
+    }
 }

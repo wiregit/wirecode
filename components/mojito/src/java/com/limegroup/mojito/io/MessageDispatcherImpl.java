@@ -28,11 +28,9 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,27 +57,18 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     
     private SecureMessageVerifier verifier;
     
-    private ThreadPoolExecutor executor;
+    private ExecutorService executor;
+    
+    private Thread thread;
     
     public MessageDispatcherImpl(final Context context) {
         super(context);
-        
-        ThreadFactory factory = new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread thread = context.getThreadFactory().newThread(r);
-                thread.setName(context.getName() + "-MessageDispatcherExecutor");
-                thread.setDaemon(true);
-                return thread;
-            }
-        };
-        
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
-        executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, queue, factory);
         
         verifier = new SecureMessageVerifier(context.getName());
         filter = new Filter();
     }
     
+    @Override
     public void bind(SocketAddress address) throws IOException {
         if (isOpen()) {
             throw new IOException("Already open");
@@ -101,7 +90,27 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         setDatagramChannel(channel);
     }
     
-    public void stop() {
+    @Override
+    public synchronized void start() {
+        ThreadFactory factory = new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread thread = context.getThreadFactory().newThread(r);
+                thread.setName(context.getName() + "-MessageDispatcherExecutor");
+                thread.setDaemon(true);
+                return thread;
+            }
+        };
+        
+        executor = Executors.newFixedThreadPool(1, factory);
+        
+        thread = context.getThreadFactory().newThread(this);
+        thread.setName(context.getName() + "-MessageDispatcherThread");
+        //thread.setDaemon(true);
+        thread.start();
+    }
+    
+    @Override
+    public synchronized void stop() {
         try {
             if (selector != null) {
                 selector.close();
@@ -111,25 +120,31 @@ public class MessageDispatcherImpl extends MessageDispatcher {
             LOG.error("An error occured during stopping", err);
         }
         
-        executor.getQueue().clear();
+        thread.interrupt();
+        executor.shutdownNow();
         clear();
     }
     
-    public boolean isRunning() {
+    @Override
+    public synchronized boolean isRunning() {
         return isOpen() && getDatagramChannel().isRegistered();
     }
 
+    @Override
     protected boolean allow(DHTMessage message) {
         Contact node = message.getContact();
         return filter.allow(node.getSocketAddress());
     }
     
+    
+    @Override
     protected void process(Runnable runnable) {
         if (isRunning()) {
             executor.execute(runnable);
         }
     }
     
+    @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
         verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
@@ -150,10 +165,12 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         } catch (CancelledKeyException ignore) {}
     }
 
+    @Override
     protected void interestRead(boolean on) {
         interest(SelectionKey.OP_READ, on);
     }
     
+    @Override
     protected void interestWrite(boolean on) {
         interest(SelectionKey.OP_WRITE, on);
     }

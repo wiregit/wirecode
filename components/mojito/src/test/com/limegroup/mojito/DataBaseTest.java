@@ -22,7 +22,7 @@ package com.limegroup.mojito;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.db.Database;
@@ -38,7 +38,7 @@ public class DataBaseTest extends BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    public static TestSuite suite() {
         return buildTestSuite(DataBaseTest.class);
     }
 
