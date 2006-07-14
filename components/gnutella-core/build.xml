@@ -41,8 +41,8 @@
 		   srcdir="${basedir}" 
            destdir="${basedir}"
            nowarn="${NOWARN}"
-      source="1.4"
-      target="1.4"
+      source="1.5"
+      target="1.5"
     >
     <classpath refid="default.classpath" />
     </javac>
