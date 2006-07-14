@@ -139,11 +139,16 @@ public class Main {
                 host = new InetSocketAddress("localhost", port+i-1);
             }
             
-            Future<BootstrapEvent> future = dhts.get(i).bootstrap(host);
-            BootstrapEvent evt = future.get();
-            
-            time += evt.getTotalTime();
-            System.out.println("Node #" + i + " finished bootstrapping in " + evt.getTotalTime() + "ms");
+            try {
+                Future<BootstrapEvent> future = dhts.get(i).bootstrap(host);
+                BootstrapEvent evt = future.get();
+                
+                time += evt.getTotalTime();
+                System.out.println("Node #" + i + " finished bootstrapping in " + evt.getTotalTime() + "ms");
+            } catch (Exception err) {
+                System.out.println("Node #" + i + " failed to bootstrap");
+                err.printStackTrace();
+            }
         }
         System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
