@@ -81,7 +81,7 @@ public interface Contact {
     public void setTimeStamp(long timeStamp);
     
     /**
-     * Returns the time of the last successful
+     * Returns the time of the last successful exchange with this node
      */
     public long getTimeStamp();
     
@@ -104,7 +104,7 @@ public interface Contact {
      * Returns the time of the last successful or unseccssful contact
      * attempt
      */
-    public long getLastDeadOrAliveTime();
+    public long getLastFailedTime();
     
     /**
      * Returns whether or not this Contact has been recently alive 

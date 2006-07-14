@@ -81,16 +81,17 @@ public final class BucketUtils {
     
     /**
      * Sorts the contacts from most recently seen to
-     * least recently seen based on their <tt>LastDeadOrAliveTime</tt>.
+     * least recently seen based on their timestamp and last failed time.
      * 
-     * Used when loading the routing table
+     * Used when loading the routing table if our nodeID has changed
      */
-    public static <T extends Contact> List<T> sortLastDeadOrAlive(List<T> nodes) {
+    public static <T extends Contact> List<T> sortAliveToFailed(List<T> nodes) {
         Collections.sort(nodes, new Comparator<Contact>() {
             public int compare(Contact a, Contact b) {
-                long t1 = a.getLastDeadOrAliveTime();
-                long t2 = b.getLastDeadOrAliveTime();
+                long t1, t2;
                 if (!a.hasFailed() && !b.hasFailed()) {
+                    t1 = a.getTimeStamp();
+                    t2 = b.getTimeStamp();
                     if (t1 == t2) {
                         return 0;
                     } else if (t1 > t2) {
@@ -102,10 +103,13 @@ public final class BucketUtils {
                     return 1;
                 } else if (!a.hasFailed() && b.hasFailed()) {
                     return -1;
-                } else {
+                } else { //a has failed and b has failed
+                    //order by least recently failed to most recently failed
+                    t1 = a.getLastFailedTime();
+                    t2 = b.getLastFailedTime();
                     if (t1 == t2) {
                         return 0;
-                    } else if (t1 > t2) {
+                    } else if (t1 < t2) {
                         return 1;
                     } else {
                         return -1;

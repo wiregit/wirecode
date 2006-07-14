@@ -49,13 +49,13 @@ public class ContactNode implements Contact, Serializable {
     
     private transient long rtt = -1L;
     
-    private transient long timeStamp = 0L;
+    private long timeStamp = 0L;
     
-    private transient long lastDeadOrAliveTime = 0L;
+    private long lastFailedTime = 0L;
     
     private transient int flags = 0;
     
-    private transient int failures = 0;
+    private int failures = 0;
     
     private transient State state = State.UNKNOWN;
     
@@ -89,7 +89,6 @@ public class ContactNode implements Contact, Serializable {
         
         if (state == State.ALIVE) {
             this.timeStamp = System.currentTimeMillis();
-            this.lastDeadOrAliveTime = timeStamp;
         }
     }
 
@@ -104,7 +103,7 @@ public class ContactNode implements Contact, Serializable {
         
         if (!isAlive()) {
             timeStamp = existing.getTimeStamp();
-            lastDeadOrAliveTime = existing.getLastDeadOrAliveTime();
+            lastFailedTime = existing.getLastFailedTime();
             failures = existing.getFailures();
         }
     }
@@ -151,15 +150,14 @@ public class ContactNode implements Contact, Serializable {
     
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
-        this.lastDeadOrAliveTime = timeStamp;
     }
     
     public long getTimeStamp() {
         return timeStamp;
     }
     
-    public long getLastDeadOrAliveTime() {
-        return lastDeadOrAliveTime;
+    public long getLastFailedTime() {
+        return lastFailedTime;
     }
 
     public boolean isFirewalled() {
@@ -189,7 +187,6 @@ public class ContactNode implements Contact, Serializable {
         state = State.ALIVE;
         failures = 0;
         timeStamp = System.currentTimeMillis();
-        lastDeadOrAliveTime = timeStamp;
     }
     
     public boolean isAlive() {
@@ -200,7 +197,6 @@ public class ContactNode implements Contact, Serializable {
         state = State.UNKNOWN;
         failures = 0;
         timeStamp = 0L;
-        lastDeadOrAliveTime = 0L;
     }
     
     public boolean isUnknown() {
@@ -222,7 +218,7 @@ public class ContactNode implements Contact, Serializable {
     
     public void handleFailure() {
         failures++;
-        lastDeadOrAliveTime = System.currentTimeMillis();
+        lastFailedTime = System.currentTimeMillis();
         
         // Node has ever been alive?
         if (getTimeStamp() > 0L) {

@@ -34,7 +34,6 @@ import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
@@ -59,6 +58,7 @@ import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
+import com.limegroup.mojito.util.BucketUtils;
 
 /**
  * The Mojito DHT. All you need to know is here!
@@ -602,22 +602,24 @@ public class MojitoDHT {
         // ContactNode
         int vendor = ois.readInt();
         int version = ois.readUnsignedShort();
-        KUID nodeId = (KUID)ois.readObject();
+        KUID oldNodeId = (KUID)ois.readObject();
         // TODO: load SocketAddress?
         int instanceId = ois.readUnsignedByte();
         int flags = ois.readUnsignedByte();
         
-        //boolean timeout = (System.currentTimeMillis()-time) 
-        //                    >= ContextSettings.NODE_ID_TIMEOUT.getValue();
+        boolean timeout = (System.currentTimeMillis()-time) 
+                            >= ContextSettings.NODE_ID_TIMEOUT.getValue();
+        KUID nodeId;
         
-        boolean timeout = false;
         if (timeout) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(nodeId + " has timed out. Cannot restore the RouteTable and Database");
+                LOG.info(oldNodeId + " has timed out. Clearing database and rebuilding route table");
             }
             
             nodeId = KUID.createRandomNodeID();
             instanceId = 0;
+        } else {
+            nodeId = oldNodeId;
         }
         
         Contact local = new ContactNode(vendor, version, nodeId, 
@@ -632,9 +634,24 @@ public class MojitoDHT {
             RouteTable routeTable = dht.context.getRouteTable();
             
             Contact node = null;
+            
             while((node = (Contact)ois.readObject()) != null) {
-                if (!timeout) {
-                    routeTable.add(node);
+                routeTable.add(node);
+            }
+            
+            if(timeout) { 
+                //we changed our local node ID! rebuild the table
+                List<Contact> nodesList = routeTable.getContacts();
+                routeTable.clear();
+                //sort the nodes list (because rebuilding the table with the
+                //new nodeID will probably evict some nodes)
+                nodesList = BucketUtils.sortAliveToFailed(nodesList);
+                //now insert everything again except the old local node
+                for(Contact contact : nodesList) {
+                    
+                    if(!contact.getNodeID().equals(oldNodeId)) {
+                        routeTable.add(contact);
+                    }
                 }
             }
         }

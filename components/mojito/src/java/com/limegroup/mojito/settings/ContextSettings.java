@@ -61,7 +61,8 @@ public class ContextSettings extends MojitoProps {
         = FACTORY.createStringSetting("MASTER_KEY", "public.key");
     
     public static final LongSetting NODE_ID_TIMEOUT
-        = FACTORY.createSettableLongSetting("NODE_ID_TIMEOUT", /*30L**/60L*1000L, "node_id_timeout", 0L, 24L*60L*60L*1000L);
+        = FACTORY.createSettableLongSetting("NODE_ID_TIMEOUT", 14L*24L*60L*60L*1000L, 
+                "node_id_timeout", 0L, 24L*60L*60L*1000L);
     
     public static final IntSetting VENDOR
         = FACTORY.createIntSetting("VENDOR", parseVendorID("LIME"));
