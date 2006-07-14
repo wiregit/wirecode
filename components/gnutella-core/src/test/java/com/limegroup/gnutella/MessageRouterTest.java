@@ -2,36 +2,38 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.NewConnection;
@@ -665,17 +667,7 @@ public final class MessageRouterTest extends BaseTestCase {
         RouterService rs = new RouterService(new ActivityCallbackStub());
         RouterService.preGuiInit();
         rs.start();
-        RouterService.startDHT(false);
-        //start a few dhts and add them to our rt
-        MojitoDHT dht;
-        for(int i = 0; i < 20; i++) {
-            dht = new MojitoDHT("test DHT");
-            int port = 3000+i;
-            dht.bind(new InetSocketAddress("localhost",port));
-            dht.start();
-            //TODO!
-//            RouterService.getLimeDHTManager().addLeafDHTNode("localhost", port);
-        }
+        PrivilegedAccessor.setValue(rs, "dhtManager", new TestDHTManager());
         Thread.sleep(300);
         //create the request
         PingRequest pr = PingRequest.createUDPingWithDHTIPPRequest();
@@ -689,8 +681,8 @@ public final class MessageRouterTest extends BaseTestCase {
         PingReply reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
         assertEquals(ConnectionSettings.NUM_HOSTS_PONG.getValue(), reply.getPackedDHTIPPorts().size());
-        IpPort ipp = (IpPort) reply.getPackedDHTIPPorts().get(1);
-        assertEquals(3019, ipp.getPort());
+        IpPort ipp = (IpPort) reply.getPackedDHTIPPorts().get(0);
+        assertEquals(3009, ipp.getPort());
         
         //try requesting other IPP too -- this should not change anything
         GUID guid = new GUID();
@@ -710,8 +702,8 @@ public final class MessageRouterTest extends BaseTestCase {
         stub.sentPongs.clear();
         assertEquals(ConnectionSettings.NUM_HOSTS_PONG.getValue(), reply.getPackedDHTIPPorts().size());
         assertEquals(0, reply.getPackedIPPorts().size());
-        ipp = (IpPort) reply.getPackedDHTIPPorts().get(1);
-        assertEquals(3019, ipp.getPort());
+        ipp = (IpPort) reply.getPackedDHTIPPorts().get(0);
+        assertEquals(3009, ipp.getPort());
         
         //now try adding some gnutella IPPs
         ConnectionSettings.DHT_TO_GNUT_HOSTS_PONG.setValue(60);
@@ -734,8 +726,8 @@ public final class MessageRouterTest extends BaseTestCase {
                      reply.getPackedDHTIPPorts().size() + reply.getPackedIPPorts().size());
         assertEquals(4, reply.getPackedIPPorts().size());
         assertEquals(6, reply.getPackedDHTIPPorts().size());
-        ipp = (IpPort) reply.getPackedDHTIPPorts().get(1);
-        assertEquals(3019, ipp.getPort());
+        ipp = (IpPort) reply.getPackedDHTIPPorts().get(0);
+        assertEquals(3009, ipp.getPort());
     }
     
     public void testHeadPingForwarding() throws Exception {
@@ -861,5 +853,41 @@ public final class MessageRouterTest extends BaseTestCase {
     		_lastSent = m;
     	}
     }
-                                            
+    
+    private static class TestDHTManager implements DHTManager{
+
+        public List<IpPort> getActiveDHTNodes(int maxNodes){
+            LinkedList<IpPort> ipps = new LinkedList<IpPort>();
+            for(int i = 0; i < maxNodes; i++) {
+                IpPort ipp;
+                try {
+                    ipp = new IpPortImpl("localhost", 3000+i);
+                    ipps.addFirst(ipp);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            }
+            return ipps;
+        }
+
+        public void addBootstrapHost(SocketAddress hostAddress) {}
+
+        public void addressChanged() {}
+
+        public int getDHTVersion() { return 1; }
+
+        public MojitoDHT getMojitoDHT() { return null; }
+
+        public boolean isActiveNode() { return false; }
+
+        public boolean isRunning() { return true; }
+
+        public void shutdown() {}
+
+        public void startDHT(boolean activeMode) {}
+
+        public void switchMode(boolean toActiveMode) {}
+
+        public void handleLifecycleEvent(LifecycleEvent evt) {}
+    }
 }
