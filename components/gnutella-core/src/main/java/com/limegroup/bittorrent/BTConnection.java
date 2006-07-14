@@ -302,6 +302,8 @@ public class BTConnection implements UploadSlotListener {
 		
 		_socket.close();
 		
+		clearRequests();
+		
 		if (usingSlot) {
 			RouterService.getUploadSlotManager().cancelRequest(this);
 			watchdog.deactivate();
@@ -611,7 +613,7 @@ public class BTConnection implements UploadSlotListener {
 	 * @param in an <tt>BTInterval</tt> representing the range to clear.
 	 */
 	private void clearRequest(BTInterval in) {
-		_info.getVerifyingFolder().releaseChunk(in.getId());
+		_info.getVerifyingFolder().releaseInterval(in);
 	}
 
 	/*

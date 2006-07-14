@@ -317,6 +317,9 @@ public class BTMessageReader implements ChannelReadObserver {
 		private boolean writeExpected;
 		
 		public BTReadMessageState addData() throws BadBTMessageException {
+			if (_length < 9)
+				throw new BadBTMessageException("piece too short");
+			
 			if (_in.size() < 4 && (chunkId < 0 || offset < 0))
 				return null;
 			

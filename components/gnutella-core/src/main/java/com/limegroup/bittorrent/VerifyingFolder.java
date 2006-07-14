@@ -654,8 +654,7 @@ public class VerifyingFolder {
 	 * @param bs the BitBasedIntervalSet of available ranges
 	 * @param exclude the set of ranges that the connection is already about to
 	 * request
-	 * @return an array with the chunk id as first element, 
-	 * offset and size within that chunk as second and third elements.
+	 * @return a BTInterval that should be requested next.
 	 */
 	public synchronized BTInterval leaseRandom(BitSet bs, Set<BTInterval> exclude) {
 		if (isComplete())
@@ -664,11 +663,39 @@ public class VerifyingFolder {
 		if (LOG.isDebugEnabled())
 			LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
 		
-		// first see if the remote has any pieces that are neither 
+		BTInterval leased = findRandom(bs, exclude);
+		
+		if (leased != null)
+			requestedRanges.addInterval(leased);
+		else if (LOG.isDebugEnabled())
+			LOG.debug("couldn't find anything to assign");
+		
+		return leased;
+	}
+	
+	private BTInterval findRandom(BitSet bs, Set<BTInterval> exclude) {
+		
+		// first try to complete any partial pieces that are not requested
+		BTInterval ret = assignEndgame(bs, exclude, false);
+		if (ret != null)
+			return ret;
+		LOG.debug("couldn't find partial, looking for unnassigned");
+		
+		// then see if the remote has any pieces that are neither 
 		// partial nor already requested
+		ret = findUnassigned(bs, exclude);
+		if (ret != null)
+			return ret;
+		LOG.debug("couldn't find unassigned, looking for already requested");
+		
+		return assignEndgame(bs, exclude, true);
+	}
+	
+	private BTInterval findUnassigned(BitSet available, Set<BTInterval>exclude) {
 		int selected = -1;
 		int current = 1;
-		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
+		
+		for (int i = available.nextSetBit(0); i >= 0; i = available.nextSetBit(i+1)) {
 			if (verifiedBlocks.get(i) || 
 					pendingRanges.containsKey(i) || 
 					partialBlocks.containsKey(i) ||
@@ -678,14 +705,22 @@ public class VerifyingFolder {
 				selected = i;
 		}
 		
-		if (selected != -1) {
-			if (LOG.isDebugEnabled())
-				LOG.debug("selecting piece "+selected);
-			
-			BTInterval ret = new BTInterval(0,getPieceSize(selected) - 1,selected);
-			requestedRanges.addInterval(ret);
-			return ret;
-		}
+		if (selected == -1)
+			return null;
+		if (LOG.isDebugEnabled())
+			LOG.debug("selecting unassigned piece "+selected);
+
+		return new BTInterval(0,getPieceSize(selected) - 1,selected);
+	}
+	
+	/**
+	 * Picks an interval that is already requested by another connection.  This is
+	 * referered to as "Endgame mode" and is done when there are no other pieces to 
+	 * request. 
+	 */
+	private BTInterval assignEndgame(BitSet bs, Set<BTInterval>exclude, boolean endgame) {
+		
+		BTInterval ret = null;
 		
 		// prepare a list of partial or requested blocks the remote host has
 		Collection<Integer> available = new HashSet<Integer>(requestedRanges.size()+partialBlocks.size());
@@ -695,13 +730,13 @@ public class VerifyingFolder {
 		}
 		
 		if (LOG.isDebugEnabled())
-			LOG.debug("available partial blocks to attempt: "+available);
+			LOG.debug("available partial and requested blocks to attempt: "+available);
 		
 		available = new ArrayList<Integer>(available);
 		Collections.shuffle((List<Integer>)available);
 		
 		// go through and find a block that we can request something from.
-		for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext();) {
+		for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext() && ret == null;) {
 			int block = iterator.next();
 			
 			// figure out which parts of the chunks we need.
@@ -727,8 +762,8 @@ public class VerifyingFolder {
 				
 				// now, if we still have some parts of the chunk, get one of them
 				// if not and this is the last partial chunk, doubly-assign some
-				// part of it (is this endgame?)
-				if (needed.isEmpty() && !iterator.hasNext()) {
+				// part of it (a.k.a. endgame?)
+				if (endgame && needed.isEmpty() && !iterator.hasNext()) {
 						LOG.debug("endgame");
 					needed = requested;
 				}
@@ -741,14 +776,13 @@ public class VerifyingFolder {
 			if (needed.isEmpty()) 
 				continue;
 			
-			BTInterval ret = new BTInterval(needed.getFirst(),block);
+			ret = new BTInterval(needed.getFirst(),block);
 			if (LOG.isDebugEnabled())
 				LOG.debug("selected partial/requested interval "+ret);
-			return ret;
 		}
 		
 		// couldn't find anything to assign.
-		return null;
+		return ret;
 	}
 	
 	/**
@@ -763,12 +797,16 @@ public class VerifyingFolder {
 	}
 	
 	/**
-	 * removes chunk from the internal list of already requested chunks
+	 * Removes an interval from the internal list of already requested intervals.
 	 * 
-	 * @param pieceNum
+	 * Note that during endgame several connections may be requesting the same interval
+	 * and as one of them fails that interval will no longer be considered requested.
+	 * That's ok as it will only result in that interval requested again.
 	 */
-	public synchronized void releaseChunk(int pieceNum) {
-		requestedRanges.remove(new Integer(pieceNum));
+	public synchronized void releaseInterval(BTInterval in) {
+		if (LOG.isDebugEnabled())
+			LOG.debug("releasing "+in);
+		requestedRanges.removeInterval(in);
 	}
 
 	/**
