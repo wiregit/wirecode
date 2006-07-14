@@ -668,7 +668,7 @@ public class VerifyingFolder {
 		if (leased != null)
 			requestedRanges.addInterval(leased);
 		else if (LOG.isDebugEnabled())
-			LOG.debug("couldn't find anything to assign");
+			LOG.debug("couldn't find anything to assign "+exclude);
 		
 		return leased;
 	}
@@ -723,12 +723,20 @@ public class VerifyingFolder {
 		BTInterval ret = null;
 		
 		// prepare a list of partial or requested blocks the remote host has
-		Collection<Integer> available = new HashSet<Integer>(requestedRanges.size()+partialBlocks.size());
+		Collection<Integer> available = null;
 		for (int requested : requestedAndPartial) {
-			if (bs.get(requested))
-				available.add(requested);
+			if (!bs.get(requested) || 
+				(!endgame && isCompleteBlock(requested,requestedRanges))) 
+				continue;
+
+			if (available == null)
+				available = new HashSet<Integer>(requestedRanges.size()+partialBlocks.size());
+			available.add(requested);
 		}
-		
+
+		if (available == null)
+			return null;
+	
 		if (LOG.isDebugEnabled())
 			LOG.debug("available partial and requested blocks to attempt: "+available);
 		
@@ -755,6 +763,9 @@ public class VerifyingFolder {
 			if (pending != null)
 				needed.delete(pending);
 			
+			// exclude any specified intervals 
+			for (Interval excluded : exclude) 
+				needed.delete(excluded);
 			
 			// try not to request any parts that are already requested
 			if (requested != null) {
@@ -765,13 +776,13 @@ public class VerifyingFolder {
 				// part of it (a.k.a. endgame?)
 				if (endgame && needed.isEmpty() && !iterator.hasNext()) {
 						LOG.debug("endgame");
-					needed = requested;
+					needed = (IntervalSet)requested.clone();
+					
+					// exclude the specified intervals again
+					for (Interval excluded : exclude) 
+						needed.delete(excluded);
 				}
 			}
-			
-			// exclude any specified intervals 
-			for (Interval excluded : exclude) 
-				needed.delete(excluded);
 			
 			if (needed.isEmpty()) 
 				continue;
@@ -784,7 +795,21 @@ public class VerifyingFolder {
 		// couldn't find anything to assign.
 		return ret;
 	}
-	
+
+	/**
+	 * @return whether the specified BlockRangeMap contains an Interval that 
+	 * represents a complete piece.
+	 */	
+	private boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck) {
+		IntervalSet set = toCheck.get(pieceNum);
+		if (set == null)
+			return false;
+		if (set.getNumberOfIntervals() != 1)
+			return false;
+		Interval i = set.getFirst();
+		return isCompleteBlock(i, pieceNum);
+	}
+
 	/**
 	 * @return the size of the piece with given number.  All pieces
 	 * except the last one have the same size.
