@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,7 +65,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * A boolean to represent the state when we have failed last bootstrap
      * and are waiting for new bootstrap hosts
      */
-    protected volatile boolean waiting = false;
+    protected AtomicBoolean waiting = new AtomicBoolean(false);
     
     /**
      * A list of DHT bootstrap hosts comming from the Gnutella network
@@ -142,7 +143,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
                             if(dhtNodeFetcher == null) {
                                 dhtNodeFetcher = new DHTNodeFetcher(AbstractDHTController.this);
                             }
-                            waiting = true;
+                            waiting.set(true);
                             //send UDPPings -- non blocking
                             dhtNodeFetcher.requestDHTHosts();
                         }
@@ -150,7 +151,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
                 }
 
                 public void phaseOneComplete(long time) {
-                    waiting = false;
+                    waiting.set(false);
                 }
                 
                 public void phaseTwoComplete(boolean foundNodes, long time) {
@@ -183,7 +184,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         
         dht.stop();
         running = false;
-        waiting = false;
+        waiting.set(false);
     }
     
     /**
@@ -206,8 +207,8 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         }
         System.out.println("adding: "+ hostAddress);
         System.out.println("waiting: "+ waiting);
-        if(waiting) {
-            waiting = false;
+
+        if(waiting.getAndSet(false)) {
             bootstrap();
         }
     }
@@ -260,7 +261,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             
             //we were waiting and had no connection to the gnutella network
             //now we do --> start sending UDP pings to request bootstrap nodes
-            if(waiting) {
+            if(waiting.get()) {
                 dhtNodeFetcher.requestDHTHosts();
             }
         } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
@@ -319,7 +320,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     }
 
     public boolean isWaiting() {
-        return waiting;
+        return waiting.get();
     }
     
     public void setLimeMessageDispatcher() {
