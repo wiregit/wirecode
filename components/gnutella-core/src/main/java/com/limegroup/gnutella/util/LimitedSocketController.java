@@ -51,6 +51,7 @@ class LimitedSocketController extends SimpleSocketController {
      */
     protected Socket connectPlain(InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
         NBSocket socket = SocketFactory.newSocket();
+        bindSocket(socket);
         
         if(observer == null) {
             // BLOCKING.

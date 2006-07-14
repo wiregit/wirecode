@@ -219,14 +219,14 @@ public final class ConnectionSettings extends LimeProps {
     public static final StringSetting CONNECT_OK_STRING =
         FACTORY.createStringSetting("CONNECT_OK_STRING", "GNUTELLA OK");
     
-    /**
-     * Setting for whether or not to use NIO for network IO.  This is useful,
-     * for example, for testing the old blocking IO code without switching 
-     * JVMs.
-     */
-    public static final BooleanSetting USE_NIO =
-        FACTORY.createBooleanSetting("USE_NIO", true);
-          
+    /** Whether or not to bind to a specific address for outgoing connections. */
+    public static final BooleanSetting CUSTOM_NETWORK_INTERFACE =
+        FACTORY.createBooleanSetting("CUSTOM_NETWORK_INTERFACE", false);
+    
+    /** The inetaddress to use if we're using a custom interface for binding. */
+    public static final StringSetting CUSTOM_INETADRESS =
+        FACTORY.createStringSetting("CUSTOM_INETADRESS_TO_BIND", "0.0.0.0");
+    
     /**
      * Setting for the address of the proxy
      */

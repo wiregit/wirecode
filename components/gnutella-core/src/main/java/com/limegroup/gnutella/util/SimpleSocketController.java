@@ -9,8 +9,11 @@ import com.limegroup.gnutella.io.NBSocket;
 import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
-class SimpleSocketController implements SocketController {
+class SimpleSocketController implements SocketController {    
 
+    /** The possibly null address to bind to. */
+    private InetSocketAddress lastBindAddr;
+    
     /**
      * Makes a connection to the given InetSocketAddress.
      * If observer is null, this will block.
@@ -51,6 +54,7 @@ class SimpleSocketController implements SocketController {
         throws IOException {
         
         NBSocket socket = SocketFactory.newSocket();
+        bindSocket(socket);
         
         if(observer == null)
             socket.connect(addr, timeout); // blocking
@@ -58,6 +62,20 @@ class SimpleSocketController implements SocketController {
             socket.connect(addr, timeout, observer); // non-blocking
         
         return socket;
+    }
+    
+    /** Attempts to bind the Socket using the values from ConnectionSettings. */
+    protected void bindSocket(Socket socket) {
+        if(ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue()) {
+            String bindAddrString = ConnectionSettings.CUSTOM_INETADRESS.getValue();
+            try {
+                if(lastBindAddr == null || !lastBindAddr.getAddress().getHostAddress().equals(bindAddrString))
+                    lastBindAddr = new InetSocketAddress(bindAddrString, 0);
+                socket.bind(lastBindAddr);
+            } catch(IOException iox) {
+                ConnectionSettings.CUSTOM_NETWORK_INTERFACE.setValue(false);
+            }
+        }
     }
     
     /**
@@ -81,6 +99,6 @@ class SimpleSocketController implements SocketController {
                 throw iox;
             }
         }
-    }    
+    }
 
 }
