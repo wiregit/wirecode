@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -459,7 +460,13 @@ public class Context {
         }
         
         this.localAddress = localAddress;
-        localNode.setSocketAddress(localAddress);
+        
+        InetSocketAddress addr = (InetSocketAddress)localAddress;
+        if (addr.getAddress().isAnyLocalAddress()) {
+            addr = new InetSocketAddress("localhost", addr.getPort());
+        }
+        
+        localNode.setSocketAddress(addr);
         localNode.nextInstanceID();
         
         messageDispatcher.bind(localAddress);
