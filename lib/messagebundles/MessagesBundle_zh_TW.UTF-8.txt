@@ -2935,6 +2935,8 @@ OPTIONS_STARTUP_MAIN_TITLE=系統啟動
 OPTIONS_PROXY_MAIN_TITLE=代理伺服器
 #### OPTIONS_CONTENT_FILTER_MAIN_TITLE=Content
 OPTIONS_CONTENT_FILTER_MAIN_TITLE=內容
+#### OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Network Interface
+#? OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=
 
 ################################################################################
 # Key/value pairs for the save directory options window item
@@ -3650,6 +3652,19 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=使用者名稱:
 #### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password:
 ###$ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=密码
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=密碼:
+
+################################################################################
+# Key/value pairs for the network interface pane item.
+################################################################################
+#### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
+#? OPTIONS_NETWORK_INTERFACE_TITLE=
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#? OPTIONS_NETWORK_INTERFACE_LABEL=
+
+#### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
+#? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
 
 ################################################################################
 # Key/value pairs for the content filter options window item
