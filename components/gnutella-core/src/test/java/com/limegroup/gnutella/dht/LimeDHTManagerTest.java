@@ -7,7 +7,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -26,7 +25,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     private static RouterService ROUTER_SERVICE;
     
-    private static LimeDHTManager DHT_MANAGER;
+    private static DHTManager DHT_MANAGER;
     
     private static MojitoDHT BOOTSTRAP_DHT;
     
@@ -63,7 +62,6 @@ public class LimeDHTManagerTest extends BaseTestCase {
         ROUTER_SERVICE.start();
         
         DHT_MANAGER = RouterService.getLimeDHTManager();
-        
     }
 
     private static void setSettings() throws Exception {
