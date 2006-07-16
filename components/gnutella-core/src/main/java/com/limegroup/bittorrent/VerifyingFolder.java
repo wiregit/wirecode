@@ -59,6 +59,13 @@ public class VerifyingFolder {
 	private static final RRProcessingQueue VERIFY_QUEUE = 
 		new RRProcessingQueue("TorrentVerifier");
 	
+	
+	/**
+	 * This is the max size of a block that we will ever request. Requesting
+	 * larger ranges is not encouraged by the protocol.
+	 */
+	private static final int BLOCK_SIZE = 16384;
+	
 	/*
 	 * The files of this torrent as an array
 	 */
@@ -157,8 +164,8 @@ public class VerifyingFolder {
 	 */
 	private void initialize(Map<String, Serializable> data) {
 		BlockRangeMap partial = (BlockRangeMap) data.get("partial");
-		if (partial != null)
-			partialBlocks.putAll(partial); 
+		if (partial != null) 
+			partialBlocks.putAll(partial);
 		
 		BitSet verified = (BitSet) data.get("verified");
 		if (verified != null) 
@@ -665,8 +672,14 @@ public class VerifyingFolder {
 		
 		BTInterval leased = findRandom(bs, exclude);
 		
-		if (leased != null)
+		if (leased != null) {
+			if (leased.high - leased.low + 1 > BLOCK_SIZE)
+				leased = new BTInterval(leased.low, leased.low + BLOCK_SIZE - 1, leased.getId());
 			requestedRanges.addInterval(leased);
+			
+			if (LOG.isDebugEnabled())
+				LOG.debug("assigning "+leased);
+		}
 		else if (LOG.isDebugEnabled())
 			LOG.debug("couldn't find anything to assign "+exclude);
 		
@@ -1022,7 +1035,7 @@ public class VerifyingFolder {
 		public Object clone() {
 			BlockRangeMap clone = new BlockRangeMap(size());
 			for (Map.Entry<Integer, IntervalSet> e : entrySet())
-				put(e.getKey(), (IntervalSet)e.getValue().clone());
+				clone.put(e.getKey(), (IntervalSet)e.getValue().clone());
 			return clone;
 		}
 	}

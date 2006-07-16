@@ -34,12 +34,6 @@ public class BTConnection implements UploadSlotListener {
 	private static final Log LOG = LogFactory.getLog(BTConnection.class);
 
 	/**
-	 * This is the max size of a block that we will ever request. Requesting
-	 * larger ranges is not encouraged by the protocol.
-	 */
-	private static final int BLOCK_SIZE = 16384;
-
-	/**
 	 * This is the max size of a block that we will ever upload, requests larger
 	 * than this are dropped.
 	 */
@@ -80,12 +74,6 @@ public class BTConnection implements UploadSlotListener {
 	 * The pieces the remote host has
 	 */
 	private volatile BitSet _availableRanges;
-
-	/**
-	 * the Set of BTInterval containing requests that we did not yet send but
-	 * which we intend to send soon. 
-	 */
-	private final Set<BTInterval> _toRequest;
 
 	/**
 	 * the Set of BTIntervals we requested but which was not yet satisfied.
@@ -193,7 +181,6 @@ public class BTConnection implements UploadSlotListener {
 		_outgoing = isOutgoing;
 		_availableRanges = new BitSet(info.getNumBlocks());
 		_requesting = new HashSet<BTInterval>();
-		_toRequest = new HashSet<BTInterval>();
 		_requested = new HashSet<BTInterval>();
 		_startTime = System.currentTimeMillis();
 		_reader = new BTMessageReader(this);
@@ -446,30 +433,16 @@ public class BTConnection implements UploadSlotListener {
 			return;
 		}
 
-		// whether we canceled some ranges that were requested or we were
-		// about to request
-		boolean modified = false;
-
 		// remove all subranges that we may be requesting
 		for (Iterator<BTInterval> iter = _requesting.iterator(); iter.hasNext();) {
 			BTInterval req = iter.next();
 			if (req.getId() == pieceNum) {
 				iter.remove();
 				sendCancel(req);
-				modified = true;
 			}
 		}
 		
-		for (Iterator<BTInterval> iter = _toRequest.iterator(); iter.hasNext();) {
-			BTInterval req = iter.next();
-			if (req.getId() == pieceNum) {
-				iter.remove();
-				modified = true;
-			}
-		}
-
-		// if we removed any ranges, choose some more rages to request...
-		if (!_torrent.isComplete() && modified)
+		if (!_isChoking)
 			request();
 	}
 
@@ -478,25 +451,6 @@ public class BTConnection implements UploadSlotListener {
 	 */
 	private void sendBitfield() {
 		_writer.enqueue(BTBitField.createMessage(_info));
-	}
-
-	/**
-	 * Requests a piece from the remote host
-	 * 
-	 * @param in an <tt>BTInterval</tt> specifying the ranges we want to
-	 *            request.
-	 */
-	void sendRequest(BTInterval in) {
-		// we do not request any pieces larger than BLOCK_SIZE!
-		for (long i = in.low; i < in.high; i += BLOCK_SIZE) {
-			// watch out, all Intervals are inclusive on both ends...
-			// safe cast, length is always <= BLOCK_SIZE
-			int length = (int) Math.min(in.high - i + 1, BLOCK_SIZE);
-			BTInterval toReq = new BTInterval(i, i + length - 1,in.getId());
-			if (!_requesting.contains(toReq))
-				_toRequest.add(toReq);
-		}
-		enqueueRequests();
 	}
 
 	private void sendCancel(BTInterval in) {
@@ -596,45 +550,9 @@ public class BTConnection implements UploadSlotListener {
 	}
 	
 	private void clearRequests() {
-		for (BTInterval clear : _toRequest)
-			clearRequest(clear);
-		
 		for (BTInterval clear : _requesting)
-			clearRequest(clear);
-
-		_toRequest.clear();
-
+			_info.getVerifyingFolder().releaseInterval(clear);
 		_requesting.clear();
-	}
-
-	/**
-	 * private utility method clearing a certain range
-	 * 
-	 * @param in an <tt>BTInterval</tt> representing the range to clear.
-	 */
-	private void clearRequest(BTInterval in) {
-		_info.getVerifyingFolder().releaseInterval(in);
-	}
-
-	/*
-	 * private helper trying to ensure there are exactly MAX_REQUESTS open 
-	 * requests sent to the remote host all the time. Gets more ranges to 
-	 * request from the ManagedTorrent if necessary
-	 */
-	private void enqueueRequests() {
-		// the reason we randomize the list of requests to be sent is that we
-		// are receiving far too many ranges multiple times when the download
-		// is about to finish.
-		List<BTInterval> random = new ArrayList<BTInterval>();
-		random.addAll(_toRequest);
-		Collections.shuffle(random);
-		for (Iterator<BTInterval> iter = random.iterator(); _requesting.size() < MAX_REQUESTS
-		&& iter.hasNext() && !_isChoking;) {
-			BTInterval toReq = iter.next();
-			_writer.enqueue(new BTRequest(toReq));
-			_toRequest.remove(toReq);
-			_requesting.add(toReq);
-		}
 	}
 
 	/**
@@ -646,13 +564,13 @@ public class BTConnection implements UploadSlotListener {
 		switch (message.getType()) {
 		case BTMessage.CHOKE:
 			_isChoking = true;
-			_requesting.clear();
+			clearRequests();
 			break;
 
 		case BTMessage.UNCHOKE:
 			_isChoking = false;
 			if (_isInteresting) 
-				requestIfPossible();
+				request();
 			break;
 
 		case BTMessage.INTERESTED:
@@ -748,11 +666,11 @@ public class BTConnection implements UploadSlotListener {
 	boolean startReceivingPiece(BTInterval interval) {
 		// its ok to remove the piece from the list of pieces we request
 		// because if the receiving fails the connection will be closed.
-		if (!_requesting.remove(interval) && !_toRequest.remove(interval)) {
+		if (!_requesting.remove(interval)) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("received unexpected range " + interval + " from "
 						+ _socket.getInetAddress() + " expected "
-						+ _requesting + " " + _toRequest);
+						+ _requesting);
 			return false;
 		}
 		
@@ -761,29 +679,21 @@ public class BTConnection implements UploadSlotListener {
 		return true;
 	}
 	
-	void requestIfPossible() {
-		// get new ranges to request if necessary
-		if (!_torrent.isComplete()
-				&& _toRequest.size() + _requesting.size() < MAX_REQUESTS)
-			request();
+	void request() {
+		if (LOG.isDebugEnabled())
+			LOG.debug("requesting ranges from " + this);
 		
-		// send next request upon receiving piece.
-		enqueueRequests();
+		// get new ranges to request if necessary
+		while (!_torrent.isComplete() && _torrent.isActive()
+				&& _requesting.size() < MAX_REQUESTS) {
+			BTInterval in = _info.getVerifyingFolder().leaseRandom(_availableRanges, _requesting);
+			if (in == null)
+				break;
+			_requesting.add(in);
+			_writer.enqueue(new BTRequest(in));
+		}
 	}
 
-	private void request() {
-		// don't request if complete
-		if (_torrent.isComplete() || !_torrent.isActive())
-			return;
-		
-		if (LOG.isInfoEnabled())
-			LOG.info("requesting ranges from " + this);
-		
-		BTInterval in = _info.getVerifyingFolder().leaseRandom(_availableRanges, _requesting);
-		if (in != null)
-			sendRequest(in);
-	}
-	
 	/**
 	 * handles a piece message and sends its payload to disk
 	 */

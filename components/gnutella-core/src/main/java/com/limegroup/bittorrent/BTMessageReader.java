@@ -360,7 +360,7 @@ public class BTMessageReader implements ChannelReadObserver {
 			
 			if (currentOffset + available == complete.high + 1) {
 				// we're done receiving this piece
-				_connection.requestIfPossible();
+				_connection.request();
 				BTMessageStat.INCOMING_PIECE.incrementStat();
 				BTMessageStatBytes.INCOMING_PIECE.addData(5 + _length);
 			}
