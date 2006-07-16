@@ -14,13 +14,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.messages.BTHave;
-import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IntWrapper;
@@ -32,12 +32,6 @@ import com.limegroup.gnutella.util.ThreadPool;
 public class ManagedTorrent {
 	
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
-	
-	/**
-	 * the upload throttle we are using
-	 */
-	private static final Throttle UPLOAD_THROTTLE = new NBThrottle(true,
-			UploadSettings.UPLOAD_SPEED.getValue() * 1000);
 	
 	/**
 	 * How often to send keepalives.  2 minutes as suggested by spec.
@@ -313,10 +307,9 @@ public class ManagedTorrent {
 			Runnable closer = new Runnable() {
 				public void run() {
 					_connectionFetcher.shutdown();
-					while(!_connections.isEmpty()) {
-						BTConnection toClose = _connections.get(_connections.size() - 1);
-						toClose.close(); // this removes itself from the list.
-					}
+					List<BTConnection> copy = new ArrayList<BTConnection>(_connections);
+					for(BTConnection con : copy) 
+						con.close(); 
 				}
 			};
 			networkInvoker.invokeLater(closer);
@@ -518,8 +511,9 @@ public class ManagedTorrent {
 	
 	/**
 	 * @return true if we need any more connections
+	 * TODO: this needs to get much smarter
 	 */
-	boolean needsMoreConnections() {
+	public boolean needsMoreConnections() {
 		// if we are complete, do not open any sockets - the active torrents will need them.
 		if (isComplete() && RouterService.getTorrentManager().hasNonSeeding())
 			return false;
@@ -760,10 +754,6 @@ public class ManagedTorrent {
 		return Arrays.equals(mt.getInfoHash(), getInfoHash());
 	}
 
-	public Throttle getUploadThrottle() {
-		return UPLOAD_THROTTLE;
-	}
-
 	public boolean isConnected() {
 		return _connections.size() > 0;
 	}
@@ -814,6 +804,12 @@ public class ManagedTorrent {
 
 	public List<BTConnection> getConnections() {
 		return _connections;
+	}
+	
+	void shuffleConnections() {
+		synchronized(_connections) {
+			Collections.shuffle(_connections);
+		}
 	}
 	
 	public int getNumConnections() {
@@ -895,7 +891,7 @@ public class ManagedTorrent {
 		float ret = 0;
 		synchronized(_connections) {
 			for (BTConnection con : _connections) 
-				ret += con.getMeasuredBandwidth(downstream);
+				ret += con.getMeasuredBandwidth(downstream, true);
 		}
 		return ret;
 	}

@@ -12,7 +12,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.gnutella.*;
 import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -43,6 +45,11 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 
 	private static final Log LOG = LogFactory.getLog(TorrentManager.class);
 
+	/**
+	 * the upload throttle we are using
+	 */
+	private static final Throttle UPLOAD_THROTTLE = new NBThrottle(true,0);
+	
 	/**
 	 * The list of active torrents.
 	 */
@@ -92,6 +99,15 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		else
 			return 6;
 
+	}
+	
+	public static void updateThrottle() {
+		UPLOAD_THROTTLE.setRate(UploadManager.getUploadSpeed());
+	}
+	
+	public static Throttle getThrottle() {
+		updateThrottle();
+		return UPLOAD_THROTTLE;
 	}
 	
 	public void addEventListener(TorrentEventListener listener) {

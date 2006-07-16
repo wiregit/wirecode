@@ -30,20 +30,26 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 	}
 
 	public synchronized void count(int added) {
+		startCounting(-1);
 		_amount += added;
 	}
 
+	private void startCounting(long now) {
+		if (_firstTimeMeasured == 0) {
+			if (now == -1)
+				now = System.currentTimeMillis();
+			_firstTimeMeasured = now;
+			_lastTimeMeasured = _firstTimeMeasured;
+		}
+	}
+	
 	public synchronized long getTotalAmount() {
 		return _amount;
 	}
 
 	public synchronized void measureBandwidth() {
 		long now = System.currentTimeMillis();
-		if (_firstTimeMeasured == 0) {
-			_firstTimeMeasured = now;
-			_lastTimeMeasured = _firstTimeMeasured;
-		}
-		
+		startCounting(now);
 		if (now - _lastTimeMeasured < _interval)
 			return;
 

@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOSocket;
@@ -148,7 +149,7 @@ public class BTConnection implements UploadSlotListener {
 	private volatile boolean usingSlot;
 	
 	/** Bandwidth trackers for the outgoing and incoming bandwidth */
-	private SimpleBandwidthTracker up, down;
+	private SimpleBandwidthTracker up, downShort, downLong;
 	
 	/** Watchdog for this connection */
 	private StalledUploadWatchdog watchdog;
@@ -186,8 +187,7 @@ public class BTConnection implements UploadSlotListener {
 		_reader = new BTMessageReader(this);
 		_writer = new BTMessageWriter(this);
 		
-		ThrottleWriter throttle = new ThrottleWriter(_torrent
-				.getUploadThrottle());
+		ThrottleWriter throttle = new ThrottleWriter(TorrentManager.getThrottle());
 		delayer = new DelayedBufferWriter(1400, 3000);
 		_writer.setWriteChannel(delayer);
 		delayer.setWriteChannel(throttle);
@@ -201,7 +201,8 @@ public class BTConnection implements UploadSlotListener {
 		_isInterested = false;
 		_isInteresting = false;
 		up = new SimpleBandwidthTracker();
-		down = new SimpleBandwidthTracker();
+		downShort = new SimpleBandwidthTracker(1000);
+		downLong = new SimpleBandwidthTracker(5000);
 
 		// if we have downloaded anything send a bitfield
 		if (_info.getVerifyingFolder().getVerifiedBlockSize() > 0)
@@ -293,17 +294,27 @@ public class BTConnection implements UploadSlotListener {
 		
 		if (usingSlot) {
 			RouterService.getUploadSlotManager().cancelRequest(this);
-			watchdog.deactivate();
+			if (watchdog != null)
+				watchdog.deactivate();
 		}
 		_torrent.connectionClosed(this);
 	}
 
 	/**
+	 * @param read whether to return download bandwidth
+	 * @param shortTerm whether to return short-term average or long-term
 	 * @return the measured bandwidth on this connection for
 	 * downloadining or uploading
 	 */
-	public float getMeasuredBandwidth(boolean read) {
-		SimpleBandwidthTracker tracker = read ? down : up;
+	public float getMeasuredBandwidth(boolean read, boolean shortTerm) {
+		SimpleBandwidthTracker tracker;
+		if (!read)
+			tracker = up;
+		else if (shortTerm)
+			tracker = downShort;
+		else
+			tracker = downLong;
+		
 		tracker.measureBandwidth();
 		try {
 			return tracker.getMeasuredBandwidth();
@@ -311,12 +322,13 @@ public class BTConnection implements UploadSlotListener {
 			return 0;
 		}
 	}
-
+	
 	/**
 	 * notification that some bytes have been read on this connection
 	 */
 	public void readBytes(int read) {
-		down.count(read);
+		downShort.count(read);
+		downLong.count(read);
 		_torrent.countDownloaded(read);
 	}
 
@@ -522,6 +534,7 @@ public class BTConnection implements UploadSlotListener {
 	 * @param data the data of the piece.
 	 */
 	void pieceRead(final BTInterval in, final byte [] data) {
+		TorrentManager.updateThrottle();
 		Runnable pieceSender = new Runnable() {
 			public void run() {
 				if (LOG.isDebugEnabled())
@@ -800,7 +813,7 @@ public class BTConnection implements UploadSlotListener {
 	
 	public void releaseSlot() {
 		usingSlot = false;
-		close();
+		sendChoke();
 	}
 	
 	public void slotAvailable() {

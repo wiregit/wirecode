@@ -100,12 +100,15 @@ public class Choker {
 	}
 	
 	private void leechRechoke() {
+		
 		List<BTConnection> connections = torrent.getConnections();
 		List<BTConnection> fastest = new ArrayList<BTConnection>(connections.size());
 		for (BTConnection con : connections) {
-			if (con.isInterested() && con.shouldBeInterested())
+			if (con.isInterested() && con.shouldBeInterested() &&
+					con.getMeasuredBandwidth(true, false) > 0.256)
 				fastest.add(con);
 		}
+		
 		Collections.sort(fastest,DOWNLOAD_SPEED_COMPARATOR);
 		// unchoke the fastest connections that are interested in us
 		int numFast = getNumUploads() - 1;
@@ -115,7 +118,7 @@ public class Choker {
 		int optimistic = Math.max(1,
 				BittorrentSettings.TORRENT_MIN_UPLOADS.getValue() - fastest.size());
 		
-		
+		torrent.shuffleConnections();
 		for (BTConnection con : connections) {
 			if (fastest.remove(con)) 
 				con.sendUnchoke(round);
@@ -221,8 +224,8 @@ public class Choker {
 			if (c1 == c2)
 				return 0;
 			
-			float bw1 = c1.getMeasuredBandwidth(download);
-			float bw2 = c2.getMeasuredBandwidth(download);
+			float bw1 = c1.getMeasuredBandwidth(download, false);
+			float bw2 = c2.getMeasuredBandwidth(download, false);
 			
 			if (bw1 == bw2)
 				return 0;

@@ -112,18 +112,27 @@ ChannelWriter, ChannelReadObserver {
 		if (incomingDone && !outgoingHandshake.hasRemaining()) {
 			finishingHandshakes = true;
 			
-			BTConnection btc = new BTConnection(sock, 
-					torrent.getMetaInfo(), 
-					loc,
-					torrent, true);
-			
-			if (LOG.isDebugEnabled())
-				LOG.debug("added connection "
-						+ sock.getInetAddress().getHostAddress());
+			if (torrent.needsMoreConnections()) {
+				BTConnection btc = new BTConnection(sock, 
+						torrent.getMetaInfo(), 
+						loc,
+						torrent, true);
 
-			// add the connection and re-schedule fetching.
-			torrent.addConnection(btc);
-			torrent.getFetcher().handshakerDone(this);
+				if (LOG.isDebugEnabled())
+					LOG.debug("created connection "
+							+ sock.getInetAddress().getHostAddress());
+
+				// add the connection and re-schedule fetching.
+				torrent.addConnection(btc);
+				torrent.getFetcher().handshakerDone(this);
+			}
+			else {
+				if (LOG.isDebugEnabled())
+					LOG.debug("have enough connections, remembering loc "+loc);
+				
+				torrent.addEndpoint(loc);
+				shutdown();
+			}
 		}
 	}
 	

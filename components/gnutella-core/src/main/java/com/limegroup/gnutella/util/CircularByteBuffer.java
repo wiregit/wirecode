@@ -265,13 +265,15 @@ public class CircularByteBuffer {
     private static class DevNull implements WritableByteChannel {
 
 		public int write(ByteBuffer src) throws IOException {
-			return 0;
+			int ret = src.remaining();
+			src.position(src.limit());
+			return ret;
 		}
 
 		public void close() throws IOException {}
 
 		public boolean isOpen() {
-			return false;
+			return true;
 		}
     	
     }
