@@ -141,7 +141,7 @@ public class BootstrapManager extends AbstractManager {
                 node = bootstrapFromHostList();
             }
             
-            if (node == null) {
+            if (node == null && hostList == null) {
                 node = bootstrapFromRouteTable();
             }
             
