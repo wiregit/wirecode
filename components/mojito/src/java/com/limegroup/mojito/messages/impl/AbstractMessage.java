@@ -25,6 +25,7 @@ import java.io.OutputStream;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.mojito.messages.DHTMessage;
 
 /**
  * An abstract class that inherits from CORE's Message and its
@@ -34,13 +35,12 @@ import com.limegroup.gnutella.messages.Message;
  * See AbstractDHTMessage for how to remove this dependence if
  * you're not planning to send Messages through the CORE! 
  */
-public abstract class AbstractMessage extends Message {
-    
-    /** The function ID of our DHT Message */
-    public static final byte F_DHT_MESSAGE = (byte)0x43;
+abstract class AbstractMessage extends Message {
     
     /** GUID goes from 0 to 16th byte */
-    public static final int GUID_END = 16;
+    public static final int[] GUID_RANGE = {0, 16};
+    
+    public static final int[] TTL_HOPS_RANGE = {17, 19};
     
     /** PAYLOAD starts at 23rd byte */
     public static final int PAYLOAD_START = 23;
@@ -61,7 +61,7 @@ public abstract class AbstractMessage extends Message {
     private byte[] payload;
     
     AbstractMessage() {
-        super(GUID, F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
+        super(GUID, DHTMessage.F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
     }
 
     public void recordDrop() {
@@ -90,11 +90,10 @@ public abstract class AbstractMessage extends Message {
         serialize();
         
         out.write(payload, 0, 16);
-        out.write(F_DHT_MESSAGE);
-        out.write(TTL);
-        out.write(HOPS);
-        ByteOrder.int2leb(payload.length-16, out);
-        out.write(payload, 16, payload.length-16);
+        out.write(DHTMessage.F_DHT_MESSAGE);
+        out.write(payload, 16, 2);
+        ByteOrder.int2leb(payload.length-16-2, out);
+        out.write(payload, 16+2, payload.length-16-2);
     }
     
     @Override
@@ -102,13 +101,12 @@ public abstract class AbstractMessage extends Message {
         serialize();
         
         System.arraycopy(payload, 0, buf, 0, 16);
-        buf[16] = F_DHT_MESSAGE;
-        buf[17] = TTL;
-        buf[18] = HOPS;
-        ByteOrder.int2leb(payload.length-16, buf, 19);
+        buf[16] = DHTMessage.F_DHT_MESSAGE;
+        System.arraycopy(payload, 16, buf, 17, 2);
+        ByteOrder.int2leb(payload.length-16-2, buf, 19);
         
         out.write(buf);
-        out.write(payload, 16, payload.length-16);
+        out.write(payload, 16+2, payload.length-16-2);
     }
     
     protected abstract void writePayload(OutputStream out) throws IOException;

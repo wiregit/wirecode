@@ -27,9 +27,7 @@ import java.nio.ByteBuffer;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
-import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.MessageFactory;
-import com.limegroup.mojito.messages.impl.AbstractMessage;
 
 /**
  * 
@@ -44,15 +42,12 @@ class LimeDHTMessageParser implements MessageParser {
         this.factory = factory;
     }
     
-    public Message parse(byte[] guid, byte ttl, byte hops, 
-            byte[] payload, int network) throws BadPacketException {
+    public Message parse(byte[] header, byte[] payload, 
+            byte softMax, int network) throws BadPacketException, IOException {
         
-        try {
-            DHTMessage message = factory.createMessage(ADDRESS, 
-                    ByteBuffer.wrap(guid), ByteBuffer.wrap(payload));
-            return (AbstractMessage)message;
-        } catch (IOException err) {
-            throw new BadPacketException(err);
-        }
+        return (Message)factory.createMessage(ADDRESS, 
+                ByteBuffer.wrap(header, 0, 16), 
+                ByteBuffer.wrap(header, 17, 2), 
+                ByteBuffer.wrap(payload));
     }
 }

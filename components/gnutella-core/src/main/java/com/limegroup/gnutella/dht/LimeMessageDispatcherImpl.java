@@ -42,7 +42,6 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.messages.impl.AbstractMessage;
 import com.limegroup.mojito.messages.impl.FindNodeRequestImpl;
 import com.limegroup.mojito.messages.impl.FindNodeResponseImpl;
 import com.limegroup.mojito.messages.impl.FindValueRequestImpl;
@@ -79,7 +78,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
 
         // Register the Message type
         LimeDHTMessageParser parser = new LimeDHTMessageParser(context.getMessageFactory());
-        MessageFactory.setParser(AbstractMessage.F_DHT_MESSAGE, parser);
+        MessageFactory.setParser(DHTMessage.F_DHT_MESSAGE, parser);
         
         // Install the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();
