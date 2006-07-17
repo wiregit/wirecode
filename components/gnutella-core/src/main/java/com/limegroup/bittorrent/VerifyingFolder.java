@@ -8,7 +8,6 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -204,6 +203,8 @@ public class VerifyingFolder {
 			byte [] data = piece.getData();
 			
 			synchronized(VerifyingFolder.this) {
+				if (hasBlock(in.getId()))
+					return;
 				pendingRanges.addInterval(in);
 				requestedRanges.removeInterval(in);
 			}
@@ -231,9 +232,6 @@ public class VerifyingFolder {
 	 */
 	private void writeBlockImpl(BTInterval in, byte[] buf) 
 	throws IOException {
-		// is the chunk verified?
-		if (hasBlock(in.getId()))
-			return;
 		
 		long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
 		int written = 0;
@@ -259,36 +257,41 @@ public class VerifyingFolder {
 			startOffset -= _files.get(i).length();
 		}
 		
-		boolean shouldVerify;
 		synchronized(this) {
 			pendingRanges.removeInterval(in);
-			shouldVerify = addBlockPart(in);
-			if (shouldVerify)
-				partialBlocks.remove(in.blockId);
+			partialBlocks.addInterval(in);
+			if (!isCompleteBlock(in.getId(), partialBlocks))
+				return;
 		}
-		if (shouldVerify){
-			boolean verified = false;
-			try {
-				verified = verify(in.getId(), false);
-			} catch (InterruptedException impossible) {
-				ErrorService.error(impossible);
-			}
-			synchronized(this) {
-				if (verified) {
-					markPieceCompleted(in.getId());
-				} else 
-					_corruptedBytes += getPieceSize(in.getId());
-			}
-			if (verified)
-				handleVerified(in.getId());
+		
+		boolean verified = verifyQuick(in.getId());
+		
+		synchronized(this) {
+			partialBlocks.remove(in.getId());
+			if (verified) 
+				markPieceCompleted(in.getId());
+			else 
+				_corruptedBytes += getPieceSize(in.getId());
 		}
+		if (verified)
+			handleVerified(in.getId());
 	}
 	
 	private synchronized void markPieceCompleted(int blockId) {
+		requestedRanges.remove(blockId);
 		verifiedBlocks.set(blockId);
 		bitFieldDirty = true;
 		if (verifiedBlocks.cardinality() == _info.getNumBlocks()) 
 			verifiedBlocks = _info.getFullBitSet();
+	}
+	
+	private boolean verifyQuick(int pieceNum) throws IOException {
+		try {
+			return verify(pieceNum, false);
+		} catch (InterruptedException impossible) {
+			ErrorService.error(impossible);
+			return false;
+		}
 	}
 	
 	/**
@@ -388,27 +391,6 @@ public class VerifyingFolder {
 				} catch (IOException ignored){}
 			}
 		}
-	}
-	
-	/**
-	 * Notifies that part of a block has been written to disk.
-	 * 
-	 * @return true if the block is now complete and ready to be verified.
-	 */
-	private boolean addBlockPart(BTInterval in) {
-		// shortcut
-		if (isCompleteBlock(in, in.getId()))
-			return true;
-		
-		partialBlocks.addInterval(in);
-		IntervalSet set = partialBlocks.get(in.getId());
-		if (set.getNumberOfIntervals() == 1) {
-			Interval one = set.getFirst();
-			if (isCompleteBlock(one,in.getId()))
-				return true;
-		}
-		
-		return false;
 	}
 	
 	private boolean isCompleteBlock(Interval in, int id) {
@@ -739,7 +721,8 @@ public class VerifyingFolder {
 		Collection<Integer> available = null;
 		for (int requested : requestedAndPartial) {
 			if (!bs.get(requested) || 
-				(!endgame && isCompleteBlock(requested,requestedRanges))) 
+				(!endgame && isCompleteBlock(requested,requestedRanges)) ||
+				isCompleteBlock(requested, partialBlocks)) // during verification of block
 				continue;
 
 			if (available == null)
