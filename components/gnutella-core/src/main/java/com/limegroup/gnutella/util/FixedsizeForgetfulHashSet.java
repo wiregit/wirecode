@@ -22,27 +22,26 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
     private static final Object PRESENT = new Object();
 
     /**
-     * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
-     * default initial capacity (16) and load factor (0.75).
+     * Constructs a new, empty set.
      */
     public FixedsizeForgetfulHashSet(int size) {
         map = new FixedsizeForgetfulHashMap<E,Object>(size);
     }
     
     /**
-     * Tests if the map is full
+     * Tests if the set is full
      * 
-     * @return true, if the map is full (ie if adding any other entry will
+     * @return true, if the set is full (ie if adding any other entry will
      * lead to removal of some other entry to maintain the fixed-size property
-     * of the map. Returns false, otherwise
+     * of the set). Returns false, otherwise
      */
     public boolean isFull() {
         return map.isFull();
     }
     
     /**
-     * Removes the least recently used entry from the map
-     * @return Value corresponding to the key-value removed from the map
+     * Removes the least recently used entry from the set
+     * @return The least recently used value from the set.
      * @modifies this
      */
     public E removeLRUEntry() {
