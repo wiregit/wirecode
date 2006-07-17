@@ -137,7 +137,7 @@ public class BootstrapManager extends AbstractManager {
         public BootstrapEvent call() throws Exception {
             start = System.currentTimeMillis();
             Contact node = null;
-            if (hostList != null) {
+            if (hostList != null && !hostList.isEmpty()) {
                 node = bootstrapFromHostList();
             } else {
                 node = bootstrapFromRouteTable();

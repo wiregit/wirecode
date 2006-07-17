@@ -70,10 +70,23 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     protected volatile boolean waiting = false;
     
     /**
+     * A flag set to true when we are bootstraping from our persisted Routing Table
+     */
+    private boolean bootstrapingFromRT = false; 
+    
+    /**
      * A list of DHT bootstrap hosts comming from the Gnutella network
      */
     private volatile LinkedList<SocketAddress> bootstrapHosts 
             = new LinkedList<SocketAddress>();
+    
+    /**
+     * The bootstrap's <tt>Future</tt> object
+     */
+    private Future<BootstrapEvent> bootstrapFuture;
+    
+    private BootstrapListener bootstrapListener = new DHTBootstrapListener();
+    
     
     public AbstractDHTController() {
         init();
@@ -113,6 +126,13 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             dht.start();
             running = true;
             
+            //append SIMPP host to the end of the list if we have any
+            //TODO: review -- we only want to do this once
+            SocketAddress simppBootstrapHost = getSIMPPHost();
+            if(simppBootstrapHost != null) {
+                bootstrapHosts.add(simppBootstrapHost);
+            }
+            
             bootstrap();
         } catch (IOException err) {
             LOG.error(err);
@@ -121,48 +141,13 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     
     /**
      * Tries to bootstrap of a list of bootstrap hosts. 
-     * If bootstraping fails, the manager clears the list and 
+     * If bootstraping fails, this controller clears the list and 
      * puts itself in a waiting state until new hosts are added. 
      * 
      */
     private void bootstrap() {
-        
-        //append SIMPP host to the end of the list if we have any
-        SocketAddress simppBootstrapHost = getSIMPPHost();
-        if(simppBootstrapHost != null) {
-            bootstrapHosts.add(simppBootstrapHost);
-        }
-        
-        BootstrapListener listener = new BootstrapListener() {
-            public void handleResult(BootstrapEvent result) {
-                if (result.getType() == Type.SUCCEEDED) {
-                    waiting = false;
-                    
-                    // Notify our connections that we are now a full DHT node 
-                    sendUpdatedCapabilities();
-                    //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
-                } else {
-                    synchronized(bootstrapHosts) {
-                        bootstrapHosts.removeAll(result.getFailedHostList());
-                        if(!bootstrapHosts.isEmpty()) {
-                            //hosts were added --> try again
-                            bootstrap();
-                        } else {
-                            if(dhtNodeFetcher == null) {
-                                dhtNodeFetcher = new DHTNodeFetcher(AbstractDHTController.this);
-                            }
-                            waiting = true;
-                            //send UDPPings -- non blocking
-                            dhtNodeFetcher.requestDHTHosts();
-                        }
-                    }
-                }
-            }
-            
-            public void handleException(Exception ex) {}
-        };
-        
-        Future<BootstrapEvent> future = dht.bootstrap(bootstrapHosts, listener);
+        bootstrapingFromRT = bootstrapHosts.isEmpty();
+        bootstrapFuture = dht.bootstrap(bootstrapHosts, bootstrapListener);
     }
     
     /**
@@ -207,11 +192,12 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             System.out.println("adding: "+ hostAddress);
             System.out.println("waiting: "+ waiting);
 
-            bootstrap = waiting;
+            bootstrap = waiting || bootstrapingFromRT;
             waiting = false;
         }
         
         if(bootstrap) {
+            bootstrapFuture.cancel(true);
             bootstrap();
         }
     }
@@ -376,4 +362,42 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             return port;
         }
     }
+    
+    private class DHTBootstrapListener implements BootstrapListener{
+
+        public void handleResult(BootstrapEvent result) {
+            if (result.getType() == Type.SUCCEEDED) {
+                //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
+                //for now, waiting = false will stop at least the UDP pings
+                waiting = false;
+                // Notify our connections that we are now a full DHT node 
+                sendUpdatedCapabilities();
+            } else {
+                synchronized(bootstrapHosts) {
+                    bootstrapHosts.removeAll(result.getFailedHostList());
+                    if(bootstrapHosts.isEmpty()) {
+                        //host list is now empty --> we try bootstraping from our RT and requests hosts 
+                        //from the network at the same time
+                        if(dhtNodeFetcher == null) {
+                            dhtNodeFetcher = new DHTNodeFetcher(AbstractDHTController.this);
+                        }
+                        waiting = true;
+                        //send UDPPings -- non blocking
+                        dhtNodeFetcher.requestDHTHosts();
+                    }
+                    //if this is a failure while bootstraping from RT, don't call bootstrap() again 
+                    //with an empty list as it will restart bootstrapping from the RT again 
+                    if(!bootstrapingFromRT) {
+                        bootstrap();
+                    }
+                }
+            }
+        }
+        
+        public void handleException(Exception ex) {
+            LOG.error(ex);
+            waiting = false; // will cancel the node fetcher too
+        }
+    }
+
 }
