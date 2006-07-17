@@ -120,7 +120,7 @@ class HashTreeNodeManager {
      * the _currentNodes size.
      */
     private synchronized void purgeLRU() {
-        List<List<byte[]>> nodes = MAP.removeLRUEntry();
+        List<List<byte[]>> nodes = MAP.removeLRUEntry().getValue();
         _currentNodes -= calculateSize(nodes);
     }
     

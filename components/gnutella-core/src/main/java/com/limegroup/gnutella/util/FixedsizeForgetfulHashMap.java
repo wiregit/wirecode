@@ -8,6 +8,7 @@ package com.limegroup.gnutella.util;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -79,16 +80,16 @@ public class FixedsizeForgetfulHashMap<K, V> extends LinkedHashMap<K, V> {
     
     /**
      * Removes the least recently used entry from the map
-     * @return Value corresponding to the key-value removed from the map
+     * @return A Map.Entry object
      * @modifies this
      */
-    public V removeLRUEntry() {
+    public Map.Entry<K, V> removeLRUEntry() {
         //if there are no elements, return null.
         if(isEmpty())
             return null;
         
-        Iterator<V> i = values().iterator();
-        V value = i.next();
+        Iterator<Map.Entry<K, V>> i = entrySet().iterator();
+        Map.Entry<K, V> value = i.next();
         i.remove();
         return value;
     }
