@@ -543,11 +543,13 @@ public class ManagedTorrent {
 		
 		boolean shouldAdd = false;
 		synchronized(_state) {
-			if (_state.getInt() == CONNECTING || 
-					_state.getInt() == DOWNLOADING) {
-				
-				if (_state.getInt() == CONNECTING)
-					_state.setInt(DOWNLOADING);
+			switch(_state.getInt()) {
+			case CONNECTING :
+			case SCRAPING :
+			case WAITING_FOR_TRACKER :
+				_state.setInt(DOWNLOADING);
+			case DOWNLOADING :
+			case SEEDING:
 				shouldAdd = true;
 			}
 		}
