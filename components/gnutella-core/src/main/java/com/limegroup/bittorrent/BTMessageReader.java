@@ -399,7 +399,8 @@ public class BTMessageReader implements ChannelReadObserver {
 				choke(false);
 				if (currentOffset > complete.high) {
 					currentState = LENGTH_STATE;
-					NIODispatcher.instance().invokeLater(new Drainer());
+					if (_in.size() > 0 && !shutdown)
+						NIODispatcher.instance().invokeLater(new Drainer());
 				}
 				
 				return new ReceivedPiece(in, data);

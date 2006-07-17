@@ -4,6 +4,7 @@
 package com.limegroup.bittorrent.handshaking;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
@@ -18,9 +19,10 @@ import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestScatteringByteChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.util.IpPort;
 
 public abstract class BTHandshaker implements  
-ChannelWriter, ChannelReadObserver {
+ChannelWriter, ChannelReadObserver, IpPort {
 
 	private static final Log LOG = LogFactory.getLog(BTHandshaker.class);
 	
@@ -77,8 +79,7 @@ ChannelWriter, ChannelReadObserver {
 			return false;
 		
 		// write out our handshake
-		int wrote = 0;
-		while ((wrote = writeChannel.write(outgoingHandshake)) > 0 &&
+		while (writeChannel.write(outgoingHandshake) > 0 &&
 			outgoingHandshake.hasRemaining());
 		
 		if (!outgoingHandshake.hasRemaining()) 
@@ -112,7 +113,7 @@ ChannelWriter, ChannelReadObserver {
 		if (incomingDone && !outgoingHandshake.hasRemaining()) {
 			finishingHandshakes = true;
 			
-			if (torrent.needsMoreConnections()) {
+			if (torrent.shouldAddConnection(loc)) {
 				BTConnection btc = new BTConnection(sock, 
 						torrent.getMetaInfo(), 
 						loc,
@@ -168,5 +169,17 @@ ChannelWriter, ChannelReadObserver {
 
 	public InterestReadChannel getReadChannel() {
 		return readChannel;
+	}
+
+	public String getAddress() {
+		return loc.getAddress();
+	}
+
+	public InetAddress getInetAddress() {
+		return loc.getInetAddress();
+	}
+
+	public int getPort() {
+		return loc.getPort();
 	}
 }

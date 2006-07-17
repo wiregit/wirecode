@@ -54,6 +54,8 @@ public class IncomingBTHandshaker extends BTHandshaker {
 						LOG.debug("incoming connection for unknown torrent");
 					return false;
 				}
+				else if (torrent.isConnectedTo(loc))
+					return false;
 				else {
 					initOutgoingHandshake();
 					setWriteInterest();

@@ -27,7 +27,6 @@ public class BandwidthManager {
 			downloadRate = (((float)downloadThrottle/100.f)*
 					((float)ConnectionSettings.CONNECTION_SPEED.getValue()/8.f))*1024.f;
 		}
-		System.out.println("setting "+downloadRate);
 		DOWN_TCP.setRate(downloadRate);
 	}
 	

@@ -5,21 +5,21 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.handshaking.BTHandshaker;
+import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
 import com.limegroup.bittorrent.handshaking.OutgoingBTHandshaker;
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class BTConnectionFetcher  {
 	
@@ -53,11 +53,17 @@ public class BTConnectionFetcher  {
 	 */
 	private static final int MAX_CONNECTORS = 5;
 	
-	/*
-	 * the Set of concurrent connection fetchers
+	/**
+	 * the Set of outgoing connection fetchers
 	 */
-	final Set<BTHandshaker> fetchers = 
-		Collections.synchronizedSet(new HashSet<BTHandshaker>());
+	final StrictIpPortSet<OutgoingBTHandshaker> outgoing =  
+		new StrictIpPortSet<OutgoingBTHandshaker>();
+	
+	/**
+	 * the Set of incoming connection hadnshakers
+	 */
+	final StrictIpPortSet<IncomingBTHandshaker> incoming = 
+		new StrictIpPortSet<IncomingBTHandshaker>();
 	
 	/**
 	 * the torrent this fetcher belongs to
@@ -95,13 +101,13 @@ public class BTConnectionFetcher  {
 			return;
 		
 		while (_torrent.isActive() && 
-				fetchers.size() < MAX_CONNECTORS &&
+				outgoing.size() < MAX_CONNECTORS &&
 				_torrent.needsMoreConnections() && 
 				_torrent.hasNonBusyLocations()) {
 			fetchConnection();
 			if (LOG.isDebugEnabled())
 				LOG.debug("started connection fetcher: "
-						+ fetchers.size());
+						+ outgoing.size());
 		}
 	}
 
@@ -111,14 +117,17 @@ public class BTConnectionFetcher  {
 	 */
 	private void fetchConnection() {
 
-		TorrentLocation ep = _torrent.getTorrentLocation();
-
-		if (ep == null) {
-			if (LOG.isDebugEnabled())
+		// get a location to connect to that we know is not currently
+		// trying to connect to us.
+		TorrentLocation ep = null;
+		do {
+			ep = _torrent.getTorrentLocation();
+			if (ep == null) {
 				LOG.debug("no hosts to connect to");
-			return;
-		}
-		
+				return;
+			}
+		} while (incoming.contains(ep) || outgoing.contains(ep));
+
 		OutgoingBTHandshaker connector = new OutgoingBTHandshaker(ep, _torrent);
 		try {
 			Socket s = Sockets.connect(ep.getAddress(),
@@ -127,31 +136,49 @@ public class BTConnectionFetcher  {
 		} catch (IOException impossible) {
 			ErrorService.error(impossible);
 		}
-		fetchers.add(connector);
+		outgoing.add(connector);
 	}
 	
-	synchronized void shutdown() {
-		if (shutdown)
-			return;
-		shutdown = true;
-		synchronized(fetchers) {
+	void shutdown() {
+		List<Shutdownable> conns; 
+		synchronized(this) {
+			if (shutdown)
+				return;
+			shutdown = true;
 			// copy because shutdown() removes
-			List<Shutdownable> conns = new ArrayList<Shutdownable>(fetchers);
-			for (Shutdownable connector : conns) 
-				connector.shutdown();
+			conns =	new ArrayList<Shutdownable>(outgoing.size()+incoming.size());
+			conns.addAll(incoming);
+			conns.addAll(outgoing);
 		}
+		for (Shutdownable connector : conns) 
+			connector.shutdown();
 	}
 
 	public ByteBuffer getOutgoingHandshake() {
 		return _handshake.duplicate();
 	}
 
-	public void handshakerStarted(BTHandshaker shaker) {
-		fetchers.add(shaker);
+	public void handshakerStarted(IncomingBTHandshaker shaker) {
+		if (LOG.isDebugEnabled())
+			LOG.debug("incoming handshaker from "+shaker.getInetAddress()+":"+shaker.getPort());
+		
+		boolean reject;
+		synchronized(this) {
+			reject = shutdown || outgoing.contains(shaker);
+			if (!reject)
+				incoming.add(shaker);
+		}
+		if (reject) {
+			LOG.debug("rejecting it");
+			shaker.shutdown();
+		}
 	}
 	
-	public void handshakerDone(BTHandshaker shaker) {
-		fetchers.remove(shaker);
-		fetch();
+	public synchronized void handshakerDone(BTHandshaker shaker) {
+		Assert.that(incoming.contains(shaker) != outgoing.contains(shaker));
+		if (!incoming.remove(shaker)) {
+			outgoing.remove(shaker);
+			fetch();
+		}
 	}
 }

@@ -24,6 +24,7 @@ import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IntWrapper;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
@@ -510,20 +511,29 @@ public class ManagedTorrent {
 	}
 	
 	/**
-	 * @return true if we need any more connections
-	 * TODO: this needs to get much smarter
+	 * @return true if we need to fetch any more connections
 	 */
 	public boolean needsMoreConnections() {
 		// if we are complete, do not open any sockets - the active torrents will need them.
 		if (isComplete() && RouterService.getTorrentManager().hasNonSeeding())
 			return false;
+		
+		// provision some slots for incoming connections unless we're firewalled
+		int limit = TorrentManager.getMaxTorrentConnections();
 		if (RouterService.acceptedIncomingConnection())
-			return _connections.size() < BittorrentSettings.TORRENT_MAX_CONNECTIONS
-					.getValue() * 4 / 5;
-		return _connections.size() < BittorrentSettings.TORRENT_MAX_CONNECTIONS
-				.getValue();
+			limit = limit * 4 / 5;
+		return _connections.size() < limit;
 	}
 
+	/**
+	 * @return true if a fetched connection should be added.
+	 */
+	public boolean shouldAddConnection(TorrentLocation loc) {
+		if (isConnectedTo(loc))
+			return false;
+		return _connections.size() < TorrentManager.getMaxTorrentConnections();
+	}
+	
 	/**
 	 * adding connection
 	 */
@@ -531,9 +541,6 @@ public class ManagedTorrent {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add connection " + btc.toString());
 		
-		// This check prevents a few exceptions that may be thrown if a
-		// connection initialization is completed after we have already stopped.
-		// May happen when a user quits a torrent manually.
 		boolean shouldAdd = false;
 		synchronized(_state) {
 			if (_state.getInt() == CONNECTING || 
@@ -544,7 +551,7 @@ public class ManagedTorrent {
 				shouldAdd = true;
 			}
 		}
-		
+
 		if (shouldAdd) {
 				_connections.add(btc);
 			if (LOG.isDebugEnabled())
@@ -666,12 +673,12 @@ public class ManagedTorrent {
 	 *            a <tt>TorrentLocation</tt> to check
 	 * @return true if we are apparently already connected to a certain location
 	 */
-	private boolean isConnectedTo(TorrentLocation to) {
+	public boolean isConnectedTo(TorrentLocation to) {
 		synchronized(_connections) {
 			for (BTConnection btc : _connections) {
-				// compare by address only. there's no way of comparing ports
-				// or peer ids
-				if (btc.getEndpoint().getAddress().equals(to.getAddress()))
+				IpPort addr = btc.getEndpoint(); 
+				if (addr.getAddress().equals(to.getAddress()) && 
+						addr.getPort() == to.getPort())
 					return true;
 			}
 		}
