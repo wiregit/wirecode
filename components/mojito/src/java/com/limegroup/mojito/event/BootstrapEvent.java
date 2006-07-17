@@ -26,6 +26,11 @@ import com.limegroup.mojito.util.CollectionUtils;
 
 public class BootstrapEvent {
     
+    public static enum Type {
+        SUCCEEDED,
+        FAILED;
+    }
+    
     private List<SocketAddress> failed;
     
     private long phaseZeroTime = 0L;
@@ -33,16 +38,33 @@ public class BootstrapEvent {
     private long phaseTwoTime = 0L;
     private boolean foundNewContacts = false;
     
-    @SuppressWarnings("unchecked")
+    private Type type;
+    
+    public BootstrapEvent(List<? extends SocketAddress> failed, long phaseZeroTime) {
+        this(failed, phaseZeroTime, 0L, 0L, false, Type.FAILED);
+    }
+    
     public BootstrapEvent(List<? extends SocketAddress> failed, 
             long phaseZeroTime, long phaseOneTime, long phaseTwoTime, 
             boolean foundNewContacts) {
+        this(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts, Type.SUCCEEDED);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public BootstrapEvent(List<? extends SocketAddress> failed, 
+            long phaseZeroTime, long phaseOneTime, long phaseTwoTime, 
+            boolean foundNewContacts, Type type) {
         
         this.failed = (List<SocketAddress>)failed;
         this.phaseZeroTime = phaseZeroTime;
         this.phaseOneTime = phaseOneTime;
         this.phaseTwoTime = phaseTwoTime;
         this.foundNewContacts = foundNewContacts;
+        this.type = type;
+    }
+    
+    public Type getType() {
+        return type;
     }
     
     public List<SocketAddress> getFailedHostList() {
@@ -71,6 +93,7 @@ public class BootstrapEvent {
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
+        buffer.append("State: ").append(type).append("\n");
         buffer.append("Phase #0: ").append(getPhaseZeroTime()).append("ms\n");
         buffer.append("Phase #1: ").append(getPhaseOneTime()).append("ms\n");
         buffer.append("Phase #2: ").append(getPhaseTwoTime()).append("ms\n");

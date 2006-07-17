@@ -146,7 +146,7 @@ public class BootstrapManager extends AbstractManager {
             }
             
             if (node == null) {
-                throw new BootstrapException(this);
+                return new BootstrapEvent(failed, System.currentTimeMillis()-start);
             }
             
             phaseOneStart = System.currentTimeMillis();
@@ -238,24 +238,6 @@ public class BootstrapManager extends AbstractManager {
                 } catch (DHTException ignore) {}
             }
             return foundNewContacts;
-        }
-    }
-    
-    /**
-     * 
-     */
-    public class BootstrapException extends Exception {
-
-        private static final long serialVersionUID = 7008814571814909344L;
-        
-        private Bootstrapper bootstrapper;
-        
-        private BootstrapException(Bootstrapper bootstrapper) {
-            this.bootstrapper = bootstrapper;
-        }
-        
-        public List<SocketAddress> getFailedHostList() {
-            return bootstrapper.failed;
         }
     }
     

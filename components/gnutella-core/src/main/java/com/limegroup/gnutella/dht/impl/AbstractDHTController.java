@@ -26,7 +26,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.manager.BootstrapManager.BootstrapException;
+import com.limegroup.mojito.event.BootstrapEvent.Type;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -134,19 +134,15 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         
         dht.bootstrap(bootstrapHosts, new BootstrapListener() {
             public void handleResult(BootstrapEvent result) {
-                waiting = false;
-                
-                // Notify our connections that we are now a full DHT node 
-                sendUpdatedCapabilities();
-                //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
-            }
-            
-            public void handleException(Exception ex) {
-                if (ex instanceof BootstrapException) {
-                    BootstrapException bex = (BootstrapException)ex;
-                    List<SocketAddress> failedHosts = bex.getFailedHostList();
+                if (result.getType() == Type.SUCCEEDED) {
+                    waiting = false;
+                    
+                    // Notify our connections that we are now a full DHT node 
+                    sendUpdatedCapabilities();
+                    //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
+                } else {
                     synchronized(bootstrapHosts) {
-                        bootstrapHosts.removeAll(failedHosts);
+                        bootstrapHosts.removeAll(result.getFailedHostList());
                         if(!bootstrapHosts.isEmpty()) {
                             //hosts were added --> try again
                             bootstrap();
@@ -160,6 +156,9 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
                         }
                     }
                 }
+            }
+            
+            public void handleException(Exception ex) {
             }
         });
     }
