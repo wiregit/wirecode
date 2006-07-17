@@ -125,24 +125,24 @@ public class FixedsizeForgetfulHashMapTest extends BaseTestCase {
         iter=rt.keySet().iterator();
         assertTrue(iter.hasNext());
         Object a1=iter.next();
-        assertTrue(a1==g1 || a1==g2 || a1==g3 || a1==g4);
+        assertSame(a1, g1);
         assertTrue(iter.hasNext());
         Object a2=iter.next();
         assertTrue(rt.size()==4);
         iter.remove();               //remove a2
         assertTrue(rt.size()==3);
-        assertTrue(a2==g1 || a2==g2 || a2==g3 || a2==g4);
+        assertSame(a2, g2);
         assertNotSame(a1, a2);
         assertTrue(iter.hasNext());
         Object a3=iter.next();
         assertEquals(3, rt.size());
         iter.remove();               //remove a3
         assertEquals(2, rt.size());
-        assertTrue(a3==g1 || a3==g2 || a3==g3 || a3==g4);
+        assertSame(a3, g3);
         assertNotSame(a3, a2);
         assertNotSame(a3, a1);
         Object a4=iter.next();
-        assertTrue(a4==g1 || a4==g2 || a4==g3 || a4==g4);
+        assertSame(a4, g4);
         assertNotSame(a4, a3);
         assertNotSame(a4, a2);
         assertNotSame(a4, a1);
@@ -154,9 +154,9 @@ public class FixedsizeForgetfulHashMapTest extends BaseTestCase {
         assertTrue(! rt.containsKey(a3));
         assertTrue(rt.containsKey(a4));
         Object b1=iter.next();
-        assertTrue(b1==a1 || b1==a4);  //NOT a2, a3
+        assertSame(b1, a1); 
         Object b2=iter.next();
-        assertTrue(b1==a1 || b1==a4);  //NOT a2, a3
+        assertSame(b2, a4);
         assertNotSame(b1, b2);
         assertTrue(! iter.hasNext());
         
