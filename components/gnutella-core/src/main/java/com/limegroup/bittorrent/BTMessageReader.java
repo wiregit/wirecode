@@ -372,6 +372,13 @@ public class BTMessageReader implements ChannelReadObserver {
 			return null;
 		}
 		
+		public String toString() {
+			return "Piece "+complete + 
+			" offset "+currentOffset+
+			" welcome "+welcome+
+			" write expected "+writeExpected;
+		}
+		
 		private int getAmountLeft() {
 			return Math.min(_in.size(), complete.high - currentOffset + 1);
 		}
@@ -382,8 +389,6 @@ public class BTMessageReader implements ChannelReadObserver {
 				writeExpected = false;
 				int toRead = getAmountLeft();
 				
-				choke(false);
-				
 				BTInterval in = new BTInterval(currentOffset, 
 						currentOffset + toRead - 1,
 						chunkId);
@@ -391,8 +396,11 @@ public class BTMessageReader implements ChannelReadObserver {
 				_connection.readBytes(toRead);
 				byte []data = new byte[toRead];
 				_in.get(data);
-				if (currentOffset > complete.high) 
+				choke(false);
+				if (currentOffset > complete.high) {
 					currentState = LENGTH_STATE;
+					NIODispatcher.instance().invokeLater(new Drainer());
+				}
 				
 				return new ReceivedPiece(in, data);
 			}
@@ -415,6 +423,20 @@ public class BTMessageReader implements ChannelReadObserver {
 		
 		public byte [] getData() {
 			return data;
+		}
+	}
+	
+	private class Drainer implements Runnable {
+		public void run() {
+			synchronized(BTMessageReader.this) {
+				if (_in.size() == 0 || shutdown)
+					return;
+				try {
+					processState();
+				} catch (BadBTMessageException bad) {
+					shutdown();
+				}
+			}
 		}
 	}
 }
