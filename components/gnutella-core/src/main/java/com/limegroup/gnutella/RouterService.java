@@ -925,7 +925,7 @@ public class RouterService {
                 
             _state = 3;
 
-            dhtManager.shutdown();
+            dhtManager.stop();
             
             getAcceptor().shutdown();
             
@@ -1813,11 +1813,11 @@ public class RouterService {
     }
     
     public static void startDHT(boolean activeMode) {
-        dhtManager.startDHT(activeMode);
+        dhtManager.start(activeMode);
     }
     
     public static void shutdownDHT() {
-        dhtManager.shutdown();
+        dhtManager.stop();
     }
     
 }

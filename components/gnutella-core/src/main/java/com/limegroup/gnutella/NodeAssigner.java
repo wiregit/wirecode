@@ -363,7 +363,8 @@ public class NodeAssigner {
         Assert.that((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue() > 
                      UltrapeerSettings.MIN_CONNECT_TIME.getValue()), "Wrong minimum initial uptime");
         
-        if (DHTSettings.DISABLE_DHT_USER.getValue() || DHTSettings.DISABLE_DHT_NETWORK.getValue()) {
+        if (DHTSettings.DISABLE_DHT_USER.getValue() 
+                || DHTSettings.DISABLE_DHT_NETWORK.getValue()) {
             DHTSettings.DHT_CAPABLE.setValue(false);
             RouterService.shutdownDHT();
             return;
@@ -372,12 +373,12 @@ public class NodeAssigner {
         boolean isActiveDHTCapable = 
             (_isHardcoreCapable &&
             //AND is my average uptime AND current uptime high enough?
-            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() &&
-             _currentUptime >= DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
+            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() 
+                    && _currentUptime >= DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
                      
         //don't give active capability to ultrapeers
-        if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() &&
-                (RouterService.isSupernode() || _willTryToBeUltrapeer)){
+        if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
+                && (RouterService.isSupernode() || _willTryToBeUltrapeer)){
             isActiveDHTCapable = false;
         }
                      
@@ -388,14 +389,16 @@ public class NodeAssigner {
         DHTSettings.DHT_CAPABLE.setValue(isActiveDHTCapable);
         
         //Node is DHT capable AND is not an ultrapeer AND not allready trying to connect as UP
-        if ((isActiveDHTCapable && acceptDHTNode()) || DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-            Runnable dhtInitializer = 
-                new Runnable() {
-                    public void run() {
-                        RouterService.startDHT(true);
-                    }
-                };
-            ThreadFactory.startThread(dhtInitializer, "dhtInitializeThread");
+        if ((isActiveDHTCapable && acceptDHTNode()) 
+                || DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+            
+            Runnable dhtInitializer = new Runnable() {
+                public void run() {
+                    RouterService.startDHT(true);
+                }
+            };
+            
+            ThreadFactory.startThread(dhtInitializer, "DHT-InitializeThread");
             return;
         } 
 

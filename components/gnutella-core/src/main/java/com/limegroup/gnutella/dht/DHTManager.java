@@ -8,9 +8,11 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
 public interface DHTManager extends LifecycleListener{
+    
+    public void start(boolean activeMode);
 
-    public void startDHT(boolean activeMode);
-
+    public void stop();
+    
     public void switchMode(boolean toActiveMode);
 
     public void addBootstrapHost(SocketAddress hostAddress);
@@ -20,9 +22,7 @@ public interface DHTManager extends LifecycleListener{
     public List<IpPort> getActiveDHTNodes(int maxNodes);
 
     public boolean isActiveNode();
-
-    public void shutdown();
-
+    
     public boolean isRunning();
 
     public int getDHTVersion();

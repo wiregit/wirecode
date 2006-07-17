@@ -210,11 +210,11 @@ public class CapabilitiesVMTest
 
 
         @Override
-        public void shutdown() {}
+        public void stop() {}
 
 
         @Override
-        public void startDHT(boolean activeMode) {}
+        public void start(boolean activeMode) {}
 
 
         @Override

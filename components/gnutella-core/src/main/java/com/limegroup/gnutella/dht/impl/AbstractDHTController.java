@@ -170,7 +170,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * to bootstrap from for the next session.
      * 
      */
-    public synchronized void shutdown(){
+    public synchronized void stop(){
         if (!running) {
             return;
         }
@@ -231,7 +231,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         }
         
         boolean wasRunning = running;
-        shutdown();
+        stop();
         
         //we are becoming active: load dht from last active session
         if(wasPassive && !passive) {
@@ -268,7 +268,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             }
         } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(running && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-                shutdown();
+                stop();
             }
         }
     }

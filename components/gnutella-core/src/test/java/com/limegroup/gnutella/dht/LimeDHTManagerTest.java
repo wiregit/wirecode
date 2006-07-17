@@ -104,10 +104,10 @@ public class LimeDHTManagerTest extends BaseTestCase {
         DHTController controller = getController();
         sleep(300);
         //add invalid hosts
-        DHT_MANAGER.addBootstrapHost(new InetSocketAddress("localhost",2000));
+        DHT_MANAGER.addBootstrapHost(new InetSocketAddress("localhost", 2000));
         assertFalse(controller.isWaiting());
         for(int i = 1; i < 10; i++) {
-            DHT_MANAGER.addBootstrapHost(new InetSocketAddress("0.0.0.0",i));
+            DHT_MANAGER.addBootstrapHost(new InetSocketAddress("0.0.0.0", i));
         }
         //now add valid: should be first in the list
         DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
@@ -144,7 +144,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     public void testSwitchPassiveActive() throws Exception{
         DHTSettings.PERSIST_DHT.setValue(true);
-        DHT_MANAGER.startDHT(true);
+        DHT_MANAGER.start(true);
         DHTController controller = getController();
         assertTrue(DHT_MANAGER.isRunning());
         assertTrue(DHT_MANAGER.isActiveNode());

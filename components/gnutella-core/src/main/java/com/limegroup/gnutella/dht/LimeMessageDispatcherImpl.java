@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -207,7 +208,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
                         handleCleanup();
                     }
                 }
-            }, CLEANUP, CLEANUP);
+            }, CLEANUP, CLEANUP, TimeUnit.MILLISECONDS);
         }
     }
     

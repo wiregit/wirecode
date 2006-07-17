@@ -20,6 +20,7 @@
 package com.limegroup.mojito.db;
 
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,7 +60,7 @@ public class KeyValuePublisher implements Runnable {
                 long period = DatabaseSettings.REPUBLISH_PERIOD.getValue();
                 long delay = period;
                 
-                future = context.scheduleAtFixedRate(this, delay, period);
+                future = context.scheduleAtFixedRate(this, delay, period, TimeUnit.MILLISECONDS);
             }
         }
     }

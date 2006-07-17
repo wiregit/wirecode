@@ -13,7 +13,7 @@ public interface DHTController {
     
     public void start();
     
-    public void shutdown();
+    public void stop();
 
     public List<IpPort> getActiveDHTNodes(int maxNodes);
     

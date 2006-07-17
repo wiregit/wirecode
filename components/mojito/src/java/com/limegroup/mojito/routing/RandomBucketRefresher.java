@@ -21,6 +21,7 @@ package com.limegroup.mojito.routing;
 
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +56,7 @@ public class RandomBucketRefresher implements Runnable {
                 delay = (long)(delay * Math.random());
             }
             
-            future = context.scheduleAtFixedRate(this, delay, period);
+            future = context.scheduleAtFixedRate(this, delay, period, TimeUnit.MILLISECONDS);
         }
     }
     

@@ -28,17 +28,13 @@ class ActiveDHTNodeController extends AbstractDHTController {
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
 
-    public ActiveDHTNodeController() {
-        super();
-    }
-
     public void init() {
-        MojitoDHT mDHT = null;
+        MojitoDHT mojitoDHT = null;
         if (DHTSettings.PERSIST_DHT.getValue() && 
                 FILE.exists() && FILE.isFile()) {
             try {
                 FileInputStream in = new FileInputStream(FILE);
-                mDHT = MojitoDHT.load(in);
+                mojitoDHT = MojitoDHT.load(in);
                 in.close();
             } catch (FileNotFoundException e) {
                 LOG.error("FileNotFoundException", e);
@@ -48,30 +44,35 @@ class ActiveDHTNodeController extends AbstractDHTController {
                 LOG.error("IOException", e);
             }
         }
-        if (mDHT == null) {
-            dht = new MojitoDHT("LimeMojitoDHT");
+        
+        if (mojitoDHT == null) {
+            super.dht = new MojitoDHT("LimeMojitoDHT");
         } else {
-            dht = mDHT;
+            super.dht = mojitoDHT;
         }
+        
         setLimeMessageDispatcher();
     }
 
+    @Override
     public synchronized void start() {
         //if we want to connect actively, we either shouldn't be an ultrapeer
         //or should be DHT capable
-        if (!DHTSettings.FORCE_DHT_CONNECT.getValue() && !DHTSettings.DHT_CAPABLE.getValue()) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Cannot initialize DHT - node is not DHT capable or is an ultrapeer");
-                }
-                return;
+        if (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
+                && !DHTSettings.DHT_CAPABLE.getValue()) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Cannot initialize DHT - node is not DHT capable or is an ultrapeer");
+            }
+            return;
         }
         
         super.start(true);
     }
 
     @Override
-    public synchronized void shutdown() {
-        super.shutdown();
+    public synchronized void stop() {
+        super.stop();
+        
         //Notify our connections that we disconnected
         sendUpdatedCapabilities();
         

@@ -882,9 +882,9 @@ public final class MessageRouterTest extends BaseTestCase {
 
         public boolean isRunning() { return true; }
 
-        public void shutdown() {}
+        public void stop() {}
 
-        public void startDHT(boolean activeMode) {}
+        public void start(boolean activeMode) {}
 
         public void switchMode(boolean toActiveMode) {}
 

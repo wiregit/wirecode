@@ -30,6 +30,8 @@ public class DHTNodeFetcher {
     
     private long lastRequest = 0L;
     
+    private TimedFetcher fetcher = null;
+    
     public DHTNodeFetcher(DHTController controller) {
         this.controller = controller;
     }
@@ -51,14 +53,12 @@ public class DHTNodeFetcher {
         
         lastRequest = now;
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
-        RouterService.getHostCatcher().sendMessage(m, 
-                                                   new DHTNodesRequestListener(),
-                                                   new UDPPingCanceller());
+        RouterService.getHostCatcher().sendMessage(m, new DHTNodesRequestListener(), new UDPPingCanceller());
     }
     
     public void startTimerTask() {
-        RouterService.schedule(new TimedFetcher(),
-                FETCH_DELAY, FETCH_DELAY);
+        fetcher = new TimedFetcher();
+        RouterService.schedule(fetcher, FETCH_DELAY, FETCH_DELAY);
     }
     
     private class TimedFetcher implements Runnable {

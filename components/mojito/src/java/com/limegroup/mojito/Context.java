@@ -535,12 +535,12 @@ public class Context {
      * @param delay
      * @param period
      */
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable r, long delay, long period) {
-        return scheduledExecutor.scheduleAtFixedRate(r, delay, period, TimeUnit.MILLISECONDS);
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable r, long delay, long period, TimeUnit unit) {
+        return scheduledExecutor.scheduleAtFixedRate(r, delay, period, unit);
     }
     
-    public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay) {
-        return scheduledExecutor.schedule(task, delay, TimeUnit.MILLISECONDS);
+    public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit) {
+        return scheduledExecutor.schedule(task, delay, unit);
     }
     
     public <V> Future<V> schedule(Callable<V> task) {

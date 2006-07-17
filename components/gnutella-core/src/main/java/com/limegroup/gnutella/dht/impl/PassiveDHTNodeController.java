@@ -37,10 +37,6 @@ class PassiveDHTNodeController extends AbstractDHTController{
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "dhtnodes.dat");
 
-    public PassiveDHTNodeController() {
-        super();
-    }
-
     @Override
     public void init() {
         dht = new MojitoDHT("LimeMojitoDHT");
@@ -101,12 +97,14 @@ class PassiveDHTNodeController extends AbstractDHTController{
     }
 
     @Override
-    protected void sendUpdatedCapabilities() {}
+    protected void sendUpdatedCapabilities() {
+        // DO NOTHING
+    }
 
     @Override
-    public synchronized void shutdown() {
+    public synchronized void stop() {
         //TODO: here, save a small list of MRS nodes for next bootstrap
-        super.shutdown();
+        super.stop();
         
         try {
             FileOutputStream out = new FileOutputStream(FILE);
@@ -151,6 +149,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             //size will be > 0
             return dhtLeaves.subList(0,Math.min(maxNodes, dhtLeaves.size()));
         }
+        
         System.out.append("rout table:" + limeDHTRouteTable);
         //ELSE return the MRS node of our routing table
         List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
@@ -164,6 +163,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             }
             ipps.add(new IpPortContactNode(cn));
         }
+        
         return ipps;
     }
     
@@ -190,7 +190,6 @@ class PassiveDHTNodeController extends AbstractDHTController{
             } else {
                 removeLeafDHTNode( host , port );
             }
-                
         } 
     }
 }

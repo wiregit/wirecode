@@ -56,7 +56,7 @@ public class PassiveDHTNodeControllerTest extends BaseTestCase {
         controller.addBootstrapHost(BOOTSTRAP_DHT.getSocketAddress());
         assertFalse(controller.isWaiting());
         Thread.sleep(300);
-        controller.shutdown();
+        controller.stop();
         //should have persisted the DHT
         controller = new PassiveDHTNodeController();
         controller.start();
@@ -65,7 +65,7 @@ public class PassiveDHTNodeControllerTest extends BaseTestCase {
         List<IpPort> nodes = controller.getActiveDHTNodes(1);
         assertEquals(((InetSocketAddress) BOOTSTRAP_DHT.getSocketAddress()).getPort(), 
                 nodes.get(0).getPort());
-        controller.shutdown();
+        controller.stop();
         controller = new PassiveDHTNodeController();
         controller.start();
         assertFalse(controller.isWaiting());
