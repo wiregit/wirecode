@@ -19,6 +19,7 @@ import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.ThrottleReader;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.messages.*;
@@ -187,10 +188,15 @@ public class BTConnection implements UploadSlotListener {
 		_reader = new BTMessageReader(this);
 		_writer = new BTMessageWriter(this);
 		
-		ThrottleWriter throttle = new ThrottleWriter(TorrentManager.getThrottle());
+		ThrottleWriter throttle = new ThrottleWriter(
+				RouterService.getBandwidthManager().getThrottle(false));
 		delayer = new DelayedBufferWriter(1400, 3000);
 		_writer.setWriteChannel(delayer);
 		delayer.setWriteChannel(throttle);
+		ThrottleReader readThrottle = new ThrottleReader(
+				RouterService.getBandwidthManager().getThrottle(true));
+		_reader.setReadChannel(readThrottle);
+		readThrottle.interest(true);
 		socket.setReadObserver(_reader);
 		socket.setWriteObserver(_writer);
 		_info = info;
@@ -479,7 +485,6 @@ public class BTConnection implements UploadSlotListener {
 	}
 
 	void pieceSent() {
-		Assert.that(usingSlot, "incosistent slot state");
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" piece sent");
 		usingSlot = false;
@@ -513,7 +518,7 @@ public class BTConnection implements UploadSlotListener {
 		if (_isChoked || _requested.isEmpty()) 
 			return;
 		
-		// pick a request at sort-of-random
+		// pick a request from them
 		Iterator<BTInterval> iter = _requested.iterator();
 		BTInterval in = iter.next();
 		iter.remove();
@@ -534,7 +539,7 @@ public class BTConnection implements UploadSlotListener {
 	 * @param data the data of the piece.
 	 */
 	void pieceRead(final BTInterval in, final byte [] data) {
-		TorrentManager.updateThrottle();
+		RouterService.getBandwidthManager().applyUploadRate();
 		Runnable pieceSender = new Runnable() {
 			public void run() {
 				if (LOG.isDebugEnabled())
@@ -812,8 +817,12 @@ public class BTConnection implements UploadSlotListener {
 	
 	
 	public void releaseSlot() {
-		usingSlot = false;
-		sendChoke();
+		NIODispatcher.instance().invokeLater(new Runnable() {
+			public void run() {
+				usingSlot = false;
+				sendChoke();
+			}
+		});
 	}
 	
 	public void slotAvailable() {

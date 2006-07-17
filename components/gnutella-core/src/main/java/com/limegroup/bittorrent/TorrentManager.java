@@ -46,11 +46,6 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	private static final Log LOG = LogFactory.getLog(TorrentManager.class);
 
 	/**
-	 * the upload throttle we are using
-	 */
-	private static final Throttle UPLOAD_THROTTLE = new NBThrottle(true,0);
-	
-	/**
 	 * The list of active torrents.
 	 */
 	private Set <ManagedTorrent>_active = new HashSet<ManagedTorrent>();
@@ -99,15 +94,6 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		else
 			return 6;
 
-	}
-	
-	public static void updateThrottle() {
-		UPLOAD_THROTTLE.setRate(UploadManager.getUploadSpeed());
-	}
-	
-	public static Throttle getThrottle() {
-		updateThrottle();
-		return UPLOAD_THROTTLE;
 	}
 	
 	public void addEventListener(TorrentEventListener listener) {

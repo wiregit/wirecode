@@ -225,6 +225,11 @@ public class RouterService {
     private static MessageRouter router;
     
     /**
+     * A central location for the upload and download throttles
+     */
+    private static BandwidthManager bandwidthManager = new BandwidthManager();
+    
+    /**
      * The UDPMultiplexor.
      */
     private static UDPMultiplexor UDP_MULTIPLEXOR;
@@ -559,6 +564,10 @@ public class RouterService {
 	 */
 	public static MessageRouter getMessageRouter() {
 		return router;
+	}
+	
+	public static BandwidthManager getBandwidthManager() {
+		return bandwidthManager;
 	}
     
 	/**
