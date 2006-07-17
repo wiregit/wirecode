@@ -34,8 +34,30 @@ public class FixedsizeForgetfulHashMap<K, V> extends LinkedHashMap<K, V> {
      * @exception IllegalArgumentException if size is less < 1.
      */
     public FixedsizeForgetfulHashMap(int size) {
-        super((size * 4)/3 + 10, 0.75f);
+        this(size, (size * 4)/3 + 10, 0.75f);
+    }
     
+    /**
+     * Create a new instance that holds only the last "size" entries,
+     * using the given initialCapacity and a loadFactor of 0.75.
+     * 
+     * @param size the number of entries to hold
+     * @exception IllegalArgumentException if size is less < 1.
+     */
+    public FixedsizeForgetfulHashMap(int size, int initialCapacity) {
+        this(size, initialCapacity, 0.75f);
+    }
+    
+    /**
+     * Create a new instance that holds only the last "size" entries, using
+     * the given initialCapacity & loadFactor.
+     * 
+     * @param size the number of entries to hold
+     * @exception IllegalArgumentException if size is less < 1.
+     */
+    public FixedsizeForgetfulHashMap(int size, int initialCapacity, float loadFactor) {
+        super(initialCapacity, loadFactor);
+        
         //if size is < 1
         if (size < 1)
             throw new IllegalArgumentException("invalid size: " + size);

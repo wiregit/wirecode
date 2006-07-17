@@ -29,6 +29,20 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
     }
     
     /**
+     * Constructs a new, empty set, using the given initialCapacity.
+     */
+    public FixedsizeForgetfulHashSet(int size, int initialCapacity) {
+        map = new FixedsizeForgetfulHashMap<E,Object>(size, initialCapacity);
+    }
+    
+    /**
+     * Constructs a new, empty set, using the given initialCapacity & loadFactor.
+     */
+    public FixedsizeForgetfulHashSet(int size, int initialCapacity, float loadFactor) {
+        map = new FixedsizeForgetfulHashMap<E,Object>(size, initialCapacity, loadFactor);
+    }
+    
+    /**
      * Tests if the set is full
      * 
      * @return true, if the set is full (ie if adding any other entry will
