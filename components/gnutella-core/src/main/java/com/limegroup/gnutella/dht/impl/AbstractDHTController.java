@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
@@ -132,7 +133,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             bootstrapHosts.add(simppBootstrapHost);
         }
         
-        dht.bootstrap(bootstrapHosts, new BootstrapListener() {
+        BootstrapListener listener = new BootstrapListener() {
             public void handleResult(BootstrapEvent result) {
                 if (result.getType() == Type.SUCCEEDED) {
                     waiting = false;
@@ -158,9 +159,10 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
                 }
             }
             
-            public void handleException(Exception ex) {
-            }
-        });
+            public void handleException(Exception ex) {}
+        };
+        
+        Future<BootstrapEvent> future = dht.bootstrap(bootstrapHosts, listener);
     }
     
     /**

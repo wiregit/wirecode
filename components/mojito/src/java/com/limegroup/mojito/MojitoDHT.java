@@ -217,14 +217,21 @@ public class MojitoDHT {
     }
     
     /**
+     * 
+     */
+    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
+        return context.bootstrap(hostList, null);
+    }
+    
+    /**
      * Tries to bootstrap from a List of Hosts.
      * 
      * @param hostList a List of <tt>SocketAddress</tt>
      * @param listener The listener for bootstrap events
      * @throws IOException
      */
-    public void bootstrap(List<? extends SocketAddress> hostList, BootstrapListener listener) {
-        context.bootstrap(hostList, listener);
+    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList, BootstrapListener listener) {
+        return context.bootstrap(hostList, listener);
     }
     
     /**
