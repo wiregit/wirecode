@@ -141,7 +141,7 @@ public class MessageInputStream extends DataInputStream {
         return Arrays.asList(nodes);
     }
 
-    public InetSocketAddress readSocketAddress() throws IOException {
+    public InetAddress readInetAddress() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
             return null;
@@ -150,8 +150,21 @@ public class MessageInputStream extends DataInputStream {
         byte[] address = new byte[length];
         readFully(address);
         
-        int port = readUnsignedShort();
-        return new InetSocketAddress(InetAddress.getByAddress(address), port);
+        return InetAddress.getByAddress(address);
+    }
+    
+    public int readPort() throws IOException {
+        return readUnsignedShort();
+    }
+    
+    public InetSocketAddress readSocketAddress() throws IOException {
+        InetAddress addr = readInetAddress();
+        if (addr == null) {
+            return null;
+        }
+        
+        int port = readPort();
+        return new InetSocketAddress(addr, port);
     }
     
     public QueryKey readQueryKey() throws IOException {

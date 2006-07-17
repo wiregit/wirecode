@@ -22,6 +22,7 @@ package com.limegroup.mojito.io;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PublicKey;
@@ -105,16 +106,23 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    public void writeInetAddress(InetAddress addr) throws IOException {
+        byte[] address = addr.getAddress();
+        writeByte(address.length);
+        write(address, 0, address.length);
+    }
+    
+    public void writePort(int port) throws IOException {
+        writeShort(port);
+    }
+    
     public void writeSocketAddress(SocketAddress addr) throws IOException {
         if (addr instanceof InetSocketAddress
                 && !((InetSocketAddress)addr).isUnresolved()) {
             InetSocketAddress iaddr = (InetSocketAddress)addr;
-            byte[] address = iaddr.getAddress().getAddress();
-            int port = iaddr.getPort();
             
-            writeByte(address.length);
-            write(address, 0, address.length);
-            writeShort(port);
+            writeInetAddress(iaddr.getAddress());
+            writePort(iaddr.getPort());
         } else {
             writeByte(0);
         }
