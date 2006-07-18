@@ -11,10 +11,10 @@ class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Futu
 	
 	private static final long NANO_BASE = System.nanoTime();
 	
-	private final Runnable delegate;
+	private volatile Runnable delegate;
 	private final long time, nanoTime;
 	private final long sequenceNumber;
-	private volatile boolean cancelled, executed;
+	private volatile boolean executed;
 	DelayedRunnable(Runnable delegate, long time) {
 		this.delegate = delegate;
 		this.time = time;
@@ -23,10 +23,11 @@ class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Futu
 	}
 	
 	public void run() {
-		if (cancelled)
+		Runnable r = delegate;
+		if (r == null)
 			return;
 		try {
-			delegate.run();
+			r.run();
 		} finally {
 			executed = true;
 		}
@@ -34,12 +35,12 @@ class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Futu
 	}
 	
 	public boolean cancel(boolean ignored) {
-		cancelled = true;
+		delegate = null;
 		return true;
 	}
 	
 	public boolean isCancelled() {
-		return cancelled;
+		return delegate == null;
 	}
 	
 	public boolean isDone() {

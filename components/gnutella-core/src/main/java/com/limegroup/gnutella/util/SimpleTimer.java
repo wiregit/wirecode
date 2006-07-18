@@ -96,23 +96,24 @@ public class SimpleTimer implements SchedulingThreadPool {
     }
     
     private class MyTimerTask extends TimerTask {
-    	volatile boolean done, cancelled;
-    	final Runnable r; 
+    	volatile boolean done;
+    	volatile Runnable r; 
     	MyTimerTask(Runnable r) {
     		this.r = r;
     	}
     	
     	public boolean cancel() {
     		boolean ret = super.cancel();
-    		cancelled = true;
+    		r = null;
     		return ret;
     	}
     	
     	public void run (){
-    		if (cancelled)
+    		Runnable toRun = r;
+    		if (toRun == null)
     			return;
     		try {
-    			r.run();
+    			toRun.run();
     		} finally  {
     			done = true;
     		}
@@ -135,7 +136,7 @@ public class SimpleTimer implements SchedulingThreadPool {
 			return null;
 		}
 		public boolean isCancelled() {
-			return task.cancelled;
+			return task.r == null;
 		}
 		public boolean isDone() {
 			return task.done;

@@ -145,6 +145,8 @@ public class TrackerManager {
 			}
 		};
 		LOG.debug("scheduling new tracker request");
+		if (scheduledAnnounce != null)
+			scheduledAnnounce.cancel();
 		scheduledAnnounce = RouterService.schedule(scheduled, minDelay, 0);
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
