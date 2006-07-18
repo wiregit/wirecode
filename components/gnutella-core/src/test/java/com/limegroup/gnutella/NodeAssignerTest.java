@@ -59,10 +59,10 @@ public class NodeAssignerTest extends BaseTestCase {
     }
 
     protected void setUp() throws Exception {
+        setSettings();
         ROUTER_SERVICE =
             new RouterService(new ActivityCallbackStub());
         ASSIGNER = new NodeAssigner(BW, BW, ROUTER_SERVICE.getConnectionManager());
-        setSettings();
 
     }
     

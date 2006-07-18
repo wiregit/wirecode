@@ -390,8 +390,9 @@ public class NodeAssigner {
         
         //Node is not allready part of the DHT 
         //AND is DHT capable AND is accepted (probabilistic factor) 
-        if (!RouterService.isActiveDHTNode() && ((isActiveDHTCapable && acceptDHTNode()) 
-                || DHTSettings.FORCE_DHT_CONNECT.getValue())) {
+        if ((isActiveDHTCapable && acceptDHTNode() 
+                && !RouterService.isActiveDHTNode()) 
+                || DHTSettings.FORCE_DHT_CONNECT.getValue()) {
             
             Runnable dhtInitializer = new Runnable() {
                 public void run() {
@@ -404,7 +405,7 @@ public class NodeAssigner {
         } 
 
         // for now, disconnect node as soon as not anymore DHT capable
-        if(RouterService.isActiveDHTNode()) { 
+        if(!isActiveDHTCapable && RouterService.isActiveDHTNode()) { 
             RouterService.shutdownDHT();
         }
     }
