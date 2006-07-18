@@ -249,9 +249,8 @@ public class ConnectionManager {
     
     /**
      * List of event listeners for LifeCycleEvents.
-     * LOCKING: listenerLock
      */
-    private volatile CopyOnWriteArrayList<LifecycleListener> lifeCycleListeners = 
+    private CopyOnWriteArrayList<LifecycleListener> lifeCycleListeners = 
         new CopyOnWriteArrayList<LifecycleListener>();
 
     /**
