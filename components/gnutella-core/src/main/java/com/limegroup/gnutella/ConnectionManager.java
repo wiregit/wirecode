@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -250,8 +251,8 @@ public class ConnectionManager {
      * List of event listeners for LifeCycleEvents.
      * LOCKING: listenerLock
      */
-    private volatile List eventListeners = Collections.EMPTY_LIST;
-    private final Object listenerLock = new Object();
+    private volatile CopyOnWriteArrayList<LifecycleListener> lifeCycleListeners = 
+        new CopyOnWriteArrayList<LifecycleListener>();
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using
@@ -2377,33 +2378,21 @@ public class ConnectionManager {
      * registers a listener for LifeCycleEvents
      */
     public void registerLifecycleListener(LifecycleListener listener) {
-        synchronized (listenerLock) {
-            if (eventListeners.contains(listener)) {
-                return;
-            }
-            List copy = new ArrayList(eventListeners);
-            copy.add(listener);
-            eventListeners = Collections.unmodifiableList(copy);
-        }
+        lifeCycleListeners.addIfAbsent(listener);
     }
     
     /**
      * unregisters a listener for LifeCycleEvents
      */
     public void unregisterLifecycleListener(LifecycleListener listener) {
-        synchronized (listenerLock) {
-            List copy = new ArrayList(eventListeners);
-            copy.remove(listener);
-            eventListeners = Collections.unmodifiableList(copy);
-        }
+        lifeCycleListeners.remove(listener);
     }
     
     /**
      * dispatches a LifecycleEvent to any registered listeners 
      */
     public void dispatchLifecycleEvent(LifecycleEvent evt) {
-        for (Iterator iter = eventListeners.iterator(); iter.hasNext();) {
-            LifecycleListener listener = (LifecycleListener) iter.next();
+        for(LifecycleListener listener : lifeCycleListeners) {
             listener.handleLifecycleEvent(evt);
         }
     }
@@ -2416,9 +2405,7 @@ public class ConnectionManager {
         int msgs; 
 
         // Count the messages on initialized connections
-        for (Iterator iter= getInitializedConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        for(ManagedConnection c : getInitializedConnections()) {
             msgs = c.getNumMessagesSent();
             msgs += c.getNumMessagesReceived();
             if ( msgs > messageThreshold )
@@ -2434,9 +2421,7 @@ public class ConnectionManager {
         int count = 0;
 
         // Count the messages on initialized connections
-        for (Iterator iter= getInitializedConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        for(ManagedConnection c : getInitializedConnections()) {
             count += c.getNumMessagesSent();
             count += c.getNumMessagesReceived();
         }

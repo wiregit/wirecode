@@ -121,7 +121,7 @@ public class PingRequest extends Message {
      * for sending to UDP hosts. 
      */
     public static PingRequest createUDPingWithDHTIPPRequest() {
-        List l = new LinkedList();
+        List<NameValue<?>> l = new LinkedList<NameValue<?>>();
         GUID guid = new GUID();
         l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
         return new PingRequest(guid.bytes(), (byte)1, l);

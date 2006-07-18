@@ -43,7 +43,7 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * The list of extra DHT ip/ports contained in this reply.
      */
-    private final List PACKED_DHT_IP_PORTS;
+    private final List<IpPort> PACKED_DHT_IP_PORTS;
     
     /**
      * The list of extra ip/ports contained in this reply.
@@ -173,9 +173,8 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param guid the Globally Unique Identifier (GUID) for this message
      * @param ttl the time to live for this message
      */
-    @SuppressWarnings("unchecked")
     public static PingReply create(byte[] guid, byte ttl) {
-        return create(guid, ttl, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        return create(guid, ttl, IpPort.EMPTY_LIST, IpPort.EMPTY_LIST);
     }
     
     /**
@@ -206,9 +205,8 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Creates a new PingReply for this host with the specified
      * GUID, TTL & return address.
      */ 
-    @SuppressWarnings("unchecked")
     public static PingReply create(byte[] guid, byte ttl, IpPort addr) {
-        return create(guid, ttl, addr, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        return create(guid, ttl, addr, IpPort.EMPTY_LIST, IpPort.EMPTY_LIST);
     }
     
     
@@ -433,14 +431,13 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Creates a new PingReply with the specified data.
      */
-    @SuppressWarnings("unchecked")
     public static PingReply create(byte[] guid, byte ttl,
       int port, byte[] ip, long files, long kbytes,
       boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
       String locale, int slots) {    
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-                      dailyUptime, isGuessCapable, locale, slots, Collections.EMPTY_LIST,
-                      Collections.EMPTY_LIST);
+                      dailyUptime, isGuessCapable, locale, slots, IpPort.EMPTY_LIST,
+                      IpPort.EMPTY_LIST);
     }
     
     /**
@@ -1165,7 +1162,7 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Gets the list of packed DHT IP/Ports.
      */
-    public List /* of IpPort */ getPackedDHTIPPorts() {
+    public List<IpPort> getPackedDHTIPPorts() {
         return PACKED_DHT_IP_PORTS;
     }
     

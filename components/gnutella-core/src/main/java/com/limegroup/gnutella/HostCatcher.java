@@ -362,24 +362,16 @@ public class HostCatcher {
     
     
     public void sendMessage(Message m, MessageListener listener, Cancellable c) {
-        Collection hosts = getAllHosts();
-        pinger.rank(hosts, listener, c, m);
+        pinger.rank(getAllHosts(), listener, c, m);
     }
     
-    private Collection<Endpoint> getAllHosts() {
+    private synchronized Collection<Endpoint> getAllHosts() {
         //keep them ordered
         LinkedHashSet<Endpoint> hosts = new LinkedHashSet<Endpoint>(getNumHosts());
-        getHosts(FREE_ULTRAPEER_SLOTS_SET.iterator(), hosts, FREE_ULTRAPEER_SLOTS_SET.size());
-        getHosts(FREE_LEAF_SLOTS_SET.iterator(), hosts, FREE_LEAF_SLOTS_SET.size());
-        getHosts(ENDPOINT_SET.iterator(), hosts, ENDPOINT_SET.size());
+        hosts.addAll(FREE_ULTRAPEER_SLOTS_SET);
+        hosts.addAll(FREE_LEAF_SLOTS_SET);
+        hosts.addAll(ENDPOINT_SET);
         return hosts;
-    }
-    
-    private Collection<Endpoint> getHosts(Iterator baseSetIterator, Set<Endpoint> targetSet, int numHost){
-        for (; baseSetIterator.hasNext();) {
-            targetSet.add((Endpoint)baseSetIterator.next());
-        }
-        return targetSet;
     }
     
     /**

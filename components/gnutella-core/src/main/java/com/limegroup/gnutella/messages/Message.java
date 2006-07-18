@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Serializable;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
