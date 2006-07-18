@@ -67,12 +67,12 @@ class PassiveDHTNodeController extends AbstractDHTController{
     }
     
     private synchronized void addLeafDHTNode(String host, int port) {
-        if(!running) {
+        if(!isRunning()) {
             return;
         }
         
         InetSocketAddress addr = new InetSocketAddress(host, port);
-        if(waiting) {
+        if(isWaiting() || isBootstrappingFromRT()) {
             
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Adding host: "+addr+" to leaf dht nodes");
@@ -85,7 +85,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
     }
     
     private synchronized void removeLeafDHTNode(String host, int port) {
-        if(!running) {
+        if(!isRunning()) {
             return;
         }
         
@@ -139,7 +139,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
 
     @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
-        if(!running || waiting) {
+        if(!isRunning() || isWaiting()) {
             return Collections.emptyList();
         }
         

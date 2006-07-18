@@ -1,23 +1,17 @@
 package com.limegroup.gnutella.dht.impl;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.impl.PassiveDHTNodeController;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.mojito.MojitoDHT;
 
-public class PassiveDHTNodeControllerTest extends BaseTestCase {
+public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
-    private static RouterService ROUTER_SERVICE;
-    
-    private static MojitoDHT BOOTSTRAP_DHT;
-
     public PassiveDHTNodeControllerTest(String name) {
         super(name);
     }
@@ -30,23 +24,19 @@ public class PassiveDHTNodeControllerTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public static void globalSetUp() throws Exception {
-        //setup bootstrap node
-        BOOTSTRAP_DHT = new MojitoDHT("bootstrapNode");
-        InetSocketAddress addr = new InetSocketAddress("localhost", 3000);
-        BOOTSTRAP_DHT.bind(addr);
-        BOOTSTRAP_DHT.start();
-        
-        //start router service
-        ROUTER_SERVICE =
-            new RouterService(new ActivityCallbackStub());
+    public void setUp() throws Exception {
         ROUTER_SERVICE.start();
+        ROUTER_SERVICE.clearHostCatcher();
+        ROUTER_SERVICE.connect();   
+        
+        assertEquals("unexpected port", PORT, 
+                 ConnectionSettings.PORT.getValue());
     }
     
-    public static void globalTearDown() throws Exception {
-        BOOTSTRAP_DHT.stop();
+    public void tearDown() throws Exception {
+        ROUTER_SERVICE.disconnect();
+        Thread.sleep(300);
     }
-    
     
     public void testNodesPersistence() throws Exception{
         PassiveDHTNodeController controller = new PassiveDHTNodeController();
@@ -63,13 +53,12 @@ public class PassiveDHTNodeControllerTest extends BaseTestCase {
         assertFalse(controller.isWaiting());
         Thread.sleep(300);
         List<IpPort> nodes = controller.getActiveDHTNodes(1);
-        assertEquals(((InetSocketAddress) BOOTSTRAP_DHT.getSocketAddress()).getPort(), 
+        assertEquals(BOOTSTRAP_DHT_PORT, 
                 nodes.get(0).getPort());
         controller.stop();
         controller = new PassiveDHTNodeController();
         controller.start();
         assertFalse(controller.isWaiting());
     }
-    
 
 }

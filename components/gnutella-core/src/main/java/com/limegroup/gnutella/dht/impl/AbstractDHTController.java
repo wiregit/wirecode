@@ -61,13 +61,13 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      */
     protected MojitoDHT dht;
 
-    protected volatile boolean running = false;
+    private volatile boolean running = false;
     
     /**
      * A boolean to represent the state when we have failed last bootstrap
      * and are waiting for new bootstrap hosts
      */
-    protected volatile boolean waiting = false;
+    private volatile boolean waiting = false;
     
     /**
      * A flag set to true when we are bootstraping from our persisted Routing Table
@@ -168,6 +168,8 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         dht.stop();
         running = false;
         waiting = false;
+        bootstrapingFromRT = false;
+        bootstrapHosts.clear();
     }
     
     /**
@@ -312,6 +314,10 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         return waiting;
     }
     
+    protected boolean isBootstrappingFromRT() {
+        return bootstrapingFromRT;
+    }
+    
     public void setLimeMessageDispatcher() {
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
         dht.setThreadFactory(new ThreadFactory() {
@@ -395,7 +401,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         }
         
         public void handleException(Exception ex) {
-            LOG.error(ex);
+            LOG.debug(ex);
             waiting = false; // will cancel the node fetcher too
         }
     }

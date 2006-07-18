@@ -99,7 +99,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
 
     @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
-        if(!running || waiting) {
+        if(!isRunning() || isWaiting()) {
             return Collections.emptyList();
         }
         

@@ -26,6 +26,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -41,6 +44,8 @@ import com.limegroup.mojito.util.BucketUtils;
  * 
  */
 public class BootstrapManager extends AbstractManager {
+    
+    private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
     
     private List<BootstrapListener> globalListeners = new ArrayList<BootstrapListener>();
     
@@ -144,11 +149,22 @@ public class BootstrapManager extends AbstractManager {
             }
             
             if (node == null) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Bootstrap failed: no bootstrap host");
+                }
                 return new BootstrapEvent(failed, System.currentTimeMillis()-start);
+            }
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Bootstraping phase 1 from node: "+node);
             }
             
             phaseOneStart = System.currentTimeMillis();
             phaseOne(node);
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Bootstraping phase 2 from node: "+node);
+            }
             
             phaseTwoStart = System.currentTimeMillis();
             boolean foundNewContacts = phaseTwo(node);
@@ -176,6 +192,11 @@ public class BootstrapManager extends AbstractManager {
          * Contact that responds or null if none of them did respond
          */
         private Contact bootstrapFromHostList() throws Exception {
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Bootstrapping from host list: "+hostList);
+            }
+            
             for (SocketAddress address : hostList) {
                 PingResponseHandler handler = new PingResponseHandler(context, address);
                 try {
@@ -193,6 +214,8 @@ public class BootstrapManager extends AbstractManager {
          * first Contact that responds or null if none of them did respond
          */
         private Contact bootstrapFromRouteTable() throws Exception {
+            LOG.debug("Bootstrapping from Route Table");
+            
             List<Contact> nodes = BucketUtils.sort(context.getRouteTable().getLiveContacts());
             for (Contact node : nodes) {
                 if (context.isLocalNode(node)) {

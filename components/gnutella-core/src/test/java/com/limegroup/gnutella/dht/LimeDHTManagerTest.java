@@ -5,17 +5,13 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
@@ -23,14 +19,14 @@ import com.limegroup.mojito.settings.NetworkSettings;
 
 public class LimeDHTManagerTest extends BaseTestCase {
     
+    private static final int PORT = 6346;
+    
     private static RouterService ROUTER_SERVICE;
     
     private static DHTManager DHT_MANAGER;
     
     private static MojitoDHT BOOTSTRAP_DHT;
     
-    private static int PORT = 6346;
-
     public LimeDHTManagerTest(String name) {
         super(name);
     }
@@ -120,26 +116,6 @@ public class LimeDHTManagerTest extends BaseTestCase {
         bootstrapHosts = (List) PrivilegedAccessor.getValue(controller, "bootstrapHosts");
         assertFalse(controller.isWaiting());
 //        assertTrue()
-    }
-    
-    public void testLeafDHTNode() throws Exception{
-        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
-        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-
-        RouterService.startDHT(true);
-        //get ready to accept connections
-        RouterService.clearHostCatcher();
-        RouterService.connect();  
-        //create a leaf and connect
-        Connection leaf = new Connection("localhost", PORT);
-        leaf.initialize(new LeafHeaders("localhost"), new EmptyResponder());
-        CapabilitiesVM.reconstructInstance();
-        leaf.send(CapabilitiesVM.instance());
-        //we should have received this leaf and bootstrapped off of it
-        sleep(3000);
-        //TODO: incomplete
-        leaf.close();
     }
     
     public void testSwitchPassiveActive() throws Exception{
