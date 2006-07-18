@@ -36,13 +36,14 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.MultiCollection;
 import com.limegroup.gnutella.util.MultiIterable;
 
 import com.limegroup.bittorrent.bencoding.BEncoder;
 import com.limegroup.bittorrent.bencoding.Token;
 
 /**
- * This class wraps a .torrent file. 
+ * Contains information usually parsed in a .torrent file
  */
 public class BTMetaInfo implements Serializable {
 	private static final Log LOG = LogFactory.getLog(BTMetaInfo.class);
@@ -52,11 +53,13 @@ public class BTMetaInfo implements Serializable {
 	private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
 
+	/** a marker for a hash that has been verified */
 	private static final byte [] VERIFIED_HASH = new byte[0];
-	                                                      
+
+	/** a single instance of the full bitset */
 	private BitSet fullSet = new FullBitSet();
 
-	/* a two dimensional array storing the hashes for this file */
+	/** a list the hashes for this file */
 	private List<byte []> _hashes;
 
 	/* the length of one piece */
@@ -65,20 +68,23 @@ public class BTMetaInfo implements Serializable {
 	/* the name of the torrent */
 	private String _name;
 
-	/*
-	 * an array of TorrentFile[] storing the path and the size of of every file
+	/**
+	 * a list of <tt>TorrentFile</tt> for every file in this torrent
 	 */
 	private List<TorrentFile> _files;
 	
 	/**
-	 * any new folders that are contained in the torrent
+	 * any folders that are contained in the torrent
 	 */
 	private Collection<File> _folders = new HashSet<File>();
 	
-	private Iterable<File> _filesAndFolders;
+	/**
+	 * a view of the files and folders contained in this torrent
+	 */
+	private Collection<File> _filesAndFolders;
 	
 	/*
-	 * A <tt> File </tt> pointing to the file/directory where the incomplete
+	 * A <tt>File</tt> pointing to the location where the incomplete
 	 * torrent is written.
 	 */
 	private File _incompleteFile;
@@ -100,8 +106,7 @@ public class BTMetaInfo implements Serializable {
 	private URN _infoHashURN;
 
 	/*
-	 * The VerifyingFolder for this torrent. The VerifyingFolder should not be
-	 * serialized to disk.
+	 * The VerifyingFolder for this torrent. 
 	 */
 	private VerifyingFolder _folder;
 
@@ -123,19 +128,14 @@ public class BTMetaInfo implements Serializable {
 	private transient FileDesc _desc = null;
 
 	/**
-	 * Accessor for PECE_LENGTH
-	 * 
-	 * @return long piece length for this torrent
+	 * @return piece length for this torrent
 	 */
 	public int getPieceLength() {
 		return _pieceLength;
 	}
 
 	/**
-	 * Acessor for the files belonging to this torrent
-	 * 
-	 * @return array of TorrentFile storing the path and the length for each
-	 *         file
+	 * @return a list of Files that will be used to write to during download
 	 */
 	public List<TorrentFile> getIncompleteFiles() {
 		List<TorrentFile> ret = new ArrayList<TorrentFile>(_files);
@@ -143,27 +143,40 @@ public class BTMetaInfo implements Serializable {
 		return ret;
 	}
 	
+	/**
+	 * @return list of files holding the complete torrent.
+	 */
 	public List<TorrentFile> getFiles() {
 		return _files;
 	}
 	
-	public Iterable<File> getFilesAndFolders() {
+	/**
+	 * @return view of the files and folders that will be created when
+	 * the torrent download completes
+	 */
+	public Collection<File> getFilesAndFolders() {
 		if (_filesAndFolders == null)
-			_filesAndFolders = new MultiIterable<File>(_files,_folders);
+			_filesAndFolders = new MultiCollection<File>(_files,_folders);
 		return _filesAndFolders;
 	}
 	
+	/**
+	 * @return true if the given file would conflict with any of the
+	 * files that will be used by this torrent when it completes
+	 */
 	boolean conflicts(File f) {
-		return _files.contains(f) || _folders.contains(f);
+		return getFilesAndFolders().contains(f);
 	}
 	
+	/**
+	 * @return true if the given file conflicts with any of the files
+	 * used by this torrent during download
+	 */
 	boolean conflictsIncomplete(File f) {
 		return getBaseFile().getParentFile().equals(f);
 	}
 
 	/**
-	 * Accessor for the base file of the torrent, this may be a directory.
-	 * 
 	 * @return <tt>File</tt> the parent file for all files in this torrent.
 	 */
 	public File getBaseFile() {
@@ -171,9 +184,6 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * Accessor for the base file of a complete torrent, returns null if torrent
-	 * is not complete yet.
-	 * 
 	 * @return <tt>File</tt> the parent file for all files in this torrent or
 	 *         the only file in this torrent
 	 */
@@ -181,6 +191,9 @@ public class BTMetaInfo implements Serializable {
 		return _completeFile;
 	}
 	
+	/**
+	 * changes the location where this torrent will be saved.
+	 */
 	public void setCompleteFile(File f) {
 		updateReferences(f, _files);
 		updateFolderReferences(f);
@@ -199,6 +212,12 @@ public class BTMetaInfo implements Serializable {
 		return _desc;
 	}
 
+	/**
+	 * Verifies whether the given hash matches the expect hash of a piece
+	 * @param sha1 the hash that was computed
+	 * @param pieceNum the piece for which the hash was computed
+	 * @return true if they match.
+	 */
 	public boolean verify(byte [] sha1, int pieceNum) {
 		byte [] hash = _hashes.get(pieceNum);
 		if (hash == VERIFIED_HASH)
@@ -210,21 +229,20 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * Accessor for the info hash
-	 * 
 	 * @return info hash
 	 */
 	public byte[] getInfoHash() {
 		return _infoHash;
 	}
-	
+
+	/**
+	 * @return infohash URN
+	 */
 	public URN getURN() {
 		return _infoHashURN;
 	}
 
 	/**
-	 * Accessor for the VerifyingFolder
-	 * 
 	 * @return VerifyingFolder
 	 */
 	public VerifyingFolder getVerifyingFolder() {
@@ -266,26 +284,20 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * helper calculating the number of pieces in a torrent
-	 * 
-	 * @return number of blocks
+	 * @return number of pieces in this torrent
 	 */
 	public int getNumBlocks() {
 		return (int) ((_totalSize + _pieceLength - 1) / _pieceLength);
 	}
 
 	/**
-	 * Accessor for the torrent's name
-	 * 
-	 * @return <tt>String</tt>, the name
+	 * @return the name of this torrent
 	 */
 	public String getName() {
 		return _name;
 	}
 
 	/**
-	 * Accessor for the trackers
-	 * 
 	 * @return array of <tt>URL</tt> storing the addresses of the trackers
 	 */
 	public URL[] getTrackers() {
@@ -296,6 +308,7 @@ public class BTMetaInfo implements Serializable {
 	 * Returns which message digest was used to create _hashes.
 	 * 
 	 * @return new Instance of the message digest that was used
+	 * 
 	 */
 	public MessageDigest getMessageDigest() {
 		return new SHA1();
@@ -312,13 +325,11 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * Reads a BTMetaInfo from any InputStream
+	 * Reads a BTMetaInfo from byte []
 	 * 
-	 * @param is
-	 *            the <tt>InputStream</tt> to read from
+	 * @param torrent byte array with the contents of .torrent
 	 * @return new instance of BTMetaInfo if all went well
-	 * @throws IOException
-	 *             if we couldn't read the BTMetaInfo from the InputStream
+	 * @throws IOException if parsing or reading failed.
 	 */
 	public static BTMetaInfo readFromBytes(byte []torrent)
 			throws IOException {
@@ -344,8 +355,7 @@ public class BTMetaInfo implements Serializable {
 	 * @param incFile
 	 *            the <tt>File</tt> from incomplete directory
 	 * @param completeDest
-	 *            the <tt>File</tt> representing incFile's parent in the
-	 *            complete directory
+	 *            the <tt>File</tt> the file in the save destination
 	 * @throws IOException on failure
 	 */
 	private void saveFile(File incFile, File completeDest) throws IOException {
@@ -357,7 +367,7 @@ public class BTMetaInfo implements Serializable {
 			return;
 		}
 
-		// overwrite complete file and make complete File writeable
+		// overwrite complete file and make it writeable
 		completeDest.delete();
 		FileUtils.setWriteable(completeDest);
 		if (!FileUtils.forceRename(incFile, completeDest)) 
@@ -379,7 +389,7 @@ public class BTMetaInfo implements Serializable {
 	 * 
 	 * @param incFile
 	 *            the directory to move
-	 * @param completeParent
+	 * @param completeDir
 	 *            the destination to move the directory to
 	 * @throws IOException if failed.
 	 */
@@ -413,10 +423,12 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * Updates the files in the torrent to start at the 
+	 * Updates the files in the specified collection to start at the 
 	 * new base path.
-	 * @param completeBase
-	 *            the top file in the torrent
+	 * The files must already be absolute and be children of _completeFile.
+	 * 
+	 * @param completeBase the new base path.
+	 *
 	 */
 	private void updateReferences(File completeBase, List<TorrentFile> l) {
 		int offset = _completeFile.getAbsolutePath().length();
@@ -432,7 +444,7 @@ public class BTMetaInfo implements Serializable {
 	}
 	
 	/**
-	 * Updates the files in the torrent to start at the 
+	 * Updates the folders in the torrent to start at the 
 	 * new base path.
 	 */
 	private void updateFolderReferences(File completeBase) {
@@ -442,16 +454,14 @@ public class BTMetaInfo implements Serializable {
 		for (File f: _folders) 
 			newFolders.add(new File(newPath + f.getPath().substring(offset)));
 		_folders.clear();
-		_folders.addAll(newFolders); // the reference is held in the MultiIterable
+		_folders.addAll(newFolders); 
 	}
 
 	/**
-	 * private constructor for BTMetaInfo, called by readFromInputStream().
+	 * Constructs a BTMetaInfo from an Object parsed from BEncoded data.
 	 * 
-	 * @param t_metaInfo
-	 *            the Object to create the BTMetaInfo from, must be a
-	 *            <tt>Map</tt>
-	 * @throws ValueException
+	 * @throws ValueException if the structure of the object does not match
+	 * what we understand or expect.
 	 */
 	private BTMetaInfo(Object t_metaInfo) throws ValueException {
 		_completeFile = null;
@@ -462,8 +472,7 @@ public class BTMetaInfo implements Serializable {
 
 		Map metaInfo = (Map) t_metaInfo;
 
-		// get the trackers, we only expect one tracker, more trackers may be
-		// added by the addTracker() method, we will throw an exception if the
+		// get the trackers, we only expect one tracker, we will throw if the
 		// tracker is invalid or does not even exist.
 		Object t_announce = metaInfo.get("announce");
 		if (!(t_announce instanceof byte []))
@@ -485,12 +494,6 @@ public class BTMetaInfo implements Serializable {
 			throw new ValueException("bad metainfo - bad info");
 		Map info = (Map) t_info;
 
-		// the hashes from the meta info
-		Object t_pieces = info.get("pieces");
-		if (!(t_pieces instanceof byte []))
-			throw new ValueException("bad metainfo - no pieces key found");
-		_hashes = parsePieces((byte [])t_pieces);
-		
 		// create the info hash, we could create the info hash while reading it
 		// but that would make the code a lot more complex. This works well too,
 		// because the order of a list is not changed during the process of
@@ -515,7 +518,14 @@ public class BTMetaInfo implements Serializable {
 			ErrorService.error(impossible);
 		}
 
-		// piece length, also very important.
+		// the hashes from the meta info
+		Object t_pieces = info.remove("pieces");
+		if (!(t_pieces instanceof byte []))
+			throw new ValueException("bad metainfo - no pieces key found");
+		_hashes = parsePieces((byte [])t_pieces);
+		t_pieces = null; // this byte [] is usually big.
+		
+		// piece length
 		Object t_pieceLength = info.get("piece length");
 		if (!(t_pieceLength instanceof Long))
 			throw new ValueException("bad metainfo - illegal piece length");
@@ -554,7 +564,7 @@ public class BTMetaInfo implements Serializable {
 
 		// read the files belonging to the torrent
 		if (info.containsKey("files") == info.containsKey("length"))
-			throw new ValueException("single/multiple file mix");
+			throw new ValueException("single/multiple file mix or neither");
 
 		File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
 		try {
@@ -617,11 +627,7 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * overrides serialization methods, so we can save the _writtenRanges.
-	 * 
-	 * @param out
-	 *            the <tt>ObjectOutputStream</tt> to write to
-	 * @throws IOException
+	 * Serializes this, including information about the written ranges.
 	 */
 	private synchronized void writeObject(ObjectOutputStream out)
 			throws IOException {
@@ -645,11 +651,6 @@ public class BTMetaInfo implements Serializable {
 
 	/**
 	 * Overrides serialization method to initialize the VerifyingFolder
-	 * 
-	 * @param in
-	 *            the <tt>ObjectInputStream</tt> this is deserialized from
-	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
 	private synchronized void readObject(ObjectInputStream in)
 			throws IOException, ClassNotFoundException {
@@ -685,12 +686,10 @@ public class BTMetaInfo implements Serializable {
 	/**
 	 * Parse a list of files from the meta info
 	 * 
-	 * @param files
-	 *            a <tt>List</tt> containing the file info
-	 * @param basePath
-	 *            the <tt>String</tt> identifying the torrent's saving folder
+	 * @param files a <tt>List</tt> containing the file info
+	 * @param basePath the <tt>String</tt> identifying the torrent's saving folder
 	 * @return List of <tt>TorrentFile</tt>
-	 * @throws ValueException
+	 * @throws ValueException if parsing fails.
 	 */
 	private List<TorrentFile> parseFiles(List files, String basePath)
 			throws ValueException {
@@ -707,12 +706,10 @@ public class BTMetaInfo implements Serializable {
 	/**
 	 * Utility method to parse a single file from the meta info
 	 * 
-	 * @param file
-	 *            the <tt>Map</tt> containing the file info
-	 * @param basePath
-	 *            the <tt>String</tt> identifying the torrent
+	 * @param file the <tt>Map</tt> containing the file info
+	 * @param basePath the <tt>String</tt> identifying the torrent
 	 * @return instance of <tt>TorrentFile</tt>
-	 * @throws ValueException
+	 * @throws ValueException if parsing fails.
 	 */
 	private TorrentFile parseFile(Map file, String basePath)
 			throws ValueException {
@@ -746,27 +743,27 @@ public class BTMetaInfo implements Serializable {
 		if (t_path_utf8 != null) {
 			
 			List pathUtf8 = (List) t_path_utf8;
-			if (pathUtf8.size() == path.size()) {
-				for (Iterator iter = pathUtf8.iterator(); iter.hasNext();) {
-					Object t_next = iter.next();
-					if ( ! (t_next instanceof byte []))
-						break; // fall through to regular path
-					
-					String pathElement;
-					try {
-						pathElement = new String((byte []) t_next, Constants.UTF_8_ENCODING);
-						paths.append(File.separator);
-						paths.append(CommonUtils.convertFileName(pathElement));
-						_folders.add(new File(paths.toString()));
-						numParsed++;
-					} catch (UnsupportedEncodingException uee) {
-						break; // fall through silently
-					}
+			for (Iterator iter = pathUtf8.iterator(); 
+			iter.hasNext() && numParsed < path.size();) {
+				Object t_next = iter.next();
+				if ( ! (t_next instanceof byte []))
+					break; // fall through to regular path
+				
+				String pathElement;
+				try {
+					pathElement = new String((byte []) t_next, Constants.UTF_8_ENCODING);
+					paths.append(File.separator);
+					paths.append(CommonUtils.convertFileName(pathElement));
+					_folders.add(new File(paths.toString()));
+					numParsed++;
+				} catch (UnsupportedEncodingException uee) {
+					break; // fall through silently
 				}
-			} // else # of files different? weird...
+			}
 		} 
 		
-		// if not all elements were found in
+		// if not all elements were found in the utf8 path, append
+		// the rest from the non-utf8
 		if (numParsed < path.size()) {
 			for (int i = numParsed; i < path.size(); i++) {
 				Object next = path.get(i);
@@ -775,6 +772,7 @@ public class BTMetaInfo implements Serializable {
 				String pathElement = getString((byte [])next);
 				paths.append(File.separator);
 				paths.append(CommonUtils.convertFileName(pathElement));
+				_folders.add(new File(paths.toString()));
 			}
 		}
 		return new TorrentFile(length, paths.toString());
@@ -783,10 +781,9 @@ public class BTMetaInfo implements Serializable {
 	/**
 	 * parse the hashes
 	 * 
-	 * @param str
-	 *            the String containing the hashes in raw form.
-	 * @return two dimensional byte array containing the hashes.
-	 * @throws ValueException
+	 * @param pieces the byte [] containing the hashes in raw form.
+	 * @return List<byte[]> containing the hashes.
+	 * @throws ValueException if parsing fails.
 	 */
 	private static List<byte[]> parsePieces(byte [] pieces) throws ValueException {
 		if (pieces.length % 20 != 0)
@@ -806,11 +803,17 @@ public class BTMetaInfo implements Serializable {
 			super(file, s, Integer.MAX_VALUE);
 		}
 	}
-	
+
+	/**
+	 * @return a <tt>BitSet</tt> to be used to represent a complete torrent.
+	 */
 	public BitSet getFullBitSet() {
 		return fullSet;
 	}
 	
+	/**
+	 * A bitset that has fixed size and every bit in it is set.
+	 */
 	private class FullBitSet extends BitSet {
 		public void set(int i) {}
 		public void clear(int i){}
