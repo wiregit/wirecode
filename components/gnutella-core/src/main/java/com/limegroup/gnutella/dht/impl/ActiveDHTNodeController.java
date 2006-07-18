@@ -77,7 +77,9 @@ class ActiveDHTNodeController extends AbstractDHTController {
         sendUpdatedCapabilities();
         
         try {
-            if(DHTSettings.PERSIST_DHT.getValue()) {
+        //TODO: fix this
+            if(DHTSettings.PERSIST_DHT.getValue() 
+                    && FILE.exists() && FILE.isFile()) {
                 FileOutputStream out = new FileOutputStream(FILE);
                 dht.store(out);
                 out.close();

@@ -388,9 +388,10 @@ public class NodeAssigner {
 
         DHTSettings.DHT_CAPABLE.setValue(isActiveDHTCapable);
         
-        //Node is DHT capable AND is not an ultrapeer AND not allready trying to connect as UP
-        if ((isActiveDHTCapable && acceptDHTNode()) 
-                || DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+        //Node is not allready part of the DHT 
+        //AND is DHT capable AND is accepted (probabilistic factor) 
+        if (!RouterService.isActiveDHTNode() && ((isActiveDHTCapable && acceptDHTNode()) 
+                || DHTSettings.FORCE_DHT_CONNECT.getValue())) {
             
             Runnable dhtInitializer = new Runnable() {
                 public void run() {

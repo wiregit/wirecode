@@ -30,7 +30,7 @@ public class NodeAssignerTest extends BaseTestCase {
     
     private static Thread upThread = new Thread(ULTRAPEER);
     
-    private static int TEST_PORT;
+    private static int TEST_PORT = 6667;
     
     private static final TestBandwidthTracker BW = new TestBandwidthTracker();
 
