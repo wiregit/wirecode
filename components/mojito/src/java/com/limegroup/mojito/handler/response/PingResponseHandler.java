@@ -22,9 +22,6 @@ package com.limegroup.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -41,7 +38,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
  */
 public class PingResponseHandler extends AbstractResponseHandler<Contact> {
     
-    private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
+    //private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
     
     private KUID nodeId;
     
@@ -74,9 +71,7 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
         
         Contact node = response.getContact();
         if (node.getSocketAddress().equals(externalAddress)) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(node + " is trying to set our external address to its address!");
-            }
+            setException(new Exception(node + " is trying to set our external address to its address!"));
             return;
         }
         
