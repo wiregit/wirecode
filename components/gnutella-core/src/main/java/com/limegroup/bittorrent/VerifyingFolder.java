@@ -29,7 +29,6 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.MultiIterable;
-import com.limegroup.gnutella.util.MultiIterator;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.RRProcessingQueue;
 import com.limegroup.gnutella.util.SystemUtils;
@@ -76,6 +75,11 @@ public class VerifyingFolder {
 	 * LOCKING: this reference as well as the elements of the array 
 	 */
 	private RandomAccessFile[] _fos = null;
+	
+	/**
+	 * a marker that the current file is currently opening.
+	 */
+	private static final RandomAccessFile[] OPENING = new RandomAccessFile[0];
 
 	/**
 	 * Mapping of the index of each partial block and the written ranges within 
@@ -418,7 +422,8 @@ public class VerifyingFolder {
 	public void open(final ManagedTorrent torrent) throws IOException {
 		synchronized(this) {
 			if (_fos != null)
-				throw new IOException("Files already open!");
+				throw new IOException("Files already open(ing)!");
+			_fos = OPENING;
 		}
 		RandomAccessFile []fos = new RandomAccessFile[_files.size()];
 		
@@ -486,7 +491,7 @@ public class VerifyingFolder {
 		}
 		
 		synchronized(this) {
-			Assert.that(_fos == null,"file being opened twice?");
+			Assert.that(_fos == OPENING);
 			_fos = fos;
 		}
 		
@@ -532,25 +537,23 @@ public class VerifyingFolder {
 			_fos = null;
 			pendingRanges.clear();
 		}
+		
+		// close the files
+		for (RandomAccessFile f : fos)
+			IOUtils.close(f);
+		
 		torrent = null;
 		// kill all jobs for this torrent
 		VERIFY_QUEUE.clear(_info.getURN());
 		QUEUE.clear(_info.getURN());
 		
-		// and close the files
-		QUEUE.invokeLater(new Runnable() {
-			public void run() {
-				for (RandomAccessFile f : fos)
-					IOUtils.close(f);
-			}
-		}, _info.getURN());
 	}
 
 	/**
 	 * determines whether the files for this torrent are open.
 	 */
 	public synchronized boolean isOpen() {
-		return _fos != null;
+		return _fos != null && _fos != OPENING;
 	}
 
 	public void sendPiece(BTInterval in, BTConnection c) throws IOException {

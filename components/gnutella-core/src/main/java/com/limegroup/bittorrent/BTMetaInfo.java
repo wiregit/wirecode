@@ -118,11 +118,6 @@ public class BTMetaInfo implements Serializable {
 	private long _totalSize;
 	
 	/*
-	 * The ManagedTorrent associated with this torrent
-	 */
-	private transient ManagedTorrent _torrent = null;
-
-	/*
 	 * FileDesc for the GUI
 	 */
 	private transient FileDesc _desc = null;
@@ -238,14 +233,11 @@ public class BTMetaInfo implements Serializable {
 
 	/**
 	 * Moves all files of this torrent to saving directory
-	 * 
-	 * @return true if successful, false if not
+	 * @throws IOException if failed
 	 */
-	public boolean moveToCompleteFolder() {
+	public void moveToCompleteFolder() throws IOException {
 		
-		if (!saveFile(_incompleteFile,
-				_completeFile))
-			return false;
+		saveFile(_incompleteFile, _completeFile);
 		
 		FileUtils.deleteRecursive(_incompleteFile.getParentFile());
 
@@ -255,18 +247,6 @@ public class BTMetaInfo implements Serializable {
 		LOG.trace("saved files");
 		initializeVerifyingFolder(null, true);
 		LOG.trace("initialized folder");
-		return true;
-	}
-
-	/**
-	 * Associates this meta info with a ManagedTorrent
-	 * 
-	 * @param torrent
-	 *            the ManagedTorrent we will inform about completed ranges,
-	 *            etc...
-	 */
-	public void setManagedTorrent(ManagedTorrent torrent) {
-		_torrent = torrent;
 	}
 
 	/**
@@ -366,46 +346,25 @@ public class BTMetaInfo implements Serializable {
 	 * @param completeDest
 	 *            the <tt>File</tt> representing incFile's parent in the
 	 *            complete directory
-	 * @return true if successful
+	 * @throws IOException on failure
 	 */
-	private boolean saveFile(File incFile, File completeDest) {
-		try {
-			completeDest = completeDest.getCanonicalFile();
-		} catch (IOException ioe) {
-			if (LOG.isDebugEnabled())
-				LOG.debug(ioe);
-			return false;
-		}
+	private void saveFile(File incFile, File completeDest) throws IOException {
+		completeDest = completeDest.getCanonicalFile();
 
 		FileUtils.setWriteable(completeDest.getParentFile());
-		if (incFile.isDirectory())
-			return saveDirectory(incFile, completeDest);
-		long incLength = incFile.length();
-		// set parent to writeable
-
+		if (incFile.isDirectory()) {
+			saveDirectory(incFile, completeDest);
+			return;
+		}
 
 		// overwrite complete file and make complete File writeable
 		completeDest.delete();
 		FileUtils.setWriteable(completeDest);
-		if (!FileUtils.forceRename(incFile, completeDest)) {
-			LOG.debug("could not rename file " + incFile);
-			return false;
-		}
+		if (!FileUtils.forceRename(incFile, completeDest)) 
+			throw new IOException("could not rename file " + incFile);
 
-		// there have been problems with FileUtils.forceRename()
-		if (incLength != completeDest.length()) {
-			LOG.debug("length of complete file does not match incomplete file "
-					+ completeDest + " , " + incLength + ":"
-					+ completeDest.length());
-			return false;
-		}
-		
 		// Add file to library.
-		// first check if it conflicts with the saved dir....
-		RouterService.getFileManager().removeFileIfShared(completeDest);
 		RouterService.getFileManager().addFileIfShared(completeDest);
-
-		return true;
 	}
 
 	/**
@@ -422,25 +381,21 @@ public class BTMetaInfo implements Serializable {
 	 *            the directory to move
 	 * @param completeParent
 	 *            the destination to move the directory to
-	 * @return true if successful
+	 * @throws IOException if failed.
 	 */
-	private boolean saveDirectory(File incFile, File completeDir) {
+	private void saveDirectory(File incFile, File completeDir) 
+	throws IOException {
 
 		// we will delete completeDir if it exists and if it is not a directory
 		if (completeDir.exists()) {
 			// completeDir is not a directory
 			if (!completeDir.isDirectory()) {
-				if (!(completeDir.delete() && completeDir.mkdirs())) {
-					if (LOG.isDebugEnabled())
-						LOG.debug("could not create complete dir " + completeDir);
-					return false;
-				}
+				if (!(completeDir.delete() && completeDir.mkdirs())) 
+					throw new IOException("could not create complete dir " + completeDir);
 			}
 		} else if (!completeDir.mkdirs()) {
 			// completeDir does not exist...
-			if (LOG.isDebugEnabled())
-				LOG.debug("could not create complete dir " + completeDir);
-			return false;
+			throw new IOException("could not create complete dir " + completeDir);
 		}
 
 		FileUtils.setWriteable(completeDir);
@@ -449,16 +404,12 @@ public class BTMetaInfo implements Serializable {
 		// it is still empty at this point
 		RouterService.getFileManager().addFileIfShared(completeDir);
 
-		for (File f : incFile.listFiles()) {
-			if (!saveFile(f, new File(completeDir, f.getName()))) 
-				return false;
-		}
+		for (File f : incFile.listFiles()) 
+			saveFile(f, new File(completeDir, f.getName())); 
 
 		// remove the empty directory from the incomplete folder.
 		// all its contents have been moved to the shared folder
 		FileUtils.deleteRecursive(incFile);
-
-		return true;
 	}
 
 	/**
