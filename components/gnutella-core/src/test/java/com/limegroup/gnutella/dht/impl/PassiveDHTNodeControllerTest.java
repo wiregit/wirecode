@@ -25,6 +25,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void setUp() throws Exception {
+        setSettings();
         ROUTER_SERVICE.start();
         ROUTER_SERVICE.clearHostCatcher();
         ROUTER_SERVICE.connect();   
