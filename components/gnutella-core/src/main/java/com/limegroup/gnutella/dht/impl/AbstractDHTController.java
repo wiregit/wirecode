@@ -89,6 +89,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     
     
     public AbstractDHTController() {
+        //delegate
         init();
     }
     
@@ -209,47 +210,13 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     }
     
     /**
-     * Sets the mode 
-     * 
-     * @param passive
-     */
-    public void setPassive(boolean passive) {
-        boolean wasPassive = dht.isFirewalled();
-        if((passive && wasPassive) || (!passive && !wasPassive)) {
-            return; //no change
-        }
-        
-        boolean wasRunning = running;
-        stop();
-        
-        //we are becoming active: load dht from last active session
-        if(wasPassive && !passive) {
-            DHTSettings.PERSIST_DHT.setValue(true);
-            init();
-        } 
-        //we are becoming passive: start new DHT with new nodeID so that 
-        //the node is not part of the DHT anymore
-        else if(!wasPassive && passive) {
-            DHTSettings.PERSIST_DHT.setValue(false);
-            init();
-        } 
-        
-        if(wasRunning) {
-            start(!passive);
-        }
-    }
-
-    /**
      * Shuts the DHT down if we got disconnected from the network.
+     * Note: if the CONNECTED event is fired and we connected as an ultrapeer 
+     * allready while beeing an active node, then the <tt>NodeAssigner</tt> 
+     * will take care of disconnecting us and connecting againg in passive mode.
      */
     public void handleLifecycleEvent(LifecycleEvent evt) {
         if(evt.isConnectedEvent()) {
-            //protect against change of state
-            if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                    && RouterService.isSupernode()) {
-                setPassive(true);
-            }
-            
             //we were waiting and had no connection to the gnutella network
             //now we do --> start sending UDP pings to request bootstrap nodes
             if(waiting) {
