@@ -20,6 +20,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
@@ -72,7 +73,7 @@ public class VerifyingFolder {
 
 	/**
 	 * The instances RandomAccessFile for all files contained in this torrent
-	 * LOCKING: this reference as well as the elements of the array - DISK_LOCK
+	 * LOCKING: this reference as well as the elements of the array 
 	 */
 	private RandomAccessFile[] _fos = null;
 
@@ -309,7 +310,7 @@ public class VerifyingFolder {
 		long offset = (long)pieceNum * _info.getPieceLength();
 		while (read < pieceSize) {
 			
-			int readNow = read(offset, buf, 0, buf.length);
+			int readNow = read(offset, buf, 0, buf.length, true);
 			if (readNow == 0)
 				return false;
 			
@@ -379,12 +380,21 @@ public class VerifyingFolder {
 				// TODO: decide if files should be moved to the save
 				// location as they are completed.. cool but not trivial
 				try {
+					long now = 0;
+					int index = _files.indexOf(file);
+					RandomAccessFile rf;
 					synchronized(this) {
-						if (isOpen()) {
-							int index = _files.indexOf(file);
-							_fos[index].close();
-							_fos[index] = new RandomAccessFile(file.getPath(), "r");
-						}
+						if (!isOpen()) 
+							return;
+						rf = _fos[index];
+						_fos[index] = null;
+					}
+					rf.close();
+					rf = new RandomAccessFile(file.getPath(), "r");
+					synchronized(this) {
+						if(!isOpen())
+							return;
+						_fos[index] = rf;
 					}
 				} catch (FileNotFoundException bs) {
 					ErrorService.error(bs);
@@ -409,9 +419,8 @@ public class VerifyingFolder {
 		synchronized(this) {
 			if (_fos != null)
 				throw new IOException("Files already open!");
-			
-			_fos = new RandomAccessFile[_files.size()];
 		}
+		RandomAccessFile []fos = new RandomAccessFile[_files.size()];
 		
 		this.torrent = torrent;
 		storedException = null;
@@ -430,9 +439,7 @@ public class VerifyingFolder {
 			// with it
 			if (isComplete()) {
 				LOG.info("opening torrent in read-only mode");
-				synchronized(this) {
-					_fos[i] = new RandomAccessFile(file, "r");
-				}
+				fos[i] = new RandomAccessFile(file, "r");
 			} else {
 				LOG.info("opening torrent in read-write");
 				if (!file.exists()) {
@@ -464,9 +471,7 @@ public class VerifyingFolder {
 				} 
 				
 				FileUtils.setWriteable(file);
-				synchronized(this) {
-					_fos[i] = new RandomAccessFile(file, "rw");
-				}
+				fos[i] = new RandomAccessFile(file, "rw");
 				
 				// if a file exists, try to verify it
 				if (isVerifying && file.length() > 0) {
@@ -478,6 +483,11 @@ public class VerifyingFolder {
 
 			// increment pos to point to the first byte of the next file
 			pos += file.length();
+		}
+		
+		synchronized(this) {
+			Assert.that(_fos == null,"file being opened twice?");
+			_fos = fos;
 		}
 		
 		// verify any files that needed verification
@@ -514,13 +524,11 @@ public class VerifyingFolder {
 	 */
 	public void close() {
 		LOG.debug("closing the file");
+		final RandomAccessFile [] fos;
 		synchronized(this) {
 			if (!isOpen())
 				return;
-			
-			for (RandomAccessFile f : _fos)
-				IOUtils.close(f);
-			
+			fos = _fos;
 			_fos = null;
 			pendingRanges.clear();
 		}
@@ -528,6 +536,14 @@ public class VerifyingFolder {
 		// kill all jobs for this torrent
 		VERIFY_QUEUE.clear(_info.getURN());
 		QUEUE.clear(_info.getURN());
+		
+		// and close the files
+		QUEUE.invokeLater(new Runnable() {
+			public void run() {
+				for (RandomAccessFile f : fos)
+					IOUtils.close(f);
+			}
+		}, _info.getURN());
 	}
 
 	/**
@@ -567,7 +583,7 @@ public class VerifyingFolder {
 			try {
 				do {
 					offset += read(position + offset, buf, offset, length
-							- offset);
+							- offset, false);
 				} while (offset < length);
 			} catch (IOException bad) {
 				if (isOpen()) {
@@ -598,11 +614,13 @@ public class VerifyingFolder {
 	 *            the offset in the array where to start storing the bytes read
 	 * @param length
 	 *            the number of bytes to read to the array
+	 * @param flush 
+	 *            whether to flush any changes before reading
 	 * @return
 	 * @throws IOException
 	 */
 	private int read(long position, byte[] buf, int offset,
-			int length) throws IOException {
+			int length, boolean flush) throws IOException {
 		
 		if (position < 0)
 			throw new IllegalArgumentException("cannot seek negative position "+position);
@@ -620,9 +638,12 @@ public class VerifyingFolder {
 						throw new IOException("file closed");
 					currentFile = _fos[i];
 				}
+				Assert.that(currentFile != null, "file being read & verified at the same time");
+				if (flush)
+					currentFile.getChannel().force(false);
 				if (currentFile.length() < f.length() && position >= currentFile.length())
 					return read;
-				int toRead = (int) Math.min(_fos[i].length() - position, length
+				int toRead = (int) Math.min(currentFile.length() - position, length
 						- read);
 				currentFile.seek(position);
 				int t_read = currentFile.read(buf, read + offset, toRead);
