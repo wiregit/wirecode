@@ -4,6 +4,7 @@
   <property name="builddir"        value="build"/>
   <property name="guidir"          value="../gui"/>
   <property name="coredir"         value="../core"/>
+  <property name="mojitodir"         value="../mojito/src/java"/>
   <property name="libdir"          value="../lib"/>
   <property name="jars"            value="${libdir}/jars"/>
   <property name="messagebundles"  value="${libdir}/messagebundles"/>
@@ -134,7 +135,7 @@
  <!-- builds all files, including tests, in the project to the specified directory-->
  <target name="build" depends="prepare">
    <javac debug="on" optimize="off" deprecation="off"
-	      srcdir="${coredir}:${guidir}:${basedir}"
+	      srcdir="${coredir}:${guidir}:${mojitodir}:${basedir}"
 	      destdir="${builddir}" nowarn="${NOWARN}"
 		  excludes="macosx/**, windows/**"
 		  fork="true" memoryMaximumSize="100m"

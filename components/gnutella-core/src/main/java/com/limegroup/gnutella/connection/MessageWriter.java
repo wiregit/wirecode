@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 
 /** 
  * Writes messages using non-blocking I/O.
@@ -30,7 +30,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
      * internally uses a ByteBuffer and we get the buffer directly to write to
      * our sink channel.  This prevents recreation of many byte[]s.
      */
-    private final BufferByteArrayOutputStream out;
+    private final ByteBufferOutputStream out;
     
     /**
      * The statistics object that keeps track of how many messages were sent,
@@ -78,7 +78,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
         this.queue = queue;
         this.sendHandler = sendHandler;
         this.channel = sink;
-        out = new BufferByteArrayOutputStream();
+        out = new ByteBufferOutputStream();
     }
     
     /** The channel we're writing to. */

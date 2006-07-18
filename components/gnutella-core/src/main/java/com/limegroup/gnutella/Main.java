@@ -103,19 +103,8 @@ public class Main implements ActivityCallback, ErrorCallback {
 
     /////////////////////////// ActivityCallback methods //////////////////////
 
-    public void connectionInitializing(ManagedConnection c) {
-    }
-
-    public void connectionInitialized(ManagedConnection c) {
-//		String host = c.getOrigHost();
-//		int    port = c.getOrigPort();
-		;//System.out.println("Connected to "+host+":"+port+".");
-    }
-
-    public void connectionClosed(ManagedConnection c) {
-//		String host = c.getOrigHost();
-//		int    port = c.getOrigPort();
-		//System.out.println("Connection to "+host+":"+port+" closed.");
+    public void handleLifecycleEvent(LifecycleEvent evt) {
+//            System.out.println("LifeCycleEvent: "+evt);
     }
 
     public void knownHost(Endpoint e) {
@@ -270,7 +259,7 @@ public class Main implements ActivityCallback, ErrorCallback {
         System.out.println("Loading component: " + component);
     }
     
-    public void addressStateChanged() {}
+    public void handleAddressStateChanged() {}
 
 	public boolean handleMagnets(final MagnetOptions[] magnets) {
 		return false;
@@ -278,6 +267,6 @@ public class Main implements ActivityCallback, ErrorCallback {
 
 	public void acceptedIncomingChanged(boolean status) { }
 
-    public void disconnected() {}
+    public void handleNoInternetConnection() {}
     
 }

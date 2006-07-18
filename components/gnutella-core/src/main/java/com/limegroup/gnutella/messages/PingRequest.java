@@ -117,6 +117,17 @@ public class PingRequest extends Message {
     }
     
     /**
+     * Creates a TTL 1 Ping to request DHT nodes, intended
+     * for sending to UDP hosts. 
+     */
+    public static PingRequest createUDPingWithDHTIPPRequest() {
+        List l = new LinkedList();
+        GUID guid = new GUID();
+        l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
+        return new PingRequest(guid.bytes(), (byte)1, l);
+    }
+    
+    /**
      * Creates a TTL 1 Ping for faster bootstrapping, intended
      * for sending to UHCs.
      */    
@@ -328,7 +339,21 @@ public class PingRequest extends Message {
         }
 
        return false;
-    }
+    } 
+    
+    /**
+     * @return whether this ping wants a reply carrying DHT IPP info
+     */
+    public boolean requestsDHTIPP() {
+       if(payload != null) {
+           try {
+               parseGGEP();
+               return _ggep.hasKey(GGEP.GGEP_HEADER_DHT_IPPORTS);
+           } catch(BadGGEPBlockException ignored) {}
+        }
+
+       return false;
+    } 
     
     private void parseGGEP() throws BadGGEPBlockException {
         if(_ggep == null)

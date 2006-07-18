@@ -36,9 +36,14 @@ import com.limegroup.gnutella.util.NetworkUtils;
 public class PingReply extends Message implements Serializable, IpPort {
     
     /**
-     * The list of extra ip/ports contained in this reply.
+     * The list of extra Gnutella ip/ports contained in this reply.
      */
     private final List<IpPort> PACKED_IP_PORTS;
+    
+    /**
+     * The list of extra DHT ip/ports contained in this reply.
+     */
+    private final List PACKED_DHT_IP_PORTS;
     
     /**
      * The list of extra ip/ports contained in this reply.
@@ -168,15 +173,17 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param guid the Globally Unique Identifier (GUID) for this message
      * @param ttl the time to live for this message
      */
+    @SuppressWarnings("unchecked")
     public static PingReply create(byte[] guid, byte ttl) {
-        return create(guid, ttl, IpPort.EMPTY_LIST);
+        return create(guid, ttl, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
     }
     
     /**
      * Creates a new <tt>PingReply</tt> for this host with the specified
      * GUID, TTL & packed hosts.
      */
-    public static PingReply create(byte[] guid, byte ttl, Collection<? extends IpPort> hosts) {
+    public static PingReply create(byte[] guid, byte ttl, Collection<? extends IpPort> gnutHosts, 
+            Collection<? extends IpPort> dhtHosts) {
         return create(
             guid,
             ttl,
@@ -192,24 +199,27 @@ public class PingReply extends Message implements Serializable, IpPort {
                 ApplicationSettings.LANGUAGE.getValue(),
             RouterService.getConnectionManager()
                 .getNumLimeWireLocalePrefSlots(),
-            hosts);
+            gnutHosts, dhtHosts);
     }
  
      /**
      * Creates a new PingReply for this host with the specified
      * GUID, TTL & return address.
-     */   
+     */ 
+    @SuppressWarnings("unchecked")
     public static PingReply create(byte[] guid, byte ttl, IpPort addr) {
-        return create(guid, ttl, addr, IpPort.EMPTY_LIST);
+        return create(guid, ttl, addr, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
     }
     
     
     /**
      * Creates a new PingReply for this host with the specified
-     * GUID, TTL, return address & packed hosts.
+     * GUID, TTL, return address & packed hosts. Either collection 
+     * of hosts can be null!
      */
     public static PingReply create(byte[] guid, byte ttl,
-                                   IpPort returnAddr, Collection<? extends IpPort> hosts) {
+                                   IpPort returnAddr, Collection<? extends IpPort> gnutHosts, 
+                                   Collection<? extends IpPort> dhtHosts) {
         GGEP ggep = newGGEP(Statistics.instance().calculateDailyUptime(),
                             RouterService.isSupernode(),
                             UDPService.instance().isGUESSCapable());
@@ -221,7 +231,9 @@ public class PingReply extends Message implements Serializable, IpPort {
                                         .getNumLimeWireLocalePrefSlots());
                                         
         addAddress(ggep, returnAddr);
-        addPackedHosts(ggep, hosts);
+        
+        addPackedHosts(ggep, gnutHosts, dhtHosts);
+        
         return create(guid,
                       ttl,
                       RouterService.getPort(),
@@ -421,12 +433,14 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Creates a new PingReply with the specified data.
      */
+    @SuppressWarnings("unchecked")
     public static PingReply create(byte[] guid, byte ttl,
       int port, byte[] ip, long files, long kbytes,
       boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
       String locale, int slots) {    
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-                      dailyUptime, isGuessCapable, locale, slots, IpPort.EMPTY_LIST);
+                      dailyUptime, isGuessCapable, locale, slots, Collections.EMPTY_LIST,
+                      Collections.EMPTY_LIST);
     }
     
     /**
@@ -450,16 +464,18 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param isGuessCapable guess capable
      * @param locale the locale 
      * @param slots the number of locale preferencing slots available
-     * @param hosts the hosts to pack into this PingReply
+     * @param gnutHosts the Gnutella hosts to pack into this PingReply
+     * @param dhtHosts the DHT hosts to pack into this PingReply
      */
     public static PingReply
         create(byte[] guid, byte ttl,
                int port, byte[] ip, long files, long kbytes,
                boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
-               String locale, int slots, Collection<? extends IpPort> hosts) {
+               String locale, int slots, Collection<? extends IpPort> gnutHosts, 
+               Collection<? extends IpPort> dhtHosts) {
         GGEP ggep = newGGEP(dailyUptime, isUltrapeer, isGuessCapable);
         addLocale(ggep, locale, slots);
-        addPackedHosts(ggep, hosts);
+        addPackedHosts(ggep, gnutHosts , dhtHosts);
         return create(guid,
                       ttl,
                       port,
@@ -700,6 +716,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         InetAddress myIP=null;
         int myPort=0;
         List<IpPort> packedIPs = Collections.emptyList();
+        List<IpPort> packedDHTIPs = Collections.emptyList();
         List<IpPort> packedCaches = Collections.emptyList();
         String cacheAddress = null;
         
@@ -803,6 +820,14 @@ public class PingReply extends Message implements Serializable, IpPort {
                 } catch(BadPacketException bpe) {}
             }
             
+            if(ggep.hasKey(GGEP.GGEP_HEADER_DHT_IPPORTS)) {
+                try {
+                    byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_DHT_IPPORTS);
+                    packedDHTIPs = NetworkUtils.unpackIps(data);
+                } catch(BadGGEPPropertyException bad) {
+                } catch(BadPacketException bpe) {}
+            }
+            
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
                 try {
                     String data = ggep.getString(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
@@ -829,6 +854,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         else
             UDP_CACHE_ADDRESS = cacheAddress;
         PACKED_IP_PORTS = packedIPs;
+        PACKED_DHT_IP_PORTS = packedDHTIPs;
         PACKED_UDP_HOST_CACHES = packedCaches;
     }
 
@@ -906,11 +932,17 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Adds the packed hosts into this GGEP.
      */
-    private static GGEP addPackedHosts(GGEP ggep, Collection<? extends IpPort> hosts) {
-        if(hosts == null || hosts.isEmpty())
-            return ggep;
-            
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(hosts));
+    private static GGEP addPackedHosts(GGEP ggep,  Collection<? extends IpPort> gnutHosts, 
+            Collection<? extends IpPort> dhtHosts) {
+        
+        if(gnutHosts != null && !gnutHosts.isEmpty()) {
+            ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(gnutHosts));
+        }
+        
+        if(dhtHosts != null && !dhtHosts.isEmpty()) {
+            ggep.put(GGEP.GGEP_HEADER_DHT_IPPORTS, NetworkUtils.packIpPorts(dhtHosts));
+        }
+        
         return ggep;
     }
 
@@ -1128,6 +1160,13 @@ public class PingReply extends Message implements Serializable, IpPort {
      */
     public List<IpPort> getPackedIPPorts() {
         return PACKED_IP_PORTS;
+    }
+    
+    /**
+     * Gets the list of packed DHT IP/Ports.
+     */
+    public List /* of IpPort */ getPackedDHTIPPorts() {
+        return PACKED_DHT_IP_PORTS;
     }
     
     /**

@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.bootstrap.BootstrapServer;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -356,6 +358,28 @@ public class HostCatcher {
                 }
             );
         }
+    }
+    
+    
+    public void sendMessage(Message m, MessageListener listener, Cancellable c) {
+        Collection hosts = getAllHosts();
+        pinger.rank(hosts, listener, c, m);
+    }
+    
+    private Collection<Endpoint> getAllHosts() {
+        //keep them ordered
+        LinkedHashSet<Endpoint> hosts = new LinkedHashSet<Endpoint>(getNumHosts());
+        getHosts(FREE_ULTRAPEER_SLOTS_SET.iterator(), hosts, FREE_ULTRAPEER_SLOTS_SET.size());
+        getHosts(FREE_LEAF_SLOTS_SET.iterator(), hosts, FREE_LEAF_SLOTS_SET.size());
+        getHosts(ENDPOINT_SET.iterator(), hosts, ENDPOINT_SET.size());
+        return hosts;
+    }
+    
+    private Collection<Endpoint> getHosts(Iterator baseSetIterator, Set<Endpoint> targetSet, int numHost){
+        for (; baseSetIterator.hasNext();) {
+            targetSet.add((Endpoint)baseSetIterator.next());
+        }
+        return targetSet;
     }
     
     /**

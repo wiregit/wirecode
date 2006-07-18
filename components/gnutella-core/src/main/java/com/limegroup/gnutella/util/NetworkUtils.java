@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -429,6 +431,65 @@ public final class NetworkUtils {
 
         throw new UnknownHostException(
                 "localhost has no interface with a non-loopback IPv4 address");
+    }
+    
+    /**
+     * Returns true if the SocketAddress is any of our local machine addresses.
+     */
+    public static boolean isLocalHostAddress(SocketAddress addr) throws IOException {
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
+        return !iaddr.isUnresolved() && isLocalHostAddress(iaddr.getAddress());
+    }
+    
+    /**
+     * Returns true if the InetAddress is any of our local machine addresses
+     */
+    public static boolean isLocalHostAddress(InetAddress addr) throws IOException {
+        return NetworkInterface.getByInetAddress(addr) != null;
+    }
+    
+    /**
+     * Returns whether or not the specified InetAddress and Port is valid.
+     */
+    public static boolean isValidSocketAddress(SocketAddress address) {
+        InetSocketAddress iaddr = (InetSocketAddress)address;
+        
+        return !iaddr.isUnresolved()
+            && isValidAddress(iaddr.getAddress())
+            && isValidPort(iaddr.getPort());
+    }
+    
+    /**
+     * Retuens the IP:Port as byte array.
+     * 
+     * This method is IPv6 compliant
+     */
+    public static byte[] getBytes(SocketAddress addr) throws UnknownHostException {
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
+        if (iaddr.isUnresolved()) {
+            throw new UnknownHostException(iaddr.toString());
+        }
+        
+        return getBytes(iaddr.getAddress(), iaddr.getPort());
+    }
+    
+    /**
+     * Returns the IP:Port as byte array.
+     * 
+     * This method is IPv6 compliant
+     */
+    public static byte[] getBytes(InetAddress addr, int port) {
+        if (port < 0 || port > 0xFFFF) {
+            throw new IllegalArgumentException("Port out of range: " + port);
+        }
+        
+        byte[] address = addr.getAddress();
+
+        byte[] dst = new byte[address.length + 2];
+        System.arraycopy(address, 0, dst, 0, address.length);
+        dst[dst.length-2] = (byte)((port >> 8) & 0xFF);
+        dst[dst.length-1] = (byte)((port     ) & 0xFF);
+        return dst;
     }
 }
 

@@ -768,7 +768,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         // Try with one of the constructors.
         l = new LinkedList(l);
         l.add(new Endpoint("1.5.3.5", 5));
-        pr = PingReply.create(GUID.makeGuid(), (byte)1, l);
+        pr = PingReply.create(GUID.makeGuid(), (byte)1, l, null);
         l = pr.getPackedIPPorts();
         assertFalse(pr.isUDPHostCache());
         l = pr.getPackedIPPorts();

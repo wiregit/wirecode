@@ -1,0 +1,157 @@
+/*
+ * Mojito Distributed Hash Table (Mojito DHT)
+ * Copyright (C) 2006 LimeWire LLC
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+ 
+package com.limegroup.mojito.io;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.security.PublicKey;
+import java.util.Collection;
+
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.messages.DHTMessage.OpCode;
+import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+
+/**
+ * The MessageOutputStream class writes a DHTMessage (serializes)
+ * to a given OutputStream.
+ */
+public class MessageOutputStream extends DataOutputStream {
+    
+    public MessageOutputStream(OutputStream out) {
+        super(out);
+    }
+	
+    public void writeKUID(KUID kuid) throws IOException {
+        if (kuid == null) {
+            throw new NullPointerException("KUID cannot be null");
+        }
+        
+        kuid.write(this);
+    }
+    
+    public void writeKeyValue(KeyValue keyValue) throws IOException {
+        writeKUID(keyValue.getKey());
+        byte[] b = keyValue.getValue();
+        writeShort(b.length);
+        write(b, 0, b.length);
+        
+        writeKUID(keyValue.getNodeID());
+        writeSocketAddress(keyValue.getSocketAddress());
+        
+        writePublicKey(keyValue.getPublicKey());
+        writeSignature(keyValue.getSignature());
+    }
+    
+    public void writeKeyValues(Collection<? extends KeyValue> values) throws IOException {
+        writeByte(values.size());
+        for(KeyValue kv : values) {
+            writeKeyValue(kv);
+        }
+    }
+    
+    public void writePublicKey(PublicKey pubKey) throws IOException {
+        if (pubKey != null) {
+            byte[] encoded = pubKey.getEncoded();
+            writeShort(encoded.length);
+            write(encoded, 0, encoded.length);
+        } else {
+            writeShort(0);
+        }
+    }
+    
+    public void writeSignature(byte[] signature) throws IOException {
+        if (signature != null && signature.length > 0) {
+            writeByte(signature.length);
+            write(signature, 0, signature.length);
+        } else {
+            writeByte(0);
+        }
+    }
+    
+    public void writeContact(Contact node) throws IOException {
+        writeInt(node.getVendor());
+        writeShort(node.getVersion());
+        writeKUID(node.getNodeID());
+        writeSocketAddress(node.getSocketAddress());
+    }
+    
+    public void writeContacts(Collection<? extends Contact> nodes) throws IOException {
+        writeByte(nodes.size());
+        for(Contact node : nodes) {
+            writeContact(node);
+        }
+    }
+    
+    public void writeInetAddress(InetAddress addr) throws IOException {
+        byte[] address = addr.getAddress();
+        writeByte(address.length);
+        write(address, 0, address.length);
+    }
+    
+    public void writePort(int port) throws IOException {
+        writeShort(port);
+    }
+    
+    public void writeSocketAddress(SocketAddress addr) throws IOException {
+        if (addr instanceof InetSocketAddress
+                && !((InetSocketAddress)addr).isUnresolved()) {
+            InetSocketAddress iaddr = (InetSocketAddress)addr;
+            
+            writeInetAddress(iaddr.getAddress());
+            writePort(iaddr.getPort());
+        } else {
+            writeByte(0);
+        }
+    }
+    
+    public void writeQueryKey(QueryKey queryKey) throws IOException {
+        if (queryKey != null) {
+            byte[] qk = queryKey.getBytes();
+            writeByte(qk.length);
+            write(qk, 0, qk.length);
+        } else {
+            writeByte(0);
+        }
+    }
+    
+    public void writeStatistics(byte[] statistics) throws IOException {
+        if (statistics != null) {
+            writeShort(statistics.length);
+            write(statistics);
+        } else {
+            writeShort(0);
+        }
+    }
+    
+    public void writeOpCode(OpCode opcode) throws IOException {
+        writeByte(opcode.getOpCode());
+    }
+    
+    public void writeStoreStatus(StoreStatus status) throws IOException {
+        writeByte(status.getStatus());
+    }
+}
