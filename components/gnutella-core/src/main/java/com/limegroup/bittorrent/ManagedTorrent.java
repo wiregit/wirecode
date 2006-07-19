@@ -35,7 +35,7 @@ import com.limegroup.gnutella.util.ThreadPool;
  * It keeps track of the known and connected peers and contains the
  * logic for starting and stopping the torrent.
  */
-public class ManagedTorrent {
+public class ManagedTorrent implements Torrent {
 	
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 	
@@ -44,22 +44,7 @@ public class ManagedTorrent {
 	 */
 	private static final int KEEP_ALIVE_INTERVAL = 2 * 60 * 1000; 
 	
-	/**
-	 * States of a torrent.  Some of them are functionally equivalent
-	 * to Downloader states.
-	 */
-	static final int WAITING_FOR_TRACKER = 1;
-	static final int VERIFYING = 2;
-	static final int CONNECTING = 3;
-	static final int DOWNLOADING = 4;
-	static final int SAVING = 5;
-	static final int SEEDING = 6;
-	static final int QUEUED = 7;
-	static final int PAUSED = 8;
-	static final int STOPPED = 9;
-	static final int DISK_PROBLEM = 10;
-	static final int TRACKER_FAILURE = 11;
-	static final int SCRAPING = 12; //scraping == requesting from tracker
+
 	
 	private static final SchedulingThreadPool INVOKER = 
 		new NIODispatcherThreadPool();
@@ -181,15 +166,15 @@ public class ManagedTorrent {
 		return _info;
 	}
 
-	/**
-	 * @return true if the torrent is complete.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#isComplete()
 	 */
 	public boolean isComplete() {
 		return _state.getInt() != DISK_PROBLEM && _folder.isComplete();
 	}
 
-	/**
-	 * Starts the torrent 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#start()
 	 */
 	public void start() {
 		if (LOG.isDebugEnabled())
@@ -251,8 +236,8 @@ public class ManagedTorrent {
 				new KeepAliveSender(),KEEP_ALIVE_INTERVAL);
 	}
 
-	/**
-	 * Stops the torrent
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#stop()
 	 */
 	public void stop() {
 				
@@ -343,8 +328,8 @@ public class ManagedTorrent {
 		return false;
 	}
 
-	/**
-	 * Pauses the torrent.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#pause()
 	 */
 	public void pause() {
 		boolean wasActive = false;
@@ -359,8 +344,8 @@ public class ManagedTorrent {
 			stopImpl();
 	}
 
-	/**
-	 * Resumes the torrent.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#resume()
 	 */
 	public boolean resume() {
 		synchronized(_state) {
@@ -475,7 +460,7 @@ public class ManagedTorrent {
 	/**
 	 * @return the state of this torrent
 	 */
-	int getState() {
+	public int getState() {
 		return _state.getInt();
 	}
 	
@@ -696,7 +681,7 @@ public class ManagedTorrent {
 	/**
 	 * @return the next time we should announce to the tracker
 	 */
-	long getNextTrackerRequestTime() {
+	public long getNextTrackerRequestTime() {
 		return trackerManager.getNextTrackerRequestTime();
 	}
 
@@ -729,8 +714,8 @@ public class ManagedTorrent {
 		choker.rechoke();
 	}
 	
-	/**
-	 * @return true if paused
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#isPaused()
 	 */
 	public boolean isPaused() {
 		return _state.getInt() == PAUSED;
@@ -751,7 +736,7 @@ public class ManagedTorrent {
 	 * @return if the torrent is active - either downloading or 
 	 * seeding, saving or verifying
 	 */
-	boolean isActive() {
+	public boolean isActive() {
 		synchronized(_state) {
 			if (isDownloading())
 				return true;
@@ -768,7 +753,7 @@ public class ManagedTorrent {
 	/**
 	 * @return if the torrent can be paused
 	 */
-	boolean isPausable() {
+	public boolean isPausable() {
 		synchronized(_state) {
 			if (isDownloading())
 				return true;
@@ -794,6 +779,9 @@ public class ManagedTorrent {
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#getConnections()
+	 */
 	public List<BTConnection> getConnections() {
 		return _connections;
 	}
@@ -804,18 +792,30 @@ public class ManagedTorrent {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#getNumConnections()
+	 */
 	public int getNumConnections() {
 		return _connections.size();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#getNumBadPeers()
+	 */
 	public int getNumBadPeers() {
 		return _badPeers.size();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#getNumPeers()
+	 */
 	public int getNumPeers() {
 		return _peers.size();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#getNumBusyPeers()
+	 */
 	public  int getNumBusyPeers() {
 		int busy = 0;
 		synchronized(_connections) {
@@ -845,6 +845,9 @@ public class ManagedTorrent {
 		return totalUp;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#getTotalDownloaded()
+	 */
 	public long getTotalDownloaded() {
 		return totalDown;
 	}
@@ -857,7 +860,14 @@ public class ManagedTorrent {
 			return 0;
 		return (1f * getTotalUploaded()) / getTotalDownloaded();
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#getAmountLost()
+	 */
+	public long getAmountLost() {
+		return _folder.getNumCorruptedBytes();
+	}
+	
 	boolean hasNonBusyLocations() {
 		long now = System.currentTimeMillis();
 		synchronized(_peers) {
@@ -883,6 +893,9 @@ public class ManagedTorrent {
 		return _connectionFetcher;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#measureBandwidth()
+	 */
 	public void measureBandwidth() {
 		synchronized(_connections) {
 			for (BTConnection con : _connections) 
@@ -890,6 +903,9 @@ public class ManagedTorrent {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Torrent#getMeasuredBandwidth(boolean)
+	 */
 	public float getMeasuredBandwidth(boolean downstream) {
 		float ret = 0;
 		synchronized(_connections) {

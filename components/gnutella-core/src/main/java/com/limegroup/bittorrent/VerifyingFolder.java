@@ -142,7 +142,8 @@ public class VerifyingFolder {
 	 * @param complete if the download is completed
 	 */
 	public VerifyingFolder(BTMetaInfo info, boolean complete, Map data) {
-		_files = complete? info.getFiles() : info.getIncompleteFiles();
+		TorrentFileSystem system = info.getFileSystem();
+		_files = complete? system.getFiles() : system.getIncompleteFiles();
 		_info = info;
 		_corruptedBytes = 0;
 		partialBlocks = new BlockRangeMap();
@@ -836,7 +837,7 @@ public class VerifyingFolder {
 	 */
 	private int getPieceSize(int pieceNum) {
 		if (pieceNum == _info.getNumBlocks() - 1)
-			return (int)(_info.getTotalSize() % _info.getPieceLength());
+			return (int)(_info.getFileSystem().getTotalSize() % _info.getPieceLength());
 		else
 			return _info.getPieceLength();
 	}

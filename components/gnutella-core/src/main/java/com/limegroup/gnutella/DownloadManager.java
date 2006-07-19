@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.bitzi.util.Base32;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -517,7 +519,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         // Pump the downloaders through a set, to remove duplicate values.
         // This is necessary in case LimeWire got into a state where a
         // downloader was written to disk twice.
-        buf = new LinkedList(new HashSet(buf));
+        buf = new LinkedList(new LinkedHashSet(buf));
 
         //Initialize and start downloaders.  Must catch ClassCastException since
         //the data could be corrupt.  This code is a little tricky.  It is
@@ -795,33 +797,37 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     
     public synchronized Downloader downloadTorrent(BTMetaInfo info, boolean overwrite) 
     throws SaveLocationException {
-    	checkTargetLocation(info, overwrite);
-    	if (overwrite)
-    		RouterService.getTorrentManager().killTorrentForFile(info.getCompleteFile());
+    	TorrentFileSystem system = info.getFileSystem();
+    	checkActiveAndWaiting(info.getURN(), system);
+    	if (!overwrite)
+    		checkTargetLocation(system, overwrite);
+    	else
+    		RouterService.getTorrentManager().killTorrentForFile(system.getCompleteFile());
     	AbstractDownloader ret = new BTDownloader(info);
     	initializeDownload(ret);
     	return ret;
     }
     
-    private void checkTargetLocation(BTMetaInfo info, boolean overwrite) 
+    private void checkTargetLocation(TorrentFileSystem info, boolean overwrite) 
     throws SaveLocationException{
-    	if (!overwrite) {
-    		for (File f : info.getFiles()) {
-    			// its ok to download to an already existing directory so
-    			// we only check for files.
-    			if (RouterService.getFileManager().isFileShared(f) ||
-    					f.exists())
-    				throw new SaveLocationException
-    				(SaveLocationException.FILE_ALREADY_EXISTS, f);
-    		}
+    	for (File f : info.getFiles()) {
+    		// its ok to download to an already existing directory so
+    		// we only check for files.
+    		if (RouterService.getFileManager().isFileShared(f) ||
+    				f.exists())
+    			throw new SaveLocationException
+    			(SaveLocationException.FILE_ALREADY_EXISTS, f);
     	}
+    }
+    private void checkActiveAndWaiting(URN urn, TorrentFileSystem system) 
+    throws SaveLocationException {
     	for (AbstractDownloader current : activeAndWaiting) {
-    		if (info.getURN().equals(current.getSHA1Urn())) {
+    		if (urn.equals(current.getSHA1Urn())) {
     			// this is the place to add new trackers eventually.
     			throw new SaveLocationException
-    			(SaveLocationException.FILE_ALREADY_DOWNLOADING, info.getCompleteFile());
+    			(SaveLocationException.FILE_ALREADY_DOWNLOADING, system.getCompleteFile());
     		}
-    		for (File f : info.getFilesAndFolders()) {
+    		for (File f : system.getFilesAndFolders()) {
     			if (current.conflictsSaveFile(f)) {
     				throw new SaveLocationException
     				(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, f);

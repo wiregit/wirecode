@@ -1,12 +1,10 @@
 package com.limegroup.bittorrent;
 
-import java.io.IOException;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
@@ -42,7 +40,7 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	}
 
 	public long getFileSize() {
-		return _info.getTotalSize();
+		return _info.getFileSystem().getTotalSize();
 	}
 
 	public FileDesc getFileDesc() {
@@ -67,8 +65,11 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	}
 
 	public int getState() {
-		if (!_torrent.isActive())
+		if (!_torrent.isActive()) {
+			if (_torrent.isComplete() && _torrent.getRatio() > 1)
+				return Uploader.COMPLETE;
 			return Uploader.INTERRUPTED;
+		}
 		return Uploader.UPLOADING;
 	}
 

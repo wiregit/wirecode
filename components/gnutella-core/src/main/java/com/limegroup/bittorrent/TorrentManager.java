@@ -205,8 +205,9 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		ManagedTorrent found = null;
 		synchronized(this) {
 			for (ManagedTorrent t: _active) {
-				if (t.getMetaInfo().conflicts(f) ||
-						t.getMetaInfo().conflictsIncomplete(f)) {
+				TorrentFileSystem system = t.getMetaInfo().getFileSystem();
+				if (system.conflicts(f) ||
+						system.conflictsIncomplete(f)) {
 					found = t;
 					break;
 				}

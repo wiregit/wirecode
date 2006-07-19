@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -34,24 +35,44 @@ implements TorrentEventListener {
     	ObjectStreamClass.NO_FIELDS;
     
 	private static final String METAINFO = "metainfo";
-	
-	private ManagedTorrent _torrent;
 
+	/**
+	 * The <tt>ManagedTorrent</tt> instance this is representing
+	 */
+	private Torrent _torrent;
+
+	/**
+	 * The <tt>BTMetaInfo</tt> for this torrent.
+	 */
 	private BTMetaInfo _info;
+	
+	/** Local ref to the urn */
+	private final URN urn;
+	
+	/**
+	 * Object containing 
+	 */
+	private TorrentFileSystem fileSystem;
 
+	/**
+	 * Handle to the <tt>DownloadManager</tt> for adding, removing, etc.
+	 */
 	private DownloadManager manager;
 	
+	/**
+	 * Handle to the incomplete file manager for saving crash state
+	 */
 	private IncompleteFileManager ifm;
 	
 	private volatile long startTime, stopTime;
-	
-	private volatile boolean complete;
 	
 	private NumericBuffer<Float> averagedBandwidth = 
 		new NumericBuffer<Float>(10);
 	
 	public BTDownloader(BTMetaInfo info) {
 		_info = info;
+		urn = info.getURN();
+		fileSystem = info.getFileSystem();
 		propertiesMap.put(METAINFO, info);
 		propertiesMap.put(DEFAULT_FILENAME, info.getName());
 	}
@@ -65,16 +86,14 @@ implements TorrentEventListener {
 	public void stop() {
 		if (_torrent.isActive() &&
 				_torrent.getState() != ManagedTorrent.SEEDING) {
-			complete = true;
 			_torrent.stop();
-		} else if (isInactive())
+		} else if (isInactive()) 
 			manager.remove(this, true);
 			
 	}
 
 	public void pause() {
 		_torrent.pause();
-
 	}
 
 	public boolean isPaused() {
@@ -90,15 +109,14 @@ implements TorrentEventListener {
 	}
 	
 	public boolean isLaunchable() {
-		return _info.getFiles().size() == 1 && _torrent.isComplete();
+		return fileSystem.getFiles().size() == 1 && _torrent.isComplete();
 	}
 	
 	public boolean isResumable() {
 		switch(_torrent.getState()) {
 		case ManagedTorrent.PAUSED:
-		case ManagedTorrent.STOPPED:
 		case ManagedTorrent.TRACKER_FAILURE:
-			return !complete;
+			return true;
 		}
 		return false;
 	}
@@ -109,8 +127,8 @@ implements TorrentEventListener {
 
 	public File getFile() {
 		if (_torrent.isComplete())
-			return _info.getCompleteFile();
-		return _info.getBaseFile();
+			return fileSystem.getCompleteFile();
+		return fileSystem.getBaseFile();
 	}
 
 	public File getDownloadFragment() {
@@ -149,10 +167,7 @@ implements TorrentEventListener {
 		case ManagedTorrent.PAUSED:
 			return PAUSED;
 		case ManagedTorrent.STOPPED:
-			if (_torrent.isComplete())
-				return COMPLETE;
-			else
-				return ABORTED;
+			return ABORTED;
 		case ManagedTorrent.DISK_PROBLEM:
 			return DISK_PROBLEM;
 		case ManagedTorrent.TRACKER_FAILURE:
@@ -179,15 +194,15 @@ implements TorrentEventListener {
 	}
 
 	public String getFileName() {
-		return _info.getName();
+		return fileSystem.getName();
 	}
 
 	public long getContentLength() {
-		return _info.getTotalSize();
+		return fileSystem.getTotalSize();
 	}
 
 	public long getAmountRead() {
-		return _info.getVerifyingFolder().getBlockSize();
+		return getTotalAmountDownloaded() - getAmountLost();
 	}
 
 	public String getVendor() {
@@ -272,7 +287,7 @@ implements TorrentEventListener {
 	}
 
 	public long getAmountLost() {
-		return _info.getVerifyingFolder().getNumCorruptedBytes();
+		return _torrent.getAmountLost();
 	}
 
 	public void measureBandwidth() {
@@ -300,15 +315,15 @@ implements TorrentEventListener {
 			boolean overwrite) throws SaveLocationException {
 		super.setSaveFile(saveDirectory, fileName, overwrite);
 		// if this didn't throw target is ok.
-		_info.setCompleteFile(new File(saveDirectory, fileName));
+		fileSystem.setCompleteFile(new File(saveDirectory, fileName));
 	}
 
 	public File getSaveFile() {
-		return _info.getCompleteFile();
+		return fileSystem.getCompleteFile();
 	}
 	
 	public URN getSHA1Urn() {
-		return _torrent.getMetaInfo().getURN();
+		return urn;
 	}
 	
 	public int getAmountPending() {
@@ -327,32 +342,29 @@ implements TorrentEventListener {
 		switch(evt.getType()) {
 		case STARTED : torrentStarted(); break;
 		case COMPLETE : torrentComplete(); break;
-		case STOPPED : 
-			torrentStopped();
-			if (!isResumable())
-				RouterService.getTorrentManager().removeEventListener(this);
+		case STOPPED : torrentStopped(); break;
 		}
 	}
 	
 	private void torrentComplete() {
 		// the download stops now. even though the torrent goes on
 		stopTime = System.currentTimeMillis();
-		complete = true;
-		manager.remove(this, true);
 		ifm.removeTorrentEntry(_info.getURN());
+		manager.remove(this, true);
 	}
 
 	private void torrentStarted() {
 		startTime = System.currentTimeMillis();
 		stopTime = 0;
-		complete = false;
 	}
 
 	private void torrentStopped() {
 		if (stopTime == 0) {
+			boolean resumable = isResumable();
 			stopTime = System.currentTimeMillis();
-			manager.remove(this, !isResumable());
+			manager.remove(this, !resumable);
 		} // otherwise torrent was already completed.
+		else Assert.that(_torrent instanceof FinishedTorrentDownload);
 	}
 	
 	private void writeObject(ObjectOutputStream out) 
@@ -361,6 +373,7 @@ implements TorrentEventListener {
 		synchronized(this) {
 			m.putAll(propertiesMap);
 		}
+		Assert.that(m.containsKey(METAINFO));
 		out.writeObject(m);
 	}
 	
@@ -369,6 +382,7 @@ implements TorrentEventListener {
 		propertiesMap = (Map<String, Serializable>)in.readObject();
 		attributes = (Map)propertiesMap.get(ATTRIBUTES);
 		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
+		fileSystem = _info.getFileSystem();
 		if (attributes == null || _info == null)
 			throw new IOException("invalid serailized data");
 		averagedBandwidth = new NumericBuffer<Float>(10);
@@ -387,7 +401,7 @@ implements TorrentEventListener {
 	}
 	
 	public void startDownload() {
-		BTUploader uploader = new BTUploader(_torrent,
+		BTUploader uploader = new BTUploader((ManagedTorrent)_torrent,
 				_info, 
 				RouterService.getTorrentManager());
 		_torrent.start();
@@ -420,14 +434,23 @@ implements TorrentEventListener {
 	}
 	
 	public boolean conflictsSaveFile(File candidate) {
-		return _info.conflicts(candidate);
+		return fileSystem.conflicts(candidate);
 	}
 
 	public boolean conflictsWithIncompleteFile(File incomplete) {
-		return _info.conflictsIncomplete(incomplete); 
+		return fileSystem.conflictsIncomplete(incomplete); 
 	}
 
 	public void finish() {
-		// nothing, torrents get stopped through the uploader facade only
+		RouterService.getTorrentManager().removeEventListener(this);
+		_torrent = new FinishedTorrentDownload(_torrent);
+		_info = null;
+		synchronized(this) {
+			propertiesMap.remove(METAINFO);
+		}
+	}
+	
+	public String toString() {
+		return "downloader facade for "+fileSystem.getCompleteFile().getName();
 	}
 }

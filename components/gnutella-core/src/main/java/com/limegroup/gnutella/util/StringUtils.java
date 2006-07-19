@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import java.util.Vector;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -606,6 +608,19 @@ public class StringUtils {
         else
             retString = fileName.substring(0, extStart);
         return retString;
+    }
+    
+    /**
+     * Utility wrapper for getting a String object out of
+     * byte [] using the ascii encoding.
+     */
+    public static String getASCIIString(byte [] bytes) {
+    	try {
+			return new String(bytes, Constants.ASCII_ENCODING);
+		} catch (UnsupportedEncodingException impossible) {
+			ErrorService.error(impossible);
+			return null;
+		}
     }
     
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
