@@ -41,7 +41,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     public static void globalSetUp() throws Exception {
         //setup bootstrap node
-        BOOTSTRAP_DHT = new MojitoDHT("bootstrapNode");
+        BOOTSTRAP_DHT = new MojitoDHT("bootstrapNode", false);
         InetSocketAddress addr = new InetSocketAddress("localhost", 3000);
         BOOTSTRAP_DHT.bind(addr);
         BOOTSTRAP_DHT.start();

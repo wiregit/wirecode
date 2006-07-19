@@ -70,50 +70,46 @@ public class MojitoDHT {
     
     private Context context;
     
-    public MojitoDHT() {
-        this(null, null, CryptoHelper.createKeyPair());
+    public MojitoDHT(boolean firewalled) {
+        this(null, null, firewalled, CryptoHelper.createKeyPair());
     }
     
-    public MojitoDHT(String name) {
-        this(name, null, CryptoHelper.createKeyPair());
+    public MojitoDHT(String name, boolean firewalled) {
+        this(name, null, firewalled, CryptoHelper.createKeyPair());
     }
     
-    private MojitoDHT(String name, Contact local, KeyPair keyPair) {
+    private MojitoDHT(String name, Contact localNode, boolean firewalled, KeyPair keyPair) {
         if (name == null) {
             name = "DHT";
         }
         
-        if (local == null) {
+        if (localNode == null) {
             int vendor = ContextSettings.VENDOR.getValue();
             int version = ContextSettings.VERSION.getValue();
             
             KUID nodeId = KUID.createRandomNodeID();
-            SocketAddress addr = new InetSocketAddress(0);
-            int flags = 0;
             int instanceId = 0;
             
-            local = new ContactNode(vendor, version, nodeId, addr, instanceId, flags, State.UNKNOWN);
+            localNode = ContactNode.createLocalContact(vendor, version, nodeId, instanceId);
+            
+            if (firewalled) {
+                ((ContactNode)localNode).setFirewalled(true);
+            }
         }
 
-        context = new Context(name, local, keyPair);
+        context = new Context(name, localNode, keyPair);
     }
     
     public String getName() {
         return context.getName();
     }
     
-    public void setFirewalled(boolean firewalled) {
-        // change from firewalled to non-firewalled? re-bootstrap
-        if (context.isFirewalled() && !firewalled) {
-            context.setFirewalled(false);
-            context.bootstrap(null);
-        } else {
-            context.setFirewalled(firewalled);
-        }
-    }
-    
     public boolean isFirewalled() {
         return context.isFirewalled();
+    }
+    
+    public void bind(int port) throws IOException {
+        bind(new InetSocketAddress(port));
     }
     
     public void bind(InetAddress addr, int port) throws IOException {
@@ -137,7 +133,7 @@ public class MojitoDHT {
     }
     
     public SocketAddress getSocketAddress() {
-        return context.getSocketAddress();
+        return context.getContactAddress();
     }
     
     public SocketAddress getLocalAddress() {
@@ -413,9 +409,8 @@ public class MojitoDHT {
         oos.writeInt(local.getVendor());
         oos.writeShort(local.getVersion());
         oos.writeObject(local.getNodeID());
-        // TODO: store SocketAddress?
         oos.writeByte(local.getInstanceID());
-        oos.writeByte(local.getFlags());
+        oos.writeBoolean(local.isFirewalled());
         
         // Store the RouteTable
         oos.writeBoolean(storeRouteTable);
@@ -487,9 +482,8 @@ public class MojitoDHT {
         int vendor = ois.readInt();
         int version = ois.readUnsignedShort();
         KUID oldNodeId = (KUID)ois.readObject();
-        // TODO: load SocketAddress?
         int instanceId = ois.readUnsignedByte();
-        int flags = ois.readUnsignedByte();
+        boolean firewalled = ois.readBoolean();
         
         boolean timeout = (System.currentTimeMillis()-time) 
                             >= ContextSettings.NODE_ID_TIMEOUT.getValue();
@@ -506,11 +500,10 @@ public class MojitoDHT {
             nodeId = oldNodeId;
         }
         
-        Contact local = new ContactNode(vendor, version, nodeId, 
-                new InetSocketAddress(0), instanceId, flags, State.UNKNOWN);
+        Contact local = ContactNode.createLocalContact(vendor, version, nodeId, instanceId);
         
         // Create an instance w/o a KeyPair for now (will set it later!)
-        MojitoDHT dht = new MojitoDHT(name, local, null);
+        MojitoDHT dht = new MojitoDHT(name, local, firewalled, null);
         
         // Load the RouteTable
         boolean storeRouteTable = ois.readBoolean();

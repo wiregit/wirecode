@@ -310,7 +310,7 @@ public abstract class MessageDispatcher implements Runnable {
     private boolean verifyQueryKey(ResponseMessage response) {
         KUID messageId = response.getMessageID();
         Contact node = response.getContact();
-        return messageId.verifyQueryKey(node.getSocketAddress());
+        return messageId.verifyQueryKey(node.getContactAddress());
     }
     
     /**
@@ -320,7 +320,7 @@ public abstract class MessageDispatcher implements Runnable {
         // Make sure we're not receiving messages from ourself.
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
-        SocketAddress src = node.getSocketAddress();
+        SocketAddress src = node.getContactAddress();
         
         if (context.isLocalNode(nodeId, src)) {
             

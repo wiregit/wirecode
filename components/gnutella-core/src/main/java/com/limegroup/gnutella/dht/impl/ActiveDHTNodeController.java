@@ -46,7 +46,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
         }
         
         if (mojitoDHT == null) {
-            super.dht = new MojitoDHT("LimeMojitoDHT");
+            super.dht = new MojitoDHT("ActiveMojitoDHT", false);
         } else {
             super.dht = mojitoDHT;
         }
@@ -66,7 +66,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
             return;
         }
         
-        super.start(true);
+        super.start();
     }
 
     @Override

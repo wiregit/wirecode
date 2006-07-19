@@ -20,6 +20,8 @@
 package com.limegroup.mojito.io;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
@@ -70,7 +72,7 @@ public class Tag {
             throws IOException {
         
         this.nodeId = contact.getNodeID();
-        this.dst = contact.getSocketAddress();
+        this.dst = contact.getContactAddress();
         
         this.message = message;
     }
@@ -82,7 +84,7 @@ public class Tag {
     
     Tag(Contact contact, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
-        this(contact.getNodeID(), contact.getSocketAddress(), message, responseHandler, contact.getAdaptativeTimeout());
+        this(contact.getNodeID(), contact.getContactAddress(), message, responseHandler, contact.getAdaptativeTimeout());
     }
     
     Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
@@ -241,9 +243,11 @@ public class Tag {
         
         // This is actually not really necessary. The QueryKey in
         // MessageID should take care of it.
-        private boolean compareSocketAddress(ResponseMessage response) {
+        private boolean compareAddresses(ResponseMessage response) {
             Contact node = response.getContact();
-            return Tag.this.dst.equals(node.getSocketAddress());
+            InetAddress dstAddr = ((InetSocketAddress)dst).getAddress();
+            InetAddress srcAddr = ((InetSocketAddress)node.getContactAddress()).getAddress();
+            return dstAddr.equals(srcAddr);
         }
         
         private boolean compareResponseType(ResponseMessage response) {
@@ -265,7 +269,7 @@ public class Tag {
         
         public boolean sanityCheck(ResponseMessage response) {
             return compareNodeID(response) 
-                && compareSocketAddress(response)
+                && compareAddresses(response)
                 && compareResponseType(response);
         }
         

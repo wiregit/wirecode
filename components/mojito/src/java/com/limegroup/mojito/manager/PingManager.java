@@ -91,11 +91,11 @@ public class PingManager extends AbstractManager {
     }
 
     public Future<Contact> ping(Contact node) {
-        return ping(node.getNodeID(), node.getSocketAddress(), null);
+        return ping(node.getNodeID(), node.getContactAddress(), null);
     }
     
     public Future<Contact> ping(Contact node, PingListener listener) {
-        return ping(node.getNodeID(), node.getSocketAddress(), listener);
+        return ping(node.getNodeID(), node.getContactAddress(), listener);
     }
 
     public Future<Contact> ping(KUID nodeId, SocketAddress address, PingListener listener) {

@@ -20,7 +20,11 @@
 package com.limegroup.mojito.routing.impl;
 
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
@@ -35,7 +39,7 @@ public class ContactNode implements Contact, Serializable {
     
     private static final long serialVersionUID = 833079992601013124L;
 
-    private static final int FIREWALLED = 0x01;
+    private static final Log LOG = LogFactory.getLog(ContactNode.class);
     
     private KUID nodeId;
     
@@ -45,7 +49,9 @@ public class ContactNode implements Contact, Serializable {
     
     private int instanceId;
     
-    private SocketAddress address;
+    private transient SocketAddress sourceAddress;
+    
+    private SocketAddress contactAddress;
     
     private transient long rtt = -1L;
     
@@ -53,26 +59,83 @@ public class ContactNode implements Contact, Serializable {
     
     private long lastFailedTime = 0L;
     
-    private transient int flags = 0;
-    
     private int failures = 0;
     
     private transient State state = State.UNKNOWN;
     
-    public ContactNode(int vendor, int version, KUID nodeId, 
-            SocketAddress address, State state) {
-        this(vendor, version, nodeId, address, 0, 0, state);
+    private transient boolean firewalled = false;
+    
+    /**
+     * 
+     */
+    public static Contact createLocalContact(int vendor, int version, 
+            KUID nodeId, int instanceId) {
+        
+        SocketAddress addr = new InetSocketAddress("localhost", 0);
+        
+        return new ContactNode(null, vendor, version, 
+                nodeId, addr, instanceId, false, State.UNKNOWN);
     }
     
-    public ContactNode(int vendor, int version, 
-            KUID nodeId, SocketAddress address, 
-            int instanceId, int flags, State state) {
+    /**
+     * 
+     */
+    public static Contact createLiveContact(SocketAddress sourceAddress, int vendor, 
+            int version, KUID nodeId, SocketAddress contactAddress, int instanceId, boolean firewalled) {
+        
+        if (contactAddress != null) {
+            int port = ((InetSocketAddress)contactAddress).getPort();
+            if (port == 0) {
+                if (!firewalled && LOG.isErrorEnabled()) {
+                    LOG.error(ContactUtils.toString(nodeId, sourceAddress) 
+                            + " contact address is set to Port 0 but it is not marked as firewalled");
+                }
+                
+                contactAddress = sourceAddress;
+                firewalled = true;
+            } else {
+                contactAddress = new InetSocketAddress(
+                        ((InetSocketAddress)sourceAddress).getAddress(), port);
+            }
+        } else {
+            contactAddress = sourceAddress;
+            firewalled = true; // force firewalled
+        }
+        
+        return new ContactNode(sourceAddress, vendor, version, 
+                nodeId, contactAddress, instanceId, firewalled, State.ALIVE);
+    }
+    
+    /**
+     * 
+     */
+    public static Contact createUnknownContact(int vendor, int version, 
+            KUID nodeId, SocketAddress contactAddress) {
+        
+        return new ContactNode(null, vendor, version, 
+                nodeId, contactAddress, 0, false, State.UNKNOWN);
+    }
+    
+    /**
+     * 
+     * @param sourceAddress
+     * @param vendor
+     * @param version
+     * @param nodeId
+     * @param contactAddress
+     * @param instanceId
+     * @param firewalled
+     * @param state
+     */
+    public ContactNode(SocketAddress sourceAddress, int vendor, int version, 
+            KUID nodeId, SocketAddress contactAddress, 
+            int instanceId, boolean firewalled, State state) {
         
         if (nodeId == null) {
             throw new NullPointerException("Node ID is null");
         }
         
-        if (address == null) {
+        if (contactAddress == null) {
             throw new NullPointerException("SocketAddress is null");
         }
         
@@ -80,11 +143,11 @@ public class ContactNode implements Contact, Serializable {
             throw new IllegalArgumentException("Version must be between 0x00 and 0xFFFF: " + version);
         }
         
+        this.sourceAddress = sourceAddress;
         this.nodeId = nodeId;
-        this.address = address;
+        this.contactAddress = contactAddress;
         this.instanceId = instanceId;
-        this.flags = flags;
-        
+        this.firewalled = firewalled;
         this.state = (state != null ? state : State.UNKNOWN);
         
         if (state == State.ALIVE) {
@@ -108,10 +171,6 @@ public class ContactNode implements Contact, Serializable {
         }
     }
     
-    public int getFlags() {
-        return flags;
-    }
-
     public int getVendor() {
         return vendor;
     }
@@ -132,14 +191,22 @@ public class ContactNode implements Contact, Serializable {
         this.instanceId = (instanceId + 1) % 0xFF;
     }
 
-    public SocketAddress getSocketAddress() {
-        return address;
+    public SocketAddress getContactAddress() {
+        return contactAddress;
     }
     
-    public void setSocketAddress(SocketAddress address) {
-        this.address = address;
+    public void setContactAddress(SocketAddress contactAddress) {
+        this.contactAddress = contactAddress;
     }
 
+    public SocketAddress getSourceAddress() {
+        return sourceAddress;
+    }
+    
+    public void setSourceAddress(SocketAddress sourceAddress) {
+        this.sourceAddress = sourceAddress;
+    }
+    
     public long getRoundTripTime() {
         return rtt;
     }
@@ -161,15 +228,11 @@ public class ContactNode implements Contact, Serializable {
     }
 
     public boolean isFirewalled() {
-        return (flags & FIREWALLED) == FIREWALLED;
+        return firewalled;
     }
     
     public void setFirewalled(boolean firewalled) {
-        if (firewalled) {
-            this.flags |= FIREWALLED;
-        } else {
-            this.flags &= ~FIREWALLED;
-        }
+        this.firewalled = firewalled;
     }
     
     public long getAdaptativeTimeout() {
@@ -258,12 +321,12 @@ public class ContactNode implements Contact, Serializable {
         
         Contact c = (Contact)o;
         return nodeId.equals(c.getNodeID())
-                && address.equals(c.getSocketAddress());
+                && contactAddress.equals(c.getContactAddress());
     }
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(ContactUtils.toString(getNodeID(), getSocketAddress()))
+        buffer.append(ContactUtils.toString(getNodeID(), getContactAddress()))
             .append(", rtt=").append(getRoundTripTime())
             .append(", failures=").append(getFailures())
             .append(", instanceId=").append(getInstanceID())

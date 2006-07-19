@@ -329,7 +329,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         Collection<Contact> nodes = response.getNodes();
         for(Contact node : nodes) {
             
-            if (!NetworkUtils.isValidSocketAddress(node.getSocketAddress())) {
+            if (!NetworkUtils.isValidSocketAddress(node.getContactAddress())) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error(response.getContact() 
                             + " sent us a ContactNode with an invalid IP/Port " + node);
@@ -502,7 +502,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         markAsQueried(node);
         
         boolean sent = context.getMessageDispatcher()
-            .send(node, createRequest(node.getSocketAddress()), this);
+            .send(node, createRequest(node.getContactAddress()), this);
         
         if (sent) {
             lookupStat.addRequest();

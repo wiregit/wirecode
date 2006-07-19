@@ -312,7 +312,7 @@ public class RouteTableImpl implements RouteTable {
             return;
         }
         
-        if (!node.getSocketAddress().equals(address)) {
+        if (!node.getContactAddress().equals(address)) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(node + " address and " + address + " do not match");
             }

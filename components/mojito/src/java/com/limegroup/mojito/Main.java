@@ -81,13 +81,15 @@ public class Main {
     }
     
     private static List<MojitoDHT> standalone(InetAddress addr, int port, int count) {
-        RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.setValue(true);
+        if (count > 1) {
+            RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.setValue(true);
+        }
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>(count);
         
         for(int i = 0; i < count; i++) {
             try {
-                MojitoDHT dht = new MojitoDHT("DHT" + i);
+                MojitoDHT dht = new MojitoDHT("DHT" + i, false);
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));

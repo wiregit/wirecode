@@ -181,7 +181,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                 } else {
                     ResponseHandler handler = new GetQueryKeyHandler(keyValuesToForward);
                     RequestMessage request = context.getMessageHelper()
-                        .createFindNodeRequest(node.getSocketAddress(), node.getNodeID());
+                        .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
                     
                     context.getMessageDispatcher().send(node, request, handler);
                 }

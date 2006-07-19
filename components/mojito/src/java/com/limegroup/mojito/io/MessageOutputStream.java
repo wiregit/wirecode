@@ -96,7 +96,7 @@ public class MessageOutputStream extends DataOutputStream {
         writeInt(node.getVendor());
         writeShort(node.getVersion());
         writeKUID(node.getNodeID());
-        writeSocketAddress(node.getSocketAddress());
+        writeSocketAddress(node.getContactAddress());
     }
     
     public void writeContacts(Collection<? extends Contact> nodes) throws IOException {

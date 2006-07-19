@@ -66,7 +66,7 @@ public class SerializeTest {
     }
     
     public static void testSerializeStats() throws Exception{
-        MojitoDHT dht = new MojitoDHT();
+        MojitoDHT dht = new MojitoDHT(false);
         try {
             dht.bind(addr);
         } catch (IOException e) {
@@ -92,7 +92,7 @@ public class SerializeTest {
     }
     
     public static void testSerializeRT() throws Exception{
-        MojitoDHT dht = new MojitoDHT();
+        MojitoDHT dht = new MojitoDHT(false);
         try {
             dht.bind(addr);
         } catch (IOException e) {

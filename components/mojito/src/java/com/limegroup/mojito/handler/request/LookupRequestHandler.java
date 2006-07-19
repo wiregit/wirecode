@@ -80,7 +80,7 @@ public class LookupRequestHandler extends AbstractRequestHandler {
         
         KUID lookup = request.getLookupID();
         QueryKey queryKey = QueryKey.getQueryKey(
-                request.getContact().getSocketAddress());
+                request.getContact().getContactAddress());
         
         List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
@@ -88,6 +88,12 @@ public class LookupRequestHandler extends AbstractRequestHandler {
                 nodes = BucketUtils.getMostRecentlySeenContacts(
                             context.getRouteTable().getContacts(), 
                             KademliaSettings.REPLICATION_PARAMETER.getValue());
+                
+                // If the external port is not set then make sure
+                // we're not in the list!
+                if (context.getExternalPort() == 0) {
+                    nodes.remove(context.getLocalNode());
+                }
                 
             } else {
                 nodes = context.getRouteTable().select(lookup, 

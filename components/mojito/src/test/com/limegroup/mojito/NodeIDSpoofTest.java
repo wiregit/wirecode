@@ -51,21 +51,21 @@ public class NodeIDSpoofTest extends BaseTestCase {
         MojitoDHT bootstrap = null, original = null, spoofer = null;
         
         try {
-            bootstrap = new MojitoDHT("Bootstrap Node");
+            bootstrap = new MojitoDHT("Bootstrap Node", false);
             bootstrap.bind(new InetSocketAddress("localhost", PORT));
             bootstrap.start();
             
             // The original Node
             KUID nodeId = KUID.createRandomNodeID();
             
-            original = new MojitoDHT("OriginalDHT");
+            original = new MojitoDHT("OriginalDHT", false);
             MojitoHelper.setNodeID(original, nodeId);
             original.bind(new InetSocketAddress(PORT+1));
             original.start();
             original.bootstrap(bootstrap.getSocketAddress());
             
             // The spoofer Node
-            spoofer = new MojitoDHT("Spoofer Node");
+            spoofer = new MojitoDHT("Spoofer Node", false);
             MojitoHelper.setNodeID(spoofer, nodeId);
             spoofer.bind(new InetSocketAddress(PORT+2));
             spoofer.start();
@@ -75,7 +75,7 @@ public class NodeIDSpoofTest extends BaseTestCase {
             List<Contact> nodes = context.getRouteTable().getContacts();
             for(Contact node : nodes) {
                 assertNotEquals(spoofer.getSocketAddress(), 
-                        node.getSocketAddress());
+                        node.getContactAddress());
             }
         } finally {
             if (bootstrap != null) {
@@ -130,7 +130,7 @@ public class NodeIDSpoofTest extends BaseTestCase {
             
             boolean contains = false;
             for(Contact node : nodes) {
-                if (node.getSocketAddress()
+                if (node.getContactAddress()
                         .equals(replacement.getSocketAddress())) {
                     contains = true;
                     break;

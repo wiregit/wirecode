@@ -47,7 +47,7 @@ public class DataBaseTest extends BaseTestCase {
     }
 
     protected void setUp() throws Exception {
-        dht = new MojitoDHT();
+        dht = new MojitoDHT(false);
         try {
             dht.bind(addr);
         } catch (IOException e) {

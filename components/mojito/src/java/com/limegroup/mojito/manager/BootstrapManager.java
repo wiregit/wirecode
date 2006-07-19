@@ -226,7 +226,7 @@ public class BootstrapManager extends AbstractManager {
                 try {
                     return handler.call();
                 } catch (DHTException ignore) {
-                    failed.add(node.getSocketAddress());
+                    failed.add(node.getContactAddress());
                 }
             }
             

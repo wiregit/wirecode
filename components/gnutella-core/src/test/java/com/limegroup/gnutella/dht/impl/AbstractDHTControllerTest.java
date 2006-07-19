@@ -76,10 +76,13 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         for(int i = 0; i < numNodes; i++) {
             KUID kuid = KUID.createRandomNodeID();
             ContactNode node = new ContactNode(
+                    new InetSocketAddress("localhost",4000+i),
                     ContextSettings.VENDOR.getValue(),
                     ContextSettings.VERSION.getValue(),
                     kuid,
                     new InetSocketAddress("localhost",4000+i),
+                    0,
+                    false,
                     State.UNKNOWN);
             rt.add(node);
         }

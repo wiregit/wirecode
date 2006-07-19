@@ -61,19 +61,23 @@ public class DefaultMessageFactory implements MessageFactory {
     public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
             throws MessageFormatException, IOException {
         
-        if (data.length == 1) {
-            ByteBuffer guid = (ByteBuffer)data[0].slice()
-                .position(AbstractMessage.GUID_RANGE[0])
-                .limit(AbstractMessage.GUID_RANGE[1]);
-            
-            ByteBuffer ttlHops = (ByteBuffer)data[0].slice()
-                .position(AbstractMessage.TTL_HOPS_RANGE[0])
-                .limit(AbstractMessage.TTL_HOPS_RANGE[1]);
-            
-            ByteBuffer payload = (ByteBuffer)data[0]
-              .position(AbstractMessage.PAYLOAD_START);
-            
-            return createMessage(src, guid, ttlHops, payload);
+        try {
+            if (data.length == 1) {
+                ByteBuffer guid = (ByteBuffer)data[0].slice()
+                    .position(AbstractMessage.GUID_RANGE[0])
+                    .limit(AbstractMessage.GUID_RANGE[1]);
+                
+                ByteBuffer ttlHops = (ByteBuffer)data[0].slice()
+                    .position(AbstractMessage.TTL_HOPS_RANGE[0])
+                    .limit(AbstractMessage.TTL_HOPS_RANGE[1]);
+                
+                ByteBuffer payload = (ByteBuffer)data[0]
+                  .position(AbstractMessage.PAYLOAD_START);
+                
+                return createMessage(src, guid, ttlHops, payload);
+            }
+        } catch (IllegalArgumentException err) {
+            throw new MessageFormatException(err);
         }
         
         for(ByteBuffer b : data) {

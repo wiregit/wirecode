@@ -42,11 +42,11 @@ public class CacheForwardTest extends BaseTestCase {
     }
 
     public void testCacheForward() {
-        MojitoDHT originalRequesterDHT = new MojitoDHT("DHT-1");
+        MojitoDHT originalRequesterDHT = new MojitoDHT("DHT-1", false);
         
-        MojitoDHT firstStorer = new MojitoDHT("DHT-2");
+        MojitoDHT firstStorer = new MojitoDHT("DHT-2", false);
         
-        MojitoDHT secondStorer = new MojitoDHT("DHT-3");
+        MojitoDHT secondStorer = new MojitoDHT("DHT-3", false);
         try {
             originalRequesterDHT.bind(new InetSocketAddress("localhost", 3000));
             firstStorer.bind(new InetSocketAddress("localhost", 3001));

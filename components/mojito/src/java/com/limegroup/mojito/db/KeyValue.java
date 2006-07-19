@@ -74,7 +74,7 @@ public class KeyValue implements Map.Entry<KUID, byte[]>, Serializable {
     public static KeyValue createLocalKeyValue(KUID key, byte[] value, 
             Contact node) {
         return createKeyValue(key, value, 
-                node.getNodeID(), node.getSocketAddress(), null, null, true);
+                node.getNodeID(), node.getContactAddress(), null, null, true);
     }
     
     /** Constructs an local KeyValue */

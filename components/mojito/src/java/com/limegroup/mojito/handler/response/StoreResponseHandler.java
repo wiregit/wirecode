@@ -118,7 +118,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             }
             
             StoreRequest request = context.getMessageHelper()
-                .createStoreRequest(node.getSocketAddress(), queryKey, keyValue);
+                .createStoreRequest(node.getContactAddress(), queryKey, keyValue);
             
             context.getMessageDispatcher().send(node, request, this);
             countDown++;

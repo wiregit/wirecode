@@ -39,7 +39,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
 
     @Override
     public void init() {
-        dht = new MojitoDHT("LimeMojitoDHT");
+        dht = new MojitoDHT("PassiveMojitoDHT", true);
         limeDHTRouteTable = (LimeDHTRoutingTable) dht.setRoutingTable(LimeDHTRoutingTable.class);
         setLimeMessageDispatcher();
         //load the small list of MRS nodes for bootstrap
@@ -49,7 +49,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 ObjectInputStream oii = new ObjectInputStream(in);
                 Contact node;
                 while((node = (Contact)oii.readObject()) != null){
-                    addBootstrapHost(node.getSocketAddress());
+                    addBootstrapHost(node.getContactAddress());
                 }
             }
         } catch (ClassNotFoundException e) {
@@ -59,11 +59,6 @@ class PassiveDHTNodeController extends AbstractDHTController{
         } catch (IOException e) {
             LOG.error("IOException", e);
         }
-    }
-
-    @Override
-    public void start() {
-        super.start(false);
     }
     
     private synchronized void addLeafDHTNode(String host, int port) {

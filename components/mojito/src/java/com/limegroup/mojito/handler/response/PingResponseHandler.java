@@ -49,7 +49,7 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
     }
     
     public PingResponseHandler(Context context, Contact contact) {
-        this(context, contact.getNodeID(), contact.getSocketAddress());
+        this(context, contact.getNodeID(), contact.getContactAddress());
     }
 
     public PingResponseHandler(Context context, KUID nodeId, SocketAddress address) {
@@ -70,7 +70,7 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
         SocketAddress externalAddress = response.getExternalAddress();
         
         Contact node = response.getContact();
-        if (node.getSocketAddress().equals(externalAddress)) {
+        if (node.getContactAddress().equals(externalAddress)) {
             setException(new Exception(node + " is trying to set our external address to its address!"));
             return;
         }

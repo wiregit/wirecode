@@ -51,7 +51,7 @@ class MojitoHelper {
         int vendor = context.getVendor();
         int version = context.getVersion();
         
-        Contact node = new ContactNode(vendor, version, nodeId, new InetSocketAddress(0), State.UNKNOWN);
+        Contact node = ContactNode.createLocalContact(vendor, version, nodeId, 0);
         node.setTimeStamp(Long.MAX_VALUE);
         routeTable.add(node);
         

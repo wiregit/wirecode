@@ -125,7 +125,8 @@ public class MessageInputStream extends DataInputStream {
         int version = readUnsignedShort();
         KUID nodeId = readNodeID();
         SocketAddress addr = readSocketAddress();
-        return new ContactNode(vendor, version, nodeId, addr, State.UNKNOWN);
+        
+        return ContactNode.createUnknownContact(vendor, version, nodeId, addr);
     }
     
     public List<Contact> readContacts() throws IOException {

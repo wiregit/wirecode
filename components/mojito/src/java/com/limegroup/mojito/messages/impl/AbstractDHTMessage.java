@@ -32,7 +32,6 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
@@ -43,6 +42,8 @@ import com.limegroup.mojito.routing.impl.ContactNode;
  */
 abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage {
 
+    private static final int FIREWALLED = 0x01;
+    
     /*
      *  To remove the (Gnutella) Message dependence don't
      *  extend from AbstractMessage and scroll down to the
@@ -103,9 +104,14 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         int vendor = in.readInt();
         int version = in.readUnsignedShort();
         KUID nodeId = in.readNodeID();
+        SocketAddress contactAddress = in.readSocketAddress();
         int instanceId = in.readUnsignedByte();
         int flags = in.readUnsignedByte();
-        this.contact = new ContactNode(vendor, version, nodeId, src, instanceId, flags, State.ALIVE);
+        
+        boolean firewalled = (flags & FIREWALLED) != 0;
+        
+        this.contact = ContactNode.createLiveContact(src, vendor, version, 
+                nodeId, contactAddress, instanceId, firewalled);
         
         this.messageId = in.readMessageID();
         
@@ -160,8 +166,15 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         out.writeInt(getContact().getVendor()); // 1-3
         out.writeShort(getContact().getVersion()); // 4-5
         out.writeKUID(getContact().getNodeID()); // 6-26
+        out.writeSocketAddress(getContact().getContactAddress());
         out.writeByte(getContact().getInstanceID()); // 27
-        out.writeByte(getContact().getFlags()); // 28
+        
+        int flags = 0;
+        if (getContact().isFirewalled()) {
+            flags |= FIREWALLED;
+        }
+        out.writeByte(flags);
+        
         out.writeKUID(getMessageID()); // 29-48
         out.writeByte(0); // 49
         out.writeInt(0); // 50-53
@@ -173,11 +186,11 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
             throws SignatureException {
         try {
             // Destination
-            SocketAddress myExternalAddress = context.getSocketAddress();
+            SocketAddress myExternalAddress = context.getContactAddress();
             signature.update(NetworkUtils.getBytes(myExternalAddress));
 
             // Source
-            SocketAddress contactAddress = getContact().getSocketAddress();
+            SocketAddress contactAddress = getContact().getContactAddress();
             signature.update(NetworkUtils.getBytes(contactAddress));
         } catch (UnknownHostException err) {
             throw new SignatureException(err);

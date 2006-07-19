@@ -27,7 +27,7 @@ public abstract class DHTTestCase extends BaseTestCase {
     
     public static void globalSetUp() throws Exception {
         //setup bootstrap node
-        BOOTSTRAP_DHT = new MojitoDHT("bootstrapNode");
+        BOOTSTRAP_DHT = new MojitoDHT("bootstrapNode", false);
         InetSocketAddress addr = new InetSocketAddress("localhost", BOOTSTRAP_DHT_PORT);
         BOOTSTRAP_DHT.bind(addr);
         BOOTSTRAP_DHT.start();

@@ -49,7 +49,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
         
         Contact node = request.getContact();
         PingResponse response = context.getMessageHelper()
-                .createPingResponse(request, node.getSocketAddress());
+                .createPingResponse(request, node.getContactAddress());
 
         context.getMessageDispatcher().send(node, response);
         networkStats.PONGS_SENT.incrementStat();

@@ -71,7 +71,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         }
         
         QueryKey expected = QueryKey.getQueryKey(
-                request.getContact().getSocketAddress());
+                request.getContact().getContactAddress());
         
         if (!expected.equals(queryKey)) {
             if (LOG.isErrorEnabled()) {

@@ -133,7 +133,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     @Override
     protected boolean allow(DHTMessage message) {
         Contact node = message.getContact();
-        return filter.allow(node.getSocketAddress());
+        return filter.allow(node.getContactAddress());
     }
     
     

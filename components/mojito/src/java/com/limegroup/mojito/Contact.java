@@ -51,29 +51,24 @@ public interface Contact {
     public KUID getNodeID();
     
     /**
-     * Sets the SocketAddress of this Contact
+     * Returns the contact address. Use the contact
+     * address to send requests or responses to the
+     * Node.
      */
-    public void setSocketAddress(SocketAddress address);
+    public SocketAddress getContactAddress();
     
     /**
-     * Returns the SocketAddress of this Contact
+     * Returns the source address. The is the address
+     * as read from the IP packet. Depending on the
+     * network configuration of the remote Host it's
+     * maybe not an valid address to respond to. 
      */
-    public SocketAddress getSocketAddress();
+    public SocketAddress getSourceAddress();
     
     /**
      * Returns the instance ID of this Contact
      */
     public int getInstanceID();
-    
-    /**
-     * Sets the ID to the next ID
-     */
-    public void nextInstanceID();
-    
-    /**
-     * Returns the flags this Contact has set
-     */
-    public int getFlags();
     
     /**
      * Sets the time of the last successful Contact

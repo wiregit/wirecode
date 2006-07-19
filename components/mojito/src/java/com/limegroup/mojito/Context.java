@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
@@ -67,6 +68,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
@@ -88,8 +90,10 @@ public class Context {
     private KeyPair masterKeyPair;
     
     private String name;
+    
     private Contact localNode;
     private SocketAddress localAddress;
+    
     private SocketAddress tmpExternalAddress;
 
     private final Object keyPairLock = new Object();
@@ -167,6 +171,16 @@ public class Context {
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
         routeTable.add(localNode);
+        
+        // Clear the firewalled flag for a moment so that we can
+        // add the local node to the Route Table
+        if (localNode.isFirewalled()) {
+            ((ContactNode)localNode).setFirewalled(false);
+            routeTable.add(localNode);
+            ((ContactNode)localNode).setFirewalled(true);
+        } else {
+            routeTable.add(localNode);
+        }
     }
     
     private void initContextTimer() {
@@ -203,7 +217,7 @@ public class Context {
      * Installs a custom MessageDispatcher implementation. The
      * passed Class must be a subclass of MessageDispatcher.
      */
-    public synchronized void setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
+    public synchronized MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
         }
@@ -215,6 +229,7 @@ public class Context {
         try {
             Constructor c = clazz.getConstructor(Context.class);
             messageDispatcher = (MessageDispatcher)c.newInstance(this);
+            return messageDispatcher;
         } catch (Exception err) {
             throw new RuntimeException(err);
         }
@@ -236,7 +251,17 @@ public class Context {
         try {
             Constructor c = clazz.getConstructor(Context.class);
             routeTable = (RouteTable)c.newInstance(this);
-            routeTable.add(localNode);
+            
+            // Clear the firewalled flag for a moment so that we can
+            // add the local node to the Route Table
+            if (localNode.isFirewalled()) {
+                ((ContactNode)localNode).setFirewalled(false);
+                routeTable.add(localNode);
+                ((ContactNode)localNode).setFirewalled(true);
+            } else {
+                routeTable.add(localNode);
+            }
+            
             return routeTable;
         } catch (Exception err) {
             throw new RuntimeException(err);
@@ -301,7 +326,7 @@ public class Context {
     }
     
     public boolean isLocalNode(Contact node) {
-        return isLocalNode(node.getNodeID(), node.getSocketAddress());
+        return isLocalNode(node.getNodeID(), node.getContactAddress());
     }
     
     public boolean isLocalNode(KUID nodeId, SocketAddress addr) {
@@ -313,42 +338,70 @@ public class Context {
     }
     
     public boolean isLocalAddress(SocketAddress address) {
-        return getSocketAddress().equals(address);
+        return localNode.getSourceAddress().equals(address);
     }
     
     public KUID getLocalNodeID() {
         return localNode.getNodeID();
     }
     
-    public SocketAddress getSocketAddress() {
-        return localNode.getSocketAddress();
+    public synchronized void setExternalPort(int port) {
+        InetSocketAddress addr = (InetSocketAddress)localNode.getContactAddress();
+        setContactAddress(new InetSocketAddress(addr.getAddress(), port));
+    }
+    
+    public synchronized int getExternalPort() {
+        return ((InetSocketAddress)localNode.getContactAddress()).getPort();
+    }
+    
+    public SocketAddress getContactAddress() {
+        return localNode.getContactAddress();
+    }
+    
+    public synchronized void setContactAddress(SocketAddress externalAddress) {
+        if (isFirewalled() && ((InetSocketAddress)externalAddress).getPort() != 0) {
+            throw new IllegalStateException();
+        }
+        
+        ((ContactNode)localNode).setContactAddress(externalAddress);
     }
     
     public SocketAddress getLocalSocketAddress() {
         return localAddress;
     }
     
-    public void setExternalSocketAddress(SocketAddress newExternalAddress)
+    public void setExternalSocketAddress(SocketAddress externalSocketAddress)
             throws IOException {
-        if (newExternalAddress != null) {
-            if (tmpExternalAddress == null) {
-                localNode.setSocketAddress(newExternalAddress);
-                tmpExternalAddress = newExternalAddress;
-            } else if (!newExternalAddress.equals(localNode.getSocketAddress())) {
-                if (tmpExternalAddress.equals(newExternalAddress)) {
-                    localNode.setSocketAddress(newExternalAddress);
-                }
-                tmpExternalAddress = newExternalAddress;
-            }
+        if (externalSocketAddress == null) {
+            return;
         }
+        
+        // --- DOES NOT CHANGE THE PORT! ---
+        
+        InetAddress externalAddress = ((InetSocketAddress)externalSocketAddress).getAddress();
+        int externalPort = ((InetSocketAddress)externalSocketAddress).getPort();
+        
+        InetAddress currentAddress = ((InetSocketAddress)localNode.getContactAddress()).getAddress();
+        int currentPort = ((InetSocketAddress)localNode.getContactAddress()).getPort();
+        
+        if (externalAddress.equals(currentAddress)) {
+            return;
+        }
+        
+        InetSocketAddress addr = new InetSocketAddress(externalAddress, currentPort);
+        
+        if (tmpExternalAddress == null 
+                || tmpExternalAddress.equals(addr)) {
+            setContactAddress(addr);
+            
+            //if (externalPort == currentPort) {}
+        }
+        
+        tmpExternalAddress = addr;
     }
     
     public boolean isFirewalled() {
         return localNode.isFirewalled();
-    }
-    
-    public void setFirewalled(boolean firewalled) {
-        localNode.setFirewalled(firewalled);
     }
     
     public Database getDatabase() {
@@ -459,15 +512,22 @@ public class Context {
             throw new IOException("DHT is already bound");
         }
         
-        this.localAddress = localAddress;
-        
-        InetSocketAddress addr = (InetSocketAddress)localAddress;
-        if (addr.getAddress().isAnyLocalAddress()) {
-            addr = new InetSocketAddress("localhost", addr.getPort());
+        int port = ((InetSocketAddress)localAddress).getPort();
+        if (port == 0) {
+            throw new IllegalArgumentException("Cannot bind Socket to Port " + port);
         }
         
-        localNode.setSocketAddress(addr);
-        localNode.nextInstanceID();
+        this.localAddress = localAddress;
+        
+        // If we not firewalled and the external port has not 
+        // been set yet then set it to the same port as the 
+        // local address.
+        if (!isFirewalled() && getExternalPort() == 0) {
+            setExternalPort(((InetSocketAddress)localAddress).getPort());
+        }
+        
+        ((ContactNode)localNode).setSourceAddress(localAddress);
+        ((ContactNode)localNode).nextInstanceID();
         
         messageDispatcher.bind(localAddress);
     }
@@ -484,6 +544,8 @@ public class Context {
             LOG.error("DHT is already running!");
             return;
         }
+        
+        tmpExternalAddress = null;
         
         initContextTimer();
         initContextExecutor();

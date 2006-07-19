@@ -103,7 +103,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * 
      * @param activeMode true to connect to the DHT in active mode
      */
-    protected void start(boolean activeMode) {
+    public void start() {
         if (running) {
             return;
         }
@@ -112,9 +112,6 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
                 || DHTSettings.DISABLE_DHT_USER.getValue()) { 
             return;
         }
-        
-        //set firewalled status
-        dht.setFirewalled(!activeMode);
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Initializing the DHT");
@@ -300,8 +297,6 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     
     public abstract void init();
     
-    public abstract void start();
-    
     public abstract boolean isActiveNode();
 
     /**
@@ -318,7 +313,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         private final int port;
         
         public IpPortContactNode(Contact node) {
-            InetSocketAddress addr = (InetSocketAddress) node.getSocketAddress();
+            InetSocketAddress addr = (InetSocketAddress) node.getContactAddress();
             this.nodeAddress = addr.getAddress();
             this.port = addr.getPort();
         }
