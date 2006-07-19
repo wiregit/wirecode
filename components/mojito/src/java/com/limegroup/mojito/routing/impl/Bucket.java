@@ -63,8 +63,7 @@ public interface Bucket {
     public void addCachedContact(Contact node);
 
     /**
-     * @return TODO
-     * 
+     * Updates the Contact in this bucket 
      */
     public Contact updateContact(Contact node);
     

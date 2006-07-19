@@ -216,7 +216,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         decrementActiveSearches();
         
         Contact node = message.getContact();
-        int hop = hopMap.get(node.getNodeID()).intValue();
+        int hop = hopMap.remove(node.getNodeID()).intValue();
         
         if (message instanceof FindValueResponse) {
             if (isValueLookup()) {
@@ -258,7 +258,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
     
         
-        int hop = hopMap.get(nodeId).intValue();
+        int hop = hopMap.remove(nodeId).intValue();
         lookupStep(hop);
         
         if (hasActiveSearches() == false) {
@@ -565,7 +565,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         if (responses.size() > resultSetSize) {
             Contact worst = responses.select(furthestId).getKey();
             responses.remove(worst.getNodeID());
-            //hopMap.remove(node.getNodeID()); // TODO
         }
         responseCount++;
     }
