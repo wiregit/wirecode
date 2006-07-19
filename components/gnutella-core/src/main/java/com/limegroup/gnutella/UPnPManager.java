@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -495,7 +496,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	private class StaleCleaner implements Runnable {
 	    
 	    // TODO: remove
-	    private String list(java.util.List l) {
+	    private String list(List l) {
 	        String s = "";
 	        for(Iterator i = l.iterator(); i.hasNext(); ) {
 	            Argument next = (Argument)i.next();

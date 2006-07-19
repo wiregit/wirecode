@@ -27,8 +27,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * Firewalled hosts can also be alternate locations, although the format is
  * slightly different.
  */
-public abstract class AlternateLocation implements HTTPHeaderValue, 
-	Comparable {
+public abstract class AlternateLocation implements HTTPHeaderValue, Comparable<AlternateLocation> {
     
     /**
      * The vendor to use.
@@ -503,10 +502,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      * propogated more, since this will serve to get better load balancing of
      * uploader. 
      */
-    public int compareTo(Object obj) {
-        
-        AlternateLocation other = (AlternateLocation) obj;
-        
+    public int compareTo(AlternateLocation other) {
         int ret = _count - other._count;
         if(ret!=0) 
             return ret;

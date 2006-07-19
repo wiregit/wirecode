@@ -2,9 +2,6 @@ package com.limegroup.gnutella.util;
 
 import java.text.Collator;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -13,7 +10,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -348,56 +344,6 @@ public class StringUtils {
     }
     
     /**
-     * Returns the entries in the set in a string form, that can be used
-     * in HTTP headers (among other purposes)
-     * @param set The set whose entries are to be convereted to string form
-     * @return the entries in the set in a string form. 
-     * e.g. For a collection with entries ("a", "b"), the string returned will
-     * be "a,b"
-     */
-    public static String getEntriesAsString(Collection collection){
-        StringBuffer buffer = new StringBuffer();
-        boolean isFirstEntry = true;
-        //get the connected supernodes and pass them
-        for(Iterator iter = collection.iterator();iter.hasNext();){
-            //get the next entry
-            Object entry = iter.next();
-            //if the first entry that we are adding
-            if(!isFirstEntry){
-                //append separator to separate the entries
-                buffer.append(Constants.ENTRY_SEPARATOR);
-            }else{
-                //unset the flag
-                isFirstEntry = false;
-            }
-            //append the entry
-            buffer.append(entry.toString());
-        }
-        return buffer.toString();
-    }
-    
-    /**
-     * Returns the entries passed in the string form as a Set fo strings
-     * @param values The string representation of entries to be split.
-     * The entries in the string are separated by Constants.ENTRY_SEPARATOR
-     * @return the entries in the set form. 
-     * e.g. For string "a,b", the Set returned will have 2 entries:
-     * "a" & "b"
-     */
-    public static Set getSetofValues(String values){
-        Set<String> valueSet = new HashSet<String>();
-        //tokenize the values
-        StringTokenizer st = new StringTokenizer(values,
-            Constants.ENTRY_SEPARATOR);
-        //add the values to the set
-        while(st.hasMoreTokens()){
-            valueSet.add(st.nextToken());
-        }
-        //return the set
-        return valueSet;
-    }
-    
-    /**
      * Replaces all occurrences of old_str in str with new_str
      *
      * @param str the String to modify
@@ -480,7 +426,7 @@ public class StringUtils {
         final int MAX_LEN = SearchSettings.MAX_QUERY_LENGTH.getValue();
 
         //Get the set of keywords within the name.
-        Set intersection = keywords(name, allowNumbers);
+        Set<String> intersection = keywords(name, allowNumbers);
 
         if (intersection.size() < 1) { // nothing to extract!
             retString = StringUtils.removeIllegalChars(name);
@@ -488,9 +434,9 @@ public class StringUtils {
         } else {
             StringBuffer sb = new StringBuffer();
             int numWritten = 0;
-            Iterator keys = intersection.iterator();
-            for (; keys.hasNext() && (numWritten < MAX_LEN); ) {
-                String currKey = (String) keys.next();
+            for(String currKey : intersection) {
+                if(numWritten >= MAX_LEN)
+                    break;
                 
                 // if we have space to add the keyword
                 if ((numWritten + currKey.length()) < MAX_LEN) {

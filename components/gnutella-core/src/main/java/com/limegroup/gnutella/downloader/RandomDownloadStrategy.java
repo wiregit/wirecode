@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -87,15 +86,12 @@ public class RandomDownloadStrategy implements SelectionStrategy {
         // or the first chunk after idealLocation
         long idealLocation = getIdealLocation(neededBytes, blockSize);
         
-        Iterator intervalIterator = candidateBytes.getAllIntervals();
-        
         // First aligned chunk after idealLocation
         Interval intervalAbove = null;
         
         // Last aligned chunk before idealLocation
         Interval intervalBelow = null;
-        while (intervalIterator.hasNext()) {
-            Interval candidateInterval = (Interval) intervalIterator.next();
+        for(Interval candidateInterval : candidateBytes) {
             if (candidateInterval.low < idealLocation)
                 intervalBelow = optimizeIntervalBelow(candidateInterval, idealLocation,
                         blockSize);

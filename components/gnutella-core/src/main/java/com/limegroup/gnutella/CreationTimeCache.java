@@ -241,7 +241,7 @@ public final class CreationTimeCache {
      * want all, give Integer.MAX_VALUE.
      * @return a List ordered by younger URNs.
      */
-    public synchronized List getFiles(final int max)
+    public synchronized List<URN> getFiles(final int max)
         throws IllegalArgumentException {
         return getFiles(null, max);
     }    
@@ -310,7 +310,7 @@ public final class CreationTimeCache {
 
     /** Returns all of the files URNs, from youngest to oldest.
      */
-    public synchronized List getFiles() {
+    public synchronized List<URN> getFiles() {
         return getFiles(Integer.MAX_VALUE);
     }
     

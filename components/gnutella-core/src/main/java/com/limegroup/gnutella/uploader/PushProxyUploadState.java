@@ -61,7 +61,7 @@ public final class PushProxyUploadState extends UploadState {
             return;
         }
         
-        Map params = UPLOADER.getParameters();
+        Map<String, Object> params = UPLOADER.getParameters();
         int fileIndex = 0; // default to 0.
         Object index = params.get(P_FILE);
         // set the file index if we know it...

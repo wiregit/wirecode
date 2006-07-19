@@ -1323,7 +1323,7 @@ public class UploadManager implements BandwidthTracker {
             //file information part: /get/0/sample.txt
             String fileInfoPart = st.nextToken().trim();
 			String fileName = null;
-			Map parameters = null;
+			Map<String, Object> parameters = null;
             boolean hadPassword = false;
 			
             if(fileInfoPart.equals("/")) {
@@ -1385,7 +1385,7 @@ public class UploadManager implements BandwidthTracker {
                         if( fileIndex.intValue() < 0 )
                             throw new IOException("Malformed PushProxy Req");
                         if( parameters == null ) // create the param map
-                            parameters = new HashMap();
+                            parameters = new HashMap<String, Object>();
                         parameters.put("file", fileIndex);
                      }
                 }
@@ -1562,7 +1562,7 @@ public class UploadManager implements BandwidthTracker {
   			_fileName = fName;
             _http11 = http11;
             if( params == null )
-                _params = Collections.EMPTY_MAP;
+                _params = Collections.emptyMap();
             else
                 _params = params;
             _hadPass = hadPass;

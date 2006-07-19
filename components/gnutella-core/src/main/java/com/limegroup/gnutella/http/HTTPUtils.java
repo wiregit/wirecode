@@ -261,7 +261,7 @@ public final class HTTPUtils {
      * to the <tt>Writer</tt>.
      */
     public static void writeFeatures(Writer writer) throws IOException {
-        Set features = getFeaturesValue();
+        Set<HTTPHeaderValue> features = getFeaturesValue();
         // Write X-Features header.
         if (features.size() > 0) {
             writeHeader(HTTPHeaderName.FEATURES,
@@ -274,7 +274,7 @@ public final class HTTPUtils {
      * to the <tt>OutputStream</tt>.
      */
     public static void writeFeatures(OutputStream stream) throws IOException {
-        Set features = getFeaturesValue();
+        Set<HTTPHeaderValue> features = getFeaturesValue();
         // Write X-Features header.
         if (features.size() > 0) {
             writeHeader(HTTPHeaderName.FEATURES,

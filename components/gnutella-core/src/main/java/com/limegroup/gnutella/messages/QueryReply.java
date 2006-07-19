@@ -382,7 +382,7 @@ public class QueryReply extends Message implements SecureMessage {
                 // size of standard, no options, ggep block...
                 int ggepLen=
                     _ggepUtil.getQRGGEP(false, false, false,
-                                        Collections.EMPTY_SET).length;
+                                        IpPort.EMPTY_SET).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
@@ -561,12 +561,7 @@ public class QueryReply extends Message implements SecureMessage {
      *  instance of the Response class.  Throws BadPacketException if
      *  this data couldn't be extracted.  */
     public Iterator<Response> getResults() throws BadPacketException {
-        parseResults();
-        Response[] responses = _data.getResponses();
-        if (responses==null)
-            throw new BadPacketException();
-        List<Response> list = Arrays.asList(responses);
-        return list.iterator();
+        return getResultsAsList().iterator();
     }
 
 
@@ -574,12 +569,7 @@ public class QueryReply extends Message implements SecureMessage {
      *  instance of the Response class.  Throws BadPacketException if
      *  this data couldn't be extracted.  */
     public List<Response> getResultsAsList() throws BadPacketException {
-        parseResults();
-        Response[] responses = _data.getResponses();        
-        if (responses==null)
-            throw new BadPacketException("results are null");
-        List<Response> list = Arrays.asList(responses);
-        return list;
+        return Arrays.asList(getResultsArray());
     }
 
 
@@ -1248,7 +1238,7 @@ public class QueryReply extends Message implements SecureMessage {
         public byte[] getQRGGEP(boolean supportsBH,
                                 boolean isMulticastResponse,
                                 boolean supportsFWTransfer,
-                                Set proxies) {
+                                Set<? extends IpPort> proxies) {
             byte[] retGGEPBlock = _standardGGEP;
             if ((proxies != null) && (proxies.size() > 0)) {
                 final int MAX_PROXIES = 4;
@@ -1266,9 +1256,9 @@ public class QueryReply extends Message implements SecureMessage {
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 int numWritten = 0;
-                Iterator iter = proxies.iterator();
+                Iterator<? extends IpPort> iter = proxies.iterator();
                 while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
-                    IpPort ppi = (IpPort)iter.next();
+                    IpPort ppi = iter.next();
                     String host = 
                         ppi.getAddress();
                     int port = ppi.getPort();

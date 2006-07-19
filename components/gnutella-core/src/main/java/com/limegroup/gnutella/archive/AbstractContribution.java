@@ -100,11 +100,11 @@ abstract class AbstractContribution implements Contribution {
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.archive.Contribution#getFileDescs()
 	 */
-	public Set getFileDescs() { 
+	public Set<FileDesc> getFileDescs() { 
 		return Collections.unmodifiableSet( _files.keySet() ); 
 	}
 	
-	protected Collection getFiles() {
+	protected Collection<ArchiveFile> getFiles() {
 		return Collections.unmodifiableCollection(_files.values());
 	}
 	

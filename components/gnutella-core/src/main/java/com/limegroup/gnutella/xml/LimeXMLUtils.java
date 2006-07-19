@@ -17,7 +17,6 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -205,15 +204,14 @@ public class LimeXMLUtils {
             throw new NullPointerException("querying with null doc.");
 
         //First find the names of all the fields in the query
-        Set queryNameValues = queryDoc.getNameValueSet();
+        Set<Map.Entry<String, String>> queryNameValues = queryDoc.getNameValueSet();
         int size = queryNameValues.size();
         int matchCount = 0; // number of matches
         int nullCount = 0; // number of fields in query not in replyDoc.
         boolean matchedBitrate = false;
-        for (Iterator i = queryNameValues.iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            String currFieldName = (String)entry.getKey();
-            String queryValue = (String)entry.getValue();
+        for(Map.Entry<String, String> entry : queryNameValues) {
+            String currFieldName = entry.getKey();
+            String queryValue = entry.getValue();
             Assert.that(queryValue != null, "null value");
             if (queryValue.equals(""))
                 continue; // "" matches everything!!

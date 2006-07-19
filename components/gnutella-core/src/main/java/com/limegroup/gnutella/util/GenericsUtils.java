@@ -73,9 +73,9 @@ public class GenericsUtils {
                 }
             }
             if(copy != null)
-                return (Map<K, V>)copy;
+                return copy;
             else
-                return (Map<K, V>)map;
+                return map;
         } else {
             throw new ClassCastException();
         }
@@ -131,9 +131,9 @@ public class GenericsUtils {
             }
             
             if(copy != null)
-                return (Collection<V>)copy;
+                return copy;
             else
-                return (Collection<V>)c;
+                return c;
         } else {
             throw new ClassCastException();
         }

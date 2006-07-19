@@ -144,7 +144,7 @@ public class PushAltLoc extends AlternateLocation {
 	}
 
 
-	public int compareTo(Object obj) {
+	public int compareTo(AlternateLocation obj) {
 	    
         if (this==obj) //equal
             return 0;

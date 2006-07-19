@@ -62,7 +62,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * comboes are themselves unique.
  *  
  */
-public class GUID implements Comparable {
+public class GUID implements Comparable<GUID> {
     /** The size of a GUID. */
     private static final int SZ=16;
     /** Used to generated new GUID's. */
@@ -315,13 +315,11 @@ public class GUID implements Comparable {
     /** 
      * Compares this GUID to o, lexically.
      */
-    public int compareTo(Object o) {
+    public int compareTo(GUID o) {
         if (this == o)
 			return 0;
-		else if (o instanceof GUID)
-			return compare(this.bytes(), ((GUID)o).bytes());
         else
-            return 1;
+			return compare(this.bytes(), o.bytes());
     }
     
     public static final Comparator<GUID> GUID_COMPARATOR = new GUIDComparator();

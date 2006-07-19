@@ -25,7 +25,7 @@ public class ResponseVerifier {
         /** The rich query. */
         final LimeXMLDocument richQuery;
         /** The keywords of the original query, lowercased. */
-        final List queryWords;
+        final List<String> queryWords;
         /** The type of the original query. */
         final MediaType type;
         /** Whether this is a what is new query */
@@ -116,7 +116,7 @@ public class ResponseVerifier {
     /** Actual implementation of scoring; called from both public versions. 
      *  @param queryWords the tokenized query keywords
      *  @param filename the name of the response*/
-    private static int score(List queryWords, String filename) {
+    private static int score(List<String> queryWords, String filename) {
         int numMatchingWords=0;
         int numQueryWords=queryWords.size();
         if (numQueryWords==0)
@@ -125,7 +125,7 @@ public class ResponseVerifier {
         //Count the number of regular expressions from the query that
         //match the result's name.  Ignore case in comparison.
         for (int i=0; i<numQueryWords; i++) {
-            String pattern = (String) queryWords.get(i);
+            String pattern = queryWords.get(i);
             if (StringUtils.contains(filename, pattern, true)) {
                 numMatchingWords++;
                 continue;
@@ -167,7 +167,7 @@ public class ResponseVerifier {
         return mapper.toString();
     }
 
-    private static List getSearchTerms(String query,
+    private static List<String> getSearchTerms(String query,
                                            LimeXMLDocument richQuery) {
         String[] terms = null;
         // combine xml and standard keywords
@@ -178,13 +178,13 @@ public class ResponseVerifier {
         for (int i = 0; i < terms.length; i++)
             qWords.add(terms[i]);
 
-        List xmlWords=null;
+        List<String> xmlWords=null;
         if (richQuery != null) {
             xmlWords = richQuery.getKeyWords();
             final int size = xmlWords.size();
             // add a lowercase version of the xml words...
             for (int i = 0; i < size; i++) {
-                String currWord = (String) xmlWords.remove(0);
+                String currWord = xmlWords.remove(0);
                 qWords.add(currWord.toLowerCase());
             }
         }

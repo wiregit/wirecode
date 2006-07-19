@@ -382,7 +382,7 @@ public class Trie<V> {
 
     @SuppressWarnings("unchecked")
     private static <T> Iterator<T> emptyIterator() {
-        return (Iterator<T>)EMPTY_ITERATOR;
+        return EMPTY_ITERATOR;
     }
 
     /**
@@ -515,7 +515,7 @@ public class Trie<V> {
      * Prints a description of the substree starting with start to buf.
      * The printing starts with the given indent level. (internal)
      */
-    private void toStringHelper(TrieNode start, StringBuffer buf, int indent) {
+    private void toStringHelper(TrieNode<? extends V> start, StringBuffer buf, int indent) {
         // Print value of node.
         if (start.getValue() != null) {
             buf.append(" -> ");
@@ -523,15 +523,15 @@ public class Trie<V> {
         }
         buf.append("\n");
         //For each child...
-        for (Iterator iter = start.labelsForward(); iter.hasNext(); ) {
+        for (Iterator<String> iter = start.labelsForward(); iter.hasNext(); ) {
             // Indent child appropriately.
             for (int i = 0; i < indent; i++)
                 buf.append(" ");
             // Print edge.
-            String label = (String)iter.next();
+            String label = iter.next();
             buf.append(label);
             // Recurse to print value.
-            TrieNode child = start.get(label.charAt(0)).getChild();
+            TrieNode<? extends V> child = start.get(label.charAt(0)).getChild();
             toStringHelper(child, buf, indent + 1);
         }
     }

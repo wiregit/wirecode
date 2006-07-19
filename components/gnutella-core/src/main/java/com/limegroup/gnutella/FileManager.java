@@ -1113,7 +1113,7 @@ public abstract class FileManager {
     /**
      * Loads a single shared file.
      */
-    protected void loadFile(FileDesc fd, File file, List<? extends LimeXMLDocument> metadata, Set urns) {
+    protected void loadFile(FileDesc fd, File file, List<? extends LimeXMLDocument> metadata, Set<? extends URN> urns) {
     }   
   
     /**

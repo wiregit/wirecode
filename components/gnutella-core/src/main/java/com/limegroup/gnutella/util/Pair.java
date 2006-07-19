@@ -5,7 +5,7 @@
 
 package com.limegroup.gnutella.util;
 
-public class Pair implements Comparable {
+public class Pair implements Comparable<Pair> {
     private int _key;
     private Object _elem;
 	
@@ -19,8 +19,7 @@ public class Pair implements Comparable {
     public void setKey(int key) {_key = key;}
     public void setElement(Object elem) {_elem = elem;}
 
-	public int compareTo(Object o) {
-		Pair p = (Pair)o;
+	public int compareTo(Pair p) {
 		return _key - p._key;
 	}
 }

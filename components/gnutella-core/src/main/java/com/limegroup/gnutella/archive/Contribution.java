@@ -41,7 +41,7 @@ public interface Contribution {
 	 * so the order should be in the order they were added
 	 *         
 	 */
-	public Set getFileDescs();
+	public Set<FileDesc> getFileDescs();
 
 	public void setTitle(String title);
 

@@ -462,10 +462,9 @@ public class HostCatcher {
             //Write elements of permanent from worst to best.  Order matters, as it
             //allows read() to put them into queue in the right order without any
             //difficulty.
-            for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
-                ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
+            for(ExtendedEndpoint e : permanentHosts)
                 e.write(out);
-            }
+            
             out.close();
         }
     }

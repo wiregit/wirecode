@@ -190,7 +190,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         if(LOG.isDebugEnabled())
             LOG.debug("xmlCollectionString = " + xmlCollectionString);
 
-        List allDocsArray = 
+        List<LimeXMLDocument[]> allDocsArray = 
             LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
                                                responsesLength);
         
@@ -198,7 +198,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             Response response = responses[i];
             LimeXMLDocument[] metaDocs;
             for(int schema = 0; schema < allDocsArray.size(); schema++) {
-                metaDocs = (LimeXMLDocument[])allDocsArray.get(schema);
+                metaDocs = allDocsArray.get(schema);
                 // If there are no documents in this schema, try another.
                 if(metaDocs == null)
                     continue;

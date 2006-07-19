@@ -147,7 +147,7 @@ public final class HTTPUploader implements Uploader {
     /**
      * The parameters passed to the HTTP Request.
      */
-    private Map _parameters = null;
+    private Map<String, Object> _parameters = null;
 
     private BandwidthTrackerImpl bandwidthTracker=null;
     
@@ -193,7 +193,7 @@ public final class HTTPUploader implements Uploader {
 	                    String fileName, 
                         Socket socket,
                         int index,
-                        Map params,
+                        Map<String, Object> params,
                         StalledUploadWatchdog dog,
                         boolean hadPassword) {
         STALLED_WATCHDOG = dog;
@@ -212,7 +212,7 @@ public final class HTTPUploader implements Uploader {
      * @param method the HTTPRequestMethod to change to.
      * @param params the parameter list to change to.
      */
-    public void reinitialize(HTTPRequestMethod method, Map params) {
+    public void reinitialize(HTTPRequestMethod method, Map<String, Object> params) {
         _method = method;
         _amountRequested = 0;
         _uploadBegin = 0;
@@ -501,7 +501,7 @@ public final class HTTPUploader implements Uploader {
 	/**
 	 * Returns the parameter list of this HTTPUploader.
 	 */
-	Map getParameters() {
+	Map<String, Object> getParameters() {
 	    return _parameters;
 	}
 	 

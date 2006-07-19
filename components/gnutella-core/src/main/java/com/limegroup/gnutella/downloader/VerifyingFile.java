@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -420,19 +419,12 @@ public class VerifyingFile {
             LOG.info("Releasing interval: " + in+" state "+dumpState());
         leasedBlocks.delete(in);
     }
-	
-    /**
-     * Returns all downloaded blocks with an Iterator.
-     */
-    public synchronized Iterator<Interval> getBlocks() {
-        return getBlocksAsList().iterator();
-    }
     
     /**
      * Returns all verified blocks with an Iterator.
      */
-    public synchronized Iterator<Interval> getVerifiedBlocks() {
-        return verifiedBlocks.getAllIntervals();
+    public synchronized Iterable<Interval> getVerifiedBlocks() {
+        return verifiedBlocks;
     }
     
     /**

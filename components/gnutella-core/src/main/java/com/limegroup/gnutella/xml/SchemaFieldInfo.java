@@ -76,7 +76,7 @@ public class SchemaFieldInfo
         return _type;
     }
     
-    public Class getJavaType()
+    public Class<?> getJavaType()
     {
         return TypeConverter.getType(_type);
     }

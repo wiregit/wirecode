@@ -42,7 +42,7 @@ public class BucketQueue<E> implements Cloneable {
             throw new IllegalArgumentException(
                 "Bad capacity: "+capacityPerPriority);
 
-        this.buckets=(Buffer<E>[])new Buffer[priorities];
+        this.buckets = new Buffer[priorities];
         for (int i=0; i<buckets.length; i++) {
             buckets[i] = new Buffer<E>(capacityPerPriority);
         }
@@ -59,7 +59,7 @@ public class BucketQueue<E> implements Cloneable {
     public BucketQueue(int[] capacities) throws IllegalArgumentException {
         if (capacities.length<=0)
             throw new IllegalArgumentException();
-        this.buckets=(Buffer<E>[])new Buffer[capacities.length];
+        this.buckets = new Buffer[capacities.length];
 
         for (int i=0; i<buckets.length; i++) {
             if (capacities[i]<=0)
@@ -73,7 +73,7 @@ public class BucketQueue<E> implements Cloneable {
     @SuppressWarnings("unchecked")
     public BucketQueue(BucketQueue<? extends E> other) {
         //Note that we can't just shallowly clone other.buckets
-        this.buckets=(Buffer<E>[])new Buffer[other.buckets.length];
+        this.buckets = new Buffer[other.buckets.length];
         for (int i=0; i<this.buckets.length; i++) {
             this.buckets[i]=new Buffer<E>(other.buckets[i]); //clone
         }

@@ -96,7 +96,7 @@ public final class UrnCache {
     private UrnCache() {
         Map map = createMap();
 		dirty = scanAndRemoveOldEntries(map);
-        URN_MAP = (Map<UrnSetKey, Set<URN>>)map;
+        URN_MAP = map;
 	}
 
     /**
@@ -233,16 +233,15 @@ public final class UrnCache {
         if(result == null)
             result = readMap(URN_CACHE_BACKUP_FILE);
         if(result == null)
-            result = new HashMap();
+            result = new HashMap<Object, Object>();
         return result;
     }
     
     /**
      * Loads values from cache file, if available.
      */
-    @SuppressWarnings("unchecked")
-    private static Map<UrnSetKey, Set<URN>> readMap(File file) {
-        Map<UrnSetKey, Set<URN>> result;
+    private static Map readMap(File file) {
+        Map result;
         ObjectInputStream ois = null;
 		try {
             ois = new ConverterObjectInputStream(
@@ -264,12 +263,11 @@ public final class UrnCache {
 	 *
 	 * @param map the <tt>Map</tt> to check
 	 */
-	@SuppressWarnings("unchecked")
-    private static boolean scanAndRemoveOldEntries(Map map) {
+    private static boolean scanAndRemoveOldEntries(Map<Object, Object> map) {
         // discard outdated info
         boolean dirty = false;
-        for(Iterator<Map.Entry> i = map.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry entry = i.next();
+        for(Iterator<Map.Entry<Object, Object>> i = map.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry<Object, Object> entry = i.next();
             if(!(entry.getKey() instanceof UrnSetKey)) {
                 i.remove();
                 dirty = true;

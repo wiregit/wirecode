@@ -7,7 +7,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -363,11 +362,10 @@ public class LimeXMLDocument implements Serializable {
             String licenseStringSuffix = getVerifiableLicenseElement(licenseType);
             if (licenseStringSuffix == null)
                 return null;
-            for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry next = (Map.Entry)i.next();
-                String key = (String)next.getKey();
+            for(Map.Entry<String, String> next : fieldToValue.entrySet()) {
+                String key = next.getKey();
                 if (key.endsWith(licenseStringSuffix))
-                    return (String)next.getValue();
+                    return next.getValue();
             }
         }
         return null;

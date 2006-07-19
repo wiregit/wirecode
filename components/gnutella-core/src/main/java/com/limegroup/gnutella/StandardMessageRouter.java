@@ -8,7 +8,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -90,12 +89,10 @@ public class StandardMessageRouter extends MessageRouter {
             }
         }
         
-        List pongs = PongCacher.instance().getBestPongs(ping.getLocale());
-        Iterator iter = pongs.iterator();
+        List<PingReply> pongs = PongCacher.instance().getBestPongs(ping.getLocale());
         byte[] guid = ping.getGUID();
         InetAddress pingerIP = handler.getInetAddress();
-        while(iter.hasNext()) {
-            PingReply pr = (PingReply)iter.next();
+        for(PingReply pr : pongs) {
             if(pr.getInetAddress().equals(pingerIP))
                 continue;
             sendPingReply(pr.mutateGUID(guid), handler);

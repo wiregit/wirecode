@@ -323,10 +323,10 @@ public class GGEP {
             // start with the magic prefix
             out.write(GGEP_PREFIX_MAGIC_NUMBER);
 
-            Iterator headers = getHeaders().iterator();
+            Iterator<String> headers = getHeaders().iterator();
             // for each header, write the GGEP header and data
             while (headers.hasNext()) {
-                String currHeader = (String) headers.next();
+                String currHeader = headers.next();
                 byte[] currData   = get(currHeader);
                 int dataLen = 0;
                 boolean shouldEncode = shouldCOBSEncode(currData);
@@ -636,8 +636,7 @@ public class GGEP {
     /** Returns true if this is a subset of other, e.g., all of this' keys 
      *  can be found in OTHER with the same value. */
     private boolean subset(GGEP other) {
-        for (Iterator iter=this._props.keySet().iterator(); iter.hasNext(); ) {
-            String key=(String)iter.next();
+        for(String key : _props.keySet()) {
             byte[] v1= this.get(key);
             byte[] v2= other.get(key);
             //Remember that v1 and v2 can be null.

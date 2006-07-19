@@ -232,22 +232,20 @@ public class MagnetOptions implements Serializable {
 	public String toExternalForm() {
 		StringBuffer ret = new StringBuffer(MAGNET);
 		
-		for (Iterator iter = getExactTopics().iterator(); iter.hasNext();) {
-			String xt = (String) iter.next();
+        for(String xt : getExactTopics())
 			ret.append("&xt=").append(xt);
-		}
+
 		if (getDisplayName() != null) 
 			ret.append("&dn=").append(EncodingUtils.encode(getDisplayName()));
+        
 		if (getKeywordTopic() != null) 
 			ret.append("&kt=").append(EncodingUtils.encode(getKeywordTopic()));
-		for (Iterator iter = getXS().iterator(); iter.hasNext();) {
-			String xs = (String) iter.next();
+        
+        for(String xs : getXS())
 			ret.append("&xs=").append(xs);
-		}
-		for (Iterator iter = getAS().iterator(); iter.hasNext();) {
-			String as = (String) iter.next();
+        
+        for(String as : getAS())
 			ret.append("&as=").append(as);
-		}
 
 		return ret.toString();	
 	}
@@ -357,13 +355,11 @@ public class MagnetOptions implements Serializable {
 			getExactTopics().isEmpty();
 	}
 	
-	private URN extractSHA1URNFromList(List strings) {
-        for (Iterator iter = strings.iterator(); iter.hasNext(); ) {
+	private URN extractSHA1URNFromList(List<String> strings) {
+        for(String str : strings) {
             try {
-                return URN.createSHA1Urn((String)iter.next());
-            }
-			catch (IOException e) {
-            } 
+                return URN.createSHA1Urn(str);
+            } catch (IOException ignored) {} 
         }
 		return null;
     }

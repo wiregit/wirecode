@@ -405,9 +405,10 @@ public final class RouteTable {
         bothMaps.putAll(_oldMap);
         bothMaps.putAll(_newMap);
 
-        Iterator iter=bothMaps.keySet().iterator();
+        
+        Iterator<byte[]> iter=bothMaps.keySet().iterator();
         while (iter.hasNext()) {
-            byte[] key=(byte[])iter.next();
+            byte[] key = iter.next();
             buf.append(new GUID(key)); // GUID
             buf.append("->");
             int id= bothMaps.get(key).handlerID;

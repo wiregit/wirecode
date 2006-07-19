@@ -8,7 +8,6 @@ import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -413,7 +412,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @param the set of proxies for this PE
 	 * @return how many bytes a PE will use when serialized.
 	 */
-	public static int getSizeBytes(Set proxies) {
+	public static int getSizeBytes(Set<? extends IpPort> proxies) {
 		return HEADER_SIZE + Math.min(proxies.size(),4) * PROXY_SIZE;
 	}
 	
@@ -463,8 +462,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		String ret = "PE [FEATURES:"+getFeatures()+", FWT Version:"+supportsFWTVersion()+
 			", GUID:"+_guid+", address: "+
             getAddress()+":"+getPort()+", proxies:{ "; 
-		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
-			IpPort ppi = (IpPort)iter.next();
+        for(IpPort ppi : getProxies()) {
 			ret = ret+ppi.getInetAddress()+":"+ppi.getPort()+" ";
 		}
 		ret = ret+ "}]";

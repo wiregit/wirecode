@@ -120,13 +120,13 @@ public final class ConnectionWatchdog {
      * @effects removes from manager any ManagedConnection's in "connections"
      *  that still aren't progressing after being pinged.
      */
-    private void killIfStillDud(List connections) {
+    private void killIfStillDud(List<? extends ManagedConnection> connections) {
         //Take a snapshot of each connection, then send a ping.
         //The horizon statistics for the connection are temporarily disabled
         //during this process.  In the rare chance that legitimate pongs 
         //(other than in response to my ping), they will be ignored.
         Map<ManagedConnection, ConnectionState> snapshot = new HashMap<ManagedConnection, ConnectionState>();
-        for(ManagedConnection c : allConnections()) {
+        for(ManagedConnection c : connections) {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));

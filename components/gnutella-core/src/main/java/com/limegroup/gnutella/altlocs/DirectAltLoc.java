@@ -142,7 +142,7 @@ public class DirectAltLoc extends AlternateLocation {
 	
 	public synchronized boolean isDemoted() { return _demoted; }
 
-	public int compareTo(Object o) {
+	public int compareTo(AlternateLocation o) {
 	    
         if (this==o) //equal
             return 0;

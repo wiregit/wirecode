@@ -92,7 +92,7 @@ public class LibraryData implements Settings {
 	 */
 	public final void clean() {
 		SharingSettings.DIRECTORIES_TO_SHARE.clean();
-		Set parents = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
+		Set<File> parents = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
 		clean(DIRECTORIES_NOT_TO_SHARE, parents);
 		clean(FILES_NOT_TO_SHARE, parents);
 		clean(SENSITIVE_DIRECTORIES_VALIDATED, parents);
@@ -104,19 +104,14 @@ public class LibraryData implements Settings {
 	 * if the second parameter is non-null, don't exist anywhere in the list
 	 * of the second parameter's settings.
 	 */
-	private void clean(Set one, Set two) {
+	private void clean(Set<File> one, Set<File> two) {
 	    synchronized(one) {
-	        for(Iterator i = one.iterator(); i.hasNext(); ) {
-	            Object o = i.next();
-	            if(!(o instanceof File)) {
-	                i.remove();
-	            } else {
-	                File f = (File)o;
-	                if(!f.exists())
-	                    i.remove();
-	                else if(two != null && !containsParent(f, two))
-	                    i.remove();
-	            }
+	        for(Iterator<File> i = one.iterator(); i.hasNext(); ) {
+	            File f = i.next();
+                if(!f.exists())
+                    i.remove();
+                else if(two != null && !containsParent(f, two))
+                    i.remove();
 	        }
         }
     }
@@ -124,7 +119,7 @@ public class LibraryData implements Settings {
 	/**
 	 * Determines if the File or any of its parents is contained in the given Set.
 	 */
-	private boolean containsParent(File parent, Set set) {
+	private boolean containsParent(File parent, Set<File> set) {
 	    while(parent != null) {
 	        if(set.contains(parent))
                 return true;

@@ -67,8 +67,8 @@ public final class DataUtils {
      * Determines whether or not the the child Set contains any elements
      * that are in the parent's set.
      */
-    public static boolean containsAny(Collection parent, Collection children) {
-        for(Iterator i = children.iterator(); i.hasNext(); )
+    public static boolean containsAny(Collection<?> parent, Collection<?> children) {
+        for(Iterator<?> i = children.iterator(); i.hasNext(); )
             if(parent.contains(i.next()))
                 return true;
         return false;
@@ -78,9 +78,9 @@ public final class DataUtils {
      * Utility function to write out the toString contents
      * of a URN.
      */
-    public static String listSet(Set s) {
+    public static String listSet(Set<?> s) {
         StringBuffer sb = new StringBuffer();
-        for(Iterator i = s.iterator(); i.hasNext();)
+        for(Iterator<?> i = s.iterator(); i.hasNext();)
             sb.append(i.next().toString());
         return sb.toString();
     }

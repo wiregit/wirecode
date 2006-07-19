@@ -10,7 +10,7 @@ import java.util.Map;
  * @author Sumeet Thadani
  */
 public class TypeConverter{
-    private static Map<String, Class> map;
+    private static Map<String, Class<?>> map;
     /**
      * This list only contains the types we are using in the schemas of the
      * first release.
@@ -21,7 +21,7 @@ public class TypeConverter{
      * XMLTableLineComparator
      */
     static{
-        map = new HashMap<String, Class>();
+        map = new HashMap<String, Class<?>>();
         map.put("string",String.class);
         map.put("DUMMY_SIMPLETYPE",String.class);
         map.put("int",Integer.class);
@@ -37,8 +37,8 @@ public class TypeConverter{
     /**
      * For types not in the hashmap we return string
      */
-    public static Class getType(String str){
-        Class val = map.get(str);
+    public static Class<?> getType(String str){
+        Class<?> val = map.get(str);
         if(val==null)
             return String.class;
         return val;

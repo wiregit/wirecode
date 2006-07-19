@@ -1863,8 +1863,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         if (commonOutFile == null)
             return 0; // trying to preview before incomplete file created
         synchronized (commonOutFile) {
-            for (Iterator iter=commonOutFile.getBlocks();iter.hasNext() ; ) {
-                Interval interval=(Interval)iter.next();
+            for(Interval interval : commonOutFile.getBlocksAsList()) {
                 if (interval.low==0)
                     return interval.high;
             }
@@ -2941,12 +2940,11 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 
         if (numDownloaders >= swarmCapacity) {
             // Search for the queued thread with a slot worse than ours.
-            int highest = queuePos; // -1 if we aren't queued.            
-            for(Iterator i = _queuedWorkers.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry current = (Map.Entry)i.next();
-                int currQueue = ((Integer)current.getValue()).intValue();
+            int highest = queuePos; // -1 if we aren't queued.
+            for(Map.Entry<DownloadWorker, Integer> current : _queuedWorkers.entrySet()) {
+                int currQueue = current.getValue().intValue();
                 if(currQueue > highest) {
-                    doomed = (DownloadWorker)current.getKey();
+                    doomed = current.getKey();
                     highest = currQueue;
                 }
             }
@@ -2971,9 +2969,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     }
     
     public synchronized String getVendor() {
-        List active = getActiveWorkers();
+        List<DownloadWorker> active = getActiveWorkers();
         if ( active.size() > 0 ) {
-            HTTPDownloader dl = ((DownloadWorker)active.get(0)).getDownloader();
+            HTTPDownloader dl = active.get(0).getDownloader();
             return dl.getVendor();
         } else if (getState() == REMOTE_QUEUED) {
             return queuedVendor;
@@ -2985,10 +2983,9 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     public void measureBandwidth() {
         float currentTotal = 0f;
         boolean c = false;
-        Iterator iter = getActiveWorkers().iterator();
-        while(iter.hasNext()) {
+        for(DownloadWorker worker : getActiveWorkers()) {
             c = true;
-            BandwidthTracker dloader = ((DownloadWorker)iter.next()).getDownloader();
+            BandwidthTracker dloader = worker.getDownloader();
             dloader.measureBandwidth();
 			currentTotal += dloader.getAverageBandwidth();
 		}
@@ -3002,9 +2999,8 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     
     public float getMeasuredBandwidth() {
         float retVal = 0f;
-        Iterator iter = getActiveWorkers().iterator();
-        while(iter.hasNext()) {
-            BandwidthTracker dloader = ((DownloadWorker)iter.next()).getDownloader();
+        for(DownloadWorker worker : getActiveWorkers()) {
+            BandwidthTracker dloader = worker.getDownloader();
             float curr = 0;
             try {
                 curr = dloader.getMeasuredBandwidth();

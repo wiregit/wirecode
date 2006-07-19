@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * From every RFD we can extract a set of tokens,
  */
-public interface Token extends Serializable, Comparable {
+public interface Token extends Serializable, Comparable<Token> {
 	/**
 	 * A Token representing a keyword
 	 */

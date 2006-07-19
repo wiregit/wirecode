@@ -10,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * A timed task to be repeated and rescheduled as needed.
  */
-public abstract class UDPTimerEvent implements Comparable {
+public abstract class UDPTimerEvent implements Comparable<UDPTimerEvent> {
 	
     private static final Log LOG =
         LogFactory.getLog(UDPTimerEvent.class);
@@ -85,8 +85,8 @@ public abstract class UDPTimerEvent implements Comparable {
     /** 
      * Compares event times
      */
-    public int compareTo(Object x) {
-        long ret = ((UDPTimerEvent)x)._eventTime - _eventTime;
+    public int compareTo(UDPTimerEvent x) {
+        long ret = x._eventTime - _eventTime;
 
         if ( ret > 0l )
             return 1;

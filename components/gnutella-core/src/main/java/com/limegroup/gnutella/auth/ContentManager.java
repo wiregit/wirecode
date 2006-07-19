@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -347,8 +346,7 @@ public class ContentManager {
                     setContentAuthority(auth);
                 }
                 
-                for(Iterator i = alreadyReq.iterator(); i.hasNext(); ) {
-                    URN urn = (URN)i.next();
+                for(URN urn : alreadyReq) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
                     auth.send(new ContentRequest(urn));

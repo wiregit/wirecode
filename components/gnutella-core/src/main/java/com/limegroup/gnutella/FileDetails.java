@@ -29,7 +29,7 @@ public interface FileDetails {
 	 * Returns the set of urns.
 	 * @return
 	 */
-	Set getUrns();
+	Set<URN> getUrns();
 	/**
 	 * Returns the xml document or <code>null</code> if there is none for this
 	 * file.

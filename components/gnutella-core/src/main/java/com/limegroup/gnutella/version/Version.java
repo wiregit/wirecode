@@ -3,7 +3,7 @@ package com.limegroup.gnutella.version;
 /**
  * Enscapulates a version, allowing easy compareTos.
  */
-public class Version implements Comparable {
+public class Version implements Comparable<Version> {
    
     /**
      * The version string.
@@ -64,9 +64,8 @@ public class Version implements Comparable {
     /**
      * Compares two versions.
      */
-    public int compareTo(Object o) {
+    public int compareTo(Version other) {
         int retVal;
-        Version other = (Version)o;
         if(major == other.major)
             if(minor == other.minor)
                 if(service == other.service)
@@ -88,7 +87,7 @@ public class Version implements Comparable {
      * Equality.
      */
     public boolean equals(Object o) {
-        return compareTo(o) == 0;
+        return compareTo((Version)o) == 0;
     }
     
     /**

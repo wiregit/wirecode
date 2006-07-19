@@ -4,7 +4,6 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -265,16 +264,16 @@ public class DownloadWorker {
      */
     private void initializeAlternateLocations() {
         int count = 0;
-        for(Iterator iter = _manager.getValidAlts().iterator(); 
-          iter.hasNext() && count < 10; count++) {
-            AlternateLocation current = (AlternateLocation)iter.next();
+        for(AlternateLocation current : _manager.getValidAlts()) {
+            if(count++ >= 10)
+                break;
             _downloader.addSuccessfulAltLoc(current);
         }
         
         count = 0;
-        for(Iterator iter = _manager.getInvalidAlts().iterator(); 
-          iter.hasNext() && count < 10; count++) {
-            AlternateLocation current = (AlternateLocation)iter.next();
+        for(AlternateLocation current : _manager.getInvalidAlts()) {
+            if(count++ >= 10)
+                break;
             _downloader.addFailedAltLoc(current);
         }
     }
@@ -1233,9 +1232,8 @@ public class DownloadWorker {
         final float ourSpeed = getOurSpeed();
         float slowestSpeed = ourSpeed;
         
-        Set queuedWorkers = _manager.getQueuedWorkers().keySet();
-        for (Iterator iter=_manager.getAllWorkers().iterator(); iter.hasNext();) {
-            DownloadWorker worker = (DownloadWorker) iter.next();
+        Set<DownloadWorker> queuedWorkers = _manager.getQueuedWorkers().keySet();
+        for(DownloadWorker worker : _manager.getAllWorkers()) {
             if(worker.isStealing())
                 continue;
             

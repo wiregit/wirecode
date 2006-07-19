@@ -1721,7 +1721,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     protected boolean writeGemExtensions(OutputStream os, 
                                          boolean addPrefixDelimiter, 
-                                         Iterator iter) throws IOException {
+                                         Iterator<?> iter) throws IOException {
         if (iter == null) {
             return addPrefixDelimiter;
         }

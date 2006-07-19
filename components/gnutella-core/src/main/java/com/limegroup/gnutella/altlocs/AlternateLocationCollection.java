@@ -39,7 +39,7 @@ public class AlternateLocationCollection<T extends AlternateLocation>
      */
     @SuppressWarnings("unchecked")
     public static <T extends AlternateLocation> AlternateLocationCollection<T> getEmptyCollection() {
-        return (AlternateLocationCollection<T>)EMPTY;
+        return EMPTY;
     }
     
 	/**
@@ -233,11 +233,8 @@ public class AlternateLocationCollection<T extends AlternateLocation>
 		StringBuffer writeBuffer = new StringBuffer();
 		boolean wrote = false;
         synchronized(this) {
-	        Iterator iter = LOCATIONS.iterator();
-            while(iter.hasNext()) {
-            	AlternateLocation current = (AlternateLocation)iter.next();
-			    writeBuffer.append(
-                           current.httpStringValue());
+            for(AlternateLocation current : LOCATIONS) {
+			    writeBuffer.append(current.httpStringValue());
 			    writeBuffer.append(commaSpace);
 			    wrote = true;
 			}

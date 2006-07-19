@@ -458,8 +458,7 @@ class CCLicense extends AbstractLicense {
         if(allWorks == null)
             return;
         
-        for(Iterator i = allWorks.values().iterator(); i.hasNext(); ) {
-            Details details = (Details)i.next();
+        for(Details details : allWorks.values()) {
             if(!details.isDescriptionAvailable() && details.licenseURL != null) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Updating licenseURL for :" + details);

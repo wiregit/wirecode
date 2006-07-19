@@ -7,10 +7,30 @@ import java.util.NoSuchElementException;
 
 public class MultiIterator<T> implements Iterator<T> {
 
-	protected final Iterator<T> [] iterators;
+	protected final Iterator<? extends T> [] iterators;
 	protected int current;
+    
+    @SuppressWarnings("unchecked")
+    public MultiIterator(Iterator<? extends T> i1) {
+        this.iterators = new Iterator[] { i1 };
+    }
+    
+    @SuppressWarnings("unchecked")
+    public MultiIterator(Iterator<? extends T> i1, Iterator<? extends T> i2) {
+        this.iterators = new Iterator[] { i1, i2 };
+    }
+    
+    @SuppressWarnings("unchecked")
+    public MultiIterator(Iterator<? extends T> i1, Iterator<? extends T> i2, Iterator<? extends T> i3) {
+        this.iterators = new Iterator[] { i1, i2, i3 };
+    }
+    
+    @SuppressWarnings("unchecked")
+    public MultiIterator(Iterator<? extends T> i1, Iterator<? extends T> i2, Iterator<? extends T> i3, Iterator<? extends T> i4) {
+        this.iterators = new Iterator[] { i1, i2, i3, i4 };
+    }
 	
-	public MultiIterator(Iterator<T> [] iterators) {
+	public MultiIterator(Iterator<? extends T>... iterators) {
 		this.iterators = iterators;
 	}
 	

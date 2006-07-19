@@ -2,7 +2,6 @@ package com.limegroup.gnutella.routing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -220,10 +219,8 @@ public class QueryRouteTable {
 			return false;
 		}
 		if(qr.hasQueryUrns()) {
-			Set urns = qr.getQueryUrns();
-			Iterator iter = urns.iterator();
-			while(iter.hasNext()) {
-				URN qurn = (URN)iter.next();
+			Set<URN> urns = qr.getQueryUrns();
+            for(URN qurn : urns) {
 				int hash = HashFunction.hash(qurn.toString(), bits);
 				if(contains(hash)) {
 					// we note a match if any one of the hashes matches
@@ -262,14 +259,12 @@ public class QueryRouteTable {
         //   the table: 2/3 or 3, whichever is more.
         int wordCount=0;
         int matchCount=0;
-        Iterator iter=richQuery.getKeyWords().iterator();
-        while(iter.hasNext()) {
+        for(String words : richQuery.getKeyWords()) {
             //getKeyWords only returns all the fields, so we still need to split
             //the words.  The code is copied from part (1) above.  It could be
             //factored, but that's slightly tricky; the above code terminates if
             //a match fails--a nice optimization--while this code simply counts
             //the number of words and matches.
-            String words = (String)iter.next();
             for (int i=0 ; ; ) {
                 //Find next keyword...
                 //    _ _ W O R D _ _ _ A B
@@ -290,9 +285,8 @@ public class QueryRouteTable {
 
         // some parts of the query are indivisible, so do some nonstandard
         // matching
-        iter=richQuery.getKeyWordsIndivisible().iterator();
-        while(iter.hasNext()) {
-            hash = HashFunction.hash((String)iter.next(), bits);
+        for(String str : richQuery.getKeyWordsIndivisible()) {
+            hash = HashFunction.hash(str, bits);
             if (contains(hash))
                 matchCount++;
             wordCount++;

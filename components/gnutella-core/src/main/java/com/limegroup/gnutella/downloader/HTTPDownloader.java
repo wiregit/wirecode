@@ -9,7 +9,6 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -874,12 +873,9 @@ public class HTTPDownloader implements BandwidthTracker {
             else if (code == 416) {//requested range not available
                 //See if the uploader is up to mischief
                 if(_rfd.isPartialSource()) {
-                    Iterator iter = _rfd.getAvailableRanges().getAllIntervals();
-                    while(iter.hasNext()) {
-                        Interval next = (Interval)iter.next();
+                    for(Interval next : _rfd.getAvailableRanges()) {
                         if(_requestedInterval.isSubrange(next))
-                            throw new 
-                            ProblemReadingHeaderException("Bad ranges sent");
+                            throw new ProblemReadingHeaderException("Bad ranges sent");
                     }
                 }
                 else {//Uploader sent 416 and no ranges

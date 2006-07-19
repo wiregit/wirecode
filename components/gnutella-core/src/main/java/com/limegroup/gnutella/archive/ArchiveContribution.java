@@ -9,7 +9,6 @@ import java.io.InterruptedIOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -140,7 +139,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 		final int metaXmlLength = metaXmlBytes.length;
 		final int filesXmlLength = filesXmlBytes.length;
 		
-		final Collection files = getFiles();
+		final Collection<ArchiveFile> files = getFiles();
 		
 		final int totalFiles = NUM_XML_FILES + files.size();
 		
@@ -156,8 +155,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 		fileSizes[1] = filesXmlLength;
 		
 		int j = 2;
-		for (Iterator i = files.iterator(); i.hasNext();) {
-			final ArchiveFile f = (ArchiveFile) i.next();
+        for(ArchiveFile f : files) {
 			fileNames[j] = f.getRemoteFileName();
 			fileSizes[j] = f.getFileSize();
 			j++;
@@ -226,9 +224,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 				ftp.setFileType( FTP.BINARY_FILE_TYPE );
 				
 				// upload contributed files
-				for (final Iterator i = files.iterator(); i.hasNext();) {
-					final ArchiveFile f = (ArchiveFile) i.next();
-					
+                for(ArchiveFile f : files) {
 					uploadFile( f.getRemoteFileName(), 
 							new FileInputStream( f.getIOFile() ),
 							ftp);
@@ -366,10 +362,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 			
 			//take licenseurl from the first File
 			
-			final Iterator filesIterator = getFiles().iterator();
-			
-			if ( filesIterator.hasNext() ) {
-				final ArchiveFile firstFile = (ArchiveFile) filesIterator.next();
+			for(ArchiveFile firstFile : getFiles()) {
 				final String licenseUrl = firstFile.getLicenseUrl();
 				if ( licenseUrl != null ) {
 					final Element licenseUrlElement = document.createElement( LICENSE_URL_ELEMENT );
@@ -379,20 +372,15 @@ abstract class ArchiveContribution extends AbstractContribution {
 			}
 			
 			// now build user-defined elements
-			final Map userFields = getFields();
-			for ( final Iterator i = userFields.keySet().iterator(); i.hasNext(); ) {
-				final Object field = i.next();
-				final Object value = userFields.get( field );  
-				
-				if ( field instanceof String ) {
-					final Element e = document.createElement( (String) field );
-					metadataElement.appendChild( e );
-					
-					if ( value != null && value instanceof String) {
-						e.appendChild( document.createTextNode( (String) value ));
-					}
-				}
-			}
+            for (Map.Entry<String, String> entry : getFields().entrySet()) {
+                String field = entry.getKey();
+                final String value = entry.getValue();
+                final Element e = document.createElement(field);
+                metadataElement.appendChild(e);
+
+                if (value != null)
+                    e.appendChild(document.createTextNode(value));
+            }
 			
 			return document;
 			
@@ -435,11 +423,9 @@ abstract class ArchiveContribution extends AbstractContribution {
 			final Element filesElement = document.createElement( FILES_ELEMENT );
 			document.appendChild( filesElement );
 			
-			Collection files = getFiles();
+			Collection<ArchiveFile> files = getFiles();
 			
-			for (final Iterator i = files.iterator(); i.hasNext();) {
-				final ArchiveFile file = (ArchiveFile) i.next();
-				
+            for(ArchiveFile file : files) {
 				final Element fileElement = file.getElement( document );
 				filesElement.appendChild( fileElement );
 			}

@@ -125,13 +125,13 @@ public class FileSetSetting extends Setting {
     /**
      * Separates each field of the array by a semicolon
      */
-    private static final String decode(Set src) {
+    private static final String decode(Set<? extends File> src) {
         if (src == null || src.isEmpty())
             return "";
         
         StringBuffer buffer = new StringBuffer();
-        for(Iterator i = src.iterator(); i.hasNext(); ) {
-            buffer.append(((File)i.next()).getAbsolutePath());
+        for(Iterator<? extends File> i = src.iterator(); i.hasNext(); ) {
+            buffer.append(i.next().getAbsolutePath());
             if (i.hasNext())
                 buffer.append(';');
         }
@@ -143,8 +143,8 @@ public class FileSetSetting extends Setting {
 	 * Removes non-existent members.
 	 */
 	public synchronized void clean() {
-	    for(Iterator i = value.iterator(); i.hasNext(); ) {
-	        File next = (File)i.next();
+	    for(Iterator<File> i = value.iterator(); i.hasNext(); ) {
+	        File next = i.next();
 	        if(!next.exists())
 	            i.remove();
         }

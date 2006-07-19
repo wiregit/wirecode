@@ -395,14 +395,12 @@ public class HandshakeResponse {
         headers.put(HeaderNames.X_ULTRAPEER, ""+RouterService.isSupernode());
         
 		// add any leaves
-        List leaves = 
-            RouterService.getConnectionManager().
-                getInitializedClientConnections();
-		headers.put(HeaderNames.LEAVES, 
-            createEndpointString(leaves, leaves.size()));
+        List<? extends IpPort> leaves =
+            RouterService.getConnectionManager().getInitializedClientConnections();
+		headers.put(HeaderNames.LEAVES, createEndpointString(leaves, leaves.size()));
 
 		// add any Ultrapeers
-        List ultrapeers = 
+        List<? extends IpPort> ultrapeers = 
             RouterService.getConnectionManager().getInitializedConnections();
 		headers.put(HeaderNames.PEERS,
 			createEndpointString(ultrapeers, ultrapeers.size()));
@@ -490,7 +488,7 @@ public class HandshakeResponse {
      * @return a string of the form IP:port,IP:port,... from the given list of 
      *  hosts
      */
-    private static String createEndpointString(Collection hosts) {
+    private static String createEndpointString(Collection<? extends IpPort> hosts) {
         return createEndpointString(hosts, NUM_X_TRY_ULTRAPEER_HOSTS);
     }
     
@@ -504,12 +502,12 @@ public class HandshakeResponse {
 	 * @return a string of the form IP:port,IP:port,... from the given list of 
      *  hosts
 	 */
-	private static String createEndpointString(Collection hosts, int limit) {
+	private static String createEndpointString(Collection<? extends IpPort> hosts, int limit) {
 		StringBuffer sb = new StringBuffer();
         int i = 0;
-        Iterator iter = hosts.iterator();
+        Iterator<? extends IpPort> iter = hosts.iterator();
 		while(iter.hasNext() && i<limit) {
-            IpPort host = (IpPort)iter.next();
+            IpPort host = iter.next();
 			sb.append(host.getAddress());
 			sb.append(":");
 			sb.append(host.getPort());
@@ -564,7 +562,7 @@ public class HandshakeResponse {
      *  header set according to the incoming headers from the remote host
      */
     private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
-        Collection hosts = RouterService.getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
+        Collection<IpPort> hosts = RouterService.getPreferencedHosts(hr.isUltrapeer(), hr.getLocalePref(), 10);
 
         headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         return headers;

@@ -46,11 +46,7 @@ public abstract class AbstractToken implements Token {
     /**
      * implements interface <tt>Comparable</tt>
      */
-    public int compareTo(Object o) {
-        // This may throw a class cast exception, 
-        // copying the Java 1.5 semantics of Comparable
-        Token t = (Token) o;
-        
+    public int compareTo(Token t) {
         // First, sort by importance
         double importanceDelta = this.getImportance() - t.getImportance();
         // Sort low importance first

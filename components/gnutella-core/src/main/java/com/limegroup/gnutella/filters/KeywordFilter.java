@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.filters;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.limegroup.gnutella.Response;
@@ -113,8 +112,7 @@ public class KeywordFilter extends SpamFilter {
         //if any of the file names in qr contain bad words, the whole
         //thing is disallowed
         try {
-            for (Iterator iter=qr.getResults(); iter.hasNext(); ) {
-                Response response=(Response)iter.next();
+            for(Response response : qr.getResultsAsList()) {
                 if (matches(response.getName()))
                     return false;
             }

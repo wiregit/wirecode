@@ -21,6 +21,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataReader;
@@ -288,7 +289,7 @@ public class MetaFileManager extends FileManager {
     /**
      * Notification that a single FileDesc has its URNs.
      */
-    protected void loadFile(FileDesc fd, File file, List<? extends LimeXMLDocument> metadata, Set urns) {
+    protected void loadFile(FileDesc fd, File file, List<? extends LimeXMLDocument> metadata, Set<? extends URN> urns) {
         super.loadFile(fd, file, metadata, urns);
         boolean added = false;
         

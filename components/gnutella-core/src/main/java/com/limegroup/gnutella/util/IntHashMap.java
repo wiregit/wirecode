@@ -74,7 +74,7 @@ package com.limegroup.gnutella.util;
  * @author Alex Chaffee (alex@apache.org)
  * @author Stephen Colebourne
  * @since 2.0
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see java.util.HashMap
  */
 public class IntHashMap<V> {
@@ -173,7 +173,7 @@ public class IntHashMap<V> {
         }
 
         this.loadFactor = loadFactor;
-        table = (Entry<V>[])new Entry[initialCapacity];
+        table = new Entry[initialCapacity];
         threshold = (int) (initialCapacity * loadFactor);
     }
 
@@ -326,7 +326,7 @@ public class IntHashMap<V> {
         Entry<V> oldMap[] = table;
 
         int newCapacity = oldCapacity * 2 + 1;
-        Entry<V> newMap[] = (Entry<V>[])new Entry[newCapacity];
+        Entry<V> newMap[] = new Entry[newCapacity];
 
         threshold = (int) (newCapacity * loadFactor);
         table = newMap;

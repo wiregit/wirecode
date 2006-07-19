@@ -404,21 +404,18 @@ public final class NetworkUtils {
     public static InetAddress getLocalAddress() throws UnknownHostException {
         InetAddress addr = InetAddress.getLocalHost();
         
-        if (addr instanceof Inet4Address 
-                && !addr.isLoopbackAddress()) {
+        if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
             return addr;
         }
         
         try {
-            Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
-
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             if (interfaces != null) {
                 while (interfaces.hasMoreElements()) {
-                    Enumeration addresses = ((NetworkInterface)interfaces.nextElement()).getInetAddresses();
+                    Enumeration<InetAddress> addresses = interfaces.nextElement().getInetAddresses();
                     while (addresses.hasMoreElements()) {
-                        addr = (InetAddress)addresses.nextElement();
-                        if (addr instanceof Inet4Address
-                                && !addr.isLoopbackAddress()) {
+                        addr = addresses.nextElement();
+                        if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
                             return addr;
                         }
                     }

@@ -646,11 +646,11 @@ class HashTreeHandler {
         /**
          * Determines if two lists of byte arrays completely match.
          */
-        private boolean isMatching(List a, List b) {
+        private boolean isMatching(List<byte[]> a, List<byte[]> b) {
             if (a.size() == b.size()) {
                 for (int i = 0; i < a.size(); i++) {
-                    byte[] one = (byte[]) a.get(i);
-                    byte[] two = (byte[]) b.get(i);
+                    byte[] one = a.get(i);
+                    byte[] two = b.get(i);
                     if(!Arrays.equals(one, two))
                         return false;
                 }

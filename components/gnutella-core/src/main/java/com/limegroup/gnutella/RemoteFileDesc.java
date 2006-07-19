@@ -12,7 +12,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -716,9 +715,7 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
 	 *  <tt>null</tt> if there is none
 	 */
 	public final URN getSHA1Urn() {
-		Iterator iter = _urns.iterator(); 
-		while(iter.hasNext()) {
-			URN urn = (URN)iter.next();
+        for(URN urn : _urns) {
 			// defensively check against null values added.
 			if(urn == null) continue;
 			if(urn.isSHA1()) {

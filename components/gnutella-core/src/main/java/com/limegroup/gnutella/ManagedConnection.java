@@ -6,7 +6,6 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -1069,9 +1068,10 @@ public class ManagedConnection extends Connection
                (remoteHostSupportsLeafGuidance() >= 0)) {
                 SearchResultHandler srh =
                     RouterService.getSearchResultHandler();
-                List queries = srh.getQueriesToReSend();
-                for(Iterator i = queries.iterator(); i.hasNext(); )
-                    send((Message)i.next());
+                List<QueryRequest> queries = srh.getQueriesToReSend();
+                for(QueryRequest qr : queries) {
+                    send(qr);
+                }
             }            
 
             // see if you need a PushProxy - the remoteHostSupportsPushProxy

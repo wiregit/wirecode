@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import com.limegroup.gnutella.ErrorService;
@@ -122,13 +121,12 @@ public class StatisticVendorMessage extends VendorMessage {
  
 
     private static byte[] getGnutellaStats(byte control, boolean incoming) {
-        List conns = RouterService.getConnectionManager().getConnections();
+        List<ManagedConnection> conns = RouterService.getConnectionManager().getConnections();
         StringBuffer buff = new StringBuffer();
 
         switch(control) {
         case GiveStatsVendorMessage.PER_CONNECTION_STATS:
-            for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
+            for(ManagedConnection c : conns) {
                 buff.append(c.toString());
                 buff.append(DELIMITER2);
                 if(incoming) {
@@ -147,8 +145,7 @@ public class StatisticVendorMessage extends VendorMessage {
         case GiveStatsVendorMessage.ALL_CONNECTIONS_STATS:
             int messages = -1;
             int dropped = -1;
-            for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
+            for(ManagedConnection c : conns) {
                 messages += incoming ? c.getNumMessagesReceived() : 
                                                c.getNumMessagesSent();
                 dropped += incoming ? c.getNumReceivedMessagesDropped() :
@@ -159,8 +156,7 @@ public class StatisticVendorMessage extends VendorMessage {
             buff.append(dropped);
             return buff.toString().getBytes();
         case GiveStatsVendorMessage.UP_CONNECTIONS_STATS:
-            for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
+            for(ManagedConnection c: conns) {
                 if(!c.isSupernodeConnection())
                     continue;
                 buff.append(c.toString());
@@ -179,8 +175,7 @@ public class StatisticVendorMessage extends VendorMessage {
             }
             return buff.toString().getBytes();
         case GiveStatsVendorMessage.LEAF_CONNECTIONS_STATS:
-            for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
-                ManagedConnection c = (ManagedConnection)iter.next();
+            for(ManagedConnection c : conns) {
                 if(!c.isLeafConnection())
                     continue;
                 buff.append(c.toString());

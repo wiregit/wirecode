@@ -11,6 +11,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPMessage;
@@ -45,7 +46,7 @@ public abstract class UploadState implements HTTPMessage {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
 									  sha1,
 									  os);
-                Set alts = UPLOADER.getNextSetOfAltsToSend();
+                Set<? extends AlternateLocation> alts = UPLOADER.getNextSetOfAltsToSend();
 				if(alts.size() > 0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
                                           new HTTPHeaderValueCollection(alts),
@@ -75,7 +76,7 @@ public abstract class UploadState implements HTTPMessage {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
 									  sha1,
 									  os);
-                Set alts = UPLOADER.getNextSetOfAltsToSend();
+                Set<? extends AlternateLocation> alts = UPLOADER.getNextSetOfAltsToSend();
 				if(alts.size() > 0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
                                           new HTTPHeaderValueCollection(alts),
@@ -129,13 +130,12 @@ public abstract class UploadState implements HTTPMessage {
 	        return;
 	    
 	    
-	    Set proxies = RouterService.getConnectionManager().getPushProxies();
+	    Set<IpPort> proxies = RouterService.getConnectionManager().getPushProxies();
 	    
 	    StringBuffer buf = new StringBuffer();
 	    int proxiesWritten =0;
-	    for (Iterator iter = proxies.iterator();
-	    	iter.hasNext() && proxiesWritten <4 ;) {
-	        IpPort current = (IpPort)iter.next();
+	    for (Iterator<IpPort> iter = proxies.iterator(); iter.hasNext() && proxiesWritten <4 ;) {
+	        IpPort current = iter.next();
 	        buf.append(current.getAddress())
 	        	.append(":")
 	        	.append(current.getPort())
@@ -164,13 +164,12 @@ public abstract class UploadState implements HTTPMessage {
 	        return;
 	    
 	    
-	    Set proxies = RouterService.getConnectionManager().getPushProxies();
+	    Set<IpPort> proxies = RouterService.getConnectionManager().getPushProxies();
 	    
 	    StringBuffer buf = new StringBuffer();
 	    int proxiesWritten =0;
-	    for (Iterator iter = proxies.iterator();
-	    	iter.hasNext() && proxiesWritten <4 ;) {
-	        IpPort current = (IpPort)iter.next();
+	    for (Iterator<IpPort> iter = proxies.iterator(); iter.hasNext() && proxiesWritten <4 ;) {
+	        IpPort current = iter.next();
 	        buf.append(current.getAddress())
 	        	.append(":")
 	        	.append(current.getPort())

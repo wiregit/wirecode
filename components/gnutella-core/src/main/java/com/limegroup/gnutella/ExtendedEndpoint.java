@@ -332,8 +332,7 @@ public class ExtendedEndpoint extends Endpoint {
     }
 
     /** Writes Objects to 'out'. */
-    private void write(Writer out, Iterator objects) 
-                       throws IOException {
+    private void write(Writer out, Iterator<?> objects) throws IOException {
         while (objects.hasNext()) {
             out.write(objects.next().toString());
             if (objects.hasNext())

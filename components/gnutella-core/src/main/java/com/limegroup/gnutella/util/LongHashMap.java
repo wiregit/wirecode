@@ -164,7 +164,7 @@ public class LongHashMap<V> {
         }
 
         this.loadFactor = loadFactor;
-        table = (Entry<V>[])new Entry[initialCapacity];
+        table = new Entry[initialCapacity];
         threshold = (int) (initialCapacity * loadFactor);
     }
 
@@ -317,7 +317,7 @@ public class LongHashMap<V> {
         Entry<V> oldMap[] = table;
 
         int newCapacity = oldCapacity * 2 + 1;
-        Entry<V> newMap[] = (Entry<V>[])new Entry[newCapacity];
+        Entry<V> newMap[] = new Entry[newCapacity];
 
         threshold = (int) (newCapacity * loadFactor);
         table = newMap;

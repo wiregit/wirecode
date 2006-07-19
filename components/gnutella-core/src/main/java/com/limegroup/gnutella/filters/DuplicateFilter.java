@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -203,12 +204,12 @@ final class QueryPair {
     String query;
     int hops;
     LimeXMLDocument xml;
-    Set URNs;
+    Set<? extends URN> URNs;
     int cachedHash = 0;
     int metaMask;
     
     QueryPair(String query, int hops, LimeXMLDocument xml,
-              Set URNs, int metaMask) {
+              Set<? extends URN> URNs, int metaMask) {
         this.query=query;
         this.hops=hops;
         this.xml = xml;

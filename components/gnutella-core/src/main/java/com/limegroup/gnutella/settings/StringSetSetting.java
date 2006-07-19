@@ -57,12 +57,12 @@ public class StringSetSetting extends Setting {
     /**
      * Separates each field of the array by a semicolon
      */
-    private static final String decode(Set src) {
+    private static final String decode(Set<String> src) {
         if (src == null || src.isEmpty())
             return "";
         
         StringBuffer buffer = new StringBuffer();
-        for(Iterator i = src.iterator(); i.hasNext(); ) {
+        for(Iterator<String> i = src.iterator(); i.hasNext(); ) {
             buffer.append(i.next());
             if (i.hasNext())
                 buffer.append(';');

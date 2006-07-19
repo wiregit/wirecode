@@ -8,20 +8,20 @@ import java.util.Map;
 * It implements Map.Entry interface, so that other classes can use it in the
 * same way, there's no backing Map though, unless stated otherwise.
 */
-public class KeyValue implements Map.Entry
+public class KeyValue<K, V> implements Map.Entry<K, V>
 {
 /** key of the property */
-	private Object key = null;
+	private K key = null;
 
 /**	Value of the property */
-	private Object value = null;
+	private V value = null;
 
 
 /**	Constructor
 	@param key key of the property
 	@param value corresponding value of the property
 */
-public KeyValue(Object key, Object value)
+public KeyValue(K key, V value)
 {
 	this.key = key;
 	this.value = value;
@@ -42,7 +42,7 @@ public KeyValue()
 * @param key key of the property
 * @param value corresponding value of the property
 */
-public void set(Object key, Object value)
+public void set(K key, V value)
 {
 	this.key = key;
 	this.value = value;
@@ -73,7 +73,7 @@ public String toString()
 * Returns the key(key) in the key value pair 
 * @return the key(key) in the key value pair
 */
-public Object getKey()
+public K getKey()
 {
     return key;
 }
@@ -82,7 +82,7 @@ public Object getKey()
 * Returns the value corresponding to this entry.  
 * @return the value corresponding to this entry.
 */
-public Object getValue()
+public V getValue()
 {
     return value;
 }
@@ -92,10 +92,10 @@ public Object getValue()
  * @param value new value to be stored in this entry.
  * @return old value corresponding to the entry.
  */
-public Object setValue(Object value)
+public V setValue(V value)
 {
     //get the old value
-    Object oldValue = this.value;
+    V oldValue = this.value;
     
     //change the value
     this.value = value;

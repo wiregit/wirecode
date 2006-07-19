@@ -964,9 +964,7 @@ public class RouterService {
 
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
-        for (Iterator iter=manager.getConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        for(ManagedConnection c : manager.getConnections()) {
             c.setPersonalFilter(SpamFilter.newPersonalFilter());
             c.setRouteFilter(SpamFilter.newRouteFilter());
         }
@@ -999,9 +997,7 @@ public class RouterService {
 		int count = 0;
 
         // Count the messages on initialized connections
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        for(ManagedConnection c : manager.getInitializedConnections()) {
             count += c.getNumMessagesSent();
             count += c.getNumMessagesReceived();
         }
@@ -1016,9 +1012,7 @@ public class RouterService {
 		int msgs; 
 
         // Count the messages on initialized connections
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
+        for(ManagedConnection c : manager.getInitializedConnections()) {
             msgs = c.getNumMessagesSent();
             msgs += c.getNumMessagesReceived();
 			if ( msgs > messageThreshold )
@@ -1044,9 +1038,9 @@ public class RouterService {
      * @param connections The collection(of Connection) 
      * of connections to be printed
      */
-    private static void dumpConnections(Collection connections)
+    private static void dumpConnections(Collection<?> connections)
     {
-        for(Iterator iterator = connections.iterator(); iterator.hasNext();) {
+        for(Iterator<?> iterator = connections.iterator(); iterator.hasNext();) {
             System.out.println(iterator.next().toString());
         }
     }
@@ -1422,7 +1416,7 @@ public class RouterService {
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
 	public static Downloader download(RemoteFileDesc[] files, 
-	                                  List alts, GUID queryGUID,
+	                                  List<? extends IpPort> alts, GUID queryGUID,
                                       boolean overwrite, File saveDir,
 									  String fileName)
 		throws SaveLocationException {
@@ -1431,7 +1425,7 @@ public class RouterService {
 	}
 	
 	public static Downloader download(RemoteFileDesc[] files, 
-									  List alts,
+									  List<? extends IpPort> alts,
 									  GUID queryGUID,
 									  boolean overwrite)
 		throws SaveLocationException {
@@ -1446,7 +1440,7 @@ public class RouterService {
                                       GUID queryGUID, 
                                       boolean overwrite, File saveDir, String fileName)
 		throws SaveLocationException {
-		return download(files, Collections.EMPTY_LIST, queryGUID,
+		return download(files, IpPort.EMPTY_LIST, queryGUID,
 				overwrite, saveDir, fileName);
 	}
 	
@@ -1642,14 +1636,12 @@ public class RouterService {
         	props.put(HeaderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
         	HeaderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
         	
-        	for (Iterator iter = manager.getInitializedConnections().iterator();iter.hasNext();) {
-        		ManagedConnection c = (ManagedConnection)iter.next();
+            for(ManagedConnection c : manager.getInitializedConnections()) {
         		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
         			c.send(huvm);
         	}
         	
-        	for (Iterator iter = manager.getInitializedClientConnections().iterator();iter.hasNext();) {
-        		ManagedConnection c = (ManagedConnection)iter.next();
+            for(ManagedConnection c : manager.getInitializedClientConnections()) {
         		if (c.remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
         			c.send(huvm);
         	}

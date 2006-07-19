@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Serializable;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
@@ -17,7 +16,7 @@ import com.limegroup.gnutella.GUID;
  * and replies (pong, search results).  Message are mostly immutable;
  * only the TTL, hops, and priority field can be changed.
  */
-public abstract class Message implements Serializable, Comparable {
+public abstract class Message implements Comparable<Message> {
     
     // Functional IDs defined by Gnutella protocol.
     public static final byte F_PING                  = (byte)0x0;
@@ -294,8 +293,7 @@ public abstract class Message implements Serializable, Comparable {
      *
      * @exception ClassCastException message not an instance of Message 
      */
-    public int compareTo(Object message) {
-        Message m=(Message)message;
+    public int compareTo(Message m) {
         return m.getPriority() - this.getPriority();
     }
 

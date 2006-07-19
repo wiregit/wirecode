@@ -139,7 +139,7 @@ public class IncompleteFileManager implements Serializable {
       * @param activeFiles which files are currently being downloaded.
       * @return true iff any entries were purged
       */
-    public synchronized boolean initialPurge(Collection activeFiles) {
+    public synchronized boolean initialPurge(Collection<File> activeFiles) {
         //Remove any files that are old.
         boolean ret = false;
         for (Iterator<File> iter=blocks.keySet().iterator(); iter.hasNext(); ) {
@@ -404,8 +404,7 @@ public class IncompleteFileManager implements Serializable {
         Map map = (Map)read;
         for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
-            if(entry.getKey() instanceof URN && 
-               entry.getValue() instanceof File) {
+            if(entry.getKey() instanceof URN && entry.getValue() instanceof File) {
                 URN urn = (URN)entry.getKey();
                 File f = (File)entry.getValue();
                 try {
@@ -645,10 +644,9 @@ public class IncompleteFileManager implements Serializable {
      */
     public synchronized URN getCompletedHash(File incompleteFile) {
         //Return a key k s.t., hashes.get(k)==incompleteFile...
-        for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry entry=(Map.Entry)iter.next();
+        for(Map.Entry<URN, File> entry : hashes.entrySet()) {
             if (incompleteFile.equals(entry.getValue()))
-                return (URN)entry.getKey();
+                return entry.getKey();
         }
         return null; //...or null if no such k.
     }

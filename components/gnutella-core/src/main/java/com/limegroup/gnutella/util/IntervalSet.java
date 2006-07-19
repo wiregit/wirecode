@@ -50,8 +50,8 @@ public class IntervalSet implements Iterable<Interval>{
         final int high = addInterval.high;
         Interval lower=null;
         Interval higher=null;
-        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
-            Interval interval=(Interval)iter.next();
+        for(Iterator<Interval> iter = intervals.iterator(); iter.hasNext(); ) {
+            Interval interval = iter.next();
             if (low<=interval.low && interval.high<=high) {//  <low-------high>
                 iter.remove();                             //      interval
                 continue;
@@ -98,8 +98,8 @@ public class IntervalSet implements Iterable<Interval>{
      * @param set
      */
     public void add(IntervalSet set) {
-        for (Iterator iter = set.getAllIntervals(); iter.hasNext(); )
-            add((Interval)iter.next());
+        for(Interval interval : set)
+            add(interval);
     }
     
     /**
@@ -111,8 +111,8 @@ public class IntervalSet implements Iterable<Interval>{
         int high = deleteMe.high;
         Interval lower = null;
         Interval higher = null;
-        for (Iterator iter = intervals.iterator(); iter.hasNext();) {
-            Interval interval = (Interval) iter.next();
+        for (Iterator<Interval> iter = intervals.iterator(); iter.hasNext();) {
+            Interval interval = iter.next();
             if (interval.high >= low && interval.low <= high) { //found
                 iter.remove();                                  // overlap
                 if (interval.high <= high) {
@@ -154,8 +154,8 @@ public class IntervalSet implements Iterable<Interval>{
      * from this set.
      */
     public void delete(IntervalSet set) {
-        for (Iterator iter = set.getAllIntervals(); iter.hasNext(); )
-            delete((Interval)iter.next());
+        for(Interval interval : set)
+            delete(interval);
     }
     
     /**
@@ -190,8 +190,7 @@ public class IntervalSet implements Iterable<Interval>{
 	 * @return whether this interval set contains fully the given interval
 	 */
 	public boolean contains(Interval i) {
-        for (Iterator iter = getAllIntervals(); iter.hasNext();) {
-            Interval ours = (Interval)iter.next();
+        for(Interval ours : this) {
             if (ours.low <= i.low && ours.high >= i.high)
                 return true;
         }
@@ -204,8 +203,7 @@ public class IntervalSet implements Iterable<Interval>{
     public boolean containsAny(Interval i) {
         int low = i.low;
         int high = i.high;
-        for (Iterator iter = getAllIntervals(); iter.hasNext(); ) {
-            Interval interval = (Interval)iter.next();
+        for(Interval interval : this) {
             if (low<=interval.low && interval.high<=high)  //  <low-------high>
                 return true;                               //      interval
 
@@ -228,7 +226,7 @@ public class IntervalSet implements Iterable<Interval>{
      * this method should return a list of 2 intervals {[3-4],[6-8]}
      * If there are no overlaps, this method returns an empty List.
      */
-    public List getOverlapIntervals(Interval checkInterval) {
+    public List<Interval> getOverlapIntervals(Interval checkInterval) {
         List<Interval> overlapBlocks = new ArrayList<Interval>(); //initialize for this write
         long high =checkInterval.high;
         long low = checkInterval.low;
@@ -240,8 +238,7 @@ public class IntervalSet implements Iterable<Interval>{
         //can overlap, Actually there is a max of  two intervals we can overlap
         //one on the top end and one on the bottom end. We need to make this 
         //more efficient
-        for(Iterator iter = intervals.iterator(); iter.hasNext(); ) {
-            Interval interval = (Interval)iter.next();
+        for(Interval interval : intervals) {
             //case a:
             if(low <= interval.low && interval.high <= high) {
                 //Need to check the whole iterval, starting point=interval.low
@@ -283,8 +280,7 @@ public class IntervalSet implements Iterable<Interval>{
 
     public int getSize() {
         int sum=0;
-        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
-            Interval block=(Interval)iter.next();
+        for(Interval block : intervals) {
             sum+=block.high-block.low+1;
         }
         return sum;
@@ -320,8 +316,8 @@ public class IntervalSet implements Iterable<Interval>{
         int low=-1;
         Interval interval=null;
         boolean fixed = false;
-        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
-            interval=(Interval)iter.next();
+        for (Iterator<Interval> iter=intervals.iterator(); iter.hasNext(); ) {
+            interval = iter.next();
             if (interval.low!=0 && low<interval.low) {//needed for first interval
                 if (low+1 > interval.low-1) {
                     if(!fixed) {
@@ -354,7 +350,7 @@ public class IntervalSet implements Iterable<Interval>{
      * IntervalSet. Note that the IntervalSet does not know the maximum value of
      * all the intervals.
      */
-    public Iterator getNeededIntervals(int maxSize) {
+    public Iterator<Interval> getNeededIntervals(int maxSize) {
         return this.invert(maxSize).getAllIntervals();
     }
 
@@ -365,9 +361,9 @@ public class IntervalSet implements Iterable<Interval>{
      */
     public IntervalSet clone() {
         IntervalSet ret = new IntervalSet();
-        for (Iterator<Interval> iter = getAllIntervals(); iter.hasNext(); )
+        for(Interval interval : this)
             // access the internal TreeSet directly, - it's faster that way.
-            ret.intervals.add(iter.next());
+            ret.intervals.add(interval);
         return ret;
     }
     
@@ -423,8 +419,7 @@ public class IntervalSet implements Iterable<Interval>{
     public byte [] toBytes() {
     	byte [] ret = new byte[intervals.size()*8];
     	int pos = 0;
-    	for (Iterator iter = intervals.iterator();iter.hasNext();) {
-    		Interval current = (Interval) iter.next();
+        for(Interval current : intervals) {
     		current.toBytes(ret,pos);
     		pos+=8;
     	}

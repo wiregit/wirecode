@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.Set;
 
 import com.limegroup.gnutella.downloader.Interval;
@@ -137,8 +136,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // to the verifying file do not cause concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
-                Interval interval = (Interval) iter.next();
+            for(Interval interval : _verifyingFile.getVerifiedBlocks()) {
     	        // don't offer ranges that are smaller than MIN_CHUNK_SIZE
     	        // ( we add one because HTTP values are exclusive )
     	        if (interval.high - interval.low + 1 < MIN_CHUNK_SIZE)
@@ -168,8 +166,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // to the verifying file do not cause concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
-                Interval interval = (Interval) iter.next();
+            for(Interval interval : _verifyingFile.getVerifiedBlocks()) {
                 if (low >= interval.low && high <= interval.high)
                     return true;
             }
@@ -184,8 +181,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      */
      public Interval getAvailableSubRange(int low, int high) {
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
-                Interval interval = (Interval) iter.next();
+            for(Interval interval : _verifyingFile.getVerifiedBlocks()) {
                 if ((interval.low <= high && low <= interval.high))
                 	// overlap found 
                     return new Interval(Math.max(interval.low, low), 
