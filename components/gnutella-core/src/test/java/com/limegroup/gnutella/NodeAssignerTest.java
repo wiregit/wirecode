@@ -192,7 +192,7 @@ public class NodeAssignerTest extends BaseTestCase {
         PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24*3600*1000));
         sleep(2000);
-        assertFalse("should not be a DHT node", RouterService.isActiveDHTNode());
+        assertFalse("should not be an active DHT node", RouterService.isActiveDHTNode());
         assertTrue("should be an ultrapeer", RouterService.isSupernode());
     }
     

@@ -51,6 +51,8 @@ public abstract class DHTTestCase extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         //dht settings:
         DHTSettings.PERSIST_DHT.setValue(false);
+        DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
+        DHTSettings.DISABLE_DHT_USER.setValue(false);
     }
     
     public static void globalTearDown() throws Exception {

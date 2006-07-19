@@ -111,6 +111,9 @@ class PassiveDHTNodeController extends AbstractDHTController{
             ObjectOutputStream oos = new ObjectOutputStream(out);
             List<Contact> contacts = limeDHTRouteTable.getLiveContacts(); 
             if(contacts.size() < 2) {
+                //delete the existing RT so we start next session from scratch
+                out.close();
+                FILE.delete();
                 return;
             }
             

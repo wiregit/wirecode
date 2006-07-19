@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.dht.impl;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 
 import junit.framework.Test;
@@ -8,7 +11,9 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
@@ -40,6 +45,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testNodesPersistence() throws Exception{
+        DHTSettings.PERSIST_DHT.setValue(true);
         PassiveDHTNodeController controller = new PassiveDHTNodeController();
         controller.start();
         Thread.sleep(300);
@@ -60,6 +66,19 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         controller = new PassiveDHTNodeController();
         controller.start();
         assertFalse(controller.isWaiting());
+        controller.stop();
+        //try a corrupt file
+        File file = new File(CommonUtils.getUserSettingsDir(), "dhtnodes.dat");
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+        bos.write("mark".getBytes());
+        bos.close();
+        controller = new PassiveDHTNodeController();
+        controller.start();
+        Thread.sleep(500);
+        assertTrue(controller.isWaiting());
+        //this should delete the corrupted file
+        controller.stop();
+        assertFalse(file.exists());
     }
 
 }
