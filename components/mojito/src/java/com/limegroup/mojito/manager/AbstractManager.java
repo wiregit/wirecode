@@ -43,13 +43,13 @@ abstract class AbstractManager<V> {
         this.context = context;
     }
     
-    public <L extends DHTEventListener<V>> void addDHTEventListener(L listener) {
+    public void addDHTEventListener(DHTEventListener<V> listener) {
         synchronized (globalListeners) {
             globalListeners.add(listener);
         }
     }
     
-    public <L extends DHTEventListener<V>> void removeDHTEventListener(L listener) {
+    public void removeDHTEventListener(DHTEventListener<V> listener) {
         synchronized (globalListeners) {
             globalListeners.remove(listener);
         }
@@ -70,7 +70,7 @@ abstract class AbstractManager<V> {
             super(callable);
         }
         
-        public <L extends DHTEventListener<V>> void addDHTEventListener(L listener) {
+        public void addDHTEventListener(DHTEventListener<V> listener) {
             synchronized (listeners) {
                 if (isDone()) {
                     try {
