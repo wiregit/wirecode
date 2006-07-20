@@ -791,15 +791,14 @@ public class DownloadWorker {
             LOG.trace("assignAndRequest for: " + _rfd);
     
         Interval interval = null;
-        synchronized(_commonOutFile) {
-            if (_commonOutFile.hasFreeBlocksToAssign() > 0) {
-                try {
+        try {
+            synchronized (_commonOutFile) {
+                if (_commonOutFile.hasFreeBlocksToAssign() > 0)
                     interval = pickAvailableInterval();
-                } catch(NoSuchRangeException nsre) {
-                    handleNoRanges();
-                    return false;
-                }
             }
+        } catch (NoSuchRangeException nsre) {
+            handleNoRanges();
+            return false;
         }
         
         // it is still possible that a worker has died and released their ranges
