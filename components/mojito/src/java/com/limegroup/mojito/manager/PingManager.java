@@ -116,7 +116,7 @@ public class PingManager extends AbstractManager<Contact> {
         @Override
         protected void fireException(Exception ex) {
             networkStats.PINGS_FAILED.incrementStat();
-            fireException(ex);
+            super.fireException(ex);
         }
     }
 }
