@@ -8,7 +8,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
@@ -24,6 +23,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
@@ -83,7 +83,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     /**
      * The bootstrap's <tt>Future</tt> object
      */
-    private Future<BootstrapEvent> bootstrapFuture;
+    private DHTFuture<BootstrapEvent> bootstrapFuture;
     
     private BootstrapListener bootstrapListener = new DHTBootstrapListener();
     
@@ -145,7 +145,8 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      */
     private void bootstrap() {
         bootstrapingFromRT = bootstrapHosts.isEmpty();
-        bootstrapFuture = dht.bootstrap(bootstrapHosts, bootstrapListener);
+        bootstrapFuture = dht.bootstrap(bootstrapHosts);
+        bootstrapFuture.addDHTEventListener(bootstrapListener);
     }
     
     /**

@@ -29,7 +29,9 @@ import java.util.concurrent.FutureTask;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
@@ -63,45 +65,49 @@ public class StoreManager extends AbstractManager {
         }
     }
     
-    public Future<StoreEvent> store(KeyValue value) {
-        return store(value, null);
-    }
-
-    public Future<StoreEvent> store(KeyValue keyValue, StoreListener l) {
+    public DHTFuture<StoreEvent> store(KeyValue keyValue) {
         StoreResponseHandler handler = new StoreResponseHandler(context, keyValue);
         StoreFuture future = new StoreFuture(handler);
-        
-        if (l != null) {
-            future.addStoreListener(l);
-        }
         
         context.execute(future);
         return future;
     }
     
-    public Future<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
         StoreResponseHandler handler = new StoreResponseHandler(context, node, queryKey, keyValue);
         StoreFuture future = new StoreFuture(handler);
         context.execute(future);
         return future;
     }
     
-    private class StoreFuture extends FutureTask<StoreEvent> {
+    private class StoreFuture extends FutureTask<StoreEvent> implements DHTFuture<StoreEvent> {
         
-        private List<StoreListener> listeners = null;
+        private List<DHTEventListener<StoreEvent>> listeners 
+            = new ArrayList<DHTEventListener<StoreEvent>>();
         
         public StoreFuture(Callable<StoreEvent> callable) {
             super(callable);
         }
 
-        public void addStoreListener(StoreListener l) {
-            if (listeners == null) {
-                listeners = new ArrayList<StoreListener>();
-            }
+        public <L extends DHTEventListener<StoreEvent>> 
+                void addDHTEventListener(L listener) {
             
-            listeners.add(l);
+            synchronized (listeners) {
+                if (isDone()) {
+                    try {
+                        StoreEvent result = get();
+                        listener.handleResult(result);
+                    } catch (CancellationException ignore) {
+                    } catch (InterruptedException ignore) {
+                    } catch (Exception ex) {
+                        listener.handleException(ex);
+                    }
+                } else {
+                    listeners.add(listener);
+                }
+            }
         }
-        
+
         @Override
         protected void done() {
             super.done();
@@ -123,8 +129,8 @@ public class StoreManager extends AbstractManager {
                 }
             }
             
-            if (listeners != null) {
-                for (StoreListener l : listeners) {
+            synchronized(listeners) {
+                for (DHTEventListener<StoreEvent> l : listeners) {
                     l.handleResult(result);
                 }
             }
@@ -137,8 +143,8 @@ public class StoreManager extends AbstractManager {
                 }
             }
             
-            if (listeners != null) {
-                for (StoreListener l : listeners) {
+            synchronized(listeners) {
+                for (DHTEventListener<StoreEvent> l : listeners) {
                     l.handleException(ex);
                 }
             }

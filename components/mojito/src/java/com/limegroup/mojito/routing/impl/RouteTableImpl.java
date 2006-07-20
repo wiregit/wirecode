@@ -195,7 +195,7 @@ public class RouteTableImpl implements RouteTable {
             }
         };
         
-        context.ping(existing, listener);
+        context.ping(existing).addDHTEventListener(listener);
     }
     
     protected synchronized void addContactToBucket(Bucket bucket, Contact node) {

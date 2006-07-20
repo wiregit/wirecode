@@ -24,13 +24,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
@@ -82,23 +84,15 @@ public class PingManager extends AbstractManager {
         }
     }
     
-    public Future<Contact> ping(SocketAddress address) {
-        return ping(null, address, null);
+    public DHTFuture<Contact> ping(SocketAddress address) {
+        return ping(null, address);
     }
 
-    public Future<Contact> ping(SocketAddress address, PingListener listener) {
-        return ping(null, address, listener);
-    }
-
-    public Future<Contact> ping(Contact node) {
-        return ping(node.getNodeID(), node.getContactAddress(), null);
+    public DHTFuture<Contact> ping(Contact node) {
+        return ping(node.getNodeID(), node.getContactAddress());
     }
     
-    public Future<Contact> ping(Contact node, PingListener listener) {
-        return ping(node.getNodeID(), node.getContactAddress(), listener);
-    }
-
-    public Future<Contact> ping(KUID nodeId, SocketAddress address, PingListener listener) {
+    public DHTFuture<Contact> ping(KUID nodeId, SocketAddress address) {
         
         synchronized (getPingLock()) {
             PingFuture future = futureMap.get(address);
@@ -113,10 +107,6 @@ public class PingManager extends AbstractManager {
                 context.execute(future);
             }
             
-            if (listener != null) {
-                future.addPingListener(listener);
-            }
-            
             return future;
         }
     }
@@ -124,15 +114,14 @@ public class PingManager extends AbstractManager {
     /**
      * 
      */
-    private class PingFuture extends FutureTask<Contact> {
+    private class PingFuture extends FutureTask<Contact> implements DHTFuture<Contact> {
 
         private SocketAddress address;
         
-        private PingResponseHandler handler;
+        private List<DHTEventListener<Contact>> listeners 
+            = new ArrayList<DHTEventListener<Contact>>();
         
-        private List<PingListener> listeners = null;
-        
-        public PingFuture(SocketAddress address, PingResponseHandler handler) {
+        public PingFuture(SocketAddress address, Callable<Contact> handler) {
             super(handler);
             this.address = address;
         }
@@ -141,16 +130,25 @@ public class PingManager extends AbstractManager {
             return address;
         }
         
-        public PingResponseHandler getPingResponseHandler() {
-            return handler;
-        }
-        
-        public void addPingListener(PingListener l) {
-            if (listeners == null) {
-                listeners = new ArrayList<PingListener>();
+        public <L extends DHTEventListener<Contact>> void addDHTEventListener(L listener) {
+            if (listener == null || isCancelled()) {
+                return;
             }
             
-            listeners.add(l);
+            synchronized (listeners) {
+                if (isDone()) {
+                    try {
+                        Contact result = get();
+                        listener.handleResult(result);
+                    } catch (CancellationException ignore) {
+                    } catch (InterruptedException ignore) {
+                    } catch (Exception ex) {
+                        listener.handleException(ex);
+                    }
+                } else {
+                    listeners.add(listener);
+                }
+            }
         }
         
         @Override
@@ -162,12 +160,12 @@ public class PingManager extends AbstractManager {
             }
             
             try {
-                Contact node = get();
-                fireResult(node);
+                Contact result = get();
+                fireResult(result);
             } catch (CancellationException ignore) {
             } catch (InterruptedException ignore) {
-            } catch (Exception err) {
-                fireException(err);
+            } catch (Exception ex) {
+                fireException(ex);
             }
         }
         
@@ -175,13 +173,13 @@ public class PingManager extends AbstractManager {
             networkStats.PINGS_OK.incrementStat();
             
             synchronized(globalListeners) {
-                for (PingListener l : globalListeners) {
+                for (DHTEventListener<Contact> l : globalListeners) {
                     l.handleResult(result);
                 }
             }
             
-            if (listeners != null) {
-                for (PingListener l : listeners) {
+            synchronized (listeners) {
+                for (DHTEventListener<Contact> l : listeners) {
                     l.handleResult(result);
                 }
             }
@@ -191,13 +189,13 @@ public class PingManager extends AbstractManager {
             networkStats.PINGS_FAILED.incrementStat();
             
             synchronized(globalListeners) {
-                for (PingListener l : globalListeners) {
+                for (DHTEventListener<Contact> l : globalListeners) {
                     l.handleException(ex);
                 }
             }
             
-            if (listeners != null) {
-                for (PingListener l : listeners) {
+            synchronized (listeners) {
+                for (DHTEventListener<Contact> l : listeners) {
                     l.handleException(ex);
                 }
             }

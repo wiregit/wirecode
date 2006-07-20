@@ -27,7 +27,9 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
@@ -69,15 +71,11 @@ abstract class AbstractLookupManager<L extends DHTEventListener, V> {
         }
     }
     
-    public Future<V> lookup(KUID lookupId) {
-        return lookup(lookupId, -1, null);
+    public DHTFuture<V> lookup(KUID lookupId) {
+        return lookup(lookupId, -1);
     }
     
-    public Future<V> lookup(KUID lookupId, L l) {
-        return lookup(lookupId, -1, l);
-    }
-    
-    public Future<V> lookup(KUID lookupId, int count, L l) {
+    public DHTFuture<V> lookup(KUID lookupId, int count) {
         synchronized(getLookupLock()) {
             LookupFuture future = futureMap.get(lookupId);
             if (future == null) {
@@ -89,23 +87,20 @@ abstract class AbstractLookupManager<L extends DHTEventListener, V> {
                 context.execute(future);
             }
             
-            if (l != null) {
-                future.addDHTEventListener(l);
-            }
-            
             return future;
         }
     }
     
     protected abstract LookupResponseHandler<V> createLookupHandler(KUID lookupId, int count);
     
-    private class LookupFuture extends FutureTask<V> {
+    private class LookupFuture extends FutureTask<V> implements DHTFuture<V> {
 
         private KUID lookupId;
         
         private LookupResponseHandler<V> handler;
         
-        private List<L> listeners = null;
+        private List<DHTEventListener<V>> listeners 
+            = new ArrayList<DHTEventListener<V>>();
         
         public LookupFuture(KUID lookupId, LookupResponseHandler<V> handler) {
             super(handler);
@@ -113,15 +108,27 @@ abstract class AbstractLookupManager<L extends DHTEventListener, V> {
             this.handler = handler;
         }
 
-        public void addDHTEventListener(L l) {
-            if (listeners == null) {
-                listeners = new ArrayList<L>();
+        public <L extends DHTEventListener<V>> void addDHTEventListener(L listener) {
+            if (listener == null || isCancelled()) {
+                return;
             }
-            listeners.add(l);
-        }
-        
-        public LookupResponseHandler<V> getLookupResponseHandler() {
-            return handler;
+            
+            synchronized (listener) {
+                synchronized (listeners) {
+                    if (isDone()) {
+                        try {
+                            V result = get();
+                            listener.handleResult(result);
+                        } catch (CancellationException ignore) {
+                        } catch (InterruptedException ignore) {
+                        } catch (Exception ex) {
+                            listener.handleException(ex);
+                        }
+                    } else {
+                        listeners.add(listener);
+                    }
+                }
+            }
         }
 
         @Override
@@ -133,25 +140,25 @@ abstract class AbstractLookupManager<L extends DHTEventListener, V> {
             }
             
             try {
-                V value = get();
-                fireResult(value);
+                V result = get();
+                fireResult(result);
             } catch (CancellationException ignore) {
             } catch (InterruptedException ignore) {
-            } catch (Exception err) {
-                fireException(err);
+            } catch (Exception ex) {
+                fireException(ex);
             }
         }
         
         @SuppressWarnings("unchecked")
         private void fireResult(final V result) {
             synchronized(globalListeners) {
-                for (L l : globalListeners) {
+                for (DHTEventListener<V> l : globalListeners) {
                     l.handleResult(result);
                 }
             }
             
-            if (listeners != null) {
-                for (L l : listeners) {
+            synchronized (listeners) {
+                for (DHTEventListener<V> l : listeners) {
                     l.handleResult(result);
                 }
             }
@@ -159,13 +166,13 @@ abstract class AbstractLookupManager<L extends DHTEventListener, V> {
         
         private void fireException(final Exception ex) {
             synchronized(globalListeners) {
-                for (L l : globalListeners) {
+                for (DHTEventListener<V> l : globalListeners) {
                     l.handleException(ex);
                 }
             }
             
-            if (listeners != null) {
-                for (L l : listeners) {
+            synchronized (listeners) {
+                for (DHTEventListener<V> l : listeners) {
                     l.handleException(ex);
                 }
             }

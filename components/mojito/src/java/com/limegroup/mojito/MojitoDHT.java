@@ -35,23 +35,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.FindNodeListener;
+import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindValueEvent;
-import com.limegroup.mojito.event.FindValueListener;
-import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreEvent;
-import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.routing.RouteTable;
@@ -193,9 +187,9 @@ public class MojitoDHT {
      * @throws IOException
      */
     
-    public Future<BootstrapEvent> bootstrap(SocketAddress address) {
+    public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
         List<SocketAddress> hostList = Arrays.asList(address);
-        return context.bootstrap(hostList, null);
+        return context.bootstrap(hostList);
     }
     
     /**
@@ -204,30 +198,15 @@ public class MojitoDHT {
      * @return The bootstrap time
      * @throws IOException
      */
-    public Future<BootstrapEvent> bootstrap(BootstrapListener listener) {
-        return context.bootstrap(listener);
-    }
-
-    public Future<BootstrapEvent> bootstrap(SocketAddress address, BootstrapListener listener) {
-        return context.bootstrap(Arrays.asList(address), listener);
+    public DHTFuture<BootstrapEvent> bootstrap() {
+        return context.bootstrap();
     }
     
     /**
      * 
      */
-    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
-        return context.bootstrap(hostList, null);
-    }
-    
-    /**
-     * Tries to bootstrap from a List of Hosts.
-     * 
-     * @param hostList a List of <tt>SocketAddress</tt>
-     * @param listener The listener for bootstrap events
-     * @throws IOException
-     */
-    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList, BootstrapListener listener) {
-        return context.bootstrap(hostList, listener);
+    public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
+        return context.bootstrap(hostList);
     }
     
     /**
@@ -238,23 +217,8 @@ public class MojitoDHT {
      * @return The responding <tt>ContactNode</tt> or null if there was a timeout
      * @throws IOException
      */
-    public Future<Contact> ping(SocketAddress dst) {
+    public DHTFuture<Contact> ping(SocketAddress dst) {
         return context.ping(dst);
-    }
-    
-    /**
-     * Asynchronous ping.
-     * If the ping is successfull, the given host may be added to the routing table
-     * 
-     * @param dst
-     * @param listener
-     * @throws IOException
-     */
-    public void ping(SocketAddress dst, PingListener listener) {
-        if (listener == null) {
-            throw new NullPointerException("PingListener is null");
-        }
-        context.ping(dst, listener);
     }
     
     // TODO remove - for test purposes only
@@ -279,16 +243,11 @@ public class MojitoDHT {
         return context.getRouteTable().getContacts();
     }
     
-    public Future<StoreEvent> put(KUID key, byte[] value) {
-        return put(key, value, null, null);
+    public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
+        return put(key, value, null);
     }
     
-    public Future<StoreEvent> put(KUID key, byte[] value, StoreListener listener) 
-            throws IOException {
-        return put(key, value, listener, null);
-    }
-    
-    public Future<StoreEvent> put(KUID key, byte[] value, StoreListener listener, PrivateKey privateKey) {
+    public DHTFuture<StoreEvent> put(KUID key, byte[] value, PrivateKey privateKey) {
         
         try {
             KeyValue keyValue = 
@@ -319,7 +278,7 @@ public class MojitoDHT {
                         context.createNewKeyPair();
                     }
                     
-                    return context.store(keyValue, listener);
+                    return context.store(keyValue);
                 }
             }
         } catch (InvalidKeyException e) {
@@ -331,38 +290,22 @@ public class MojitoDHT {
         return null;
     }
     
-    public Future<FindValueEvent> get(KUID key) throws IOException {
-        return context.get(key, null);
+    public DHTFuture<FindValueEvent> get(KUID key) {
+        return context.get(key);
     }
     
-    public Future<FindValueEvent> get(KUID key, FindValueListener listener) {
-        if (!key.isValueID()) {
-            throw new IllegalArgumentException("Key must be a Value ID");
-        }
-        
-        if (listener == null) {
-            throw new NullPointerException("FindValueListener is null");
-        }
-        
-        return context.get(key, listener);
-    }
-    
-    public Future<StoreEvent> remove(KUID key) {
-        return remove(key, null, null);
-    }
-    
-    public Future<StoreEvent> remove(KUID key, StoreListener listener) {
-        return remove(key, listener, null);
+    public DHTFuture<StoreEvent> remove(KUID key) {
+        return remove(key, null);
     }
 
-    public Future<StoreEvent> remove(KUID key, StoreListener listener, PrivateKey privateKey) {
+    public DHTFuture<StoreEvent> remove(KUID key, PrivateKey privateKey) {
         // To remove a KeyValue you just store an empty value!
-        return put(key, new byte[0], listener, privateKey);
+        return put(key, new byte[0], privateKey);
     }
 
     // TODO for debugging purposes only
-    void lookup(KUID lookup, FindNodeListener listener) throws IOException {
-        context.lookup(lookup, listener);
+    DHTFuture<FindNodeEvent> lookup(KUID lookup) {
+        return context.lookup(lookup);
     }
     
     // TODO for debugging purposes only

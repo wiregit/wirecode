@@ -189,7 +189,8 @@ public class CommandHandler {
         SocketAddress addr = new InetSocketAddress(host, port);
         
         out.println("Bootstraping... " + addr);
-        dht.bootstrap(addr, new BootstrapListener() {
+        
+        BootstrapListener listener = new BootstrapListener() {
             public void handleResult(BootstrapEvent result) {
                 out.println("Bootstraping finished:\n" + result);
                 out.flush();
@@ -200,7 +201,9 @@ public class CommandHandler {
                 ex.printStackTrace(out);
                 out.flush();
             }
-        });
+        };
+        
+        dht.bootstrap(addr).addDHTEventListener(listener);
     }
     
     public static void put(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {

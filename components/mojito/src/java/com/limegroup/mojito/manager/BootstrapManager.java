@@ -23,7 +23,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.FutureTask;
 
 import org.apache.commons.logging.Log;
@@ -31,9 +31,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
@@ -81,7 +83,7 @@ public class BootstrapManager extends AbstractManager {
         }
     }
     
-    public Future<BootstrapEvent> bootstrap(BootstrapListener l) {
+    public DHTFuture<BootstrapEvent> bootstrap() {
         synchronized(lock) {
             if (future == null) {
                 Bootstrapper bootstrapper = new Bootstrapper();
@@ -90,25 +92,17 @@ public class BootstrapManager extends AbstractManager {
                 context.execute(future);
             }
             
-            if (l != null) {
-                future.addBootstrapListener(l);
-            }
-            
             return future;
         }
     }
     
-    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList, BootstrapListener l) {
+    public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
         synchronized (lock) {
             if (future == null) {
                 Bootstrapper bootstrapper = new Bootstrapper(hostList);
                 future = new BootstrapFuture(bootstrapper);
                 
                 context.execute(future);
-            }
-            
-            if (l != null) {
-                future.addBootstrapListener(l);
             }
             
             return future;
@@ -262,20 +256,36 @@ public class BootstrapManager extends AbstractManager {
         }
     }
     
-    private class BootstrapFuture extends FutureTask<BootstrapEvent> {
+    private class BootstrapFuture extends FutureTask<BootstrapEvent> implements DHTFuture<BootstrapEvent> {
         
-        private List<BootstrapListener> listeners = new ArrayList<BootstrapListener>();
+        private List<DHTEventListener<BootstrapEvent>> listeners 
+            = new ArrayList<DHTEventListener<BootstrapEvent>>();
         
         public BootstrapFuture(Callable<BootstrapEvent> task) {
             super(task);
         }
-
-        public void addBootstrapListener(BootstrapListener l) {
-            if (listeners == null) {
-                listeners = new ArrayList<BootstrapListener>();
+        
+        public <L extends DHTEventListener<BootstrapEvent>> 
+                void addDHTEventListener(L listener) {
+            
+            if (listener == null || isCancelled()) {
+                return;
             }
             
-            listeners.add(l);
+            synchronized (listeners) {
+                if (isDone()) {
+                    try {
+                        BootstrapEvent result = get();
+                        listener.handleResult(result);
+                    } catch (CancellationException ignore) {
+                    } catch (InterruptedException ignore) {
+                    } catch (Exception ex) {
+                        listener.handleException(ex);
+                    }
+                } else {
+                    listeners.add(listener);
+                }
+            }
         }
         
         @Override
@@ -289,8 +299,10 @@ public class BootstrapManager extends AbstractManager {
             try {
                 BootstrapEvent result = get();
                 fireResult(result);
-            } catch (Exception err) {
-                fireException(err);
+            } catch (CancellationException ignore) {
+            } catch (InterruptedException ignore) {
+            } catch (Exception ex) {
+                fireException(ex);
             }
         }
         
@@ -301,8 +313,8 @@ public class BootstrapManager extends AbstractManager {
                 }
             }
             
-            if (listeners != null) {
-                for (BootstrapListener l : listeners) {
+            synchronized(listeners) {
+                for (DHTEventListener<BootstrapEvent> l : listeners) {
                     l.handleResult(result);
                 }
             }
@@ -315,8 +327,8 @@ public class BootstrapManager extends AbstractManager {
                 }
             }
             
-            if (listeners != null) {
-                for (BootstrapListener l : listeners) {
+            synchronized(listeners) {
+                for (DHTEventListener<BootstrapEvent> l : listeners) {
                     l.handleException(ex);
                 }
             }

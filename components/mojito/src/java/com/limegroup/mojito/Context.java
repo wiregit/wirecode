@@ -49,14 +49,10 @@ import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.KeyValuePublisher;
 import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindNodeEvent;
-import com.limegroup.mojito.event.FindNodeListener;
 import com.limegroup.mojito.event.FindValueEvent;
-import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreEvent;
-import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.manager.BootstrapManager;
@@ -636,45 +632,30 @@ public class Context {
      * @param l the PingListener for incoming pongs
      * @throws IOException
      */
-    public Future<Contact> ping(SocketAddress address) {
+    public DHTFuture<Contact> ping(SocketAddress address) {
         return pingManager.ping(address);
     }
     
     /** Pings the given Node */
-    public Future<Contact> ping(SocketAddress address, PingListener listener) {
-        return pingManager.ping(address, listener);
-    }
-    
-    /** Pings the given Node */
-    public Future<Contact> ping(Contact node) {
+    public DHTFuture<Contact> ping(Contact node) {
         return pingManager.ping(node);
     }
     
-    /** Pings the given Node */
-    public Future<Contact> ping(Contact node, PingListener listener) {
-        return pingManager.ping(node, listener);
-    }
-    
     /** Starts a value for the given KUID */
-    public Future<FindValueEvent> get(KUID key, FindValueListener listener) {
-        return findValueManager.lookup(key, listener);
+    public DHTFuture<FindValueEvent> get(KUID key) {
+        return findValueManager.lookup(key);
     }
     
     /** Starts a lookup for the given KUID */
-    public Future<FindNodeEvent> lookup(KUID lookupId) {
+    public DHTFuture<FindNodeEvent> lookup(KUID lookupId) {
         return findNodeManager.lookup(lookupId);
-    }
-    
-    /** Starts a lookup for the given KUID */
-    public Future<FindNodeEvent> lookup(KUID lookupId, FindNodeListener listener) {
-        return findNodeManager.lookup(lookupId, listener);
     }
     
     /**
      * Tries to bootstrap from the local Route Table.
      */
-    public Future<BootstrapEvent> bootstrap(BootstrapListener listener) {
-        return bootstrapManager.bootstrap(listener);
+    public DHTFuture<BootstrapEvent> bootstrap() {
+        return bootstrapManager.bootstrap();
     }
     
     /**
@@ -682,29 +663,21 @@ public class Context {
      * size of the list it may fall back to bootstrapping from
      * the local Route Table!
      */
-    public Future<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList, 
-                BootstrapListener listener) {
-        return bootstrapManager.bootstrap(hostList, listener);
+    public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
+        return bootstrapManager.bootstrap(hostList);
     }
     
     /** 
      * Stores the given KeyValue 
      */
-    public Future<StoreEvent> store(KeyValue keyValue) {
+    public DHTFuture<StoreEvent> store(KeyValue keyValue) {
         return storeManager.store(keyValue);
     }
     
     /** 
      * Stores the given KeyValue 
      */
-    public Future<StoreEvent> store(KeyValue keyValue, StoreListener listener) {
-        return storeManager.store(keyValue, listener);
-    }
-    
-    /** 
-     * Stores the given KeyValue 
-     */
-    public Future<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
         return storeManager.store(node, queryKey, keyValue);
     }
     
