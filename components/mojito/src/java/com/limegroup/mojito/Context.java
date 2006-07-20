@@ -54,6 +54,7 @@ import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.KeyValuePublisher;
 import com.limegroup.mojito.event.BootstrapEvent;
+import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.PingListener;
@@ -625,17 +626,17 @@ public class Context implements MojitoDHT {
     
     /** Adds a global PingListener */
     public void addPingListener(PingListener listener) {
-        pingManager.addPingListener(listener);
+        pingManager.addDHTEventListener(listener);
     }
     
     /** Removes a global PingListener */
     public void removePingListener(PingListener listener) {
-        pingManager.removePingListener(listener);
+        pingManager.removeDHTEventListener(listener);
     }
     
     /** Returns all global PingListeners */
-    public PingListener[] getPingListeners() {
-        return pingManager.getPingListeners();
+    public DHTEventListener[] getPingListeners() {
+        return pingManager.getDHTEventListeners();
     }
     
     /**

@@ -33,7 +33,6 @@ import java.util.List;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.routing.impl.ContactNode;

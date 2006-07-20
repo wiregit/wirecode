@@ -23,8 +23,6 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.FutureTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,8 +32,6 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
@@ -45,11 +41,9 @@ import com.limegroup.mojito.util.BucketUtils;
 /**
  * 
  */
-public class BootstrapManager extends AbstractManager {
+public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
     private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
-    
-    private List<BootstrapListener> globalListeners = new ArrayList<BootstrapListener>();
     
     private Object lock = new Object();
     
@@ -57,24 +51,6 @@ public class BootstrapManager extends AbstractManager {
     
     public BootstrapManager(Context context) {
         super(context);
-    }
-    
-    public void addBootstrapListener(BootstrapListener l) {
-        synchronized (globalListeners) {
-            globalListeners.add(l);
-        }
-    }
-    
-    public void removeBootstrapListener(BootstrapListener l) {
-        synchronized (globalListeners) {
-            globalListeners.remove(l);
-        }
-    }
-
-    public BootstrapListener[] getBootstrapListeners() {
-        synchronized (globalListeners) {
-            return globalListeners.toArray(new BootstrapListener[0]);
-        }
     }
     
     public boolean isBootstrapping() {
@@ -256,81 +232,16 @@ public class BootstrapManager extends AbstractManager {
         }
     }
     
-    private class BootstrapFuture extends FutureTask<BootstrapEvent> implements DHTFuture<BootstrapEvent> {
-        
-        private List<DHTEventListener<BootstrapEvent>> listeners 
-            = new ArrayList<DHTEventListener<BootstrapEvent>>();
+    private class BootstrapFuture extends AbstractDHTFuture {
         
         public BootstrapFuture(Callable<BootstrapEvent> task) {
             super(task);
         }
         
-        public <L extends DHTEventListener<BootstrapEvent>> 
-                void addDHTEventListener(L listener) {
-            
-            if (listener == null || isCancelled()) {
-                return;
-            }
-            
-            synchronized (listeners) {
-                if (isDone()) {
-                    try {
-                        BootstrapEvent result = get();
-                        listener.handleResult(result);
-                    } catch (CancellationException ignore) {
-                    } catch (InterruptedException ignore) {
-                    } catch (Exception ex) {
-                        listener.handleException(ex);
-                    }
-                } else {
-                    listeners.add(listener);
-                }
-            }
-        }
-        
         @Override
-        protected void done() {
-            super.done();
-            
+        protected void deregister() {
             synchronized(lock) {
                 future = null;
-            }
-            
-            try {
-                BootstrapEvent result = get();
-                fireResult(result);
-            } catch (CancellationException ignore) {
-            } catch (InterruptedException ignore) {
-            } catch (Exception ex) {
-                fireException(ex);
-            }
-        }
-        
-        private void fireResult(final BootstrapEvent result) {
-            synchronized(globalListeners) {
-                for (BootstrapListener l : globalListeners) {
-                    l.handleResult(result);
-                }
-            }
-            
-            synchronized(listeners) {
-                for (DHTEventListener<BootstrapEvent> l : listeners) {
-                    l.handleResult(result);
-                }
-            }
-        }
-        
-        private void fireException(final Exception ex) {
-            synchronized(globalListeners) {
-                for (BootstrapListener l : globalListeners) {
-                    l.handleException(ex);
-                }
-            }
-            
-            synchronized(listeners) {
-                for (DHTEventListener<BootstrapEvent> l : listeners) {
-                    l.handleException(ex);
-                }
             }
         }
     }

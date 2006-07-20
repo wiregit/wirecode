@@ -22,13 +22,12 @@ package com.limegroup.mojito.manager;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.FindValueEvent;
-import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.handler.response.FindValueResponseHandler;
 
 /**
  * 
  */
-public class FindValueManager extends AbstractLookupManager<FindValueListener, FindValueEvent> {
+public class FindValueManager extends AbstractLookupManager<FindValueEvent> {
     
     public FindValueManager(Context context) {
         super(context);

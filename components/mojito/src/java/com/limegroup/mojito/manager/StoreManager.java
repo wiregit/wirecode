@@ -19,50 +19,23 @@
 
 package com.limegroup.mojito.manager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.StoreEvent;
-import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 
 /**
  * 
  */
-public class StoreManager extends AbstractManager {
-    
-    private List<StoreListener> globalListeners = new ArrayList<StoreListener>();
+public class StoreManager extends AbstractManager<StoreEvent> {
     
     public StoreManager(Context context) {
         super(context);
-    }
-    
-    public void addStoreListener(StoreListener listener) {
-        synchronized (globalListeners) {
-            globalListeners.add(listener);
-        }
-    }
-    
-    public void removeStoreListener(StoreListener listener) {
-        synchronized (globalListeners) {
-            globalListeners.remove(listener);
-        }
-    }
-
-    public StoreListener[] getStoreListeners() {
-        synchronized (globalListeners) {
-            return globalListeners.toArray(new StoreListener[0]);
-        }
     }
     
     public DHTFuture<StoreEvent> store(KeyValue keyValue) {
@@ -80,74 +53,14 @@ public class StoreManager extends AbstractManager {
         return future;
     }
     
-    private class StoreFuture extends FutureTask<StoreEvent> implements DHTFuture<StoreEvent> {
-        
-        private List<DHTEventListener<StoreEvent>> listeners 
-            = new ArrayList<DHTEventListener<StoreEvent>>();
+    private class StoreFuture extends AbstractDHTFuture {
         
         public StoreFuture(Callable<StoreEvent> callable) {
             super(callable);
         }
 
-        public <L extends DHTEventListener<StoreEvent>> 
-                void addDHTEventListener(L listener) {
-            
-            synchronized (listeners) {
-                if (isDone()) {
-                    try {
-                        StoreEvent result = get();
-                        listener.handleResult(result);
-                    } catch (CancellationException ignore) {
-                    } catch (InterruptedException ignore) {
-                    } catch (Exception ex) {
-                        listener.handleException(ex);
-                    }
-                } else {
-                    listeners.add(listener);
-                }
-            }
-        }
-
         @Override
-        protected void done() {
-            super.done();
-            
-            try {
-                StoreEvent entry = get();
-                fireResult(entry);
-            } catch (CancellationException ignore) {
-            } catch (InterruptedException ignore) {
-            } catch (Exception err) {
-                fireException(err);
-            }
-        }
-        
-        private void fireResult(final StoreEvent result) {
-            synchronized(globalListeners) {
-                for (StoreListener l : globalListeners) {
-                    l.handleResult(result);
-                }
-            }
-            
-            synchronized(listeners) {
-                for (DHTEventListener<StoreEvent> l : listeners) {
-                    l.handleResult(result);
-                }
-            }
-        }
-        
-        private void fireException(final Exception ex) {
-            synchronized(globalListeners) {
-                for (StoreListener l : globalListeners) {
-                    l.handleException(ex);
-                }
-            }
-            
-            synchronized(listeners) {
-                for (DHTEventListener<StoreEvent> l : listeners) {
-                    l.handleException(ex);
-                }
-            }
+        protected void deregister() {
         }
     }
 }
