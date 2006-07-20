@@ -92,7 +92,7 @@ public class SerializeTest {
     }
     
     public static void testSerializeRT() throws Exception{
-        MojitoDHT dht = new MojitoDHT(false);
+        MojitoDHT dht = MojitoFactory.createDHT();
         try {
             dht.bind(addr);
         } catch (IOException e) {

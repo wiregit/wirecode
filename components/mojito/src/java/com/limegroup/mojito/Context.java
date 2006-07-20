@@ -21,17 +21,22 @@ package com.limegroup.mojito;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,6 +73,7 @@ import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -79,7 +85,7 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
  * The Context is the heart of Mojito where everything comes 
  * together. 
  */
-public class Context {
+public class Context implements MojitoDHT {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
@@ -127,7 +133,7 @@ public class Context {
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
     
-    public Context(String name, Contact localNode, KeyPair keyPair) {
+    Context(String name, Contact localNode, KeyPair keyPair) {
         this.name = name;
         this.localNode = localNode;
         this.keyPair = keyPair;
@@ -362,7 +368,7 @@ public class Context {
         ((ContactNode)localNode).setContactAddress(externalAddress);
     }
     
-    public SocketAddress getLocalSocketAddress() {
+    public SocketAddress getLocalAddress() {
         return localAddress;
     }
     
@@ -497,6 +503,14 @@ public class Context {
         return isRunning() && bootstrapManager.isBootstrapping();
     }
     
+    public synchronized void bind(int port) throws IOException {
+        bind(new InetSocketAddress(port));
+    }
+    
+    public synchronized void bind(InetAddress addr, int port) throws IOException {
+        bind(new InetSocketAddress(addr, port));
+    }
+
     /**
      * Binds the DatagramChannel to a specific address & port.
      * 
@@ -651,6 +665,14 @@ public class Context {
         return findNodeManager.lookup(lookupId);
     }
     
+    public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
+        return bootstrap(Arrays.asList(address));
+    }
+    
+    public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
+        return bootstrapManager.bootstrap(hostList);
+    }
+
     /**
      * Tries to bootstrap from the local Route Table.
      */
@@ -658,13 +680,60 @@ public class Context {
         return bootstrapManager.bootstrap();
     }
     
-    /**
-     * Tries to bootstrap from a List of Hosts. Depending on the 
-     * size of the list it may fall back to bootstrapping from
-     * the local Route Table!
-     */
-    public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
-        return bootstrapManager.bootstrap(hostList);
+    public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
+        return put(key, value, null);
+    }
+    
+    public DHTFuture<StoreEvent> put(KUID key, byte[] value, PrivateKey privateKey) {
+        
+        try {
+            KeyValue keyValue = 
+                KeyValue.createLocalKeyValue(key, value, getLocalNode());
+            
+            if (privateKey == null) {
+                if (DatabaseSettings.SIGN_KEY_VALUES.getValue()) {
+                    keyValue.sign(getPrivateKey());
+                    keyValue.setPublicKey(getPublicKey());
+                }
+            } else {
+                keyValue.sign(privateKey);
+                
+                if (!keyValue.verify(getMasterKey())) {
+                    throw new SignatureException("Cannot store " + keyValue 
+                            + " because signature does not match with the master key");
+                }
+            }
+            
+            Database database = getDatabase();
+            synchronized(database) {
+                if (database.add(keyValue) 
+                        || database.isTrustworthy(keyValue)) {
+                    
+                    // Create a new KeyPair every time we have removed
+                    // all local KeyValues.
+                    if (database.getLocalValueCount() == 0) {
+                        createNewKeyPair();
+                    }
+                    
+                    return store(keyValue);
+                }
+            }
+        } catch (InvalidKeyException e) {
+            LOG.error("InvalidKeyException", e);
+        } catch (SignatureException e) {
+            LOG.error("SignatureException", e);
+        }
+        
+        return null;
+    }
+    
+    public DHTFuture<StoreEvent> remove(KUID key) {
+        return remove(key, null);
+    }
+
+    public DHTFuture<StoreEvent> remove(KUID key, PrivateKey privateKey) {
+        // To remove a KeyValue you just store an empty value!
+        return put(key, new byte[0], privateKey);
     }
     
     /** 
@@ -673,12 +742,20 @@ public class Context {
     public DHTFuture<StoreEvent> store(KeyValue keyValue) {
         return storeManager.store(keyValue);
     }
-    
+   
     /** 
      * Stores the given KeyValue 
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
         return storeManager.store(node, queryKey, keyValue);
+    }
+    
+    public Set<KUID> getKeys() {
+        return getDatabase().getKeys();
+    }
+    
+    public Collection<KeyValue> getValues() {
+        return getDatabase().getValues();
     }
     
     /**
@@ -822,5 +899,9 @@ public class Context {
         public Thread newThread(Runnable r) {
             return new Thread(r, getName()+"-"+(num++));
         }
+    }
+    
+    public void store(OutputStream out) throws IOException {
+        MojitoFactory.store(this, out);
     }
 }

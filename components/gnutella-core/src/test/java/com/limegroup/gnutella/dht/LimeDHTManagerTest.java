@@ -15,6 +15,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.settings.NetworkSettings;
 
 public class LimeDHTManagerTest extends BaseTestCase {
@@ -41,7 +42,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     public static void globalSetUp() throws Exception {
         //setup bootstrap node
-        BOOTSTRAP_DHT = new MojitoDHT("bootstrapNode", false);
+        BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
         InetSocketAddress addr = new InetSocketAddress("localhost", 3000);
         BOOTSTRAP_DHT.bind(addr);
         BOOTSTRAP_DHT.start();

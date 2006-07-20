@@ -89,7 +89,8 @@ public class Main {
         
         for(int i = 0; i < count; i++) {
             try {
-                MojitoDHT dht = new MojitoDHT("DHT" + i, false);
+                //MojitoDHT dht = new MojitoDHT("DHT" + i, false);
+                MojitoDHT dht = MojitoFactory.createDHT("DHT" + i);
                 
                 if (addr != null) {
                     dht.bind(new InetSocketAddress(addr, port+i));
@@ -100,7 +101,7 @@ public class Main {
                 dht.start();
 
                 dhts.add(dht);
-                System.out.println(i + ": " + ((MojitoDHT)dhts.get(dhts.size()-1)).getLocalNode());
+                System.out.println(i + ": " + ((Context)dhts.get(dhts.size()-1)).getLocalNode());
             } catch (IOException err) {
                 System.err.println("Failed to start/connect DHT #" + i);
                 err.printStackTrace();
@@ -183,7 +184,7 @@ public class Main {
             try {
                 if (line.indexOf("quit") >= 0) {
                     for(int i = 0; i < dhts.size(); i++) {
-                        ((MojitoDHT)dhts.get(i)).stop();
+                        dhts.get(i).stop();
                     }
                     System.exit(0);
                 } else if (line.indexOf("switch") >= 0) {

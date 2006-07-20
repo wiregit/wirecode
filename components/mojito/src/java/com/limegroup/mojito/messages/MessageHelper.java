@@ -46,6 +46,9 @@ public class MessageHelper {
     }
 
     public void setMessageFactory(MessageFactory factory) {
+        if (factory == null) {
+            factory = new DefaultMessageFactory(context);
+        }
         this.factory = factory;
     }
 

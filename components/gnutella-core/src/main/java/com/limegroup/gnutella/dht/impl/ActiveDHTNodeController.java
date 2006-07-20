@@ -17,7 +17,9 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.MojitoFactory;
 
 class ActiveDHTNodeController extends AbstractDHTController {
     
@@ -34,7 +36,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
                 FILE.exists() && FILE.isFile()) {
             try {
                 FileInputStream in = new FileInputStream(FILE);
-                mojitoDHT = MojitoDHT.load(in);
+                mojitoDHT = MojitoFactory.load(in);
                 in.close();
             } catch (FileNotFoundException e) {
                 LOG.error("FileNotFoundException", e);
@@ -46,7 +48,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
         }
         
         if (mojitoDHT == null) {
-            super.dht = new MojitoDHT("ActiveMojitoDHT", false);
+            super.dht = MojitoFactory.createDHT("ActiveMojitoDHT");
         } else {
             super.dht = mojitoDHT;
         }
@@ -104,7 +106,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
         }
         
         //IF we are active and bootstrapped: we need only return ourselves
-        IpPort localNode = new IpPortContactNode(dht.getLocalNode());
+        IpPort localNode = new IpPortContactNode(((Context)dht).getLocalNode());
         return Arrays.asList(localNode);
     }
 }

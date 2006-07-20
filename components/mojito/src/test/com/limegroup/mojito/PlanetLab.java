@@ -95,8 +95,8 @@ public class PlanetLab {
         List dhts = new ArrayList(number);
         for(int i = 0; i < number; i++) {
             try {
-                MojitoDHT dht = new MojitoDHT("DHT-" + i, false);
-                statsManager.addDHTNode(dht.getContext().getDHTStats());
+                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
+                statsManager.addDHTNode(((Context)dht).getDHTStats());
                 dht.bind(new InetSocketAddress(port+i));
                 
                 dht.start();

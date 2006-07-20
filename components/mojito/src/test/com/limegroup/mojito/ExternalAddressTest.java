@@ -48,22 +48,20 @@ public class ExternalAddressTest extends BaseTestCase {
     }
     
     public void testSettingExternalAddress() throws Exception {
-        MojitoDHT dht1 = new MojitoDHT("DHT-1", false);
+        MojitoDHT dht1 = MojitoFactory.createDHT("DHT-1");
         dht1.bind(new InetSocketAddress(2000));
-        Context context1 = dht1.getContext();
         dht1.start();
         
-        MojitoDHT dht2 = new MojitoDHT("DHT-2", false);
+        MojitoDHT dht2 = MojitoFactory.createDHT("DHT-2");
         dht2.bind(new InetSocketAddress(3000));
-        Context context2 = dht2.getContext();
         dht2.start();
         
         Thread.sleep(3000);
         
-        PingRequestHandlerStub pingHandlerStub = new PingRequestHandlerStub(context2);
+        PingRequestHandlerStub pingHandlerStub = new PingRequestHandlerStub((Context)dht2);
         Field pingHandler = MessageDispatcher.class.getDeclaredField("pingHandler");
         pingHandler.setAccessible(true);
-        pingHandler.set(context2.getMessageDispatcher(), pingHandlerStub);
+        pingHandler.set(((Context)dht2).getMessageDispatcher(), pingHandlerStub);
         
         // BEGIN
         
@@ -71,30 +69,30 @@ public class ExternalAddressTest extends BaseTestCase {
          * First Ping: Accept any IP:Port
          */
         pingHandlerStub.externalAddress = new InetSocketAddress("10.254.0.251", 3000);
-        context1.ping(new InetSocketAddress("localhost", 3000), null);
+        dht1.ping(new InetSocketAddress("localhost", 3000));
         Thread.sleep(1000);
-        assertEquals(pingHandlerStub.externalAddress, context1.getContactAddress());
+        assertEquals(pingHandlerStub.externalAddress, dht1.getContactAddress());
         
         /*
          * After 1st Ping: Two Nodes must say the same IP:Port
          */
         pingHandlerStub.externalAddress = new InetSocketAddress("www.google.com", 1234);
-        context1.ping(new InetSocketAddress("localhost", 3000), null);
+        dht1.ping(new InetSocketAddress("localhost", 3000));
         Thread.sleep(1000);
-        assertNotEquals(pingHandlerStub.externalAddress, context1.getContactAddress());
+        assertNotEquals(pingHandlerStub.externalAddress, dht1.getContactAddress());
         
         pingHandlerStub.externalAddress = new InetSocketAddress("www.limewire.com", 80);
-        context1.ping(new InetSocketAddress("localhost", 3000), null);
+        dht1.ping(new InetSocketAddress("localhost", 3000));
         Thread.sleep(1000);
-        assertNotEquals(pingHandlerStub.externalAddress, context1.getContactAddress());
+        assertNotEquals(pingHandlerStub.externalAddress, dht1.getContactAddress());
         
         /*
          * But Now!
          */
         pingHandlerStub.externalAddress = new InetSocketAddress("www.limewire.com", 80);
-        context1.ping(new InetSocketAddress("localhost", 3000), null);
+        dht1.ping(new InetSocketAddress("localhost", 3000));
         Thread.sleep(1000);
-        assertEquals(pingHandlerStub.externalAddress, context1.getContactAddress());
+        assertEquals(pingHandlerStub.externalAddress, dht1.getContactAddress());
         
         dht1.stop();
         dht2.stop();

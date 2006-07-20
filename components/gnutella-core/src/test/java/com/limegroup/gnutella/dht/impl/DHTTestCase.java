@@ -10,6 +10,7 @@ import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.MojitoFactory;
 
 public abstract class DHTTestCase extends BaseTestCase {
     
@@ -27,7 +28,7 @@ public abstract class DHTTestCase extends BaseTestCase {
     
     public static void globalSetUp() throws Exception {
         //setup bootstrap node
-        BOOTSTRAP_DHT = new MojitoDHT("bootstrapNode", false);
+        BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
         InetSocketAddress addr = new InetSocketAddress("localhost", BOOTSTRAP_DHT_PORT);
         BOOTSTRAP_DHT.bind(addr);
         BOOTSTRAP_DHT.start();

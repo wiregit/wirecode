@@ -24,6 +24,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.util.BucketUtils;
 
 class PassiveDHTNodeController extends AbstractDHTController{
@@ -39,7 +40,8 @@ class PassiveDHTNodeController extends AbstractDHTController{
 
     @Override
     public void init() {
-        dht = new MojitoDHT("PassiveMojitoDHT", true);
+        dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT");
+        
         limeDHTRouteTable = (LimeDHTRoutingTable) dht.setRoutingTable(LimeDHTRoutingTable.class);
         setLimeMessageDispatcher();
         //load the small list of MRS nodes for bootstrap

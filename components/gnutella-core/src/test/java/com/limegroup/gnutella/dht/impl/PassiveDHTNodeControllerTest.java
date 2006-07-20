@@ -50,7 +50,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         controller.start();
         Thread.sleep(300);
         assertTrue(controller.isWaiting());
-        controller.addBootstrapHost(BOOTSTRAP_DHT.getSocketAddress());
+        controller.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
         assertFalse(controller.isWaiting());
         Thread.sleep(300);
         controller.stop();

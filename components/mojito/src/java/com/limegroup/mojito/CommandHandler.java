@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.Future;
 
+import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapEvent;
@@ -96,10 +97,10 @@ public class CommandHandler {
     }
     
     public static void info(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
-        out.println("Local ContactNode: " + dht.getLocalNode());
+        out.println("Local ContactNode: " + ((Context)dht).getLocalNode());
         out.println("Is running: " + dht.isRunning());
-        out.println("Database Size: " + dht.getDatabase().size());
-        out.println("RouteTable Size: " + dht.getRouteTable().size());
+        out.println("Database Size: " + ((Context)dht).getDatabase().size());
+        out.println("RouteTable Size: " + ((Context)dht).getRouteTable().size());
         out.println("Estimated DHT Size: " + dht.size());
     }
     
@@ -119,7 +120,7 @@ public class CommandHandler {
     public static void database(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         StringBuilder buffer = new StringBuilder("\n");
         
-        Database database = dht.getDatabase();
+        Database database = ((Context)dht).getDatabase();
         Collection values = database.getValues();
         for(Iterator it = values.iterator(); it.hasNext(); ) {
             KeyValue value = (KeyValue)it.next();
@@ -135,7 +136,7 @@ public class CommandHandler {
     public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         StringBuilder buffer = new StringBuilder("\n");
         
-        RouteTable routingTable = dht.getRouteTable();
+        RouteTable routingTable = ((Context)dht).getRouteTable();
         buffer.append(routingTable.toString());
         
         out.println(buffer);
@@ -357,7 +358,7 @@ public class CommandHandler {
         FileInputStream fis = new FileInputStream(file);
         
         try {
-            return MojitoDHT.load(fis);
+            return MojitoFactory.load(fis);
         } catch (ClassNotFoundException err) {
             err.printStackTrace(out);
         } finally {
@@ -371,12 +372,13 @@ public class CommandHandler {
         File file = new File(args[1]);
         out.println("Storing: " + file);
         FileOutputStream fos = new FileOutputStream(file);
-        dht.store(fos, true, true);
+        //dht.store(fos, true, true);
+        dht.store(fos);
         fos.close();
     }
     
     public static void stats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
-        DHTStats stats = dht.getContext().getDHTStats();
+        DHTStats stats = ((Context)dht).getDHTStats();
         stats.dumpStats(out, true);
     }
 }

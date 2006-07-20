@@ -42,11 +42,11 @@ public class CacheForwardTest extends BaseTestCase {
     }
 
     public void testCacheForward() {
-        MojitoDHT originalRequesterDHT = new MojitoDHT("DHT-1", false);
+        MojitoDHT originalRequesterDHT = MojitoFactory.createDHT("DHT-1");
         
-        MojitoDHT firstStorer = new MojitoDHT("DHT-2", false);
+        MojitoDHT firstStorer = MojitoFactory.createDHT("DHT-2");
         
-        MojitoDHT secondStorer = new MojitoDHT("DHT-3", false);
+        MojitoDHT secondStorer = MojitoFactory.createDHT("DHT-3");
         try {
             originalRequesterDHT.bind(new InetSocketAddress("localhost", 3000));
             firstStorer.bind(new InetSocketAddress("localhost", 3001));
@@ -59,30 +59,30 @@ public class CacheForwardTest extends BaseTestCase {
         firstStorer.start();
         
         try {
-            firstStorer.bootstrap(originalRequesterDHT.getSocketAddress());
+            firstStorer.bootstrap(originalRequesterDHT.getContactAddress());
             
             // 
-            byte[] valueID = firstStorer.getLocalNode().getNodeID().getBytes();
+            byte[] valueID = firstStorer.getLocalNodeID().getBytes();
             //replace with first bits of first storer to make sure it lands there first
             originalRequesterDHT.put(KUID.createValueID(valueID), "test".getBytes("UTF-8"));
             Thread.sleep(1000);
             
             //try the normal store forward
             secondStorer.start();
-            secondStorer.bootstrap(firstStorer.getSocketAddress());
+            secondStorer.bootstrap(firstStorer.getContactAddress());
 
             //now change instanceID and retry -- should store forward again
             secondStorer.stop();
             Thread.sleep(1000);
             secondStorer.bind(new InetSocketAddress("localhost", 3002));
             secondStorer.start();
-            secondStorer.bootstrap(firstStorer.getSocketAddress());
+            secondStorer.bootstrap(firstStorer.getContactAddress());
             
             Thread.sleep(10000);
             
             //now contact host with same instanceID -- should not store forward
             System.out.println("Second storer will send ping!");
-            secondStorer.getContext().ping(firstStorer.getLocalNode());
+            ((Context)secondStorer).ping(((Context)firstStorer).getLocalNode());
             Thread.sleep(10000);
             
         } catch (IOException e) {

@@ -47,7 +47,7 @@ public class DataBaseTest extends BaseTestCase {
     }
 
     protected void setUp() throws Exception {
-        dht = new MojitoDHT(false);
+        dht = MojitoFactory.createDHT();
         try {
             dht.bind(addr);
         } catch (IOException e) {
@@ -64,7 +64,7 @@ public class DataBaseTest extends BaseTestCase {
     }
     
     public void testRemoveValueDB() throws Exception {
-        Database db = dht.getContext().getDatabase();
+        Database db = ((Context)dht).getDatabase();
         KUID key = KUID.createValueID(KUID.createUnknownID().getBytes());
         byte[] value = "test".getBytes("UTF-8");
         

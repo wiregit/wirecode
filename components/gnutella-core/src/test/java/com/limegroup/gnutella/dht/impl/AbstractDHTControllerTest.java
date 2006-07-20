@@ -49,7 +49,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         
         Future future = (Future)PrivilegedAccessor.getValue(controller, "bootstrapFuture");
         
-        controller.addBootstrapHost(BOOTSTRAP_DHT.getSocketAddress());
+        controller.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
         assertTrue(future.isCancelled());
         assertFalse("Should not be waiting",controller.isWaiting());
         
