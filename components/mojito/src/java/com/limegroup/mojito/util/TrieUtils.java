@@ -48,7 +48,7 @@ public final class TrieUtils {
         final List<V> values = new ArrayList<V>(size);
         
         trie.select(key, new Cursor<K,V>() {
-            public boolean select(Entry<K, V> entry) {
+            public boolean select(Entry<? extends K, ? extends V> entry) {
                 if (cursor == null || cursor.select(entry)) {
                     values.add(entry.getValue());
                 }
@@ -62,11 +62,14 @@ public final class TrieUtils {
     public static <K,V> Set<Map.Entry<K, V>> entrySet(Trie<K,V> trie) {
         return entrySet(trie, new HashSet<Map.Entry<K, V>>(trie.size()));
     }
-    
-    public static <K,V> Set<Map.Entry<K, V>> entrySet(Trie<K,V> trie, final Set<Map.Entry<K, V>> entries) {
+   
+    public static <K,V> Set<Map.Entry<K, V>> entrySet(Trie<K,V> trie, 
+            final Set<Map.Entry<K, V>> entries) {
+        
         trie.traverse(new Cursor<K, V>() {
-            public boolean select(Entry<K, V> entry) {
-                entries.add(entry);
+            @SuppressWarnings("unchecked")
+            public boolean select(Entry<? extends K, ? extends V> entry) {
+                entries.add((Entry<K, V>)entry);
                 return false;
             }
         });
@@ -79,7 +82,7 @@ public final class TrieUtils {
     
     public static <K,V> Set<K> keySet(Trie<K,V> trie, final Set<K> keys) {
         trie.traverse(new Cursor<K, V>() {
-            public boolean select(Entry<K, V> entry) {
+            public boolean select(Entry<? extends K, ? extends V> entry) {
                 keys.add(entry.getKey());
                 return false;
             }
@@ -93,7 +96,7 @@ public final class TrieUtils {
     
     public static <K,V> Collection<V> values(Trie<K,V> trie, final Collection<V> values) {
         trie.traverse(new Cursor<K, V>() {
-            public boolean select(Entry<K, V> entry) {
+            public boolean select(Entry<? extends K, ? extends V> entry) {
                 values.add(entry.getValue());
                 return false;
             }
@@ -139,7 +142,7 @@ public final class TrieUtils {
             return trie.put(key, value);
         }
 
-        public synchronized List<V> range(K key, int length, Cursor<K,V> cursor) {
+        public synchronized List<V> range(K key, int length, Cursor<? super K, ? super V> cursor) {
             return trie.range(key, length, cursor);
         }
 
@@ -151,7 +154,7 @@ public final class TrieUtils {
             return trie.remove(key);
         }
 
-        public synchronized Map.Entry<K,V> select(K key, Cursor<K,V> cursor) {
+        public synchronized Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor) {
             return trie.select(key, cursor);
         }
         
@@ -159,7 +162,7 @@ public final class TrieUtils {
             return trie.select(key);
         }
 
-        public synchronized Map.Entry<K,V> traverse(Cursor<K,V> cursor) {
+        public synchronized Map.Entry<K,V> traverse(Cursor<? super K, ? super V> cursor) {
             return trie.traverse(cursor);
         }
 

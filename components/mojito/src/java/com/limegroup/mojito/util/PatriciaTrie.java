@@ -254,17 +254,17 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     }
     
     @SuppressWarnings("unchecked")
-    public Map.Entry<K,V> select(K key, Cursor<K, V> cursor) {
+    public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor) {
         Entry[] entry = new Entry[]{ null };
         selectR(root.left, -1, key, cursor, entry);
         return entry[0];
     }
 
-    private boolean selectR(Entry<K, V> h, int bitIndex, 
+    private boolean selectR(Entry<K,V> h, int bitIndex, 
             final K key, 
-            final Cursor<K, V> cursor,
+            final Cursor<? super K, ? super V> cursor,
             final Entry[] entry) {
-        
+
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && cursor.select(h)) {
                 entry[0] = h;
@@ -294,14 +294,14 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      */
     public List<V> range(K key, int length) {
         return range(key, length, new Cursor<K, V>() {
-            public boolean select(Map.Entry<K, V> entry) {
+            public boolean select(Map.Entry<? extends K, ? extends V> entry) {
                 return true;
             }
         });
     }
     
     @SuppressWarnings("unchecked")
-    public List<V> range(K key, int length, Cursor<K, V> keySelector) {
+    public List<V> range(K key, int length, Cursor<? super K, ? super V> cursor) {
         
         // If length is -1 then return everything!
         if (length == -1) {
@@ -331,10 +331,10 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         
         if (length < entry.bitIndex) {
             //System.out.println("Has Subtree");
-            return valuesInRangeR(entry, -1, keySelector, new ArrayList<V>());
+            return valuesInRangeR(entry, -1, cursor, new ArrayList<V>());
         } else {
             //System.out.println("Has No Subtree");
-            if (keySelector.select(entry)) {
+            if (((Cursor<K,V>)cursor).select(entry)) {
                 return Arrays.asList(entry.value);
             } else {
                 return Collections.emptyList();
@@ -361,17 +361,17 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     }
     
     private List<V> valuesInRangeR(Entry<K, V> h, int bitIndex, 
-            final Cursor<K, V> keySelector, final List<V> values) {
+            final Cursor<? super K, ? super V> cursor, final List<V> values) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() 
-                    && keySelector.select(h)) {
+                    && cursor.select(h)) {
                 values.add(h.value);
             }
             return values;
         }
         
-        valuesInRangeR(h.left, h.bitIndex, keySelector, values);
-        return valuesInRangeR(h.right, h.bitIndex, keySelector, values);
+        valuesInRangeR(h.left, h.bitIndex, cursor, values);
+        return valuesInRangeR(h.right, h.bitIndex, cursor, values);
     }
     
     /**
@@ -588,14 +588,14 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     }
     
     @SuppressWarnings("unchecked")
-    public Map.Entry<K, V> traverse(Cursor<K, V> cursor) {
+    public Map.Entry<K, V> traverse(Cursor<? super K, ? super V> cursor) {
         Entry[] entry = new Entry[1];
         travserseR(root.left, -1, cursor, entry);
         return entry[0];
     }
     
     private boolean travserseR(Entry<K, V> h, int bitIndex, 
-            final Cursor<K, V> cursor, final Entry[] entry) {
+            final Cursor<? super K, ? super V> cursor, final Entry[] entry) {
         
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && cursor.select(h)) {

@@ -225,7 +225,7 @@ class BucketNode implements Bucket {
     public Contact getLeastRecentlySeenLiveContact() {
         final Contact[] leastRecentlySeen = new Contact[]{ null };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
-            public boolean select(Map.Entry<KUID, Contact> entry) {
+            public boolean select(Map.Entry<? extends KUID, ? extends Contact> entry) {
                 Contact node = entry.getValue();
                 Contact lrs = leastRecentlySeen[0];
                 if (lrs == null || node.getTimeStamp() < lrs.getTimeStamp()) {
@@ -240,7 +240,7 @@ class BucketNode implements Bucket {
     public Contact getMostRecentlySeenLiveContact() {
         final Contact[] mostRecentlySeen = new Contact[]{ null };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
-            public boolean select(Map.Entry<KUID, Contact> entry) {
+            public boolean select(Map.Entry<? extends KUID, ? extends Contact> entry) {
                 Contact node = entry.getValue();
                 Contact mrs = mostRecentlySeen[0];
                 if (mrs == null || node.getTimeStamp() > mrs.getTimeStamp()) {
@@ -301,7 +301,7 @@ class BucketNode implements Bucket {
     private int getLiveNotDeadCount() {
         final int[] notDead = new int[]{ 0 };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
-            public boolean select(Map.Entry<KUID, Contact> entry) {
+            public boolean select(Map.Entry<? extends KUID, ? extends Contact> entry) {
                 Contact node = entry.getValue();
                 if (!node.isDead()) {
                     notDead[0]++;

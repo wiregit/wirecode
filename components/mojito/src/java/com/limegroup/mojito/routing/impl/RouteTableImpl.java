@@ -398,7 +398,7 @@ public class RouteTableImpl implements RouteTable {
     public synchronized List<Contact> select(final KUID nodeId, final int count) {
         final List<Contact> nodes = new ArrayList<Contact>(count);
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<KUID, Bucket> entry) {
+            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 nodes.addAll(bucket.select(nodeId, count - nodes.size()));
                 return nodes.size() >= count;
@@ -415,7 +415,7 @@ public class RouteTableImpl implements RouteTable {
         
         if (liveContacts) {
             bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
-                public boolean select(Entry<KUID, Bucket> entry) {
+                public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
                     Bucket bucket = entry.getValue();
                     for(Contact contact : bucket.select(nodeId, count - nodes.size())) {
                         if (!contact.hasFailed()) {
@@ -427,7 +427,7 @@ public class RouteTableImpl implements RouteTable {
             });
         } else {
             bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
-                public boolean select(Entry<KUID, Bucket> entry) {
+                public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
                     Bucket bucket = entry.getValue();
                     nodes.addAll(bucket.select(nodeId, count - nodes.size()));
                     
@@ -451,7 +451,7 @@ public class RouteTableImpl implements RouteTable {
     public synchronized List<Contact> getLiveContacts() {
         final List<Contact> nodes = new ArrayList<Contact>();
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<KUID, Bucket> entry) {
+            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 // This should be faster than addAll() as all  
                 // elements are added straight to the 'nodes'
@@ -468,7 +468,7 @@ public class RouteTableImpl implements RouteTable {
     public synchronized List<Contact> getCachedContacts() {
         final List<Contact> nodes = new ArrayList<Contact>();
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<KUID, Bucket> entry) {
+            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 nodes.addAll(bucket.getCachedContacts());
                 return false;
@@ -481,7 +481,7 @@ public class RouteTableImpl implements RouteTable {
         final List<KUID> randomIds = new ArrayList<KUID>();
         
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<KUID, Bucket> entry) {
+            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 if (!bucket.contains(context.getLocalNodeID())) {
                     if (force || bucket.isRefreshRequired()) {

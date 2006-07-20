@@ -40,14 +40,14 @@ public interface Trie<K, V> {
     public List<V> values();
     
     public List<V> range(K key, int length);
-    public List<V> range(K key, int length, Cursor<K, V> cursor);
+    public List<V> range(K key, int length, Cursor<? super K, ? super V> cursor);
     
     public V select(K key);
-    public Map.Entry<K,V> select(K key, Cursor<K, V> cursor);
+    public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor);
     
-    public Map.Entry<K,V> traverse(Cursor<K, V> cursor);
+    public Map.Entry<K,V> traverse(Cursor<? super K, ? super V> cursor);
     
     public static interface Cursor<K, V> {
-        public boolean select(Map.Entry<K, V> entry);
+        public boolean select(Map.Entry<? extends K, ? extends V> entry);
     }
 }
