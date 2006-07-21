@@ -363,7 +363,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             }
         }
         
-        public void handleException(Exception ex) {
+        public void handleThrowable(Throwable ex) {
             LOG.debug(ex);
             waiting = false; // will cancel the node fetcher too
         }

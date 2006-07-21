@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.FutureTask;
 
 import com.limegroup.mojito.Context;
@@ -37,28 +38,22 @@ abstract class AbstractManager<V> {
     protected final Context context;
     
     private List<DHTEventListener<V>> globalListeners 
-        = new ArrayList<DHTEventListener<V>>();
+        = new CopyOnWriteArrayList<DHTEventListener<V>>();
     
     public AbstractManager(Context context) {
         this.context = context;
     }
     
     public void addDHTEventListener(DHTEventListener<V> listener) {
-        synchronized (globalListeners) {
-            globalListeners.add(listener);
-        }
+        globalListeners.add(listener);
     }
     
     public void removeDHTEventListener(DHTEventListener<V> listener) {
-        synchronized (globalListeners) {
-            globalListeners.remove(listener);
-        }
+        globalListeners.remove(listener);
     }
 
     public DHTEventListener[] getDHTEventListeners() {
-        synchronized (globalListeners) {
-            return globalListeners.toArray(new DHTEventListener[0]);
-        }
+        return globalListeners.toArray(new DHTEventListener[0]);
     }
     
     protected abstract class AbstractDHTFuture extends FutureTask<V> implements DHTFuture<V> {
@@ -71,6 +66,14 @@ abstract class AbstractManager<V> {
         }
         
         public void addDHTEventListener(DHTEventListener<V> listener) {
+            if (listener == null) {
+                return;
+            }
+            
+            if (isCancelled()) {
+                return;
+            }
+            
             synchronized (listeners) {
                 if (isDone()) {
                     try {
@@ -78,8 +81,8 @@ abstract class AbstractManager<V> {
                         listener.handleResult(result);
                     } catch (CancellationException ignore) {
                     } catch (InterruptedException ignore) {
-                    } catch (Exception ex) {
-                        listener.handleException(ex);
+                    } catch (Throwable ex) {
+                        listener.handleThrowable(ex);
                     }
                 } else {
                     listeners.add(listener);
@@ -100,16 +103,14 @@ abstract class AbstractManager<V> {
                 fireResult(result);
             } catch (CancellationException ignore) {
             } catch (InterruptedException ignore) {
-            } catch (Exception ex) {
-                fireException(ex);
+            } catch (Throwable ex) {
+                fireThrowable(ex);
             }
         }
         
         protected void fireResult(V result) {
-            synchronized(globalListeners) {
-                for (DHTEventListener<V> l : globalListeners) {
-                    l.handleResult(result);
-                }
+            for (DHTEventListener<V> l : globalListeners) {
+                l.handleResult(result);
             }
             
             synchronized(listeners) {
@@ -119,16 +120,14 @@ abstract class AbstractManager<V> {
             }
         }
         
-        protected void fireException(Exception ex) {
-            synchronized(globalListeners) {
-                for (DHTEventListener<V> l : globalListeners) {
-                    l.handleException(ex);
-                }
+        protected void fireThrowable(Throwable ex) {
+            for (DHTEventListener<V> l : globalListeners) {
+                l.handleThrowable(ex);
             }
             
             synchronized(listeners) {
                 for (DHTEventListener<V> l : listeners) {
-                    l.handleException(ex);
+                    l.handleThrowable(ex);
                 }
             }
         }

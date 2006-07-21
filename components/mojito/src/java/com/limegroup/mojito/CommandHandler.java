@@ -196,7 +196,7 @@ public class CommandHandler {
                 out.flush();
             }
             
-            public void handleException(Exception ex) {
+            public void handleThrowable(Throwable ex) {
                 out.println("Bootstraping failed");
                 ex.printStackTrace(out);
                 out.flush();

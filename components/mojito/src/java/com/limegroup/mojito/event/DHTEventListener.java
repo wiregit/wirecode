@@ -32,5 +32,5 @@ public interface DHTEventListener<T> {
     /**
      * 
      */
-    public void handleException(Exception ex);
+    public void handleThrowable(Throwable ex);
 }

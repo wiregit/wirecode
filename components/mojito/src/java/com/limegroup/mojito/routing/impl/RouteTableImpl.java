@@ -151,7 +151,7 @@ public class RouteTableImpl implements RouteTable {
                 //TODO add spoofer to ban list
             }
             
-            public void handleException(Exception ex) {
+            public void handleThrowable(Throwable ex) {
                 if (!(ex instanceof DHTException)) {
                     return;
                 }
