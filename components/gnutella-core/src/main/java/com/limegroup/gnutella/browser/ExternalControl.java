@@ -52,8 +52,7 @@ public class ExternalControl implements ConnectionAcceptor {
 		return arg.toString();
 	}
 	
-	private static final ExternalControl INSTANCE =
-		new ExternalControl();
+	private static ExternalControl INSTANCE;
 	
 	private ExternalControl() {
 		RouterService.getConnectionDispatcher().
@@ -61,6 +60,12 @@ public class ExternalControl implements ConnectionAcceptor {
 				new String[]{"MAGNET","TORRENT"},
 				true,
 				true);
+	}
+	
+	public static synchronized ExternalControl instance() {
+		if (INSTANCE == null) 
+			INSTANCE = new ExternalControl();
+		return INSTANCE;
 	}
 	
 	public void acceptConnection(String word, Socket sock) {

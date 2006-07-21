@@ -3,7 +3,7 @@ package com.limegroup.gnutella.updates;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.apache.xerces.parsers.DOMParser;
+import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

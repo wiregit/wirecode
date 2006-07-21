@@ -9,7 +9,7 @@ import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.CommonUtils;
 
-import org.apache.xerces.parsers.DOMParser;
+import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.w3c.dom.Node;

@@ -2,7 +2,7 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.StringReader;
 import java.io.IOException;
-import org.apache.xerces.parsers.DOMParser;
+import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
