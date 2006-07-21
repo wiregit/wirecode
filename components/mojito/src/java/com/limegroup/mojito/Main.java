@@ -133,9 +133,10 @@ public class Main {
     
     private static void run(int port, List<MojitoDHT> dhts, SocketAddress bootstrapHost) throws Exception {
         long time = 0L;
-        
         DHTFuture<BootstrapEvent> future = null;
-        for(int i = 1; i < dhts.size(); i++) {
+        
+        int start = (bootstrapHost != null ? 0 : 1);
+        for(int i = start; i < dhts.size(); i++) {
             SocketAddress host = null;
             if (bootstrapHost != null) {
                 host = bootstrapHost;
@@ -147,7 +148,6 @@ public class Main {
                 future = dhts.get(i).bootstrap(host);
                 
                 BootstrapEvent evt = future.get();
-                
                 time += evt.getTotalTime();
                 System.out.println("Node #" + i + " finished bootstrapping in " + evt.getTotalTime() + "ms");
             } catch (Exception err) {
