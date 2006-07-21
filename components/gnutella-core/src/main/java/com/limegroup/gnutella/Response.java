@@ -708,7 +708,7 @@ public class Response {
         
         private static Set<Endpoint> parseLocations(byte[] locBytes) {
             Set<Endpoint> locations = null;
-            IPFilter ipFilter = IPFilter.instance();
+            IPFilter ipFilter = RouterService.getIpFilter();
  
             if (locBytes.length % 6 == 0) {
                 for (int j = 0; j < locBytes.length; j += 6) {

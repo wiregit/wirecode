@@ -15,6 +15,13 @@ public class IPList {
     private List<IP> ips = new LinkedList<IP>();
 
     public IPList () {}
+    
+    /**
+     * Determines if any hosts exist in this list.
+     */
+    public boolean isEmpty() {
+        return ips.isEmpty();
+    }
 
     /** 
      * Adds a certain IP to the IPList.

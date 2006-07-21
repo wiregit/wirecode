@@ -16,7 +16,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
-import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -2197,7 +2196,7 @@ public class ConnectionManager {
             Assert.that(endpoint != null);
             
             // If this was an invalid endpoint, try again.
-            if (!IPFilter.instance().allow(endpoint.getAddress()) 
+            if (!RouterService.getIpFilter().allow(endpoint.getAddress()) 
                 || isConnectedTo(endpoint.getAddress())
                 || isConnectingTo(endpoint)) {
                 _catcher.getAnEndpoint(this);

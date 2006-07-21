@@ -4,6 +4,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -176,7 +178,7 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
             new String[] {"18.239.0.*", "13.0.0.0"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"18.239.0.144"});
-        IPFilter filter = IPFilter.instance();
+        IPFilter filter = RouterService.getIpFilter();
         assertTrue(filter.allow("18.240.0.0"));
         assertTrue(! filter.allow("18.239.0.142"));
         assertTrue(filter.allow("18.239.0.144"));
@@ -184,7 +186,7 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(filter.allow("13.0.0.1"));
         byte[] address={(byte)18, (byte)239, (byte)0, (byte)144};
         assertTrue(filter.allow(
-            PingReply.createExternal(new byte[16], (byte)3, 6346, address, false)));
+            (Message)PingReply.createExternal(new byte[16], (byte)3, 6346, address, false)));
         byte[] address2=new byte[] {(byte)18, (byte)239, (byte)0, (byte)143};
         assertTrue(! filter.allow(
             new QueryReply(new byte[16], (byte)3, 6346, address2, 0,
