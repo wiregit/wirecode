@@ -20,28 +20,35 @@
 package com.limegroup.gnutella.util;
 
 import java.io.Serializable;
+import java.util.AbstractCollection;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
- * An optimized PATRICIA Trie for Kademlia. 
+ * An optimized PATRICIA Trie.  Currently only supports fixed-length keys. 
  */
-public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
+public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>, Serializable {
     
     private static final long serialVersionUID = 110232526181493307L;
 
-    private final Entry<K, V> root = new Entry<K, V>(null, null, -1);
+    private final TrieEntry<K, V> root = new TrieEntry<K, V>(null, null, -1);
     
     private int size = 0;
     private transient int modCount = 0;
     
     private final KeyCreator<K> keyCreator;
     
-    @SuppressWarnings("unchecked")
-    public PatriciaTrie(KeyCreator keyCreator) {
+    public PatriciaTrie(KeyCreator<K> keyCreator) {
         this.keyCreator = keyCreator;
     }
     
@@ -112,7 +119,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
             throw new NullPointerException("Key cannot be null");
         }
         
-        Entry<K, V> found = getR(root.left, -1, key);
+        TrieEntry<K, V> found = getR(root.left, -1, key);
         if (key.equals(found.key)) {
             if (/*found == root */ found.isEmpty()) {
                 incrementSize();
@@ -125,7 +132,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         int bitIndex = bitIndex(key, found.key);
         if (isValidBitIndex(bitIndex)) { // in 99.999...9% the case
             /* NEW KEY+VALUE TUPLE */
-            Entry<K, V> t = new Entry<K, V>(key, value, bitIndex);
+            TrieEntry<K, V> t = new TrieEntry<K, V>(key, value, bitIndex, root);
             root.left = putR(root.left, t, root);
             incrementSize();
             return null;
@@ -152,7 +159,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * The actual put implementation. Entry t is the new Entry we're
      * gonna add.
      */
-    private Entry<K, V> putR(Entry<K, V> h, final Entry<K, V> t, Entry<K, V> p) {
+    private TrieEntry<K, V> putR(TrieEntry<K, V> h, final TrieEntry<K, V> t, TrieEntry<K, V> p) {
         if ((h.bitIndex >= t.bitIndex) || (h.bitIndex <= p.bitIndex)) {
             
             if (!isBitSet(t.key, t.bitIndex)) {
@@ -180,13 +187,43 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         return h;
     }
     
+    @Override
+    public Set<Map.Entry<K,V>> entrySet() {
+        Set<Map.Entry<K,V>> es = entrySet;
+        return (es != null ? es : (entrySet = (Set<Map.Entry<K,V>>) (Set) new EntrySet()));
+    }
+    
     /**
      * Returns the Value whose Key equals our lookup Key
      * or null if no such key exists.
      */
-    public V get(K key) {
-        Entry<K, V> entry = getR(root.left, -1, key);
-        return (!entry.isEmpty() && key.equals(entry.key) ? entry.value : null);
+    public V get(Object k) {
+        TrieEntry<K, V> entry = getEntry(k);
+        return entry != null ? entry.getValue() : null;
+    }
+
+    /**
+     * Returns the entry associated with the specified key in the
+     * PatriciaTrie.  Returns null if the map contains no mapping
+     * for this key.
+     */
+    TrieEntry<K,V> getEntry(Object k) {
+        K key = asKey(k);
+        if(key == null)
+            return null;
+        
+        TrieEntry<K,V> entry = getR(root.left, -1, key);
+        return !entry.isEmpty() && key.equals(entry.key) ? entry : null;
+    }
+    
+    /** Casts the key to K. */
+    @SuppressWarnings("unchecked")
+    protected final K asKey(Object key) {
+        try {
+            return (K)key;
+        } catch(ClassCastException cce) {
+            return null;
+        }
     }
     
     /**
@@ -194,7 +231,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * selectR but with the exception that it might return the
      * root Entry even if it's empty.
      */
-    private Entry<K, V> getR(Entry<K, V> h, int bitIndex, K key) {
+    private TrieEntry<K, V> getR(TrieEntry<K, V> h, int bitIndex, K key) {
         if (h.bitIndex <= bitIndex) {
             return h;
         }
@@ -212,9 +249,9 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      */
     @SuppressWarnings("unchecked")
     public V select(K key) {
-        Entry[] entry = new Entry[1];
+        TrieEntry[] entry = new TrieEntry[1];
         if (!selectR(root.left, -1, key, entry)) {
-            Entry<K, V> e = entry[0];
+            TrieEntry<K, V> e = entry[0];
             return e.value;
         }
         return null;
@@ -225,7 +262,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * its overhead because we're selecting only one best matching
      * Entry from the Trie.
      */
-    private boolean selectR(Entry<K, V> h, int bitIndex, final K key, final Entry[] entry) {
+    private boolean selectR(TrieEntry<K, V> h, int bitIndex, final K key, final TrieEntry[] entry) {
         if (h.bitIndex <= bitIndex) {
             // If we hit the root Node and it is empty
             // we have to look for an alternative best
@@ -251,15 +288,15 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     
     @SuppressWarnings("unchecked")
     public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor) {
-        Entry[] entry = new Entry[]{ null };
+        TrieEntry[] entry = new TrieEntry[]{ null };
         selectR(root.left, -1, key, cursor, entry);
         return entry[0];
     }
 
-    private boolean selectR(Entry<K,V> h, int bitIndex, 
+    private boolean selectR(TrieEntry<K,V> h, int bitIndex, 
             final K key, 
             final Cursor<? super K, ? super V> cursor,
-            final Entry[] entry) {
+            final TrieEntry[] entry) {
 
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && cursor.select(h)) {
@@ -288,7 +325,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * 
      * @param length (depth) in bits
      */
-    public List<V> range(K key, int length) {
+    public Collection<V> range(K key, int length) {
         return range(key, length, new Cursor<K, V>() {
             public boolean select(Map.Entry<? extends K, ? extends V> entry) {
                 return true;
@@ -296,19 +333,18 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         });
     }
     
-    @SuppressWarnings("unchecked")
-    public List<V> range(K key, int length, Cursor<? super K, ? super V> cursor) {
-        
+    public Collection<V> range(K key, int length, Cursor<? super K, ? super V> cursor) {
         // If length is -1 then return everything!
         if (length == -1) {
-            return values();
+            Collection<V> values = values();
+            return new ArrayList<V>(values);
         }
         
         if (length >= keyCreator.length()) {
             throw new IllegalArgumentException(length + " >= " + keyCreator.length());
         }
         
-        Entry<K, V> entry = rangeR(root.left, -1, key, length, root);
+        TrieEntry<K, V> entry = rangeR(root.left, -1, key, length, root);
         if (entry.isEmpty()) {
             return Collections.emptyList();
         }
@@ -330,7 +366,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
             return valuesInRangeR(entry, -1, cursor, new ArrayList<V>());
         } else {
             //System.out.println("Has No Subtree");
-            if (((Cursor<K,V>)cursor).select(entry)) {
+            if (cursor.select(entry)) {
                 return Arrays.asList(entry.value);
             } else {
                 return Collections.emptyList();
@@ -342,8 +378,8 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * This is very similar to getR but with the difference that
      * we stop the lookup if h.bitIndex > keyLength.
      */
-    private Entry<K, V> rangeR(Entry<K, V> h, int bitIndex, 
-            final K key, final int keyLength, Entry<K, V> p) {
+    private TrieEntry<K, V> rangeR(TrieEntry<K, V> h, int bitIndex, 
+            final K key, final int keyLength, TrieEntry<K, V> p) {
         
         if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
             return (h.isEmpty() ? p : h);
@@ -356,7 +392,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         }
     }
     
-    private List<V> valuesInRangeR(Entry<K, V> h, int bitIndex, 
+    private List<V> valuesInRangeR(TrieEntry<K, V> h, int bitIndex, 
             final Cursor<? super K, ? super V> cursor, final List<V> values) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() 
@@ -373,8 +409,12 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     /**
      * Returns true if this trie contains the specified Key
      */
-    public boolean containsKey(K key) {
-        Entry entry = getR(root.left, -1, key);
+    public boolean containsKey(Object k) {
+        K key = asKey(k);
+        if(key == null)
+            return false;
+        
+        TrieEntry entry = getR(root.left, -1, key);
         return !entry.isEmpty() && key.equals(entry.key);
     }
     
@@ -384,7 +424,11 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * @param key the Key to delete
      * @return Returns the deleted Value
      */
-    public V remove(K key) {
+    public V remove(Object k) {
+        K key = asKey(k);
+        if(key == null)
+            return null;
+        
         return removeR(root.left, -1, key, root);
     }
     
@@ -393,7 +437,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * 
      * Serach for the Key
      */
-    private V removeR(Entry<K, V> h, int bitIndex, K key, Entry<K, V> p) {
+    private V removeR(TrieEntry<K, V> h, int bitIndex, K key, TrieEntry<K, V> p) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && key.equals(h.key)) {
                 return removeEntry(h, p);
@@ -415,7 +459,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * an internal (hard to remove) or external Entry (easy 
      * to remove)
      */
-    private V removeEntry(Entry<K, V> h, Entry<K, V> p) {
+    private V removeEntry(TrieEntry<K, V> h, TrieEntry<K, V> p) {
         
         if (h != root) {
             if (h.isInternalNode()) {
@@ -435,15 +479,15 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * If it's an external Entry then just remove it.
      * This is very easy and straight forward.
      */
-    private void removeExternalEntry(Entry<K, V> h) {
+    private void removeExternalEntry(TrieEntry<K, V> h) {
         if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isExternalNode()) {
             throw new IllegalArgumentException(h + " is not an external Entry!");
         } 
         
-        Entry<K, V> parent = h.parent;
-        Entry<K, V> child = (h.left == h) ? h.right : h.left;
+        TrieEntry<K, V> parent = h.parent;
+        TrieEntry<K, V> child = (h.left == h) ? h.right : h.left;
         
         if (parent.left == h) {
             h.parent.left = child;
@@ -463,7 +507,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
      * this code. The Idea is essentially that Entry p takes Entry h's
      * place in the trie which requires some re-wireing.
      */
-    private void removeInternalEntry(Entry<K, V> h, Entry<K, V> p) {
+    private void removeInternalEntry(TrieEntry<K, V> h, TrieEntry<K, V> p) {
         if (h == root) {
             throw new IllegalArgumentException("Cannot delete root Entry!");
         } else if (!h.isInternalNode()) {
@@ -475,8 +519,8 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         
         // Fix P's parent and child Nodes
         {
-            Entry<K, V> parent = p.parent;
-            Entry<K, V> child = (p.left == h) ? p.right : p.left;
+            TrieEntry<K, V> parent = p.parent;
+            TrieEntry<K, V> child = (p.left == h) ? p.right : p.left;
             
             if (parent.left == p) {
                 parent.left = child;
@@ -524,7 +568,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         return buffer.toString();
     }
     
-    private StringBuilder toStringR(Entry<K, V> h, int bitIndex, 
+    private StringBuilder toStringR(TrieEntry<K, V> h, int bitIndex, 
             final StringBuilder buffer) {
 
         if (h.bitIndex <= bitIndex) {
@@ -549,7 +593,7 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     /**
      * The actual keys() implementation. Just an inorder traverse
      */
-    private List<K> keysR(Entry<K, V> h, int bitIndex, final List<K> keys) {
+    private List<K> keysR(TrieEntry<K, V> h, int bitIndex, final List<K> keys) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty()) {
                 keys.add(h.key);
@@ -561,38 +605,15 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         return keysR(h.right, h.bitIndex, keys);
     }
     
-    /**
-     * Returns all Values
-     */
-    public List<V> values() {
-        return valuesR(root.left, -1, new ArrayList<V>(size()));
-    }
-    
-    /**
-     * The actual values() implementation. Just an inorder traverse
-     */
-    private List<V> valuesR(Entry<K, V> h, int bitIndex, final List<V> values) {
-        if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty()) {
-                values.add(h.value);
-            }
-            return values;
-        }
-        
-        valuesR(h.left, h.bitIndex, values);
-        return valuesR(h.right, h.bitIndex, values);
-    }
-    
     @SuppressWarnings("unchecked")
     public Map.Entry<K, V> traverse(Cursor<? super K, ? super V> cursor) {
-        Entry[] entry = new Entry[1];
+        TrieEntry[] entry = new TrieEntry[1];
         travserseR(root.left, -1, cursor, entry);
         return entry[0];
     }
     
-    private boolean travserseR(Entry<K, V> h, int bitIndex, 
-            final Cursor<? super K, ? super V> cursor, final Entry[] entry) {
-        
+    private boolean travserseR(TrieEntry<K, V> h, int bitIndex, 
+            final Cursor<? super K, ? super V> cursor, final TrieEntry[] entry) {
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && cursor.select(h)) {
                 entry[0] = h;
@@ -600,10 +621,11 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
             }
             return true; // continue
         }
-        
+
         if (travserseR(h.left, h.bitIndex, cursor, entry)) {
             return travserseR(h.right, h.bitIndex, cursor, entry);
         }
+        
         return false;
     }
     
@@ -636,21 +658,30 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     /**
      * The actual Trie nodes.
      */
-    @SuppressWarnings("hiding") // it wouldn't complain if this class was static!
-    private class Entry<K,V> implements Map.Entry<K,V>, Serializable {
+    private static class TrieEntry<K,V> implements Map.Entry<K,V>, Serializable {
         
         private static final long serialVersionUID = 4596023148184140013L;
+        
+        private final Object root; // for debugging
         
         private K key;
         private V value;
         
         private int bitIndex;
         
-        private Entry<K,V> parent;
-        private Entry<K,V> left;
-        private Entry<K,V> right;
+        private TrieEntry<K,V> parent;
+        private TrieEntry<K,V> left;
+        private TrieEntry<K,V> right;
         
-        private Entry(K key, V value, int bitIndex) {
+        private TrieEntry(K key, V value, int bitIndex) {
+            this(key, value, bitIndex, null);
+        }
+        
+        private TrieEntry(K key, V value, int bitIndex, Object root) {
+            if(root == null)
+                this.root = this;
+            else
+                this.root = root;
             this.key = key;
             this.value = value;
             
@@ -659,6 +690,25 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
             this.parent = null;
             this.left = this;
             this.right = null;
+        }
+        
+        public boolean equals(Object o) {
+            if(o == this) {
+                return true;
+            } else if(o instanceof Map.Entry) {
+                Map.Entry e = (Map.Entry)o;
+                Object k1 = getKey();
+                Object k2 = e.getKey();
+                if (k1 == k2 || (k1 != null && k1.equals(k2))) {
+                    Object v1 = getValue();
+                    Object v2 = e.getValue();
+                    if (v1 == v2 || (v1 != null && v1.equals(v2))) 
+                        return true;
+                }
+                return false;
+            } else {
+                return false;
+            }
         }
         
         /**
@@ -776,4 +826,251 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
         /** Returns the n-th different bit between key and found */
         public int bitIndex(K key, K found);
     }
+    
+    /**
+     * An iterator for the entries.
+     */
+    private abstract class NodeIterator<E> implements Iterator<E> {
+        TrieEntry<K,V> next;    // next entry to return
+        int expectedModCount;   // For fast-fail 
+        TrieEntry<K,V> current; // current entry
+        
+        private TrieEntry<K, V> lastRet; // the last node we returned.
+        private TrieEntry<K, V> lastParent; // the node we childed from.
+        
+        protected NodeIterator() {
+            expectedModCount = modCount;
+            next = findNext(root.left);
+        }
+        
+        public boolean hasNext() {
+            return next != null;
+        }
+        
+        TrieEntry<K,V> nextEntry() { 
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+            TrieEntry<K,V> e = next;
+            if (e == null) 
+                throw new NoSuchElementException();
+            
+            next = findNext(lastParent);
+            current = e;
+            return current;
+        }
+        
+        public void remove() {
+            if (current == null)
+                throw new IllegalStateException();
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+            K k = current.key;
+            current = null;
+            PatriciaTrie.this.remove(k);
+            expectedModCount = modCount;
+        } 
+        
+        protected TrieEntry<K, V> findNext(final TrieEntry<K, V> start) {
+            TrieEntry<K, V> current = start;
+        
+            // Try going down the left if we know this wasn't our parent
+            // once before.  If it was our parent, we know we've tried the
+            // left already.
+            if(start != lastParent) {
+                while(!current.left.isEmpty()) {
+                    // stop traversing if we've already
+                    // returned the left of this node.
+                    if(lastRet == current.left) {
+                        break;
+                    }
+                    
+                    if(isValidNext(current.left, current)) {
+                        lastParent = current;
+                        lastRet = current.left;
+                        return lastRet;
+                    }
+                    
+                    current = current.left;
+                }
+            }
+            
+            // If there's no data at all, exit.
+            if(current.isEmpty()) {
+                return null;
+            }
+            
+            // If nothing valid on the left, try the right.
+            if(lastRet != current.right) {
+                // See if it immediately is valid.
+                if(isValidNext(current.right, current)) {
+                    lastParent = current;
+                    lastRet = current.right;
+                    return lastRet;
+                }
+                
+                // Must search on the right's side it wasn't initially valid.
+                return findNext(current.right);
+            }
+            
+            // Neither left nor right are valid, find the first parent
+            // whose child did not come from the right & traverse it.
+            while(current == current.parent.right)
+                current = current.parent;
+            
+            // If there's no right, the parent must be root, so we're done.
+            if(current.parent.right == null)
+                return null;
+            
+            // If the parent's right points to itself, we've found one.
+            if(lastRet != current.parent.right && isValidNext(current.parent.right, current.parent)) {
+                lastParent = current.parent;
+                lastRet = current.parent.right;
+                return lastRet;
+            }
+            
+            // If the parent's right is itself, there can't be any more nodes.
+            if(current.parent.right == current.parent)
+                return null;
+            
+            return findNext(current.parent.right);
+        }
+        
+        /** Returns true if 'next' is a the correct next entry after 'from'. */
+        protected boolean isValidNext(TrieEntry<K, V> next, TrieEntry<K, V> from) {            
+            return next.bitIndex <= from.bitIndex && !next.isEmpty();
+        }
+    }
+
+    private class ValueIterator extends NodeIterator<V> {
+        public V next() {
+            return nextEntry().value;
+        }
+    }
+
+    private class KeyIterator extends NodeIterator<K> {
+        public K next() {
+            return nextEntry().getKey();
+        }
+    }
+
+    private class EntryIterator extends NodeIterator<Map.Entry<K,V>> {
+        public Map.Entry<K,V> next() {
+            return nextEntry();
+        }
+    }
+
+    // Subclass overrides these to alter behavior of views' iterator() method
+    Iterator<K> newKeyIterator()   {
+        return new KeyIterator();
+    }
+    
+    Iterator<V> newValueIterator()   {
+        return new ValueIterator();
+    }
+    
+    Iterator<Map.Entry<K,V>> newEntryIterator()   {
+        return new EntryIterator();
+    }
+    
+    /**
+     * Each of these fields are initialized to contain an instance of the
+     * appropriate view the first time this view is requested.  The views are
+     * stateless, so there's no reason to create more than one of each.
+     */
+    private transient volatile Set<K>               keySet = null;
+    private transient volatile Collection<V>        values = null;
+    private transient volatile Set<Map.Entry<K,V>>  entrySet = null;
+    
+    private class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+        public Iterator<Map.Entry<K,V>> iterator() {
+            return newEntryIterator();
+        }
+        
+        public boolean contains(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            
+            TrieEntry<K,V> candidate = getEntry(((Map.Entry)o).getKey());
+            return candidate != null && candidate.equals(o);
+        }
+        
+        public boolean remove(Object o) {
+            return PatriciaTrie.this.remove(o) != null;
+        }
+        
+        public int size() {
+            return size;
+        }
+        
+        public void clear() {
+            PatriciaTrie.this.clear();
+        }
+    }
+    
+    /**
+     * Returns a set view of the keys contained in this map.  The set is
+     * backed by the map, so changes to the map are reflected in the set, and
+     * vice-versa.  The set supports element removal, which removes the
+     * corresponding mapping from this map, via the <tt>Iterator.remove</tt>,
+     * <tt>Set.remove</tt>, <tt>removeAll</tt>, <tt>retainAll</tt>, and
+     * <tt>clear</tt> operations.  It does not support the <tt>add</tt> or
+     * <tt>addAll</tt> operations.
+     *
+     * @return a set view of the keys contained in this map.
+     */
+    public Set<K> keySet() {
+        Set<K> ks = keySet;
+        return (ks != null ? ks : (keySet = new KeySet()));
+    }
+
+    private class KeySet extends AbstractSet<K> {
+        public Iterator<K> iterator() {
+            return newKeyIterator();
+        }
+        public int size() {
+            return size;
+        }
+        public boolean contains(Object o) {
+            return containsKey(o);
+        }
+        public boolean remove(Object o) {
+            return PatriciaTrie.this.remove(o) != null;
+        }
+        public void clear() {
+            PatriciaTrie.this.clear();
+        }
+    }
+    
+    /**
+     * Returns a collection view of the values contained in this map.  The
+     * collection is backed by the map, so changes to the map are reflected in
+     * the collection, and vice-versa.  The collection supports element
+     * removal, which removes the corresponding mapping from this map, via the
+     * <tt>Iterator.remove</tt>, <tt>Collection.remove</tt>,
+     * <tt>removeAll</tt>, <tt>retainAll</tt>, and <tt>clear</tt> operations.
+     * It does not support the <tt>add</tt> or <tt>addAll</tt> operations.
+     *
+     * @return a collection view of the values contained in this map.
+     */
+    public Collection<V> values() {
+        Collection<V> vs = values;
+        return (vs != null ? vs : (values = new Values()));
+    }
+
+    private class Values extends AbstractCollection<V> {
+        public Iterator<V> iterator() {
+            return newValueIterator();
+        }
+        public int size() {
+            return size;
+        }
+        public boolean contains(Object o) {
+            return containsValue(o);
+        }
+        public void clear() {
+            PatriciaTrie.this.clear();
+        }
+    }
+    
+    
 }

@@ -19,28 +19,16 @@
  
 package com.limegroup.gnutella.util;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 /**
  * An interface for Tries
  */
-public interface Trie<K, V> {
+public interface Trie<K, V> extends Map<K, V> {
     
-    public V put(K key, V value);
-    public V get(K key);
-    public V remove(K key);
-    public boolean containsKey(K key);
-    //public boolean containsValue(V value);
-    public int size();
-    public boolean isEmpty();
-    public void clear();
-    
-    public List<K> keys();
-    public List<V> values();
-    
-    public List<V> range(K key, int length);
-    public List<V> range(K key, int length, Cursor<? super K, ? super V> cursor);
+    public Collection<V> range(K key, int length);
+    public Collection<V> range(K key, int length, Cursor<? super K, ? super V> cursor);
     
     public V select(K key);
     public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor);

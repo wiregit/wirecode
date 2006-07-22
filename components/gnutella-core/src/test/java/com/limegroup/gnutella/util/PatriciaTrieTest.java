@@ -37,10 +37,10 @@ public class PatriciaTrieTest extends BaseTestCase {
             }
             
         });
-        /*
+        
         for(Map.Entry<Integer, String> entry : intTrie.entrySet()) {
             System.out.println("ITERATOR: Key: " + entry.getKey() + ", value: " + entry.getValue());
-        }*/
+        }
         
         
         // c, p, l, t, k, a, y, r, u, o, w, i, e, 
@@ -82,10 +82,10 @@ public class PatriciaTrieTest extends BaseTestCase {
             }
             
         });
-        /*
+        
         for(Map.Entry<Character, String> entry : charTrie.entrySet()) {
             System.out.println("ITERATOR: Key: " + entry.getKey() + ", value: " + entry.getValue());
-        }*/
+        }
         
     }
     
