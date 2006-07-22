@@ -1034,7 +1034,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return containsKey(o);
         }
         public boolean remove(Object o) {
-            return PatriciaTrie.this.remove(o) != null;
+            int size = size();
+            PatriciaTrie.this.remove(o);
+            return size != size();
         }
         public void clear() {
             PatriciaTrie.this.clear();
