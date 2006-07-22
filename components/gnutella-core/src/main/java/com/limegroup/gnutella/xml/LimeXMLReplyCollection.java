@@ -33,7 +33,7 @@ import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.StringTrie;
 
 /**
  * Maps LimeXMLDocuments for FileDescs in a specific schema.
@@ -74,7 +74,7 @@ public class LimeXMLReplyCollection {
      * SYNCHRONIZATION: Synchronize on mainMap when accessing,
      *  adding or removing.
      */
-    private final Map<String, Trie<List<LimeXMLDocument>>> trieMap;
+    private final Map<String, StringTrie<List<LimeXMLDocument>>> trieMap;
     
     /**
      * Whether or not data became dirty after we last wrote to disk.
@@ -109,7 +109,7 @@ public class LimeXMLReplyCollection {
      */
     public LimeXMLReplyCollection(String URI) {
         this.schemaURI = URI;
-        this.trieMap = new HashMap<String, Trie<List<LimeXMLDocument>>>();
+        this.trieMap = new HashMap<String, StringTrie<List<LimeXMLDocument>>>();
         this.dataFile = new File(LimeXMLProperties.instance().getXMLDocsDir(),
                                  LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
         this.mainMap = new HashMap<URN, LimeXMLDocument>();
@@ -315,10 +315,10 @@ public class LimeXMLReplyCollection {
             for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
                 final String name = entry.getKey();
                 final String value = I18NConvert.instance().getNorm(entry.getValue());
-                Trie<List<LimeXMLDocument>> trie = trieMap.get(name);
+                StringTrie<List<LimeXMLDocument>> trie = trieMap.get(name);
                 // if no lookup table created yet, create one & insert.
                 if(trie == null) {
-                    trie = new Trie<List<LimeXMLDocument>>(true); //ignore case.
+                    trie = new StringTrie<List<LimeXMLDocument>>(true); //ignore case.
                     trieMap.put(name, trie);
                 }
                 List<LimeXMLDocument> allDocs = trie.get(value);
@@ -341,7 +341,7 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
                 final String name = entry.getKey();
-                Trie<List<LimeXMLDocument>> trie = trieMap.get(name);
+                StringTrie<List<LimeXMLDocument>> trie = trieMap.get(name);
                 // if no trie, ignore.
                 if(trie == null)
                     continue;
@@ -421,7 +421,7 @@ public class LimeXMLReplyCollection {
                 // Get the name of the particular field being queried for.
                 final String name = entry.getKey();
                 // Lookup the matching Trie for that field.
-                Trie<List<LimeXMLDocument>> trie = trieMap.get(name);
+                StringTrie<List<LimeXMLDocument>> trie = trieMap.get(name);
                 // No matching trie?.. Ignore.
                 if(trie == null)
                     continue;

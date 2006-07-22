@@ -55,7 +55,7 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     // Basic Trie operations
     private void tTrie_Basic() throws Throwable {
-        Trie t = new Trie(false);
+        StringTrie t = new StringTrie(false);
         Iterator iter = null;
 
 	    //Note int Trie.match(String, int, int String) is private, call it
@@ -131,7 +131,7 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     // Empty string
     private void tTrie_EmptyString() {
-        Trie t = new Trie(false);
+        StringTrie t = new StringTrie(false);
         Iterator iter = null;
 
         assertNull(t.get(""));
@@ -158,7 +158,7 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     // Prefix and substring prefix tests
     private void tTrie_Prefix() {
-        Trie t = new Trie(false);
+        StringTrie t = new StringTrie(false);
         Iterator iter = null;
 
         assertNull(t.add("an", anVal));
@@ -194,7 +194,7 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     // Remove tests
     private void tTrie_Remove() {
-        Trie t = new Trie(false);
+        StringTrie t = new StringTrie(false);
 
         assertNull(t.add("an", anVal));
         assertNull(t.add("ant", antVal));
@@ -218,7 +218,7 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     // Case-insensitive tests
     private void tTrie_IgnoreCase() {
-        Trie t = new Trie(true);
+        StringTrie t = new StringTrie(true);
         Iterator iter = null;
 
         assertNull(t.add("an", anVal));
@@ -265,13 +265,13 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     // Case-insensitive with special casing tests for Java 1.1+.
     private void tTrie_IgnoreCaseSpecial() {
-        Trie t = null;
+        StringTrie t = null;
         Iterator iter = null;
 
         // Test stability of Trie with special casing rules for strings.
         // 1. German keyword: test conversion of German Ess-Tsett (sharp s)
         // First test that sharp s is converted to a pair of uppercase S
-        t = new Trie(true);
+        t = new StringTrie(true);
         assertNull(t.add("\u00df", ssVal0));
         //System.out.println("Should list 'ss':");
         //System.out.println(t.toString());
@@ -288,7 +288,7 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEmpty(iter);
 
         // Special case conversion stability tests
-        t = new Trie(true);
+        t = new StringTrie(true);
         assertNull(t.add("Stra\u00dfe", strasseVal));
         assertNull(t.add("stra\u00df", strassVal)); // split e
         assertSame(strasseVal, t.add("STRASSE", strasseVal)); // replace
@@ -306,7 +306,7 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // 2. Turkish keyword: test of i (with or without dot above)
         // First test if capital dotted I is converted to small ASCII i
-        t = new Trie(true);
+        t = new StringTrie(true);
         assertNull(t.add("\u0130", iVal0)); // capital dotted I
         //System.out.println("Should list 'i':");
         //System.out.println(t.toString());
@@ -346,7 +346,7 @@ public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     // accessible helper for private int Trie.match(String, int, int, String)
-    private static final int match(final Trie trie, final String a,
+    private static final int match(final StringTrie trie, final String a,
                                    int startOffset, int stopOffset,
                                    final String b) throws Throwable {
         try {
