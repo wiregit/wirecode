@@ -48,8 +48,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     
     private final KeyCreator<K> keyCreator;
     
-    public PatriciaTrie(KeyCreator<K> keyCreator) {
-        this.keyCreator = keyCreator;
+    @SuppressWarnings("unchecked")
+    public PatriciaTrie(KeyCreator<? super K> keyCreator) {
+        this.keyCreator = (KeyCreator<K>)keyCreator;
     }
     
     /**
@@ -1014,7 +1015,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         public boolean remove(Object o) {
-            return PatriciaTrie.this.remove(o) != null;
+            int size = size();
+            PatriciaTrie.this.remove(o);
+            return size != size();
         }
         
         public int size() {
@@ -1092,6 +1095,4 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             PatriciaTrie.this.clear();
         }
     }
-    
-    
 }
