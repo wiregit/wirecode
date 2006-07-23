@@ -216,7 +216,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         return !entry.isEmpty() && key.equals(entry.key) ? entry : null;
     }
     
-    /** Casts the key to K. */
+    /** Casts the key to K.  TODO: this doesn't work */
     @SuppressWarnings("unchecked")
     protected final K asKey(Object key) {
         try {
@@ -302,8 +302,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             if(!h.isEmpty()) {
                 Cursor.SelectStatus ret = cursor.select(h);
                 if(ret == Cursor.SelectStatus.REMOVE) {
-                    remove(h.key);
-                    return true; // continue
+                    throw new IllegalStateException("cannot remove during select");
+                    //remove(h.key);
+                    //return true; // continue
                 } else if(ret == Cursor.SelectStatus.EXIT) {
                     entry[0] = h;
                     return false; // exit
@@ -368,10 +369,8 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         if (length < entry.bitIndex) {
-            //System.out.println("Has Subtree");
             return valuesInRangeR(entry, -1, cursor, new ArrayList<V>());
         } else {
-            //System.out.println("Has No Subtree");
             Cursor.SelectStatus ret = cursor.select(entry);
             switch(ret) {
             case EXIT: 
@@ -478,7 +477,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * to remove)
      */
     private V removeEntry(TrieEntry<K, V> h, TrieEntry<K, V> p) {
-        
         if (h != root) {
             if (h.isInternalNode()) {
                 removeInternalEntry(h, p);
@@ -601,56 +599,26 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * Returns all Keys as List. You can think of it as
-     * a Set since there're no duplicate keys.
+     * Traverses through the trie, passing each entry to the cursor.
+     * This will return the element that the cursor returned EXIT on,
+     * or null if the trie runs out of elements.  Any elements the cursor
+     * returns REMOVE on will be removed.  The cursor should return 
+     * CONTINUE when it wishes to continue looking at more elements.
      */
-    public List<K> keys() {
-        return keysR(root.left, -1, new ArrayList<K>(size()));
-    }
-    
-    /**
-     * The actual keys() implementation. Just an inorder traverse
-     */
-    private List<K> keysR(TrieEntry<K, V> h, int bitIndex, final List<K> keys) {
-        if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty()) {
-                keys.add(h.key);
-            }
-            return keys;
-        }
-        
-        keysR(h.left, h.bitIndex, keys);
-        return keysR(h.right, h.bitIndex, keys);
-    }
-    
-    @SuppressWarnings("unchecked")
     public Map.Entry<K, V> traverse(Cursor<? super K, ? super V> cursor) {
-        TrieEntry[] entry = new TrieEntry[1];
-        travserseR(root.left, -1, cursor, entry);
-        return entry[0];
-    }
-    
-    private boolean travserseR(TrieEntry<K, V> h, int bitIndex, 
-            final Cursor<? super K, ? super V> cursor, final TrieEntry[] entry) {
-        if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty()) {
-                Cursor.SelectStatus ret = cursor.select(h);
-                if(ret == Cursor.SelectStatus.EXIT) {
-                    entry[0] = h;
-                    return false; // exit
-                } else if(ret == Cursor.SelectStatus.REMOVE) {
-                    remove(h.key);
-                    return true;
-                } // else if (ret = Cursor.SelectStatus.CONTINUE), fall through
+        for(Iterator<Map.Entry<K, V>> i = entrySet().iterator(); i.hasNext();) {
+            Map.Entry<K, V> entry = i.next();
+            Cursor.SelectStatus ret = cursor.select(entry);
+            switch(ret) {
+            case EXIT:
+                return entry;
+            case REMOVE:
+                i.remove();
+            case CONTINUE: // do nothing.
             }
-            return true; // continue
-        }
-
-        if (travserseR(h.left, h.bitIndex, cursor, entry)) {
-            return travserseR(h.right, h.bitIndex, cursor, entry);
         }
         
-        return false;
+        return null;
     }
     
     /** Helper method. Returns true if bitIndex is a valid index */
@@ -855,32 +823,34 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * An iterator for the entries.
      */
     private abstract class NodeIterator<E> implements Iterator<E> {
-        TrieEntry<K,V> next;    // next entry to return
         int expectedModCount;   // For fast-fail 
-        TrieEntry<K,V> current; // current entry
+        TrieEntry<K, V> current; // the current entry we're on
+        TrieEntry<K, V> currentParent; // the parent whose child is the current entry
         
         private TrieEntry<K, V> lastRet; // the last node we returned.
         private TrieEntry<K, V> lastParent; // the node we childed from.
         
         protected NodeIterator() {
             expectedModCount = modCount;
-            next = findNext(root.left);
+            findNext(root.left);
         }
         
         public boolean hasNext() {
-            return next != null;
+            return lastRet != null;
         }
         
         TrieEntry<K,V> nextEntry() { 
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
-            TrieEntry<K,V> e = next;
+            TrieEntry<K,V> e = lastRet;
+            TrieEntry<K, V> parent = lastParent;
             if (e == null) 
                 throw new NoSuchElementException();
             
-            next = findNext(lastParent);
+            findNext(parent);
             current = e;
-            return current;
+            currentParent = parent;
+            return e;
         }
         
         public void remove() {
@@ -888,9 +858,25 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 throw new IllegalStateException();
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
-            K k = current.key;
+            
+            TrieEntry<K, V> node = current;
+            TrieEntry<K, V> parent = currentParent;
+            TrieEntry<K, V> parentsParent = parent.parent;
+            
             current = null;
-            PatriciaTrie.this.remove(k);
+            currentParent = null;
+            
+            boolean isInternal = node.isInternalNode();
+            PatriciaTrie.this.removeEntry(node, parent);
+            
+            // Must account for the next's parent being changed
+            // in the case of an internal node.  The already-stored
+            // next element was reached by a different parent then
+            // it would have been after it was shifted to take the
+            // place of the now-removed entry.
+            if(isInternal && lastRet == lastParent)
+                lastParent = parentsParent;
+            
             expectedModCount = modCount;
         } 
         
@@ -920,6 +906,8 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             
             // If there's no data at all, exit.
             if(current.isEmpty()) {
+                lastRet = null;
+                lastParent = null;
                 return null;
             }
             
@@ -942,8 +930,11 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 current = current.parent;
             
             // If there's no right, the parent must be root, so we're done.
-            if(current.parent.right == null)
+            if(current.parent.right == null) {
+                lastRet = null;
+                lastParent = null;
                 return null;
+            }
             
             // If the parent's right points to itself, we've found one.
             if(lastRet != current.parent.right && isValidNext(current.parent.right, current.parent)) {
@@ -953,9 +944,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             }
             
             // If the parent's right is itself, there can't be any more nodes.
-            if(current.parent.right == current.parent)
+            if(current.parent.right == current.parent) {
+                lastRet = null;
+                lastParent = null;
                 return null;
+            }
             
+            // We need to traverse down the parent's right's path.
             return findNext(current.parent.right);
         }
         

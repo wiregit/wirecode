@@ -11,8 +11,6 @@ import com.limegroup.gnutella.ByteOrder;
  * This class is heavily optimized, as IP objects are constructed for every
  * PingReply, QueryReply, PushRequest, and internally or externally generated
  * connection.
- *
- * @author Gregorio Roper
  */
 public class IP {
     private static final String MSG = "Could not parse: ";

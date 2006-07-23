@@ -88,6 +88,8 @@ public final class IPFilter extends SpamFilter {
         // Load data from hostiles.txt...
         File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
         BufferedReader reader = null;
+        long start, end;
+        start = System.currentTimeMillis();
         try {
             System.out.println("Trying to load from hostiles...");
             reader = new BufferedReader(new FileReader(hostiles));
@@ -101,8 +103,12 @@ public final class IPFilter extends SpamFilter {
             IOUtils.close(reader);
         }
         
+        end = System.currentTimeMillis();
+        System.out.println("Done loading hostiles, time: " + (end-start));
+        
         // Load basic good...
         IPList newGood = new IPList();
+        System.out.println("Loading good");
         allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
         for (int i=0; i<allHosts.length; i++) {
             System.out.println("Loading from good settings[" + i + "], " + allHosts[i]);

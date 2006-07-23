@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.filters;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.limegroup.gnutella.util.PatriciaTrie;
@@ -10,12 +13,9 @@ import com.limegroup.gnutella.util.Trie.Cursor;
 /**
  * A mutable list of IP addresses.  More specifically, a list of sets of
  * addresses, like "18.239.0.*".  Provides fast operations to find if an address
- * is in the list.  Used to implement IPFilter.  Not synchronized.
- *
- * @author Gregorio Roper 
+ * is in the list.  Used to implement IPFilter.  Not synchronized. 
  */
 public class IPList {
-    
     
     /** The list of IPs. */
     private Trie<IP, IP> ips = new PatriciaTrie<IP, IP>(new IPKeyCreator());
@@ -27,6 +27,11 @@ public class IPList {
      */
     public boolean isEmpty() {
         return ips.isEmpty();
+    }
+    
+    /** Gets the number of addresses loaded. */
+    public int size() {
+        return ips.size();
     }
 
     /** 
@@ -42,11 +47,23 @@ public class IPList {
         }
         
         // If we already had it (or an address that contained it),
-        // then don't include.
-        // TODO: Only add this check if we complete the full properties
-        //       of the TODO in the contains method.
-     //   if(!contains(ip))  
+        // then don't include.  Also remove any IPs we encountered
+        // that are contained by this new IP.
+        // These two properties are necessary to allow the optimization
+        // in Lookup to exit when the distance is greater than 1.
+        AddFilter filter = new AddFilter(ip);
+        Map.Entry<IP, IP> entry = ips.select(ip, filter);
+        if(entry != null) {
+            if(!entry.getKey().contains(ip)) {
+                // TODO: remove during select instead of afterwards.
+                for(IP obsolete : filter.getContained()) {
+                    ips.remove(obsolete);
+                }
+                ips.put(ip, ip);
+            }
+        } else {
             ips.put(ip, ip);
+        }
     }
 
     /**
@@ -54,36 +71,12 @@ public class IPList {
      * @returns true if ip_address is contained somewhere in the list of IPs
      */
     public boolean contains(final IP ip) {
-        System.out.println("Looking up: " + ip);
-        Trie.Cursor<IP, IP> cursor = new Trie.Cursor<IP, IP>() {
-            public Cursor.SelectStatus select(Map.Entry<? extends IP, ? extends IP> entry) {
-                IP compare = entry.getKey();
-                if (compare.contains(ip)) {
-                    System.out.println("Found a match on: " + compare);
-                    return Cursor.SelectStatus.EXIT; // Terminate
-                }
-                
-                int distance = compare.getDistanceTo(ip);
-                System.out.println("Comparing to: " + compare + ", distance: " + distance);
-
-                // TODO: If we can ensure that when we add items,
-                //       other items they contain are removed,
-                //       OR if we can ensure that spacially larger
-                //       IPs (those with larger netmasks) are traversed
-                //       before smaller IPs, then we can the below shortcut.
-                return Cursor.SelectStatus.CONTINUE;
-                
-                // We traverse a PATRICIA Trie from the nearest to
-                // the furthest item to the lookup key. So if the 
-                // nearest item didn't contain the lookup IP and the
-                // xor distance is more than one bit then terminate
-                // as well as the lookup is hopeless and we'd otherwise
-                // traverse the entire Trie.
-                //return distance > 1;
-            }
-        };
+        long start, end;
         
-        Map.Entry<IP,IP> e = ips.select(ip, cursor);
+        start = System.nanoTime();
+        Map.Entry<IP,IP> e = ips.select(ip, new LookupFilter(ip));
+        end = System.nanoTime();
+        System.out.println("Lookup for: " + ip + " took: " + (end-start));
         return e != null && e.getKey().contains(ip);
     }
     
@@ -114,6 +107,8 @@ public class IPList {
      * 
      * @param ip an IPv4 address, represented as an IP object with a /32 netmask.
      * @return 32-bit unsigned distance (using xor metric), represented as Java int
+     * 
+     * TODO: Optimize this to use the values of Patricia.
      */
     public int minDistanceTo(IP ip) {
         if (ip.mask != -1) {
@@ -135,6 +130,74 @@ public class IPList {
        // Change the most significant bit back to its normal sense.
        return Integer.MIN_VALUE ^ min_distance;
     }
+    
+    /** A filter for looking up IPs. */
+    private static class LookupFilter implements Trie.Cursor<IP, IP> {
+        private final IP lookup;
+        
+        LookupFilter(IP lookup) {
+            this.lookup = lookup;
+        }
+        
+        public Cursor.SelectStatus select(Map.Entry<? extends IP, ? extends IP> entry) {
+            IP compare = entry.getKey();
+            if (compare.contains(lookup)) {
+                return Cursor.SelectStatus.EXIT; // Terminate
+            }
+           
+            // We traverse a PATRICIA Trie from the nearest to
+            // the furthest item to the lookup key. So if the 
+            // nearest item didn't contain the lookup IP and the
+            // xor distance is more than one bit then terminate
+            // as well as the lookup is hopeless and we'd otherwise
+            // traverse the entire Trie.
+            int distance = compare.getDistanceTo(lookup);
+            return distance > 1 ? SelectStatus.EXIT : SelectStatus.CONTINUE;
+        }
+    };
+    
+    /**
+     * A filter for adding IPs -- stores IPs we encountered that
+     * are contained by the to-be-added IP, so they can later
+     * be removed.
+     */
+    private static class AddFilter implements Trie.Cursor<IP, IP> {
+        private final IP lookup;
+        private List<IP> contained;
+        
+        AddFilter(IP lookup) {
+            this.lookup = lookup;
+        }
+        
+        /**
+         * Returns all the IPs we encountered while selecting
+         * that were contained by the IP being added.
+         */
+        public List<IP> getContained() {
+            if(contained == null)
+                return Collections.emptyList();
+            else
+                return contained;
+        }
+        
+        public Cursor.SelectStatus select(Map.Entry<? extends IP, ? extends IP> entry) {
+            IP compare = entry.getKey();
+            if (compare.contains(lookup)) {
+                return Cursor.SelectStatus.EXIT; // Terminate
+            }
+            
+            // TODO: remove here when it starts working.
+            if(lookup.contains(compare)) {
+                if(contained == null)
+                    contained = new ArrayList<IP>();
+                contained.add(compare);
+            }
+            
+            // See AddFilter for explanation.
+            int distance = compare.getDistanceTo(lookup);
+            return distance > 1 ? SelectStatus.EXIT : SelectStatus.CONTINUE;
+        }
+    };
     
     private static class IPKeyCreator implements KeyCreator<IP> {
 

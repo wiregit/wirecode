@@ -135,7 +135,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         cursor.finished();
     }
     
-    public void testCursorRemove() {
+    public void testTraverseCursorRemove() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
         charTrie.put('c', "c");
         charTrie.put('p', "p");
@@ -175,25 +175,95 @@ public class PatriciaTrieTest extends BaseTestCase {
         
         assertEquals(26, charTrie.size());
         
-        cursor.addToRemove('m', 'p');
+        Object[] toRemove = new Object[] { 'm', 'p', 'q', 'r', 's' };
+        cursor.addToRemove(toRemove);
         
         cursor.starting();
         charTrie.traverse(cursor);
         cursor.finished();
             
-        assertEquals(24, charTrie.size());
+        assertEquals(26 - toRemove.length, charTrie.size());
         
         cursor.starting();
         for(Iterator<Map.Entry<Character, String>> i = charTrie.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry<Character,String> entry = i.next();
             cursor.select(entry);
-            if(entry.getValue().equals("m")) 
-                fail("got an 'm'");
-            else if(entry.getValue().equals("p"))
-                fail("got a 'p'");    
+            if(Arrays.asList(toRemove).contains(entry.getKey()))
+                fail("got an: " + entry);    
         }
         cursor.finished();
     }
+    
+    public void testSelectCursorRemove() {
+        PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
+        charTrie.put('c', "c");
+        charTrie.put('p', "p");
+        charTrie.put('l', "l");
+        charTrie.put('t', "t");
+        charTrie.put('k', "k");
+        charTrie.put('a', "a");
+        charTrie.put('y', "y");
+        charTrie.put('r', "r");
+        charTrie.put('u', "u");
+        charTrie.put('o', "o");
+        charTrie.put('w', "w");
+        charTrie.put('i', "i");
+        charTrie.put('e', "e");
+        charTrie.put('x', "x");
+        charTrie.put('q', "q");
+        charTrie.put('b', "b");
+        charTrie.put('j', "j");
+        charTrie.put('s', "s");
+        charTrie.put('n', "n");
+        charTrie.put('v', "v");
+        charTrie.put('g', "g");
+        charTrie.put('h', "h");
+        charTrie.put('m', "m");
+        charTrie.put('z', "z");
+        charTrie.put('f', "f");
+        charTrie.put('d', "d");
+        
+        // only the path it'll take to find 'h'.
+        TestCursor cursor = new TestCursor('h', "h", 'i', "i", 'j', "j",
+                'k', "k", 'l', "l", 'm', "m", 'n', "n", 'o', "o",
+                'p', "p");
+        
+        // Test removing both an internal & external node.
+        // 'm' is an example External node in this Trie, and 'p' is an internal.
+        
+        assertEquals(26, charTrie.size());
+        
+        Object[] toRemove = new Object[] { 'p', 'k', 'i' };
+        cursor.addToRemove(toRemove);
+        
+        cursor.selectFor('p');
+        cursor.starting();
+        Map.Entry<Character, String> result = charTrie.select('h', cursor);
+        cursor.finished();
+        
+        assertEquals(new Character('p'), result.getKey());
+        assertEquals("p", result.getValue());
+            
+        assertEquals(26 - toRemove.length, charTrie.size());
+        
+        // get a full cursor now
+        cursor = new TestCursor('a', "a", 'b', "b", 'c', "c", 'd', "d", 'e', "e",
+                'f', "f", 'g', "g", 'h', "h", 'i', "i", 'j', "j",
+                'k', "k", 'l', "l", 'm', "m", 'n', "n", 'o', "o",
+                'p', "p", 'q', "q", 'r', "r", 's', "s", 't', "t",
+                'u', "u", 'v', "v", 'w', "w", 'x', "x", 'y', "y", 
+                'z', "z");
+        cursor.remove(toRemove);
+        cursor.starting();
+        for(Iterator<Map.Entry<Character, String>> i = charTrie.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry<Character,String> entry = i.next();
+            cursor.select(entry);
+            if(Arrays.asList(toRemove).contains(entry.getKey()))
+                fail("got an: " + entry);    
+        }
+        cursor.finished();
+    }
+    
     
     public void testIteratorRemove() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
@@ -235,30 +305,27 @@ public class PatriciaTrieTest extends BaseTestCase {
         
         assertEquals(26, charTrie.size());
         
+        Object[] toRemove = new Object[] { 'm', 'p', 'q', 'r', 's' };
+        
         cursor.starting();
         for(Iterator<Map.Entry<Character, String>> i = charTrie.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry<Character,String> entry = i.next();
             cursor.select(entry);
-            if(entry.getValue().equals("m")) 
-                i.remove();
-            else if(entry.getValue().equals("p"))
+            if(Arrays.asList(toRemove).contains(entry.getKey()))
                 i.remove();            
         }
         cursor.finished();
             
-        assertEquals(24, charTrie.size());
+        assertEquals(26 - toRemove.length, charTrie.size());
         
-        cursor.remove('m');
-        cursor.remove('p');
-        
+        cursor.remove(toRemove);
+
         cursor.starting();
         for(Iterator<Map.Entry<Character, String>> i = charTrie.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry<Character,String> entry = i.next();
             cursor.select(entry);
-            if(entry.getValue().equals("m")) 
-                fail("got an 'm'");
-            else if(entry.getValue().equals("p"))
-                fail("got a 'p'");    
+            if(Arrays.asList(toRemove).contains(entry.getKey()))
+                fail("got an: " + entry);    
         }
         cursor.finished();
     }
@@ -266,7 +333,7 @@ public class PatriciaTrieTest extends BaseTestCase {
     private static class TestCursor implements Cursor<Object, Object> {
         private List<Object> keys;
         private List<Object> values;
-        
+        private Object selectFor;
         private List<Object> toRemove;
         private int index = 0;
         
@@ -283,14 +350,20 @@ public class PatriciaTrieTest extends BaseTestCase {
             }
         }
         
+        void selectFor(Object object) {
+            selectFor = object;
+        }
+        
         void addToRemove(Object... objects) {
             toRemove = new ArrayList<Object>(Arrays.asList(objects));
         }
         
-        void remove(Object o) {
-            int idx = keys.indexOf(o);
-            keys.remove(idx);
-            values.remove(idx);
+        void remove(Object... objects) {
+            for(int i = 0; i < objects.length; i++) {
+                int idx = keys.indexOf(objects[i]);
+                keys.remove(idx);
+                values.remove(idx);
+            }
         }
         
         void starting() {
@@ -319,8 +392,11 @@ public class PatriciaTrieTest extends BaseTestCase {
                 toRemove.remove(entry.getKey());
                 return SelectStatus.REMOVE;
             } 
-                
-            return SelectStatus.CONTINUE;
+            
+            if(selectFor != null && selectFor.equals(entry.getKey()))
+                return SelectStatus.EXIT;
+            else
+                return SelectStatus.CONTINUE;
         }
         
         void finished() {
