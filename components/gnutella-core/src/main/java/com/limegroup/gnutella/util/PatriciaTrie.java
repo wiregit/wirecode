@@ -299,9 +299,15 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             final TrieEntry[] entry) {
 
         if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty() && cursor.select(h)) {
-                entry[0] = h;
-                return false; // exit
+            if(!h.isEmpty()) {
+                Cursor.SelectStatus ret = cursor.select(h);
+                if(ret == Cursor.SelectStatus.REMOVE) {
+                    remove(h.key);
+                    return true; // continue
+                } else if(ret == Cursor.SelectStatus.EXIT) {
+                    entry[0] = h;
+                    return false; // exit
+                } // else if (ret == Cursor.SelectStatus.CONTINUE), fall through
             }
             return true; // continue
         }
@@ -327,8 +333,8 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     public Collection<V> range(K key, int length) {
         return range(key, length, new Cursor<K, V>() {
-            public boolean select(Map.Entry<? extends K, ? extends V> entry) {
-                return true;
+            public Cursor.SelectStatus select(Map.Entry<? extends K, ? extends V> entry) {
+                return Cursor.SelectStatus.EXIT;
             }
         });
     }
@@ -366,10 +372,14 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return valuesInRangeR(entry, -1, cursor, new ArrayList<V>());
         } else {
             //System.out.println("Has No Subtree");
-            if (cursor.select(entry)) {
+            Cursor.SelectStatus ret = cursor.select(entry);
+            switch(ret) {
+            case EXIT: 
                 return Arrays.asList(entry.value);
-            } else {
+            case CONTINUE:
                 return Collections.emptyList();
+            default:
+                throw new IllegalStateException("cursor must always use EXIT | CONTINUE");
             }
         }
     }
@@ -395,9 +405,17 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     private List<V> valuesInRangeR(TrieEntry<K, V> h, int bitIndex, 
             final Cursor<? super K, ? super V> cursor, final List<V> values) {
         if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty() 
-                    && cursor.select(h)) {
-                values.add(h.value);
+            if (!h.isEmpty()) {
+                Cursor.SelectStatus ret = cursor.select(h);
+                switch(ret) {
+                case EXIT: 
+                    values.add(h.value);
+                    break;
+                case CONTINUE:
+                    break;
+                default:
+                    throw new IllegalStateException("cursor must always use EXIT | CONTINUE");
+                }
             }
             return values;
         }
@@ -615,9 +633,15 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     private boolean travserseR(TrieEntry<K, V> h, int bitIndex, 
             final Cursor<? super K, ? super V> cursor, final TrieEntry[] entry) {
         if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty() && cursor.select(h)) {
-                entry[0] = h;
-                return false; // exit
+            if (!h.isEmpty()) {
+                Cursor.SelectStatus ret = cursor.select(h);
+                if(ret == Cursor.SelectStatus.EXIT) {
+                    entry[0] = h;
+                    return false; // exit
+                } else if(ret == Cursor.SelectStatus.REMOVE) {
+                    remove(h.key);
+                    return true;
+                } // else if (ret = Cursor.SelectStatus.CONTINUE), fall through
             }
             return true; // continue
         }

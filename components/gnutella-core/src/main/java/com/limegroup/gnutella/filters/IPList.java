@@ -5,6 +5,7 @@ import java.util.Map;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.PatriciaTrie.KeyCreator;
+import com.limegroup.gnutella.util.Trie.Cursor;
 
 /**
  * A mutable list of IP addresses.  More specifically, a list of sets of
@@ -55,11 +56,11 @@ public class IPList {
     public boolean contains(final IP ip) {
         System.out.println("Looking up: " + ip);
         Trie.Cursor<IP, IP> cursor = new Trie.Cursor<IP, IP>() {
-            public boolean select(Map.Entry<? extends IP, ? extends IP> entry) {
+            public Cursor.SelectStatus select(Map.Entry<? extends IP, ? extends IP> entry) {
                 IP compare = entry.getKey();
                 if (compare.contains(ip)) {
                     System.out.println("Found a match on: " + compare);
-                    return true; // Terminate
+                    return Cursor.SelectStatus.EXIT; // Terminate
                 }
                 
                 int distance = compare.getDistanceTo(ip);
@@ -70,7 +71,7 @@ public class IPList {
                 //       OR if we can ensure that spacially larger
                 //       IPs (those with larger netmasks) are traversed
                 //       before smaller IPs, then we can the below shortcut.
-                return false;
+                return Cursor.SelectStatus.CONTINUE;
                 
                 // We traverse a PATRICIA Trie from the nearest to
                 // the furthest item to the lookup key. So if the 

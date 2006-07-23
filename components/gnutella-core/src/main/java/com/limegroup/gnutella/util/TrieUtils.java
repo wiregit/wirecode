@@ -43,11 +43,12 @@ public final class TrieUtils {
         final List<V> values = new ArrayList<V>(size);
         
         trie.select(key, new Cursor<K,V>() {
-            public boolean select(Entry<? extends K, ? extends V> entry) {
-                if (cursor == null || cursor.select(entry)) {
+            public Cursor.SelectStatus select(Entry<? extends K, ? extends V> entry) {
+                if (cursor == null || cursor.select(entry) == Cursor.SelectStatus.EXIT) {
                     values.add(entry.getValue());
                 }
-                return values.size() >= size;
+                
+                return values.size() >= size ? Cursor.SelectStatus.EXIT : Cursor.SelectStatus.CONTINUE;
             }
         });
         

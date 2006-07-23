@@ -36,6 +36,10 @@ public interface Trie<K, V> extends Map<K, V> {
     public Map.Entry<K,V> traverse(Cursor<? super K, ? super V> cursor);
     
     public static interface Cursor<K, V> {
-        public boolean select(Map.Entry<? extends K, ? extends V> entry);
+        public SelectStatus select(Map.Entry<? extends K, ? extends V> entry);
+     
+        public static enum SelectStatus {
+            EXIT, CONTINUE, REMOVE;
+        }
     }
 }
