@@ -16,6 +16,9 @@ CString GetRunningPath() {
 
 // Takes a path to a file like "C:\Folder\Song.mp3" or a Web address like "http://www.site.com/"
 // Opens it with the default program or the default Web browser
+JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_run(JNIEnv *e, jclass c, jstring j) {
+	Run(GetString(e, j));
+}
 void Run(LPCTSTR path) {
 
 	// Call ShellExecute() with all the defaults
@@ -25,6 +28,9 @@ void Run(LPCTSTR path) {
 // Takes a path to a file on the disk, like "C:\Folder\file.ext", or a whole folder like "C:\Folder" without a trailing slash
 // Moves it to the Windows Recycle Bin
 // Returns false on error
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_recycle(JNIEnv *e, jclass c, jstring j) {
+	return Recycle(GetString(e, j));
+}
 bool Recycle(LPCTSTR path) {
 
 	// Make a buffer that contains the text of the path followed by 2 null terminators, as SHFILEOPSTRUCT.pFrom requires

@@ -2,7 +2,7 @@
 // Include the standard Windows DLL header which we've edited to include the Java headers and more headers
 #include "stdafx.h"
 
-// A Windows DLL has a DllMain method
+// A Windows DLL has a DllMain method that Windows calls when it loads the DLL
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
 
 	// Indicate success

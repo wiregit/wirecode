@@ -24,17 +24,7 @@ public class SystemUtils {
         boolean canLoad;
         try {
             // Only load the library on systems where we've made it.
-            if(CommonUtils.isMacOSX()) {
-                System.loadLibrary("SystemUtilities");
-            } else if(CommonUtils.isWindows()) {
-
-            	/*
-            	System.loadLibrary("GenericWindowsUtils");
-                if(CommonUtils.isWindows2000orXP()) {
-                    System.loadLibrary("WindowsV5PlusUtils");
-                }
-                */
-
+            if(CommonUtils.isMacOSX() || CommonUtils.isWindows()) {
                 System.loadLibrary("SystemUtilities");
             }
             canLoad = true;
@@ -53,20 +43,9 @@ public class SystemUtils {
      * the mouse.  The time returned is in milliseconds.
      */
     public static long getIdleTime() {
-    	
-    	if (supportsIdleTime()) {
-    		
-    		long i;
-    		i = idleTime();
-    		System.out.println("Idle Time is " + i);
-    		return i;
-    	}
-
-    	/*
     	if(supportsIdleTime()) 
             return idleTime();
-        */
-    	
+
         return 0;
     }
     
@@ -107,8 +86,6 @@ public class SystemUtils {
             setFileWriteable(fileName);
     }
 
-    private static final native long idleTime();
-    private static final native int setFileWriteable(String filename);
     private static final native int setOpenFileLimit0(int max);
 
 	/**
@@ -305,6 +282,8 @@ public class SystemUtils {
     }
 
     // Native methods implemented in C++ code in WindowsFirewall.dll
+    private static final native int setFileWriteable(String filename);
+    private static final native long idleTime();
     private static final native String getRunningPathNative();
     private static final native String setWindowIconNative(Component frame, String bin, String icon);
     private static final native boolean firewallPresentNative();
