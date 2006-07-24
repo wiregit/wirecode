@@ -25,11 +25,15 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.AndView;
+import com.limegroup.gnutella.util.BitField;
+import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.NotView;
 import com.limegroup.gnutella.util.RRProcessingQueue;
 import com.limegroup.gnutella.util.SystemUtils;
 
@@ -107,6 +111,9 @@ public class VerifyingFolder {
 	 */
 	private BitSet verifiedBlocks;
 	
+	/** A view over which blocks we are missing - the inverse of verifiedBlocks */
+	private BitField verified, missing;
+	
 	/** a cached bitfield. LOCKING: this*/
 	private byte [] bitField;
 	/** whether the cached bitfield is dirty LOCKING: this */
@@ -154,13 +161,17 @@ public class VerifyingFolder {
 			new MultiIterable<Integer>(partialBlocks.keySet(), 
 					requestedRanges.keySet());
 		
-		if (complete) 
+		if (complete) {
 			verifiedBlocks = _info.getFullBitSet();
-		else {
+			verified = _info.getFullBitField();
+		}else {
 			verifiedBlocks = new BitSet(_info.getNumBlocks());
 			if (data != null)
 				initialize(data);
+			verified = new BitFieldSet(verifiedBlocks, _info.getNumBlocks());
 		}
+		
+		missing = new NotView(verified);
 	}
 	
 	/**
@@ -287,8 +298,11 @@ public class VerifyingFolder {
 		requestedRanges.remove(blockId);
 		verifiedBlocks.set(blockId);
 		bitFieldDirty = true;
-		if (verifiedBlocks.cardinality() == _info.getNumBlocks()) 
+		if (verifiedBlocks.cardinality() == _info.getNumBlocks()) {
 			verifiedBlocks = _info.getFullBitSet();
+			verified = _info.getFullBitField();
+			missing = new NotView(verified);
+		}
 	}
 	
 	private boolean verifyQuick(int pieceNum) throws IOException {
@@ -413,7 +427,7 @@ public class VerifyingFolder {
 	}
 	
 	public synchronized boolean hasBlock(int block) {
-		return verifiedBlocks.get(block);
+		return verified.get(block);
 	}
 
 	/**
@@ -522,7 +536,7 @@ public class VerifyingFolder {
 	 * @return true if the whole torrent has been written and verified
 	 */
 	synchronized boolean isComplete() {
-		return verifiedBlocks == _info.getFullBitSet();
+		return verified == _info.getFullBitField();
 	}
 
 	/**
@@ -670,14 +684,15 @@ public class VerifyingFolder {
 	 * request
 	 * @return a BTInterval that should be requested next.
 	 */
-	public synchronized BTInterval leaseRandom(BitSet bs, Set<BTInterval> exclude) {
+	public synchronized BTInterval leaseRandom(BitField bs, Set<BTInterval> exclude) {
 		if (isComplete())
 			return null;
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
 		
-		BTInterval leased = findRandom(bs, exclude);
+		BitField interesting = new AndView(bs, missing);
+		BTInterval leased = findRandom(interesting, exclude);
 		
 		if (leased != null) {
 			if (leased.high - leased.low + 1 > BLOCK_SIZE)
@@ -693,7 +708,7 @@ public class VerifyingFolder {
 		return leased;
 	}
 	
-	private BTInterval findRandom(BitSet bs, Set<BTInterval> exclude) {
+	private BTInterval findRandom(BitField bs, Set<BTInterval> exclude) {
 		
 		// first try to complete any partial pieces that are not requested
 		BTInterval ret = assignEndgame(bs, exclude, false);
@@ -703,7 +718,7 @@ public class VerifyingFolder {
 		
 		// then see if the remote has any pieces that are neither 
 		// partial nor already requested
-		ret = findUnassigned(bs, exclude);
+		ret = findUnassigned(bs);
 		if (ret != null)
 			return ret;
 		LOG.debug("couldn't find unassigned, looking for already requested");
@@ -711,13 +726,12 @@ public class VerifyingFolder {
 		return assignEndgame(bs, exclude, true);
 	}
 	
-	private BTInterval findUnassigned(BitSet available, Set<BTInterval>exclude) {
+	private BTInterval findUnassigned(BitField available) {
 		int selected = -1;
 		int current = 1;
 		
 		for (int i = available.nextSetBit(0); i >= 0; i = available.nextSetBit(i+1)) {
-			if (verifiedBlocks.get(i) || 
-					pendingRanges.containsKey(i) || 
+			if (pendingRanges.containsKey(i) || 
 					partialBlocks.containsKey(i) ||
 					requestedRanges.containsKey(i))
 				continue;
@@ -738,7 +752,7 @@ public class VerifyingFolder {
 	 * referered to as "Endgame mode" and is done when there are no other pieces to 
 	 * request. 
 	 */
-	private BTInterval assignEndgame(BitSet bs, Set<BTInterval>exclude, boolean endgame) {
+	private BTInterval assignEndgame(BitField bs, Set<BTInterval>exclude, boolean endgame) {
 		
 		BTInterval ret = null;
 		
@@ -872,7 +886,7 @@ public class VerifyingFolder {
 				for(int i = 0; i < bitField.length; i++)
 					bitField[i] = (byte)0xFF;
 			} else {
-				for(int i = verifiedBlocks.nextSetBit(0); i >= 0; i = verifiedBlocks.nextSetBit(i+1)) 
+				for(int i = verified.nextSetBit(0); i >= 0; i = verified.nextSetBit(i+1)) 
 					bitField[i / 8] = (byte) (bitField[i / 8] | (1 << (7 - i % 8)));
 			}
 			bitFieldDirty = false;
@@ -935,8 +949,8 @@ public class VerifyingFolder {
 	 * @return number of bytes written and verified
 	 */
 	synchronized long getVerifiedBlockSize() {
-		long ret = verifiedBlocks.cardinality() * (long)_info.getPieceLength();
-		if (verifiedBlocks.get(_info.getNumBlocks() - 1)) {
+		long ret = verified.cardinality() * (long)_info.getPieceLength();
+		if (verified.get(_info.getNumBlocks() - 1)) {
 			ret = ret - _info.getPieceLength() + 
 				getPieceSize(_info.getNumBlocks() -1 );
 		}
@@ -974,35 +988,24 @@ public class VerifyingFolder {
 	 * @return the number of pieces that we have verified
 	 * and the other bitset doesn't have
 	 */
-	synchronized int getNumMissing(BitSet other) {
+	synchronized int getNumMissing(BitField other) {
 		if (isComplete())
-			return verifiedBlocks.cardinality() - other.cardinality();
-		int ret = 0;
-		for(int i=verifiedBlocks.nextSetBit(0); i>=0; i=verifiedBlocks.nextSetBit(i+1)) {
-			if (!other.get(i))
-				ret++;
-		}
-		return ret;
+			return verified.cardinality() - other.cardinality();
+		
+		BitField theirMissing = new NotView(other);
+		return (new AndView(verified, theirMissing)).cardinality();
 	}
 	
 	/**
-	 * @return the # of pieces that we do not have that
-	 * the other host has
+	 * @return true if the remote host has any pieces we miss
 	 */
-	synchronized boolean containsAnyWeMiss(BitSet other) {
+	synchronized boolean containsAnyWeMiss(BitField other) {
 		// if we are complete we miss nothing
 		if (isComplete())
 			return false;
 		
-		// if they are complete we miss what we don't have
-		if (other == _info.getFullBitSet())
-			return verifiedBlocks.cardinality() < _info.getNumBlocks();
-		
-	    for(int i=other.nextSetBit(0); i>=0; i=other.nextSetBit(i+1)) {
-	    	if (!verifiedBlocks.get(i))
-	    		return true;
-	    }
-		return false;
+		BitField interesting = new AndView(other,missing);
+		return interesting.nextSetBit(0) > -1;
 	}
 	
 	private static class BlockRangeMap extends HashMap<Integer, IntervalSet> {

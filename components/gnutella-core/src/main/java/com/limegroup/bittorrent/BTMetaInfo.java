@@ -33,6 +33,8 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.BitField;
+import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
@@ -58,6 +60,7 @@ public class BTMetaInfo implements Serializable {
 
 	/** a single instance of the full bitset */
 	private BitSet fullSet = new FullBitSet();
+	private BitField fullBitField;
 
 	/** a list the hashes for this file */
 	private List<byte []> _hashes;
@@ -321,6 +324,7 @@ public class BTMetaInfo implements Serializable {
 
 
 		fileSystem = new TorrentFileSystem(info, _hashes.size(), _pieceLength, _infoHash);
+		fullBitField = new BitFieldSet(fullSet, getNumBlocks());
 		initializeVerifyingFolder(null, false);
 	}
 	
@@ -366,6 +370,7 @@ public class BTMetaInfo implements Serializable {
 		_pieceLength = pieceLength.intValue();
 		initializeVerifyingFolder(folderData, false);
 		fullSet = new FullBitSet();
+		fullBitField = new BitFieldSet(fullSet,getNumBlocks());
 	}
 
 	/**
@@ -399,6 +404,10 @@ public class BTMetaInfo implements Serializable {
 	 */
 	public BitSet getFullBitSet() {
 		return fullSet;
+	}
+	
+	public BitField getFullBitField() {
+		return fullBitField;
 	}
 	
 	/**

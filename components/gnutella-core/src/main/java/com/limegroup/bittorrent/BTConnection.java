@@ -25,6 +25,8 @@ import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.messages.*;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
+import com.limegroup.gnutella.util.BitField;
+import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.BitSet;
 
@@ -76,16 +78,17 @@ public class BTConnection implements UploadSlotListener {
 	 * The pieces the remote host has
 	 */
 	private volatile BitSet _availableRanges;
-
+	
+	/** A bitfield view of what they have */
+	private volatile BitField _available;
+	
 	/**
 	 * the Set of BTIntervals we requested but which was not yet satisfied.
 	 */
 	private final Set<BTInterval> _requesting;
 
 	/**
-	 * the Set of BTInterval requested by the remote
-	 * host, we avoid queueing up all requested pieces in the writer to
-	 * save memory
+	 * the Set of BTInterval requested by the remote host.
 	 */
 	private final Set<BTInterval> _requested;
 
@@ -182,6 +185,7 @@ public class BTConnection implements UploadSlotListener {
 		_torrent = torrent;
 		_outgoing = isOutgoing;
 		_availableRanges = new BitSet(info.getNumBlocks());
+		_available = new BitFieldSet(_availableRanges, info.getNumBlocks());
 		_requesting = new HashSet<BTInterval>();
 		_requested = new HashSet<BTInterval>();
 		_startTime = System.currentTimeMillis();
@@ -439,14 +443,15 @@ public class BTConnection implements UploadSlotListener {
 		
 		// As a minor optimization we will not inform the remote host of any
 		// pieces that it already has
-		if (!_availableRanges.get(pieceNum)) {
+		if (!_available.get(pieceNum)) {
 			numMissing++;
 			_writer.enqueue(have);
 		}  
 
 		// we should indicate that we are not interested anymore, so we are
 		// not unchoked when we do not want to request anything.
-		if (!_info.getVerifyingFolder().containsAnyWeMiss(_availableRanges)) {
+		if (!_info.getVerifyingFolder().containsAnyWeMiss(_available)) {
+			cancelAllRequests();
 			sendNotInterested();
 			return;
 		}
@@ -476,7 +481,7 @@ public class BTConnection implements UploadSlotListener {
 	}
 	
 	/**
-	 * Cancels all requests. Called when the download is complete
+	 * Cancels all requests. 
 	 */
 	void cancelAllRequests() {
 		for (BTInterval request : _requesting) 
@@ -599,6 +604,7 @@ public class BTConnection implements UploadSlotListener {
 
 		case BTMessage.NOT_INTERESTED:
 			_isInterested = false;
+			_requested.clear(); // forget what they requested
 			if (!_isChoked)
 				_torrent.rechoke();
 			// if we have all pieces and the remote is not interested,
@@ -704,7 +710,7 @@ public class BTConnection implements UploadSlotListener {
 		// get new ranges to request if necessary
 		while (!_torrent.isComplete() && _torrent.isActive()
 				&& _requesting.size() < MAX_REQUESTS) {
-			BTInterval in = _info.getVerifyingFolder().leaseRandom(_availableRanges, _requesting);
+			BTInterval in = _info.getVerifyingFolder().leaseRandom(_available, _requesting);
 			if (in == null)
 				break;
 			_requesting.add(in);
@@ -752,11 +758,12 @@ public class BTConnection implements UploadSlotListener {
 			}
 		}
 		
-		if (_availableRanges.cardinality() == numBits) {
-			_availableRanges = _info.getFullBitSet();
+		if (_available.cardinality() == numBits) {
+			_availableRanges = null;
+			_available = _info.getFullBitField();
 			numMissing = 0;
 		} else
-			numMissing = _info.getVerifyingFolder().getNumMissing(_availableRanges);
+			numMissing = _info.getVerifyingFolder().getNumMissing(_available);
 		
 		if (willBeInteresting)
 			sendInterested();
@@ -767,7 +774,7 @@ public class BTConnection implements UploadSlotListener {
 	 */
 	private void handleHave(BTHave message) {
 		int pieceNum = message.getPieceNum();
-		if (_availableRanges.get(pieceNum))
+		if (_available.get(pieceNum))
 			return; // dublicate Have, ignore.
 		
 		VerifyingFolder v = _info.getVerifyingFolder();
@@ -780,8 +787,9 @@ public class BTConnection implements UploadSlotListener {
 		else
 			sendInterested();
 		
-		if (_availableRanges.cardinality() == _info.getNumBlocks()) {
-			_availableRanges = _info.getFullBitSet();
+		if (_available.cardinality() == _info.getNumBlocks()) {
+			_availableRanges = null;
+			_available = _info.getFullBitField();
 			numMissing = 0;
 		}
 	}
@@ -852,6 +860,6 @@ public class BTConnection implements UploadSlotListener {
 	 * @return if the remote host has the complete file, i.e. is a "seed".
 	 */
 	public boolean isSeed() {
-		return _availableRanges.cardinality() == _info.getNumBlocks();
+		return _available.cardinality() == _info.getNumBlocks();
 	}
 }

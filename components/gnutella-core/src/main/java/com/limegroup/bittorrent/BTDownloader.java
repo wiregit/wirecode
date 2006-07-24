@@ -202,7 +202,8 @@ implements TorrentEventListener {
 	}
 
 	public long getAmountRead() {
-		return getTotalAmountDownloaded() - getAmountLost();
+		return _info != null ?_info.getVerifyingFolder().getBlockSize() :
+			getContentLength();
 	}
 
 	public String getVendor() {
