@@ -190,18 +190,10 @@ public class CapabilitiesVMTest
         @Override
         public void addressChanged() {}
 
-
-        @Override
-        public int getDHTVersion() {
-            return 1;
-        }
-
-
         @Override
         public MojitoDHT getMojitoDHT() {
             return null;
         }
-
 
         @Override
         public void handleLifecycleEvent(LifecycleEvent evt) {}

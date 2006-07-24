@@ -100,13 +100,6 @@ public class LimeDHTManager implements DHTManager {
         return false;
     }
     
-    public synchronized int getDHTVersion() {
-        if(dhtController != null) {
-            return dhtController.getDHTVersion();
-        }
-        return 0;
-    }
-    
     public synchronized MojitoDHT getMojitoDHT() {
         if(dhtController != null) {
             return dhtController.getMojitoDHT();

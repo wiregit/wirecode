@@ -780,11 +780,12 @@ public class PingReply extends Message implements Serializable, IpPort {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_DHT_SUPPORT);
                     if(bytes.length >= 3) {
                         dhtVersion = ByteOrder.beb2short(bytes, 0);
-                        if(dhtVersion == 0) {
+                        byte mode = (byte) (bytes[2] & DHTMode.DHT_MODE_MASK);
+                        if( mode == DHTMode.NONE.getByte()) {
                             dhtMode = DHTMode.NONE;
-                        } else if((bytes[2] & DHTMode.DHT_MODE_MASK) == DHTMode.ACTIVE.getByte()) {
+                        } else if(mode == DHTMode.ACTIVE.getByte()) {
                             dhtMode = DHTMode.ACTIVE;
-                        } else if((bytes[2] & DHTMode.DHT_MODE_MASK) == DHTMode.PASSIVE.getByte()) {
+                        } else if(mode == DHTMode.PASSIVE.getByte()) {
                             dhtMode = DHTMode.PASSIVE;
                         }
                     }
@@ -1002,14 +1003,13 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Adds the DHT GGEP extension to the pong.  This has the version of
      * the DHT that we support as well as the mode of this node (active/passive).
-     * If the version is 0, then this node supports DHT but is neither active or passive.
      * 
      * @param ggep the <tt>GGEP</tt> instance to add the extension to
      */
     private static void addDHTExtension(GGEP ggep) {
         byte[] payload = new byte[3];
         // put version
-        ByteOrder.short2beb((short)RouterService.getLimeDHTManager().getDHTVersion(), payload, 0);
+        ByteOrder.short2beb((short)DHTManager.DHT_VERSION, payload, 0);
         if(RouterService.isDHTNode()) {
             if(RouterService.isActiveDHTNode()) {
                 payload[2] = DHTMode.ACTIVE.getByte();
