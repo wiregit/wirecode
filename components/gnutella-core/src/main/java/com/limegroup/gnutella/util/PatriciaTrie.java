@@ -19,6 +19,10 @@
  
 package com.limegroup.gnutella.util;
 
+import static com.limegroup.gnutella.util.Trie.Cursor.SelectStatus.CONTINUE;
+import static com.limegroup.gnutella.util.Trie.Cursor.SelectStatus.EXIT;
+import static com.limegroup.gnutella.util.Trie.Cursor.SelectStatus.REMOVE;
+
 import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
@@ -35,7 +39,9 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * An optimized PATRICIA Trie.  Currently only supports fixed-length keys. 
+ * A PATRICIA Trie.
+ * 
+ * PATRICIA = Practical Algorithm to Retrieve Information Coded in Alphanumeric
  */
 public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>, Serializable {
     
@@ -46,11 +52,17 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     private int size = 0;
     private transient int modCount = 0;
     
-    private final KeyCreator<K> keyCreator;
+    private final KeyCreator<? super K> keyCreator;
     
-    @SuppressWarnings("unchecked")
     public PatriciaTrie(KeyCreator<? super K> keyCreator) {
-        this.keyCreator = (KeyCreator<K>)keyCreator;
+        this.keyCreator = keyCreator;
+    }
+    
+    /**
+     * Returns the KeyCreator
+     */
+    public KeyCreator<? super K> getKeyCreator() {
+        return keyCreator;
     }
     
     /**
@@ -120,9 +132,22 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             throw new NullPointerException("Key cannot be null");
         }
         
-        TrieEntry<K, V> found = getR(root.left, -1, key);
+        int keyLength = length(key);
+        
+        // The only place to store a key with a length
+        // of zero bits is the root node
+        if (keyLength == 0) {
+            if (root.isEmpty()) {
+                incrementSize();
+            } else {
+                incrementModCount();
+            }
+            return root.setKeyValue(key, value);
+        }
+        
+        TrieEntry<K, V> found = getR(root.left, -1, key, keyLength);
         if (key.equals(found.key)) {
-            if (/*found == root */ found.isEmpty()) {
+            if (found.isEmpty()) { // <- must be the root
                 incrementSize();
             } else {
                 incrementModCount();
@@ -134,10 +159,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if (isValidBitIndex(bitIndex)) { // in 99.999...9% the case
             /* NEW KEY+VALUE TUPLE */
             TrieEntry<K, V> t = new TrieEntry<K, V>(key, value, bitIndex, root);
-            root.left = putR(root.left, t, root);
+            root.left = putR(root.left, t, keyLength, root);
             incrementSize();
             return null;
-        } else if (isNullBitKey(bitIndex)) { // all 160bits are 0
+        } else if (isNullBitKey(bitIndex)) {
+            // A bits of the Key are zero. The only place to
+            // store such a Key is the root Node!
+            
             /* NULL BIT KEY */
             if (root.isEmpty()) {
                 incrementSize();
@@ -145,7 +173,10 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 incrementModCount();
             }
             return root.setKeyValue(key, value);
-        } else if (isEqualBitKey(bitIndex)) { // actually not possible 
+            
+        } else if (isEqualBitKey(bitIndex)) {
+            // This is a very special and rare case.
+            
             /* REPLACE OLD KEY+VALUE */
             if (found != root) {
                 incrementModCount();
@@ -160,10 +191,12 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * The actual put implementation. Entry t is the new Entry we're
      * gonna add.
      */
-    private TrieEntry<K, V> putR(TrieEntry<K, V> h, final TrieEntry<K, V> t, TrieEntry<K, V> p) {
+    private TrieEntry<K, V> putR(TrieEntry<K, V> h, 
+            final TrieEntry<K, V> t, final int keyLength, TrieEntry<K, V> p) {
+        
         if ((h.bitIndex >= t.bitIndex) || (h.bitIndex <= p.bitIndex)) {
             
-            if (!isBitSet(t.key, t.bitIndex)) {
+            if (!isBitSet(t.key, keyLength, t.bitIndex)) {
                 t.left = t;
                 t.right = h;
             } else {
@@ -179,10 +212,10 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return t;
         }
 
-        if (!isBitSet(t.key, h.bitIndex)) {
-            h.left = putR(h.left, t, h);
+        if (!isBitSet(t.key, keyLength, h.bitIndex)) {
+            h.left = putR(h.left, t, keyLength, h);
         } else {
-            h.right = putR(h.right, t, h);
+            h.right = putR(h.right, t, keyLength, h);
         }
         
         return h;
@@ -210,10 +243,12 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     TrieEntry<K,V> getEntry(Object k) {
         K key = asKey(k);
-        if(key == null)
+        if(key == null) {
             return null;
+        }
         
-        TrieEntry<K,V> entry = getR(root.left, -1, key);
+        int keyLength = length(key);
+        TrieEntry<K,V> entry = getR(root.left, -1, key, keyLength);
         return !entry.isEmpty() && key.equals(entry.key) ? entry : null;
     }
     
@@ -232,15 +267,17 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * selectR but with the exception that it might return the
      * root Entry even if it's empty.
      */
-    private TrieEntry<K, V> getR(TrieEntry<K, V> h, int bitIndex, K key) {
+    private TrieEntry<K, V> getR(TrieEntry<K, V> h, int bitIndex, 
+            final K key, final int keyLength) {
+        
         if (h.bitIndex <= bitIndex) {
             return h;
         }
 
-        if (!isBitSet(key, h.bitIndex)) {
-            return getR(h.left, h.bitIndex, key);
+        if (!isBitSet(key, keyLength, h.bitIndex)) {
+            return getR(h.left, h.bitIndex, key, keyLength);
         } else {
-            return getR(h.right, h.bitIndex, key);
+            return getR(h.right, h.bitIndex, key, keyLength);
         }
     }
     
@@ -250,10 +287,11 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     @SuppressWarnings("unchecked")
     public V select(K key) {
-        TrieEntry[] entry = new TrieEntry[1];
-        if (!selectR(root.left, -1, key, entry)) {
-            TrieEntry<K, V> e = entry[0];
-            return e.value;
+        int keyLength = length(key);
+        TrieEntry[] result = new TrieEntry[1];
+        if (!selectR(root.left, -1, key, keyLength, result)) {
+            TrieEntry<K, V> e = result[0];
+            return e.getValue();
         }
         return null;
     }
@@ -263,25 +301,27 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * its overhead because we're selecting only one best matching
      * Entry from the Trie.
      */
-    private boolean selectR(TrieEntry<K, V> h, int bitIndex, final K key, final TrieEntry[] entry) {
+    private boolean selectR(TrieEntry<K, V> h, int bitIndex, 
+            final K key, final int keyLength, final TrieEntry[] result) {
+        
         if (h.bitIndex <= bitIndex) {
             // If we hit the root Node and it is empty
             // we have to look for an alternative best
             // mathcing node.
             if (!h.isEmpty()) {
-                entry[0] = h;
+                result[0] = h;
                 return false;
             }
             return true;
         }
 
-        if (!isBitSet(key, h.bitIndex)) {
-            if (selectR(h.left, h.bitIndex, key, entry)) {
-                return selectR(h.right, h.bitIndex, key, entry);
+        if (!isBitSet(key, keyLength, h.bitIndex)) {
+            if (selectR(h.left, h.bitIndex, key, keyLength, result)) {
+                return selectR(h.right, h.bitIndex, key, keyLength, result);
             }
         } else {
-            if (selectR(h.right, h.bitIndex, key, entry)) {
-                return selectR(h.left, h.bitIndex, key, entry);
+            if (selectR(h.right, h.bitIndex, key, keyLength, result)) {
+                return selectR(h.left, h.bitIndex, key, keyLength, result);
             }
         }
         return false;
@@ -289,15 +329,17 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     
     @SuppressWarnings("unchecked")
     public Map.Entry<K,V> select(K key, Cursor<? super K, ? super V> cursor) {
-        TrieEntry[] entry = new TrieEntry[]{ null };
-        selectR(root.left, -1, key, cursor, entry);
-        return entry[0];
+        int keyLength = length(key);
+        TrieEntry[] result = new TrieEntry[]{ null };
+        selectR(root.left, -1, key, keyLength, cursor, result);
+        return result[0];
     }
 
     private boolean selectR(TrieEntry<K,V> h, int bitIndex, 
             final K key, 
+            final int keyLength,
             final Cursor<? super K, ? super V> cursor,
-            final TrieEntry[] entry) {
+            final TrieEntry[] result) {
 
         if (h.bitIndex <= bitIndex) {
             if(!h.isEmpty()) {
@@ -307,20 +349,20 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                     //remove(h.key);
                     //return true; // continue
                 } else if(ret == Cursor.SelectStatus.EXIT) {
-                    entry[0] = h;
+                    result[0] = h;
                     return false; // exit
                 } // else if (ret == Cursor.SelectStatus.CONTINUE), fall through
             }
             return true; // continue
         }
 
-        if (!isBitSet(key, h.bitIndex)) {
-            if (selectR(h.left, h.bitIndex, key, cursor, entry)) {
-                return selectR(h.right, h.bitIndex, key, cursor, entry);
+        if (!isBitSet(key, keyLength, h.bitIndex)) {
+            if (selectR(h.left, h.bitIndex, key, keyLength, cursor, result)) {
+                return selectR(h.right, h.bitIndex, key, keyLength, cursor, result);
             }
         } else {
-            if (selectR(h.right, h.bitIndex, key, cursor, entry)) {
-                return selectR(h.left, h.bitIndex, key, cursor, entry);
+            if (selectR(h.right, h.bitIndex, key, keyLength, cursor, result)) {
+                return selectR(h.left, h.bitIndex, key, keyLength, cursor, result);
             }
         }
         
@@ -334,22 +376,23 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * @param length (depth) in bits
      */
     public Collection<V> range(K key, int length) {
-        return range(key, length, new Cursor<K, V>() {
+        /*return range(key, length, new Cursor<K, V>() {
             public Cursor.SelectStatus select(Map.Entry<? extends K, ? extends V> entry) {
                 return Cursor.SelectStatus.EXIT;
             }
-        });
+        });*/
+        throw new UnsupportedOperationException();
     }
     
     public Collection<V> range(K key, int length, Cursor<? super K, ? super V> cursor) {
-        // If length is -1 then return everything!
+        /*// If length is -1 then return everything!
         if (length == -1) {
             Collection<V> values = values();
             return new ArrayList<V>(values);
         }
         
-        if (length >= keyCreator.length()) {
-            throw new IllegalArgumentException(length + " >= " + keyCreator.length());
+        if (length >= length(key)) {
+            throw new IllegalArgumentException(length + " >= " + length(key));
         }
         
         TrieEntry<K, V> entry = rangeR(root.left, -1, key, length, root);
@@ -364,7 +407,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         // ... or there are less than 'length' equal bits
-        int bitIndex = keyCreator.bitIndex(key, entry.key);
+        int bitIndex = bitIndex(key, entry.key);
         if (bitIndex >= 0 && bitIndex < length) {
             return Collections.emptyList();
         }
@@ -381,14 +424,15 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             default:
                 throw new IllegalStateException("cursor must always use EXIT | CONTINUE");
             }
-        }
+        }*/
+        throw new UnsupportedOperationException();
     }
     
     /**
      * This is very similar to getR but with the difference that
      * we stop the lookup if h.bitIndex > keyLength.
      */
-    private TrieEntry<K, V> rangeR(TrieEntry<K, V> h, int bitIndex, 
+    /*private TrieEntry<K, V> rangeR(TrieEntry<K, V> h, int bitIndex, 
             final K key, final int keyLength, TrieEntry<K, V> p) {
         
         if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
@@ -422,17 +466,19 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         
         valuesInRangeR(h.left, h.bitIndex, cursor, values);
         return valuesInRangeR(h.right, h.bitIndex, cursor, values);
-    }
+    }*/
     
     /**
      * Returns true if this trie contains the specified Key
      */
     public boolean containsKey(Object k) {
         K key = asKey(k);
-        if(key == null)
+        if(key == null) {
             return false;
+        }
         
-        TrieEntry entry = getR(root.left, -1, key);
+        int keyLength = length(key);
+        TrieEntry entry = getR(root.left, -1, key, keyLength);
         return !entry.isEmpty() && key.equals(entry.key);
     }
     
@@ -444,10 +490,12 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     public V remove(Object k) {
         K key = asKey(k);
-        if(key == null)
+        if(key == null) {
             return null;
+        }
         
-        return removeR(root.left, -1, key, root);
+        int keyLength = length(key);
+        return removeR(root.left, -1, key, keyLength, root);
     }
     
     /**
@@ -455,7 +503,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * 
      * Serach for the Key
      */
-    private V removeR(TrieEntry<K, V> h, int bitIndex, K key, TrieEntry<K, V> p) {
+    private V removeR(TrieEntry<K, V> h, int bitIndex, 
+            final K key, final int keyLength, TrieEntry<K, V> p) {
+        
         if (h.bitIndex <= bitIndex) {
             if (!h.isEmpty() && key.equals(h.key)) {
                 return removeEntry(h, p);
@@ -463,10 +513,10 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return null;
         }
         
-        if (!isBitSet(key, h.bitIndex)) {
-            return removeR(h.left, h.bitIndex, key, h);
+        if (!isBitSet(key, keyLength, h.bitIndex)) {
+            return removeR(h.left, h.bitIndex, key, keyLength, h);
         } else {
-            return removeR(h.right, h.bitIndex, key, h);
+            return removeR(h.right, h.bitIndex, key, keyLength, h);
         }
     }
     
@@ -637,11 +687,19 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         return bitIndex == KeyCreator.EQUAL_BIT_KEY;
     }
     
-    private boolean isBitSet(K key, int bitIndex) {
+    private int length(K key) {
+        if (key == null) {
+            return 0;
+        }
+        
+        return keyCreator.length(key);
+    }
+    
+    private boolean isBitSet(K key, int keyLength, int bitIndex) {
         if (key == null) { // root's might be null!
             return false;
         }
-        return keyCreator.isBitSet(key, bitIndex);
+        return keyCreator.isBitSet(key, keyLength, bitIndex);
     }
     
     private int bitIndex(K key, K foundKey) {
@@ -753,15 +811,15 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 buffer.append("Entry(");
             }
             
-            buffer.append("key=").append(key).append(" [").append(bitIndex).append("], ");
-            buffer.append("value=").append(value).append(", ");
+            buffer.append("key=").append(getKey()).append(" [").append(bitIndex).append("], ");
+            buffer.append("value=").append(getValue()).append(", ");
             //buffer.append("bitIndex=").append(bitIndex).append(", ");
             
             if (parent != null) {
                 if (parent == root) {
                     buffer.append("parent=").append("ROOT");
                 } else {
-                    buffer.append("parent=").append(parent.key).append(" [").append(parent.bitIndex).append("]");
+                    buffer.append("parent=").append(parent.getKey()).append(" [").append(parent.bitIndex).append("]");
                 }
             } else {
                 buffer.append("parent=").append("null");
@@ -772,7 +830,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 if (root == left) {
                     buffer.append("left=").append("ROOT");
                 } else {
-                    buffer.append("left=").append(left.key).append(" [").append(left.bitIndex).append("]");
+                    buffer.append("left=").append(left.getKey()).append(" [").append(left.bitIndex).append("]");
                 }
             } else {
                 buffer.append("left=").append("null");
@@ -783,7 +841,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 if (root == right) {
                     buffer.append("right=").append("ROOT");
                 } else {
-                    buffer.append("right=").append(right.key).append(" [").append(right.bitIndex).append("]");
+                    buffer.append("right=").append(right.getKey()).append(" [").append(right.bitIndex).append("]");
                 }
             } else {
                 buffer.append("right=").append("null");
@@ -810,11 +868,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
          */
         public static final int EQUAL_BIT_KEY = -2;
         
-        /** Returns the length of the Key in bits. */
-        public int length();
+        /** 
+         * Returns the length of the Key in bits. 
+         */
+        public int length(K key);
         
         /** Returns whether or not a bit is set */
-        public boolean isBitSet(K key, int bitIndex);
+        public boolean isBitSet(K key, int keyLength, int bitIndex);
         
         /** Returns the n-th different bit between key and found */
         public int bitIndex(K key, K found);

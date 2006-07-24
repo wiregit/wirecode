@@ -211,11 +211,11 @@ public class IPList {
         
         private static final int[] BITS = createIntBitMask(32);
         
-        public int length() {
+        public int length(IP key) {
             return 32;
         }
 
-        public boolean isBitSet(IP key, int bitIndex) {
+        public boolean isBitSet(IP key, int keyLength, int bitIndex) {
             int maddr = key.addr & key.mask;
             return (maddr & BITS[bitIndex]) != 0;
         }

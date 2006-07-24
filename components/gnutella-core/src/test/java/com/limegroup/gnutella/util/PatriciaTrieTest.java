@@ -330,6 +330,25 @@ public class PatriciaTrieTest extends BaseTestCase {
         cursor.finished();
     }
     
+    public void testVariableLengthKeys() {
+        PatriciaTrie<String, String> trie 
+            = new PatriciaTrie<String, String>(new CharSequenceKeyCreator());
+        
+        String[] keys = { 
+                "a", "aa", "aaa", "aaaa", "aaaaa",
+                "b", "bb", "bbb", "bbbb", "bbbbb"
+        };
+        
+        trie.put("", "empty");
+
+        for (String key : keys) {
+            trie.put(key, key);
+        }
+        
+        
+        System.out.println(trie);
+    }
+    
     private static class TestCursor implements Cursor<Object, Object> {
         private List<Object> keys;
         private List<Object> values;
@@ -416,11 +435,11 @@ public class PatriciaTrieTest extends BaseTestCase {
 
         private static final int[] BITS = createIntBitMask(32);
 
-        public int length() {
+        public int length(Integer key) {
             return 32;
         }
 
-        public boolean isBitSet(Integer key, int bitIndex) {
+        public boolean isBitSet(Integer key, int keyLength, int bitIndex) {
             return (key & BITS[bitIndex]) != 0;
         }
 
@@ -462,11 +481,11 @@ public class PatriciaTrieTest extends BaseTestCase {
 
         private static final int[] BITS = createIntBitMask(16);
 
-        public int length() {
+        public int length(Character key) {
             return 16;
         }
 
-        public boolean isBitSet(Character key, int bitIndex) {
+        public boolean isBitSet(Character key, int keyLength, int bitIndex) {
             return (key & BITS[bitIndex]) != 0;
         }
 
