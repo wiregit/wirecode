@@ -21,11 +21,11 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.PingRequest;
 
@@ -41,8 +41,8 @@ public class PingRequestImpl extends AbstractRequestMessage
     }
     
     public PingRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer... data) throws IOException {
-        super(context, OpCode.PING_REQUEST, src, data);
+            SocketAddress src, MessageInputStream in) throws IOException {
+        super(context, OpCode.PING_REQUEST, src, in);
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {

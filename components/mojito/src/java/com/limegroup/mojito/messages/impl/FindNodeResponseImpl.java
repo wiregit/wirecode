@@ -21,7 +21,6 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -53,10 +52,8 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     }
     
     public FindNodeResponseImpl(Context context, 
-            SocketAddress src, ByteBuffer... data) throws IOException {
-        super(context, OpCode.FIND_NODE_RESPONSE, src, data);
-        
-        MessageInputStream in = getMessageInputStream();
+            SocketAddress src, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_NODE_RESPONSE, src, in);
         
         this.queryKey = in.readQueryKey();
         this.nodes = in.readContacts();

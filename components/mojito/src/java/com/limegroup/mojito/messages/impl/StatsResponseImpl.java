@@ -23,7 +23,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -48,10 +47,8 @@ public class StatsResponseImpl extends AbstractResponseMessage
     }
 
     public StatsResponseImpl(Context context, 
-            SocketAddress src, ByteBuffer... data) throws IOException {
-        super(context, OpCode.STATS_RESPONSE, src, data);
-        
-        MessageInputStream in = getMessageInputStream();
+            SocketAddress src, MessageInputStream in) throws IOException {
+        super(context, OpCode.STATS_RESPONSE, src, in);
         
         byte[] s = in.readStatistics();
         

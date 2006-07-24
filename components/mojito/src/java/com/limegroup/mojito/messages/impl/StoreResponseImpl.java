@@ -21,7 +21,6 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
@@ -49,10 +48,8 @@ public class StoreResponseImpl extends AbstractResponseMessage
     }
 
     public StoreResponseImpl(Context context, 
-            SocketAddress src, ByteBuffer... data) throws IOException {
-        super(context, OpCode.STORE_RESPONSE, src, data);
-        
-        MessageInputStream in = getMessageInputStream();
+            SocketAddress src, MessageInputStream in) throws IOException {
+        super(context, OpCode.STORE_RESPONSE, src, in);
         
         this.valueId = in.readValueID();
         this.status = in.readStoreStatus();

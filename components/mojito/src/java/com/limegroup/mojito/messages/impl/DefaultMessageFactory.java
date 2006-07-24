@@ -26,11 +26,13 @@ import java.nio.ByteOrder;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.util.ByteBufferInputStream;
 import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -84,30 +86,31 @@ public class DefaultMessageFactory implements MessageFactory {
             b.order(ByteOrder.BIG_ENDIAN);
         }
         
-        OpCode opcode = OpCode.valueOf(data[0].get() & 0xFF);
+        MessageInputStream in = new MessageInputStream(new ByteBufferInputStream(data));
+        OpCode opcode = OpCode.valueOf(in.readUnsignedByte());
         
         try {
             switch(opcode) {
                 case PING_REQUEST:
-                    return new PingRequestImpl(context, src, data);
+                    return new PingRequestImpl(context, src, in);
                 case PING_RESPONSE:
-                    return new PingResponseImpl(context, src, data);
+                    return new PingResponseImpl(context, src, in);
                 case FIND_NODE_REQUEST:
-                    return new FindNodeRequestImpl(context, src, data);
+                    return new FindNodeRequestImpl(context, src, in);
                 case FIND_NODE_RESPONSE:
-                    return new FindNodeResponseImpl(context, src, data);
+                    return new FindNodeResponseImpl(context, src, in);
                 case FIND_VALUE_REQUEST:
-                    return new FindValueRequestImpl(context, src, data);
+                    return new FindValueRequestImpl(context, src, in);
                 case FIND_VALUE_RESPONSE:
-                    return new FindValueResponseImpl(context, src, data);
+                    return new FindValueResponseImpl(context, src, in);
                 case STORE_REQUEST:
-                    return new StoreRequestImpl(context, src, data);
+                    return new StoreRequestImpl(context, src, in);
                 case STORE_RESPONSE:
-                    return new StoreResponseImpl(context, src, data);
+                    return new StoreResponseImpl(context, src, in);
                 case STATS_REQUEST:
-                    return new StatsRequestImpl(context, src, data);
+                    return new StatsRequestImpl(context, src, in);
                 case STATS_RESPONSE:
-                    return new StatsResponseImpl(context, src, data);
+                    return new StatsResponseImpl(context, src, in);
                 default:
                     throw new IOException("Unhandled OpCode " + opcode);
             }

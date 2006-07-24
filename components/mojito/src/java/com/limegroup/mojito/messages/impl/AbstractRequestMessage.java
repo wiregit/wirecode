@@ -21,11 +21,11 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.RequestMessage;
 
 /**
@@ -40,8 +40,8 @@ abstract class AbstractRequestMessage extends AbstractDHTMessage
     }
 
     public AbstractRequestMessage(Context context, OpCode opcode, 
-            SocketAddress src, ByteBuffer... data) 
+            SocketAddress src, MessageInputStream in) 
             throws IOException {
-        super(context, opcode, src, data);
+        super(context, opcode, src, in);
     }
 }

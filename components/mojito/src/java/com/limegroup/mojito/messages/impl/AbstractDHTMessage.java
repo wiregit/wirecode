@@ -27,7 +27,6 @@ import java.nio.ByteBuffer;
 import java.security.Signature;
 import java.security.SignatureException;
 
-import com.limegroup.gnutella.util.ByteBufferInputStream;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
@@ -62,8 +61,6 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
     
     private KUID messageId;
     
-    private MessageInputStream in;
-    
     public AbstractDHTMessage(Context context, 
             OpCode opcode, Contact contact, KUID messageId) {
 
@@ -90,7 +87,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
     }
 
     public AbstractDHTMessage(Context context, 
-            OpCode opcode, SocketAddress src, ByteBuffer... data) throws IOException {
+            OpCode opcode, SocketAddress src, MessageInputStream in) throws IOException {
         
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
@@ -98,8 +95,6 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         
         this.context = context;
         this.opcode = opcode;
-        
-        in = new MessageInputStream(new ByteBufferInputStream(data));
         
         int vendor = in.readInt();
         int version = in.readUnsignedShort();
@@ -118,15 +113,6 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         //int messageFlags = in.readUnsignedByte();
         //int checksum = in.readInt();
         in.skip(5); // see above
-        
-        this.data = data;
-    }
-    
-    protected MessageInputStream getMessageInputStream() throws IOException {
-        if (in == null) {
-            throw new IOException("Illegal State");
-        }
-        return in;
     }
     
     public Context getContext() {

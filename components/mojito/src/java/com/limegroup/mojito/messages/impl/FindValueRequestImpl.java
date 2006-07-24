@@ -21,11 +21,11 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.FindValueRequest;
 
 /**
@@ -41,8 +41,8 @@ public class FindValueRequestImpl extends AbstractLookupRequest
     }
     
     public FindValueRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer... data) throws IOException {
-        super(context, OpCode.FIND_VALUE_REQUEST, src, data);
+            SocketAddress src, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_VALUE_REQUEST, src, in);
     }
     
     public String toString() {

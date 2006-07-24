@@ -21,7 +21,6 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 import java.security.Signature;
 import java.security.SignatureException;
 
@@ -53,10 +52,8 @@ public class StatsRequestImpl extends AbstractRequestMessage
     }
 
     public StatsRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer... data) throws IOException {
-        super(context, OpCode.STATS_REQUEST, src, data);
-        
-        MessageInputStream in = getMessageInputStream();
+            SocketAddress src, MessageInputStream in) throws IOException {
+        super(context, OpCode.STATS_REQUEST, src, in);
         
         this.request = in.readUnsignedByte();
         this.signature = in.readSignature();

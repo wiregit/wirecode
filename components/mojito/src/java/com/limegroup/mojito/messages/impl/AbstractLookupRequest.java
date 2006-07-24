@@ -21,7 +21,6 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
@@ -47,11 +46,9 @@ abstract class AbstractLookupRequest extends AbstractRequestMessage
     }
     
     public AbstractLookupRequest(Context context, 
-            OpCode opcode, SocketAddress src, ByteBuffer... data) 
+            OpCode opcode, SocketAddress src, MessageInputStream in) 
             throws IOException {
-        super(context, opcode, src, data);
-        
-        MessageInputStream in = getMessageInputStream();
+        super(context, opcode, src, in);
         
         switch(opcode) {
             case FIND_NODE_REQUEST:

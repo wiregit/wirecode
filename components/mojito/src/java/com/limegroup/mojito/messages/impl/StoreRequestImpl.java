@@ -21,7 +21,6 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
@@ -51,10 +50,8 @@ public class StoreRequestImpl extends AbstractRequestMessage
     }
     
     public StoreRequestImpl(Context context, 
-            SocketAddress src, ByteBuffer... data) throws IOException {
-        super(context, OpCode.STORE_REQUEST, src, data);
-        
-        MessageInputStream in = getMessageInputStream();
+            SocketAddress src, MessageInputStream in) throws IOException {
+        super(context, OpCode.STORE_REQUEST, src, in);
         
         this.queryKey = in.readQueryKey();
         this.keyValue = in.readKeyValue();
