@@ -22,19 +22,26 @@ public class BitFieldSet implements BitField {
 	}
 
 	public int cardinality() {
-		return bs.cardinality();
+		if (bs.length() <= maxSize)
+			return bs.cardinality();
+		else
+			return bs.get(0, maxSize).cardinality(); // expensive, avoid.
 	}
 
 	public boolean get(int i) {
+		if (i > maxSize)
+			throw new IndexOutOfBoundsException();
 		return bs.get(i);
 	}
 
 	public int nextClearBit(int i) {
-		return bs.nextClearBit(i);
+		int ret = bs.nextClearBit(i); 
+		return ret >= maxSize ? -1 : ret;
 	}
 
 	public int nextSetBit(int i) {
-		return bs.nextSetBit(i);
+		int ret = bs.nextSetBit(i);
+		return ret >= maxSize ? -1 : ret;
 	}
 
 }
