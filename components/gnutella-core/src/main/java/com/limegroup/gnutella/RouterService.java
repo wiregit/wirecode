@@ -1573,6 +1573,10 @@ public class RouterService {
         return dhtManager.isActiveNode();
     }
     
+    public static boolean isDHTWaiting() {
+        return dhtManager.isWaiting();
+    }
+    
     public static void switchMode(boolean toActiveNode) {
         dhtManager.switchMode(toActiveNode);
     }

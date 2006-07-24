@@ -370,6 +370,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         int udpLength=GGEP.GGEP_HEADER_UNICAST_SUPPORT.length();
         int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
         int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
+        int dhtLength = GGEP.GGEP_HEADER_DHT_SUPPORT.length();
         int ggepLength=1   //magic number
                       +1   //"DUPTIME" extension flags
                       +idLength //ID
@@ -386,26 +387,33 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                       +1   //"VC" extension flags
                       +vcLength // ID
                       +1   // data length
-                      +5;  // data bytes
+                      +5   // data bytes
+                      +1  //"DHT" extension flags
+                      +dhtLength
+                      +1   // data length
+                      +3;  // data bytes 
         assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
         int offset=23+14;                              //GGEP offset
         assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
         assertTrue("Got: "+(0xFF&bytes[offset+1]), 
-                   bytes[offset+1]==(byte)(0x00 | idLength)); //extension flags
+                   bytes[offset+1]==(byte)(0x00 | dhtLength)); //extension flags
         assertTrue(bytes[offset+2]==(byte)'D');
-        assertTrue(bytes[offset+3]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+4]==(byte)'G');
-        assertTrue(bytes[offset+2+idLength+5]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+6]==(byte)'E');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+4]==(byte)'P');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+5]==(byte)'V');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+6]==(byte)'C');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+8]==(byte)'L');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+9]==(byte)'I');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+10]==(byte)'M');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+11]==(byte)'E');
-        assertTrue(bytes[offset+2+idLength+4+udpLength+3+upLength+12]==39);
+        assertTrue(bytes[offset+3]==(byte)'H');
+        assertTrue(bytes[offset+4]==(byte)'T');
+        assertTrue(bytes[offset+2+dhtLength+5]==(byte)'D');
+        assertTrue(bytes[offset+2+dhtLength+6]==(byte)'U');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4]==(byte)'G');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+5]==(byte)'U');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+6]==(byte)'E');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3]==(byte)'U');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+4]==(byte)'P');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+5]==(byte)'V');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+6]==(byte)'C');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+8]==(byte)'L');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+9]==(byte)'I');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+10]==(byte)'M');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+11]==(byte)'E');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+udpLength+3+upLength+12]==39);
         //...etc.
         assertTrue(bytes[bytes.length-2-(3+udpLength)-(5+upLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
         assertTrue(bytes[bytes.length-1-(3+udpLength)-(5+upLength)-(7+vcLength)]==(byte)0x02); //big byte of 523
@@ -449,6 +457,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
         int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
         int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
+        int dhtLength = GGEP.GGEP_HEADER_DHT_SUPPORT.length();
         int ggepLength=1   //magic number
                       +1   //"DUPTIME" extension flags
                       +idLength //ID
@@ -461,23 +470,30 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                       +1   //"VC" extension flags
                       +vcLength // ID
                       +1   // data length
-                      +5;  // data bytes
+                      +5   // data bytes
+                      +1   //"DHT" extension flags
+                      +dhtLength
+                      +1   // data length
+                      +3;  // data bytes 
         assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
         int offset=23+14;                              //GGEP offset
         assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
         assertTrue("Got: "+(0xFF&bytes[offset+1]), 
-                   bytes[offset+1]==(byte)(0x00 | idLength)); //extension flags
+                bytes[offset+1]==(byte)(0x00 | dhtLength)); //extension flags
         assertTrue(bytes[offset+2]==(byte)'D');
-        assertTrue(bytes[offset+3]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+4]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+5]==(byte)'P');
-        assertTrue(bytes[offset+2+idLength+4+upLength+5]==(byte)'V');
-        assertTrue(bytes[offset+2+idLength+4+upLength+6]==(byte)'C');
-        assertTrue(bytes[offset+2+idLength+4+upLength+8]==(byte)'L');
-        assertTrue(bytes[offset+2+idLength+4+upLength+9]==(byte)'I');
-        assertTrue(bytes[offset+2+idLength+4+upLength+10]==(byte)'M');
-        assertTrue(bytes[offset+2+idLength+4+upLength+11]==(byte)'E');
-        assertTrue(bytes[offset+2+idLength+4+upLength+12]==39);
+        assertTrue(bytes[offset+3]==(byte)'H');
+        assertTrue(bytes[offset+4]==(byte)'T');
+        assertTrue(bytes[offset+2+dhtLength+5]==(byte)'D');
+        assertTrue(bytes[offset+2+dhtLength+6]==(byte)'U');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4]==(byte)'U');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+5]==(byte)'P');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+5]==(byte)'V');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+6]==(byte)'C');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+8]==(byte)'L');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+9]==(byte)'I');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+10]==(byte)'M');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+11]==(byte)'E');
+        assertTrue(bytes[offset+2+dhtLength+5+idLength+4+upLength+12]==39);
         //...etc.
         assertTrue(bytes[bytes.length-2-(5+upLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
         assertTrue(bytes[bytes.length-1-(5+upLength)-(7+vcLength)]==(byte)0x02); //big byte of 523

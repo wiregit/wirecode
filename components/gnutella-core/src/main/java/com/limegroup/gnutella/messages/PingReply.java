@@ -19,6 +19,8 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
@@ -133,6 +135,16 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Constant for the query key reported for the pong.
      */
     private final QueryKey QUERY_KEY;
+    
+    /**
+     * Constant for the DHT Version. 
+     */
+    private final int DHT_VERSION;
+    
+    /**
+     * Contant for the DHT mode (active/passive/none)
+     */
+    private final DHTMode DHT_MODE;
 
     /**
      * Constant boolean for whether or not this pong contains any GGEP
@@ -717,6 +729,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         List<IpPort> packedCaches = Collections.emptyList();
         String cacheAddress = null;
         
+        int dhtVersion = -1;
+        DHTMode dhtMode = null;
+        
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
             if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
@@ -756,6 +771,22 @@ public class PingReply extends Message implements Serializable, IpPort {
                     if(bytes.length >= 3) {
                         freeLeafSlots = bytes[1];
                         freeUltrapeerSlots = bytes[2];
+                    }
+                } catch (BadGGEPPropertyException e) {}
+            }
+            
+            if(ggep.hasKey((GGEP.GGEP_HEADER_DHT_SUPPORT))) {
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_DHT_SUPPORT);
+                    if(bytes.length >= 3) {
+                        dhtVersion = ByteOrder.beb2short(bytes, 0);
+                        if(dhtVersion == 0) {
+                            dhtMode = DHTMode.NONE;
+                        } else if((bytes[2] & DHTMode.DHT_MODE_MASK) == DHTMode.ACTIVE.getByte()) {
+                            dhtMode = DHTMode.ACTIVE;
+                        } else if((bytes[2] & DHTMode.DHT_MODE_MASK) == DHTMode.PASSIVE.getByte()) {
+                            dhtMode = DHTMode.PASSIVE;
+                        }
                     }
                 } catch (BadGGEPPropertyException e) {}
             }
@@ -853,6 +884,8 @@ public class PingReply extends Message implements Serializable, IpPort {
         PACKED_IP_PORTS = packedIPs;
         PACKED_DHT_IP_PORTS = packedDHTIPs;
         PACKED_UDP_HOST_CACHES = packedCaches;
+        DHT_VERSION = dhtVersion;
+        DHT_MODE = dhtMode;
     }
 
 
@@ -875,6 +908,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         // indicate UP support
         if (isUltrapeer)
             addUltrapeerExtension(ggep);
+        
+        // add DHT support
+        addDHTExtension(ggep);
         
         // all pongs should have vendor info
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
@@ -961,6 +997,31 @@ public class PingReply extends Message implements Serializable, IpPort {
 
         // add it
         ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
+    }
+    
+    /**
+     * Adds the DHT GGEP extension to the pong.  This has the version of
+     * the DHT that we support as well as the mode of this node (active/passive).
+     * If the version is 0, then this node supports DHT but is neither active or passive.
+     * 
+     * @param ggep the <tt>GGEP</tt> instance to add the extension to
+     */
+    private static void addDHTExtension(GGEP ggep) {
+        byte[] payload = new byte[3];
+        // put version
+        ByteOrder.short2beb((short)RouterService.getLimeDHTManager().getDHTVersion(), payload, 0);
+        if(RouterService.isDHTNode()) {
+            if(RouterService.isActiveDHTNode()) {
+                payload[2] = DHTMode.ACTIVE.getByte();
+            } else {
+                payload[2] = DHTMode.PASSIVE.getByte();
+            }
+        } else {
+            payload[2] = DHTMode.NONE.getByte();
+        }
+
+        // add it
+        ggep.put(GGEP.GGEP_HEADER_DHT_SUPPORT, payload);
     }
 
     /** puts major as the high order bits, minor as the low order bits.
@@ -1171,6 +1232,14 @@ public class PingReply extends Message implements Serializable, IpPort {
      */
     public List<IpPort> getPackedUDPHostCaches() {
         return PACKED_UDP_HOST_CACHES;
+    }
+    
+    public DHTMode getDHTMode() {
+        return DHT_MODE;
+    }
+    
+    public int getDHTVersion() {
+        return DHT_VERSION;
     }
 
     /**

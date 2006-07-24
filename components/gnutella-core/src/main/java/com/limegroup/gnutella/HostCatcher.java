@@ -518,6 +518,12 @@ public class HostCatcher {
             endpoint.setUDPHostCache(true);
         }
         
+        int dhtVersion = pr.getDHTVersion();
+        if(dhtVersion > -1) {
+            endpoint.setDHTVersion(dhtVersion);
+            endpoint.setDHTMode(pr.getDHTMode());
+        }
+        
         if(!isValidHost(endpoint))
             return false;
         

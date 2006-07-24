@@ -365,7 +365,7 @@ public class NodeAssigner {
         
         if (DHTSettings.DISABLE_DHT_USER.getValue() 
                 || DHTSettings.DISABLE_DHT_NETWORK.getValue()) {
-            DHTSettings.DHT_CAPABLE.setValue(false);
+            DHTSettings.ACTIVE_DHT_CAPABLE.setValue(false);
             RouterService.shutdownDHT();
             return;
         }
@@ -386,7 +386,7 @@ public class NodeAssigner {
             LOG.debug("Node is "+(isActiveDHTCapable?"":"NOT")+" DHT capable");
         }
 
-        DHTSettings.DHT_CAPABLE.setValue(isActiveDHTCapable);
+        DHTSettings.ACTIVE_DHT_CAPABLE.setValue(isActiveDHTCapable);
         
         //Node is not allready part of the DHT 
         //AND is DHT capable AND is accepted (probabilistic factor) 

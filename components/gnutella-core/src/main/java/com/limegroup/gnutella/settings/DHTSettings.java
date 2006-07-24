@@ -11,9 +11,9 @@ public class DHTSettings extends LimeProps{
         FACTORY.createSettableStringArraySetting("DHT_BOOTSTRAP_HOSTS", new String[0], "dht_bootstrap_hosts");
 
     /**
-     * Setting for whether or not we are DHT capable.
+     * Setting for whether or not we are active DHT capable.
      */
-    public static final BooleanSetting DHT_CAPABLE =
+    public static final BooleanSetting ACTIVE_DHT_CAPABLE =
         FACTORY.createExpirableBooleanSetting("EVER_DHT_CAPABLE", false);
     
     /**

@@ -67,7 +67,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.USE_GWEBCACHE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        DHTSettings.DHT_CAPABLE.setValue(true);
+        DHTSettings.ACTIVE_DHT_CAPABLE.setValue(true);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
         DHTSettings.DISABLE_DHT_USER.setValue(false);
         DHTSettings.EXCLUDE_ULTRAPEERS.setValue(false);

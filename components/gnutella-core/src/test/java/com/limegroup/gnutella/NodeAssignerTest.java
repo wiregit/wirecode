@@ -85,7 +85,7 @@ public class NodeAssignerTest extends BaseTestCase {
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
         DHTSettings.DISABLE_DHT_USER.setValue(false);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
-        DHTSettings.DHT_CAPABLE.setValue(false);
+        DHTSettings.ACTIVE_DHT_CAPABLE.setValue(false);
         DHTSettings.EXCLUDE_ULTRAPEERS.setValue(true);
         DHTSettings.FORCE_DHT_CONNECT.setValue(false);
     }

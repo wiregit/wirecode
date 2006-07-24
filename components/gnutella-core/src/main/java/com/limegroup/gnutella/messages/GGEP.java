@@ -57,6 +57,10 @@ public class GGEP {
     public static final String GGEP_HEADER_SHA1 = "S1";
     /** The extension header (key) to determine if a SHA1 is valid. */
     public static final String GGEP_HEADER_SHA1_VALID = "SV";
+
+    /** The extension header (key) for DHT support */
+    public static final String GGEP_HEADER_DHT_SUPPORT = "DHT";
+    
     /** The extension header (key) for DHT IPP requests. */
     public static final String GGEP_HEADER_DHT_IPPORTS = "DHTIPP";
     

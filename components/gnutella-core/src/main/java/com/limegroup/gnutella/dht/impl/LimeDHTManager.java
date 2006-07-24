@@ -93,11 +93,18 @@ public class LimeDHTManager implements DHTManager {
         return false;
     }
     
+    public synchronized boolean isWaiting() {
+        if(dhtController != null) {
+            return dhtController.isWaiting();
+        }
+        return false;
+    }
+    
     public synchronized int getDHTVersion() {
         if(dhtController != null) {
             return dhtController.getDHTVersion();
         }
-        return -1;
+        return 0;
     }
     
     public synchronized MojitoDHT getMojitoDHT() {

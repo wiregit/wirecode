@@ -61,7 +61,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
         //if we want to connect actively, we either shouldn't be an ultrapeer
         //or should be DHT capable
         if (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
-                && !DHTSettings.DHT_CAPABLE.getValue()) {
+                && !DHTSettings.ACTIVE_DHT_CAPABLE.getValue()) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Cannot initialize DHT - node is not DHT capable or is an ultrapeer");
             }

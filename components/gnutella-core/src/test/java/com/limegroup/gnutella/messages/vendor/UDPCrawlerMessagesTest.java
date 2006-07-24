@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
@@ -23,8 +24,10 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CountingConnection;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -32,6 +35,7 @@ import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -39,7 +43,9 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.mojito.MojitoDHT;
 
 
 public class UDPCrawlerMessagesTest extends BaseTestCase {
@@ -396,7 +402,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
                 == (int)UDPCrawlerPing.LOCALE_INFO);
         
         //see if the result we got had any uptime (it should!)
-        short uptime = ByteOrder.leb2short(payload,9);
+        short uptime = ByteOrder.leb2short(payload,13);
         assertGreaterThan(0,uptime);
  	}
  	
@@ -527,6 +533,31 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
         assertTrue(e.getPort() == UP1.getPort());
     }
     
+    public void testMsgDHTStatus() throws Exception {
+        PrivilegedAccessor.setValue(ROUTER_SERVICE, "dhtManager", new DHTManagerStub());
+        UDPCrawlerPing msgDHTCapable = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x20);
+        DHTSettings.ACTIVE_DHT_CAPABLE.setValue(true);
+        UDPCrawlerPong pong = new UDPCrawlerPong(msgDHTCapable);
+        byte[] payload = pong.getPayload();
+        byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
+        assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
+                == (int)UDPCrawlerPing.CONNECTION_TIME);
+        assertTrue((format & UDPCrawlerPing.DHT_STATUS)
+                == (int)UDPCrawlerPing.DHT_STATUS);
+        
+        byte status = payload[3];
+        assertTrue( (status & UDPCrawlerPong.DHT_CAPABLE_MASK) == UDPCrawlerPong.DHT_CAPABLE_MASK);
+        assertTrue( (status & UDPCrawlerPong.DHT_WAITING_MASK) == UDPCrawlerPong.DHT_WAITING_MASK);
+        assertFalse( (status & UDPCrawlerPong.DHT_ACTIVE_MASK) == UDPCrawlerPong.DHT_ACTIVE_MASK);
+        
+        //now see if offset is correctly set
+        msgDHTCapable = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x30);
+        pong = new UDPCrawlerPong(msgDHTCapable);
+        payload = pong.getPayload();
+        status = payload[7];
+        assertTrue( (status & UDPCrawlerPong.DHT_WAITING_MASK) == UDPCrawlerPong.DHT_WAITING_MASK);
+    }
+    
  	private void tryMessage() throws Exception {
  		assertTrue(UDPService.instance().isListening());
  		UDP_ACCESS.setSoTimeout(5000);
@@ -578,5 +609,32 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
                 byte[] restOf, int network) throws BadPacketException {
             return null;
         }
+    }
+    
+    private static class DHTManagerStub implements DHTManager{
+        
+        public void addBootstrapHost(SocketAddress hostAddress) {}
+
+        public void addressChanged() {}
+
+        public List<IpPort> getActiveDHTNodes(int maxNodes) {return null;}
+
+        public int getDHTVersion() {return 0;}
+
+        public MojitoDHT getMojitoDHT() {return null;}
+
+        public boolean isActiveNode() {return false;}
+
+        public boolean isRunning() {return true;}
+
+        public boolean isWaiting() {return true;}
+
+        public void start(boolean activeMode) {}
+
+        public void stop() {}
+
+        public void switchMode(boolean toActiveMode) {}
+
+        public void handleLifecycleEvent(LifecycleEvent evt) {}
     }
 }

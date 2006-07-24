@@ -10,8 +10,10 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -407,6 +409,16 @@ public class HostCatcherTest extends BaseTestCase {
         // udp host caches ..
         hc.add(new ExtendedEndpoint("1.2.3.4", 6346).setUDPHostCache(true), false);
         hc.add(new ExtendedEndpoint("1.2.3.5", 6341).setUDPHostCache(true), false);
+        
+        // dht capable node
+        ExtendedEndpoint ep = new ExtendedEndpoint("10.40.50.3", 6346);
+        ep.setDHTVersion(0);
+        hc.add(ep, false);
+        // dht active node
+        ep = new ExtendedEndpoint("10.40.50.5", 6346);
+        ep.setDHTVersion(1);
+        ep.setDHTMode(DHTMode.ACTIVE);
+        hc.add(ep, false);
             
         File tmp=File.createTempFile("hc_test", ".net" );
         hc.write(tmp);
@@ -418,13 +430,21 @@ public class HostCatcherTest extends BaseTestCase {
         assertEquals(0, hc.getNumHosts());
         hc.read(tmp);
         assertEquals(2, uhc.getSize());        
-        assertEquals(3, hc.getNumHosts());
+        assertEquals(5, hc.getNumHosts());
         assertEquals(new Endpoint("18.239.0.142", 6342),
                      hc.getAnEndpoint());
         assertEquals(new Endpoint("18.239.0.141", 6341),
                      hc.getAnEndpoint());
         assertEquals(new Endpoint("18.239.0.143", 6343),
                      hc.getAnEndpoint());
+        ExtendedEndpoint xep = (ExtendedEndpoint) hc.getAnEndpoint();
+        assertTrue(xep.supportsDHT());
+        assertEquals(xep.getDHTVersion(), 0);
+        assertNull(xep.getDHTMode());
+        xep = (ExtendedEndpoint) hc.getAnEndpoint();
+        assertTrue(xep.supportsDHT());
+        assertEquals(xep.getDHTVersion(), 1);
+        assertEquals(DHTMode.ACTIVE, xep.getDHTMode());
         assertEquals(0, hc.getNumHosts());
         //Cleanup.
         tmp.delete();
