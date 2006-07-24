@@ -24,8 +24,8 @@ import java.net.SocketAddress;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.RequestMessage;
 
 /**
@@ -35,7 +35,7 @@ abstract class AbstractRequestMessage extends AbstractDHTMessage
         implements RequestMessage {
 
     public AbstractRequestMessage(Context context, 
-            OpCode opcode, Contact contact, KUID messageId) {
+            OpCode opcode, Contact contact, MessageID messageId) {
         super(context, opcode, contact, messageId);
     }
 

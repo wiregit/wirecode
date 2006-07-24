@@ -26,10 +26,10 @@ import java.util.Collection;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.MessageID;
 
 /**
  * An implementation of FindNodeResponse
@@ -43,7 +43,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
 
     @SuppressWarnings("unchecked")
     public FindNodeResponseImpl(Context context, 
-            Contact contact, KUID messageId, 
+            Contact contact, MessageID messageId, 
             QueryKey queryKey, Collection<? extends Contact> nodes) {
         super(context, OpCode.FIND_NODE_RESPONSE, contact, messageId);
 

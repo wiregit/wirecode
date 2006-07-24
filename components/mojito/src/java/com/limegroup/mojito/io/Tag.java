@@ -36,6 +36,7 @@ import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -116,7 +117,7 @@ public class Tag {
         return size;
     }
     
-    public KUID getMessageID() {
+    public MessageID getMessageID() {
         return message.getMessageID();
     }
     
@@ -195,7 +196,7 @@ public class Tag {
             return Tag.this.getSocketAddres();
         }
         
-        public KUID getMessageID() {
+        public MessageID getMessageID() {
             return Tag.this.getMessageID();
         }
         

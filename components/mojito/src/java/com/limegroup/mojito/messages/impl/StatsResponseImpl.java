@@ -28,9 +28,9 @@ import java.util.zip.GZIPOutputStream;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StatsResponse;
 
 
@@ -40,7 +40,7 @@ public class StatsResponseImpl extends AbstractResponseMessage
     private String statistics;
 
     public StatsResponseImpl(Context context, 
-            Contact contact, KUID messageId, String statistics) {
+            Contact contact, MessageID messageId, String statistics) {
         super(context, OpCode.STATS_RESPONSE, contact, messageId);
 
         this.statistics = statistics;

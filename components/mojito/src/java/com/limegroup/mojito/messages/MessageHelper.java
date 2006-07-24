@@ -60,11 +60,12 @@ public class MessageHelper {
         return context.getLocalNode();
     }
 
-    protected KUID createMessageID(SocketAddress dst) {
-        if (NetworkUtils.isValidSocketAddress(dst)) {
-            return KUID.createRandomMessageID(dst);
+    protected MessageID createMessageID(SocketAddress dst) {
+        if (!NetworkUtils.isValidSocketAddress(dst)) {
+            throw new IllegalArgumentException(dst + " is an invalid SocketAddress");
         }
-        return KUID.MIN_MESSAGE_ID;
+        
+        return MessageID.create(dst);
     }
 
     protected int getEstimatedSize() {

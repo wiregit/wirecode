@@ -24,9 +24,9 @@ import java.net.SocketAddress;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.LookupResponse;
+import com.limegroup.mojito.messages.MessageID;
 
 /**
  * An abstract class for LookupResponse implementations
@@ -35,7 +35,7 @@ abstract class AbstractLookupResponse extends AbstractResponseMessage
 	implements LookupResponse {
 
     public AbstractLookupResponse(Context context, 
-            OpCode opcode, Contact contact, KUID messageId) {
+            OpCode opcode, Contact contact, MessageID messageId) {
         super(context, opcode, contact, messageId);
     }
     

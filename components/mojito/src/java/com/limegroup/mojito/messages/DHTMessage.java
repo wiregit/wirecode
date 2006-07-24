@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.KUID;
 
 /**
  * This is an abstract base class for all DHT messages.
@@ -103,7 +102,7 @@ public interface DHTMessage {
     public Contact getContact();
     
     /** Returns the Message ID of the Message */
-    public KUID getMessageID();
+    public MessageID getMessageID();
     
     /** Writes this Message to the OutputStream */
     public void write(OutputStream out) throws IOException;

@@ -32,6 +32,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 
@@ -51,6 +52,14 @@ public class MessageOutputStream extends DataOutputStream {
         }
         
         kuid.write(this);
+    }
+    
+    public void writeMessageID(MessageID messageId) throws IOException {
+        if (messageId == null) {
+            throw new NullPointerException("MessageID cannot be null");
+        }
+        
+        messageId.write(this);
     }
     
     public void writeKeyValue(KeyValue keyValue) throws IOException {

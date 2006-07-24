@@ -34,6 +34,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.routing.impl.ContactNode;
 
 /**
@@ -59,10 +60,10 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
     
     private Contact contact;
     
-    private KUID messageId;
+    private MessageID messageId;
     
     public AbstractDHTMessage(Context context, 
-            OpCode opcode, Contact contact, KUID messageId) {
+            OpCode opcode, Contact contact, MessageID messageId) {
 
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
@@ -74,10 +75,6 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
 
         if (messageId == null) {
             throw new NullPointerException("MessageID is null");
-        }
-
-        if (!messageId.isMessageID()) {
-            throw new IllegalArgumentException("MessageID is of wrong type: " + messageId);
         }
         
         this.context = context;
@@ -131,7 +128,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         return contact;
     }
     
-    public KUID getMessageID() {
+    public MessageID getMessageID() {
         return messageId;
     }
     
@@ -161,7 +158,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         }
         out.writeByte(flags);
         
-        out.writeKUID(getMessageID()); // 29-48
+        out.writeMessageID(getMessageID()); // 29-48
         out.writeByte(0); // 49
         out.writeInt(0); // 50-53
     }

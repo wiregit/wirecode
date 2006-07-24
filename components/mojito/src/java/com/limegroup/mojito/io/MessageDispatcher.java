@@ -51,6 +51,7 @@ import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.MessageFormatException;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -308,7 +309,7 @@ public abstract class MessageDispatcher implements Runnable {
      * sent us the Response.
      */
     private boolean verifyQueryKey(ResponseMessage response) {
-        KUID messageId = response.getMessageID();
+        MessageID messageId = response.getMessageID();
         Contact node = response.getContact();
         return messageId.verifyQueryKey(node.getContactAddress());
     }
@@ -549,7 +550,7 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * A map of MessageID -> Receipts
      */
-    private class ReceiptMap extends FixedSizeHashMap<KUID, Receipt> {
+    private class ReceiptMap extends FixedSizeHashMap<MessageID, Receipt> {
         
         private static final long serialVersionUID = -3084244582682726933L;
 
@@ -575,7 +576,7 @@ public abstract class MessageDispatcher implements Runnable {
             }
         }
         
-        protected boolean removeEldestEntry(Map.Entry<KUID, Receipt> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<MessageID, Receipt> eldest) {
             Receipt receipt = (Receipt)eldest.getValue();
             
             boolean timeout = receipt.timeout();

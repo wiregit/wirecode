@@ -34,6 +34,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
@@ -55,15 +56,15 @@ public class MessageInputStream extends DataInputStream {
     }
     
     private byte[] readKUIDBytes() throws IOException {
-        return readBytes(KUID.LENGTH/8);
+        return readBytes(KUID.LENGTH);
     }
     
     public KUID readNodeID() throws IOException {
         return KUID.createNodeID(readKUIDBytes());
     }
     
-    public KUID readMessageID() throws IOException {
-        return KUID.createMessageID(readKUIDBytes());
+    public MessageID readMessageID() throws IOException {
+        return MessageID.create(readBytes(MessageID.LENGTH));
     }
     
     public KUID readValueID() throws IOException {

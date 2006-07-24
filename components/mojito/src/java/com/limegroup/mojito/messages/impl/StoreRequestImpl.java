@@ -25,10 +25,10 @@ import java.net.SocketAddress;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StoreRequest;
 
 /**
@@ -41,7 +41,7 @@ public class StoreRequestImpl extends AbstractRequestMessage
     private KeyValue keyValue;
 
     public StoreRequestImpl(Context context, 
-            Contact contact, KUID messageId,
+            Contact contact, MessageID messageId,
             QueryKey queryKey, KeyValue keyValue) {
         super(context, OpCode.STORE_REQUEST, contact, messageId);
 

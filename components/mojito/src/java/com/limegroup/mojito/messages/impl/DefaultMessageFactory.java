@@ -40,6 +40,7 @@ import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageFormatException;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.StatsRequest;
@@ -127,51 +128,51 @@ public class DefaultMessageFactory implements MessageFactory {
         return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
     }
 
-    public FindNodeRequest createFindNodeRequest(Contact contact, KUID messageId, 
+    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, 
             KUID lookupId) {
         return new FindNodeRequestImpl(context, contact, messageId, lookupId);
     }
 
-    public FindNodeResponse createFindNodeResponse(Contact contact, KUID messageId, 
+    public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 
             QueryKey queryKey, Collection<? extends Contact> nodes) {
         return new FindNodeResponseImpl(context, contact, messageId, queryKey, nodes);
     }
 
-    public FindValueRequest createFindValueRequest(Contact contact, KUID messageId, 
+    public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
             KUID lookupId) {
         return new FindValueRequestImpl(context, contact, messageId, lookupId);
     }
 
-    public FindValueResponse createFindValueResponse(Contact contact, KUID messageId, 
+    public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
             Collection<KeyValue> values) {
         return new FindValueResponseImpl(context, contact, messageId, values);
     }
 
-    public PingRequest createPingRequest(Contact contact, KUID messageId) {
+    public PingRequest createPingRequest(Contact contact, MessageID messageId) {
         return new PingRequestImpl(context, contact, messageId);
     }
 
-    public PingResponse createPingResponse(Contact contact, KUID messageId, 
+    public PingResponse createPingResponse(Contact contact, MessageID messageId, 
             SocketAddress externalAddress, int estimatedSize) {
         return new PingResponseImpl(context, contact, messageId, externalAddress, estimatedSize);
     }
 
-    public StatsRequest createStatsRequest(Contact contact, KUID messageId, 
+    public StatsRequest createStatsRequest(Contact contact, MessageID messageId, 
             int stats) {
         return new StatsRequestImpl(context, contact, messageId, stats);
     }
 
-    public StatsResponse createStatsResponse(Contact contact, KUID messageId, 
+    public StatsResponse createStatsResponse(Contact contact, MessageID messageId, 
             String statistics) {
         return new StatsResponseImpl(context, contact, messageId, statistics);
     }
 
-    public StoreRequest createStoreRequest(Contact contact, KUID messageId, 
+    public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
             QueryKey queryKey, KeyValue keyValue) {
         return new StoreRequestImpl(context, contact, messageId, queryKey, keyValue);
     }
 
-    public StoreResponse createStoreResponse(Contact contact, KUID messageId, 
+    public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
             KUID valueId, StoreStatus status) {
         return new StoreResponseImpl(context, contact, messageId, valueId, status);
     }

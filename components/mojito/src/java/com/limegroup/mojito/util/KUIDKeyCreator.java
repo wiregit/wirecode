@@ -30,7 +30,7 @@ public class KUIDKeyCreator implements PatriciaTrie.KeyCreator<KUID> {
     }
 
     public int length() {
-        return KUID.LENGTH;
+        return KUID.LENGTH_IN_BITS;
     }
     
     public int bitIndex(KUID key, KUID found) {

@@ -41,32 +41,32 @@ public interface MessageFactory {
     public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 
             throws IOException;
     
-    public PingRequest createPingRequest(Contact contact, KUID messageId);
+    public PingRequest createPingRequest(Contact contact, MessageID messageId);
 
-    public PingResponse createPingResponse(Contact contact, KUID messageId, 
+    public PingResponse createPingResponse(Contact contact, MessageID messageId, 
             SocketAddress externalAddress, int estimatedSize);
 
-    public FindNodeRequest createFindNodeRequest(Contact contact, KUID messageId, 
+    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, 
             KUID lookupId);
 
-    public FindNodeResponse createFindNodeResponse(Contact contact, KUID messageId, 
+    public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 
             QueryKey queryKey, Collection<? extends Contact> nodes);
 
-    public FindValueRequest createFindValueRequest(Contact contact, KUID messageId, 
+    public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
             KUID lookupId);
 
-    public FindValueResponse createFindValueResponse(Contact contact, KUID messageId, 
+    public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
             Collection<KeyValue> values);
 
-    public StoreRequest createStoreRequest(Contact contact, KUID messageId, 
+    public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
             QueryKey queryKey, KeyValue keyValue);
 
-    public StoreResponse createStoreResponse(Contact contact, KUID messageId, 
+    public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
             KUID valueId, StoreStatus status);
 
-    public StatsRequest createStatsRequest(Contact contact, KUID messageId, 
+    public StatsRequest createStatsRequest(Contact contact, MessageID messageId, 
             int stats);
 
-    public StatsResponse createStatsResponse(Contact contact, KUID messageId, 
+    public StatsResponse createStatsResponse(Contact contact, MessageID messageId, 
             String statistics);
 }

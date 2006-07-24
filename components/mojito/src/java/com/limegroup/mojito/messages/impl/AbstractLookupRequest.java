@@ -28,6 +28,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.LookupRequest;
+import com.limegroup.mojito.messages.MessageID;
 
 /**
  * An abstract class for LookupRequest implementations
@@ -39,7 +40,7 @@ abstract class AbstractLookupRequest extends AbstractRequestMessage
     
     public AbstractLookupRequest(Context context, 
             OpCode opcode, Contact contact, 
-            KUID messageId, KUID lookupId) {
+            MessageID messageId, KUID lookupId) {
         super(context, opcode, contact, messageId);
         
         this.lookupId = lookupId;

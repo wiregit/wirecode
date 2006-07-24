@@ -27,6 +27,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.FindValueRequest;
+import com.limegroup.mojito.messages.MessageID;
 
 /**
  * An implementation of FindValueRequest
@@ -35,7 +36,7 @@ public class FindValueRequestImpl extends AbstractLookupRequest
         implements FindValueRequest {
 
     public FindValueRequestImpl(Context context, 
-            Contact contact, KUID messageId, KUID lookupId) {
+            Contact contact, MessageID messageId, KUID lookupId) {
         super(context, OpCode.FIND_VALUE_REQUEST, 
                 contact, messageId, lookupId);
     }

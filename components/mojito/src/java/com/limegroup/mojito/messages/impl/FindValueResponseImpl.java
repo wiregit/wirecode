@@ -25,11 +25,11 @@ import java.util.Collection;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.MessageID;
 
 /**
  * An implementation of FindValueResponse
@@ -40,7 +40,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     private Collection<KeyValue> values;
 
     public FindValueResponseImpl(Context context, 
-            Contact contact, KUID messageId, 
+            Contact contact, MessageID messageId, 
             Collection<KeyValue> values) {
         super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId);
 

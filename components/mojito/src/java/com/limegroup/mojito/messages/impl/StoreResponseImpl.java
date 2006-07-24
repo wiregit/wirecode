@@ -27,6 +27,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StoreResponse;
 
 /**
@@ -39,7 +40,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
     private StoreStatus status;
 
     public StoreResponseImpl(Context context, 
-            Contact contact, KUID messageId, 
+            Contact contact, MessageID messageId, 
             KUID valueId, StoreStatus status) {
         super(context, OpCode.STORE_RESPONSE, contact, messageId);
 

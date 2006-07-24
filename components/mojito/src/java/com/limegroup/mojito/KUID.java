@@ -48,8 +48,10 @@ import com.limegroup.mojito.util.PatriciaTrie.KeyCreator;
 public class KUID implements Comparable<KUID>, Serializable {
     
     private static final long serialVersionUID = 633717248208386374L;
-
-    public static final int LENGTH = 160; // bit
+    
+    public static final int LENGTH = 20;
+    
+    public static final int LENGTH_IN_BITS = LENGTH * 8; // 160 bit
     
     private static final Random GENERATOR = new Random();
     
@@ -103,9 +105,9 @@ public class KUID implements Comparable<KUID>, Serializable {
     private static final byte[] RANDOM_PAD = new byte[4];
                                                 
     static {
-        byte[] min = new byte[20];
+        byte[] min = new byte[LENGTH];
         
-        byte[] max = new byte[20];
+        byte[] max = new byte[LENGTH];
         Arrays.fill(max, (byte)0xFF);
         
         MIN_UNKNOWN_ID = new KUID(Type.UNKNOWN_ID, min);
@@ -133,8 +135,8 @@ public class KUID implements Comparable<KUID>, Serializable {
             throw new NullPointerException("ID is null");
         }
         
-        if ((id.length * 8) != LENGTH) {
-            throw new IllegalArgumentException("ID must be " + LENGTH + " bits long");
+        if (id.length != LENGTH) {
+            throw new IllegalArgumentException("ID must be " + LENGTH + " bytes long");
         }
         
         this.type = type;
@@ -258,7 +260,7 @@ public class KUID implements Comparable<KUID>, Serializable {
      */
     public int bits() {
         int bits = 0;
-        for(int i = 0; i < LENGTH; i++) {
+        for(int i = 0; i < LENGTH_IN_BITS; i++) {
             if (isBitSet(i)) {
                 bits++;
             }
@@ -292,7 +294,7 @@ public class KUID implements Comparable<KUID>, Serializable {
             return KeyCreator.NULL_BIT_KEY;
         }
         
-        if (bitIndex == LENGTH) {
+        if (bitIndex == LENGTH_IN_BITS) {
             return KeyCreator.EQUAL_BIT_KEY;
         }
         
@@ -604,7 +606,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     private static byte[] getBytes(ByteBuffer data) {
-        byte[] id = new byte[LENGTH/8];
+        byte[] id = new byte[LENGTH];
         data.get(id);
         return id;
     }
@@ -641,7 +643,7 @@ public class KUID implements Comparable<KUID>, Serializable {
      * Creates a random message ID and piggy packs a QueryKey to it.
      */
     public static KUID createRandomMessageID(SocketAddress dest) {
-        byte[] id = new byte[LENGTH/8];
+        byte[] id = new byte[LENGTH];
         GENERATOR.nextBytes(id);
         
         if (dest instanceof InetSocketAddress) {
@@ -743,7 +745,7 @@ public class KUID implements Comparable<KUID>, Serializable {
      * Creates and returns an Unknown ID
      */
     public static KUID createUnknownID() {
-        byte[] id = new byte[LENGTH/8];
+        byte[] id = new byte[LENGTH];
         GENERATOR.nextBytes(id);
         return createUnknownID(id);
     }

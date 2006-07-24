@@ -27,6 +27,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.FindNodeRequest;
+import com.limegroup.mojito.messages.MessageID;
 
 /**
  * An implementation of FindNodeRequest
@@ -35,7 +36,7 @@ public class FindNodeRequestImpl extends AbstractLookupRequest
         implements FindNodeRequest {
 
     public FindNodeRequestImpl(Context context, 
-            Contact contact, KUID messageId, KUID lookupId) {
+            Contact contact, MessageID messageId, KUID lookupId) {
         super(context, OpCode.FIND_NODE_REQUEST, 
                 contact, messageId, lookupId);
     }
