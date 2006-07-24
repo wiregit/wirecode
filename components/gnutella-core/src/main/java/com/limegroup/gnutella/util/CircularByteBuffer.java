@@ -24,7 +24,7 @@ public class CircularByteBuffer {
 	private final int capacity;
     private ByteBuffer in, out;
     
-    private ByteOrder order;
+    private ByteOrder order = ByteOrder.BIG_ENDIAN;
     
     private boolean lastOut = true;
     
@@ -167,7 +167,7 @@ public class CircularByteBuffer {
             if (!out.hasRemaining())
                 out.rewind();
             if (in.position() > out.position()) {
-            	if (len < 0)
+            	if (len == Integer.MAX_VALUE)
             		out.limit(in.position());
             	else
             		out.limit(Math.min(in.position(), len - written + out.position()));
@@ -190,7 +190,7 @@ public class CircularByteBuffer {
     }
     
     public int write(WritableByteChannel sink) throws IOException {
-    	return write(sink, -1);
+    	return write(sink, Integer.MAX_VALUE);
     }
     
     public int read(ReadableByteChannel source) throws IOException {
