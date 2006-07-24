@@ -1,5 +1,4 @@
 /*
- * Mojito Distributed Hash Table (Mojito DHT)
  * Copyright (C) 2006 LimeWire LLC
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,21 +18,13 @@
  
 package com.limegroup.gnutella.util;
 
-import static com.limegroup.gnutella.util.Trie.Cursor.SelectStatus.CONTINUE;
-import static com.limegroup.gnutella.util.Trie.Cursor.SelectStatus.EXIT;
-import static com.limegroup.gnutella.util.Trie.Cursor.SelectStatus.REMOVE;
-
 import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -258,6 +249,10 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         try {
             return (K)key;
         } catch(ClassCastException cce) {
+            // Because the type is erased, the cast & return are
+            // actually doing nothing, making this CCE impossible.
+            // However, it's still here on the off-chance it may
+            // work.
             return null;
         }
     }

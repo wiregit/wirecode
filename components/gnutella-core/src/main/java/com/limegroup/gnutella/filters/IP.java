@@ -195,10 +195,10 @@ public class IP {
     }
     
     private String toString(int i) {
-        return ((addr >> 24) & 0xFF) + "." +
-               ((addr >> 16) & 0xFF) + "." + 
-               ((addr >>  8) & 0xFF) + "." + 
-               ( addr        & 0xFF);
+        return ((i >> 24) & 0xFF) + "." +
+               ((i >> 16) & 0xFF) + "." + 
+               ((i >>  8) & 0xFF) + "." + 
+               ( i        & 0xFF);
     }
     
     /**

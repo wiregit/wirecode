@@ -14,6 +14,26 @@ import com.limegroup.gnutella.util.Trie.Cursor;
  * A mutable list of IP addresses.  More specifically, a list of sets of
  * addresses, like "18.239.0.*".  Provides fast operations to find if an address
  * is in the list.  Used to implement IPFilter.  Not synchronized. 
+ * 
+ * This class is optimized by the use of a PATRICIA Trie to store the ranges.
+ * Many of the optimizations work because of two key properties that we use
+ * when inserting items into the Trie.
+ * 
+ *   1) If the item to be inserted is within a range already in the Trie,
+ *      the item is not inserted.
+ *   2) If the item to be inserted contains any items that are within the
+ *      Trie, those items are removed.
+ *      
+ * Maintaining these properties allows certain necessary optimizations, such as
+ * looking at only the closest node when performing a lookup.  If these
+ * optimizations were not done, then certain items would appear closer within
+ * the Trie, despite there being a range further away that encompassed a given IP.
+ * 
+ * Using a PATRICIA allows an intelligent traversal to be done, so that at most
+ * 32 comparisons (the number of bits in an address) are performed regardless 
+ * of the number of items inserted into the Trie.  It also allows very efficient
+ * means of calculating the minimum distance (using an xor metric), because the
+ * Trie orders the IPs by distance.  
  */
 public class IPList {
     
@@ -33,7 +53,7 @@ public class IPList {
     public int size() {
         return ips.size();
     }
-
+    
     /** 
      * Adds a certain IP to the IPList.
      * @param ipStr a String containing the IP, see IP.java for formatting
@@ -45,7 +65,7 @@ public class IPList {
         } catch (IllegalArgumentException e) {
             return;
         }
-        
+                
         // If we already had it (or an address that contained it),
         // then don't include.  Also remove any IPs we encountered
         // that are contained by this new IP.
@@ -70,14 +90,9 @@ public class IPList {
      * @param String equal to an IP
      * @returns true if ip_address is contained somewhere in the list of IPs
      */
-    public boolean contains(final IP ip) {
-        long start, end;
-        
-        start = System.nanoTime();
-        Map.Entry<IP,IP> e = ips.select(ip, new LookupFilter(ip));
-        end = System.nanoTime();
-        System.out.println("Lookup for: " + ip + " took: " + (end-start));
-        return e != null && e.getKey().contains(ip);
+    public boolean contains(IP lookup) {
+        IP ip = ips.select(lookup);        
+        return ip != null && ip.contains(lookup);
     }
     
     /**
@@ -103,58 +118,22 @@ public class IPList {
     
     
     /**
-     * Calculates the minimum distance between an IPv4 address this list of IPv4 address ranges.
+     * Calculates the minimum distance between an IPv4 address and this list of IPv4 address ranges.
      * 
-     * @param ip an IPv4 address, represented as an IP object with a /32 netmask.
+     * @param lookup an IPv4 address, represented as an IP object with a /32 netmask.
      * @return 32-bit unsigned distance (using xor metric), represented as Java int
-     * 
-     * TODO: Optimize this to use the values of Patricia.
      */
-    public int minDistanceTo(IP ip) {
-        if (ip.mask != -1) {
+    public int minDistanceTo(IP lookup) {
+        if (lookup.mask != -1) {
             throw new IllegalArgumentException("Expected single IP, not an IP range.");
         }
-        // Note that this function uses xor with Integer.MIN_VALUE
-        // to reverse the sense of the most significant bit.  This
-        // causes the "<" and ">" operators to work properly even
-        // though we're representing 32-bit unsinged values as
-        // Java ints.
-       int min_distance = Integer.MAX_VALUE;
-       for(IP ipRange : ips.keySet()) {
-           int distance = Integer.MIN_VALUE ^ ipRange.getDistanceTo(ip);
-           if (min_distance > distance) {
-               min_distance = distance;
-           }
-       }
         
-       // Change the most significant bit back to its normal sense.
-       return Integer.MIN_VALUE ^ min_distance;
+        // The nature of the PATRICIA Trie & the distance (using an xor metric)
+        // work well in that the closest item within the trie is also the shortest
+        // distance.
+        IP ip = ips.select(lookup);
+        return ip.getDistanceTo(lookup);
     }
-    
-    /** A filter for looking up IPs. */
-    private static class LookupFilter implements Trie.Cursor<IP, IP> {
-        private final IP lookup;
-        
-        LookupFilter(IP lookup) {
-            this.lookup = lookup;
-        }
-        
-        public Cursor.SelectStatus select(Map.Entry<? extends IP, ? extends IP> entry) {
-            IP compare = entry.getKey();
-            if (compare.contains(lookup)) {
-                return Cursor.SelectStatus.EXIT; // Terminate
-            }
-           
-            // We traverse a PATRICIA Trie from the nearest to
-            // the furthest item to the lookup key. So if the 
-            // nearest item didn't contain the lookup IP and the
-            // xor distance is more than one bit then terminate
-            // as well as the lookup is hopeless and we'd otherwise
-            // traverse the entire Trie.
-            int distance = compare.getDistanceTo(lookup);
-            return distance > 1 ? SelectStatus.EXIT : SelectStatus.CONTINUE;
-        }
-    };
     
     /**
      * A filter for adding IPs -- stores IPs we encountered that

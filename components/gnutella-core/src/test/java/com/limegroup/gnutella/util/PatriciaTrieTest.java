@@ -135,6 +135,52 @@ public class PatriciaTrieTest extends BaseTestCase {
         cursor.finished();
     }
     
+    // TODO: see how select is supposed to work after it passes up it's
+    //       expected entry in the cursor
+    public void testSelect() {
+        PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
+        charTrie.put('c', "c");
+        charTrie.put('p', "p");
+        charTrie.put('l', "l");
+        charTrie.put('t', "t");
+        charTrie.put('k', "k");
+        charTrie.put('a', "a");
+        charTrie.put('y', "y");
+        charTrie.put('r', "r");
+        charTrie.put('u', "u");
+        charTrie.put('o', "o");
+        charTrie.put('w', "w");
+        charTrie.put('i', "i");
+        charTrie.put('e', "e");
+        charTrie.put('x', "x");
+        charTrie.put('q', "q");
+        charTrie.put('b', "b");
+        charTrie.put('j', "j");
+        charTrie.put('s', "s");
+        charTrie.put('n', "n");
+        charTrie.put('v', "v");
+        charTrie.put('g', "g");
+        charTrie.put('h', "h");
+        charTrie.put('m', "m");
+        charTrie.put('z', "z");
+        charTrie.put('f', "f");
+        charTrie.put('d', "d");
+        TestCursor cursor = new TestCursor(
+                'd', "d", 'e', "e",
+                'f', "f", 'g', "g", 'a', "a", 'b', "b", 'c', "c",  
+                'h', "h", 'i', "i", 'j', "j",
+                'k', "k", 'l', "l", 'm', "m", 'n', "n", 'o', "o",
+                'p', "p", 'q', "q", 'r', "r", 's', "s", 't', "t",
+                'u', "u", 'v', "v", 'w', "w", 'x', "x", 'y', "y", 
+                'z', "z");
+                
+        assertEquals(26, charTrie.size());
+        
+        cursor.starting();
+        charTrie.select('d', cursor);
+        cursor.finished();
+    }
+    
     public void testTraverseCursorRemove() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
         charTrie.put('c', "c");

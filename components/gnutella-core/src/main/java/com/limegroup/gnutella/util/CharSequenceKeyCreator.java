@@ -52,8 +52,8 @@ public class CharSequenceKeyCreator implements KeyCreator<CharSequence> {
             return false;
         }
         
-        int index = (int) (bitIndex / BITS.length);
-        int bit = (int)(bitIndex - index * BITS.length);
+        int index = bitIndex / BITS.length;
+        int bit = bitIndex - index * BITS.length;
         return (key.charAt(index) & BITS[bit]) != 0;
     }
 }

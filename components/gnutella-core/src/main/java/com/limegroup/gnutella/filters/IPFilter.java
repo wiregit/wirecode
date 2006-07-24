@@ -104,7 +104,7 @@ public final class IPFilter extends SpamFilter {
         }
         
         end = System.currentTimeMillis();
-        System.out.println("Done loading hostiles, time: " + (end-start));
+        System.out.println("Done loading hostiles (size: " + newBad.size() + "), time: " + (end-start));
         
         // Load basic good...
         IPList newGood = new IPList();
