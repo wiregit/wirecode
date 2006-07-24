@@ -48,9 +48,9 @@ public class StoreResponseImpl extends AbstractResponseMessage
         this.status = status;
     }
 
-    public StoreResponseImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.STORE_RESPONSE, src, in);
+    public StoreResponseImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.STORE_RESPONSE, messageId, version, src, in);
         
         this.valueId = in.readValueID();
         this.status = in.readStoreStatus();

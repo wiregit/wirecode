@@ -19,11 +19,9 @@
  
 package com.limegroup.mojito.messages.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.mojito.messages.DHTMessage;
 
@@ -37,14 +35,6 @@ import com.limegroup.mojito.messages.DHTMessage;
  */
 abstract class AbstractMessage extends Message {
     
-    /** GUID goes from 0 to 16th byte */
-    public static final int[] GUID_RANGE = {0, 16};
-    
-    public static final int[] TTL_HOPS_RANGE = {17, 19};
-    
-    /** PAYLOAD starts at 23rd byte */
-    public static final int PAYLOAD_START = 23;
-    
     /** 
      * An empty GUID, it's never written to Network.
      * See overwritten write-methods for more info!
@@ -57,9 +47,6 @@ abstract class AbstractMessage extends Message {
     /** Default HOPS */
     private static final byte HOPS = (byte)0x00;
     
-    /** The serialized  Message */
-    private byte[] payload;
-    
     AbstractMessage() {
         super(GUID, DHTMessage.F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
     }
@@ -71,43 +58,21 @@ abstract class AbstractMessage extends Message {
         return this;
     }
 
-    /**
-     * Serialized this Message if it has not been serialized yet.
-     */
-    private void serialize() throws IOException {
-        if (getLength() == 0) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(640);
-            writePayload(baos);
-            baos.close();
-            
-            payload = baos.toByteArray();
-            updateLength(payload.length);
-        }
+    @Override
+    public abstract void write(OutputStream out) throws IOException;
+    
+    @Override
+    public final void write(OutputStream out, byte[] buf) throws IOException {
+        write(out);
+    }
+
+    @Override
+    public final void writeQuickly(OutputStream out) throws IOException {
+        write(out);
     }
     
     @Override
-    public void writeQuickly(OutputStream out) throws IOException {
-        serialize();
-        
-        out.write(payload, 0, 16);
-        out.write(DHTMessage.F_DHT_MESSAGE);
-        out.write(payload, 16, 2);
-        ByteOrder.int2leb(payload.length-16-2, out);
-        out.write(payload, 16+2, payload.length-16-2);
+    protected final void writePayload(OutputStream out) throws IOException {
+        throw new UnsupportedOperationException();
     }
-    
-    @Override
-    public void write(OutputStream out, byte[] buf) throws IOException {
-        serialize();
-        
-        System.arraycopy(payload, 0, buf, 0, 16);
-        buf[16] = DHTMessage.F_DHT_MESSAGE;
-        System.arraycopy(payload, 16, buf, 17, 2);
-        ByteOrder.int2leb(payload.length-16-2, buf, 19);
-        
-        out.write(buf);
-        out.write(payload, 16+2, payload.length-16-2);
-    }
-    
-    protected abstract void writePayload(OutputStream out) throws IOException;
 }

@@ -41,9 +41,9 @@ public class FindNodeRequestImpl extends AbstractLookupRequest
                 contact, messageId, lookupId);
     }
     
-    public FindNodeRequestImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.FIND_NODE_REQUEST, src, in);
+    public FindNodeRequestImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_NODE_REQUEST, src, messageId, version, in);
     }
     
     public String toString() {

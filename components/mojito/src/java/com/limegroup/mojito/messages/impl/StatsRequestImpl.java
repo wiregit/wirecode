@@ -51,9 +51,9 @@ public class StatsRequestImpl extends AbstractRequestMessage
         this.signature = null;
     }
 
-    public StatsRequestImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.STATS_REQUEST, src, in);
+    public StatsRequestImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.STATS_REQUEST, src, messageId, version, in);
         
         this.request = in.readUnsignedByte();
         this.signature = in.readSignature();

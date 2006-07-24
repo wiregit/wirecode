@@ -47,9 +47,9 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         this.values = values;
     }
 
-    public FindValueResponseImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.FIND_VALUE_RESPONSE, src, in);
+    public FindValueResponseImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, version, in);
         
         this.values = in.readKeyValues();
     }

@@ -47,9 +47,9 @@ public class PingResponseImpl extends AbstractResponseMessage
         this.estimatedSize = estimatedSize;
     }
 
-    public PingResponseImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.PING_RESPONSE, src, in);
+    public PingResponseImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.PING_RESPONSE, messageId, version, src, in);
         
         this.externalAddress = in.readSocketAddress();
         this.estimatedSize = in.readInt();

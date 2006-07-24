@@ -49,9 +49,9 @@ public class StoreRequestImpl extends AbstractRequestMessage
         this.keyValue = keyValue;
     }
     
-    public StoreRequestImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.STORE_REQUEST, src, in);
+    public StoreRequestImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
         
         this.queryKey = in.readQueryKey();
         this.keyValue = in.readKeyValue();

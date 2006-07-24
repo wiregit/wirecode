@@ -64,54 +64,47 @@ public class DefaultMessageFactory implements MessageFactory {
     public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
             throws MessageFormatException, IOException {
         
-        try {
-            if (data.length == 1) {
-                ByteBuffer guid = (ByteBuffer)data[0].slice()
-                    .position(AbstractMessage.GUID_RANGE[0])
-                    .limit(AbstractMessage.GUID_RANGE[1]);
-                
-                ByteBuffer ttlHops = (ByteBuffer)data[0].slice()
-                    .position(AbstractMessage.TTL_HOPS_RANGE[0])
-                    .limit(AbstractMessage.TTL_HOPS_RANGE[1]);
-                
-                ByteBuffer payload = (ByteBuffer)data[0]
-                  .position(AbstractMessage.PAYLOAD_START);
-                
-                return createMessage(src, guid, ttlHops, payload);
-            }
-        } catch (IllegalArgumentException err) {
-            throw new MessageFormatException(err);
-        }
-        
         for(ByteBuffer b : data) {
             b.order(ByteOrder.BIG_ENDIAN);
         }
         
         MessageInputStream in = new MessageInputStream(new ByteBufferInputStream(data));
+        
+        // --- GNUTELLA HEADER ---
+        MessageID messageId = in.readMessageID();
+        byte func = in.readByte();
+        if (func != DHTMessage.F_DHT_MESSAGE) {
+            throw new MessageFormatException("Unknown function ID: " + func);
+        }
+        
+        int version = in.readUnsignedShort();
+        byte[] length = in.readBytes(4); // Little-Endian!
+        
+        // --- MOJITO HEADER ---
         OpCode opcode = OpCode.valueOf(in.readUnsignedByte());
         
         try {
             switch(opcode) {
                 case PING_REQUEST:
-                    return new PingRequestImpl(context, src, in);
+                    return new PingRequestImpl(context, src, messageId, version, in);
                 case PING_RESPONSE:
-                    return new PingResponseImpl(context, src, in);
+                    return new PingResponseImpl(context, src, messageId, version, in);
                 case FIND_NODE_REQUEST:
-                    return new FindNodeRequestImpl(context, src, in);
+                    return new FindNodeRequestImpl(context, src, messageId, version, in);
                 case FIND_NODE_RESPONSE:
-                    return new FindNodeResponseImpl(context, src, in);
+                    return new FindNodeResponseImpl(context, src, messageId, version, in);
                 case FIND_VALUE_REQUEST:
-                    return new FindValueRequestImpl(context, src, in);
+                    return new FindValueRequestImpl(context, src, messageId, version, in);
                 case FIND_VALUE_RESPONSE:
-                    return new FindValueResponseImpl(context, src, in);
+                    return new FindValueResponseImpl(context, src, messageId, version, in);
                 case STORE_REQUEST:
-                    return new StoreRequestImpl(context, src, in);
+                    return new StoreRequestImpl(context, src, messageId, version, in);
                 case STORE_RESPONSE:
-                    return new StoreResponseImpl(context, src, in);
+                    return new StoreResponseImpl(context, src, messageId, version, in);
                 case STATS_REQUEST:
-                    return new StatsRequestImpl(context, src, in);
+                    return new StatsRequestImpl(context, src, messageId, version, in);
                 case STATS_RESPONSE:
-                    return new StatsResponseImpl(context, src, in);
+                    return new StatsResponseImpl(context, src, messageId, version, in);
                 default:
                     throw new IOException("Unhandled OpCode " + opcode);
             }

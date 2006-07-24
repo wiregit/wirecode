@@ -46,9 +46,9 @@ public class StatsResponseImpl extends AbstractResponseMessage
         this.statistics = statistics;
     }
 
-    public StatsResponseImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.STATS_RESPONSE, src, in);
+    public StatsResponseImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.STATS_RESPONSE, messageId, version, src, in);
         
         byte[] s = in.readStatistics();
         

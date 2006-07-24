@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.security.Signature;
 import java.security.SignatureException;
 
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
@@ -83,18 +84,22 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         this.messageId = messageId;
     }
 
-    public AbstractDHTMessage(Context context, 
-            OpCode opcode, SocketAddress src, MessageInputStream in) throws IOException {
+    public AbstractDHTMessage(Context context, OpCode opcode, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
         
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
         }
         
+        if (messageId == null) {
+            throw new NullPointerException("MessageID is null");
+        }
+        
         this.context = context;
         this.opcode = opcode;
+        this.messageId = messageId;
         
         int vendor = in.readInt();
-        int version = in.readUnsignedShort();
         KUID nodeId = in.readNodeID();
         SocketAddress contactAddress = in.readSocketAddress();
         int instanceId = in.readUnsignedByte();
@@ -105,7 +110,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         this.contact = ContactNode.createLiveContact(src, vendor, version, 
                 nodeId, contactAddress, instanceId, firewalled);
         
-        this.messageId = in.readMessageID();
+        //this.messageId = in.readMessageID();
         
         //int messageFlags = in.readUnsignedByte();
         //int checksum = in.readInt();
@@ -116,7 +121,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         return context;
     }
     
-    public ByteBuffer[] getData() {
+    protected ByteBuffer[] getData() {
         return data;
     }
     
@@ -132,22 +137,45 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         return messageId;
     }
     
-    /*
-     *  To remove the (Gnutella) Message dependence rename
-     *  writePayload(OutputStream) to write(OutputStream) 
-     */
+    @Override
+    public void write(OutputStream os) throws IOException {
+        serialize();
+        
+        MessageOutputStream out = new MessageOutputStream(os);
+        
+        messageId.write(out);
+        out.writeByte(DHTMessage.F_DHT_MESSAGE);
+        out.writeShort(getContact().getVendor());
+        
+        ByteBuffer payload = data[0];
+        int offset = payload.arrayOffset();
+        int length = payload.remaining();
+        out.write((length      ) & 0xFF);
+        out.write((length >>  8) & 0xFF);
+        out.write((length >> 16) & 0xFF);
+        out.write((length >> 24) & 0xFF);
+        
+        out.write(payload.array(), offset, length);
+    }
     
-    // public void write(OutputStream out) throws IOException {
-    protected void writePayload(OutputStream out) throws IOException {
-        MessageOutputStream msgOut = new MessageOutputStream(out);
-        writeHeader(msgOut);
-        writeBody(msgOut);
+    private synchronized void serialize() throws IOException {
+        if (data != null && data.length == 1) {
+            return;
+        }
+        
+        ByteBufferOutputStream baos = new ByteBufferOutputStream(640);
+        MessageOutputStream out = new MessageOutputStream(baos);
+        writeHeader(out);
+        writeBody(out);
+        out.close();
+        
+        data = new ByteBuffer[]{ ByteBuffer.wrap(baos.toByteArray()) };
     }
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
         out.writeOpCode(getOpCode()); // 0
         out.writeInt(getContact().getVendor()); // 1-3
-        out.writeShort(getContact().getVersion()); // 4-5
+        //out.writeShort(getContact().getVersion()); // 4-5
         out.writeKUID(getContact().getNodeID()); // 6-26
         out.writeSocketAddress(getContact().getContactAddress());
         out.writeByte(getContact().getInstanceID()); // 27
@@ -158,7 +186,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         }
         out.writeByte(flags);
         
-        out.writeMessageID(getMessageID()); // 29-48
+        //out.writeMessageID(getMessageID()); // 29-48
         out.writeByte(0); // 49
         out.writeInt(0); // 50-53
     }
