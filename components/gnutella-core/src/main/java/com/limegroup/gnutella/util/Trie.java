@@ -21,11 +21,12 @@ package com.limegroup.gnutella.util;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * An interface for Tries
  */
-public interface Trie<K, V> extends Map<K, V> {
+public interface Trie<K, V> extends SortedMap<K, V> {
     
     public Collection<V> range(K key, int length);
     public Collection<V> range(K key, int length, Cursor<? super K, ? super V> cursor);

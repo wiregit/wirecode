@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie;
-import com.limegroup.gnutella.util.PatriciaTrie.KeyCreator;
+import com.limegroup.gnutella.util.PatriciaTrie.KeyAnalyzer;
 import com.limegroup.gnutella.util.Trie.Cursor;
 
 /**
@@ -38,7 +38,7 @@ import com.limegroup.gnutella.util.Trie.Cursor;
 public class IPList {
     
     /** The list of IPs. */
-    private Trie<IP, IP> ips = new PatriciaTrie<IP, IP>(new IPKeyCreator());
+    private Trie<IP, IP> ips = new PatriciaTrie<IP, IP>(new IPKeyAnalyzer());
 
     public IPList () {}
     
@@ -178,7 +178,7 @@ public class IPList {
         }
     };
     
-    private static class IPKeyCreator implements KeyCreator<IP> {
+    private static class IPKeyAnalyzer implements KeyAnalyzer<IP> {
 
         private static final int[] createIntBitMask(final int bitCount) {
             int[] bits = new int[bitCount];
@@ -218,10 +218,22 @@ public class IPList {
             }
             
             if (allNull) {
-                return KeyCreator.NULL_BIT_KEY;
+                return KeyAnalyzer.NULL_BIT_KEY;
             }
             
-            return KeyCreator.EQUAL_BIT_KEY;
+            return KeyAnalyzer.EQUAL_BIT_KEY;
+        }
+
+        public int compare(IP o1, IP o2) {
+            int addr1 = o1.addr & o1.mask;
+            int addr2 = o2.addr & o2.mask;
+            if(addr1 > addr2)
+                return 1;
+            else if(addr1 < addr2)
+                return -1;
+            else
+                return 0;
+                
         }
     }
 }

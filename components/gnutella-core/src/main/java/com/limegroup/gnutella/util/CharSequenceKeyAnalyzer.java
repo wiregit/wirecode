@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.util.PatriciaTrie.KeyCreator;
+import com.limegroup.gnutella.util.PatriciaTrie.KeyAnalyzer;
 
-public class CharSequenceKeyCreator implements KeyCreator<CharSequence> {
+public class CharSequenceKeyAnalyzer implements KeyAnalyzer<CharSequence> {
     
     private static final long serialVersionUID = -7032449491269434877L;
     
@@ -41,10 +41,10 @@ public class CharSequenceKeyCreator implements KeyCreator<CharSequence> {
         }
         
         if (allNull) {
-            return KeyCreator.NULL_BIT_KEY;
+            return KeyAnalyzer.NULL_BIT_KEY;
         }
         
-        return KeyCreator.EQUAL_BIT_KEY;
+        return KeyAnalyzer.EQUAL_BIT_KEY;
     }
     
     public boolean isBitSet(CharSequence key, int keyLength, int bitIndex) {
@@ -56,4 +56,9 @@ public class CharSequenceKeyCreator implements KeyCreator<CharSequence> {
         int bit = bitIndex - index * BITS.length;
         return (key.charAt(index) & BITS[bit]) != 0;
     }
+
+    public int compare(CharSequence o1, CharSequence o2) {
+        return o1.toString().compareTo(o2.toString());
+    }
 }
+
