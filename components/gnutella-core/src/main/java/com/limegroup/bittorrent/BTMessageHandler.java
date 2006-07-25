@@ -12,7 +12,7 @@ import com.limegroup.bittorrent.messages.BTMessage;
  * to be written to disk
  * 4. finishReceivingPiece() is called when the entire message is received.
  */
-public interface BTMessageHandler {
+interface BTMessageHandler {
 	
 	/**
 	 * @param message the incoming message to process.

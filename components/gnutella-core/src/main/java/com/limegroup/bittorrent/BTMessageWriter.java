@@ -9,14 +9,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.io.ChannelWriter;
+import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
 import com.limegroup.bittorrent.messages.BTMessage;
 
-public class BTMessageWriter implements
-		ChannelWriter {
+public class BTMessageWriter implements ChannelWriter {
 
 	private static final Log LOG = LogFactory.getLog(BTMessageWriter.class);
 
@@ -37,8 +37,15 @@ public class BTMessageWriter implements
 	 */
 	private final LinkedList<BTMessage> _queue;
 
-	// the BTConnection this BTMessageWriter is associated with
-	private final BTConnection _connection;
+	/**
+	 * Observer to notify in case of errors
+	 */
+	private final IOErrorObserver ioxObserver;
+	
+	/**
+	 * Observer to notify with piece events.
+	 */
+	private final PieceSendListener pieceListener;
 	
 	/** Whether this writer is shutdown */
 	private volatile boolean shutdown;
@@ -51,9 +58,10 @@ public class BTMessageWriter implements
 	/**
 	 * Constructor
 	 */
-	public BTMessageWriter(BTConnection connection) {
+	public BTMessageWriter(IOErrorObserver ioxObserver, PieceSendListener pieceListener) {
 		_queue = new LinkedList<BTMessage>();
-		_connection = connection;
+		this.ioxObserver = ioxObserver;
+		this.pieceListener = pieceListener;
 		_out[0] = ByteBuffer.allocate(5);
 	}
 
@@ -65,12 +73,12 @@ public class BTMessageWriter implements
 			return false;
 		
 		if (LOG.isDebugEnabled())
-			LOG.debug("entering handleWrite call to "+_connection);
+			LOG.debug("entering handleWrite call to "+this);
 		int written = 0;
 		while(true) {
 			if (myKeepAlive.hasRemaining()) {
 				if (LOG.isDebugEnabled())
-					LOG.debug("sending a keepalive to "+_connection);
+					LOG.debug("sending a keepalive on "+this);
 				written += _channel.write(myKeepAlive);
 				if (myKeepAlive.hasRemaining()) // need to finish keepalive first.
 					return true;
@@ -81,7 +89,7 @@ public class BTMessageWriter implements
 				
 				if (!sendNextMessage()) {
 					if (LOG.isDebugEnabled())
-						LOG.debug("no more messages to send to "+_connection);
+						LOG.debug("no more messages to send on "+this);
 					_channel.interest(this, false);
 					return false;
 				}
@@ -95,7 +103,7 @@ public class BTMessageWriter implements
 				_out[1] = null; // can be gc'd now
 				
 				if (currentMessage.getType() == BTMessage.PIECE) 
-					_connection.pieceSent();
+					pieceListener.pieceSent();
 			}
 			
 			if (written > 0) {
@@ -129,7 +137,7 @@ public class BTMessageWriter implements
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("enqueing message of type " + m.getType() + " to "
-					+ _connection.toString() + " : " + m.toString());
+					+ this + " : " + m.toString());
 		
 		// if there was a keepalive waiting to be sent and none of it 
 		// was written get rid of it
@@ -144,7 +152,7 @@ public class BTMessageWriter implements
 	 * Implement ChannelWriter interface
 	 */
 	public void handleIOException(IOException iox) {
-		_connection.handleIOException(iox);
+		ioxObserver.handleIOException(iox);
 
 	}
 
@@ -155,7 +163,7 @@ public class BTMessageWriter implements
 		if (shutdown)
 			return;
 		shutdown = true;
-		_connection.close();
+		ioxObserver.shutdown();
 	}
 
 	/**
@@ -178,7 +186,7 @@ public class BTMessageWriter implements
 	 */
 	public void count(int written) {
 		BandwidthStat.BITTORRENT_MESSAGE_UPSTREAM_BANDWIDTH.addData(written);
-		_connection.wroteBytes(written);
+		pieceListener.wroteBytes(written);
 	}
 	
 	/**
@@ -195,7 +203,7 @@ public class BTMessageWriter implements
 		currentMessage = _queue.removeFirst();
 		
 		if (LOG.isDebugEnabled())
-			LOG.debug("sending message "+currentMessage+" to "+_connection);
+			LOG.debug("sending message "+currentMessage+" on "+this);
 
 		_out[1] = currentMessage.getPayload();
 		_out[0].clear();
@@ -248,5 +256,9 @@ public class BTMessageWriter implements
 			BTMessageStat.OUTGOING_REQUEST.incrementStat();
 			BTMessageStatBytes.OUTGOING_REQUEST.addData(length);
 		}
+	}
+	
+	public String toString() {
+		return "BTMessageWriter for "+ pieceListener;
 	}
 }

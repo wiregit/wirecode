@@ -30,7 +30,8 @@ import com.limegroup.gnutella.util.BitSet;
  * Class wrapping a Bittorrent connection.
  */
 public class BTConnection 
-implements UploadSlotListener, Chokable, BTMessageHandler, IOErrorObserver {
+implements UploadSlotListener, Chokable, BTMessageHandler, IOErrorObserver,
+PieceSendListener {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnection.class);
 
@@ -196,7 +197,7 @@ implements UploadSlotListener, Chokable, BTMessageHandler, IOErrorObserver {
 		_socket = socket;
 		_startTime = System.currentTimeMillis();
 		_reader = new BTMessageReader(this, this);
-		_writer = new BTMessageWriter(this);
+		_writer = new BTMessageWriter(this, this);
 		
 		ThrottleWriter throttle = new ThrottleWriter(
 				RouterService.getBandwidthManager().getThrottle(false));
@@ -478,7 +479,7 @@ implements UploadSlotListener, Chokable, BTMessageHandler, IOErrorObserver {
 		clearRequests();
 	}
 
-	void pieceSent() {
+	public void pieceSent() {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" piece sent");
 		usingSlot = false;

@@ -3,7 +3,7 @@ package com.limegroup.bittorrent;
 /**
  * Interface describing objects that the unchoking logic works on.
  */
-public interface Chokable {
+interface Chokable {
 
 	/**
 	 * @return true if we are choking the remote host
