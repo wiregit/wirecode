@@ -61,7 +61,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     
     private Thread thread;
     
-    public MessageDispatcherImpl(final Context context) {
+    public MessageDispatcherImpl(Context context) {
         super(context);
         
         verifier = new SecureMessageVerifier(context.getName());
