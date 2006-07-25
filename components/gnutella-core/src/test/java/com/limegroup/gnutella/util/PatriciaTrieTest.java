@@ -46,6 +46,85 @@ public class PatriciaTrieTest extends BaseTestCase {
         assertNull(intTrie.put(1, "One"));
     }
     
+    public void testCeilEntry() {
+        PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
+        charTrie.put('c', "c");
+        charTrie.put('p', "p");
+        charTrie.put('l', "l");
+        charTrie.put('t', "t");
+        charTrie.put('k', "k");
+        charTrie.put('a', "a");
+        charTrie.put('y', "y");
+        charTrie.put('r', "r");
+        charTrie.put('u', "u");
+        charTrie.put('o', "o");
+        charTrie.put('w', "w");
+        charTrie.put('i', "i");
+        charTrie.put('e', "e");
+        charTrie.put('x', "x");
+        charTrie.put('q', "q");
+        charTrie.put('b', "b");
+        charTrie.put('j', "j");
+        charTrie.put('s', "s");
+        charTrie.put('n', "n");
+        charTrie.put('v', "v");
+        charTrie.put('g', "g");
+        charTrie.put('h', "h");
+        charTrie.put('m', "m");
+        charTrie.put('z', "z");
+        charTrie.put('f', "f");
+        charTrie.put('d', "d");
+        
+        Object[] results = new Object[] {
+            'a', "a", 'b', "b", 'c', "c", 'd', "d", 'e', "e",
+            'f', "f", 'g', "g", 'h', "h", 'i', "i", 'j', "j",
+            'k', "k", 'l', "l", 'm', "m", 'n', "n", 'o', "o",
+            'p', "p", 'q', "q", 'r', "r", 's', "s", 't', "t",
+            'u', "u", 'v', "v", 'w', "w", 'x', "x", 'y', "y", 
+            'z', "z"
+        };
+        
+        for(int i = 0; i < results.length; i++) {
+            Map.Entry<Character, String> found = charTrie.getCeilEntry((Character)results[i]);
+            assertNotNull(found);
+            assertEquals(results[i], found.getKey());
+            assertEquals(results[++i], found.getValue());
+        }
+        
+        // Remove some & try again...
+        charTrie.remove('a');
+        charTrie.remove('z');
+        charTrie.remove('q');
+        charTrie.remove('l');
+        charTrie.remove('p');
+        charTrie.remove('m');
+        charTrie.remove('u');
+        charTrie.getCeilEntry('u');
+        
+        Map.Entry<Character, String> found = charTrie.getCeilEntry('a');
+        assertNotNull(found);
+     //   assertEquals((Character)'b', found.getKey());
+        
+        found = charTrie.getCeilEntry('z');
+        assertNull(found);
+        
+        found = charTrie.getCeilEntry('q');
+        assertNotNull(found);
+   //     assertEquals((Character)'r', found.getKey());
+        
+        found = charTrie.getCeilEntry('l');
+        assertNotNull(found);
+   //     assertEquals((Character)'n', found.getKey());
+        
+        found = charTrie.getCeilEntry('p');
+        assertNotNull(found);
+    //    assertEquals((Character)'r', found.getKey());
+        
+        found = charTrie.getCeilEntry('m');
+        assertNotNull(found);
+    //    assertEquals((Character)'n', found.getKey());
+    }
+    
     public void testIteration() {
         PatriciaTrie<Integer, String> intTrie = new PatriciaTrie<Integer, String>(new IntegerKeyCreator());
         intTrie.put(1, "One");
@@ -445,13 +524,13 @@ public class PatriciaTrieTest extends BaseTestCase {
         }
 
         public SelectStatus select(Entry<? extends Object, ? extends Object> entry) {
-            System.out.println("Scanning: " + entry.getKey());
+          //  System.out.println("Scanning: " + entry.getKey());
             assertEquals(keys.get(index), entry.getKey());
             assertEquals(values.get(index), entry.getValue());
             index++;
             
             if(toRemove.contains(entry.getKey())) {
-                System.out.println("Removing: " + entry.getKey());
+            //    System.out.println("Removing: " + entry.getKey());
                 index--;
                 keys.remove(index);
                 values.remove(index);

@@ -273,14 +273,17 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     private TrieEntry<K, V> getR(TrieEntry<K, V> h, int bitIndex, 
             final K key, final int keyLength) {
-        
+        //System.out.print("Looking for: " + key + ", at: " + h.getKey() + " (" + bitIndex + ")");
         if (h.bitIndex <= bitIndex) {
+          //  System.out.println(" - Uplink.");
             return h;
         }
 
         if (!isBitSet(key, keyLength, h.bitIndex)) {
+//            System.out.println(" - Going left.");
             return getR(h.left, h.bitIndex, key, keyLength);
         } else {
+            //System.out.println(" - Going right.");
             return getR(h.right, h.bitIndex, key, keyLength);
         }
     }
@@ -567,16 +570,23 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         TrieEntry<K, V> parent = h.parent;
         TrieEntry<K, V> child = (h.left == h) ? h.right : h.left;
         
-        child.predecessor = parent;
+        System.out.println("Removing entry: " + h);
+        
         if (parent.left == h) {
             parent.left = child;
         } else {
             parent.right = child;
         }
         
+        // either the parent is changing, or the predecessor is changing.
         if (child.bitIndex > parent.bitIndex) {
             child.parent = parent;
+        } else {
+            child.predecessor = parent;
         }
+        
+        System.out.println("Child is now: " + child);
+        
     }
     
     /**
@@ -904,15 +914,18 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * An iterator for the entries.
      */
     private abstract class NodeIterator<E> implements Iterator<E> {
-        int expectedModCount;   // For fast-fail 
-        TrieEntry<K, V> current; // the current entry we're on
-        TrieEntry<K, V> currentParent; // the parent whose child is the current entry
+        protected int expectedModCount = modCount;   // For fast-fail 
+        protected TrieEntry<K, V> next; // the next node to return
+        protected TrieEntry<K, V> current; // the current entry we're on
         
-        private TrieEntry<K, V> next; // the next node to return
-        
+        // Starts iteration from the beginning.
         protected NodeIterator() {
-            expectedModCount = modCount;
             next = findNext(root.left);
+        }
+        
+        // Starts iteration at the given entry.
+        protected NodeIterator(TrieEntry<K, V> firstEntry) {
+            next = firstEntry;
         }
         
         public boolean hasNext() {
@@ -1060,6 +1073,27 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return nextEntry();
         }
     }
+    
+    private class SubMapEntryIterator extends NodeIterator<Map.Entry<K,V>> {
+        private final K firstExcludedKey;
+
+        SubMapEntryIterator(TrieEntry<K,V> first, TrieEntry<K,V> firstExcluded) {
+            super(first);
+            firstExcludedKey = 
+              (firstExcluded == null ? null : firstExcluded.key);
+        }
+
+        public boolean hasNext() {
+            return next != null && next.key != firstExcludedKey;
+        }
+
+        public Map.Entry<K,V> next() {
+            if (next == null || next.key == firstExcludedKey)
+                throw new NoSuchElementException();
+            return nextEntry();
+        }
+    }
+    
 
     // Subclass overrides these to alter behavior of views' iterator() method
     Iterator<K> newKeyIterator()   {
@@ -1250,8 +1284,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
 
     public SortedMap<K, V> headMap(K toKey) {
-        // TODO Auto-generated method stub
-        return null;
+        return new SubMap(null, toKey);
     }
 
     /**
@@ -1262,23 +1295,97 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
 
     public SortedMap<K, V> subMap(K fromKey, K toKey) {
-        // TODO Auto-generated method stub
-        return null;
+        return new SubMap(fromKey, toKey);
     }
 
     public SortedMap<K, V> tailMap(K fromKey) {
-        // TODO Auto-generated method stub
+        return new SubMap(fromKey, null);
+    }
+    
+    /**
+     * THIS IS BROKEN.
+     * 
+     * Retrieves the first entry that is valid for the start of a
+     * lexical range query. 
+     * 
+     * Note that this is different than a prefix search.  The prefix search
+     * will follow the set bits properly, snaking through the Trie until it
+     * encounters a match (with a possible subtree).
+     * @return
+     */
+    private TrieEntry<K, V> entryForRangeStart(K key, int keyLength) {
+        TrieEntry<K, V> node = root.left;
+        
+        boolean bitSet = false;
+        while(true) {
+            // first external we encounter is valid.
+            if(node.isExternalNode())
+                return node;
+            
+            if(isBitSet(key, keyLength, node.bitIndex)) {
+                if(node.right.bitIndex <= node.bitIndex) // uplink?
+                    return node.right;
+                bitSet = true;
+                node = node.right;
+            } else {
+                if(node.left.bitIndex <= node.bitIndex) // uplink?
+                    return node.left;
+                node = node.left;
+            }
+        }
+    }
+    
+    /**
+     * Gets the entry corresponding to the specified key; if no such entry
+     * exists, returns the entry for the least key greater than the specified
+     * key; if no such entry exists (i.e., the greatest key in the Tree is less
+     * than the specified key), returns <tt>null</tt>.
+     */
+    public TrieEntry<K,V> getCeilEntry(K key) {
+        TrieEntry<K, V> result = getR(root.left, -1, key, length(key)); //entryForRangeStart(key, length(key));
+        if(result == null)
+            return null;
+        
+        System.out.println("Looking for: " + key + ", found: " + result);
+        
+        int compare = keyAnalyzer.compare(key, result.getKey());
+        if(compare == 0)
+            return result;
+        
+        // Go backwards until we either have nothing left, or the result is
+        // less than K.
+        if(compare < 0) {
+            
+        }
+        
+        for(Iterator<Map.Entry<K, V>> i = new SubMapEntryIterator(result, null); i.hasNext(); ) {
+            Map.Entry<K, V> next = i.next();
+            System.out.println("Next in line was: " + next.getKey());
+            if(keyAnalyzer.compare(key, next.getKey()) <= 0)
+                return (TrieEntry<K, V>)next;
+        }
+        
         return null;
     }
     
-    /*
+    /**
+     * Returns the entry for the greatest key less than the specified key; if
+     * no such entry exists (i.e., the least key in the Tree is greater than
+     * the specified key), returns <tt>null</tt>.
+     */
+    public TrieEntry<K,V> getPrecedingEntry(K key) {
+        return null;
+    }
+    
     private class SubMap extends AbstractMap<K,V> implements SortedMap<K,V>, java.io.Serializable {
 
         // TODO: add serialVersionUID
         
+        /** The key to start from, null if the beginning. */
+        private K fromKey;
         
-        private boolean fromStart = false, toEnd = false;
-        private K fromKey, toKey;
+        /** The key to end at, null if till the end. */
+        private K toKey;
 
         SubMap(K fromKey, K toKey) {
             if (keyAnalyzer.compare(fromKey, toKey) > 0)
@@ -1286,24 +1393,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             this.fromKey = fromKey;
             this.toKey = toKey;
         }
-
-        SubMap(K key, boolean headMap) {
-            if (headMap) {
-                fromStart = true;
-                toKey = key;
-            } else {
-                toEnd = true;
-                fromKey = key;
-            }
-        }
-
-        SubMap(boolean fromStart, K fromKey, boolean toEnd, K toKey) {
-            this.fromStart = fromStart;
-            this.fromKey= fromKey;
-            this.toEnd = toEnd;
-            this.toKey = toKey;
-        }
-
+        
         public boolean isEmpty() {
             return entrySet.isEmpty();
         }
@@ -1329,17 +1419,17 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
 
         public K firstKey() {
-            TrieEntry<K,V> e = fromStart ? firstEntry() : getCeilEntry(fromKey);
+            TrieEntry<K,V> e = fromKey == null ? firstEntry() : getCeilEntry(fromKey);
             K first = e.getKey();
-            if (!toEnd && keyAnalyzer.compare(first, toKey) >= 0)
+            if (toKey != null && keyAnalyzer.compare(first, toKey) >= 0)
                 throw(new NoSuchElementException());
             return first;
         }
 
         public K lastKey() {
-            TrieEntry<K,V> e = toEnd ? lastEntry() : getPrecedingEntry(toKey);
+            TrieEntry<K,V> e = toKey == null ? lastEntry() : getPrecedingEntry(toKey);
             K last = e.getKey();
-            if (!fromStart && keyAnalyzer.compare(last, fromKey) < 0)
+            if (fromKey != null && keyAnalyzer.compare(last, fromKey) < 0)
                 throw(new NoSuchElementException());
             return last;
         }
@@ -1398,8 +1488,8 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
 
             public Iterator<Map.Entry<K,V>> iterator() {
                 return new SubMapEntryIterator(
-                    (fromStart ? firstEntry() : getCeilEntry(fromKey)),
-                    (toEnd     ? null         : getCeilEntry(toKey)));
+                    (fromKey == null ? firstEntry() : getCeilEntry(fromKey)),
+                    (toKey   == null ? null         : getCeilEntry(toKey)));
             }
         }
 
@@ -1414,25 +1504,25 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         public SortedMap<K,V> headMap(K toKey) {
             if (!inRange2(toKey))
                 throw new IllegalArgumentException("toKey out of range");
-            return new SubMap(fromStart, fromKey, false, toKey);
+            return new SubMap(fromKey, toKey);
         }
 
         public SortedMap<K,V> tailMap(K fromKey) {
             if (!inRange2(fromKey))
                 throw new IllegalArgumentException("fromKey out of range");
-            return new SubMap(false, fromKey, toEnd, toKey);
+            return new SubMap(fromKey, toKey);
         }
 
         private boolean inRange(K key) {
-            return (fromStart || keyAnalyzer.compare(key, fromKey) >= 0) &&
-                   (toEnd     || keyAnalyzer.compare(key, toKey)   <  0);
+            return (fromKey == null || keyAnalyzer.compare(key, fromKey) >= 0) &&
+                   (toKey   == null || keyAnalyzer.compare(key, toKey)   <  0);
         }
 
         // This form allows the high endpoint (as well as all legit keys)
         private boolean inRange2(K key) {
-            return (fromStart || keyAnalyzer.compare(key, fromKey) >= 0) &&
-                   (toEnd     || keyAnalyzer.compare(key, toKey)   <= 0);
+            return (fromKey == null || keyAnalyzer.compare(key, fromKey) >= 0) &&
+                   (toKey   == null || keyAnalyzer.compare(key, toKey)   <= 0);
         }
-    }*/
+    }
     
 }
