@@ -31,7 +31,7 @@ import com.limegroup.gnutella.util.BitSet;
  */
 public class BTConnection 
 implements UploadSlotListener, Chokable, BTMessageHandler, IOErrorObserver,
-PieceSendListener {
+PieceSendListener, PieceReadListener {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnection.class);
 
@@ -479,6 +479,9 @@ PieceSendListener {
 		clearRequests();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.PieceSendListener#pieceSent()
+	 */
 	public void pieceSent() {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" piece sent");
@@ -492,7 +495,7 @@ PieceSendListener {
 	 * notifies this, that the connection is ready to write the next chunk of
 	 * the torrent
 	 */
-	void readyForWriting() {
+	private void readyForWriting() {
 		if (_isChoked || _requested.isEmpty()) 
 			return;
 		
@@ -505,11 +508,11 @@ PieceSendListener {
 			usingSlot = false;
 			choke();
 		} else if (proceed == 0) 
-			requestPieceRead();
+			beginPieceSend();
 		// else queued, will receive callback.
 	}
 	
-	void requestPieceRead() {
+	private void beginPieceSend() {
 		if (_isChoked || _requested.isEmpty()) 
 			return;
 		
@@ -522,18 +525,16 @@ PieceSendListener {
 			LOG.debug(this+" requesting disk read for "+in);
 		
 		try {
-			_info.getVerifyingFolder().sendPiece(in, this);
+			_info.getVerifyingFolder().requestPieceRead(in, this);
 		} catch (IOException bad) {
 			close();
 		}
 	}
 
-	/**
-	 * Notification that a piece is ready to be sent.
-	 * @param in the interval to which the piece corresponds
-	 * @param data the data of the piece.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.PieceReadListener#pieceRead(com.limegroup.bittorrent.BTInterval, byte[])
 	 */
-	void pieceRead(final BTInterval in, final byte [] data) {
+	public void pieceRead(final BTInterval in, final byte [] data) {
 		RouterService.getBandwidthManager().applyUploadRate();
 		Runnable pieceSender = new Runnable() {
 			public void run() {
@@ -830,7 +831,7 @@ PieceSendListener {
 	public void slotAvailable() {
 		NIODispatcher.instance().invokeLater(new Runnable() {
 			public void run() {
-				requestPieceRead();
+				beginPieceSend();
 			}
 		});
 	}

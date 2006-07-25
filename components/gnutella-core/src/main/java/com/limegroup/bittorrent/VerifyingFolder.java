@@ -399,7 +399,6 @@ public class VerifyingFolder {
 				// TODO: decide if files should be moved to the save
 				// location as they are completed.. cool but not trivial
 				try {
-					long now = 0;
 					int index = _files.indexOf(file);
 					RandomAccessFile rf;
 					synchronized(this) {
@@ -571,7 +570,7 @@ public class VerifyingFolder {
 		return _fos != null && _fos != OPENING;
 	}
 
-	public void sendPiece(BTInterval in, BTConnection c) throws IOException {
+	public void requestPieceRead(BTInterval in, PieceReadListener c) throws IOException {
 		IOException e = storedException;
 		if (e != null)
 			throw e;
@@ -580,10 +579,10 @@ public class VerifyingFolder {
 	
 	private class SendJob implements Runnable {
 		private final BTInterval in;
-		private final BTConnection c;
-		SendJob(BTInterval in, BTConnection c) {
+		private final PieceReadListener listener;
+		SendJob(BTInterval in, PieceReadListener listener) {
 			this.in = in;
-			this.c = c;
+			this.listener = listener;
 		}
 		
 		public void run() {
@@ -593,7 +592,7 @@ public class VerifyingFolder {
 				return;
 			
 			if (LOG.isDebugEnabled())
-				LOG.debug("sending piece " + in);
+				LOG.debug("reading piece " + in);
 			int length = in.high - in.low + 1;
 			long position = (long)in.getId() * _info.getPieceLength() + in.low;
 			int offset = 0;
@@ -610,7 +609,7 @@ public class VerifyingFolder {
 				}
 			}
 			
-			c.pieceRead(in, buf);
+			listener.pieceRead(in, buf);
 		}
 	}
 	
