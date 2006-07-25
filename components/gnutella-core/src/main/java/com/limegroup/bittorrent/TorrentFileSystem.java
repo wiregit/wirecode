@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Constants;
@@ -200,43 +201,43 @@ public class TorrentFileSystem implements Serializable {
 
 		StringBuffer paths = new StringBuffer(basePath);
 		
-		int numParsed = 0;
+		Set<File> folders = new HashSet<File>();
+		
 		// prefer the utf8 path if possible
 		if (t_path_utf8 != null) {
-			
 			List pathUtf8 = (List) t_path_utf8;
-			for (Iterator iter = pathUtf8.iterator(); 
-			iter.hasNext() && numParsed < path.size();) {
+			for (Iterator iter = pathUtf8.iterator(); iter.hasNext();) {
 				Object t_next = iter.next();
-				if ( ! (t_next instanceof byte []))
-					break; // fall through to regular path
-				
-				String pathElement;
-				try {
-					pathElement = new String((byte []) t_next, Constants.UTF_8_ENCODING);
-					paths.append(File.separator);
-					paths.append(CommonUtils.convertFileName(pathElement));
-					_folders.add(new File(paths.toString()));
-					numParsed++;
-				} catch (UnsupportedEncodingException uee) {
-					break; // fall through silently
+				if ( ! (t_next instanceof byte [])) {
+					// invalid UTF-8 path, fall through to asscii path
+					paths = new StringBuffer(basePath);
+					folders.clear();
+					break; 
 				}
+				
+				String pathElement = StringUtils.getUTF8String((byte []) t_next);
+				paths.append(File.separator);
+				paths.append(CommonUtils.convertFileName(pathElement));
+				if (iter.hasNext())
+					folders.add(new File(paths.toString()));
 			}
 		} 
 		
-		// if not all elements were found in the utf8 path, append
-		// the rest from the non-utf8
-		if (numParsed < path.size()) {
-			for (int i = numParsed; i < path.size(); i++) {
+		// parse asccii paths  
+		if (paths.length() == basePath.length()) {
+			for (int i = 0; i < path.size(); i++) {
 				Object next = path.get(i);
 				if (! (next instanceof byte []))
 					throw new ValueException("bad paths");
 				String pathElement = StringUtils.getASCIIString((byte [])next);
 				paths.append(File.separator);
 				paths.append(CommonUtils.convertFileName(pathElement));
-				_folders.add(new File(paths.toString()));
+				if (i < path.size() - 1)
+					folders.add(new File(paths.toString()));
 			}
 		}
+		
+		_folders.addAll(folders);
 		return new TorrentFile(length, paths.toString());
 	}
 	

@@ -1010,6 +1010,8 @@ public class VerifyingFolder {
 	
 	private static class BlockRangeMap extends HashMap<Integer, IntervalSet> {
 		
+		private static final long serialVersionUID = 4006274480019024111L;
+
 		BlockRangeMap() {
 			super();
 		}

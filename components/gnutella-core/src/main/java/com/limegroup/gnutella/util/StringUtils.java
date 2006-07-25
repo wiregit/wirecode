@@ -615,12 +615,27 @@ public class StringUtils {
      * byte [] using the ascii encoding.
      */
     public static String getASCIIString(byte [] bytes) {
+    	return getEncodedString(bytes, Constants.ASCII_ENCODING);
+    }
+    
+    /**
+     * Utility wrapper for getting a String object out of
+     * byte [] using the UTF-8 encoding.
+     */
+    public static String getUTF8String(byte [] bytes) {
+    	return getEncodedString(bytes, Constants.UTF_8_ENCODING);
+    }
+    
+    /**
+     * @return a string with an encoding we know we support.
+     */
+    private static String getEncodedString(byte [] bytes, String encoding) {
     	try {
-			return new String(bytes, Constants.ASCII_ENCODING);
-		} catch (UnsupportedEncodingException impossible) {
-			ErrorService.error(impossible);
-			return null;
-		}
+    		return new String(bytes, encoding);
+    	} catch (UnsupportedEncodingException impossible) {
+    		ErrorService.error(impossible);
+    		return null;
+    	}
     }
     
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
