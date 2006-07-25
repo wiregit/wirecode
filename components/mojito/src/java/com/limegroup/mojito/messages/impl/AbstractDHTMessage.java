@@ -102,6 +102,11 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         int vendor = in.readInt();
         KUID nodeId = in.readNodeID();
         SocketAddress contactAddress = in.readSocketAddress();
+        
+        if (contactAddress == null) {
+            throw new UnknownHostException("Contact Address is null");
+        }
+        
         int instanceId = in.readUnsignedByte();
         int flags = in.readUnsignedByte();
         
@@ -109,8 +114,6 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         
         this.contact = ContactNode.createLiveContact(src, vendor, version, 
                 nodeId, contactAddress, instanceId, firewalled);
-        
-        //this.messageId = in.readMessageID();
         
         //int messageFlags = in.readUnsignedByte();
         //int checksum = in.readInt();
@@ -143,19 +146,20 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         
         MessageOutputStream out = new MessageOutputStream(os);
         
-        messageId.write(out);
-        out.writeByte(DHTMessage.F_DHT_MESSAGE);
-        out.writeShort(getContact().getVendor());
+        // --- GNUTELLA HEADER ---
+        
+        messageId.write(out); // 0-15
+        out.writeByte(DHTMessage.F_DHT_MESSAGE); // 16
+        out.writeShort(getContact().getVendor()); //17-18
         
         ByteBuffer payload = data[0];
-        int offset = payload.arrayOffset();
-        int length = payload.remaining();
+        int length = payload.remaining(); // 19-22
         out.write((length      ) & 0xFF);
         out.write((length >>  8) & 0xFF);
         out.write((length >> 16) & 0xFF);
         out.write((length >> 24) & 0xFF);
         
-        out.write(payload.array(), offset, length);
+        out.write(payload.array(), payload.arrayOffset(), length); // 23-n
     }
     
     private synchronized void serialize() throws IOException {
@@ -165,7 +169,11 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         
         ByteBufferOutputStream baos = new ByteBufferOutputStream(640);
         MessageOutputStream out = new MessageOutputStream(baos);
+        
+        // --- MOJITO HEADER CONINUED ---
         writeHeader(out);
+        
+        // --- MOJITO BODY ---
         writeBody(out);
         out.close();
         
@@ -175,20 +183,18 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
     protected void writeHeader(MessageOutputStream out) throws IOException {
         out.writeOpCode(getOpCode()); // 0
         out.writeInt(getContact().getVendor()); // 1-3
-        //out.writeShort(getContact().getVersion()); // 4-5
-        out.writeKUID(getContact().getNodeID()); // 6-26
-        out.writeSocketAddress(getContact().getContactAddress());
-        out.writeByte(getContact().getInstanceID()); // 27
+        out.writeKUID(getContact().getNodeID()); // 4-23
+        out.writeSocketAddress(getContact().getContactAddress()); // 24-31
+        out.writeByte(getContact().getInstanceID()); // 32
         
         int flags = 0;
         if (getContact().isFirewalled()) {
             flags |= FIREWALLED;
         }
-        out.writeByte(flags);
+        out.writeByte(flags); // 33
         
-        //out.writeMessageID(getMessageID()); // 29-48
-        out.writeByte(0); // 49
-        out.writeInt(0); // 50-53
+        out.writeByte(0); // 34
+        out.writeInt(0); // 35-38
     }
     
     protected abstract void writeBody(MessageOutputStream out) throws IOException;

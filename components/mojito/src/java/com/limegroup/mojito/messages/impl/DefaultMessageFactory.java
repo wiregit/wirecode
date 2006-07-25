@@ -64,26 +64,25 @@ public class DefaultMessageFactory implements MessageFactory {
     public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
             throws MessageFormatException, IOException {
         
-        for(ByteBuffer b : data) {
-            b.order(ByteOrder.BIG_ENDIAN);
-        }
-        
-        MessageInputStream in = new MessageInputStream(new ByteBufferInputStream(data));
-        
-        // --- GNUTELLA HEADER ---
-        MessageID messageId = in.readMessageID();
-        byte func = in.readByte();
-        if (func != DHTMessage.F_DHT_MESSAGE) {
-            throw new MessageFormatException("Unknown function ID: " + func);
-        }
-        
-        int version = in.readUnsignedShort();
-        byte[] length = in.readBytes(4); // Little-Endian!
-        
-        // --- MOJITO HEADER ---
-        OpCode opcode = OpCode.valueOf(in.readUnsignedByte());
+        MessageInputStream in = null;
         
         try {
+            in = new MessageInputStream(new ByteBufferInputStream(data));
+            
+            // --- GNUTELLA HEADER ---
+            MessageID messageId = in.readMessageID();
+            int func = in.readUnsignedByte();
+            if (func != DHTMessage.F_DHT_MESSAGE) {
+                throw new MessageFormatException("Unknown function ID: " + func);
+            }
+            
+            int version = in.readUnsignedShort();
+            //byte[] length = in.readBytes(4); // Little-Endian!
+            in.skip(4);
+            
+            // --- CONTINUTE WITH MOJITO HEADER ---
+            OpCode opcode = OpCode.valueOf(in.readUnsignedByte());
+            
             switch(opcode) {
                 case PING_REQUEST:
                     return new PingRequestImpl(context, src, messageId, version, in);
@@ -108,8 +107,12 @@ public class DefaultMessageFactory implements MessageFactory {
                 default:
                     throw new IOException("Unhandled OpCode " + opcode);
             }
+        } catch (IllegalArgumentException err) {
+            throw new MessageFormatException(err);
         } catch (IOException err) {
             throw new MessageFormatException(err);
+        } finally {
+            in.close();
         }
     }
     

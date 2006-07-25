@@ -81,7 +81,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
 
         // Register the Message type
         LimeDHTMessageParser parser = new LimeDHTMessageParser(context.getMessageFactory());
-        MessageFactory.setParser(DHTMessage.F_DHT_MESSAGE, parser);
+        MessageFactory.setParser((byte)DHTMessage.F_DHT_MESSAGE, parser);
         
         // Install the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();

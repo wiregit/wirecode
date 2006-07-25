@@ -48,7 +48,7 @@ abstract class AbstractMessage extends Message {
     private static final byte HOPS = (byte)0x00;
     
     AbstractMessage() {
-        super(GUID, DHTMessage.F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
+        super(GUID, (byte)DHTMessage.F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
     }
 
     public void recordDrop() {

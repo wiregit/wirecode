@@ -39,7 +39,7 @@ public class MessageID implements Comparable<MessageID>, Serializable {
 
     private static final long serialVersionUID = -1477232241287654597L;
 
-    public static final int LENGTH = 20;
+    public static final int LENGTH = 16;
 
     private static final Random GENERATOR = new Random();
 
@@ -63,7 +63,8 @@ public class MessageID implements Comparable<MessageID>, Serializable {
         }
         
         if (messageId.length != LENGTH) {
-            throw new IllegalArgumentException("MessageID must be " + LENGTH + " bytes long: " + messageId.length);
+            throw new IllegalArgumentException("MessageID must be " 
+                    + LENGTH + " bytes long: " + messageId.length);
         }
         
         this.messageId = messageId;
