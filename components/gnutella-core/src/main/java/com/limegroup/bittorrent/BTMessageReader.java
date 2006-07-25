@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.io.ChannelReadObserver;
+import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
@@ -36,9 +37,11 @@ public class BTMessageReader implements ChannelReadObserver {
 	// the channel we read from
 	private InterestReadChannel _channel;
 
-	// the connection this reader is associated with and that will be informed
-	// of any incoming messages
-	private final BTConnection _connection;
+	/** Observer to notify in case of errors */
+	private final IOErrorObserver ioxObserver;
+	
+	/** <tt>BTMessageHandler</tt> that will process the incoming messages */
+	private final BTMessageHandler handler;
 
 	// the ByteBuffer for the message currently being read from the network.
 	private CircularByteBuffer _in;
@@ -67,9 +70,10 @@ public class BTMessageReader implements ChannelReadObserver {
 	/**
 	 * Constructor
 	 */
-	public BTMessageReader(BTConnection connection) {
+	public BTMessageReader(IOErrorObserver ioxObserver, BTMessageHandler handler) {
 		_in = new CircularByteBuffer(BUFFER_SIZE, NIODispatcher.instance().getBufferCache());
-		_connection = connection;
+		this.ioxObserver = ioxObserver;
+		this.handler = handler;
 		LENGTH_STATE = new LengthState();
 		TYPE_STATE = new TypeState();
 		currentState = LENGTH_STATE;
@@ -129,7 +133,7 @@ public class BTMessageReader implements ChannelReadObserver {
 	 * Implement ChannelReadObserver interface
 	 */
 	public void handleIOException(IOException iox) {
-		_connection.handleIOException(iox);
+		ioxObserver.handleIOException(iox);
 	}
 
 	/**
@@ -141,7 +145,7 @@ public class BTMessageReader implements ChannelReadObserver {
 				return;
 			shutdown = true;
 		}
-		_connection.close();
+		ioxObserver.shutdown();
 	}
 
 	/**
@@ -185,7 +189,7 @@ public class BTMessageReader implements ChannelReadObserver {
 			_length = _in.getInt();
 			
 			if (LOG.isDebugEnabled())
-				LOG.debug(_connection+ " parsed length "+_length);
+				LOG.debug(handler+ " parsed length "+_length);
 			
 			if (_length < 0 || _length > MAX_PIECE_SIZE)
 				throw new BadBTMessageException("bad message size " + _length);
@@ -213,7 +217,7 @@ public class BTMessageReader implements ChannelReadObserver {
 			type = _in.get();
 			
 			if (LOG.isDebugEnabled())
-				LOG.debug(_connection + " parsed type "+type);
+				LOG.debug(handler + " parsed type "+type);
 			
 			boolean wasFirst = first;
 			first = false;
@@ -249,7 +253,7 @@ public class BTMessageReader implements ChannelReadObserver {
 				buf.clear();
 			}
 			BTMessage message = BTMessage.parseMessage(buf, type);
-			_connection.processMessage(message);
+			handler.processMessage(message);
 			return LENGTH_STATE;
 		}
 	}
@@ -298,7 +302,7 @@ public class BTMessageReader implements ChannelReadObserver {
 			BTMessageStat.INCOMING_BITFIELD.incrementStat();
 			BTMessageStatBytes.INCOMING_BITFIELD.addData(5 + 
 					_length);
-			_connection.processMessage(field);
+			handler.processMessage(field);
 		}
 	}
 
@@ -337,7 +341,7 @@ public class BTMessageReader implements ChannelReadObserver {
 				currentOffset = offset;
 				// check if the piece was requested
 				complete = new BTInterval(offset, offset + _length - 9, chunkId); 
-				welcome = _connection.startReceivingPiece(complete);
+				welcome = handler.startReceivingPiece(complete);
 			}
 			
 			int available = getAmountLeft();
@@ -350,7 +354,7 @@ public class BTMessageReader implements ChannelReadObserver {
 				// if the buffer is full, turn off read interest
 				if (!writeExpected) { 
 					writeExpected = true;
-					_connection.handlePiece(this);
+					handler.handlePiece(this);
 				}
 			} else {
 				_in.discard(available);
@@ -363,7 +367,7 @@ public class BTMessageReader implements ChannelReadObserver {
 				BTMessageStatBytes.INCOMING_PIECE.addData(5 + _length);
 				
 				// we're done receiving this piece, request more.
-				_connection.request();
+				handler.finishReceivingPiece();
 				if (writeExpected)
 					currentState = null;
 				else
@@ -393,7 +397,7 @@ public class BTMessageReader implements ChannelReadObserver {
 						currentOffset + toRead - 1,
 						chunkId);
 				currentOffset += toRead;
-				_connection.readBytes(toRead);
+				handler.readBytes(toRead);
 				byte []data = new byte[toRead];
 				_in.get(data);
 				choke(false);

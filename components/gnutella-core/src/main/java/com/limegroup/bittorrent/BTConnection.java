@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
+import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.io.ThrottleReader;
@@ -28,7 +29,8 @@ import com.limegroup.gnutella.util.BitSet;
 /**
  * Class wrapping a Bittorrent connection.
  */
-public class BTConnection implements UploadSlotListener, Chokable {
+public class BTConnection 
+implements UploadSlotListener, Chokable, BTMessageHandler, IOErrorObserver {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnection.class);
 
@@ -193,7 +195,7 @@ public class BTConnection implements UploadSlotListener, Chokable {
 	public void init(NIOSocket socket) {
 		_socket = socket;
 		_startTime = System.currentTimeMillis();
-		_reader = new BTMessageReader(this);
+		_reader = new BTMessageReader(this, this);
 		_writer = new BTMessageWriter(this);
 		
 		ThrottleWriter throttle = new ThrottleWriter(
@@ -315,8 +317,8 @@ public class BTConnection implements UploadSlotListener, Chokable {
 		}
 	}
 	
-	/**
-	 * notification that some bytes have been read on this connection
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTMessageHandler#readBytes(int)
 	 */
 	public void readBytes(int read) {
 		downShort.count(read);
@@ -340,6 +342,10 @@ public class BTConnection implements UploadSlotListener, Chokable {
 			BTMessageStat.INCOMING_BAD.incrementStat();
 		if (LOG.isDebugEnabled())
 			LOG.debug(iox);
+		shutdown();
+	}
+	
+	public void shutdown() {
 		close();
 	}
 
@@ -561,8 +567,8 @@ public class BTConnection implements UploadSlotListener, Chokable {
 		_requesting.clear();
 	}
 
-	/**
-	 * @param message the incoming message to process.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTMessageHandler#processMessage(com.limegroup.bittorrent.messages.BTMessage)
 	 */
 	public void processMessage(BTMessage message) {
 		if (LOG.isDebugEnabled())
@@ -670,7 +676,7 @@ public class BTConnection implements UploadSlotListener, Chokable {
 	 * Notification that we are now receiving the specified piece
 	 * @return true if the piece was requested.
 	 */
-	boolean startReceivingPiece(BTInterval interval) {
+	public boolean startReceivingPiece(BTInterval interval) {
 		// its ok to remove the piece from the list of pieces we request
 		// because if the receiving fails the connection will be closed.
 		if (!_requesting.remove(interval)) {
@@ -684,6 +690,10 @@ public class BTConnection implements UploadSlotListener, Chokable {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this + " starting to receive piece " + interval);
 		return true;
+	}
+	
+	public void finishReceivingPiece() {
+		request();
 	}
 	
 	void request() {
@@ -701,8 +711,8 @@ public class BTConnection implements UploadSlotListener, Chokable {
 		}
 	}
 
-	/**
-	 * handles a piece message and sends its payload to disk
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTMessageHandler#handlePiece(com.limegroup.bittorrent.BTPieceFactory)
 	 */
 	public void handlePiece(BTPieceFactory factory) {
 		try {
