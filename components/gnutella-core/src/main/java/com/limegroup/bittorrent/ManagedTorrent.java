@@ -594,7 +594,7 @@ public class ManagedTorrent implements Torrent {
 					if (btc.isSeed())
 						seeds.add(btc);
 					else {
-						btc.sendChoke();
+						btc.choke();
 						btc.cancelAllRequests();
 						btc.sendNotInterested();
 					}

@@ -2,20 +2,15 @@ package com.limegroup.bittorrent;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.NIOSocket;
@@ -33,7 +28,7 @@ import com.limegroup.gnutella.util.BitSet;
 /**
  * Class wrapping a Bittorrent connection.
  */
-public class BTConnection implements UploadSlotListener {
+public class BTConnection implements UploadSlotListener, Chokable {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnection.class);
 
@@ -62,17 +57,17 @@ public class BTConnection implements UploadSlotListener {
 	/*
 	 * the NIOSocket
 	 */
-	private final NIOSocket _socket;
+	private NIOSocket _socket;
 
 	/*
 	 * Reader for the messages
 	 */
-	private final BTMessageReader _reader;
+	private BTMessageReader _reader;
 
 	/*
 	 * Writer for the messages
 	 */
-	private final BTMessageWriter _writer;
+	BTMessageWriter _writer;
 
 	/**
 	 * The pieces the remote host has
@@ -90,7 +85,7 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * the Set of BTInterval requested by the remote host.
 	 */
-	private final Set<BTInterval> _requested;
+	final Set<BTInterval> _requested;
 
 	/**
 	 * the metaInfo of this torrent
@@ -102,11 +97,6 @@ public class BTConnection implements UploadSlotListener {
 	 */
 	private final TorrentLocation _endpoint;
 
-	/**
-	 * whether or not this is an outgoing connection
-	 */
-	private final boolean _outgoing;
-
 	/*
 	 * our torrent
 	 */
@@ -116,7 +106,7 @@ public class BTConnection implements UploadSlotListener {
 	 * whether we choke them: if we are choking, all requests from the remote
 	 * host will be ignored
 	 */
-	private boolean _isChoked;
+	boolean _isChoked;
 
 	/**
 	 * whether they choke us: only send requests if they are not choking us
@@ -137,7 +127,7 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * the time when this Connection was created
 	 */
-	private final long _startTime;
+	private long _startTime;
 	
 	/**
 	 * The # of pieces the remote host is missing.
@@ -147,7 +137,7 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * The # of the round this connection was unchoked last time.
 	 */
-	private int unchokeRound;
+	int unchokeRound;
 	
 	/** Whether this connection is currently using an upload slot */
 	private volatile boolean usingSlot;
@@ -159,7 +149,7 @@ public class BTConnection implements UploadSlotListener {
 	private StalledUploadWatchdog watchdog;
 	
 	/** Delayer for this connection */
-	private final DelayedBufferWriter delayer;
+	private DelayedBufferWriter delayer;
 	
 	/** Whether this connection is currently closing */
 	private volatile boolean closing;
@@ -175,19 +165,33 @@ public class BTConnection implements UploadSlotListener {
 	 *            the BTMetaInfo holding all information for this torrent
 	 * @param torrent
 	 * 			  the ManagedTorrent to whom this connection belongs.
-	 * @param isOutgoing
-	 *            whether or not this is an outgoing connection
 	 */
-	public BTConnection(NIOSocket socket, BTMetaInfo info, TorrentLocation ep,
-			ManagedTorrent torrent, boolean isOutgoing) {
-		_socket = socket;
+	public BTConnection(BTMetaInfo info, TorrentLocation ep,
+			ManagedTorrent torrent) {
 		_endpoint = ep;
 		_torrent = torrent;
-		_outgoing = isOutgoing;
 		_availableRanges = new BitSet(info.getNumBlocks());
 		_available = new BitFieldSet(_availableRanges, info.getNumBlocks());
 		_requesting = new HashSet<BTInterval>();
 		_requested = new HashSet<BTInterval>();
+		_info = info;
+
+		// connections start choked and not interested
+		_isChoked = true;
+		_isChoking = true;
+		_isInterested = false;
+		_isInteresting = false;
+		up = new SimpleBandwidthTracker();
+		downShort = new SimpleBandwidthTracker(1000);
+		downLong = new SimpleBandwidthTracker(5000);
+
+	}
+
+	/**
+	 * Initializes the connection 
+	 */
+	public void init(NIOSocket socket) {
+		_socket = socket;
 		_startTime = System.currentTimeMillis();
 		_reader = new BTMessageReader(this);
 		_writer = new BTMessageWriter(this);
@@ -201,68 +205,49 @@ public class BTConnection implements UploadSlotListener {
 				RouterService.getBandwidthManager().getThrottle(true));
 		_reader.setReadChannel(readThrottle);
 		readThrottle.interest(true);
-		socket.setReadObserver(_reader);
-		socket.setWriteObserver(_writer);
-		_info = info;
-
-		// connections start choked and not interested
-		_isChoked = true;
-		_isChoking = true;
-		_isInterested = false;
-		_isInteresting = false;
-		up = new SimpleBandwidthTracker();
-		downShort = new SimpleBandwidthTracker(1000);
-		downLong = new SimpleBandwidthTracker(5000);
-
+		_socket.setReadObserver(_reader);
+		_socket.setWriteObserver(_writer);
+		
 		// if we have downloaded anything send a bitfield
 		if (_info.getVerifyingFolder().getVerifiedBlockSize() > 0)
 			sendBitfield();
 	}
-
-
-	/**
-	 * @return true if we are choking the remote host
+	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#isChoked()
 	 */
 	public boolean isChoked() {
 		return _isChoked;
 	}
 	
-	/**
-	 * @return true if the remote host is choking us.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#isChoking()
 	 */
 	public boolean isChoking() {
 		return _isChoking;
 	}
 
-	/**
-	 * @return true if the remote host is interested in us
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#isInterested()
 	 */
 	public boolean isInterested() {
 		return _isInterested;
 	}
 	
-	/**
-	 * @return whether the remote host should be interested
-	 * in downloading from us.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#shouldBeInterested()
 	 */
 	public boolean shouldBeInterested() {
 		return numMissing > 0;
 	}
 	
-	/**
-	 * @return true if the remote host may have ranges that we want 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#isInteresting()
 	 */
 	public boolean isInteresting() {
 		return _isInteresting;
 	}
 	
-	/**
-	 * @return true if we initiated this connection
-	 */
-	public boolean isOutgoing() {
-		return _outgoing;
-	}
-
 	/**
 	 * @return true if the connection should be retried.
 	 */
@@ -310,11 +295,8 @@ public class BTConnection implements UploadSlotListener {
 		_torrent.connectionClosed(this);
 	}
 
-	/**
-	 * @param read whether to return download bandwidth
-	 * @param shortTerm whether to return short-term average or long-term
-	 * @return the measured bandwidth on this connection for
-	 * downloadining or uploading
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#getMeasuredBandwidth(boolean, boolean)
 	 */
 	public float getMeasuredBandwidth(boolean read, boolean shortTerm) {
 		SimpleBandwidthTracker tracker;
@@ -364,7 +346,7 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * Chokes the connection
 	 */
-	void sendChoke() {
+	public void choke() {
 		_requested.clear();
 		if (!_isChoked) {
 			if (LOG.isDebugEnabled())
@@ -377,9 +359,10 @@ public class BTConnection implements UploadSlotListener {
 	
 	/**
 	 * Unchokes the connection
+	 * @param now the unchoking round.
 	 */
-	void sendUnchoke(int now) {
-		setUnchokeRound(now);
+	public void unchoke(int now) {
+		unchokeRound = now;
 		if (_isChoked) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(this +" unchoking, round "+now);
@@ -398,15 +381,15 @@ public class BTConnection implements UploadSlotListener {
 	/**
 	 * @return the round during which the connection was last unchoked
 	 */
-	int getUnchokeRound() {
+	public int getUnchokeRound() {
 		return unchokeRound;
 	}
 	
 	/**
 	 * sets the round during which the connection was choked
 	 */
-	void setUnchokeRound(int round) {
-		unchokeRound = round;
+	public void clearUnchokeRound() {
+		unchokeRound = -1;
 	}
 
 	/**
@@ -513,7 +496,7 @@ public class BTConnection implements UploadSlotListener {
 		
 		if (proceed == -1) { // denied, choke the connection
 			usingSlot = false;
-			sendChoke();
+			choke();
 		} else if (proceed == 0) 
 			requestPieceRead();
 		// else queued, will receive callback.
@@ -828,7 +811,7 @@ public class BTConnection implements UploadSlotListener {
 		NIODispatcher.instance().invokeLater(new Runnable() {
 			public void run() {
 				usingSlot = false;
-				sendChoke();
+				choke();
 			}
 		});
 	}
@@ -842,22 +825,31 @@ public class BTConnection implements UploadSlotListener {
 	}
 
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#getAverageBandwidth()
+	 */
 	public float getAverageBandwidth() {
 		return up.getAverageBandwidth();
 	}
 
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#getMeasuredBandwidth()
+	 */
 	public float getMeasuredBandwidth() throws InsufficientDataException {
 		return up.getMeasuredBandwidth();
 	}
 
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#measureBandwidth()
+	 */
 	public void measureBandwidth() {
 		up.measureBandwidth();
 	}
 	
-	/**
-	 * @return if the remote host has the complete file, i.e. is a "seed".
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.Chokable#isSeed()
 	 */
 	public boolean isSeed() {
 		return _available.cardinality() == _info.getNumBlocks();

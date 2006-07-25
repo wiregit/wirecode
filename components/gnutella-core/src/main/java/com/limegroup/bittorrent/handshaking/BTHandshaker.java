@@ -114,15 +114,15 @@ ChannelWriter, ChannelReadObserver, IpPort {
 			finishingHandshakes = true;
 			
 			if (torrent.shouldAddConnection(loc)) {
-				BTConnection btc = new BTConnection(sock, 
-						torrent.getMetaInfo(), 
+				BTConnection btc = new BTConnection(torrent.getMetaInfo(), 
 						loc,
-						torrent, true);
+						torrent);
 
 				if (LOG.isDebugEnabled())
 					LOG.debug("created connection "
 							+ sock.getInetAddress().getHostAddress());
-
+				
+				btc.init(sock);
 				// add the connection and re-schedule fetching.
 				torrent.addConnection(btc);
 				torrent.getFetcher().handshakerDone(this);
