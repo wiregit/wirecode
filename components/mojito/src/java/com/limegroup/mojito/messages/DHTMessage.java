@@ -30,7 +30,7 @@ import com.limegroup.mojito.Contact;
 public interface DHTMessage {
     
     /** The function ID of our DHT Message */
-    public static final byte F_DHT_MESSAGE = (byte)0x44; // 'D'
+    public static final int F_DHT_MESSAGE = 0x44; // 'D'
     
     /**
      * The opcodes of our Messages

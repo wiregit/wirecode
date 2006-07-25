@@ -40,9 +40,9 @@ public class PingRequestImpl extends AbstractRequestMessage
         super(context, OpCode.PING_REQUEST, contact, messageId);
     }
     
-    public PingRequestImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.PING_REQUEST, src, in);
+    public PingRequestImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.PING_REQUEST, src, messageId, version, in);
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {

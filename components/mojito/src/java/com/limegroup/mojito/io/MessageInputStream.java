@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Collections;
@@ -125,6 +126,10 @@ public class MessageInputStream extends DataInputStream {
         int version = readUnsignedShort();
         KUID nodeId = readNodeID();
         SocketAddress addr = readSocketAddress();
+        
+        if (addr == null) {
+            throw new UnknownHostException("SocketAddress is null");
+        }
         
         return ContactNode.createUnknownContact(vendor, version, nodeId, addr);
     }

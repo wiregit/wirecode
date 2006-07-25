@@ -40,8 +40,8 @@ abstract class AbstractRequestMessage extends AbstractDHTMessage
     }
 
     public AbstractRequestMessage(Context context, OpCode opcode, 
-            SocketAddress src, MessageInputStream in) 
+            SocketAddress src, MessageID messageId, int version, MessageInputStream in) 
             throws IOException {
-        super(context, opcode, src, in);
+        super(context, opcode, src, messageId, version, in);
     }
 }

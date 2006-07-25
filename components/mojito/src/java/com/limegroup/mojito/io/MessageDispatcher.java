@@ -524,13 +524,22 @@ public abstract class MessageDispatcher implements Runnable {
     /** Called to verify a SecureMessage */
     protected abstract void verify(SecureMessage secureMessage, SecureMessageCallback smc);
     
-    /** Called to check whether or not the Message should be processed */
-    protected boolean allow(DHTMessage message) {
+    /**
+     * This method is called from the MessageDispatcher Thread to
+     * determinate whether or not the DHTMessage should be accepted.
+     * As it's running on the MessageDispatcher Thread it shouldn't
+     * block for too long. Use the allow() method for heavyweight
+     * checks!
+     */
+    protected boolean accept(DHTMessage message) {
         return true;
     }
     
-    /** */
-    protected boolean accept(DHTMessage message) {
+    /** 
+     * This method is called to determinate whether or not the
+     * DHTMessage should be processed.
+     */
+    protected boolean allow(DHTMessage message) {
         return true;
     }
     

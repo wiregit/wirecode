@@ -46,8 +46,7 @@ class LimeDHTMessageParser implements MessageParser {
             byte softMax, int network) throws BadPacketException, IOException {
         
         return (Message)factory.createMessage(ADDRESS, 
-                ByteBuffer.wrap(header, 0, 16), 
-                ByteBuffer.wrap(header, 17, 2), 
+                ByteBuffer.wrap(header), 
                 ByteBuffer.wrap(payload));
     }
 }

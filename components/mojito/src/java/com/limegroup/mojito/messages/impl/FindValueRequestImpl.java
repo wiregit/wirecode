@@ -41,9 +41,9 @@ public class FindValueRequestImpl extends AbstractLookupRequest
                 contact, messageId, lookupId);
     }
     
-    public FindValueRequestImpl(Context context, 
-            SocketAddress src, MessageInputStream in) throws IOException {
-        super(context, OpCode.FIND_VALUE_REQUEST, src, in);
+    public FindValueRequestImpl(Context context, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_VALUE_REQUEST, src, messageId, version, in);
     }
     
     public String toString() {

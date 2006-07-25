@@ -47,9 +47,9 @@ abstract class AbstractLookupRequest extends AbstractRequestMessage
     }
     
     public AbstractLookupRequest(Context context, 
-            OpCode opcode, SocketAddress src, MessageInputStream in) 
-            throws IOException {
-        super(context, opcode, src, in);
+            OpCode opcode, SocketAddress src, 
+            MessageID messageId, int version, MessageInputStream in) throws IOException {
+        super(context, opcode, src, messageId, version, in);
         
         switch(opcode) {
             case FIND_NODE_REQUEST:
