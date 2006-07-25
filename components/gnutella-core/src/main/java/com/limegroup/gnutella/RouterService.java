@@ -542,7 +542,7 @@ public class RouterService {
     /**
      * Accessor for the <tt>LimeDHTManager</tt> instance.
      */
-    public static DHTManager getLimeDHTManager() {
+    public static DHTManager getDHTManager() {
         return dhtManager;
     }
     
@@ -1567,7 +1567,9 @@ public class RouterService {
      * Tells whether this node is *actively* connected to the DHT or 
      * is *passively* connected to the DHT, i.e. can perform queries
      * and store requests but is not part of the DHT routing table 
-     * (does not store data or respond to queries)
+     * (does not store data or respond to queries). Note: This 
+     * also returns false if the node is not connected to the DHT.
+     * 
      */
     public static boolean isActiveDHTNode() {
         return dhtManager.isActiveNode();

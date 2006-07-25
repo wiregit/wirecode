@@ -6,12 +6,8 @@ import java.util.List;
 import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
-import com.limegroup.mojito.settings.ContextSettings;
 
 public interface DHTManager extends LifecycleListener{
-    
-    //TODO: this will change!
-    public static int DHT_VERSION = ContextSettings.VERSION.getValue();
     
     public static enum DHTMode {
         NONE((byte)0x00),ACTIVE((byte)0x01),PASSIVE((byte)0x20);
@@ -27,6 +23,11 @@ public interface DHTManager extends LifecycleListener{
         public byte getByte() {
             return mode;
         }
+        
+        public boolean isActive() {
+            return ((mode & DHT_MODE_MASK) == ACTIVE.getByte());
+        }
+        
     }
     
     public static final byte DHT_MODE_MASK = 0x0F;
@@ -50,5 +51,7 @@ public interface DHTManager extends LifecycleListener{
     public boolean isWaiting();
 
     public MojitoDHT getMojitoDHT();
+    
+    public int getVersion();
 
 }

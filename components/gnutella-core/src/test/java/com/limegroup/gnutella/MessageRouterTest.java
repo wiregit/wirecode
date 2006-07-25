@@ -888,6 +888,10 @@ public final class MessageRouterTest extends BaseTestCase {
         public void switchMode(boolean toActiveMode) {}
 
         public void handleLifecycleEvent(LifecycleEvent evt) {}
+        
+        public int getVersion() {
+            return 0;
+        }
 
         public boolean isWaiting() {
             return false;

@@ -43,6 +43,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         //from network
         fillRoutingTable(controller, 2);
         controller.start();
+        Thread.sleep(1000);
         assertFalse("Should not be waiting",controller.isWaiting());
 
         assertTrue("Should be bootstrapping from RT", controller.isBootstrappingFromRT());
@@ -67,6 +68,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         Thread.sleep(1000);
         //now add other host: it should not cancel the previous attempt
         controller.addBootstrapHost(new InetSocketAddress("localhost",6000));
+        future = (Future)PrivilegedAccessor.getValue(controller, "bootstrapFuture");
         assertFalse(future.isCancelled());
     }
     

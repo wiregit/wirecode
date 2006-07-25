@@ -58,7 +58,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
             new RouterService(new ActivityCallbackStub());
         ROUTER_SERVICE.start();
         
-        DHT_MANAGER = RouterService.getLimeDHTManager();
+        DHT_MANAGER = RouterService.getDHTManager();
     }
 
     private static void setSettings() throws Exception {

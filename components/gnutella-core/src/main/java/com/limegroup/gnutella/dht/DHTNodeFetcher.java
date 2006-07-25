@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
@@ -14,8 +16,13 @@ import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IpPort;
 
 /**
- * This class takes care of fetching DHT hosts from the Gnutella network 
- * using UDP pings. It uses the ranker from the HostCatcher class, which it cancels
+ * This class takes care of fetching DHT hosts from the Gnutella network.
+ * 
+ * First tries to get active nodes directly from the HostCatcher. if that fails, 
+ * it tries to send UDP pings to nodes who support the DHT. If that fails too, it
+ * sends UDP pings to all nodes in the HostCatcher.
+ * 
+ * This uses the ranker from the HostCatcher class, which it cancels
  * when the <tt>AbstractDHTController</tt> is able to bootstrap. 
  * 
  * This class can also start a timer task to periodically requests hosts until 
@@ -24,7 +31,7 @@ import com.limegroup.gnutella.util.IpPort;
  */
 public class DHTNodeFetcher {
     
-    private static final long FETCH_DELAY = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
+    private final long FETCH_DELAY = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
     
     private final DHTController controller;
     
@@ -46,6 +53,24 @@ public class DHTNodeFetcher {
             return;
         }
         
+        //TODO: min version: for now, 0
+        List<ExtendedEndpoint> dhtHosts = 
+            RouterService.getHostCatcher().getDHTSupportEndpoint(0);
+        
+        //first see if we have any active dht node in our HostCatcher.
+        boolean haveActive = false;
+        for(ExtendedEndpoint ep : dhtHosts) {
+            if(ep.getDHTMode().isActive()) {
+                haveActive = true;
+                controller.addBootstrapHost(new InetSocketAddress(ep.getAddress(), ep.getPort()));
+            } 
+        }
+        
+        if(haveActive) { //we have added active hosts already - no need to request
+            return;
+        }
+        
+        //We don't have active hosts --> send UDP pings
         long now = System.currentTimeMillis();
         if(now - lastRequest < FETCH_DELAY) {
             return;
@@ -53,7 +78,16 @@ public class DHTNodeFetcher {
         
         lastRequest = now;
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
-        RouterService.getHostCatcher().sendMessage(m, new DHTNodesRequestListener(), new UDPPingCanceller());
+        
+        if(!dhtHosts.isEmpty()) { 
+            //we don't have active hosts but have hosts that support dht
+            RouterService.getHostCatcher().sendMessage(m, dhtHosts, 
+                    new DHTNodesRequestListener(), new UDPPingCanceller());
+        } else {
+            //send to all hosts
+            RouterService.getHostCatcher().sendMessage(m, 
+                    new DHTNodesRequestListener(), new UDPPingCanceller());
+        }
     }
     
     public void startTimerTask() {

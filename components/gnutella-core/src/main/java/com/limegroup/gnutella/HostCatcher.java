@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.bootstrap.BootstrapServer;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -119,6 +122,21 @@ public class HostCatcher {
      * Constant for the index of non-Ultrapeer hosts.
      */
     public static final int NORMAL_PRIORITY = 0;
+    
+    private static final Comparator<ExtendedEndpoint> DHT_ACTIVE_COMPARATOR = 
+        new Comparator<ExtendedEndpoint>() {
+            public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
+                DHTMode mode1 = e1.getDHTMode();
+                DHTMode mode2 = e2.getDHTMode();
+                if(mode1.isActive() && !mode2.isActive()) {
+                    return -1;
+                } else if(mode2.isActive() && !mode1.isActive()) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        };
 
 
     /** The list of hosts to try.  These are sorted by priority: ultrapeers,
@@ -365,13 +383,39 @@ public class HostCatcher {
         pinger.rank(getAllHosts(), listener, c, m);
     }
     
-    private synchronized Collection<Endpoint> getAllHosts() {
+    public void sendMessage(Message m, Collection<? extends IpPort> hosts , 
+            MessageListener listener, Cancellable c) {
+        pinger.rank(hosts, listener, c, m);
+    }
+    
+    private synchronized Collection<ExtendedEndpoint> getAllHosts() {
         //keep them ordered
-        LinkedHashSet<Endpoint> hosts = new LinkedHashSet<Endpoint>(getNumHosts());
+        LinkedHashSet<ExtendedEndpoint> hosts = new LinkedHashSet<ExtendedEndpoint>(getNumHosts());
         hosts.addAll(FREE_ULTRAPEER_SLOTS_SET);
         hosts.addAll(FREE_LEAF_SLOTS_SET);
         hosts.addAll(ENDPOINT_SET);
         return hosts;
+    }
+    
+    /**
+     * Gets a List of hosts that support the DHT. If <tt>this</tt> knows any active nodes,
+     * return them at the head of the list.
+     * Note: this method is slow and is not meant to be used often.
+     * 
+     * @param minVersion The minimum DHT Version. Should be 0 to return all versions
+     * 
+     * @return A Collection of ExtendedEndpoints that support the DHT.
+     */
+    public synchronized List<ExtendedEndpoint> getDHTSupportEndpoint(int minVersion) {
+        List<ExtendedEndpoint> hostsList = new ArrayList<ExtendedEndpoint>();
+        for(ExtendedEndpoint host : getAllHosts()) {
+            if(host.supportsDHT() 
+                    && host.getDHTVersion() >= minVersion) {
+                hostsList.add(host);
+            }
+        }
+        Collections.sort(hostsList, DHT_ACTIVE_COMPARATOR);
+        return hostsList;
     }
     
     /**

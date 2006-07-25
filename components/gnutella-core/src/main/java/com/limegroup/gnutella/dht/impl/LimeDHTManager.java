@@ -9,9 +9,13 @@ import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.settings.ContextSettings;
 
 public class LimeDHTManager implements DHTManager {
-
+    
+    //TODO: this will change
+    private int version = ContextSettings.VERSION.getValue();
+    
     private DHTController dhtController = null;
     
     public synchronized void start(boolean activeMode) {
@@ -111,5 +115,9 @@ public class LimeDHTManager implements DHTManager {
         if(dhtController != null) {
             dhtController.handleLifecycleEvent(evt);
         }
+    }
+
+    public int getVersion() {
+        return version;
     }
 }

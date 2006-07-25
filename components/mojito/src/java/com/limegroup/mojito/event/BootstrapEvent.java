@@ -20,6 +20,7 @@
 package com.limegroup.mojito.event;
 
 import java.net.SocketAddress;
+import java.util.Collections;
 import java.util.List;
 
 import com.limegroup.mojito.util.CollectionUtils;
@@ -27,6 +28,7 @@ import com.limegroup.mojito.util.CollectionUtils;
 public class BootstrapEvent {
     
     public static enum Type {
+        PING_SUCCEEDED,
         SUCCEEDED,
         FAILED;
     }
@@ -48,6 +50,10 @@ public class BootstrapEvent {
             long phaseZeroTime, long phaseOneTime, long phaseTwoTime, 
             boolean foundNewContacts) {
         this(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts, Type.SUCCEEDED);
+    }
+    
+    public BootstrapEvent(Type type) {
+        this(Collections.EMPTY_LIST, 0L, 0L, 0L, false, type);
     }
     
     @SuppressWarnings("unchecked")

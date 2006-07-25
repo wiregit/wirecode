@@ -74,7 +74,8 @@ public class DHTSettings extends LimeProps{
      * Setting for the delay between DHT node fetcher runs
      */
     public static final LongSetting DHT_NODE_FETCHER_TIME =
-        FACTORY.createSettableLongSetting("DHT_NODE_FETCHER_TIME", 30L * 60L * 1000L, "DHTSettings.DHTNodeFetcherTime", 0L, 30L * 60L * 1000L);
+        FACTORY.createSettableLongSetting("DHT_NODE_FETCHER_TIME", 
+                30L * 1000L, "DHTSettings.DHTNodeFetcherTime", 0L, 30L * 60L * 1000L); //30 sec for now
     
     /**
      * The maximum amount of time for which we will ping the network for DHT nodes

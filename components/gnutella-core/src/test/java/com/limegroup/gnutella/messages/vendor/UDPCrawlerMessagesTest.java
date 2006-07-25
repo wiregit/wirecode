@@ -619,8 +619,6 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
 
         public List<IpPort> getActiveDHTNodes(int maxNodes) {return null;}
 
-        public int getDHTVersion() {return 0;}
-
         public MojitoDHT getMojitoDHT() {return null;}
 
         public boolean isActiveNode() {return false;}
@@ -636,5 +634,9 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
         public void switchMode(boolean toActiveMode) {}
 
         public void handleLifecycleEvent(LifecycleEvent evt) {}
+
+        public int getVersion() {
+            return 1;
+        }
     }
 }

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -13,7 +14,6 @@ import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -411,11 +411,12 @@ public class HostCatcherTest extends BaseTestCase {
         hc.add(new ExtendedEndpoint("1.2.3.5", 6341).setUDPHostCache(true), false);
         
         // dht capable node
-        ExtendedEndpoint ep = new ExtendedEndpoint("10.40.50.3", 6346);
-        ep.setDHTVersion(0);
+        ExtendedEndpoint ep = new ExtendedEndpoint("18.239.0.100", 6323, 3);
+        ep.setDHTVersion(2);
+        ep.setDHTMode(DHTMode.NONE);
         hc.add(ep, false);
         // dht active node
-        ep = new ExtendedEndpoint("10.40.50.5", 6346);
+        ep = new ExtendedEndpoint("18.239.0.101", 6322, 2);
         ep.setDHTVersion(1);
         ep.setDHTMode(DHTMode.ACTIVE);
         hc.add(ep, false);
@@ -439,8 +440,7 @@ public class HostCatcherTest extends BaseTestCase {
                      hc.getAnEndpoint());
         ExtendedEndpoint xep = (ExtendedEndpoint) hc.getAnEndpoint();
         assertTrue(xep.supportsDHT());
-        assertEquals(xep.getDHTVersion(), 0);
-        assertNull(xep.getDHTMode());
+        assertEquals(xep.getDHTVersion(), 2);
         xep = (ExtendedEndpoint) hc.getAnEndpoint();
         assertTrue(xep.supportsDHT());
         assertEquals(xep.getDHTVersion(), 1);
@@ -696,6 +696,36 @@ public class HostCatcherTest extends BaseTestCase {
         hc.add(p, true);
         hc.getAnEndpoint(observer);
         assertEquals(p, observer.getEndpoint());       
+    }
+    
+    public void testGetDHTSupportEndpoint() throws Exception {
+        assertEquals(0, hc.getDHTSupportEndpoint(0).size());
+        
+        ExtendedEndpoint ep;
+        //dht passive nodes
+        for(int i=6300; i < 6304 ; i++) {
+            ep = new ExtendedEndpoint("18.239.0.100", i);
+            ep.setDHTVersion(2);
+            ep.setDHTMode(DHTMode.NONE);
+            hc.add(ep, false);
+        }
+        
+        //dht active node
+        ep = new ExtendedEndpoint("18.239.0.101", 6322);
+        ep.setDHTVersion(1);
+        ep.setDHTMode(DHTMode.ACTIVE);
+        hc.add(ep, false);
+        
+        List<ExtendedEndpoint> hostList = hc.getDHTSupportEndpoint(0);
+        assertEquals(5, hostList.size());
+        ep = hostList.get(0);
+        assertEquals("18.239.0.101", ep.getAddress());
+        assertTrue(ep.getDHTMode().isActive());
+        
+        //try excluding version
+        hostList = hc.getDHTSupportEndpoint(2);
+        assertEquals(4, hostList.size());
+        assertEquals("18.239.0.100", hostList.get(0).getAddress());
     }
         
    

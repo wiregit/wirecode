@@ -358,7 +358,9 @@ public class ExtendedEndpoint extends Endpoint {
         if(supportsDHT()) {
             out.write(_dhtVersion + "");
             out.write(FIELD_SEPARATOR);
-            out.write(_dhtMode.toString());
+            if(_dhtVersion > -1 && _dhtMode!= null) {
+                out.write(_dhtMode.toString());
+            }
         }
         out.write(FIELD_SEPARATOR);
         out.write(EOL);

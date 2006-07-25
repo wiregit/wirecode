@@ -34,6 +34,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.event.FindNodeEvent;
+import com.limegroup.mojito.event.BootstrapEvent.Type;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.util.BucketUtils;
@@ -129,6 +130,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                 LOG.debug("Bootstraping phase 1 from node: "+node);
             }
             
+            future.fireResult(new BootstrapEvent(Type.PING_SUCCEEDED));
             phaseOneStart = System.currentTimeMillis();
             phaseOne(node);
             
@@ -184,7 +186,9 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          * first Contact that responds or null if none of them did respond
          */
         private Contact bootstrapFromRouteTable() throws Exception {
-            LOG.debug("Bootstrapping from Route Table");
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Bootstrapping from Route Table : "+context.getRouteTable());
+            }
             
             List<Contact> nodes = BucketUtils.sort(context.getRouteTable().getLiveContacts());
             for (Contact node : nodes) {

@@ -120,7 +120,7 @@ public class Main {
         RouterService.preGuiInit();
         service.start();
         
-        MojitoDHT dht = RouterService.getLimeDHTManager().getMojitoDHT();
+        MojitoDHT dht = RouterService.getDHTManager().getMojitoDHT();
         if (addr != null) {
             dht.bind(new InetSocketAddress(addr, port));
         } else {

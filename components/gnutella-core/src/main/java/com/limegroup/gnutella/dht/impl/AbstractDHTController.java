@@ -103,7 +103,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * 
      * @param activeMode true to connect to the DHT in active mode
      */
-    public void start() {
+    public synchronized void start() {
         if (running) {
             return;
         }
@@ -125,7 +125,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             running = true;
             
             //append SIMPP host to the end of the list if we have any
-            //TODO: review -- we only want to do this once
+            //TODO: review -- we only want to do this once -- maybe move to Manager?
             SocketAddress simppBootstrapHost = getSIMPPHost();
             if(simppBootstrapHost != null) {
                 bootstrapHosts.add(simppBootstrapHost);
@@ -143,7 +143,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * puts itself in a waiting state until new hosts are added. 
      * 
      */
-    private void bootstrap() {
+    private synchronized void bootstrap() {
         bootstrapingFromRT = bootstrapHosts.isEmpty();
         bootstrapFuture = dht.bootstrap(bootstrapHosts);
         bootstrapFuture.addDHTEventListener(bootstrapListener);
@@ -335,31 +335,37 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     private class DHTBootstrapListener implements BootstrapListener{
 
         public void handleResult(BootstrapEvent result) {
-            if (result.getType() == Type.SUCCEEDED) {
+            if(result.getType() == Type.PING_SUCCEEDED){
+
                 //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
                 //for now, waiting = false will stop at least the UDP pings
                 waiting = false;
+                bootstrapingFromRT = false;
+                
+            } else if (result.getType() == Type.SUCCEEDED) {
                 // Notify our connections that we are now a full DHT node 
                 sendUpdatedCapabilities();
-            } else {
+                
+            } else { //boostrap failure!
+                
                 synchronized(bootstrapHosts) {
                     bootstrapHosts.removeAll(result.getFailedHostList());
                     if(bootstrapHosts.isEmpty()) {
                         //host list is now empty --> we try bootstraping from our RT and requests hosts 
                         //from the network at the same time
+                        waiting = true;
+
                         if(dhtNodeFetcher == null) {
                             dhtNodeFetcher = new DHTNodeFetcher(AbstractDHTController.this);
                         }
-                        waiting = true;
                         //send UDPPings -- non blocking
-                        dhtNodeFetcher.requestDHTHosts();
-                    }
-                    //if this is a failure while bootstraping from RT, don't call bootstrap() again 
-                    //with an empty list as it will restart bootstrapping from the RT again 
-                    if(!bootstrapingFromRT) {
-                        bootstrap();
-                    }
+                        dhtNodeFetcher.startTimerTask();
+                        return;
+                    } 
                 }
+                //here: bootstrap host list is not empty: try boostraping again
+                //keep it outside the synchronized block.
+                bootstrap();
             }
         }
         

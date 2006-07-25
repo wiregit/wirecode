@@ -19,7 +19,6 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -1009,7 +1008,8 @@ public class PingReply extends Message implements Serializable, IpPort {
     private static void addDHTExtension(GGEP ggep) {
         byte[] payload = new byte[3];
         // put version
-        ByteOrder.short2beb((short)DHTManager.DHT_VERSION, payload, 0);
+        ByteOrder.short2beb((short)RouterService.getDHTManager().getVersion(), 
+                             payload, 0);
         if(RouterService.isDHTNode()) {
             if(RouterService.isActiveDHTNode()) {
                 payload[2] = DHTMode.ACTIVE.getByte();
