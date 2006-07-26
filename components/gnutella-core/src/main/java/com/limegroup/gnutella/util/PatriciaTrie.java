@@ -1345,7 +1345,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         // Get the entry directly after this one.
-        TrieEntry<K, V> ceil = successor(found == null ? root.left : found, found);
+        TrieEntry<K, V> ceil = successor(found == null ? root.left : found.predecessor, found);
         
         // Make sure we remove the entry we added temporarily.
         if(added) {
