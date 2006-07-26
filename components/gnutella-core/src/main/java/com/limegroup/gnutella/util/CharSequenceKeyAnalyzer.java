@@ -20,14 +20,19 @@ public class CharSequenceKeyAnalyzer implements KeyAnalyzer<CharSequence> {
         return (key != null ? key.length() * 16 : 0);
     }
     
-    public int bitIndex(CharSequence key, CharSequence found) {
+    public int bitIndex(int startAt, CharSequence key, CharSequence found) {
         boolean allNull = true;
         
         int keyLength = length(key);
         int foundKeyLength = length(found);
         int length = Math.max(keyLength, foundKeyLength);
         
-        for (int i = 0; i < length; i++) {
+        // At each index (starting with the index of startAt),
+        // get the XOR of each, (if it's startAt, then shift it accordingly),
+        // then get the number of trailing (leading?) zeros, account back for
+        // startAt, and return the result.
+        
+        for (int i = startAt; i < length; i++) {
             boolean a = isBitSet(key, keyLength, i);
             boolean b = isBitSet(found, foundKeyLength, i);
             

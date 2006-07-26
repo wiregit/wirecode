@@ -199,12 +199,12 @@ public class IPList {
             return (maddr & BITS[bitIndex]) != 0;
         }
         
-        public int bitIndex(IP key, IP found) {
+        public int bitIndex(int startAt, IP key, IP found) {
             int maddr1 = key.addr & key.mask;
             int maddr2 = (found != null) ? found.addr & found.mask : 0;
             
             boolean allNull = true;
-            for (int i = 0; i < 32; i++) {
+            for (int i = startAt; i < 32; i++) {
                 int a = maddr1 & BITS[i];
                 int b = maddr2 & BITS[i];
                 

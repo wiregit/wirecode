@@ -134,7 +134,118 @@ public class PatriciaTrieTest extends BaseTestCase {
         charTrie.put('\0', "");
         found = charTrie.getCeilEntry('\0');
         assertNotNull(found);
-        assertEquals((Character)'\0', found.getKey());        
+        assertEquals((Character)'\0', found.getKey());      
+    }
+    
+    public void testPrecedingEntry() {
+        PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
+        charTrie.put('c', "c");
+        charTrie.put('p', "p");
+        charTrie.put('l', "l");
+        charTrie.put('t', "t");
+        charTrie.put('k', "k");
+        charTrie.put('a', "a");
+        charTrie.put('y', "y");
+        charTrie.put('r', "r");
+        charTrie.put('u', "u");
+        charTrie.put('o', "o");
+        charTrie.put('w', "w");
+        charTrie.put('i', "i");
+        charTrie.put('e', "e");
+        charTrie.put('x', "x");
+        charTrie.put('q', "q");
+        charTrie.put('b', "b");
+        charTrie.put('j', "j");
+        charTrie.put('s', "s");
+        charTrie.put('n', "n");
+        charTrie.put('v', "v");
+        charTrie.put('g', "g");
+        charTrie.put('h', "h");
+        charTrie.put('m', "m");
+        charTrie.put('z', "z");
+        charTrie.put('f', "f");
+        charTrie.put('d', "d");
+        
+        Object[] results = new Object[] {
+            'a', "a", 'b', "b", 'c', "c", 'd', "d", 'e', "e",
+            'f', "f", 'g', "g", 'h', "h", 'i', "i", 'j', "j",
+            'k', "k", 'l', "l", 'm', "m", 'n', "n", 'o', "o",
+            'p', "p", 'q', "q", 'r', "r", 's', "s", 't', "t",
+            'u', "u", 'v', "v", 'w', "w", 'x', "x", 'y', "y", 
+            'z', "z"
+        };
+        
+        for(int i = 0; i < results.length; i+=2) {
+            System.out.println("Looking for: " + results[i]);
+            Map.Entry<Character, String> found = charTrie.getPrecedingEntry((Character)results[i]);
+            if(i == 0) {
+                assertNull(found);
+            } else {
+                assertNotNull(found);
+                assertEquals(results[i-2], found.getKey());
+                assertEquals(results[i-1], found.getValue());
+            }
+        }
+
+        Map.Entry<Character, String> found = charTrie.getPrecedingEntry((char)('z' + 1));
+        assertNotNull(found);
+        assertEquals((Character)'z', found.getKey());
+        
+        
+        // Remove some & try again...
+        charTrie.remove('a');
+        charTrie.remove('z');
+        charTrie.remove('q');
+        charTrie.remove('l');
+        charTrie.remove('p');
+        charTrie.remove('m');
+        charTrie.remove('u');
+        
+        found = charTrie.getPrecedingEntry('u');
+        assertNotNull(found);
+        assertEquals((Character)'t', found.getKey());
+        
+        found = charTrie.getPrecedingEntry('v');
+        assertNotNull(found);
+        assertEquals((Character)'t', found.getKey());
+        
+        found = charTrie.getPrecedingEntry('a');
+        assertNull(found);
+        
+        found = charTrie.getPrecedingEntry('z');
+        assertNotNull(found);
+        assertEquals((Character)'y', found.getKey());
+        
+        found = charTrie.getPrecedingEntry((char)('z'+1));
+        assertNotNull(found);
+        assertEquals((Character)'y', found.getKey());
+        
+        found = charTrie.getPrecedingEntry('q');
+        assertNotNull(found);
+        assertEquals((Character)'o', found.getKey());
+        
+        found = charTrie.getPrecedingEntry('r');
+        assertNotNull(found);
+        assertEquals((Character)'o', found.getKey());
+        
+        found = charTrie.getPrecedingEntry('p');
+        assertNotNull(found);
+        assertEquals((Character)'o', found.getKey());
+        
+        found = charTrie.getPrecedingEntry('l');
+        assertNotNull(found);
+        assertEquals((Character)'k', found.getKey());
+        
+        found = charTrie.getPrecedingEntry('m');
+        assertNotNull(found);
+        assertEquals((Character)'k', found.getKey());
+        
+        found = charTrie.getPrecedingEntry('\0');
+        assertNull(found);
+        
+        charTrie.put('\0', "");
+        found = charTrie.getPrecedingEntry('\0');
+        assertNull(found);      
     }
     
     public void testIteration() {
@@ -581,12 +692,12 @@ public class PatriciaTrieTest extends BaseTestCase {
             return (key & BITS[bitIndex]) != 0;
         }
 
-        public int bitIndex(Integer key, Integer found) {
+        public int bitIndex(int startAt, Integer key, Integer found) {
             if (found == null)
                 found = 0;
 
             boolean allNull = true;
-            for (int i = 0; i < 32; i++) {
+            for (int i = startAt; i < 32; i++) {
                 int a = key & BITS[i];
                 int b = found & BITS[i];
 
@@ -631,12 +742,12 @@ public class PatriciaTrieTest extends BaseTestCase {
             return (key & BITS[bitIndex]) != 0;
         }
 
-        public int bitIndex(Character key, Character found) {
+        public int bitIndex(int startAt, Character key, Character found) {
             if (found == null)
                 found = 0;
 
             boolean allNull = true;
-            for (int i = 0; i < 16; i++) {
+            for (int i = startAt; i < 16; i++) {
                 int a = key & BITS[i];
                 int b = found & BITS[i];
 
