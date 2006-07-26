@@ -25,6 +25,7 @@ implements ConnectObserver {
 	public OutgoingBTHandshaker(TorrentLocation loc, ManagedTorrent torrent) {
 		super(loc);
 		this.torrent = torrent;
+		this.observer = torrent.getFetcher();
 	}
 
 	public void setSock(Socket sock) {

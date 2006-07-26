@@ -204,7 +204,7 @@ implements TorrentEventListener {
 	}
 
 	public long getAmountRead() {
-		return _info != null ?_info.getVerifyingFolder().getBlockSize() :
+		return _info != null ?_info.getDiskManager().getBlockSize() :
 			getContentLength();
 	}
 
@@ -277,7 +277,7 @@ implements TorrentEventListener {
 	}
 
 	public long getAmountVerified() {
-		return _info.getVerifyingFolder().getVerifiedBlockSize();
+		return _info.getDiskManager().getVerifiedBlockSize();
 	}
 
 	public int getChunkSize() {
@@ -325,7 +325,7 @@ implements TorrentEventListener {
 	}
 	
 	public int getAmountPending() {
-		return _info.getVerifyingFolder().getAmountPending();
+		return _info.getDiskManager().getAmountPending();
 	}
 
 

@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
@@ -16,7 +15,7 @@ import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
 import com.limegroup.bittorrent.messages.BTMessage;
 
-public class BTMessageWriter implements ChannelWriter {
+public class BTMessageWriter implements BTChannelWriter {
 
 	private static final Log LOG = LogFactory.getLog(BTMessageWriter.class);
 
@@ -117,6 +116,9 @@ public class BTMessageWriter implements ChannelWriter {
 		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.MessageWriter#sendKeepAlive()
+	 */
 	public void sendKeepAlive() {
 		if (_queue.isEmpty() && _out[1] == null) {
 			myKeepAlive.clear();
@@ -124,12 +126,8 @@ public class BTMessageWriter implements ChannelWriter {
 		}
 	}
 	
-	/**
-	 * Enqueues another message for the remote host
-	 * 
-	 * @param m
-	 *            the BTMessage to enqueue
-	 * @return true if the message was enqueued, false if not.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.MessageWriter#enqueue(com.limegroup.bittorrent.messages.BTMessage)
 	 */
 	public void enqueue(BTMessage m) {
 		
@@ -184,7 +182,7 @@ public class BTMessageWriter implements ChannelWriter {
 	/**
 	 * count written bytes in statistics and for banwdidth tracking
 	 */
-	public void count(int written) {
+	private void count(int written) {
 		BandwidthStat.BITTORRENT_MESSAGE_UPSTREAM_BANDWIDTH.addData(written);
 		pieceListener.wroteBytes(written);
 	}

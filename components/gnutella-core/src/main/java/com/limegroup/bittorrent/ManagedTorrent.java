@@ -77,7 +77,7 @@ public class ManagedTorrent implements Torrent {
 	/**
 	 * The manager of disk operations.
 	 */
-	private volatile VerifyingFolder _folder;
+	private volatile TorrentDiskManager _folder;
 
 	/**
 	 * The manager of tracker requests.
@@ -129,7 +129,7 @@ public class ManagedTorrent implements Torrent {
 	public ManagedTorrent(BTMetaInfo info, 
 			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher) {
 		_info = info;
-		_folder = info.getVerifyingFolder();
+		_folder = info.getDiskManager();
 		_connections = Collections.synchronizedList(new ArrayList<BTLink>());
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
@@ -534,8 +534,9 @@ public class ManagedTorrent implements Torrent {
 	
 	/**
 	 * adds a fetched connection
+	 * @return true if it was added
 	 */
-	public void addConnection(final BTLink btc) {
+	public boolean addConnection(final BTLink btc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add connection " + btc.toString());
 		
@@ -552,12 +553,13 @@ public class ManagedTorrent implements Torrent {
 			}
 		}
 
-		if (shouldAdd) {
-				_connections.add(btc);
-			if (LOG.isDebugEnabled())
-				LOG.debug("added connection " + btc.toString());
-		} else
-			btc.shutdown();
+		if (!shouldAdd)
+			return false;
+		
+		_connections.add(btc);
+		if (LOG.isDebugEnabled())
+			LOG.debug("added connection " + btc.toString());
+		return true;
 	}
 
 	/**
@@ -567,7 +569,7 @@ public class ManagedTorrent implements Torrent {
 		if (LOG.isDebugEnabled())
 			LOG.debug("removing connection " + btc.toString());
 		_connections.remove(btc);
-		if (btc.isInterested() && !btc.isChoked())
+		if (btc.isUploading())
 			rechoke();
 		boolean connectionsEmpty = _connections.isEmpty();
 		boolean peersEmpty = _peers.isEmpty();
@@ -649,7 +651,7 @@ public class ManagedTorrent implements Torrent {
 		_info.moveToCompleteFolder();
 		
 		// and re-open it for seeding.
-		_folder = _info.getVerifyingFolder();
+		_folder = _info.getDiskManager();
 		if (LOG.isDebugEnabled())
 			LOG.debug("new veryfing folder");
 		

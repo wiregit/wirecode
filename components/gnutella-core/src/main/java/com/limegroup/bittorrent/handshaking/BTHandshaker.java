@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.BTConnection;
+import com.limegroup.bittorrent.BTHandshakeObserver;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.io.ChannelReadObserver;
@@ -28,6 +29,7 @@ ChannelWriter, ChannelReadObserver, IpPort {
 	
 	
 	protected ManagedTorrent torrent;
+	protected BTHandshakeObserver observer;
 	
 	protected ByteBuffer outgoingHandshake;
 	protected ByteBuffer [] incomingHandshake;
@@ -115,17 +117,16 @@ ChannelWriter, ChannelReadObserver, IpPort {
 			
 			if (torrent.shouldAddConnection(loc)) {
 				BTConnection btc = new BTConnection(torrent.getMetaInfo(), 
-						loc,
-						torrent);
+						loc);
 
 				if (LOG.isDebugEnabled())
 					LOG.debug("created connection "
 							+ sock.getInetAddress().getHostAddress());
 				
-				btc.init(sock);
 				// add the connection and re-schedule fetching.
-				torrent.addConnection(btc);
-				torrent.getFetcher().handshakerDone(this);
+				if (torrent.addConnection(btc))
+					btc.init(sock, torrent);
+				observer.handshakerDone(this);
 			}
 			else {
 				if (LOG.isDebugEnabled())
@@ -148,8 +149,8 @@ ChannelWriter, ChannelReadObserver, IpPort {
 			shutdown = true;
 		}
 		
-		if (torrent != null)
-			torrent.getFetcher().handshakerDone(this);
+		if (observer != null)
+			observer.handshakerDone(this);
 		
 		sock.close();
 	}

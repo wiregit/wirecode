@@ -155,7 +155,7 @@ public class Tracker {
 				String.valueOf(torrent.getTotalUploaded()));
 
 		addGetField(buf, "left", String.valueOf(info.getFileSystem().getTotalSize()
-				- info.getVerifyingFolder().getBlockSize()));
+				- info.getDiskManager().getBlockSize()));
 
 		addGetField(buf, "compact", "1");
 

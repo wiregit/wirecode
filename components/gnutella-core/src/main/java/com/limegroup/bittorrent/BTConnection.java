@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.AbstractNBSocket;
+import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.ThrottleReader;
@@ -64,12 +65,12 @@ PieceSendListener, PieceReadListener {
 	/*
 	 * Reader for the messages
 	 */
-	private BTMessageReader _reader;
+	private ChannelReadObserver _reader;
 
 	/*
 	 * Writer for the messages
 	 */
-	BTMessageWriter _writer;
+	private BTChannelWriter _writer;
 
 	/**
 	 * The pieces the remote host has
@@ -102,7 +103,7 @@ PieceSendListener, PieceReadListener {
 	/*
 	 * our torrent
 	 */
-	private final ManagedTorrent _torrent;
+	private ManagedTorrent _torrent;
 
 	/**
 	 * whether we choke them: if we are choking, all requests from the remote
@@ -168,10 +169,8 @@ PieceSendListener, PieceReadListener {
 	 * @param torrent
 	 * 			  the ManagedTorrent to whom this connection belongs.
 	 */
-	public BTConnection(BTMetaInfo info, TorrentLocation ep,
-			ManagedTorrent torrent) {
+	public BTConnection(BTMetaInfo info, TorrentLocation ep) {
 		_endpoint = ep;
-		_torrent = torrent;
 		_availableRanges = new BitSet(info.getNumBlocks());
 		_available = new BitFieldSet(_availableRanges, info.getNumBlocks());
 		_requesting = new HashSet<BTInterval>();
@@ -192,8 +191,13 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * Initializes the connection 
 	 */
-	public void init(AbstractNBSocket socket) {
+	public void init(AbstractNBSocket socket, ManagedTorrent torrent) {
+		// if we were shutdown before initializing, return.
+		if (closing)
+			return;
+		
 		_socket = socket;
+		_torrent = torrent;
 		_startTime = System.currentTimeMillis();
 		_reader = new BTMessageReader(this, this);
 		_writer = new BTMessageWriter(this, this);
@@ -211,7 +215,7 @@ PieceSendListener, PieceReadListener {
 		_socket.setWriteObserver(_writer);
 		
 		// if we have downloaded anything send a bitfield
-		if (_info.getVerifyingFolder().getVerifiedBlockSize() > 0)
+		if (_info.getDiskManager().getVerifiedBlockSize() > 0)
 			sendBitfield();
 	}
 	
@@ -274,6 +278,10 @@ PieceSendListener, PieceReadListener {
 		if (closing)
 			return;
 		closing = true;
+		
+		// if not initialized just return
+		if (_socket == null)
+			return; 
 		
 		try {
 			_socket.shutdownOutput();
@@ -440,7 +448,7 @@ PieceSendListener, PieceReadListener {
 
 		// we should indicate that we are not interested anymore, so we are
 		// not unchoked when we do not want to request anything.
-		if (!_info.getVerifyingFolder().containsAnyWeMiss(_available)) {
+		if (!_info.getDiskManager().containsAnyWeMiss(_available)) {
 			sendNotInterested();
 			return;
 		}
@@ -524,7 +532,7 @@ PieceSendListener, PieceReadListener {
 			LOG.debug(this+" requesting disk read for "+in);
 		
 		try {
-			_info.getVerifyingFolder().requestPieceRead(in, this);
+			_info.getDiskManager().requestPieceRead(in, this);
 		} catch (IOException bad) {
 			close();
 		}
@@ -564,7 +572,7 @@ PieceSendListener, PieceReadListener {
 	
 	private void clearRequests() {
 		for (BTInterval clear : _requesting)
-			_info.getVerifyingFolder().releaseInterval(clear);
+			_info.getDiskManager().releaseInterval(clear);
 		_requesting.clear();
 	}
 
@@ -666,7 +674,7 @@ PieceSendListener, PieceReadListener {
 			return;
 		}
 
-		if (_info.getVerifyingFolder().hasBlock(in.getId())) 
+		if (_info.getDiskManager().hasBlock(in.getId())) 
 			_requested.add(in);
 		
 		if (!_requested.isEmpty() && !usingSlot)
@@ -704,7 +712,7 @@ PieceSendListener, PieceReadListener {
 		// get new ranges to request if necessary
 		while (!_torrent.isComplete() && _torrent.isActive()
 				&& _requesting.size() < MAX_REQUESTS) {
-			BTInterval in = _info.getVerifyingFolder().leaseRandom(_available, _requesting);
+			BTInterval in = _info.getDiskManager().leaseRandom(_available, _requesting);
 			if (in == null)
 				break;
 			_requesting.add(in);
@@ -717,7 +725,7 @@ PieceSendListener, PieceReadListener {
 	 */
 	public void handlePiece(BTPieceFactory factory) {
 		try {
-			_info.getVerifyingFolder().writeBlock(factory);
+			_info.getDiskManager().writeBlock(factory);
 		} catch (IOException ioe) {
 			close();
 			// inform the user and stop the download
@@ -746,7 +754,7 @@ PieceSendListener, PieceReadListener {
 		for (int i = 0; i < numBits; i++) {
 			byte mask = (byte) (0x80 >>> (i % 8));
 			if ((mask & field.get(i / 8)) == mask) {
-				if (!willBeInteresting && !_info.getVerifyingFolder().hasBlock(i))
+				if (!willBeInteresting && !_info.getDiskManager().hasBlock(i))
 					willBeInteresting = true;
 				_availableRanges.set(i);
 			}
@@ -757,7 +765,7 @@ PieceSendListener, PieceReadListener {
 			_available = _info.getFullBitField();
 			numMissing = 0;
 		} else
-			numMissing = _info.getVerifyingFolder().getNumMissing(_available);
+			numMissing = _info.getDiskManager().getNumMissing(_available);
 		
 		if (willBeInteresting)
 			sendInterested();
@@ -771,7 +779,7 @@ PieceSendListener, PieceReadListener {
 		if (_available.get(pieceNum))
 			return; // dublicate Have, ignore.
 		
-		VerifyingFolder v = _info.getVerifyingFolder();
+		TorrentDiskManager v = _info.getDiskManager();
 		_availableRanges.set(pieceNum);
 
 		

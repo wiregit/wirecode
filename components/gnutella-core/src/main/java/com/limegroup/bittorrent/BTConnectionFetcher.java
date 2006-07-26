@@ -21,7 +21,7 @@ import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
-public class BTConnectionFetcher  {
+public class BTConnectionFetcher implements BTHandshakeObserver  {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnectionFetcher.class);
 	
@@ -158,6 +158,9 @@ public class BTConnectionFetcher  {
 		return _handshake.duplicate();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTHandshakeObserver#handshakerStarted(com.limegroup.bittorrent.handshaking.IncomingBTHandshaker)
+	 */
 	public void handshakerStarted(IncomingBTHandshaker shaker) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("incoming handshaker from "+shaker.getInetAddress()+":"+shaker.getPort());
@@ -174,6 +177,9 @@ public class BTConnectionFetcher  {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTHandshakeObserver#handshakerDone(com.limegroup.bittorrent.handshaking.BTHandshaker)
+	 */
 	public synchronized void handshakerDone(BTHandshaker shaker) {
 		Assert.that(incoming.contains(shaker) != outgoing.contains(shaker));
 		if (!incoming.remove(shaker)) {

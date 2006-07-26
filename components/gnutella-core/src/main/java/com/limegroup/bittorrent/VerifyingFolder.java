@@ -38,13 +38,9 @@ import com.limegroup.gnutella.util.RRProcessingQueue;
 import com.limegroup.gnutella.util.SystemUtils;
 
 /**
- * This class extends VerifyingFile for the simple reason that I would like to
- * add a feature to download from BitTorrent and Gnutella, possibly even at the
- * same time. Other than that it saves a couple of lines of code and wastes a
- * little memory on two empty IntervalSets and two or three unused class members
- * of the VerifyingFile class.
+ * A default implementation of <tt>TorrentDiskManager</tt>
  */
-public class VerifyingFolder {
+class VerifyingFolder implements TorrentDiskManager {
 	
 	private static final Log LOG = LogFactory.getLog(VerifyingFolder.class);
 	
@@ -111,9 +107,8 @@ public class VerifyingFolder {
 	 */
 	private BitSet verifiedBlocks;
 	
-	/** A view over which blocks we are missing - the inverse of verifiedBlocks */
-	private BitField verified, missing;
-	
+	private BitField missing, verified;
+
 	/** a cached bitfield. LOCKING: this*/
 	private byte [] bitField;
 	/** whether the cached bitfield is dirty LOCKING: this */
@@ -429,9 +424,8 @@ public class VerifyingFolder {
 		return verified.get(block);
 	}
 
-	/**
-	 * Opens this VerifyingFolder for writing. MUST be called before anything
-	 * else. If there is no completion size, this fails.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.TorrentFileManager#open(com.limegroup.bittorrent.ManagedTorrent)
 	 */
 	public void open(final ManagedTorrent torrent) throws IOException {
 		synchronized(this) {
@@ -527,19 +521,19 @@ public class VerifyingFolder {
 			isVerifying = false;
 	}
 	
-	boolean isVerifying() {
+	public boolean isVerifying() {
 		return isVerifying;
 	}
 
 	/**
 	 * @return true if the whole torrent has been written and verified
 	 */
-	synchronized boolean isComplete() {
+	public synchronized boolean isComplete() {
 		return verified == _info.getFullBitField();
 	}
 
-	/**
-	 * closes all internal RandomAccessFile objects
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.TorrentFileManager#close()
 	 */
 	public void close() {
 		LOG.debug("closing the file");
@@ -563,13 +557,16 @@ public class VerifyingFolder {
 		
 	}
 
-	/**
-	 * determines whether the files for this torrent are open.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.TorrentFileManager#isOpen()
 	 */
 	public synchronized boolean isOpen() {
 		return _fos != null && _fos != OPENING;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.TorrentFileManager#requestPieceRead()
+	 */
 	public void requestPieceRead(BTInterval in, PieceReadListener c) throws IOException {
 		IOException e = storedException;
 		if (e != null)
@@ -947,7 +944,7 @@ public class VerifyingFolder {
 	/**
 	 * @return number of bytes written and verified
 	 */
-	synchronized long getVerifiedBlockSize() {
+	public synchronized long getVerifiedBlockSize() {
 		long ret = verified.cardinality() * (long)_info.getPieceLength();
 		if (verified.get(_info.getNumBlocks() - 1)) {
 			ret = ret - _info.getPieceLength() + 
@@ -959,7 +956,7 @@ public class VerifyingFolder {
 	/**
 	 * @return number of bytes written
 	 */
-	synchronized long getBlockSize() {
+	public synchronized long getBlockSize() {
 		long written = getVerifiedBlockSize();
 		return written + partialBlocks.byteSize();
 	}
@@ -967,27 +964,30 @@ public class VerifyingFolder {
 	/**
 	 * @return number of bytes corrupted
 	 */
-	synchronized long getNumCorruptedBytes() {
+	public synchronized long getNumCorruptedBytes() {
 		return _corruptedBytes;
 	}
 	
-	synchronized Map getSerializableObject() {
+	public synchronized Serializable getSerializableObject() {
 		Map<String, Serializable> toWrite = new HashMap<String, Serializable>();
 		toWrite.put("verified",(Serializable)verifiedBlocks.clone());
 		toWrite.put("partial",(Serializable)partialBlocks.clone());
 		toWrite.put("wasVerifying", new Boolean(isVerifying));
-		return toWrite;
+		return (Serializable)toWrite;
 	}
 	
-	synchronized int getAmountPending() {
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.TorrentFileManager#getAmountPending()
+	 */
+	public synchronized int getAmountPending() {
 		return (int)pendingRanges.byteSize();
 	}
 	
-	/**
-	 * @return the number of pieces that we have verified
-	 * and the other bitset doesn't have
+	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.TorrentFileManager#getNumMissing(com.limegroup.gnutella.util.BitField)
 	 */
-	synchronized int getNumMissing(BitField other) {
+	public synchronized int getNumMissing(BitField other) {
 		if (isComplete())
 			return verified.cardinality() - other.cardinality();
 		
@@ -998,7 +998,7 @@ public class VerifyingFolder {
 	/**
 	 * @return true if the remote host has any pieces we miss
 	 */
-	synchronized boolean containsAnyWeMiss(BitField other) {
+	public synchronized boolean containsAnyWeMiss(BitField other) {
 		// if we are complete we miss nothing
 		if (isComplete())
 			return false;

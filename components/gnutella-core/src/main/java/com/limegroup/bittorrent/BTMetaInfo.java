@@ -8,16 +8,13 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,20 +22,14 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.bitzi.util.Base32;
-import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.SHA1;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.BitField;
 import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.MultiCollection;
 import com.limegroup.gnutella.util.StringUtils;
 
 import com.limegroup.bittorrent.bencoding.BEncoder;
@@ -86,7 +77,7 @@ public class BTMetaInfo implements Serializable {
 	/*
 	 * The VerifyingFolder for this torrent. 
 	 */
-	private VerifyingFolder _folder;
+	private TorrentDiskManager _folder;
 
 	/*
 	 * an array of URL[] containing any trackers. This field is non-final
@@ -154,9 +145,10 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * @return VerifyingFolder
+	 * @return a <tt>TorrentDiskManager</tt> instance to 
+	 * be used by a torrent for this.
 	 */
-	public VerifyingFolder getVerifyingFolder() {
+	public TorrentDiskManager getDiskManager() {
 		return _folder;
 	}
 
@@ -173,7 +165,7 @@ public class BTMetaInfo implements Serializable {
 		_desc = null;
 
 		LOG.trace("saved files");
-		initializeVerifyingFolder(null, true);
+		initializeDiskManager(null, true);
 		LOG.trace("initialized folder");
 	}
 
@@ -241,9 +233,9 @@ public class BTMetaInfo implements Serializable {
 	}
 	
 	/**
-	 * private utility method for initializing the VerifyingFolder
+	 * private utility method for initializing the DiskManager
 	 */
-	private void initializeVerifyingFolder(Map data, boolean complete) {
+	private void initializeDiskManager(Map data, boolean complete) {
 		_folder = new VerifyingFolder(this, complete, data);
 	}
 
@@ -325,7 +317,7 @@ public class BTMetaInfo implements Serializable {
 
 		fileSystem = new TorrentFileSystem(info, _hashes.size(), _pieceLength, _infoHash);
 		fullBitField = new BitFieldSet(fullSet, getNumBlocks());
-		initializeVerifyingFolder(null, false);
+		initializeDiskManager(null, false);
 	}
 	
 	/**
@@ -368,7 +360,7 @@ public class BTMetaInfo implements Serializable {
 			throw new IOException("cannot read BTMetaInfo");
 		
 		_pieceLength = pieceLength.intValue();
-		initializeVerifyingFolder(folderData, false);
+		initializeDiskManager(folderData, false);
 		fullSet = new FullBitSet();
 		fullBitField = new BitFieldSet(fullSet,getNumBlocks());
 	}

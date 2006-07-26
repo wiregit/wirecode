@@ -57,9 +57,10 @@ public class IncomingBTHandshaker extends BTHandshaker {
 				else if (torrent.isConnectedTo(loc))
 					return false;
 				else {
+					observer = torrent.getFetcher();
 					initOutgoingHandshake();
 					setWriteInterest();
-					torrent.getFetcher().handshakerStarted(this);
+					observer.handshakerStarted(this);
 				}
 				break;
 			case 3 : // peerId
