@@ -56,7 +56,7 @@ bool WindowsFirewallExceptionsNotAllowed() {
 // Determines if it's listed in Windows Firewall
 // Returns true if is listed, false if it's not or there was an error
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring path) {
-	return WindowsFirewallIsProgramListed(GetString(e, path));
+	return WindowsFirewallIsProgramListed(GetJavaString(e, path));
 }
 bool WindowsFirewallIsProgramListed(LPCTSTR path) {
 
@@ -74,7 +74,7 @@ bool WindowsFirewallIsProgramListed(LPCTSTR path) {
 // Determines if the listing for that program in Windows Firewall is checked or unchecked
 // Returns true if it is enabled, false if it's not or there was an error
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring path) {
-	return WindowsFirewallIsProgramEnabled(GetString(e, path));
+	return WindowsFirewallIsProgramEnabled(GetJavaString(e, path));
 }
 bool WindowsFirewallIsProgramEnabled(LPCTSTR path) {
 
@@ -92,7 +92,7 @@ bool WindowsFirewallIsProgramEnabled(LPCTSTR path) {
 // Adds the program's listing in Windows Firewall to make sure it is listed and checked
 // Returns false on error
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring path, jstring name) {
-	return WindowsFirewallAdd(GetString(e, path), GetString(e, name));
+	return WindowsFirewallAdd(GetJavaString(e, path), GetJavaString(e, name));
 }
 bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name) {
 
@@ -109,7 +109,7 @@ bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name) {
 // Removes the program's listing from the Windows Firewall exceptions list
 // Returns false on error
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring path) {
-	return WindowsFirewallRemove(GetString(e, path));
+	return WindowsFirewallRemove(GetJavaString(e, path));
 }
 bool WindowsFirewallRemove(LPCTSTR path) {
 
