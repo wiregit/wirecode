@@ -99,30 +99,42 @@ public class PatriciaTrieTest extends BaseTestCase {
         charTrie.remove('p');
         charTrie.remove('m');
         charTrie.remove('u');
-        charTrie.getCeilEntry('u');
         
-        Map.Entry<Character, String> found = charTrie.getCeilEntry('a');
+        Map.Entry<Character, String> found = charTrie.getCeilEntry('u');
         assertNotNull(found);
-     //   assertEquals((Character)'b', found.getKey());
+        assertEquals((Character)'v', found.getKey());
+        
+        found = charTrie.getCeilEntry('a');
+        assertNotNull(found);
+        assertEquals((Character)'b', found.getKey());
         
         found = charTrie.getCeilEntry('z');
         assertNull(found);
         
         found = charTrie.getCeilEntry('q');
         assertNotNull(found);
-   //     assertEquals((Character)'r', found.getKey());
+        assertEquals((Character)'r', found.getKey());
         
         found = charTrie.getCeilEntry('l');
         assertNotNull(found);
-   //     assertEquals((Character)'n', found.getKey());
+        assertEquals((Character)'n', found.getKey());
         
         found = charTrie.getCeilEntry('p');
         assertNotNull(found);
-    //    assertEquals((Character)'r', found.getKey());
+        assertEquals((Character)'r', found.getKey());
         
         found = charTrie.getCeilEntry('m');
         assertNotNull(found);
-    //    assertEquals((Character)'n', found.getKey());
+        assertEquals((Character)'n', found.getKey());
+        
+        found = charTrie.getCeilEntry('\0');
+        assertNotNull(found);
+        assertEquals((Character)'b', found.getKey());
+        
+        charTrie.put('\0', "");
+        found = charTrie.getCeilEntry('\0');
+        assertNotNull(found);
+        assertEquals((Character)'\0', found.getKey());        
     }
     
     public void testIteration() {

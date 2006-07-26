@@ -273,17 +273,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     private TrieEntry<K, V> getR(TrieEntry<K, V> h, int bitIndex, 
             final K key, final int keyLength) {
-        //System.out.print("Looking for: " + key + ", at: " + h.getKey() + " (" + bitIndex + ")");
         if (h.bitIndex <= bitIndex) {
-          //  System.out.println(" - Uplink.");
             return h;
         }
 
         if (!isBitSet(key, keyLength, h.bitIndex)) {
-//            System.out.println(" - Going left.");
             return getR(h.left, h.bitIndex, key, keyLength);
         } else {
-            //System.out.println(" - Going right.");
             return getR(h.right, h.bitIndex, key, keyLength);
         }
     }
@@ -570,8 +566,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         TrieEntry<K, V> parent = h.parent;
         TrieEntry<K, V> child = (h.left == h) ? h.right : h.left;
         
-        System.out.println("Removing entry: " + h);
-        
         if (parent.left == h) {
             parent.left = child;
         } else {
@@ -584,8 +578,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         } else {
             child.predecessor = parent;
         }
-        
-        System.out.println("Child is now: " + child);
         
     }
     
@@ -654,6 +646,106 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         p.parent = h.parent;
         p.left = h.left;
         p.right = h.right;
+    }
+    
+
+    
+    /**
+     * Scans for the next node, starting at the specified point.
+     * 
+     * The basic premise is that each iteration can follow the following steps:
+     * 
+     * 1) Scan all the way to the left.
+     *   a) If we already started from this node last time, proceed to Step 2.
+     *   b) If a valid uplink is found, use it.
+     *   c) If the result is an empty node (root not set), break the scan.
+     *   d) If we already returned the left node, break the scan.
+     *   
+     * 2) Check the right.
+     *   a) If we already returned the right node, proceed to Step 3.
+     *   b) If it is a valid uplink, use it.
+     *   c) Do Step 1 from the right node.
+     *   
+     * 3) Back up through the parents until we encounter find a parent
+     *    that we're not the right child of.
+     *    
+     * 4) If there's no right child of that parent, the iteration is finished.
+     *    Otherwise continue to Step 5.
+     * 
+     * 5) Check to see if the right child is a valid uplink.
+     *    a) If we already returned that child, proceed to Step 6.
+     *       Otherwise, use it.
+     *    
+     * 6) If the right child of the parent is the parent itself, we've
+     *    already found & returned the end of the Trie, so exit.
+     *    
+     * 7) Do Step 1 on the parent's right child.
+     */
+    protected TrieEntry<K, V> successor(TrieEntry<K, V> start, TrieEntry<K, V> previous) {
+        TrieEntry<K, V> current = start;
+
+        // Only look at the left if this was a recursive or
+        // the first check, otherwise we know we've already looked
+        // at the left.
+        if(previous == null || start != previous.predecessor) {
+            while(!current.left.isEmpty()) {
+                // stop traversing if we've already
+                // returned the left of this node.
+                if(previous == current.left) {
+                    break;
+                }
+                
+                if(isValidNext(current.left, current)) {
+                    return current.left;
+                }
+                
+                current = current.left;
+            }
+        }
+        
+        // If there's no data at all, exit.
+        if(current.isEmpty()) {
+            return null;
+        }
+        
+        // If nothing valid on the left, try the right.
+        if(previous != current.right) {
+            // See if it immediately is valid.
+            if(isValidNext(current.right, current)) {
+                return current.right;
+            }
+            
+            // Must search on the right's side it wasn't initially valid.
+            return successor(current.right, previous);
+        }
+        
+        // Neither left nor right are valid, find the first parent
+        // whose child did not come from the right & traverse it.
+        while(current == current.parent.right)
+            current = current.parent;
+        
+        // If there's no right, the parent must be root, so we're done.
+        if(current.parent.right == null) {
+            return null;
+        }
+        
+        // If the parent's right points to itself, we've found one.
+        if(previous != current.parent.right && isValidNext(current.parent.right, current.parent)) {
+            return current.parent.right;
+        }
+        
+        // If the parent's right is itself, there can't be any more nodes.
+        if(current.parent.right == current.parent) {
+            return null;
+        }
+        
+        // We need to traverse down the parent's right's path.
+        return successor(current.parent.right, previous);
+    }
+    
+    /** Returns true if 'next' is a the correct next entry after 'from'. */
+    private boolean isValidNext(TrieEntry<K, V> next, TrieEntry<K, V> from) {            
+        return next.bitIndex <= from.bitIndex && !next.isEmpty();
     }
     
     public String toString() {
@@ -920,7 +1012,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         
         // Starts iteration from the beginning.
         protected NodeIterator() {
-            next = findNext(root.left);
+            next = successor(root.left, null);
         }
         
         // Starts iteration at the given entry.
@@ -939,7 +1031,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             if (e == null) 
                 throw new NoSuchElementException();
             
-            next = findNext(e.predecessor);
+            next = successor(e.predecessor, next);
             current = e;
             return e;
         }
@@ -955,104 +1047,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             PatriciaTrie.this.removeEntry(node);
             
             expectedModCount = modCount;
-        } 
-        
-        /**
-         * Scans for the next node, starting at the specified point.
-         * 
-         * The basic premise is that each iteration can follow the following steps:
-         * 
-         * 1) Scan all the way to the left.
-         *   a) If we already started from this node last time, proceed to Step 2.
-         *   b) If a valid uplink is found, use it.
-         *   c) If the result is an empty node (root not set), break the scan.
-         *   d) If we already returned the left node, break the scan.
-         *   
-         * 2) Check the right.
-         *   a) If we already returned the right node, proceed to Step 3.
-         *   b) If it is a valid uplink, use it.
-         *   c) Do Step 1 from the right node.
-         *   
-         * 3) Back up through the parents until we encounter find a parent
-         *    that we're not the right child of.
-         *    
-         * 4) If there's no right child of that parent, the iteration is finished.
-         *    Otherwise continue to Step 5.
-         * 
-         * 5) Check to see if the right child is a valid uplink.
-         *    a) If we already returned that child, proceed to Step 6.
-         *       Otherwise, use it.
-         *    
-         * 6) If the right child of the parent is the parent itself, we've
-         *    already found & returned the end of the Trie, so exit.
-         *    
-         * 7) Do Step 1 on the parent's right child.
-         */
-        protected TrieEntry<K, V> findNext(final TrieEntry<K, V> start) {
-            TrieEntry<K, V> current = start;
-
-            // Only look at the left if this was a recursive or
-            // the first check, otherwise we know we've already looked
-            // at the left.
-            if(next == null || start != next.predecessor) {
-                while(!current.left.isEmpty()) {
-                    // stop traversing if we've already
-                    // returned the left of this node.
-                    if(next == current.left) {
-                        break;
-                    }
-                    
-                    if(isValidNext(current.left, current)) {
-                        return current.left;
-                    }
-                    
-                    current = current.left;
-                }
-            }
-            
-            // If there's no data at all, exit.
-            if(current.isEmpty()) {
-                return null;
-            }
-            
-            // If nothing valid on the left, try the right.
-            if(next != current.right) {
-                // See if it immediately is valid.
-                if(isValidNext(current.right, current)) {
-                    return current.right;
-                }
-                
-                // Must search on the right's side it wasn't initially valid.
-                return findNext(current.right);
-            }
-            
-            // Neither left nor right are valid, find the first parent
-            // whose child did not come from the right & traverse it.
-            while(current == current.parent.right)
-                current = current.parent;
-            
-            // If there's no right, the parent must be root, so we're done.
-            if(current.parent.right == null) {
-                return null;
-            }
-            
-            // If the parent's right points to itself, we've found one.
-            if(next != current.parent.right && isValidNext(current.parent.right, current.parent)) {
-                return current.parent.right;
-            }
-            
-            // If the parent's right is itself, there can't be any more nodes.
-            if(current.parent.right == current.parent) {
-                return null;
-            }
-            
-            // We need to traverse down the parent's right's path.
-            return findNext(current.parent.right);
-        }
-        
-        /** Returns true if 'next' is a the correct next entry after 'from'. */
-        protected boolean isValidNext(TrieEntry<K, V> next, TrieEntry<K, V> from) {            
-            return next.bitIndex <= from.bitIndex && !next.isEmpty();
         }
     }
 
@@ -1303,69 +1297,64 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * THIS IS BROKEN.
-     * 
-     * Retrieves the first entry that is valid for the start of a
-     * lexical range query. 
-     * 
-     * Note that this is different than a prefix search.  The prefix search
-     * will follow the set bits properly, snaking through the Trie until it
-     * encounters a match (with a possible subtree).
-     * @return
-     */
-    private TrieEntry<K, V> entryForRangeStart(K key, int keyLength) {
-        TrieEntry<K, V> node = root.left;
-        
-        boolean bitSet = false;
-        while(true) {
-            // first external we encounter is valid.
-            if(node.isExternalNode())
-                return node;
-            
-            if(isBitSet(key, keyLength, node.bitIndex)) {
-                if(node.right.bitIndex <= node.bitIndex) // uplink?
-                    return node.right;
-                bitSet = true;
-                node = node.right;
-            } else {
-                if(node.left.bitIndex <= node.bitIndex) // uplink?
-                    return node.left;
-                node = node.left;
-            }
-        }
-    }
-    
-    /**
      * Gets the entry corresponding to the specified key; if no such entry
      * exists, returns the entry for the least key greater than the specified
      * key; if no such entry exists (i.e., the greatest key in the Tree is less
      * than the specified key), returns <tt>null</tt>.
      */
     public TrieEntry<K,V> getCeilEntry(K key) {
-        TrieEntry<K, V> result = getR(root.left, -1, key, length(key)); //entryForRangeStart(key, length(key));
-        if(result == null)
-            return null;
+        // Basically: Follow the steps of adding the entry
+        //            (without changing a value if one already existed).
+        //            Then, given the TrieEntry that was added,
+        //            iterate to one past it -- that's our ceil.
+        //            If the entry was found, return the entry immediately. 
+        // TODO: Cleanup so that we don't actually have to add/remove from the
+        //       tree.  (We do it here because there are other well-defined 
+        //       functions to perform the search.)
         
-        System.out.println("Looking for: " + key + ", found: " + result);
+        int keyLength = length(key);
+        TrieEntry<K, V> found;
+        boolean added = false;
         
-        int compare = keyAnalyzer.compare(key, result.getKey());
-        if(compare == 0)
-            return result;
-        
-        // Go backwards until we either have nothing left, or the result is
-        // less than K.
-        if(compare < 0) {
-            
+        if (keyLength == 0) {
+            if(!root.isEmpty())
+                return root;
+            else
+                found = null; // search from the beginning.
+        } else {
+            found = getR(root.left, -1, key, keyLength);
+            if(key.equals(found.key)) {
+                return found;
+            } else {
+                int bitIndex = bitIndex(key, found.key);
+                if (isValidBitIndex(bitIndex)) { // in 99.999...9% the case
+                    TrieEntry<K, V> t = new TrieEntry<K, V>(key, null, bitIndex);
+                    found = t;
+                    root.left = putR(root.left, t, keyLength, root);
+                    added = true;
+                    incrementSize(); // must increment because remove will decrement
+                } else if(isNullBitKey(bitIndex)) {
+                    if(!root.isEmpty())
+                        return root;
+                    else
+                        found = null;
+                } else if(isEqualBitKey(bitIndex)) {
+                    return found;
+                }
+            }
         }
         
-        for(Iterator<Map.Entry<K, V>> i = new SubMapEntryIterator(result, null); i.hasNext(); ) {
-            Map.Entry<K, V> next = i.next();
-            System.out.println("Next in line was: " + next.getKey());
-            if(keyAnalyzer.compare(key, next.getKey()) <= 0)
-                return (TrieEntry<K, V>)next;
+        // Get the entry directly after this one.
+        TrieEntry<K, V> ceil = successor(found == null ? root.left : found, found);
+        
+        // Make sure we remove the entry we added temporarily.
+        if(added) {
+            removeEntry(found);
+            modCount -= 2; // we didn't really modify it.
         }
         
-        return null;
+        
+        return ceil;
     }
     
     /**
