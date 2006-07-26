@@ -122,7 +122,7 @@ CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR i
 	// Open the .ico file, getting handles to the large and small icons inside it
 	HICON bigicon   = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
 	HICON smallicon = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
-	if (!bigicon || !smallicon) return CString("Unable to open icon file");
+	if (!bigicon || !smallicon) return "Unable to open icon file";
 
 	/*
 	 * It is important that you do not call this function repeatedly.
@@ -136,5 +136,5 @@ CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR i
 	// Set both sizes of the window's icon
 	SendMessage(window, WM_SETICON, ICON_BIG,   (LPARAM)bigicon);
 	SendMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)smallicon);
-	return CString(""); // Return blank on success
+	return ""; // Return blank on success
 }
