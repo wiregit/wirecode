@@ -1,4 +1,7 @@
 
+// Microsoft Visual Studio compiles this Windows native code into SystemUtilities.dll
+// LimeWire uses these functions from the class com.limegroup.gnutella.util.SystemUtils
+
 // Include the standard Windows DLL header which we've edited to include the Java headers and more headers
 #include "stdafx.h"
 
@@ -15,7 +18,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserve
 CString GetString(JNIEnv *e, jstring j) {
 
 	// If j is a null pointer, just return a blank string
-	if (j == NULL) return CString("");
+	if (!j) return CString("");
 
 	// Get a character pointer into the text characters of the Java string
 	const char *c = e->GetStringUTFChars(j, FALSE);

@@ -1,4 +1,7 @@
 
+// Microsoft Visual Studio compiles this Windows native code into SystemUtilities.dll
+// LimeWire uses these functions from the class com.limegroup.gnutella.util.SystemUtils
+
 // Include the standard Windows DLL header which we've edited to include the Java headers and more headers
 #include "stdafx.h"
 
@@ -52,8 +55,8 @@ bool WindowsFirewallExceptionsNotAllowed() {
 // Takes a program path and file name, like "C:\Folder\Program.exe"
 // Determines if it's listed in Windows Firewall
 // Returns true if is listed, false if it's not or there was an error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring j) {
-	return WindowsFirewallIsProgramListed(GetString(e, j));
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring path) {
+	return WindowsFirewallIsProgramListed(GetString(e, path));
 }
 bool WindowsFirewallIsProgramListed(LPCTSTR path) {
 
@@ -70,8 +73,8 @@ bool WindowsFirewallIsProgramListed(LPCTSTR path) {
 // Takes a program path and file name like "C:\Folder\Program.exe"
 // Determines if the listing for that program in Windows Firewall is checked or unchecked
 // Returns true if it is enabled, false if it's not or there was an error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring j) {
-	return WindowsFirewallIsProgramEnabled(GetString(e, j));
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring path) {
+	return WindowsFirewallIsProgramEnabled(GetString(e, path));
 }
 bool WindowsFirewallIsProgramEnabled(LPCTSTR path) {
 
@@ -88,8 +91,8 @@ bool WindowsFirewallIsProgramEnabled(LPCTSTR path) {
 // Takes a path like "C:\Folder\Program.exe" and a name like "My Program"
 // Adds the program's listing in Windows Firewall to make sure it is listed and checked
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring j1, jstring j2) {
-	return WindowsFirewallAdd(GetString(e, j1), GetString(e, j2));
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring path, jstring name) {
+	return WindowsFirewallAdd(GetString(e, path), GetString(e, name));
 }
 bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name) {
 
@@ -105,8 +108,8 @@ bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name) {
 // Takes a path and file name like "C:\Folder\Program.exe"
 // Removes the program's listing from the Windows Firewall exceptions list
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring j) {
-	return WindowsFirewallRemove(GetString(e, j));
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring path) {
+	return WindowsFirewallRemove(GetString(e, path));
 }
 bool WindowsFirewallRemove(LPCTSTR path) {
 

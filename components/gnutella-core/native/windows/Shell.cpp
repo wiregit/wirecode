@@ -1,4 +1,7 @@
 
+// Microsoft Visual Studio compiles this Windows native code into SystemUtilities.dll
+// LimeWire uses these functions from the class com.limegroup.gnutella.util.SystemUtils
+
 // Include the standard Windows DLL header which we've edited to include the Java headers and more headers
 #include "stdafx.h"
 
@@ -16,20 +19,20 @@ CString GetRunningPath() {
 
 // Takes a path to a file like "C:\Folder\Song.mp3" or a Web address like "http://www.site.com/"
 // Opens it with the default program or the default Web browser
-JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_run(JNIEnv *e, jclass c, jstring j) {
-	Run(GetString(e, j));
+JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_runNative(JNIEnv *e, jclass c, jstring path) {
+	Run(GetString(e, path));
 }
 void Run(LPCTSTR path) {
 
-	// Call ShellExecute() with all the defaults
-	ShellExecute(NULL, NULL, path, "", "", SW_SHOWNORMAL); // This acts exactly like Run on the Start menu
+	// Call ShellExecute() with all the defaults, this acts exactly like Run on the Start menu, and returns immediately
+	ShellExecute(NULL, NULL, path, "", "", SW_SHOWNORMAL);
 }
 
 // Takes a path to a file on the disk, like "C:\Folder\file.ext", or a whole folder like "C:\Folder" without a trailing slash
 // Moves it to the Windows Recycle Bin
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_recycle(JNIEnv *e, jclass c, jstring j) {
-	return Recycle(GetString(e, j));
+JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_recycleNative(JNIEnv *e, jclass c, jstring path) {
+	return Recycle(GetString(e, path));
 }
 bool Recycle(LPCTSTR path) {
 
@@ -60,8 +63,8 @@ bool Recycle(LPCTSTR path) {
 // Takes a path to a file on the disk, like "C:\Folder\file.txt"
 // Removes its read-only setting
 // Returns the result from _chmod
-JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWriteable(JNIEnv *e, jclass c, jstring j) {
-	return SetFileWritable(GetString(e, j));
+JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWriteable(JNIEnv *e, jclass c, jstring path) {
+	return SetFileWritable(GetString(e, path));
 }
 int SetFileWritable(LPCTSTR path) {
 
