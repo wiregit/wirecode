@@ -122,6 +122,83 @@ public class SystemUtils {
     }
 
     /**
+     * Reads a numerical value stored in the Windows Registry.
+     * 
+     * @param root The name of the root registry key, like "HKEY_LOCAL_MACHINE"
+     * @param path The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
+     * @param name The name of the variable within that key, or blank to access the key's default value
+     * @return     The number value stored there, or 0 on error
+     */
+    private static final int registryReadNumber(String root, String path, String name) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return registryReadNumberNative(root, path, name);
+    	else
+    		return 0;
+    }
+
+    /**
+     * Reads a text value stored in the Windows Registry.
+     * 
+     * @param root The name of the root registry key, like "HKEY_LOCAL_MACHINE"
+     * @param path The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
+     * @param name The name of the variable within that key, or blank to access the key's default value
+     * @return     The text value stored there, or blank on error
+     */
+    private static final String registryReadText(String root, String path, String name) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return registryReadTextNative(root, path, name);
+    	else
+    		return "";
+    }
+
+    /**
+     * Sets a numerical value in the Windows Registry.
+     * 
+     * @param root  The name of the root registry key, like "HKEY_LOCAL_MACHINE"
+     * @param path  The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
+     * @param name  The name of the variable within that key, or blank to access the key's default value
+     * @param value The number value to set there
+     * @return      False on error
+     */
+    private static final boolean registryWriteNumber(String root, String path, String name, int value) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return registryWriteNumberNative(root, path, name, value);
+    	else
+    		return false;
+    }
+
+    /**
+     * Sets a text value in the Windows Registry.
+     * 
+     * @param root  The name of the root registry key, like "HKEY_LOCAL_MACHINE"
+     * @param path  The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
+     * @param name  The name of the variable within that key, or blank to access the key's default value
+     * @param value The text value to set there
+     * @return      False on error
+     */
+    private static final boolean registryWriteText(String root, String path, String name, String value) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return registryWriteTextNative(root, path, name, value);
+    	else
+    		return false;
+    }
+
+    /**
+     * Deletes a variable or key in the Windows Registry.
+     * 
+     * @param root The name of the root registry key, like "HKEY_LOCAL_MACHINE"
+     * @param path The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
+     * @param name The name of the variable within that key, or blank to access the key's default value
+     * @return     False on error
+     */
+    private static final boolean registryDelete(String root, String path, String name) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return registryDeleteNative(root, path, name);
+    	else
+    		return false;
+    }
+
+    /**
      * Determine if this Windows computer has Windows Firewall on it.
      * 
      * @return True if it does, false if it does not or there was an error
@@ -206,7 +283,32 @@ public class SystemUtils {
     		return firewallRemoveNative(path);
     	return false;
     }
-    
+
+    /**
+     * Runs a path using the default program on the native platform.
+     * 
+     * Given a path to a program, runs that program.
+     * Given a path to a document, opens it in the default program for that kind of document.
+     * Given a Web address, navigates to it in the default browser.
+     * Given a path to a folder, opens it in the shell.
+     * 
+     * This method returns immediately, not later after the program exits.
+     * On Windows, this method does the same thing as Start, Run.
+     * 
+     * @param path The complete path to run, like "C:\folder\file.ext" or "http://www.limewire.com/"
+     * @return     0, in place of the process exit code
+     */
+    public static int run(String path) {
+    	runNative(path);
+
+    	/*
+    	 * The program is probably still running, but calling code wants a return code.
+    	 * Return 0, the default success code.
+    	 */
+
+    	return 0;
+    }
+
     /**
      * Deletes the given file or directory.
      */
@@ -217,6 +319,15 @@ public class SystemUtils {
         
         if (CommonUtils.isMacOSX()) {
             return moveToTrashOSX(file);
+        } else if (CommonUtils.isWindows() && isLoaded) {
+            String path = null;
+            try {
+                path = file.getCanonicalPath();
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+                path = file.getAbsolutePath();
+            }
+        	return recycleNative(path);
         } else {
             file.delete();
         }
@@ -281,11 +392,26 @@ public class SystemUtils {
         return command;
     }
 
-    // Native methods implemented in C++ code in WindowsFirewall.dll
-    private static final native int setFileWriteable(String filename);
-    private static final native long idleTime();
+    /*
+     * The following methods are implemented in C++ code in SystemUtilities.dll.
+     * In addition, setFileWritable(String) and idleTime() may be implemeted in LimeWire's native library for another platform, like Mac or Linux.
+     * The idea is that the Windows, Mac, and Linux libraries have methods with the same names.
+     * Call a method, and it will run platform-specific code to complete the task in the appropriate platform-specific way.
+     */
+
     private static final native String getRunningPathNative();
+    private static final native void runNative(String path);
+    private static final native boolean recycleNative(String path);
+    private static final native int setFileWriteable(String path);
+    private static final native long idleTime();
     private static final native String setWindowIconNative(Component frame, String bin, String icon);
+
+    private static final native int registryReadNumberNative(String root, String path, String name);
+    private static final native String registryReadTextNative(String root, String path, String name);
+    private static final native boolean registryWriteNumberNative(String root, String path, String name, int value);
+    private static final native boolean registryWriteTextNative(String root, String path, String name, String value);
+    private static final native boolean registryDeleteNative(String root, String path, String name);
+
     private static final native boolean firewallPresentNative();
     private static final native boolean firewallEnabledNative();
     private static final native boolean firewallExceptionsNotAllowedNative();
