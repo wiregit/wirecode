@@ -1243,7 +1243,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             if(child == null)
                 return null;
             
-            if(child.bitIndex < node.bitIndex)
+            if(child.bitIndex <= node.bitIndex)
                 return child;
             
             node = child;
@@ -1264,7 +1264,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return null;
         
         // Go as far right as possible, until we encounter an uplink.
-        while(node.right.bitIndex >= node.bitIndex)
+        while(node.right.bitIndex > node.bitIndex)
             node = node.right;
         
         return node;
@@ -1323,52 +1323,43 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         //       functions to perform the search.)
         
         int keyLength = length(key);
-        TrieEntry<K, V> found;
-        
         
         if (keyLength == 0) {
             if(!root.isEmpty())
                 return root;
             else
-                found = null; // search from the beginning.
-        } else {
-            found = getR(root.left, -1, key, keyLength);
-            if(key.equals(found.key)) {
-                return found;
-            } else {
-                int bitIndex = bitIndex(key, found.key);
-                if (isValidBitIndex(bitIndex)) { // in 99.999...9% the case
-                    TrieEntry<K, V> t = new TrieEntry<K, V>(key, null, bitIndex);
-                    found = t;
-                    root.left = putR(root.left, t, keyLength, root);
-                    incrementSize(); // must increment because remove will decrement
-                } else if(isNullBitKey(bitIndex)) {
-                    if(!root.isEmpty())
-                        return root;
-                    else
-                        found = null;
-                } else if(isEqualBitKey(bitIndex)) {
-                    return found;
-                }
-            }
+                return firstEntry();
         }
         
-        // Get the entry directly after this one.
-        TrieEntry<K, V> ceil = successor(found == null ? root.left : found.predecessor, found);
+        TrieEntry<K, V> found = getR(root.left, -1, key, keyLength);
+        if (key.equals(found.key))
+            return found;
         
-        // Make sure we remove the entry we added temporarily.
-        if(found != null) {
-            removeEntry(found);
+        int bitIndex = bitIndex(key, found.key);
+        if (isValidBitIndex(bitIndex)) {
+            TrieEntry<K, V> added = new TrieEntry<K, V>(key, null, bitIndex);
+            root.left = putR(root.left, added, keyLength, root);
+            incrementSize(); // must increment because remove will decrement
+            TrieEntry<K, V> ceil = successor(added.predecessor, added);
+            removeEntry(added);
             modCount -= 2; // we didn't really modify it.
+            return ceil;
+        } else if (isNullBitKey(bitIndex)) {
+            if (!root.isEmpty())
+                return root;
+            else
+                return firstEntry();
+        } else if (isEqualBitKey(bitIndex)) {
+            return found;
         }
         
-        return ceil;
+        // we should have exited above.
+        throw new IllegalStateException("invalid lookup: " + key);
     }
     
     /**
-     * Returns the entry for the greatest key less than the specified key; if
-     * no such entry exists (i.e., the least key in the Tree is greater than
-     * the specified key), returns <tt>null</tt>.
+     * Returns the entry for the greatest key less than the specified key; if no such entry exists (i.e., the least key in the Tree is greater than the specified key), returns
+     * <tt>null</tt>.
      */
     public TrieEntry<K,V> getPrecedingEntry(K key) {
         return null;
