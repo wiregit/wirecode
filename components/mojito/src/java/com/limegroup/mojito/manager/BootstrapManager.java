@@ -76,7 +76,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
         synchronized (lock) {
             if (future == null) {
-                Bootstrapper bootstrapper = new Bootstrapper(hostList);
+                Bootstrapper bootstrapper = new Bootstrapper(
+                        new ArrayList<SocketAddress>(hostList));
                 future = new BootstrapFuture(bootstrapper);
                 
                 context.execute(future);

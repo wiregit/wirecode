@@ -124,11 +124,13 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             dht.start();
             running = true;
             
-            //append SIMPP host to the end of the list if we have any
-            //TODO: review -- we only want to do this once -- maybe move to Manager?
-            SocketAddress simppBootstrapHost = getSIMPPHost();
-            if(simppBootstrapHost != null) {
-                bootstrapHosts.add(simppBootstrapHost);
+            synchronized(bootstrapHosts) {
+                //append SIMPP host to the end of the list if we have any
+                //TODO: review -- we only want to do this once -- maybe move to Manager?
+                SocketAddress simppBootstrapHost = getSIMPPHost();
+                if(simppBootstrapHost != null) {
+                    bootstrapHosts.add(simppBootstrapHost);
+                }
             }
             
             bootstrap();
@@ -143,9 +145,11 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * puts itself in a waiting state until new hosts are added. 
      * 
      */
-    private synchronized void bootstrap() {
-        bootstrapingFromRT = bootstrapHosts.isEmpty();
-        bootstrapFuture = dht.bootstrap(bootstrapHosts);
+    private void bootstrap() {
+        synchronized(bootstrapHosts) {
+            bootstrapingFromRT = bootstrapHosts.isEmpty();
+            bootstrapFuture = dht.bootstrap(bootstrapHosts);
+        }
         bootstrapFuture.addDHTEventListener(bootstrapListener);
     }
     
@@ -178,7 +182,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * 
      * @param hostAddress The SocketAddress of the new bootstrap host.
      */
-    public synchronized void addBootstrapHost(SocketAddress hostAddress) {
+    public void addBootstrapHost(SocketAddress hostAddress) {
         boolean bootstrap = false;
         synchronized (bootstrapHosts) {
             //Keep bootstrap list small because it should be updated often
