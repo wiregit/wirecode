@@ -1303,18 +1303,28 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * than the specified key), returns <tt>null</tt>.
      */
     public TrieEntry<K,V> getCeilEntry(K key) {
-        // Basically: Follow the steps of adding the entry
-        //            (without changing a value if one already existed).
-        //            Then, given the TrieEntry that was added,
-        //            iterate to one past it -- that's our ceil.
-        //            If the entry was found, return the entry immediately. 
+        // Basically:
+        // Follow the steps of adding an entry, but instead...
+        //
+        // - If we ever encounter a situation where we found an equal
+        //   key, we return it immediately.
+        //
+        // - If we hit an empty root, return the first iterable item.
+        //
+        // - If we have to add a new item, we temporarily add it,
+        //   find the successor to it, then remove the added item.
+        //
+        // These steps ensure that the returned value is either the
+        // entry for the key itself, or the first entry directly after
+        // the key.
+        
         // TODO: Cleanup so that we don't actually have to add/remove from the
         //       tree.  (We do it here because there are other well-defined 
         //       functions to perform the search.)
         
         int keyLength = length(key);
         TrieEntry<K, V> found;
-        boolean added = false;
+        
         
         if (keyLength == 0) {
             if(!root.isEmpty())
@@ -1331,7 +1341,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                     TrieEntry<K, V> t = new TrieEntry<K, V>(key, null, bitIndex);
                     found = t;
                     root.left = putR(root.left, t, keyLength, root);
-                    added = true;
                     incrementSize(); // must increment because remove will decrement
                 } else if(isNullBitKey(bitIndex)) {
                     if(!root.isEmpty())
@@ -1348,11 +1357,10 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         TrieEntry<K, V> ceil = successor(found == null ? root.left : found.predecessor, found);
         
         // Make sure we remove the entry we added temporarily.
-        if(added) {
+        if(found != null) {
             removeEntry(found);
             modCount -= 2; // we didn't really modify it.
         }
-        
         
         return ceil;
     }
