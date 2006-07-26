@@ -95,7 +95,7 @@ public class ManagedTorrent implements Torrent {
 	 * only from the NIODispatcher thread, so no locking is required
 	 * when iterating on that thread.
 	 */
-	private final List<BTConnection> _connections;
+	private final List<BTLink> _connections;
 
 	/** 
 	 * The manager of choking logic
@@ -130,7 +130,7 @@ public class ManagedTorrent implements Torrent {
 			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher) {
 		_info = info;
 		_folder = info.getVerifyingFolder();
-		_connections = Collections.synchronizedList(new ArrayList<BTConnection>());
+		_connections = Collections.synchronizedList(new ArrayList<BTLink>());
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
 		trackerManager = new TrackerManager(this);
@@ -296,9 +296,9 @@ public class ManagedTorrent implements Torrent {
 			Runnable closer = new Runnable() {
 				public void run() {
 					_connectionFetcher.shutdown();
-					List<BTConnection> copy = new ArrayList<BTConnection>(_connections);
-					for(BTConnection con : copy) 
-						con.close(); 
+					List<BTLink> copy = new ArrayList<BTLink>(_connections);
+					for(BTLink con : copy) 
+						con.shutdown(); 
 				}
 			};
 			networkInvoker.invokeLater(closer);
@@ -360,7 +360,7 @@ public class ManagedTorrent implements Torrent {
 	/**
 	 * notification that a connection was closed.
 	 */
-	void connectionClosed(BTConnection btc) {
+	void connectionClosed(BTLink btc) {
 		if (btc.isWorthRetrying()) {
 			// this forgets any strikes on the location
 			TorrentLocation ep = new TorrentLocation(btc.getEndpoint());
@@ -440,7 +440,7 @@ public class ManagedTorrent implements Torrent {
 		final BTHave have = new BTHave(in);
 		Runnable haveNotifier = new Runnable() {
 			public void run() {
-				for (BTConnection btc : _connections) 
+				for (BTLink btc : _connections) 
 					btc.sendHave(have);
 			}
 		};
@@ -535,7 +535,7 @@ public class ManagedTorrent implements Torrent {
 	/**
 	 * adds a fetched connection
 	 */
-	public void addConnection(final BTConnection btc) {
+	public void addConnection(final BTLink btc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("trying to add connection " + btc.toString());
 		
@@ -557,13 +557,13 @@ public class ManagedTorrent implements Torrent {
 			if (LOG.isDebugEnabled())
 				LOG.debug("added connection " + btc.toString());
 		} else
-			btc.close();
+			btc.shutdown();
 	}
 
 	/**
 	 * private helper method, removing connection
 	 */
-	private void removeConnection(final BTConnection btc) {
+	private void removeConnection(final BTLink btc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("removing connection " + btc.toString());
 		_connections.remove(btc);
@@ -589,20 +589,17 @@ public class ManagedTorrent implements Torrent {
 		// cancel all requests and uploads and disconnect from seeds
 		Runnable r = new Runnable(){
 			public void run() {
-				List<BTConnection> seeds = new ArrayList<BTConnection>(_connections.size());
-				for (BTConnection btc : _connections) {
+				List<BTLink> seeds = new ArrayList<BTLink>(_connections.size());
+				for (BTLink btc : _connections) {
 					if (btc.isSeed())
 						seeds.add(btc);
-					else {
-						btc.choke();
-						btc.cancelAllRequests();
-						btc.sendNotInterested();
-					}
+					else 
+						btc.suspendTraffic();
 				}
 				
 				// close all seed connections
-				for (BTConnection seed : seeds)
-					seed.close();
+				for (BTLink seed : seeds)
+					seed.shutdown();
 				
 				// clear the state as we no longer need it
 				// (until source exchange is implemented)
@@ -668,7 +665,7 @@ public class ManagedTorrent implements Torrent {
 	 */
 	public boolean isConnectedTo(TorrentLocation to) {
 		synchronized(_connections) {
-			for (BTConnection btc : _connections) {
+			for (BTLink btc : _connections) {
 				IpPort addr = btc.getEndpoint(); 
 				if (addr.getAddress().equals(to.getAddress()) && 
 						addr.getPort() == to.getPort())
@@ -782,7 +779,7 @@ public class ManagedTorrent implements Torrent {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.Torrent#getConnections()
 	 */
-	public List<BTConnection> getConnections() {
+	public List<BTLink> getConnections() {
 		return _connections;
 	}
 	
@@ -816,10 +813,10 @@ public class ManagedTorrent implements Torrent {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.Torrent#getNumBusyPeers()
 	 */
-	public  int getNumBusyPeers() {
+	public  int getNumNonInterestingPeers() {
 		int busy = 0;
 		synchronized(_connections) {
-			for (BTConnection con : _connections) {
+			for (BTLink con : _connections) {
 				if (!con.isInteresting())
 					busy++;
 			}
@@ -827,6 +824,16 @@ public class ManagedTorrent implements Torrent {
 		return busy;
 	}
 
+	public int getNumChockingPeers() {
+		int qd = 0;
+		synchronized(_connections) {
+			for (BTLink c : _connections) {
+				if (c.isChoking())
+					qd++;
+			}
+		}
+		return qd;
+	}
 	/**
 	 * records that some data was uploaded
 	 */
@@ -898,7 +905,7 @@ public class ManagedTorrent implements Torrent {
 	 */
 	public void measureBandwidth() {
 		synchronized(_connections) {
-			for (BTConnection con : _connections) 
+			for (BTLink con : _connections) 
 				con.measureBandwidth();
 		}
 	}
@@ -909,7 +916,7 @@ public class ManagedTorrent implements Torrent {
 	public float getMeasuredBandwidth(boolean downstream) {
 		float ret = 0;
 		synchronized(_connections) {
-			for (BTConnection con : _connections) 
+			for (BTLink con : _connections) 
 				ret += con.getMeasuredBandwidth(downstream, true);
 		}
 		return ret;
@@ -921,7 +928,7 @@ public class ManagedTorrent implements Torrent {
 	 */
 	private class KeepAliveSender implements Runnable {
 		public void run() {
-			for (BTConnection con : _connections) 
+			for (BTLink con : _connections) 
 				con.sendKeepAlive();
 			
 			networkInvoker.invokeLater(this, KEEP_ALIVE_INTERVAL);

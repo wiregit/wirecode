@@ -11,10 +11,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
-import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.NIODispatcher;
-import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.io.ThrottleReader;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
@@ -30,7 +29,7 @@ import com.limegroup.gnutella.util.BitSet;
  * Class wrapping a Bittorrent connection.
  */
 public class BTConnection 
-implements UploadSlotListener, Chokable, BTMessageHandler, IOErrorObserver,
+implements UploadSlotListener, BTMessageHandler, BTLink,
 PieceSendListener, PieceReadListener {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnection.class);
@@ -58,9 +57,9 @@ PieceSendListener, PieceReadListener {
 	private static final long MAX_PIECE_SEND_TIME = 60 * 1000; 
 
 	/*
-	 * the NIOSocket
+	 * the NBSocket we're using
 	 */
-	private NIOSocket _socket;
+	private AbstractNBSocket _socket;
 
 	/*
 	 * Reader for the messages
@@ -193,7 +192,7 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * Initializes the connection 
 	 */
-	public void init(NIOSocket socket) {
+	public void init(AbstractNBSocket socket) {
 		_socket = socket;
 		_startTime = System.currentTimeMillis();
 		_reader = new BTMessageReader(this, this);
@@ -251,8 +250,8 @@ PieceSendListener, PieceReadListener {
 		return _isInteresting;
 	}
 	
-	/**
-	 * @return true if the connection should be retried.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTLink#isWorthRetrying()
 	 */
 	public boolean isWorthRetrying() {
 		// don't retry connections that were aborted immediately after starting
@@ -381,7 +380,7 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * sends a keepalive
 	 */
-	void sendKeepAlive() {
+	public void sendKeepAlive() {
 		_writer.sendKeepAlive();
 	}
 	
@@ -415,6 +414,7 @@ PieceSendListener, PieceReadListener {
 	 * Informs the remote we are not interested in downloading.
 	 */
 	void sendNotInterested() {
+		cancelAllRequests();
 		if (_isInteresting) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(this+ " we lose interest");
@@ -428,7 +428,7 @@ PieceSendListener, PieceReadListener {
 	 * 
 	 * @param have the <tt>BTHave</tt> message representing a complete piece.
 	 */
-	void sendHave(BTHave have) {
+	public void sendHave(BTHave have) {
 		int pieceNum = have.getPieceNum();
 		
 		// As a minor optimization we will not inform the remote host of any
@@ -441,7 +441,6 @@ PieceSendListener, PieceReadListener {
 		// we should indicate that we are not interested anymore, so we are
 		// not unchoked when we do not want to request anything.
 		if (!_info.getVerifyingFolder().containsAnyWeMiss(_available)) {
-			cancelAllRequests();
 			sendNotInterested();
 			return;
 		}
@@ -473,7 +472,7 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * Cancels all requests. 
 	 */
-	void cancelAllRequests() {
+	private void cancelAllRequests() {
 		for (BTInterval request : _requesting) 
 			sendCancel(request);
 		clearRequests();
@@ -865,5 +864,27 @@ PieceSendListener, PieceReadListener {
 	 */
 	public boolean isSeed() {
 		return _available.cardinality() == _info.getNumBlocks();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTLink#isBusy()
+	 */
+	public boolean isBusy() {
+		return !isInteresting();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTLink#isUploading()
+	 */
+	public boolean isUploading() {
+		return isInterested() && !isChoked();
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.BTLink#suspendTraffic()
+	 */
+	public void suspendTraffic() {
+		sendNotInterested();
+		choke();
 	}
 }

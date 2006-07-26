@@ -14,7 +14,7 @@ public class FinishedTorrentDownload implements Torrent {
 		this.state = active.getState();
 	}
 	
-	public List<BTConnection> getConnections() {
+	public List<BTLink> getConnections() {
 		return Collections.EMPTY_LIST;
 	}
 
@@ -26,7 +26,7 @@ public class FinishedTorrentDownload implements Torrent {
 		return 0;
 	}
 
-	public int getNumBusyPeers() {
+	public int getNumNonInterestingPeers() {
 		return 0;
 	}
 
@@ -35,6 +35,10 @@ public class FinishedTorrentDownload implements Torrent {
 	}
 
 	public int getNumPeers() {
+		return 0;
+	}
+
+	public int getNumChockingPeers() {
 		return 0;
 	}
 

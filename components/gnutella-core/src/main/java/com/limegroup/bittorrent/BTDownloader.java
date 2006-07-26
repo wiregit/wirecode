@@ -31,7 +31,9 @@ import com.limegroup.gnutella.util.NumericBuffer;
 public class BTDownloader extends AbstractDownloader 
 implements TorrentEventListener {
 	
-    private static final ObjectStreamField[] serialPersistentFields = 
+	private static final long serialVersionUID = -7785186190441081641L;
+
+	private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
     
 	private static final String METAINFO = "metainfo";
@@ -247,16 +249,11 @@ implements TorrentEventListener {
 	}
 
 	public int getBusyHostCount() {
-		return _torrent.getNumBusyPeers();
+		return _torrent.getNumNonInterestingPeers();
 	}
 
 	public int getQueuedHostCount() {
-		int qd = 0;
-		for (BTConnection c : _torrent.getConnections()) {
-			if (c.isChoking())
-				qd++;
-		}
-		return qd;
+		return _torrent.getNumChockingPeers();
 	}
 
 	public boolean isCompleted() {

@@ -46,7 +46,7 @@ interface Torrent {
 	
 	public long getNextTrackerRequestTime();
 
-	public List<BTConnection> getConnections();
+	public List<BTLink> getConnections();
 
 	public int getNumConnections();
 
@@ -54,7 +54,9 @@ interface Torrent {
 
 	public int getNumPeers();
 
-	public int getNumBusyPeers();
+	public int getNumNonInterestingPeers();
+	
+	public int getNumChockingPeers();
 
 	public long getTotalDownloaded();
 	
