@@ -185,7 +185,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
         new SimpleStatistic();
     
         
-    protected class SizeStatistic extends AbstractStatistic{
+    protected static class SizeStatistic extends AbstractStatistic{
         public void addData(int data) {
             super.addData(data);
             super.storeCurrentStat();

@@ -52,6 +52,7 @@ public class BootstrapEvent {
         this(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts, Type.SUCCEEDED);
     }
     
+    @SuppressWarnings("unchecked")
     public BootstrapEvent(Type type) {
         this(Collections.EMPTY_LIST, 0L, 0L, 0L, false, type);
     }

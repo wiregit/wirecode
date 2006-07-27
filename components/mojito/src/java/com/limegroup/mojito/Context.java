@@ -104,7 +104,7 @@ public class Context implements MojitoDHT {
     
     private Database database;
     private RouteTable routeTable;
-    private MessageDispatcher messageDispatcher;
+    private volatile MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
     private KeyValuePublisher publisher;
     private RandomBucketRefresher bucketRefresher;
@@ -357,7 +357,7 @@ public class Context implements MojitoDHT {
         return ((InetSocketAddress)localNode.getContactAddress()).getPort();
     }
     
-    public SocketAddress getContactAddress() {
+    public synchronized SocketAddress getContactAddress() {
         return localNode.getContactAddress();
     }
     

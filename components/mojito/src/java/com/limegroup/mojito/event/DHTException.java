@@ -26,8 +26,6 @@ import com.limegroup.mojito.messages.RequestMessage;
 
 public class DHTException extends Exception {
 
-    private static final long serialVersionUID = 682785229998273262L;
-    
     private KUID nodeId;
     
     private SocketAddress address;

@@ -561,8 +561,6 @@ public abstract class MessageDispatcher implements Runnable {
      */
     private class ReceiptMap extends FixedSizeHashMap<MessageID, Receipt> {
         
-        private static final long serialVersionUID = -3084244582682726933L;
-
         public ReceiptMap(int maxSize) {
             super(maxSize);
         }
