@@ -120,7 +120,8 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
             buffer.limit(priorLimit);
         }
         
-        available -= totalRead;
+        if (totalRead > 0)
+        	available -= totalRead;
         //LOG.debug("Read: " + totalRead  + ", leaving: " + available + " left.");
         
         return totalRead;
