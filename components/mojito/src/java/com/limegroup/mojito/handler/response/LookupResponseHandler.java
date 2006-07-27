@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -100,6 +101,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     /** Global lookup timeout */
     private long lookupTimeout;
+    
+    /**
+     * 
+     */
+    private ReentrantLock lock = new ReentrantLock();
     
     /**
      * The statistics for this lookup
@@ -175,28 +181,33 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     @Override
-    protected synchronized void start() throws Exception {
-        startTime = System.currentTimeMillis();
-        
-        // Get the first round of alpha nodes and send them requests
-        List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, 
-                                        KademliaSettings.LOOKUP_PARAMETER.getValue());
-        
-        if (force != null && !alphaList.contains(force)) {
-            alphaList.add(0, force);
-            alphaList.remove(alphaList.size()-1);
-        }
-        
-        for(Contact node : alphaList) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Sending " + node + " a Find request for " + lookupId);
+    protected void start() throws Exception {
+        lock.lock();
+        try {
+            startTime = System.currentTimeMillis();
+            
+            // Get the first round of alpha nodes and send them requests
+            List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, 
+                                            KademliaSettings.LOOKUP_PARAMETER.getValue());
+            
+            if (force != null && !alphaList.contains(force)) {
+                alphaList.add(0, force);
+                alphaList.remove(alphaList.size()-1);
             }
             
-            doLookup(node);                
-        }
-        
-        if (hasActiveSearches() == false) {
-            doFinishLookup(-1L, 0);
+            for(Contact node : alphaList) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Sending " + node + " a Find request for " + lookupId);
+                }
+                
+                doLookup(node);                
+            }
+            
+            if (hasActiveSearches() == false) {
+                doFinishLookup(-1L, 0);
+            }
+        } finally {
+            lock.unlock();
         }
     }
     
@@ -208,61 +219,70 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         return -1L;
     }
     
-    protected synchronized void response(ResponseMessage message, long time) throws IOException {
-        
-        assert (hasActiveSearches());
-        
-        lookupStat.addReply();
-        decrementActiveSearches();
-        
-        Contact node = message.getContact();
-        int hop = hopMap.remove(node.getNodeID()).intValue();
-        
-        if (message instanceof FindValueResponse) {
-            if (isValueLookup()) {
-                handleFindValueResponse((FindValueResponse)message, time, hop);
+    protected void response(ResponseMessage message, long time) throws IOException {
+        lock.lock();
+        try {
+            assert (hasActiveSearches());
+            
+            lookupStat.addReply();
+            decrementActiveSearches();
+            
+            Contact node = message.getContact();
+            int hop = hopMap.remove(node.getNodeID()).intValue();
+            
+            if (message instanceof FindValueResponse) {
+                if (isValueLookup()) {
+                    handleFindValueResponse((FindValueResponse)message, time, hop);
+                } else {
+                    // Some Idot sent us a FIND_VALUE response for a
+                    // FIND_NODE lookup! Ignore? We're losing one
+                    // parallel lookup (temporarily) if we do nothing.
+                    // I think it's better to kick off a new lookup
+                    // now rather than to wait for a yet another
+                    // response/lookup that would re-activate this one.
+                    lookupStep(hop);
+                }
             } else {
-                // Some Idot sent us a FIND_VALUE response for a
-                // FIND_NODE lookup! Ignore? We're losing one
-                // parallel lookup (temporarily) if we do nothing.
-                // I think it's better to kick off a new lookup
-                // now rather than to wait for a yet another
-                // response/lookup that would re-activate this one.
-                lookupStep(hop);
+                handleFindNodeResponse((FindNodeResponse)message, time, hop);
             }
-        } else {
-            handleFindNodeResponse((FindNodeResponse)message, time, hop);
-        }
-        
-        if (hasActiveSearches() == false) {
-            doFinishLookup(time(), hop);
+            
+            if (hasActiveSearches() == false) {
+                doFinishLookup(time(), hop);
+            }
+        } finally {
+            lock.unlock();
         }
     }
     
-    protected synchronized void timeout(KUID nodeId, 
+    protected void timeout(KUID nodeId, 
             SocketAddress dst, RequestMessage message, long time) throws IOException {
         
-        assert (hasActiveSearches());
-        
-        lookupStat.addTimeout();
-        decrementActiveSearches();
-        
-        if (LOG.isTraceEnabled()) {
-            if (isValueLookup()) {
-                LOG.trace(ContactUtils.toString(nodeId, dst) 
-                        + " did not respond to our FIND_VALUE request");   
-            } else {
-                LOG.trace(ContactUtils.toString(nodeId, dst) 
-                        + " did not respond to our FIND_NODE request");
+        lock.lock();
+        try {
+            assert (hasActiveSearches());
+            
+            lookupStat.addTimeout();
+            decrementActiveSearches();
+            
+            if (LOG.isTraceEnabled()) {
+                if (isValueLookup()) {
+                    LOG.trace(ContactUtils.toString(nodeId, dst) 
+                            + " did not respond to our FIND_VALUE request");   
+                } else {
+                    LOG.trace(ContactUtils.toString(nodeId, dst) 
+                            + " did not respond to our FIND_NODE request");
+                }
             }
-        }
-    
         
-        int hop = hopMap.remove(nodeId).intValue();
-        lookupStep(hop);
-        
-        if (hasActiveSearches() == false) {
-            doFinishLookup(time(), hop);
+            
+            int hop = hopMap.remove(nodeId).intValue();
+            lookupStep(hop);
+            
+            if (hasActiveSearches() == false) {
+                doFinishLookup(time(), hop);
+            }
+        } finally {
+            lock.unlock();
         }
     }
     
