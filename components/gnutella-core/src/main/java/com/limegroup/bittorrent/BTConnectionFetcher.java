@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,10 +19,11 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
-public class BTConnectionFetcher implements BTHandshakeObserver  {
+public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnectionFetcher.class);
 	
@@ -56,33 +58,41 @@ public class BTConnectionFetcher implements BTHandshakeObserver  {
 	/**
 	 * the Set of outgoing connection fetchers
 	 */
-	final StrictIpPortSet<OutgoingBTHandshaker> outgoing =  
+	private final StrictIpPortSet<OutgoingBTHandshaker> outgoing =  
 		new StrictIpPortSet<OutgoingBTHandshaker>();
 	
 	/**
 	 * the Set of incoming connection hadnshakers
 	 */
-	final StrictIpPortSet<IncomingBTHandshaker> incoming = 
+	private final StrictIpPortSet<IncomingBTHandshaker> incoming = 
 		new StrictIpPortSet<IncomingBTHandshaker>();
 	
 	/**
 	 * the torrent this fetcher belongs to
 	 */
-	final ManagedTorrent _torrent;
+	private final ManagedTorrent _torrent;
+	
+	/**
+	 * The threadpool to schedule future fetching on
+	 */
+	private final SchedulingThreadPool scheduler;
 
 	/**
 	 * The fixed outgoing handshake for this torrent.
 	 */
-	final ByteBuffer _handshake;
+	private final ByteBuffer _handshake;
 	
 	/**
 	 * Whether this fetcher is shutdown.
 	 */
 	private volatile boolean shutdown;
 	
+	private Future scheduled;
 	
-	BTConnectionFetcher(ManagedTorrent torrent) {
+	
+	BTConnectionFetcher(ManagedTorrent torrent, SchedulingThreadPool scheduler) {
 		_torrent = torrent;
+		this.scheduler = scheduler;
 		ByteBuffer handshake = ByteBuffer.allocate(68);
 		handshake.put((byte) BITTORRENT_PROTOCOL.length()); // 19
 		handshake.put(BITTORRENT_PROTOCOL_BYTES); // "BitTorrent protocol"
@@ -100,6 +110,8 @@ public class BTConnectionFetcher implements BTHandshakeObserver  {
 		if (shutdown)
 			return;
 		
+		cancelScheduledFetch();
+		
 		while (_torrent.isActive() && 
 				outgoing.size() < MAX_CONNECTORS &&
 				_torrent.needsMoreConnections() && 
@@ -109,8 +121,33 @@ public class BTConnectionFetcher implements BTHandshakeObserver  {
 				LOG.debug("started connection fetcher: "
 						+ outgoing.size());
 		}
+		
+		if (_torrent.needsMoreConnections()) {
+			long nextNonBusy = _torrent.getNextLocationRetryTime();
+			if (nextNonBusy < Long.MAX_VALUE)
+				fetch(nextNonBusy);
+		}
+	}
+	
+	public synchronized void fetch(long when) {
+		if (scheduled != null)
+			return;
+		if (LOG.isDebugEnabled())
+			LOG.debug("scheduling a fetch in "+when);
+		scheduled = scheduler.invokeLater(this, when);
 	}
 
+	private synchronized void cancelScheduledFetch() {
+		if (scheduled == null)
+			return;
+		LOG.debug("cancelling a scheduled fetch");
+		scheduled.cancel(true);
+		scheduled = null;
+	}
+	
+	public void run() {
+		fetch();
+	}
 
 	/**
 	 * Starts a connector thread if possible
@@ -140,11 +177,12 @@ public class BTConnectionFetcher implements BTHandshakeObserver  {
 	}
 	
 	void shutdown() {
-		List<Shutdownable> conns; 
+		List<Shutdownable> conns;
 		synchronized(this) {
 			if (shutdown)
 				return;
 			shutdown = true;
+			cancelScheduledFetch();
 			// copy because shutdown() removes
 			conns =	new ArrayList<Shutdownable>(outgoing.size()+incoming.size());
 			conns.addAll(incoming);

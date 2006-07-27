@@ -232,8 +232,11 @@ public class ManagedTorrent implements Torrent {
 		// start the choking / unchoking of connections
 		choker.scheduleRechoke();
 		
-		keepAliveSender = networkInvoker.invokeLater(
-				new KeepAliveSender(),KEEP_ALIVE_INTERVAL);
+		networkInvoker.invokeLater(new Runnable() {
+			public void run() {
+				keepAliveSender = networkInvoker.invokeLater(
+						new KeepAliveSender(),KEEP_ALIVE_INTERVAL);
+			}});
 	}
 
 	/* (non-Javadoc)
@@ -273,8 +276,6 @@ public class ManagedTorrent implements Torrent {
 		// close the folder and stop the periodic tasks
 		_folder.close();
 		choker.stop();
-		if (keepAliveSender != null)
-			keepAliveSender.cancel(true);
 		
 		// fire off an announcement to the tracker
 		trackerManager.announceStop();
@@ -291,18 +292,18 @@ public class ManagedTorrent implements Torrent {
 			diskInvoker.invokeLater(saver);
 		}
 		
-		// close connections if any
-		if (!_connections.isEmpty()) {
-			Runnable closer = new Runnable() {
-				public void run() {
-					_connectionFetcher.shutdown();
-					List<BTLink> copy = new ArrayList<BTLink>(_connections);
-					for(BTLink con : copy) 
-						con.shutdown(); 
-				}
-			};
-			networkInvoker.invokeLater(closer);
-		}
+		// close connections and cancel keepaliveSender
+		Runnable closer = new Runnable() {
+			public void run() {
+				if (keepAliveSender != null)
+					keepAliveSender.cancel(true);
+				_connectionFetcher.shutdown();
+				List<BTLink> copy = new ArrayList<BTLink>(_connections);
+				for(BTLink con : copy) 
+					con.shutdown(); 
+			}
+		};
+		networkInvoker.invokeLater(closer);
 		
 		dispatchEvent(TorrentEvent.Type.STOPPED); 
 		
@@ -368,9 +369,21 @@ public class ManagedTorrent implements Torrent {
 			_peers.add(ep);
 		}
 		removeConnection(btc);
+		
+		if (!needsMoreConnections())
+			return;
+		
 		int state = _state.getInt();
-		if (state == DOWNLOADING || state == CONNECTING)
-			_connectionFetcher.fetch();
+		if (state == DOWNLOADING || state == CONNECTING) {
+			if (hasNonBusyLocations())
+				_connectionFetcher.fetch();
+			else {
+				long freeTime = getNextLocationRetryTime();
+				if (LOG.isDebugEnabled())
+					LOG.debug("all locations busy, will fetch in "+freeTime);
+				_connectionFetcher.fetch(freeTime);
+			}
+		}
 	}
 
 	/**
@@ -381,7 +394,7 @@ public class ManagedTorrent implements Torrent {
 				new FixedSizeExpiringSet<TorrentLocation>(500, 60 * 60 * 1000));
 		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
 
-		_connectionFetcher = new BTConnectionFetcher(this);
+		_connectionFetcher = new BTConnectionFetcher(this, networkInvoker);
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("Starting torrent");
@@ -889,6 +902,18 @@ public class ManagedTorrent implements Torrent {
 	}
 	
 	/**
+	 * @return the next time a recently failed location can be
+	 * retried, or Long.MAX_VALUE if no such found.
+	 */
+	public long getNextLocationRetryTime() {
+		long soonest = Long.MAX_VALUE;
+		long now = System.currentTimeMillis();
+		for (TorrentLocation to : _peers) 
+			soonest = Math.min(soonest, to.getWaitTime(now));
+		return soonest;
+	}
+	
+	/**
 	 * whether or not continuing is hopeless
 	 */
 	boolean shouldStop() {
@@ -933,7 +958,7 @@ public class ManagedTorrent implements Torrent {
 			for (BTLink con : _connections) 
 				con.sendKeepAlive();
 			
-			networkInvoker.invokeLater(this, KEEP_ALIVE_INTERVAL);
+			keepAliveSender = networkInvoker.invokeLater(this, KEEP_ALIVE_INTERVAL);
 		}
 	}
 	

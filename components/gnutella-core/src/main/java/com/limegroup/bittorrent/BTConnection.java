@@ -273,9 +273,8 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * Closes the connection.
 	 */
-	public void close() {
-		
-		if (closing)
+	private void close() {
+		if (closing) 
 			return;
 		closing = true;
 		
@@ -805,7 +804,7 @@ PieceSendListener, PieceReadListener {
 	}
 
 	public String toString() {
-		StringBuilder b = new StringBuilder("("+getHost());
+		StringBuilder b = new StringBuilder(_socket == null? "new" : "("+getHost());
 		if (isChoked())
 			b.append(" Ced");
 		if (isChoking())

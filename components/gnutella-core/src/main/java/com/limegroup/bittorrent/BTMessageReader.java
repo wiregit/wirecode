@@ -92,8 +92,6 @@ public class BTMessageReader implements ChannelReadObserver {
 				thisTime += read;
 			if (thisTime > 0)
 				count(thisTime);
-			else if (read == -1)
-				throw new IOException();
 			else 
 				break;
 			processState();
