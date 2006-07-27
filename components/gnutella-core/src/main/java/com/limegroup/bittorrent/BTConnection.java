@@ -13,13 +13,10 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.ThrottleReader;
-import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.messages.*;
-import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
 import com.limegroup.gnutella.util.BitField;
 import com.limegroup.gnutella.util.BitFieldSet;
@@ -51,12 +48,6 @@ PieceSendListener, PieceReadListener {
 	 */
 	private static final long MIN_RETRYABLE_LIFE_TIME = 60 * 1000;
 	
-	/**
-	 * Maximum time it should take to send a piece
-	 * (pieces are 32kb max)
-	 */
-	private static final long MAX_PIECE_SEND_TIME = 60 * 1000; 
-
 	/*
 	 * the NBSocket we're using
 	 */
@@ -65,12 +56,12 @@ PieceSendListener, PieceReadListener {
 	/*
 	 * Reader for the messages
 	 */
-	private ChannelReadObserver _reader;
+	private final ChannelReadObserver _reader;
 
 	/*
 	 * Writer for the messages
 	 */
-	private BTChannelWriter _writer;
+	private final BTChannelWriter _writer;
 
 	/**
 	 * The pieces the remote host has
@@ -148,12 +139,6 @@ PieceSendListener, PieceReadListener {
 	/** Bandwidth trackers for the outgoing and incoming bandwidth */
 	private SimpleBandwidthTracker up, downShort, downLong;
 	
-	/** Watchdog for this connection */
-	private StalledUploadWatchdog watchdog;
-	
-	/** Delayer for this connection */
-	private DelayedBufferWriter delayer;
-	
 	/** Whether this connection is currently closing */
 	private volatile boolean closing;
 	
@@ -185,6 +170,9 @@ PieceSendListener, PieceReadListener {
 		up = new SimpleBandwidthTracker();
 		downShort = new SimpleBandwidthTracker(1000);
 		downLong = new SimpleBandwidthTracker(5000);
+		
+		_writer = new BTMessageWriter(this, this);
+		_reader = new BTMessageReader(this, this);
 
 	}
 
@@ -199,14 +187,9 @@ PieceSendListener, PieceReadListener {
 		_socket = socket;
 		_torrent = torrent;
 		_startTime = System.currentTimeMillis();
-		_reader = new BTMessageReader(this, this);
-		_writer = new BTMessageWriter(this, this);
 		
-		ThrottleWriter throttle = new ThrottleWriter(
-				RouterService.getBandwidthManager().getThrottle(false));
-		delayer = new DelayedBufferWriter(1400, 3000);
-		_writer.setWriteChannel(delayer);
-		delayer.setWriteChannel(throttle);
+		_writer.init();
+		
 		ThrottleReader readThrottle = new ThrottleReader(
 				RouterService.getBandwidthManager().getThrottle(true));
 		_reader.setReadChannel(readThrottle);
@@ -296,11 +279,9 @@ PieceSendListener, PieceReadListener {
 		
 		clearRequests();
 		
-		if (usingSlot) {
+		if (usingSlot) 
 			RouterService.getUploadSlotManager().cancelRequest(this);
-			if (watchdog != null)
-				watchdog.deactivate();
-		}
+		
 		_torrent.connectionClosed(this);
 	}
 
@@ -492,7 +473,6 @@ PieceSendListener, PieceReadListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" piece sent");
 		usingSlot = false;
-		prepareForPiece(false);
 		RouterService.getUploadSlotManager().requestDone(this);
 		readyForWriting();
 	}
@@ -546,28 +526,12 @@ PieceSendListener, PieceReadListener {
 			public void run() {
 				if (LOG.isDebugEnabled())
 					LOG.debug("disk read done for "+in);
-				prepareForPiece(true);
 				_writer.enqueue(new BTPieceMessage(in, data));
 			}
 		};
 		NIODispatcher.instance().invokeLater(pieceSender);
 	}
 	
-	/**
-	 * Prepares the connection for sending a piece
-	 * @param start whether we are starting a piece or finishing it.
-	 */
-	private void prepareForPiece(boolean start) {
-		if (start) {
-			if (watchdog == null)
-				watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
-			watchdog.activate(_writer);
-			delayer.setImmediateFlush(true);
-		} else {
-			watchdog.deactivate();
-			delayer.setImmediateFlush(false);
-		}
-	}
 	
 	private void clearRequests() {
 		for (BTInterval clear : _requesting)

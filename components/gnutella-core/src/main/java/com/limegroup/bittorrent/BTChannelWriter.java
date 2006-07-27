@@ -21,5 +21,10 @@ public interface BTChannelWriter extends ChannelWriter {
 	 * @return true if the message was enqueued, false if not.
 	 */
 	public void enqueue(BTMessage m);
+	
+	/**
+	 * Initializes this writer (optional)
+	 */
+	public void init();
 
 }

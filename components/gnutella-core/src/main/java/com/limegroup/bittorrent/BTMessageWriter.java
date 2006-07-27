@@ -8,8 +8,12 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.InterestWriteChannel;
+import com.limegroup.gnutella.io.ThrottleWriter;
+import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
@@ -19,6 +23,12 @@ public class BTMessageWriter implements BTChannelWriter {
 
 	private static final Log LOG = LogFactory.getLog(BTMessageWriter.class);
 
+	/**
+	 * Maximum time it should take to send a piece
+	 * (pieces are 32kb max)
+	 */
+	private static final long MAX_PIECE_SEND_TIME = 60 * 1000; 
+	
 	/** A keepalive with 4x0 bytes */
 	private static final ByteBuffer KEEP_ALIVE = ByteBuffer.allocate(4).asReadOnlyBuffer();
 	
@@ -54,6 +64,12 @@ public class BTMessageWriter implements BTChannelWriter {
 	 */
 	private BTMessage currentMessage;
 	
+	/** A delayer to buffer messages waiting to be sent out */
+	private DelayedBufferWriter delayer;
+	
+	/** Watchdog to make sure uploading Pieces does not stall */
+	private StalledUploadWatchdog watchdog;
+	
 	/**
 	 * Constructor
 	 */
@@ -64,6 +80,14 @@ public class BTMessageWriter implements BTChannelWriter {
 		_out[0] = ByteBuffer.allocate(5);
 	}
 
+	public void init() {
+		ThrottleWriter throttle = new ThrottleWriter(
+				RouterService.getBandwidthManager().getThrottle(false));
+		delayer = new DelayedBufferWriter(1400, 3000);
+		setWriteChannel(delayer);
+		delayer.setWriteChannel(throttle);
+	}
+	
 	/**
 	 * Implements ChannelWriter interface
 	 */
@@ -101,8 +125,10 @@ public class BTMessageWriter implements BTChannelWriter {
 			if (!_out[1].hasRemaining()) {
 				_out[1] = null; // can be gc'd now
 				
-				if (currentMessage.getType() == BTMessage.PIECE) 
+				if (isPiece(currentMessage)) {
+					prepareForPiece(false);
 					pieceListener.pieceSent();
+				}
 			}
 			
 			if (written > 0) {
@@ -132,6 +158,8 @@ public class BTMessageWriter implements BTChannelWriter {
 	public void enqueue(BTMessage m) {
 		
 		_queue.addLast(m);
+		if (isPiece(m))
+			prepareForPiece(true);
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("enqueing message of type " + m.getType() + " to "
@@ -144,6 +172,26 @@ public class BTMessageWriter implements BTChannelWriter {
 		
 		if (_channel != null)
 			_channel.interest(this, true);
+	}
+	
+	private boolean isPiece(BTMessage m){
+		return m.getType() == BTMessage.PIECE;
+	}
+	
+	/**
+	 * Prepares the connection for sending a piece
+	 * @param start whether we are starting a piece or finishing it.
+	 */
+	private void prepareForPiece(boolean start) {
+		if (start) {
+			if (watchdog == null)
+				watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
+			watchdog.activate(this);
+			delayer.setImmediateFlush(true);
+		} else {
+			watchdog.deactivate();
+			delayer.setImmediateFlush(false);
+		}
 	}
 	
 	/**
@@ -161,6 +209,8 @@ public class BTMessageWriter implements BTChannelWriter {
 		if (shutdown)
 			return;
 		shutdown = true;
+		if (watchdog != null)
+			watchdog.deactivate();
 		ioxObserver.shutdown();
 	}
 
