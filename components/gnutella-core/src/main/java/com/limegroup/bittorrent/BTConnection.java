@@ -13,7 +13,6 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.ThrottleReader;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.messages.*;
@@ -142,6 +141,9 @@ PieceSendListener, PieceReadListener {
 	/** Whether this connection is currently closing */
 	private volatile boolean closing;
 	
+	/** Cached runnables for handling of slot-related events */
+	private Runnable slotReleaser, slotNotifier;
+	
 	/**
 	 * Constructs instance of this
 	 * 
@@ -179,7 +181,8 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * Initializes the connection 
 	 */
-	public void init(AbstractNBSocket socket, ManagedTorrent torrent) {
+	public void init(AbstractNBSocket socket, 
+			ManagedTorrent torrent) {
 		// if we were shutdown before initializing, return.
 		if (closing)
 			return;
@@ -188,7 +191,7 @@ PieceSendListener, PieceReadListener {
 		_torrent = torrent;
 		_startTime = System.currentTimeMillis();
 		
-		_writer.init();
+		_writer.init(torrent.getScheduler());
 		
 		ThrottleReader readThrottle = new ThrottleReader(
 				RouterService.getBandwidthManager().getThrottle(true));
@@ -366,13 +369,6 @@ PieceSendListener, PieceReadListener {
 	}
 	
 	/**
-	 * sends a keepalive
-	 */
-	public void sendKeepAlive() {
-		_writer.sendKeepAlive();
-	}
-	
-	/**
 	 * @return the round during which the connection was last unchoked
 	 */
 	public int getUnchokeRound() {
@@ -529,7 +525,7 @@ PieceSendListener, PieceReadListener {
 				_writer.enqueue(new BTPieceMessage(in, data));
 			}
 		};
-		NIODispatcher.instance().invokeLater(pieceSender);
+		_torrent.getScheduler().invokeLater(pieceSender);
 	}
 	
 	
@@ -790,22 +786,35 @@ PieceSendListener, PieceReadListener {
 	
 	
 	public void releaseSlot() {
-		NIODispatcher.instance().invokeLater(new Runnable() {
-			public void run() {
-				usingSlot = false;
-				choke();
-			}
-		});
+		_torrent.getScheduler().invokeLater(getSlotReleaser());
+	}
+	
+	private Runnable getSlotReleaser() {
+		if (slotReleaser == null) {
+			slotReleaser = new Runnable() {
+				public void run() {
+					usingSlot = false;
+					choke();
+				}
+			};
+		}
+		return slotReleaser;
 	}
 	
 	public void slotAvailable() {
-		NIODispatcher.instance().invokeLater(new Runnable() {
-			public void run() {
-				beginPieceSend();
-			}
-		});
+		_torrent.getScheduler().invokeLater(getSlotNotifier());
 	}
 
+	private Runnable getSlotNotifier() {
+		if (slotNotifier == null) {
+			slotNotifier = new Runnable() {
+				public void run() {
+					beginPieceSend();
+				}
+			};
+		}
+		return slotNotifier;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.Chokable#getAverageBandwidth()

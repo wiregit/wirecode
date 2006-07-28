@@ -14,6 +14,8 @@ import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
+import com.limegroup.gnutella.util.Periodic;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
@@ -34,6 +36,11 @@ public class BTMessageWriter implements BTChannelWriter {
 	
 	/** keepAlive for this writer */
 	private final ByteBuffer myKeepAlive = KEEP_ALIVE.duplicate();
+	
+	/**
+	 * How often to send keepalives.  2 minutes as suggested by spec.
+	 */
+	private static final int KEEP_ALIVE_INTERVAL = 2 * 60 * 1000; 
 	
 	// InterestWriteChannel to write to.
 	private InterestWriteChannel _channel;
@@ -70,6 +77,9 @@ public class BTMessageWriter implements BTChannelWriter {
 	/** Watchdog to make sure uploading Pieces does not stall */
 	private StalledUploadWatchdog watchdog;
 	
+	/** A periodic keepalive sender */
+	private Periodic keepAliveSender;
+	
 	/**
 	 * Constructor
 	 */
@@ -80,12 +90,18 @@ public class BTMessageWriter implements BTChannelWriter {
 		_out[0] = ByteBuffer.allocate(5);
 	}
 
-	public void init() {
+	public void init(SchedulingThreadPool scheduler) {
 		ThrottleWriter throttle = new ThrottleWriter(
 				RouterService.getBandwidthManager().getThrottle(false));
 		delayer = new DelayedBufferWriter(1400, 3000);
 		setWriteChannel(delayer);
 		delayer.setWriteChannel(throttle);
+		keepAliveSender = new Periodic(new Runnable() {
+			public void run() {
+				sendKeepAlive();
+			}
+		}, scheduler);
+		keepAliveSender.rescheduleIfLater(KEEP_ALIVE_INTERVAL);
 	}
 	
 	/**
@@ -156,7 +172,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	 * @see com.limegroup.bittorrent.MessageWriter#enqueue(com.limegroup.bittorrent.messages.BTMessage)
 	 */
 	public void enqueue(BTMessage m) {
-		
+		keepAliveSender.rescheduleIfLater(KEEP_ALIVE_INTERVAL);
 		_queue.addLast(m);
 		if (isPiece(m))
 			prepareForPiece(true);
@@ -209,6 +225,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		if (shutdown)
 			return;
 		shutdown = true;
+		keepAliveSender.unschedule();
 		if (watchdog != null)
 			watchdog.deactivate();
 		ioxObserver.shutdown();

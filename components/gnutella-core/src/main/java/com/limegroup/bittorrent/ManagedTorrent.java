@@ -39,13 +39,6 @@ public class ManagedTorrent implements Torrent {
 	
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 	
-	/**
-	 * How often to send keepalives.  2 minutes as suggested by spec.
-	 */
-	private static final int KEEP_ALIVE_INTERVAL = 2 * 60 * 1000; 
-	
-
-	
 	private static final SchedulingThreadPool INVOKER = 
 		new NIODispatcherThreadPool();
 
@@ -101,11 +94,6 @@ public class ManagedTorrent implements Torrent {
 	 * The manager of choking logic
 	 */
 	private Choker choker;
-	
-	/**
-	 * A runnable that sends periodic keepalives.
-	 */
-	private Future keepAliveSender;
 	
 	/** 
 	 * The current state of this torrent.
@@ -231,12 +219,6 @@ public class ManagedTorrent implements Torrent {
 		
 		// start the choking / unchoking of connections
 		choker.scheduleRechoke();
-		
-		networkInvoker.invokeLater(new Runnable() {
-			public void run() {
-				keepAliveSender = networkInvoker.invokeLater(
-						new KeepAliveSender(),KEEP_ALIVE_INTERVAL);
-			}});
 	}
 
 	/* (non-Javadoc)
@@ -295,8 +277,6 @@ public class ManagedTorrent implements Torrent {
 		// close connections and cancel keepaliveSender
 		Runnable closer = new Runnable() {
 			public void run() {
-				if (keepAliveSender != null)
-					keepAliveSender.cancel(true);
 				_connectionFetcher.shutdown();
 				List<BTLink> copy = new ArrayList<BTLink>(_connections);
 				for(BTLink con : copy) 
@@ -927,6 +907,14 @@ public class ManagedTorrent implements Torrent {
 		return _connectionFetcher;
 	}
 	
+	/**
+	 * @return the <tt>SchedulingThreadPool</tt> executing network-
+	 * related tasks
+	 */
+	public SchedulingThreadPool getScheduler() {
+		return networkInvoker;
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.Torrent#measureBandwidth()
 	 */
@@ -947,19 +935,6 @@ public class ManagedTorrent implements Torrent {
 				ret += con.getMeasuredBandwidth(downstream, true);
 		}
 		return ret;
-	}
-	
-	/**
-	 * a scheduled task that sends a keepalive message to the
-	 * connected peers.
-	 */
-	private class KeepAliveSender implements Runnable {
-		public void run() {
-			for (BTLink con : _connections) 
-				con.sendKeepAlive();
-			
-			keepAliveSender = networkInvoker.invokeLater(this, KEEP_ALIVE_INTERVAL);
-		}
 	}
 	
 	/**

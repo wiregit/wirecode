@@ -41,11 +41,6 @@ interface BTLink extends Chokable, IOErrorObserver, BandwidthTracker {
 	public boolean isInteresting();
 	
 	/**
-	 * sends a keep-alive message to this link.
-	 */
-	public void sendKeepAlive();
-	
-	/**
 	 * sends a <tt>BTHave</tt> message on this link. 
 	 */
 	public void sendHave(BTHave have);
