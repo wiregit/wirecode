@@ -1,37 +1,70 @@
 package com.limegroup.gnutella.util;
 
+import java.util.concurrent.Future;
+
 
 public class Periodic {
 
-	private final long delay;
 	private final SchedulingThreadPool scheduler;
 	private final Delegate d;
 	
 	private long nextExecuteTime;
-	private boolean scheduled;
+	private Future future;
+	
 	public Periodic(Runnable r,
-			long delay, 
 			SchedulingThreadPool scheduler) {
 		this.d = new Delegate(r);
-		this.delay = delay;
 		this.scheduler = scheduler;
 	}
 	
-	public synchronized void schedule() {
-		schedule(delay);
+	/**
+	 * changes the execution time of this Periodic task if it is
+	 * later than the current execution time.
+	 * @param newDelay the new delay from now when this should be executed
+	 * @return true if the execution time changed
+	 */
+	public synchronized boolean rescheduleIfLater(long newDelay) {
+		long newTime = System.currentTimeMillis() + newDelay;
+		
+		if (future == null) { 
+			future = scheduler.invokeLater(d,newDelay);
+			nextExecuteTime = 0;
+		}
+		
+		if (newTime > nextExecuteTime) {
+			nextExecuteTime = newTime;
+			return true;
+		}
+		return false;
 	}
 	
-	public synchronized void schedule(long customDelay) {
-		nextExecuteTime = System.currentTimeMillis() + customDelay;
+	/**
+	 * changes the execution time of this Periodic task if it is
+	 * sooner than the current execution time.
+	 * @param newDelay the new delay from now when this should be executed
+	 * @return true if the execution time changed
+	 */
+	public synchronized boolean rescheduleIfSooner(long newDelay) {
+		// if not scheduled at all, just schedule
+		if (future == null) 
+			return rescheduleIfLater(newDelay);
 		
-		if (!scheduled) {
-			scheduler.invokeLater(d,customDelay);
-			scheduled = true;
+		long newTime = System.currentTimeMillis() + newDelay;
+		if (newTime < nextExecuteTime) {
+			future.cancel(false);
+			nextExecuteTime = newTime;
+			future = scheduler.invokeLater(d, newDelay);
+			return true;
 		}
+		return false;
 	}
 	
 	public synchronized void unschedule() {
-		nextExecuteTime = -1;
+		if (future != null) {
+			future.cancel(true);
+			future = null;
+			nextExecuteTime = -1;
+		}
 	}
 	
 	private class Delegate implements Runnable {
@@ -42,14 +75,11 @@ public class Periodic {
 		
 		public void run() {
 			synchronized(Periodic.this) {
-				scheduled = false;
-				if (nextExecuteTime < 0)
-					return;
+				future = null;
 				
 				long now = System.currentTimeMillis();
 				if (now < nextExecuteTime) {
-					scheduler.invokeLater(this, nextExecuteTime - now);
-					scheduled = true;
+					future = scheduler.invokeLater(this, nextExecuteTime - now);
 					return;
 				}
 			}

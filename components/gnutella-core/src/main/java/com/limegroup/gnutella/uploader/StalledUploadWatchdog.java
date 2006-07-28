@@ -49,6 +49,8 @@ public final class StalledUploadWatchdog extends Periodic {
     
     private final Closer closer;
     
+    private final long delayTime;
+    
     private OStreamWrap osWrap;
     
     public StalledUploadWatchdog() {
@@ -56,8 +58,9 @@ public final class StalledUploadWatchdog extends Periodic {
     }
     
     public StalledUploadWatchdog(long delayTime) {
-    	super(new Closer(),delayTime, RouterService.getSchedulingThreadPool());
+    	super(new Closer(), RouterService.getSchedulingThreadPool());
     	this.closer = (Closer)getRunnable();
+    	this.delayTime = delayTime;
     }
     
     /**
@@ -77,7 +80,7 @@ public final class StalledUploadWatchdog extends Periodic {
     public void activate(Shutdownable shutdownable) {
         if(LOG.isDebugEnabled())
             LOG.debug("Activated on: " + shutdownable);
-        schedule();
+        rescheduleIfLater(delayTime);
         
         closer.shutdownable = shutdownable;
     }

@@ -58,7 +58,6 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     	this.delay = delay;
     	this.interester = new Periodic(
     			new Interester(),
-    			delay,
     			scheduler);
     }
 
@@ -201,7 +200,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         			return false;
         		else {
         			// otherwise schedule a flushing event.
-        			interester.schedule(lastFlushTime + delay - now);
+        			interester.rescheduleIfLater(lastFlushTime + delay - now);
         		}
         	}
         } 
