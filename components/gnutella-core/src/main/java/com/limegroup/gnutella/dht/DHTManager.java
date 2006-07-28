@@ -48,8 +48,8 @@ public interface DHTManager extends LifecycleListener{
     
     public boolean isRunning();
     
-    public boolean isWaiting();
-
+    public boolean isWaitingForNodes();
+    
     public MojitoDHT getMojitoDHT();
     
     public int getVersion();

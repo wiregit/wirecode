@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
@@ -16,7 +15,10 @@ import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IpPort;
 
 /**
- * This class takes care of fetching DHT hosts from the Gnutella network.
+ * This class takes care of fetching DHT hosts from the Gnutella network. 
+
+ * Implicitely, this will also propagate the knowledge through the network,
+ * as the MessageRouter forwards pongs to the leafs!
  * 
  * First tries to get active nodes directly from the HostCatcher. if that fails, 
  * it tries to send UDP pings to nodes who support the DHT. If that fails too, it
@@ -33,14 +35,14 @@ public class DHTNodeFetcher {
     
     private final long FETCH_DELAY = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
     
-    private final DHTController controller;
+    private final DHTBootstrapper bootstrapper;
     
-    private long lastRequest = 0L;
+    private volatile long lastRequest = 0L;
     
     private TimedFetcher fetcher = null;
     
-    public DHTNodeFetcher(DHTController controller) {
-        this.controller = controller;
+    public DHTNodeFetcher(DHTBootstrapper bootstrapper) {
+        this.bootstrapper = bootstrapper;
     }
     
     /**
@@ -62,7 +64,7 @@ public class DHTNodeFetcher {
         for(ExtendedEndpoint ep : dhtHosts) {
             if(ep.getDHTMode().isActive()) {
                 haveActive = true;
-                controller.addBootstrapHost(new InetSocketAddress(ep.getAddress(), ep.getPort()));
+                bootstrapper.addBootstrapHost(new InetSocketAddress(ep.getAddress(), ep.getPort()));
             } 
         }
         
@@ -97,7 +99,7 @@ public class DHTNodeFetcher {
     
     private class TimedFetcher implements Runnable {
         public void run() {
-            if (!controller.isWaiting()) {
+            if (!bootstrapper.isWaitingForNodes()) {
                 return;
             }
             requestDHTHosts();
@@ -110,9 +112,9 @@ public class DHTNodeFetcher {
             long delay = System.currentTimeMillis() - lastRequest;
             //stop when not waiting anymore OR when not connected to the Gnutella network 
             //OR timeout
-            return (!controller.isWaiting() 
+            return (delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue())
                     || !RouterService.isConnected()
-                    || (delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue()));
+                    || (!bootstrapper.isWaitingForNodes());
         }
     }
     
@@ -127,7 +129,7 @@ public class DHTNodeFetcher {
             List<IpPort> l = reply.getPackedDHTIPPorts();
             
             for (IpPort ipp : l) {
-                controller.addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
+                bootstrapper.addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
             }
         }
         public void registered(byte[] guid) {}

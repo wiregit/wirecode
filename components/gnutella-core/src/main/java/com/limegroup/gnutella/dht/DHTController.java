@@ -19,11 +19,13 @@ public interface DHTController {
     
     public void addBootstrapHost(SocketAddress hostAddress);
     
+    public void sendUpdatedCapabilities();
+    
     public boolean isActiveNode();
     
     public boolean isRunning();
     
-    public boolean isWaiting();
+    public boolean isWaitingForNodes();
     
     public int getDHTVersion();
     

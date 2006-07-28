@@ -50,6 +50,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
     private BootstrapFuture future = null;
     
+    private volatile boolean bootstrapped = false;
+    
     public BootstrapManager(Context context) {
         super(context);
     }
@@ -58,6 +60,14 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         synchronized(lock) {
             return future != null;
         }
+    }
+    
+    public synchronized boolean isBootstrapped() {
+        return bootstrapped;
+    }
+    
+    public synchronized void setBootstrapped(boolean bootstrapped) {
+        this.bootstrapped = bootstrapped;
     }
     
     public DHTFuture<BootstrapEvent> bootstrap() {
@@ -157,6 +167,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             buffer.append("totalTime: ").append(totalTime).append("\n");
             System.out.println(buffer.toString());*/
             
+            bootstrapped = true;
             return new BootstrapEvent(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
         }
         

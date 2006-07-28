@@ -23,7 +23,6 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.util.BucketUtils;
 
@@ -69,16 +68,16 @@ class PassiveDHTNodeController extends AbstractDHTController{
         }
         
         InetSocketAddress addr = new InetSocketAddress(host, port);
-        if(isWaiting() || isBootstrappingFromRT()) {
+        if(dhtBootstrapper.isWaitingForNodes() || dhtBootstrapper.isBootstrappingFromRT()) {
             
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Adding host: "+addr+" to leaf dht nodes");
             }
             
             addBootstrapHost(addr);
-        } else {
-            limeDHTRouteTable.addLeafDHTNode(addr);
-        }
+        } 
+        //add to our leaf nodes
+        limeDHTRouteTable.addLeafDHTNode(addr);
     }
     
     private synchronized void removeLeafDHTNode(String host, int port) {
@@ -94,7 +93,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
     }
 
     @Override
-    protected void sendUpdatedCapabilities() {
+    public void sendUpdatedCapabilities() {
         // DO NOTHING
     }
 
@@ -139,7 +138,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
 
     @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
-        if(!isRunning() || isWaiting()) {
+        if(!isRunning() || !dht.isBootstrapped()) {
             return Collections.emptyList();
         }
         

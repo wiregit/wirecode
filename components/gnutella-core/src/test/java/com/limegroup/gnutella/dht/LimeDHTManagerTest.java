@@ -82,14 +82,14 @@ public class LimeDHTManagerTest extends BaseTestCase {
     public void testBootstrap() throws Exception {
         RouterService.startDHT(true);
         DHTController controller = getController();
-        sleep(500);
+        sleep(1000);
         assertTrue(controller.isRunning());
         assertTrue(controller.isActiveNode());
-        assertTrue(controller.isWaiting());
+        assertTrue(DHT_MANAGER.isWaitingForNodes());
         
         //add to the manager
         DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
-        assertFalse(controller.isWaiting());
+        assertFalse(controller.isWaitingForNodes());
         sleep(100);
         assertGreaterThan(-1, CapabilitiesVM.instance().supportsDHT());
     }
@@ -102,20 +102,21 @@ public class LimeDHTManagerTest extends BaseTestCase {
         sleep(300);
         //add invalid hosts
         DHT_MANAGER.addBootstrapHost(new InetSocketAddress("localhost", 2000));
-        assertFalse(controller.isWaiting());
+        assertFalse(controller.isWaitingForNodes());
         for(int i = 1; i < 10; i++) {
             DHT_MANAGER.addBootstrapHost(new InetSocketAddress("0.0.0.0", i));
         }
         //now add valid: should be first in the list
         DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
-        List bootstrapHosts = (List) PrivilegedAccessor.getValue(controller, "bootstrapHosts");
-        assertEquals(10, bootstrapHosts.size());
+        DHTBootstrapper bootstrapper = (DHTBootstrapper)PrivilegedAccessor.getValue(controller, "dhtBootstrapper");
+        List bootstrapHosts = (List) PrivilegedAccessor.getValue(bootstrapper, "bootstrapHosts");
+        assertEquals(11, bootstrapHosts.size());
         assertEquals(BOOTSTRAP_DHT.getLocalAddress(), bootstrapHosts.get(0));
         assertFalse(bootstrapHosts.contains(new InetSocketAddress("localhost",2000)));
         sleep(1000);
         //by now, should have failed previous unsuccessfull bootstrap and bootstrapped correctly
         bootstrapHosts = (List) PrivilegedAccessor.getValue(controller, "bootstrapHosts");
-        assertFalse(controller.isWaiting());
+        assertFalse(controller.isWaitingForNodes());
 //        assertTrue()
     }
     
@@ -151,13 +152,13 @@ public class LimeDHTManagerTest extends BaseTestCase {
         assertNotEquals(passiveNodeId, controller.getMojitoDHT().getLocalNodeID());
     }
     
-    public void tearDown() {
+    public void tearDown() throws Exception{
         //Ensure no more threads.
         RouterService.shutdown();
         sleep();
     }
     
-    private void sleep() {
+    private void sleep() throws Exception{
         sleep(300);
     }
     
@@ -165,10 +166,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
         return (DHTController) PrivilegedAccessor.getValue(DHT_MANAGER, "dhtController");
     }
 
-    private void sleep(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-        }
+    private void sleep(int milliseconds) throws Exception{
+        Thread.sleep(milliseconds);
     }
 }

@@ -103,6 +103,11 @@ public interface MojitoDHT {
     public boolean isRunning();
     
     /**
+     * Returns whether or not this DHT is bootstrapped
+     */
+    public boolean isBootstrapped();
+    
+    /**
      * Starts the DHT
      */
     public void start();

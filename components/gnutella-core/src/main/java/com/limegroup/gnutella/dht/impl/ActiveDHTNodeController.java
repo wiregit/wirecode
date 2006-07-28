@@ -58,12 +58,11 @@ class ActiveDHTNodeController extends AbstractDHTController {
 
     @Override
     public synchronized void start() {
-        //if we want to connect actively, we either shouldn't be an ultrapeer
-        //or should be DHT capable
+        //if we want to connect actively, we should be active DHT capable
         if (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
                 && !DHTSettings.ACTIVE_DHT_CAPABLE.getValue()) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot initialize DHT - node is not DHT capable or is an ultrapeer");
+                LOG.debug("Cannot initialize ACTIVE DHT - node is not DHT active capable");
             }
             return;
         }
@@ -90,7 +89,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     }
     
     @Override
-    protected void sendUpdatedCapabilities() {
+    public void sendUpdatedCapabilities() {
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
     }
@@ -101,7 +100,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
 
     @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
-        if(!isRunning() || isWaiting()) {
+        if(!isRunning() || !dht.isBootstrapped()) {
             return Collections.emptyList();
         }
         

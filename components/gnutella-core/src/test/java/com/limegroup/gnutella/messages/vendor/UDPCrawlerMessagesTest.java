@@ -625,7 +625,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
 
         public boolean isRunning() {return true;}
 
-        public boolean isWaiting() {return true;}
+        public boolean isWaitingForNodes() {return false;}
 
         public void start(boolean activeMode) {}
 

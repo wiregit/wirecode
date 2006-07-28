@@ -373,7 +373,7 @@ public class NodeAssigner {
         boolean isActiveDHTCapable = 
             (_isHardcoreCapable &&
             //AND is my average uptime AND current uptime high enough?
-            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() 
+            (ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() 
                     && _currentUptime >= DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
                      
         //don't give active capability to ultrapeers

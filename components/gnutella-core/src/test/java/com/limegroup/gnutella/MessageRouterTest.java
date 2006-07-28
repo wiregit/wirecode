@@ -872,8 +872,10 @@ public final class MessageRouterTest extends BaseTestCase {
         public void addBootstrapHost(SocketAddress hostAddress) {}
 
         public void addressChanged() {}
-
-        public int getDHTVersion() { return 1; }
+        
+        public boolean isWaitingForNodes() {
+            return false;
+        }
 
         public MojitoDHT getMojitoDHT() { return null; }
 

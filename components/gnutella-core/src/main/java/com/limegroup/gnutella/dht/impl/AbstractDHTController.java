@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
@@ -52,43 +53,16 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     private static final Log LOG = LogFactory.getLog(AbstractDHTController.class);
     
     /**
-     * The Gnutella DHT node fetcher 
-     */
-    private DHTNodeFetcher dhtNodeFetcher;
-
-    /**
      * The instance of the DHT
      */
     protected MojitoDHT dht;
 
     private volatile boolean running = false;
     
-    /**
-     * A boolean to represent the state when we have failed last bootstrap
-     * and are waiting for new bootstrap hosts
-     */
-    private volatile boolean waiting = false;
-    
-    /**
-     * A flag set to true when we are bootstraping from our persisted Routing Table
-     */
-    private boolean bootstrapingFromRT = false; 
-    
-    /**
-     * A list of DHT bootstrap hosts comming from the Gnutella network
-     */
-    private volatile LinkedList<SocketAddress> bootstrapHosts 
-            = new LinkedList<SocketAddress>();
-    
-    /**
-     * The bootstrap's <tt>Future</tt> object
-     */
-    private DHTFuture<BootstrapEvent> bootstrapFuture;
-    
-    private BootstrapListener bootstrapListener = new DHTBootstrapListener();
-    
+    protected final DHTBootstrapper dhtBootstrapper;
     
     public AbstractDHTController() {
+        dhtBootstrapper = new LimeDHTBootstrapper(this);
         //delegate
         init();
     }
@@ -97,6 +71,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * Start the Mojito DHT and connects it to the network in either passive mode
      * or active mode if we are not firewalled.
      * The start preconditions are the following:
+     * 1) We are not already connected AND we have at least one initialized Gnutella connection
      * 1) if we want to actively connect: We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
      * 2) We are not an ultrapeer while excluding ultrapeers from the active network
      * 3) We are not already connected or trying to bootstrap
@@ -104,7 +79,8 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * @param activeMode true to connect to the DHT in active mode
      */
     public synchronized void start() {
-        if (running) {
+        if (running || (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
+                && !RouterService.isConnected())) {
             return;
         }
         
@@ -124,33 +100,10 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             dht.start();
             running = true;
             
-            synchronized(bootstrapHosts) {
-                //append SIMPP host to the end of the list if we have any
-                //TODO: review -- we only want to do this once -- maybe move to Manager?
-                SocketAddress simppBootstrapHost = getSIMPPHost();
-                if(simppBootstrapHost != null) {
-                    bootstrapHosts.add(simppBootstrapHost);
-                }
-            }
-            
-            bootstrap();
+            dhtBootstrapper.bootstrap(dht);
         } catch (IOException err) {
             LOG.error(err);
         }
-    }
-    
-    /**
-     * Tries to bootstrap of a list of bootstrap hosts. 
-     * If bootstraping fails, this controller clears the list and 
-     * puts itself in a waiting state until new hosts are added. 
-     * 
-     */
-    private void bootstrap() {
-        synchronized(bootstrapHosts) {
-            bootstrapingFromRT = bootstrapHosts.isEmpty();
-            bootstrapFuture = dht.bootstrap(bootstrapHosts);
-        }
-        bootstrapFuture.addDHTEventListener(bootstrapListener);
     }
     
     /**
@@ -168,11 +121,13 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             LOG.debug("Shutting down DHT");
         }
         
-        dht.stop();
+        dhtBootstrapper.stop();
+        
+        if(dht != null) {
+            dht.stop();
+        }
+        
         running = false;
-        waiting = false;
-        bootstrapingFromRT = false;
-        bootstrapHosts.clear();
     }
     
     /**
@@ -183,92 +138,29 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * @param hostAddress The SocketAddress of the new bootstrap host.
      */
     public void addBootstrapHost(SocketAddress hostAddress) {
-        boolean bootstrap = false;
-        synchronized (bootstrapHosts) {
-            //Keep bootstrap list small because it should be updated often
-            if(bootstrapHosts.size() >= 20) {
-                bootstrapHosts.removeLast();
-            }
-            
-            //always put/replace the host to the head of the list
-            bootstrapHosts.remove(hostAddress);
-            bootstrapHosts.addFirst(hostAddress);
-
-            System.out.println("adding: "+ hostAddress);
-            System.out.println("waiting: "+ waiting);
-
-            bootstrap = waiting || bootstrapingFromRT;
-            waiting = false;
-        }
-        
-        if(bootstrap) {
-            bootstrapFuture.cancel(true);
-            bootstrap();
-        }
+        dhtBootstrapper.addBootstrapHost(hostAddress);
     }
     
     public boolean isRunning() {
         return running;
     }
     
+    public boolean isWaitingForNodes() {
+        return dhtBootstrapper.isWaitingForNodes();
+    }
+    
     /**
      * Shuts the DHT down if we got disconnected from the network.
-     * Note: if the CONNECTED event is fired and we connected as an ultrapeer 
-     * allready while beeing an active node, then the <tt>NodeAssigner</tt> 
-     * will take care of disconnecting us and connecting againg in passive mode.
+     * The nodeAssigner will take care of restarting this DHT node if 
+     * it still qualifies.
+     * 
      */
     public void handleLifecycleEvent(LifecycleEvent evt) {
-        if(evt.isConnectedEvent()) {
-            //we were waiting and had no connection to the gnutella network
-            //now we do --> start sending UDP pings to request bootstrap nodes
-            if(waiting) {
-                dhtNodeFetcher.requestDHTHosts();
-            }
-        } else if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
+        if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(running && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
                 stop();
             }
         }
-    }
-    
-    /**
-     * Gets the SIMPP host responsible for the keyspace containing the local node ID
-     * 
-     * @return
-     */
-    private SocketAddress getSIMPPHost(){
-        String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
-        List<SocketAddress> hostList = new ArrayList<SocketAddress>(simppHosts.length);
-
-        for (String hostString : simppHosts) {
-            int index = hostString.indexOf(":");
-            if(index < 0 || index == hostString.length()-1) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(new UnknownHostException("invalid host: " + hostString));
-                }
-                
-                continue;
-            }
-            
-            try {
-                String host = hostString.substring(0, index);
-                int port = Integer.parseInt(hostString.substring(index+1).trim());
-                InetSocketAddress addr = new InetSocketAddress(host, port);
-                hostList.add(addr);
-            } catch(NumberFormatException nfe) {
-                LOG.error(new UnknownHostException("invalid host: " + hostString));
-            }
-        }
-
-        if(hostList.isEmpty()) {
-            return null;
-        }
-        
-        //each host in the list is responsible for a subspace of the keyspace
-        int localPrefix = (int)((dht.getLocalNodeID().getBytes()[0] & 0xF0) >> 4);
-        
-        int index = (int)((float)hostList.size()/15f * localPrefix) % hostList.size();
-        return hostList.get(index);
     }
     
     public MojitoDHT getMojitoDHT() {
@@ -279,14 +171,6 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         return dht.getVersion();
     }
 
-    public boolean isWaiting() {
-        return waiting;
-    }
-    
-    protected boolean isBootstrappingFromRT() {
-        return bootstrapingFromRT;
-    }
-    
     public void setLimeMessageDispatcher() {
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
         dht.setThreadFactory(new ThreadFactory() {
@@ -307,11 +191,11 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     /**
      * Sends the updated capabilities to our ultrapeers -- only if we are an active node!
      */
-    protected abstract void sendUpdatedCapabilities();
+    public abstract void sendUpdatedCapabilities();
     
     /*** End abstract methods ***/
     
-    protected class IpPortContactNode implements IpPort {
+    protected static class IpPortContactNode implements IpPort {
         
         private final InetAddress nodeAddress;
         
@@ -335,48 +219,4 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             return port;
         }
     }
-    
-    private class DHTBootstrapListener implements BootstrapListener{
-
-        public void handleResult(BootstrapEvent result) {
-            if(result.getType() == Type.PING_SUCCEEDED){
-
-                //TODO here we should also cancel the DHTNodeFetcher because it's not used anymore
-                //for now, waiting = false will stop at least the UDP pings
-                waiting = false;
-                bootstrapingFromRT = false;
-                
-            } else if (result.getType() == Type.SUCCEEDED) {
-                // Notify our connections that we are now a full DHT node 
-                sendUpdatedCapabilities();
-                
-            } else { //boostrap failure!
-                
-                synchronized(bootstrapHosts) {
-                    bootstrapHosts.removeAll(result.getFailedHostList());
-                    if(bootstrapHosts.isEmpty()) {
-                        //host list is now empty --> we try bootstraping from our RT and requests hosts 
-                        //from the network at the same time
-                        waiting = true;
-
-                        if(dhtNodeFetcher == null) {
-                            dhtNodeFetcher = new DHTNodeFetcher(AbstractDHTController.this);
-                        }
-                        //send UDPPings -- non blocking
-                        dhtNodeFetcher.startTimerTask();
-                        return;
-                    } 
-                }
-                //here: bootstrap host list is not empty: try boostraping again
-                //keep it outside the synchronized block.
-                bootstrap();
-            }
-        }
-        
-        public void handleThrowable(Throwable ex) {
-            LOG.debug(ex);
-            waiting = false; // will cancel the node fetcher too
-        }
-    }
-
 }

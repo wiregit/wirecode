@@ -504,6 +504,13 @@ public class Context implements MojitoDHT {
         return isRunning() && bootstrapManager.isBootstrapping();
     }
     
+    /**
+     * Returns whether or not the MojitoDHT is bootstrapped
+     */
+    public synchronized boolean isBootstrapped() {
+        return isRunning() && bootstrapManager.isBootstrapped();
+    }
+    
     public synchronized void bind(int port) throws IOException {
         bind(new InetSocketAddress(port));
     }
@@ -581,6 +588,8 @@ public class Context implements MojitoDHT {
         }
         
         running = false;
+        
+        bootstrapManager.setBootstrapped(false);
         
         bucketRefresher.stop();
         publisher.stop();

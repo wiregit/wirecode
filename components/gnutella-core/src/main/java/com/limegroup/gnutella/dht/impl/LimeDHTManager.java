@@ -30,9 +30,8 @@ public class LimeDHTManager implements DHTManager {
             } else {
                 dhtController = new PassiveDHTNodeController();
             }
-            
-            dhtController.start();
         }
+        dhtController.start();
     }
     
     public synchronized void switchMode(boolean toActiveMode) {
@@ -97,13 +96,13 @@ public class LimeDHTManager implements DHTManager {
         return false;
     }
     
-    public synchronized boolean isWaiting() {
+    public boolean isWaitingForNodes() {
         if(dhtController != null) {
-            return dhtController.isWaiting();
+            return dhtController.isWaitingForNodes();
         }
         return false;
     }
-    
+
     public synchronized MojitoDHT getMojitoDHT() {
         if(dhtController != null) {
             return dhtController.getMojitoDHT();
