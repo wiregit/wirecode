@@ -25,5 +25,5 @@ import com.limegroup.mojito.event.DHTEventListener;
 
 public interface DHTFuture<T> extends Future<T> {
     
-    public <L extends DHTEventListener<T>> void addDHTEventListener(L listener);
+    public void addDHTEventListener(DHTEventListener<T> listener);
 }
