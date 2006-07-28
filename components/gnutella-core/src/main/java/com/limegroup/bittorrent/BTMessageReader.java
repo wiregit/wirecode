@@ -87,11 +87,10 @@ public class BTMessageReader implements ChannelReadObserver {
 			return;
 		while(true) {
 			int read = 0;
-			int thisTime = 0;
-			while( !bufferFull() && (read = _in.read(_channel)) > 0 )
-				thisTime += read;
-			if (thisTime > 0)
-				count(thisTime);
+			if(!bufferFull()) 
+				read = _in.read(_channel);
+			if (read > 0)
+				count(read);
 			else 
 				break;
 			processState();
@@ -100,6 +99,11 @@ public class BTMessageReader implements ChannelReadObserver {
 		}
 	}
 	
+	/**
+	 * chokes or unchokes read signals from this channel.  
+	 * Not the same as torrent connection choking
+	 * @param choke whether to choke or unchoke the channel
+	 */
 	private void choke(boolean choke) {
 		if (choked != choke) {
 			_channel.interest(!choke);

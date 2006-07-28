@@ -193,6 +193,12 @@ public class CircularByteBuffer {
     	return write(sink, Integer.MAX_VALUE);
     }
     
+    /**
+     * Reads data from the source channel
+     * @return the amount of data read, >= 0
+     * @throws IOException if an error occured or 
+     * no data was read and end of stream was reached.
+     */
     public int read(ReadableByteChannel source) throws IOException {
         int read = 0;
         int thisTime = 0;
@@ -213,8 +219,11 @@ public class CircularByteBuffer {
             in.limit(in.capacity());
             if (thisTime == 0)
                 break;
-            if (thisTime == -1)
-            	throw new IOException();
+            if (thisTime == -1) {
+            	if (read == 0)
+            		throw new IOException();
+            	return read;
+            }
             
             read += thisTime;
         } 
