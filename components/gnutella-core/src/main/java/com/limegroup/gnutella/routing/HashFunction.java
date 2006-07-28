@@ -1,10 +1,22 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.StringUtils;
 
-/** 
+/**
+ * 
+ * 
+ * 
+ * 
+ * All of the methods in this class are static.
+ * This means the program never makes a HashFunction object, it just calls the methods here to hash things.
+ * Only code in QueryRouteTable calls this method.
+ * 
+ * 
  * The official platform-independent hashing function for query-routing.  The
  * key property is that it allows interpolation of hash tables of different
  * sizes.  More formally, with x&gt;=0, n&gt;=0, k&gt;=0, 0&lt;=r&lt;=n,<ul>
@@ -15,12 +27,15 @@ import com.limegroup.gnutella.util.StringUtils;
  * This version should now work cross-platform, however it is not intended
  * to be secure, only very fast to compute.  See Chapter 12.3.2. of CLR
  * for details of multiplication-based algorithms.
+ * 
+ * 
  */
 public class HashFunction {
-    //private static final double A=(Math.sqrt(5.0)-1.0)/2.0;
-    //private static final long TWO_31=0x80000000l;
-    //private static final int A_INT=(int)(A*TWO_31); //=1327217884
-    private static final int A_INT=0x4F1BBCDC;
+
+	/**
+	 * 
+	 */
+    private static final int A_INT = 0x4F1BBCDC;
         
     /**
      * Returns the n-<b>bit</b> hash of x, where n="bits".  That is, the
@@ -28,28 +43,42 @@ public class HashFunction {
      * between 0 and (2^bits)-1.
      */
     private static int hashFast(int x, byte bits) {
-        // Keep only the "bits" highest bits of the 32 *lowest* bits of the
-        // product (ignore overflowing bits of the 64-bit product result).
-        // The constant factor should distribute equally each byte of x in
-        // the returned bits.
-        return (int)(x * A_INT) >>> (32 - bits);
+
+    	/*
+    	 * Keep only the "bits" highest bits of the 32 *lowest* bits of the
+    	 * product (ignore overflowing bits of the 64-bit product result).
+    	 * The constant factor should distribute equally each byte of x in
+    	 * the returned bits.
+    	 */
+
+    	return (int)(x * A_INT) >>> (32 - bits);
     }
 
-    /*
+    /**
+     * 
+     * Only code in QueryRouteTable calls this method.
+     * 
+     * 
      * Returns the n-bit hash of x.toLowerCase(), where n=<tt>bits</tt>.
      * That is, the returned value value can fit in "<tt>bits</tt>" unsigned
      * bits, and is between 0 and <tt>(2 ^ bits) - 1</tt>.
-     *
+     * 
      * @param x the string to hash
      * @param bits the number of bits to use in the resulting answer
      * @return the hash value
      * @see hash(String,int,int,byte)
-     */    
+     * 
+     * 
+     */
     public static int hash(String x, byte bits) {
+
         return hash(x, 0, x.length(), bits);
-    }       
+    }
 
     /**
+     * 
+     * Only code in QueryRouteTable calls this method.
+     * 
      * Returns the same value as hash(x.substring(start, end), bits), but tries
      * to avoid allocations.<p>
      *
@@ -100,7 +129,12 @@ public class HashFunction {
     }
 
 
-    /** 
+    /**
+     * 
+     * 
+     * Only code in QueryRouteTable calls this method.
+     * 
+     * 
      * Returns a list of canonicalized keywords in the given file name, suitable
      * for passing to hash(String,int).  The returned keywords are
      * lower-cased, though that is not strictly needed as hash ignores
@@ -138,7 +172,11 @@ public class HashFunction {
             FileManager.DELIMITERS);
     }
 
-    /** 
+    /**
+     * 
+     * Only code in QueryRouteTable calls this method.
+     * 
+     * 
      * Returns the index of the keyword starting at or after the i'th position
      * of query, or -1 if no such luck.
      */
@@ -158,7 +196,11 @@ public class HashFunction {
         return -1;
     }   
 
-    /** 
+    /**
+     * 
+     * Only code in QueryRouteTable calls this method.
+     * 
+     * 
      * Returns the index just past the end of the keyword starting at the i'th
      * position of query, or query.length() if no such index.
      */
@@ -177,6 +219,10 @@ public class HashFunction {
         
 
     /**
+     * 
+     * Only code in QueryRouteTable calls this method.
+     * 
+     * 
      * @return an array of strings with the original strings and prefixes
      */
     public static String[] getPrefixes(String[] words){

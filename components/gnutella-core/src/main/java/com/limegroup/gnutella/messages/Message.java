@@ -77,7 +77,7 @@ public abstract class Message implements Serializable, Comparable {
     /** 0x81, query reply. */
     public static final byte F_QUERY_REPLY           = (byte)0x81;
 
-    /** 0x30, route table update. */
+    /** 0x30, a QRP message. */
     public static final byte F_ROUTE_TABLE_UPDATE    = (byte)0x30;
 
     /** 0x31, vendor message. */

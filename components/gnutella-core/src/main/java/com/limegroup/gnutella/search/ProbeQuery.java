@@ -102,6 +102,9 @@ final class ProbeQuery {
      */
     int sendProbe() {
 
+    	//zootella
+    	System.out.println("Sending probe query with TTL 1 to " + TTL_1_PROBES.size() + " ultrapeers, and TTL 2 to " + TTL_2_PROBES.size() + " ultrapeers");
+
         // Make iter to loop through the ultrapeers we'll send our query packet with a TTL of 1 to
         Iterator iter = TTL_1_PROBES.iterator();
 

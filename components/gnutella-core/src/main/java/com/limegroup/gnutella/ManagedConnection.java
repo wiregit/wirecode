@@ -662,12 +662,12 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
         	// Make a new QueryRouteTable object
             _lastQRPTableReceived = new QueryRouteTable(
                 m.getTableSize(), // The size of the query route table
-                m.getInfinity()); // The infinity to use, one more than the max TTL (ask)
+                m.getInfinity()); // The infinity the QRP table uses
 
         // The remote computer is replacing a previous query route table with a new one
         } else {
 
-        	// Give the reset table message to the reset() method of the previous QRP table object
+        	// Make our QueryRouteTable for this remote computer block everything
             _lastQRPTableReceived.reset(m);
         }
     }

@@ -83,7 +83,7 @@ public class QueryRequest extends Message implements Serializable {
      * SPECIAL_MINSPEED_MASK  0x80 m         We're using these 2 bytes to hold flags, not a speed
      * SPECIAL_FIREWALL_MASK  0x40  f        The searching computer isn't externally contactable on the Internet
      * SPECIAL_XML_MASK       0x20   x       The searching computer wants hits with XML metadata
-     * SPECIAL_OUTOFBAND_MASK 0x04       o   This query message was sent in a UDP packet (do)
+     * SPECIAL_OUTOFBAND_MASK 0x04       o   Hit computers should respond to this query out of band, with UDP packets
      * SPECIAL_FWTRANS_MASK   0x02        w  The searching computer can do UDP firewall-to-firewall file transfers
      * 
      * The second byte is the maximum number of hits the searching computer wants.

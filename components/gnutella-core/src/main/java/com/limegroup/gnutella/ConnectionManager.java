@@ -2063,6 +2063,7 @@ public class ConnectionManager {
 
     /**
      * Send the newly connected computer a Gnutella ping packet.
+     * If the computer said "Pong-Caching: 0.1" in the handshake, doesn't send anything.
      * 
      * If we don't need any more connections, we'll send the ping with a TTL of 1.
      * If we do need more connections, we'll set the TTL to 4.

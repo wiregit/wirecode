@@ -1104,27 +1104,21 @@ public class RouterService {
     }
 
 	/**
-     * 
-     * 
-     * 
-	 * Searches the network for files with the given metadata.
+	 * Search the Gnutella network for something the user typed.
 	 * 
-	 * @param richQuery metadata query to insert between the nulls,
-	 *  typically in XML format
-	 * @see query(byte[], String, MediaType)
-     * 
-     * @param guid
-     * @param query
-     * @param richQuery
-     * @param type
+     * @param guid      The GUID we've chosen to uniquely identify this search on the Gnutella network, and in our GUI
+     * @param query     The search text the user typed into the Search box
+     * @param richQuery A metadata query to insert between the nulls in the query message, a String of XML
+     * @param type      A MediaType object that represents the type of media we're looking for, and can filter the search to only find that type
 	 */
 	public static void query(final byte[] guid, final String query, final String richQuery, final MediaType type) {
 
 		try {
 
+			// When we make the query message we'll send to start this search, we'll point qr at it
             QueryRequest qr = null;
 
-            // The given GUID has our IP address and port number hidden in it
+            // The given GUID has our IP address and port number hidden in it, newQueryGUID() found that we can get UDP
             if (isIpPortValid() &&                                          // We know our IP address and port number, and
                 (new GUID(guid)).addressesMatch(getAddress(), getPort())) { // The given GUID has our IP address and port number hidden in it
 
@@ -1137,14 +1131,22 @@ public class RouterService {
                  * VERY long lived client
                  */
 
-                // 
+            	/*
+            	 * Make a query packet marked to get query hit packets out of band in UDP.
+            	 * Takes a GUID with our IP address and port number hidden in it, this is how hit computers will address UDP packets back to us.
+            	 * Sets 0x04 in the speed flags bytes, this marks the query as wanting out of band results.
+            	 */
+
+                // Make a query message with our IP address and port number hidden in the GUID, and the OOB flag set
                 qr = QueryRequest.createOutOfBandQuery(guid, query, richQuery, type);
-                
+
+                // Make a note that we're sending another query that will get out-of-band results
                 OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
 
-            // The given GUID doesn't have our IP address and port number hidden in it
+            // The given GUID doesn't have our IP address and port number hidden in it, newQueryGUID() found we can't get UDP
             } else {
 
+            	// Make a query message that doesn't have our IP address and port number hidden in the GUID, and doesn't have the OOB flag set
                 qr = QueryRequest.createQuery(guid, query, richQuery, type);
             }
 
@@ -1189,9 +1191,15 @@ public class RouterService {
      */ 
     private static void recordAndSendQuery(final QueryRequest qr, final MediaType type) {
 
+        // Record that we last sent out a query right now
         _lastQueryTime = System.currentTimeMillis();
+
+        // Tell the ResponseVerifier we're searching for this so it knows to expect results that match it
         VERIFIER.record(qr, type);
+
+        // Add a query to the list of them the SearchResultHandler keeps so that it can count how many hits we've gotten and tell our ultrapeers this number
         RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
+
         router.sendDynamicQuery(qr);
     }
 

@@ -69,6 +69,7 @@ public final class QueryHandler {
     /**
      * 6, we'll never send out a query packet with a TTL bigger than 6.
      * Actually, calculateNewTTL() tries TTLs less than MAX_QUERY_TTL, so the maximum is 5.
+     * In practice, LimeWire never sends query messages with TTLs of 1, 2, or 3 only.
      */
     public static final byte MAX_QUERY_TTL = (byte)6;
 
@@ -424,6 +425,9 @@ public final class QueryHandler {
 		_curTime = System.currentTimeMillis(); // Make a note of the time now, the time we're going to send the query
 		if (_curTime < _nextQueryTime) return; // If we haven't waited long enough yet, leave
 
+		//zootella
+		System.out.println("Passed by the next query time of " + _nextQueryTime);
+
         // Make a note in the debugging log
         if (LOG.isTraceEnabled()) LOG.trace("Query = " + QUERY.getQuery() + ", numHostsQueried: " + _theoreticalHostsQueried);
 
@@ -743,6 +747,9 @@ public final class QueryHandler {
 
         // If calculateNewTTL gave us 1, and either this is the probe connection or an ultrapeer that supporst query routing, move the TTL up to 2
         if (ttl == 1 && ((mc.isUltrapeerQueryRoutingConnection() && !mc.shouldForwardQuery(QUERY)) || probeConnection)) ttl = 2;
+
+        //zootella
+        System.out.println("Chose TTL for regular query: " + ttl);
 
         // Make a copy of our query packet with the TTL we chose for it
         QueryRequest query = createQuery(QUERY, ttl);

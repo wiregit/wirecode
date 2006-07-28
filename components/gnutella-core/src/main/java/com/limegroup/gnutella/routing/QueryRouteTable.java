@@ -18,9 +18,12 @@ import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-//Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
 
 /**
+ * 
+ * 
+ * 
+ * 
  * A list of query keywords that a connection can respond to, as well as the
  * minimum TTL for a response.  More formally, a QueryRouteTable is a (possibly
  * infinite!) list of keyword TTL pairs, [ &#60;keyword_1, ttl_1&#62;, ...,
@@ -40,51 +43,81 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * removed the ability for a QueryRouteTable to have an infinity that wasn't
  * 7.  However, nothing outright checked that, so patch messages that were
  * based on a non-7 infinity were silently failing (always stayed empty).
- * In practice, we could probably even change the infinity to 2, and change
+ * In practice, we could probably even change the infinity to 2, and
  * change the number of entryBits to 2, with the keywordPresent and
  * keywordAbsent values going to 1 and -1, cutting the size of our patch
  * messages further in half (a quarter of the original size).  This would
  * probably require upgrading the X-Query-Routing to another version.
  *
- * <b>This class is NOT synchronized.</b>
+ * This class is NOT synchronized.
+ * 
+ * Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
  */
 public class QueryRouteTable {
-    /** 
-     * The suggested default max table TTL.
+
+	//done
+
+	/**
+	 * 7, we pass a value of 7 TTL for infinity in the QRP messages we send.
+	 * This is the suggested default max table TTL.
+	 * 
+	 * In the early days of Gnutella, messages actually had a TTL of 7.
+	 * Now, however, this is just 7 for historical reasons.
      */
-    public static final byte DEFAULT_INFINITY=(byte)7;
+    public static final byte DEFAULT_INFINITY = (byte)7;
+
+    //do
+
     /** What should come across the wire if a keyword status is unchanged. */
-    public static final byte KEYWORD_NO_CHANGE=(byte)0;
-    /** The suggested default table size. */
-    public static final int DEFAULT_TABLE_SIZE=1<<16;  //64KB
-    /** The maximum size of patch messages, in bytes. */
-    public static final int MAX_PATCH_SIZE=1<<12;      //4 KB
-    
+    public static final byte KEYWORD_NO_CHANGE = (byte)0;
+
+    //done
+
+    /** 65536, our QRP table will be 65536 bytes big, which is 64 KB of data. */
+    public static final int DEFAULT_TABLE_SIZE = 1 << 16; // 1 shifted up 16 bits is 65536
+
     /**
-     * The current infinity this table is using.  Necessary for creating
+     * 4096 bytes, 4 KB.
+     * encode() breaks a QRP table into 4 KB pieces and sends them in QRP patch table messages.
+     */
+    public static final int MAX_PATCH_SIZE = 1 << 12;
+
+    //do
+
+    /**
+     * 7
+     * 
+     * The current infinity this table is using. Necessary for creating
      * ResetTableMessages with the correct infinity.
      */
     private byte infinity;
-    
+
     /**
+     * -6
+     * 1 - infinity
+     * 
      * What should come across the wire if a keyword is present.
      * The nature of this value is dependent on the infinity of the
      * ResetTableMessage.
      */
     private byte keywordPresent;
-    
+
     /**
+     * 6
+     * infinity - 1
+     * 
      * What should come across the wire if a keyword is absent.
      * The nature of thsi value is dependent on the infinity of the
      * ResetTableMessage.
      */
     private byte keywordAbsent;
 
-    /** The *new* table implementation.  The table of keywords - each value in
-     *  the BitSet is either 'true' or 'false' - 'true' signifies that a keyword
-     *  match MAY be at a leaf 1 hop away, whereas 'false' signifies it isn't.
-     *  QRP is really not used in full by the Gnutella Ultrapeer protocol, hence
-     *  the easy optimization of only using BitSets.
+    /**
+     * The *new* table implementation.  The table of keywords - each value in
+     * the BitSet is either 'true' or 'false' - 'true' signifies that a keyword
+     * match MAY be at a leaf 1 hop away, whereas 'false' signifies it isn't.
+     * QRP is really not used in full by the Gnutella Ultrapeer protocol, hence
+     * the easy optimization of only using BitSets.
      */
     private BitSet bitTable;
     
@@ -110,62 +143,101 @@ public class QueryRouteTable {
      *  in message N.) */
     private Inflater uncompressor;
 
+    /*
+     * /////////////////////////////// Basic Methods ///////////////////////////
+     */
 
-
-    /////////////////////////////// Basic Methods ///////////////////////////
-
-
-    /** Creates a QueryRouteTable with default sizes. */
+    /**
+     * 
+     * 
+     * Creates a QueryRouteTable with default sizes.
+     * 
+     * 
+     * FileManager.buildQRT() makes a new QueryRouteTable object with this constructor.
+     * ManagedConnection.patchQueryRouteTable(PatchTableMessage) also calls here.
+     * 
+     * 
+     */
     public QueryRouteTable() {
+
         this(DEFAULT_TABLE_SIZE);
     }
 
     /**
+     * 
+     * FileManager.getQRT() makes a new QueryRouteTable object with this constructor.
+     * 
+     * 
+     * 
      * Creates a new <tt>QueryRouteTable</tt> instance with the specified
      * size.  This <tt>QueryRouteTable</tt> will be completely empty with
      * no keywords -- no queries will have hits in this route table until
      * patch messages are received.
-     *
+     * 
      * @param size the size of the query routing table
      */
     public QueryRouteTable(int size) {
+
         this(size, DEFAULT_INFINITY);
     }
-    
-    /**
-     * Creates a new <tt>QueryRouteTable</tt> instance with the specified
-     * size and infinity.  This <tt>QueryRouteTable</tt> will be completely 
-     * empty with no keywords -- no queries will have hits in this route 
-     * table until patch messages are received.
-     *
-     * @param size the size of the query routing table
-     * @param infinity the infinity to use
-     */
-    public QueryRouteTable(int size, byte infinity) {
-        initialize(size, infinity);
-    }    
+
+    //done
 
     /**
+     * Make a new QueryRouteTable object to represent a QRP table that describes what keywords might generate hits.
+     * ManagedConnection.resetQueryRouteTable(ResetTableMessage) calls this constructor.
+     * 
+     * Creates a new <tt>QueryRouteTable</tt> instance with the specified
+     * size and infinity.  This <tt>QueryRouteTable</tt> will be completely
+     * empty with no keywords -- no queries will have hits in this route
+     * table until patch messages are received.
+     * 
+     * @param size     The size of the QRP table, like 65536 bytes
+     * @param infinity The infinity number, like 7
+     */
+    public QueryRouteTable(int size, byte infinity) {
+
+    	// Clear this QueryRouteTable, making it block everything, and set its size and infinity value
+        initialize(size, infinity);
+    }
+
+    /**
+     * Clear this QueryRouteTable, making it block everything, and set its size and infinity value.
+     * 
      * Initializes this <tt>QueryRouteTable</tt> to the specified size.
      * This table will be empty until patch messages are received.
-     *
-     * @param size the size of the query route table
+     * 
+     * @param The size of the QRT table, like 65536 bytes
+     * @param The infinity TTL, like 7
      */
     private void initialize(int size, byte infinity) {
+
+    	// Save the given table size, the number of bytes it will take up
         this.bitTableLength = size;
+
+        // Make a new BitSet, an array of bits that can grow as we set them
         this.bitTable = new BitSet();
+
+        // We don't know the sequence number or sequence size yet
         this.sequenceNumber = -1;
         this.sequenceSize = -1;
+
+        // The next patch message we expect will have sequence number 0
         this.nextPatch = 0;
-        this.keywordPresent = (byte)(1 - infinity);
-        this.keywordAbsent = (byte)(infinity - 1);
-        this.infinity = infinity;
+
+        // Set numbers based on the infinity TTL, which is probably 7
+        this.keywordPresent = (byte)(1 - infinity); // -6, the number that indicates a keyword is present
+        this.keywordAbsent = (byte)(infinity - 1);  // 6, the number that indicates a keyword is absent
+        this.infinity = infinity;                   // 7, the infinity value this table is using
     }
-    
+
+    //do
+
     /**
      * Returns the size of this QueryRouteTable.
      */
     public int getSize() {
+
         return bitTableLength;
     }    
     
@@ -343,7 +415,8 @@ public class QueryRouteTable {
      *    @modifies this
      */
     public void addAll(QueryRouteTable qrt) {
-        this.bitTable.or( qrt.resize(this.bitTableLength) );
+    	
+        this.bitTable.or(qrt.resize(this.bitTableLength));
     }
     
     /**
@@ -393,7 +466,7 @@ public class QueryRouteTable {
             return false;
 
         //TODO: two qrt's can be equal even if they have different TTL ranges.
-        QueryRouteTable other=(QueryRouteTable)o;
+        QueryRouteTable other = (QueryRouteTable)o;
         if (this.bitTableLength!=other.bitTableLength)
             return false;
 
@@ -412,20 +485,25 @@ public class QueryRouteTable {
         return "QueryRouteTable : " + bitTable.toString();
     }
 
+    //done
 
-    ////////////////////// Core Encoding and Decoding //////////////////////
-
+    /*
+     * ////////////////////// Core Encoding and Decoding //////////////////////
+     */
 
     /**
-     * Resets this <tt>QueryRouteTable</tt> to the specified size with
-     * no data.  This is done when a RESET message is received.
-     *
-     * @param rtm the <tt>ResetTableMessage</tt> containing the size
-     *  to reset the table to
+     * Reset this QueryRouteTable to the given size, making it block everything.
+     * We do this when a remote computer sends a QRP reset table message.
+     * 
+     * @param rtm The ResetTableMessage a remote computer sent us
      */
     public void reset(ResetTableMessage rtm) {
+
+        // Clear this QueryRouteTable, making it block everything, and set its size and infinity value
         initialize(rtm.getTableSize(), rtm.getInfinity());
     }
+
+    //do
 
     /**
      * Adds the specified patch message to this query routing table.
@@ -521,38 +599,59 @@ public class QueryRouteTable {
             }
         }   
     }
-    
-    /**
-     * Stub for calling encode(QueryRouteTable, true).
-     */
-    public List /* of RouteTableMessage */ encode(QueryRouteTable prev) {
+
+    //done
+
+    /** Not used. */
+    public List encode(QueryRouteTable prev) { // List of RouteTableMessage objects
         return encode(prev, true);
     }
 
+    //do
+
     /**
+     * Make all the QRP messages we need to completely describe the QRP table this QueryRouteTable object represents.
+     * Makes a ResetTableMessage followed by any number of PatchTableMessage objects, and returns them in a List.
+     * 
+     * 
+     * Only MessageRouter.forwardQueryRouteTables() calls this method.
+     * 
+     * 
+     * 
      * Returns an List of RouteTableMessage that will convey the state of
      * this.  If that is null, this will include a reset.  Otherwise it will
      * include only those messages needed to to convert that to this.  More
-     * formally, for any non-null QueryRouteTable's m and that, the following 
+     * formally, for any non-null QueryRouteTable's m and that, the following
      * holds:
-     *
+     * 
      * <pre>
-     * for (Iterator iter=m.encode(); iter.hasNext(); ) 
+     * for (Iterator iter = m.encode(); iter.hasNext();)
      *    prev.update((RouteTableUpdate)iter.next());
-     * Assert.that(prev.equals(m)); 
-     * </pre> 
+     * Assert.that(prev.equals(m));
+     * </pre>
+     * 
+     * @param prev
+     * @param allowCompression
+     * @return                 A LinkedList of ResetTableMessage and PatchTableMessage objects.
+     *                         Both of these classes extend RouteTableMessage, so you can look at all the items in the list as though they were RouteTableMessage objects.
+     *                         Send these messages in their order in the list to completely communicate this QRP table to a remote computer.
      */
-    public List /* of RouteTableMessage */ encode(
-      QueryRouteTable prev, boolean allowCompression) {
-        List /* of RouteTableMessage */ buf=new LinkedList();
-        if (prev==null)
-            buf.add(new ResetTableMessage(bitTableLength, infinity));
-        else
-            Assert.that(prev.bitTableLength==this.bitTableLength,
-                        "TODO: can't deal with tables of different lengths");
+    public List encode(QueryRouteTable prev, boolean allowCompression) {
+
+        List buf = new LinkedList();
+
+        if (prev == null) {
+
+        	buf.add(new ResetTableMessage(bitTableLength, infinity));
+
+        } else {
+
+            Assert.that(prev.bitTableLength == this.bitTableLength, "TODO: can't deal with tables of different lengths");
+        }
 
         //1. Calculate patch array
-        byte[] data=new byte[bitTableLength];
+        byte[] data = new byte[bitTableLength];
+
         // Fill up data with KEYWORD_NO_CHANGE, since the majority
         // of elements will be that.
         // Because it is already filled, we do not need to iterate and
@@ -628,23 +727,49 @@ public class QueryRouteTable {
                 compression=PatchTableMessage.COMPRESSOR_DEFLATE;
             }
         }
-                   
 
-        //3. Break into 1KB chunks and send.  TODO: break size limits if needed.
-        final int chunks=(int)Math.ceil((float)data.length/(float)MAX_PATCH_SIZE);
-        int chunk=1;
-        for (int i=0; i<data.length; i+=MAX_PATCH_SIZE) {
-            //Just past the last position of data to copy.
-            //Note special case for last chunk.  
-            int stop=Math.min(i+MAX_PATCH_SIZE, data.length);
-            buf.add(new PatchTableMessage((short)chunk, (short)chunks,
-                                          compression, bits,
-                                          data, i, stop));
+        /*
+         * 3. Break into 1KB chunks and send.  TODO: break size limits if needed.
+         * 
+         * Actually, it looks like this breaks it into 4 KB chunks.
+         */
+
+        // Calculate how many 4 KB chunks it will take to hold the whole QRP table
+        final int chunks = (int)Math.ceil( // Match ceiling, round up to the next number
+        	(float)data.length /           // The number of bytes in the QRP table
+        	(float)MAX_PATCH_SIZE);        // 4 KB in bytes
+
+        int chunk = 1;
+
+        // Move i to the start of each chunk, like 0, 4096, 8192, through the location of the last chunk
+        for (int i = 0; i < data.length; i += MAX_PATCH_SIZE) {
+
+        	/*
+        	 * Just past the last position of data to copy.
+        	 * Note special case for last chunk.
+        	 */
+
+        	// Compute the distance in bytes from the start of the table to where this chunk ends
+        	int stop = Math.min(    // Choose whichever is smaller
+        		i + MAX_PATCH_SIZE, // The index to the end of the chunk if this chunk is full
+        		data.length);       // The index of the very end of the table
+
+        	// Make a new PatchTableMessage for this 4 KB chunk of table, and add it to our buffer of them to send
+            buf.add(                   // Add it to our buffer of them to send
+            	new PatchTableMessage( // Make a new PatchTableMessage
+            		(short)chunk,      // The sequence number to use, like 1, 2, 3, and so on
+            		(short)chunks,     // The number of QRP patch table messages we're going to send to send the whole table
+            		compression,       // 0x01 if the table is deflate compressed, 0x00 if it's not
+            		bits,              // (do)
+            		data,              // The array to find the data in
+            		i,                 // Start looking this far into the array
+            		stop));            // Stop when reaching this point in the array
+
             chunk++;
-        }        
-        return buf;        
-    }
+        }
 
+        return buf;
+    }
 
     ///////////////// Helper Functions for Codec ////////////////////////
 

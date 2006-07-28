@@ -1845,9 +1845,9 @@ public abstract class FileManager {
 
         _queryRouteTable = new QueryRouteTable();
         FileDesc[] fds = getAllSharedFileDescriptors();
-        for(int i = 0; i < fds.length; i++) {
-            if (fds[i] instanceof IncompleteFileDesc)
-                continue;
+        for (int i = 0; i < fds.length; i++) {
+        	
+            if (fds[i] instanceof IncompleteFileDesc) continue;
             
             _queryRouteTable.add(fds[i].getPath());
         }

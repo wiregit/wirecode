@@ -39,17 +39,23 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
     	// We're a leaf, so we can't connect to another leaf
     	// If the remote computer says it's not an ultrapeer, we need to reject the connection
         if (!response.isUltrapeer()) {
-        	
+
+        	/*
+        	 * Tour Point: We're a leaf, and accidentally connected to another leaf.
+        	 * It responded with stage 2 headers.
+        	 * We'll send a stage 3 of "503 I am a shielded leaf node".
+        	 */
+
         	// Record that one more leaf tried to connect to us
             HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
 
             // Compose and return stage 3 rejection headers
             return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
-        
+
         // If this is a preferenced connection
         if (getLocalePreferencing()) {
-        	
+
         	// TODO: Add the statistic HandshakingStat.LEAF_OUTGOING_REJECT_LOCALE.incrementStat();
         	
         	// If the langauge setting here, like English, and the language setting for the remote computer don't match
@@ -108,11 +114,16 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
 		// We're a leaf, so we can't connect to other leaves
 		// If the remote computer connected to us and said it's a leaf
         if (!hr.isUltrapeer()) {
-        	
+
+        	/*
+        	 * Tour Point: We're a leaf, and an ultrapeer tried to connect to us.
+        	 * Leaves don't accept connections, so we'll send a stage 2 rejection of "503 I am a shielded leaf node".
+        	 */
+
         	// Record that another leaf tried to connect to us
             HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
 
-            // Compose and return stage 3 rejection headers
+            // Compose and return stage 2 rejection headers
             return HandshakeResponse.createLeafRejectOutgoingResponse();
         }		
 

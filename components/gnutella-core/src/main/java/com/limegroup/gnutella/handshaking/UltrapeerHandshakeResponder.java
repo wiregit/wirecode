@@ -84,7 +84,7 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 		}
 
 		// We're going to accept the connection, compose and return stage 3 headers
-        return HandshakeResponse.createAcceptOutgoingResponse(ret); // Include "X-Ultrapeer: False" and "Content-Encoding: deflate" we may have added here
+		return HandshakeResponse.createAcceptOutgoingResponse(ret); // Include "X-Ultrapeer: False" and "Content-Encoding: deflate" we may have added here
 	}
 
     /**
@@ -167,8 +167,9 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
         boolean supernodeNeeded = _manager.supernodeNeeded();
         
         // If we have space for another connection but don't need more ultrapeers, tell the remote computer to drop down to leaf mode
-        if (allowedAsLeaf && !supernodeNeeded) {
-        	
+        if (allowedAsLeaf &&    // We have fewer than 30 leaves, and
+        	!supernodeNeeded) { // We have fewer than 27 leaves filling our 30 leaf slots
+
         	// Record we told one more ultrapeer to become a leaf
             HandshakingStat.UP_INCOMING_GUIDED.incrementStat();
             

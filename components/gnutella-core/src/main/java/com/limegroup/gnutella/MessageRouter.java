@@ -306,11 +306,17 @@ public abstract class MessageRouter {
 	 * Handle to the <tt>FileManager</tt> instance.
 	 */
 	private static FileManager _fileManager;
-    
+
+	//done
+
 	/**
-	 * A handle to the thread that deals with QRP Propagation
+	 * A thread that loops forever, calling forwardQueryRouteTables() every 10 seconds.
+	 * The program's single MessageRouter object makes this one QRPPropagator object.
+	 * QRPPropagator extends MangedThread, which extends Thread, so this is a thread.
 	 */
 	private final QRPPropagator QRP_PROPAGATOR = new QRPPropagator();
+
+	//do
 
     /**
      * Variable for the most recent <tt>QueryRouteTable</tt> created
@@ -553,13 +559,17 @@ public abstract class MessageRouter {
 			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
 
+        // 0x30 QRP, 0x00 Reset Table, a remote computer will start over describing its QRP table to us
         } else if (msg instanceof ResetTableMessage) {
 
+            // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleResetTableMessage((ResetTableMessage)msg, receivingConnection);
 
+        // 0x30 QRP, 0x01 Patch Table, a remote computer is sending us the next part of its QRP table
 		} else if (msg instanceof PatchTableMessage) {
 
+            // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handlePatchTableMessage((PatchTableMessage)msg, receivingConnection);
 
@@ -3103,16 +3113,17 @@ public abstract class MessageRouter {
     /**
      * Handles a message to reset the query route table for the given
      * connection.
+     * 
+     * 
+     * Only MessageRouter.handleMessage() calls this method.
      *
-     * @param rtm the <tt>ResetTableMessage</tt> for resetting the query
-     *  route table
-     * @param mc the <tt>ManagedConnection</tt> for which the query route
-     *  table should be reset
+     * 
+     * @param rtm A QRP reset table message
+     * @param mc  The remote computer that sent it to us
      */
     private void handleResetTableMessage(ResetTableMessage rtm, ManagedConnection mc) {
-        
-        // if it's not from a leaf or an Ultrapeer advertising 
-        // QRP support, ignore it
+
+    	// Only do something if it's from one of our leaves, or a fellow ultrapeer that told us "X-Ultrapeer-Query-Routing: 0.1" in the handshake.
         if (!isQRPConnection(mc)) return;
 
         // reset the query route table for this connection
@@ -3134,15 +3145,14 @@ public abstract class MessageRouter {
      * Handles a message to patch the query route table for the given
      * connection.
      *
-     * @param rtm the <tt>PatchTableMessage</tt> for patching the query
-     *  route table
-     * @param mc the <tt>ManagedConnection</tt> for which the query route
-     *  table should be patched
+     * 
+     * 
+     * @param ptm A QRP patch table message
+     * @param mc  The remote computer that sent it to us
      */
     private void handlePatchTableMessage(PatchTableMessage ptm, ManagedConnection mc) {
-        
-        // if it's not from a leaf or an Ultrapeer advertising 
-        // QRP support, ignore it
+
+    	// Only do something if it's from one of our leaves, or a fellow ultrapeer that told us "X-Ultrapeer-Query-Routing: 0.1" in the handshake.
         if (!isQRPConnection(mc)) return;
 
         // patch the query route table for this connection
@@ -3189,95 +3199,112 @@ public abstract class MessageRouter {
         }
     }
 
-    //do
-
     /**
-     * Utility method for checking whether or not the given connection
-     * is able to pass QRP messages.
-     *
-     * @param c the <tt>Connection</tt> to check
-     * @return <tt>true</tt> if this is a QRP-enabled connection,
-     *  otherwise <tt>false</tt>
+     * Determine if a given remote computer should be sending us QRP messages.
+     * Returns true if it's our leaf, or if it said "X-Ultrapeer-Query-Routing: 0.1" in the handshake.
+     * 
+     * @param c The ManagedConnection object that represents the remote computer we did the Gnutella handshake with
+     * @return  true if we expect QRP messages from this computer, false if we don't
      */
     private static boolean isQRPConnection(Connection c) {
-        
-        if (c.isSupernodeClientConnection())       return true;
+
+    	// If we are an ultrapeer and the remote computer is our leaf beneath us, yes, it should be sending us QRP messages
+        if (c.isSupernodeClientConnection()) return true;
+
+        // If the remote computer said "X-Ultrapeer-Query-Routing: 0.1", yes, it should be sending us QRP messages
         if (c.isUltrapeerQueryRoutingConnection()) return true;
+
+        // Otherwise, the remote computer should not be sending us QRP messages.
         return false;
     }
 
-    /** Thread the processing of QRP Table delivery. */
+    //do
+
+    /**
+	 * A thread that loops forever, calling forwardQueryRouteTables() every 10 seconds.
+	 * The program's single MessageRouter object makes this one QRPPropagator object.
+	 * QRPPropagator extends MangedThread, which extends Thread, so this is a thread.
+     */
     private class QRPPropagator extends ManagedThread {
-        
+
+    	/**
+    	 * Make the program's single QRPPropagator object.
+    	 */
         public QRPPropagator() {
-            
+
+        	// Label this thread "QRPPropagator", and let Java exit even if it's still running
             setName("QRPPropagator");
             setDaemon(true);
         }
 
-        /** While the connection is not closed, sends all data delay. */
+        /**
+         * Loop forever, calling forwardQueryRouteTables() every 10 seconds.
+         * When initialize() calls QRP_PROPAGATOR.start(), this managedRun() method gets called.
+         */
         public void managedRun() {
-            
-            try {
-                
-                while (true) {
-                    
-					// Check for any scheduled QRP table propagations
-					// every 10 seconds
-                    Thread.sleep(10*1000);
-    				forwardQueryRouteTables();
-                }
-                
-            } catch(Throwable t) {
-                
-                ErrorService.error(t);
-            }
-        }
 
-    } //end QRPPropagator
+            try {
+
+            	// Loop forever
+                while (true) {
+
+                	// Wait here for 10 seconds
+                	Thread.sleep(10 * 1000);
+
+                	
+                	
+                	
+                	// (do)
+                	forwardQueryRouteTables();
+                }
+
+            // Pass an exception to the ErrorService, and let the thread exit
+            } catch (Throwable t) { ErrorService.error(t); }
+        }
+    }
 
     /**
+     * 
+     * 
+     * Only QRPPropagator.managedRun() above calls this method.
+     * The "QRPPropagator" thread calls here every 10 seconds as the program runs.
+     * 
+     * 
      * Sends updated query routing tables to all connections which haven't
      * been updated in a while.  You can call this method as often as you want;
      * it takes care of throttling.
-     *     @modifies connections
-     */    
+     */
     private void forwardQueryRouteTables() {
-        
-		//Check the time to decide if it needs an update.
+
+		// Check the time to decide if it needs an update.
 		long time = System.currentTimeMillis();
 
-		//For all connections to new hosts c needing an update...
-		List list=_manager.getInitializedConnections();
+		// For all connections to new hosts c needing an update...
+		List list = _manager.getInitializedConnections();
 		QueryRouteTable table = null;
 		List /* of RouteTableMessage */ patches = null;
 		QueryRouteTable lastSent = null;
-		
+
+		// Loop for each ultrapeer we're connected to
 		for (int i = 0; i < list.size(); i++) {
+			ManagedConnection c = (ManagedConnection)list.get(i);
 
-			ManagedConnection c=(ManagedConnection)list.get(i);
-
-			// continue if I'm an Ultrapeer and the node on the
-			// other end doesn't support Ultrapeer-level query
-			// routing
-			if (RouterService.isSupernode()) { 
-                
-				// only skip it if it's not an Ultrapeer query routing
-				// connection
-				if (!c.isUltrapeerQueryRoutingConnection()) continue;
+			// Skip this ultrapeer if it can't do QRP
+			if (RouterService.isSupernode()) {                // If we're an ultrapeer, and
+				if (!c.isUltrapeerQueryRoutingConnection()) { // This remote ultrapeer didn't tell us "X-Ultrapeer-Query-Routing: 0.1" in the handshake
+					continue;                                 // Go to the start of the loop to get the next ultrapeer
+				}
+			} else if (!(                          // Otherwise, make sure that we're a leaf and c, our ultrapeer above us, supports QRP
+				c.isClientSupernodeConnection() && // We're a leaf and c is our ultrapeer above us, and
+				c.isQueryRoutingEnabled())) {      // It said it can accept our QRP table
+				continue;                          // Go to the start of the loop to get the next ultrapeer
 			}
-            
-			// otherwise, I'm a leaf, and don't send routing
-			// tables if it's not a connection to an Ultrapeer
-			// or if query routing is not enabled on the connection
-			else if (!(c.isClientSupernodeConnection() && c.isQueryRoutingEnabled())) continue;
 
-			// See if it is time for this connections QRP update
-			// This call is safe since only this thread updates time
+			// If it hasn't been 5 minutes since we sent this ultrapeer our QRP table, skip it and go to the next one
 			if (time < c.getNextQRPForwardTime()) continue;
 
 			c.incrementNextQRPForwardTime(time);
-				
+
 			// Create a new query route table if we need to
 			if (table == null) {
                 
@@ -3320,6 +3347,10 @@ public abstract class MessageRouter {
 		}
     }
 
+    
+    
+    
+    
     /**
      * Accessor for the most recently calculated <tt>QueryRouteTable</tt>
      * for this node.  If this node is an Ultrapeer, the table will include
