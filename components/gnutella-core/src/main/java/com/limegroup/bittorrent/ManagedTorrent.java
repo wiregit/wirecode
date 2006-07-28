@@ -122,7 +122,7 @@ public class ManagedTorrent implements Torrent {
 		_peers = Collections.EMPTY_SET;
 		_badPeers = Collections.EMPTY_SET;
 		trackerManager = new TrackerManager(this);
-		choker = new Choker(this, networkInvoker);
+		choker = new LeechChoker(_connections, networkInvoker);
 		this.dispatcher = dispatcher;
 	}
 
@@ -218,7 +218,7 @@ public class ManagedTorrent implements Torrent {
 		trackerManager.announceStart();
 		
 		// start the choking / unchoking of connections
-		choker.scheduleRechoke();
+		choker.start();
 	}
 
 	/* (non-Javadoc)
@@ -614,7 +614,10 @@ public class ManagedTorrent implements Torrent {
 		
 		_state.setInt(SEEDING);
 		
-		// resume uploads
+		// switch the choker logic and resume uploads
+		choker.stop();
+		choker = new SeedChoker(_connections,networkInvoker);
+		choker.start();
 		choker.rechoke();
 		
 		// tell the tracker we are a seed now
@@ -776,12 +779,6 @@ public class ManagedTorrent implements Torrent {
 	 */
 	public List<BTLink> getConnections() {
 		return _connections;
-	}
-	
-	void shuffleConnections() {
-		synchronized(_connections) {
-			Collections.shuffle(_connections);
-		}
 	}
 	
 	/* (non-Javadoc)
