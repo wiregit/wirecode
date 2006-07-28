@@ -477,14 +477,14 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
-    public synchronized List<KUID> getRefreshIDs(final boolean force) {
+    public synchronized List<KUID> getRefreshIDs(final boolean bootstrapping) {
         final List<KUID> randomIds = new ArrayList<KUID>();
         
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
             public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
-                if (!bucket.contains(context.getLocalNodeID())) {
-                    if (force || bucket.isRefreshRequired()) {
+                if (!bucket.contains(context.getLocalNodeID()) || !bootstrapping) {
+                    if (bootstrapping || bucket.isRefreshRequired()) {
                         
                         // Select a random ID with this prefix
                         KUID randomId = KUID.createPrefxNodeID(bucket.getBucketID(), bucket.getDepth());
