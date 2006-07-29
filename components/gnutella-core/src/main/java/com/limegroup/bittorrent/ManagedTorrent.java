@@ -354,16 +354,8 @@ public class ManagedTorrent implements Torrent {
 			return;
 		
 		int state = _state.getInt();
-		if (state == DOWNLOADING || state == CONNECTING) {
-			if (hasNonBusyLocations())
-				_connectionFetcher.fetch();
-			else {
-				long freeTime = getNextLocationRetryTime();
-				if (LOG.isDebugEnabled())
-					LOG.debug("all locations busy, will fetch in "+freeTime);
-				_connectionFetcher.fetch(freeTime);
-			}
-		}
+		if (state == DOWNLOADING || state == CONNECTING) 
+			_connectionFetcher.fetch();
 	}
 
 	/**
@@ -505,6 +497,9 @@ public class ManagedTorrent implements Torrent {
 	 * @return true if we need to fetch any more connections
 	 */
 	public boolean needsMoreConnections() {
+		if (!isActive())
+			return false;
+		
 		// if we are complete, do not open any sockets - the active torrents will need them.
 		if (isComplete() && RouterService.getTorrentManager().hasNonSeeding())
 			return false;
@@ -879,19 +874,24 @@ public class ManagedTorrent implements Torrent {
 	}
 	
 	/**
-	 * @return the next time a recently failed location can be
+	 * @return the time until a recently failed location can be
 	 * retried, or Long.MAX_VALUE if no such found.
 	 */
 	public long getNextLocationRetryTime() {
 		long soonest = Long.MAX_VALUE;
 		long now = System.currentTimeMillis();
-		for (TorrentLocation to : _peers) 
-			soonest = Math.min(soonest, to.getWaitTime(now));
+		synchronized(_peers) {
+			for (TorrentLocation to : _peers)  {
+				soonest = Math.min(soonest, to.getWaitTime(now));
+				if (soonest == 0)
+					break;
+			}
+		}
 		return soonest;
 	}
 	
 	/**
-	 * whether or not continuing is hopeless
+	 * @return true if continuing is hopeless
 	 */
 	boolean shouldStop() {
 		return _connections.size() == 0 && _peers.size() == 0;

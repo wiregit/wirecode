@@ -87,7 +87,6 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 	 */
 	private final Periodic scheduled;
 	
-	
 	BTConnectionFetcher(ManagedTorrent torrent, SchedulingThreadPool scheduler) {
 		_torrent = torrent;
 		ByteBuffer handshake = ByteBuffer.allocate(68);
@@ -104,15 +103,16 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		scheduled = new Periodic(this,scheduler);
 	}
 	
-	public void fetch() {
-		if (torrentNeedsFetching())
-			fetch(0);
-	}
-	
-	public void fetch(long when) {
-		if (scheduled.rescheduleIfSooner(when) &&
-				LOG.isDebugEnabled())
-			LOG.debug("scheduling a fetch in "+when);
+	public synchronized void fetch() {
+		if (shutdown || !_torrent.needsMoreConnections())
+			return;
+		
+		long nextNonBusy = _torrent.getNextLocationRetryTime();
+		if (nextNonBusy < Long.MAX_VALUE)
+			scheduled.rescheduleIfSooner(nextNonBusy);
+		else if (LOG.isDebugEnabled())
+			LOG.debug("no known hosts to connect to");
+		
 	}
 	
 	public void run() {
@@ -123,25 +123,19 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		if (shutdown)
 			return;
 		
-		while (torrentNeedsFetching() && 
-				outgoing.size() < MAX_CONNECTORS) {
+		while (_torrent.needsMoreConnections() &&
+				outgoing.size() < MAX_CONNECTORS &&
+				_torrent.hasNonBusyLocations()) {
 			fetchConnection();
 			if (LOG.isDebugEnabled())
 				LOG.debug("started connection fetcher: "
 						+ outgoing.size());
 		}
 		
-		if (_torrent.needsMoreConnections()) {
-			long nextNonBusy = _torrent.getNextLocationRetryTime();
-			if (nextNonBusy < Long.MAX_VALUE)
-				fetch(nextNonBusy);
-		}
-	}
-	
-	private boolean torrentNeedsFetching() {
-		return _torrent.isActive() &&
-		_torrent.needsMoreConnections() &&
-		_torrent.hasNonBusyLocations();
+		// we didn't start enough fetchers - see if there 
+		// are any busy hosts we could retry later.
+		if (outgoing.size() < MAX_CONNECTORS)
+			fetch();
 	}
 
 	/**
@@ -172,17 +166,17 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 	}
 	
 	void shutdown() {
-		List<Shutdownable> conns;
+		if (shutdown)
+			return;
 		synchronized(this) {
-			if (shutdown)
-				return;
 			shutdown = true;
-			// copy because shutdown() removes
-			conns =	new ArrayList<Shutdownable>(outgoing.size()+incoming.size());
-			conns.addAll(incoming);
-			conns.addAll(outgoing);
 		}
 		scheduled.unschedule();
+
+		// copy because shutdown() removes
+		List<Shutdownable> conns = new ArrayList<Shutdownable>(outgoing.size()+incoming.size());
+		conns.addAll(incoming);
+		conns.addAll(outgoing);
 		for (Shutdownable connector : conns) 
 			connector.shutdown();
 	}
@@ -198,26 +192,21 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		if (LOG.isDebugEnabled())
 			LOG.debug("incoming handshaker from "+shaker.getInetAddress()+":"+shaker.getPort());
 		
-		boolean reject;
-		synchronized(this) {
-			reject = shutdown || outgoing.contains(shaker);
-			if (!reject)
-				incoming.add(shaker);
-		}
-		if (reject) {
+		if (shutdown || outgoing.contains(shaker)) {
 			LOG.debug("rejecting it");
 			shaker.shutdown();
-		}
+		} else 
+			incoming.add(shaker);
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.BTHandshakeObserver#handshakerDone(com.limegroup.bittorrent.handshaking.BTHandshaker)
 	 */
-	public synchronized void handshakerDone(BTHandshaker shaker) {
+	public void handshakerDone(BTHandshaker shaker) {
 		Assert.that(incoming.contains(shaker) != outgoing.contains(shaker));
-		if (!incoming.remove(shaker)) {
+		if (!incoming.remove(shaker)) 
 			outgoing.remove(shaker);
-			fetch();
-		}
+		if (outgoing.size() < MAX_CONNECTORS)
+			fetch(); // TODO: figure out if this is necessary... exhaust corner cases
 	}
 }
