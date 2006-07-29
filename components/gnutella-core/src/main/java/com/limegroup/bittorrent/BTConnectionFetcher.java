@@ -2,10 +2,12 @@ package com.limegroup.bittorrent;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,7 +19,11 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.io.AbstractNBSocket;
+import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.Periodic;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.Sockets;
@@ -50,22 +56,18 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 	 */
 	private static final byte[] EXTENSION_BYTES = new byte[8];
 
-	/*
-	 * Max concurrent connection attempts
+	/**
+	 * Set of connectors that are still establishing transport layer
+	 * connections
 	 */
-	private static final int MAX_CONNECTORS = 5;
+	private final StrictIpPortSet<TorrentConnector> connecting =
+		new StrictIpPortSet<TorrentConnector>();
 	
 	/**
-	 * the Set of outgoing connection fetchers
+	 * Set of handshakers that are negotiating the bt protocol layer
 	 */
-	private final StrictIpPortSet<OutgoingBTHandshaker> outgoing =  
-		new StrictIpPortSet<OutgoingBTHandshaker>();
-	
-	/**
-	 * the Set of incoming connection hadnshakers
-	 */
-	private final StrictIpPortSet<IncomingBTHandshaker> incoming = 
-		new StrictIpPortSet<IncomingBTHandshaker>();
+	private final StrictIpPortSet<BTHandshaker> handshaking =
+		new StrictIpPortSet<BTHandshaker>();
 	
 	/**
 	 * the torrent this fetcher belongs to
@@ -124,17 +126,17 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 			return;
 		
 		while (_torrent.needsMoreConnections() &&
-				outgoing.size() < MAX_CONNECTORS &&
+				connecting.size() < Sockets.getNumAllowedSockets() &&
 				_torrent.hasNonBusyLocations()) {
 			fetchConnection();
 			if (LOG.isDebugEnabled())
 				LOG.debug("started connection fetcher: "
-						+ outgoing.size());
+						+ connecting.size());
 		}
 		
 		// we didn't start enough fetchers - see if there 
 		// are any busy hosts we could retry later.
-		if (outgoing.size() < MAX_CONNECTORS)
+		if (connecting.size() < Sockets.getNumAllowedSockets())
 			fetch();
 	}
 
@@ -152,17 +154,16 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 				LOG.debug("no hosts to connect to");
 				return;
 			}
-		} while (incoming.contains(ep) || outgoing.contains(ep));
+		} while (connecting.contains(ep) || handshaking.contains(ep));
 
-		OutgoingBTHandshaker connector = new OutgoingBTHandshaker(ep, _torrent);
+		TorrentConnector connector = new TorrentConnector(ep);
+		connecting.add(connector);
 		try {
-			Socket s = Sockets.connect(ep.getAddress(),
+			connector.toCancel = Sockets.connect(ep.getAddress(),
 					ep.getPort(), Constants.TIMEOUT, connector);
-			connector.setSock(s);
 		} catch (IOException impossible) {
-			ErrorService.error(impossible);
+			connecting.remove(connector); // remove just in case
 		}
-		outgoing.add(connector);
 	}
 	
 	void shutdown() {
@@ -174,9 +175,9 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		scheduled.unschedule();
 
 		// copy because shutdown() removes
-		List<Shutdownable> conns = new ArrayList<Shutdownable>(outgoing.size()+incoming.size());
-		conns.addAll(incoming);
-		conns.addAll(outgoing);
+		List<Shutdownable> conns = new ArrayList<Shutdownable>(connecting.size()+handshaking.size());
+		conns.addAll(connecting);
+		conns.addAll(handshaking);
 		for (Shutdownable connector : conns) 
 			connector.shutdown();
 	}
@@ -192,21 +193,88 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		if (LOG.isDebugEnabled())
 			LOG.debug("incoming handshaker from "+shaker.getInetAddress()+":"+shaker.getPort());
 		
-		if (shutdown || outgoing.contains(shaker)) {
+		if (shutdown || handshaking.contains(shaker)) {
 			LOG.debug("rejecting it");
 			shaker.shutdown();
 		} else 
-			incoming.add(shaker);
+			handshaking.add(shaker);
+		
+		if (connecting.contains(shaker)) {
+			for (TorrentConnector connector : connecting) {
+				if (IpPort.COMPARATOR.compare(connector, shaker) == 0) {
+					LOG.debug("stopping a connection attempt to same location");
+					connector.shutdown();
+					return;
+				}
+			}
+		}
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.BTHandshakeObserver#handshakerDone(com.limegroup.bittorrent.handshaking.BTHandshaker)
 	 */
 	public void handshakerDone(BTHandshaker shaker) {
-		Assert.that(incoming.contains(shaker) != outgoing.contains(shaker));
-		if (!incoming.remove(shaker)) 
-			outgoing.remove(shaker);
-		if (outgoing.size() < MAX_CONNECTORS)
-			fetch(); // TODO: figure out if this is necessary... exhaust corner cases
+		Assert.that(handshaking.contains(shaker));
+		handshaking.remove(shaker);
+		if (connecting.size() < Sockets.getNumAllowedSockets())
+			fetch(); 
+	}
+	
+	/**
+	 * Connector that establishes the transport layer connection between
+	 * two hosts.
+	 */
+	private class TorrentConnector implements ConnectObserver, IpPort {
+		private final TorrentLocation destination;
+		private final AtomicBoolean shutdown = new AtomicBoolean(false);
+		
+		/** a ref to a connecting socket we need to close should we get shutdown */
+		volatile Socket toCancel;
+		
+		TorrentConnector(TorrentLocation destination) {
+			this.destination = destination;
+		}
+		
+		public void handleConnect(Socket sock) {
+			if (shutdown.get()) 
+				return;
+			
+			if (LOG.isDebugEnabled())
+				LOG.debug("established transport to "+sock.getInetAddress());
+			
+			connecting.remove(this);
+			
+			if (handshaking.contains(this)) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("handshaker for this location exists");
+				IOUtils.close(sock);
+				return;
+			}
+			
+			BTHandshaker shaker = new OutgoingBTHandshaker(destination, _torrent, (AbstractNBSocket)sock);
+			handshaking.add(shaker);
+			shaker.startHandshaking();
+		}
+
+		public void handleIOException(IOException iox) {
+			shutdown();
+		}
+
+		public void shutdown() {
+			if (shutdown.getAndSet(true))
+				return;
+			connecting.remove(this);
+			IOUtils.close(toCancel);
+		}
+		
+		public String getAddress() {
+			return destination.getAddress();
+		}
+		public InetAddress getInetAddress() {
+			return destination.getInetAddress();
+		}
+		public int getPort() {
+			return destination.getPort();
+		}
 	}
 }
