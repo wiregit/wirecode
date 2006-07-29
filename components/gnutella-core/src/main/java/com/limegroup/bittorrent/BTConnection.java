@@ -749,9 +749,13 @@ PieceSendListener, PieceReadListener {
 			sendInterested();
 		
 		if (_available.cardinality() == _info.getNumBlocks()) {
+			if (LOG.isDebugEnabled())
+				LOG.debug(this+" now has everything");
 			_availableRanges = null;
 			_available = _info.getFullBitField();
 			numMissing = 0;
+			if (_torrent.isComplete()) // we're also seed - goodbye
+				shutdown();
 		}
 	}
 
