@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.AbstractNBSocket;
 
 public class IncomingBTHandshaker extends BTHandshaker {
 
@@ -19,12 +19,11 @@ public class IncomingBTHandshaker extends BTHandshaker {
 	
 	private final TorrentManager manager;
 	
-	public IncomingBTHandshaker(NIOSocket sock, TorrentManager manager) {
+	public IncomingBTHandshaker(AbstractNBSocket sock, TorrentManager manager) {
 		super(new TorrentLocation(sock.getInetAddress(), 
 				sock.getPort(),
 				new byte[20],
-				new byte[8]));
-		this.sock = sock;
+				new byte[8]), sock);
 		this.manager = manager;
 	}
 	

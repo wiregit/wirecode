@@ -1,7 +1,6 @@
 package com.limegroup.bittorrent.handshaking;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -11,33 +10,24 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.bittorrent.BTConnectionFetcher;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
-import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.AbstractNBSocket;
 
-public class OutgoingBTHandshaker extends BTHandshaker 
-implements ConnectObserver {
+public class OutgoingBTHandshaker extends BTHandshaker {
 	private static final Log LOG = LogFactory.getLog(OutgoingBTHandshaker.class);
 	
 	/**
 	 * creates an outgoing handshaker to the given location for
 	 * the given torrent.
 	 */
-	public OutgoingBTHandshaker(TorrentLocation loc, ManagedTorrent torrent) {
-		super(loc);
+	public OutgoingBTHandshaker(TorrentLocation loc, ManagedTorrent torrent, AbstractNBSocket sock) {
+		super(loc, sock);
 		this.torrent = torrent;
 		this.observer = torrent.getFetcher();
 	}
 
-	public void setSock(Socket sock) {
-		this.sock = (NIOSocket)sock;
-	}
-	
-	public void handleConnect(Socket socket) throws IOException {
-		if (LOG.isDebugEnabled())
-			LOG.debug("established connection to "+socket.getInetAddress());
-		
-		setSock(socket);
-		// connection was established - init the buffers and interests.
+	public void startHandshaking() {
+		if (shutdown)
+			return;
 		initOutgoingHandshake();
 		initIncomingHandshake();
 		setWriteInterest();

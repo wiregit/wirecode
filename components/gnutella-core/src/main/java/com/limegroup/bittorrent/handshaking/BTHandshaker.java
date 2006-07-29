@@ -14,12 +14,12 @@ import com.limegroup.bittorrent.BTConnection;
 import com.limegroup.bittorrent.BTHandshakeObserver;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
+import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestScatteringByteChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.util.IpPort;
 
 public abstract class BTHandshaker implements  
@@ -37,16 +37,19 @@ ChannelWriter, ChannelReadObserver, IpPort {
 	
 	protected InterestWriteChannel writeChannel;
 	protected InterestScatteringByteChannel readChannel;
-	protected volatile NIOSocket sock;
 	
 	protected boolean incomingDone, finishingHandshakes;
-	private volatile boolean shutdown;
+	protected volatile boolean shutdown;
 	
 	protected final TorrentLocation loc;
+	protected final AbstractNBSocket sock;
 	
-	protected BTHandshaker(TorrentLocation loc) {
+	protected BTHandshaker(TorrentLocation loc, AbstractNBSocket sock) {
 		this.loc = loc;
+		this.sock = sock;
 	}
+	
+	public abstract void startHandshaking();
 	
 	public void handleRead() throws IOException {
 		if (shutdown)

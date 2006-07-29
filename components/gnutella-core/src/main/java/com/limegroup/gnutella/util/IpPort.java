@@ -1,7 +1,10 @@
 package com.limegroup.gnutella.util;
 
 import java.net.InetAddress;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Utility interface that allows class containing host information to be 
@@ -33,7 +36,12 @@ public interface IpPort {
     /**
      * The sole comparator to use for IpPort objects.
      */
-    public static final Comparator COMPARATOR = new IpPortComparator();
+    public static final Comparator<IpPort> COMPARATOR = new IpPortComparator();
+    
+    /** An empty list, casted to an IpPort. */
+    public static final List<IpPort> EMPTY_LIST = Collections.emptyList();
+    /** An empty set, casted to an IpPort. */
+    public static final Set<IpPort> EMPTY_SET = Collections.emptySet();
     
     /**
      * A comparator to compare IpPort objects.
@@ -44,12 +52,10 @@ public interface IpPort {
      * to hashCode & equals, the only valid way to enforce Set equality
      * is to use a Comparator that is based on the IpPortness.
      */
-    public static class IpPortComparator implements Comparator {
-        public int compare(Object a, Object b) {
-            if(a == b)
+    public static class IpPortComparator implements Comparator<IpPort> {
+        public int compare(IpPort ip1, IpPort ip2) {
+            if(ip1 == ip2)
                 return 0;
-            IpPort ip1 = (IpPort)a;
-            IpPort ip2 = (IpPort)b;
             int diff = ip1.getPort() - ip2.getPort();
             if(diff == 0) {
                 byte[] neta = ip1.getInetAddress().getAddress();
