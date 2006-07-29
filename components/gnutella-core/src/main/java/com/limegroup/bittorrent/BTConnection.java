@@ -281,11 +281,18 @@ PieceSendListener, PieceReadListener {
 		_socket.close();
 		
 		clearRequests();
-		
-		if (usingSlot) 
-			RouterService.getUploadSlotManager().cancelRequest(this);
+		cancelSlotRequest();
 		
 		_torrent.connectionClosed(this);
+	}
+	
+	private void cancelSlotRequest() {
+		if (usingSlot) {
+			if (LOG.isDebugEnabled())
+				LOG.debug(this+" cancelling slot request");
+			RouterService.getUploadSlotManager().cancelRequest(this);
+		}
+		usingSlot = false;
 	}
 
 	/* (non-Javadoc)
@@ -348,6 +355,7 @@ PieceSendListener, PieceReadListener {
 		if (!_isChoked) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(this+" choking");
+			cancelSlotRequest();
 			_writer.enqueue(BTChoke.createMessage());
 			_isChoked = true;
 		} 
@@ -779,6 +787,8 @@ PieceSendListener, PieceReadListener {
 			b.append(" Iing");
 		if (isSeed())
 			b.append(" Seed");
+		if (usingSlot)
+			b.append(" U");
 		b.append(")");
 		return b.toString();
 	}
@@ -797,6 +807,8 @@ PieceSendListener, PieceReadListener {
 		if (slotReleaser == null) {
 			slotReleaser = new Runnable() {
 				public void run() {
+					if (LOG.isDebugEnabled())
+						LOG.debug(BTConnection.this +" releasing slot");
 					usingSlot = false;
 					choke();
 				}
@@ -813,6 +825,8 @@ PieceSendListener, PieceReadListener {
 		if (slotNotifier == null) {
 			slotNotifier = new Runnable() {
 				public void run() {
+					if (LOG.isDebugEnabled())
+						LOG.debug(BTConnection.this+" got available slot");
 					beginPieceSend();
 				}
 			};
