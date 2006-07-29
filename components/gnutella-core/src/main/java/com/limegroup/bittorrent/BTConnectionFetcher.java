@@ -109,12 +109,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		if (shutdown || !_torrent.needsMoreConnections())
 			return;
 		
-		long nextNonBusy = _torrent.getNextLocationRetryTime();
-		if (nextNonBusy < Long.MAX_VALUE)
-			scheduled.rescheduleIfSooner(nextNonBusy);
-		else if (LOG.isDebugEnabled())
-			LOG.debug("no known hosts to connect to");
-		
+		scheduled.rescheduleIfSooner(_torrent.getNextLocationRetryTime());
 	}
 	
 	public void run() {
@@ -129,9 +124,6 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 				connecting.size() < Sockets.getNumAllowedSockets() &&
 				_torrent.hasNonBusyLocations()) {
 			fetchConnection();
-			if (LOG.isDebugEnabled())
-				LOG.debug("started connection fetcher: "
-						+ connecting.size());
 		}
 		
 		// we didn't start enough fetchers - see if there 
@@ -164,6 +156,9 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		} catch (IOException impossible) {
 			connecting.remove(connector); // remove just in case
 		}
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("starting a connector to "+ep.getAddress()+" total "+connecting.size());
 	}
 	
 	void shutdown() {
@@ -216,8 +211,6 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 	public void handshakerDone(BTHandshaker shaker) {
 		Assert.that(handshaking.contains(shaker));
 		handshaking.remove(shaker);
-		if (connecting.size() < Sockets.getNumAllowedSockets())
-			fetch(); 
 	}
 	
 	/**
@@ -254,6 +247,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 			BTHandshaker shaker = new OutgoingBTHandshaker(destination, _torrent, (AbstractNBSocket)sock);
 			handshaking.add(shaker);
 			shaker.startHandshaking();
+			fetch();
 		}
 
 		public void handleIOException(IOException iox) {
@@ -263,8 +257,9 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		public void shutdown() {
 			if (shutdown.getAndSet(true))
 				return;
-			connecting.remove(this);
 			IOUtils.close(toCancel);
+			connecting.remove(this);
+			fetch();
 		}
 		
 		public String getAddress() {

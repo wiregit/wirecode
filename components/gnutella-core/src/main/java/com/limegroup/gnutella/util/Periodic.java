@@ -27,8 +27,11 @@ public class Periodic {
 		long newTime = System.currentTimeMillis() + newDelay;
 		
 		if (future == null) { 
-			future = scheduler.invokeLater(d,newDelay);
-			nextExecuteTime = 0;
+			if (newDelay > 0)
+				future = scheduler.invokeLater(d,newDelay);
+			else
+				scheduler.invokeLater(d);
+			nextExecuteTime = -1;
 		}
 		
 		if (newTime > nextExecuteTime) {
@@ -53,7 +56,12 @@ public class Periodic {
 		if (newTime < nextExecuteTime) {
 			future.cancel(false);
 			nextExecuteTime = newTime;
-			future = scheduler.invokeLater(d, newDelay);
+			if (newDelay > 0)
+				future = scheduler.invokeLater(d, newDelay);
+			else { 
+				future = null;
+				scheduler.invokeLater(d);
+			}
 			return true;
 		}
 		return false;
