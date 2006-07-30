@@ -88,13 +88,14 @@ public class BTMessageWriter implements BTChannelWriter {
 		this.ioxObserver = ioxObserver;
 		this.pieceListener = pieceListener;
 		_out[0] = ByteBuffer.allocate(5);
+		myKeepAlive.flip();
 	}
 
 	public void init(SchedulingThreadPool scheduler) {
 		ThrottleWriter throttle = new ThrottleWriter(
 				RouterService.getBandwidthManager().getThrottle(false));
 		delayer = new DelayedBufferWriter(1400, 3000);
-		setWriteChannel(delayer);
+		_channel = delayer; 
 		delayer.setWriteChannel(throttle);
 		keepAliveSender = new Periodic(new Runnable() {
 			public void run() {
