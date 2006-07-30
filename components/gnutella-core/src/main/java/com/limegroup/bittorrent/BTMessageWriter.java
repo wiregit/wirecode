@@ -140,11 +140,7 @@ public class BTMessageWriter implements BTChannelWriter {
 			
 			if (!_out[1].hasRemaining()) {
 				_out[1] = null; // can be gc'd now
-				
-				if (isPiece(currentMessage)) {
-					prepareForPiece(false);
-					pieceListener.pieceSent();
-				}
+				messageSent(currentMessage);
 			}
 			
 			if (written > 0) {
@@ -174,8 +170,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	public void enqueue(BTMessage m) {
 		keepAliveSender.rescheduleIfLater(KEEP_ALIVE_INTERVAL);
 		_queue.addLast(m);
-		if (isPiece(m))
-			prepareForPiece(true);
+		messageArrived(m);
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("enqueing message of type " + m.getType() + " to "
@@ -190,24 +185,45 @@ public class BTMessageWriter implements BTChannelWriter {
 			_channel.interest(this, true);
 	}
 	
+	private void messageArrived(BTMessage m) {
+		if (isImmediate(m))
+			delayer.setImmediateFlush(true);
+		
+		if (isPiece(m)) {
+			if (watchdog == null)
+				watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
+			watchdog.activate(this);
+		}
+	}
+	
+	private void messageSent(BTMessage m) {
+		if (!anyImmediatesQueued())
+			delayer.setImmediateFlush(false);
+		if (isPiece(m)) {
+			watchdog.deactivate();
+			pieceListener.pieceSent();
+		}
+	}
+	
 	private boolean isPiece(BTMessage m){
 		return m.getType() == BTMessage.PIECE;
 	}
 	
-	/**
-	 * Prepares the connection for sending a piece
-	 * @param start whether we are starting a piece or finishing it.
-	 */
-	private void prepareForPiece(boolean start) {
-		if (start) {
-			if (watchdog == null)
-				watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
-			watchdog.activate(this);
-			delayer.setImmediateFlush(true);
-		} else {
-			watchdog.deactivate();
-			delayer.setImmediateFlush(false);
+	private boolean isImmediate(BTMessage m) {
+		switch(m.getType()) {
+		case BTMessage.PIECE :
+		case BTMessage.REQUEST : 
+			return true;
 		}
+		return false;
+	}
+	
+	private boolean anyImmediatesQueued() {
+		for (BTMessage queued : _queue) {
+			if (isImmediate(queued))
+				return true;
+		}
+		return false;
 	}
 	
 	/**
