@@ -22,10 +22,6 @@ public class FinishedTorrentDownload implements Torrent {
 		return -1;
 	}
 
-	public int getNumBadPeers() {
-		return 0;
-	}
-
 	public int getNumNonInterestingPeers() {
 		return 0;
 	}

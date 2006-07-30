@@ -50,8 +50,6 @@ interface Torrent {
 
 	public int getNumConnections();
 
-	public int getNumBadPeers();
-
 	public int getNumPeers();
 
 	public int getNumNonInterestingPeers();

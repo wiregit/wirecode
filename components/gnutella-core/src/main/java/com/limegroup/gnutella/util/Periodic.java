@@ -2,7 +2,10 @@ package com.limegroup.gnutella.util;
 
 import java.util.concurrent.Future;
 
-
+/**
+ * A utility to schedule, reschedule and cancel the execution of 
+ * a task.
+ */
 public class Periodic {
 
 	private final SchedulingThreadPool scheduler;
@@ -11,6 +14,12 @@ public class Periodic {
 	private long nextExecuteTime;
 	private Future future;
 	
+	/**
+	 * Creates a periodic task 
+	 * @param r the <tt>Runnable</tt> to execute
+	 * @param scheduler the <tt>SchedulingThreadPool</tt> to schedule
+	 * executon on.
+	 */
 	public Periodic(Runnable r,
 			SchedulingThreadPool scheduler) {
 		this.d = new Delegate(r);
@@ -20,21 +29,24 @@ public class Periodic {
 	/**
 	 * changes the execution time of this Periodic task if it is
 	 * later than the current execution time.
+	 * 
+	 * Note: some implementations of <tt>SchedulingThreadPool</tt> use nanoseconds
+	 * as their time unit, so do not schedule anything for more than 292 years in the
+	 * future.  More practically, this means you should not use Long.MAX_VALUE as parameter.
+	 * 
 	 * @param newDelay the new delay from now when this should be executed
 	 * @return true if the execution time changed
 	 */
 	public synchronized boolean rescheduleIfLater(long newDelay) {
 		long newTime = System.currentTimeMillis() + newDelay;
-		
 		if (future == null) { 
-			if (newDelay > 0)
+			nextExecuteTime = newTime;
+			if (newDelay > 0) 
 				future = scheduler.invokeLater(d,newDelay);
 			else
 				scheduler.invokeLater(d);
-			nextExecuteTime = -1;
-		}
-		
-		if (newTime > nextExecuteTime) {
+			return true;
+		} else if (newTime > nextExecuteTime) {
 			nextExecuteTime = newTime;
 			return true;
 		}
@@ -67,6 +79,9 @@ public class Periodic {
 		return false;
 	}
 	
+	/**
+	 * Cancels any scheduled execution of the task.
+	 */
 	public synchronized void unschedule() {
 		if (future != null) {
 			future.cancel(true);

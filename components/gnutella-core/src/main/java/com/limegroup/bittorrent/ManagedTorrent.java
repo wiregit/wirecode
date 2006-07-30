@@ -58,11 +58,6 @@ public class ManagedTorrent implements Torrent {
 	private Set<TorrentLocation> _peers;
 
 	/**
-	 * The list of known bad TorrentLocations
-	 */
-	private Set<TorrentLocation> _badPeers;
-
-	/**
 	 * the meta info for this torrent
 	 */
 	private BTMetaInfo _info;
@@ -120,7 +115,6 @@ public class ManagedTorrent implements Torrent {
 		_folder = info.getDiskManager();
 		_connections = Collections.synchronizedList(new ArrayList<BTLink>());
 		_peers = Collections.EMPTY_SET;
-		_badPeers = Collections.EMPTY_SET;
 		trackerManager = new TrackerManager(this);
 		choker = new LeechChoker(_connections, networkInvoker);
 		this.dispatcher = dispatcher;
@@ -362,8 +356,6 @@ public class ManagedTorrent implements Torrent {
 	 * Initializes some state relevant to the torrent
 	 */
 	private void initializeTorrent() {
-		_badPeers = Collections.synchronizedSet(
-				new FixedSizeExpiringSet<TorrentLocation>(500, 60 * 60 * 1000));
 		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
 
 		_connectionFetcher = new BTConnectionFetcher(this, networkInvoker);
@@ -469,14 +461,6 @@ public class ManagedTorrent implements Torrent {
 			_connectionFetcher.fetch();
 		}
 	}
-	
-	/**
-	 * adds an endpoing to the set of known failed locations
-	 */
-	public void addBadEndpoint(TorrentLocation to) {
-		_badPeers.add(to);
-	}
-
 	
 	/**
 	 * Stops the torrent because of tracker failure.
@@ -594,7 +578,6 @@ public class ManagedTorrent implements Torrent {
 				// clear the state as we no longer need it
 				// (until source exchange is implemented)
 				_peers.clear();
-				_badPeers.clear();
 			}
 		};
 		networkInvoker.invokeLater(r);
@@ -681,19 +664,17 @@ public class ManagedTorrent implements Torrent {
 	TorrentLocation getTorrentLocation() {
 		long now = System.currentTimeMillis();
 		TorrentLocation ret = null;
-		do {
-			synchronized(_peers) {
-				for (TorrentLocation loc : _peers) {
-					if (loc.isBusy(now))
-						continue;
-					else if (!isConnectedTo(loc)) {
-						ret = loc;
-						break;
-					}
+		synchronized(_peers) {
+			for (TorrentLocation loc : _peers) {
+				if (loc.isBusy(now))
+					continue;
+				else if (!isConnectedTo(loc)) {
+					ret = loc;
+					_peers.remove(ret);
+					break;
 				}
 			}
-		} while (ret != null && _badPeers.contains(ret));
-		_peers.remove(ret);
+		}
 		return ret;
 	}
 
@@ -781,13 +762,6 @@ public class ManagedTorrent implements Torrent {
 	 */
 	public int getNumConnections() {
 		return _connections.size();
-	}
-
-	/* (non-Javadoc)
-	 * @see com.limegroup.bittorrent.Torrent#getNumBadPeers()
-	 */
-	public int getNumBadPeers() {
-		return _badPeers.size();
 	}
 
 	/* (non-Javadoc)

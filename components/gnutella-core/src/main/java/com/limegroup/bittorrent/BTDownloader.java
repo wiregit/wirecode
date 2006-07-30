@@ -241,7 +241,7 @@ implements TorrentEventListener {
 	}
 
 	public int getNumberOfInvalidAlternateLocations() {
-		return _torrent.getNumBadPeers();
+		return 0; // not applicable to torrents
 	}
 
 	public int getPossibleHostCount() {

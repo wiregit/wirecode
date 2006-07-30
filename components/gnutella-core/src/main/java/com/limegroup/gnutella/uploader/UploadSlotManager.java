@@ -199,8 +199,11 @@ public class UploadSlotManager implements BandwidthTracker {
 	private void killPreemptible(int priority) {
 		for(int i = active.size() - 1; i >= 0; i--) {
 			UploadSlotRequest request = active.get(i);
-			if (request.getPriority() < priority && request.isPreemptible())
+			if (request.getPriority() < priority && request.isPreemptible()) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("freeing slot from "+request.getUser());
 				request.getUser().releaseSlot();
+			}
 		}
 	}
 
@@ -365,7 +368,7 @@ public class UploadSlotManager implements BandwidthTracker {
 		// can't resume if someone is still active
 		if (existActiveHigherPriority(BT_SEED))
 			return;
-		
+		// consider moving this to an external collection
 		for(Iterator iter = queuedResumable.iterator();
 		iter.hasNext() && hasFreeSlot(active.size());) {
 			BTSlotRequest queuedRequest = (BTSlotRequest) iter.next();

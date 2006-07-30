@@ -80,8 +80,6 @@ public class OutgoingBTHandshaker extends BTHandshaker {
 		loc.strike();
 		if (!loc.isOut())
 			torrent.addEndpoint(loc);
-		else
-			torrent.addBadEndpoint(loc);
 		super.handleIOException(iox);
 	}
 }

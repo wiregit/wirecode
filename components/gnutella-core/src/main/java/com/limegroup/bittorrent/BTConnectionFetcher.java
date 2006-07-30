@@ -108,8 +108,9 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 	public synchronized void fetch() {
 		if (shutdown || !_torrent.needsMoreConnections())
 			return;
-		
-		scheduled.rescheduleIfSooner(_torrent.getNextLocationRetryTime());
+		long nextRetryTime = _torrent.getNextLocationRetryTime();
+		if (nextRetryTime != Long.MAX_VALUE)
+			scheduled.rescheduleIfSooner(nextRetryTime);
 	}
 	
 	public void run() {
