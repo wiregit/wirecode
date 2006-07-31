@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
 
+@SuppressWarnings("serial")
 public class DHTException extends Exception {
 
     private KUID nodeId;

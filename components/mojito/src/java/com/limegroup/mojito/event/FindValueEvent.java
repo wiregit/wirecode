@@ -67,7 +67,7 @@ public class FindValueEvent implements Iterable<DHTValue> {
     }
     
     public Iterator<DHTValue> iterator() {
-        return new GetValueIterator();
+        return new ResponseIterator();
     }
     
     public String toString() {
@@ -80,20 +80,20 @@ public class FindValueEvent implements Iterable<DHTValue> {
         return buffer.toString();
     }
     
-    private class GetValueIterator implements Iterator<DHTValue> {
+    private class ResponseIterator implements Iterator<DHTValue> {
         
         private Iterator<FindValueResponse> it = responses.iterator();
         
         private Iterator<DHTValue> values = null;
         
         public boolean hasNext() {
-            return it.hasNext();
+            return it.hasNext() || (values != null && values.hasNext());
         }
 
         public DHTValue next() {
             if (values == null || !values.hasNext()) {
                 if (it.hasNext()) {
-                    values = new GetValueIterator2(it.next());
+                    values = new GetValueIterator(it.next());
                 }
             }
             
@@ -109,7 +109,7 @@ public class FindValueEvent implements Iterable<DHTValue> {
         }
     }
     
-    private class GetValueIterator2 implements Iterator<DHTValue> {
+    private class GetValueIterator implements Iterator<DHTValue> {
         
         private Contact node;
         
@@ -117,7 +117,7 @@ public class FindValueEvent implements Iterable<DHTValue> {
         
         private Iterator<DHTValue> values;
         
-        private GetValueIterator2(FindValueResponse response) {
+        private GetValueIterator(FindValueResponse response) {
             this.node = response.getContact();
             this.keys = response.getKeys().iterator();
             this.values = response.getValues().iterator();
@@ -135,10 +135,15 @@ public class FindValueEvent implements Iterable<DHTValue> {
             if (keys.hasNext()) {
                 try {
                     KUID key = keys.next();
-                    return next(key);
+                    DHTValue v = next(key);
+                    return v;
                 } catch (Exception err) {
                     LOG.error("Exception", err);
-                    return next();
+                    if (keys.hasNext()) {
+                        return next();
+                    }
+
+                    throw new NoSuchElementException(err.getMessage());
                 }
             }
             
@@ -146,7 +151,7 @@ public class FindValueEvent implements Iterable<DHTValue> {
         }
 
         private DHTValue next(KUID nodeId) throws Exception {
-            GetValues getValues = new GetValues(node, lookupId, nodeId);
+            GetValueResponseHandler getValues = new GetValueResponseHandler(node, lookupId, nodeId);
             Collection<DHTValue> v = getValues.call();
             values = v.iterator();
             return values.next();
@@ -157,7 +162,7 @@ public class FindValueEvent implements Iterable<DHTValue> {
         }
     }
     
-    private class GetValues extends AbstractResponseHandler<Collection<DHTValue>> {
+    private class GetValueResponseHandler extends AbstractResponseHandler<Collection<DHTValue>> {
         
         private Contact node;
         
@@ -165,7 +170,7 @@ public class FindValueEvent implements Iterable<DHTValue> {
         
         private KUID nodeId;
         
-        private GetValues(Contact node, KUID valueId, KUID nodeId) {
+        private GetValueResponseHandler(Contact node, KUID valueId, KUID nodeId) {
             super(FindValueEvent.this.context);
             
             this.node = node;

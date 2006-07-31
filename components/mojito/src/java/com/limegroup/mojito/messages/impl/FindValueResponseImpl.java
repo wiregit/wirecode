@@ -57,7 +57,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
             MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, version, in);
         
-        this.keys = in.readKUIDs();
+        this.keys = in.readNodeIDs();
         this.values = in.readDHTValues(getContact());
     }
     

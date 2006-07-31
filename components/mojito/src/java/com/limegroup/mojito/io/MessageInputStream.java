@@ -99,7 +99,7 @@ public class MessageInputStream extends DataInputStream {
         return Arrays.asList(values);
     }
     
-    public Collection<KUID> readKUIDs() throws IOException {
+    public Collection<KUID> readValueIDs() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.emptySet();
@@ -108,6 +108,20 @@ public class MessageInputStream extends DataInputStream {
         KUID[] keys = new KUID[size];
         for (int i = 0; i < size; i++) {
             keys[i] = readValueID();
+        }
+        
+        return Arrays.asList(keys);
+    }
+    
+    public Collection<KUID> readNodeIDs() throws IOException {
+        int size = readUnsignedByte();
+        if (size == 0) {
+            return Collections.emptySet();
+        }
+        
+        KUID[] keys = new KUID[size];
+        for (int i = 0; i < size; i++) {
+            keys[i] = readNodeID();
         }
         
         return Arrays.asList(keys);

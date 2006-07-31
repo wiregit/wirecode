@@ -52,8 +52,8 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueEve
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void handleFoundValues(FindValueResponse reponse) {
-        responses.add(reponse);
+    protected void handleFoundValues(FindValueResponse response) {
+        responses.add(response);
     }
 
     @Override

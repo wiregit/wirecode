@@ -72,6 +72,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         this.value = value;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     protected void start() throws Exception {
         
@@ -86,9 +87,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 = new EntryImpl<Contact, QueryKey>(node, queryKey);
             nodes = Arrays.asList(entry);
         }
-        
-        //System.out.println("Storing at:");
-        //System.out.println(CollectionUtils.toString(nodes));
         
         storeAt(nodes);
     }

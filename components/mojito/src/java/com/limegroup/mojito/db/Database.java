@@ -26,6 +26,9 @@ import java.util.Set;
 
 import com.limegroup.mojito.KUID;
 
+/**
+ * 
+ */
 public interface Database extends Serializable {
     
     /**
