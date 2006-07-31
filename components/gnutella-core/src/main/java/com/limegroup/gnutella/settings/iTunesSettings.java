@@ -26,6 +26,6 @@ public class iTunesSettings extends LimeProps {
      */
     public static StringArraySetting ITUNES_SUPPORTED_FILE_TYPES = 
         FACTORY.createStringArraySetting("ITUNES_SUPPORTED_FILE_TYPES", 
-            new String[]{".mp3", ".aif", ".aiff", ".wav", ".mp2", ".mp4", 
-                        ".aac", ".mid", ".m4a", ".m4p", ".ogg"});
+            new String[]{"mp3", "aif", "aiff", "wav", "mp2", "mp4", 
+                        "aac", "mid", "m4a", "m4p", "ogg"});
 }
