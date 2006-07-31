@@ -228,7 +228,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             handleFindNodeResponse((FindNodeResponse)message, time, hop);
         }
         
-        if (hasActiveSearches() == false) {
+        if (hasActiveSearches() == false || isLookupFinished()) {
             doFinishLookup(time(), hop);
         }
     }
@@ -486,7 +486,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         handleLookupFinished(time, hops);
     }
     
-    protected void handleFoundValues(FindValueResponse reponse) {
+    protected void handleFoundValues(FindValueResponse response) {
         throw new UnsupportedOperationException();
     }
     
