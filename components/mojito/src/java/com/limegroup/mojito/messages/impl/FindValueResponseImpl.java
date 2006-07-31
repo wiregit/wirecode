@@ -25,7 +25,8 @@ import java.util.Collection;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindValueResponse;
@@ -37,29 +38,40 @@ import com.limegroup.mojito.messages.MessageID;
 public class FindValueResponseImpl extends AbstractLookupResponse
         implements FindValueResponse {
 
-    private Collection<KeyValue> values;
+    private Collection<KUID> keys;
+    
+    private Collection<DHTValue> values;
 
+    @SuppressWarnings("unchecked")
     public FindValueResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
-            Collection<KeyValue> values) {
+            Collection<KUID> keys,
+            Collection<? extends DHTValue> values) {
         super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId);
-
-        this.values = values;
+        
+        this.keys = keys;
+        this.values = (Collection<DHTValue>)values;
     }
 
     public FindValueResponseImpl(Context context, SocketAddress src, 
             MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, version, in);
         
-        this.values = in.readKeyValues();
+        this.keys = in.readKUIDs();
+        this.values = in.readDHTValues(getContact());
     }
     
-    public Collection<KeyValue> getValues() {
+    public Collection<KUID> getKeys() {
+        return keys;
+    }
+    
+    public Collection<DHTValue> getValues() {
         return values;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeKeyValues(values);
+        out.writeKUIDs(keys);
+        out.writeDHTValues(values);
     }
     
     public String toString() {

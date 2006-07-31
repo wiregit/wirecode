@@ -46,6 +46,7 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         networkStats = context.getNetworkStats();
     }
 
+    @Override
     public void request(RequestMessage message) throws IOException {
         
         StatsRequest request = (StatsRequest) message;

@@ -31,7 +31,7 @@ import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
@@ -135,13 +135,13 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
-            KUID lookupId) {
-        return new FindValueRequestImpl(context, contact, messageId, lookupId);
+            KUID lookupId, Collection<KUID> keys) {
+        return new FindValueRequestImpl(context, contact, messageId, lookupId, keys);
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KeyValue> values) {
-        return new FindValueResponseImpl(context, contact, messageId, values);
+            Collection<KUID> keys, Collection<? extends DHTValue> values) {
+        return new FindValueResponseImpl(context, contact, messageId, keys, values);
     }
 
     public PingRequest createPingRequest(Contact contact, MessageID messageId) {
@@ -164,8 +164,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, KeyValue keyValue) {
-        return new StoreRequestImpl(context, contact, messageId, queryKey, keyValue);
+            QueryKey queryKey, DHTValue value) {
+        return new StoreRequestImpl(context, contact, messageId, queryKey, value);
     }
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 

@@ -19,48 +19,185 @@
 
 package com.limegroup.mojito.event;
 
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.messages.FindValueRequest;
+import com.limegroup.mojito.messages.FindValueResponse;
+import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.messages.ResponseMessage;
 
 /**
  * 
  */
-public class FindValueEvent {
+public class FindValueEvent implements Iterable<DHTValue> {
     
-    public KUID lookupId;
+    private static final Log LOG = LogFactory.getLog(FindValueEvent.class);
     
-    private List<Entry<Contact, Collection<KeyValue>>> values;
+    private Context context;
+    
+    private KUID lookupId;
+    
+    private List<FindValueResponse> responses;
     
     @SuppressWarnings("unchecked")
-    public FindValueEvent(KUID lookupId, List<? extends Entry<Contact,Collection<KeyValue>>> values) {
+    public FindValueEvent(Context context, KUID lookupId, 
+            List<? extends FindValueResponse> values) {
+        
+        this.context = context;
         this.lookupId = lookupId;
-        this.values = (List<Entry<Contact,Collection<KeyValue>>>)values;
+        this.responses = (List<FindValueResponse>)values;
     }
     
     public KUID getLookupID() {
         return lookupId;
     }
     
-    public List<Entry<Contact,Collection<KeyValue>>> getValues() {
-        return values;
+    public Iterator<DHTValue> iterator() {
+        return new GetValueIterator();
     }
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(lookupId).append("\n");
         
-        int i = 0;
-        for (Entry<Contact, Collection<KeyValue>> entry : values) {
-            buffer.append(entry.getKey()).append("\n");
-            for (KeyValue keyValue : entry.getValue()) {
-                buffer.append("  ").append(i++).append(": ").append(keyValue).append("\n");
-            }
+        for (FindValueResponse reponse : responses) {
+            buffer.append(reponse).append("\n");
         }
         return buffer.toString();
+    }
+    
+    private class GetValueIterator implements Iterator<DHTValue> {
+        
+        private Iterator<FindValueResponse> it = responses.iterator();
+        
+        private Iterator<DHTValue> values = null;
+        
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        public DHTValue next() {
+            if (values == null || !values.hasNext()) {
+                if (it.hasNext()) {
+                    values = new GetValueIterator2(it.next());
+                }
+            }
+            
+            if (values != null && values.hasNext()) {
+                return values.next();
+            }
+            
+            throw new NoSuchElementException();
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    private class GetValueIterator2 implements Iterator<DHTValue> {
+        
+        private Contact node;
+        
+        private Iterator<KUID> keys;
+        
+        private Iterator<DHTValue> values;
+        
+        private GetValueIterator2(FindValueResponse response) {
+            this.node = response.getContact();
+            this.keys = response.getKeys().iterator();
+            this.values = response.getValues().iterator();
+        }
+
+        public boolean hasNext() {
+            return keys.hasNext() || values.hasNext();
+        }
+
+        public DHTValue next() {
+            if (values.hasNext()) {
+                return values.next();
+            }
+            
+            if (keys.hasNext()) {
+                try {
+                    KUID key = keys.next();
+                    return next(key);
+                } catch (Exception err) {
+                    LOG.error("Exception", err);
+                    return next();
+                }
+            }
+            
+            throw new NoSuchElementException();
+        }
+
+        private DHTValue next(KUID nodeId) throws Exception {
+            GetValues getValues = new GetValues(node, lookupId, nodeId);
+            Collection<DHTValue> v = getValues.call();
+            values = v.iterator();
+            return values.next();
+        }
+        
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    private class GetValues extends AbstractResponseHandler<Collection<DHTValue>> {
+        
+        private Contact node;
+        
+        private KUID valueId;
+        
+        private KUID nodeId;
+        
+        private GetValues(Contact node, KUID valueId, KUID nodeId) {
+            super(FindValueEvent.this.context);
+            
+            this.node = node;
+            this.valueId = valueId;
+            this.nodeId = nodeId;
+        }
+        
+        @Override
+        protected void start() throws Exception {
+            super.start();
+            
+            List<KUID> nodeIds = Arrays.asList(nodeId);
+            FindValueRequest request = context.getMessageHelper()
+                .createFindValueRequest(node.getContactAddress(), valueId, nodeIds);
+            
+            context.getMessageDispatcher().send(node, request, this);
+        }
+
+        @Override
+        protected void response(ResponseMessage message, long time) throws IOException {
+            Collection<DHTValue> values = ((FindValueResponse)message).getValues();
+            setReturnValue(values);
+        }
+        
+        @Override
+        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+            fireTimeoutException(nodeId, dst, message, time);
+        }
+        
+        @Override
+        protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+            setException(new DHTException(nodeId, dst, message, -1L, e));
+        }
     }
 }

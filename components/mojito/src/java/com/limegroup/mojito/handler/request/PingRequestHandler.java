@@ -41,6 +41,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
         networkStats = context.getNetworkStats();
     }
     
+    @Override
     public void request(RequestMessage message) throws IOException {
         
         networkStats.PING_REQUESTS.incrementStat();

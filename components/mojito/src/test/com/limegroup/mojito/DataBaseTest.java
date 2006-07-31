@@ -25,8 +25,8 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db1.Database;
+import com.limegroup.mojito.db1.KeyValue;
 
 public class DataBaseTest extends BaseTestCase {
     

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.StoreEvent;
@@ -192,12 +192,12 @@ public interface MojitoDHT {
     /**
      * Returns a Set of all keys in the Database
      */
-    public Set<KUID> getKeys();
+    public Set<KUID> keySet();
     
     /**
      * Returns a Collection of all values in the Database
      */
-    public Collection<KeyValue> getValues();
+    public Collection<DHTValue> getValues();
     
     /**
      * Tries to find the value for the given key

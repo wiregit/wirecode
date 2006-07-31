@@ -29,12 +29,10 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.concurrent.Future;
 
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
@@ -98,7 +96,8 @@ public class CommandHandler {
     public static void info(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         out.println("Local ContactNode: " + ((Context)dht).getLocalNode());
         out.println("Is running: " + dht.isRunning());
-        out.println("Database Size: " + ((Context)dht).getDatabase().size());
+        out.println("Database Size (Keys): " + ((Context)dht).getDatabase().getKeyCount());
+        out.println("Database Size (Values): " + ((Context)dht).getDatabase().getValueCount());
         out.println("RouteTable Size: " + ((Context)dht).getRouteTable().size());
         out.println("Estimated DHT Size: " + dht.size());
     }
@@ -120,14 +119,12 @@ public class CommandHandler {
         StringBuilder buffer = new StringBuilder("\n");
         
         Database database = ((Context)dht).getDatabase();
-        Collection values = database.getValues();
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
-            KeyValue value = (KeyValue)it.next();
-            
+        for(DHTValue value : database.values()) {    
             buffer.append("VALUE: ").append(value).append("\n\n");
         }
         buffer.append("-------------\n");
-        buffer.append("TOTAL: " + values.size()).append("\n");
+        buffer.append("TOTAL: ").append(database.getKeyCount())
+            .append("/").append(database.getValueCount()).append("\n");
         
         out.println(buffer);
     }
@@ -334,7 +331,7 @@ public class CommandHandler {
             FindValueEvent evt = dht.get(key).get();
             long time = System.currentTimeMillis() - start;
             
-            if (!evt.getValues().isEmpty()) {
+            /*if (!evt.getValues().isEmpty()) {
                 StringBuffer buffer = new StringBuffer();
                 buffer.append(key).append(" in ").append(time).append("ms\n");
                 buffer.append(evt);
@@ -342,7 +339,13 @@ public class CommandHandler {
                 out.println(buffer.toString());
             } else {
                 out.println(key + " was not found after " + time + "ms");
+            }*/
+            
+            StringBuilder buffer = new StringBuilder();
+            for (DHTValue value : evt) {
+                buffer.append(value).append("\n");
             }
+            out.println(buffer.toString());
             
             out.println();
             

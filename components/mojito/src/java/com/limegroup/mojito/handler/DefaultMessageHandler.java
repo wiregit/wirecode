@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,9 +34,8 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.db.Database.KeyValueBag;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -130,56 +131,63 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         
         // Are we one of the K closest nodes to the contact?
         if (routeTable.isNearToLocal(node.getNodeID())) {
-            List<KeyValue> keyValuesToForward = new ArrayList<KeyValue>();
+            List<Entry<KUID, DHTValue>> valuesToForward = new ArrayList<Entry<KUID, DHTValue>>();
             
             Database database = context.getDatabase();
             synchronized(database) {
-                Collection<KeyValueBag> bags = database.getKeyValueBags();
-                for(KeyValueBag bag : bags) {
+                for(KUID valueId : database.keySet()) {
                     
-                    // To avoid redundant STORE forward, a node only transfers a value if it is the closest to the key
-                    // or if its ID is closer than any other ID (except the new closest one of course)
-                    // TODO: maybe relax this a little bit: what if we're not the closest and the closest is stale?
-                    List<Contact> closestNodesToKey = routeTable.select(bag.getKey(), k, false);
+                    // To avoid redundant STORE forward, a node only transfers a value 
+                    // if it is the closest to the key or if its ID is closer than any 
+                    // other ID (except the new closest one of course)
+                    // TODO: maybe relax this a little bit: what if we're not the closest 
+                    // and the closest is stale?
+                    
+                    List<Contact> closestNodesToKey = routeTable.select(valueId, k, false);
                     Contact closest = closestNodesToKey.get(0);
                     
                     if (context.isLocalNode(closest)   
                             || ((node.equals(closest)
-                                    //maybe we haven't added him to the routing table
-                                    || node.getNodeID().isNearer(closest.getNodeID(), bag.getKey())) 
-                                    && (closestNodesToKey.size() > 1)
-                                    && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
+                                //maybe we haven't added him to the routing table
+                                || node.getNodeID().isNearer(closest.getNodeID(), valueId)) 
+                                && (closestNodesToKey.size() > 1)
+                                && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                         
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
                         }
                         
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                        for(KeyValue keyValue : bag.values()) {
-                            KUID originatorID = keyValue.getNodeID();
-                            if(originatorID != null && !originatorID.equals(node.getNodeID())) {
-                                keyValuesToForward.add(keyValue);
-                            }
-                        }
+                        valuesToForward.addAll(database.get(valueId).entrySet());
                         
                     } else if (closestNodesToKey.size() == k) {
                         //if we are the furthest node: delete non-local value from local db
                         Contact furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
-                        if(context.isLocalNode(furthest)) {
-                            int count = bag.removeAll(true);
+                        if (context.isLocalNode(furthest)) {
+                            
+                            // TODO Fix: Fails 'cause Collection is unmodifyable 
+                            int count = 0;
+                            for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
+                                DHTValue chunk = it.next();
+                                if (!chunk.isLocalValue()) {
+                                    it.remove();
+                                    count++;
+                                }
+                            }
+                            
                             databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                         }
                     }
                 }
             }
             
-            if (!keyValuesToForward.isEmpty()) {
+            if (!valuesToForward.isEmpty()) {
                 if (message instanceof FindNodeResponse) {
                     store(message.getContact(), 
                             ((FindNodeResponse)message).getQueryKey(), 
-                            keyValuesToForward);
+                            valuesToForward);
                 } else {
-                    ResponseHandler handler = new GetQueryKeyHandler(keyValuesToForward);
+                    ResponseHandler handler = new GetQueryKeyHandler(valuesToForward);
                     RequestMessage request = context.getMessageHelper()
                         .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
                     
@@ -189,19 +197,21 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         }
     }
     
-    private void store(Contact node, QueryKey queryKey, List<KeyValue> keyValues) {
-        for (KeyValue keyValue : keyValues) {
-            context.store(node, queryKey, keyValue);
+    private void store(Contact node, QueryKey queryKey, 
+            List<Entry<KUID, DHTValue>> valuesToForward) {
+        
+        for (Entry<KUID, DHTValue> entry : valuesToForward) {
+            context.store(node, queryKey, entry.getValue());
         }
     }
     
     private class GetQueryKeyHandler extends AbstractResponseHandler {
         
-        private List<KeyValue> keyValues;
+        private List<Entry<KUID, DHTValue>> valuesToForward;
         
-        private GetQueryKeyHandler(List<KeyValue> keyValues) {
+        private GetQueryKeyHandler(List<Entry<KUID, DHTValue>> valuesToForward) {
             super(DefaultMessageHandler.this.context);
-            this.keyValues = keyValues;
+            this.valuesToForward = valuesToForward;
         }
 
         protected void response(ResponseMessage message, long time) throws IOException {
@@ -216,7 +226,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
             }
             
             Contact node = message.getContact();
-            store(node, response.getQueryKey(), keyValues);
+            store(node, response.getQueryKey(), valuesToForward);
         }
 
         protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {

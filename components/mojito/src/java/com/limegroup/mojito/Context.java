@@ -27,11 +27,10 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -50,9 +49,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValuePublisher;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.db.KeyValuePublisher;
+import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.FindNodeEvent;
@@ -74,7 +74,6 @@ import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
-import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -106,7 +105,7 @@ public class Context implements MojitoDHT {
     private RouteTable routeTable;
     private volatile MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
-    private KeyValuePublisher publisher;
+    private DHTValuePublisher publisher;
     private RandomBucketRefresher bucketRefresher;
     
     private PingManager pingManager;
@@ -156,12 +155,12 @@ public class Context implements MojitoDHT {
         globalLookupStats = new GlobalLookupStatisticContainer(this);
         databaseStats = new DatabaseStatisticContainer(this);
         
-        database = new Database(this);
+        database = new DatabaseImpl();
         routeTable = new RouteTableImpl(this);
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
-        publisher = new KeyValuePublisher(this);
+        publisher = new DHTValuePublisher(this);
 
         bucketRefresher = new RandomBucketRefresher(this);
         
@@ -271,6 +270,26 @@ public class Context implements MojitoDHT {
         }
     }
     
+    public synchronized void setDatabase(Database database) {
+        if (isRunning()) {
+            throw new IllegalStateException();
+        }
+        
+        if (database == null) {
+            database = new DatabaseImpl();
+        }
+        
+        this.database = database;
+        
+        for (KUID valueId : database.keySet()) {
+            for (DHTValue value : database.get(valueId).values()) {
+                if (value.isLocalValue()) {
+                    value.setOriginator(localNode);
+                }
+            }
+        }
+    }
+    
     public DHTStats getDHTStats() {
         return dhtStats;
     }
@@ -367,6 +386,10 @@ public class Context implements MojitoDHT {
         }
         
         ((ContactNode)localNode).setContactAddress(externalAddress);
+        
+        // NOTE: local DHTValues are holding a reference to
+        // 'localNode' and setting the originator is not
+        // neccessary thus.
     }
     
     public SocketAddress getLocalAddress() {
@@ -382,7 +405,7 @@ public class Context implements MojitoDHT {
         // --- DOES NOT CHANGE THE PORT! ---
         
         InetAddress externalAddress = ((InetSocketAddress)externalSocketAddress).getAddress();
-        int externalPort = ((InetSocketAddress)externalSocketAddress).getPort();
+        //int externalPort = ((InetSocketAddress)externalSocketAddress).getPort();
         
         InetAddress currentAddress = ((InetSocketAddress)localNode.getContactAddress()).getAddress();
         int currentPort = ((InetSocketAddress)localNode.getContactAddress()).getPort();
@@ -419,7 +442,7 @@ public class Context implements MojitoDHT {
         return messageDispatcher;
     }
     
-    public KeyValuePublisher getPublisher() {
+    public DHTValuePublisher getPublisher() {
         return publisher;
     }
     
@@ -691,81 +714,39 @@ public class Context implements MojitoDHT {
     }
     
     public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
-        return put(key, value, null);
-    }
-    
-    public DHTFuture<StoreEvent> put(KUID key, byte[] value, PrivateKey privateKey) {
-        
-        try {
-            KeyValue keyValue = 
-                KeyValue.createLocalKeyValue(key, value, getLocalNode());
-            
-            if (privateKey == null) {
-                if (DatabaseSettings.SIGN_KEY_VALUES.getValue()) {
-                    keyValue.sign(getPrivateKey());
-                    keyValue.setPublicKey(getPublicKey());
-                }
-            } else {
-                keyValue.sign(privateKey);
-                
-                if (!keyValue.verify(getMasterKey())) {
-                    throw new SignatureException("Cannot store " + keyValue 
-                            + " because signature does not match with the master key");
-                }
-            }
-            
-            Database database = getDatabase();
-            synchronized(database) {
-                if (database.add(keyValue) 
-                        || database.isTrustworthy(keyValue)) {
-                    
-                    // Create a new KeyPair every time we have removed
-                    // all local KeyValues.
-                    if (database.getLocalValueCount() == 0) {
-                        createNewKeyPair();
-                    }
-                    
-                    return store(keyValue);
-                }
-            }
-        } catch (InvalidKeyException e) {
-            LOG.error("InvalidKeyException", e);
-        } catch (SignatureException e) {
-            LOG.error("SignatureException", e);
-        }
-        
-        return null;
+        DHTValue dhtValue = DHTValue.createLocalValue(getLocalNode(), key, value);
+        database.store(dhtValue);
+        return store(dhtValue);
     }
     
     public DHTFuture<StoreEvent> remove(KUID key) {
-        return remove(key, null);
-    }
-
-    public DHTFuture<StoreEvent> remove(KUID key, PrivateKey privateKey) {
         // To remove a KeyValue you just store an empty value!
-        return put(key, new byte[0], privateKey);
+        return put(key, DHTValue.EMPTY_DATA);
     }
     
     /** 
      * Stores the given KeyValue 
      */
-    public DHTFuture<StoreEvent> store(KeyValue keyValue) {
-        return storeManager.store(keyValue);
+    public DHTFuture<StoreEvent> store(DHTValue dhtValue) {
+        return storeManager.store(dhtValue);
     }
    
     /** 
      * Stores the given KeyValue 
      */
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
-        return storeManager.store(node, queryKey, keyValue);
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue dhtValue) {
+        return storeManager.store(node, queryKey, dhtValue);
     }
     
-    public Set<KUID> getKeys() {
-        return getDatabase().getKeys();
+    public Set<KUID> keySet() {
+        return getDatabase().keySet();
     }
     
-    public Collection<KeyValue> getValues() {
-        return getDatabase().getValues();
+    public Collection<DHTValue> getValues() {
+        Database database = getDatabase();
+        synchronized (database) {
+            return new ArrayList<DHTValue>(database.values());
+        }
     }
     
     /**

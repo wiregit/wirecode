@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db1.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.settings.DatabaseSettings;

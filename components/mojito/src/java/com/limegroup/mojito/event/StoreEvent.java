@@ -22,21 +22,26 @@ package com.limegroup.mojito.event;
 import java.util.List;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.DHTValue;
 
 public class StoreEvent {
     
-    private KeyValue value;
+    private DHTValue value;
     
     private List<Contact> nodes;
     
     @SuppressWarnings("unchecked")
-    public StoreEvent(KeyValue value, List<? extends Contact> nodes) {
+    public StoreEvent(DHTValue value, List<? extends Contact> nodes) {
         this.value = value;
         this.nodes = (List<Contact>)nodes;
     }
     
-    public KeyValue getKeyValue() {
+    public KUID getValueID() {
+        return value.getValueID();
+    }
+    
+    public DHTValue getValue() {
         return value;
     }
     

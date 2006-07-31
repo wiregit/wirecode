@@ -27,7 +27,7 @@ import java.util.Collection;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 
 /**
@@ -53,13 +53,13 @@ public interface MessageFactory {
             QueryKey queryKey, Collection<? extends Contact> nodes);
 
     public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
-            KUID lookupId);
+            KUID lookupId, Collection<KUID> keys);
 
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KeyValue> values);
+            Collection<KUID> keys, Collection<? extends DHTValue> values);
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, KeyValue keyValue);
+            QueryKey queryKey, DHTValue value);
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
             KUID valueId, StoreStatus status);

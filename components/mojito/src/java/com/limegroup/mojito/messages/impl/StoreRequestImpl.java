@@ -25,7 +25,7 @@ import java.net.SocketAddress;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.MessageID;
@@ -38,15 +38,16 @@ public class StoreRequestImpl extends AbstractRequestMessage
         implements StoreRequest {
 
     private QueryKey queryKey;
-    private KeyValue keyValue;
-
+    
+    private DHTValue value;
+    
     public StoreRequestImpl(Context context, 
             Contact contact, MessageID messageId,
-            QueryKey queryKey, KeyValue keyValue) {
+            QueryKey queryKey, DHTValue value) {
         super(context, OpCode.STORE_REQUEST, contact, messageId);
 
         this.queryKey = queryKey;
-        this.keyValue = keyValue;
+        this.value = value;
     }
     
     public StoreRequestImpl(Context context, SocketAddress src, 
@@ -54,23 +55,23 @@ public class StoreRequestImpl extends AbstractRequestMessage
         super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
         
         this.queryKey = in.readQueryKey();
-        this.keyValue = in.readKeyValue();
+        this.value = in.readDHTValue(getContact());
     }
     
     public QueryKey getQueryKey() {
         return queryKey;
     }
 
-    public KeyValue getKeyValue() {
-        return keyValue;
+    public DHTValue getDHTValue() {
+        return value;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeQueryKey(queryKey);
-        out.writeKeyValue(keyValue);
+        out.writeDHTValue(value);
     }
 
     public String toString() {
-        return "StoreRequest: " + keyValue.toString();
+        return "StoreRequest: " + value;
     }
 }

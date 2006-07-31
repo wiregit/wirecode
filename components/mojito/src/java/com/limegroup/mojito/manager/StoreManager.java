@@ -25,7 +25,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 
@@ -38,16 +38,16 @@ public class StoreManager extends AbstractManager<StoreEvent> {
         super(context);
     }
     
-    public DHTFuture<StoreEvent> store(KeyValue keyValue) {
-        StoreResponseHandler handler = new StoreResponseHandler(context, keyValue);
+    public DHTFuture<StoreEvent> store(DHTValue value) {
+        StoreResponseHandler handler = new StoreResponseHandler(context, value);
         StoreFuture future = new StoreFuture(handler);
         
         context.execute(future);
         return future;
     }
     
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
-        StoreResponseHandler handler = new StoreResponseHandler(context, node, queryKey, keyValue);
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
+        StoreResponseHandler handler = new StoreResponseHandler(context, node, queryKey, value);
         StoreFuture future = new StoreFuture(handler);
         context.execute(future);
         return future;

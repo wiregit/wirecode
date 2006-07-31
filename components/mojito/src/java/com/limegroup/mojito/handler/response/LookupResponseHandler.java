@@ -38,7 +38,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueResponse;
@@ -208,8 +208,8 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         return -1L;
     }
     
+    @Override
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
-        
         assert (hasActiveSearches());
         
         lookupStat.addReply();
@@ -218,17 +218,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         Contact node = message.getContact();
         int hop = hopMap.remove(node.getNodeID()).intValue();
         
-        if (message instanceof FindValueResponse) {
-            if (isValueLookup()) {
+        if (isValueLookup()) {
+            if (message instanceof FindValueResponse) {
                 handleFindValueResponse((FindValueResponse)message, time, hop);
             } else {
-                // Some Idot sent us a FIND_VALUE response for a
-                // FIND_NODE lookup! Ignore? We're losing one
-                // parallel lookup (temporarily) if we do nothing.
-                // I think it's better to kick off a new lookup
-                // now rather than to wait for a yet another
-                // response/lookup that would re-activate this one.
-                lookupStep(hop);
+                handleFindNodeResponse((FindNodeResponse)message, time, hop);
             }
         } else {
             handleFindNodeResponse((FindNodeResponse)message, time, hop);
@@ -239,6 +233,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
     }
     
+    @Override
     protected synchronized void timeout(KUID nodeId, 
             SocketAddress dst, RequestMessage message, long time) throws IOException {
         
@@ -266,6 +261,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
     }
     
+    @Override
     public void error(final KUID nodeId, final SocketAddress dst, final RequestMessage message, Exception e) {
         if (e instanceof SocketException && hasActiveSearches()) {
             try {
@@ -285,38 +281,40 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     private void handleFindValueResponse(FindValueResponse response, long time, int hop) throws IOException {
         
         long totalTime = time();
-        Collection<KeyValue> values = response.getValues();
         
-        if (values.isEmpty()) {
+        Collection<KUID> keys = response.getKeys();
+        Collection<DHTValue> values = response.getValues();
+        
+        if (keys.isEmpty() && values.isEmpty()) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(response.getContact()
-                    + " returned an empty KeyValueCollection for " + lookupId);
+                    + " returned neither keys nor values for " + lookupId);
             }
             
             lookupStep(hop);
-            
-        } else {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(response.getContact()
-                        + " returned KeyValues for "
-                        + lookupId + " after "
-                        + queried.size() + " queried Nodes and a total time of "
-                        + totalTime + "ms");
-            }
+            return;
+        }
         
-            if (foundValueLocs == 0) {
-                lookupStat.setHops(hop, isValueLookup());
-                lookupStat.setTime((int)totalTime, isValueLookup());
-            }
-            foundValueLocs++;
-            
-            handleFoundValues(response.getContact(), values);
-            
-            if (isExhaustiveValueLookup()) {
-                lookupStep(hop);
-            } else {
-                setLookupFinished(true);
-            }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(response.getContact()
+                    + " returned values for "
+                    + lookupId + " after "
+                    + queried.size() + " queried Nodes and a total time of "
+                    + totalTime + "ms");
+        }
+    
+        if (foundValueLocs == 0) {
+            lookupStat.setHops(hop, isValueLookup());
+            lookupStat.setTime((int)totalTime, isValueLookup());
+        }
+        foundValueLocs++;
+        
+        handleFoundValues(response);
+        
+        if (isExhaustiveValueLookup()) {
+            lookupStep(hop);
+        } else {
+            setLookupFinished(true);
         }
     }
 
@@ -488,7 +486,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         handleLookupFinished(time, hops);
     }
     
-    protected void handleFoundValues(Contact node, Collection<KeyValue> c) {
+    protected void handleFoundValues(FindValueResponse reponse) {
         throw new UnsupportedOperationException();
     }
     

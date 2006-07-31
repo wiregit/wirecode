@@ -22,23 +22,24 @@ package com.limegroup.mojito.handler.response;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.util.EntryImpl;
 
 /**
  * 
  */
 public class FindValueResponseHandler extends LookupResponseHandler<FindValueEvent> {
 
-    private List<Entry<Contact,Collection<KeyValue>>> values = new ArrayList<Entry<Contact,Collection<KeyValue>>>();
+    private static final Collection<KUID> KEYS = Collections.emptySet();
+    
+    private List<FindValueResponse> responses 
+        = new ArrayList<FindValueResponse>();
     
     public FindValueResponseHandler(Context context, KUID lookupId) {
         super(context, lookupId.assertValueID());
@@ -46,18 +47,17 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueEve
 
     @Override
     protected RequestMessage createRequest(SocketAddress address) {
-        return context.getMessageHelper().createFindValueRequest(address, lookupId);
+        return context.getMessageHelper().createFindValueRequest(address, lookupId, KEYS);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected void handleFoundValues(Contact node, Collection<KeyValue> c) {
-        Entry<Contact, Collection<KeyValue>> entry 
-            = new EntryImpl<Contact, Collection<KeyValue>>(node, c);
-        values.add(entry);
+    protected void handleFoundValues(FindValueResponse reponse) {
+        responses.add(reponse);
     }
 
     @Override
     protected void handleLookupFinished(long time, int hops) {
-        setReturnValue(new FindValueEvent(getLookupID(), values));
+        setReturnValue(new FindValueEvent(context, getLookupID(), responses));
     }
 }

@@ -59,11 +59,13 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
         this.address = address;
     }
 
+    @Override
     protected void start() throws Exception {
         PingRequest request = context.getMessageHelper().createPingRequest(address);
         context.getMessageDispatcher().send(nodeId, address, request, this);
     }
     
+    @Override
     protected void response(ResponseMessage message, long time) throws IOException {
         
         PingResponse response = (PingResponse)message;
@@ -81,10 +83,12 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
         setReturnValue(message.getContact());
     }
 
+    @Override
     protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         fireTimeoutException(nodeId, dst, message, time);
     }
     
+    @Override
     public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         setException(new DHTException(nodeId, dst, message, -1L, e));
     }

@@ -31,7 +31,7 @@ import java.util.Collection;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
@@ -62,23 +62,26 @@ public class MessageOutputStream extends DataOutputStream {
         messageId.write(this);
     }
     
-    public void writeKeyValue(KeyValue keyValue) throws IOException {
-        writeKUID(keyValue.getKey());
-        byte[] b = keyValue.getValue();
-        writeShort(b.length);
-        write(b, 0, b.length);
+    public void writeDHTValue(DHTValue value) throws IOException {
+        writeContact(value.getOriginator());
+        value.getValueID().write(this);
         
-        writeKUID(keyValue.getNodeID());
-        writeSocketAddress(keyValue.getSocketAddress());
-        
-        writePublicKey(keyValue.getPublicKey());
-        writeSignature(keyValue.getSignature());
+        byte[] data = value.getData();
+        writeShort(data.length);
+        write(data, 0, data.length);
     }
     
-    public void writeKeyValues(Collection<? extends KeyValue> values) throws IOException {
+    public void writeKUIDs(Collection<KUID> keys) throws IOException {
+        writeByte(keys.size());
+        for (KUID k : keys) {
+            k.write(this);
+        }
+    }
+    
+    public void writeDHTValues(Collection<? extends DHTValue> values) throws IOException {
         writeByte(values.size());
-        for(KeyValue kv : values) {
-            writeKeyValue(kv);
+        for(DHTValue value : values) {
+            writeDHTValue(value);
         }
     }
     

@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.routing.impl;
 
-import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
@@ -35,7 +34,7 @@ import com.limegroup.mojito.util.ContactUtils;
 /**
  * 
  */
-public class ContactNode implements Contact, Serializable {
+public class ContactNode implements Contact {
     
     private static final long serialVersionUID = 833079992601013124L;
 

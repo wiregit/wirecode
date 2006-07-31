@@ -407,7 +407,7 @@ public class KUID implements Comparable<KUID>, Serializable {
             return false;
         } else {
             KUID other = (KUID)o;
-            return type == other.type && Arrays.equals(id, other.id);
+            return /*type == other.type &&*/ Arrays.equals(id, other.id);
         }
     }
     

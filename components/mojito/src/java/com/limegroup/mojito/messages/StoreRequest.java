@@ -20,11 +20,11 @@
 package com.limegroup.mojito.messages;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 
 public interface StoreRequest extends RequestMessage {
 
     public QueryKey getQueryKey();
 
-    public KeyValue getKeyValue();
+    public DHTValue getDHTValue();
 }

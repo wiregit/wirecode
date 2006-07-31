@@ -34,7 +34,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -52,24 +52,24 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     private Contact node;
     private QueryKey queryKey;
     
-    private KeyValue keyValue;
+    private DHTValue value;
     
     private List<Contact> targets = new ArrayList<Contact>();
     
     private int countDown = 0;
     
-    public StoreResponseHandler(Context context, KeyValue keyValue) {
+    public StoreResponseHandler(Context context, DHTValue value) {
         super(context);
-        this.keyValue = keyValue;
+        this.value = value;
     }
 
     public StoreResponseHandler(Context context, Contact node, 
-            QueryKey queryKey, KeyValue keyValue) {
+            QueryKey queryKey, DHTValue value) {
         super(context);
         
         this.node = node;
         this.queryKey = queryKey;
-        this.keyValue = keyValue;
+        this.value = value;
     }
     
     @Override
@@ -79,7 +79,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         
         if (node == null && queryKey == null) {
             FindNodeResponseHandler handler 
-                = new FindNodeResponseHandler(context, keyValue.getKey().toNodeID());
+                = new FindNodeResponseHandler(context, value.getValueID().toNodeID());
             nodes = handler.call().getNodes();   
         } else {
             Entry<Contact, QueryKey> entry 
@@ -111,14 +111,14 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             
             if (queryKey == null) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error("Cannot store " + keyValue + " at " 
+                    LOG.error("Cannot store " + value + " at " 
                             + node + " because we have no QueryKey for it");
                 }
                 continue;
             }
             
             StoreRequest request = context.getMessageHelper()
-                .createStoreRequest(node.getContactAddress(), queryKey, keyValue);
+                .createStoreRequest(node.getContactAddress(), queryKey, value);
             
             context.getMessageDispatcher().send(node, request, this);
             countDown++;
@@ -142,14 +142,15 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     
     @Override
     protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        e.printStackTrace();
         fireEventIfFinished();
     }
 
     private synchronized void fireEventIfFinished() {
         assert (countDown >= 0);
         if (countDown == 0) {
-            keyValue.setNumLocs(targets.size());
-            setReturnValue(new StoreEvent(keyValue, targets));
+            value.publishedTo(targets.size());
+            setReturnValue(new StoreEvent(value, targets));
         }
         countDown--;
     }

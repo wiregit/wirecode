@@ -25,14 +25,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.security.KeyPair;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
@@ -143,7 +140,7 @@ public class MojitoFactory {
             oos.writeBoolean(storeDatabase);
             boolean anyLocalKeyValue = false;
             
-            if (storeDatabase) {
+            /*if (storeDatabase) {
                 Collection<KeyValue> keyValues = context.getDatabase().getValues();
                 
                 for(KeyValue keyValue : keyValues) {
@@ -162,7 +159,7 @@ public class MojitoFactory {
                 
                 // Terminator
                 oos.writeObject(null);
-            }
+            }*/
             
             // Store the KeyPair if there are any local KeyValues
             if (storeDatabase && anyLocalKeyValue) {
@@ -246,7 +243,7 @@ public class MojitoFactory {
         }
         
         // Load the Database
-        boolean storeDatabase = ois.readBoolean();
+        /*boolean storeDatabase = ois.readBoolean();
         if (storeDatabase) {
             Database database = dht.getDatabase();
             
@@ -264,7 +261,8 @@ public class MojitoFactory {
             keyPair = CryptoHelper.createKeyPair();
         }
         dht.setKeyPair(keyPair);
-
+        */
+        
         return dht;
     }
 }

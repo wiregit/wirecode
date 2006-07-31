@@ -27,7 +27,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
 import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 
@@ -96,19 +96,18 @@ public class MessageHelper {
                 queryKey, nodes);
     }
 
-    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId) {
+    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, Collection<KUID> keys) {
         return factory.createFindValueRequest(getLocalNode(), 
-                createMessageID(dst), lookupId.assertValueID());
+                createMessageID(dst), lookupId.assertValueID(), keys);
     }
 
-    public FindValueResponse createFindValueResponse(RequestMessage request, Collection<KeyValue> values) {
-        return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), 
-                values);
+    public FindValueResponse createFindValueResponse(RequestMessage request, 
+            Collection<KUID> keys, Collection<? extends DHTValue> values) {
+        return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), keys, values);
     }
 
-    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, KeyValue keyValue) {
-        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), 
-                queryKey, keyValue);
+    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, DHTValue value) {
+        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), queryKey, value);
     }
 
     public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, StoreStatus status) {

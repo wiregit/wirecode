@@ -29,7 +29,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.StoreRequest;
@@ -55,6 +55,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         this.networkStats = context.getNetworkStats();
     }
     
+    @Override
     public void request(RequestMessage message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
@@ -83,8 +84,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        KeyValue keyValue = request.getKeyValue();
-        KUID valueId = keyValue.getKey();
+        DHTValue value = request.getDHTValue();
+        KUID valueId = value.getValueID();
         
         // under the assumption that the requester sent us a lookup before
         // check if we are part of the closest alive nodes to this value
@@ -96,17 +97,17 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             nodes = context.getRouteTable().select(valueId, k, true);
             if (!nodes.contains(context.getLocalNode())) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("We are not close to " + keyValue.getKey() 
+                    LOG.trace("We are not close to " + valueId 
                             + ". KeyValue will expire faster!");
                 }
                 
                 context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
-                keyValue.setNearby(false);
+                value.setNearby(false);
             }
         }
         
         StoreStatus status = StoreStatus.FAILED;
-        if (context.getDatabase().add(keyValue)) {
+        if (context.getDatabase().add(value)) {
             networkStats.STORE_REQUESTS_OK.incrementStat();
             status = StoreStatus.SUCCEEDED;
         } else {

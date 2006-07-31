@@ -43,6 +43,7 @@ public class StatsResponseHandler extends AbstractResponseHandler<StatsResponse>
         super(context);
     }
     
+    @Override
     protected void response(ResponseMessage message, long time) throws IOException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Stats request to " + message.getContact() + " succeeded");
@@ -51,11 +52,13 @@ public class StatsResponseHandler extends AbstractResponseHandler<StatsResponse>
         setReturnValue((StatsResponse)message);
     }
 
+    @Override
     protected void timeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
         fireTimeoutException(nodeId, dst, message, time);
     }
     
+    @Override
     public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         setException(new Exception(message.toString(), e));
     }
