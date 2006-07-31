@@ -222,16 +222,16 @@ public class NBThrottle implements Throttle {
                     //LOG.trace("Removing closed but interested party: " + next.getKey());
                     i.remove();
                 } else if(key != null) {
+                	i.remove();
                     //LOG.debug("Processing: " + key.attachment());
-                    listener.requestBandwidth();
-                    try {
-                        NIODispatcher.instance().process(now, key, key.attachment(), _processOp);
-                    } finally {
-                        listener.releaseBandwidth();
-                    }
-                    i.remove();
-                    if(_available < MINIMUM_TO_GIVE)
-                        break;
+                	listener.requestBandwidth();
+                	try {
+                		NIODispatcher.instance().process(now, key, key.attachment(), _processOp);
+                	} finally {
+                		listener.releaseBandwidth();
+                	}
+                	if (_available < MINIMUM_TO_GIVE)
+                		break;
                 }
             }
             _active = false;
@@ -289,9 +289,15 @@ public class NBThrottle implements Throttle {
             _available = _bytesPerTick;
             _nextTickTime = currentTime + MILLIS_PER_TICK;
             spreadBandwidth();
-        } else if(_available > MINIMUM_TO_GIVE) {
+        } else if(_available >= MINIMUM_TO_GIVE) {
             spreadBandwidth();
         }
+    }
+    
+    public long nextTickTime() {
+    	if (_available < MINIMUM_TO_GIVE || _requests.isEmpty())
+    		return _nextTickTime;
+    	return 0;
     }
     
     /**
@@ -306,12 +312,10 @@ public class NBThrottle implements Throttle {
                     if(attachment == null)
                         throw new IllegalStateException("must have an attachment");
                     
-                    if(!_interested.containsKey(attachment)) {
-                        //LOG.debug("Moving: " + attachment + " from rquests to interested");
-                        if(req.bandwidthAvailable())
-                            _interested.put(attachment, req);
-                        // else it'll be cleared when we loop later on.
-                    }
+                    //LOG.debug("Moving: " + attachment + " from rquests to interested");
+                    if(req.bandwidthAvailable())
+                    	_interested.put(attachment, req);
+                    // else it'll be cleared when we loop later on.
                 }
                 _requests.clear();
             }

@@ -14,15 +14,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -591,13 +588,14 @@ public class NIODispatcher implements Runnable {
             runPendingTasks();
             
             Collection<SelectionKey> polled = pollOtherSelectors();
-            boolean immediate = !polled.isEmpty();
+            long nextTickDelay = nextTickDelay();
+            boolean immediate = !polled.isEmpty() || nextTickDelay == 0;
             try {
                 if(!immediate && checkTime)
                     startSelect = System.currentTimeMillis();
-                    
+                
                 if(!immediate)
-                    primarySelector.select(100);
+                    primarySelector.select(Math.min(100,nextTickDelay));
                 else
                     primarySelector.selectNow();
             } catch (NullPointerException err) {
@@ -646,7 +644,7 @@ public class NIODispatcher implements Runnable {
                 LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ").");
             
             Collection<SelectionKey> allKeys;
-            if(immediate) {
+            if(!polled.isEmpty()) {
                 allKeys = new HashSet<SelectionKey>(keys.size() + polled.size());
                 allKeys.addAll(keys);
                 allKeys.addAll(polled);
@@ -665,6 +663,16 @@ public class NIODispatcher implements Runnable {
             TIMEOUTER.processTimeouts(now);
             wokeup = false;
         }
+    }
+    
+    /**
+     * @return the time until the next throttle should tick.
+     */
+    private long nextTickDelay() {
+    	long next = Long.MAX_VALUE;
+    	for (Throttle t: THROTTLE)
+    		next = Math.min(next, t.nextTickTime());
+    	return Math.max(0, next - System.currentTimeMillis());
     }
     
     /**
