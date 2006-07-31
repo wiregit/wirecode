@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
@@ -18,17 +15,12 @@ import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
-import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.MojitoDHT;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.BootstrapEvent.Type;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 

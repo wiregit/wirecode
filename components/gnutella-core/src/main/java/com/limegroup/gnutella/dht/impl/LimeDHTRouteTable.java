@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.impl;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -18,13 +18,13 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
-public class LimeDHTRoutingTable extends RouteTableImpl {
+class LimeDHTRouteTable extends RouteTableImpl {
     
-    private static final Log LOG = LogFactory.getLog(LimeDHTRoutingTable.class);
+    private static final Log LOG = LogFactory.getLog(LimeDHTRouteTable.class);
     
     private Map<IpPort, KUID> leafDHTNodes = new HashMap<IpPort, KUID>();
 
-    public LimeDHTRoutingTable(Context context) {
+    public LimeDHTRouteTable(Context context) {
         super(context);
     }
     

@@ -30,10 +30,14 @@ import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 import com.limegroup.mojito.messages.MessageFactory;
 
 /**
- * 
+ * A parser to parse DHTMessages
  */
 class LimeDHTMessageParser implements MessageParser {
     
+    /**
+     * The sender's address is not available at this point.
+     * Use a fake address for now and set it later...
+     */
     private static final SocketAddress ADDRESS = new InetSocketAddress(0);
     
     private MessageFactory factory;
