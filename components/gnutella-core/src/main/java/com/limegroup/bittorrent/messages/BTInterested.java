@@ -28,6 +28,10 @@ public class BTInterested extends BTMessage {
 		return EMPTY_PAYLOAD;
 	}
 
+	public boolean isUrgent() {
+		return true;
+	}
+	
 	public String toString() {
 		return "BTInterested" ;
 	}

@@ -44,6 +44,10 @@ public class BTPieceMessage extends BTMessage implements BTPiece {
 		return payload;
 	}
 	
+	public boolean isUrgent() {
+		return true;
+	}
+	
 	public String toString() {
 		return "BTPiece (" + in.getId() + ";" + in.low + ";" + _data.length + ")" ;
 	}

@@ -158,7 +158,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.MessageWriter#sendKeepAlive()
 	 */
-	public void sendKeepAlive() {
+	private void sendKeepAlive() {
 		if (_queue.isEmpty() && _out[1] == null) {
 			myKeepAlive.clear();
 			_channel.interest(this, true);
@@ -187,7 +187,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	}
 	
 	private void messageArrived(BTMessage m) {
-		if (isImmediate(m))
+		if (m.isUrgent())
 			delayer.setImmediateFlush(true);
 		
 		if (isPiece(m)) {
@@ -198,7 +198,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	}
 	
 	private void messageSent(BTMessage m) {
-		if (!anyImmediatesQueued())
+		if (!hasUrgentQueued())
 			delayer.setImmediateFlush(false);
 		if (isPiece(m)) {
 			watchdog.deactivate();
@@ -210,18 +210,9 @@ public class BTMessageWriter implements BTChannelWriter {
 		return m.getType() == BTMessage.PIECE;
 	}
 	
-	private boolean isImmediate(BTMessage m) {
-		switch(m.getType()) {
-		case BTMessage.PIECE :
-		case BTMessage.REQUEST : 
-			return true;
-		}
-		return false;
-	}
-	
-	private boolean anyImmediatesQueued() {
+	private boolean hasUrgentQueued() {
 		for (BTMessage queued : _queue) {
-			if (isImmediate(queued))
+			if (queued.isUrgent())
 				return true;
 		}
 		return false;

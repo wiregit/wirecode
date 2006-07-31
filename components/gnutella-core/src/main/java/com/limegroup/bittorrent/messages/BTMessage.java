@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
-import com.limegroup.gnutella.util.CircularByteBuffer;
 
 public abstract class BTMessage {
 	// private static final Log LOG = LogFactory.getLog(BTMessage.class);
@@ -73,6 +72,13 @@ public abstract class BTMessage {
 	 * @return ByteBuffer, the payload
 	 */
 	public abstract ByteBuffer getPayload();
+	
+	/**
+	 * @return true if this message should not be buffered for batch sending.
+	 */
+	public boolean isUrgent() {
+		return false;
+	}
 
 	/**
 	 * Notification that a keepAlive was received 

@@ -78,6 +78,10 @@ public class BTRequest extends BTMessage {
 		return _payload;
 	}
 	
+	public boolean isUrgent() {
+		return true;
+	}
+	
 	public String toString() {
 		return "BTRequest (" + in + ")" ;
 	}
