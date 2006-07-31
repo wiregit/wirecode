@@ -21,7 +21,9 @@ package com.limegroup.mojito.manager;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
@@ -32,11 +34,12 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapEvent;
+import com.limegroup.mojito.event.BootstrapTimeoutException;
 import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.BootstrapEvent.Type;
+import com.limegroup.mojito.handler.response.BootstrapPingResponseHandler;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
-import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
@@ -83,11 +86,11 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         }
     }
     
-    public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
+    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
         synchronized (lock) {
             if (future == null) {
                 Bootstrapper bootstrapper = new Bootstrapper(
-                        new ArrayList<SocketAddress>(hostList));
+                        new HashSet<SocketAddress>(hostList));
                 future = new BootstrapFuture(bootstrapper);
                 
                 context.execute(future);
@@ -104,7 +107,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
      */
     private class Bootstrapper implements Callable<BootstrapEvent> {
         
-        private List<SocketAddress> hostList = null;
+        private Set<SocketAddress> hostList = null;
         
         private long start = 0L;
         private long phaseOneStart = 0L;
@@ -117,8 +120,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         }
         
         @SuppressWarnings("unchecked")
-        private Bootstrapper(List<? extends SocketAddress> hostList) {
-            this.hostList = (List<SocketAddress>)hostList;
+        private Bootstrapper(Set<? extends SocketAddress> hostList) {
+            this.hostList = (Set<SocketAddress>)hostList;
         }
         
         public BootstrapEvent call() throws Exception {
@@ -181,13 +184,12 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                 LOG.debug("Bootstrapping from host list: "+hostList);
             }
             
-            for (SocketAddress address : hostList) {
-                PingResponseHandler handler = new PingResponseHandler(context, address);
-                try {
-                    return handler.call();
-                } catch (DHTException ignore) {
-                    failed.add(address);
-                }
+            BootstrapPingResponseHandler<SocketAddress> handler = 
+                new BootstrapPingResponseHandler<SocketAddress>(context, hostList);
+            try {
+                return handler.call();
+            } catch (BootstrapTimeoutException exception) {
+                failed.addAll(exception.getFailedHosts());
             }
             
             return null;
@@ -203,16 +205,19 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             }
             
             List<Contact> nodes = BucketUtils.sort(context.getRouteTable().getLiveContacts());
-            for (Contact node : nodes) {
-                if (context.isLocalNode(node)) {
-                    continue;
-                }
-                
-                PingResponseHandler handler = new PingResponseHandler(context, node);
+            nodes.remove(context.getLocalNode());
+            
+            //TODO remove this: temporary type change
+            Set<Contact> tempSet = new HashSet<Contact>(nodes);
+            
+            
+            if(!tempSet.isEmpty()) {
+                BootstrapPingResponseHandler<Contact> handler = 
+                    new BootstrapPingResponseHandler<Contact>(context, tempSet);
                 try {
                     return handler.call();
-                } catch (DHTException ignore) {
-                    failed.add(node.getContactAddress());
+                } catch (BootstrapTimeoutException exception) {
+                    failed.addAll(exception.getFailedHosts());
                 }
             }
             

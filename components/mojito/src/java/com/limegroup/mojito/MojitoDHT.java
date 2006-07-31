@@ -182,7 +182,7 @@ public interface MojitoDHT {
     /**
      * Tries to bootstrap from one of the items in the hostList
      */
-    public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList);
+    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList);
     
     /**
      * Tries to ping the given address

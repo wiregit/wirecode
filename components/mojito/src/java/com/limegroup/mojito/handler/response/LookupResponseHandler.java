@@ -234,7 +234,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             handleFindNodeResponse((FindNodeResponse)message, time, hop);
         }
         
-        if (hasActiveSearches() == false) {
+        if (!hasActiveSearches() || isLookupFinished()) {
             doFinishLookup(time(), hop);
         }
     }
@@ -273,7 +273,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             } catch (IOException err) {
                 LOG.error("IOException", err);
                 
-                if (hasActiveSearches() == false) {
+                if (!hasActiveSearches()) {
                     setException(err);
                 }
             }

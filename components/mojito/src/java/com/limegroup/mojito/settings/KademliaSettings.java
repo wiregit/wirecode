@@ -65,5 +65,5 @@ public class KademliaSettings extends MojitoProps {
      * is given up.
      */
     public static final IntSetting MAX_BOOTSTRAP_FAILURES
-        = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 10);
+        = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 50);
 }

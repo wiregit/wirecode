@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,6 +15,7 @@ import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapEvent;
@@ -51,7 +51,7 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
     /**
      * A list of DHT bootstrap hosts comming from the Gnutella network
      */
-    private volatile LinkedList<SocketAddress> bootstrapHosts = new LinkedList<SocketAddress>();
+    private volatile LIFOSet<SocketAddress> bootstrapHosts = new LIFOSet<SocketAddress>();
     
     /**
      * The bootstrap's <tt>Future</tt> object
@@ -105,14 +105,10 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
         
         synchronized(bootstrapHosts) {
             //Keep bootstrap list small because it should be updated often
-            if(bootstrapHosts.size() >= 20) {
+            if(bootstrapHosts.size() >= 50) {
                 bootstrapHosts.removeLast();
             }
-            
-            //always put/replace the host to the head of the list
-            bootstrapHosts.remove(hostAddress);
-            bootstrapHosts.addFirst(hostAddress);
-            
+            bootstrapHosts.add(hostAddress);
         }
         
         if(waiting.getAndSet(false) || bootstrappingFromRT.getAndSet(false)) {

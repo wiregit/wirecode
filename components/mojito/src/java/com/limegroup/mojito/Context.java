@@ -34,6 +34,7 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -676,10 +677,12 @@ public class Context implements MojitoDHT {
     }
     
     public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
-        return bootstrap(Arrays.asList(address));
+        Set<SocketAddress> set = new HashSet<SocketAddress>();
+        set.add(address);
+        return bootstrap(set);
     }
     
-    public DHTFuture<BootstrapEvent> bootstrap(List<? extends SocketAddress> hostList) {
+    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
         return bootstrapManager.bootstrap(hostList);
     }
 
