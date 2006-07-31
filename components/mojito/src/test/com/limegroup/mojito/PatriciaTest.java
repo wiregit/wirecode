@@ -89,11 +89,11 @@ public class PatriciaTest extends BaseTestCase {
     public void testRange() {
         PatriciaTrie trie = new PatriciaTrie();
         for(int i = 0; i < 50; i++) {
-            KUID id = KUID.createRandomMessageID();
+            KUID id = KUID.createRandomNodeID();
             trie.put(id, id);
         }
         
-        List list = trie.range(KUID.createRandomMessageID(), -1);
+        List list = trie.range(KUID.createRandomNodeID(), -1);
         
         assertFalse(trie.isEmpty());
         assertFalse(list.isEmpty());

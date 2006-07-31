@@ -26,6 +26,7 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.util.ArrayUtils;
 
 public class KUIDTest extends BaseTestCase {
@@ -66,8 +67,8 @@ public class KUIDTest extends BaseTestCase {
         InetSocketAddress addr1 = new InetSocketAddress("localhost", 1234);
         QueryKey key1 = QueryKey.getQueryKey(addr1);
         
-        KUID messageId1 = KUID.createRandomMessageID(addr1);
-        Method m = KUID.class.getDeclaredMethod("getQueryKey", new Class[0]);
+        MessageID messageId1 = MessageID.create(addr1);
+        Method m = MessageID.class.getDeclaredMethod("getQueryKey", new Class[0]);
         m.setAccessible(true);
         QueryKey key2 = (QueryKey)m.invoke(messageId1, new Object[0]);
         
