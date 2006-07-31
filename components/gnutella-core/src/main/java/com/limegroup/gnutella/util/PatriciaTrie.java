@@ -54,16 +54,12 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         this.keyAnalyzer = keyAnalyzer;
     }
     
-    /**
-     * Returns the KeyAnalyzer
-     */
+    /** Returns the KeyAnalyzer */
     public KeyAnalyzer<? super K> getKeyAnalyzer() {
         return keyAnalyzer;
     }
     
-    /**
-     * Clears the Trie (i.e. removes all emelemnts).
-     */
+    /** Clears the Trie (i.e. removes all emelemnts). */
     public void clear() {
         root.key = null;
         root.bitIndex = -1;
@@ -77,43 +73,29 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         incrementModCount();
     }
     
-    /**
-     * Returns true if the Trie is empty
-     */
+    /** Returns true if the Trie is empty */
     public boolean isEmpty() {
         return size == 0;
     }
     
-    /**
-     * Returns the number items in the Trie
-     */
+    /** Returns the number items in the Trie */
     public int size() {
         return size;
     }
    
-    /**
-     * Increments both, the size and mod counter.
-     */
+    /** Increments both the size and mod counter. */
     private void incrementSize() {
         size++;
         incrementModCount();
     }
     
-    /**
-     * Decrements the size and increments the mod
-     * counter.
-     */
+    /** Decrements the size and increments the mod counter. */
     private void decrementSize() {
         size--;
         incrementModCount();
     }
     
-    /**
-     * Increments the mod counter. It's currently
-     * unused but it will be useful to detect
-     * concurrent modifications on the Trie (e.g.
-     * as thrown by Iterators).
-     */
+    /** Increments the mod counter. */
     private void incrementModCount() {
         modCount++;
     }
@@ -599,6 +581,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         } 
         
         TrieEntry<K, V> p = h.predecessor;
+        
         // Set P's bitIndex
         p.bitIndex = h.bitIndex;
         
@@ -609,10 +592,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             
             // if it was looping to itself previously,
             // it will now be pointed from it's parent
+            // (if we aren't removing it's parent --
+            //  in that case, it remains looping to itself).
             // otherwise, it will continue to have the same
             // predecessor.
-            if(p.predecessor == p)
+            if(p.predecessor == p && p.parent != h)
                 p.predecessor = p.parent;
+            
             if (parent.left == p) {
                 parent.left = child;
             } else {
@@ -649,6 +635,14 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         p.parent = h.parent;
         p.left = h.left;
         p.right = h.right;
+        
+        // Make sure that if h was pointing to any uplinks,
+        // p now points to them.
+        if(isValidUplink(p.left, p))
+            p.left.predecessor = p;
+        if(isValidUplink(p.right, p))
+            p.right.predecessor = p;
+            
     }
     
     /**
@@ -707,10 +701,11 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * If the given entry is null, returns the first node.
      */
     private TrieEntry<K, V> nextEntry(TrieEntry<K, V> node) {
-        if(node == null)
+        if(node == null) {
             return firstEntry();
-        else
+        } else {
             return nextEntryImpl(node.predecessor, node);
+        }
     }
     
     /**
@@ -749,6 +744,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     private TrieEntry<K, V> nextEntryImpl(TrieEntry<K, V> start, TrieEntry<K, V> previous) {
         TrieEntry<K, V> current = start;
+        
+        if(start.parent != null && start.parent.bitIndex >= start.bitIndex)
+            throw new IllegalStateException("node: " + start + ", parent: " + start.parent + " has >= bitIndex!");
 
         // Only look at the left if this was a recursive or
         // the first check, otherwise we know we've already looked
@@ -766,6 +764,8 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 }
                 
                 current = current.left;
+                if(current.parent != null && current.parent.bitIndex >= current.bitIndex)
+                    throw new IllegalStateException("node: " + current + ", parent: " + current.parent + " has >= bitIndex!");
             }
         }
         
@@ -787,8 +787,11 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         
         // Neither left nor right are valid, find the first parent
         // whose child did not come from the right & traverse it.
-        while(current == current.parent.right)
+        while(current == current.parent.right) {
             current = current.parent;
+            if(current.parent != null && current.parent.bitIndex >= current.bitIndex)
+                throw new IllegalStateException("node: " + current + ", parent: " + current.parent + " has >= bitIndex!");
+        }
         
         // If there's no right, the parent must be root, so we're done.
         if(current.parent.right == null) {
@@ -841,16 +844,17 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     public Map.Entry<K, V> traverse(Cursor<? super K, ? super V> cursor) {
         TrieEntry<K, V> entry = nextEntry(null);
         while(entry != null) {
-            Cursor.SelectStatus ret = cursor.select(entry);
+            TrieEntry<K, V> current = entry;
+            Cursor.SelectStatus ret = cursor.select(current);
+            entry = nextEntry(current);
             switch(ret) {
             case EXIT:
-                return entry;
+                return current;
             case REMOVE:
-                removeEntry(entry);
+                removeEntry(current);
                 break;
             case CONTINUE: // do nothing.
             }
-            entry = nextEntry(entry);
         }
         
         return null;
@@ -858,7 +862,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     
     /** Returns true if 'next' is a valid uplink coming from 'from'. */
     private boolean isValidUplink(TrieEntry<K, V> next, TrieEntry<K, V> from) {            
-        return next.bitIndex <= from.bitIndex && !next.isEmpty();
+        return next != null && next.bitIndex <= from.bitIndex && !next.isEmpty();
     }
     
     /** Returns true if bitIndex is a valid index */
@@ -1305,7 +1309,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * This is implemented by going always to the left until
      * we encounter a valid uplink.  That uplink is the first key.
      */
-    protected TrieEntry<K, V> firstEntry() {
+    private TrieEntry<K, V> firstEntry() {
         // if Trie is empty, no first node.
         if(isEmpty())
             return null;
@@ -1331,7 +1335,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * This is implemented by going always to the right until
      * we encounter a valid uplink.  That uplink is the last key.
      */
-    protected TrieEntry<K, V> lastEntry() {
+    private TrieEntry<K, V> lastEntry() {
         return followRight(root.left);
     }
     
@@ -1503,7 +1507,9 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         private K toKey;
 
         SubMap(K fromKey, K toKey) {
-            if (keyAnalyzer.compare(fromKey, toKey) > 0)
+            if(fromKey == null && toKey == null)
+                throw new IllegalArgumentException("must have a from or to!");
+            if(fromKey != null && toKey != null && keyAnalyzer.compare(fromKey, toKey) > 0)
                 throw new IllegalArgumentException("fromKey > toKey");
             this.fromKey = fromKey;
             this.toKey = toKey;

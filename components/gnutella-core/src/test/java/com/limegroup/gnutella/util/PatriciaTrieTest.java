@@ -1,11 +1,18 @@
 package com.limegroup.gnutella.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.SortedMap;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import junit.framework.Test;
@@ -176,7 +183,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         };
         
         for(int i = 0; i < results.length; i+=2) {
-            System.out.println("Looking for: " + results[i]);
+            //System.out.println("Looking for: " + results[i]);
             Map.Entry<Character, String> found = charTrie.getPrecedingEntry((Character)results[i]);
             if(i == 0) {
                 assertNull(found);
@@ -419,12 +426,16 @@ public class PatriciaTrieTest extends BaseTestCase {
                 'u', "u", 'v', "v", 'w', "w", 'x', "x", 'y', "y", 
                 'z', "z");
         
+        cursor.starting();
+        charTrie.traverse(cursor);
+        cursor.finished();
+        
         // Test removing both an internal & external node.
         // 'm' is an example External node in this Trie, and 'p' is an internal.
         
         assertEquals(26, charTrie.size());
         
-        Object[] toRemove = new Object[] { 'e', 'm', 'p', 'q', 'r', 's' };
+        Object[] toRemove = new Object[] { 'g', 'd', 'e', 'm', 'p', 'q', 'r', 's' };
         cursor.addToRemove(toRemove);
         
         cursor.starting();
@@ -432,6 +443,10 @@ public class PatriciaTrieTest extends BaseTestCase {
         cursor.finished();
             
         assertEquals(26 - toRemove.length, charTrie.size());
+
+        cursor.starting();
+        charTrie.traverse(cursor);
+        cursor.finished();
         
         cursor.starting();
         for(Iterator<Map.Entry<Character, String>> i = charTrie.entrySet().iterator(); i.hasNext(); ) {
@@ -442,6 +457,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         }
         cursor.finished();
     }
+    
     /*
     public void testSelectCursorRemove() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
@@ -579,23 +595,111 @@ public class PatriciaTrieTest extends BaseTestCase {
         cursor.finished();
     }
     
-    public void testVariableLengthKeys() {
-        PatriciaTrie<String, String> trie 
-            = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+    public void testHamlet() throws Exception {
+        // Make sure that Hamlet is read & stored in the same order as a SortedSet.
+        List<String> original = new ArrayList();
+        List<String> control = new ArrayList();
+        SortedMap<String, String> sortedControl = new TreeMap<String, String>();
+        PatriciaTrie<String, String> trie = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
         
-        final String[] keys = new String[]{
-                "Albert", "Xavier", "XyZ", "Anna", "Alien", "Alberto",
-                "Alberts", "Allie", "Alliese", "Alabama", "Banane",
-                "Blabla", "Amber", "Ammun", "Akka", "Akko", "Albertoo",
-                "Amma"
-        };
+        File hamlet = CommonUtils.getResourceFile("com/limegroup/gnutella/util/hamlet.txt");
+        BufferedReader reader = new BufferedReader(new FileReader(hamlet));
+        String read = null;
+        while( (read = reader.readLine()) != null) {
+            StringTokenizer st = new StringTokenizer(read);
+            while(st.hasMoreTokens()) {
+                String token = st.nextToken();
+                original.add(token);
+                sortedControl.put(token, token);
+                trie.put(token, token);
+            }
+        }
+        control.addAll(sortedControl.values());
 
-        for (String key : keys) {
-            trie.put(key, key);
+        assertEquals(control.size(), sortedControl.size());
+        assertEquals(sortedControl.size(), trie.size());
+        Iterator<String> iter = trie.values().iterator();
+        for(int i = 0; i < control.size(); i++) {
+            assertEquals(control.get(i), iter.next());
         }
         
+        Random rnd = new Random();
+        int item = 0;
+        iter = trie.values().iterator();
+        int removed = 0;
+        for(; item < control.size(); item++) {
+            assertEquals(control.get(item), iter.next());
+            if(rnd.nextBoolean()) {
+                iter.remove();
+                removed++;
+            }
+        }
         
-        System.out.println(trie);
+        assertEquals(control.size(), item);
+        assertGreaterThan(0, removed);
+        assertEquals(control.size(), trie.size() + removed);
+        
+        // reset hamlet
+        trie.clear();
+        for(int i = 0; i < original.size(); i++) 
+            trie.put(original.get(i), original.get(i));
+        
+        assertEquals(sortedControl.values().toArray(), trie.values().toArray());
+        assertEquals(sortedControl.keySet().toArray(), trie.keySet().toArray());
+        assertEquals(sortedControl.entrySet().toArray(), trie.entrySet().toArray());
+        
+        assertEquals(sortedControl.firstKey(), trie.firstKey());
+        assertEquals(sortedControl.lastKey(), trie.lastKey());
+        
+        SortedMap<String, String> sub = trie.headMap(control.get(523));
+        assertEquals(523, sub.size());
+        for(int i = 0; i < control.size(); i++) {
+            if(i < 523)
+                assertTrue(sub.containsKey(control.get(i)));
+            else
+                assertFalse(sub.containsKey(control.get(i)));
+        }
+        // Too slow to check values on all, so just do a few.
+        assertTrue(sub.containsValue(control.get(522)));
+        assertFalse(sub.containsValue(control.get(523)));
+        assertFalse(sub.containsValue(control.get(524)));
+        
+        try {
+            sub.headMap(control.get(524));
+            fail("should have thrown IAE");
+        } catch(IllegalArgumentException expected) {}
+        
+        assertEquals(sub.lastKey(), control.get(522));
+        assertEquals(sub.firstKey(), control.get(0));
+        
+        sub = sub.tailMap(control.get(234));
+        assertEquals(289, sub.size());
+        assertEquals(control.get(234), sub.firstKey());
+        assertEquals(control.get(522), sub.lastKey());
+        for(int i = 0; i < control.size(); i++) {
+            if(i < 523 && i > 233)
+                assertTrue(sub.containsKey(control.get(i)));
+            else
+                assertFalse(sub.containsKey(control.get(i)));
+        }
+
+        try {
+            sub.tailMap(control.get(232));
+            fail("should have thrown IAE");
+        } catch(IllegalArgumentException expected) {}
+        
+        sub = sub.subMap(control.get(300), control.get(400));
+        assertEquals(100, sub.size());
+        assertEquals(control.get(300), sub.firstKey());
+        assertEquals(control.get(399), sub.lastKey());
+        
+        for(int i = 0; i < control.size(); i++) {
+            if(i < 400 && i > 299)
+                assertTrue(sub.containsKey(control.get(i)));
+            else
+                assertFalse(sub.containsKey(control.get(i)));
+        }      
+        
     }
     
     private static class TestCursor implements Cursor<Object, Object> {
@@ -653,7 +757,7 @@ public class PatriciaTrieTest extends BaseTestCase {
             index++;
             
             if(toRemove.contains(entry.getKey())) {
-            //    System.out.println("Removing: " + entry.getKey());
+           //     System.out.println("Removing: " + entry.getKey());
                 index--;
                 keys.remove(index);
                 values.remove(index);
