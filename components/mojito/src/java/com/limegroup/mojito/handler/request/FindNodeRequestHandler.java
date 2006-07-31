@@ -16,11 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,40 +30,25 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
-import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
-import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.CollectionUtils;
 
-
 /**
- * The LookupRequestHandler handles incoming FIND_NODE as well as 
- * FIND_VALUE requests.
+ * The FindNodeRequestHandler handles unsolicited FIND_NODE requests
  */
-public class LookupRequestHandler extends AbstractRequestHandler {
+public class FindNodeRequestHandler extends AbstractRequestHandler {
+
+    private static final Log LOG = LogFactory.getLog(FindNodeRequestHandler.class);
     
-    private static final Log LOG = LogFactory.getLog(LookupRequestHandler.class);
-    
-    public LookupRequestHandler(Context context) {
+    public FindNodeRequestHandler(Context context) {
         super(context);
     }
 
-    public void request(RequestMessage message) throws IOException {
-        
-        LookupRequest request = (LookupRequest)message;
-        if (request instanceof FindNodeRequest) {
-            handleFindNodeRequest(request);
-        } else {
-            handleFindValueRequest(request);
-        }
-    }
-    
     /**
      * This method returns a list of nodes along with a QueryKey generated for this node. 
      * The QueryKey will can then be used by the querying node to store data at this node.
@@ -76,7 +60,9 @@ public class LookupRequestHandler extends AbstractRequestHandler {
      * @param request The LookupRequest for this lookup
      * @throws IOException
      */
-    private void handleFindNodeRequest(LookupRequest request) throws IOException {
+    @Override
+    protected void request(RequestMessage message) throws IOException {
+        LookupRequest request = (LookupRequest)message;
         
         KUID lookup = request.getLookupID();
         QueryKey queryKey = QueryKey.getQueryKey(
@@ -115,24 +101,5 @@ public class LookupRequestHandler extends AbstractRequestHandler {
                     .createFindNodeResponse(request, queryKey, nodes);
         
         context.getMessageDispatcher().send(request.getContact(), response);
-    }
-    
-    private void handleFindValueRequest(LookupRequest request) throws IOException {
-        
-        KUID lookup = request.getLookupID();
-        
-        Collection<KeyValue> values = context.getDatabase().get(lookup);
-        if (values != null && !values.isEmpty()) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Hit! " + lookup + " = {" + CollectionUtils.toString(values) + "}");
-            }
-            
-            FindValueResponse response = context.getMessageHelper()
-                        .createFindValueResponse(request, values);
-            context.getMessageDispatcher().send(request.getContact(), response);
-        } else {
-            // OK, send ContactNodes instead!
-            handleFindNodeRequest(request);
-        }
     }
 }
