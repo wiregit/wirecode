@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.StoreEvent;
@@ -160,14 +161,21 @@ public interface MojitoDHT {
     public void setMessageFactory(MessageFactory messageFactory);
     
     /**
-     * Sets and returns the MessageDispatcher
+     * Sets and returns the MessageDispatcher. The class must be a sub-class of
+     * <tt>MessageDispatcher</tt>
      */
     public MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher);
     
     /**
-     * Sets and returns the RouteTable
+     * Sets and returns the RouteTable. The class must be a sub-class of
+     * <tt>RouteTable</tt>
      */
-    public RouteTable setRoutingTable(Class<? extends RouteTable> routeTable);
+    public RouteTable setRouteTable(Class<? extends RouteTable> routeTable);
+    
+    /**
+     * Sets the Database
+     */
+    public void setDatabase(Database database);
     
     /**
      * Tries to (re-)bootstrap from the RouteTable
@@ -210,19 +218,9 @@ public interface MojitoDHT {
     public DHTFuture<StoreEvent> put(KUID key, byte[] value);
     
     /**
-     * Stores the given key, value pair
-     */
-    //public DHTFuture<StoreEvent> put(KUID key, byte[] value, PrivateKey privateKey);
-    
-    /**
      * Removes the value for the given key
      */
     public DHTFuture<StoreEvent> remove(KUID key);
-    
-    /**
-     * Removes the value for the given key
-     */
-    //public DHTFuture<StoreEvent> remove(KUID key, PrivateKey privateKey);
     
     /**
      * Writes the current state of Monjito DHT to the OutputStream

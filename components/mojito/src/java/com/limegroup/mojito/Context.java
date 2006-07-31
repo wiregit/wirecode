@@ -103,7 +103,7 @@ public class Context implements MojitoDHT {
     
     private Database database;
     private RouteTable routeTable;
-    private volatile MessageDispatcher messageDispatcher;
+    private MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
     private DHTValuePublisher publisher;
     private RandomBucketRefresher bucketRefresher;
@@ -128,7 +128,7 @@ public class Context implements MojitoDHT {
     private LinkedList<Integer> localSizeHistory = new LinkedList<Integer>();
     private LinkedList<Integer> remoteSizeHistory = new LinkedList<Integer>();
     
-    private ThreadFactory threadFactory = new DefaultThreadFactory();
+    private volatile ThreadFactory threadFactory = new DefaultThreadFactory();
     
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
@@ -214,82 +214,7 @@ public class Context implements MojitoDHT {
     public String getName() {
         return name;
     }
-    
-    /**
-     * Installs a custom MessageDispatcher implementation. The
-     * passed Class must be a subclass of MessageDispatcher.
-     */
-    public synchronized MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
-        if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
-        }
 
-        if (clazz == null) {
-            clazz = MessageDispatcherImpl.class;
-        }
-        
-        try {
-            Constructor c = clazz.getConstructor(Context.class);
-            messageDispatcher = (MessageDispatcher)c.newInstance(this);
-            return messageDispatcher;
-        } catch (Exception err) {
-            throw new RuntimeException(err);
-        }
-    }
-    
-    /**
-     * Installs a custom RouteTable implementation. The
-     * passed Class must be a subclass of <tt>RouteTable</tt>.
-     */
-    public synchronized RouteTable setRoutingTable(Class<? extends RouteTable> clazz) {
-        if (isRunning()) {
-            throw new IllegalStateException("Cannot switch RouteTable while DHT is running");
-        }
-
-        if (clazz == null) {
-            clazz = RouteTableImpl.class;
-        }
-        
-        try {
-            Constructor c = clazz.getConstructor(Context.class);
-            routeTable = (RouteTable)c.newInstance(this);
-            
-            // Clear the firewalled flag for a moment so that we can
-            // add the local node to the Route Table
-            if (localNode.isFirewalled()) {
-                ((ContactNode)localNode).setFirewalled(false);
-                routeTable.add(localNode);
-                ((ContactNode)localNode).setFirewalled(true);
-            } else {
-                routeTable.add(localNode);
-            }
-            
-            return routeTable;
-        } catch (Exception err) {
-            throw new RuntimeException(err);
-        }
-    }
-    
-    public synchronized void setDatabase(Database database) {
-        if (isRunning()) {
-            throw new IllegalStateException();
-        }
-        
-        if (database == null) {
-            database = new DatabaseImpl();
-        }
-        
-        this.database = database;
-        
-        for (KUID valueId : database.keySet()) {
-            for (DHTValue value : database.get(valueId).values()) {
-                if (value.isLocalValue()) {
-                    value.setOriginator(localNode);
-                }
-            }
-        }
-    }
-    
     public DHTStats getDHTStats() {
         return dhtStats;
     }
@@ -367,6 +292,157 @@ public class Context implements MojitoDHT {
         return localNode.getNodeID();
     }
     
+    public synchronized MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
+        }
+
+        if (clazz == null) {
+            clazz = MessageDispatcherImpl.class;
+        }
+        
+        try {
+            Constructor c = clazz.getConstructor(Context.class);
+            messageDispatcher = (MessageDispatcher)c.newInstance(this);
+            return messageDispatcher;
+        } catch (Exception err) {
+            throw new RuntimeException(err);
+        }
+    }
+    
+    /**
+     * Returns the MessageDispatcher
+     */
+    public MessageDispatcher getMessageDispatcher() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the MessageDispatcher
+        return messageDispatcher;
+    }
+    
+    public synchronized RouteTable setRouteTable(Class<? extends RouteTable> clazz) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch RouteTable while DHT is running");
+        }
+
+        if (clazz == null) {
+            clazz = RouteTableImpl.class;
+        }
+        
+        try {
+            Constructor c = clazz.getConstructor(Context.class);
+            routeTable = (RouteTable)c.newInstance(this);
+            
+            // Clear the firewalled flag for a moment so that we can
+            // add the local node to the Route Table
+            if (localNode.isFirewalled()) {
+                ((ContactNode)localNode).setFirewalled(false);
+                routeTable.add(localNode);
+                ((ContactNode)localNode).setFirewalled(true);
+            } else {
+                routeTable.add(localNode);
+            }
+            
+            return routeTable;
+        } catch (Exception err) {
+            throw new RuntimeException(err);
+        }
+    }
+    
+    /**
+     * Returns the RouteTable
+     */
+    public RouteTable getRouteTable() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the RouteTable
+        return routeTable;
+    }
+    
+    public synchronized void setDatabase(Database database) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch Database while DHT is running");
+        }
+        
+        if (database == null) {
+            database = new DatabaseImpl();
+        }
+        
+        this.database = database;
+        
+        // Make sure all local values have the local Node
+        // as originator
+        for (KUID valueId : database.keySet()) {
+            for (DHTValue value : database.get(valueId).values()) {
+                if (value.isLocalValue()) {
+                    value.setOriginator(localNode);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Returns the Database
+     */
+    public Database getDatabase() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the Database
+        return database;
+    }
+    
+    public void setThreadFactory(ThreadFactory threadFactory) {
+        if (threadFactory == null) {
+            threadFactory = new DefaultThreadFactory();
+        }
+        
+        this.threadFactory = threadFactory;
+    }
+    
+    /**
+     * Returns the current ThreadFactory
+     */
+    public ThreadFactory getThreadFactory() {
+        return threadFactory;
+    }
+    
+    public synchronized void setMessageFactory(MessageFactory messageFactory) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageFactory while DHT is running");
+        }
+        
+        messageHelper.setMessageFactory(messageFactory);
+    }
+    
+    /**
+     * Returns the current MessageFactory. In most cases you want to use
+     * the MessageHelper instead which is a simplified version of the
+     * MessageFactory.
+     */
+    public MessageFactory getMessageFactory() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the MessageHelper
+        return messageHelper.getMessageFactory();
+    }
+    
+    /**
+     * Sets the MessageHelper
+     */
+    public synchronized void setMessageHelper(MessageHelper messageHelper) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageHelper while DHT is running");
+        }
+        
+        this.messageHelper = messageHelper;
+    }
+    
+    /**
+     * Returns the current MessageHelper which is a simplified
+     * MessageFactory
+     */
+    public MessageHelper getMessageHelper() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the MessageHelper
+        return messageHelper;
+    }
+    
     public synchronized void setExternalPort(int port) {
         InetSocketAddress addr = (InetSocketAddress)localNode.getContactAddress();
         setContactAddress(new InetSocketAddress(addr.getAddress(), port));
@@ -430,46 +506,6 @@ public class Context implements MojitoDHT {
         return localNode.isFirewalled();
     }
     
-    public Database getDatabase() {
-        return database;
-    }
-    
-    public RouteTable getRouteTable() {
-        return routeTable;
-    }
-    
-    public MessageDispatcher getMessageDispatcher() {
-        return messageDispatcher;
-    }
-    
-    public DHTValuePublisher getPublisher() {
-        return publisher;
-    }
-    
-    public synchronized void setMessageHelper(MessageHelper messageHelper) {
-        if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageHelper while DHT is running");
-        }
-        
-        this.messageHelper = messageHelper;
-    }
-    
-    public MessageHelper getMessageHelper() {
-        return messageHelper;
-    }
-    
-    public synchronized void setMessageFactory(MessageFactory messageFactory) {
-        if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageFactory while DHT is running");
-        }
-        
-        messageHelper.setMessageFactory(messageFactory);
-    }
-    
-    public MessageFactory getMessageFactory() {
-        return messageHelper.getMessageFactory();
-    }
-    
     public int getReceivedMessagesCount() {
         return messageDispatcher.getReceivedMessagesCount();
     }
@@ -485,26 +521,7 @@ public class Context implements MojitoDHT {
     public long getSentMessagesSize() {
         return messageDispatcher.getSentMessagesSize();
     }
-    
-    /**
-     * Sets the ThreadFactory. A null value will re-set the
-     * current ThreadFactory
-     */
-    public void setThreadFactory(ThreadFactory threadFactory) {
-        if (threadFactory == null) {
-            threadFactory = new DefaultThreadFactory();
-        }
-        
-        this.threadFactory = threadFactory;
-    }
-    
-    /**
-     * Returns the current ThreadFactory
-     */
-    public ThreadFactory getThreadFactory() {
-        return threadFactory;
-    }
-    
+
     /**
      * Returns whether or not the MessageDispatcher has
      * an open DatagramChannel
