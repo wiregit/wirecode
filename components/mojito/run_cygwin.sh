@@ -1,7 +1,13 @@
 #!/bin/sh
 
 CLASSPATH=\
-".;../lib/jars/commons-logging.jar;../lib/jars/log4j.jar;"
+".;src/java;../core;"
+
+for JAR in $(find ../lib/jars -name *.jar); do 
+   CLASSPATH="${CLASSPATH};${JAR}"
+done
+
+echo $CLASSPATH
 
 export CLASSPATH
 
