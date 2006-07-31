@@ -17,7 +17,6 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -164,6 +163,7 @@ public class ManagedTorrent implements Torrent {
 		
 		if (_state.getInt() != QUEUED)
 			throw new IllegalStateException();
+		dispatchEvent(TorrentEvent.Type.STARTING);
 		
 		diskInvoker.invokeLater(new Runnable() {
 			public void run() {
@@ -359,9 +359,6 @@ public class ManagedTorrent implements Torrent {
 		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
 
 		_connectionFetcher = new BTConnectionFetcher(this, networkInvoker);
-		
-		if (LOG.isDebugEnabled())
-			LOG.debug("Starting torrent");
 	}
 
 	/**

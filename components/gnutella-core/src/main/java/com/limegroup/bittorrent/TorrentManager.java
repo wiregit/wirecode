@@ -12,9 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOSocket;
-import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.gnutella.*;
 import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -47,15 +45,20 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	private static final Log LOG = LogFactory.getLog(TorrentManager.class);
 
 	/**
-	 * The list of active torrents.
+	 * The set of active torrents.
 	 */
 	private Set <ManagedTorrent>_active = new HashSet<ManagedTorrent>();
 	
 	/**
-	 * The list of active torrents that are seeding.
+	 * The set of active torrents that are seeding.
 	 * INVARIANT: subset of _active.
 	 */
 	private Set <ManagedTorrent>_seeding = new HashSet<ManagedTorrent>();
+	
+	/**
+	 * Set of torrents that are about to get started.
+	 */
+	private Set <ManagedTorrent> _starting = new HashSet<ManagedTorrent>();
 	
 	private List <TorrentEventListener> listeners = 
 		new CopyOnWriteArrayList<TorrentEventListener>();
@@ -133,12 +136,13 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	public void handleTorrentEvent(TorrentEvent evt) {
 		if (evt.getSource() == this)
 			return;
-		if (evt.getType() == TorrentEvent.Type.STARTED)
-			torrentStarted(evt.getTorrent());
-		else if (evt.getType() == TorrentEvent.Type.STOPPED)
-			torrentStopped(evt.getTorrent());
-		else if (evt.getType() == TorrentEvent.Type.COMPLETE)
-			torrentComplete(evt.getTorrent());
+		ManagedTorrent t = evt.getTorrent();
+		switch(evt.getType()) {
+		case STARTING: torrentStarting(t); break;
+		case STARTED: torrentStarted(t); break;
+		case STOPPED: torrentStopped(t); break;
+		case COMPLETE: torrentComplete(t); break;
+		}
 	}
 	
 	/**
@@ -162,8 +166,14 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		Assert.that(_active.contains(t));
 		_seeding.add(t);
 	}
+	
+	private synchronized void torrentStarting(ManagedTorrent t) {
+		_starting.add(t);
+	}
 
 	private synchronized void torrentStarted(ManagedTorrent t) {
+		Assert.that(_starting.contains(t));
+		_starting.remove(t);
 		// if the user is adding a seeding torrent.. 
 		// effectively restart it
 		if (_seeding.remove(t))
@@ -190,7 +200,8 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 	
 	public synchronized boolean allowNewTorrent() {
-		return _active.size() - _seeding.size() < getMaxActiveTorrents();
+		return _starting.size() + 
+		_active.size() - _seeding.size() < getMaxActiveTorrents();
 	}
 	
 	public synchronized int getNumActiveTorrents() {
