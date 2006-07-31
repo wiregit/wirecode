@@ -16,9 +16,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.db;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -30,13 +32,13 @@ import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 
-// TODO rename to Publisher?
-public class KeyValuePublisher implements Runnable {
+public class DHTValuePublisher implements Runnable {
     
-    private static final Log LOG = LogFactory.getLog(KeyValuePublisher.class);
+    private static final Log LOG = LogFactory.getLog(DHTValuePublisher.class);
     
     private Context context;
-    private Database database;
+    
+    private Object lock = new Object();
     
     private DatabaseStatisticContainer databaseStats;
     
@@ -45,11 +47,8 @@ public class KeyValuePublisher implements Runnable {
     private int published = 0;
     private int evicted = 0;
     
-    private Object lock = new Object();
-    
-    public KeyValuePublisher(Context context) {
+    public DHTValuePublisher(Context context) {
         this.context = context;
-        this.database = context.getDatabase();
         
         databaseStats = context.getDatabaseStats();
     }
@@ -74,40 +73,39 @@ public class KeyValuePublisher implements Runnable {
         }
     }
     
-    private void publish(KeyValue keyValue) throws Exception {
+    private void publish(DHTValue value) throws Exception {
         
-        // Check if KeyValue is still in DB because we're
+        // Check if value is still in DB because we're
         // working with a copy of the Collection.
+        Database database = context.getDatabase();
         synchronized(database) {
             
-            if (!database.contains(keyValue)) {
+            if (!database.contains(value)) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("KeyValue " + keyValue 
-                            + " is no longer stored in our database");
+                    LOG.trace(value + " is no longer stored in our database");
                 }
                 return;
             }
             
-            if (database.isKeyValueExpired(keyValue)) {
+            if (value.isExpired()) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(keyValue + " is expired!");
+                    LOG.trace(value + " is expired!");
                 }
                 
-                database.remove(keyValue);
+                database.remove(value);
                 evicted++;
                 databaseStats.EXPIRED_VALUES.incrementStat();
                 return;
             }
             
-            if (!keyValue.isLocalKeyValue()) {
-                LOG.trace(keyValue + " is not a local value");
+            if (!value.isLocalValue()) {
+                LOG.trace(value + " is not a local value");
                 return;
             }
             
-            if (!database.isRepublishingRequired(keyValue)) {
+            if (!value.isRepublishingRequired()) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(keyValue 
-                            + " does not require republishing");
+                    LOG.trace(value + " does not require republishing");
                 }
                 return;
             }
@@ -124,12 +122,12 @@ public class KeyValuePublisher implements Runnable {
             }
         }
         
-        StoreEvent evt = context.store(keyValue).get();
+        StoreEvent evt = context.store(value).get();
         published++;
         
         if (LOG.isTraceEnabled()) {
             if (evt.getNodes().isEmpty()) {
-                LOG.trace("Failed to store " + keyValue);
+                LOG.trace("Failed to store " + value);
             } else {
                 LOG.trace(evt.toString());
             }
@@ -137,11 +135,16 @@ public class KeyValuePublisher implements Runnable {
     }
 
     public void run() {
-        
         published = 0;
         evicted = 0;
         
-        for(KeyValue keyValue : database.getValues()) {
+        List<DHTValue> values = null;
+        Database database = context.getDatabase();
+        synchronized (database) {
+            values = new ArrayList<DHTValue>(database.values());
+        }
+        
+        for(DHTValue value : values) {
             if (context.isBootstrapping()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info(context.getName() + " is bootstrapping, interrupting publisher");
@@ -150,7 +153,7 @@ public class KeyValuePublisher implements Runnable {
             }
             
             try {
-                publish(keyValue);
+                publish(value);
             } catch (Exception err) {
                 LOG.error("Exception", err);
             }
