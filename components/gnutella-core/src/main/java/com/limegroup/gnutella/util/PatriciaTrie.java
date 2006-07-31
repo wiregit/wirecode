@@ -125,7 +125,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return root.setKeyValue(key, value);
         }
         
-        TrieEntry<K, V> found = getR(root.left, -1, key, 0, keyLength);
+        TrieEntry<K, V> found = getR(root.left, -1, key, keyLength);
         if (key.equals(found.key)) {
             if (found.isEmpty()) { // <- must be the root
                 incrementSize();
@@ -235,7 +235,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         int keyLength = length(key);
-        TrieEntry<K,V> entry = getR(root.left, -1, key, 0, keyLength);
+        TrieEntry<K,V> entry = getR(root.left, -1, key, keyLength);
         return !entry.isEmpty() && key.equals(entry.key) ? entry : null;
     }
     
@@ -259,15 +259,15 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * root Entry even if it's empty.
      */
     private TrieEntry<K, V> getR(TrieEntry<K, V> h, int bitIndex, 
-            final K key, int keyOffset, final int keyLength) {
+            final K key, final int keyLength) {
         if (h.bitIndex <= bitIndex) {
             return h;
         }
 
-        if (!isBitSet(key, keyOffset + keyLength, h.bitIndex + keyOffset)) {
-            return getR(h.left, h.bitIndex, key, keyOffset, keyLength);
+        if (!isBitSet(key, keyLength, h.bitIndex)) {
+            return getR(h.left, h.bitIndex, key, keyLength);
         } else {
-            return getR(h.right, h.bitIndex, key, keyOffset, keyLength);
+            return getR(h.right, h.bitIndex, key, keyLength);
         }
     }
     
@@ -410,13 +410,20 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return new TreeMap<K, V>(keyAnalyzer);
         }
         
+        SortedMap<K, V> map = new TreeMap<K, V>(keyAnalyzer);
         if (length < entry.bitIndex) {
-            return valuesInRangeR(entry, -1, new TreeMap<K, V>(keyAnalyzer));
+            PrefixIterator iter = new PrefixIterator(entry);
+            while(iter.hasNext()) {
+                Map.Entry<K, V> next = iter.next();
+                //System.out.println("Adding: " + next);
+                map.put(next.getKey(), next.getValue());
+            }
         } else {
-            SortedMap<K, V> map = new TreeMap<K, V>(keyAnalyzer);
             map.put(entry.getKey(), entry.getValue());
-            return map;
         }
+        
+        return map;
+        
     }
     
     /**
@@ -437,18 +444,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
     }
     
-    private SortedMap<K, V> valuesInRangeR(TrieEntry<K, V> h, int bitIndex, final SortedMap<K, V> values) {
-        if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty()) {
-                    values.put(h.key, h.value);
-            }
-            return values;
-        }
-        
-        valuesInRangeR(h.left, h.bitIndex, values);
-        return valuesInRangeR(h.right, h.bitIndex, values);
-    }
-    
     /** Returns true if this trie contains the specified Key */
     public boolean containsKey(Object k) {
         K key = asKey(k);
@@ -457,7 +452,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         int keyLength = length(key);
-        TrieEntry entry = getR(root.left, -1, key, 0, keyLength);
+        TrieEntry entry = getR(root.left, -1, key, keyLength);
         return !entry.isEmpty() && key.equals(entry.key);
     }
     
@@ -697,15 +692,29 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if(node == null) {
             return firstEntry();
         } else {
-            return nextEntryImpl(node.predecessor, node);
+            return nextEntryImpl(node.predecessor, node, null);
+        }
+    }
+    
+    /**
+     * Returns the entry lexigraphically after the given entry.
+     * If the given entry is null, returns the first node.
+     * 
+     * This will traverse only within the subtree.  If the given node
+     * is not within the subtree, this will have undefined results.
+     */
+    private TrieEntry<K, V> nextEntryInSubtree(TrieEntry<K, V> node, TrieEntry<K, V> parentOfSubtree) {
+        if(node == null) {
+            return firstEntry();
+        } else {
+            return nextEntryImpl(node.predecessor, node, parentOfSubtree);
         }
     }
     
     /**
      * Scans for the next node, starting at the specified point, and using 'previous'
      * as a hint that the last node we returned was 'previous' (so we know not to return
-     * it again).
-     * 
+     * it again).  If 'tree' is non-null, this will limit the search to the given tree.
      * 
      * The basic premise is that each iteration can follow the following steps:
      * 
@@ -735,7 +744,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      *    
      * 7) Do Step 1 on the parent's right child.
      */
-    private TrieEntry<K, V> nextEntryImpl(TrieEntry<K, V> start, TrieEntry<K, V> previous) {
+    private TrieEntry<K, V> nextEntryImpl(TrieEntry<K, V> start, TrieEntry<K, V> previous, TrieEntry<K, V> tree) {
         TrieEntry<K, V> current = start;
 
         // Only look at the left if this was a recursive or
@@ -769,20 +778,30 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 return current.right;
             }
             
-            // Must search on the right's side it wasn't initially valid.
-            return nextEntryImpl(current.right, previous);
+            // Must search on the right's side if it wasn't initially valid.
+            return nextEntryImpl(current.right, previous, tree);
         }
         
         // Neither left nor right are valid, find the first parent
         // whose child did not come from the right & traverse it.
         while(current == current.parent.right) {
+            // If we're going to traverse to above the subtree, stop.
+            if(current == tree)
+                return null;
+            
             current = current.parent;
         }
+
+        // If we're on the top of the subtree, we can't go any higher.
+        if(current == tree)
+            return null;
+        
         
         // If there's no right, the parent must be root, so we're done.
         if(current.parent.right == null) {
             return null;
         }
+
         
         // If the parent's right points to itself, we've found one.
         if(previous != current.parent.right && isValidUplink(current.parent.right, current.parent)) {
@@ -795,7 +814,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         // We need to traverse down the parent's right's path.
-        return nextEntryImpl(current.parent.right, previous);
+        return nextEntryImpl(current.parent.right, previous, tree);
     }
     
     public String toString() {
@@ -1079,15 +1098,24 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         protected int expectedModCount = modCount;   // For fast-fail 
         protected TrieEntry<K, V> next; // the next node to return
         protected TrieEntry<K, V> current; // the current entry we're on
+        protected final TrieEntry<K, V> subtree; // the subtree to search within
         
         // Starts iteration from the beginning.
         protected NodeIterator() {
+            subtree = null;
             next = PatriciaTrie.this.nextEntry(null);
         }
         
         // Starts iteration at the given entry.
         protected NodeIterator(TrieEntry<K, V> firstEntry) {
+            subtree = null;
             next = firstEntry;
+        }
+        
+        // Starts iteration at the given entry & search only within the given subtree.
+        protected NodeIterator(TrieEntry<K, V> startScan, TrieEntry<K, V> subtreeParent) {
+            subtree = subtreeParent;
+            next = PatriciaTrie.this.followLeft(startScan);
         }
         
         public boolean hasNext() {
@@ -1101,7 +1129,10 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             if (e == null) 
                 throw new NoSuchElementException();
             
-            next = PatriciaTrie.this.nextEntry(e);
+            if(subtree == null)
+                next = PatriciaTrie.this.nextEntry(e);
+            else
+                next = PatriciaTrie.this.nextEntryInSubtree(e, subtree);
             current = e;
             return e;
         }
@@ -1133,6 +1164,16 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
 
     private class EntryIterator extends NodeIterator<Map.Entry<K,V>> {
+        public Map.Entry<K,V> next() {
+            return nextEntry();
+        }
+    }
+    
+    private class PrefixIterator extends NodeIterator<Map.Entry<K, V>> {
+        PrefixIterator(TrieEntry<K,V> startScan) {
+            super(startScan, startScan);
+        }
+
         public Map.Entry<K,V> next() {
             return nextEntry();
         }
@@ -1304,7 +1345,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if(isEmpty())
             return null;
         
-        TrieEntry<K, V> node = root;
+        return followLeft(root);
+    }
+    
+    /**
+     * Goes left through the tree until it finds a valid node.
+     */
+    private TrieEntry<K, V> followLeft(TrieEntry<K, V> node) {
         while(true) {
             TrieEntry<K, V> child = node.left;
             // if we hit root and it didn't have a node, go right instead.
@@ -1316,7 +1363,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             
             node = child;
         }
-        
     }
     
     /**
@@ -1401,7 +1447,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 return firstEntry();
         }
         
-        TrieEntry<K, V> found = getR(root.left, -1, key, 0, keyLength);
+        TrieEntry<K, V> found = getR(root.left, -1, key, keyLength);
         if (key.equals(found.key))
             return found;
         
@@ -1456,7 +1502,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return null; // there can never be anything before root.
         }
         
-        TrieEntry<K, V> found = getR(root.left, -1, key, 0, keyLength);
+        TrieEntry<K, V> found = getR(root.left, -1, key, keyLength);
         if (key.equals(found.key))
             return previousEntry(found);
         
