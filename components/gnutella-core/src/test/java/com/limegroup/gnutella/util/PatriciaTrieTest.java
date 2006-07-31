@@ -344,9 +344,6 @@ public class PatriciaTrieTest extends BaseTestCase {
         cursor.finished();
     }
     
-    // TODO: see how select is supposed to work after it passes up it's
-    //       expected entry in the cursor
-    /*
     public void testSelect() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
         charTrie.put('c', "c");
@@ -376,20 +373,20 @@ public class PatriciaTrieTest extends BaseTestCase {
         charTrie.put('f', "f");
         charTrie.put('d', "d");
         TestCursor cursor = new TestCursor(
-                'd', "d", 'e', "e",
-                'f', "f", 'g', "g", 'a', "a", 'b', "b", 'c', "c",  
-                'h', "h", 'i', "i", 'j', "j",
-                'k', "k", 'l', "l", 'm', "m", 'n', "n", 'o', "o",
-                'p', "p", 'q', "q", 'r', "r", 's', "s", 't', "t",
-                'u', "u", 'v', "v", 'w', "w", 'x', "x", 'y', "y", 
-                'z', "z");
+                'd', "d", 'e', "e", 'f', "f", 'g', "g",
+                'a', "a", 'b', "b", 'c', "c",  
+                'l', "l", 'm', "m", 'n', "n", 'o', "o",
+                'h', "h", 'i', "i", 'j', "j", 'k', "k", 
+                't', "t", 'u', "u", 'v', "v", 'w', "w",
+                'p', "p", 'q', "q", 'r', "r", 's', "s", 
+                'x', "x", 'y', "y", 'z', "z");
                 
         assertEquals(26, charTrie.size());
         
         cursor.starting();
         charTrie.select('d', cursor);
         cursor.finished();
-    } */
+    }
     
     public void testTraverseCursorRemove() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
@@ -457,78 +454,6 @@ public class PatriciaTrieTest extends BaseTestCase {
         }
         cursor.finished();
     }
-    
-    /*
-    public void testSelectCursorRemove() {
-        PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
-        charTrie.put('c', "c");
-        charTrie.put('p', "p");
-        charTrie.put('l', "l");
-        charTrie.put('t', "t");
-        charTrie.put('k', "k");
-        charTrie.put('a', "a");
-        charTrie.put('y', "y");
-        charTrie.put('r', "r");
-        charTrie.put('u', "u");
-        charTrie.put('o', "o");
-        charTrie.put('w', "w");
-        charTrie.put('i', "i");
-        charTrie.put('e', "e");
-        charTrie.put('x', "x");
-        charTrie.put('q', "q");
-        charTrie.put('b', "b");
-        charTrie.put('j', "j");
-        charTrie.put('s', "s");
-        charTrie.put('n', "n");
-        charTrie.put('v', "v");
-        charTrie.put('g', "g");
-        charTrie.put('h', "h");
-        charTrie.put('m', "m");
-        charTrie.put('z', "z");
-        charTrie.put('f', "f");
-        charTrie.put('d', "d");
-        
-        // only the path it'll take to find 'h'.
-        TestCursor cursor = new TestCursor('h', "h", 'i', "i", 'j', "j",
-                'k', "k", 'l', "l", 'm', "m", 'n', "n", 'o', "o",
-                'p', "p");
-        
-        // Test removing both an internal & external node.
-        // 'm' is an example External node in this Trie, and 'p' is an internal.
-        
-        assertEquals(26, charTrie.size());
-        
-        Object[] toRemove = new Object[] { 'p', 'k', 'i' };
-        cursor.addToRemove(toRemove);
-        
-        cursor.selectFor('p');
-        cursor.starting();
-        Map.Entry<Character, String> result = charTrie.select('h', cursor);
-        cursor.finished();
-        
-        assertEquals(new Character('p'), result.getKey());
-        assertEquals("p", result.getValue());
-            
-        assertEquals(26 - toRemove.length, charTrie.size());
-        
-        // get a full cursor now
-        cursor = new TestCursor('a', "a", 'b', "b", 'c', "c", 'd', "d", 'e', "e",
-                'f', "f", 'g', "g", 'h', "h", 'i', "i", 'j', "j",
-                'k', "k", 'l', "l", 'm', "m", 'n', "n", 'o', "o",
-                'p', "p", 'q', "q", 'r', "r", 's', "s", 't', "t",
-                'u', "u", 'v', "v", 'w', "w", 'x', "x", 'y', "y", 
-                'z', "z");
-        cursor.remove(toRemove);
-        cursor.starting();
-        for(Iterator<Map.Entry<Character, String>> i = charTrie.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry<Character,String> entry = i.next();
-            cursor.select(entry);
-            if(Arrays.asList(toRemove).contains(entry.getKey()))
-                fail("got an: " + entry);    
-        }
-        cursor.finished();
-    }
-    */
     
     public void testIteratorRemove() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
@@ -698,9 +623,55 @@ public class PatriciaTrieTest extends BaseTestCase {
                 assertTrue(sub.containsKey(control.get(i)));
             else
                 assertFalse(sub.containsKey(control.get(i)));
-        }      
-        
+        }
     }
+    
+    public void testVariableLengthKeys() {
+        PatriciaTrie<String, String> trie 
+            = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+        
+        final String[] keys = new String[]{
+                "Albert", "Xavier", "XyZ", "Anna", "Alien", "Alberto",
+                "Alberts", "Allie", "Alliese", "Alabama", "Banane",
+                "Blabla", "Amber", "Ammun", "Akka", "Akko", "Albertoo",
+                "Amma"
+        };
+
+        for (String key : keys) {
+            trie.put(key, key);
+        }
+        
+        SortedMap map = trie.getPrefixedBy("Al");
+        System.out.println("For Al: " + map);
+        
+        map = trie.getPrefixedBy("Albert");
+        System.out.println("For Albert: " + map);
+        
+        map = trie.getPrefixedBy("Alberto");
+        System.out.println("For Alberto: " + map);
+        
+        map = trie.getPrefixedBy("X");
+        System.out.println("For X: " + map);
+        
+        map = trie.getPrefixedBy("An");
+        System.out.println("For An: " + map);
+        
+        map = trie.getPrefixedBy("Ban");
+        System.out.println("For Ban: " + map);
+        
+        map = trie.getPrefixedBy("Am");
+        System.out.println("For Am: " + map);
+        
+        map = trie.getPrefixedBy("Ak");
+        System.out.println("For Ak: " + map);
+        
+        map = trie.getPrefixedBy("Ab");
+        System.out.println("For Ab: " + map);
+        
+        map = trie.getPrefixedBy("Albertooo");
+        System.out.println("For Albertooo: " + map);
+    }
+
     
     private static class TestCursor implements Cursor<Object, Object> {
         private List<Object> keys;
@@ -757,7 +728,7 @@ public class PatriciaTrieTest extends BaseTestCase {
             index++;
             
             if(toRemove.contains(entry.getKey())) {
-           //     System.out.println("Removing: " + entry.getKey());
+              // System.out.println("Removing: " + entry.getKey());
                 index--;
                 keys.remove(index);
                 values.remove(index);
@@ -824,6 +795,10 @@ public class PatriciaTrieTest extends BaseTestCase {
         public int compare(Integer o1, Integer o2) {
             return o1.compareTo(o2);
         }
+
+        public int bitsPerElement() {
+            return 1;
+        }
     }
 
     private static class AlphaKeyCreator implements KeyAnalyzer<Character> {
@@ -873,6 +848,10 @@ public class PatriciaTrieTest extends BaseTestCase {
 
         public int compare(Character o1, Character o2) {
             return o1.compareTo(o2);
+        }
+
+        public int bitsPerElement() {
+            return 1;
         }
         
         

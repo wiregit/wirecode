@@ -235,5 +235,9 @@ public class IPList {
                 return 0;
                 
         }
+
+        public int bitsPerElement() {
+            return 1;
+        }
     }
 }

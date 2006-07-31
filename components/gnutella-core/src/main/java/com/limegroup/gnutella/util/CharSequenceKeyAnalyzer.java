@@ -65,5 +65,9 @@ public class CharSequenceKeyAnalyzer implements KeyAnalyzer<CharSequence> {
     public int compare(CharSequence o1, CharSequence o2) {
         return o1.toString().compareTo(o2.toString());
     }
+
+    public int bitsPerElement() {
+        return 16;
+    }
 }
 
