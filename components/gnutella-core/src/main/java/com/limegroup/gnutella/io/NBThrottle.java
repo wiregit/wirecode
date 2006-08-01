@@ -295,9 +295,7 @@ public class NBThrottle implements Throttle {
     }
     
     public long nextTickTime() {
-    	if (_available < MINIMUM_TO_GIVE || _requests.isEmpty())
-    		return _nextTickTime;
-    	return 0;
+    	return _nextTickTime;
     }
     
     /**
