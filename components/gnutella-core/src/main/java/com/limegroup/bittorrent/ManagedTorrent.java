@@ -22,6 +22,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
+import com.limegroup.gnutella.util.StrictIpPortSet;
 import com.limegroup.gnutella.util.ThreadPool;
 
 
@@ -356,7 +357,7 @@ public class ManagedTorrent implements Torrent {
 	 * Initializes some state relevant to the torrent
 	 */
 	private void initializeTorrent() {
-		_peers = Collections.synchronizedSet(new HashSet<TorrentLocation>());
+		_peers = Collections.synchronizedSet(new StrictIpPortSet<TorrentLocation>());
 
 		_connectionFetcher = new BTConnectionFetcher(this, networkInvoker);
 	}
@@ -641,8 +642,7 @@ public class ManagedTorrent implements Torrent {
 		synchronized(_connections) {
 			for (BTLink btc : _connections) {
 				IpPort addr = btc.getEndpoint(); 
-				if (addr.getAddress().equals(to.getAddress()) && 
-						addr.getPort() == to.getPort())
+				if (IpPort.COMPARATOR.compare(addr, btc.getEndpoint()) == 0)
 					return true;
 			}
 		}
