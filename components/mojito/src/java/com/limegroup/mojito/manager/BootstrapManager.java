@@ -87,11 +87,11 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         }
     }
     
-    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
+    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostSet) {
         synchronized (lock) {
             if (future == null) {
                 // Preserve the order of the Set
-                Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>(hostList);
+                Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>(hostSet);
                 Bootstrapper bootstrapper = new Bootstrapper(copy);
                 future = new BootstrapFuture(bootstrapper);
                 
@@ -109,7 +109,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
      */
     private class Bootstrapper implements Callable<BootstrapEvent> {
         
-        private Set<SocketAddress> hostList = null;
+        private Set<SocketAddress> hostSet = null;
         
         private long start = 0L;
         private long phaseOneStart = 0L;
@@ -122,15 +122,15 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         }
         
         @SuppressWarnings("unchecked")
-        private Bootstrapper(Set<? extends SocketAddress> hostList) {
-            this.hostList = (Set<SocketAddress>)hostList;
+        private Bootstrapper(Set<? extends SocketAddress> hostSet) {
+            this.hostSet = (Set<SocketAddress>)hostSet;
         }
         
         public BootstrapEvent call() throws Exception {
             start = System.currentTimeMillis();
             Contact node = null;
-            if (hostList != null && !hostList.isEmpty()) {
-                node = bootstrapFromHostList();
+            if (hostSet != null && !hostSet.isEmpty()) {
+                node = bootstrapFromHostSet();
             } else {
                 node = bootstrapFromRouteTable();
             }
@@ -180,14 +180,14 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          * Tries to ping the IPPs from the hostList and returns the first
          * Contact that responds or null if none of them did respond
          */
-        private Contact bootstrapFromHostList() throws Exception {
+        private Contact bootstrapFromHostSet() throws Exception {
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Bootstrapping from host list: "+hostList);
+                LOG.debug("Bootstrapping from host Set: "+hostSet);
             }
             
             BootstrapPingResponseHandler<SocketAddress> handler = 
-                new BootstrapPingResponseHandler<SocketAddress>(context, hostList);
+                new BootstrapPingResponseHandler<SocketAddress>(context, hostSet);
             try {
                 return handler.call();
             } catch (BootstrapTimeoutException exception) {

@@ -30,8 +30,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -48,6 +46,7 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.settings.RouteTableSettings;
@@ -137,17 +136,9 @@ public class Main {
         long time = 0L;
         DHTFuture<BootstrapEvent> future = null;
         
-        int start = (bootstrapHost != null ? 0 : 1);
-        for(int i = start; i < dhts.size(); i++) {
-            SocketAddress host = null;
-            if (bootstrapHost != null) {
-                host = bootstrapHost;
-            } else {
-                host = new InetSocketAddress("localhost", port);
-            }
-            
-            try {
-                /*SocketAddress[] hosts = { 
+        Set<SocketAddress> bootstrapHostSet = new LIFOSet<SocketAddress>();
+        
+                        /*SocketAddress[] hosts = { 
                     new InetSocketAddress("www.apple.com", 80), 
                     new InetSocketAddress("www.microsoft.com", 80), 
                     new InetSocketAddress("www.google.com", 80),
@@ -169,10 +160,24 @@ public class Main {
                 };
                 
                 future = dhts.get(i).bootstrap(new LinkedHashSet<SocketAddress>(Arrays.asList(hosts)));*/
-                
-                future = dhts.get(i).bootstrap(host);
+        
+        if(bootstrapHost != null) {
+            bootstrapHostSet.add(bootstrapHost);
+        } else {
+            bootstrapHostSet.add(new InetSocketAddress("localhost", port));
+        }
+        
+        int start = (bootstrapHost != null ? 0 : 1);
+        for(int i = start; i < dhts.size(); i++) {
+            
+            try {
+                MojitoDHT dht = dhts.get(i);
+                future = dht.bootstrap(bootstrapHostSet);
                 
                 BootstrapEvent evt = future.get();
+                
+                bootstrapHostSet.add(dht.getContactAddress());
+                
                 time += evt.getTotalTime();
                 System.out.println("Node #" + i + " finished bootstrapping in " + evt.getTotalTime() + "ms");
             } catch (Exception err) {

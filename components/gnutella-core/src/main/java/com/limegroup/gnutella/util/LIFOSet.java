@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,8 +40,6 @@ public class LIFOSet<E> implements Set<E>{
             list.add(o);
             return true;
         }
-        //we have it already: put it at the head of the list
-//        assert(list.remove(o));
         list.remove(o);
         list.add(o);
         return false;
@@ -88,22 +87,17 @@ public class LIFOSet<E> implements Set<E>{
         if(list.isEmpty()) {
             return false;
         }
-        
         return set.remove(list.remove(list.size()-1));
     }
 
     public boolean removeAll(Collection<?> c) {
-        boolean changed = list.removeAll(c);
-//        assert(set.removeAll(c) == changed);
-        set.removeAll(c);
-        return changed;
+        list.removeAll(c);
+        return set.removeAll(c);
     }
 
     public boolean retainAll(Collection<?> c) {
-        boolean changed = list.retainAll(c);
-//        assert(set.retainAll(c) == changed);
-        set.retainAll(c);
-        return changed;
+        list.retainAll(c);
+        return set.retainAll(c);
     }
 
     public int size() {
@@ -117,6 +111,15 @@ public class LIFOSet<E> implements Set<E>{
     public <T> T[] toArray(T[] a) {
         return set.toArray(a);
     }
+    
+    @Override
+    public String toString() {
+        List<E> reverse = new ArrayList<E>(list);
+        Collections.reverse(reverse);
+        return reverse.toString();
+    }
+
+
 
     private class LIFOSetIterator implements Iterator<E> {
         
@@ -141,12 +144,9 @@ public class LIFOSet<E> implements Set<E>{
         }
         
         public void remove() {
-//            assert (set.remove(current));
-//            assert (list.remove(current));
             set.remove(current);
             list.remove(current);
             current=null;
         }
-        
      }
 }
