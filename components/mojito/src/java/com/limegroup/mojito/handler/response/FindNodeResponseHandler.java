@@ -19,6 +19,7 @@
 
 package com.limegroup.mojito.handler.response;
 
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
@@ -29,41 +30,77 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.FindNodeEvent;
+import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
+import com.limegroup.mojito.util.TrieUtils;
 
 /**
  * 
  */
 public class FindNodeResponseHandler 
         extends LookupResponseHandler<FindNodeEvent> {
-
+	
     private List<Entry<Contact, QueryKey>> nodes = Collections.emptyList();
     
     public FindNodeResponseHandler(Context context, KUID lookupId) {
         super(context, lookupId.assertNodeID());
+        initializeHandler();
     }
     
     public FindNodeResponseHandler(Context context, Contact force, KUID lookupId) {
         super(context, force, lookupId.assertNodeID());
+        initializeHandler();
     }
     
     public FindNodeResponseHandler(Context context, KUID lookupId, int resultSetSize) {
         super(context, lookupId.assertNodeID(), resultSetSize);
+        initializeHandler();
     }
-
+    
+    private void initializeHandler() {
+    	lookupTimeout = KademliaSettings.NODE_LOOKUP_TIMEOUT.getValue();
+        lookupStat = new FindNodeLookupStatisticContainer(context, lookupId);
+        init();
+    }
+    
     @Override
+	protected synchronized void response(ResponseMessage message, long time) throws IOException {
+		super.response(message, time);
+		
+		if(message instanceof FindValueResponse) {
+			//Some Idot sent us a FIND_VALUE response for a
+            // FIND_NODE lookup! Ignore? We're losing one
+            // parallel lookup (temporarily) if we do nothing.
+            // I think it's better to kick off a new lookup
+            // now rather than to wait for a yet another
+            // response/lookup that would re-activate this one.
+            lookupStep();
+		} else {
+			handleFindNodeResponse((FindNodeResponse)message, time);
+		}
+		postHandle();
+	}
+    
+	@Override
+	protected void doFinishLookup(long time) {
+		setLookupFinished(true);
+		lookupStat.setHops(currentHop, false);
+        lookupStat.setTime((int)time, false);
+        
+        // addResponse(ContactNode) limits the size of the
+        // Trie to K and we can thus use the size method of it!
+        nodes = TrieUtils.select(responses, lookupId, responses.size());
+        
+        setReturnValue(new FindNodeEvent(getLookupID(),nodes));
+	}
+
+	@Override
     protected RequestMessage createRequest(SocketAddress address) {
         return context.getMessageHelper().createFindNodeRequest(address, lookupId);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void handleFoundNodes(List<? extends Entry<Contact, QueryKey>> nodes) {
-        this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
-    }
-
-    @Override
-    protected void handleLookupFinished(long time, int hops) {
-        setReturnValue(new FindNodeEvent(getLookupID(), nodes));
-    }
 }
