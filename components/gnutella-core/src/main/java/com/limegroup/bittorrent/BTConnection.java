@@ -40,7 +40,7 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * the number of requests to send to any host without waiting for reply
 	 */
-	private static final int MAX_REQUESTS = 3;
+	private static final int MAX_REQUESTS = 4;
 
 	/**
 	 * connections that die after less than a minute won't be retried
@@ -676,8 +676,8 @@ PieceSendListener, PieceReadListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requesting ranges from " + this);
 		
-		// if we still have outstanding requests, wait for them
-		if (_requesting.size() > 0) 
+		// if we still have more than one outstanding request, wait for them
+		if (_requesting.size() > 1) 
 			return;
 		
 		// get new ranges to request if necessary
