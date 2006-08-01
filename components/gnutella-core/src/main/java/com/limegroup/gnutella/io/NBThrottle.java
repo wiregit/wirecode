@@ -97,7 +97,7 @@ public class NBThrottle implements Throttle {
     private volatile int _bytesPerTick;
     
     /** The amount currently available in this tick. */
-    private int _available;
+    private volatile int _available;
     
     /** The next time a tick should occur. */
     private long _nextTickTime = -1;
@@ -246,6 +246,8 @@ public class NBThrottle implements Throttle {
             //LOG.debug("Adding: " + writer + " to requests");
             _requests.add(writer);
         }
+        if (_available >= MINIMUM_TO_GIVE)
+        	NIODispatcher.instance().wakeup();
     }
     
     /**

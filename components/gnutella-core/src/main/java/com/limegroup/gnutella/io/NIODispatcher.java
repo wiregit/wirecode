@@ -568,7 +568,7 @@ public class NIODispatcher implements Runnable {
      * Wakes up the primary selector if it wasn't already woken up,
      * and the current thread is not the dispatch thread.
      */
-    private void wakeup() {
+    void wakeup() {
         if(!wokeup && Thread.currentThread() != dispatchThread) {
             wokeup = true;
             primarySelector.wakeup();
@@ -641,7 +641,7 @@ public class NIODispatcher implements Runnable {
             }
             
             if(LOG.isTraceEnabled())
-                LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ").");
+                LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + "). wokeup "+wokeup+" immediate "+immediate);
             
             Collection<SelectionKey> allKeys;
             if(!polled.isEmpty()) {
