@@ -43,6 +43,11 @@ public class DatabaseImpl implements Database {
     
     private transient int valueCount = 0;
     
+    private void init() {
+        database = new HashMap<KUID, DHTValueBag>();
+        valueCount = 0;
+    }
+    
     public synchronized int getKeyCount() {
         return database.size();
     }
@@ -150,6 +155,8 @@ public class DatabaseImpl implements Database {
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
+        
+        init(); // Init transient fields
         
         List<DHTValue> values = (List<DHTValue>)in.readObject();
         if (values != null) {

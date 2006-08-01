@@ -164,8 +164,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected synchronized void start() throws Exception {
         super.start();
         
-        startTime = System.currentTimeMillis();
-        
         // Get the closest Contacts from our RouteTable 
         // and add them to the yet-to-be queried list
         List<Contact> nodes = context.getRouteTable().select(lookupId, getResultSetSize(), false);
@@ -192,6 +190,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
         
         // Go Go Go!
+        startTime = System.currentTimeMillis();
         for(Contact node : alphaList) {
             doLookup(node);                
         }

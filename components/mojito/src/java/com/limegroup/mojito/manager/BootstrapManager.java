@@ -98,6 +98,19 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     }
     
     /**
+     * Cancels a currently active bootstrap process
+     */
+    public boolean cancelBootstrapping() {
+        synchronized (lock) {
+            if (future != null) {
+                future.cancel(true);
+                return true;
+            }
+            return false;
+        }
+    }
+    
+    /**
      * Ping
      * Lookup own Node ID
      * Lookup radnom IDs

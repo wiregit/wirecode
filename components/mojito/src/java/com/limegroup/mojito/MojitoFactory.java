@@ -220,7 +220,6 @@ public class MojitoFactory {
             RouteTable routeTable = dht.getRouteTable();
             
             Contact node = null;
-            
             while((node = (Contact)ois.readObject()) != null) {
                 routeTable.add(node);
             }

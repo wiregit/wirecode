@@ -37,6 +37,7 @@ import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.StoreEvent;
+import com.limegroup.mojito.event.BootstrapEvent.Type;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -185,12 +186,14 @@ public class CommandHandler {
         
         SocketAddress addr = new InetSocketAddress(host, port);
         
-        out.println("Bootstraping... " + addr);
+        out.println("Bootstrapping... " + addr);
         
         BootstrapListener listener = new BootstrapListener() {
             public void handleResult(BootstrapEvent result) {
-                out.println("Bootstraping finished:\n" + result);
-                out.flush();
+                if (result.getType() == Type.SUCCEEDED) {
+                    out.println("Bootstraping finished:\n" + result);
+                    out.flush();
+                }
             }
             
             public void handleThrowable(Throwable ex) {
@@ -200,6 +203,7 @@ public class CommandHandler {
             }
         };
         
+        ((Context)dht).cancelBootstrapping();
         dht.bootstrap(addr).addDHTEventListener(listener);
     }
     

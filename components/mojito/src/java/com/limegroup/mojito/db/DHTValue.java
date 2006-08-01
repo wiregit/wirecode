@@ -19,6 +19,9 @@
 
 package com.limegroup.mojito.db;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -70,6 +73,11 @@ public class DHTValue implements Serializable {
         this.valueId = valueId;
         this.data = (data != null) ? data : EMPTY_DATA;
         this.isLocalValue = isLocalValue;
+    }
+    
+    private void init() {
+        lastRepublishingTime = 0L;
+        locations = 0;
     }
     
     public KUID getValueID() {
@@ -194,5 +202,14 @@ public class DHTValue implements Serializable {
                 .append("Data: ").append(new String(data));
         }
         return buffer.toString();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        init(); // Init transient fields
+        in.defaultReadObject();
     }
 }

@@ -715,6 +715,20 @@ public class Context implements MojitoDHT {
         return findNodeManager.lookup(lookupId);
     }
     
+    /**
+     * Cancels an active bootstrap process
+     */
+    public boolean cancelBootstrapping() {
+        return bootstrapManager.cancelBootstrapping();
+    }
+    
+    /**
+     * Tries to bootstrap from the local Route Table.
+     */
+    public DHTFuture<BootstrapEvent> bootstrap() {
+        return bootstrapManager.bootstrap();
+    }
+    
     public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
         return bootstrap(Arrays.asList(address));
     }
@@ -723,13 +737,6 @@ public class Context implements MojitoDHT {
         return bootstrapManager.bootstrap(hostList);
     }
 
-    /**
-     * Tries to bootstrap from the local Route Table.
-     */
-    public DHTFuture<BootstrapEvent> bootstrap() {
-        return bootstrapManager.bootstrap();
-    }
-    
     public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
         DHTValue dhtValue = DHTValue.createLocalValue(getLocalNode(), key, value);
         database.store(dhtValue);

@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.routing.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
@@ -154,6 +157,13 @@ public class ContactNode implements Contact {
         }
     }
 
+    private void init() {
+        sourceAddress = null;
+        rtt = -1;
+        state = State.UNKNOWN;
+        firewalled = false;
+    }
+    
     public void updateWithExistingContact(Contact existing) {
         if (!nodeId.equals(existing.getNodeID())) {
             throw new IllegalArgumentException("Node IDs do not match");
@@ -333,5 +343,14 @@ public class ContactNode implements Contact {
             .append(", firewalled=").append(isFirewalled());
         
         return buffer.toString();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        init(); // Init transient fields
+        in.defaultReadObject();
     }
 }
