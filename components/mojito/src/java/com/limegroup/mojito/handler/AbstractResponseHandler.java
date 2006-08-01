@@ -251,7 +251,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * means if it has returnded a result or threw an
      * Exception
      */
-    private boolean isDone() {
+    protected boolean isDone() {
         return done;
     }
     

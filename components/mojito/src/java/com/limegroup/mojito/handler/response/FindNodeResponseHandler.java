@@ -19,8 +19,8 @@
 
 package com.limegroup.mojito.handler.response;
 
+import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -29,7 +29,12 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.FindNodeEvent;
+import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
+import com.limegroup.mojito.util.TrieUtils;
 
 /**
  * 
@@ -37,38 +42,83 @@ import com.limegroup.mojito.messages.RequestMessage;
 public class FindNodeResponseHandler 
         extends LookupResponseHandler<FindNodeEvent> {
 
-    private List<Entry<Contact, QueryKey>> nodes = Collections.emptyList();
+    //private static final Log LOG = LogFactory.getLog(FindNodeResponseHandler.class);
+    
+    private FindNodeLookupStatisticContainer lookupStat;
     
     public FindNodeResponseHandler(Context context, KUID lookupId) {
-        super(context, lookupId.assertNodeID());
+        super(context, lookupId);
+        init();
     }
     
     public FindNodeResponseHandler(Context context, Contact force, KUID lookupId) {
-        super(context, force, lookupId.assertNodeID());
+        super(context, force, lookupId);
+        init();
     }
     
     public FindNodeResponseHandler(Context context, KUID lookupId, int resultSetSize) {
-        super(context, lookupId.assertNodeID(), resultSetSize);
+        super(context, lookupId, resultSetSize);
+        init();
+    }
+    
+    public FindNodeResponseHandler(Context context, Contact forcedContact, 
+            KUID lookupId, int resultSetSize) {
+        super(context, forcedContact, lookupId, resultSetSize);
+        init();
+    }
+    
+    private void init() {
+        lookupStat = new FindNodeLookupStatisticContainer(context, lookupId);
+    }
+    
+    @Override
+    protected boolean isGlobalTimeout(long time) {
+        long lookupTimeout = KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
+        return lookupTimeout > 0L && time >= lookupTimeout;
     }
 
     @Override
-    protected boolean isValueLookup() {
-        return false;
+    protected int getParallelLookups() {
+        return KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue();
     }
-
+    
     @Override
-    protected RequestMessage createRequest(SocketAddress address) {
+    protected LookupRequest createLookupRequest(SocketAddress address) {
         return context.getMessageHelper().createFindNodeRequest(address, lookupId);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected void handleFoundNodes(List<? extends Entry<Contact, QueryKey>> nodes) {
-        this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
+    protected synchronized void response(ResponseMessage message, long time) throws IOException {
+        super.response(message, time);
+        lookupStat.addReply();
     }
 
     @Override
-    protected void handleLookupFinished(long time, int hops) {
+    protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+        super.timeout(nodeId, dst, message, time);
+        lookupStat.addTimeout();
+    }
+
+    @Override
+    protected boolean doLookup(Contact node) throws IOException {
+        if (super.doLookup(node)) {
+            lookupStat.addRequest();
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
+    protected void finishLookup() {
+        long time = time();
+        int hop = getCurrentHop();
+        
+        lookupStat.setHops(hop, false);
+        lookupStat.setTime((int)time, false);
+        
+        List<Entry<Contact,QueryKey>> nodes 
+                = TrieUtils.select(responses, lookupId, responses.size());
+        
         setReturnValue(new FindNodeEvent(getLookupID(), nodes));
     }
 }
