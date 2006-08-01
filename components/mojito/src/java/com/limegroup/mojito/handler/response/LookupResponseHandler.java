@@ -123,10 +123,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     LookupResponseHandler(Context context, Contact force, KUID lookupId, int resultSetSize) {
         super(context);
         
-        if (!lookupId.isNodeID() && !lookupId.isValueID()) {
-            throw new IllegalArgumentException("Lookup ID bust be either a NodeID or ValueID");
-        }
-        
         this.force = force;
         this.lookupId = lookupId;
         this.furthestId = lookupId.invert();
@@ -166,9 +162,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         return lookupId;
     }
     
-    public boolean isValueLookup() {
-        return lookupId.isValueID();
-    }
+    protected abstract boolean isValueLookup();
     
     public boolean isExhaustiveValueLookup() {
         return KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();

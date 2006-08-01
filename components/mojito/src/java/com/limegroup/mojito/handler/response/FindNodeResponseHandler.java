@@ -52,6 +52,11 @@ public class FindNodeResponseHandler
     }
 
     @Override
+    protected boolean isValueLookup() {
+        return false;
+    }
+
+    @Override
     protected RequestMessage createRequest(SocketAddress address) {
         return context.getMessageHelper().createFindNodeRequest(address, lookupId);
     }

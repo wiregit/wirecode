@@ -45,6 +45,12 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueEve
         super(context, lookupId.assertValueID());
     }
 
+    
+    @Override
+    protected boolean isValueLookup() {
+        return true;
+    }
+
     @Override
     protected RequestMessage createRequest(SocketAddress address) {
         return context.getMessageHelper().createFindValueRequest(address, lookupId, KEYS);
