@@ -124,7 +124,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return root.setKeyValue(key, value);
         }
         
-        TrieEntry<K, V> found = getR(root.left, -1, key, keyLength);
+        TrieEntry<K, V> found = getNearestEntryForKey(key, keyLength);
         if (key.equals(found.key)) {
             if (found.isEmpty()) { // <- must be the root
                 incrementSize();
@@ -138,7 +138,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if (isValidBitIndex(bitIndex)) { // in 99.999...9% the case
             /* NEW KEY+VALUE TUPLE */
             TrieEntry<K, V> t = new TrieEntry<K, V>(key, value, bitIndex);
-            root.left = putR(root.left, t, keyLength, root);
+            addEntry(t, keyLength);
             incrementSize();
             return null;
         } else if (isNullBitKey(bitIndex)) {
@@ -166,45 +166,45 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         throw new IndexOutOfBoundsException("Failed to put: " + key + " -> " + value + ", " + bitIndex);
     }
     
-    /**
-     * The actual put implementation. Entry t is the new Entry we're
-     * gonna add.
-     */
-    private TrieEntry<K, V> putR(TrieEntry<K, V> h, 
-            final TrieEntry<K, V> t, final int keyLength, TrieEntry<K, V> p) {
-        
-        if ((h.bitIndex >= t.bitIndex) || (h.bitIndex <= p.bitIndex)) {
+    /** Adds the given entry into the Trie. */
+    private TrieEntry<K, V> addEntry(TrieEntry<K, V> toAdd, int keyLength) {
+        TrieEntry<K, V> current = root.left;
+        TrieEntry<K, V> path = root;
+        while(true) {
+            if(current.bitIndex >= toAdd.bitIndex || current.bitIndex <= path.bitIndex) {
+                toAdd.predecessor = toAdd;
                 
-            t.predecessor = t;
-            
-            if (!isBitSet(t.key, keyLength, t.bitIndex)) {
-                t.left = t;
-                t.right = h;
-            } else {
-                t.left = h;
-                t.right = t;
+                if (!isBitSet(toAdd.key, keyLength, toAdd.bitIndex)) {
+                    toAdd.left = toAdd;
+                    toAdd.right = current;
+                } else {
+                    toAdd.left = current;
+                    toAdd.right = toAdd;
+                }
+               
+                toAdd.parent = path;
+                if (current.bitIndex >= toAdd.bitIndex) {
+                    current.parent = toAdd;
+                }
+                
+                // if we inserted an uplink, set the predecessor on it
+                if(current.bitIndex <= path.bitIndex) {
+                    current.predecessor = toAdd;
+                }
+         
+                if (path == root || !isBitSet(toAdd.key, keyLength, path.bitIndex))
+                    path.left = toAdd;
+                else
+                    path.right = toAdd;
+                return toAdd;
             }
-           
-            t.parent = p;
-            if (h.bitIndex >= t.bitIndex) {
-                h.parent = t;
-            }
-            
-            // if we inserted an uplink, set the predecessor on it
-            if(h.bitIndex <= p.bitIndex) {
-                h.predecessor = t;
-            }
-            
-            return t;
+                
+            path = current;
+            if(!isBitSet(toAdd.key, keyLength, current.bitIndex))
+                current = current.left;
+            else
+                current = current.right;
         }
-
-        if (!isBitSet(t.key, keyLength, h.bitIndex)) {
-            h.left = putR(h.left, t, keyLength, h);
-        } else {
-            h.right = putR(h.right, t, keyLength, h);
-        }
-        
-        return h;
     }
     
     @Override
@@ -234,7 +234,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         int keyLength = length(key);
-        TrieEntry<K,V> entry = getR(root.left, -1, key, keyLength);
+        TrieEntry<K,V> entry = getNearestEntryForKey(key, keyLength);
         return !entry.isEmpty() && key.equals(entry.key) ? entry : null;
     }
     
@@ -253,20 +253,26 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
+     * Returns the nearest entry for a given key.  This is useful
+     * for finding knowing if a given key exists (and finding the value
+     * for it), or for inserting the key.
+     * 
      * The actual get implementation. This is very similar to
      * selectR but with the exception that it might return the
      * root Entry even if it's empty.
      */
-    private TrieEntry<K, V> getR(TrieEntry<K, V> h, int bitIndex, 
-            final K key, final int keyLength) {
-        if (h.bitIndex <= bitIndex) {
-            return h;
-        }
-
-        if (!isBitSet(key, keyLength, h.bitIndex)) {
-            return getR(h.left, h.bitIndex, key, keyLength);
-        } else {
-            return getR(h.right, h.bitIndex, key, keyLength);
+    private TrieEntry<K, V> getNearestEntryForKey(K key, int keyLength) {
+        TrieEntry<K, V> current = root.left;
+        TrieEntry<K, V> path = root;
+        while(true) {
+            if(current.bitIndex <= path.bitIndex)
+                return current;
+            
+            path = current;
+            if(!isBitSet(key, keyLength, current.bitIndex))
+                current = current.left;
+            else
+                current = current.right;
         }
     }
     
@@ -404,7 +410,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         int keyLength = length(key);
-        TrieEntry entry = getR(root.left, -1, key, keyLength);
+        TrieEntry entry = getNearestEntryForKey(key, keyLength);
         return !entry.isEmpty() && key.equals(entry.key);
     }
     
@@ -425,38 +431,30 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     public V remove(Object k) {
         K key = asKey(k);
-        if(key == null) {
+        if(key == null)
             return null;
-        }
         
-        int keyLength = length(key);
-        return removeR(root.left, -1, key, keyLength);
-    }
-    
-    /**
-     * Part 1
-     * 
-     * Serach for the Key
-     */
-    private V removeR(TrieEntry<K, V> h, int bitIndex, 
-            final K key, final int keyLength) {
-        
-        if (h.bitIndex <= bitIndex) {
-            if (!h.isEmpty() && key.equals(h.key)) {
-                return removeEntry(h);
+        int keyLength = length(key);        
+        TrieEntry<K, V> current = root.left;
+        TrieEntry<K, V> path = root;
+        while(true) {
+            if(current.bitIndex <= path.bitIndex) {
+                if(!current.isEmpty() && key.equals(current.key))
+                    return removeEntry(current);
+                else
+                    return null;
             }
-            return null;
-        }
-        
-        if (!isBitSet(key, keyLength, h.bitIndex)) {
-            return removeR(h.left, h.bitIndex, key, keyLength);
-        } else {
-            return removeR(h.right, h.bitIndex, key, keyLength);
+            
+            path = current;
+            if(!isBitSet(key, keyLength, current.bitIndex))
+                current = current.left;
+            else
+                current = current.right;
         }
     }
     
     /**
-     * Part 2
+     * Removes a single entry from the Trie.
      * 
      * If we found a Key (Entry h) then figure out if it's
      * an internal (hard to remove) or external Entry (easy 
@@ -476,7 +474,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * Part 3
+     * Removes an external entry from the Trie.
      * 
      * If it's an external Entry then just remove it.
      * This is very easy and straight forward.
@@ -507,7 +505,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * Part 4
+     * Removes an internal entry from the Trie.
      * 
      * If it's an internal Entry then "good luck" with understanding
      * this code. The Idea is essentially that Entry p takes Entry h's
@@ -1401,14 +1399,14 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 return firstEntry();
         }
         
-        TrieEntry<K, V> found = getR(root.left, -1, key, keyLength);
+        TrieEntry<K, V> found = getNearestEntryForKey(key, keyLength);
         if (key.equals(found.key))
             return found;
         
         int bitIndex = bitIndex(0, key, found.key);
         if (isValidBitIndex(bitIndex)) {
             TrieEntry<K, V> added = new TrieEntry<K, V>(key, null, bitIndex);
-            root.left = putR(root.left, added, keyLength, root);
+            addEntry(added, keyLength);
             incrementSize(); // must increment because remove will decrement
             TrieEntry<K, V> ceil = nextEntry(added);
             removeEntry(added);
@@ -1456,14 +1454,14 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return null; // there can never be anything before root.
         }
         
-        TrieEntry<K, V> found = getR(root.left, -1, key, keyLength);
+        TrieEntry<K, V> found = getNearestEntryForKey(key, keyLength);
         if (key.equals(found.key))
             return previousEntry(found);
         
         int bitIndex = bitIndex(0, key, found.key);
         if (isValidBitIndex(bitIndex)) {
             TrieEntry<K, V> added = new TrieEntry<K, V>(key, null, bitIndex);
-            root.left = putR(root.left, added, keyLength, root);
+            addEntry(added, keyLength);
             incrementSize(); // must increment because remove will decrement
             TrieEntry<K, V> prior = previousEntry(added);
             removeEntry(added);
@@ -1479,27 +1477,65 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         throw new IllegalStateException("invalid lookup: " + key);
     }
     
+    /**
+     * Finds the subtree that contains the prefix.
+     * 
+     * This is very similar to getR but with the difference that
+     * we stop the lookup if h.bitIndex > keyLength.
+     */
+    private TrieEntry<K, V> subtree(K prefix, int offset, int length) {
+        TrieEntry<K, V> current = root.left;
+        TrieEntry<K, V> path = root;
+        while(true) {
+            if(current.bitIndex <= path.bitIndex || length < current.bitIndex)
+                break;
+            
+            path = current;
+            if(!isBitSet(prefix, length, current.bitIndex))
+                current = current.left;
+            else
+                current = current.right;
+        }        
+
+        // Make sure the entry is valid for a subtree.
+        TrieEntry<K, V> entry = current.isEmpty() ? path : current;
+        
+        // If entry is root, it can't be empty.
+        if (entry.isEmpty())
+            return null;
+        
+        int offsetLength = offset + length;
+        
+        // Found key's length-th bit differs from our key
+        // which means it cannot be the prefix...
+        if(isBitSet(prefix, offsetLength, offsetLength) != 
+          isBitSet(entry.key, length(entry.key), offsetLength))
+            return null;
+        
+        // ... or there are less than 'length' equal bits
+        // TODO: must offset the bitIndex lookup in key
+        int bitIndex = bitIndex(0, prefix, entry.key);
+        if (bitIndex >= 0 && bitIndex < length)
+            return null;
+        
+        
+        return entry;
+    }
+    
+    
     
     /** A submap used for prefix views over the Trie. */
     private class PrefixSubMap extends SubMap {
         protected final K prefix;
         protected final int offset;
-        protected final int length;
-        protected final int offsetLength;
+        protected final int length;        
+        private transient int keyModCount = 0;
         protected int size;
         
         PrefixSubMap(K prefix, int offset, int length) {
             this.prefix = prefix;
             this.offset = offset;
             this.length = length;
-            offsetLength = offset + length;
-        }
-        
-        private transient int keyModCount = 0;
-        
-        @Override
-        public Set<Entry<K, V>> entrySet() {
-            return super.entrySet();
         }
 
         @Override
@@ -1553,6 +1589,8 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                     entry = nextEntry((TrieEntry<K, V>)entry);
                     toKey = entry == null ? null : entry.getKey();
                 }
+                
+                keyModCount = modCount;
             }
         }
         
@@ -1562,7 +1600,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
 
         private class PrefixEntrySetView extends SubMap.EntrySetView {
             private TrieEntry<K, V> prefixStart;
-            private boolean empty; 
+            private int iterModCount = 0;
             
             public int size() {
                 fixup();
@@ -1574,64 +1612,18 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             }
 
             public Iterator<Map.Entry<K,V>> iterator() {
-                if(modCount != keyModCount) {
-                    fixupIterator();
+                if(modCount != iterModCount) {
+                    prefixStart = subtree(prefix, offset, length);
+                    iterModCount = modCount;
                 }
                 
-                if(empty) {
+                if(prefixStart == null) {
                     return EmptyIterator.emptyIterator();
                 } else if(length >= prefixStart.bitIndex){
                     return Collections.singletonList((Map.Entry<K, V>)prefixStart).iterator();
                 } else {
                     return new PrefixIterator(prefixStart);
                 }
-            }
-            
-            /**
-             * Finds the subtree that contains the prefix.
-             * 
-             * This is very similar to getR but with the difference that
-             * we stop the lookup if h.bitIndex > keyLength.
-             */
-            private TrieEntry<K, V> subtree() {
-                TrieEntry<K, V> current = root.left;
-                TrieEntry<K, V> path = root;
-                while(true) {
-                    if(current.bitIndex <= path.bitIndex || length < current.bitIndex)
-                        return current.isEmpty() ? path : current;
-                    
-                    path = current;
-                    if(!isBitSet(prefix, length, current.bitIndex))
-                        current = current.left;
-                    else
-                        current = current.right;
-                }
-            }
-            
-            private void fixupIterator() {
-                TrieEntry<K, V> entry = subtree();
-                empty = true;
-                prefixStart = null;
-                
-                // entry isn't root
-                if (entry.isEmpty())
-                    return;
-                
-                // Found key's length-th bit differs from our key
-                // which means it cannot be the prefix...
-                if(isBitSet(prefix, offsetLength, offsetLength) != 
-                  isBitSet(entry.key, length(entry.key), offsetLength))
-                    return;
-                
-                // ... or there are less than 'length' equal bits
-                // TODO: must offset the bitIndex lookup in key
-                int bitIndex = bitIndex(0, prefix, entry.key);
-                if (bitIndex >= 0 && bitIndex < length)
-                    return;
-                
-                // Otherwise, the entry is the start of the tree.
-                empty = false;
-                prefixStart = entry;
             }
         }
     }
