@@ -21,9 +21,10 @@ package com.limegroup.mojito.manager;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
@@ -89,8 +90,9 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
         synchronized (lock) {
             if (future == null) {
-                Bootstrapper bootstrapper = new Bootstrapper(
-                        new HashSet<SocketAddress>(hostList));
+                // Preserve the order of the Set
+                Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>(hostList);
+                Bootstrapper bootstrapper = new Bootstrapper(copy);
                 future = new BootstrapFuture(bootstrapper);
                 
                 context.execute(future);
@@ -204,16 +206,13 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                 LOG.debug("Bootstrapping from Route Table : "+context.getRouteTable());
             }
             
-            List<Contact> nodes = BucketUtils.sort(context.getRouteTable().getLiveContacts());
+            Set<Contact> nodes = new TreeSet<Contact>(BucketUtils.MRS_COMPARATOR);
+            nodes.addAll(context.getRouteTable().getLiveContacts());
             nodes.remove(context.getLocalNode());
             
-            //TODO remove this: temporary type change
-            Set<Contact> tempSet = new HashSet<Contact>(nodes);
-            
-            
-            if(!tempSet.isEmpty()) {
+            if(!nodes.isEmpty()) {
                 BootstrapPingResponseHandler<Contact> handler = 
-                    new BootstrapPingResponseHandler<Contact>(context, tempSet);
+                    new BootstrapPingResponseHandler<Contact>(context, nodes);
                 try {
                     return handler.call();
                 } catch (BootstrapTimeoutException exception) {

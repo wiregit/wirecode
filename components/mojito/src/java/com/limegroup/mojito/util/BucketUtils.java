@@ -30,6 +30,20 @@ import com.limegroup.mojito.Contact;
  */
 public final class BucketUtils {
     
+    public static final Comparator<Contact> MRS_COMPARATOR = new Comparator<Contact>() {
+        public int compare(Contact a, Contact b) {
+            long t1 = a.getTimeStamp();
+            long t2 = b.getTimeStamp();
+            if (t1 == t2) {
+                return 0;
+            } else if (t1 > t2) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+    };
+        
     private BucketUtils() {}
     
     /**
@@ -63,19 +77,7 @@ public final class BucketUtils {
      * least recently seen
      */
     public static <T extends Contact> List<T> sort(List<T> nodes) {
-        Collections.sort(nodes, new Comparator<Contact>() {
-            public int compare(Contact a, Contact b) {
-                long t1 = a.getTimeStamp();
-                long t2 = b.getTimeStamp();
-                if (t1 == t2) {
-                    return 0;
-                } else if (t1 > t2) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            }
-        });
+        Collections.sort(nodes, MRS_COMPARATOR);
         return nodes;
     }
     
