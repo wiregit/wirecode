@@ -18,12 +18,14 @@ class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Futu
 	private boolean executing;
 	DelayedRunnable(Runnable delegate, long time) {
 		this.delegate = delegate;
-		this.time = time;
-		sequenceNumber = sequencer.getAndDecrement();
+		this.time = time + System.currentTimeMillis();
+		sequenceNumber = sequencer.getAndIncrement();
 		this.nanoTime = System.nanoTime() - NANO_BASE + time * 1000 * 1000;
 	}
 	
 	public void run() {
+		if (isDone())
+			return;
 		synchronized(this){
 			if (delegate == null)
 				return;
@@ -34,7 +36,6 @@ class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Futu
 		} finally {
 			executed = true;
 		}
-		
 	}
 	
 	public synchronized boolean cancel(boolean ignored) {
