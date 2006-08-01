@@ -80,7 +80,7 @@ public class RandomBucketRefresher implements Runnable {
             return;
         }
         
-        if (context.isBootstrapping()) {
+        if (!context.isBootstrapped()) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
             }

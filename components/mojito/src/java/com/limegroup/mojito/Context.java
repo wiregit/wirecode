@@ -60,6 +60,8 @@ import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreEvent;
+import com.limegroup.mojito.event.exceptions.DHTException;
+import com.limegroup.mojito.event.exceptions.NotBootstrappedException;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.manager.BootstrapManager;
@@ -668,12 +670,10 @@ public class Context implements MojitoDHT {
     
     /** Starts a value for the given KUID */
     public DHTFuture<FindValueEvent> get(KUID key) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("get");
+        }
         return findValueManager.lookup(key);
-    }
-    
-    /** Starts a lookup for the given KUID */
-    public DHTFuture<FindNodeEvent> lookup(KUID lookupId) {
-        return findNodeManager.lookup(lookupId);
     }
     
     public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
@@ -698,6 +698,10 @@ public class Context implements MojitoDHT {
     }
     
     public DHTFuture<StoreEvent> put(KUID key, byte[] value, PrivateKey privateKey) {
+        
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("put");
+        }
         
         try {
             KeyValue keyValue = 
@@ -753,6 +757,9 @@ public class Context implements MojitoDHT {
      * Stores the given KeyValue 
      */
     public DHTFuture<StoreEvent> store(KeyValue keyValue) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("store");
+        }
         return storeManager.store(keyValue);
     }
    
@@ -760,6 +767,9 @@ public class Context implements MojitoDHT {
      * Stores the given KeyValue 
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("store");
+        }
         return storeManager.store(node, queryKey, keyValue);
     }
     
@@ -886,7 +896,7 @@ public class Context implements MojitoDHT {
             }
         }
         
-        // There's always we!
+        // There's always us!
         return Math.max(1, combinedSize);
     }
     

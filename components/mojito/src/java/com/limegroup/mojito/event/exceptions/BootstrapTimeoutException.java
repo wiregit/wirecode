@@ -1,4 +1,4 @@
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.event.exceptions;
 
 import java.net.SocketAddress;
 import java.util.Set;
