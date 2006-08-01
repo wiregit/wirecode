@@ -100,7 +100,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		ThrottleWriter throttle = new ThrottleWriter(
 				RouterService.getBandwidthManager().getThrottle(false));
 		delayer = new DelayedBufferWriter(1400, 3000);
-		_channel = delayer; 
+		_channel = throttle; 
 		delayer.setWriteChannel(throttle);
 		keepAliveSender = new Periodic(new Runnable() {
 			public void run() {
@@ -124,7 +124,7 @@ public class BTMessageWriter implements BTChannelWriter {
 			if (myKeepAlive.hasRemaining()) {
 				if (LOG.isDebugEnabled())
 					LOG.debug("sending a keepalive on "+this);
-				written += _channel.write(myKeepAlive);
+				written += delayer.write(myKeepAlive);
 				if (myKeepAlive.hasRemaining()) // need to finish keepalive first.
 					return true;
 			}
@@ -139,14 +139,12 @@ public class BTMessageWriter implements BTChannelWriter {
 					if (needsFlush) 
 						needsFlush = !delayer.flush();
 					
-					_channel.interest(this, needsFlush);
+					delayer.interest(this, needsFlush);
 					return false;
 				} 
 			}
-			// this should ideally be done with gathering writes, but
-			// because somewhere in the chain we have a delayer its ok.
-			written = _channel.write(_out[0]);
-			written += _channel.write(_out[1]);
+			written = delayer.write(_out[0]);
+			written += delayer.write(_out[1]);
 			
 			if (!_out[1].hasRemaining()) {
 				_out[1] = null; // can be gc'd now
@@ -170,7 +168,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	private void sendKeepAlive() {
 		if (_queue.isEmpty() && _out[1] == null) {
 			myKeepAlive.clear();
-			_channel.interest(this, true);
+			delayer.interest(this, true);
 		}
 	}
 	
@@ -191,8 +189,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		if (myKeepAlive.remaining() == 4)
 			myKeepAlive.limit(0);
 		
-		if (_channel != null)
-			_channel.interest(this, true);
+		delayer.interest(this, true);
 	}
 	
 	private void messageArrived(BTMessage m) {
@@ -243,7 +240,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	 */
 	public void setWriteChannel(InterestWriteChannel newChannel) {
 		_channel = newChannel;
-		_channel.interest(this, true);
+		delayer.setWriteChannel(newChannel);
 	}
 
 	/**
