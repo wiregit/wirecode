@@ -30,6 +30,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -145,6 +147,29 @@ public class Main {
             }
             
             try {
+                /*SocketAddress[] hosts = { 
+                    new InetSocketAddress("www.apple.com", 80), 
+                    new InetSocketAddress("www.microsoft.com", 80), 
+                    new InetSocketAddress("www.google.com", 80),
+                    new InetSocketAddress("www.t-mobile.com", 80),
+                    new InetSocketAddress("www.verizon.com", 80),
+                    new InetSocketAddress("www.limewire.org", 80),
+                    new InetSocketAddress("www.cnn.com", 80), 
+                    new InetSocketAddress("www.scifi.com", 80), 
+                    new InetSocketAddress("192.168.1.5", 80),
+                    new InetSocketAddress("www.gnutella.com", 80),
+                    new InetSocketAddress("www.limewire.org", 80), 
+                    new InetSocketAddress("slashdot.org", 80), 
+                    new InetSocketAddress("www.altavista.com", 80), 
+                    new InetSocketAddress("www.ask.com", 80),
+                    new InetSocketAddress("www.vodafone.co.uk", 80),
+                    new InetSocketAddress("www.n-tv.de", 80),
+                    new InetSocketAddress("www.n24.de", 80), 
+                    host
+                };
+                
+                future = dhts.get(i).bootstrap(new LinkedHashSet<SocketAddress>(Arrays.asList(hosts)));*/
+                
                 future = dhts.get(i).bootstrap(host);
                 
                 BootstrapEvent evt = future.get();
