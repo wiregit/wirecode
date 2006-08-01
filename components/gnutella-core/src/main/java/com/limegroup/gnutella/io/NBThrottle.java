@@ -180,7 +180,7 @@ public class NBThrottle implements Throttle {
             MINIMUM_TO_GIVE = 30;
         } else {
             MAXIMUM_TO_GIVE = Integer.MAX_VALUE;
-            MINIMUM_TO_GIVE = 0;
+            MINIMUM_TO_GIVE = 1;
         }
     }
     
