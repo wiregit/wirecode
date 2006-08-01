@@ -642,7 +642,7 @@ public class ManagedTorrent implements Torrent {
 		synchronized(_connections) {
 			for (BTLink btc : _connections) {
 				IpPort addr = btc.getEndpoint(); 
-				if (IpPort.COMPARATOR.compare(addr, btc.getEndpoint()) == 0)
+				if (IpPort.COMPARATOR.compare(addr, to) == 0)
 					return true;
 			}
 		}
