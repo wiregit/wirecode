@@ -91,7 +91,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     private Contact forcedContact;
     
     /** The current hop */
-    private int currentHop = 1;
+    private int currentHop = 0;
     
     LookupResponseHandler(Context context, KUID lookupId) {
         this(context, null, lookupId, -1);
@@ -170,7 +170,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         // and add them to the yet-to-be queried list
         List<Contact> nodes = context.getRouteTable().select(lookupId, getResultSetSize(), false);
         for(Contact node : nodes) {
-            addYetToBeQueried(node);
+            addYetToBeQueried(node, currentHop+1);
         }
         
         // Mark the local node as queried 
@@ -241,7 +241,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                         LOG.trace("Adding " + node + " to the yet-to-be queried list");
                     }
                     
-                    addYetToBeQueried(node);
+                    addYetToBeQueried(node, currentHop+1);
                     
                     // Add them to the routing table as not alive
                     // contacts. We're likely going to add them
@@ -479,10 +479,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     /** Adds the Node to the to-query Trie */
-    private boolean addYetToBeQueried(Contact node) {
+    private boolean addYetToBeQueried(Contact node, int hop) {
         if (!isQueried(node) && !context.isLocalNode(node)) {
             toQuery.put(node.getNodeID(), node);
-            hopMap.put(node.getNodeID(), currentHop);
+            hopMap.put(node.getNodeID(), hop);
             return true;
         }
         return false;
