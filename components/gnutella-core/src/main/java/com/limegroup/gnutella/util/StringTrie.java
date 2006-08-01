@@ -324,7 +324,7 @@ public class StringTrie<V> {
             // Find the edge whose label starts with prefix[i].
             TrieEdge<V> edge = node.get(prefix.charAt(i));
             if (edge == null) {
-                return emptyIterator();
+                return EmptyIterator.emptyIterator();
             }
             // Now check that rest of label matches
             node = edge.getChild();
@@ -346,7 +346,7 @@ public class StringTrie<V> {
         }
         // Yield all children of node, including node itself.
         if (node == null)
-            return emptyIterator();
+            return EmptyIterator.emptyIterator();
         else
             return new ValueIterator(node);
     }
@@ -376,32 +376,6 @@ public class StringTrie<V> {
 
         public boolean hasNext() {
             return delegate.hasNext();
-        }
-    }
-    
-
-    @SuppressWarnings("unchecked")
-    private static <T> Iterator<T> emptyIterator() {
-        return (Iterator<T>)EMPTY_ITERATOR;
-    }
-
-    /**
-     * The constant EmptyIterator to return when nothing matches.
-     */
-    private final static Iterator EMPTY_ITERATOR = new EmptyIterator();
-
-    /**
-     * Yields nothing. (internal)
-     */
-    private static class EmptyIterator extends UnmodifiableIterator {
-        // inherits javadoc comment
-        public boolean hasNext() {
-            return false;
-        }
-
-        // inherits javadoc comment
-        public Object next() {
-            throw new NoSuchElementException();
         }
     }
 

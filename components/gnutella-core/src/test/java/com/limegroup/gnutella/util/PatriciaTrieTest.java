@@ -670,6 +670,14 @@ public class PatriciaTrieTest extends BaseTestCase {
         
         map = trie.getPrefixedBy("Albertooo");
         System.out.println("For Albertooo: " + map);
+        
+        map = trie.getPrefixedBy("New");
+        System.out.println("First time for New: " + map);
+        trie.put("New1", "New1");
+        trie.put("New Two", "New Two");
+        trie.put("New 3", "New Three");
+        trie.put("Not New", "Not New");
+        System.out.println("Second time for New: " + map);
     }
 
     

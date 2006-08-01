@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * A PATRICIA Trie.
@@ -387,61 +386,14 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      */
     private SortedMap<K, V> getPrefixedByBits(K key, int offset, int length) {
         int offsetLength = offset + length;
-        
         if (offsetLength > length(key)) {
             throw new IllegalArgumentException(offset + " + " + length + " > " + length(key));
         }
         
-        TrieEntry<K, V> entry = rangeR(root.left, -1, key, length, root);
-        if (entry.isEmpty()) {
-            return new TreeMap<K, V>(keyAnalyzer);
-        }
+        if(offsetLength == 0)
+            return this;
         
-        // Found key's length-th bit differs from our
-        // key which means it cannot be the prefix...
-        if (isBitSet(key, offsetLength, offsetLength) != isBitSet(entry.key, length(entry.key), offsetLength)) {
-            return new TreeMap<K, V>(keyAnalyzer);
-        }
-        
-        // ... or there are less than 'length' equal bits
-        // TODO: must offset the bitIndex lookup in key
-        int bitIndex = bitIndex(0, key, entry.key);
-        if (bitIndex >= 0 && bitIndex < length) {
-            return new TreeMap<K, V>(keyAnalyzer);
-        }
-        
-        SortedMap<K, V> map = new TreeMap<K, V>(keyAnalyzer);
-        if (length < entry.bitIndex) {
-            PrefixIterator iter = new PrefixIterator(entry);
-            while(iter.hasNext()) {
-                Map.Entry<K, V> next = iter.next();
-                //System.out.println("Adding: " + next);
-                map.put(next.getKey(), next.getValue());
-            }
-        } else {
-            map.put(entry.getKey(), entry.getValue());
-        }
-        
-        return map;
-        
-    }
-    
-    /**
-     * This is very similar to getR but with the difference that
-     * we stop the lookup if h.bitIndex > keyLength.
-     */
-    private TrieEntry<K, V> rangeR(TrieEntry<K, V> h, int bitIndex, 
-            final K key, final int keyLength, TrieEntry<K, V> p) {
-        
-        if (h.bitIndex <= bitIndex || keyLength < h.bitIndex) {
-            return (h.isEmpty() ? p : h);
-        }
-        
-        if (!isBitSet(key, keyLength, h.bitIndex)) {
-            return rangeR(h.left, h.bitIndex, key, keyLength, h);
-        } else {
-            return rangeR(h.right, h.bitIndex, key, keyLength, h);
-        }
+        return new PrefixSubMap(key, offset, length);
     }
     
     /** Returns true if this trie contains the specified Key */
@@ -1098,24 +1050,15 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         protected int expectedModCount = modCount;   // For fast-fail 
         protected TrieEntry<K, V> next; // the next node to return
         protected TrieEntry<K, V> current; // the current entry we're on
-        protected final TrieEntry<K, V> subtree; // the subtree to search within
         
         // Starts iteration from the beginning.
         protected NodeIterator() {
-            subtree = null;
             next = PatriciaTrie.this.nextEntry(null);
         }
         
         // Starts iteration at the given entry.
         protected NodeIterator(TrieEntry<K, V> firstEntry) {
-            subtree = null;
             next = firstEntry;
-        }
-        
-        // Starts iteration at the given entry & search only within the given subtree.
-        protected NodeIterator(TrieEntry<K, V> startScan, TrieEntry<K, V> subtreeParent) {
-            subtree = subtreeParent;
-            next = PatriciaTrie.this.followLeft(startScan);
         }
         
         public boolean hasNext() {
@@ -1129,12 +1072,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             if (e == null) 
                 throw new NoSuchElementException();
             
-            if(subtree == null)
-                next = PatriciaTrie.this.nextEntry(e);
-            else
-                next = PatriciaTrie.this.nextEntryInSubtree(e, subtree);
+            next = findNext(e);
             current = e;
             return e;
+        }
+        
+        protected TrieEntry<K, V> findNext(TrieEntry<K, V> prior) {
+            return PatriciaTrie.this.nextEntry(prior);
         }
         
         public void remove() {
@@ -1169,13 +1113,23 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
     }
     
+    /** An iterator for iterating over a prefix search. */
     private class PrefixIterator extends NodeIterator<Map.Entry<K, V>> {
-        PrefixIterator(TrieEntry<K,V> startScan) {
-            super(startScan, startScan);
+        protected final TrieEntry<K, V> subtree; // the subtree to search within
+        
+        // Starts iteration at the given entry & search only within the given subtree.
+        PrefixIterator(TrieEntry<K, V> startScan) {
+            subtree = startScan;
+            next = PatriciaTrie.this.followLeft(startScan);
         }
 
         public Map.Entry<K,V> next() {
             return nextEntry();
+        }
+        
+        @Override
+        protected TrieEntry<K, V> findNext(TrieEntry<K, V> prior) {
+            return PatriciaTrie.this.nextEntryInSubtree(prior, subtree);
         }
     }
     
@@ -1525,15 +1479,180 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         throw new IllegalStateException("invalid lookup: " + key);
     }
     
+    
+    /** A submap used for prefix views over the Trie. */
+    private class PrefixSubMap extends SubMap {
+        protected final K prefix;
+        protected final int offset;
+        protected final int length;
+        protected final int offsetLength;
+        protected int size;
+        
+        PrefixSubMap(K prefix, int offset, int length) {
+            this.prefix = prefix;
+            this.offset = offset;
+            this.length = length;
+            offsetLength = offset + length;
+        }
+        
+        private transient int keyModCount = 0;
+        
+        @Override
+        public Set<Entry<K, V>> entrySet() {
+            return super.entrySet();
+        }
+
+        @Override
+        public K firstKey() {
+            fixup();
+            return super.firstKey();
+        }
+
+        @Override
+        protected boolean inRange(K key) {
+            fixup();
+            return super.inRange(key);
+        }
+
+        @Override
+        protected boolean inRange2(K key) {
+            fixup();
+            return super.inRange2(key);
+        }
+
+        @Override
+        public K lastKey() {
+            fixup();
+            return super.lastKey();
+        }
+        
+        private void fixup() {
+            // The trie has changed since we last
+            // found our toKey / fromKey
+            if(modCount != keyModCount) {
+                Iterator<Map.Entry<K, V>> iter = entrySet().iterator();
+                size = 0;
+                
+                Map.Entry<K, V> entry = null;
+                if(iter.hasNext()) {
+                    entry = iter.next();
+                    size = 1;
+                }
+                
+                fromKey = entry == null ? null : entry.getKey();
+                toKey = fromKey;
+                
+                while(iter.hasNext()) {
+                    size++;
+                    entry = iter.next();
+                }
+                
+                toKey = entry == null ? null : entry.getKey();
+                
+                if(toKey != null) {
+                    entry = nextEntry((TrieEntry<K, V>)entry);
+                    toKey = entry == null ? null : entry.getKey();
+                }
+            }
+        }
+        
+        protected Set<Map.Entry<K, V>> newSubMapEntrySet() {
+            return new PrefixEntrySetView();
+        }
+
+        private class PrefixEntrySetView extends SubMap.EntrySetView {
+            private TrieEntry<K, V> prefixStart;
+            private boolean empty; 
+            
+            public int size() {
+                fixup();
+                return PrefixSubMap.this.size;
+            }
+
+            public boolean isEmpty() {
+                return !iterator().hasNext();
+            }
+
+            public Iterator<Map.Entry<K,V>> iterator() {
+                if(modCount != keyModCount) {
+                    fixupIterator();
+                }
+                
+                if(empty) {
+                    return EmptyIterator.emptyIterator();
+                } else if(length >= prefixStart.bitIndex){
+                    return Collections.singletonList((Map.Entry<K, V>)prefixStart).iterator();
+                } else {
+                    return new PrefixIterator(prefixStart);
+                }
+            }
+            
+            /**
+             * Finds the subtree that contains the prefix.
+             * 
+             * This is very similar to getR but with the difference that
+             * we stop the lookup if h.bitIndex > keyLength.
+             */
+            private TrieEntry<K, V> subtree() {
+                TrieEntry<K, V> current = root.left;
+                TrieEntry<K, V> path = root;
+                while(true) {
+                    if(current.bitIndex <= path.bitIndex || length < current.bitIndex)
+                        return current.isEmpty() ? path : current;
+                    
+                    path = current;
+                    if(!isBitSet(prefix, length, current.bitIndex))
+                        current = current.left;
+                    else
+                        current = current.right;
+                }
+            }
+            
+            private void fixupIterator() {
+                TrieEntry<K, V> entry = subtree();
+                empty = true;
+                prefixStart = null;
+                
+                // entry isn't root
+                if (entry.isEmpty())
+                    return;
+                
+                // Found key's length-th bit differs from our key
+                // which means it cannot be the prefix...
+                if(isBitSet(prefix, offsetLength, offsetLength) != 
+                  isBitSet(entry.key, length(entry.key), offsetLength))
+                    return;
+                
+                // ... or there are less than 'length' equal bits
+                // TODO: must offset the bitIndex lookup in key
+                int bitIndex = bitIndex(0, prefix, entry.key);
+                if (bitIndex >= 0 && bitIndex < length)
+                    return;
+                
+                // Otherwise, the entry is the start of the tree.
+                empty = false;
+                prefixStart = entry;
+            }
+        }
+    }
+    
     private class SubMap extends AbstractMap<K,V> implements SortedMap<K,V>, java.io.Serializable {
 
         // TODO: add serialVersionUID
         
         /** The key to start from, null if the beginning. */
-        private K fromKey;
+        protected K fromKey;
         
         /** The key to end at, null if till the end. */
-        private K toKey;
+        protected K toKey;
+        
+        /**
+         * Constructs a blank SubMap -- this should ONLY be used
+         * by subclasses that wish to lazily construct their
+         * fromKey or toKey
+         */
+        protected SubMap() {
+        }
 
         SubMap(K fromKey, K toKey) {
             if(fromKey == null && toKey == null)
@@ -1574,7 +1693,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             TrieEntry<K,V> e = fromKey == null ? firstEntry() : getCeilEntry(fromKey);
             K first = e.getKey();
             if (toKey != null && keyAnalyzer.compare(first, toKey) >= 0)
-                throw(new NoSuchElementException());
+                throw new NoSuchElementException();
             return first;
         }
 
@@ -1582,14 +1701,20 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             TrieEntry<K,V> e = toKey == null ? lastEntry() : getPrecedingEntry(toKey);
             K last = e.getKey();
             if (fromKey != null && keyAnalyzer.compare(last, fromKey) < 0)
-                throw(new NoSuchElementException());
+                throw new NoSuchElementException();
             return last;
         }
 
-        private transient Set<Map.Entry<K,V>> entrySet = new EntrySetView();
+        private transient Set<Map.Entry<K,V>> entrySet;
 
         public Set<Map.Entry<K,V>> entrySet() {
+            if(entrySet == null)
+                entrySet = newSubMapEntrySet();
             return entrySet;
+        }
+        
+        protected Set<Map.Entry<K, V>> newSubMapEntrySet() {
+            return new EntrySetView();
         }
 
         private class EntrySetView extends AbstractSet<Map.Entry<K,V>> {
@@ -1667,13 +1792,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return new SubMap(fromKey, toKey);
         }
 
-        private boolean inRange(K key) {
+        protected boolean inRange(K key) {
             return (fromKey == null || keyAnalyzer.compare(key, fromKey) >= 0) &&
                    (toKey   == null || keyAnalyzer.compare(key, toKey)   <  0);
         }
 
         // This form allows the high endpoint (as well as all legit keys)
-        private boolean inRange2(K key) {
+        protected boolean inRange2(K key) {
             return (fromKey == null || keyAnalyzer.compare(key, fromKey) >= 0) &&
                    (toKey   == null || keyAnalyzer.compare(key, toKey)   <= 0);
         }
