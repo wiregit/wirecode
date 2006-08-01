@@ -798,6 +798,14 @@ public class PatriciaTrieTest extends BaseTestCase {
         assertFalse(iterator.hasNext());
         assertEquals("Al", trie.remove("Al"));
         
+        map = trie.getPrefixedBy("Akka");
+        assertEquals(1, map.size());
+        assertEquals("Akka", map.firstKey());
+        assertEquals("Akka", map.lastKey());
+        iterator = map.keySet().iterator();
+        assertEquals("Akka", iterator.next());
+        assertFalse(iterator.hasNext());
+        
         map = trie.getPrefixedBy("Ab");
         assertTrue(map.isEmpty());
         assertEquals(0, map.size());
@@ -843,6 +851,49 @@ public class PatriciaTrieTest extends BaseTestCase {
         iterator = map.values().iterator();
         assertFalse(iterator.hasNext());
     }
+    
+    public void testPrefixedByRemoval() {
+        PatriciaTrie<String, String> trie 
+            = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+        
+        final String[] keys = new String[]{
+                "Albert", "Xavier", "XyZ", "Anna", "Alien", "Alberto",
+                "Alberts", "Allie", "Alliese", "Alabama", "Banane",
+                "Blabla", "Amber", "Ammun", "Akka", "Akko", "Albertoo",
+                "Amma"
+        };
+
+        for (String key : keys) {
+            trie.put(key, key);
+        }
+        
+        SortedMap map = trie.getPrefixedBy("Al");
+        assertEquals(8, map.size());
+        Iterator<String> iter = map.keySet().iterator();
+        assertEquals("Alabama", iter.next());
+        assertEquals("Albert", iter.next());
+        assertEquals("Alberto", iter.next());
+        assertEquals("Albertoo", iter.next());
+        assertEquals("Alberts", iter.next());
+        assertEquals("Alien", iter.next());
+        iter.remove();
+        assertEquals(7, map.size());
+        assertEquals("Allie", iter.next());
+        assertEquals("Alliese", iter.next());
+        assertFalse(iter.hasNext());
+        
+        map = trie.getPrefixedBy("Ak");
+        assertEquals(2, map.size());
+        iter = map.keySet().iterator();
+        assertEquals("Akka", iter.next());
+        iter.remove();
+        assertEquals(1, map.size());
+        assertEquals("Akko", iter.next());
+        if(iter.hasNext())
+            fail("shouldn't have next (but was: " + iter.next() + ")");
+        assertFalse(iter.hasNext());
+    }
+
     
     private static class TestCursor implements Cursor<Object, Object> {
         private List<Object> keys;

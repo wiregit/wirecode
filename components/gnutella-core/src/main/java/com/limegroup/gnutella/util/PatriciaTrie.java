@@ -1157,22 +1157,58 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     
     /** An iterator for iterating over a prefix search. */
     private class PrefixEntryIterator extends NodeIterator<Map.Entry<K, V>> {
-        protected final TrieEntry<K, V> subtree; // the subtree to search within
+        // values to reset the subtree if we remove it.
+        protected final K prefix; 
+        protected final int offset;
+        protected final int length;
+        protected boolean lastOne;
+        
+        protected TrieEntry<K, V> subtree; // the subtree to search within
         
         // Starts iteration at the given entry & search only within the given subtree.
-        PrefixEntryIterator(TrieEntry<K, V> startScan) {
+        PrefixEntryIterator(TrieEntry<K, V> startScan, K prefix, int offset, int length) {
             subtree = startScan;
             next = PatriciaTrie.this.followLeft(startScan);
+            this.prefix = prefix;
+            this.offset = offset;
+            this.length = length;
         }
 
         public Map.Entry<K,V> next() {
-            return nextEntry();
+            Map.Entry<K, V> entry = nextEntry();
+            if(lastOne)
+                next = null;
+            return entry;
         }
         
         @Override
         protected TrieEntry<K, V> findNext(TrieEntry<K, V> prior) {
             return PatriciaTrie.this.nextEntryInSubtree(prior, subtree);
         }
+        
+        @Override
+        public void remove() {
+            // If the current entry we're removing is the subtree
+            // then we need to find a new subtree parent.
+            boolean needsFixing = false;
+            int bitIdx = subtree.bitIndex;
+            if(current == subtree)
+                needsFixing = true;
+            
+            super.remove();
+            
+            // If the subtree changed its bitIndex or we
+            // removed the old subtree, get a new one.
+            if(bitIdx != subtree.bitIndex || needsFixing)
+                subtree = subtree(prefix, offset, length);
+            
+            // If the subtree's bitIndex is less than the
+            // length of our prefix, it's the last item
+            // in the prefix tree.
+            if(length >= subtree.bitIndex)
+                lastOne = true;
+        }
+        
     }
     
     /** An iterator for submaps. */
@@ -1773,7 +1809,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 } else if(length >= prefixStart.bitIndex){
                     return new SingletonIterator(prefixStart);
                 } else {
-                    return new PrefixEntryIterator(prefixStart);
+                    return new PrefixEntryIterator(prefixStart, prefix, offset, length);
                 }
             }
         }
@@ -1819,6 +1855,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         @SuppressWarnings("unchecked")
         public boolean containsKey(Object key) {
             return inRange((K) key) && PatriciaTrie.this.containsKey(key);
+        }
+       
+        @SuppressWarnings("unchecked")
+        public V remove(Object key) {
+            if(!inRange((K)key))
+                return null;
+            return PatriciaTrie.this.remove(key);
         }
 
         @SuppressWarnings("unchecked")
