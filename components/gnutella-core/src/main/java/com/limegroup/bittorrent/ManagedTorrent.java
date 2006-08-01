@@ -526,6 +526,7 @@ public class ManagedTorrent implements Torrent {
 			return false;
 		
 		_connections.add(btc);
+		_peers.remove(btc.getEndpoint());
 		if (LOG.isDebugEnabled())
 			LOG.debug("added connection " + btc.toString());
 		return true;
