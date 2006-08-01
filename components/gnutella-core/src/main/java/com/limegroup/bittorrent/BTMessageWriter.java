@@ -71,6 +71,11 @@ public class BTMessageWriter implements BTChannelWriter {
 	 */
 	private BTMessage currentMessage;
 	
+	/**
+	 * Whether the delayer should be flushed.
+	 */
+	private boolean needsFlush;
+	
 	/** A delayer to buffer messages waiting to be sent out */
 	private DelayedBufferWriter delayer;
 	
@@ -130,6 +135,12 @@ public class BTMessageWriter implements BTChannelWriter {
 				if (!sendNextMessage()) {
 					if (LOG.isDebugEnabled())
 						LOG.debug("no more messages to send on "+this);
+					
+					if (needsFlush) {
+						needsFlush = false;
+						delayer.flush();
+					}
+					
 					_channel.interest(this, false);
 					return false;
 				}
@@ -187,9 +198,6 @@ public class BTMessageWriter implements BTChannelWriter {
 	}
 	
 	private void messageArrived(BTMessage m) {
-		if (m.isUrgent())
-			delayer.setImmediateFlush(true);
-		
 		if (isPiece(m)) {
 			if (watchdog == null)
 				watchdog = new StalledUploadWatchdog(MAX_PIECE_SEND_TIME);
@@ -198,8 +206,9 @@ public class BTMessageWriter implements BTChannelWriter {
 	}
 	
 	private void messageSent(BTMessage m) {
-		if (!hasUrgentQueued())
-			delayer.setImmediateFlush(false);
+		if (m.isUrgent()) 
+			needsFlush = true;
+		
 		if (isPiece(m)) {
 			watchdog.deactivate();
 			pieceListener.pieceSent();
@@ -208,14 +217,6 @@ public class BTMessageWriter implements BTChannelWriter {
 	
 	private boolean isPiece(BTMessage m){
 		return m.getType() == BTMessage.PIECE;
-	}
-	
-	private boolean hasUrgentQueued() {
-		for (BTMessage queued : _queue) {
-			if (queued.isUrgent())
-				return true;
-		}
-		return false;
 	}
 	
 	/**

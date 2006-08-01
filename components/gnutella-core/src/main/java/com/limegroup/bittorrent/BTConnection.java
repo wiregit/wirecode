@@ -676,6 +676,10 @@ PieceSendListener, PieceReadListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requesting ranges from " + this);
 		
+		// if we still have outstanding requests, wait for them
+		if (_requesting.size() > 0) 
+			return;
+		
 		// get new ranges to request if necessary
 		while (!_torrent.isComplete() && _torrent.isActive()
 				&& _requesting.size() < MAX_REQUESTS) {

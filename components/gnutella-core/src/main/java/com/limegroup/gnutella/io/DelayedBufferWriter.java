@@ -40,9 +40,6 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     /** The last time we flushed, so we don't flush again too soon. */
     private long lastFlushTime;
     
-    /** Whether buffering is disabled */
-    private volatile boolean immediateFlush;
-
     /** Constructs a new DelayedBufferWriter whose buffer is the given size. */
     public DelayedBufferWriter(int size) {
     	this(size, MAX_TIME);
@@ -108,13 +105,6 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
         newChannel.interest(this,true);
     }
     
-    /**
-     * @param on whether this delayer should not delay writes.
-     */
-    public void setImmediateFlush(boolean on) {
-    	immediateFlush = on;
-    }
-
 
     /** Unused, Unsupported */
     public void handleIOException(IOException iox) {
@@ -137,16 +127,6 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
      * buffer is emptied or no data can be written to the sink.
      */
     public int write(ByteBuffer buffer) throws IOException {
-    	if (immediateFlush) {
-    		long now = System.currentTimeMillis();
-    		if (hasBufferedData()) {
-    			flush(now);
-    			if (hasBufferedData())
-    				return 0;
-    		} else
-    			lastFlushTime = now;
-    		return sink.write(buffer);
-    	}
     	int originalPos = buffer.position();
         while(buffer.hasRemaining()) {
             if(buf.hasRemaining()) {
@@ -213,6 +193,10 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
      * if anything was written.  THIS DOES NOT BLOCK, NOR DOES IT ENFORCE
      * THAT ALL DATA WILL BE WRITTEN, UNLIKE OutputStream.flush().
      */
+    public void flush() throws IOException {
+    	flush(System.currentTimeMillis());
+    }
+    
     private void flush(long now) throws IOException {
         buf.flip();
         InterestWriteChannel chan = sink;
