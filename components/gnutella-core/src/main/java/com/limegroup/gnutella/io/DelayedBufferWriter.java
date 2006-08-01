@@ -192,9 +192,12 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
      * Writes data to the underlying channel, remembering the time we did this
      * if anything was written.  THIS DOES NOT BLOCK, NOR DOES IT ENFORCE
      * THAT ALL DATA WILL BE WRITTEN, UNLIKE OutputStream.flush().
+     * 
+     * @return true if the buffer is now empty
      */
-    public void flush() throws IOException {
+    public boolean flush() throws IOException {
     	flush(System.currentTimeMillis());
+    	return !hasBufferedData();
     }
     
     private void flush(long now) throws IOException {

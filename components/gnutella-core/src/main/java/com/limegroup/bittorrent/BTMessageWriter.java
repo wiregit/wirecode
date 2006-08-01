@@ -134,16 +134,14 @@ public class BTMessageWriter implements BTChannelWriter {
 				
 				if (!sendNextMessage()) {
 					if (LOG.isDebugEnabled())
-						LOG.debug("no more messages to send on "+this);
+						LOG.debug("no more messages to send on "+this+" needs flush "+needsFlush);
 					
-					if (needsFlush) {
-						needsFlush = false;
-						delayer.flush();
-					}
+					if (needsFlush) 
+						needsFlush = !delayer.flush();
 					
-					_channel.interest(this, false);
+					_channel.interest(this, needsFlush);
 					return false;
-				}
+				} 
 			}
 			// this should ideally be done with gathering writes, but
 			// because somewhere in the chain we have a delayer its ok.
