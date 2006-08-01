@@ -46,7 +46,7 @@ public class KademliaSettings extends MojitoProps {
      * The number of pings to send in parallel
      */
     public static final IntSetting PARALLEL_PINGS
-        = FACTORY.createSettableIntSetting("PARALLEL_PINGS", 10, "parallel_pings", 1, 20);
+        = FACTORY.createSettableIntSetting("PARALLEL_PINGS", 15, "parallel_pings", 1, 30);
     
     /**
      * The FIND_NODE lookup timeout
