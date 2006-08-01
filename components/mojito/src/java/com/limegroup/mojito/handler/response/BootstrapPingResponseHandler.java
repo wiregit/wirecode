@@ -19,6 +19,7 @@ import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * This class pings a given number of hosts in parallel 
@@ -70,11 +71,22 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
             SocketAddress address;
             if(host instanceof Contact) {
                 Contact contact = (Contact) host;
+                
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Sending bootstrap ping to contact: " + contact);
+                }
+                
                 address = contact.getContactAddress();
                 request = context.getMessageHelper().createPingRequest(address);
                 context.getMessageDispatcher().send(contact.getNodeID(), address, request, this);
+                
             } else { //it has to be a SocketAddress
                 address = (SocketAddress) host;
+                
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Sending bootstrap ping to address: " + address);
+                }
+                
                 request = context.getMessageHelper().createPingRequest(address);
                 context.getMessageDispatcher().send(null, address, request, this);
             }
@@ -102,6 +114,10 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
             return;
         }
         
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Got bootstrap ping response from " + message.getContact());
+        }
+        
         context.setExternalSocketAddress(externalAddress);
         context.addEstimatedRemoteSize(response.getEstimatedSize());
         
@@ -114,6 +130,10 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
     protected synchronized void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         if(finished) {
             return;
+        }
+        
+        if(LOG.isErrorEnabled()) {
+            LOG.error("Bootstrap error: "+e);
         }
         
         if(e instanceof SocketException && !shouldStop()) {
@@ -139,8 +159,12 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
             return;
         }
         
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Timeout on bootstrap ping to " + ContactUtils.toString(nodeId,dst));
+        }
+        
         failedPings++;
-        assert (failedHosts.contains(dst));
+        assert (!failedHosts.contains(dst));
         failedHosts.add(dst);
         activePings--;
         
