@@ -230,7 +230,7 @@ public class NBThrottle implements Throttle {
                 	} finally {
                 		listener.releaseBandwidth();
                 	}
-                	if (_available < MINIMUM_TO_GIVE)
+                	if (_write && _available < MINIMUM_TO_GIVE)
                 		break;
                 }
             }
