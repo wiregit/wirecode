@@ -239,5 +239,21 @@ public class IPList {
         public int bitsPerElement() {
             return 1;
         }
+
+        public boolean isPrefix(IP prefix, int offset, int length, IP key) {
+            int addr1 = prefix.addr & prefix.mask;
+            int addr2 = key.addr & key.mask;
+            addr1 = addr1 << offset;
+            
+            int mask = 0;
+            for(int i = 0; i < length; i++) {
+                mask |= (0x1 << i);
+            }
+            
+            addr1 &= mask;
+            addr2 &= mask;
+            
+            return addr1 == addr2;
+        }
     }
 }

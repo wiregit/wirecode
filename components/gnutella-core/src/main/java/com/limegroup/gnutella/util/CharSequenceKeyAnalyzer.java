@@ -69,5 +69,13 @@ public class CharSequenceKeyAnalyzer implements KeyAnalyzer<CharSequence> {
     public int bitsPerElement() {
         return 16;
     }
+
+    public boolean isPrefix(CharSequence prefix, int offset, int length, CharSequence key) {
+        if(offset % 16 != 0 || length % 16 != 0)
+            throw new IllegalArgumentException("Cannot determine prefix outside of character boundaries");
+        String s1 = prefix.subSequence(offset / 16, length / 16).toString();
+        String s2 = key.toString();
+        return s2.startsWith(s1);
+    }
 }
 

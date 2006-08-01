@@ -6,9 +6,11 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
@@ -53,7 +55,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         assertNull(intTrie.put(1, "One"));
     }
     
-    public void testCeilEntry() {
+    public void testCeilingEntry() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
         charTrie.put('c', "c");
         charTrie.put('p', "p");
@@ -92,7 +94,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         };
         
         for(int i = 0; i < results.length; i++) {
-            Map.Entry<Character, String> found = charTrie.getCeilEntry((Character)results[i]);
+            Map.Entry<Character, String> found = charTrie.ceilingEntry((Character)results[i]);
             assertNotNull(found);
             assertEquals(results[i], found.getKey());
             assertEquals(results[++i], found.getValue());
@@ -107,44 +109,44 @@ public class PatriciaTrieTest extends BaseTestCase {
         charTrie.remove('m');
         charTrie.remove('u');
         
-        Map.Entry<Character, String> found = charTrie.getCeilEntry('u');
+        Map.Entry<Character, String> found = charTrie.ceilingEntry('u');
         assertNotNull(found);
         assertEquals((Character)'v', found.getKey());
         
-        found = charTrie.getCeilEntry('a');
+        found = charTrie.ceilingEntry('a');
         assertNotNull(found);
         assertEquals((Character)'b', found.getKey());
         
-        found = charTrie.getCeilEntry('z');
+        found = charTrie.ceilingEntry('z');
         assertNull(found);
         
-        found = charTrie.getCeilEntry('q');
+        found = charTrie.ceilingEntry('q');
         assertNotNull(found);
         assertEquals((Character)'r', found.getKey());
         
-        found = charTrie.getCeilEntry('l');
+        found = charTrie.ceilingEntry('l');
         assertNotNull(found);
         assertEquals((Character)'n', found.getKey());
         
-        found = charTrie.getCeilEntry('p');
+        found = charTrie.ceilingEntry('p');
         assertNotNull(found);
         assertEquals((Character)'r', found.getKey());
         
-        found = charTrie.getCeilEntry('m');
+        found = charTrie.ceilingEntry('m');
         assertNotNull(found);
         assertEquals((Character)'n', found.getKey());
         
-        found = charTrie.getCeilEntry('\0');
+        found = charTrie.ceilingEntry('\0');
         assertNotNull(found);
         assertEquals((Character)'b', found.getKey());
         
         charTrie.put('\0', "");
-        found = charTrie.getCeilEntry('\0');
+        found = charTrie.ceilingEntry('\0');
         assertNotNull(found);
         assertEquals((Character)'\0', found.getKey());      
     }
     
-    public void testPrecedingEntry() {
+    public void testLowerEntry() {
         PatriciaTrie<Character, String> charTrie = new PatriciaTrie<Character, String>(new AlphaKeyCreator());
         charTrie.put('c', "c");
         charTrie.put('p', "p");
@@ -184,7 +186,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         
         for(int i = 0; i < results.length; i+=2) {
             //System.out.println("Looking for: " + results[i]);
-            Map.Entry<Character, String> found = charTrie.getPrecedingEntry((Character)results[i]);
+            Map.Entry<Character, String> found = charTrie.lowerEntry((Character)results[i]);
             if(i == 0) {
                 assertNull(found);
             } else {
@@ -194,7 +196,7 @@ public class PatriciaTrieTest extends BaseTestCase {
             }
         }
 
-        Map.Entry<Character, String> found = charTrie.getPrecedingEntry((char)('z' + 1));
+        Map.Entry<Character, String> found = charTrie.lowerEntry((char)('z' + 1));
         assertNotNull(found);
         assertEquals((Character)'z', found.getKey());
         
@@ -208,50 +210,50 @@ public class PatriciaTrieTest extends BaseTestCase {
         charTrie.remove('m');
         charTrie.remove('u');
         
-        found = charTrie.getPrecedingEntry('u');
+        found = charTrie.lowerEntry('u');
         assertNotNull(found);
         assertEquals((Character)'t', found.getKey());
         
-        found = charTrie.getPrecedingEntry('v');
+        found = charTrie.lowerEntry('v');
         assertNotNull(found);
         assertEquals((Character)'t', found.getKey());
         
-        found = charTrie.getPrecedingEntry('a');
+        found = charTrie.lowerEntry('a');
         assertNull(found);
         
-        found = charTrie.getPrecedingEntry('z');
+        found = charTrie.lowerEntry('z');
         assertNotNull(found);
         assertEquals((Character)'y', found.getKey());
         
-        found = charTrie.getPrecedingEntry((char)('z'+1));
+        found = charTrie.lowerEntry((char)('z'+1));
         assertNotNull(found);
         assertEquals((Character)'y', found.getKey());
         
-        found = charTrie.getPrecedingEntry('q');
+        found = charTrie.lowerEntry('q');
         assertNotNull(found);
         assertEquals((Character)'o', found.getKey());
         
-        found = charTrie.getPrecedingEntry('r');
+        found = charTrie.lowerEntry('r');
         assertNotNull(found);
         assertEquals((Character)'o', found.getKey());
         
-        found = charTrie.getPrecedingEntry('p');
+        found = charTrie.lowerEntry('p');
         assertNotNull(found);
         assertEquals((Character)'o', found.getKey());
         
-        found = charTrie.getPrecedingEntry('l');
+        found = charTrie.lowerEntry('l');
         assertNotNull(found);
         assertEquals((Character)'k', found.getKey());
         
-        found = charTrie.getPrecedingEntry('m');
+        found = charTrie.lowerEntry('m');
         assertNotNull(found);
         assertEquals((Character)'k', found.getKey());
         
-        found = charTrie.getPrecedingEntry('\0');
+        found = charTrie.lowerEntry('\0');
         assertNull(found);
         
         charTrie.put('\0', "");
-        found = charTrie.getPrecedingEntry('\0');
+        found = charTrie.lowerEntry('\0');
         assertNull(found);      
     }
     
@@ -626,7 +628,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         }
     }
     
-    public void testVariableLengthKeys() {
+    public void testPrefixedBy() {
         PatriciaTrie<String, String> trie 
             = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
         
@@ -641,45 +643,206 @@ public class PatriciaTrieTest extends BaseTestCase {
             trie.put(key, key);
         }
         
-        SortedMap map = trie.getPrefixedBy("Al");
-        System.out.println("For Al: " + map);
+        SortedMap<String, String> map;
+        Iterator<String> iterator;
+        Iterator<Map.Entry<String, String>> entryIterator;
+        Map.Entry<String, String> entry;
+        
+        map = trie.getPrefixedBy("Al");
+        assertEquals(8, map.size());
+        assertEquals("Alabama", map.firstKey());
+        assertEquals("Alliese", map.lastKey());
+        assertEquals("Albertoo", map.get("Albertoo"));
+        assertNotNull(trie.get("Xavier"));
+        assertNull(map.get("Xavier"));
+        assertNull(trie.get("Alice"));
+        assertNull(map.get("Alice"));
+        iterator = map.values().iterator();
+        assertEquals("Alabama", iterator.next());
+        assertEquals("Albert", iterator.next());
+        assertEquals("Alberto", iterator.next());
+        assertEquals("Albertoo", iterator.next());
+        assertEquals("Alberts", iterator.next());
+        assertEquals("Alien", iterator.next());
+        assertEquals("Allie", iterator.next());
+        assertEquals("Alliese", iterator.next());
+        assertFalse(iterator.hasNext());
         
         map = trie.getPrefixedBy("Albert");
-        System.out.println("For Albert: " + map);
+        iterator = map.keySet().iterator();
+        assertEquals("Albert", iterator.next());
+        assertEquals("Alberto", iterator.next());
+        assertEquals("Albertoo", iterator.next());
+        assertEquals("Alberts", iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(4, map.size());
+        assertEquals("Albert", map.firstKey());
+        assertEquals("Alberts", map.lastKey());
+        assertNull(trie.get("Albertz"));
+        map.put("Albertz", "Albertz");
+        assertEquals("Albertz", trie.get("Albertz"));
+        assertEquals(5, map.size());
+        assertEquals("Albertz", map.lastKey());
+        iterator = map.keySet().iterator();
+        assertEquals("Albert", iterator.next());
+        assertEquals("Alberto", iterator.next());
+        assertEquals("Albertoo", iterator.next());
+        assertEquals("Alberts", iterator.next());
+        assertEquals("Albertz", iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals("Albertz", map.remove("Albertz"));
         
         map = trie.getPrefixedBy("Alberto");
-        System.out.println("For Alberto: " + map);
+        assertEquals(2, map.size());
+        assertEquals("Alberto", map.firstKey());
+        assertEquals("Albertoo", map.lastKey());
+        entryIterator = map.entrySet().iterator();
+        entry = entryIterator.next();
+        assertEquals("Alberto", entry.getKey());
+        assertEquals("Alberto", entry.getValue());
+        entry = entryIterator.next();
+        assertEquals("Albertoo", entry.getKey());
+        assertEquals("Albertoo", entry.getValue());
+        assertFalse(entryIterator.hasNext());
+        trie.put("Albertoad", "Albertoad");
+        assertEquals(3, map.size());
+        assertEquals("Alberto", map.firstKey());
+        assertEquals("Albertoo", map.lastKey());
+        entryIterator = map.entrySet().iterator();
+        entry = entryIterator.next();
+        assertEquals("Alberto", entry.getKey());
+        assertEquals("Alberto", entry.getValue());
+        entry = entryIterator.next();
+        assertEquals("Albertoad", entry.getKey());
+        assertEquals("Albertoad", entry.getValue());
+        entry = entryIterator.next();
+        assertEquals("Albertoo", entry.getKey());
+        assertEquals("Albertoo", entry.getValue());
+        assertFalse(entryIterator.hasNext());
+        assertEquals("Albertoo", trie.remove("Albertoo"));
+        assertEquals("Alberto", map.firstKey());
+        assertEquals("Albertoad", map.lastKey());
+        assertEquals(2, map.size());
+        entryIterator = map.entrySet().iterator();
+        entry = entryIterator.next();
+        assertEquals("Alberto", entry.getKey());
+        assertEquals("Alberto", entry.getValue());
+        entry = entryIterator.next();
+        assertEquals("Albertoad", entry.getKey());
+        assertEquals("Albertoad", entry.getValue());
+        assertFalse(entryIterator.hasNext());
+        assertEquals("Albertoad", trie.remove("Albertoad"));
+        trie.put("Albertoo", "Albertoo");
         
         map = trie.getPrefixedBy("X");
-        System.out.println("For X: " + map);
+        assertEquals(2, map.size());
+        assertFalse(map.containsKey("Albert"));
+        assertTrue(map.containsKey("Xavier"));
+        assertFalse(map.containsKey("Xalan"));
+        iterator = map.values().iterator();
+        assertEquals("Xavier", iterator.next());
+        assertEquals("XyZ", iterator.next());
+        assertFalse(iterator.hasNext());
         
         map = trie.getPrefixedBy("An");
-        System.out.println("For An: " + map);
+        assertEquals(1, map.size());
+        assertEquals("Anna", map.firstKey());
+        assertEquals("Anna", map.lastKey());
+        iterator = map.keySet().iterator();
+        assertEquals("Anna", iterator.next());
+        assertFalse(iterator.hasNext());
         
         map = trie.getPrefixedBy("Ban");
-        System.out.println("For Ban: " + map);
+        assertEquals(1, map.size());
+        assertEquals("Banane", map.firstKey());
+        assertEquals("Banane", map.lastKey());
+        iterator = map.keySet().iterator();
+        assertEquals("Banane", iterator.next());
+        assertFalse(iterator.hasNext());
         
         map = trie.getPrefixedBy("Am");
-        System.out.println("For Am: " + map);
+        assertFalse(map.isEmpty());
+        assertEquals(3, map.size());
+        assertEquals("Amber", trie.remove("Amber"));
+        iterator = map.keySet().iterator();
+        assertEquals("Amma", iterator.next());
+        assertEquals("Ammun", iterator.next());
+        assertFalse(iterator.hasNext());
+        iterator = map.keySet().iterator();
+        map.put("Amber", "Amber");
+        assertEquals(3, map.size());
+        try {
+            iterator.next();
+            fail("CME expected");
+        } catch(ConcurrentModificationException expected) {}
+        assertEquals("Amber", map.firstKey());
+        assertEquals("Ammun", map.lastKey());
         
         map = trie.getPrefixedBy("Ak");
-        System.out.println("For Ak: " + map);
+        assertEquals(2, map.size());
+        assertEquals("Akka", map.firstKey());
+        assertEquals("Akko", map.lastKey());
+        map.put("Ak", "Ak");
+        assertEquals("Ak", map.firstKey());
+        assertEquals("Akko", map.lastKey());
+        assertEquals(3, map.size());
+        trie.put("Al", "Al");
+        assertEquals(3, map.size());
+        assertEquals("Ak", map.remove("Ak"));
+        assertEquals("Akka", map.firstKey());
+        assertEquals("Akko", map.lastKey());
+        assertEquals(2, map.size());
+        iterator = map.keySet().iterator();
+        assertEquals("Akka", iterator.next());
+        assertEquals("Akko", iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals("Al", trie.remove("Al"));
         
         map = trie.getPrefixedBy("Ab");
-        System.out.println("For Ab: " + map);
+        assertTrue(map.isEmpty());
+        assertEquals(0, map.size());
+        try {
+            Object o = map.firstKey();
+            fail("got a first key: " + o);
+        } catch(NoSuchElementException nsee) {}
+        try {
+            Object o = map.lastKey();
+            fail("got a last key: " + o);
+        } catch(NoSuchElementException nsee) {}
+        iterator = map.values().iterator();
+        assertFalse(iterator.hasNext());
         
         map = trie.getPrefixedBy("Albertooo");
-        System.out.println("For Albertooo: " + map);
+        assertTrue(map.isEmpty());
+        assertEquals(0, map.size());
+        try {
+            Object o = map.firstKey();
+            fail("got a first key: " + o);
+        } catch(NoSuchElementException nsee) {}
+        try {
+            Object o = map.lastKey();
+            fail("got a last key: " + o);
+        } catch(NoSuchElementException nsee) {}
+        iterator = map.values().iterator();
+        assertFalse(iterator.hasNext());
         
-        map = trie.getPrefixedBy("New");
-        System.out.println("First time for New: " + map);
-        trie.put("New1", "New1");
-        trie.put("New Two", "New Two");
-        trie.put("New 3", "New Three");
-        trie.put("Not New", "Not New");
-        System.out.println("Second time for New: " + map);
+        map = trie.getPrefixedBy("");
+        assertSame(trie, map); // stricter than necessary, but a good check
+        
+        map = trie.getPrefixedBy("\0");
+        assertTrue(map.isEmpty());
+        assertEquals(0, map.size());
+        try {
+            Object o = map.firstKey();
+            fail("got a first key: " + o);
+        } catch(NoSuchElementException nsee) {}
+        try {
+            Object o = map.lastKey();
+            fail("got a last key: " + o);
+        } catch(NoSuchElementException nsee) {}
+        iterator = map.values().iterator();
+        assertFalse(iterator.hasNext());
     }
-
     
     private static class TestCursor implements Cursor<Object, Object> {
         private List<Object> keys;
@@ -807,6 +970,22 @@ public class PatriciaTrieTest extends BaseTestCase {
         public int bitsPerElement() {
             return 1;
         }
+        
+        public boolean isPrefix(Integer prefix, int offset, int length, Integer key) {
+            int addr1 = prefix.intValue();
+            int addr2 = key.intValue();
+            addr1 = addr1 << offset;
+            
+            int mask = 0;
+            for(int i = 0; i < length; i++) {
+                mask |= (0x1 << i);
+            }
+            
+            addr1 &= mask;
+            addr2 &= mask;
+            
+            return addr1 == addr2;
+        }
     }
 
     private static class AlphaKeyCreator implements KeyAnalyzer<Character> {
@@ -860,6 +1039,22 @@ public class PatriciaTrieTest extends BaseTestCase {
 
         public int bitsPerElement() {
             return 1;
+        }
+        
+        public boolean isPrefix(Character prefix, int offset, int length, Character key) {
+            int addr1 = prefix;
+            int addr2 = key;
+            addr1 = addr1 << offset;
+            
+            int mask = 0;
+            for(int i = 0; i < length; i++) {
+                mask |= (0x1 << i);
+            }
+            
+            addr1 &= mask;
+            addr2 &= mask;
+            
+            return addr1 == addr2;
         }
         
         
