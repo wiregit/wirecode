@@ -259,19 +259,17 @@ class BucketNode implements Bucket {
             }
         }
         
-        if(!isLiveFull()) {
+        if(!isLiveFull() && !cache.isEmpty()) {
             //insert MRS cached contacts (only live ones)
             List<Contact> contacts = new ArrayList<Contact>(getCachedContacts());
-            if(!contacts.isEmpty()) {
-                //reverse traversal of the list
-                for(int i = contacts.size()-1; i>=0 && !isLiveFull(); i--) {
-                    Contact node = contacts.get(i);
-                    if(node.isAlive()) {
-                        nodeTrie.put(node.getNodeID(), node);
-                    } 
-                    boolean removed = removeCachedContact(node.getNodeID());
-                    assert (removed);
-                }
+            //reverse traversal of the list
+            for(int i = contacts.size()-1; i>=0 && !isLiveFull(); i--) {
+                Contact node = contacts.get(i);
+                if(node.isAlive()) {
+                    nodeTrie.put(node.getNodeID(), node);
+                } 
+                boolean removed = removeCachedContact(node.getNodeID());
+                assert (removed);
             }
         }
     }
