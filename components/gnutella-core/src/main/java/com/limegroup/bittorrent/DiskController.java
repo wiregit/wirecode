@@ -1,0 +1,58 @@
+package com.limegroup.bittorrent;
+
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * Interface describing functionality for performing reads and 
+ * writes to multiple files on disk.
+ */
+interface DiskController {
+
+	public void write(long startOffset, byte[] data) throws IOException;
+
+	/**
+	 * @return true if this disk storage is open
+	 */
+	public boolean isOpen();
+
+	/**
+	 * 
+	 * @param isVerifying if the file should force verification.
+	 * @param complete true if the torrent is complete
+	 * @return List of <tt>TorrentFile</tt> that should be verified,
+	 * null if none
+	 * @throws IOException if a problem occurs.
+	 */
+	public List<TorrentFile> open(boolean complete, boolean isVerifying)
+			throws IOException;
+
+	/**
+	 * closes all files under this controller
+	 */
+	public void close();
+
+	/**
+	 * close the given file and reopen it for reading
+	 */
+	public void setReadOnly(TorrentFile completed);
+
+	/**
+	 * 
+	 * @param position
+	 *            the position in the file where to start reading
+	 * @param buf
+	 *            the array to write the read bytes to
+	 * @param offset
+	 *            the offset in the array where to start storing the bytes read
+	 * @param length
+	 *            the number of bytes to read to the array
+	 * @param flush 
+	 *            whether to flush any changes before reading
+	 * @return
+	 * @throws IOException
+	 */
+	public int read(long position, byte[] buf, int offset, int length,
+			boolean flush) throws IOException;
+
+}

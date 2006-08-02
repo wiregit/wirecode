@@ -1,10 +1,7 @@
 package com.limegroup.bittorrent;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -20,7 +17,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
@@ -28,8 +24,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.AndView;
 import com.limegroup.gnutella.util.BitField;
 import com.limegroup.gnutella.util.BitFieldSet;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.BitSet;
@@ -69,17 +63,6 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * The files of this torrent as an array
 	 */
 	private final List<TorrentFile> _files;
-
-	/**
-	 * The instances RandomAccessFile for all files contained in this torrent
-	 * LOCKING: this reference as well as the elements of the array 
-	 */
-	private RandomAccessFile[] _fos = null;
-	
-	/**
-	 * a marker that the current file is currently opening.
-	 */
-	private static final RandomAccessFile[] OPENING = new RandomAccessFile[0];
 
 	/**
 	 * Mapping of the index of each partial block and the written ranges within 
@@ -136,6 +119,11 @@ class VerifyingFolder implements TorrentDiskManager {
 	
 	/** Whether the files on disk are currently being verified */
 	private volatile boolean isVerifying;
+	
+	/**
+	 * Disk controller for performing the reads and writes.
+	 */
+	private DiskController diskController;
 
 	/**
 	 * constructs instance of this
@@ -246,27 +234,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	throws IOException {
 		
 		long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
-		int written = 0;
-		int filesSize = _files.size();
-		for (int i = 0; i < filesSize && written < buf.length; i++) {
-			TorrentFile current = _files.get(i);
-			if (startOffset < current.length()) {
-				RandomAccessFile currentFile;
-				synchronized(this) {
-					if (!isOpen())
-						throw new IOException("file closed");
-					currentFile = _fos[i];
-				}
-				currentFile.seek(startOffset);
-				int toWrite = (int) Math.min(current.length()- startOffset,
-						buf.length - written);
-				
-				currentFile.write(buf, written, toWrite);
-				startOffset += toWrite;
-				written += toWrite;
-			} 
-			startOffset -= current.length();
-		}
+		diskController.write(startOffset, buf);
 		
 		synchronized(this) {
 			pendingRanges.removeInterval(in);
@@ -323,7 +291,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		long offset = (long)pieceNum * _info.getPieceLength();
 		while (read < pieceSize) {
 			
-			int readNow = read(offset, buf, 0, buf.length, true);
+			int readNow = diskController.read(offset, buf, 0, buf.length, true);
 			if (readNow == 0)
 				return false;
 			
@@ -389,29 +357,8 @@ class VerifyingFolder implements TorrentDiskManager {
 					break;
 				}
 			}
-			if (done) {
-				// TODO: decide if files should be moved to the save
-				// location as they are completed.. cool but not trivial
-				try {
-					int index = _files.indexOf(file);
-					RandomAccessFile rf;
-					synchronized(this) {
-						if (!isOpen()) 
-							return;
-						rf = _fos[index];
-						_fos[index] = null;
-					}
-					rf.close();
-					rf = new RandomAccessFile(file.getPath(), "r");
-					synchronized(this) {
-						if(!isOpen())
-							return;
-						_fos[index] = rf;
-					}
-				} catch (FileNotFoundException bs) {
-					ErrorService.error(bs);
-				} catch (IOException ignored){}
-			}
+			if (done) 
+				diskController.setReadOnly(file);
 		}
 	}
 	
@@ -427,84 +374,27 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * @see com.limegroup.bittorrent.TorrentFileManager#open(com.limegroup.bittorrent.ManagedTorrent)
 	 */
 	public void open(final ManagedTorrent torrent) throws IOException {
-		synchronized(this) {
-			if (_fos != null)
-				throw new IOException("Files already open(ing)!");
-			_fos = OPENING;
-		}
-		RandomAccessFile []fos = new RandomAccessFile[_files.size()];
+		diskController = new RAFDiskController(_files);
 		
 		this.torrent = torrent;
 		storedException = null;
 		
+		boolean wasVerifying = isVerifying;
 		// whether the data on disk should be re-verified
 		isVerifying |= (getBlockSize() == 0);
 		
-		// position of the first byte of a file in the torrent
-		long pos = 0;
-		
-		List<TorrentFile> filesToVerify = null;
-		for (int i = 0; i < _files.size(); i++) {
-			TorrentFile file = _files.get(i);
-
-			// if the file is complete, just open it for reading and be done
-			// with it
-			if (isComplete()) {
-				LOG.info("opening torrent in read-only mode");
-				fos[i] = new RandomAccessFile(file, "r");
-			} else {
-				LOG.info("opening torrent in read-write");
-				if (!file.exists()) {
-
-					// Ensure that the directory this file is in exists & is
-					// writeable.
-					// TODO: make sure this doesn't allow trickery with names
-					File parentFile = file.getParentFile();
-					if (parentFile != null) {
-						parentFile.mkdirs();
-						FileUtils.setWriteable(parentFile);
-					}
-					
-					file.createNewFile();
-					
-					// a file is missing, so this must be a new download.
-					// if it was not, we need to reverify every file.
-					if (!isVerifying) {
-						// pretend nothing was downloaded
-						synchronized(this) {
-							partialBlocks.clear(); 
-							verifiedBlocks.clear();
-						}
-						isVerifying = true;
-						i = -1; // restart the loop
-						continue;
-					}
-
-				} 
-				
-				FileUtils.setWriteable(file);
-				fos[i] = new RandomAccessFile(file, "rw");
-				
-				// if a file exists, try to verify it
-				if (isVerifying && file.length() > 0) {
-					if (filesToVerify == null)
-						filesToVerify = new ArrayList<TorrentFile>(_files.size());
-					filesToVerify.add(file);
-				}
-			}
-
-			// increment pos to point to the first byte of the next file
-			pos += file.length();
-		}
-		
-		synchronized(this) {
-			Assert.that(_fos == OPENING);
-			_fos = fos;
-		}
+		List<TorrentFile> filesToVerify = diskController.open(isComplete(), isVerifying);
 		
 		// verify any files that needed verification
 		if (filesToVerify != null) {
 			isVerifying = true;
+			// pretend nothing was downloaded
+			if (!wasVerifying) {
+				synchronized(this) {
+					verifiedBlocks.clear();
+					partialBlocks.clear();
+				}
+			}
 			verifyFiles(filesToVerify);
 			if (torrent != null) {
 				VERIFY_QUEUE.invokeLater(new Runnable(){
@@ -536,18 +426,10 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	public void close() {
 		LOG.debug("closing the file");
-		final RandomAccessFile [] fos;
 		synchronized(this) {
-			if (!isOpen())
-				return;
-			fos = _fos;
-			_fos = null;
 			pendingRanges.clear();
 		}
-		
-		// close the files
-		for (RandomAccessFile f : fos)
-			IOUtils.close(f);
+		diskController.close();
 		
 		torrent = null;
 		// kill all jobs for this torrent
@@ -559,8 +441,8 @@ class VerifyingFolder implements TorrentDiskManager {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.TorrentFileManager#isOpen()
 	 */
-	public synchronized boolean isOpen() {
-		return _fos != null && _fos != OPENING;
+	public boolean isOpen() {
+		return diskController != null & diskController.isOpen();
 	}
 
 	/* (non-Javadoc)
@@ -595,7 +477,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			byte[] buf = new byte[length];
 			try {
 				do {
-					offset += read(position + offset, buf, offset, length
+					offset += diskController.read(position + offset, buf, offset, length
 							- offset, false);
 				} while (offset < length);
 			} catch (IOException bad) {
@@ -614,65 +496,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		if (t != null)
 			t.diskExceptionHappened();
 	}
-	/**
-	 * reads a number of bytes from a torrent must obtain monitor 
-	 * before reading if you want to make sure the VerifyingFolder can't be
-	 * closed while you are trying to read
-	 * 
-	 * @param position
-	 *            the position in the file where to start reading
-	 * @param buf
-	 *            the array to write the read bytes to
-	 * @param offset
-	 *            the offset in the array where to start storing the bytes read
-	 * @param length
-	 *            the number of bytes to read to the array
-	 * @param flush 
-	 *            whether to flush any changes before reading
-	 * @return
-	 * @throws IOException
-	 */
-	private int read(long position, byte[] buf, int offset,
-			int length, boolean flush) throws IOException {
-		
-		if (position < 0)
-			throw new IllegalArgumentException("cannot seek negative position "+position);
-		else if (offset + length > buf.length)
-			throw new ArrayIndexOutOfBoundsException(
-					"buffer to small to store supplied number of bytes");
-		
-		int read = 0;
-		for (int i = 0; i < _files.size() && read < length; i++) {
-			File f = _files.get(i);
-			while (position < f.length() && read < length) {
-				RandomAccessFile currentFile;
-				synchronized(this) {
-					if (!isOpen())
-						throw new IOException("file closed");
-					currentFile = _fos[i];
-				}
-				Assert.that(currentFile != null, "file being read & verified at the same time");
-				
-				if (flush)
-					currentFile.getChannel().force(false);
-				
-				long currentLength = currentFile.length();
-				if (currentLength < f.length() && position >= currentLength)
-					return read;
-				int toRead = (int) Math.min(currentLength - position, length
-						- read);
-				currentFile.seek(position);
-				int t_read = currentFile.read(buf, read + offset, toRead);
-				if (t_read == -1)
-					throw new IOException();
-				position += t_read;
-				read += t_read;
-			}
-			position -= f.length();
-		}
-		return read;
-	}
-
+	
 	/**
 	 * returns a random available range that has preferrably not yet been
 	 * requested
