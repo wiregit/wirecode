@@ -31,7 +31,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.event.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;

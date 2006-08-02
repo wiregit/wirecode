@@ -56,12 +56,10 @@ import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.db.KeyValuePublisher;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.DHTEventListener;
-import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreEvent;
-import com.limegroup.mojito.event.exceptions.DHTException;
-import com.limegroup.mojito.event.exceptions.NotBootstrappedException;
+import com.limegroup.mojito.exceptions.NotBootstrappedException;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.manager.BootstrapManager;
@@ -385,7 +383,7 @@ public class Context implements MojitoDHT {
         // --- DOES NOT CHANGE THE PORT! ---
         
         InetAddress externalAddress = ((InetSocketAddress)externalSocketAddress).getAddress();
-        int externalPort = ((InetSocketAddress)externalSocketAddress).getPort();
+        //int externalPort = ((InetSocketAddress)externalSocketAddress).getPort();
         
         InetAddress currentAddress = ((InetSocketAddress)localNode.getContactAddress()).getAddress();
         int currentPort = ((InetSocketAddress)localNode.getContactAddress()).getPort();

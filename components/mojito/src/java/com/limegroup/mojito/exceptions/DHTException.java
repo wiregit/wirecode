@@ -17,13 +17,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.event.exceptions;
+package com.limegroup.mojito.exceptions;
 
 import java.net.SocketAddress;
 
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
 
+@SuppressWarnings("serial")
 public class DHTException extends Exception {
 
     private KUID nodeId;

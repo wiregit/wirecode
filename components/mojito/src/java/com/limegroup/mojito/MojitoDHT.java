@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 

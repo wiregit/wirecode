@@ -30,9 +30,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.LockTimeoutException;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.ContactUtils;
 
@@ -160,6 +162,15 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      */
     public int getMaxErrors() {
         return maxErrors;
+    }
+    
+    /**
+     * The maximum time we're waiting on a lock. Subclasses
+     * may overwrite this method to customize the timeout.
+     */
+    protected long getLockTimeout() {
+        return Math.max((long)(timeout() * 1.5f), 
+                ContextSettings.WAIT_ON_LOCK.getValue());
     }
     
     /**
@@ -304,7 +315,12 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
                 }
                 
                 if (!done && !cancelled) {
-                    lock.wait();
+                    long timeout = getLockTimeout();
+                    lock.wait(timeout);
+                    
+                    if (!done && !cancelled) {
+                        ex = new LockTimeoutException("Timeout: " + timeout);
+                    }
                 }
     
                 if (!done) {

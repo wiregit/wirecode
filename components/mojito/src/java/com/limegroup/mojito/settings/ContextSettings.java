@@ -67,6 +67,9 @@ public class ContextSettings extends MojitoProps {
     public static final IntSetting VENDOR
         = FACTORY.createIntSetting("VENDOR", parseVendorID("LIME"));
     
+    public static final LongSetting WAIT_ON_LOCK
+        = FACTORY.createLongSetting("WAIT_ON_LOCK", 3L*60L*1000L);
+    
     public static int parseVendorID(String vendorId) {
         char[] chars = vendorId.toCharArray();
         if (chars.length != 4) {
