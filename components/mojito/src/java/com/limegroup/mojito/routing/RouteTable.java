@@ -108,6 +108,11 @@ public interface RouteTable {
     public void clear();
     
     /**
+     * Clears all unknown and dead nodes from the routing table
+     */
+    public void purge();
+    
+    /**
      * Returns the number of live and cached Contacts in the Route Table
      */
     public int size();

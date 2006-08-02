@@ -41,6 +41,8 @@ import com.limegroup.mojito.event.exceptions.BootstrapTimeoutException;
 import com.limegroup.mojito.event.exceptions.DHTException;
 import com.limegroup.mojito.handler.response.BootstrapPingResponseHandler;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
+import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
@@ -49,6 +51,15 @@ import com.limegroup.mojito.util.BucketUtils;
 public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
     private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
+    
+	/**
+	 * The maximum number of nodes that can fail per lookup (until the timeout)
+	 * 
+	 */
+	private static final int MAX_NODE_FAILED_PER_LOOKUP = 
+		(int)((KademliaSettings.NODE_LOOKUP_TIMEOUT.getValue()
+				 / NetworkSettings.MAX_TIMEOUT.getValue())
+				 * KademliaSettings.LOOKUP_PARAMETER.getValue()); 
     
     private Object lock = new Object();
     
@@ -76,12 +87,13 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
     public DHTFuture<BootstrapEvent> bootstrap() {
         synchronized(lock) {
-            if (future == null) {
-                Bootstrapper bootstrapper = new Bootstrapper();
-                future = new BootstrapFuture(bootstrapper);
-                
-                context.execute(future);
+        	if(future != null) {
+            	future.cancel(true);
             }
+            Bootstrapper bootstrapper = new Bootstrapper();
+            future = new BootstrapFuture(bootstrapper);
+            
+            context.execute(future);
             
             return future;
         }
@@ -89,14 +101,15 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
     public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostSet) {
         synchronized (lock) {
-            if (future == null) {
-                // Preserve the order of the Set
-                Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>(hostSet);
-                Bootstrapper bootstrapper = new Bootstrapper(copy);
-                future = new BootstrapFuture(bootstrapper);
-                
-                context.execute(future);
+            if(future != null) {
+            	future.cancel(true);
             }
+            // Preserve the order of the Set
+            Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>(hostSet);
+            Bootstrapper bootstrapper = new Bootstrapper(copy);
+            future = new BootstrapFuture(bootstrapper);
+            
+            context.execute(future);
             
             return future;
         }
@@ -108,13 +121,15 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
      * Lookup radnom IDs
      */
     private class Bootstrapper implements Callable<BootstrapEvent> {
-        
+    	
         private Set<SocketAddress> hostSet = null;
         
         private long start = 0L;
         private long phaseOneStart = 0L;
         private long phaseTwoStart = 0L;
         private long stop = 0L;
+        
+        private boolean retriedBootstrap;
         
         private List<SocketAddress> failed = new ArrayList<SocketAddress>();
         
@@ -148,20 +163,21 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             future.fireResult(new BootstrapEvent(Type.PING_SUCCEEDED));
             phaseOneStart = System.currentTimeMillis();
-            phaseOne(node);
-            
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Bootstraping phase 2 from node: "+node);
-            }
-            
-            phaseTwoStart = System.currentTimeMillis();
-            boolean foundNewContacts = phaseTwo(node);
+
+            boolean foundNewContacts = startBootstrapLookups(node);
             
             stop = System.currentTimeMillis();
             
             long phaseZeroTime = phaseOneStart - start;
             long phaseOneTime = phaseTwoStart - phaseOneStart;
             long phaseTwoTime = stop - phaseTwoStart;
+            
+            if(!foundNewContacts) {
+            	if(LOG.isDebugEnabled()) {
+                    LOG.debug("Bootstrap failed: did not receive any response from phase 2!");
+                }
+                return new BootstrapEvent(failed, phaseOneTime+phaseTwoTime+phaseZeroTime);
+            }
             
             /*long totalTime = stop - start;
             StringBuilder buffer = new StringBuilder();
@@ -174,6 +190,18 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             bootstrapped = true;
             return new BootstrapEvent(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
+        }
+        
+        private boolean startBootstrapLookups(Contact node) throws Exception{
+        	
+            phaseOne(node);
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Bootstraping phase 2 from node: "+node);
+            }
+            
+            phaseTwoStart = System.currentTimeMillis();
+            return phaseTwo(node);
         }
         
         /**
@@ -234,19 +262,54 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         
         /**
          * Refresh all Buckets (Phase two)
+         * 
+         * When we detect that the routing table is stale, we purge it
+         * and start the bootstrap all over again. 
+         * A stale routing table can be detected by a high number of failures
+         * during the lookup (alive hosts to expected result set size ratio).
          */
         private boolean phaseTwo(Contact node) throws Exception {
             boolean foundNewContacts = false;
+            int failures = 0;
+            
             List<KUID> randomId = context.getRouteTable().getRefreshIDs(true);
             for (KUID nodeId : randomId) {
                 FindNodeResponseHandler handler 
                     = new FindNodeResponseHandler(context, nodeId);
                 try {
                     FindNodeEvent evt = handler.call();
-                    if (!foundNewContacts && !evt.getNodes().isEmpty()) {
+                    
+                    float responseRatio = 
+                    	evt.getNodes().size()/(float)KademliaSettings.REPLICATION_PARAMETER.getValue();
+                    
+                    if(responseRatio < KademliaSettings.BOOTSTRAP_RATIO.getValue()) {
+                    	failures++;
+                    	
+                    	if(LOG.isDebugEnabled()) {
+                    		LOG.debug("Bootstrap poor lookup ratio. Failures: " +failures);
+                    	}
+                    	
+                    	if((failures * MAX_NODE_FAILED_PER_LOOKUP) 
+                    			< KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    		//routing table is stale! remove unknown and dead contacts
+                    		//and start over
+                    		context.getRouteTable().purge();
+                    		
+                    		if(!retriedBootstrap) {
+                        		LOG.debug("Retrying bootstrap from phase 2");
+                    			retriedBootstrap = true;
+                        		return startBootstrapLookups(node);
+                    		} else {
+                    			return false;
+                    		}
+                    	}
+                    	
+                    } else if (!foundNewContacts) {
                         foundNewContacts = true;
                     }
-                } catch (DHTException ignore) {}
+                } catch (DHTException ignore) {
+                	failures++;
+                }
             }
             return foundNewContacts;
         }

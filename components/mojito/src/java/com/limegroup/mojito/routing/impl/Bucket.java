@@ -166,6 +166,11 @@ public interface Bucket {
      * Returns the most recently seen cached Contact
      */
     public Contact getMostRecentlySeenCachedContact();
+    
+    /**
+     * Removes the unknown and dead Contacts in this bucket.
+     */
+    public void purge();
 
     /**
      * Splits the Bucket into two parts

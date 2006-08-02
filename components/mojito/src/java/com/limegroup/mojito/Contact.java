@@ -162,4 +162,6 @@ public interface Contact {
      * The latter three only if this Contact is not alive.
      */
     public void updateWithExistingContact(Contact existing);
+    
+    public void setState(State state);
 }

@@ -7,8 +7,6 @@ for JAR in $(find ../lib/jars -name *.jar); do
    CLASSPATH="${CLASSPATH};${JAR}"
 done
 
-echo $CLASSPATH
-
 export CLASSPATH
 
 ulimit -n 1024

@@ -529,6 +529,16 @@ public class RouteTableImpl implements RouteTable {
         init();
     }
     
+    public synchronized void purge() {
+    	bucketTrie.traverse(new Cursor<KUID, Bucket>() {
+            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
+                Bucket bucket = entry.getValue();
+                bucket.purge();
+                return false;
+            }
+        });
+    }
+    
     public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Local: ").append(context.getLocalNode()).append("\n");

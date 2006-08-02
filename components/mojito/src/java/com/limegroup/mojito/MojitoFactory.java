@@ -31,6 +31,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.routing.RouteTable;
@@ -225,6 +226,7 @@ public class MojitoFactory {
             Contact node = null;
             
             while((node = (Contact)ois.readObject()) != null) {
+            	node.setState(State.UNKNOWN);
                 routeTable.add(node);
             }
             
