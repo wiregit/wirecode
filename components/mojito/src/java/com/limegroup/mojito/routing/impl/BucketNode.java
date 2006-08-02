@@ -260,14 +260,15 @@ class BucketNode implements Bucket {
         }
         
         if(!isLiveFull() && !cache.isEmpty()) {
-            //insert MRS cached contacts (only live ones)
+            // The cache Map is in LRS order. Add the Contacts to a List and 
+            // iterate it backwards so that we get the elements in MRS order.
             List<Contact> contacts = new ArrayList<Contact>(getCachedContacts());
-            //reverse traversal of the list
             for(int i = contacts.size()-1; i>=0 && !isLiveFull(); i--) {
                 Contact node = contacts.get(i);
                 if(node.isAlive()) {
                     nodeTrie.put(node.getNodeID(), node);
-                } 
+                }
+                
                 boolean removed = removeCachedContact(node.getNodeID());
                 assert (removed);
             }
