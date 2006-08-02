@@ -34,6 +34,7 @@ import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.statistics.DHTStats;
 
 /**
  * 
@@ -54,6 +55,11 @@ public interface MojitoDHT {
      * Returns the vendor of the DHT
      */
     public int getVendor();
+    
+    /**
+     * Returns the DHT stats
+     */
+    public DHTStats getDHTStats();
     
     /**
      * Returns the local Node ID
@@ -227,4 +233,5 @@ public interface MojitoDHT {
      * Writes the current state of Monjito DHT to the OutputStream
      */
     public void store(OutputStream out) throws IOException;
+    
 }

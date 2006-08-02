@@ -81,12 +81,12 @@ public class SerializeTest {
         GZIPOutputStream gzout = new GZIPOutputStream(baos);
         OutputStreamWriter out = new OutputStreamWriter(baos);
         
-        dht.getContext().getDHTStats().dumpStats(out, false);
+        dht.getDHTStats().dumpStats(out, false);
         System.out.println("Size: " + baos.toByteArray().length);
         System.out.println(new String(baos.toByteArray()));
         
         StringWriter writer = new StringWriter();
-        dht.getContext().getDHTStats().dumpStats(writer,false);
+        dht.getDHTStats().dumpStats(writer,false);
         System.out.println(writer.toString());
         System.exit(0);
     }
@@ -102,9 +102,10 @@ public class SerializeTest {
         dht.start();
         
 //        Thread.sleep(3*1000);
-        RouteTable rtable = dht.getContext().getRouteTable();
+        RouteTable rtable = dht.getRouteTable();
         for (int i = 0; i < 5000; i++) {
-            Contact node = new ContactNode(0, 0, KUID.createRandomNodeID(),  new InetSocketAddress(i), State.UNKNOWN);
+            Contact node = new ContactNode(new InetSocketAddress(i), 
+                    0, 0, KUID.createRandomNodeID(), null, 0, false , State.UNKNOWN);
             rtable.add(node);
         }
         

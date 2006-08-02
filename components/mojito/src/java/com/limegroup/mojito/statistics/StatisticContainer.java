@@ -28,12 +28,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.MojitoDHT;
 
 
 public abstract class StatisticContainer{
 
-    public StatisticContainer(Context context) {
-        context.getDHTStats().addStatisticContainer(this);
+    public StatisticContainer(MojitoDHT dht) {
+        dht.getDHTStats().addStatisticContainer(this);
     }
     
     protected StatisticContainer() {}

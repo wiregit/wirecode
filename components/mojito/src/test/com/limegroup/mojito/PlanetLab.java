@@ -31,8 +31,13 @@ import java.util.List;
 import java.util.Random;
 
 import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
+import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.FindValueListener;
+import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.StoreListener;
+import com.limegroup.mojito.event.BootstrapEvent.Type;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.PlanetLabTestsStatContainer;
 import com.limegroup.mojito.statistics.StatsManager;
@@ -142,59 +147,51 @@ public class PlanetLab {
                         err.printStackTrace();
                     }
                     
-                    dht.bootstrap(dst, new BootstrapListener() {
-                        public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
-                            System.out.println(index + ": no bootstrap host!");
-                        }
-
-                        public void phaseOneComplete(long time) {
-                            System.out.println(index + ": bootstrap phase ONE finished");
-                        }
-
-                        public void phaseTwoComplete(boolean foundNodes, long time) {
-                            StringBuffer buffer = new StringBuffer();
-                            buffer.append(index).append(": finished bootstrapping phase TWO in ");
-                            buffer.append(time).append(" ms ");
-                            
-                            if (foundNodes) {
-                                buffer.append("with new nodes");
-                            } else {
-                                buffer.append("with no new nodes");
-                            }
-                            
-                            System.out.println(buffer.toString());
-                            
-                            synchronized(lock) {
-                                lock.notify();
-                            }
-                            
-                            if(testNumber == 2 || testNumber == 4) {
-                                if(index < TEST_VALUES.length){
-                                    DHTController controller = new DHTController(dht, dst, TEST_VALUES[index]);
-                                    new Thread(controller).start();
-                                }
-                            } else if (testNumber == 3) {
-                                DHTController controller = new DHTController(dht, dst, null);
-                                new Thread(controller).start();
-                            } else if (testNumber == 6) { //hotspot test
-                                minChurn = Long.MAX_VALUE - 1L;
-                                maxChurn = Long.MAX_VALUE;
-                                minRetriever = 1L * 1000L; //retrieve values every 1 to 3 seconds
-                                maxRetriever = 3L * 1000L;
-                                TEST_VALUES = new String[]{"hello"};
-                                DHTController controller = new DHTController(dht, dst, null);
-                                new Thread(controller).start();
-                            }
-                        }
-                    });
+                    DHTFuture future = dht.bootstrap(dst);
+                    BootstrapEvent event = (BootstrapEvent) future.get();
                     
+                    if(event.getType() == Type.SUCCEEDED) {
+                        StringBuffer buffer = new StringBuffer();
+                        buffer.append(index).append(": finished bootstrapping phase TWO in ");
+                        buffer.append(event.getTotalTime()).append(" ms ");
+                        
+                        if (event.hasFoundNewContacts()) {
+                            buffer.append("with new nodes");
+                        } else {
+                            buffer.append("with no new nodes");
+                        }
+                        
+                        System.out.println(buffer.toString());
+                        
+                        synchronized(lock) {
+                            lock.notify();
+                        }
+                        
+                        if(testNumber == 2 || testNumber == 4) {
+                            if(index < TEST_VALUES.length){
+                                DHTController controller = new DHTController(dht, dst, TEST_VALUES[index]);
+                                new Thread(controller).start();
+                            }
+                        } else if (testNumber == 3) {
+                            DHTController controller = new DHTController(dht, dst, null);
+                            new Thread(controller).start();
+                        } else if (testNumber == 6) { //hotspot test
+                            minChurn = Long.MAX_VALUE - 1L;
+                            maxChurn = Long.MAX_VALUE;
+                            minRetriever = 1L * 1000L; //retrieve values every 1 to 3 seconds
+                            maxRetriever = 3L * 1000L;
+                            TEST_VALUES = new String[]{"hello"};
+                            DHTController controller = new DHTController(dht, dst, null);
+                            new Thread(controller).start();
+                        }
+                    }
                     try { 
                         lock.wait(5L*60L*1000L); 
                     } catch (InterruptedException err) {
                         err.printStackTrace();
                     }
                 }
-            } catch (IOException err) {
+            } catch (Exception err) {
                 err.printStackTrace();
             }
         }
@@ -308,7 +305,7 @@ public class PlanetLab {
             
             this.value = value;
             
-            planetlabStats = new PlanetLabTestsStatContainer(dht.getContext());
+            planetlabStats = new PlanetLabTestsStatContainer(dht);
         }
         
         public void run() {
@@ -322,24 +319,22 @@ public class PlanetLab {
                 //publisher node:
                 //Publish values every minRepublisher minutes
                 if (value != null) {
+                    /*long publishDelay = System.currentTimeMillis() - lastPublishTime;*/
+                    /*if(publishDelay >= minRepublisher){*/
+                    
+                    lastPublishTime = System.currentTimeMillis();
+                    DHTFuture<StoreEvent> future = dht.put(toKUID(value), getBytes(value));
+                    future.addDHTEventListener(new StoreListener() {
+                        public void handleResult(StoreEvent result) {
+                            planetlabStats.PUBLISH_LOCATIONS.addData(result.getNodes().size());
+                        }
+                        public void handleThrowable(Throwable ex) {}
+                    });
+                    planetlabStats.PUBLISH_COUNT.incrementStat();
+                    //}
                     try {
-                        /*long publishDelay = System.currentTimeMillis() - lastPublishTime;*/
-                        /*if(publishDelay >= minRepublisher){*/
-                        
-                        lastPublishTime = System.currentTimeMillis();
-                        dht.put(toKUID(value), getBytes(value), new StoreListener() {
-                            public void store(KeyValue keyValue, Collection nodes) {
-                                planetlabStats.PUBLISH_LOCATIONS.addData(nodes.size());
-                            }
-                        });
-                        planetlabStats.PUBLISH_COUNT.incrementStat();
-                        //}
-                        try {
-                            Thread.sleep(minRepublisher);
-                        } catch (InterruptedException e) {}
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+                        Thread.sleep(minRepublisher);
+                    } catch (InterruptedException e) {}
                 } 
                 //retriever node:
                 //1.Stay online for minChurn to maxChurn minutes
@@ -350,37 +345,39 @@ public class PlanetLab {
                     long churn = minChurn + GENERATOR.nextInt((int)(maxChurn-minChurn));
                     long startTime = System.currentTimeMillis();
                     long livetime = 0L;
-                    try {
-                        while(livetime < churn) {
-                            synchronized (lock2) {
-                                long sleep = minRetriever + GENERATOR.nextInt((int)(maxRetriever - minRetriever));
-                                try {
-                                    Thread.sleep(sleep);
-                                } catch (InterruptedException e) {}
-                                String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
-                                
-                                KUID key = toKUID(value);
-                                
-                                dht.get(key, new LookupAdapter() {
-                                    public void finish(KUID lookup, Collection c, long time) {
-                                        if(c.isEmpty()){
-                                            planetlabStats.RETRIEVE_FAILURES.incrementStat();
-                                        } else {
-                                            planetlabStats.RETRIEVE_SUCCESS.incrementStat();
-                                        }
-                                        synchronized(lock2) {
-                                            lock2.notify();
-                                        }
+                    while(livetime < churn) {
+                        synchronized (lock2) {
+                            long sleep = minRetriever + GENERATOR.nextInt((int)(maxRetriever - minRetriever));
+                            try {
+                                Thread.sleep(sleep);
+                            } catch (InterruptedException e) {}
+                            String value = TEST_VALUES[GENERATOR.nextInt(TEST_VALUES.length)];
+                            
+                            KUID key = toKUID(value);
+                            
+                            DHTFuture<FindValueEvent> future = dht.get(key);
+                            future.addDHTEventListener(new FindValueListener() {
+                                public void handleResult(FindValueEvent result) {
+                                    if(result.getValues().isEmpty()) {
+                                        planetlabStats.RETRIEVE_FAILURES.incrementStat();
+                                    } else {
+                                        planetlabStats.RETRIEVE_SUCCESS.incrementStat();
                                     }
-                                });
-                                try {
-                                    lock2.wait();
-                                } catch (InterruptedException e) {}
-                            }
-                            livetime = System.currentTimeMillis() - startTime;
+                                    synchronized(lock2) {
+                                        lock2.notify();
+                                    }
+                                }
+                                public void handleThrowable(Throwable ex) {
+                                    synchronized(lock2) {
+                                        lock2.notify();
+                                    }
+                                }
+                            });
+                            try {
+                                lock2.wait();
+                            } catch (InterruptedException e) {}
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        livetime = System.currentTimeMillis() - startTime;
                     }
                     running = false;
                     dht.stop();
@@ -391,36 +388,18 @@ public class PlanetLab {
                         Thread.sleep(sleep);
                     } catch (InterruptedException e) {}
                     
-                    synchronized (lock) {
-                        try {
-                            dht.bind(address);
-                            dht.start();
-                            
-                            dht.bootstrap(bootstrapServer, new BootstrapListener() {
-                                public void noBootstrapHost(List<? extends SocketAddress> failedHosts) {
-                                    synchronized(lock) {
-                                        lock.notify();
-                                    }
-                                }
-
-                                public void phaseOneComplete(long time) {}
-
-                                public void phaseTwoComplete(boolean foundNodes, long time) {
-                                    running = true;
-                                    synchronized(lock) {
-                                        lock.notify();
-                                    }
-                                }
-                            });
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        dht.bind(address);
+                        dht.start();
                         
-                        try {
-                            lock.wait();
-                            planetlabStats.CHURN_RECONNECTS.incrementStat();
-                        } catch (InterruptedException e) {
-                        }
+                        DHTFuture future = dht.bootstrap(bootstrapServer);
+                        BootstrapEvent event = (BootstrapEvent) future.get();
+                        if(event.getType() == Type.SUCCEEDED) {
+                            running = true;
+                        } 
+                        planetlabStats.CHURN_RECONNECTS.incrementStat();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }

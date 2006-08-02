@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.MojitoDHT;
 
 
 public class PlanetLabTestsStatContainer extends StatisticContainer {
 
-    public PlanetLabTestsStatContainer(Context context) {
-        super(context);
+    public PlanetLabTestsStatContainer(MojitoDHT dht) {
+        super(dht);
     }
 
     public void writeStats(Writer writer) throws IOException {

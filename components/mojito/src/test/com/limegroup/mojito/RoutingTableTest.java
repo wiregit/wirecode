@@ -60,7 +60,7 @@ public class RoutingTableTest extends BaseTestCase {
         KademliaSettings.REPLICATION_PARAMETER.setValue(2);
         RouteTableSettings.MAX_LIVE_NODE_FAILURES.setValue(2);
        
-        dht = new MojitoDHT(false);
+        dht = MojitoFactory.createDHT();
         try {
             dht.bind(addr);
         } catch (IOException e) {
@@ -68,7 +68,7 @@ public class RoutingTableTest extends BaseTestCase {
         }
         
         dht.start();
-        routingTable = dht.getContext().getRouteTable();
+        routingTable = dht.getRouteTable();
     }
 
     protected void tearDown() throws Exception {

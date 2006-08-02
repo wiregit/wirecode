@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.routing.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
@@ -41,7 +41,7 @@ import com.limegroup.mojito.util.Trie.Cursor;
  */
 class BucketNode implements Bucket {
     
-    private Context context;
+    private Contact localNode;
     
     private KUID bucketId;
     
@@ -53,8 +53,8 @@ class BucketNode implements Bucket {
     
     private long timeStamp = 0L;
     
-    public BucketNode(Context context, KUID bucketId, int depth) {
-        this.context = context;
+    public BucketNode(Contact localNode, KUID bucketId, int depth) {
+        this.localNode = localNode;
         this.bucketId = bucketId;
         this.depth = depth;
         
@@ -254,8 +254,24 @@ class BucketNode implements Bucket {
     
     public void purge(){
         for (Contact node : nodeTrie.values()) {
-            if(!node.isAlive() && !context.isLocalNode(node)) {
+            if(!node.isAlive() && !node.getNodeID().equals(localNode.getNodeID())) {
                 nodeTrie.remove(node.getNodeID());
+            }
+        }
+        
+        if(!isLiveFull()) {
+            //insert MRS cached contacts (only live ones)
+            List<Contact> contacts = new ArrayList<Contact>(getCachedContacts());
+            if(!contacts.isEmpty()) {
+                //reverse traversal of the list
+                for(int i = contacts.size()-1; i>=0 && !isLiveFull(); i--) {
+                    Contact node = contacts.get(i);
+                    if(node.isAlive()) {
+                        nodeTrie.put(node.getNodeID(), node);
+                    } 
+                    boolean removed = removeCachedContact(node.getNodeID());
+                    assert (removed);
+                }
             }
         }
     }
@@ -282,8 +298,8 @@ class BucketNode implements Bucket {
 
         assert (getCachedContacts().isEmpty() == true);
         
-        Bucket left = new BucketNode(context, bucketId, depth+1);
-        Bucket right = new BucketNode(context, bucketId.set(depth), depth+1);
+        Bucket left = new BucketNode(localNode, bucketId, depth+1);
+        Bucket right = new BucketNode(localNode, bucketId.set(depth), depth+1);
         
         for (Contact node : getLiveContacts()) {
             KUID nodeId = node.getNodeID();
