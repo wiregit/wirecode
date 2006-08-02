@@ -62,6 +62,9 @@ import java.util.SortedMap;
  * See http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Tree/PATRICIA/ for
  * more information.
  * 
+ * Any methods here that take an Object may throw a ClassCastException if
+ * the method is expecting an instance of K (and it isn't K).
+ * 
  * @author Roger Kapsi
  * @author Sam Berlin
  */
@@ -262,19 +265,20 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * Returns the entry associated with the specified key in the
      * PatriciaTrie.  Returns null if the map contains no mapping
      * for this key.
+     * 
+     * This may throw ClassCastException if the object is not of type K.
      */
     TrieEntry<K,V> getEntry(Object k) {
         K key = asKey(k);
-        if(key == null) {
+        if(key == null)
             return null;
-        }
         
         int keyLength = length(key);
         TrieEntry<K,V> entry = getNearestEntryForKey(key, keyLength);
         return !entry.isEmpty() && key.equals(entry.key) ? entry : null;
     }
     
-    /** Casts the key to K.  TODO: this doesn't work for catching CCE. */
+    /** Gets the key as a 'K'. */
     @SuppressWarnings("unchecked")
     protected final K asKey(Object key) {
         try {
@@ -375,14 +379,20 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if (h.bitIndex <= bitIndex) {
             if(!h.isEmpty()) {
                 Cursor.SelectStatus ret = cursor.select(h);
-                if(ret == Cursor.SelectStatus.REMOVE) {
+                switch(ret) {
+                case REMOVE:
                     throw new UnsupportedOperationException("cannot remove during select");
-                    //remove(h.key);
-                    //return true; // continue
-                } else if(ret == Cursor.SelectStatus.EXIT) {
+                case EXIT:
                     result[0] = h;
                     return false; // exit
-                } // else if (ret == Cursor.SelectStatus.CONTINUE), fall through
+                case REMOVE_AND_EXIT:
+                    TrieEntry<K, V> entry = new TrieEntry<K, V>(h.getKey(), h.getValue(), -1);
+                    result[0] = entry;
+                    removeEntry(h);
+                    return false;
+                case CONTINUE:
+                    // fallthrough.
+                }
             }
             return true; // continue
         }
@@ -548,12 +558,16 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         return new PrefixSubMap(key, offset, length);
     }
     
-    /** Returns true if this trie contains the specified Key */
+    /**
+     * Returns true if this trie contains the specified Key
+     * 
+     * This may throw ClassCastException if the object is not
+     * of type K.
+     */
     public boolean containsKey(Object k) {
         K key = asKey(k);
-        if(key == null) {
+        if(key == null)
             return false;
-        }
         
         int keyLength = length(key);
         TrieEntry entry = getNearestEntryForKey(key, keyLength);
@@ -571,6 +585,8 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     
     /**
      * Removes a Key from the Trie if one exists
+     * 
+     * This may throw ClassCastException if the object is not of type K.
      * 
      * @param key the Key to delete
      * @return Returns the deleted Value
@@ -924,13 +940,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         return buffer.toString();
     }
     
-    /**
-     * Traverses through the trie, passing each entry to the cursor.
-     * This will return the element that the cursor returned EXIT on,
-     * or null if the trie runs out of elements.  Any elements the cursor
-     * returns REMOVE on will be removed.  The cursor should return 
-     * CONTINUE when it wishes to continue looking at more elements.
-     */
     public Map.Entry<K, V> traverse(Cursor<? super K, ? super V> cursor) {
         TrieEntry<K, V> entry = nextEntry(null);
         while(entry != null) {
@@ -942,7 +951,11 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 return current;
             case REMOVE:
                 removeEntry(current);
-                break;
+                break; // out of switch, stay in while loop
+            case REMOVE_AND_EXIT:
+                Map.Entry<K, V> value = new TrieEntry<K, V>(current.getKey(), current.getValue(), -1);
+                removeEntry(current);
+                return value;
             case CONTINUE: // do nothing.
             }
         }
@@ -1812,7 +1825,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         // ... or there are less than 'length' equal bits
-        // TODO: must offset the bitIndex lookup in key
         int bitIndex = keyAnalyzer.bitIndex(prefix, offset, length,
                                             entry.key, 0, length(entry.getKey()));
         if (bitIndex >= 0 && bitIndex < length)

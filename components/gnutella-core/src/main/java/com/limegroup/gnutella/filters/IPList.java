@@ -171,11 +171,14 @@ public class IPList {
                 if(contained == null)
                     contained = new ArrayList<IP>();
                 contained.add(compare);
+                return SelectStatus.CONTINUE;
+            } else {
+                // Because select traverses in XOR closeness,
+                // the first time we encounter an item that's
+                // not contained, we know we've exhausted all
+                // possible containing values.
+                return SelectStatus.EXIT;
             }
-            
-            // If we're moving further away from the IP, exit.
-            int distance = compare.getDistanceTo(lookup);
-            return distance > 1 ? SelectStatus.EXIT : SelectStatus.CONTINUE;
         }
     };
     
@@ -243,6 +246,9 @@ public class IPList {
                 
         }
 
+        // This method is generally intended for variable length keys.
+        // Fixed-length keys, such as an IP address (32 bits) tend to
+        // look at each element as a bit, thus 1 element == 1 bit.
         public int bitsPerElement() {
             return 1;
         }

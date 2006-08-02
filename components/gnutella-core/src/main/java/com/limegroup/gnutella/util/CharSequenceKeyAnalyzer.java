@@ -45,12 +45,12 @@ public class CharSequenceKeyAnalyzer implements KeyAnalyzer<CharSequence> {
             if(kOff >= len1)
                 k = 0;
             else
-                k = key.charAt(i + off1);
+                k = key.charAt(kOff);
             
             if(found == null || fOff >= len2)
                 f = 0;
             else
-                f = found.charAt(i + off2);
+                f = found.charAt(fOff);
             
             if(k != f) {
                int x = k ^ f;

@@ -87,7 +87,6 @@ public final class IPFilter extends SpamFilter {
             reader = new BufferedReader(new FileReader(hostiles));
             String read = null;
             while( (read = reader.readLine()) != null) {
-              //  System.out.println("Loading from hostiles, " + read);
                 newBad.add(read);
             }
         } catch(IOException ignored) {

@@ -998,10 +998,7 @@ public class RouterService {
             }
         }
         
-        // TODO: notify downloader & uploader about new filters.
-       // downloadManager.spamFiltersChanged(filter);
-       // uploadManager.spamFiltersChanged(filter);
-        
+        // TODO: notify DownloadManager & UploadManager about new banned IP ranges
     }
 
     /**

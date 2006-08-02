@@ -119,6 +119,8 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * calling select for each entry (traversing in order of XOR closeness,
      * NOT lexographically) until the cursor returns Cursor.SelectStatus.EXIT.
      * The cursor can return Cursor.SelectStatus.CONTINUE to continue traversing.
+     * Cursor.SelectStatus.REMOVE_AND_EXIT is used to remove the current element
+     * and stop traversing.
      * 
      * The Cursor.SelectStatus.REMOVE operation is not supported.
      * 
@@ -135,6 +137,8 @@ public interface Trie<K, V> extends SortedMap<K, V> {
      * Cursor.SelectStatus.EXIT.  Cursor.SelectStatus.CONTINUE is used to 
      * continue traversing.  Cursor.SelectStatus.REMOVE is used to remove
      * the element that was selected and continue traversing.
+     * Cursor.SelectStatus.REMOVE_AND_EXIT is used to remove the current element
+     * and stop traversing.
      *   
      * @param cursor
      * @return The entry the cursor returned EXIT on, or null if it continued
@@ -154,8 +158,9 @@ public interface Trie<K, V> extends SortedMap<K, V> {
         /**
          * Notification that the trie is currently looking at the given entry.
          * Return EXIT to finish the trie operation, CONTINUE to look at the
-         * next entry, or REMOVE to remove the entry.  Not all operations support
-         * REMOVE.
+         * next entry, REMOVE to remove the entry and continue iterating, or
+         * REMOVE_AND_EXIT to remove the entry and stop iterating. 
+         * Not all operations support REMOVE.
          * 
          * @param entry
          * @return
@@ -163,7 +168,7 @@ public interface Trie<K, V> extends SortedMap<K, V> {
         public SelectStatus select(Map.Entry<? extends K, ? extends V> entry);
      
         public static enum SelectStatus {
-            EXIT, CONTINUE, REMOVE;
+            EXIT, CONTINUE, REMOVE, REMOVE_AND_EXIT;
         }
     }
 }
