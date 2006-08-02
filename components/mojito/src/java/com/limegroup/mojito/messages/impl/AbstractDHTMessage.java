@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.security.Signature;
 import java.security.SignatureException;
 
@@ -55,13 +54,13 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
     
     protected final Context context;
     
-    private ByteBuffer[] data;
-    
     private OpCode opcode;
     
     private Contact contact;
     
     private MessageID messageId;
+    
+    private byte[] payload;
     
     public AbstractDHTMessage(Context context, 
             OpCode opcode, Contact contact, MessageID messageId) {
@@ -115,17 +114,12 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         this.contact = ContactNode.createLiveContact(src, vendor, version, 
                 nodeId, contactAddress, instanceId, firewalled);
         
-        //int messageFlags = in.readUnsignedByte();
-        //int checksum = in.readInt();
-        in.skip(5); // see above
+        int extensions = in.readUnsignedShort();
+        in.skip(extensions);
     }
     
     public Context getContext() {
         return context;
-    }
-    
-    protected ByteBuffer[] getData() {
-        return data;
     }
     
     public OpCode getOpCode() {
@@ -152,18 +146,17 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         out.writeByte(DHTMessage.F_DHT_MESSAGE); // 16
         out.writeShort(getContact().getVendor()); //17-18
         
-        ByteBuffer payload = data[0];
-        int length = payload.remaining(); // 19-22
-        out.write((length      ) & 0xFF);
-        out.write((length >>  8) & 0xFF);
-        out.write((length >> 16) & 0xFF);
-        out.write((length >> 24) & 0xFF);
+        out.write((payload.length      ) & 0xFF); // 19-22
+        out.write((payload.length >>  8) & 0xFF);
+        out.write((payload.length >> 16) & 0xFF);
+        out.write((payload.length >> 24) & 0xFF);
         
-        out.write(payload.array(), payload.arrayOffset(), length); // 23-n
+        // --- GNUTELLA PAYLOAD ---
+        out.write(payload, 0, payload.length); // 23-n
     }
     
     private synchronized void serialize() throws IOException {
-        if (data != null && data.length == 1) {
+        if (payload != null) {
             return;
         }
         
@@ -175,9 +168,9 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         
         // --- MOJITO BODY ---
         writeBody(out);
-        out.close();
         
-        data = new ByteBuffer[]{ ByteBuffer.wrap(baos.toByteArray()) };
+        out.close();
+        payload = baos.toByteArray();
     }
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
@@ -193,8 +186,8 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         }
         out.writeByte(flags); // 33
         
-        out.writeByte(0); // 34
-        out.writeInt(0); // 35-38
+        // We don't support any header extensions so write none
+        out.writeShort(0); // 34-35
     }
     
     protected abstract void writeBody(MessageOutputStream out) throws IOException;
