@@ -30,37 +30,52 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 
+/**
+ * 
+ */
 public class DHTValue implements Serializable {
     
     private static final long serialVersionUID = -5172585009004184680L;
 
     public static final byte[] EMPTY_DATA = new byte[0];
 
+    /** The originator of the DHTValue */
     private Contact originator;
     
+    /** The sender who sent the DHTValue to us (store forward) */
     private Contact sender;
     
+    /** The Key of the DHTValue */
     private KUID valueId;
     
+    /** The Value */
     private byte[] data;
     
+    /** The time when this DHTValue object was created */
     private long creationTime = System.currentTimeMillis();
     
+    /** The time when this DHTValue was republished */
     private transient long lastRepublishingTime = 0L;
     
+    /** The number of locations where this value was stored */
     private transient int locations = 0;
     
+    /** Whether or not this DHTValue is a local value */
     private boolean isLocalValue = true;
     
+    /** Whether or not this DHTValue is nearby to our NodeID */
     private boolean nearby = true;
     
+    /** The hashCode, lazy initialization */
     private int hashCode = -1;
     
+    /** Creates and returns a local DHTValue */
     public static DHTValue createLocalValue(Contact originator, 
             KUID valueId, byte[] data) {
         return new DHTValue(originator, originator, valueId, data, true);
     }
     
+    /** Creates and returns a remote DHTValue */
     public static DHTValue createRemoteValue(Contact originator, Contact sender, 
             KUID valueId, byte[] data) {
         return new DHTValue(originator, sender, valueId, data, false);
@@ -80,58 +95,76 @@ public class DHTValue implements Serializable {
         locations = 0;
     }
     
+    /** Returns the ValueID */
     public KUID getValueID() {
         return valueId;
     }
     
+    /** Returns the Value */
     public byte[] getData() {
         return data;
     }
     
+    /** Returns the size of the value */
     public int size() {
         return data.length;
     }
     
+    /** Whether or not the value is empty */
     public boolean isEmpty() {
         return size() == 0;
     }
     
+    /** Sets the originator, meant for internal use only! */
     public void setOriginator(Contact originator) {
         this.originator = originator;
     }
     
+    /** Returns the originator of the value */
     public Contact getOriginator() {
         return originator;
     }
     
-    public void setSender(Contact sender) {
+    /*public void setSender(Contact sender) {
         this.sender = sender;
-    }
+    }*/
     
+    /** Returns the sender of the value */
     public Contact getSender() {
         return sender;
     }
     
+    /** Returns the creationTime of this DHTValue object */ 
     public long getCreationTime() {
         return creationTime;
     }
     
+    /** 
+     * Returns whether or not the originator and sender 
+     * of the DHTValue are the same
+     */
     public boolean isDirect() {
         return originator.getNodeID().equals(sender.getNodeID());
     }
     
+    /** Returns whether or not this is a local DHTValue */
     public boolean isLocalValue() {
         return isLocalValue;
     }
     
+    /** Sets whether or not this DHTValue is nearby to us */
     public void setNearby(boolean nearby) {
         this.nearby = nearby;
     }
     
+    /** Returns whether or not this DHTValue is nearby to us */
     public boolean isNearby() {
         return nearby;
     }
     
+    /** 
+     * Returns true if this DHTValue has expired
+     */ 
     public boolean isExpired() {
         if (isLocalValue()) {
             return false;
@@ -143,6 +176,9 @@ public class DHTValue implements Serializable {
         return System.currentTimeMillis() >= expirationTime;
     }
     
+    /**
+     * Returns true if this DHTValue requires republishing
+     */
     public boolean isRepublishingRequired() {
         if (!isLocalValue()) {
             return false;
@@ -159,6 +195,10 @@ public class DHTValue implements Serializable {
         return System.currentTimeMillis() >= time;
     }
     
+    /**
+     * Sets the number of locations where this DHTValue was stored and 
+     * the lastRepublishingTime to the current System time
+     */
     public void publishedTo(int locations) {
         if (locations < 0) {
             throw new IllegalArgumentException("locations: " + locations);
@@ -209,7 +249,7 @@ public class DHTValue implements Serializable {
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        init(); // Init transient fields
         in.defaultReadObject();
+        init(); // Init transient fields
     }
 }
