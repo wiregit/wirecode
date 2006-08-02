@@ -318,8 +318,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
                     long timeout = getLockTimeout();
                     lock.wait(timeout);
                     
+                    // Woke up but still not done nor cancelled?
+                    // Must be the timeout -> throw an Exception!
                     if (!done && !cancelled) {
-                        ex = new LockTimeoutException("Timeout: " + timeout);
+                        setException(new LockTimeoutException("Timeout: " + timeout));
                     }
                 }
     
