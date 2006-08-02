@@ -1162,7 +1162,7 @@ public class DownloadManager implements BandwidthTracker {
             }
         } catch(UnknownHostException notCritical) {}
     
-        IPFilter filter = IPFilter.instance();
+        IPFilter filter = RouterService.getIpFilter();
         //make sure we send it to the proxies, if any
         Set proxies = file.getPushProxies();
         for (Iterator iter = proxies.iterator();iter.hasNext();) {
@@ -1260,7 +1260,7 @@ public class DownloadManager implements BandwidthTracker {
             NetworkUtils.ip2string(shouldDoFWTransfer ? externalAddr : addr) +
             ":" + port;
 
-        IPFilter filter = IPFilter.instance();
+        IPFilter filter = RouterService.getIpFilter();
         // try to contact each proxy
         for(Iterator iter = proxies.iterator(); iter.hasNext(); ) {
             IpPort ppi = (IpPort)iter.next();

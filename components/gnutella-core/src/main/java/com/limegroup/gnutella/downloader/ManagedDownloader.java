@@ -52,7 +52,6 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
-import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -1292,7 +1291,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     protected boolean hostIsAllowed(RemoteFileDesc other) {
          // If this host is banned, don't add.
-        if ( !IPFilter.instance().allow(other.getHost()) )
+        if ( !RouterService.getIpFilter().allow(other.getHost()) )
             return false;            
 
         if (RouterService.acceptedIncomingConnection() ||

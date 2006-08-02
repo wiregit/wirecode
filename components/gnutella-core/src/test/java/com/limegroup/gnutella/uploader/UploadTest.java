@@ -56,7 +56,6 @@ import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
@@ -183,7 +182,7 @@ public class UploadTest extends BaseTestCase {
 		    new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*",InetAddress.getLocalHost().getHostAddress()});
-        IPFilter.refreshIPFilter();
+        RouterService.getIpFilter().refreshHosts();
         ConnectionSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
@@ -1147,7 +1146,7 @@ public class UploadTest extends BaseTestCase {
      */
     public void testExpiredAltsRemoved() throws Exception {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[]{"*.*.*.*"});
-        IPFilter.refreshIPFilter();
+        RouterService.getIpFilter().refreshHosts();
         // set the expiration values to the bare minimum 
         UploadSettings.LEGACY_BIAS.setValue(0f);
         UploadSettings.PING_BIAS.setValue(0f);

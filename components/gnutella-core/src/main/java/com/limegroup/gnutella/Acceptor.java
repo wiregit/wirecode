@@ -16,7 +16,6 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.BufferUtils;
@@ -597,7 +596,7 @@ public class Acceptor {
      * @return true iff ip is a banned address.
      */
     public boolean isBannedIP(byte[] addr) {        
-        return !IPFilter.instance().allow(addr);
+        return !RouterService.getIpFilter().allow(addr);
     }
     
     /**

@@ -12,6 +12,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * This class establishes a connection for a chat, either
@@ -53,40 +54,25 @@ public final class ChatManager {
 
 		// see if chatting is turned off
 		if (! allowChats) {
-			try {
-				socket.close();
-			} catch (IOException e) {
-			}
+		    IOUtils.close(socket);
 			return;
 		}
 
 		// do a check to see it the host has been blocked
-		String host = socket.getInetAddress().getHostAddress();
-		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        if(!RouterService.getIpFilter().allow(socket.getInetAddress())) {
+            IOUtils.close(socket);
+            return;
+        }
         
-		List<String> bannedList = Arrays.asList(bannedIPs);
-		if (bannedList.contains(host) ) {
-			try {
-  				socket.close();
-  			} catch (IOException e) {
-  			}
-  			return;
-		}
-
 		try {
-			ActivityCallback callback = 
-			    RouterService.getCallback();
-			InstantMessenger im = 
-			    new InstantMessenger(socket, this, callback);
+			ActivityCallback callback = RouterService.getCallback();
+			InstantMessenger im = new InstantMessenger(socket, this, callback);
 			// insert the newly created InstantMessager into the list
 			_chatsInProgress.add(im);
 			callback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
-			try {
-				socket.close();
-			} catch (IOException ee) {
-			}
+            IOUtils.close(socket);
 		}
 	}
 

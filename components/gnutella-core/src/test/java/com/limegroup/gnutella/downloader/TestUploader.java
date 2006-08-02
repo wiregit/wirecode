@@ -188,7 +188,7 @@ public class TestUploader extends AssertComparisons {
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
      */
-    private final IPFilter IP_FILTER = IPFilter.instance();
+    private final IPFilter IP_FILTER = RouterService.getIpFilter();
     
     
     /**

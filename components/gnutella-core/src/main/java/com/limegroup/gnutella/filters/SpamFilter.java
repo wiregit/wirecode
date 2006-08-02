@@ -2,6 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import java.util.Vector;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.FilterSettings;
 
@@ -30,11 +31,9 @@ public abstract class SpamFilter {
         Vector<SpamFilter> buf=new Vector<SpamFilter>();
 
         //1. IP-based techniques.
-        String[] badIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-        if (badIPs.length!=0) {   //no need to check getAllowIPs
-            IPFilter bf=IPFilter.instance();
-            buf.add(bf);
-        }
+        IPFilter ipFilter = RouterService.getIpFilter();
+        if(ipFilter.hasBlacklistedHosts())
+            buf.add(ipFilter);
 
         //2. Keyword-based techniques.
         String[] badWords = FilterSettings.BANNED_WORDS.getValue();

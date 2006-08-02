@@ -11,14 +11,12 @@ import com.limegroup.gnutella.ByteOrder;
  * This class is heavily optimized, as IP objects are constructed for every
  * PingReply, QueryReply, PushRequest, and internally or externally generated
  * connection.
- *
- * @author Gregorio Roper
  */
 public class IP {
     private static final String MSG = "Could not parse: ";
 
-    private final int addr;
-    private final int mask;
+    final int addr;
+    final int mask;
     
     /**
      * Creates an IP object out of a four byte array of the IP in
@@ -175,11 +173,6 @@ public class IP {
             mask <<= (4 - numOctets) * 8;
         return mask;
     }
-
-    /** Returns the 32-bit netmask for this IPv4 address range. */
-    /* package */ int getMask() {
-        return mask;
-    }
     
     /**
      * Computes the minimum distance between any two IPv4 addresses within two
@@ -192,6 +185,20 @@ public class IP {
      */
     public int getDistanceTo(IP ip) {
         return (ip.addr ^ this.addr) & ip.mask & this.mask;
+    }
+    
+    /**
+     * Returns the stuff as a string.
+     */
+    public String toString() {
+        return toString(addr) + "/" + toString(mask); 
+    }
+    
+    private String toString(int i) {
+        return ((i >> 24) & 0xFF) + "." +
+               ((i >> 16) & 0xFF) + "." + 
+               ((i >>  8) & 0xFF) + "." + 
+               ( i        & 0xFF);
     }
     
     /**

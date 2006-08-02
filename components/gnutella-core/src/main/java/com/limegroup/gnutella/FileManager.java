@@ -34,7 +34,7 @@ import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.StringTrie;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -159,7 +159,7 @@ public abstract class FileManager {
      * i, for all k in _files[i]._path where _files[i] is not an
      * IncompleteFileDesc, _keywordTrie.get(k) contains i.
      */
-    private Trie<IntSet> _keywordTrie;
+    private StringTrie<IntSet> _keywordTrie;
     
     /**
      * A map of appropriately case-normalized URN strings to the
@@ -341,7 +341,7 @@ public abstract class FileManager {
         _numPendingFiles = 0;
         _numForcedFiles = 0;
         _files = new ArrayList<FileDesc>();
-        _keywordTrie = new Trie<IntSet>(true);  //ignore case
+        _keywordTrie = new StringTrie<IntSet>(true);  //ignore case
         _urnMap = new HashMap<URN, IntSet>();
         _extensions = new HashSet<String>();
         _sharedDirectories = new HashMap<File, IntSet>();

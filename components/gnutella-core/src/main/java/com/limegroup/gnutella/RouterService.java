@@ -140,7 +140,7 @@ public class RouterService {
 	/**
 	 * <tt>DownloadManager</tt> for handling HTTP downloading.
 	 */
-    private static DownloadManager downloader = new DownloadManager();
+    private static DownloadManager downloadManager = new DownloadManager();
 
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
@@ -185,6 +185,9 @@ public class RouterService {
      * The content manager
      */
     private static ContentManager contentManager = new ContentManager();
+    
+    /** The IP Filter to use. */
+    private static IPFilter ipFilter = new IPFilter(false);
     
     /**
      * isShuttingDown flag
@@ -326,6 +329,11 @@ public class RouterService {
   	private static class Initializer implements Runnable {
   	    public void run() {
   	        //add more while-gui init tasks here
+            RouterService.getIpFilter().refreshHosts(new IPFilter.IPFilterCallback() {
+                public void ipFiltersLoaded() {
+                    adjustSpamFilters();
+                }
+            });
   	        RouterService.getAcceptor().init();
   	    }
   	}
@@ -379,12 +387,12 @@ public class RouterService {
     		LOG.trace("STOP ConnectionManager");
     		
     		LOG.trace("START DownloadManager");
-    		downloader.initialize(); 
+    		downloadManager.initialize(); 
     		LOG.trace("STOP DownloadManager");
     		
     		LOG.trace("START SupernodeAssigner");
     		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
-    													 downloader, 
+    													 downloadManager, 
     													 manager);
     		sa.start();
     		LOG.trace("STOP SupernodeAssigner");
@@ -415,7 +423,7 @@ public class RouterService {
             // Restore any downloads in progress.
             LOG.trace("START DownloadManager.postGuiInit");
             callback.componentLoading("DOWNLOAD_MANAGER_POST_GUI");
-            downloader.postGuiInit();
+            downloadManager.postGuiInit();
             LOG.trace("STOP DownloadManager.postGuiInit");
             
             LOG.trace("START UpdateManager.instance");
@@ -512,6 +520,11 @@ public class RouterService {
         return RouterService.callback;
     }
     
+    /** Gets the IPFilter that should be shared. */
+    public static IPFilter getIpFilter() {
+        return ipFilter;
+    }
+    
     /**
      * Sets full power mode.
      */
@@ -550,7 +563,7 @@ public class RouterService {
      * @return the <tt>DownloadManager</tt> in use
      */
     public static DownloadManager getDownloadManager() {
-        return downloader;
+        return downloadManager;
     }
 
     public static AltLocManager getAltlocManager() {
@@ -777,28 +790,28 @@ public class RouterService {
      * Returns the number of downloads in progress.
      */
     public static int getNumDownloads() {
-        return downloader.downloadsInProgress();
+        return downloadManager.downloadsInProgress();
     }
     
     /**
      * Returns the number of active downloads.
      */
     public static int getNumActiveDownloads() {
-        return downloader.getNumActiveDownloads();
+        return downloadManager.getNumActiveDownloads();
     }
     
     /**
      * Returns the number of downloads waiting to be started.
      */
     public static int getNumWaitingDownloads() {
-        return downloader.getNumWaitingDownloads();
+        return downloadManager.getNumWaitingDownloads();
     }
     
     /**
      * Returns the number of individual downloaders.
      */
     public static int getNumIndividualDownloaders() {
-        return downloader.getNumIndividualDownloaders();
+        return downloadManager.getNumIndividualDownloaders();
     }
     
     /**
@@ -905,7 +918,7 @@ public class RouterService {
             
             cleanupPreviewFiles();
             
-            downloader.writeSnapshot();
+            downloadManager.writeSnapshot();
             
             fileManager.stop(); // Saves UrnCache and CreationTimeCache
 
@@ -954,22 +967,38 @@ public class RouterService {
                 files[i].delete();  //May or may not work; ignore return code.
         }
     }
+    
+    /**
+     * Reloads the IP Filter data & adjusts spam filters when ready.
+     */
+    public static void reloadIPFilter() {
+        ipFilter.refreshHosts(new IPFilter.IPFilterCallback() {
+            public void ipFiltersLoaded() {
+                adjustSpamFilters();
+            }
+        });
+    }
 
     /**
      * Notifies the backend that spam filters settings have changed, and that
      * extra work must be done.
      */
     public static void adjustSpamFilters() {
-        IPFilter.refreshIPFilter();
-
+        UDPReplyHandler.setPersonalFilter(SpamFilter.newPersonalFilter());
+        
         //Just replace the spam filters.  No need to do anything
         //fancy like incrementally updating them.
         for(ManagedConnection c : manager.getConnections()) {
-            c.setPersonalFilter(SpamFilter.newPersonalFilter());
-            c.setRouteFilter(SpamFilter.newRouteFilter());
+            if(ipFilter.allow(c)) {
+                c.setPersonalFilter(SpamFilter.newPersonalFilter());
+                c.setRouteFilter(SpamFilter.newRouteFilter());
+            } else {
+                // If the connection isn't allowed now, close it.
+                c.close();
+            }
         }
         
-        UDPReplyHandler.setPersonalFilter(SpamFilter.newPersonalFilter());
+        // TODO: notify DownloadManager & UploadManager about new banned IP ranges
     }
 
     /**
@@ -1420,7 +1449,7 @@ public class RouterService {
                                       boolean overwrite, File saveDir,
 									  String fileName)
 		throws SaveLocationException {
-		return downloader.download(files, alts, queryGUID, overwrite, saveDir,
+		return downloadManager.download(files, alts, queryGUID, overwrite, saveDir,
 								   fileName);
 	}
 	
@@ -1466,7 +1495,7 @@ public class RouterService {
 		if (!magnet.isDownloadable()) {
 			throw new IllegalArgumentException("invalid magnet: not have enough information for downloading");
 		}
-		return downloader.download(magnet, overwrite, null, magnet.getDisplayName());
+		return downloadManager.download(magnet, overwrite, null, magnet.getDisplayName());
 	}
 
 	/**
@@ -1487,7 +1516,7 @@ public class RouterService {
 	 */
 	public static Downloader download(MagnetOptions magnet, boolean overwrite,
 			File saveDir, String fileName) throws SaveLocationException {
-		return downloader.download(magnet, overwrite, saveDir, fileName);
+		return downloadManager.download(magnet, overwrite, saveDir, fileName);
 	}
 
    /**
@@ -1498,7 +1527,7 @@ public class RouterService {
      */ 
     public static Downloader download(File incompleteFile)
             throws CantResumeException, SaveLocationException {
-        return downloader.download(incompleteFile);
+        return downloadManager.download(incompleteFile);
     }
 
 	/**

@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.filters;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -8,51 +12,118 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
- * Blocks messages and hosts based on IP address.  Formerly know as
- * BlackListFilter.  Immutable.  
+ * Blocks messages and hosts based on IP address.  
  */
 public final class IPFilter extends SpamFilter {
     
-    private static IPFilter _instance;
+    private volatile IPList badHosts;
+    private volatile IPList goodHosts;
     
-    private final IPList badHosts = new IPList();
-    private final IPList goodHosts = new IPList();
+    private final ProcessingQueue IP_LOADER = new ProcessingQueue("IpLoader");
 
-    /** Constructs a new BlackListFilter containing the addresses listed
-     *  in the SettingsManager. */
-    private IPFilter(){        
-        String[] allHosts = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-        for (int i=0; i<allHosts.length; i++)
-            badHosts.add(allHosts[i]);
-        
-        allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
-        for (int i=0; i<allHosts.length; i++)
-            goodHosts.add(allHosts[i]);        
+    /** Constructs an IPFilter that automatically loads the content. */
+    public IPFilter() {
+        this(true);
+    }
+    
+    /** Constructs an IPFilter that can optionally load the content. */
+    public IPFilter(boolean load) {
+        if(load) {
+            refreshHosts();
+        } else {
+            badHosts = new IPList();
+            goodHosts = new IPList();
+        }
     }
     
     /**
-     * Returns the current active instance of IPFilter.
+     * Constructs an IPFilter that will load the hosts in the background
+     * and notify the callback when it completes.
      */
-    public static IPFilter instance() {
-        if( _instance == null )
-            _instance = new IPFilter();
-        return _instance;
+    public IPFilter(IPFilterCallback callback) {
+        // setup some blank lists temporarily.
+        badHosts = new IPList();
+        goodHosts = new IPList();
+        
+        refreshHosts(callback);
+    }
+    
+    /** Blocks while loading the new filters. */
+    public void refreshHosts() {
+        refreshHostsImpl();
     }
     
     /**
      * Refresh the IPFilter's instance.
      */
-    public static void refreshIPFilter() {
-        _instance = new IPFilter();
+    public void refreshHosts(final IPFilterCallback callback) {
+        IP_LOADER.add(new Runnable() {
+            public void run() {
+                refreshHostsImpl();
+                callback.ipFiltersLoaded();
+            }
+        });
     }
-
-    /**
-     * Return the badList of the instance
-     */
-    public IPList getBadHosts() {
-        return badHosts;
+    
+    /** Does the work of setting new good  & bad hosts. */
+    private void refreshHostsImpl() {        
+        // Load basic bad...
+        IPList newBad = new IPList();
+        String[] allHosts = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        for (int i=0; i<allHosts.length; i++) {
+            newBad.add(allHosts[i]);
+        }
+        
+        // Load data from hostiles.txt...
+        File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(hostiles));
+            String read = null;
+            while( (read = reader.readLine()) != null) {
+                newBad.add(read);
+            }
+        } catch(IOException ignored) {
+        } finally {
+            IOUtils.close(reader);
+        }
+        
+        // Load basic good...
+        IPList newGood = new IPList();
+        allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
+        for (int i=0; i<allHosts.length; i++) {
+            newGood.add(allHosts[i]);
+        }
+        
+        badHosts = newBad;
+        goodHosts = newGood;
+    }
+    
+    /** Determiens if any blacklisted hosts exist. */
+    public boolean hasBlacklistedHosts() {
+        return !badHosts.isEmpty();
+    }
+    
+    /** Delegate method for badHosts.logMinDistanceTo(IP) */
+    public int logMinDistanceTo(byte[] addr) {
+        return badHosts.logMinDistanceTo(new IP(addr));
+    }
+    
+    /** Determines if the given address is allowed. */
+    public boolean allow(InetAddress addr) {
+        IP ip = new IP(addr.getAddress());
+        return goodHosts.contains(ip) || !badHosts.contains(ip);
+    }
+    
+    /** Determines if the given IpPort is allowed. */
+    public boolean allow(IpPort ipp) {
+        return allow(ipp.getAddress());
     }
     
     /** 
@@ -114,6 +185,10 @@ public final class IPFilter extends SpamFilter {
             return allow(push.getIP());
         } else // we dont want to block other kinds of messages
             return true;
+    }
+    
+    public static interface IPFilterCallback {
+        public void ipFiltersLoaded();
     }
 }
 
