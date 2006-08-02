@@ -144,7 +144,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return found.setKeyValue(key, value);
         }
         
-        int bitIndex = bitIndex(0, key, found.key);
+        int bitIndex = bitIndex(key, found.key);
         if (isValidBitIndex(bitIndex)) { // in 99.999...9% the case
             /* NEW KEY+VALUE TUPLE */
             TrieEntry<K, V> t = new TrieEntry<K, V>(key, value, bitIndex);
@@ -855,16 +855,11 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /**
-     * Returns the first different bit between key & foundKey,
-     * starting at startAt.
-     * 
-     * @param startAt
-     * @param key
-     * @param foundKey
-     * @return
+     * Utility method for calling
+     * keyAnalyzer.bitIndex(key, 0, length(key), foundKey, 0, length(foundKey))
      */
-    private int bitIndex(int startAt, K key, K foundKey) {
-        return keyAnalyzer.bitIndex(startAt, key, foundKey);
+    private int bitIndex(K key, K foundKey) {
+        return keyAnalyzer.bitIndex(key, 0, length(key), foundKey, 0, length(foundKey));
     }
     
     /** The actual Trie nodes. */
@@ -1040,10 +1035,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         public boolean isBitSet(K key, int keyLength, int bitIndex);
         
         /**
-         * Returns the n-th different bit between key and found,
-         * starting the comparison at startAt.
+         * Returns the n-th different bit between key and found.
+         * This starts the comparison in key at 'keyStart' and goes
+         * for 'keyLength' bits, and compares to the found key
+         * starting at 'foundStart' and going for 'foundLength' bits.
          */
-        public int bitIndex(int startAt, K key, K found);
+        public int bitIndex(K key, int keyStart, int keyLength,
+                            K found, int foundStart, int foundLength);
         
         /**
          * Returns the number of bits per element in the key.
@@ -1463,7 +1461,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if (key.equals(found.key))
             return nextEntry(found);
         
-        int bitIndex = bitIndex(0, key, found.key);
+        int bitIndex = bitIndex(key, found.key);
         if (isValidBitIndex(bitIndex)) {
             TrieEntry<K, V> added = new TrieEntry<K, V>(key, null, bitIndex);
             addEntry(added, keyLength);
@@ -1523,7 +1521,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if (key.equals(found.key))
             return found;
         
-        int bitIndex = bitIndex(0, key, found.key);
+        int bitIndex = bitIndex(key, found.key);
         if (isValidBitIndex(bitIndex)) {
             TrieEntry<K, V> added = new TrieEntry<K, V>(key, null, bitIndex);
             addEntry(added, keyLength);
@@ -1577,7 +1575,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if (key.equals(found.key))
             return previousEntry(found);
         
-        int bitIndex = bitIndex(0, key, found.key);
+        int bitIndex = bitIndex(key, found.key);
         if (isValidBitIndex(bitIndex)) {
             TrieEntry<K, V> added = new TrieEntry<K, V>(key, null, bitIndex);
             addEntry(added, keyLength);
@@ -1617,7 +1615,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         if (key.equals(found.key))
             return found;
         
-        int bitIndex = bitIndex(0, key, found.key);
+        int bitIndex = bitIndex(key, found.key);
         if (isValidBitIndex(bitIndex)) {
             TrieEntry<K, V> added = new TrieEntry<K, V>(key, null, bitIndex);
             addEntry(added, keyLength);
@@ -1654,10 +1652,11 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
                 break;
             
             path = current;
-            if(!isBitSet(prefix, length, current.bitIndex))
+            if(!isBitSet(prefix, length+offset, current.bitIndex+offset)) {
                 current = current.left;
-            else
+            } else {
                 current = current.right;
+            }
         }        
 
         // Make sure the entry is valid for a subtree.
@@ -1672,15 +1671,16 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         // Found key's length-th bit differs from our key
         // which means it cannot be the prefix...
         if(isBitSet(prefix, offsetLength, offsetLength) != 
-          isBitSet(entry.key, length(entry.key), offsetLength))
+          isBitSet(entry.key, length(entry.key), length)) {
             return null;
+        }
         
         // ... or there are less than 'length' equal bits
         // TODO: must offset the bitIndex lookup in key
-        int bitIndex = bitIndex(0, prefix, entry.key);
+        int bitIndex = keyAnalyzer.bitIndex(prefix, offset, length,
+                                            entry.key, 0, length(entry.getKey()));
         if (bitIndex >= 0 && bitIndex < length)
             return null;
-        
         
         return entry;
     }

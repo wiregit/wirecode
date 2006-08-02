@@ -199,12 +199,18 @@ public class IPList {
             return (maddr & BITS[bitIndex]) != 0;
         }
         
-        public int bitIndex(int startAt, IP key, IP found) {
+        public int bitIndex(IP key,   int keyOff, int keyLength,
+                            IP found, int foundOff, int foundKeyLength) {
             int maddr1 = key.addr & key.mask;
             int maddr2 = (found != null) ? found.addr & found.mask : 0;
             
+            if(keyOff != 0 || foundOff != 0)
+                throw new IllegalArgumentException("offsets must be 0 for fixed-size keys");
+            
+            int length = Math.max(keyLength, foundKeyLength);
+            
             boolean allNull = true;
-            for (int i = startAt; i < 32; i++) {
+            for (int i = 0; i < length; i++) {
                 int a = maddr1 & BITS[i];
                 int b = maddr2 & BITS[i];
                 

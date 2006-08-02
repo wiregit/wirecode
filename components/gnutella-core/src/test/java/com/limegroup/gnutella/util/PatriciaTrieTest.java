@@ -852,6 +852,65 @@ public class PatriciaTrieTest extends BaseTestCase {
         assertFalse(iterator.hasNext());
     }
     
+    public void testPrefixByOffsetAndLength() {
+        PatriciaTrie<String, String> trie 
+            = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+        
+        final String[] keys = new String[]{
+                "Albert", "Xavier", "XyZ", "Anna", "Alien", "Alberto",
+                "Alberts", "Allie", "Alliese", "Alabama", "Banane",
+                "Blabla", "Amber", "Ammun", "Akka", "Akko", "Albertoo",
+                "Amma"
+        };
+    
+        for (String key : keys) {
+            trie.put(key, key);
+        }
+        
+        SortedMap<String, String> map;
+        Iterator<String> iterator;
+        
+        map = trie.getPrefixedBy("Alice", 2);
+        assertEquals(8, map.size());
+        assertEquals("Alabama", map.firstKey());
+        assertEquals("Alliese", map.lastKey());
+        assertEquals("Albertoo", map.get("Albertoo"));
+        assertNotNull(trie.get("Xavier"));
+        assertNull(map.get("Xavier"));
+        assertNull(trie.get("Alice"));
+        assertNull(map.get("Alice"));
+        iterator = map.values().iterator();
+        assertEquals("Alabama", iterator.next());
+        assertEquals("Albert", iterator.next());
+        assertEquals("Alberto", iterator.next());
+        assertEquals("Albertoo", iterator.next());
+        assertEquals("Alberts", iterator.next());
+        assertEquals("Alien", iterator.next());
+        assertEquals("Allie", iterator.next());
+        assertEquals("Alliese", iterator.next());
+        assertFalse(iterator.hasNext());
+        
+        map = trie.getPrefixedBy("BAlice", 1, 2);
+        assertEquals(8, map.size());
+        assertEquals("Alabama", map.firstKey());
+        assertEquals("Alliese", map.lastKey());
+        assertEquals("Albertoo", map.get("Albertoo"));
+        assertNotNull(trie.get("Xavier"));
+        assertNull(map.get("Xavier"));
+        assertNull(trie.get("Alice"));
+        assertNull(map.get("Alice"));
+        iterator = map.values().iterator();
+        assertEquals("Alabama", iterator.next());
+        assertEquals("Albert", iterator.next());
+        assertEquals("Alberto", iterator.next());
+        assertEquals("Albertoo", iterator.next());
+        assertEquals("Alberts", iterator.next());
+        assertEquals("Alien", iterator.next());
+        assertEquals("Allie", iterator.next());
+        assertEquals("Alliese", iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+    
     public void testPrefixedByRemoval() {
         PatriciaTrie<String, String> trie 
             = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
@@ -989,12 +1048,19 @@ public class PatriciaTrieTest extends BaseTestCase {
             return (key & BITS[bitIndex]) != 0;
         }
 
-        public int bitIndex(int startAt, Integer key, Integer found) {
+        public int bitIndex(Integer key,   int keyOff, int keyLength,
+                            Integer found, int foundOff, int foundKeyLength) {
             if (found == null)
                 found = 0;
+            
+            if(keyOff != 0 || foundOff != 0)
+                throw new IllegalArgumentException("offsets must be 0 for fixed-size keys");
 
             boolean allNull = true;
-            for (int i = startAt; i < 32; i++) {
+            
+            int length = Math.max(keyLength, foundKeyLength);
+            
+            for (int i = 0; i < length; i++) {
                 int a = key & BITS[i];
                 int b = found & BITS[i];
 
@@ -1059,12 +1125,18 @@ public class PatriciaTrieTest extends BaseTestCase {
             return (key & BITS[bitIndex]) != 0;
         }
 
-        public int bitIndex(int startAt, Character key, Character found) {
+        public int bitIndex(Character key,   int keyOff, int keyLength,
+                            Character found, int foundOff, int foundKeyLength) {
             if (found == null)
                 found = 0;
+            
+            if(keyOff != 0 || foundOff != 0)
+                throw new IllegalArgumentException("offsets must be 0 for fixed-size keys");
+            
+            int length = Math.max(keyLength, foundKeyLength);
 
             boolean allNull = true;
-            for (int i = startAt; i < 16; i++) {
+            for (int i = 0; i < length; i++) {
                 int a = key & BITS[i];
                 int b = found & BITS[i];
 
