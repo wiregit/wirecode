@@ -247,8 +247,10 @@ class VerifyingFolder implements TorrentDiskManager {
 		
 		long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
 		int written = 0;
-		for (int i = 0; i < _files.size() && written < buf.length; i++) {
-			if (startOffset < _files.get(i).length()) {
+		int filesSize = _files.size();
+		for (int i = 0; i < filesSize && written < buf.length; i++) {
+			TorrentFile current = _files.get(i);
+			if (startOffset < current.length()) {
 				RandomAccessFile currentFile;
 				synchronized(this) {
 					if (!isOpen())
@@ -256,17 +258,14 @@ class VerifyingFolder implements TorrentDiskManager {
 					currentFile = _fos[i];
 				}
 				currentFile.seek(startOffset);
-				int toWrite = (int) Math.min(_files.get(i).length()- startOffset,
+				int toWrite = (int) Math.min(current.length()- startOffset,
 						buf.length - written);
-				
-				if (currentFile.length() < startOffset + toWrite)
-					currentFile.setLength(startOffset + toWrite);
 				
 				currentFile.write(buf, written, toWrite);
 				startOffset += toWrite;
 				written += toWrite;
 			} 
-			startOffset -= _files.get(i).length();
+			startOffset -= current.length();
 		}
 		
 		synchronized(this) {
@@ -653,11 +652,14 @@ class VerifyingFolder implements TorrentDiskManager {
 					currentFile = _fos[i];
 				}
 				Assert.that(currentFile != null, "file being read & verified at the same time");
+				
 				if (flush)
 					currentFile.getChannel().force(false);
-				if (currentFile.length() < f.length() && position >= currentFile.length())
+				
+				long currentLength = currentFile.length();
+				if (currentLength < f.length() && position >= currentLength)
 					return read;
-				int toRead = (int) Math.min(currentFile.length() - position, length
+				int toRead = (int) Math.min(currentLength - position, length
 						- read);
 				currentFile.seek(position);
 				int t_read = currentFile.read(buf, read + offset, toRead);
@@ -806,7 +808,7 @@ class VerifyingFolder implements TorrentDiskManager {
 				// if not and this is the last partial chunk, doubly-assign some
 				// part of it (a.k.a. endgame?)
 				if (endgame && needed.isEmpty() && !iterator.hasNext()) {
-						LOG.debug("endgame");
+					LOG.debug("endgame");
 					needed = (IntervalSet)requested.clone();
 					
 					// exclude the specified intervals again
@@ -819,8 +821,12 @@ class VerifyingFolder implements TorrentDiskManager {
 				continue;
 			
 			ret = new BTInterval(needed.getFirst(),block);
-			if (LOG.isDebugEnabled())
-				LOG.debug("selected partial/requested interval "+ret);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("selected partial/requested interval "+ret+
+						" with partial "+partialBlocks.get(ret.getId())+
+						" requested "+requestedRanges.get(ret.getId())+
+						" pending "+pendingRanges.get(ret.getId()));
+			}
 		}
 		
 		// couldn't find anything to assign.

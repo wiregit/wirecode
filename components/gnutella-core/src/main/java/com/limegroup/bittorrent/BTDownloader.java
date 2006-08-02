@@ -358,6 +358,7 @@ implements TorrentEventListener {
 
 	private void torrentStopped() {
 		if (stopTime == 0) {
+			averagedBandwidth.clear();
 			boolean resumable = isResumable();
 			stopTime = System.currentTimeMillis();
 			manager.remove(this, !resumable);
