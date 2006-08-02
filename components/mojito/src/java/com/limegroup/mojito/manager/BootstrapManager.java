@@ -290,7 +290,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                     	}
                     	
                     	if((failures * MAX_NODE_FAILED_PER_LOOKUP) 
-                    			< KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    			>= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
                     		//routing table is stale! remove unknown and dead contacts
                     		//and start over
                     		context.getRouteTable().purge();
