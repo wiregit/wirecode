@@ -66,8 +66,9 @@ public class RouteTableImpl implements RouteTable {
     }
     
     private void init() {
+        KUID nodeId = context.getLocalNodeID();
         KUID bucketId = KUID.MIN_NODE_ID;
-        bucketTrie.put(bucketId, new BucketNode(context.getLocalNode(), bucketId, 0));
+        bucketTrie.put(bucketId, new BucketNode(nodeId, bucketId, 0));
         
         consecutiveFailures = 0;
         smallestSubtreeBucket = null;

@@ -41,7 +41,7 @@ import com.limegroup.mojito.util.Trie.Cursor;
  */
 class BucketNode implements Bucket {
     
-    private Contact localNode;
+    private KUID nodeId;
     
     private KUID bucketId;
     
@@ -53,8 +53,8 @@ class BucketNode implements Bucket {
     
     private long timeStamp = 0L;
     
-    public BucketNode(Contact localNode, KUID bucketId, int depth) {
-        this.localNode = localNode;
+    public BucketNode(KUID nodeId, KUID bucketId, int depth) {
+        this.nodeId = nodeId;
         this.bucketId = bucketId;
         this.depth = depth;
         
@@ -254,7 +254,7 @@ class BucketNode implements Bucket {
     
     public void purge(){
         for (Contact node : nodeTrie.values()) {
-            if(!node.isAlive() && !node.getNodeID().equals(localNode.getNodeID())) {
+            if(!node.isAlive() && !nodeId.equals(node.getNodeID())) {
                 nodeTrie.remove(node.getNodeID());
             }
         }
@@ -298,8 +298,8 @@ class BucketNode implements Bucket {
 
         assert (getCachedContacts().isEmpty() == true);
         
-        Bucket left = new BucketNode(localNode, bucketId, depth+1);
-        Bucket right = new BucketNode(localNode, bucketId.set(depth), depth+1);
+        Bucket left = new BucketNode(nodeId, bucketId, depth+1);
+        Bucket right = new BucketNode(nodeId, bucketId.set(depth), depth+1);
         
         for (Contact node : getLiveContacts()) {
             KUID nodeId = node.getNodeID();

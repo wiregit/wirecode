@@ -34,7 +34,7 @@ public class BucketNodeTest extends TestCase {
     
     public void testPurge() {
         SocketAddress address = new InetSocketAddress("localhost", 2000);
-        Bucket bucket = new BucketNode(localNode, KUID.MIN_NODE_ID, 0);
+        Bucket bucket = new BucketNode(localNode.getNodeID(), KUID.MIN_NODE_ID, 0);
         bucket.addLiveContact(localNode);
         //try purging bucket with only local node
         bucket.purge();
