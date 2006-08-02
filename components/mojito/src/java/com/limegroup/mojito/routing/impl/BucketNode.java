@@ -253,15 +253,11 @@ class BucketNode implements Bucket {
     }
     
     public void purge(){
-    	nodeTrie.traverse(new Cursor<KUID, Contact>() {
-            public boolean select(Map.Entry<? extends KUID, ? extends Contact> entry) {
-                Contact node = entry.getValue();
-                if(node.isDead() || node.isUnknown()) {
-                	nodeTrie.remove(node.getNodeID()); //TODO: optimize this??
-                }
-                return false;
+        for (Contact node : nodeTrie.values()) {
+            if(!node.isAlive() && !context.isLocalNode(node)) {
+                nodeTrie.remove(node.getNodeID());
             }
-        });
+        }
     }
 
     // O(1)
