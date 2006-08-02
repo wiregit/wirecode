@@ -75,7 +75,6 @@ public class IPList {
         Map.Entry<IP, IP> entry = ips.select(ip, filter);
         if(entry != null) {
             if(!entry.getKey().contains(ip)) {
-                // TODO: remove during select instead of afterwards.
                 for(IP obsolete : filter.getContained()) {
                     ips.remove(obsolete);
                 }
@@ -132,7 +131,10 @@ public class IPList {
         // work well in that the closest item within the trie is also the shortest
         // distance.
         IP ip = ips.select(lookup);
-        return ip.getDistanceTo(lookup);
+        if(ip == null)
+            return Integer.MAX_VALUE;
+        else
+            return ip.getDistanceTo(lookup);
     }
     
     /**
@@ -165,14 +167,13 @@ public class IPList {
                 return Cursor.SelectStatus.EXIT; // Terminate
             }
             
-            // TODO: remove here when it starts working.
             if(lookup.contains(compare)) {
                 if(contained == null)
                     contained = new ArrayList<IP>();
                 contained.add(compare);
             }
             
-            // See AddFilter for explanation.
+            // If we're moving further away from the IP, exit.
             int distance = compare.getDistanceTo(lookup);
             return distance > 1 ? SelectStatus.EXIT : SelectStatus.CONTINUE;
         }

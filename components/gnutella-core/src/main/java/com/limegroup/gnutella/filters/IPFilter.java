@@ -56,7 +56,6 @@ public final class IPFilter extends SpamFilter {
     
     /** Blocks while loading the new filters. */
     public void refreshHosts() {
-        System.out.println("Loading hosts (blocking)");
         refreshHostsImpl();
     }
     
@@ -64,7 +63,6 @@ public final class IPFilter extends SpamFilter {
      * Refresh the IPFilter's instance.
      */
     public void refreshHosts(final IPFilterCallback callback) {
-        System.out.println("Loading hosts (asynchronous)");
         IP_LOADER.add(new Runnable() {
             public void run() {
                 refreshHostsImpl();
@@ -74,24 +72,18 @@ public final class IPFilter extends SpamFilter {
     }
     
     /** Does the work of setting new good  & bad hosts. */
-    private void refreshHostsImpl() {
-        System.out.println("Loading hosts (impl)");
-        
+    private void refreshHostsImpl() {        
         // Load basic bad...
         IPList newBad = new IPList();
         String[] allHosts = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
         for (int i=0; i<allHosts.length; i++) {
-            System.out.println("Loading from settings[" + i + "], " + allHosts[i]);
             newBad.add(allHosts[i]);
         }
         
         // Load data from hostiles.txt...
         File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
         BufferedReader reader = null;
-        long start, end;
-        start = System.currentTimeMillis();
         try {
-            System.out.println("Trying to load from hostiles...");
             reader = new BufferedReader(new FileReader(hostiles));
             String read = null;
             while( (read = reader.readLine()) != null) {
@@ -103,15 +95,10 @@ public final class IPFilter extends SpamFilter {
             IOUtils.close(reader);
         }
         
-        end = System.currentTimeMillis();
-        System.out.println("Done loading hostiles (size: " + newBad.size() + "), time: " + (end-start));
-        
         // Load basic good...
         IPList newGood = new IPList();
-        System.out.println("Loading good");
         allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
         for (int i=0; i<allHosts.length; i++) {
-            System.out.println("Loading from good settings[" + i + "], " + allHosts[i]);
             newGood.add(allHosts[i]);
         }
         
