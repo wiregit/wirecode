@@ -255,7 +255,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                         }
                     } else { // there might be a NodeID collision
                         if (LOG.isWarnEnabled()) {
-                            LOG.warn(node + " seems to collidate with " + context.getLocalNode());
+                            LOG.warn(node + " seems to collide with " + context.getLocalNode());
                         }
                         
                         // Continue with the lookup but run in parallel a
