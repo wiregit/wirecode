@@ -167,7 +167,7 @@ public class BusyLeafQRTUpdateTest extends BaseTestCase {
         public void addStubOvrConnection( ManagedConnectionCountQRT mcso ) throws Exception {
             PrivilegedAccessor.invokeMethod( 
                     this, "connectionInitializing",  
-                    new Object[] { mcso }, new Class[] { Connection.class } );
+                    new Object[] { mcso }, new Class[] { ManagedConnection.class } );
 
             PrivilegedAccessor.invokeMethod( 
                     this, "connectionInitialized",  
