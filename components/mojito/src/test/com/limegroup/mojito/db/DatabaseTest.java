@@ -120,7 +120,7 @@ public class DatabaseTest extends BaseTestCase {
                 database.get(value4.getValueID())
                     .get(value4.getOriginatorID()).getData()));
         
-        // And local values replace direct values
+        // Add a new direct value
         DHTValue value5 = createDirectDHTValue("Mojito".getBytes());
         database.store(value5);
         assertEquals(2, database.getKeyCount());
@@ -129,6 +129,7 @@ public class DatabaseTest extends BaseTestCase {
                 database.get(value5.getValueID())
                     .get(value5.getOriginatorID()).getData()));
         
+        // local values replace direct values
         DHTValue value6 = createLocalDHTValue(value5.getOriginatorID(), 
                 value5.getValueID(), "Mary".getBytes());
         database.store(value6);
@@ -138,7 +139,7 @@ public class DatabaseTest extends BaseTestCase {
                 database.get(value6.getValueID())
                     .get(value6.getOriginatorID()).getData()));
         
-        // as well as indirect values
+        // Add an indirect value
         DHTValue value7 = createDirectDHTValue("Bloody".getBytes());
         database.store(value7);
         assertEquals(3, database.getKeyCount());
@@ -147,6 +148,7 @@ public class DatabaseTest extends BaseTestCase {
                 database.get(value7.getValueID())
                     .get(value7.getOriginatorID()).getData()));
         
+        // local values replace indirect values
         DHTValue value8 = createLocalDHTValue(value7.getOriginatorID(), 
                 value7.getValueID(), "Lime".getBytes());
         database.store(value8);
@@ -330,7 +332,7 @@ public class DatabaseTest extends BaseTestCase {
                 database.get(value5.getValueID())
                     .get(value5.getOriginatorID()).getData()));
         
-        // But a local value can return a local value
+        // But a local value can remove a local value
         DHTValue value6 = createLocalDHTValue(value4.getOriginatorID(), 
                 value4.getValueID(), new byte[0]);
         database.store(value6);
