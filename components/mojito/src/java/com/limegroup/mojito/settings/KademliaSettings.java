@@ -52,13 +52,13 @@ public class KademliaSettings extends MojitoProps {
      * The FIND_NODE lookup timeout
      */
     public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
-        = FACTORY.createLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 30L*1000L);
+        = FACTORY.createSettableLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 30L*1000L, "find_node_lookup_timeout", 30L*1000L, 3L*60L*1000L);
     
     /**
      * The FIND_VALUE lookup timeout
      */
     public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
-        = FACTORY.createLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 45L*1000L);
+        = FACTORY.createSettableLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 45L*1000L, "find_value_lookup_timeout", 45L*1000L, 3L*80L*1000L);
     
     /**
      * Whether or not a value lookup is exhaustive

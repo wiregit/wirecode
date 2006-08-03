@@ -75,7 +75,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
     }
     
     public long timeout() {
-        return NetworkSettings.MAX_TIMEOUT.getValue();
+        return NetworkSettings.TIMEOUT.getValue();
     }
 
     public boolean isCancelled() {

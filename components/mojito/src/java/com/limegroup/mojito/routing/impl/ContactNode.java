@@ -246,11 +246,11 @@ public class ContactNode implements Contact {
     
     public long getAdaptativeTimeout() {
         //for now, based on failures and previous round trip time
-        long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
-        if(rtt <= 0L || isDead()) {
-            return maxTimeout;
+        long timeout = NetworkSettings.TIMEOUT.getValue();
+        if(rtt <= 0L || !isAlive()) {
+            return timeout;
         } else {
-            return Math.min(maxTimeout, 
+            return Math.min(timeout, 
                 ((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * rtt) + failures * rtt));
         }
     }

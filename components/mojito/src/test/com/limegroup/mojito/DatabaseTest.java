@@ -29,18 +29,18 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.routing.impl.ContactNode;
 
-public class DataBaseTest extends BaseTestCase {
+public class DatabaseTest extends BaseTestCase {
     
     private static InetSocketAddress addr = new InetSocketAddress("localhost",3000);
     
     private MojitoDHT dht = null;
     
-    public DataBaseTest(String name) {
+    public DatabaseTest(String name) {
         super(name);
     }
 
     public static TestSuite suite() {
-        return buildTestSuite(DataBaseTest.class);
+        return buildTestSuite(DatabaseTest.class);
     }
 
     public static void main(String[] args) {

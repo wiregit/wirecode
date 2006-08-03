@@ -125,6 +125,10 @@ public class DHTValue implements Serializable {
         return originator;
     }
     
+    public KUID getOriginatorID() {
+        return originator.getNodeID();
+    }
+    
     /*public void setSender(Contact sender) {
         this.sender = sender;
     }*/
@@ -170,8 +174,15 @@ public class DHTValue implements Serializable {
             return false;
         }
 
-        long expirationTime = getCreationTime()
-                + DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue();
+        long expirationTime = 0L;
+        if (isNearby()) {
+            expirationTime = getCreationTime()
+                + DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
+        } else {
+            expirationTime = getCreationTime()
+                + (long)(DatabaseSettings.VALUE_EXPIRATION_TIME.getValue()
+                    * DatabaseSettings.NOT_NEARBY_EXPIRATION_TIME_RATIO.getValue());
+        }
         
         return System.currentTimeMillis() >= expirationTime;
     }

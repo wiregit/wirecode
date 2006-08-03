@@ -34,6 +34,7 @@ import java.util.Set;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
+import com.limegroup.mojito.settings.DatabaseSettings;
 
 public class DatabaseImpl implements Database {
 
@@ -69,6 +70,10 @@ public class DatabaseImpl implements Database {
             throw new IllegalArgumentException();
         }
         
+        if (!canAddValue(database, value)) {
+            return false;
+        }
+        
         KUID valueId = value.getValueID();
         DHTValueBag valueMap = database.get(valueId);
         
@@ -86,7 +91,26 @@ public class DatabaseImpl implements Database {
         return added;
     }
     
+    protected boolean canAddValue(Map<KUID, ? extends Map<KUID, DHTValue>> database, DHTValue value) {
+        
+        KUID valueId = value.getValueID();
+        KUID nodeId = value.getOriginatorID();
+        Map<KUID, DHTValue> map = database.get(valueId);
+        
+        if (map == null) {
+            return database.size() < DatabaseSettings.MAX_DATABASE_SIZE.getValue();
+        } else if (map.size() < DatabaseSettings.MAX_VALUES_PER_KEY.getValue()) {
+            return true;
+        }
+        
+        return value.isDirect() && map.containsKey(nodeId);
+    }
+    
     public synchronized boolean remove(DHTValue value) {
+        if (!canRemoveValue(database, value)) {
+            return false;
+        }
+        
         KUID valueId = value.getValueID();
         DHTValueBag valueMap = database.get(valueId);
         if (valueMap != null) {
@@ -102,6 +126,10 @@ public class DatabaseImpl implements Database {
             }
         }
         return false;
+    }
+    
+    protected boolean canRemoveValue(Map<KUID, ? extends Map<KUID, DHTValue>> database, DHTValue value) {
+        return true;
     }
     
     public synchronized Map<KUID, DHTValue> get(KUID valueId) {
@@ -185,7 +213,7 @@ public class DatabaseImpl implements Database {
         protected boolean addDirect(DHTValue value) {
             assert (value.isDirect());
             
-            KUID originatorId = value.getOriginator().getNodeID();
+            KUID originatorId = value.getOriginatorID();
             
             // Do not replace local with non-local values
             DHTValue current = get(originatorId);
@@ -204,7 +232,7 @@ public class DatabaseImpl implements Database {
             assert (!value.isDirect());
             assert (!value.isLocalValue()); // cannot be a local value
             
-            KUID originatorId = value.getOriginator().getNodeID();
+            KUID originatorId = value.getOriginatorID();
             
             // Do not overwrite an directly stored value
             DHTValue current = get(originatorId);
@@ -225,8 +253,15 @@ public class DatabaseImpl implements Database {
             if (value.isDirect() 
                     || value.isLocalValue() 
                     || value.isExpired()) {
-                KUID originatorId = value.getOriginator().getNodeID();
-                return super.remove(originatorId);
+                
+                KUID originatorId = value.getOriginatorID();
+                DHTValue current = get(originatorId);
+                if (current != null) {
+                    if (!current.isLocalValue()
+                            || (current.isLocalValue() && value.isLocalValue())) {
+                        return super.remove(originatorId);
+                    }
+                }
             }
             
             return null;

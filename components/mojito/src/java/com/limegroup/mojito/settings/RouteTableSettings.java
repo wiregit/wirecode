@@ -31,9 +31,6 @@ public final class RouteTableSettings extends MojitoProps {
     public static final IntSetting MAX_CACHE_SIZE
         = FACTORY.createSettableIntSetting("MAX_CACHE_SIZE", 16, "max_cache_size", 1, 256);
     
-    public static final BooleanSetting SKIP_STALE
-        = FACTORY.createBooleanSetting("SKIP_STALE", true);
-    
     // TODO reasonable min and max values
     public static final IntSetting MAX_LIVE_NODE_FAILURES
         = FACTORY.createSettableIntSetting("MAX_LIVE_NODE_FAILURES", 4, "max_live_node_failures", 4, 10);

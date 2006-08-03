@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.security.KeyPair;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -32,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
-import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.util.BucketUtils;
 
@@ -54,7 +52,7 @@ public class MojitoFactory {
     }
     
     public static MojitoDHT createDHT(String name) {
-        return create(name, null, false, CryptoHelper.createKeyPair());
+        return create(name, null, false);
     }
     
     public static MojitoDHT createFirewalledDHT() {
@@ -62,11 +60,10 @@ public class MojitoFactory {
     }
     
     public static MojitoDHT createFirewalledDHT(String name) {
-        return create(name, null, true, CryptoHelper.createKeyPair());
+        return create(name, null, true);
     }
     
-    private static Context create(String name, Contact localNode, 
-            boolean firewalled, KeyPair keyPair) {
+    private static Context create(String name, Contact localNode, boolean firewalled) {
         
         if (name == null) {
             name = DEFAULT_NAME;
@@ -86,7 +83,7 @@ public class MojitoFactory {
             }
         }
 
-        Context context = new Context(name, localNode, keyPair);
+        Context context = new Context(name, localNode);
         return context;
     }
     
@@ -159,14 +156,14 @@ public class MojitoFactory {
                 
                 // Terminator
                 oos.writeObject(null);
-            }*/
+            }
             
             // Store the KeyPair if there are any local KeyValues
             if (storeDatabase && anyLocalKeyValue) {
                 oos.writeObject(context.getKeyPair());
             } else {
                 oos.writeObject(null);
-            }
+            }*/
         }
     }
     
@@ -209,10 +206,9 @@ public class MojitoFactory {
             nodeId = oldNodeId;
         }
         
-        Contact local = ContactNode.createLocalContact(vendor, version, nodeId, instanceId);
+        Contact localNode = ContactNode.createLocalContact(vendor, version, nodeId, instanceId);
         
-        // Create an instance w/o a KeyPair for now (will set it later!)
-        Context dht = create(name, local, firewalled, null);
+        Context dht = create(name, localNode, firewalled);
         
         // Load the RouteTable
         boolean storeRouteTable = ois.readBoolean();

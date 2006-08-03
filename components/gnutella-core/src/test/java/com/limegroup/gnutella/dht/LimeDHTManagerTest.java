@@ -96,7 +96,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
     
     public void testAddBootstrapHost() throws Exception{
         NetworkSettings.MAX_ERRORS.setValue(1);
-        NetworkSettings.MAX_TIMEOUT.setValue(300);
+        NetworkSettings.TIMEOUT.setValue(300);
         RouterService.startDHT(true);
         DHTController controller = getController();
         sleep(300);

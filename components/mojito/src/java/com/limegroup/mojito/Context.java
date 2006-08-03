@@ -28,7 +28,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,9 +96,6 @@ public class Context implements MojitoDHT {
     private SocketAddress localAddress;
     
     private SocketAddress tmpExternalAddress;
-
-    private final Object keyPairLock = new Object();
-    private volatile KeyPair keyPair;
     
     private Database database;
     private RouteTable routeTable;
@@ -133,10 +129,9 @@ public class Context implements MojitoDHT {
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
     
-    Context(String name, Contact localNode, KeyPair keyPair) {
+    Context(String name, Contact localNode) {
         this.name = name;
         this.localNode = localNode;
-        this.keyPair = keyPair;
         
         PublicKey masterKey = null;
         try {
@@ -240,32 +235,6 @@ public class Context implements MojitoDHT {
     
     public void setMasterKeyPair(KeyPair masterKeyPair) {
         this.masterKeyPair = masterKeyPair;
-    }
-    
-    public void createNewKeyPair() {
-        setKeyPair(null);
-    }
-    
-    public void setKeyPair(KeyPair keyPair) {
-        synchronized (keyPairLock) {
-            if (keyPair == null) {
-                this.keyPair = CryptoHelper.createKeyPair();
-            } else {
-                this.keyPair = keyPair;
-            }
-        }
-    }
-    
-    public KeyPair getKeyPair() {
-        return keyPair;
-    }
-    
-    public PublicKey getPublicKey() {
-        return keyPair.getPublic();
-    }
-    
-    public PrivateKey getPrivateKey() {
-        return keyPair.getPrivate();
     }
     
     public Contact getLocalNode() {

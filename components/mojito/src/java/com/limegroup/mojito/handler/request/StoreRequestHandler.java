@@ -97,8 +97,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             nodes = context.getRouteTable().select(valueId, k, true);
             if (!nodes.contains(context.getLocalNode())) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("We are not close to " + valueId 
-                            + ". KeyValue will expire faster!");
+                    LOG.trace("We are not nearby to " + valueId 
+                            + ". The value will expire faster!");
                 }
                 
                 context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();

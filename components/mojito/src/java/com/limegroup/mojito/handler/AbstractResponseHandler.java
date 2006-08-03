@@ -92,7 +92,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         this.context = context;
         
         if (timeout < 0L) {
-            this.timeout = NetworkSettings.MAX_TIMEOUT.getValue();
+            this.timeout = NetworkSettings.TIMEOUT.getValue();
         } else {
             this.timeout = timeout;
         }

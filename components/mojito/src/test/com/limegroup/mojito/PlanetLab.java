@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import com.limegroup.mojito.db1.KeyValue;
+import com.limegroup.gnutella.util.KeyValue;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.StoreListener;
 import com.limegroup.mojito.settings.DatabaseSettings;
@@ -47,7 +47,7 @@ public class PlanetLab {
     private static long maxChurn = 10L * 60L * 1000L;
     
     private static long minRepublisher = (long)(((float)2/3) * 
-        DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue());
+        DatabaseSettings.VALUE_EXPIRATION_TIME.getValue());
     
     private static long minRetriever = 1L * 60L * 1000L;
     private static long maxRetriever = 5L * 60L * 1000L;
@@ -120,7 +120,7 @@ public class PlanetLab {
         
         if(testNumber == 4 || testNumber == 5) {
             //5 minutes expiration
-            DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.setValue(5L * 60L * 1000L);
+            DatabaseSettings.VALUE_EXPIRATION_TIME.setValue(5L * 60L * 1000L);
         }
         
         long start = System.currentTimeMillis();
