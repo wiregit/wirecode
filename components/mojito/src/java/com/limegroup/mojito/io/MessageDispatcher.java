@@ -393,7 +393,11 @@ public abstract class MessageDispatcher implements Runnable {
             processResponse(receipt, response);
             
         } else if (message instanceof RequestMessage) {
-            if (!context.getLocalNode().isFirewalled()) {
+            if (context.getLocalNode().isFirewalled()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.trace("Local Node is firewalled, dropping " + message);
+                }
+            } else {
                 processRequest((RequestMessage)message);
             }
             
