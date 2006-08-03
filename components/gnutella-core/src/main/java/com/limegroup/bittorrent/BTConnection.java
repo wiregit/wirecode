@@ -329,7 +329,7 @@ PieceSendListener, PieceReadListener {
 	 */
 	public void wroteBytes(int written) {
 		up.count(written);
-		_torrent.countUploaded(written);
+		_info.countUploaded(written);
 	}
 
 	/**

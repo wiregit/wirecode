@@ -92,6 +92,17 @@ public class BTMetaInfo implements Serializable {
 	private transient FileDesc _desc = null;
 	
 	/**
+	 * The amount of data uploaded in previous session(s)
+	 * only set once during deserialization
+	 */
+	private long uploadedBefore;
+	
+	/**
+	 * The amount of data uploaded this session
+	 */
+	private volatile long uploadedNow;
+	
+	/**
 	 * @return piece length for this torrent
 	 */
 	public int getPieceLength() {
@@ -100,6 +111,21 @@ public class BTMetaInfo implements Serializable {
 
 	public TorrentFileSystem getFileSystem() {
 		return fileSystem;
+	}
+	
+	long getAmountUploaded() {
+		return uploadedNow;
+	}
+	
+	void countUploaded(int uploaded) {
+		uploadedNow += uploaded;
+	}
+	
+	float getRatio() {
+		long downloaded = _folder.getBlockSize();
+		if (downloaded == 0)
+			return 0;
+		return (uploadedBefore + uploadedNow) * 1f / downloaded;
 	}
 	
 	/**
@@ -332,6 +358,7 @@ public class BTMetaInfo implements Serializable {
 		toWrite.put("_fileSystem",fileSystem);
 		toWrite.put("_infoHash",_infoHash);
 		toWrite.put("_trackers",_trackers);
+		toWrite.put("ratio", getRatio());
 		
 		toWrite.put("folder data",_folder.getSerializableObject());
 		
@@ -351,16 +378,19 @@ public class BTMetaInfo implements Serializable {
 		_infoHash = (byte []) toRead.get("_infoHash");
 		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
 		_trackers = (URL []) toRead.get("_trackers");
+		Float ratio = (Float) toRead.get("ratio");
 		
 		Map folderData = (Map) toRead.get("folder data");
 		
 		if (_hashes == null || pieceLength == null || fileSystem == null ||
 				 _infoHash == null || _trackers == null ||
-				folderData == null)
+				folderData == null || ratio == null)
 			throw new IOException("cannot read BTMetaInfo");
 		
 		_pieceLength = pieceLength.intValue();
 		initializeDiskManager(folderData, false);
+		if (ratio.floatValue() != 0)
+			uploadedBefore = (long)(_folder.getBlockSize() * ratio.floatValue()); 
 		fullSet = new FullBitSet();
 		fullBitField = new BitFieldSet(fullSet,getNumBlocks());
 	}
