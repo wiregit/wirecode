@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -566,6 +568,12 @@ public class HostCatcher {
         if(dhtVersion > -1) {
             endpoint.setDHTVersion(dhtVersion);
             endpoint.setDHTMode(pr.getDHTMode());
+            //if active DHT endpoint, immediately send to dht manager
+            if(endpoint.getDHTMode() == DHTMode.ACTIVE) {
+                SocketAddress address = new InetSocketAddress(
+                        endpoint.getAddress(), endpoint.getPort());
+                RouterService.getDHTManager().addBootstrapHost(address);
+            }
         }
         
         if(!isValidHost(endpoint))

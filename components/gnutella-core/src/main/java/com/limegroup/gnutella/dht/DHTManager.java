@@ -39,7 +39,7 @@ public interface DHTManager extends LifecycleListener{
     public void switchMode(boolean toActiveMode);
 
     public void addBootstrapHost(SocketAddress hostAddress);
-
+    
     public void addressChanged();
 
     public List<IpPort> getActiveDHTNodes(int maxNodes);

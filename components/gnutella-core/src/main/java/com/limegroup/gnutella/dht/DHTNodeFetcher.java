@@ -60,12 +60,16 @@ public class DHTNodeFetcher {
             RouterService.getHostCatcher().getDHTSupportEndpoint(0);
         
         //first see if we have any active dht node in our HostCatcher.
+        //The list is ordered by Active nodes first so as soon as we get an inactive
+        //node we can exit the loop.
         boolean haveActive = false;
         for(ExtendedEndpoint ep : dhtHosts) {
             if(ep.getDHTMode().isActive()) {
                 haveActive = true;
                 bootstrapper.addBootstrapHost(new InetSocketAddress(ep.getAddress(), ep.getPort()));
-            } 
+            } else {
+                break;
+            }
         }
         
         if(haveActive) { //we have added active hosts already - no need to request

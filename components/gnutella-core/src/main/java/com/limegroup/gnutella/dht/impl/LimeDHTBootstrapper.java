@@ -92,7 +92,7 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
     
     /**
      * Adds a host to the head of a list of boostrap hosts ordered by Most Recently Seen.
-     * If the manager is waiting for hosts or is bootstrapping from the persisted RT, 
+     * If this bootstrapper is waiting for hosts or is bootstrapping from the persisted RT, 
      * this method tries to bootstrap immediately after.
      * 
      * @param hostAddress The SocketAddress of the new bootstrap host.
@@ -145,9 +145,11 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
     /**
      * Gets the SIMPP host responsible for the keyspace containing the local node ID
      * 
+     * TODO: public for testing only
+     * 
      * @return The SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
      */
-    private SocketAddress getSIMPPHost(){
+    public SocketAddress getSIMPPHost(){
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
         List<SocketAddress> hostList = new ArrayList<SocketAddress>(simppHosts.length);
 

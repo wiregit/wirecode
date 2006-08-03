@@ -132,7 +132,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     
     /**
      * Adds a host to the head of a list of boostrap hosts ordered by Most Recently Seen.
-     * If the manager is waiting for hosts, this method tries to bootstrap 
+     * If the bootstrapper is waiting for hosts, this method tries to bootstrap 
      * immediately after.
      * 
      * @param hostAddress The SocketAddress of the new bootstrap host.
