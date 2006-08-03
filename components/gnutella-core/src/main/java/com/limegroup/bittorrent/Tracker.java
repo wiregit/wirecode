@@ -125,8 +125,8 @@ public class Tracker {
 	private String createQueryString(Event event) {
 		StringBuffer buf = new StringBuffer();
 		try {
-			String infoHash = URLEncoder.encode(new String(info.getInfoHash(),
-					Constants.ASCII_ENCODING), Constants.ASCII_ENCODING);
+			String infoHash = URLEncoder.encode(StringUtils.getASCIIString(info.getInfoHash()),
+					Constants.ASCII_ENCODING);
 			addGetField(buf, "info_hash", infoHash);
 
 			String peerId = URLEncoder
@@ -134,10 +134,6 @@ public class Tracker {
 							Constants.ASCII_ENCODING);
 			addGetField(buf, "peer_id", peerId);
 
-			// the "key" parameter is one of the most stupid parts of the
-			// tracker protocol. It is used by the tracker to identify a session
-			// even if the ip changes. - peerId and infoHash are more than
-			// enough information to do so.
 			addGetField(buf, "key", peerId + infoHash);
 
 		} catch (UnsupportedEncodingException uee) {

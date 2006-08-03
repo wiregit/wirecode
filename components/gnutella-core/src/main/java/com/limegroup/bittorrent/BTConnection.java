@@ -201,8 +201,10 @@ PieceSendListener, PieceReadListener {
 		_socket.setWriteObserver(_writer);
 		
 		// if we have downloaded anything send a bitfield
-		if (_info.getDiskManager().getVerifiedBlockSize() > 0)
+		if (_info.getDiskManager().getVerifiedBlockSize() > 0) {
+			numMissing = _info.getDiskManager().getNumMissing(_available);
 			sendBitfield();
+		}
 	}
 	
 	/* (non-Javadoc)

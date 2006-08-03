@@ -711,6 +711,10 @@ class VerifyingFolder implements TorrentDiskManager {
 			if (isComplete()) {
 				for(int i = 0; i < bitField.length; i++)
 					bitField[i] = (byte)0xFF;
+				int odd = _info.getNumBlocks() % 8;
+				if (odd != 0) 
+					bitField[bitField.length - 1] <<= (8 - odd);
+				
 			} else {
 				for(int i = verified.nextSetBit(0); i >= 0; i = verified.nextSetBit(i+1)) 
 					bitField[i / 8] = (byte) (bitField[i / 8] | (1 << (7 - i % 8)));
