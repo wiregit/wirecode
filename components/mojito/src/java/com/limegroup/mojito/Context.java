@@ -246,15 +246,15 @@ public class Context implements MojitoDHT {
     }
     
     public boolean isLocalNode(KUID nodeId, SocketAddress addr) {
-        return isLocalNodeID(nodeId) || isLocalAddress(addr);
+        return isLocalNodeID(nodeId) || isLocalContactAddress(addr);
     }
     
     public boolean isLocalNodeID(KUID nodeId) {
         return nodeId != null && nodeId.equals(localNode.getNodeID());
     }
     
-    public boolean isLocalAddress(SocketAddress address) {
-        return localNode.getSourceAddress().equals(address);
+    public boolean isLocalContactAddress(SocketAddress address) {
+        return localNode.getContactAddress().equals(address);
     }
     
     public KUID getLocalNodeID() {

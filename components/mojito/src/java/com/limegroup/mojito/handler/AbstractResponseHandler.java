@@ -61,6 +61,9 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     /** Whether or not this handler has been started */
     private volatile boolean started = false;
     
+    /** Whether or not this handler has finished */
+    private volatile boolean finished = false;
+    
     /** Whether or not this handler was cancelled */
     private volatile boolean cancelled = false;
     
@@ -108,6 +111,13 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * Is called by call()
      */
     protected void start() throws Exception {
+    }
+    
+    /**
+     * Is called by call()
+     */
+    protected void finish() {
+        
     }
     
     /**
@@ -326,6 +336,11 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
             ex = err;
             cancelled();
             throw err;
+        } finally {
+            if (!finished) {
+                finished = true;
+                finish();
+            }
         }
     }
 
