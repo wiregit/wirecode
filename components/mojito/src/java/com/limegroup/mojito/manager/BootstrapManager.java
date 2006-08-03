@@ -35,6 +35,7 @@ import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.BootstrapEvent.Type;
+import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.util.BucketUtils;
@@ -100,6 +101,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     /**
      * Cancels a currently active bootstrap process
      */
+    @Deprecated // Can be removed as solved differently on mojito-v3-branch
     public boolean cancelBootstrapping() {
         synchronized (lock) {
             if (future != null) {
@@ -156,7 +158,13 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             future.fireResult(new BootstrapEvent(Type.PING_SUCCEEDED));
             phaseOneStart = System.currentTimeMillis();
-            phaseOne(node);
+            
+            try {
+                phaseOne(node);
+            } catch (CollisionException err) {
+                LOG.error("CollisionException", err);
+                handleCollision(node);
+            }
             
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Bootstraping phase 2 from node: "+node);
@@ -182,6 +190,19 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             bootstrapped = true;
             return new BootstrapEvent(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
+        }
+        
+        private void handleCollision(Contact node) {
+            // TODO:
+            // - Create a new local Node ID
+            // - Clear the RouteTable
+            // - Re-Add the local Node to the RouteTable
+            // - Start bootstrapping from 'node'
+            //   We should maybe try an another Node to bootstrap.
+            //   For example one of the alive contacts from our previous
+            //   RouteTable 'cause "node" could be a malicious Contact!?
+            //   However, if "node" is a malicious Contact then are the
+            //   Contacts it returned malicious as well.
         }
         
         /**
@@ -238,6 +259,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         private FindNodeEvent phaseOne(Contact node) throws Exception {
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, node, context.getLocalNodeID());
+            handler.setCollisionCheckEnabled(true);
             return handler.call();
         }
         
