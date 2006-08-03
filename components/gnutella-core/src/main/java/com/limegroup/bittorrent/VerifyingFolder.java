@@ -123,7 +123,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	/**
 	 * Disk controller for performing the reads and writes.
 	 */
-	private DiskController diskController;
+	private DiskController<TorrentFile> diskController;
 
 	/**
 	 * constructs instance of this
@@ -374,7 +374,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * @see com.limegroup.bittorrent.TorrentFileManager#open(com.limegroup.bittorrent.ManagedTorrent)
 	 */
 	public void open(final ManagedTorrent torrent) throws IOException {
-		diskController = new RAFDiskController(_files);
+		diskController = new RAFDiskController<TorrentFile>(_files);
 		
 		this.torrent = torrent;
 		storedException = null;

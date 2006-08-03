@@ -19,14 +19,14 @@ import com.limegroup.gnutella.util.IOUtils;
  * implementation of the DiskController interface using
  * <tt>RandomAccessFile</tt> for io.
  */
-class RAFDiskController implements DiskController {
+class RAFDiskController<F extends File> implements DiskController<F> {
 	
 	private static final Log LOG = LogFactory.getLog(RAFDiskController.class);
 	
 	/*
 	 * The files of this torrent as an array
 	 */
-	private final List<TorrentFile> _files;
+	private final List<F> _files;
 
 	/**
 	 * The instances RandomAccessFile for all files contained in this torrent
@@ -39,7 +39,7 @@ class RAFDiskController implements DiskController {
 	 */
 	private static final RandomAccessFile[] OPENING = new RandomAccessFile[0];
 	
-	RAFDiskController(List<TorrentFile> files) {
+	RAFDiskController(List<F> files) {
 		_files = files;
 	}
 	
@@ -50,7 +50,7 @@ class RAFDiskController implements DiskController {
 		int written = 0;
 		int filesSize = _files.size();
 		for (int i = 0; i < filesSize && written < data.length; i++) {
-			TorrentFile current = _files.get(i);
+			File current = _files.get(i);
 			if (startOffset < current.length()) {
 				RandomAccessFile currentFile;
 				synchronized(this) {
@@ -80,7 +80,7 @@ class RAFDiskController implements DiskController {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.DiskController#open(boolean, boolean)
 	 */
-	public List<TorrentFile> open(boolean complete, boolean isVerifying) throws IOException {
+	public List<F> open(boolean complete, boolean isVerifying) throws IOException {
 		synchronized(this) {
 			if (_fos != null)
 				throw new IOException("Files already open(ing)!");
@@ -91,9 +91,9 @@ class RAFDiskController implements DiskController {
 		// position of the first byte of a file in the torrent
 		long pos = 0;
 		
-		List<TorrentFile> filesToVerify = null;
+		List<F> filesToVerify = null;
 		for (int i = 0; i < _files.size(); i++) {
-			TorrentFile file = _files.get(i);
+			F file = _files.get(i);
 
 			// if the file is complete, just open it for reading and be done
 			// with it
@@ -131,7 +131,7 @@ class RAFDiskController implements DiskController {
 				// if a file exists, try to verify it
 				if (isVerifying && file.length() > 0) {
 					if (filesToVerify == null)
-						filesToVerify = new ArrayList<TorrentFile>(_files.size());
+						filesToVerify = new ArrayList<F>(_files.size());
 					filesToVerify.add(file);
 				}
 			}
@@ -168,7 +168,7 @@ class RAFDiskController implements DiskController {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.DiskController#setReadOnly(com.limegroup.bittorrent.TorrentFile)
 	 */
-	public void setReadOnly(TorrentFile completed) {
+	public void setReadOnly(F completed) {
 		// TODO: decide if files should be moved to the save
 		// location as they are completed.. cool but not trivial
 		try {

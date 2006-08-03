@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  * Interface describing functionality for performing reads and 
  * writes to multiple files on disk.
  */
-interface DiskController {
+interface DiskController<F extends File> {
 
 	public void write(long startOffset, byte[] data) throws IOException;
 
@@ -24,7 +25,7 @@ interface DiskController {
 	 * null if none
 	 * @throws IOException if a problem occurs.
 	 */
-	public List<TorrentFile> open(boolean complete, boolean isVerifying)
+	public List<F> open(boolean complete, boolean isVerifying)
 			throws IOException;
 
 	/**
@@ -35,7 +36,7 @@ interface DiskController {
 	/**
 	 * close the given file and reopen it for reading
 	 */
-	public void setReadOnly(TorrentFile completed);
+	public void setReadOnly(F completed);
 
 	/**
 	 * 
