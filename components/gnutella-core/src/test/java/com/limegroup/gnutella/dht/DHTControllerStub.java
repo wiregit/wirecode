@@ -9,7 +9,7 @@ import com.limegroup.mojito.MojitoDHT;
 
 public class DHTControllerStub implements DHTController {
 
-    public void addBootstrapHost(SocketAddress hostAddress) {
+    public void addDHTNode(SocketAddress hostAddress) {
     }
 
     public List<IpPort> getActiveDHTNodes(int maxNodes) {

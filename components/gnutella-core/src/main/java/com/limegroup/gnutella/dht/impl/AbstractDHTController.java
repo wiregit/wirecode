@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
@@ -18,17 +16,13 @@ import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
-import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.MojitoDHT;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.BootstrapEvent.Type;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -60,6 +54,8 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     private volatile boolean running = false;
     
     protected final DHTBootstrapper dhtBootstrapper;
+    
+    private RandomNodeAdder dhtNodeAdder;
     
     public AbstractDHTController() {
         dhtBootstrapper = new LimeDHTBootstrapper(this);
@@ -122,6 +118,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         }
         
         dhtBootstrapper.stop();
+        dhtNodeAdder.stop();
         
         if(dht != null) {
             dht.stop();
@@ -131,14 +128,22 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     }
     
     /**
-     * Adds a host to the head of a list of boostrap hosts ordered by Most Recently Seen.
-     * If the bootstrapper is waiting for hosts, this method tries to bootstrap 
-     * immediately after.
+     * If this node is not bootstrapped, passes the given hostAddress
+     * to the DHT bootstrapper. 
+     * If it is already bootstrapped, this randomly tries to add the node
+     * to the DHT routing table.
      * 
-     * @param hostAddress The SocketAddress of the new bootstrap host.
+     * @param hostAddress The SocketAddress of the DHT host.
      */
-    public void addBootstrapHost(SocketAddress hostAddress) {
-        dhtBootstrapper.addBootstrapHost(hostAddress);
+    public void addDHTNode(SocketAddress hostAddress) {
+        if(dht.isBootstrapped()) {
+            if(dhtNodeAdder == null || dhtNodeAdder.isRunning()) {
+                dhtNodeAdder = new RandomNodeAdder();
+            }
+            dhtNodeAdder.addDHTNode(hostAddress);
+        } else {
+            dhtBootstrapper.addBootstrapHost(hostAddress);
+        }
     }
     
     public boolean isRunning() {
@@ -217,6 +222,50 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
 
         public int getPort() {
             return port;
+        }
+    }
+    
+    /**
+     * This class is used to fight against possible DHT clusters 
+     * by sending a Mojito ping to the last 20 DHT nodes seen in the Gnutella
+     * network. It is effectively randomly adding them to the DHT routing table.
+     * 
+     */
+    private class RandomNodeAdder implements Runnable{
+        
+        private Set<SocketAddress> dhtNodes;
+        
+        private boolean stopped;
+        
+        public RandomNodeAdder() {
+            dhtNodes = new FixedSizeLIFOSet<SocketAddress>(30);
+            long delay = DHTSettings.DHT_NODE_ADDER.getValue();
+            RouterService.schedule(this, delay, delay);
+        }
+        
+        public void addDHTNode(SocketAddress address) {
+            synchronized(dhtNodes) {
+                dhtNodes.add(address);
+            }
+        }
+        
+        public void run() {
+            if(stopped) {
+                return;
+            }
+            synchronized(dhtNodes) {
+                for(SocketAddress addr : dhtNodes) {
+                    dht.ping(addr);
+                }
+            }
+        }
+        
+        public boolean isRunning() {
+            return !stopped;
+        }
+        
+        public void stop() {
+            stopped = true;
         }
     }
 }

@@ -195,7 +195,7 @@ public final class CapabilitiesVM extends VendorMessage {
     }
     
     /**
-     * Returns the current DHT version if this node is a DHT node
+     * Returns the current DHT version if this node is an active DHT node
      */
     public int supportsDHT() {
         return supportsCapability(LIME_DHT_ACTIVE_CAPABLE_BYTES);

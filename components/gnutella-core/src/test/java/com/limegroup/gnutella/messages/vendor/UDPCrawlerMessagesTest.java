@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
@@ -24,10 +23,9 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CountingConnection;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -43,9 +41,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.mojito.MojitoDHT;
 
 
 public class UDPCrawlerMessagesTest extends BaseTestCase {
@@ -610,33 +606,4 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
             return null;
         }
     }
-    
-    private static class DHTManagerStub implements DHTManager{
-        
-        public void addBootstrapHost(SocketAddress hostAddress) {}
-
-        public void addressChanged() {}
-
-        public List<IpPort> getActiveDHTNodes(int maxNodes) {return null;}
-
-        public MojitoDHT getMojitoDHT() {return null;}
-
-        public boolean isActiveNode() {return false;}
-
-        public boolean isRunning() {return true;}
-
-        public boolean isWaitingForNodes() {return false;}
-
-        public void start(boolean activeMode) {}
-
-        public void stop() {}
-
-        public void switchMode(boolean toActiveMode) {}
-
-        public void handleLifecycleEvent(LifecycleEvent evt) {}
-
-        public int getVersion() {
-            return 1;
-        }
-    }
-}
+}    

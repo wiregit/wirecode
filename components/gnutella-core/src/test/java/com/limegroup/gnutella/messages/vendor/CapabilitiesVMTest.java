@@ -2,22 +2,17 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.net.SocketAddress;
-import java.util.List;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.impl.LimeDHTManager;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.mojito.MojitoDHT;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
@@ -63,7 +58,7 @@ public class CapabilitiesVMTest
         assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
         
         RouterService rs = new RouterService(new ActivityCallbackStub());
-        PrivilegedAccessor.setValue(rs, "dhtManager", new LimeDHTManagerStub());
+        PrivilegedAccessor.setValue(rs, "dhtManager", new DHTManagerStub());
         
         CapabilitiesVM.reconstructInstance();
         vmp = CapabilitiesVM.instance();
@@ -170,45 +165,4 @@ public class CapabilitiesVMTest
         assertNotEquals(vmpOther,vmpOneOther);
 
     }
-
-    private class LimeDHTManagerStub extends LimeDHTManager {
-        public boolean isRunning() {return true;}
-
-
-        @Override
-        public List<IpPort> getActiveDHTNodes(int maxNodes) {return null;}
-
-
-        @Override
-        public boolean isActiveNode() {return true;}
-
-
-        @Override
-        public synchronized void addBootstrapHost(SocketAddress hostAddress) {}
-
-
-        @Override
-        public void addressChanged() {}
-
-        @Override
-        public MojitoDHT getMojitoDHT() {
-            return null;
-        }
-
-        @Override
-        public void handleLifecycleEvent(LifecycleEvent evt) {}
-
-
-        @Override
-        public void stop() {}
-
-
-        @Override
-        public void start(boolean activeMode) {}
-
-
-        @Override
-        public void switchMode(boolean toActiveMode) {}
-    }
-
 }

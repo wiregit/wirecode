@@ -1095,11 +1095,11 @@ public class Connection implements IpPort {
     }
     
     /**
-     * Returns the DHT version if the remote host is DHT Capable
+     * Returns the DHT version if the remote host is an active DHT node
      * or -1 if it is not.
      * 
      */
-    public int remostHostIsDHTNode() {
+    public int remostHostIsActiveDHTNode() {
         if(_capabilities != null) 
             return _capabilities.supportsDHT();
         return -1;

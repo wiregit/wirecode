@@ -572,7 +572,7 @@ public class HostCatcher {
             if(endpoint.getDHTMode() == DHTMode.ACTIVE) {
                 SocketAddress address = new InetSocketAddress(
                         endpoint.getAddress(), endpoint.getPort());
-                RouterService.getDHTManager().addBootstrapHost(address);
+                RouterService.getDHTManager().addDHTNode(address);
             }
         }
         

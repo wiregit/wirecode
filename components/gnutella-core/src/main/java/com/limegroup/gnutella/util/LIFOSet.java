@@ -10,6 +10,11 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 
+/**
+ * 
+ * A Set ordered by Last-In-First-Out. 
+ * 
+ */
 public class LIFOSet<E> implements Set<E>{
     
     private Set<E> set;

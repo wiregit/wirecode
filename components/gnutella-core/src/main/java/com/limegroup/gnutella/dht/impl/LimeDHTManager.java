@@ -46,9 +46,9 @@ public class LimeDHTManager implements DHTManager {
         start(toActiveMode);
     }
 
-    public synchronized void addBootstrapHost(SocketAddress hostAddress) {
+    public void addDHTNode(SocketAddress hostAddress) {
         if (dhtController != null) {
-            dhtController.addBootstrapHost(hostAddress);
+            dhtController.addDHTNode(hostAddress);
         }
     }
     
@@ -66,7 +66,7 @@ public class LimeDHTManager implements DHTManager {
         }
     }
     
-    public synchronized List<IpPort> getActiveDHTNodes(int maxNodes){
+    public List<IpPort> getActiveDHTNodes(int maxNodes){
         if(dhtController == null) {
             return Collections.emptyList();
         }
@@ -74,7 +74,7 @@ public class LimeDHTManager implements DHTManager {
         return dhtController.getActiveDHTNodes(maxNodes);
     }
     
-    public synchronized boolean isActiveNode() {
+    public boolean isActiveNode() {
         if(dhtController != null) {
             return dhtController.isActiveNode();
         }
@@ -89,7 +89,7 @@ public class LimeDHTManager implements DHTManager {
         }
     }
     
-    public synchronized boolean isRunning() {
+    public boolean isRunning() {
         if(dhtController != null) {
             return dhtController.isRunning();
         }
@@ -103,14 +103,14 @@ public class LimeDHTManager implements DHTManager {
         return false;
     }
 
-    public synchronized MojitoDHT getMojitoDHT() {
+    public MojitoDHT getMojitoDHT() {
         if(dhtController != null) {
             return dhtController.getMojitoDHT();
         }
         return null;
     }
 
-    public synchronized void handleLifecycleEvent(LifecycleEvent evt) {
+    public void handleLifecycleEvent(LifecycleEvent evt) {
         if(dhtController != null) {
             dhtController.handleLifecycleEvent(evt);
         }

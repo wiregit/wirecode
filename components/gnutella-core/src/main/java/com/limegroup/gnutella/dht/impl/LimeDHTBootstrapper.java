@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -15,6 +16,7 @@ import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.MojitoDHT;
@@ -49,9 +51,10 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
     private AtomicBoolean waiting = new AtomicBoolean(false);
     
     /**
-     * A list of DHT bootstrap hosts comming from the Gnutella network
+     * A list of DHT bootstrap hosts comming from the Gnutella network. 
+     * Limit size to 50 for now.
      */
-    private volatile LIFOSet<SocketAddress> bootstrapHosts = new LIFOSet<SocketAddress>();
+    private volatile Set<SocketAddress> bootstrapHosts = new FixedSizeLIFOSet<SocketAddress>(50);
     
     /**
      * The bootstrap's <tt>Future</tt> object
@@ -105,9 +108,6 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
         
         synchronized(bootstrapHosts) {
             //Keep bootstrap list small because it should be updated often
-            if(bootstrapHosts.size() >= 50) {
-                bootstrapHosts.removeLast();
-            }
             bootstrapHosts.add(hostAddress);
         }
         

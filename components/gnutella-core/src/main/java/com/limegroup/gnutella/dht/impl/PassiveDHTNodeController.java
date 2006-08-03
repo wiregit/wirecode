@@ -50,7 +50,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 ObjectInputStream oii = new ObjectInputStream(in);
                 Contact node;
                 while((node = (Contact)oii.readObject()) != null){
-                    addBootstrapHost(node.getContactAddress());
+                    addDHTNode(node.getContactAddress());
                 }
             }
         } catch (ClassNotFoundException e) {
@@ -74,7 +74,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 LOG.debug("Adding host: "+addr+" to leaf dht nodes");
             }
             
-            addBootstrapHost(addr);
+            addDHTNode(addr);
         } 
         //add to our leaf nodes
         limeDHTRouteTable.addLeafDHTNode(addr);
@@ -184,7 +184,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             
         } else if(evt.isConnectionVendoredEvent()){
             
-            if(c.remostHostIsDHTNode() > -1) {
+            if(c.remostHostIsActiveDHTNode() > -1) {
                 addLeafDHTNode( host , port );
             } else {
                 removeLeafDHTNode( host , port );

@@ -869,7 +869,7 @@ public final class MessageRouterTest extends BaseTestCase {
             return ipps;
         }
 
-        public void addBootstrapHost(SocketAddress hostAddress) {}
+        public void addDHTNode(SocketAddress hostAddress) {}
 
         public void addressChanged() {}
         

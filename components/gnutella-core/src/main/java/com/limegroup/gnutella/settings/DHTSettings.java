@@ -74,15 +74,24 @@ public class DHTSettings extends LimeProps{
      * Setting for the delay between DHT node fetcher runs
      */
     public static final LongSetting DHT_NODE_FETCHER_TIME =
+        //30 minutes for now
         FACTORY.createSettableLongSetting("DHT_NODE_FETCHER_TIME", 
-                30L * 1000L, "DHTSettings.DHTNodeFetcherTime", 0L, 30L * 60L * 1000L); //30 sec for now
+                30L * 60L * 1000L, "DHTSettings.DHTNodeFetcherTime", 0L, 60L * 60L * 1000L); 
     
     /**
      * The maximum amount of time for which we will ping the network for DHT nodes
      */
     public static final LongSetting MAX_NODE_FETCHER_TIME = 
-        FACTORY.createSettableLongSetting("MAX_NODE_FETCHER_TIME", 30L * 1000L, "DHTSettings.MaxNodeFetcherTime", 0L, 5L * 60L * 1000L);
-
+        FACTORY.createSettableLongSetting("MAX_NODE_FETCHER_TIME", 30L * 1000L, 
+                "DHTSettings.MaxNodeFetcherTime", 0L, 5L * 60L * 1000L);
+    
+    /**
+     * Setting for the delay between DHT random node adder runs
+     */
+    public static final LongSetting DHT_NODE_ADDER =
+        //30 minutes for now
+        FACTORY.createSettableLongSetting("DHT_NODE_ADDER_TIME", 
+                30L * 60L * 1000L, "DHTSettings.DHTNodeAdderTime", 0L, 24L * 60L * 60L * 1000L); 
     
     public static final IntSetting NUM_PERSISTED_NODES = 
         FACTORY.createIntSetting("MAX_PERSISTED_NODES", 20);

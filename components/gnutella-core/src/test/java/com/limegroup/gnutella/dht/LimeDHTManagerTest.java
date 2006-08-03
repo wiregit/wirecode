@@ -88,7 +88,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
         assertTrue(DHT_MANAGER.isWaitingForNodes());
         
         //add to the manager
-        DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
+        DHT_MANAGER.addDHTNode(BOOTSTRAP_DHT.getLocalAddress());
         assertFalse(controller.isWaitingForNodes());
         sleep(100);
         assertGreaterThan(-1, CapabilitiesVM.instance().supportsDHT());
@@ -101,13 +101,13 @@ public class LimeDHTManagerTest extends BaseTestCase {
         DHTController controller = getController();
         sleep(300);
         //add invalid hosts
-        DHT_MANAGER.addBootstrapHost(new InetSocketAddress("localhost", 2000));
+        DHT_MANAGER.addDHTNode(new InetSocketAddress("localhost", 2000));
         assertFalse(controller.isWaitingForNodes());
         for(int i = 1; i < 10; i++) {
-            DHT_MANAGER.addBootstrapHost(new InetSocketAddress("0.0.0.0", i));
+            DHT_MANAGER.addDHTNode(new InetSocketAddress("0.0.0.0", i));
         }
         //now add valid: should be first in the list
-        DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
+        DHT_MANAGER.addDHTNode(BOOTSTRAP_DHT.getLocalAddress());
         DHTBootstrapper bootstrapper = (DHTBootstrapper)PrivilegedAccessor.getValue(controller, "dhtBootstrapper");
         List bootstrapHosts = (List) PrivilegedAccessor.getValue(bootstrapper, "bootstrapHosts");
         assertEquals(11, bootstrapHosts.size());
@@ -128,7 +128,7 @@ public class LimeDHTManagerTest extends BaseTestCase {
         assertTrue(DHT_MANAGER.isActiveNode());
         KUID nodeId = controller.getMojitoDHT().getLocalNodeID();
         //try to bootstrap at the same time
-        DHT_MANAGER.addBootstrapHost(BOOTSTRAP_DHT.getLocalAddress());
+        DHT_MANAGER.addDHTNode(BOOTSTRAP_DHT.getLocalAddress());
         DHT_MANAGER.switchMode(false);
         controller = getController();
         //we should have switched IDs
