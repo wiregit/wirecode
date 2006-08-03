@@ -393,7 +393,9 @@ public abstract class MessageDispatcher implements Runnable {
             processResponse(receipt, response);
             
         } else if (message instanceof RequestMessage) {
-            processRequest((RequestMessage)message);
+            if (!context.getLocalNode().isFirewalled()) {
+                processRequest((RequestMessage)message);
+            }
             
         } else if (LOG.isFatalEnabled()) {
             LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
