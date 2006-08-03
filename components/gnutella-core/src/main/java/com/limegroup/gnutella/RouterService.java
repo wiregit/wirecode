@@ -274,7 +274,7 @@ public class RouterService {
 	 */
 	private static boolean _fullPower = true;
 	
-	private static final byte [] MYGUID;
+	private static final byte [] MYGUID, MYBTGUID;
 	static {
 	    byte [] myguid=null;
 	    try {
@@ -284,6 +284,14 @@ public class RouterService {
 	        ApplicationSettings.CLIENT_ID.setValue((new GUID(myguid)).toHexString());
 	    }
 	    MYGUID=myguid;
+	    
+	    byte []mybtguid = new byte[20];
+	    mybtguid[0] = 0x4C; // L
+	    mybtguid[1] = 0x49; // I
+	    mybtguid[2] = 0x4D; // M
+	    mybtguid[3] = 0x45; // E
+	    System.arraycopy(MYGUID,0,mybtguid,4,16);
+	    MYBTGUID = mybtguid;
 	}
 
 	/**
@@ -705,6 +713,10 @@ public class RouterService {
 	
 	public static byte [] getMyGUID() {
 	    return MYGUID;
+	}
+	
+	public static byte [] getMyBTGUID() {
+		return MYBTGUID;
 	}
 
     /**

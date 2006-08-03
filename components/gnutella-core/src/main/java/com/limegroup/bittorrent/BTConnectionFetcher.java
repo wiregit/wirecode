@@ -96,8 +96,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 		handshake.put(BITTORRENT_PROTOCOL_BYTES); // "BitTorrent protocol"
 		handshake.put(EXTENSION_BYTES);
 		handshake.put(_torrent.getInfoHash());
-		handshake.put("LIME".getBytes());
-		handshake.put(RouterService.getMyGUID());
+		handshake.put(RouterService.getMyBTGUID());
 		handshake.flip();
 		// Note: with gathering writes everything but the info hash 
 		// can be shared.

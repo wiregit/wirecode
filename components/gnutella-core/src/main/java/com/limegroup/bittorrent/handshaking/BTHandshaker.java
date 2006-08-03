@@ -84,8 +84,8 @@ ChannelWriter, ChannelReadObserver, IpPort {
 			return false;
 		
 		// write out our handshake
-		while (writeChannel.write(outgoingHandshake) > 0 &&
-			outgoingHandshake.hasRemaining());
+		while (outgoingHandshake.hasRemaining() &&
+				writeChannel.write(outgoingHandshake) > 0);
 		
 		if (!outgoingHandshake.hasRemaining()) 
 			writeChannel.interest(this, false);
