@@ -92,7 +92,7 @@ public class LIFOSet<E> implements Set<E>{
         if(list.isEmpty()) {
             return false;
         }
-        return set.remove(list.remove(list.size()-1));
+        return set.remove(list.remove(0));
     }
 
     public boolean removeAll(Collection<?> c) {
@@ -110,11 +110,16 @@ public class LIFOSet<E> implements Set<E>{
     }
 
     public Object[] toArray() {
-        return set.toArray();
+        List<E> reverse = new ArrayList<E>(list);
+        Object[] l = list.toArray();
+        Collections.reverse(reverse);
+        return reverse.toArray();
     }
 
     public <T> T[] toArray(T[] a) {
-        return set.toArray(a);
+        List<E> reverse = new ArrayList<E>(list);
+        Collections.reverse(reverse);
+        return reverse.toArray(a);
     }
     
     @Override
