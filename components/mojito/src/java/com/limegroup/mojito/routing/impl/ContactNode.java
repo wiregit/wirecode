@@ -188,6 +188,10 @@ public class ContactNode implements Contact {
         return version;
     }
     
+    public void setNodeID(KUID nodeId) {
+        this.nodeId = nodeId;
+    }
+    
     public KUID getNodeID() {
         return nodeId;
     }

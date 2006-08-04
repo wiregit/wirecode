@@ -466,10 +466,14 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         
         PingListener listener = new PingListener() {
             public void handleResult(Contact result) {
-                // Interrupt the lookup!
-                Exception collision = new CollisionException(
-                        context.getLocalNode() + " collides with " +  result);
-                setException(collision);
+                synchronized (LookupResponseHandler.this) {
+                    if (!isDone()) {
+                        // Interrupt the lookup!
+                        Exception collision = new CollisionException(result, 
+                                context.getLocalNode() + " collides with " +  result);
+                        setException(collision);
+                    }
+                }
             }
 
             public void handleThrowable(Throwable ex) {

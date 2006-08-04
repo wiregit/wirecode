@@ -153,21 +153,24 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             }
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Bootstraping phase 1 from node: "+node);
+                LOG.debug("Bootstraping phase 1 from node: " + node);
             }
             
             future.fireResult(new BootstrapEvent(Type.PING_SUCCEEDED));
             phaseOneStart = System.currentTimeMillis();
             
-            try {
-                phaseOne(node);
-            } catch (CollisionException err) {
-                LOG.error("CollisionException", err);
-                handleCollision(node);
+            while(true) {
+                try {
+                    phaseOne(node);
+                    break;
+                } catch (CollisionException err) {
+                    LOG.error("CollisionException", err);
+                    handleCollision(err.getCollideContact());
+                }
             }
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Bootstraping phase 2 from node: "+node);
+                LOG.debug("Bootstraping phase 2 from node: " + node);
             }
             
             phaseTwoStart = System.currentTimeMillis();
@@ -179,30 +182,12 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             long phaseOneTime = phaseTwoStart - phaseOneStart;
             long phaseTwoTime = stop - phaseTwoStart;
             
-            /*long totalTime = stop - start;
-            StringBuilder buffer = new StringBuilder();
-            buffer.append("foundNewNodes: ").append(foundNewNodes).append("\n");
-            buffer.append("phaseZeroTime: ").append(phaseZeroTime).append("\n");
-            buffer.append("phaseOneTime: ").append(phaseOneTime).append("\n");
-            buffer.append("phaseTwoTime: ").append(phaseTwoTime).append("\n");
-            buffer.append("totalTime: ").append(totalTime).append("\n");
-            System.out.println(buffer.toString());*/
-            
             bootstrapped = true;
             return new BootstrapEvent(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
         }
         
-        private void handleCollision(Contact node) {
-            // TODO:
-            // - Create a new local Node ID
-            // - Clear the RouteTable
-            // - Re-Add the local Node to the RouteTable
-            // - Start bootstrapping from 'node'
-            //   We should maybe try an another Node to bootstrap.
-            //   For example one of the alive contacts from our previous
-            //   RouteTable 'cause "node" could be a malicious Contact!?
-            //   However, if "node" is a malicious Contact then are the
-            //   Contacts it returned malicious as well.
+        private void handleCollision(Contact collide) {
+            context.changeNodeID();
         }
         
         /**

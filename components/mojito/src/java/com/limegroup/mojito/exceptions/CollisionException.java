@@ -19,22 +19,34 @@
 
 package com.limegroup.mojito.exceptions;
 
+import com.limegroup.mojito.Contact;
+
 @SuppressWarnings("serial")
 public class CollisionException extends Exception {
-
-    public CollisionException() {
+    
+    private Contact collides;
+    
+    public CollisionException(Contact collides) {
         super();
+        this.collides = collides;
     }
 
-    public CollisionException(String message, Throwable cause) {
+    public CollisionException(Contact collides, String message, Throwable cause) {
         super(message, cause);
+        this.collides = collides;
     }
 
-    public CollisionException(String message) {
+    public CollisionException(Contact collides, String message) {
         super(message);
+        this.collides = collides;
     }
 
-    public CollisionException(Throwable cause) {
+    public CollisionException(Contact collides, Throwable cause) {
         super(cause);
+        this.collides = collides;
+    }
+    
+    public Contact getCollideContact() {
+        return collides;
     }
 }

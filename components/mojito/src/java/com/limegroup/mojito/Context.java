@@ -167,17 +167,7 @@ public class Context implements MojitoDHT {
         
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode);
-        
-        // Clear the firewalled flag for a moment so that we can
-        // add the local node to the Route Table
-        if (localNode.isFirewalled()) {
-            ((ContactNode)localNode).setFirewalled(false);
-            routeTable.add(localNode);
-            ((ContactNode)localNode).setFirewalled(true);
-        } else {
-            routeTable.add(localNode);
-        }
+        initRouteTable();
     }
     
     private void initContextTimer() {
@@ -241,6 +231,39 @@ public class Context implements MojitoDHT {
         return localNode;
     }
     
+    /**
+     * Clears the RouteTable, generates a new random Node ID
+     * for the local Node and adds the (new) Node to the RouteTable.
+     * 
+     * WARNING: Meant to be called only by BootstrapManager!
+     */
+    public void changeNodeID() {
+        routeTable.clear();
+        KUID nodeId = KUID.createRandomNodeID();
+        
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + nodeId);
+        }
+        
+        ((ContactNode)localNode).setNodeID(nodeId);
+        initRouteTable();
+    }
+    
+    /**
+     * Adds the local Node to the RouteTable
+     */
+    private void initRouteTable() {
+        // Clear the firewalled flag for a moment so that we can
+        // add the local node to the Route Table
+        if (localNode.isFirewalled()) {
+            ((ContactNode)localNode).setFirewalled(false);
+            routeTable.add(localNode);
+            ((ContactNode)localNode).setFirewalled(true);
+        } else {
+            routeTable.add(localNode);
+        }    
+    }
+    
     public boolean isLocalNode(Contact node) {
         return isLocalNode(node.getNodeID(), node.getContactAddress());
     }
@@ -300,16 +323,7 @@ public class Context implements MojitoDHT {
         try {
             Constructor c = clazz.getConstructor(Context.class);
             routeTable = (RouteTable)c.newInstance(this);
-            
-            // Clear the firewalled flag for a moment so that we can
-            // add the local node to the Route Table
-            if (localNode.isFirewalled()) {
-                ((ContactNode)localNode).setFirewalled(false);
-                routeTable.add(localNode);
-                ((ContactNode)localNode).setFirewalled(true);
-            } else {
-                routeTable.add(localNode);
-            }
+            initRouteTable();
             
             return routeTable;
         } catch (Exception err) {
