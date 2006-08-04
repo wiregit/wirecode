@@ -104,7 +104,6 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
         if(chain == null)
             throw new IllegalStateException("reading with no chain!");
             
-        channel.interest(false);
         
         int totalRead = 0;
         if(available > 0) {
@@ -122,10 +121,11 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
 
         	if (totalRead > 0)
         		available -= totalRead;
+        } else {
+        	channel.interest(false);
+        	if(lastInterestState)
+        		throttle.interest(this);
         }
-        
-        if(lastInterestState)
-            throttle.interest(this);
         //LOG.debug("Read: " + totalRead  + ", leaving: " + available + " left.");
         
         return totalRead;
