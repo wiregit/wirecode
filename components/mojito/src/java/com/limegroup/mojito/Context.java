@@ -238,9 +238,15 @@ public class Context implements MojitoDHT {
      * WARNING: Meant to be called only by BootstrapManager!
      */
     public void changeNodeID() {
+        setLocalNodeID(KUID.createRandomNodeID());
+    }
+    
+    /**
+     * Sets the local Node ID to the given ID. See also 
+     * changeNodeID() !
+     */
+    private void setLocalNodeID(KUID nodeId) {
         routeTable.clear();
-        KUID nodeId = KUID.createRandomNodeID();
-        
         if (LOG.isInfoEnabled()) {
             LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + nodeId);
         }
@@ -269,7 +275,7 @@ public class Context implements MojitoDHT {
     }
     
     public boolean isLocalNode(KUID nodeId, SocketAddress addr) {
-        return isLocalNodeID(nodeId) || isLocalContactAddress(addr);
+        return isLocalNodeID(nodeId) && isLocalContactAddress(addr);
     }
     
     public boolean isLocalNodeID(KUID nodeId) {

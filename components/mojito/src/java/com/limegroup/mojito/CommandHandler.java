@@ -62,7 +62,8 @@ public class CommandHandler {
             "stats",
             "restart",
             "firewalled",
-            "exhaustive"
+            "exhaustive",
+            "id .+"
     };
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
@@ -386,5 +387,13 @@ public class CommandHandler {
     public static void stats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         DHTStats stats = ((Context)dht).getDHTStats();
         stats.dumpStats(out, true);
+    }
+    
+    public static void id(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        KUID nodeId = KUID.createNodeID(ArrayUtils.parseHexString(args[1]));
+        System.out.println("Setting NodeID to: " + nodeId);
+        Method m = dht.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
+        m.setAccessible(true);
+        m.invoke(dht, new Object[]{nodeId});
     }
 }

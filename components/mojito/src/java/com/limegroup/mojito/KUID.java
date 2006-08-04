@@ -545,13 +545,6 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Creates and returns a Node ID from the ByteBuffer (relative get)
-     */
-    public static KUID createNodeID(ByteBuffer data) {
-        return new KUID(Type.NODE_ID, getBytes(data));
-    }
-    
-    /**
      * Creates and returns a Value ID from a byte array
      */
     public static KUID createValueID(byte[] id) {

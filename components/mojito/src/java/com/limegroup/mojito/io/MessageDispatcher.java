@@ -195,7 +195,8 @@ public abstract class MessageDispatcher implements Runnable {
         DHTMessage message = tag.getMessage();
         
         // Make sure we're not sending messages to ourself
-        if (context.isLocalNode(nodeId, dst)) {
+        if (context.isLocalNode(nodeId, dst)
+                && !(message instanceof PingRequest)) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
@@ -326,7 +327,8 @@ public abstract class MessageDispatcher implements Runnable {
         KUID nodeId = node.getNodeID();
         SocketAddress src = node.getContactAddress();
         
-        if (context.isLocalNode(nodeId, src)) {
+        if (context.isLocalNode(nodeId, src)
+                && !(message instanceof PingResponse)) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
