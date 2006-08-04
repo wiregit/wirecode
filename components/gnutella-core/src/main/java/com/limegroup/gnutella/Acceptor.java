@@ -555,7 +555,8 @@ public class Acceptor implements ConnectionAcceptor {
         // If the client was closed before we were able to get the address,
         // then getInetAddress will return null.
         InetAddress address = client.getInetAddress();
-        if (address == null) {
+        if (address == null || !NetworkUtils.isValidAddress(address) ||
+        		!NetworkUtils.isValidPort(client.getPort())) {
             IOUtils.close(client);
             LOG.warn("connection closed while accepting");
         } else if (isBannedIP(address.getAddress())) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -665,12 +666,13 @@ public class ManagedTorrent implements Torrent {
 		long now = System.currentTimeMillis();
 		TorrentLocation ret = null;
 		synchronized(_peers) {
-			for (TorrentLocation loc : _peers) {
+			for (Iterator<TorrentLocation> iter = _peers.iterator(); iter.hasNext();) {
+				TorrentLocation loc = iter.next();
 				if (loc.isBusy(now))
 					continue;
-				else if (!isConnectedTo(loc)) {
+				iter.remove();
+				if (!isConnectedTo(loc)) {
 					ret = loc;
-					_peers.remove(ret);
 					break;
 				}
 			}
