@@ -213,7 +213,7 @@ public class NBThrottle implements Throttle {
             
             _active = true;
             long now = System.currentTimeMillis();
-            for(Iterator i = _interested.entrySet().iterator(); !_ready.isEmpty() && i.hasNext(); ) {
+            for(Iterator i = _interested.entrySet().iterator(); i.hasNext(); ) {
                 Map.Entry next = (Map.Entry)i.next();
                 ThrottleListener listener = (ThrottleListener)next.getValue();
                 Object attachment = next.getKey();
@@ -230,7 +230,7 @@ public class NBThrottle implements Throttle {
                 	} finally {
                 		listener.releaseBandwidth();
                 	}
-                	if (_write && _available < MINIMUM_TO_GIVE)
+                	if (_available < MINIMUM_TO_GIVE)
                 		break;
                 }
             }
