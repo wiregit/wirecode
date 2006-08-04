@@ -246,13 +246,24 @@ public class Context implements MojitoDHT {
      * changeNodeID() !
      */
     private void setLocalNodeID(KUID nodeId) {
-        routeTable.clear();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + nodeId);
+        if (!nodeId.equals(getLocalNodeID())) {
+            routeTable.clear();
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + nodeId);
+            }
+            
+            ((ContactNode)localNode).setNodeID(nodeId);
+            initRouteTable();
+            
+            Database database = getDatabase();
+            synchronized (database) {
+                for (DHTValue value : database.values()) {
+                    if (!value.isLocalValue()) {
+                        database.remove(value);
+                    }
+                }
+            }
         }
-        
-        ((ContactNode)localNode).setNodeID(nodeId);
-        initRouteTable();
     }
     
     /**
