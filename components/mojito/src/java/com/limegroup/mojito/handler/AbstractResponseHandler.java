@@ -339,7 +339,12 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         } finally {
             if (!finished) {
                 finished = true;
-                finish();
+                
+                try {
+                    finish();
+                } catch (Throwable t) {
+                    LOG.error("Throwable", t);
+                }
             }
         }
     }
