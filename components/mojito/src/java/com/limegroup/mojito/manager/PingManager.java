@@ -29,6 +29,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -58,20 +59,44 @@ public class PingManager extends AbstractManager<Contact> {
     }
     
     public DHTFuture<Contact> ping(SocketAddress address) {
-        return ping(null, address);
+        return ping(null, null, address);
     }
 
     public DHTFuture<Contact> ping(Contact node) {
-        return ping(node.getNodeID(), node.getContactAddress());
+        return ping(null, node.getNodeID(), node.getContactAddress());
     }
     
     public DHTFuture<Contact> ping(KUID nodeId, SocketAddress address) {
+        return ping(null, nodeId, address);
+    }
+    
+    /**
+     * Sends a special ping to the given Node to test if there
+     * is a Node ID collision
+     */
+    public DHTFuture<Contact> collisionPing(Contact node) {
+        // The idea is to invert our local Node so that the
+        // other Node doesn't get the impression we're trying
+        // to spoof anything and we don't want that the other
+        // guy adds this Contact to its RouteTable. To do so
+        // we're creating a firewalled version of our local Node
+        // (with the inverted Node ID of course).
+        int vendor = context.getVendor();
+        int version = context.getVersion();
+        KUID nodeId = context.getLocalNodeID().invert();
+        SocketAddress addr = context.getContactAddress();
+        Contact sender = ContactNode.createLiveContact(addr, vendor, version, nodeId, addr, 0, true);
         
+        return ping(sender, node.getNodeID(), node.getContactAddress());
+    }
+    
+    private DHTFuture<Contact> ping(Contact sender, KUID nodeId, SocketAddress address) {
         synchronized (getPingLock()) {
+            
             PingFuture future = futureMap.get(address);
             
             if (future == null) {
-                PingResponseHandler handler = new PingResponseHandler(context, nodeId, address);
+                PingResponseHandler handler = new PingResponseHandler(context, sender, nodeId, address);
                 
                 future = new PingFuture(address, handler);
                 futureMap.put(address, future);

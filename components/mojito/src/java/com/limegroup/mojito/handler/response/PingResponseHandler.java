@@ -27,6 +27,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -40,28 +41,46 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
     
     //private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
     
+    private Contact sender;
+    
     private KUID nodeId;
     
     private SocketAddress address;
     
     public PingResponseHandler(Context context, SocketAddress address) {
-        this(context, null, address);
+        this(context, null, null, address);
     }
     
     public PingResponseHandler(Context context, Contact contact) {
-        this(context, contact.getNodeID(), contact.getContactAddress());
+        this(context, null, contact.getNodeID(), contact.getContactAddress());
     }
 
+    public PingResponseHandler(Context context, Contact sender, Contact contact) {
+        this(context, sender, contact.getNodeID(), contact.getContactAddress());
+    }
+    
     public PingResponseHandler(Context context, KUID nodeId, SocketAddress address) {
+        this(context, null, nodeId, address);
+    }
+    
+    public PingResponseHandler(Context context, Contact sender, KUID nodeId, SocketAddress address) {
         super(context);
         
+        this.sender = sender;
         this.nodeId = nodeId;
         this.address = address;
     }
 
     @Override
     protected void start() throws Exception {
-        PingRequest request = context.getMessageHelper().createPingRequest(address);
+        PingRequest request = null;
+        
+        if (sender == null) {
+            request = context.getMessageHelper().createPingRequest(address);
+        } else {
+            request = context.getMessageFactory().createPingRequest(sender, MessageID.create(address));
+        }
+        
         context.getMessageDispatcher().send(nodeId, address, request, this);
     }
     

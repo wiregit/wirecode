@@ -674,6 +674,11 @@ public class Context implements MojitoDHT {
         return pingManager.ping(node);
     }
     
+    /** Sends a special collision test Ping to the given Node */
+    public DHTFuture<Contact> collisionPing(Contact node) {
+        return pingManager.collisionPing(node);
+    }
+    
     /** Starts a value for the given KUID */
     public DHTFuture<FindValueEvent> get(KUID key) {
         return findValueManager.lookup(key);

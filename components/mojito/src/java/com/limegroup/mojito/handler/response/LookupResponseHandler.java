@@ -38,16 +38,13 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.DHTException;
+import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.LookupRequest;
-import com.limegroup.mojito.messages.MessageID;
-import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
-import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
@@ -467,21 +464,19 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      */
     protected void doCollisionCheck(Contact node) throws IOException {
         
-        // Create a firewalled contact of the local Node! 
-        int vendor = context.getVendor();
-        int version = context.getVersion();
-        KUID nodeId = context.getLocalNodeID().invert();
-        SocketAddress addr = context.getContactAddress();
-        Contact sender = ContactNode.createLiveContact(addr, vendor, version, nodeId, addr, 0, true);
+        PingListener listener = new PingListener() {
+            public void handleResult(Contact result) {
+                // Interrupt the lookup!
+                Exception collision = new CollisionException(
+                        context.getLocalNode() + " collides with " +  result);
+                setException(collision);
+            }
+
+            public void handleThrowable(Throwable ex) {
+            }
+        };
         
-        // Create a PingRequest and set the firewalled Contact
-        // as sender. This makes sure the receiver won't add it
-        // to its Route Table!
-        PingRequest request = context.getMessageFactory()
-            .createPingRequest(sender, MessageID.create(node.getContactAddress()));
-        
-        // And send it!
-        context.getMessageDispatcher().send(node, request, new CollisionVerifyer());
+        context.collisionPing(node).addDHTEventListener(listener);
     }
     
     /**
@@ -567,32 +562,5 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             responses.remove(worst.getNodeID());
         }
         responseCount++;
-    }
-    
-    private class CollisionVerifyer extends AbstractResponseHandler<Contact> {
-        
-        private CollisionVerifyer() {
-            super(LookupResponseHandler.this.context);
-        }
-        
-        @Override
-        protected synchronized void response(ResponseMessage message, long time) throws IOException {
-            Exception collision = new CollisionException(
-                    context.getLocalNode() + " collides with " +  message.getContact());
-            // Interrupt the lookup!
-            LookupResponseHandler.this.setException(collision);
-            
-            setReturnValue(message.getContact());
-        }
-        
-        @Override
-        protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-            fireTimeoutException(nodeId, dst, message, time);
-        }
-        
-        @Override
-        public synchronized void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-            setException(new DHTException(nodeId, dst, message, -1L, e));
-        }
     }
 }
