@@ -487,9 +487,6 @@ public class NIODispatcher implements Runnable {
      */
     private void runPendingTasks() {
         long now = System.currentTimeMillis();
-        for(NBThrottle t: THROTTLE)
-            t.tick(now);
-        
         Collection<Runnable> localLater;
         synchronized(Q_LOCK) {
             localLater = LATER;
@@ -517,6 +514,10 @@ public class NIODispatcher implements Runnable {
                 }
             }
         }
+        
+        now = System.currentTimeMillis();
+        for(NBThrottle t: THROTTLE)
+            t.tick(now);
     }
     
     /**
