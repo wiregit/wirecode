@@ -202,6 +202,7 @@ public class UploadSlotManager implements BandwidthTracker {
 			if (request.getPriority() < priority && request.isPreemptible()) {
 				if (LOG.isDebugEnabled())
 					LOG.debug("freeing slot from "+request.getUser());
+				active.remove(i);
 				request.getUser().releaseSlot();
 			}
 		}

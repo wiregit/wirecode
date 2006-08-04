@@ -815,7 +815,6 @@ PieceSendListener, PieceReadListener {
 				public void run() {
 					if (LOG.isDebugEnabled())
 						LOG.debug(BTConnection.this +" releasing slot");
-					usingSlot = false;
 					choke();
 				}
 			};
