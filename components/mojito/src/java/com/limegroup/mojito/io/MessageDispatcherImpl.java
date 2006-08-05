@@ -38,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.security.CryptoHelper;
@@ -53,7 +52,6 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     private static final long SELECTOR_SLEEP = 50L;
     
     private Selector selector;
-    private Filter filter;
     
     private SecureMessageVerifier verifier;
     
@@ -65,7 +63,6 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         super(context);
         
         verifier = new SecureMessageVerifier(context.getName());
-        filter = new Filter();
     }
     
     @Override
@@ -132,8 +129,7 @@ public class MessageDispatcherImpl extends MessageDispatcher {
 
     @Override
     protected boolean allow(DHTMessage message) {
-        Contact node = message.getContact();
-        return filter.allow(node.getContactAddress());
+        return true;
     }
     
     
