@@ -810,15 +810,13 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     
     private void checkTargetLocation(TorrentFileSystem info, boolean overwrite) 
     throws SaveLocationException{
-    	for (File f : info.getFiles()) {
-    		// its ok to download to an already existing directory so
-    		// we only check for files.
-    		if (RouterService.getFileManager().isFileShared(f) ||
-    				f.exists())
+    	for (File f : info.getFilesAndFolders()) {
+    		if (f.exists())
     			throw new SaveLocationException
     			(SaveLocationException.FILE_ALREADY_EXISTS, f);
     	}
     }
+    
     private void checkActiveAndWaiting(URN urn, TorrentFileSystem system) 
     throws SaveLocationException {
     	for (AbstractDownloader current : activeAndWaiting) {
