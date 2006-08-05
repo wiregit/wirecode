@@ -29,14 +29,21 @@ class SeedChoker extends Choker {
 	SeedChoker(List<? extends Chokable> chokables,
 			SchedulingThreadPool invoker) {
 		super(chokables, invoker);
+		round = Integer.MIN_VALUE;
+	}
+
+	private void initRound() {
+		if (round >= 0)
+			return;
 		int maxRound = 0;
 		for (Chokable c : chokables)
 			maxRound = Math.max(maxRound,c.getUnchokeRound());
 		round = maxRound;
 	}
-
+	
 	@Override
 	protected void rechokeImpl(boolean forceUnchokes) {
+		initRound();
 		int numForceUnchokes = 0;
 		if (forceUnchokes) {
 			int x = (getNumUploads() + 2) / 3;
