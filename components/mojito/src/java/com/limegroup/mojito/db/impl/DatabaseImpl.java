@@ -22,31 +22,60 @@ package com.limegroup.mojito.db.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.settings.DatabaseSettings;
 
+/*
+ * valueId
+ *   nodeId
+ *     value
+ *   nodeId
+ *     value
+ * valueId
+ *   nodeId
+ *     value
+ *   nodeId
+ *     value
+ *   nodeId
+ *     value
+ */
 public class DatabaseImpl implements Database {
 
     private static final long serialVersionUID = -4857315774747734947L;
     
-    private transient Map<KUID, DHTValueBag> database = new HashMap<KUID, DHTValueBag>();
+    private transient Map<KUID,DHTValueBag> database = new HashMap<KUID,DHTValueBag>();
     
-    private transient int valueCount = 0;
+    private transient DHTValueCollection values = null;
+    
+    private int maxDatabaseSize = -1;
+    
+    private int maxValuesPerKey = -1;
+    
+    public DatabaseImpl() {
+        this(-1, -1);
+    }
+    
+    public DatabaseImpl(int maxDatabaseSize, int maxValuesPerKey) {
+        this.maxDatabaseSize = maxDatabaseSize;
+        this.maxValuesPerKey = maxValuesPerKey;
+    }
     
     private void init() {
-        database = new HashMap<KUID, DHTValueBag>();
-        valueCount = 0;
+        database = new HashMap<KUID,DHTValueBag>();
+        values = null;
     }
     
     public synchronized int getKeyCount() {
@@ -54,12 +83,20 @@ public class DatabaseImpl implements Database {
     }
     
     public synchronized int getValueCount() {
-        return valueCount;
+        int count = 0;
+        for (DHTValueBag bag : database.values()) {
+            count += bag.size();
+        }
+        return count;
+    }
+    
+    public synchronized void clear() {
+        database.clear();
     }
     
     public synchronized boolean store(DHTValue value) {
         if (value.isEmpty()) {
-            return remove(value);
+            return remove(value, true);
         } else {
             return add(value);
         }
@@ -75,31 +112,29 @@ public class DatabaseImpl implements Database {
         }
         
         KUID valueId = value.getValueID();
-        DHTValueBag valueMap = database.get(valueId);
+        DHTValueBag bag = database.get(valueId);
         
-        if (valueMap == null) {
-            valueMap = new DHTValueBag();
-            database.put(valueId, valueMap);
+        if (bag == null) {
+            bag = new DHTValueBag(valueId);
+            database.put(valueId, bag);
         }
         
-        int size = valueMap.size();
-        boolean added = valueMap.add(value);
-        if (size != valueMap.size()) {
-            valueCount++;
-        }
-        
-        return added;
+        return bag.add(value);
     }
     
     protected boolean canAddValue(Map<KUID, ? extends Map<KUID, DHTValue>> database, DHTValue value) {
+        
+        if (value.isLocalValue()) {
+            return true;
+        }
         
         KUID valueId = value.getValueID();
         KUID nodeId = value.getOriginatorID();
         Map<KUID, DHTValue> map = database.get(valueId);
         
         if (map == null) {
-            return database.size() < DatabaseSettings.MAX_DATABASE_SIZE.getValue();
-        } else if (map.size() < DatabaseSettings.MAX_VALUES_PER_KEY.getValue()) {
+            return maxDatabaseSize < 0 || database.size() < maxDatabaseSize;
+        } else if (maxValuesPerKey < 0 || map.size() < maxValuesPerKey) {
             return true;
         }
         
@@ -107,21 +142,26 @@ public class DatabaseImpl implements Database {
     }
     
     public synchronized boolean remove(DHTValue value) {
+        return remove(value, false);
+    }
+    
+    private synchronized boolean remove(DHTValue value, boolean remote) {
         if (!canRemoveValue(database, value)) {
             return false;
         }
         
         KUID valueId = value.getValueID();
-        DHTValueBag valueMap = database.get(valueId);
-        if (valueMap != null) {
-            int size = valueMap.size();
-            valueMap.remove(value);
-            if (valueMap.isEmpty()) {
-                database.remove(valueId);
+        DHTValueBag bag = database.get(valueId);
+        if (bag != null) {
+            int size = bag.size();
+            
+            if (remote) {
+                bag.remoteRemove(value);
+            } else {
+                bag.remove(value);
             }
             
-            if (valueMap.size() != size) {
-                valueCount--;
+            if (bag.size() != size) {
                 return true;
             }
         }
@@ -133,56 +173,48 @@ public class DatabaseImpl implements Database {
     }
     
     public synchronized Map<KUID, DHTValue> get(KUID valueId) {
-        DHTValueBag valueMap = database.get(valueId);
-        if (valueMap != null) {
-            return Collections.unmodifiableMap(valueMap);
+        DHTValueBag bag = database.get(valueId);
+        if (bag != null) {
+            return bag;
         }
         return Collections.emptyMap();
     }
     
     public synchronized boolean contains(DHTValue value) {
-        DHTValueBag valueMap = database.get(value.getValueID());
-        if (valueMap != null) {
-            KUID nodeId = value.getOriginator().getNodeID();
-            return valueMap.containsKey(nodeId);
-        }
-        return false;
+        return get(value.getValueID()).containsKey(value.getOriginatorID());
     }
     
     public synchronized Set<KUID> keySet() {
-        return Collections.unmodifiableSet(database.keySet());
+        return database.keySet();
     }
     
     public synchronized Collection<DHTValue> values() {
-        List<DHTValue> values = new ArrayList<DHTValue>((int)(database.size() * 1.5f));
-        for (DHTValueBag bag : database.values()) {
-            for (DHTValue value : bag.values()) {
-                values.add(value);
-            }
+        if (values == null) {
+            values = new DHTValueCollection();
         }
         return values;
     }
     
     private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-        List<DHTValue> values = null;
+        out.defaultWriteObject();
         
-        for (DHTValueBag db : database.values()) {
-            for (DHTValue value : db.values()) {
-                if (value.isLocalValue()) {
-                    if (values == null) {
-                        values = new ArrayList<DHTValue>();
-                    }
-                    values.add(value);
+        List<DHTValue> values = null;
+        for (DHTValue value : values()) {
+            if (value.isLocalValue()) {
+                if (values == null) {
+                    values = new ArrayList<DHTValue>();
                 }
+                values.add(value);
             }
         }
-        
         out.writeObject(values);
     }
     
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
+        
+        in.defaultReadObject();
         
         init(); // Init transient fields
         
@@ -198,58 +230,27 @@ public class DatabaseImpl implements Database {
     @SuppressWarnings("serial")
     private class DHTValueBag extends LinkedHashMap<KUID, DHTValue> {
 
-        public DHTValueBag() {
+        private KUID valueId;
+        
+        private int modCount = 0;
+        
+        public DHTValueBag(KUID valueId) {
             super(5, 0.75f, true);
+            this.valueId = valueId;
         }
         
         public boolean add(DHTValue value) {
-            if (value.isDirect()) {
-                return addDirect(value);
-            } else {
-                return addIndirect(value);
-            }
-        }
-        
-        protected boolean addDirect(DHTValue value) {
-            assert (value.isDirect());
-            
-            KUID originatorId = value.getOriginatorID();
-            
-            // Do not replace local with non-local values
-            DHTValue current = get(originatorId);
-            if (current != null 
-                    && current.isLocalValue() 
-                    && !value.isLocalValue()) {
-                return false;
-            }
-            
-            // One value per originator
-            put(originatorId, value);
-            return true;
-        }
-        
-        protected boolean addIndirect(DHTValue value) {
-            assert (!value.isDirect());
-            assert (!value.isLocalValue()); // cannot be a local value
-            
-            KUID originatorId = value.getOriginatorID();
-            
-            // Do not overwrite an directly stored value
-            DHTValue current = get(originatorId);
-            if (current != null 
-                    && current.isDirect()) {
-                return false;
-            }
-            
-            // One value per originator
-            put(originatorId, value);
-            return true;
+            int modCount = this.modCount;
+            put(value.getOriginatorID(), value);
+            return modCount != this.modCount;
         }
 
-        @Override
-        public DHTValue remove(Object key) {
-            DHTValue value = (DHTValue)key;
-            
+        /**
+         * Removes the given DHTValue from the bag if certain
+         * conditions met like it must be a direct remove
+         * request.
+         */
+        public DHTValue remoteRemove(DHTValue value) {
             if (value.isDirect() 
                     || value.isLocalValue() 
                     || value.isExpired()) {
@@ -259,12 +260,190 @@ public class DatabaseImpl implements Database {
                 if (current != null) {
                     if (!current.isLocalValue()
                             || (current.isLocalValue() && value.isLocalValue())) {
-                        return super.remove(originatorId);
+                        return remove(originatorId);
                     }
                 }
             }
             
             return null;
+        }
+        
+        @Override
+        public DHTValue put(KUID key, DHTValue value) {
+            assert (valueId.equals(value.getValueID()));
+            assert (key.equals(value.getOriginatorID()));
+            
+            DHTValue current = null;
+            if ((value.isDirect() && putDirectDHTValue(key, value)) 
+                    || (!value.isDirect() && putIndirectDHTValue(key, value))) {
+                
+                if (isEmpty() && !database.containsKey(valueId)) {
+                    database.put(valueId, this);
+                }
+                
+                current = super.put(key, value);
+                modCount++;
+            }
+            
+            return current;
+        }
+        
+        /**
+         * Returns whether or not the given (direct) DHTValue can
+         * be added to the bag
+         */
+        private boolean putDirectDHTValue(KUID key, DHTValue value) {
+            assert (value.isDirect());
+            
+            // Do not replace local with non-local values
+            DHTValue current = get(key);
+            if (current != null 
+                    && current.isLocalValue() 
+                    && !value.isLocalValue()) {
+                return false;
+            }
+            
+            return true;
+        }
+        
+        /**
+         * Returns whether or not the given (indirect) DHTValue can
+         * be added to the bag
+         */
+        private boolean putIndirectDHTValue(KUID key, DHTValue value) {
+            assert (!value.isDirect());
+            assert (!value.isLocalValue()); // cannot be a local value
+            
+            // Do not overwrite an directly stored value
+            DHTValue current = get(key);
+            if (current != null 
+                    && current.isDirect()) {
+                return false;
+            }
+            
+            return true;
+        }
+        
+        private Object removeLock = new Object();
+        private boolean removeEmptyBag = true;
+        
+        @Override
+        public DHTValue remove(Object key) {
+            if (key instanceof DHTValue) {
+                key = ((DHTValue)key).getOriginatorID();
+            }
+            
+            int size = size();
+            DHTValue value = super.remove(key);
+            if (size != size()) {
+                modCount++;
+                
+                synchronized (removeLock) {
+                    if (removeEmptyBag && isEmpty()) {
+                        database.remove(valueId);
+                    }
+                }
+            }
+            return value;
+        }
+    }
+    
+    /**
+     * A collection of DHTVales. It acts a view of the underlying Map.
+     */
+    private class DHTValueCollection extends AbstractCollection<DHTValue> {
+
+        @Override
+        public boolean add(DHTValue o) {
+            return DatabaseImpl.this.store(o);
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return DatabaseImpl.this.contains((DHTValue)o);
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            return DatabaseImpl.this.remove((DHTValue)o);
+        }
+
+        @Override
+        public Iterator<DHTValue> iterator() {
+            return new DHTValueIterator();
+        }
+
+        @Override
+        public int size() {
+            return getValueCount();
+        }
+    }
+    
+    /**
+     * An iterator that iterates through all DHTValueBags
+     * and returns the DHTValues
+     */
+    private class DHTValueIterator implements Iterator<DHTValue> {
+        
+        private Iterator<DHTValueBag> bags = database.values().iterator();
+        
+        private Iterator<DHTValue> values = null;
+        
+        private DHTValueBag lastBag = null;
+        
+        private DHTValue lastValue = null;
+        
+        public boolean hasNext() {
+            if (values != null && values.hasNext()) {
+                return true;
+            }
+            return bags.hasNext();
+        }
+
+        public DHTValue next() {
+            if (values == null || !values.hasNext()) {
+                if (!bags.hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                
+                lastBag = bags.next();
+                values = lastBag.values().iterator();
+            }
+            
+            lastValue = values.next();
+            return lastValue;
+        }
+
+        public void remove() {
+            if (lastBag == null || lastValue == null) {
+                throw new IllegalStateException();
+            }
+            
+            synchronized (lastBag.removeLock) {
+                try {
+                    // Disable the auto removal of bags from the 
+                    // database Map when the bag becomes empty
+                    // as we're holding an iterator of the
+                    // database Map which would throw an
+                    // ConcurrentModificationException as soon
+                    // as we're modifying the Map directly
+                    lastBag.removeEmptyBag = false;
+                    
+                    values.remove();
+                    lastValue = null;
+                    
+                    if (lastBag.isEmpty()) {
+                        bags.remove();
+                    }
+                } finally {
+                    // and enable it again
+                    lastBag.removeEmptyBag = true;
+                }
+            }
+            
+            if (lastBag.isEmpty()) {
+                lastBag = null;
+            }
         }
     }
 }

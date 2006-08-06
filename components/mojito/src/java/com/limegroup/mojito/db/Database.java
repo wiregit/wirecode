@@ -89,4 +89,9 @@ public interface Database extends Serializable {
      * which is greater or equal to key count.
      */
     public int getValueCount();
+    
+    /**
+     * Clears the Database
+     */
+    public void clear();
 }

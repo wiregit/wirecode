@@ -165,7 +165,6 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         Contact furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
                         if (context.isLocalNode(furthest)) {
                             
-                            // TODO Fix: Fails 'cause Collection is unmodifyable 
                             int count = 0;
                             for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
                                 DHTValue chunk = it.next();

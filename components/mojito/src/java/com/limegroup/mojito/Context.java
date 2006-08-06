@@ -252,15 +252,31 @@ public class Context implements MojitoDHT {
                 LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + nodeId);
             }
             
+            Database database = getDatabase();
+            
+            // Get all local DHTValues and clear the Database
+            List<DHTValue> values = new ArrayList<DHTValue>();
+            synchronized (database) {
+                for (DHTValue value : database.values()) {
+                    if (value.isLocalValue()) {
+                        values.add(value);
+                    }
+                }
+                database.clear();
+            }
+            
             ((ContactNode)localNode).setNodeID(nodeId);
             initRouteTable();
             
-            Database database = getDatabase();
+            // Add the local DHTValues under the new Node ID
             synchronized (database) {
-                for (DHTValue value : database.values()) {
-                    if (!value.isLocalValue()) {
-                        database.remove(value);
-                    }
+                for (DHTValue value : values) {
+                    value.setOriginator(localNode); // this is technically
+                                                    // not necessary as they're
+                                                    // already holding a reference
+                                                    // to localNode and the new ID
+                                                    // gets reflected to them
+                    database.add(value);
                 }
             }
         }
@@ -370,11 +386,9 @@ public class Context implements MojitoDHT {
         
         // Make sure all local values have the local Node
         // as originator
-        for (KUID valueId : database.keySet()) {
-            for (DHTValue value : database.get(valueId).values()) {
-                if (value.isLocalValue()) {
-                    value.setOriginator(localNode);
-                }
+        for (DHTValue value : database.values()) {
+            if (value.isLocalValue()) {
+                value.setOriginator(localNode);
             }
         }
     }
